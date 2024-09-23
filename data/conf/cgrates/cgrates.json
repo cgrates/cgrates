@@ -16,6 +16,7 @@
 // 	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
 // 	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 // 	"default_caching": "*reload",							// default actions to do when caching items
+// 	"caching_delay": "0s", 									// add delay before cache reload
 // 	"min_call_duration": "0s",				                // only authorize calls with allowed duration higher than this
 // 	"max_call_duration": "3h",				                // maximum call duration a prepaid call can last
 // 	"connect_attempts": 5,									// initial server connect attempts
@@ -57,8 +58,8 @@
 
 // "cores": {
 // 	"caps": 0,							// maximum concurrent request allowed ( 0 to disabled )
-// 	"caps_strategy": "*busy",			// strategy in case in case of concurrent requests reached	
-// 	"caps_stats_interval": "0",			// the interval we sample for caps stats ( 0 to disabled )
+// 	"caps_strategy": "*busy",			// strategy in case of concurrent requests reached	
+// 	"caps_stats_interval": "0",			// the interval duration we sample for caps stats ( 0 to disabled )
 // 	"ees_conns": [],					// connections to EventExporter
 // 	"shutdown_timeout": "1s"			// the duration to wait until all services are stopped
 // },
@@ -88,40 +89,43 @@
 // },							// rpc connections definitions
 
 
-// "data_db": {								// database used to store runtime data (eg: accounts)
-// 	"db_type": "*redis",					// data_db type: <*redis|*mongo>
-// 	"db_host": "127.0.0.1",					// data_db host address
-// 	"db_port": 6379, 						// data_db port to reach the database
-// 	"db_name": "10", 						// data_db database name to connect to
-// 	"db_user": "cgrates", 					// username to use when connecting to data_db
-// 	"db_password": "", 						// password to use when connecting to data_db
-// 	"remote_conns":[],						// the conns that are queried when the items are not found in local DB 
-// 	"remote_conn_id": "",					// the ID to be sent to remote_conns to identify the connection
-// 	"replication_conns":[],					// the conns the items are replicated
-// 	"replication_filtered": false, 			// if this is enabled the replication will be made only to the conns that received a get
-// 	"replication_cache": "", 				// the caching action that is executed on the replication_conns when the items are replicated 
+// "data_db": {				// database used to store runtime data (eg: accounts)
+// 	"db_type": "*redis",		// data_db type: <*redis|*mongo>
+// 	"db_host": "127.0.0.1",		// data_db host address
+// 	"db_port": 6379, 		// data_db port to reach the database
+// 	"db_name": "10", 		// data_db database name to connect to
+// 	"db_user": "cgrates", 		// username to use when connecting to data_db
+// 	"db_password": "", 		// password to use when connecting to data_db
+// 	"remote_conns":[],		// the conns that are queried when the items are not found in local DB
+// 	"remote_conn_id": "",		// the ID to be sent to remote_conns to identify the connection
+// 	"replication_conns":[],		// the conns the items are replicated
+// 	"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
+// 	"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
 // 	"items":{
 // 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-// 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-// 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
-// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}, 
+// 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 // 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 // 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+// 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 // 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 // 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
@@ -134,53 +138,55 @@
 
 // 	},
 // 	"opts":{
-// 		"redisMaxConns": 10,					// the connection pool size
-// 		"redisConnectAttempts": 20,				// the maximum amount of dial attempts
-// 		"redisSentinel": "",					// the name of sentinel when used
-// 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
-// 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
-// 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-// 		"redisConnectTimeout": "0",				// the amount of wait time until timeout for a connection attempt
-// 		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
-// 		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
-// 		"mongoQueryTimeout": "10s",				// timeout for query when mongo is used
-// 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-// 		"redisClientCertificate": "",			// path to client certificate
-// 		"redisClientKey": "",					// path to client key
-// 		"redisCACertificate": "",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"redisMaxConns": 10,		// the connection pool size
+// 		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
+// 		"redisSentinel": "",		// the name of sentinel when used
+// 		"redisCluster": false,		// if enabled the datadb will try to connect to the redis cluster
+// 		"redisClusterSync": "5s",	// the sync interval for the redis cluster
+// 		"redisClusterOndownDelay": "0",	// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+// 		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
+// 		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
+// 		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
+// 		"redisTLS": false,		// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+// 		"redisClientCertificate": "",	// path to client certificate
+// 		"redisClientKey": "",		// path to client key
+// 		"redisCACertificate": "",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"mongoQueryTimeout": "10s",	// timeout for query when mongo is used
+// 		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
 // 	}
 // },
 
-// "stor_db": {								// database used to store offline tariff plans and CDRs	
-// 	"db_type": "*mysql",					// stor database type to use: <*mongo|*mysql|*postgres|*internal>	
-// 	"db_host": "127.0.0.1",					// the host to connect to	
-// 	"db_port": 3306,						// the port to reach the stor_db	
-// 	"db_name": "cgrates",					// stor database name	
-// 	"db_user": "cgrates",					// username to use when connecting to stor_db	
-// 	"db_password": "CGRateS.org",			// password to use when connecting to stor_db	
-// 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal	
-// 	"prefix_indexed_fields": [],			// prefix indexes on cdrs table to speed up queries, used in case of *internal	
-// 	"opts": {	
-// 		"sqlMaxOpenConns": 100,				// maximum database connections opened, not applying for mongo	
-// 		"sqlMaxIdleConns": 10,				// maximum database connections idle, not applying for mongo	
-// 		"sqlConnMaxLifetime": "0", 			// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo	
-// 		"mysqlDSNParams":{},                // DSN params for opening db  	
-// 		"mongoQueryTimeout":"10s",			// timeout for query when mongo is used	
-// 		"pgSSLMode":"disable",				// ssl mode in case of *postgres	
-// 		"mysqlLocation": "Local",			// the location the time from mysql is retrived	
-// 	},	
-// 	"items":{	
-// 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},	
-// 	},	
+// "stor_db": {					// database used to store offline tariff plans and CDRs
+// 	"db_type": "*mysql",			// stor database type to use: <*mongo|*mysql|*postgres|*internal>
+// 	"db_host": "127.0.0.1",			// the host to connect to
+// 	"db_port": 3306,			// the port to reach the stor_db
+// 	"db_name": "cgrates",			// stor database name
+// 	"db_user": "cgrates",			// username to use when connecting to stor_db
+// 	"db_password": "CGRateS.org",		// password to use when connecting to stor_db
+// 	"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+// 	"prefix_indexed_fields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
+// 	"opts": {
+// 		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
+// 		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
+// 		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
+// 		"mysqlDSNParams":{},		// DSN params for opening db
+// 		"pgSSLMode":"disable",		// ssl mode in case of *postgres
+// 		"mysqlLocation": "Local",	// the location the time from mysql is retrived
+// 		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
+// 		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
+// 	},
+// 	"items":{
+// 		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 	}
 // },
 
 // "listen": {
-// 	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
-// 	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
-// 	"http": "127.0.0.1:2080",				// HTTP listening address
-// 	"rpc_json_tls" : "127.0.0.1:2022",		// RPC JSON TLS listening address
-// 	"rpc_gob_tls": "127.0.0.1:2023",		// RPC GOB TLS listening address
-// 	"http_tls": "127.0.0.1:2280",			// HTTP TLS listening address
+// 	"rpc_json": "127.0.0.1:2012",		// RPC JSON listening address
+// 	"rpc_gob": "127.0.0.1:2013",		// RPC GOB listening address
+// 	"http": "127.0.0.1:2080",		// HTTP listening address
+// 	"rpc_json_tls" : "127.0.0.1:2022",	// RPC JSON TLS listening address
+// 	"rpc_gob_tls": "127.0.0.1:2023",	// RPC GOB TLS listening address
+// 	"http_tls": "127.0.0.1:2280",		// HTTP TLS listening address
 // },
 
 
@@ -233,6 +239,8 @@
 // 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// statqueues with metrics
 // 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
 // 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// control thresholds caching
+// 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
+// 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},			// control thresholds caching
 // 		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},				// control filters caching
 // 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control route profile caching
 // 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
@@ -247,6 +255,7 @@
 // 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control threshold filter indexes caching
 // 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control route filter indexes caching
 // 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control attribute filter indexes caching
+// 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	 	// control ranking profile caching
 // 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 					// control charger filter indexes caching
 // 		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control dispatcher filter indexes caching
 // 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control rate profile filter indexes caching
@@ -287,7 +296,6 @@
 // "cdrs": {									// CDRs config
 // 	"enabled": false,						// start the CDR Server:  <true|false>
 // 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
-// 	"store_cdrs": true, 					// store cdrs in StorDB
 // 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
 // 	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
 // 	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
@@ -298,129 +306,139 @@
 // 	"ees_conns": [],						// connections to EventExporter
 // 	"rates_conns": [],						// connections to RateS
 // 	"accounts_conns": [],					// connections to AccountS
-// 	"opts": {								//
-// 		// "*accounts": [						
+// 	"opts": {
+// 		// "*accounts": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*attributes": [					
+// 		// "*attributes": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*chargers": [						
+// 		// "*chargers": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*ees": [							
+// 		// "*ees": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*rates": [							
+// 		// "*rates": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*stats": [							
+// 		// "*stats": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*thresholds": [					
+// 		// "*thresholds": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
+// 		// 	},
+// 		// ],
+// 		// "*refund": [
+// 		// 	{
+// 		// 		"Tenant": "*any",
+// 		// 		"FilterIDs": [],
+// 		// 		"Value": false,
+// 		// 	},
+// 		// ],
+// 		// "*rerate": [
+// 		// 	{
+// 		// 		"Tenant": "*any",
+// 		// 		"FilterIDs": [],
+// 		// 		"Value": false,
+// 		// 	},
+// 		// ],
+// 		// "*store": [
+// 		// 	{
+// 		// 		"Tenant": "*any",
+// 		// 		"FilterIDs": [],
+// 		// 		"Value": true,
 // 		// 	},
 // 		// ],
 // 	},
 // },
 
 
-// "ers": {														// EventReaderService
-// 	"enabled": false,											// starts the EventReader service: <true|false>
-// 	"sessions_conns":["*internal"],								// RPC Connections IDs
-// 	"partial_cache_ttl": "1s",									// the duration to cache partial records when not pairing	
+// "ers": {					// EventReaderService
+// 	"enabled": false,			// starts the EventReader service: <true|false>
+// 	"sessions_conns":["*internal"],		// RPC Connections IDs
+// 	// "ees_conns": [],			// connection for routing processed and invalid messages through EEs
+// 	"partial_cache_ttl": "1s",		// the duration to cache partial records when not pairing	
 // 	"readers": [
 // 		{
-// 			"id": "*default",									// identifier of the EventReader profile
-// 			"type": "*none",									// reader type <*fileCSV>
-// 			"run_delay": "0",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-// 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-// 			"source_path": "/var/spool/cgrates/ers/in",			// read data from this path
-// 			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
+// 			"id": "*default",				// identifier of the EventReader profile
+// 			"type": "*none",				// reader type <*fileCSV>
+// 			"run_delay": "0",				// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+// 			"concurrent_requests": 1024,			// maximum simultaneous requests/files to process, 0 for unlimited
+// 			"source_path": "/var/spool/cgrates/ers/in",	// read data from this path
+// 			"processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
+// 			"tenant": "",					// tenant used by import
+// 			"timezone": "",					// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+// 			// "ees_success_ids": [],			// ids of exporters used for moving the successfully processed event
+// 			// "ees_failed_ids": [],			// ids of exporters used for moving the unprocessed event
+// 			"filters": [],					// limit parsing based on the filters
+// 			"flags": [],					// flags to influence the event processing
+// 			"reconnects": -1,				// number of retries in case of connection lost
+// 			"max_reconnect_interval": "5m", 		// time to wait in between reconnect attempts
 // 			"opts": {
 // 				// Partial
-// 				// "partialPath": "/",							// the path were the partial events will be sent
-// 				"partialCacheAction": "*none",					// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
-// 				"partialOrderField": "~*req.AnswerTime",		// the field after what the events are order when merged
-// 				// "partialcsvFieldSeparator": ","				// separator used when dumping the fields
+// 				// "partialPath": "/",			// the path were the partial events will be sent
+// 				"partialCacheAction": "*none",		// the action that will be executed for the partial CSVs that are not matched<*none|*post_cdr|*dump_to_file>
+// 				"partialOrderField": "~*req.AnswerTime",// the field after what the events are order when merged
+// 				// "partialcsvFieldSeparator": ","	// separator used when dumping the fields
 				
 // 				// FileCSV 
-// 				"csvRowLength": 0,								// Number of fields from csv file
-// 				"csvFieldSeparator": ",",						// separator used when reading the fields
-// 				"csvHeaderDefineChar": ":", 					// the starting character for header definition used in case of CSV files
-// 				// "csvLazyQuotes": false,						// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
+// 				"csvRowLength": 0,		// Number of fields from csv file
+// 				"csvFieldSeparator": ",",	// separator used when reading the fields
+// 				"csvHeaderDefineChar": ":", 	// the starting character for header definition used in case of CSV files
+// 				// "csvLazyQuotes": false,	// if a quote may appear in an unquoted field and a non-doubled quote may appear in a quoted field
 
 // 				// FileXML
-// 				"xmlRootPath": "",								// path towards one event in case of XML CDRs
+// 				// "xmlRootPath": "",		// path towards one event in case of XML CDRs
 
 // 				// AMQP and AMQPv1
-// 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP and AMQPv1 readers from were the events are read
-// 				// "amqpQueueIDProcessed": "", 					// the queue id for AMQP and AMQPv1 readers were the events are sent after they are processed
-
-// 				// "amqpUsername": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
-// 				// "amqpPassword": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
-
-// 				// "amqpUsernameProcessed": "",					
-// 				// "amqpPasswordProcessed": "",					
-
-// 				// "amqpConsumerTag": "cgrates",				// the ID of the consumer, amqp 0.9.1 exclusive	
-// 				// "amqpExchange": "",							// amqp 0.9.1 exclusive		
-// 				// "amqpExchangeType": "",						// amqp 0.9.1 exclusive	
-// 				// "amqpRoutingKey": "",						// amqp 0.9.1 exclusive	
-
-// 				// "amqpExchangeProcessed": "",									
-// 				// "amqpExchangeTypeProcessed": "",
-// 				// "amqpRoutingKeyProcessed": "",
-
+// 				// "amqpQueueID": "cgrates_cdrs",	// identifier for the primary queue where messages are consumed (0.9.1/1.0)
+// 				// "amqpUsername": "",			// username for SASL PLAIN auth, exclusive to AMQP 1.0, often representing the policy name
+// 				// "amqpPassword": "",			// password for authentication, exclusive to AMQP 1.0
+// 				// "amqpConsumerTag": "cgrates",	// unique tag for the consumer, useful for message tracking and consumer management (0.9.1)
+// 				// "amqpExchange": "",			// name of the primary exchange where messages will be published (0.9.1)
+// 				// "amqpExchangeType": "",		// type of the primary exchange (direct, topic, fanout, headers) (0.9.1)
+// 				// "amqpRoutingKey": "",		// key used for routing messages to the primary queue (0.9.1)
 
 // 				// Kafka
-// 				// "kafkaTopic": "cgrates",						// the topic from were the events are read
-// 				// "kafkaGroupID": "cgrates",					// the group that reads the events
-// 				// "kafkaMaxWait": "1ms",						// the maximum amount of time to wait for new data to come
-// 				// "kafkaTLS": false,							// if set to true it will try to authenticate the server
+// 				// "kafkaTopic": "cgrates",	// the topic from were the events are read
+// 				// "kafkaGroupID": "cgrates",	// the group that reads the events
+// 				// "kafkaMaxWait": "1ms",	// the maximum amount of time to wait for new data to come
+// 				// "kafkaTLS": false,		// if set to true it will try to authenticate the server
 // 				// "kafkaCAPath": "",
 // 				// "kafkaSkipTLSVerify": false,
 
-// 				// "kafkaTopicProcessed": "",					//the topic were the events are sent after they are processed
-// 				// "kafkaTLSProcessed": false,					
-// 				// "kafkaCAPathProcessed": "",
-// 				// "kafkaSkipTLSVerifyProcessed": false,
-
 // 				// SQL
-// 				// "sqlDBName": "cgrates", 						// the name of the database from were the events are read
-// 				// "sqlTableName": "cdrs",						// the name of the table from were the events are read
-// 				// "pgSSLMode": "disable",						// the ssl mode for postgres db
-
-// 				// "sqlDBNameProcessed": "", 					// the name of the database were the events are sent after they are processed
-// 				// "sqlTableNameProcessed": "",					// the name of the table were the events are sent after they are processed
-// 				// "pgSSLModeProcessed": "",					// the ssl mode for postgres db
+// 				// "sqlDBName": "cgrates", 	// the name of the database from were the events are read
+// 				// "sqlTableName": "cdrs",	// the name of the table from were the events are read
+// 				// "pgSSLMode": "disable",	// the ssl mode for postgres db
 
 // 				// SQS and S3
 // 				// "awsRegion": "",
@@ -428,49 +446,26 @@
 // 				// "awsSecret": "",
 // 				// "awsToken": "",
 
-// 				// "awsRegionProcessed": "",
-// 				// "awsKeyProcessed": "",
-// 				// "awsSecretProcessed": "",
-// 				// "awsTokenProcessed": "",
-
 // 				// SQS
-// 				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS readers from were the events are read
-
-// 				// "sqsQueueIDProcessed": "", 					// the queue id for SQS readers were the events are sent after they are processed
+// 				// "sqsQueueID": "cgrates_cdrs", 	// the queue id for SQS readers from were the events are read
 
 // 				// S3
-// 				// "s3BucketID": "cgrates_cdrs", 					// the bucket id for S3 readers from were the events are read
-// 				// "s3FolderPathProcessed": "", 				// only for S3 event posting 
-				
-// 				// "s3BucketIDProcessed": "cgrates_cdrs", 		// the bucket id for S3 readers were the events are sent after they are processed
+// 				// "s3BucketID": "cgrates_cdrs", 	// the bucket id for S3 readers from were the events are read
 
 // 				// nats
-// 				// "natsJetStream": false,						// controls if the nats reader uses the JetStream
-// 				// "natsConsumerName": "cgrates",				// in case of JetStream the name of the consumer
-// 				// "natsStreamName": "cdrs",					// the name of the NATS JetStream stream from which the consumer will read messages
-// 				"natsSubject": "cgrates_cdrs",					// the subject from were the events are read
-// 				// "natsQueueID": "",							// the queue id the consumer listen to
-// 				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
-// 				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
-// 				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
-// 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
-// 				// "natsClientKey": "",							// the path to a client key( used by tls)
-// 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
-
-// 				// "natsJetStreamProcessed": false,				// controls if the nats poster uses the JetStream
-// 				// "natsSubjectProcessed": "cgrates_cdrs",		// the subject were the events are posted
-// 				// "natsJWTFileProcessed": "",					// the path to the JWT file( can be the chained file or the user file)
-// 				// "natsSeedFileProcessed": "",					// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
-// 				// "natsCertificateAuthorityProcessed": "",		// the path to a custom certificate authority file( used by tls)
-// 				// "natsClientCertificateProcessed": "",		// the path to a client certificate( used by tls)
-// 				// "natsClientKeyProcessed": "",				// the path to a client key( used by tls)
-// 				// "natsJetStreamMaxWaitProcessed": "5s",		// the maximum amount of time to wait for a response
+// 				// "natsJetStream": false,		// controls if the nats reader uses the JetStream
+// 				// "natsConsumerName": "cgrates",	// in case of JetStream the name of the consumer
+// 				// "natsStreamName": "cdrs",		// the name of the NATS JetStream stream from which the consumer will read messages
+// 				"natsSubject": "cgrates_cdrs",		// the subject from were the events are read
+// 				// "natsQueueID": "",			// the queue id the consumer listen to
+// 				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
+// 				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+// 				// "natsCertificateAuthority": "",	// the path to a custom certificate authority file( used by tls)
+// 				// "natsClientCertificate": "",		// the path to a client certificate( used by tls)
+// 				// "natsClientKey": "",			// the path to a client key( used by tls)
+// 				// "natsJetStreamMaxWait": "5s",	// the maximum amount of time to wait for a response
 // 			},
-// 			"tenant": "",										// tenant used by import
-// 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-// 			"filters": [],										// limit parsing based on the filters
-// 			"flags": [],										// flags to influence the event processing
-// 			"fields":[											// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+// 			"fields":[	// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 // 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
 // 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
 // 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
@@ -481,12 +476,12 @@
 // 				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.10", "mandatory": true},
 // 				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
 // 				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
-// 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true},
+// 				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.13", "mandatory": true}
 // 			],
 // 			"partial_commit_fields": [],
-// 			"cache_dump_fields": [],
-// 		},
-// 	],
+// 			"cache_dump_fields": []
+// 		}
+// 	]
 // },
 
 // "efs": {                                                    // ExportFailover service
@@ -496,128 +491,128 @@
 // 	"failed_posts_ttl": "5s",								// time to wait before writing the failed posts in a single file
 // },
 
-// "ees": {									// EventExporterService
-// 	"enabled": false,						// starts the EventReader service: <true|false>
-// 	"attributes_conns":[],					// RPC Connections IDs
+// "ees": {				// EventExporterService
+// 	"enabled": false,		// starts the EventReader service: <true|false>
+// 	"attributes_conns":[],		// RPC Connections IDs
 // 	"cache": {
 // 		"*fileCSV": {"limit": -1, "ttl": "5s", "static_ttl": false},
 // 	},
 // 	"exporters": [
 // 		{
-// 			"id": "*default",									// identifier of the EventReader profile
-// 			"type": "*none",									// exporter type 
-// 			"export_path": "/var/spool/cgrates/ees",			// path where the exported events will be placed
-// 			"concurrent_requests": 0,							// maximum simultaneous requests to process, 0 for unlimited
-// 			"opts": {
+// 			"id": "*default",					// identifier of the EventReader profile
+// 			"type": "*none",					// exporter type 
+// 			"export_path": "/var/spool/cgrates/ees",		// path where the exported events will be placed
+// 			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
+// 			"concurrent_requests": 0,				// maximum simultaneous requests to process, 0 for unlimited
+// 			"timezone": "",						// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+// 			"efs_conns": ["*internal"],				// connID to efs service
+// 			"filters": [],						// limit parsing based on the filters
+// 			"flags": [],						// flags to influence the event processing
+// 			"attribute_ids": [],					// select Attribute profiles instead of discovering them
+// 			"attribute_context": "",				// context used to discover matching Attribute profiles
+// 			"synchronous": false,					// block processing until export has a result
+// 			"blocker": false,					// stops the processing of the following exporters
+// 			"attempts": 1,						// export attempts
+// 			"opts": {						// extra options for exporter
 
 // 				// CSV
-// 				// "csvFieldSeparator": ",",					// separator used when reading the fields
+// 				// "csvFieldSeparator": ",",		// separator used when reading the fields
 
-				
+
 // 				// Elasticsearch options
-// 				// "elsCloud":true,                             //ExportPath will be  an CLoud ID deployment
-// 				// "elsApiKey": "",                             // Base64-encoded token for authorization; if set, overrides username/password and service token.
-// 				// "elsUsername":"",                            // Username for HTTP Basic Authentication.
-// 			    // "elsPassword":"",                            // Password for HTTP Basic Authentication.
-// 				// "elsServiceToken":""                         // Service token for authorization; if set, overrides username/password.
-// 				// "elsCertificateFingerPrint":""               // SHA256 hex fingerprint given by Elasticsearch on first launch.
-// 				// "elsDiscoverNodesOnStart":false,             // Discover nodes when initializing the client. Default: false.
-// 				// "elsDiscoverNodesInterval":"10s",            // Discover nodes periodically. Default: disabled.
-// 				// "elsEnableDebugLogger":"false",              // Enable the debug logging.
-// 				// "elsLogger":"",                              //The logger type can either be elsJson,elsColor and elsText
-// 				// "elsCompressRequestBody":false,              //Enable compression on requests
-// 				// "elsCompressRequestBodyLevel":0,             //Default: gzip.DefaultCompression, 9:BestCompression,-2:HuffmanOnly,1:BestSpeed
-// 				// "elsRetryOnStatus":[],                       // List of status codes for retry. Default: 502, 503, 504.
-// 				// "elsMaxRetries": 0,                          // Default: 3.
-// 				// "elsDisableRetry": false,                    // Default: false.
-// 				// "elsIndex": "",								// ElsIndex               	
-// 				// "elsIfPrimaryTerm": 0,						// ElsIfPrimaryTerm
-//  				// "elsIfSeqNo": 0,								// ElsIfSeqNo
-// 				// "elsOpType": "",								// ElsOpType
-// 				// "elsPipeline": "",							// ElsPipeline
-// 				// "elsRouting": "",							// ElsRouting
-// 				// "elsTimeout": "",							// ElsTimeout
-// 				// "elsVersion": 0,								// ElsVersionLow
-// 				// "elsVersionType": "",						// ElsVersionType
-// 				// "elsWaitForActiveShards": "",				// ElsWaitForActiveShards
-				
-				
+// 				// "elsCloud":true,                     // whether ExportPath represents a cloud ID deployment
+// 				// "elsApiKey": "",                     // Base64-encoded token for authorization; if set, overrides username/password and service token.
+// 				// "elsUsername":"",                    // Username for HTTP Basic Authentication.
+// 				// "elsPassword":"",			// Password for HTTP Basic Authentication.
+// 				// "elsServiceToken":""                 // Service token for authorization; if set, overrides username/password.
+// 				// "elsCertificateFingerPrint":""       // SHA256 hex fingerprint given by Elasticsearch on first launch.
+// 				// "elsDiscoverNodesOnStart":false,     // Discover nodes when initializing the client. Default: false.
+// 				// "elsDiscoverNodesInterval":"10s",    // Discover nodes periodically. Default: disabled.
+// 				// "elsEnableDebugLogger":"false",      // Enable the debug logging.
+// 				// "elsLogger":"",                      // The logger type can either be elsJson,elsColor and elsText
+// 				// "elsCompressRequestBody":false,      // Enable compression on requests
+// 				// "elsCompressRequestBodyLevel":0,     // Default: gzip.DefaultCompression, 9:BestCompression,-2:HuffmanOnly,1:BestSpeed
+// 				// "elsRetryOnStatus":[],               // List of status codes for retry. Default: 502, 503, 504.
+// 				// "elsMaxRetries": 0,                  // Default: 3.
+// 				// "elsDisableRetry": false,            // Default: false.
+// 				// "elsIndex": "",			// ElsIndex
+// 				// "elsIfPrimaryTerm": 0,		// ElsIfPrimaryTerm
+//  				// "elsIfSeqNo": 0,			// ElsIfSeqNo
+// 				// "elsOpType": "",			// ElsOpType
+// 				// "elsPipeline": "",			// ElsPipeline
+// 				// "elsRouting": "",			// ElsRouting
+// 				// "elsTimeout": "",			// ElsTimeout
+// 				// "elsVersion": 0,			// ElsVersionLow
+// 				// "elsVersionType": "",		// ElsVersionType
+// 				// "elsWaitForActiveShards": "",	// ElsWaitForActiveShards
+
+
 // 				// SQL
-// 				// "sqlMaxIdleConns": 0,						// SQLMaxIdleConns    
-// 				// "sqlMaxOpenConns": 0,						// SQLMaxOpenConns
-// 				// "sqlConnMaxLifetime": "0",					// SQLConnMaxLifetime 
-// 				// "mysqlDSNParams": {},                        // DSN params
+// 				// "sqlMaxIdleConns": 0,		// SQLMaxIdleConns    
+// 				// "sqlMaxOpenConns": 0,		// SQLMaxOpenConns
+// 				// "sqlConnMaxLifetime": "0",		// SQLConnMaxLifetime 
+// 				// "mysqlDSNParams": {},                // DSN params
 
 
-// 				// "sqlTableName":"cdrs", 						// the name of the table from where the events are exported
-// 				// "sqlDBName": "cgrates",						// the name of the database from where the events are exported
-// 				// "pgSSLMode": "disable",						// the postgresSSLMode for postgres            				
-				
-				
+// 				// "sqlTableName":"cdrs", 		// the name of the table from where the events are exported
+// 				// "sqlDBName": "cgrates",		// the name of the database from where the events are exported
+// 				// "pgSSLMode": "disable",		// the postgresSSLMode for postgres            				
+
+
 // 				// Kafka
-// 				// "kafkaTopic": "cgrates",						// the topic from where the events are exported
-// 				// "kafkaTLS": false,							// if set to true it will try to authenticate the server
-// 				// "kafkaCAPath": "",							// path to certificate authority pem file
-// 				// "kafkaSkipTLSVerify": false,					// if set to true it will skip certificate verification
-				
-				
+// 				// "kafkaTopic": "cgrates",		// the topic from where the events are exported
+// 				// "kafkaTLS": false,			// if set to true it will try to authenticate the server
+// 				// "kafkaCAPath": "",			// path to certificate authority pem file
+// 				// "kafkaSkipTLSVerify": false,		// if set to true it will skip certificate verification
+
+
 // 				// AMQP
-// 				// "amqpQueueID": "cgrates_cdrs",				// the queue id for AMQP exporters from were the events are exported
-// 				// "amqpRoutingKey": "",						// RoutingKey, amqp 0.9.1 exclusive
-// 				// "amqpExchange": "",							// Exchange, amqp 0.9.1 exclusive
-// 				// "amqpExchangeType": "",						// ExchangeType, amqp 0.9.1 exclusive
-// 				// "amqpUsername": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
-// 				// "amqpPassword": "",							// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
-				
+// 				// "amqpQueueID": "cgrates_cdrs",	// the queue id for AMQP exporters from were the events are exported
+// 				// "amqpRoutingKey": "",		// RoutingKey, amqp 0.9.1 exclusive
+// 				// "amqpExchange": "",			// Exchange, amqp 0.9.1 exclusive
+// 				// "amqpExchangeType": "",		// ExchangeType, amqp 0.9.1 exclusive
+// 				// "amqpUsername": "",			// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
+// 				// "amqpPassword": "",			// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
+
 
 // 				// SQS and S3
-// 				// "awsRegion": "",								// AWSRegion  
-// 				// "awsKey": "",								// AWSKey        
-// 				// "awsSecret": "",								// AWSSecret
-// 				// "awsToken": "",								// AWSToken      
+// 				// "awsRegion": "",			// AWSRegion
+// 				// "awsKey": "",			// AWSKey
+// 				// "awsSecret": "",			// AWSSecret
+// 				// "awsToken": "",			// AWSToken
 
 // 				//SQS
-// 				// "sqsQueueID": "cgrates_cdrs", 				// the queue id for SQS exporters from were the events are exported
+// 				// "sqsQueueID": "cgrates_cdrs", 	// the queue id for SQS exporters from were the events are exported
 
 // 				// S3
-// 				// "s3BucketID": "cgrates_cdrs", 				// the bucket id for S3 readers from where the events that are  exported
-// 				// "s3FolderPath": "",							// S3FolderPath 
+// 				// "s3BucketID": "cgrates_cdrs", 	// the bucket id for S3 readers from where the events that are  exported
+// 				// "s3FolderPath": "",			// S3FolderPath 
 
 // 				// Nats
-// 				// "natsJetStream": false,						// controls if the nats poster uses the JetStream
-// 				// "natsSubject": "cgrates_cdrs",				// the subject were the events are exported
-// 				// "natsJWTFile": "",							// the path to the JWT file( can be the chained file or the user file)
-// 				// "natsSeedFile": "",							// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
-// 				// "natsCertificateAuthority": "",				// the path to a custom certificate authority file( used by tls)
-// 				// "natsClientCertificate": "",					// the path to a client certificate( used by tls)
-// 				// "natsClientKey": "",							// the path to a client key( used by tls)
-// 				// "natsJetStreamMaxWait": "5s",				// the maximum amount of time to wait for a response
+// 				// "natsJetStream": false,		// controls if the nats poster uses the JetStream
+// 				// "natsSubject": "cgrates_cdrs",	// the subject were the events are exported
+// 				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
+// 				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
+// 				// "natsCertificateAuthority": "",	// the path to a custom certificate authority file( used by tls)
+// 				// "natsClientCertificate": "",		// the path to a client certificate( used by tls)
+// 				// "natsClientKey": "",			// the path to a client key( used by tls)
+// 				// "natsJetStreamMaxWait": "5s",	// the maximum amount of time to wait for a response
 
 // 				//RPC
-// 				// "rpcCodec": "",  // for compression, encoding and decoding <internalRPC | BIRPC | JSON/HTTP/GOB>
-// 				// "serviceMethod": "", // the method that should be called trough RPC
-//                 // "keyPath": "" , // path to server key 
-// 				// "certPath": "", // path to client certificate
-// 				// "caPath": "",  // path to CA certificate
-// 				// "tls": false, //
-// 				// "connIDs": [],  // connections for connManager to this exporter
-// 				// "rpcConnTimeout" : "1s", // connection unsuccesfull on timeout
-// 				// "rpcReplyTimeout":"2s", // connection down at replies if taking longer that this value
-// 				// "rpcAPIOpts": {}, // opts that will be passed within APIOpts
-// 			},												// extra options for exporter
-// 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-// 			"filters": [],										// limit parsing based on the filters
-// 			"flags": [],										// flags to influence the event processing
-// 			"attribute_ids": [],								// select Attribute profiles instead of discovering them
-// 			"attribute_context": "",							// context used to discover matching Attribute profiles
-// 			"synchronous": false,								// block processing until export has a result
-// 			"blocker": false,									// stops the processing of the following exporters
-// 			"attempts": 1,										// export attempts
-// 			"fields":[],										// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-// 			"efs_conns": ["*internal"],                         // connID to efs service
-// 			"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
-// 		},
-// 	],
+// 				// "rpcCodec": "",			// for compression, encoding and decoding <internalRPC | BIRPC | JSON/HTTP/GOB>
+// 				// "serviceMethod": "",			// the method that should be called trough RPC
+// 				// "keyPath": "" ,			// path to server key 
+// 				// "certPath": "",			// path to client certificate
+// 				// "caPath": "",			// path to CA certificate
+// 				// "tls": false,
+// 				// "connIDs": [],			// connections for connManager to this exporter
+// 				// "rpcConnTimeout" : "1s",		// connection unsuccesfull on timeout
+// 				// "rpcReplyTimeout":"2s",		// connection down at replies if taking longer that this value
+// 				// "rpcAPIOpts": {},			// opts that will be passed within APIOpts
+// 			},
+// 			"fields":[]					// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+// 		}
+// 	]
 // },
 
 
@@ -663,217 +658,217 @@
 // 	"rates_conns": [], 						// connections to RateS
 // 	"accounts_conns": [],					// connections to AccountS
 // 	"opts": {
-// 		// "*accounts": [					
+// 		// "*accounts": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*attributes": [					
+// 		// "*attributes": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*cdrs": [						
+// 		// "*cdrs": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*chargers": [						
+// 		// "*chargers": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*resources": [						
+// 		// "*resources": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*routes": [						
+// 		// "*routes": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*stats": [							
+// 		// "*stats": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*thresholds": [					
+// 		// "*thresholds": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*initiate": [					
+// 		// "*initiate": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*update": [					
+// 		// "*update": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*terminate": [					
+// 		// "*terminate": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*message": [					
+// 		// "*message": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*attributesDerivedReply": [					
+// 		// "*attributesDerivedReply": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*blockerError": [					
+// 		// "*blockerError": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*cdrsDerivedReply": [					
+// 		// "*cdrsDerivedReply": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*resourcesAuthorize": [					
+// 		// "*resourcesAuthorize": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*resourcesAllocate": [					
+// 		// "*resourcesAllocate": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*resourcesRelease": [					
+// 		// "*resourcesRelease": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*resourcesDerivedReply": [					
+// 		// "*resourcesDerivedReply": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*routesDerivedReply": [					
+// 		// "*routesDerivedReply": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*statsDerivedReply": [					
+// 		// "*statsDerivedReply": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*thresholdsDerivedReply": [					
+// 		// "*thresholdsDerivedReply": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*maxUsage": [					
+// 		// "*maxUsage": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*forceDuration": [					
+// 		// "*forceDuration": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*ttl": [					
+// 		// "*ttl": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": "",
 // 		// 	},
 // 		// ],
-// 		// "*chargeable": [					
+// 		// "*chargeable": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": false,
 // 		// 	},
 // 		// ],
-// 		// "*ttlLastUsage": [					
+// 		// "*ttlLastUsage": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": "",
 // 		// 	},
 // 		// ],
-// 		// "*ttlLastUsed": [					
+// 		// "*ttlLastUsed": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": "",
 // 		// 	},
 // 		// ],
-// 		// "*debitInterval": [					
+// 		// "*debitInterval": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": "",
 // 		// 	},
 // 		// ],
-// 		// "*ttlMaxDelay": [					
+// 		// "*ttlMaxDelay": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
 // 		// 		"Value": "",
 // 		// 	},
 // 		// ],
-// 		// "*ttlUsage": [					
+// 		// "*ttlUsage": [
 // 		// 	{
 // 		// 		"Tenant": "*any",
 // 		// 		"FilterIDs": [],
@@ -895,18 +890,26 @@
 
 
 // "freeswitch_agent": {
-// 	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
+// 	"enabled": false,				// starts the FreeSWITCH agent: <true|false>
 // 	"sessions_conns": ["*birpc_internal"],
-// 	"subscribe_park": true,					// subscribe via fsock to receive park events
-// 	"create_cdr": false,					// creates CDR out of events and sends them to CDRS component
-// 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
-// 	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
+// 	"subscribe_park": true,				// subscribe via fsock to receive park events
+// 	"create_cdr": false,				// creates CDR out of events and sends them to CDRS component
+// 	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
+// 	"low_balance_ann_file": "",			// file to be played when low balance is reached for prepaid calls
 // 	"empty_balance_context": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 // 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 // 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
-// 	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
-// 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5, "max_reconnect_interval": "", "alias":""}
-// 	],
+// 	"active_session_delimiter": ",",		// delimiter for 'show channels' responses and requests
+// 	"event_socket_conns":[				// instantiate connections to multiple FreeSWITCH servers
+// 		{
+// 			"address": "127.0.0.1:8021", 	// FreeSWITCH server address and port
+// 			"password": "ClueCon",  	// authentication password for FreeSWITCH
+// 			"reconnects": 5, 		// max reconnect attempts before giving up ("-1" for no limit)
+// 			"max_reconnect_interval": "",	// max time between reconnects ("0" for no limit)
+// 			"reply_timeout": "1m",		// max wait time for FreeSWITCH replies
+// 			"alias": ""
+// 		}
+// 	]
 // },
 
 
@@ -1146,6 +1149,17 @@
 // 	},								
 // },
 
+
+// "trends":{									// TrendS config
+// 	"enabled": false,						// starts TrendS service: <true|false>.
+// 	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"thresholds_conns": [],					// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// },
+
+// "rankings":{								// RankingS config
+// 	"enabled": false,						// starts RankingS service: <true|false>.
+// 	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// },
 
 // "routes": {									// RouteS config
 // 	"enabled": false,						// starts RouteS service: <true|false>.
@@ -1527,22 +1541,24 @@
 // 	"out_datadb_name": "10",
 // 	"out_datadb_user": "cgrates",
 // 	"out_datadb_password": "",
-// 	"out_datadb_encoding" : "msgpack",		
+// 	"out_datadb_encoding" : "msgpack",
 // 	"users_filters":[],
 // 	"out_datadb_opts":{
-// 		"redisMaxConns": 10,				// the connection pool size
-// 		"redisConnectAttempts": 20,			// the maximum amount of dial attempts
-// 		"redisSentinel": "",					
-// 		"redisCluster": false,					
-// 		"redisClusterSync": "5s",					
+// 		"redisMaxConns": 10,		// the connection pool size
+// 		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
+// 		"redisSentinel": "",
+// 		"redisCluster": false,
+// 		"redisClusterSync": "5s",
 // 		"redisClusterOndownDelay": "0",
-// 		"redisConnectTimeout": "0",			// the amount of wait time until timeout for a connection attempt
-// 		"redisReadTimeout": "0",			// the amount of wait time until timeout for reading operations
-// 		"redisWriteTimeout": "0",   		// the amount of wait time until timeout for writing operations
-// 		"redisTLS": false,					// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
-// 		"redisClientCertificate":"",		// path to client certificate
-// 		"redisClientKey":"",				// path to client key
-// 		"redisCACertificate":"",			// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
+// 		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
+// 		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
+// 		"redisTLS": false,		// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
+// 		"redisClientCertificate":"",	// path to client certificate
+// 		"redisClientKey":"",		// path to client key
+// 		"redisCACertificate":"",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
+// 		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
 // 	},
 // },
 
@@ -1681,6 +1697,18 @@
 // 	],
 // },
 
+// "janus_agent": {
+// 	"enabled": false,                         // enables the Janus agent: <true|false>
+// 	"url": "/janus",
+// 	"sessions_conns": ["*internal"],
+// 	"janus_conns": [{                         // instantiate connections to multiple Janus Servers
+// 		"address": "127.0.0.1:8088",          // janus API address 
+// 		"type": "*ws",                        // type of the transport to interact via janus API
+// 		"admin_address": "localhost:7188",    // janus admin address used to retrive more information for sessions and handles
+// 		"admin_password": "",                 // secret to pass restriction to communicate to the endpoint
+// 	}],
+// 	"request_processors": [],                 // request processors to be applied to Janus messages
+// },
 
 // "templates": {
 // 	"*err": [
@@ -1877,28 +1905,29 @@
 // },
 
 
-// "config_db": {								// database used to store runtime data (eg: accounts)
-// 	"db_type": "*internal",					// data_db type: <*redis|*mongo>
-// 	"db_host": "",							// data_db host address
-// 	"db_port": 0,	 						// data_db port to reach the database
-// 	"db_name": "",	 						// data_db database name to connect to
-// 	"db_user": "",		 					// username to use when connecting to data_db
-// 	"db_password": "", 						// password to use when connecting to data_db
+// "config_db": {					// database used to store runtime data (eg: accounts)
+// 	"db_type": "*internal",			// data_db type: <*redis|*mongo>
+// 	"db_host": "",				// data_db host address
+// 	"db_port": 0,	 			// data_db port to reach the database
+// 	"db_name": "",	 			// data_db database name to connect to
+// 	"db_user": "",		 		// username to use when connecting to data_db
+// 	"db_password": "", 			// password to use when connecting to data_db
 // 	"opts":{
-// 		"redisMaxConns": 10,					// the connection pool size
-// 		"redisConnectAttempts": 20,				// the maximum amount of dial attempts
-// 		"redisSentinel": "",					// the name of sentinel when used
-// 		"redisCluster": false,					// if enabled the datadb will try to connect to the redis cluster
-// 		"redisClusterSync": "5s",				// the sync interval for the redis cluster
-// 		"redisClusterOndownDelay": "0",			// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-// 		"redisConnectTimeout": "0",				// the amount of wait time until timeout for a connection attempt
-// 		"redisReadTimeout": "0",				// the amount of wait time until timeout for reading operations
-// 		"redisWriteTimeout": "0",   			// the amount of wait time until timeout for writing operations
-// 		"mongoQueryTimeout":"10s",				// timeout for query when mongo is used
-// 		"redisTLS": false,						// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-// 		"redisClientCertificate":"",			// path to client certificate
-// 		"redisClientKey":"",					// path to client key
-// 		"redisCACertificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"redisMaxConns": 10,		// the connection pool size
+// 		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
+// 		"redisSentinel": "",		// the name of sentinel when used
+// 		"redisCluster": false,		// if enabled the datadb will try to connect to the redis cluster
+// 		"redisClusterSync": "5s",	// the sync interval for the redis cluster
+// 		"redisClusterOndownDelay": "0",	// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+// 		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
+// 		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
+// 		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
+// 		"redisTLS": false,		// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+// 		"redisClientCertificate":"",	// path to client certificate
+// 		"redisClientKey":"",		// path to client key
+// 		"redisCACertificate":"",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+// 		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
+// 		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
 // 	}
 // },
 
