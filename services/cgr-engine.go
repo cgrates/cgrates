@@ -169,6 +169,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	iAccountSCh := make(chan birpc.ClientConnector, 1)
 	iTpeSCh := make(chan birpc.ClientConnector, 1)
 	iEFsCh := make(chan birpc.ClientConnector, 1)
+	iERsCh := make(chan birpc.ClientConnector, 1)
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
@@ -196,6 +197,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), utils.ActionSv1, iActionSCh)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTpes), utils.TPeSv1, iTpeSCh)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, iEFsCh)
+	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaERs), utils.ErSv1, iERsCh)
 
 	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep)
 	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, cgr.srvDep)
@@ -244,7 +246,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 		NewStatService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.server,
 			iStatSCh, cgr.cM, cgr.anzS, cgr.srvDep),
 
-		NewEventReaderService(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
+		NewEventReaderService(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.server, iERsCh, cgr.anzS, cgr.srvDep),
 		NewDNSAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
 		NewFreeswitchAgent(cgr.cfg, cgr.cM, cgr.srvDep),
 		NewKamailioAgent(cgr.cfg, cgr.cM, cgr.srvDep),

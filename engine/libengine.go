@@ -149,8 +149,8 @@ func NewService(val any) (_ IntService, err error) {
 	return NewServiceWithName(val, utils.EmptyString, false)
 }
 func NewServiceWithPing(val any, name, prefix string) (*birpc.Service, error) {
-	srv, err := birpc.NewServiceWithMethodsRename(val, name, true, func(funcName string) string {
-		return strings.TrimPrefix(funcName, prefix)
+	srv, err := birpc.NewServiceWithMethodsRename(val, name, true, func(oldFn string) (newFn string) {
+		return strings.TrimPrefix(oldFn, prefix)
 	})
 	if err != nil {
 		return nil, err

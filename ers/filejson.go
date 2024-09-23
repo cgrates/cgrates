@@ -65,7 +65,7 @@ type JSONFileER struct {
 	cgrCfg        *config.CGRConfig
 	cfgIdx        int // index of config instance within ERsCfg.Readers
 	fltrS         *engine.FilterS
-	sourceDir     string
+	sourceDir     string        // path to the directory monitored by the reader for new events
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
 	rdrError      chan error

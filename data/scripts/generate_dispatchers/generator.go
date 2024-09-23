@@ -43,6 +43,7 @@ import (
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/rates"
@@ -81,6 +82,7 @@ func main() {
 		{"cores.go", "MetaCore", new(cores.CoreS), utils.EmptyString},
 		{"guardian.go", "MetaGuardian", guardian.Guardian, utils.GuardianS},
 		{"efs.go", "MetaEFs", new(efs.EfS), utils.EmptyString},
+		{"ers.go", "MetaERs", new(ers.ERService), utils.ErS},
 		{"tpes.go", "MetaTpes", new(tpes.TPeS), utils.EmptyString},
 		// {"servicemanager.go", "MetaServiceManager", new(servmanager.ServiceManager), utils.EmptyString},
 	} {
