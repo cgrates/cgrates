@@ -384,6 +384,8 @@ const (
 	MetaUCH                  = "*uch"
 	MetaGuardian             = "*guardians"
 	MetaEEs                  = "*ees"
+	MetaEFs                  = "*efs"
+	MetaERs                  = "*ers"
 	MetaRates                = "*rates"
 	MetaRateSOverwrite       = "*rateSOverwrite"
 	MetaContinue             = "*continue"
@@ -931,7 +933,6 @@ const (
 	MetaThresholds         = "*thresholds"
 	MetaRoutes             = "*routes"
 	MetaAttributes         = "*attributes"
-	MetaEFs                = "*efs"
 	MetaActionProfiles     = "*action_profiles"
 	MetaLoadIDs            = "*load_ids"
 	MetaNodeID             = "*node_id"
@@ -1352,6 +1353,14 @@ const (
 	EfSv1Ping         = "EfSv1.Ping"
 	EfSv1ProcessEvent = "EfSv1.ProcessEvent"
 	EfSv1ReplayEvents = "EfSv1.ReplayEvents"
+)
+
+// ERs
+const (
+	ErS            = "ErS"
+	ErSv1          = "ErSv1"
+	ErSv1Ping      = "ErSv1.Ping"
+	ErSv1RunReader = "ErSv1.RunReader"
 )
 
 // ConfigSv1 APIs

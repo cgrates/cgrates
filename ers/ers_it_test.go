@@ -85,10 +85,7 @@ func TestERsAddReader(t *testing.T) {
 func TestERsListenAndServeErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			ID:   "",
-			Type: "",
-		},
+		{},
 	}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(cfg, fltrS, nil)
@@ -102,21 +99,12 @@ func TestERsListenAndServeErr(t *testing.T) {
 func TestERsProcessEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			ID:   "",
-			Type: "",
-		},
+		{},
 	}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(cfg, fltrS, nil)
-	rdrCfg := &config.EventReaderCfg{
-		ID:   "",
-		Type: "",
-	}
-	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
-	}
+	rdrCfg := &config.EventReaderCfg{}
+	cgrEvent := &utils.CGREvent{}
 	err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "unsupported reqType: <>" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reqType: <>", err)
@@ -126,10 +114,7 @@ func TestERsProcessEventErr(t *testing.T) {
 func TestERsCloseAllRdrs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			ID:   "",
-			Type: "",
-		},
+		{},
 	}
 	fltrS := &engine.FilterS{}
 	srv := NewERService(cfg, fltrS, nil)
@@ -140,7 +125,6 @@ func TestERsListenAndServeRdrErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:   "",
 			Type: utils.MetaNone,
 		},
 	}
@@ -161,7 +145,6 @@ func TestERsListenAndServeStopchan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:   "",
 			Type: utils.MetaNone,
 		},
 	}
@@ -181,7 +164,6 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:   "",
 			Type: utils.MetaNone,
 		},
 	}
@@ -192,15 +174,8 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 	srv.rdrErr = make(chan error, 1)
 	srv.rdrEvents = make(chan *erEvent, 1)
 	srv.rdrEvents <- &erEvent{
-		cgrEvent: &utils.CGREvent{
-			Tenant:  "",
-			ID:      "",
-			Event:   nil,
-			APIOpts: nil,
-		},
-		rdrCfg: &config.EventReaderCfg{
-			ID: "",
-		},
+		cgrEvent: &utils.CGREvent{},
+		rdrCfg:   &config.EventReaderCfg{},
 	}
 	go func() {
 		time.Sleep(10 * time.Millisecond)
@@ -216,7 +191,6 @@ func TestERsListenAndServeCfgRldChan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
-			ID:   "",
 			Type: utils.MetaNone,
 		},
 	}
@@ -349,14 +323,7 @@ func TestERsListenAndServeCfgRldChan5(t *testing.T) {
 	fltrS := &engine.FilterS{}
 	srv := NewERService(cfg, fltrS, nil)
 	exp := &CSVFileER{
-		cgrCfg:    cfg,
-		cfgIdx:    0,
-		fltrS:     nil,
-		sourceDir: "",
-		rdrEvents: nil,
-		rdrError:  nil,
-		rdrExit:   nil,
-		conReqs:   nil,
+		cgrCfg: cfg,
 	}
 	var evRdr EventReader = exp
 	srv.rdrs = map[string]EventReader{
@@ -436,12 +403,7 @@ func TestERsProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
-		Tenant:  "",
-		ID:      "",
-		Event:   nil,
-		APIOpts: nil,
-	}
+	cgrEvent := &utils.CGREvent{}
 	err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "unsupported reqType: <>" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reqType: <>", err)
@@ -464,12 +426,7 @@ func TestERsProcessEvent2(t *testing.T) {
 			},
 		},
 	}
-	cgrEvent := &utils.CGREvent{
-		Tenant:  "",
-		ID:      "",
-		Event:   nil,
-		APIOpts: nil,
-	}
+	cgrEvent := &utils.CGREvent{}
 	err := srv.processEvent(cgrEvent, rdrCfg)
 	if err != nil {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
@@ -546,9 +503,6 @@ func TestERsProcessEvent5(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
-		Event:  nil,
 		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
@@ -628,9 +582,6 @@ func TestERsProcessEvent8(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
-		Event:  nil,
 		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
@@ -658,9 +609,6 @@ func TestERsProcessEvent9(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
-		Event:  nil,
 		APIOpts: map[string]any{
 			utils.OptsRoutesLimit: true,
 		},
@@ -689,8 +637,6 @@ func TestERsProcessEvent10(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
 		Event: map[string]any{
 			utils.Usage: time.Second,
 		},
@@ -744,8 +690,6 @@ func TestERsProcessEvent11(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{
-		Tenant: "",
-		ID:     "",
 		Event: map[string]any{
 			utils.Usage: 0,
 		},

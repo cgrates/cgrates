@@ -22,8 +22,10 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/servmanager"
@@ -31,14 +33,22 @@ import (
 )
 
 // NewEventReaderService returns the EventReader Service
-func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewEventReaderService(
+	cfg *config.CGRConfig,
+	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
+	server *cores.Server,
+	intConn chan birpc.ClientConnector,
+	anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
+		server:      server,
+		intConn:     intConn,
+		anz:         anz,
 		srvDep:      srvDep,
 	}
 }
@@ -53,6 +63,9 @@ type EventReaderService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
+	server   *cores.Server
+	intConn  chan birpc.ClientConnector
+	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -77,6 +90,15 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	// build the service
 	erS.ers = ers.NewERService(erS.cfg, filterS, erS.connMgr)
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shtDwn)
+
+	srv, err := engine.NewServiceWithPing(erS.ers, utils.ErSv1, utils.V1Prfx)
+	if err != nil {
+		return err
+	}
+	if !erS.cfg.DispatcherSCfg().Enabled {
+		erS.server.RpcRegister(srv)
+	}
+	erS.intConn <- erS.anz.GetInternalCodec(srv, utils.ERs)
 	return
 }
 
@@ -99,9 +121,10 @@ func (erS *EventReaderService) Reload(*context.Context, context.CancelFunc) (err
 // Shutdown stops the service
 func (erS *EventReaderService) Shutdown() (err error) {
 	erS.Lock()
+	defer erS.Unlock()
 	close(erS.stopChan)
 	erS.ers = nil
-	erS.Unlock()
+	erS.server.RpcUnregisterName(utils.ErSv1)
 	return
 }
 

@@ -65,7 +65,8 @@ func TestEventReaderSReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, srvDep)
 	sS := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
-	erS := NewEventReaderService(cfg, filterSChan, nil, srvDep)
+	intERsConn := make(chan birpc.ClientConnector, 1)
+	erS := NewEventReaderService(cfg, filterSChan, nil, server, intERsConn, anz, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(erS, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
@@ -127,7 +128,8 @@ func TestEventReaderSReload2(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	erS := NewEventReaderService(cfg, filterSChan, nil, srvDep)
+	server := cores.NewServer(nil)
+	erS := NewEventReaderService(cfg, filterSChan, nil, server, nil, nil, srvDep)
 	ers := ers.NewERService(cfg, nil, nil)
 
 	runtime.Gosched()
