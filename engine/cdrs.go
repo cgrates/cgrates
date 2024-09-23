@@ -437,20 +437,21 @@ func (cdrS *CDRServer) eeSProcessEvent(cgrEv *CGREventWithEeIDs) (err error) {
 
 // cdrProcessingArgs holds the arguments for processing CDR events.
 type cdrProcessingArgs struct {
-	attrS  bool
-	chrgS  bool
-	refund bool
-	ralS   bool
-	store  bool
-	reRate bool
-	export bool
-	thdS   bool
-	stS    bool
+	attrS     bool
+	chrgS     bool
+	refund    bool
+	ralS      bool
+	store     bool
+	reRate    bool
+	export    bool
+	thdS      bool
+	stS       bool
+	reprocess bool
 }
 
 // newCDRProcessingArgs initializes processing arguments from config and overrides them with provided flags.
-func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts map[string]any) (cdrProcessingArgs, error) {
-	args := cdrProcessingArgs{
+func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts map[string]any) (*cdrProcessingArgs, error) {
+	args := &cdrProcessingArgs{
 		attrS:  len(cfg.AttributeSConns) != 0,
 		chrgS:  len(cfg.ChargerSConns) != 0,
 		store:  cfg.StoreCdrs,
@@ -462,7 +463,7 @@ func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts
 	var err error
 	if v, has := opts[utils.OptsAttributeS]; has {
 		if args.attrS, err = utils.IfaceAsBool(v); err != nil {
-			return cdrProcessingArgs{}, err
+			return nil, err
 		}
 	}
 	if flags.Has(utils.MetaAttributes) {
@@ -470,7 +471,7 @@ func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts
 	}
 	if v, has := opts[utils.OptsChargerS]; has {
 		if args.chrgS, err = utils.IfaceAsBool(v); err != nil {
-			return cdrProcessingArgs{}, err
+			return nil, err
 		}
 	}
 	if flags.Has(utils.MetaChargers) {
@@ -484,7 +485,7 @@ func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts
 	}
 	if v, has := opts[utils.OptsThresholdS]; has {
 		if args.thdS, err = utils.IfaceAsBool(v); err != nil {
-			return cdrProcessingArgs{}, err
+			return nil, err
 		}
 	}
 	if flags.Has(utils.MetaThresholds) {
@@ -492,7 +493,7 @@ func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts
 	}
 	if v, has := opts[utils.OptsStatS]; has {
 		if args.stS, err = utils.IfaceAsBool(v); err != nil {
-			return cdrProcessingArgs{}, err
+			return nil, err
 		}
 	}
 	if flags.Has(utils.MetaStats) {
@@ -500,7 +501,7 @@ func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts
 	}
 	if v, has := opts[utils.OptsRerate]; has {
 		if args.reRate, err = utils.IfaceAsBool(v); err != nil {
-			return cdrProcessingArgs{}, err
+			return nil, err
 		}
 	}
 	if flags.Has(utils.MetaRerate) {
@@ -512,7 +513,7 @@ func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts
 	}
 	if v, has := opts[utils.OptsRefund]; has {
 		if args.refund, err = utils.IfaceAsBool(v); err != nil {
-			return cdrProcessingArgs{}, err
+			return nil, err
 		}
 	}
 	if flags.Has(utils.MetaRefund) {
@@ -521,9 +522,97 @@ func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts
 	if args.refund && !args.reRate {
 		args.ralS = false
 	}
+	if args.refund {
+		args.reprocess = true
+	}
+	if flags.Has(utils.MetaReprocess) {
+		args.reprocess = flags.GetBool(utils.MetaReprocess)
+	}
 	if v, has := opts[utils.OptsRALs]; has {
 		if args.ralS, err = utils.IfaceAsBool(v); err != nil {
-			return cdrProcessingArgs{}, err
+			return nil, err
+		}
+	}
+	if flags.Has(utils.MetaRALs) {
+		args.ralS = flags.GetBool(utils.MetaRALs)
+	}
+	return args, nil
+}
+
+// newCDRProcessingArgsNoCfg initializes processing arguments by taking flags from provided FlagsWithParams and APIOpts, without taking them from configs.
+func newCDRProcessingArgsNoCfg(flags utils.FlagsWithParams, opts map[string]any) (*cdrProcessingArgs, error) {
+	args := new(cdrProcessingArgs)
+	var err error
+	if v, has := opts[utils.OptsAttributeS]; has {
+		if args.attrS, err = utils.IfaceAsBool(v); err != nil {
+			return nil, err
+		}
+	}
+	if flags.Has(utils.MetaAttributes) {
+		args.attrS = flags.GetBool(utils.MetaAttributes)
+	}
+	if v, has := opts[utils.OptsChargerS]; has {
+		if args.chrgS, err = utils.IfaceAsBool(v); err != nil {
+			return nil, err
+		}
+	}
+	if flags.Has(utils.MetaChargers) {
+		args.chrgS = flags.GetBool(utils.MetaChargers)
+	}
+	if flags.Has(utils.MetaStore) {
+		args.store = flags.GetBool(utils.MetaStore)
+	}
+	if flags.Has(utils.MetaExport) {
+		args.export = flags.GetBool(utils.MetaExport)
+	}
+	if v, has := opts[utils.OptsThresholdS]; has {
+		if args.thdS, err = utils.IfaceAsBool(v); err != nil {
+			return nil, err
+		}
+	}
+	if flags.Has(utils.MetaThresholds) {
+		args.thdS = flags.GetBool(utils.MetaThresholds)
+	}
+	if v, has := opts[utils.OptsStatS]; has {
+		if args.stS, err = utils.IfaceAsBool(v); err != nil {
+			return nil, err
+		}
+	}
+	if flags.Has(utils.MetaStats) {
+		args.stS = flags.GetBool(utils.MetaStats)
+	}
+	if v, has := opts[utils.OptsRerate]; has {
+		if args.reRate, err = utils.IfaceAsBool(v); err != nil {
+			return nil, err
+		}
+	}
+	if flags.Has(utils.MetaRerate) {
+		args.reRate = flags.GetBool(utils.MetaRerate)
+	}
+	if args.reRate {
+		args.ralS = true
+		args.refund = true
+	}
+	if v, has := opts[utils.OptsRefund]; has {
+		if args.refund, err = utils.IfaceAsBool(v); err != nil {
+			return nil, err
+		}
+	}
+	if flags.Has(utils.MetaRefund) {
+		args.refund = flags.GetBool(utils.MetaRefund)
+	}
+	if args.refund && !args.reRate {
+		args.ralS = false
+	}
+	if args.refund {
+		args.reprocess = true
+	}
+	if flags.Has(utils.MetaReprocess) {
+		args.reprocess = flags.GetBool(utils.MetaReprocess)
+	}
+	if v, has := opts[utils.OptsRALs]; has {
+		if args.ralS, err = utils.IfaceAsBool(v); err != nil {
+			return nil, err
 		}
 	}
 	if flags.Has(utils.MetaRALs) {
@@ -534,7 +623,7 @@ func newCDRProcessingArgs(cfg *config.CdrsCfg, flags utils.FlagsWithParams, opts
 
 // processEvent processes a CGREvent based on arguments
 // in case of partially executed, both error and evs will be returned
-func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args cdrProcessingArgs) (outEvs []*utils.EventWithFlags, err error) {
+func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args *cdrProcessingArgs) (outEvs []*utils.EventWithFlags, err error) {
 	if args.attrS {
 		for _, ev := range evs {
 			if err = cdrS.attrSProcessEvent(ev); err != nil {
@@ -564,7 +653,7 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args cdrProcessingAr
 		cgrEvs = evs
 	}
 	// Check if the unique ID was not already processed
-	if !args.refund {
+	if !args.reprocess {
 		for _, cgrEv := range cgrEvs {
 			me := MapEvent(cgrEv.Event)
 			if !me.HasField(utils.CGRID) { // try to compute the CGRID if missing
@@ -1127,8 +1216,8 @@ func (cdrS *CDRServer) V1RateCDRs(ctx *context.Context, arg *ArgRateCDRs, reply 
 	return
 }
 
-// ReprocessCDRs is used to reprocess CDRs which are already stored within StorDB
-func (cdrS *CDRServer) ReprocessCDRs(ctx *context.Context, arg *ArgRateCDRs, reply *string) (err error) {
+// V1ReprocessCDRs is used to reprocess CDRs which are already stored within StorDB
+func (cdrS *CDRServer) V1ReprocessCDRs(ctx *context.Context, arg *ArgRateCDRs, reply *string) (err error) {
 	var cdrFltr *utils.CDRsFilter
 	if cdrFltr, err = arg.RPCCDRsFilter.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		return utils.NewErrServerError(err)
@@ -1140,10 +1229,11 @@ func (cdrS *CDRServer) ReprocessCDRs(ctx *context.Context, arg *ArgRateCDRs, rep
 
 	// Compute processing arguments based on flags and configuration.
 	flgs := utils.FlagsWithParamsFromSlice(arg.Flags)
-	procArgs, err := newCDRProcessingArgs(cdrS.cgrCfg.CdrsCfg(), flgs, arg.APIOpts)
+	procArgs, err := newCDRProcessingArgsNoCfg(flgs, arg.APIOpts)
 	if err != nil {
 		return fmt.Errorf("failed to configure processing args: %v", err)
 	}
+	procArgs.reprocess = true
 
 	cgrEvs := make([]*utils.CGREvent, len(cdrs))
 	for i, cdr := range cdrs {

@@ -984,7 +984,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 		}}
 	expLog := `with AttributeS`
 	if _, err := cdrs.processEvents(evs,
-		cdrProcessingArgs{
+		&cdrProcessingArgs{
 			attrS:  true,
 			chrgS:  true,
 			refund: true,
@@ -1004,7 +1004,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf2)
 	expLog = `with ChargerS`
 	if _, err := cdrs.processEvents(evs,
-		cdrProcessingArgs{
+		&cdrProcessingArgs{
 			attrS:  false,
 			chrgS:  true,
 			refund: true,
@@ -1025,7 +1025,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	Cache.Set(utils.CacheCDRIDs, utils.ConcatenatedKey("test1", utils.MetaDefault), "val", []string{}, true, utils.NonTransactional)
 	expLog = `with CacheS`
 	if _, err = cdrs.processEvents(evs,
-		cdrProcessingArgs{
+		&cdrProcessingArgs{
 			attrS:  false,
 			chrgS:  false,
 			refund: false,
@@ -1046,16 +1046,17 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	evs[0].Event[utils.AnswerTime] = "time"
 	expLog = `could not retrieve previously`
 	if _, err = cdrs.processEvents(evs,
-		cdrProcessingArgs{
-			attrS:  false,
-			chrgS:  false,
-			refund: true,
-			ralS:   true,
-			store:  true,
-			reRate: false,
-			export: true,
-			thdS:   true,
-			stS:    true,
+		&cdrProcessingArgs{
+			attrS:     false,
+			chrgS:     false,
+			refund:    true,
+			ralS:      true,
+			store:     true,
+			reRate:    false,
+			export:    true,
+			thdS:      true,
+			stS:       true,
+			reprocess: true,
 		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf4.String(); !strings.Contains(rcvLog, expLog) {
@@ -1067,16 +1068,17 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	evs[0].Event[utils.AnswerTime] = time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC)
 	expLog = `refunding CDR`
 	if _, err = cdrs.processEvents(evs,
-		cdrProcessingArgs{
-			attrS:  false,
-			chrgS:  false,
-			refund: true,
-			ralS:   false,
-			store:  false,
-			reRate: false,
-			export: false,
-			thdS:   false,
-			stS:    false,
+		&cdrProcessingArgs{
+			attrS:     false,
+			chrgS:     false,
+			refund:    true,
+			ralS:      false,
+			store:     false,
+			reRate:    false,
+			export:    false,
+			thdS:      false,
+			stS:       false,
+			reprocess: true,
 		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf5.String(); strings.Contains(rcvLog, expLog) {
@@ -1089,16 +1091,17 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf6)
 	expLog = `refunding CDR`
 	if _, err = cdrs.processEvents(evs,
-		cdrProcessingArgs{
-			attrS:  false,
-			chrgS:  false,
-			refund: true,
-			ralS:   false,
-			store:  true,
-			reRate: false,
-			export: false,
-			thdS:   false,
-			stS:    false,
+		&cdrProcessingArgs{
+			attrS:     false,
+			chrgS:     false,
+			refund:    true,
+			ralS:      false,
+			store:     true,
+			reRate:    false,
+			export:    false,
+			thdS:      false,
+			stS:       false,
+			reprocess: true,
 		}); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	} else if rcvLog := buf6.String(); strings.Contains(rcvLog, expLog) {
@@ -1109,7 +1112,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf7)
 	expLog = `exporting cdr`
 	if _, err = cdrs.processEvents(evs,
-		cdrProcessingArgs{
+		&cdrProcessingArgs{
 			attrS:  false,
 			chrgS:  false,
 			refund: true,
@@ -1129,7 +1132,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf8)
 	expLog = `processing event`
 	if _, err = cdrs.processEvents(evs,
-		cdrProcessingArgs{
+		&cdrProcessingArgs{
 			attrS:  false,
 			chrgS:  false,
 			refund: true,
@@ -1149,7 +1152,7 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	setlog(buf9)
 	expLog = `processing event`
 	if _, err = cdrs.processEvents(evs,
-		cdrProcessingArgs{
+		&cdrProcessingArgs{
 			attrS:  false,
 			chrgS:  false,
 			refund: true,
