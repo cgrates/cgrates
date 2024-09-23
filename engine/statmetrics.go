@@ -75,7 +75,7 @@ type StatMetric interface {
 	GetFloat64Value(roundingDecimal int) (val float64)
 	AddEvent(evID string, ev utils.DataProvider) error
 	AddOneEvent(ev utils.DataProvider) error
-	RemEvent(evTenantID string) error
+	RemEvent(evTenantID string)
 	Marshal(ms Marshaler) (marshaled []byte, err error)
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 	GetFilterIDs() (filterIDs []string)
@@ -181,10 +181,10 @@ func (asr *StatASR) AddOneEvent(ev utils.DataProvider) (err error) {
 }
 
 // RemEvent deletes  a stored event and  decrements statistics of the metric for recalculation
-func (asr *StatASR) RemEvent(evID string) (err error) {
+func (asr *StatASR) RemEvent(evID string) {
 	val, has := asr.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	ans := 0
 	if val.Stat > 0.5 {
@@ -199,7 +199,6 @@ func (asr *StatASR) RemEvent(evID string) (err error) {
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	asr.val = nil
-	return
 }
 
 // Marshal is part of StatMetric interface
@@ -341,10 +340,10 @@ func (acd *StatACD) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (acd *StatACD) RemEvent(evID string) (err error) {
+func (acd *StatACD) RemEvent(evID string) {
 	val, has := acd.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	if val.Duration != 0 {
 		acd.Sum -= val.Duration
@@ -356,7 +355,6 @@ func (acd *StatACD) RemEvent(evID string) (err error) {
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	acd.val = nil
-	return
 }
 
 func (acd *StatACD) Marshal(ms Marshaler) (marshaled []byte, err error) {
@@ -496,10 +494,10 @@ func (tcd *StatTCD) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (tcd *StatTCD) RemEvent(evID string) (err error) {
+func (tcd *StatTCD) RemEvent(evID string) {
 	val, has := tcd.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	if val.Duration != 0 {
 		tcd.Sum -= val.Duration
@@ -511,7 +509,6 @@ func (tcd *StatTCD) RemEvent(evID string) (err error) {
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	tcd.val = nil
-	return
 }
 
 func (tcd *StatTCD) Marshal(ms Marshaler) (marshaled []byte, err error) {
@@ -649,10 +646,10 @@ func (acc *StatACC) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (acc *StatACC) RemEvent(evID string) (err error) {
+func (acc *StatACC) RemEvent(evID string) {
 	cost, has := acc.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	acc.Sum -= cost.Stat
 	acc.Count--
@@ -662,7 +659,6 @@ func (acc *StatACC) RemEvent(evID string) (err error) {
 		cost.CompressFactor = cost.CompressFactor - 1
 	}
 	acc.val = nil
-	return
 }
 
 func (acc *StatACC) Marshal(ms Marshaler) (marshaled []byte, err error) {
@@ -800,10 +796,10 @@ func (tcc *StatTCC) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (tcc *StatTCC) RemEvent(evID string) (err error) {
+func (tcc *StatTCC) RemEvent(evID string) {
 	cost, has := tcc.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	if cost.Stat != 0 {
 		tcc.Sum -= cost.Stat
@@ -815,7 +811,6 @@ func (tcc *StatTCC) RemEvent(evID string) (err error) {
 		cost.CompressFactor = cost.CompressFactor - 1
 	}
 	tcc.val = nil
-	return
 }
 
 func (tcc *StatTCC) Marshal(ms Marshaler) (marshaled []byte, err error) {
@@ -954,10 +949,10 @@ func (pdd *StatPDD) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (pdd *StatPDD) RemEvent(evID string) (err error) {
+func (pdd *StatPDD) RemEvent(evID string) {
 	val, has := pdd.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	if val.Duration != 0 {
 		pdd.Sum -= val.Duration
@@ -969,7 +964,6 @@ func (pdd *StatPDD) RemEvent(evID string) (err error) {
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	pdd.val = nil
-	return
 }
 
 func (pdd *StatPDD) Marshal(ms Marshaler) (marshaled []byte, err error) {
@@ -1102,16 +1096,15 @@ func (ddc *StatDDC) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (ddc *StatDDC) RemEvent(evID string) (err error) {
+func (ddc *StatDDC) RemEvent(evID string) {
 	fieldValues, has := ddc.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	if len(fieldValues) == 0 {
 		delete(ddc.Events, evID)
-		return utils.ErrNotFound
+		return
 	}
-
 	// decrement events
 	var fieldValue string
 	for k := range fieldValues {
@@ -1124,7 +1117,6 @@ func (ddc *StatDDC) RemEvent(evID string) (err error) {
 		return // do not delete the reference until it reaches 0
 	}
 	delete(ddc.Events[evID], fieldValue)
-
 	// remove from fieldValues
 	if _, has := ddc.FieldValues[fieldValue]; !has {
 		return
@@ -1133,7 +1125,6 @@ func (ddc *StatDDC) RemEvent(evID string) (err error) {
 	if ddc.FieldValues[fieldValue].Size() <= 0 {
 		delete(ddc.FieldValues, fieldValue)
 	}
-	return
 }
 
 func (ddc *StatDDC) Marshal(ms Marshaler) (marshaled []byte, err error) {
@@ -1267,10 +1258,10 @@ func (sum *StatSum) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (sum *StatSum) RemEvent(evID string) (err error) {
+func (sum *StatSum) RemEvent(evID string) {
 	val, has := sum.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	if val.Stat != 0 {
 		sum.Sum -= val.Stat
@@ -1282,7 +1273,6 @@ func (sum *StatSum) RemEvent(evID string) (err error) {
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	sum.val = nil
-	return
 }
 
 func (sum *StatSum) Marshal(ms Marshaler) (marshaled []byte, err error) {
@@ -1421,10 +1411,10 @@ func (avg *StatAverage) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (avg *StatAverage) RemEvent(evID string) (err error) {
+func (avg *StatAverage) RemEvent(evID string) {
 	val, has := avg.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	if val.Stat >= 0 {
 		avg.Sum -= val.Stat
@@ -1436,7 +1426,6 @@ func (avg *StatAverage) RemEvent(evID string) (err error) {
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	avg.val = nil
-	return
 }
 
 func (avg *StatAverage) Marshal(ms Marshaler) (marshaled []byte, err error) {
@@ -1573,14 +1562,14 @@ func (dst *StatDistinct) AddOneEvent(ev utils.DataProvider) (err error) {
 	return
 }
 
-func (dst *StatDistinct) RemEvent(evID string) (err error) {
+func (dst *StatDistinct) RemEvent(evID string) {
 	fieldValues, has := dst.Events[evID]
 	if !has {
-		return utils.ErrNotFound
+		return
 	}
 	if len(fieldValues) == 0 {
 		delete(dst.Events, evID)
-		return utils.ErrNotFound
+		return
 	}
 
 	// decrement events
@@ -1604,7 +1593,6 @@ func (dst *StatDistinct) RemEvent(evID string) (err error) {
 	if dst.FieldValues[fieldValue].Size() <= 0 {
 		delete(dst.FieldValues, fieldValue)
 	}
-	return
 }
 
 func (dst *StatDistinct) Marshal(ms Marshaler) (marshaled []byte, err error) {

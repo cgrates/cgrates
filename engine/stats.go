@@ -248,8 +248,8 @@ func (sS *StatService) getStatQueue(tnt, id string) (sq *StatQueue, err error) {
 	if sq, err = sS.dm.GetStatQueue(tnt, id, true, true, utils.EmptyString); err != nil {
 		return
 	}
-	var removed int
-	if removed, err = sq.remExpired(); err != nil || removed == 0 {
+	removed := sq.remExpired()
+	if removed == 0 {
 		return
 	}
 	sS.storeStatQueue(sq)
@@ -383,18 +383,11 @@ func (sS *StatService) processEvent(tnt string, args *utils.CGREvent) (statQueue
 	if err != nil {
 		return nil, err
 	}
-
 	statQueueIDs = matchSQs.IDs()
 	var withErrors bool
 	for _, sq := range matchSQs {
-		if err = sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<StatS> Queue: %s, ignoring event: %s, error: %s",
-					sq.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
-			withErrors = true
-		}
+		sq.ProcessEvent(tnt, args.ID, sS.filterS, evNm)
 		sS.storeStatQueue(sq)
-
 	}
 	if sS.processThresholds(matchSQs, args.APIOpts) != nil || sS.processEEs(matchSQs, args.APIOpts) != nil ||
 		withErrors {

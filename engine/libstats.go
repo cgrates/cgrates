@@ -233,17 +233,12 @@ func (sq *StatQueue) TenantID() string {
 }
 
 // ProcessEvent processes a utils.CGREvent, returns true if processed
-func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) (err error) {
+func (sq *StatQueue) ProcessEvent(tnt, evID string, filterS *FilterS, evNm utils.MapStorage) error {
 	if oneEv := sq.isOneEvent(); oneEv {
 		return sq.addOneEvent(tnt, filterS, evNm)
 	}
-	if _, err = sq.remExpired(); err != nil {
-		return
-	}
-
-	if err = sq.remOnQueueLength(); err != nil {
-		return
-	}
+	sq.remExpired()
+	sq.remOnQueueLength()
 	return sq.addStatEvent(tnt, evID, filterS, evNm)
 }
 
@@ -272,22 +267,14 @@ func (sq *StatQueue) addOneEvent(tnt string, filterS *FilterS, evNm utils.MapSto
 }
 
 // remStatEvent removes an event from metrics
-func (sq *StatQueue) remEventWithID(evID string) (err error) {
-	for metricID, metric := range sq.SQMetrics {
-		if err = metric.RemEvent(evID); err != nil {
-			if err.Error() == utils.ErrNotFound.Error() {
-				err = nil
-				continue
-			}
-			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
-			return
-		}
+func (sq *StatQueue) remEventWithID(evID string) {
+	for _, metric := range sq.SQMetrics {
+		metric.RemEvent(evID)
 	}
-	return
 }
 
 // remExpired expires items in queue
-func (sq *StatQueue) remExpired() (removed int, err error) {
+func (sq *StatQueue) remExpired() (removed int) {
 	var expIdx *int // index of last item to be expired
 	for i, item := range sq.SQItems {
 		if item.ExpiryTime == nil {
@@ -296,9 +283,7 @@ func (sq *StatQueue) remExpired() (removed int, err error) {
 		if item.ExpiryTime.After(time.Now()) {
 			break
 		}
-		if err = sq.remEventWithID(item.EventID); err != nil {
-			return
-		}
+		sq.remEventWithID(item.EventID)
 		expIdx = utils.IntPointer(i)
 	}
 	if expIdx == nil {
@@ -310,18 +295,15 @@ func (sq *StatQueue) remExpired() (removed int, err error) {
 }
 
 // remOnQueueLength removes elements based on QueueLength setting
-func (sq *StatQueue) remOnQueueLength() (err error) {
+func (sq *StatQueue) remOnQueueLength() {
 	if sq.sqPrfl.QueueLength <= 0 { // infinite length
 		return
 	}
-	if len(sq.SQItems) == sq.sqPrfl.QueueLength { // reached limit, rem first element
+	if len(sq.SQItems) == sq.sqPrfl.QueueLength { // reached limit, remove first element
 		item := sq.SQItems[0]
-		if err = sq.remEventWithID(item.EventID); err != nil {
-			return
-		}
+		sq.remEventWithID(item.EventID)
 		sq.SQItems = sq.SQItems[1:]
 	}
-	return
 }
 
 // addStatEvent computes metrics for an event

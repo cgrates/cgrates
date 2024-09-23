@@ -1871,15 +1871,11 @@ func TestPDDGetValue(t *testing.T) {
 	if v := pdd.GetValue(config.CgrConfig().GeneralCfg().RoundingDecimals); v != 9*time.Second+500*time.Millisecond {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
-	if err := pdd.RemEvent(ev.ID); err != nil {
-		t.Error(err)
-	}
+	pdd.RemEvent(ev.ID)
 	if v := pdd.GetValue(config.CgrConfig().GeneralCfg().RoundingDecimals); v != -time.Nanosecond {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
-	if err := pdd.RemEvent(ev2.ID); err != nil {
-		t.Error(err)
-	}
+	pdd.RemEvent(ev2.ID)
 	if v := pdd.GetValue(config.CgrConfig().GeneralCfg().RoundingDecimals); v != -time.Nanosecond {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
@@ -1905,12 +1901,8 @@ func TestPDDGetValue(t *testing.T) {
 	if v := pdd.GetValue(config.CgrConfig().GeneralCfg().RoundingDecimals); v != -time.Nanosecond {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
-	if err := pdd.RemEvent(ev5.ID); err == nil || err.Error() != "NOT_FOUND" {
-		t.Error(err)
-	}
-	if err := pdd.RemEvent(ev4.ID); err != nil {
-		t.Error(err)
-	}
+	pdd.RemEvent(ev5.ID)
+	pdd.RemEvent(ev4.ID)
 	if v := pdd.GetValue(config.CgrConfig().GeneralCfg().RoundingDecimals); v != -time.Nanosecond {
 		t.Errorf("wrong pdd value: %+v", v)
 	}
@@ -3384,26 +3376,6 @@ func TestStatMetricsStatDistinctGetFilterIDs(t *testing.T) {
 	}
 }
 
-func TestStatMetricsStatDistinctRemEventErr2(t *testing.T) {
-	dst := &StatDistinct{
-		FilterIDs:   []string{"Test_Filter_ID"},
-		FieldValues: map[string]utils.StringSet{},
-		Events: map[string]map[string]int64{
-			"Event1": {
-				"FieldValue1": 1,
-			},
-			"Event2": {},
-		},
-		MinItems:  3,
-		FieldName: "Test_Field_Name",
-		Count:     3,
-	}
-	err := dst.RemEvent("Event2")
-	if err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", utils.ErrNotFound, err)
-	}
-}
-
 func TestStatMetricsStatDistinctRemEvent(t *testing.T) {
 	dst := &StatDistinct{
 		FilterIDs:   []string{"Test_Filter_ID"},
@@ -3429,10 +3401,8 @@ func TestStatMetricsStatDistinctRemEvent(t *testing.T) {
 		FieldName: "Test_Field_Name",
 		Count:     2,
 	}
-	err := dst.RemEvent("Event1")
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Recevied <%+v>", err)
-	}
+	dst.RemEvent("Event1")
+
 	if !reflect.DeepEqual(expected, dst) {
 		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, dst)
 	}
@@ -3469,10 +3439,7 @@ func TestStatMetricsStatDistinctRemEvent2(t *testing.T) {
 		FieldName: "Test_Field_Name",
 		Count:     2,
 	}
-	err := dst.RemEvent("Event1")
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Recevied <%+v>", err)
-	}
+	dst.RemEvent("Event1")
 	if !reflect.DeepEqual(expected, dst) {
 		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, dst)
 	}
@@ -3692,25 +3659,6 @@ func TestStatMetricsStatDDCGetMinItems(t *testing.T) {
 	}
 }
 
-func TestStatMetricsStatDDCRemEventErr2(t *testing.T) {
-	ddc := &StatDDC{
-		FilterIDs:   []string{"Test_Filter_ID"},
-		FieldValues: map[string]utils.StringSet{},
-		Events: map[string]map[string]int64{
-			"Event1": {
-				"FieldValue1": 1,
-			},
-			"Event2": {},
-		},
-		MinItems: 3,
-		Count:    3,
-	}
-	err := ddc.RemEvent("Event2")
-	if err == nil || err != utils.ErrNotFound {
-		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", utils.ErrNotFound, err)
-	}
-}
-
 func TestStatMetricsStatDDCRemEvent(t *testing.T) {
 	ddc := &StatDDC{
 		FilterIDs:   []string{"Test_Filter_ID"},
@@ -3734,10 +3682,7 @@ func TestStatMetricsStatDDCRemEvent(t *testing.T) {
 		MinItems: 3,
 		Count:    2,
 	}
-	err := ddc.RemEvent("Event1")
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Recevied <%+v>", err)
-	}
+	ddc.RemEvent("Event1")
 	if !reflect.DeepEqual(expected, ddc) {
 		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, ddc)
 	}
@@ -3772,10 +3717,8 @@ func TestStatMetricsStatDDCRemEvent2(t *testing.T) {
 		MinItems: 3,
 		Count:    2,
 	}
-	err := ddc.RemEvent("Event1")
-	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Recevied <%+v>", err)
-	}
+	ddc.RemEvent("Event1")
+
 	if !reflect.DeepEqual(expected, ddc) {
 		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", expected, ddc)
 	}
