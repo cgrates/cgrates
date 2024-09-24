@@ -1,6 +1,6 @@
 # Define global variables
 %global version 0.10.4
-%global go_version 1.22.3
+%global go_version 1.23.1
 
 # Define system paths
 %global _logdir	       /var/log/%name
