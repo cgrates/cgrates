@@ -3,6 +3,12 @@
 
 ## [0.10.5~dev] - 2024-09-24
 
+### Maintenance
+
+- [Version] Incremented version
+
+Full Changelog: https://github.com/cgrates/cgrates/compare/v0.10.4...v0.10
+
 ## [0.10.4] - 2024-09-24
 
 ### Bug fixes
@@ -33,7 +39,7 @@
 - [Version] Incremented version
 - [Dependencies] Updated all dependencies to latest backwards compatible versions. #4464
 
-Full Changelog: https://github.com/cgrates/cgrates/compare/v0.10.3...v0.10
+Full Changelog: https://github.com/cgrates/cgrates/compare/v0.10.3...v0.10.4
 
 ## [0.10.3] - 2023-08-09
 

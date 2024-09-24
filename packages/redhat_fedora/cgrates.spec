@@ -1,5 +1,5 @@
 # Define global variables
-%global version 0.10.3
+%global version 0.10.4
 %global git_commit %(echo $gitLastCommit)
 %global releaseTag %(echo $rpmTag)
 %global go_version 1.23.1
@@ -13,8 +13,8 @@
 
 # Define package metadata
 Name:           cgrates
-Version:        v%{version}
-Release:        rc1.%{releaseTag}
+Version:        %{version}
+Release:        %{releaseTag}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
