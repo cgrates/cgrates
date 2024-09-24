@@ -107,6 +107,18 @@ type Trend struct {
 
 }
 
+// Compile is used to initialize or cleanup the Trend
+//
+//	thread safe since it should be used close to source
+func (t *Trend) Compile(cleanTtl time.Duration, qLength int) {
+	t.tMux.Lock()
+	defer t.tMux.Unlock()
+	t.cleanup(cleanTtl, qLength)
+	if t.mTotals == nil { // indexes were not yet built
+		t.computeIndexes()
+	}
+}
+
 // cleanup will clean stale data out of
 func (t *Trend) cleanup(ttl time.Duration, qLength int) (altered bool) {
 	expTime := time.Now().Add(-ttl)

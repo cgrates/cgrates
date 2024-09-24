@@ -1653,3 +1653,8 @@ type ArgExportCDRs struct {
 	Verbose     bool     // verbose is used to inform the user about the positive and negative exported cdrs
 	RPCCDRsFilter
 }
+
+type ArgScheduleTrendQueries struct {
+	TenantIDWithAPIOpts
+	TrendIDs []string
+}
