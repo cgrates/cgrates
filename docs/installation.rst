@@ -26,28 +26,58 @@ Debian or Debian-based Distributions
 
 You can add the CGRateS repository to your system's sources list as follows:
 
-.. code-block:: bash
+.. tabs::
 
-   # Install dependencies
-   sudo apt-get install wget gnupg -y
+   .. group-tab:: Bookworm
 
-   # Download and move the GPG Key to the trusted area
-   wget https://apt.cgrates.org/apt.cgrates.org.gpg.key -O apt.cgrates.org.asc
-   sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
+      .. code-block:: bash
 
-   # Add the repository to the apt sources list
-   echo "deb http://apt.cgrates.org/debian/ v0.10 main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         # Install dependencies
+         sudo apt-get install wget gnupg -y
 
-   # Update the system repository and install CGRateS
-   sudo apt-get update -y
-   sudo apt-get install cgrates -y
+         # Download and move the GPG Key to the trusted area
+         wget https://apt.cgrates.org/apt.cgrates.org.gpg.key -O apt.cgrates.org.asc
+         sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
-Alternatively, you can manually install a specific .deb package as follows:
+         # Add the repository to the apt sources list
+         echo "deb http://apt.cgrates.org/debian/ v0.10-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
-.. code-block:: bash
+         # Update the system repository and install CGRateS
+         sudo apt-get update -y
+         sudo apt-get install cgrates -y
 
-   wget http://pkg.cgrates.org/deb/v0.10/cgrates_current_amd64.deb
-   sudo dpkg -i ./cgrates_current_amd64.deb
+      Alternatively, you can manually install a specific .deb package as follows:
+
+      .. code-block:: bash
+
+         wget http://pkg.cgrates.org/deb/v0.10/bookworm/cgrates_current_amd64.deb
+         sudo dpkg -i ./cgrates_current_amd64.deb
+
+   .. group-tab:: Bullseye
+
+      .. code-block:: bash
+
+         # Install dependencies
+         sudo apt-get install wget gnupg -y
+
+         # Download and move the GPG Key to the trusted area
+         wget https://apt.cgrates.org/apt.cgrates.org.gpg.key -O apt.cgrates.org.asc
+         sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
+
+         # Add the repository to the apt sources list
+         echo "deb http://apt.cgrates.org/debian/ v0.10-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+
+         # Update the system repository and install CGRateS
+         sudo apt-get update -y
+         sudo apt-get install cgrates -y
+
+      Alternatively, you can manually install a specific .deb package as follows:
+
+      .. code-block:: bash
+
+         wget http://pkg.cgrates.org/deb/v0.10/bullseye/cgrates_current_amd64.deb
+         sudo dpkg -i ./cgrates_current_amd64.deb
+
 
 .. note::
    A complete archive of CGRateS packages is available at http://pkg.cgrates.org/deb/.
@@ -92,8 +122,8 @@ Alternatively, you can manually install a specific .rpm package as follows:
 Installing from Source
 ----------------------
 
-Prerequisites:
-^^^^^^^^^^^^^^
+Prerequisites
+^^^^^^^^^^^^^
 
 - **Git**
 
@@ -116,8 +146,8 @@ To install the latest Go version at the time of writing this documentation, run:
    sudo tar -C /usr/local -xzf go1.22.3.linux-amd64.tar.gz
    export PATH=$PATH:/usr/local/go/bin
 
-Installation:
-^^^^^^^^^^^^^
+Installation
+^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -147,8 +177,8 @@ Creating Your Own Packages
 
 After compiling the source code, you may choose to create your own packages.
 
-For Debian-based distros:
-^^^^^^^^^^^^^^^^^^^^^^^^^
+For Debian-based distros
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -172,8 +202,8 @@ To install the generated package, run:
    cd $HOME/go/src/github.com/cgrates
    sudo dpkg -i cgrates_*.deb
 
-For Redhat-based distros:
-^^^^^^^^^^^^^^^^^^^^^^^^^
+For Redhat-based distros
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
