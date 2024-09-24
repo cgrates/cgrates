@@ -1,6 +1,6 @@
 module github.com/cgrates/cgrates
 
-go 1.22.4
+go 1.23.1
 
 // replace github.com/cgrates/radigo => /home/dan/go/src/github.com/cgrates/radigo
 // replace github.com/cgrates/rpcclient => ../rpcclient
