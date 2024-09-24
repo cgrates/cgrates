@@ -12,7 +12,7 @@
 # Define package metadata
 Name:           cgrates
 Version:        v%{version}
-Release:        {{{releaseTag}}}
+Release:        rc1.{{{releaseTag}}}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates

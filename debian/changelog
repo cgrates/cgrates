@@ -1,4 +1,11 @@
-cgrates (0.10.4) UNRELEASED; urgency=medium
+cgrates (0.10.5~dev-1) UNRELEASED; urgency=medium
+
+  * Starting new dev cycle.
+
+ -- DanB <danb@cgrates.org>  Thu, 24 Sep 2023 16:14:34 +0200
+
+
+ cgrates (0.10.4) UNRELEASED; urgency=medium
 
   * 0.10.4 release.
 

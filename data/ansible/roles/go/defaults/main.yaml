@@ -1,8 +1,8 @@
 ---
-go_version: 1.22.3
+go_version: 1.23.1
 go_platform: linux
 go_arch: amd64
 go_tarball: go{{ go_version }}.{{ go_platform }}-{{ go_arch }}.tar.gz
 go_download_url: https://dl.google.com/go/{{ go_tarball }}
-go_checksum: 8920ea521bad8f6b7bc377b4824982e011c19af27df88a815e3586ea895f1b36
+go_checksum: 49bbb517cfa9eee677e1e7897f7cf9cfdbcf49e05f61984a2789136de359f9bd
 install_go: true
