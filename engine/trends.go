@@ -174,8 +174,8 @@ func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []
 	return
 }
 
-// V1ScheduleTrendQueries is the query for manually re-/scheduling Trend Queries
-func (tS *TrendS) V1ScheduleTrendQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
+// V1ScheduleQueries is the query for manually re-/scheduling Trend Queries
+func (tS *TrendS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
 	if sched, errSched := tS.scheduleTrendQueries(ctx, args.Tenant, args.TrendIDs); errSched != nil {
 		return errSched
 	} else {
