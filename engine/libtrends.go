@@ -105,7 +105,40 @@ type Trend struct {
 	mCounts map[string]int       // number of times a metric is present in Metrics
 	mTotals map[string]float64   // cached sum, used for average calculations
 
-	tP *TrendProfile // cache here the settings
+}
+
+// cleanup will clean stale data out of
+func (t *Trend) cleanup(ttl time.Duration, qLength int) (altered bool) {
+	expTime := time.Now().Add(-ttl)
+	var expIdx *int
+	for i, rT := range t.RunTimes {
+		if rT.After(expTime) {
+			continue
+		}
+		expIdx = &i
+		delete(t.Metrics, rT)
+	}
+	if expIdx != nil {
+		if len(t.RunTimes)-1 == *expIdx {
+			t.RunTimes = make([]time.Time, 0)
+		} else {
+			t.RunTimes = t.RunTimes[*expIdx+1:]
+		}
+		altered = true
+	}
+	diffLen := len(t.RunTimes) - qLength
+	if qLength > 0 && diffLen > 0 {
+		var rmTms []time.Time
+		rmTms, t.RunTimes = t.RunTimes[:diffLen], t.RunTimes[diffLen:]
+		for _, rmTm := range rmTms {
+			delete(t.Metrics, rmTm)
+		}
+		altered = true
+	}
+	if altered {
+		t.computeIndexes()
+	}
+	return
 }
 
 // computeIndexes should be called after each retrieval from DB
