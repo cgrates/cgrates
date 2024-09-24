@@ -2,7 +2,7 @@
 
 [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
 [![Documentation Status](https://readthedocs.org/projects/cgrates/badge/?version=v0.10)](https://cgrates.readthedocs.io/en/v0.10/?badge=v0.10)
-[![GoDoc](https://pkg.go.dev/badge/github.com/cgrates/cgrates)](https://pkg.go.dev/github.com/cgrates/cgrates@v0.10.3)
+[![GoDoc](https://pkg.go.dev/badge/github.com/cgrates/cgrates)](https://pkg.go.dev/github.com/cgrates/cgrates@v0.10.4)
 
 ### Features
 
@@ -36,6 +36,6 @@ Browsable HTML docs http://readthedocs.org/docs/cgrates/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
-API reference [godoc](https://pkg.go.dev/github.com/cgrates/cgrates@v0.10.3/apier)
+API reference [godoc](https://pkg.go.dev/github.com/cgrates/cgrates@v0.10.4/apier)
 
 Also check [irc.freenode.net #cgrates](irc://irc.freenode.net:6667/cgrates) ([Webchat](http://webchat.freenode.net?randomnick=1&channels=%23cgrates)) and [Google group](https://groups.google.com/forum/#!forum/cgrates) for a more real-time support.
