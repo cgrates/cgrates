@@ -28,6 +28,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -2110,7 +2111,7 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 
-	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = time.Second
+	cfg.CacheCfg().Partitions[utils.CacheUCH].TTL = 5 * time.Millisecond
 	engine.Cache = engine.NewCacheS(cfg, dm, connMgr, nil)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)
 	agReq.CGRRequest.Set(&utils.FullPath{Path: utils.AccountField, PathSlice: []string{utils.AccountField}}, utils.NewLeafNode("1001"))
@@ -2145,13 +2146,42 @@ func TestAgReqSetFieldsInCacheWithTimeOut(t *testing.T) {
 	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, "Unexist"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	// give enough time to Cache to remove ttl the *uch
-	time.Sleep(2 * time.Second)
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
+	// Give enough time to Cache to remove ttl the *uch.
+	time.Sleep(10 * time.Millisecond)
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.Tenant}); err != utils.ErrNotFound {
+		t.Errorf("agReq.FieldAsInterface([]string{%q,%q}):got err=%v, want %v",
+			utils.MetaUCH, utils.Tenant, err, utils.ErrNotFound)
+
+		// Check item expiry time just in case.
+		var expiryTime time.Time
+		if err := engine.Cache.V1GetItemExpiryTime(context.Background(),
+			&utils.ArgsGetCacheItemWithAPIOpts{
+				ArgsGetCacheItem: utils.ArgsGetCacheItem{
+					CacheID: utils.MetaUCH,
+					ItemID:  utils.Tenant,
+				},
+			}, &expiryTime); err != nil {
+			t.Errorf("V1GetItemExpiryTime(%q,%q): got unexpected err=%v, item probably expired in the meantime",
+				utils.MetaUCH, utils.Tenant, err)
+		}
+		t.Errorf("item supposed to expire at %v, current time: %v", expiryTime, time.Now())
 	}
-	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.AccountField}); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
+	if _, err := agReq.FieldAsInterface([]string{utils.MetaUCH, utils.AccountField}); err != utils.ErrNotFound {
+		t.Errorf("agReq.FieldAsInterface([]string{%q,%q}):got err=%v, want %v",
+			utils.MetaUCH, utils.AccountField, err, utils.ErrNotFound)
+		// Check item expiry time just in case.
+		var expiryTime time.Time
+		if err := engine.Cache.V1GetItemExpiryTime(context.Background(),
+			&utils.ArgsGetCacheItemWithAPIOpts{
+				ArgsGetCacheItem: utils.ArgsGetCacheItem{
+					CacheID: utils.MetaUCH,
+					ItemID:  utils.AccountField,
+				},
+			}, &expiryTime); err != nil {
+			t.Errorf("V1GetItemExpiryTime(%q,%q): got unexpected err=%v, item probably expired in the meantime",
+				utils.MetaUCH, utils.Tenant, err)
+		}
+		t.Errorf("item supposed to expire at %v, current time: %v", expiryTime, time.Now())
 	}
 }
 
