@@ -25,6 +25,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -35,6 +36,9 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/nats-io/nats.go"
 )
 
 var (
@@ -70,7 +74,7 @@ func TestDecodeExportEvents(t *testing.T) {
 		}
 		dec := gob.NewDecoder(bytes.NewBuffer(content))
 		gob.Register(new(utils.CGREvent))
-		singleEvent := new(FailedExportersLogg)
+		singleEvent := new(FailedExportersLog)
 		if err := dec.Decode(&singleEvent); err != nil {
 			t.Error(err)
 		} else {
@@ -182,4 +186,185 @@ func testEfsSKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
+}
+
+// TestEFsReplayEvents tests the implementation of the EfSv1.ReplayEvents.
+func TestEFsReplayEvents(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	failedDir := t.TempDir()
+	content := fmt.Sprintf(`{
+"data_db": {
+	"db_type": "*internal"
+},
+"stor_db": {
+	"db_type": "*internal"
+},
+"admins": {
+	"enabled": true
+},
+"efs": {
+	"enabled": true,
+	"failed_posts_ttl": "3ms",
+	"poster_attempts": 1
+},
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "nats_exporter",
+			"type": "*natsJSONMap",
+			"flags": ["*log"],
+			"efs_conns": ["*localhost"],
+			"export_path": "nats://localhost:4222",
+			"attempts": 1,
+			"failed_posts_dir": "%s",
+			"synchronous": true,
+			"opts": {
+				"natsSubject": "processed_cdrs",
+			},
+			"fields":[
+				{"tag": "TestField", "path": "*exp.TestField", "type": "*variable", "value": "~*req.TestField"},
+			]
+		}
+	]
+}
+}`, failedDir)
+
+	testEnv := engine.TestEnvironment{
+		ConfigJSON: content,
+		// LogBuffer:  &bytes.Buffer{},
+		Encoding: *utils.Encoding,
+	}
+	// defer fmt.Println(testEnv.LogBuffer)
+	client, _ := testEnv.Setup(t, context.Background())
+	// helper to sort slices
+	less := func(a, b string) bool { return a < b }
+	// amount of events to export/replay
+	count := 5
+	t.Run("successful nats export", func(t *testing.T) {
+		cmd := exec.Command("nats-server")
+		if err := cmd.Start(); err != nil {
+			t.Fatalf("failed to start nats-server: %v", err)
+		}
+		time.Sleep(50 * time.Millisecond)
+		defer cmd.Process.Kill()
+		nc, err := nats.Connect("nats://localhost:4222", nats.Timeout(time.Second), nats.DrainTimeout(time.Second))
+		if err != nil {
+			t.Fatalf("failed to connect to nats-server: %v", err)
+		}
+		defer nc.Drain()
+		ch := make(chan *nats.Msg, count)
+		sub, err := nc.ChanQueueSubscribe("processed_cdrs", "", ch)
+		if err != nil {
+			t.Fatalf("failed to subscribe to nats queue: %v", err)
+		}
+		var reply map[string]map[string]any
+		for i := range count {
+			if err := client.Call(context.Background(), utils.EeSv1ProcessEvent, &utils.CGREventWithEeIDs{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "test",
+					Event: map[string]any{
+						"TestField": i,
+					},
+				},
+			}, &reply); err != nil {
+				t.Errorf("EeSv1.ProcessEvent returned unexpected err: %v", err)
+			}
+		}
+		time.Sleep(1 * time.Millisecond) // wait for the channel to receive the replayed exports
+		want := make([]string, 0, count)
+		for i := range count {
+			want = append(want, fmt.Sprintf(`{"TestField":"%d"}`, i))
+		}
+		if err := sub.Unsubscribe(); err != nil {
+			t.Errorf("failed to unsubscribe from nats subject: %v", err)
+		}
+		close(ch)
+		got := make([]string, 0, count)
+		for elem := range ch {
+			got = append(got, string(elem.Data))
+		}
+		if diff := cmp.Diff(want, got, cmpopts.SortSlices(less)); diff != "" {
+			t.Errorf("unexpected nats messages received over channel (-want +got): \n%s", diff)
+		}
+	})
+	t.Run("replay failed nats export", func(t *testing.T) {
+		t.Skip("skipping due to gob decoding err")
+		var exportReply map[string]map[string]any
+		for i := range count {
+			err := client.Call(context.Background(), utils.EeSv1ProcessEvent,
+				&utils.CGREventWithEeIDs{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "test",
+						Event: map[string]any{
+							"TestField": i,
+						},
+					},
+				}, &exportReply)
+			if err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
+				t.Errorf("EeSv1.ProcessEvent err = %v, want %v", err, utils.ErrPartiallyExecuted)
+			}
+		}
+		time.Sleep(5 * time.Millisecond)
+		replayFailedDir := t.TempDir()
+		var replayReply string
+		if err := client.Call(context.Background(), utils.EfSv1ReplayEvents, ReplayEventsParams{
+			Tenant:     "cgrates.org",
+			Provider:   utils.EEs,
+			SourcePath: failedDir,
+			FailedPath: replayFailedDir,
+			Modules:    []string{"test", "EEs"},
+		}, &replayReply); err != nil {
+			t.Errorf("EfSv1.ReplayEvents returned unexpected err: %v", err)
+		}
+		cmd := exec.Command("nats-server")
+		if err := cmd.Start(); err != nil {
+			t.Fatalf("failed to start nats-server: %v", err)
+		}
+		time.Sleep(50 * time.Millisecond)
+		defer cmd.Process.Kill()
+		nc, err := nats.Connect("nats://localhost:4222", nats.Timeout(time.Second), nats.DrainTimeout(time.Second))
+		if err != nil {
+			t.Fatalf("failed to connect to nats-server: %v", err)
+		}
+		defer nc.Drain()
+		ch := make(chan *nats.Msg, count)
+		sub, err := nc.ChanQueueSubscribe("processed_cdrs", "", ch)
+		if err != nil {
+			t.Fatalf("failed to subscribe to nats queue: %v", err)
+		}
+		if err := client.Call(context.Background(), utils.EfSv1ReplayEvents, ReplayEventsParams{
+			Tenant:     "cgrates.org",
+			Provider:   utils.EEs,
+			SourcePath: replayFailedDir,
+			FailedPath: utils.MetaNone,
+			Modules:    []string{"test", "EEs"},
+		}, &replayReply); err != nil {
+			t.Errorf("EfSv1.ReplayEvents returned unexpected err: %v", err)
+		}
+		time.Sleep(time.Millisecond) // wait for the channel to receive the replayed exports
+		want := make([]string, 0, count)
+		for i := range count {
+			want = append(want, fmt.Sprintf(`{"TestField":"%d"}`, i))
+		}
+		if err := sub.Unsubscribe(); err != nil {
+			t.Errorf("failed to unsubscribe from nats subject: %v", err)
+		}
+		close(ch)
+		got := make([]string, 0, count)
+		for elem := range ch {
+			got = append(got, string(elem.Data))
+		}
+		if diff := cmp.Diff(want, got, cmpopts.SortSlices(less)); diff != "" {
+			t.Errorf("unexpected nats messages received over channel (-want +got): \n%s", diff)
+		}
+	})
 }

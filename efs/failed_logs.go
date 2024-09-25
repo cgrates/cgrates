@@ -31,8 +31,8 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-// FailedExportersLogg is a failover poster for kafka logger type
-type FailedExportersLogg struct {
+// FailedExportersLog is a failover poster for kafka logger type
+type FailedExportersLog struct {
 	lk             sync.RWMutex
 	Path           string
 	Opts           map[string]any // this is meta
@@ -46,50 +46,51 @@ type FailedExportersLogg struct {
 }
 
 // AddEvent adds one event
-func (expEv *FailedExportersLogg) AddEvent(ev any) {
+func (expEv *FailedExportersLog) AddEvent(ev any) {
 	expEv.lk.Lock()
+	defer expEv.lk.Unlock()
 	expEv.Events = append(expEv.Events, ev)
-	expEv.lk.Unlock()
 }
 
 // NewExportEventsFromFile returns ExportEvents from the file
 // used only on replay failed post
-func NewExportEventsFromFile(filePath string) (expEv *FailedExportersLogg, err error) {
-	var fileContent []byte
-	if fileContent, err = os.ReadFile(filePath); err != nil {
+func NewExportEventsFromFile(filePath string) (*FailedExportersLog, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
 		return nil, err
 	}
-	if err = os.Remove(filePath); err != nil {
+	if err := os.Remove(filePath); err != nil {
 		return nil, err
 	}
-	dec := gob.NewDecoder(bytes.NewBuffer(fileContent))
-	// unmarshall it
-	expEv = new(FailedExportersLogg)
-	err = dec.Decode(&expEv)
-	return
+	var expEv FailedExportersLog
+	dec := gob.NewDecoder(bytes.NewBuffer(content))
+	if err := dec.Decode(&expEv); err != nil {
+		return nil, err
+	}
+	return &expEv, nil
 }
 
 // ReplayFailedPosts tryies to post cdrs again
-func (expEv *FailedExportersLogg) ReplayFailedPosts(ctx *context.Context, attempts int, tnt string) (err error) {
+func (expEv *FailedExportersLog) ReplayFailedPosts(ctx *context.Context, attempts int, tnt string) error {
 	nodeID := utils.IfaceAsString(expEv.Opts[utils.NodeID])
 	logLvl, err := utils.IfaceAsInt(expEv.Opts[utils.Level])
 	if err != nil {
-		return
+		return err
 	}
 	expLogger := engine.NewExportLogger(ctx, nodeID, tnt, logLvl,
 		expEv.connMngr, expEv.cfg)
 	for _, event := range expEv.Events {
-		var content []byte
-		if content, err = utils.ToUnescapedJSON(event); err != nil {
-			return
+		content, err := utils.ToUnescapedJSON(event)
+		if err != nil {
+			return err
 		}
-		if err = expLogger.Writer.WriteMessages(context.Background(), kafka.Message{
+		if err := expLogger.Writer.WriteMessages(context.Background(), kafka.Message{
 			Key:   []byte(utils.GenUUID()),
 			Value: content,
 		}); err != nil {
 			var reply string
 			// if there are any errors in kafka, we will post in FailedPostDirectory
-			if err = expEv.connMngr.Call(ctx, expEv.cfg.LoggerCfg().EFsConns, utils.EfSv1ProcessEvent,
+			return expEv.connMngr.Call(ctx, expEv.cfg.LoggerCfg().EFsConns, utils.EfSv1ProcessEvent,
 				&utils.ArgsFailedPosts{
 					Tenant:    tnt,
 					Path:      expLogger.Writer.Addr.String(),
@@ -97,11 +98,8 @@ func (expEv *FailedExportersLogg) ReplayFailedPosts(ctx *context.Context, attemp
 					FailedDir: expLogger.FldPostDir,
 					Module:    utils.Kafka,
 					APIOpts:   expLogger.GetMeta(),
-				}, &reply); err != nil {
-				return err
-			}
-			return nil
+				}, &reply)
 		}
 	}
-	return err
+	return nil
 }

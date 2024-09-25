@@ -30,6 +30,7 @@ require (
 	github.com/fiorix/go-diameter/v4 v4.0.4
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/google/go-cmp v0.6.0
 	github.com/mediocregopher/radix/v3 v3.8.1
 	github.com/miekg/dns v1.1.62
 	github.com/nats-io/nats-server/v2 v2.10.18

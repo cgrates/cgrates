@@ -21,6 +21,7 @@ package efs
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -45,23 +46,22 @@ func SetFailedPostCacheTTL(ttl time.Duration) {
 }
 
 func writeFailedPosts(_ string, value any) {
-	expEv, canConvert := value.(*FailedExportersLogg)
+	expEv, canConvert := value.(*FailedExportersLog)
 	if !canConvert {
 		return
 	}
 	filePath := expEv.FilePath()
 	expEv.lk.RLock()
+	defer expEv.lk.RUnlock()
 	if err := WriteToFile(filePath, expEv); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Unable to write failed post to file <%s> because <%s>",
 			filePath, err))
-		expEv.lk.RUnlock()
 		return
 	}
-	expEv.lk.RUnlock()
 }
 
 // FilePath returns the file path it should use for saving the failed events
-func (expEv *FailedExportersLogg) FilePath() string {
+func (expEv *FailedExportersLog) FilePath() string {
 	return path.Join(expEv.FailedPostsDir, expEv.Module+utils.PipeSep+utils.UUIDSha1Prefix()+utils.GOBSuffix)
 }
 
@@ -84,28 +84,32 @@ func WriteToFile(filePath string, expEv FailoverPoster) (err error) {
 
 // NewFailoverPosterFromFile returns ExportEvents from the file
 // used only on replay failed post
-func NewFailoverPosterFromFile(filePath, providerType string, efs *EfS) (failPoster FailoverPoster, err error) {
-	var fileContent []byte
-	err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error {
-		if fileContent, err = os.ReadFile(filePath); err != nil {
-			return err
+func NewFailoverPosterFromFile(filePath, provider string, efs *EfS) (FailoverPoster, error) {
+	var content []byte
+	err := guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error {
+		var readErr error
+		if content, readErr = os.ReadFile(filePath); readErr != nil {
+			return readErr
 		}
 		return os.Remove(filePath)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
 	if err != nil {
-		return
+		return nil, err
 	}
-	dec := gob.NewDecoder(bytes.NewBuffer(fileContent))
-	// unmarshall it
-	expEv := new(FailedExportersLogg)
-	err = dec.Decode(&expEv)
-	switch providerType {
+
+	dec := gob.NewDecoder(bytes.NewBuffer(content))
+	var expEv FailedExportersLog
+	if err := dec.Decode(&expEv); err != nil {
+		return nil, err
+	}
+
+	switch provider {
 	case utils.EEs:
 		opts, err := AsOptsEESConfig(expEv.Opts)
 		if err != nil {
 			return nil, err
 		}
-		failPoster = &FailedExportersEEs{
+		return &FailedExportersEEs{
 			module:         expEv.Module,
 			failedPostsDir: expEv.FailedPostsDir,
 			Path:           expEv.Path,
@@ -114,11 +118,12 @@ func NewFailoverPosterFromFile(filePath, providerType string, efs *EfS) (failPos
 			Format:         expEv.Format,
 
 			connMngr: efs.connMgr,
-		}
+		}, nil
 	case utils.Kafka:
 		expEv.cfg = efs.cfg
 		expEv.connMngr = efs.connMgr
-		failPoster = expEv
+		return &expEv, nil
+	default:
+		return nil, errors.New("invalid provider")
 	}
-	return
 }

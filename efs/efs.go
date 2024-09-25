@@ -19,8 +19,10 @@ along with this program.  If not, see <http://.gnu.org/licenses/>
 package efs
 
 import (
-	"os"
-	"path"
+	"fmt"
+	"io/fs"
+	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
@@ -76,14 +78,14 @@ func (efs *EfS) V1ProcessEvent(ctx *context.Context, args *utils.ArgsFailedPosts
 		}
 	case utils.Kafka:
 	}
-	var failedPost *FailedExportersLogg
+	var failedPost *FailedExportersLog
 	if x, ok := failedPostCache.Get(key); ok {
 		if x != nil {
-			failedPost = x.(*FailedExportersLogg)
+			failedPost = x.(*FailedExportersLog)
 		}
 	}
 	if failedPost == nil {
-		failedPost = &FailedExportersLogg{
+		failedPost = &FailedExportersLog{
 			Path:           args.Path,
 			Format:         format,
 			Opts:           args.APIOpts,
@@ -97,56 +99,64 @@ func (efs *EfS) V1ProcessEvent(ctx *context.Context, args *utils.ArgsFailedPosts
 	return nil
 }
 
+// ReplayEventsParams contains parameters for replaying failed posts.
+type ReplayEventsParams struct {
+	Tenant     string
+	Provider   string   // source of failed posts
+	SourcePath string   // path for events to be replayed
+	FailedPath string   // path for events that failed to replay, *none to discard, defaults to SourceDir if empty
+	Modules    []string // list of modules to replay requests for, nil for all
+}
+
 // V1ReplayEvents will read the Events from gob files that were failed to be exported and try to re-export them again.
-func (efS *EfS) V1ReplayEvents(ctx *context.Context, args *utils.ArgsReplayFailedPosts, reply *string) error {
-	failedPostsDir := efS.cfg.EFsCfg().FailedPostsDir
-	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != utils.EmptyString {
-		failedPostsDir = *args.FailedRequestsInDir
+func (efS *EfS) V1ReplayEvents(ctx *context.Context, args ReplayEventsParams, reply *string) error {
+
+	// Set default directories if not provided.
+	if args.SourcePath == "" {
+		args.SourcePath = efS.cfg.EFsCfg().FailedPostsDir
 	}
-	failedOutDir := failedPostsDir
-	if args.FailedRequestsOutDir != nil && *args.FailedRequestsOutDir != utils.EmptyString {
-		failedOutDir = *args.FailedRequestsOutDir
+	if args.FailedPath == "" {
+		args.FailedPath = args.SourcePath
 	}
-	// check all the files in the FailedPostsInDirectory
-	filesInDir, err := os.ReadDir(failedPostsDir)
-	if err != nil {
-		return err
-	}
-	if len(filesInDir) == 0 {
-		return utils.ErrNotFound
-	}
-	// check every file and check if any of them match the modules
-	for _, file := range filesInDir {
-		if len(args.Modules) != 0 {
-			var allowedModule bool
-			for _, module := range args.Modules {
-				if strings.HasPrefix(file.Name(), module) {
-					allowedModule = true
-					break
-				}
-			}
-			if !allowedModule {
-				continue
-			}
+
+	if err := filepath.WalkDir(args.SourcePath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> failed to access path %s: %v", utils.EFs, path, err))
+			return nil // skip paths that cause an error
 		}
-		filePath := path.Join(failedPostsDir, file.Name())
-		var expEv FailoverPoster
-		if expEv, err = NewFailoverPosterFromFile(filePath, args.TypeProvider, efS); err != nil {
-			return err
+		if d.IsDir() {
+			return nil // skip directories
 		}
-		// check if the failed out dir path is the same as the same in dir in order to export again in case of failure
+
+		// Skip files not belonging to the specified modules.
+		if len(args.Modules) != 0 && !slices.ContainsFunc(args.Modules, func(mod string) bool {
+			return strings.HasPrefix(d.Name(), mod)
+		}) {
+			utils.Logger.Info(fmt.Sprintf("<%s> skipping file %s: not found within specified modules", utils.EFs, d.Name()))
+			return nil
+		}
+
+		expEv, err := NewFailoverPosterFromFile(path, args.Provider, efS)
+		if err != nil {
+			return fmt.Errorf("failed to init failover poster from %s: %v", path, err)
+		}
+
+		// Determine the failover path.
 		failoverPath := utils.MetaNone
-		if failedOutDir != utils.MetaNone {
-			failoverPath = path.Join(failedOutDir, file.Name())
+		if args.FailedPath != utils.MetaNone {
+			failoverPath = filepath.Join(args.FailedPath, d.Name())
 		}
 
 		err = expEv.ReplayFailedPosts(ctx, efS.cfg.EFsCfg().PosterAttempts, args.Tenant)
-		if err != nil && failedOutDir != utils.MetaNone { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
+		if err != nil && failoverPath != utils.MetaNone {
+			// Write the events that failed to be replayed to the failover directory.
 			if err = WriteToFile(failoverPath, expEv); err != nil {
-				return utils.NewErrServerError(err)
+				return fmt.Errorf("failed to write the events that failed to be replayed to %s: %v", path, err)
 			}
 		}
-
+		return nil
+	}); err != nil {
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
