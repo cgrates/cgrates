@@ -2306,22 +2306,15 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 func TestThresholdsRunBackupStoreIntervalLessThanZero(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = -1
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdS{
-		dm:          dm,
-		storedTdIDs: make(utils.StringSet),
 		cfg:         cfg,
-		fltrS:       filterS,
 		loopStopped: make(chan struct{}, 1),
-		stopBackup:  make(chan struct{}),
 	}
-
 	tS.runBackup(context.Background())
-
-	if len(tS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(tS.loopStopped))
+	select {
+	case <-tS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 
@@ -2330,62 +2323,52 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
+	tnt := "cgrates.org"
+	thID := "Th1"
 	tS := &ThresholdS{
 		dm: dm,
 		storedTdIDs: utils.StringSet{
-			"Th1": struct{}{},
+			thID: struct{}{},
 		},
 		cfg:         cfg,
-		fltrS:       filterS,
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
-
 	value := &Threshold{
-		Hits:   0,
 		dirty:  utils.BoolPointer(true),
-		Tenant: "cgrates.org",
-		ID:     "Th1",
+		Tenant: tnt,
+		ID:     thID,
 	}
+	Cache.SetWithoutReplicate(utils.CacheThresholds, thID, value, nil, true, "")
 
-	Cache.SetWithoutReplicate(utils.CacheThresholds, "Th1", value, nil, true,
-		utils.NonTransactional)
-
-	exp := &Threshold{
-		Hits:   0,
-		dirty:  utils.BoolPointer(false),
-		Tenant: "cgrates.org",
-		ID:     "Th1",
-	}
-
-	go func() {
-		time.Sleep(9 * time.Millisecond)
-		close(tS.stopBackup)
-	}()
+	// Backup loop checks for the state of the stopBackup
+	// channel after storing the threshold. Channel can be
+	// safely closed beforehand.
+	close(tS.stopBackup)
 	tS.runBackup(context.Background())
 
-	if rcv, err := tS.dm.GetThreshold(context.Background(), "cgrates.org", "Th1", true, false,
-		utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+	want := &Threshold{
+		dirty:  utils.BoolPointer(false),
+		Tenant: tnt,
+		ID:     thID,
+	}
+	if got, err := tS.dm.GetThreshold(context.Background(), tnt, thID, true, false, utils.NonTransactional); err != nil {
+		t.Errorf("dm.GetThreshold(%q,%q): got unexpected err=%v", tnt, thID, err)
+	} else if !reflect.DeepEqual(got, want) {
+		t.Errorf("dm.GetThreshold(%q,%q) = %v, want %v", tnt, thID, got, want)
 	}
 
-	if len(tS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(tS.loopStopped))
+	select {
+	case <-tS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 
 func TestThresholdsReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdS{
-		dm:          dm,
-		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cfg:         cfg,
@@ -2393,27 +2376,25 @@ func TestThresholdsReload(t *testing.T) {
 	tS.loopStopped <- struct{}{}
 	tS.Reload(context.Background())
 	close(tS.stopBackup)
+	select {
+	case <-tS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
+	}
 }
 
 func TestThresholdsStartLoop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ThresholdSCfg().StoreInterval = -1
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	tS := &ThresholdS{
-		dm:          dm,
-		fltrS:       filterS,
-		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cfg:         cfg,
 	}
-
 	tS.StartLoop(context.Background())
-	time.Sleep(10 * time.Millisecond)
-
-	if len(tS.loopStopped) != 1 {
-		t.Errorf("expected loopStopped field to have only one element, received: <%+v>", len(tS.loopStopped))
+	select {
+	case <-tS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
 	}
 }
 
