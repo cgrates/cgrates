@@ -29,6 +29,7 @@ type TrendSCfg struct {
 	Enabled         bool
 	StatSConns      []string
 	ThresholdSConns []string
+	ScheduledIDs    map[string][]string
 }
 
 func (t *TrendSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
@@ -52,6 +53,9 @@ func (t *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendSJsonCfg) (err error) {
 	if jsnCfg.Thresholds_conns != nil {
 		t.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
+	if jsnCfg.Scheduled_ids != nil {
+		t.ScheduledIDs = jsnCfg.Scheduled_ids
+	}
 	return
 }
 
@@ -65,6 +69,9 @@ func (t *TrendSCfg) AsMapInterface(string) any {
 
 	if t.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(t.ThresholdSConns)
+	}
+	if t.ScheduledIDs != nil {
+		mp[utils.ScheduledIDsCfg] = t.ScheduledIDs
 	}
 	return mp
 }
@@ -82,6 +89,12 @@ func (t *TrendSCfg) Clone() (cln *TrendSCfg) {
 	if t.ThresholdSConns != nil {
 		cln.ThresholdSConns = slices.Clone(t.ThresholdSConns)
 	}
+	if t.ScheduledIDs != nil {
+		cln.ScheduledIDs = make(map[string][]string)
+		for key, value := range t.ScheduledIDs {
+			cln.ScheduledIDs[key] = slices.Clone(value)
+		}
+	}
 	return
 }
 
@@ -89,6 +102,7 @@ type TrendSJsonCfg struct {
 	Enabled          *bool
 	Stats_conns      *[]string
 	Thresholds_conns *[]string
+	Scheduled_ids    map[string][]string
 }
 
 func diffTrendsJsonCfg(d *TrendSJsonCfg, v1, v2 *TrendSCfg) *TrendSJsonCfg {
@@ -104,5 +118,7 @@ func diffTrendsJsonCfg(d *TrendSJsonCfg, v1, v2 *TrendSCfg) *TrendSJsonCfg {
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
 	}
+	d.Scheduled_ids = diffMapStringSlice(d.Scheduled_ids, v1.ScheduledIDs, v2.ScheduledIDs)
+
 	return d
 }

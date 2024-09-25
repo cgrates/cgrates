@@ -1993,6 +1993,7 @@ const (
 	EnabledCfg         = "enabled"
 	ThresholdSConnsCfg = "thresholds_conns"
 	CacheSConnsCfg     = "caches_conns"
+	ScheduledIDsCfg    = "scheduled_ids"
 )
 
 // Efs

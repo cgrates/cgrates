@@ -1178,6 +1178,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// starts TrendS service: <true|false>.
 	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"thresholds_conns": [],					// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"scheduled_ids": {}                      
 },
 
 "rankings":{								// RankingS config
