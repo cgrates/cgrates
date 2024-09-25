@@ -21,6 +21,7 @@ package dispatchers
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,7 @@ func (dS *DispatcherService) ErSv1Ping(ctx *context.Context, args *utils.CGREven
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaERs, utils.ErSv1Ping, args, reply)
 }
-func (dS *DispatcherService) ErSv1RunReader(ctx *context.Context, args utils.StringWithAPIOpts, reply *string) (err error) {
+func (dS *DispatcherService) ErSv1RunReader(ctx *context.Context, args ers.V1RunReaderParams, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if len(args.Tenant) != 0 {
 		tnt = args.Tenant

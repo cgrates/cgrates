@@ -21,6 +21,7 @@ package dispatchers
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -51,9 +52,9 @@ func (dS *DispatcherService) EfSv1ProcessEvent(ctx *context.Context, args *utils
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaEFs, utils.EfSv1ProcessEvent, args, reply)
 }
-func (dS *DispatcherService) EfSv1ReplayEvents(ctx *context.Context, args *utils.ArgsReplayFailedPosts, reply *string) (err error) {
+func (dS *DispatcherService) EfSv1ReplayEvents(ctx *context.Context, args efs.ReplayEventsParams, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
+	if len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
 	ev := make(map[string]any)

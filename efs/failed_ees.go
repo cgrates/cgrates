@@ -250,7 +250,7 @@ func (expEv *FailedExportersEEs) AddEvent(ev any) {
 
 // ReplayFailedPosts tryies to post cdrs again
 func (expEv *FailedExportersEEs) ReplayFailedPosts(ctx *context.Context, attempts int, tnt string) (err error) {
-	eesFailedEvents := &FailedExportersEEs{
+	failedEvents := &FailedExportersEEs{
 		Path:   expEv.Path,
 		Opts:   expEv.Opts,
 		Format: expEv.Format,
@@ -268,14 +268,16 @@ func (expEv *FailedExportersEEs) ReplayFailedPosts(ctx *context.Context, attempt
 	}
 	for _, ev := range expEv.Events {
 		if err = ees.ExportWithAttempts(context.Background(), ee, ev, keyFunc(), expEv.connMngr, tnt); err != nil {
-			eesFailedEvents.AddEvent(ev)
+			failedEvents.AddEvent(ev)
 		}
 	}
 	ee.Close()
-	if len(eesFailedEvents.Events) > 0 {
-		err = utils.ErrPartiallyExecuted
-	} else {
-		eesFailedEvents = nil
+	switch len(failedEvents.Events) {
+	case 0: // none failed to be replayed
+		return nil
+	case len(expEv.Events): // all failed, return last encountered error
+		return err
+	default:
+		return utils.ErrPartiallyExecuted
 	}
-	return
 }
