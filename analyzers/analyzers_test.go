@@ -22,13 +22,12 @@ import (
 	"encoding/json"
 	"os"
 	"reflect"
-	"runtime"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/blevesearch/bleve"
-	"github.com/blevesearch/bleve/search"
+	"github.com/blevesearch/bleve/v2"
+	"github.com/blevesearch/bleve/v2/search"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -173,7 +172,6 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 	}
 	go func() {
 		time.Sleep(time.Nanosecond)
-		runtime.Gosched()
 		anz.db.Close()
 	}()
 	anz.ListenAndServe(context.Background())
