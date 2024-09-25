@@ -994,12 +994,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks4(t *testing.T) {
 func TestStatQueueReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().StoreInterval = 5 * time.Millisecond
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
 	sS := &StatS{
-		dm:          dm,
-		fltrS:       filterS,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}, 1),
 		cfg:         cfg,
@@ -1007,6 +1002,11 @@ func TestStatQueueReload(t *testing.T) {
 	sS.loopStopped <- struct{}{}
 	sS.Reload(context.Background())
 	close(sS.stopBackup)
+	select {
+	case <-sS.loopStopped:
+	case <-time.After(time.Second):
+		t.Error("timed out waiting for loop to stop")
+	}
 }
 
 func TestStatQueueStartLoop(t *testing.T) {

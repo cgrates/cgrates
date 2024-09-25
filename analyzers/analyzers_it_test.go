@@ -70,6 +70,14 @@ func (*smock) DisconnectPeer(ctx *context.Context,
 
 // Test start here
 func TestAnalyzerSIT(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaMongo:
+	case utils.MetaInternal, utils.MetaMySQL, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	for _, stest := range sTestsAlsPrf {
 		t.Run("TestAnalyzerSIT", stest)
 	}
@@ -126,7 +134,6 @@ func testAnalyzerSRPCConn(t *testing.T) {
 
 func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	var reply string
-	time.Sleep(100 * time.Millisecond)
 	if err := anzRPC.Call(context.Background(), utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
 		APIOpts: map[string]any{utils.MetaCache: utils.MetaReload},
 	}, &reply); err != nil {
@@ -134,7 +141,6 @@ func testAnalyzerSLoadTarrifPlans(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
@@ -219,7 +225,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 
 func testAnalyzerSV1Search(t *testing.T) {
 	// need to wait in order for the log gorutine to execute
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	var result []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*internal +RequestMethod:AttributeSv1\.ProcessEvent`}, &result); err != nil {
 		t.Error(err)
@@ -257,7 +263,7 @@ func testAnalyzerSV1BirPCSession(t *testing.T) {
 		err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Fatal(err)
 	}
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	var result []map[string]any
 	if err := anzRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &QueryArgs{HeaderFilters: `+RequestEncoding:\*birpc_json +RequestMethod:"SessionSv1.DisconnectPeer"`}, &result); err != nil {
 		t.Error(err)

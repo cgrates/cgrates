@@ -53,7 +53,7 @@ func TestNewAnalyzeConnector(t *testing.T) {
 	if err = rpc.Call(context.Background(), utils.CoreSv1Ping, "args", "reply"); err == nil || err.Error() != "error" {
 		t.Errorf("Expected 'error' received %v", err)
 	}
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(15 * time.Millisecond)
 	runtime.Gosched()
 	if cnt, err := anz.db.DocCount(); err != nil {
 		t.Fatal(err)
