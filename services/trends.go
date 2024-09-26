@@ -78,12 +78,12 @@ func (trs *TrendService) Start() error {
 	dbchan := trs.dm.GetDMChan()
 	dm := <-dbchan
 	dbchan <- dm
-
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.TrendS))
 	trs.Lock()
 	defer trs.Unlock()
 	trs.trs = engine.NewTrendS(dm, trs.connMgr, filterS, trs.cfg)
+	trs.trs.StartScheduling()
 	srv, err := engine.NewService(v1.NewTrendSv1(trs.trs))
 	if err != nil {
 		return err
@@ -105,6 +105,7 @@ func (tr *TrendService) Shutdown() (err error) {
 	defer tr.srvDep[utils.DataDB].Done()
 	tr.Lock()
 	defer tr.Unlock()
+	tr.trs.StopScheduling()
 	<-tr.connChan
 	return
 }
@@ -113,7 +114,7 @@ func (tr *TrendService) Shutdown() (err error) {
 func (tr *TrendService) IsRunning() bool {
 	tr.RLock()
 	defer tr.RUnlock()
-	return false
+	return tr.trs != nil
 }
 
 // ServiceName returns the service name

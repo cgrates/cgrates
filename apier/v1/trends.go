@@ -106,9 +106,19 @@ func (apierSv1 *APIerSv1) RemoveTrendProfile(ctx *context.Context, args *utils.T
 
 // NewTrendSv1 initializes TrendSV1
 func NewTrendSv1(trs *engine.TrendS) *TrendSv1 {
-	return &TrendSv1{}
+	return &TrendSv1{
+		trS: trs,
+	}
 }
 
 type TrendSv1 struct {
 	trS *engine.TrendS
+}
+
+func (trs *TrendSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) error {
+	return trs.trS.V1ScheduleQueries(ctx, args, scheduled)
+}
+
+func (trs *TrendSv1) GetTrend(ctx *context.Context, args *utils.ArgGetTrend, trend *engine.Trend) error {
+	return trs.trS.V1GetTrend(ctx, args, trend)
 }

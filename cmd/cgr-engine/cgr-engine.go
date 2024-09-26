@@ -143,7 +143,7 @@ func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 
 func startRPC(server *cores.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
-	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
+	internalAttrSChan, internalChargerSChan, internalThdSChan, internalTrendSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
 	internalEEsChan, internalERsChan chan birpc.ClientConnector,
@@ -166,6 +166,8 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalChargerSChan <- chrgS
 		case thS := <-internalThdSChan:
 			internalThdSChan <- thS
+		case trS := <-internalTrendSChan:
+			internalTrendSChan <- trS
 		case splS := <-internalSuplSChan:
 			internalSuplSChan <- splS
 		case analyzerS := <-internalAnalyzerSChan:
@@ -584,7 +586,7 @@ func main() {
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan, anz, srvDep)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
 		internalStatSChan, connManager, anz, srvDep)
-	srS := services.NewTrendService(cfg, dmService, cacheS, filterSChan, server,
+	trS := services.NewTrendService(cfg, dmService, cacheS, filterSChan, server,
 		internalTrendSChan, connManager, anz, srvDep)
 	sgS := services.NewRankingService(cfg, dmService, cacheS, filterSChan, server,
 		internalRankingSChan, connManager, anz, srvDep)
@@ -613,7 +615,7 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz, srvDep)
 
-	srvManager.AddServices(gvService, attrS, chrS, tS, stS, srS, sgS, reS, routeS, schS, rals,
+	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, sgS, reS, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
@@ -657,6 +659,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, internalSchedulerSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSessionSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.StatSv1, internalStatSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.TrendSv1, internalTrendSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.RouteSv1, internalRouteSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, internalThresholdSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
@@ -680,7 +683,7 @@ func main() {
 	go startRPC(server, internalResponderChan, internalCDRServerChan,
 		internalResourceSChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
-		internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
+		internalTrendSChan, internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
 		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,
 		internalCacheSChan, internalEEsChan, internalERsChan, shdChan)
 

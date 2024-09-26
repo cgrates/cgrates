@@ -1703,6 +1703,8 @@ const (
 	APIerSv1GetTrendProfileIDs = "APIerSv1.GetTrendProfileIDs"
 	APIerSv1GetTrendProfiles   = "APIerSv1.GetTrendProfiles"
 	TrendSv1Ping               = "TrendSv1.Ping"
+	TrendSv1ScheduleQueries    = "TrendSv1.ScheduleQueries"
+	TrendSv1GetTrend           = "TrendSv1.GetTrend"
 )
 
 // RankingS APIs

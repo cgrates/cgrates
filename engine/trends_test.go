@@ -84,7 +84,4 @@ func TestNewTrendS(t *testing.T) {
 		t.Errorf("Expected crnTQs to be empty, but got length %d", len(trendS.crnTQs))
 	}
 
-	if trendS.crn != nil {
-		t.Errorf("Expected crn to be nil, but got %v", trendS.crn)
-	}
 }

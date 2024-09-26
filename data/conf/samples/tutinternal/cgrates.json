@@ -25,6 +25,11 @@
 	"db_type": "*internal"
 },
 
+"trends": {
+	"enabled": true,
+	"stats_conns":["*internal"],
+},
+
 
 "rals": {
 	"enabled": true,
