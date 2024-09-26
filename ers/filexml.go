@@ -166,6 +166,7 @@ func (rdr *XMLFileER) processFile(fPath, fName string) error {
 	reqVars := utils.NavigableMap2{utils.MetaFileName: utils.NewNMData(fName)}
 	for _, xmlElmt := range xmlElmts {
 		rowNr++ // increment the rowNr after checking if it's not the end of file
+		reqVars[utils.MetaFileLineNumber] = utils.NewNMData(rowNr)
 		agReq := agents.NewAgentRequest(
 			config.NewXmlProvider(xmlElmt, rdr.Config().XmlRootPath), reqVars,
 			nil, nil, rdr.Config().Tenant,

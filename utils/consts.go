@@ -672,6 +672,7 @@ const (
 	MetaGroup                   = "*group"
 	InternalRPCSet              = "InternalRPCSet"
 	MetaFileName                = "*fileName"
+	MetaFileLineNumber          = "*fileLineNumber"
 	MetaBusy                    = "*busy"
 	MetaQueue                   = "*queue"
 	MetaRounding                = "*rounding"
