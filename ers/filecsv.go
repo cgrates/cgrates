@@ -148,6 +148,7 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 			return
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
+		reqVars[utils.MetaFileLineNumber] = utils.NewNMData(rowNr)
 		agReq := agents.NewAgentRequest(
 			config.NewSliceDP(record), reqVars,
 			nil, nil, rdr.Config().Tenant,

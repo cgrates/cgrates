@@ -197,6 +197,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		record := string(buf)
+		reqVars[utils.MetaFileLineNumber] = utils.NewNMData(rowNr)
 		agReq := agents.NewAgentRequest(
 			config.NewFWVProvider(record), reqVars,
 			nil, nil, rdr.Config().Tenant,
