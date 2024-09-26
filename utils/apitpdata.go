@@ -1658,3 +1658,8 @@ type ArgScheduleTrendQueries struct {
 	TenantIDWithAPIOpts
 	TrendIDs []string
 }
+
+type ArgGetTrend struct {
+	TenantWithAPIOpts
+	ID string
+}

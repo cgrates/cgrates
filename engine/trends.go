@@ -39,8 +39,9 @@ func NewTrendS(dm *DataManager,
 		connMgr:     connMgr,
 		filterS:     filterS,
 		cgrcfg:      cgrcfg,
+		crn:         cron.New(),
 		loopStopped: make(chan struct{}),
-		crnTQsMux:   new(sync.RWMutex),
+		crnTQsMux:   &sync.RWMutex{},
 		crnTQs:      make(map[string]map[string]cron.EntryID),
 	}
 }
@@ -82,6 +83,7 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 			ID:       tP.ID,
 			RunTimes: make([]time.Time, 0),
 			Metrics:  make(map[time.Time]map[string]*MetricWithTrend),
+			tMux:     new(sync.RWMutex),
 		}
 	} else if err != nil {
 		utils.Logger.Warning(
@@ -90,15 +92,16 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
 		return
 	}
-
+	if trend.tMux == nil {
+		trend.tMux = new(sync.RWMutex)
+	}
 	trend.tMux.Lock()
 	defer trend.tMux.Unlock()
-
 	trend.cleanup(tP.TTL, tP.QueueLength)
-	if trend.mTotals == nil { // indexes were not yet built
+
+	if len(trend.mTotals) == 0 { // indexes were not yet built
 		trend.computeIndexes()
 	}
-
 	now := time.Now()
 	var metrics []string
 	if len(tP.Metrics) != 0 {
@@ -113,6 +116,9 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 		return // nothing to compute
 	}
 	trend.RunTimes = append(trend.RunTimes, now)
+	if trend.Metrics == nil {
+		trend.Metrics = make(map[time.Time]map[string]*MetricWithTrend)
+	}
 	trend.Metrics[now] = make(map[string]*MetricWithTrend)
 	for _, mID := range metrics {
 		mWt := &MetricWithTrend{ID: mID}
@@ -139,6 +145,15 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 
 }
 
+func (tS *TrendS) StartScheduling() {
+	tS.crn.Start()
+}
+
+func (tS *TrendS) StopScheduling() {
+	ctx := tS.crn.Stop()
+	<-ctx.Done()
+}
+
 // scheduleTrendQueries will schedule/re-schedule specific trend queries
 func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []string) (scheduled int, err error) {
 	var partial bool
@@ -161,8 +176,9 @@ func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []
 					"<%s> scheduling TrendProfile <%s:%s>, error: <%s>",
 					utils.TrendS, tnt, tID, err.Error()))
 			partial = true
-		} else {
+		} else { // log the entry ID for debugging
 			tS.crnTQsMux.Lock()
+			tS.crnTQs[tP.Tenant] = make(map[string]cron.EntryID)
 			tS.crnTQs[tP.Tenant][tP.ID] = entryID
 			tS.crnTQsMux.Unlock()
 		}
@@ -181,5 +197,12 @@ func (tS *TrendS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgSchedul
 	} else {
 		*scheduled = sched
 	}
+	return
+}
+
+func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, trend *Trend) (err error) {
+	var tr *Trend
+	tr, err = tS.dm.GetTrend(arg.Tenant, arg.ID, true, true, utils.NonTransactional)
+	*trend = *tr
 	return
 }

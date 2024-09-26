@@ -111,8 +111,6 @@ type Trend struct {
 //
 //	thread safe since it should be used close to source
 func (t *Trend) Compile(cleanTtl time.Duration, qLength int) {
-	t.tMux.Lock()
-	defer t.tMux.Unlock()
 	t.cleanup(cleanTtl, qLength)
 	if t.mTotals == nil { // indexes were not yet built
 		t.computeIndexes()
@@ -121,23 +119,26 @@ func (t *Trend) Compile(cleanTtl time.Duration, qLength int) {
 
 // cleanup will clean stale data out of
 func (t *Trend) cleanup(ttl time.Duration, qLength int) (altered bool) {
-	expTime := time.Now().Add(-ttl)
-	var expIdx *int
-	for i, rT := range t.RunTimes {
-		if rT.After(expTime) {
-			continue
+	if ttl >= 0 {
+		expTime := time.Now().Add(-ttl)
+		var expIdx *int
+		for i, rT := range t.RunTimes {
+			if rT.After(expTime) {
+				continue
+			}
+			expIdx = &i
+			delete(t.Metrics, rT)
 		}
-		expIdx = &i
-		delete(t.Metrics, rT)
-	}
-	if expIdx != nil {
-		if len(t.RunTimes)-1 == *expIdx {
-			t.RunTimes = make([]time.Time, 0)
-		} else {
-			t.RunTimes = t.RunTimes[*expIdx+1:]
+		if expIdx != nil {
+			if len(t.RunTimes)-1 == *expIdx {
+				t.RunTimes = make([]time.Time, 0)
+			} else {
+				t.RunTimes = t.RunTimes[*expIdx+1:]
+			}
+			altered = true
 		}
-		altered = true
 	}
+
 	diffLen := len(t.RunTimes) - qLength
 	if qLength > 0 && diffLen > 0 {
 		var rmTms []time.Time
