@@ -162,7 +162,7 @@ func (rdr *XMLFileER) processFile(fName string) error {
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaFileName: utils.NewLeafNode(fName), utils.MetaReaderID: utils.NewLeafNode(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].ID)}}
 	for _, xmlElmt := range xmlElmts {
 		rowNr++ // increment the rowNr after checking if it's not the end of file
-		reqVars.Map[utils.MetaFileLineNumber] = utils.NewLeafNode(reqVars)
+		reqVars.Map[utils.MetaFileLineNumber] = utils.NewLeafNode(rowNr)
 		agReq := agents.NewAgentRequest(
 			config.NewXMLProvider(xmlElmt, xmlRootPath), reqVars,
 			nil, nil, nil, rdr.Config().Tenant,
