@@ -681,6 +681,7 @@ type TrendsJsonCfg struct {
 	Enabled          *bool
 	Stats_conns      *[]string
 	Thresholds_conns *[]string
+	Scheduled_ids    map[string][]string
 }
 
 type RankingsJsonCfg struct {

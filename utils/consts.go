@@ -2534,6 +2534,7 @@ const (
 	SchedulerConnsCfg  = "scheduler_conns"
 	GapiCredentialsCfg = "gapi_credentials"
 	GapiTokenCfg       = "gapi_token"
+	ScheduledIDsCfg    = "scheduled_ids"
 )
 
 // MigratorCgrCfg
