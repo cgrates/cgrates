@@ -18,12 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"slices"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 type TrendSCfg struct {
 	Enabled         bool
 	StatSConns      []string
 	ThresholdSConns []string
+	ScheduledIDs    map[string][]string
 }
 
 func (sa *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendsJsonCfg) (err error) {
@@ -50,6 +55,9 @@ func (sa *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendsJsonCfg) (err error) {
 				sa.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
 			}
 		}
+	}
+	if jsnCfg.Scheduled_ids != nil {
+		sa.ScheduledIDs = jsnCfg.Scheduled_ids
 	}
 	return
 }
@@ -78,6 +86,9 @@ func (sa *TrendSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.ThresholdSConnsCfg] = thresholdSConns
 	}
+	if sa.ScheduledIDs != nil {
+		initialMP[utils.ScheduledIDsCfg] = sa.ScheduledIDs
+	}
 	return
 }
 
@@ -93,5 +104,12 @@ func (sa *TrendSCfg) Clone() (cln *TrendSCfg) {
 		cln.ThresholdSConns = make([]string, len(sa.ThresholdSConns))
 		copy(cln.ThresholdSConns, sa.ThresholdSConns)
 	}
+	if sa.ScheduledIDs != nil {
+		cln.ScheduledIDs = make(map[string][]string)
+		for key, value := range sa.ScheduledIDs {
+			cln.ScheduledIDs[key] = slices.Clone(value)
+		}
+	}
 	return
+
 }

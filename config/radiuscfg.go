@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -292,4 +293,16 @@ func (cda *DAClientOpts) AsMapInterface() map[string]any {
 		mp[utils.FlagsCfg] = cda.Flags.SliceFlags()
 	}
 	return mp
+}
+
+func diffMapStringSlice(d, v1, v2 map[string][]string) map[string][]string {
+	if d == nil {
+		d = make(map[string][]string)
+	}
+	for k, v := range v2 {
+		if val, has := v1[k]; !has || !slices.Equal(val, v) {
+			d[k] = v
+		}
+	}
+	return d
 }

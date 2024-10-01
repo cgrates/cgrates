@@ -379,3 +379,65 @@ func TestDAClientOptsAsMapInterface(t *testing.T) {
 		t.Errorf("opts.AsMapInterface() returned an unexpected value(-want +got): \n%s", diff)
 	}
 }
+
+func TestDiffMapStringSlice(t *testing.T) {
+	tests := []struct {
+		name string
+		d    map[string][]string
+		v1   map[string][]string
+		v2   map[string][]string
+		want map[string][]string
+	}{
+		{
+			name: "Empty maps",
+			d:    nil,
+			v1:   map[string][]string{},
+			v2:   map[string][]string{},
+			want: map[string][]string{},
+		},
+		{
+			name: "v1 has no key from v2",
+			d:    nil,
+			v1:   map[string][]string{},
+			v2:   map[string][]string{"tenant1": {"id1", "id2"}},
+			want: map[string][]string{"tenant1": {"id1", "id2"}},
+		},
+		{
+			name: "Different values for the same key",
+			d:    nil,
+			v1:   map[string][]string{"tenant1": {"id1", "id2"}},
+			v2:   map[string][]string{"tenant1": {"id3", "id4"}},
+			want: map[string][]string{"tenant1": {"id3", "id4"}},
+		},
+		{
+			name: "Same key with equal values",
+			d:    nil,
+			v1:   map[string][]string{"tenant1": {"id1", "id2"}},
+			v2:   map[string][]string{"tenant1": {"id1", "id2"}},
+			want: map[string][]string{},
+		},
+		{
+			name: "d is not nil, adds differences from v2",
+			d:    map[string][]string{"existing": {"val3"}},
+			v1:   map[string][]string{"tenant1": {"id1", "id2"}},
+			v2:   map[string][]string{"tenant1": {"id3", "id4"}, "tenant2": {"id4", "id5"}},
+			want: map[string][]string{"existing": {"val3"}, "tenant1": {"id3", "id4"}, "tenant2": {"id4", "id5"}},
+		},
+		{
+			name: "Adding multiple tenants",
+			d:    nil,
+			v1:   map[string][]string{"tenant1": {"id1", "id2"}},
+			v2:   map[string][]string{"tenant1": {"id1", "id2"}, "tenant2": {"id4", "id5"}},
+			want: map[string][]string{"tenant2": {"id4", "id5"}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := diffMapStringSlice(tt.d, tt.v1, tt.v2)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("diffMapStringSlice() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
