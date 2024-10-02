@@ -124,7 +124,8 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 			mWt.TrendLabel = utils.NotAvailable
 			continue
 		}
-		if mWt.TrendGrowth, err = trend.getTrendGrowth(mID, mWt.Value, tP.CorrelationType, tS.cgrcfg.GeneralCfg().RoundingDecimals); err != nil {
+		if mWt.TrendGrowth, err = trend.getTrendGrowth(mID, mWt.Value, tP.CorrelationType,
+			tS.cgrcfg.GeneralCfg().RoundingDecimals); err != nil {
 			mWt.TrendLabel = utils.NotAvailable
 		} else {
 			mWt.TrendLabel = trend.getTrendLabel(mWt.TrendGrowth, tP.Tolerance)
@@ -141,13 +142,24 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 
 }
 
-func (tS *TrendS) StartScheduling() {
+// StartCron will activates the Cron, together with all scheduled Trend queries
+func (tS *TrendS) StartCron() {
 	tS.crn.Start()
 }
 
-func (tS *TrendS) StopScheduling() {
+// StopCron will shutdown the Cron tasks
+func (tS *TrendS) StopCron() {
 	ctx := tS.crn.Stop()
-	<-ctx.Done()
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(tS.cgrcfg.CoreSCfg().ShutdownTimeout):
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<%s> timeout waiting for Cron to finish",
+				utils.TrendS))
+	}
+
 }
 
 // scheduleTrendQueries will schedule/re-schedule specific trend queries

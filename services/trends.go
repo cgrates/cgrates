@@ -83,7 +83,7 @@ func (trs *TrendService) Start() error {
 	trs.Lock()
 	defer trs.Unlock()
 	trs.trs = engine.NewTrendS(dm, trs.connMgr, filterS, trs.cfg)
-	trs.trs.StartScheduling()
+	trs.trs.StartCron()
 	srv, err := engine.NewService(v1.NewTrendSv1(trs.trs))
 	if err != nil {
 		return err
@@ -105,7 +105,7 @@ func (tr *TrendService) Shutdown() (err error) {
 	defer tr.srvDep[utils.DataDB].Done()
 	tr.Lock()
 	defer tr.Unlock()
-	tr.trs.StopScheduling()
+	tr.trs.StopCron()
 	<-tr.connChan
 	return
 }

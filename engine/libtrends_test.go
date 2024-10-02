@@ -138,7 +138,6 @@ func TestTrendCleanUp(t *testing.T) {
 	t4 := now.Add(2 * time.Second)
 	t5 := now.Add(time.Minute)
 	trend := &Trend{
-		tMux:   new(sync.RWMutex),
 		Tenant: "cgrates.org",
 		ID:     "TestTrendCleanUp",
 
