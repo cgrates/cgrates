@@ -83,7 +83,6 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 			ID:       tP.ID,
 			RunTimes: make([]time.Time, 0),
 			Metrics:  make(map[time.Time]map[string]*MetricWithTrend),
-			tMux:     new(sync.RWMutex),
 		}
 	} else if err != nil {
 		utils.Logger.Warning(
@@ -91,9 +90,6 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 				"<%s> querying trend with id: <%s:%s> dm error: <%s>",
 				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
 		return
-	}
-	if trend.tMux == nil {
-		trend.tMux = new(sync.RWMutex)
 	}
 	trend.tMux.Lock()
 	defer trend.tMux.Unlock()

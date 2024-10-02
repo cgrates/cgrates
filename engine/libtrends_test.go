@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"sync"
 	"testing"
 	"time"
 
@@ -32,7 +31,6 @@ func TestTrendGetTrendGrowth(t *testing.T) {
 	t2 := now.Add(-2 * time.Second)
 	t3 := now.Add(-3 * time.Second)
 	trnd1 := &Trend{
-		tMux:     new(sync.RWMutex),
 		Tenant:   "cgrates.org",
 		ID:       "TestTrendGetTrendLabel",
 		RunTimes: []time.Time{t3, t2, t1},
@@ -59,8 +57,6 @@ func TestTrendGetTrendLabel(t *testing.T) {
 	t2 := now.Add(-2 * time.Second)
 	t3 := now.Add(-3 * time.Second)
 	trnd1 := &Trend{
-		tMux: new(sync.RWMutex),
-
 		Tenant:   "cgrates.org",
 		ID:       "TestTrendGetTrendLabel",
 		RunTimes: []time.Time{t3, t2, t1},
