@@ -249,3 +249,72 @@ func TestTrendTenantID(t *testing.T) {
 		t.Errorf("Expected QueueLength 10, but got %d", trend.tP.QueueLength)
 	}
 }
+
+func TestTComputeIndexes(t *testing.T) {
+	runTime1 := time.Now()
+	runTime2 := runTime1.Add(time.Minute)
+
+	trend := &Trend{
+		RunTimes: []time.Time{runTime1, runTime2},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{
+			runTime1: {
+				"metric1": &MetricWithTrend{ID: "metric1", Value: 10.0},
+				"metric2": &MetricWithTrend{ID: "metric2", Value: 20.0},
+			},
+			runTime2: {
+				"metric1": &MetricWithTrend{ID: "metric1", Value: 15.0},
+			},
+		},
+	}
+
+	trend.computeIndexes()
+
+	if trend.mLast["metric1"] != runTime2 {
+		t.Errorf("Expected last time for metric1 to be %v, got %v", runTime2, trend.mLast["metric1"])
+	}
+
+	if trend.mCounts["metric1"] != 2 {
+		t.Errorf("Expected count for metric1 to be 2, got %d", trend.mCounts["metric1"])
+	}
+
+	if trend.mTotals["metric1"] != 25.0 {
+		t.Errorf("Expected total for metric1 to be 25.0, got %f", trend.mTotals["metric1"])
+	}
+
+	if trend.mLast["metric2"] != runTime1 {
+		t.Errorf("Expected last time for metric2 to be %v, got %v", runTime1, trend.mLast["metric2"])
+	}
+
+	if trend.mCounts["metric2"] != 1 {
+		t.Errorf("Expected count for metric2 to be 1, got %d", trend.mCounts["metric2"])
+	}
+
+	if trend.mTotals["metric2"] != 20.0 {
+		t.Errorf("Expected total for metric2 to be 20.0, got %f", trend.mTotals["metric2"])
+	}
+}
+
+func TestGetTrendLabel(t *testing.T) {
+	trend := &Trend{}
+
+	tests := []struct {
+		tGrowth   float64
+		tolerance float64
+		expected  string
+	}{
+		{1.0, 0.5, utils.MetaPositive},
+		{-1.0, 0.5, utils.MetaNegative},
+		{0.0, 0.5, utils.MetaConstant},
+		{0.3, 0.5, utils.MetaConstant},
+		{-0.3, 0.5, utils.MetaConstant},
+		{0.6, 0.5, utils.MetaPositive},
+		{-0.6, 0.5, utils.MetaNegative},
+	}
+
+	for _, test := range tests {
+		result := trend.getTrendLabel(test.tGrowth, test.tolerance)
+		if result != test.expected {
+			t.Errorf("For tGrowth: %f and tolerance: %f, expected %s, got %s", test.tGrowth, test.tolerance, test.expected, result)
+		}
+	}
+}
