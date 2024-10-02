@@ -41,7 +41,7 @@ func NewTrendS(dm *DataManager,
 		cgrcfg:      cgrcfg,
 		crn:         cron.New(),
 		loopStopped: make(chan struct{}),
-		crnTQsMux:   &sync.RWMutex{},
+		crnTQsMux:   new(sync.RWMutex),
 		crnTQs:      make(map[string]map[string]cron.EntryID),
 	}
 }
