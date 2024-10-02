@@ -72,3 +72,70 @@ func TestCurrentDBVersions(t *testing.T) {
 	}
 
 }
+
+func TestCurrentStorDBVersions(t *testing.T) {
+	expected := Versions{
+		utils.CostDetails:      2,
+		utils.SessionSCosts:    3,
+		utils.CDRs:             2,
+		utils.TpFilters:        1,
+		utils.TpThresholds:     1,
+		utils.TpRoutes:         1,
+		utils.TpStats:          1,
+		utils.TpResources:      1,
+		utils.TpResource:       1,
+		utils.TpChargers:       1,
+		utils.TpDispatchers:    1,
+		utils.TpRateProfiles:   1,
+		utils.TpActionProfiles: 1,
+	}
+
+	actual := CurrentStorDBVersions()
+
+	if len(actual) != len(expected) {
+		t.Fatalf("Expected %d versions, got %d", len(expected), len(actual))
+	}
+
+	for key, expectedValue := range expected {
+		actualValue, exists := actual[key]
+		if !exists {
+			t.Errorf("Expected version for %s not found", key)
+		} else if actualValue != expectedValue {
+			t.Errorf("For %s, expected %d, got %d", key, expectedValue, actualValue)
+		}
+	}
+}
+
+func TestCurrentAllDBVersions(t *testing.T) {
+	expected := Versions{
+		utils.Stats:          4,
+		utils.Accounts:       3,
+		utils.Actions:        2,
+		utils.Thresholds:     4,
+		utils.Routes:         2,
+		utils.Attributes:     7,
+		utils.RQF:            5,
+		utils.Resource:       1,
+		utils.Subscribers:    1,
+		utils.Chargers:       2,
+		utils.Dispatchers:    2,
+		utils.LoadIDsVrs:     1,
+		utils.RateProfiles:   1,
+		utils.ActionProfiles: 1,
+	}
+
+	actual := CurrentAllDBVersions()
+
+	if len(actual) != len(expected) {
+		t.Fatalf("Expected %d versions, got %d", len(expected), len(actual))
+	}
+
+	for key, expectedValue := range expected {
+		actualValue, exists := actual[key]
+		if !exists {
+			t.Errorf("Expected version for %s not found", key)
+		} else if actualValue != expectedValue {
+			t.Errorf("For %s, expected %d, got %d", key, expectedValue, actualValue)
+		}
+	}
+}
