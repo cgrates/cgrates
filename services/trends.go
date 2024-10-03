@@ -83,7 +83,9 @@ func (trs *TrendService) Start() error {
 	trs.Lock()
 	defer trs.Unlock()
 	trs.trs = engine.NewTrendS(dm, trs.connMgr, filterS, trs.cfg)
-	trs.trs.StartCron()
+	if err := trs.trs.StartCron(); err != nil {
+		return err
+	}
 	srv, err := engine.NewService(v1.NewTrendSv1(trs.trs))
 	if err != nil {
 		return err
