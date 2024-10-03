@@ -76,11 +76,6 @@ type TrendProfileWithAPIOpts struct {
 	APIOpts map[string]any
 }
 
-type TrendProfilesAPI struct {
-	Tenant string
-	TpIDs  []string
-}
-
 func (srp *TrendProfile) TenantID() string {
 	return utils.ConcatenatedKey(srp.Tenant, srp.ID)
 }

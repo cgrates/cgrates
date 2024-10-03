@@ -41,38 +41,6 @@ func (apierSv1 *APIerSv1) GetTrendProfile(ctx *context.Context, arg *utils.Tenan
 	return
 }
 
-// GetTrendProfiles returns a list of Trendprofiles
-func (apierSv1 *APIerSv1) GetTrendProfiles(ctx *context.Context, arg *engine.TrendProfilesAPI, reply *[]*engine.TrendProfile) (err error) {
-	tr, err := apierSv1.DataManager.GetTrendProfiles(arg.Tenant, arg.TpIDs)
-	if err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	*reply = tr
-	return
-}
-
-// GetTrendProfileIDs returns list of trendProfile IDs registered for a tenant
-func (apierSv1 *APIerSv1) GetTrendProfileIDs(ctx *context.Context, args *utils.PaginatorWithTenant, trPrfIDs *[]string) (err error) {
-	tnt := args.Tenant
-	if tnt == utils.EmptyString {
-		tnt = apierSv1.Config.GeneralCfg().DefaultTenant
-	}
-	prfx := utils.TrendsProfilePrefix + tnt + utils.ConcatenatedKeySep
-	keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
-	if err != nil {
-		return err
-	}
-	if len(keys) == 0 {
-		return utils.ErrNotFound
-	}
-	trIDs := make([]string, len(keys))
-	for i, key := range keys {
-		trIDs[i] = key[len(prfx):]
-	}
-	*trPrfIDs = args.PaginateStringSlice(trIDs)
-	return
-}
-
 // SetTrendProfile alters/creates a TrendProfile
 func (apierSv1 *APIerSv1) SetTrendProfile(ctx *context.Context, arg *engine.TrendProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.TrendProfile, []string{utils.ID}); len(missing) != 0 {
