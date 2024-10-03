@@ -164,3 +164,118 @@ func TestTrendCleanUp(t *testing.T) {
 
 	}
 }
+
+func TestLibTrendSClone(t *testing.T) {
+	original := &TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "ID1",
+		Schedule:        "0 * * * *",
+		StatID:          "statID",
+		Metrics:         []string{"metric1", "metric2"},
+		TTL:             10 * time.Minute,
+		QueueLength:     100,
+		MinItems:        5,
+		CorrelationType: "*average",
+		Tolerance:       0.1,
+		Stored:          true,
+		ThresholdIDs:    []string{"threshold1", "threshold2"},
+	}
+
+	cloned := original.Clone()
+
+	if cloned.Tenant != original.Tenant {
+		t.Errorf("Expected Tenant %s, got %s", original.Tenant, cloned.Tenant)
+	}
+	if cloned.ID != original.ID {
+		t.Errorf("Expected ID %s, got %s", original.ID, cloned.ID)
+	}
+	if cloned.Schedule != original.Schedule {
+		t.Errorf("Expected Schedule %s, got %s", original.Schedule, cloned.Schedule)
+	}
+	if cloned.StatID != original.StatID {
+		t.Errorf("Expected StatID %s, got %s", original.StatID, cloned.StatID)
+	}
+	if len(cloned.Metrics) != len(original.Metrics) {
+		t.Errorf("Expected Metrics length %d, got %d", len(original.Metrics), len(cloned.Metrics))
+	}
+	for i, metric := range original.Metrics {
+		if cloned.Metrics[i] != metric {
+			t.Errorf("Expected Metrics[%d] %s, got %s", i, metric, cloned.Metrics[i])
+		}
+	}
+	if cloned.TTL != original.TTL {
+		t.Errorf("Expected TTL %v, got %v", original.TTL, cloned.TTL)
+	}
+	if cloned.QueueLength != original.QueueLength {
+		t.Errorf("Expected QueueLength %d, got %d", original.QueueLength, cloned.QueueLength)
+	}
+	if cloned.MinItems != original.MinItems {
+		t.Errorf("Expected MinItems %d, got %d", original.MinItems, cloned.MinItems)
+	}
+	if cloned.CorrelationType != original.CorrelationType {
+		t.Errorf("Expected CorrelationType %s, got %s", original.CorrelationType, cloned.CorrelationType)
+	}
+	if cloned.Tolerance != original.Tolerance {
+		t.Errorf("Expected Tolerance %f, got %f", original.Tolerance, cloned.Tolerance)
+	}
+	if cloned.Stored != original.Stored {
+		t.Errorf("Expected Stored %v, got %v", original.Stored, cloned.Stored)
+	}
+	if len(cloned.ThresholdIDs) != len(original.ThresholdIDs) {
+		t.Errorf("Expected ThresholdIDs length %d, got %d", len(original.ThresholdIDs), len(cloned.ThresholdIDs))
+	}
+	for i, thresholdID := range original.ThresholdIDs {
+		if cloned.ThresholdIDs[i] != thresholdID {
+			t.Errorf("Expected ThresholdIDs[%d] %s, got %s", i, thresholdID, cloned.ThresholdIDs[i])
+		}
+	}
+}
+
+func TestLibTrendsComputeIndexes(t *testing.T) {
+	t1 := time.Now()
+	t2 := t1.Add(1 * time.Second)
+	t3 := t2.Add(2 * time.Second)
+
+	trend := &Trend{
+		RunTimes: []time.Time{t3, t2, t1},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{
+			t3: {
+				"metric1": {ID: "metric1", Value: 41.0},
+				"metric2": {ID: "metric2", Value: 10.0},
+			},
+			t2: {
+				"metric1": {ID: "metric1", Value: 9.0},
+			},
+			t1: {
+				"metric2": {ID: "metric2", Value: 5.0},
+				"metric3": {ID: "metric3", Value: 2.0},
+			},
+		},
+	}
+
+	trend.computeIndexes()
+
+	if count := trend.mCounts["metric1"]; count != 2 {
+		t.Errorf("Expected metric1 count to be 2, got %d", count)
+	}
+
+	if total := trend.mTotals["metric1"]; total != 50.0 {
+		t.Errorf("Expected metric1 total to be 50.0, got %f", total)
+	}
+
+	if count := trend.mCounts["metric2"]; count != 2 {
+		t.Errorf("Expected metric2 count to be 2, got %d", count)
+	}
+
+	if total := trend.mTotals["metric2"]; total != 15.0 {
+		t.Errorf("Expected metric2 total to be 15.0, got %f", total)
+	}
+
+	if count := trend.mCounts["metric3"]; count != 1 {
+		t.Errorf("Expected metric3 count to be 1, got %d", count)
+	}
+
+	if total := trend.mTotals["metric3"]; total != 2.0 {
+		t.Errorf("Expected metric3 total to be 2.0, got %f", total)
+	}
+}
