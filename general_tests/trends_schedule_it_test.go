@@ -77,13 +77,12 @@ cgrates.org,TREND_2,@every 2s,Stats1_2,,-1,-1,1,*last,1,false,`,
 cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,,*tcc;*acd;*tcd,,,,,
 cgrates.org,Stats1_2,*string:~*req.Account:1002,,,,,*sum#~*req.Usage;*pdd,,,,,`}
 
-	testEnv := TestEnvironment{
-		Name:       "TestTrendSchedule",
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
 
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	t.Run("CheckTrendSchedule", func(t *testing.T) {
 		var scheduled int
 		if err := client.Call(context.Background(), utils.TrendSv1ScheduleQueries,

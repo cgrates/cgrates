@@ -92,14 +92,11 @@ ACT_TRANSFER,*transfer_balance,"{""DestinationAccountID"":""cgrates.org:ACC_DEST
 ACT_TRANSFER,*cdrlog,,,,,,,,,,,,,,,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name:       "TestTransferBalance",
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
-		// LogBuffer:  &bytes.Buffer{},
 	}
-	// defer fmt.Println(testEnv.LogBuffer)
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("CheckInitialBalances", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded

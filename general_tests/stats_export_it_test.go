@@ -88,11 +88,10 @@ func TestStatsEEsExport(t *testing.T) {
 
 }`
 
-	testEnv := TestEnvironment{
-		Name:       "TestStatsEEsExport",
+	ng := TestEngine{
 		ConfigJSON: content,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("SetStatProfile", func(t *testing.T) {
 		var reply string

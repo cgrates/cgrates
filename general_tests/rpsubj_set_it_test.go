@@ -85,13 +85,11 @@ RP_DATA,DR_DATA,*any,10`,
 cgrates.org,data,RPF_DATA,2022-01-14T00:00:00Z,RP_DATA,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name: "TestRatingSubjectSet",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
@@ -215,13 +213,11 @@ RP_DATA,DR_DATA,*any,10`,
 cgrates.org,data,1001,2022-01-14T00:00:00Z,RP_DATA,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name: "TestRatingSubjectSetDefault",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded

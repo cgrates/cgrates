@@ -55,12 +55,10 @@ func TestEscapeCharacters(t *testing.T) {
 
 }`
 
-	testEnv := TestEnvironment{
-		Name: "TestEscapeCharacters",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	/*
 		When escape sequences are written manually, like \u0000 in the csv file, they are not interpreted as

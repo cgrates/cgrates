@@ -105,11 +105,11 @@ func TestERsLineNr(t *testing.T) {
 }`, csvFd, procFd, fwvFd, procFd, xmlFd, procFd)
 
 	buf := &bytes.Buffer{}
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		LogBuffer:  buf,
 	}
-	_, _ = testEnv.Setup(t, 0)
+	_, _ = ng.Run(t)
 
 	fileIdx := 0
 	createFile := func(t *testing.T, dir, ext, content string) {

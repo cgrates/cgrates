@@ -44,12 +44,11 @@ func TestSSv1AuthorizeEventSMS(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	testEnv := TestEnvironment{
-		Name:       "TestSSv1AuthorizeEventSMS",
+	ng := TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("AuthorizeEventSMS", func(t *testing.T) {
 		args := &sessions.V1AuthorizeArgs{
