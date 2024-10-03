@@ -107,13 +107,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name: "TestBalanceBlocker",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
@@ -353,13 +351,11 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_SMS,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name: "TestBalanceFactor",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("CheckInitialBalance", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
@@ -871,13 +867,11 @@ ACT_TOPUP_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
 ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,false,10`,
 	}
 
-	testEnv := TestEnvironment{
-		Name: "TestBalanceCDRLog",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("CheckInitialBalances", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
@@ -1261,12 +1255,11 @@ RP_MONETARY,DR_MONETARY,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject`,
 	}
 
-	testEnv := TestEnvironment{
-		Name:       "TestBalanceFactor",
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	t.Run("SetAccount", func(t *testing.T) {
 		time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 		var reply string

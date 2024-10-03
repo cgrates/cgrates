@@ -52,39 +52,53 @@ func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	}
 }
 
-// TestEnvironment holds the setup parameters and configurations
+// TestEngine holds the setup parameters and configurations
 // required for running integration tests.
-type TestEnvironment struct {
-	Name       string            // usually the name of the test
-	ConfigPath string            // file path to the main configuration file
-	ConfigJSON string            // contains the configuration JSON content if ConfigPath is missing
-	TpPath     string            // specifies the path to the tariff plans
-	TpFiles    map[string]string // maps CSV filenames to their content for tariff plan loading
-	LogBuffer  io.Writer         // captures the log output of the test environment
-	// Encoding   string         // specifies the data encoding type (e.g., JSON, GOB)
+type TestEngine struct {
+	ConfigPath     string            // path to the main configuration file
+	ConfigJSON     string            // configuration JSON content (used if ConfigPath is empty)
+	LogBuffer      io.Writer         // captures log output of the test environment
+	PreserveDataDB bool              // prevents automatic data_db flush when set
+	PreserveStorDB bool              // prevents automatic stor_db flush when set
+	TpPath         string            // path to the tariff plans
+	TpFiles        map[string]string // CSV data for tariff plans: filename -> content
+
+	// PreStartHook executes custom logic relying on CGRConfig
+	// before starting cgr-engine.
+	PreStartHook func(*testing.T, *config.CGRConfig)
 }
 
-// Setup initializes the testing environment using the provided configuration. It loads the configuration
-// from a specified path or creates a new one if the path is not provided. The method starts the engine,
-// establishes an RPC client connection, and loads CSV data if provided. It returns an RPC client and the
-// configuration.
-func (env TestEnvironment) Setup(t *testing.T, engineDelay int) (*birpc.Client, *config.CGRConfig) {
+// Run initializes a cgr-engine instance for testing, loads tariff plans (if available) and returns
+// an RPC client and the CGRConfig object. It calls t.Fatal on any setup failure.
+func (env TestEngine) Run(t *testing.T) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
 
-	var cfg *config.CGRConfig
+	// Parse config files.
+	var cfgPath string
 	switch {
-	case env.ConfigPath != "":
-		var err error
-		cfg, err = config.NewCGRConfigFromPath(env.ConfigPath)
-		if err != nil {
-			t.Fatalf("failed to init config from path %s: %v", env.ConfigPath, err)
+	case env.ConfigJSON != "":
+		cfgPath = t.TempDir()
+		filePath := filepath.Join(cfgPath, "cgrates.json")
+		if err := os.WriteFile(filePath, []byte(env.ConfigJSON), 0644); err != nil {
+			t.Fatal(err)
 		}
+	case env.ConfigPath != "":
+		cfgPath = env.ConfigPath
 	default:
-		cfg, env.ConfigPath = initCfg(t, env.ConfigJSON)
+		t.Fatal("missing config source")
+	}
+	cfg, err := config.NewCGRConfigFromPath(cfgPath)
+	if err != nil {
+		t.Fatalf("could not init config from path %s: %v", cfgPath, err)
 	}
 
-	flushDBs(t, cfg, true, true)
-	startEngine(t, cfg, env.ConfigPath, engineDelay, env.LogBuffer)
+	flushDBs(t, cfg, !env.PreserveDataDB, !env.PreserveStorDB)
+
+	if env.PreStartHook != nil {
+		env.PreStartHook(t, cfg)
+	}
+
+	startEngine(t, cfg, env.LogBuffer)
 
 	client, err := newRPCClient(cfg.ListenCfg())
 	if err != nil {
@@ -100,24 +114,23 @@ func (env TestEnvironment) Setup(t *testing.T, engineDelay int) (*birpc.Client, 
 	return client, cfg
 }
 
-// initCfg creates a new CGRConfig from the provided configuration content string.
-// It generates a temporary directory and file path, writes the content to the configuration
-// file, and returns the created CGRConfig and the configuration directory path.
-func initCfg(t *testing.T, cfgContent string) (cfg *config.CGRConfig, cfgPath string) {
+func waitForService(t *testing.T, ctx *context.Context, client *birpc.Client, service string) {
 	t.Helper()
-	if cfgContent == utils.EmptyString {
-		t.Fatal("ConfigJSON is required but empty")
+	method := service + ".Ping"
+	backoff := utils.FibDuration(time.Millisecond, 0)
+	var reply any
+	for {
+		select {
+		case <-ctx.Done():
+			t.Fatalf("%s service did not become available: %v", service, ctx.Err())
+		default:
+			err := client.Call(context.Background(), method, nil, &reply)
+			if err == nil && reply == utils.Pong {
+				return
+			}
+			time.Sleep(backoff())
+		}
 	}
-	cfgPath = t.TempDir()
-	filePath := filepath.Join(cfgPath, "cgrates.json")
-	if err := os.WriteFile(filePath, []byte(cfgContent), 0644); err != nil {
-		t.Fatal(err)
-	}
-	cfg, err := config.NewCGRConfigFromPath(cfgPath)
-	if err != nil {
-		t.Fatalf("failed to init config from path %s: %v", cfgPath, err)
-	}
-	return cfg, cfgPath
 }
 
 // loadCSVs loads tariff plan data from CSV files into the service. It handles directory creation and file
@@ -134,10 +147,16 @@ func loadCSVs(t *testing.T, client *birpc.Client, tpPath, customTpPath string, c
 		}
 		paths = append(paths, customTpPath)
 	}
-
-	if tpPath != utils.EmptyString {
+	if tpPath != "" {
 		paths = append(paths, tpPath)
 	}
+	if len(paths) == 0 {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	waitForService(t, ctx, client, utils.APIerSv1)
 
 	var reply string
 	for _, path := range paths {
@@ -165,16 +184,16 @@ func flushDBs(t *testing.T, cfg *config.CGRConfig, flushDataDB, flushStorDB bool
 }
 
 // startEngine starts the CGR engine process with the provided configuration. It writes engine logs to the
-// provided logBuffer (if any) and waits for the engine to be ready.
-func startEngine(t *testing.T, cfg *config.CGRConfig, cfgPath string, waitEngine int, logBuffer io.Writer) {
+// provided logBuffer (if any).
+func startEngine(t *testing.T, cfg *config.CGRConfig, logBuffer io.Writer) {
 	t.Helper()
 	binPath, err := exec.LookPath("cgr-engine")
 	if err != nil {
-		t.Fatal("could not find cgr-engine executable")
+		t.Fatal(err)
 	}
 	engine := exec.Command(
 		binPath,
-		"-config_path", cfgPath,
+		"-config_path", cfg.ConfigPath,
 		"-logger", utils.MetaStdLog,
 	)
 	if logBuffer != nil {
@@ -186,7 +205,7 @@ func startEngine(t *testing.T, cfg *config.CGRConfig, cfgPath string, waitEngine
 	}
 	t.Cleanup(func() {
 		if err := engine.Process.Kill(); err != nil {
-			t.Logf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+			t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
 		}
 	})
 	fib := utils.FibDuration(time.Millisecond, 0)
@@ -199,5 +218,4 @@ func startEngine(t *testing.T, cfg *config.CGRConfig, cfgPath string, waitEngine
 	if err != nil {
 		t.Fatalf("starting cgr-engine on port %s failed: %v", cfg.ListenCfg().RPCJSONListen, err)
 	}
-	time.Sleep(time.Duration(waitEngine) * time.Millisecond)
 }

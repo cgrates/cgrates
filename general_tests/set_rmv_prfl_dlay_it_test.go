@@ -47,13 +47,11 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	testEnv := TestEnvironment{
-		Name: "TestSetRemoveProfilesWithCachingDelay",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "tutorial"),
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("RemoveTPFromFolder", func(t *testing.T) {
 		var reply string

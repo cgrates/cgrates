@@ -112,12 +112,12 @@ cgrates.org,call,DEFAULT,,RP_DEFAULT,`,
 	}
 
 	buf := &bytes.Buffer{}
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 		LogBuffer:  buf,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	cdrIdx := 0
 	processCDR := func(t *testing.T, dest string, shouldFail bool) engine.EventCost {

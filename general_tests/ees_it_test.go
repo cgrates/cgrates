@@ -113,11 +113,10 @@ func TestEEsExportEventChanges(t *testing.T) {
 
 }`
 
-	testEnv := TestEnvironment{
-		Name:       "TestEEsExportEventChanges",
+	ng := TestEngine{
 		ConfigJSON: content,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("SetAttributeProfile", func(t *testing.T) {
 		attrPrf := &engine.AttributeProfileWithAPIOpts{
@@ -388,13 +387,10 @@ func TestEEsReplayFailedPosts(t *testing.T) {
 
 }`, failedDir)
 
-	testEnv := TestEnvironment{
-		Name:       "TestEEsReplayFailedPosts",
+	ng := TestEngine{
 		ConfigJSON: content,
-		// LogBuffer:  &bytes.Buffer{},
 	}
-	// defer fmt.Println(testEnv.LogBuffer)
-	client, _ := testEnv.Setup(t, 0)
+	client, _ := ng.Run(t)
 
 	// helper to sort slices
 	less := func(a, b string) bool { return a < b }

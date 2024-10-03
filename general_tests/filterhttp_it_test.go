@@ -165,13 +165,11 @@ cgrates.org,ATTR_ACNT_1001,*any,FLTR_HTTP,,,*req.OfficeGroup,*http#[` + srv.URL 
 cgrates.org,ATTR_DEST,*any,FLTR_DST_1002;FLTR_DEST,,,*req.Supplier,*constant,Supplier1,,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name: "TestFilterHTTP",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("FilterHTTPFullEvent", func(t *testing.T) {
 

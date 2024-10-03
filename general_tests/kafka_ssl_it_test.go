@@ -129,10 +129,10 @@ func TestKafkaSSL(t *testing.T) {
 
 }`, brokerSSLURL, mainTopic, brokerPlainURL, processedTopic, brokerSSLURL, mainTopic)
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 	}
-	client, _ := testEnv.Setup(t, 0)
+	client, _ := ng.Run(t)
 
 	createKafkaTopics(t, brokerPlainURL, true, mainTopic, processedTopic)
 

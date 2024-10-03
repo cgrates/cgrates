@@ -180,13 +180,11 @@ func TestCdrLogEes(t *testing.T) {
 
 	}
 
-	testEnv := TestEnvironment{
-		Name: "TTestCdrLogEes",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    map[string]string{},
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("AddBalanceCdrLog", func(t *testing.T) {
 		var reply string

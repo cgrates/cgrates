@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 	"time"
@@ -112,13 +111,11 @@ TRIGGER_1001,,*min_balance,0,false,0,,,main,*data,,,,,,,,,,ACT_USAGE_1GB,
 TRIGGER_1001,,*balance_expired,,true,0,,,main,*data,,,,,,,,,,ACT_TOPUP_INITIAL,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
-		LogBuffer:  &bytes.Buffer{},
 	}
-	// defer fmt.Println(testEnv.LogBuffer)
-	client, _ := testEnv.Setup(t, 10)
+	client, _ := ng.Run(t)
 
 	// helper functions
 	i := 0

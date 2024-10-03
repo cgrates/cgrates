@@ -46,13 +46,11 @@ func TestRerateCDRs(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	testEnv := TestEnvironment{
-		Name: "TestRerateCDRs",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "reratecdrs"),
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	CGRID := utils.GenUUID()
 

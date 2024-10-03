@@ -35,13 +35,11 @@ import (
 var aSummaryBefore *engine.AccountSummary
 
 func TestGetAccountCost(t *testing.T) {
-	testEnv := TestEnvironment{
-		Name: "TestGetAccountCost",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "rerate_cdrs_mysql"),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "reratecdrs"),
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	CGRID := utils.GenUUID()
 

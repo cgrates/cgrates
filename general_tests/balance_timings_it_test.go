@@ -121,12 +121,11 @@ HALF1,*any,*any,*any,*any,00:00:00;11:59:59
 HALF2,*any,*any,*any,*any,12:00:00;23:59:59`,
 	}
 
-	testEnv := TestEnvironment{
-		Name:       "TestBalanceTimings",
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(50 * time.Millisecond)
 
 	t.Run("TimingIsActiveAt", func(t *testing.T) {
@@ -371,11 +370,10 @@ RP_1001,DR_1002_20CNT,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name:       "TestBalanceTimings",
+	ng := TestEngine{
 		ConfigJSON: content,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(50 * time.Millisecond)
 
 	t.Run("SetTimings", func(t *testing.T) {
@@ -657,11 +655,10 @@ RP_1001,DR_1002_20CNT,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name:       "TestBalanceTimings",
+	ng := TestEngine{
 		ConfigJSON: content,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(50 * time.Millisecond)
 
 	t.Run("SetTimings", func(t *testing.T) {

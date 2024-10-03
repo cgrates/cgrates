@@ -80,11 +80,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,sms,subj_test,,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, 10)
+	client, _ := ng.Run(t)
 
 	setAccount := func(t *testing.T, acnt string, balance float64) {
 		t.Helper()

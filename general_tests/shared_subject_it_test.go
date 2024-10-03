@@ -121,13 +121,11 @@ cgrates.org,call,Subject1,2014-01-14T00:00:00Z,RP_Subject1,
 cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 	}
 
-	testEnv := TestEnvironment{
-		Name: "TestSharedSubject",
-		// Encoding:   *encoding,
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 
 	t.Run("Cost1001->1002", func(t *testing.T) {
 		var reply []*utils.EventWithFlags

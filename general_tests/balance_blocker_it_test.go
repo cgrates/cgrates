@@ -96,11 +96,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	testNg := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := testNg.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("Authorize", func(t *testing.T) {
@@ -199,11 +199,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("InterimUpdate30s", func(t *testing.T) {
@@ -324,11 +324,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("ProcessEvent", func(t *testing.T) {
@@ -465,11 +465,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("Authorize", func(t *testing.T) {
@@ -568,11 +568,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("InterimUpdate30s", func(t *testing.T) {
@@ -693,11 +693,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("ProcessEvent", func(t *testing.T) {
@@ -837,11 +837,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("Authorize", func(t *testing.T) {
@@ -941,11 +941,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("InterimUpdate30s", func(t *testing.T) {
@@ -1067,11 +1067,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("ProcessEvent", func(t *testing.T) {
@@ -1209,11 +1209,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("Authorize", func(t *testing.T) {
@@ -1313,11 +1313,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("InterimUpdate30s", func(t *testing.T) {
@@ -1439,11 +1439,11 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testEnv := TestEnvironment{
+	ng := TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
-	client, _ := testEnv.Setup(t, *utils.WaitRater)
+	client, _ := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for tps to be loaded
 
 	t.Run("ProcessEvent", func(t *testing.T) {
