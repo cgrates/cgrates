@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -134,4 +135,62 @@ func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
 		t.Errorf("Expected error <%+v>, received error <%+v>", utils.ErrNotFound, err)
 	}
 
+}
+
+func TestSentrypeerGetTokenErrorResponse(t *testing.T) {
+	tokenUrl := "Url"
+	clientID := "ID"
+	clientSecret := "clientSecret"
+	audience := "audience"
+	grantType := "grantType"
+
+	token, err := sentrypeerGetToken(tokenUrl, clientID, clientSecret, audience, grantType)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+	if token != "" {
+		t.Errorf("Expected empty token, got %v", token)
+	}
+}
+
+func TestExtractUrlFromType(t *testing.T) {
+	tests := []struct {
+		name     string
+		httpType string
+		wantURL  string
+		wantErr  error
+	}{
+		{
+			name:     "Valid input",
+			httpType: "http#cgrates.com",
+			wantURL:  "cgrates.com",
+			wantErr:  nil,
+		},
+		{
+			name:     "Incorrect format",
+			httpType: "http",
+			wantURL:  "",
+			wantErr:  errors.New("url is not specified"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotURL, err := extractUrlFromType(tt.httpType)
+
+			if tt.wantErr != nil {
+				if err == nil || err.Error() != tt.wantErr.Error() {
+					t.Errorf("Expected error %v, got %v", tt.wantErr, err)
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("Expected no error, got %v", err)
+				}
+			}
+
+			if gotURL != tt.wantURL {
+				t.Errorf("Expected URL %q, got %q", tt.wantURL, gotURL)
+			}
+		})
+	}
 }
