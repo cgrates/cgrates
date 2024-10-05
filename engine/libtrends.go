@@ -85,21 +85,37 @@ type TrendWithAPIOpts struct {
 	APIOpts map[string]any
 }
 
+// NewTrendFromProfile is a constructor for an empty trend out of it's profile
+func NewTrendFromProfile(tP *TrendProfile) *Trend {
+	return &Trend{
+		Tenant:   tP.Tenant,
+		ID:       tP.ID,
+		RunTimes: make([]time.Time, 0),
+		Metrics:  make(map[time.Time]map[string]*MetricWithTrend),
+		tPrfl:    tP,
+	}
+}
+
 // Trend is the unit matched by filters
 type Trend struct {
 	tMux sync.RWMutex
 
-	Tenant            string
-	ID                string
-	RunTimes          []time.Time
-	Metrics           map[time.Time]map[string]*MetricWithTrend
-	CompressedMetrics []byte // if populated, Metrics will be emty
+	Tenant   string
+	ID       string
+	RunTimes []time.Time
+	Metrics  map[time.Time]map[string]*MetricWithTrend
 
 	// indexes help faster processing
 	mLast   map[string]time.Time // last time a metric was present
 	mCounts map[string]int       // number of times a metric is present in Metrics
 	mTotals map[string]float64   // cached sum, used for average calculations
 
+	tPrfl *TrendProfile // store here the trend profile so we can have it at hands further
+
+}
+
+func (t *Trend) Clone() (tC *Trend) {
+	return
 }
 
 // Compile is used to initialize or cleanup the Trend

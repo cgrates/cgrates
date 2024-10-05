@@ -72,7 +72,7 @@ func TestNewTrendS(t *testing.T) {
 		t.Errorf("Expected CGRConfig to be set correctly, got %v, want %v", trendS.cgrcfg, cgrcfg)
 	}
 
-	if trendS.loopStopped == nil {
+	if trendS.trendStop == nil {
 		t.Errorf("Expected loopStopped to be initialized, but got nil")
 	}
 	if trendS.crnTQsMux == nil {

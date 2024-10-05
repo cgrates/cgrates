@@ -1661,5 +1661,9 @@ type ArgScheduleTrendQueries struct {
 
 type ArgGetTrend struct {
 	TenantWithAPIOpts
-	ID string
+	ID            string
+	RunIndexStart int
+	RunIndexEnd   int
+	RunTimeStart  string
+	RunTimeEnd    string
 }
