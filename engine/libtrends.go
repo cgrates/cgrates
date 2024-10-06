@@ -92,7 +92,8 @@ func NewTrendFromProfile(tP *TrendProfile) *Trend {
 		ID:       tP.ID,
 		RunTimes: make([]time.Time, 0),
 		Metrics:  make(map[time.Time]map[string]*MetricWithTrend),
-		tPrfl:    tP,
+
+		tPrfl: tP,
 	}
 }
 
@@ -100,10 +101,11 @@ func NewTrendFromProfile(tP *TrendProfile) *Trend {
 type Trend struct {
 	tMux sync.RWMutex
 
-	Tenant   string
-	ID       string
-	RunTimes []time.Time
-	Metrics  map[time.Time]map[string]*MetricWithTrend
+	Tenant            string
+	ID                string
+	RunTimes          []time.Time
+	Metrics           map[time.Time]map[string]*MetricWithTrend
+	CompressedMetrics []byte // if populated, Metrics and RunTimes will be emty
 
 	// indexes help faster processing
 	mLast   map[string]time.Time // last time a metric was present
