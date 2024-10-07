@@ -20,6 +20,7 @@ package config
 
 import (
 	"slices"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -29,6 +30,9 @@ type TrendSCfg struct {
 	StatSConns      []string
 	ThresholdSConns []string
 	ScheduledIDs    map[string][]string
+	StoreInterval   time.Duration
+	EEsConns        []string
+	EEsExporterIDs  []string
 }
 
 func (sa *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendsJsonCfg) (err error) {
@@ -59,12 +63,30 @@ func (sa *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendsJsonCfg) (err error) {
 	if jsnCfg.Scheduled_ids != nil {
 		sa.ScheduledIDs = jsnCfg.Scheduled_ids
 	}
+	if jsnCfg.Store_interval != nil {
+		if sa.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Ees_conns != nil {
+		sa.EEsConns = make([]string, len(*jsnCfg.Ees_conns))
+		for idx, connID := range *jsnCfg.Ees_conns {
+			sa.EEsConns[idx] = connID
+			if connID == utils.MetaInternal {
+				sa.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+			}
+		}
+	}
+	if jsnCfg.Ees_exporter_ids != nil {
+		sa.EEsExporterIDs = append(sa.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
+	}
 	return
 }
 
 func (sa *TrendSCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg: sa.Enabled,
+		utils.EnabledCfg:       sa.Enabled,
+		utils.StoreIntervalCfg: utils.EmptyString,
 	}
 	if sa.StatSConns != nil {
 		statSConns := make([]string, len(sa.StatSConns))
@@ -89,12 +111,26 @@ func (sa *TrendSCfg) AsMapInterface() (initialMP map[string]any) {
 	if sa.ScheduledIDs != nil {
 		initialMP[utils.ScheduledIDsCfg] = sa.ScheduledIDs
 	}
+	if sa.EEsConns != nil {
+		eesConns := make([]string, len(sa.EEsConns))
+		for i, item := range sa.EEsConns {
+			eesConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+				eesConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.EEsConnsCfg] = eesConns
+	}
+	eesExporterIDs := make([]string, len(sa.EEsExporterIDs))
+	copy(eesExporterIDs, sa.EEsExporterIDs)
+	initialMP[utils.EEsExporterIDsCfg] = eesExporterIDs
 	return
 }
 
 func (sa *TrendSCfg) Clone() (cln *TrendSCfg) {
 	cln = &TrendSCfg{
-		Enabled: sa.Enabled,
+		Enabled:       sa.Enabled,
+		StoreInterval: sa.StoreInterval,
 	}
 	if sa.StatSConns != nil {
 		cln.StatSConns = make([]string, len(sa.StatSConns))
@@ -109,6 +145,14 @@ func (sa *TrendSCfg) Clone() (cln *TrendSCfg) {
 		for key, value := range sa.ScheduledIDs {
 			cln.ScheduledIDs[key] = slices.Clone(value)
 		}
+	}
+	if sa.EEsConns != nil {
+		cln.EEsConns = make([]string, len(sa.EEsConns))
+		copy(cln.EEsConns, sa.EEsConns)
+	}
+	if sa.EEsExporterIDs != nil {
+		cln.EEsExporterIDs = make([]string, len(sa.EEsExporterIDs))
+		copy(cln.EEsExporterIDs, sa.EEsExporterIDs)
 	}
 	return
 
