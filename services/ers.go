@@ -95,7 +95,7 @@ func (erS *EventReaderService) Start() (err error) {
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan)
 
 	// Register ERsV1 methods.
-	srv, err := birpc.NewService(v1.NewErSv1(erS.ers), "", false)
+	srv, err := engine.NewService(v1.NewErSv1(erS.ers))
 	if err != nil {
 		return err
 	}
