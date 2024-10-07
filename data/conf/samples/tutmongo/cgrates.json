@@ -128,14 +128,5 @@
 	"apiers_conns": ["*internal"],
 },
 
-//  "sentrypeer":{
-// 	 "client_id":"",
-// 	 "client_secret":"",
-// 	 "token_url":"",
-// 	 "ip_url":"",
-// 	 "number_url":"",
-// 	 "audience":"",
-// 	 "grant_type":"",
-//   },
 
 }

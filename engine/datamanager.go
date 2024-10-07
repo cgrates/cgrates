@@ -1306,7 +1306,6 @@ func (dm *DataManager) GetTrend(tenant, id string,
 		err = utils.ErrNoDatabaseConn
 		return
 	}
-
 	if tr, err = dm.dataDB.GetTrendDrv(tenant, id); err != nil {
 		if err != utils.ErrNotFound { // database error
 			return
@@ -1340,7 +1339,6 @@ func (dm *DataManager) GetTrend(tenant, id string,
 			return
 		}
 	}
-
 	if cacheWrite {
 		if errCh := Cache.Set(utils.CacheTrends, tntID, tr, nil,
 			cacheCommit(transactionID), transactionID); errCh != nil {
@@ -1452,33 +1450,30 @@ func (dm *DataManager) GetTrendProfileIDs(tenants []string) (tps map[string][]st
 		if err != nil {
 			return
 		}
-		if len(keys) == 0 {
-			return nil, utils.ErrNotFound
+	} else {
+		for _, tenant := range tenants {
+			var tntkeys []string
+			tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
+			tntkeys, err = dm.dataDB.GetKeysForPrefix(tntPrfx)
+			if err != nil {
+				return
+			}
+			keys = append(keys, tntkeys...)
 		}
-		tps = make(map[string][]string)
-		for _, key := range keys {
-			indx := strings.Index(key, utils.ConcatenatedKeySep)
-			tenant := key[len(utils.TrendsProfilePrefix):indx]
-			id := key[indx+1:]
-			tps[tenant] = append(tps[tenant], id)
-		}
-		return
 	}
-	for _, tenant := range tenants {
-		tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
-		keys, err = dm.dataDB.GetKeysForPrefix(tntPrfx)
-		if err != nil {
-			return
-		}
-		if len(keys) == 0 {
-			return nil, utils.ErrNotFound
-		}
-		tps = make(map[string][]string)
-		for _, key := range keys {
-			tps[tenant] = append(tps[tenant], key[len(tntPrfx):])
-		}
+	// if len(keys) == 0 {
+	// 	return nil, utils.ErrNotFound
+	// }
+
+	tps = make(map[string][]string)
+	for _, key := range keys {
+		indx := strings.Index(key, utils.ConcatenatedKeySep)
+		tenant := key[len(utils.TrendsProfilePrefix):indx]
+		id := key[indx+1:]
+		tps[tenant] = append(tps[tenant], id)
 	}
 	return
+
 }
 
 func (dm *DataManager) SetTrendProfile(trp *TrendProfile) (err error) {

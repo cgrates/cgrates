@@ -90,3 +90,7 @@ func (trs *TrendSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgSchedu
 func (trs *TrendSv1) GetTrend(ctx *context.Context, args *utils.ArgGetTrend, trend *engine.Trend) error {
 	return trs.trS.V1GetTrend(ctx, args, trend)
 }
+
+func (trs *TrendSv1) GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) error {
+	return trs.trS.V1GetScheduledTrends(ctx, args, schedTrends)
+}

@@ -1,0 +1,32 @@
+{
+
+"general": {
+    "log_level": 7,
+},
+
+"data_db": {								
+"db_type": "redis",						
+"db_port": 6379, 						
+"db_name": "10", 						
+},
+
+"stor_db": {
+"db_password": "CGRateS.org",
+},
+
+"trends": {
+    "enabled": true,
+    "stats_conns":["*localhost"],
+    "scheduled_ids": {"cgrates.org":["TR_1min"],"tenant1":["TR_5min"],"tenant2":[]}  
+},
+
+"stats": {
+    "enabled": true,
+    "store_interval": "-1",
+},
+
+"apiers": {
+    "enabled": true,
+ },
+    
+}

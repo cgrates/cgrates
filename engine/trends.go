@@ -21,6 +21,8 @@ package engine
 import (
 	"fmt"
 	"runtime"
+	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -142,6 +144,18 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 				"<%s> setting Trend with id: <%s:%s> DM error: <%s>",
 				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
 		return
+	}
+	if err = tS.processThresholds(trnd); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<%s> Trend with id <%s:%s> error: <%s> with ThresholdS",
+				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
+	}
+	if err = tS.processEEs(trnd); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf(
+				"<%s> Trend with id <%s:%s> error: <%s> with EEs",
+				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
 	}
 
 }
@@ -331,6 +345,7 @@ func (tS *TrendS) StartTrendS() error {
 		return err
 	}
 	tS.crn.Start()
+	go tS.asyncStoreTrends()
 	return nil
 }
 
@@ -396,8 +411,13 @@ func (tS *TrendS) scheduleAutomaticQueries() error {
 }
 
 // scheduleTrendQueries will schedule/re-schedule specific trend queries
-func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []string) (scheduled int, err error) {
+func (tS *TrendS) scheduleTrendQueries(_ *context.Context, tnt string, tIDs []string) (scheduled int, err error) {
 	var partial bool
+	tS.crnTQsMux.Lock()
+	if _, has := tS.crnTQs[tnt]; !has {
+		tS.crnTQs[tnt] = make(map[string]cron.EntryID)
+	}
+	tS.crnTQsMux.Unlock()
 	for _, tID := range tIDs {
 		tS.crnTQsMux.RLock()
 		if entryID, has := tS.crnTQs[tnt][tID]; has {
@@ -419,7 +439,6 @@ func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []
 			partial = true
 		} else { // log the entry ID for debugging
 			tS.crnTQsMux.Lock()
-			tS.crnTQs[tP.Tenant] = make(map[string]cron.EntryID)
 			tS.crnTQs[tP.Tenant][tP.ID] = entryID
 			tS.crnTQsMux.Unlock()
 		}
@@ -446,6 +465,9 @@ func (tS *TrendS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgSchedul
 //
 //	in this way being possible to work with paginators
 func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTrend *Trend) (err error) {
+	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
 	var trnd *Trend
 	if trnd, err = tS.dm.GetTrend(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return
@@ -474,7 +496,7 @@ func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTr
 	}
 	if arg.RunTimeEnd == utils.EmptyString {
 		tEnd = runTimes[len(runTimes)-1].Add(time.Duration(1))
-	} else if tEnd, err = utils.ParseTimeDetectLayout(arg.RunTimeStart, tS.cgrcfg.GeneralCfg().DefaultTimezone); err != nil {
+	} else if tEnd, err = utils.ParseTimeDetectLayout(arg.RunTimeEnd, tS.cgrcfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
 	}
 	retTrend.RunTimes = make([]time.Time, 0, len(runTimes))
@@ -483,7 +505,7 @@ func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTr
 			retTrend.RunTimes = append(retTrend.RunTimes, runTime)
 		}
 	}
-	if len(runTimes) == 0 { // filtered out all
+	if len(retTrend.RunTimes) == 0 { // filtered out all
 		return utils.ErrNotFound
 	}
 	retTrend.Metrics = make(map[time.Time]map[string]*MetricWithTrend)
@@ -491,4 +513,51 @@ func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTr
 		retTrend.Metrics[runTime] = trnd.Metrics[runTime]
 	}
 	return
+}
+
+func (tS *TrendS) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = tS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	tS.crnTQsMux.RLock()
+	defer tS.crnTQsMux.RUnlock()
+	trendIDsMp, has := tS.crnTQs[tnt]
+	if !has {
+		return utils.ErrNotFound
+	}
+	var scheduledTrends []utils.ScheduledTrend
+	var entryIds map[string]cron.EntryID
+	if len(args.TrendIDPrefix) == 0 {
+		entryIds = trendIDsMp
+	} else {
+		entryIds = make(map[string]cron.EntryID)
+		for _, tID := range args.TrendIDPrefix {
+			for key, entryID := range trendIDsMp {
+				if strings.HasPrefix(key, tID) {
+					entryIds[key] = entryID
+				}
+			}
+		}
+	}
+	if len(entryIds) == 0 {
+		return utils.ErrNotFound
+	}
+	var entry cron.Entry
+	for id, entryID := range entryIds {
+		entry = tS.crn.Entry(entryID)
+		if entry.ID == 0 {
+			continue
+		}
+		scheduledTrends = append(scheduledTrends, utils.ScheduledTrend{
+			TrendID: id,
+			Next:    entry.Next,
+			Prev:    entry.Prev,
+		})
+	}
+	slices.SortFunc(scheduledTrends, func(a, b utils.ScheduledTrend) int {
+		return a.Next.Compare(b.Next)
+	})
+	*schedTrends = scheduledTrends
+	return nil
 }
