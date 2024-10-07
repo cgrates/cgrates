@@ -7,6 +7,7 @@ on:
   #   branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   # check-if-duplicate-action:
@@ -34,7 +35,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22.x"
+          go-version: "1.23.x"
 
       - name: Go Format
         run: gofmt -s -w . && git diff --exit-code
