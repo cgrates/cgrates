@@ -149,7 +149,11 @@ func (rplSv1 *ReplicatorSv1) GetTrend(ctx *context.Context, tntID *utils.TenantI
 	if err != nil {
 		return err
 	}
-	*reply = *rcv
+	reply.Tenant = rcv.Tenant
+	reply.ID = rcv.ID
+	reply.RunTimes = rcv.RunTimes
+	reply.CompressedMetrics = rcv.CompressedMetrics
+	reply.Metrics = rcv.Metrics
 	return nil
 }
 

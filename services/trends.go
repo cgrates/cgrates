@@ -76,13 +76,14 @@ func (trs *TrendService) Start() error {
 	filterS := <-trs.filterSChan
 	trs.filterSChan <- filterS
 	dbchan := trs.dm.GetDMChan()
-	dm := <-dbchan
-	dbchan <- dm
+	datadb := <-dbchan
+	dbchan <- datadb
+
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.TrendS))
 	trs.Lock()
 	defer trs.Unlock()
-	trs.trs = engine.NewTrendS(dm, trs.connMgr, filterS, trs.cfg)
+	trs.trs = engine.NewTrendS(datadb, trs.connMgr, filterS, trs.cfg)
 	if err := trs.trs.StartTrendS(); err != nil {
 		return err
 	}

@@ -1658,6 +1658,10 @@ type ArgScheduleTrendQueries struct {
 	TenantIDWithAPIOpts
 	TrendIDs []string
 }
+type ArgScheduledTrends struct {
+	TenantIDWithAPIOpts
+	TrendIDPrefix []string
+}
 
 type ArgGetTrend struct {
 	TenantWithAPIOpts
@@ -1666,4 +1670,10 @@ type ArgGetTrend struct {
 	RunIndexEnd   int
 	RunTimeStart  string
 	RunTimeEnd    string
+}
+
+type ScheduledTrend struct {
+	TrendID string
+	Next    time.Time
+	Prev    time.Time
 }
