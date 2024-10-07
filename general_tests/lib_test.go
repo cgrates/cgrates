@@ -70,20 +70,20 @@ type TestEngine struct {
 
 // Run initializes a cgr-engine instance for testing, loads tariff plans (if available) and returns
 // an RPC client and the CGRConfig object. It calls t.Fatal on any setup failure.
-func (env TestEngine) Run(t *testing.T) (*birpc.Client, *config.CGRConfig) {
+func (ng TestEngine) Run(t *testing.T) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
 
 	// Parse config files.
 	var cfgPath string
 	switch {
-	case env.ConfigJSON != "":
+	case ng.ConfigJSON != "":
 		cfgPath = t.TempDir()
 		filePath := filepath.Join(cfgPath, "cgrates.json")
-		if err := os.WriteFile(filePath, []byte(env.ConfigJSON), 0644); err != nil {
+		if err := os.WriteFile(filePath, []byte(ng.ConfigJSON), 0644); err != nil {
 			t.Fatal(err)
 		}
-	case env.ConfigPath != "":
-		cfgPath = env.ConfigPath
+	case ng.ConfigPath != "":
+		cfgPath = ng.ConfigPath
 	default:
 		t.Fatal("missing config source")
 	}
@@ -92,13 +92,13 @@ func (env TestEngine) Run(t *testing.T) (*birpc.Client, *config.CGRConfig) {
 		t.Fatalf("could not init config from path %s: %v", cfgPath, err)
 	}
 
-	flushDBs(t, cfg, !env.PreserveDataDB, !env.PreserveStorDB)
+	flushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
 
-	if env.PreStartHook != nil {
-		env.PreStartHook(t, cfg)
+	if ng.PreStartHook != nil {
+		ng.PreStartHook(t, cfg)
 	}
 
-	startEngine(t, cfg, env.LogBuffer)
+	startEngine(t, cfg, ng.LogBuffer)
 
 	client, err := newRPCClient(cfg.ListenCfg())
 	if err != nil {
@@ -106,31 +106,12 @@ func (env TestEngine) Run(t *testing.T) (*birpc.Client, *config.CGRConfig) {
 	}
 
 	var customTpPath string
-	if len(env.TpFiles) != 0 {
+	if len(ng.TpFiles) != 0 {
 		customTpPath = t.TempDir()
 	}
-	loadCSVs(t, client, env.TpPath, customTpPath, env.TpFiles)
+	loadCSVs(t, client, ng.TpPath, customTpPath, ng.TpFiles)
 
 	return client, cfg
-}
-
-func waitForService(t *testing.T, ctx *context.Context, client *birpc.Client, service string) {
-	t.Helper()
-	method := service + ".Ping"
-	backoff := utils.FibDuration(time.Millisecond, 0)
-	var reply any
-	for {
-		select {
-		case <-ctx.Done():
-			t.Fatalf("%s service did not become available: %v", service, ctx.Err())
-		default:
-			err := client.Call(context.Background(), method, nil, &reply)
-			if err == nil && reply == utils.Pong {
-				return
-			}
-			time.Sleep(backoff())
-		}
-	}
 }
 
 // loadCSVs loads tariff plan data from CSV files into the service. It handles directory creation and file
@@ -217,5 +198,24 @@ func startEngine(t *testing.T, cfg *config.CGRConfig, logBuffer io.Writer) {
 	}
 	if err != nil {
 		t.Fatalf("starting cgr-engine on port %s failed: %v", cfg.ListenCfg().RPCJSONListen, err)
+	}
+}
+
+func waitForService(t *testing.T, ctx *context.Context, client *birpc.Client, service string) {
+	t.Helper()
+	method := service + ".Ping"
+	backoff := utils.FibDuration(time.Millisecond, 0)
+	var reply any
+	for {
+		select {
+		case <-ctx.Done():
+			t.Fatalf("%s service did not become available: %v", service, ctx.Err())
+		default:
+			err := client.Call(context.Background(), method, nil, &reply)
+			if err == nil && reply == utils.Pong {
+				return
+			}
+			time.Sleep(backoff())
+		}
 	}
 }
