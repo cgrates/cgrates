@@ -206,7 +206,7 @@ func (tS *TrendS) processEEs(trnd *Trend) (err error) {
 		len(trnd.RunTimes) < trnd.tPrfl.MinItems {
 		return
 	}
-	if len(tS.cgrcfg.StatSCfg().EEsConns) == 0 {
+	if len(tS.cgrcfg.TrendSCfg().EEsConns) == 0 {
 		return
 	}
 	opts := map[string]any{
@@ -231,11 +231,11 @@ func (tS *TrendS) processEEs(trnd *Trend) (err error) {
 				utils.Metrics: mtrx,
 			},
 		},
-		EeIDs: tS.cgrcfg.StatSCfg().EEsExporterIDs,
+		EeIDs: tS.cgrcfg.TrendSCfg().EEsExporterIDs,
 	}
 	var withErrs bool
 	var reply map[string]map[string]any
-	if err := tS.connMgr.Call(context.TODO(), tS.cgrcfg.StatSCfg().EEsConns,
+	if err := tS.connMgr.Call(context.TODO(), tS.cgrcfg.TrendSCfg().EEsConns,
 		utils.EeSv1ProcessEvent, trndEv, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
@@ -250,10 +250,10 @@ func (tS *TrendS) processEEs(trnd *Trend) (err error) {
 
 // storeTrend will store or schedule the trend based on settings
 func (tS *TrendS) storeTrend(trnd *Trend) (err error) {
-	if tS.cgrcfg.StatSCfg().StoreInterval == 0 {
+	if tS.cgrcfg.TrendSCfg().StoreInterval == 0 {
 		return
 	}
-	if tS.cgrcfg.StatSCfg().StoreInterval == -1 {
+	if tS.cgrcfg.TrendSCfg().StoreInterval == -1 {
 		return tS.dm.SetTrend(trnd)
 	}
 
@@ -309,7 +309,7 @@ func (tS *TrendS) storeTrends() {
 
 // asyncStoreTrends runs as a backround process, calling storeTrends based on storeInterval
 func (tS *TrendS) asyncStoreTrends() {
-	storeInterval := tS.cgrcfg.StatSCfg().StoreInterval
+	storeInterval := tS.cgrcfg.TrendSCfg().StoreInterval
 	if storeInterval <= 0 {
 		close(tS.storingStopped)
 		return
