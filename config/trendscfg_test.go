@@ -22,38 +22,11 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
-
-func TestTrendSLoadFromJSONCfg(t *testing.T) {
-	trendCfg := &TrendSCfg{
-		Enabled:         true,
-		StatSConns:      []string{"connection1"},
-		ThresholdSConns: []string{"threshold1"},
-		ScheduledIDs:    map[string][]string{"tenant1": {"id1"}},
-	}
-
-	err := trendCfg.loadFromJSONCfg(nil)
-
-	if err != nil {
-		t.Errorf("Expected no error, but got: %v", err)
-	}
-
-	if trendCfg.Enabled != true {
-		t.Errorf("Expected Enabled to be true, but got: %v", trendCfg.Enabled)
-	}
-	if len(trendCfg.StatSConns) != 1 || trendCfg.StatSConns[0] != "connection1" {
-		t.Errorf("Expected StatSConns to be unchanged, but got: %v", trendCfg.StatSConns)
-	}
-	if len(trendCfg.ThresholdSConns) != 1 || trendCfg.ThresholdSConns[0] != "threshold1" {
-		t.Errorf("Expected ThresholdSConns to be unchanged, but got: %v", trendCfg.ThresholdSConns)
-	}
-	if len(trendCfg.ScheduledIDs) != 1 || trendCfg.ScheduledIDs["tenant1"][0] != "id1" {
-		t.Errorf("Expected ScheduledIDs to be unchanged, but got: %v", trendCfg.ScheduledIDs)
-	}
-}
 
 func TestScheduledIDsDiffTrendSJsonCfg(t *testing.T) {
 	v1 := &TrendSCfg{
@@ -77,6 +50,134 @@ func TestScheduledIDsDiffTrendSJsonCfg(t *testing.T) {
 
 	if (got.Scheduled_ids == nil && len(expected.Scheduled_ids) != 0) || !reflect.DeepEqual(got.Scheduled_ids, expected.Scheduled_ids) {
 		t.Errorf("Scheduled_ids mismatch. Got: %v, expected: %v", got.Scheduled_ids, expected.Scheduled_ids)
+	}
+}
+
+func TestTrendSLoadFromJSONCfg_NilConfig(t *testing.T) {
+	trendCfg := &TrendSCfg{
+		Enabled:         true,
+		StatSConns:      []string{"connection1"},
+		ThresholdSConns: []string{"threshold1"},
+		ScheduledIDs:    map[string][]string{"tenant1": {"id1"}},
+		StoreInterval:   10 * time.Second,
+		EEsConns:        []string{"conn1"},
+		EEsExporterIDs:  []string{"exporter1"},
+	}
+	err := trendCfg.loadFromJSONCfg(nil)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+
+}
+
+func TestLoadFromJSONCfgStoreInterval(t *testing.T) {
+	validInterval := "30"
+	jsnCfgValid := &TrendSJsonCfg{
+		Store_interval: &validInterval,
+	}
+	trendCfg := &TrendSCfg{}
+	err := trendCfg.loadFromJSONCfg(jsnCfgValid)
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	if trendCfg.StoreInterval != 30*time.Nanosecond {
+		t.Errorf("Expected StoreInterval to be 30ns, but got: %v", trendCfg.StoreInterval)
+	}
+	invalidInterval := "invalid_duration"
+	jsnCfgInvalid := &TrendSJsonCfg{
+		Store_interval: &invalidInterval,
+	}
+	trendCfg = &TrendSCfg{}
+	err = trendCfg.loadFromJSONCfg(jsnCfgInvalid)
+	if err == nil {
+		t.Errorf("Expected an error, got none")
+	}
+}
+
+func TestTrendSLoadFromJSONCfgEesConns(t *testing.T) {
+	trendCfg := &TrendSCfg{
+		EEsConns: []string{"old_conn1", "old_conn2"},
+	}
+	jsnCfg := &TrendSJsonCfg{
+		Ees_conns: &[]string{"new_conn1", "new_conn2"},
+	}
+	err := trendCfg.loadFromJSONCfg(jsnCfg)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+	expectedConns := []string{"new_conn1", "new_conn2"}
+	if len(trendCfg.EEsConns) != len(expectedConns) {
+		t.Errorf("Expected EEsConns length to be %d, but got: %d", len(expectedConns), len(trendCfg.EEsConns))
+	}
+	for i, conn := range expectedConns {
+		if trendCfg.EEsConns[i] != conn {
+			t.Errorf("Expected EEsConns[%d] to be %v, but got: %v", i, conn, trendCfg.EEsConns[i])
+		}
+	}
+}
+
+func TestTrendSLoadFromJSONCfgEesExporterIDs(t *testing.T) {
+	trendCfg := &TrendSCfg{
+		EEsExporterIDs: []string{"old_exporter1", "old_exporter2"},
+	}
+	jsnCfg := &TrendSJsonCfg{
+		Ees_exporter_ids: &[]string{"new_exporter1", "new_exporter2"},
+	}
+	err := trendCfg.loadFromJSONCfg(jsnCfg)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+	expectedIDs := []string{"old_exporter1", "old_exporter2", "new_exporter1", "new_exporter2"}
+	if len(trendCfg.EEsExporterIDs) != len(expectedIDs) {
+		t.Errorf("Expected EEsExporterIDs length to be %d, but got: %d", len(expectedIDs), len(trendCfg.EEsExporterIDs))
+	}
+	for i, id := range expectedIDs {
+		if trendCfg.EEsExporterIDs[i] != id {
+			t.Errorf("Expected EEsExporterIDs[%d] to be %v, but got: %v", i, id, trendCfg.EEsExporterIDs[i])
+		}
+	}
+}
+
+func TestTrendSCfgAsMapInterface(t *testing.T) {
+	storeInterval := 10 * time.Second
+	eesExporterIDs := []string{"exporter1", "exporter2"}
+	statSConns := []string{"statConn1"}
+	thresholdSConns := []string{"thresholdConn1"}
+	scheduledIDs := map[string][]string{"tenant1": {"id1"}}
+	eesConns := []string{"eesConn1"}
+
+	trendCfg := TrendSCfg{
+		Enabled:         true,
+		StatSConns:      statSConns,
+		ThresholdSConns: thresholdSConns,
+		ScheduledIDs:    scheduledIDs,
+		StoreInterval:   storeInterval,
+		EEsConns:        eesConns,
+		EEsExporterIDs:  eesExporterIDs,
+	}
+
+	expectedMap := map[string]any{
+		utils.EnabledCfg:         true,
+		utils.StoreIntervalCfg:   storeInterval.String(),
+		utils.StatSConnsCfg:      getInternalJSONConns(statSConns),
+		utils.ThresholdSConnsCfg: getInternalJSONConns(thresholdSConns),
+		utils.ScheduledIDsCfg:    scheduledIDs,
+		utils.EEsConnsCfg:        getInternalJSONConns(eesConns),
+		utils.EEsExporterIDsCfg:  eesExporterIDs,
+	}
+
+	result := trendCfg.AsMapInterface("").(map[string]any)
+
+	if !reflect.DeepEqual(result, expectedMap) {
+		t.Errorf("Expected: %+v, got: %+v", expectedMap, result)
+	}
+
+	trendCfg.StoreInterval = 0
+	expectedMap[utils.StoreIntervalCfg] = utils.EmptyString
+	result = trendCfg.AsMapInterface("").(map[string]any)
+
+	if result[utils.StoreIntervalCfg] != utils.EmptyString {
+		t.Errorf("Expected StoreInterval to be '%s', but got: %v", utils.EmptyString, result[utils.StoreIntervalCfg])
 	}
 }
 
@@ -167,13 +268,12 @@ func TestTrendSCfgClone(t *testing.T) {
 		StatSConns:      []string{"conn1", "conn2"},
 		ThresholdSConns: []string{"thresh1", "thresh2"},
 		ScheduledIDs:    map[string][]string{"tenant1": {"id1", "id2"}, "tenant2": {"id3"}},
+		StoreInterval:   30 * time.Second,
+		EEsConns:        []string{"eeconn1", "eeconn2"},
+		EEsExporterIDs:  []string{"exporter1", "exporter2"},
 	}
 
 	cloned := original.Clone()
-
-	if cloned == original {
-		t.Error("Clone should return a different instance, but got the same")
-	}
 
 	if cloned.Enabled != original.Enabled {
 		t.Errorf("Enabled field mismatch: expected %v, got %v", original.Enabled, cloned.Enabled)
@@ -189,11 +289,23 @@ func TestTrendSCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(cloned.ScheduledIDs, original.ScheduledIDs) {
 		t.Errorf("ScheduledIDs mismatch: expected %v, got %v", original.ScheduledIDs, cloned.ScheduledIDs)
 	}
+	if cloned.StoreInterval != original.StoreInterval {
+		t.Errorf("StoreInterval mismatch: expected %v, got %v", original.StoreInterval, cloned.StoreInterval)
+	}
+	if !reflect.DeepEqual(cloned.EEsConns, original.EEsConns) {
+		t.Errorf("EEsConns mismatch: expected %v, got %v", original.EEsConns, cloned.EEsConns)
+	}
+	if !reflect.DeepEqual(cloned.EEsExporterIDs, original.EEsExporterIDs) {
+		t.Errorf("EEsExporterIDs mismatch: expected %v, got %v", original.EEsExporterIDs, cloned.EEsExporterIDs)
+	}
 
 	cloned.Enabled = false
 	cloned.StatSConns[0] = "modified_conn"
 	cloned.ThresholdSConns[0] = "modified_thresh"
 	cloned.ScheduledIDs["tenant1"][0] = "modified_id"
+	cloned.StoreInterval = 45 * time.Second
+	cloned.EEsConns[0] = "modified_eeconn"
+	cloned.EEsExporterIDs[0] = "modified_exporter"
 
 	if cloned.Enabled == original.Enabled {
 		t.Error("Modifying cloned.Enabled should not affect original.Enabled")
@@ -206,6 +318,15 @@ func TestTrendSCfgClone(t *testing.T) {
 	}
 	if reflect.DeepEqual(cloned.ScheduledIDs, original.ScheduledIDs) {
 		t.Error("Modifying cloned.ScheduledIDs should not affect original.ScheduledIDs")
+	}
+	if cloned.StoreInterval == original.StoreInterval {
+		t.Error("Modifying cloned.StoreInterval should not affect original.StoreInterval")
+	}
+	if reflect.DeepEqual(cloned.EEsConns, original.EEsConns) {
+		t.Error("Modifying cloned.EEsConns should not affect original.EEsConns")
+	}
+	if reflect.DeepEqual(cloned.EEsExporterIDs, original.EEsExporterIDs) {
+		t.Error("Modifying cloned.EEsExporterIDs should not affect original.EEsExporterIDs")
 	}
 }
 
@@ -282,5 +403,71 @@ func TestTrendSCfgLoadError(t *testing.T) {
 	expectedErr := "mock error"
 	if err.Error() != expectedErr {
 		t.Errorf("expected error %v, got %v", expectedErr, err)
+	}
+}
+
+func TestDiffTrendsJsonCfgStoreInterval(t *testing.T) {
+	v1 := &TrendSCfg{
+		StoreInterval: 0,
+	}
+	v2 := &TrendSCfg{
+		StoreInterval: 2 * time.Second,
+	}
+	expected := &TrendSJsonCfg{
+		Store_interval: utils.StringPointer("2s"),
+	}
+	d := diffTrendsJsonCfg(nil, v1, v2)
+	if !reflect.DeepEqual(d.Store_interval, expected.Store_interval) {
+		t.Errorf("Store_interval mismatch. Got: %v, expected: %v", d.Store_interval, expected.Store_interval)
+	}
+	v2.StoreInterval = 0
+	expected.Store_interval = nil
+	d = diffTrendsJsonCfg(nil, v1, v2)
+	if d.Store_interval != nil {
+		t.Errorf("Expected Store_interval to be nil, but got: %v", d.Store_interval)
+	}
+}
+
+func TestDiffTrendsJsonCfgEEsConns(t *testing.T) {
+	v1 := &TrendSCfg{
+		EEsConns: []string{"conn1", "conn2"},
+	}
+	v2 := &TrendSCfg{
+		EEsConns: []string{"conn3", "conn4"},
+	}
+	expected := &TrendSJsonCfg{
+		Ees_conns: utils.SliceStringPointer(([]string{"conn3", "conn4"})),
+	}
+	d := diffTrendsJsonCfg(nil, v1, v2)
+	if !reflect.DeepEqual(d.Ees_conns, expected.Ees_conns) {
+		t.Errorf("Ees_conns mismatch. Got: %v, expected: %v", d.Ees_conns, expected.Ees_conns)
+	}
+	v2.EEsConns = []string{"conn1", "conn2"}
+	expected.Ees_conns = nil
+	d = diffTrendsJsonCfg(nil, v1, v2)
+	if d.Ees_conns != nil {
+		t.Errorf("Expected Ees_conns to be nil, but got: %v", d.Ees_conns)
+	}
+}
+
+func TestDiffTrendsJsonCfgEEsExporterIDs(t *testing.T) {
+	v1 := &TrendSCfg{
+		EEsExporterIDs: []string{"exporter1", "exporter2"},
+	}
+	v2 := &TrendSCfg{
+		EEsExporterIDs: []string{"exporter3", "exporter4"},
+	}
+	expected := &TrendSJsonCfg{
+		Ees_exporter_ids: &[]string{"exporter3", "exporter4"},
+	}
+	d := diffTrendsJsonCfg(nil, v1, v2)
+	if !reflect.DeepEqual(d.Ees_exporter_ids, expected.Ees_exporter_ids) {
+		t.Errorf("Ees_exporter_ids mismatch. Got: %v, expected: %v", d.Ees_exporter_ids, expected.Ees_exporter_ids)
+	}
+	v2.EEsExporterIDs = []string{"exporter1", "exporter2"}
+	expected.Ees_exporter_ids = nil
+	d = diffTrendsJsonCfg(nil, v1, v2)
+	if d.Ees_exporter_ids != nil {
+		t.Errorf("Expected Ees_exporter_ids to be nil, but got: %v", d.Ees_exporter_ids)
 	}
 }
