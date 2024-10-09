@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -316,5 +318,59 @@ func TestGetTrendLabel(t *testing.T) {
 		if result != test.expected {
 			t.Errorf("For tGrowth: %f and tolerance: %f, expected %s, got %s", test.tGrowth, test.tolerance, test.expected, result)
 		}
+	}
+}
+
+func TestGetTrendGrowth(t *testing.T) {
+
+	trend := Trend{
+		tMux:    &sync.RWMutex{},
+		mLast:   map[string]time.Time{},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{},
+		mTotals: map[string]float64{},
+		mCounts: map[string]int{},
+	}
+
+	_, err := trend.getTrendGrowth("unknownID", 100, utils.MetaLast, 2)
+	if !errors.Is(err, utils.ErrNotFound) {
+		t.Errorf("Expected error ErrNotFound, got: %v", err)
+	}
+
+	now := time.Now()
+	trend.mLast["metric1"] = now
+
+	_, err = trend.getTrendGrowth("metric1", 100, utils.MetaLast, 2)
+	if !errors.Is(err, utils.ErrNotFound) {
+		t.Errorf("Expected error ErrNotFound, got: %v", err)
+	}
+
+	trend.Metrics = map[time.Time]map[string]*MetricWithTrend{
+		now: {
+			"metric1": {ID: "metric1", Value: 80},
+		},
+	}
+
+	got, err := trend.getTrendGrowth("metric1", 100, utils.MetaLast, 2)
+	expected := utils.Round(20.0/100, 2, utils.MetaRoundingMiddle)
+	if err != nil || !reflect.DeepEqual(got, expected) {
+		t.Errorf("Mismatch for MetaLast correlation. Got: %v, expected: %v", got, expected)
+	}
+
+	trend.mTotals = map[string]float64{
+		"metric1": 400,
+	}
+	trend.mCounts = map[string]int{
+		"metric1": 4,
+	}
+
+	got, err = trend.getTrendGrowth("metric1", 120, utils.MetaAverage, 2)
+	expected = utils.Round(20.0/100, 2, utils.MetaRoundingMiddle)
+	if err != nil || !reflect.DeepEqual(got, expected) {
+		t.Errorf("Mismatch for MetaAverage correlation. Got: %v, expected: %v", got, expected)
+	}
+
+	_, err = trend.getTrendGrowth("metric1", 100, "invalidCorrelation", 2)
+	if !errors.Is(err, utils.ErrCorrelationUndefined) {
+		t.Errorf("Expected error ErrCorrelationUndefined, got: %v", err)
 	}
 }
