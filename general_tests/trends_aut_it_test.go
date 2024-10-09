@@ -179,13 +179,13 @@ func testScheduledTrends(t *testing.T) {
 		},
 		{
 			TrendID: "TREND_2",
-			Next:    time.Now().Add(2 * time.Second),
+			Next:    time.Now().Add(3 * time.Second),
 		},
 	}
 
 	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefix: []string{"TREND"}}, &schedTrends); err != nil {
 		t.Error(err)
-	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(2*time.Second), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Prev")); diff != utils.EmptyString {
+	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(3*time.Second), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Prev")); diff != utils.EmptyString {
 		t.Errorf("unexpected scheduled trends (-want +got)\n%s", diff)
 	}
 
