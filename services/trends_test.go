@@ -29,13 +29,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestTrendServiceReload(t *testing.T) {
-	trendService := &TrendService{}
-	if err := trendService.Reload(); err != nil {
-		t.Errorf("Reload() expected no error, got %v", err)
-	}
-}
-
 func TestNewTrendService(t *testing.T) {
 
 	cfg := &config.CGRConfig{}

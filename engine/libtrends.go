@@ -125,7 +125,7 @@ func (t *Trend) Clone() (tC *Trend) {
 //	thread safe since it should be used close to source
 func (t *Trend) Compile(cleanTtl time.Duration, qLength int) {
 	t.cleanup(cleanTtl, qLength)
-	if t.mTotals == nil { // indexes were not yet built
+	if len(t.mTotals) == 0 { // indexes were not yet built
 		t.computeIndexes()
 	}
 }

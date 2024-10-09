@@ -99,11 +99,7 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 	if trnd.tPrfl == nil {
 		trnd.tPrfl = tP
 	}
-	trnd.cleanup(tP.TTL, tP.QueueLength)
-
-	if len(trnd.mTotals) == 0 { // indexes were not yet built
-		trnd.computeIndexes()
-	}
+	trnd.Compile(tP.TTL, tP.QueueLength)
 	now := time.Now()
 	var metrics []string
 	if len(tP.Metrics) != 0 {
@@ -137,7 +133,9 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 			mWt.TrendLabel = trnd.getTrendLabel(mWt.TrendGrowth, tP.Tolerance)
 		}
 		trnd.Metrics[now][mWt.ID] = mWt
+		trnd.indexesAppendMetric(mWt, now)
 	}
+
 	if err = tS.storeTrend(trnd); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
@@ -178,6 +176,7 @@ func (tS *TrendS) processThresholds(trnd *Trend) (err error) {
 			trnd.tPrfl.ThresholdIDs[0] == utils.MetaNone {
 			return
 		}
+		thIDs = make([]string, len(trnd.tPrfl.ThresholdIDs))
 		copy(thIDs, trnd.tPrfl.ThresholdIDs)
 	}
 	opts[utils.OptsThresholdsProfileIDs] = thIDs
@@ -376,6 +375,17 @@ func (tS *TrendS) StopTrendS() {
 				utils.TrendS))
 		return
 	}
+}
+
+func (tS *TrendS) Reload() {
+	ctx := tS.crn.Stop()
+	close(tS.trendStop)
+	<-ctx.Done()
+	<-tS.storingStopped
+	tS.trendStop = make(chan struct{})
+	tS.storingStopped = make(chan struct{})
+	tS.crn.Start()
+	go tS.asyncStoreTrends()
 }
 
 // scheduleAutomaticQueries will schedule the queries at start/reload based on configured
