@@ -96,3 +96,16 @@ func TestTrendServiceIsRunning(t *testing.T) {
 		t.Errorf("Expected IsRunning to return false, got %v", result)
 	}
 }
+
+func TestTrendServiceStartAlreadyRunning(t *testing.T) {
+
+	trendService := &TrendService{}
+
+	trendService.trs = &engine.TrendS{}
+
+	err := trendService.Start()
+
+	if err != utils.ErrServiceAlreadyRunning {
+		t.Errorf("Expected error '%v', got '%v'", utils.ErrServiceAlreadyRunning, err)
+	}
+}
