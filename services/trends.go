@@ -100,6 +100,9 @@ func (trs *TrendService) Start() error {
 
 // Reload handles the change of config
 func (tr *TrendService) Reload() (err error) {
+	tr.Lock()
+	tr.trs.Reload()
+	tr.Unlock()
 	return
 }
 

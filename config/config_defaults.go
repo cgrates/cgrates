@@ -859,6 +859,7 @@ const CGRATES_CFG_JSON = `
 	"store_interval": "",
 	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"scheduled_ids": {},
+	"thresholds_conns": [],	
  	"ees_conns": [],			 
 	"ees_exporter_ids": []                     
 },
