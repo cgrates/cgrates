@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -277,5 +278,74 @@ func TestLibTrendsComputeIndexes(t *testing.T) {
 
 	if total := trend.mTotals["metric3"]; total != 2.0 {
 		t.Errorf("Expected metric3 total to be 2.0, got %f", total)
+	}
+}
+
+func TestGetTrendGrowthNotFound(t *testing.T) {
+
+	trend := &Trend{
+		mLast:   map[string]time.Time{},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{},
+	}
+
+	tG, err := trend.getTrendGrowth("nonexistentID", 100, utils.MetaLast, 2)
+
+	if tG != -1.0 {
+		t.Errorf("Expected trend growth to be -1.0, but got: %v", tG)
+	}
+
+	if !errors.Is(err, utils.ErrNotFound) {
+		t.Errorf("Expected error to be ErrNotFound, but got: %v", err)
+	}
+}
+
+func TestGetTrendGrowthMetricNotFound(t *testing.T) {
+
+	trend := &Trend{
+		mLast: map[string]time.Time{
+			"metricID": time.Now(),
+		},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{
+			time.Now(): {},
+		},
+	}
+
+	tG, err := trend.getTrendGrowth("metricID", 150, utils.MetaLast, 2)
+
+	if tG != -1.0 {
+		t.Errorf("Expected trend growth to be -1.0, but got: %v", tG)
+	}
+
+	if !errors.Is(err, utils.ErrNotFound) {
+		t.Errorf("Expected error to be ErrNotFound, but got: %v", err)
+	}
+}
+
+func TestGetTrendLabel_DefaultCase(t *testing.T) {
+
+	trend := &Trend{}
+
+	tGrowth := 0.0
+	tolerance := 1.0
+
+	lbl := trend.getTrendLabel(tGrowth, tolerance)
+
+	if lbl != utils.MetaConstant {
+		t.Errorf("Expected label to be %s, but got: %s", utils.MetaConstant, lbl)
+	}
+}
+
+func TestTrendCompile(t *testing.T) {
+
+	trend := &Trend{
+		mTotals: nil,
+	}
+
+	cleanTtl := time.Minute
+	qLength := 10
+	trend.Compile(cleanTtl, qLength)
+
+	if trend.mTotals == nil {
+		t.Error("Expected mTotals to be initialized, but it is nil")
 	}
 }
