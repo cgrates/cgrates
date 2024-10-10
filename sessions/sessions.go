@@ -2123,7 +2123,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 
 	if !args.GetAttributes && !args.AuthorizeResources &&
 		!args.GetMaxUsage && !args.GetRoutes {
-		return utils.NewErrMandatoryIeMissing("subsystems")
+		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 	if args.GetAttributes {
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.AttributeIDs, false)
@@ -2409,7 +2409,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	// end of RPC caching
 
 	if !args.GetAttributes && !args.AllocateResources && !args.InitSession {
-		return utils.NewErrMandatoryIeMissing("subsystems")
+		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
 	if args.GetAttributes {
@@ -2650,7 +2650,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 	// end of RPC caching
 
 	if !args.GetAttributes && !args.UpdateSession {
-		return utils.NewErrMandatoryIeMissing("subsystems")
+		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 
 	if args.GetAttributes {
@@ -2795,7 +2795,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	}
 	// end of RPC caching
 	if !args.TerminateSession && !args.ReleaseResources {
-		return utils.NewErrMandatoryIeMissing("subsystems")
+		return utils.NewErrMandatoryIeMissing(utils.Subsystems)
 	}
 
 	ev := engine.MapEvent(args.CGREvent.Event)
