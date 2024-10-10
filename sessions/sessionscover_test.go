@@ -2453,7 +2453,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 	args.CGREvent = cgrEvent
 	//RPC caching
 	sessions.cgrCfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = -1
-	expected = "MANDATORY_IE_MISSING: [subsystems]"
+	expected = "MANDATORY_IE_MISSING: [Subsystems]"
 
 	caches := engine.NewCacheS(cfg, dm, nil)
 	value := &utils.CachedRPCResponse{
@@ -2900,7 +2900,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	args = NewV1InitSessionArgs(false, []string{},
 		false, []string{}, false, []string{}, false, false,
 		cgrEvent, true)
-	expected = "MANDATORY_IE_MISSING: [subsystems]"
+	expected = "MANDATORY_IE_MISSING: [Subsystems]"
 	if err := sessions.BiRPCv1InitiateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -3211,7 +3211,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 
 	args = NewV1UpdateSessionArgs(false, []string{}, false,
 		cgrEvent, true)
-	expected = "MANDATORY_IE_MISSING: [subsystems]"
+	expected = "MANDATORY_IE_MISSING: [Subsystems]"
 	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
@@ -3346,7 +3346,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 
 	cgrEvent.ID = utils.EmptyString
 	args = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEvent, true)
-	expected = "MANDATORY_IE_MISSING: [subsystems]"
+	expected = "MANDATORY_IE_MISSING: [Subsystems]"
 	if err := sessions.BiRPCv1TerminateSession(context.Background(), args, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}

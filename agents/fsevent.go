@@ -75,6 +75,7 @@ const (
 	VarAnswerEpoch           = "variable_answer_epoch"
 	VarCGRACD                = varPrefix + utils.CgrAcd
 	VarCGROriginHost         = varPrefix + utils.CGROriginHost
+	VarCGRMaxUsage           = "cgr_max_usage"
 )
 
 func NewFSEvent(strEv string) (fsev FSEvent) {
