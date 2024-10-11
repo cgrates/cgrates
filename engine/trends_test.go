@@ -19,9 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
+	"sync"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cron"
 )
 
 func TestTrendProfileTenantID(t *testing.T) {
@@ -82,6 +87,75 @@ func TestNewTrendS(t *testing.T) {
 		t.Errorf("Expected crnTQs to be initialized, but got nil")
 	} else if len(trendS.crnTQs) != 0 {
 		t.Errorf("Expected crnTQs to be empty, but got length %d", len(trendS.crnTQs))
+	}
+
+}
+
+func TestProcessEEsWithError(t *testing.T) {
+
+	trend := &Trend{
+		ID:     "ID",
+		Tenant: "cgrates.org",
+	}
+
+	mockConnMgr := &ConnManager{}
+	trendService := &TrendS{
+		cgrcfg:  &config.CGRConfig{},
+		connMgr: mockConnMgr,
+	}
+
+	err := trendService.processEEs(trend)
+	if err != nil || errors.Is(err, utils.ErrPartiallyExecuted) {
+		t.Errorf("Expected error %v, got %v", utils.ErrPartiallyExecuted, err)
+	}
+
+}
+
+func TestV1ScheduleQueriesInvalidTrendID(t *testing.T) {
+
+	ctx := context.Background()
+
+	tS := &TrendS{
+		crn:       cron.New(),
+		crnTQs:    make(map[string]map[string]cron.EntryID),
+		crnTQsMux: &sync.RWMutex{},
+	}
+
+	args := &utils.ArgScheduleTrendQueries{
+		TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "ID",
+			},
+			APIOpts: make(map[string]any),
+		},
+		TrendIDs: []string{"invalidID"},
+	}
+
+	var scheduled int
+	err := tS.V1ScheduleQueries(ctx, args, &scheduled)
+
+	if err == nil {
+		t.Errorf("expected an error but got none")
+	}
+
+	if scheduled != 0 {
+		t.Errorf("expected scheduled to be 0 but got %d", scheduled)
+	}
+}
+
+func TestProcessThresholds_OptsInitialization(t *testing.T) {
+	tS := &TrendS{}
+
+	trnd := &Trend{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+	}
+
+	err := tS.processThresholds(trnd)
+
+	if err != nil {
+		t.Errorf("expected no error but got: %v", err)
 	}
 
 }
