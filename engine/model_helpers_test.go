@@ -6063,3 +6063,164 @@ func TestRankingProfileToAPI(t *testing.T) {
 		t.Errorf("Expected QueryInterval %s, got %s", expected.QueryInterval, result.QueryInterval)
 	}
 }
+
+func TestAPItoModelTPRanking(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    *utils.TPRankingProfile
+		expected RankingsMdls
+	}{
+		{
+			name:     "Nil Input",
+			input:    nil,
+			expected: RankingsMdls{},
+		},
+		{
+			name: "No StatIDs",
+			input: &utils.TPRankingProfile{
+				TPid:              "tpid1",
+				Tenant:            "cgrates.org",
+				ID:                "id1",
+				QueryInterval:     "1h",
+				Sorting:           "asc",
+				ThresholdIDs:      []string{"threshold1", "threshold2"},
+				MetricIDs:         []string{"metric1", "metric2"},
+				SortingParameters: []string{"param1", "param2"},
+				StatIDs:           []string{},
+			},
+			expected: RankingsMdls{
+				&RankingsMdl{
+					Tpid:              "tpid1",
+					Tenant:            "cgrates.org",
+					ID:                "id1",
+					QueryInterval:     "1h",
+					Sorting:           "asc",
+					StatIDs:           "",
+					ThresholdIDs:      "threshold1" + utils.InfieldSep + "threshold2",
+					MetricIDs:         "metric1" + utils.InfieldSep + "metric2",
+					SortingParameters: "param1" + utils.InfieldSep + "param2",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := APItoModelTPRanking(tt.input)
+
+			if len(actual) != len(tt.expected) {
+				t.Errorf("Expected %d models, got %d", len(tt.expected), len(actual))
+				return
+			}
+
+			for i := range tt.expected {
+				if *tt.expected[i] != *actual[i] {
+					t.Errorf("Expected model %+v, got %+v", *tt.expected[i], *actual[i])
+				}
+			}
+		})
+	}
+}
+
+func TestAPItoModelTrends(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    *utils.TPTrendsProfile
+		expected TrendsMdls
+	}{
+		{
+			name:     "Nil Input",
+			input:    nil,
+			expected: TrendsMdls{},
+		},
+		{
+			name: "Valid Input",
+			input: &utils.TPTrendsProfile{
+				TPid:            "tpid1",
+				Tenant:          "cgrates.org",
+				ID:              "id1",
+				Schedule:        "daily",
+				QueueLength:     10,
+				StatID:          "stat1",
+				TTL:             "3600",
+				MinItems:        5,
+				CorrelationType: "type1",
+				Tolerance:       0.1,
+				Stored:          true,
+				ThresholdIDs:    []string{"threshold1", "threshold2"},
+				Metrics:         []string{"metric1", "metric2"},
+			},
+			expected: TrendsMdls{
+				&TrendsMdl{
+					Tpid:            "tpid1",
+					Tenant:          "cgrates.org",
+					ID:              "id1",
+					Schedule:        "daily",
+					QueueLength:     10,
+					StatID:          "stat1",
+					TTL:             "3600",
+					MinItems:        5,
+					CorrelationType: "type1",
+					Tolerance:       0.1,
+					Stored:          true,
+					ThresholdIDs:    "threshold1" + utils.InfieldSep + "threshold2",
+					Metrics:         "metric1" + utils.InfieldSep + "metric2",
+					CreatedAt:       time.Time{},
+				},
+			},
+		},
+		{
+			name: "Empty ThresholdIDs and Metrics",
+			input: &utils.TPTrendsProfile{
+				TPid:            "tpid2",
+				Tenant:          "tenant2",
+				ID:              "id2",
+				Schedule:        "weekly",
+				QueueLength:     15,
+				StatID:          "stat2",
+				TTL:             "7200",
+				MinItems:        10,
+				CorrelationType: "type2",
+				Tolerance:       0.2,
+				Stored:          false,
+				ThresholdIDs:    []string{},
+				Metrics:         []string{},
+			},
+			expected: TrendsMdls{
+				&TrendsMdl{
+					Tpid:            "tpid2",
+					Tenant:          "tenant2",
+					ID:              "id2",
+					Schedule:        "weekly",
+					QueueLength:     15,
+					StatID:          "stat2",
+					TTL:             "7200",
+					MinItems:        10,
+					CorrelationType: "type2",
+					Tolerance:       0.2,
+					Stored:          false,
+					ThresholdIDs:    "",
+					Metrics:         "",
+					CreatedAt:       time.Time{},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := APItoModelTrends(tt.input)
+
+			if len(actual) != len(tt.expected) {
+				t.Errorf("Expected %d models, got %d", len(tt.expected), len(actual))
+				return
+			}
+
+			for i := range tt.expected {
+				if *tt.expected[i] != *actual[i] {
+					t.Errorf("Expected model %+v, got %+v", *tt.expected[i], *actual[i])
+				}
+			}
+		})
+	}
+}
