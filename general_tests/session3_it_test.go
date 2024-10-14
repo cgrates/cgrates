@@ -83,6 +83,7 @@ func TestSes3ItSessions(t *testing.T) {
 }
 
 func testSes3ItLoadConfig(t *testing.T) {
+	var err error
 	ses3CfgPath = path.Join(*utils.DataDir, "conf", "samples", ses3CfgDir)
 	if ses3Cfg, err = config.NewCGRConfigFromPath(ses3CfgPath); err != nil {
 		t.Error(err)

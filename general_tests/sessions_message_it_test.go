@@ -73,6 +73,7 @@ func TestSesMFDIt(t *testing.T) {
 }
 
 func testSesMFDItLoadConfig(t *testing.T) {
+	var err error
 	sesMFDCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesMFDCfgDir)
 	if sesMFDCfg, err = config.NewCGRConfigFromPath(sesMFDCfgPath); err != nil {
 		t.Error(err)

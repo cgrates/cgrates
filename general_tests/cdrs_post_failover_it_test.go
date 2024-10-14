@@ -110,6 +110,7 @@ func testCDRsPostFailoverStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testCDRsPostFailoverRpcConn(t *testing.T) {
+	var err error
 	cdrsPostFailRpc, err = newRPCClient(cdrsPostFailCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
@@ -213,7 +214,7 @@ func testCDRsPostFailoverToFile(t *testing.T) {
 }
 
 func testCDRsPostFailoverKillEngine(t *testing.T) {
-	if err = os.RemoveAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir); err != nil {
+	if err := os.RemoveAll(cdrsPostFailCfg.GeneralCfg().FailedPostsDir); err != nil {
 		t.Error(err)
 	}
 	if err := engine.KillEngine(*utils.WaitRater); err != nil {

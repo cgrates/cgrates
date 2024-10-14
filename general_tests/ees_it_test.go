@@ -225,6 +225,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 			t.Error(err)
 		}
 
+		var err error
 		var requestTypeExport1 any
 		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
@@ -254,7 +255,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 
 	t.Run("CheckExporterIDs", func(t *testing.T) {
 		var exporterID1 any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -267,7 +268,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 		}
 
 		var exporterID2 any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -282,7 +283,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 
 	t.Run("CheckAttributesAlteredFields", func(t *testing.T) {
 		var changedValue any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -294,7 +295,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 			t.Errorf("expected %v, received %v", "11", changedValue)
 		}
 		var balanceID any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -306,7 +307,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 			t.Errorf("expected %v, received %v", "BALANCE_TEST", balanceID)
 		}
 		var balanceType any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -318,7 +319,7 @@ func TestEEsExportEventChanges(t *testing.T) {
 			t.Errorf("expected %v, received %v", "BALANCE_TEST", balanceType)
 		}
 		var balanceFound any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,

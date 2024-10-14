@@ -94,6 +94,7 @@ func TestSesMRSItMoney(t *testing.T) {
 
 // test for 0 balance with sesMRSsion terminate with 1s usage
 func testSesMRSItLoadConfig(t *testing.T) {
+	var err error
 	sesMRSCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesMRSCfgDIR)
 	if sesMRSCfg, err = config.NewCGRConfigFromPath(sesMRSCfgPath); err != nil {
 		t.Error(err)

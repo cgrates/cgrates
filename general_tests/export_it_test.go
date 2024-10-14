@@ -86,6 +86,7 @@ func TestExport(t *testing.T) {
 }
 
 func testExpLoadConfig(t *testing.T) {
+	var err error
 	expCfgPath = path.Join(*utils.DataDir, "conf", "samples", expCfgDir)
 	if expCfg, err = config.NewCGRConfigFromPath(expCfgPath); err != nil {
 		t.Error(err)

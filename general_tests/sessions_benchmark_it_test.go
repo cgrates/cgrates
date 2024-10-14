@@ -75,6 +75,7 @@ func TestSesPIt(t *testing.T) {
 }
 
 func testSesPItLoadConfig(t *testing.T) {
+	var err error
 	sesPCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesPCfgDir)
 	if sesPCfg, err = config.NewCGRConfigFromPath(sesPCfgPath); err != nil {
 		t.Error(err)

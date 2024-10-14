@@ -393,6 +393,7 @@ func testCDRsExpStopEngine(t *testing.T) {
 }
 
 func testCDRsExpStopHTTPServer(t *testing.T) {
+	var err error
 	if err = cdrsExpHTTPServer.Shutdown(context.Background()); err != nil {
 		t.Fatal(err)
 	}
