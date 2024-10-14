@@ -107,11 +107,7 @@ func testAccWThdStartEngine(t *testing.T) {
 }
 
 func testAccWThdRpcConn(t *testing.T) {
-	var err error
-	accWThdRpc, err = engine.NewRPCClient(accWThdCfg.ListenCfg()) // We connect over JSON so we can troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	accWThdRpc = engine.NewRPCClient(t, accWThdCfg.ListenCfg())
 }
 
 func testAccWThdSetThresholdProfile(t *testing.T) {

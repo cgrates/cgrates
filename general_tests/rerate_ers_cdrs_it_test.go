@@ -121,11 +121,7 @@ func testRerateCDRsERsStartEngine(t *testing.T) {
 }
 
 func testRerateCDRsERsRPCConn(t *testing.T) {
-	var err error
-	rrErsCdrsRPC, err = engine.NewRPCClient(rrErsCdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	rrErsCdrsRPC = engine.NewRPCClient(t, rrErsCdrsCfg.ListenCfg())
 }
 
 func testRerateCDRsERsLoadTP(t *testing.T) {

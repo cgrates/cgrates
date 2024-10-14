@@ -108,10 +108,7 @@ func testTutStopEngine(t *testing.T) {
 }
 
 func testTutRpcConn(t *testing.T) {
-	var err error
-	if tutRpc, err = engine.NewRPCClient(tutCfg.ListenCfg()); err != nil {
-		t.Fatal("could not connect to rater: ", err.Error())
-	}
+	tutRpc = engine.NewRPCClient(t, tutCfg.ListenCfg())
 }
 
 func testTutFromFolder(t *testing.T) {

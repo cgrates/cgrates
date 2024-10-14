@@ -20,7 +20,6 @@ package engine
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -349,15 +348,24 @@ func LoadAllDataDBToCache(dm *DataManager) (err error) {
 	return
 }
 
-func NewRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
+// NewRPCClient creates and returns a new RPC client for cgr-engine.
+func NewRPCClient(t *testing.T, cfg *config.ListenCfg) *birpc.Client {
+	t.Helper()
+	var err error
+	var client *birpc.Client
 	switch *utils.Encoding {
 	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+		client, err = jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
+		client, err = birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
+		t.Fatalf("unsupported RPC encoding: %s", *utils.Encoding)
 	}
+	if err != nil {
+		t.Fatalf("unable to connect to cgr-engine: %v", err)
+	}
+	return client
+
 }
 
 // TestEngine holds the setup parameters and configurations
@@ -407,11 +415,7 @@ func (ng TestEngine) Run(t *testing.T) (*birpc.Client, *config.CGRConfig) {
 	}
 
 	startEngine(t, cfg, ng.LogBuffer)
-
-	client, err := NewRPCClient(cfg.ListenCfg())
-	if err != nil {
-		t.Fatalf("could not connect to cgr-engine: %v", err)
-	}
+	client := NewRPCClient(t, cfg.ListenCfg())
 
 	var customTpPath string
 	if len(ng.TpFiles) != 0 {

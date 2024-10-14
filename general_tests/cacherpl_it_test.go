@@ -174,19 +174,9 @@ func testCacheRplStartEngine(t *testing.T) {
 }
 
 func testCacheRplRpcConn(t *testing.T) {
-	var err error
-	dspEngine1RPC, err = engine.NewRPCClient(dspEngine1Cfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-	dspEngine2RPC, err = engine.NewRPCClient(dspEngine2Cfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-	engine1RPC, err = engine.NewRPCClient(engine1Cfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
+	dspEngine1RPC = engine.NewRPCClient(t, dspEngine1Cfg.ListenCfg())
+	dspEngine2RPC = engine.NewRPCClient(t, dspEngine2Cfg.ListenCfg())
+	engine1RPC = engine.NewRPCClient(t, engine1Cfg.ListenCfg())
 }
 
 func testCacheRplAddData(t *testing.T) {

@@ -145,13 +145,8 @@ func testSessionSRplStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessionSRplApierRpcConn(t *testing.T) {
-	var err error
-	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
-		t.Fatal(err)
-	}
-	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
-		t.Fatal(err)
-	}
+	smgRplcMstrRPC = engine.NewRPCClient(t, smgRplcMasterCfg.ListenCfg())
+	smgRplcSlvRPC = engine.NewRPCClient(t, smgRplcSlaveCfg.ListenCfg())
 }
 
 // Load the tariff plan, creating accounts and their balances

@@ -100,11 +100,7 @@ func testSesTntChngCdrsStartEngine(t *testing.T) {
 }
 
 func testSesTntChngCdrsRPCConn(t *testing.T) {
-	var err error
-	sesTntChngRPC, err = engine.NewRPCClient(sesTntChngCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
+	sesTntChngRPC = engine.NewRPCClient(t, sesTntChngCfg.ListenCfg())
 }
 
 func testSesTntChngCdrsSetChargerProfile1(t *testing.T) {

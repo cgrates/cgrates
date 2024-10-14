@@ -125,11 +125,7 @@ func testV1RtsCaseStartEngine(t *testing.T) {
 }
 
 func testV1RtsCaseRpcConn(t *testing.T) {
-	var err error
-	rtsCaseSv1Rpc, err = engine.NewRPCClient(rtsCaseSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	rtsCaseSv1Rpc = engine.NewRPCClient(t, rtsCaseSv1Cfg.ListenCfg())
 }
 
 func testV1RtsCaseFromFolder(t *testing.T) {

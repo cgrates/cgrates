@@ -101,11 +101,7 @@ func testSesItStartEngine(t *testing.T) {
 }
 
 func testSesItRPCConn(t *testing.T) {
-	var err error
-	sesRPC, err = engine.NewRPCClient(sesCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
+	sesRPC = engine.NewRPCClient(t, sesCfg.ListenCfg())
 }
 
 func testSesItLoadFromFolder(t *testing.T) {

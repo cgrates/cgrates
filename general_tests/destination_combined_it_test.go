@@ -92,11 +92,7 @@ func testDestinationStartEngine(t *testing.T) {
 }
 
 func testDestinationRpcConn(t *testing.T) {
-	var err error
-	tutorialRpc, err = engine.NewRPCClient(tutorialCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	tutorialRpc = engine.NewRPCClient(t, tutorialCfg.ListenCfg())
 }
 
 func testDestinationFromFolder(t *testing.T) {

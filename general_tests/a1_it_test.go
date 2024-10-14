@@ -104,11 +104,7 @@ func testA1itStartEngine(t *testing.T) {
 }
 
 func testA1itRPCConn(t *testing.T) {
-	var err error
-	a1rpc, err = engine.NewRPCClient(a1Cfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
+	a1rpc = engine.NewRPCClient(t, a1Cfg.ListenCfg())
 }
 
 func testA1itLoadTPFromFolder(t *testing.T) {

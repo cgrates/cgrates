@@ -140,11 +140,7 @@ func testSharedClientLockStartEngine(t *testing.T) {
 }
 
 func testSharedClientLockRpcConn(t *testing.T) {
-	var err error
-	clntLockRPC, err = engine.NewRPCClient(clntLockCfg.ListenCfg())
-	if err != nil {
-		t.Fatal("Could not connect to engine: ", err.Error())
-	}
+	clntLockRPC = engine.NewRPCClient(t, clntLockCfg.ListenCfg())
 }
 
 func testSharedClientLockSetProfiles(t *testing.T) {
