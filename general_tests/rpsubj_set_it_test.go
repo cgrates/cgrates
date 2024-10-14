@@ -85,7 +85,7 @@ RP_DATA,DR_DATA,*any,10`,
 cgrates.org,data,RPF_DATA,2022-01-14T00:00:00Z,RP_DATA,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -213,7 +213,7 @@ RP_DATA,DR_DATA,*any,10`,
 cgrates.org,data,1001,2022-01-14T00:00:00Z,RP_DATA,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}

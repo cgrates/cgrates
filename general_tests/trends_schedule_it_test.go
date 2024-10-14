@@ -113,7 +113,7 @@ cgrates.org,Threshold1,*string:~*req.Metrics.*acd.ID:*acd,2024-07-29T15:00:00Z,-
 cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-1,10,1s,false,10,,true
 `}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}

@@ -88,7 +88,7 @@ func TestStatsEEsExport(t *testing.T) {
 
 }`
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 	}
 	client, _ := ng.Run(t)

@@ -107,7 +107,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -351,7 +351,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_SMS,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -867,7 +867,7 @@ ACT_TOPUP_MONETARY,*cdrlog,"{""BalanceID"":""~*acnt.BalanceID""}",,,,,,,,,,,,,,
 ACT_TOPUP_SMS,*topup_reset,,,balance_sms,*sms,,*any,,,*unlimited,,1000,10,false,false,10`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -1255,7 +1255,7 @@ RP_MONETARY,DR_MONETARY,*any,10`,
 		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}

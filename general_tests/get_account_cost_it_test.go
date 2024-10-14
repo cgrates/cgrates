@@ -35,7 +35,7 @@ import (
 var aSummaryBefore *engine.AccountSummary
 
 func TestGetAccountCost(t *testing.T) {
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "rerate_cdrs_mysql"),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "reratecdrs"),
 	}

@@ -180,7 +180,7 @@ func TestCdrLogEes(t *testing.T) {
 
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    map[string]string{},
 	}

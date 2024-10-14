@@ -80,7 +80,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,sms,subj_test,,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}

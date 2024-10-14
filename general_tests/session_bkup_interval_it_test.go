@@ -137,7 +137,7 @@ RP_ANY,DR_ANY_20CNT,*any,10`,
 cgrates.org,call,*any,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	loadCSVs(t, sBkupRPC, "", t.TempDir(), tpFiles)
+	engine.LoadCSVs(t, sBkupRPC, "", t.TempDir(), tpFiles)
 
 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 }

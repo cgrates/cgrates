@@ -126,7 +126,7 @@ func testRpcdrsRpcConn(t *testing.T) {
 }
 
 func testRpcdrsLoadTP(t *testing.T) {
-	loadCSVs(t, rpcdrsRpc, path.Join(*utils.DataDir, "tariffplans", "reratecdrs"), "", nil)
+	engine.LoadCSVs(t, rpcdrsRpc, path.Join(*utils.DataDir, "tariffplans", "reratecdrs"), "", nil)
 }
 
 func testRpcdrsSetBalance(t *testing.T) {
@@ -375,7 +375,7 @@ cgrates.org,STAT_AGG,,2014-07-29T15:00:00Z,0,-1,0,*tcd;*tcc;*sum#1,,false,false,
 		t.Fatalf("could not connect to cgr-engine: %v", err)
 	}
 
-	loadCSVs(t, rpcdrsRpc, "", t.TempDir(), tpFiles)
+	engine.LoadCSVs(t, rpcdrsRpc, "", t.TempDir(), tpFiles)
 
 }
 

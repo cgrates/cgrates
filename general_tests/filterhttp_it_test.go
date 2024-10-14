@@ -165,7 +165,7 @@ cgrates.org,ATTR_ACNT_1001,*any,FLTR_HTTP,,,*req.OfficeGroup,*http#[` + srv.URL 
 cgrates.org,ATTR_DEST,*any,FLTR_DST_1002;FLTR_DEST,,,*req.Supplier,*constant,Supplier1,,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}

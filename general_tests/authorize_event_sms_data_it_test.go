@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -44,7 +45,7 @@ func TestSSv1AuthorizeEventSMS(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
 	}

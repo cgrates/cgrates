@@ -30,6 +30,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -112,7 +113,7 @@ func TestServiceToggle(t *testing.T) {
 
 	// Start a cgr-engine instance that has all the services
 	// from the slice above enabled.
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: fmt.Sprintf(cfgJSON, "true"),
 	}
 	client, cfg := ng.Run(t)
@@ -121,7 +122,7 @@ func TestServiceToggle(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 	for _, service := range services {
-		waitForService(t, ctx, client, service)
+		engine.WaitForService(t, ctx, client, service)
 	}
 
 	// Toggle the state of all services via config reload.

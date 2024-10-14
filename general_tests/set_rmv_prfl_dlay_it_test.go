@@ -47,7 +47,7 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "tutorial"),
 	}

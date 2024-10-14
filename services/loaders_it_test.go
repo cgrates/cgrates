@@ -47,7 +47,11 @@ func testCreateDirs(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
-	if err := os.WriteFile(path.Join("/tmp/In", utils.AttributesCsv), []byte(engine.AttributesCSVContent), 0644); err != nil {
+	if err := os.WriteFile(path.Join("/tmp/In", utils.AttributesCsv), []byte(`
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
+cgrates.org,ALS1,con1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true,20
+cgrates.org,ALS1,con2;con3,,,,*req.Field2,*variable,Sub2,true,20
+`), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
 }

@@ -111,7 +111,7 @@ TRIGGER_1001,,*min_balance,0,false,0,,,main,*data,,,,,,,,,,ACT_USAGE_1GB,
 TRIGGER_1001,,*balance_expired,,true,0,,,main,*data,,,,,,,,,,ACT_TOPUP_INITIAL,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
