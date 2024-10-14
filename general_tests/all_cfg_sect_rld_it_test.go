@@ -149,11 +149,7 @@ func testSectStartEngine(t *testing.T) {
 }
 
 func testSectRPCConn(t *testing.T) {
-	var err error
-	testSectRPC, err = engine.NewRPCClient(testSectCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
+	testSectRPC = engine.NewRPCClient(t, testSectCfg.ListenCfg())
 }
 
 func testSectConfigSReloadCores(t *testing.T) {

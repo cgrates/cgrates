@@ -111,10 +111,7 @@ func testSessionSBkupIntrvlStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessionSBkupIntrvlApierRpcConn(t *testing.T) {
-	var err error
-	if sBkupRPC, err = engine.NewRPCClient(sBkupCfg.ListenCfg()); err != nil {
-		t.Fatal(err)
-	}
+	sBkupRPC = engine.NewRPCClient(t, sBkupCfg.ListenCfg())
 }
 
 // Load the tariff plan, creating accounts and their balances

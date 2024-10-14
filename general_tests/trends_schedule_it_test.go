@@ -199,7 +199,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-
 
 	t.Run("CheckExportedTrends", func(t *testing.T) {
 		var eventType any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -210,7 +210,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-
 		}
 
 		var exporterID any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -320,7 +320,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-
 
 	t.Run("CheckExportedTrends", func(t *testing.T) {
 		var eventType any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -333,7 +333,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-
 		}
 
 		var trendID any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -346,7 +346,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-
 		}
 
 		var averageCallCost any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -359,7 +359,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-
 		}
 
 		var totalCallDuration any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -371,7 +371,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-
 			t.Errorf("expected %v, received %v", "1920000000000", totalCallDuration)
 		}
 		var totalCallCost any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,

@@ -342,11 +342,11 @@ func TestDispatchersLoadBalanceWithAuth(t *testing.T) {
 }`
 	)
 
-	dsp := TestEngine{ // dispatcher engine
+	dsp := engine.TestEngine{ // dispatcher engine
 		ConfigJSON: dspCfg,
 	}
 	clientDsp, _ := dsp.Run(t)
-	hostA := TestEngine{ // first worker engine (additionally loads the tps), ports 210xx
+	hostA := engine.TestEngine{ // first worker engine (additionally loads the tps), ports 210xx
 		ConfigJSON:     fmt.Sprintf(hostCfg, "A", 210),
 		PreserveDataDB: true,
 		PreserveStorDB: true,
@@ -365,13 +365,13 @@ cgrates.org,attr_auth,*auth,*string:~*req.ApiKey:12345,,,*req.APIMethods,*consta
 		},
 	}
 	_, _ = hostA.Run(t)
-	hostB := TestEngine{ // second worker engine, ports 220xx
+	hostB := engine.TestEngine{ // second worker engine, ports 220xx
 		ConfigJSON:     fmt.Sprintf(hostCfg, "B", 220),
 		PreserveDataDB: true,
 		PreserveStorDB: true,
 	}
 	_, _ = hostB.Run(t)
-	hostC := TestEngine{ // third worker engine, ports 230xx
+	hostC := engine.TestEngine{ // third worker engine, ports 230xx
 		PreserveDataDB: true,
 		PreserveStorDB: true,
 		ConfigJSON:     fmt.Sprintf(hostCfg, "C", 230),
@@ -474,12 +474,12 @@ func TestDispatchersRoutingOnAcc(t *testing.T) {
 	)
 
 	buf := &bytes.Buffer{}
-	dsp := TestEngine{ // dispatcher engine
+	dsp := engine.TestEngine{ // dispatcher engine
 		LogBuffer:  buf,
 		ConfigJSON: dspCfg,
 	}
 	clientDsp, _ := dsp.Run(t)
-	hostA := TestEngine{ // first worker engine (additionally loads the tps), ports 210xx
+	hostA := engine.TestEngine{ // first worker engine (additionally loads the tps), ports 210xx
 		ConfigJSON:     fmt.Sprintf(hostCfg, "A", 210),
 		PreserveDataDB: true,
 		PreserveStorDB: true,
@@ -505,13 +505,13 @@ act_topup,*topup_reset,,,main_balance,*sms,,,,,*unlimited,,10,,,,`,
 		},
 	}
 	_, _ = hostA.Run(t)
-	hostB := TestEngine{ // second worker engine, ports 220xx
+	hostB := engine.TestEngine{ // second worker engine, ports 220xx
 		ConfigJSON:     fmt.Sprintf(hostCfg, "B", 220),
 		PreserveDataDB: true,
 		PreserveStorDB: true,
 	}
 	_, _ = hostB.Run(t)
-	hostC := TestEngine{ // third worker engine, ports 230xx
+	hostC := engine.TestEngine{ // third worker engine, ports 230xx
 		PreserveDataDB: true,
 		PreserveStorDB: true,
 		ConfigJSON:     fmt.Sprintf(hostCfg, "C", 230),

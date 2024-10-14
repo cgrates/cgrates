@@ -48,12 +48,6 @@ func testCleanDirectory(t *testing.T) {
 	}
 }
 
-func testStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestGetOneData(t *testing.T) {
 	type testData struct {
 		Field1 string `json:"field1"`

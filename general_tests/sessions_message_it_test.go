@@ -99,11 +99,7 @@ func testSesMFDItStartEngine(t *testing.T) {
 }
 
 func testSesMFDItRPCConn(t *testing.T) {
-	var err error
-	sesMFDRPC, err = engine.NewRPCClient(sesMFDCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
+	sesMFDRPC = engine.NewRPCClient(t, sesMFDCfg.ListenCfg())
 }
 
 func testSesMFDItSetChargers(t *testing.T) {
