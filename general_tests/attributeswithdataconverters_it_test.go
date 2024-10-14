@@ -102,11 +102,7 @@ func testAttrWDcStartEngine(t *testing.T) {
 }
 
 func testAttrWDcRPCConn(t *testing.T) {
-	var err error
-	attrWDcRpc, err = engine.NewRPCClient(attrWDcCfg.ListenCfg())
-	if err != nil {
-		t.Error(err)
-	}
+	attrWDcRpc = engine.NewRPCClient(t, attrWDcCfg.ListenCfg())
 }
 
 func testAttrWDcLoadFromFolder(t *testing.T) {

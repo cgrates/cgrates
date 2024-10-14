@@ -122,11 +122,7 @@ func testFraudStartEngine(t *testing.T) {
 }
 
 func testFraudRPCConn(t *testing.T) {
-	var err error
-	fraudRPC, err = engine.NewRPCClient(fraudCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	fraudRPC = engine.NewRPCClient(t, fraudCfg.ListenCfg())
 }
 
 func testFraudLoadTarriffPlans(t *testing.T) {

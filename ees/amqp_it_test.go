@@ -97,6 +97,12 @@ func testAMQPStartEngine(t *testing.T) {
 	}
 }
 
+func testStopCgrEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+}
+
 func testAMQPRPCConn(t *testing.T) {
 	var err error
 	amqpRPC, err = newRPCClient(amqpCfg.ListenCfg())

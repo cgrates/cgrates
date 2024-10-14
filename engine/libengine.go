@@ -296,3 +296,46 @@ var pingM = &birpc.MethodType{
 func RegisterPingMethod(methodMap map[string]*birpc.MethodType) {
 	methodMap["Ping"] = pingM
 }
+
+func LoadAllDataDBToCache(dm *DataManager) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	for key, ids := range map[string][]string{
+		utils.DestinationPrefix:        {utils.MetaAny},
+		utils.ReverseDestinationPrefix: {utils.MetaAny},
+		utils.RatingPlanPrefix:         {utils.MetaAny},
+		utils.RatingProfilePrefix:      {utils.MetaAny},
+		utils.ActionPrefix:             {utils.MetaAny},
+		utils.ActionPlanPrefix:         {utils.MetaAny},
+		utils.AccountActionPlansPrefix: {utils.MetaAny},
+		utils.ActionTriggerPrefix:      {utils.MetaAny},
+		utils.SharedGroupPrefix:        {utils.MetaAny},
+		utils.ResourceProfilesPrefix:   {utils.MetaAny},
+		utils.ResourcesPrefix:          {utils.MetaAny},
+		utils.StatQueuePrefix:          {utils.MetaAny},
+		utils.StatQueueProfilePrefix:   {utils.MetaAny},
+		utils.ThresholdPrefix:          {utils.MetaAny},
+		utils.ThresholdProfilePrefix:   {utils.MetaAny},
+		utils.FilterPrefix:             {utils.MetaAny},
+		utils.RouteProfilePrefix:       {utils.MetaAny},
+		utils.AttributeProfilePrefix:   {utils.MetaAny},
+		utils.ChargerProfilePrefix:     {utils.MetaAny},
+		utils.DispatcherProfilePrefix:  {utils.MetaAny},
+		utils.DispatcherHostPrefix:     {utils.MetaAny},
+		utils.TimingsPrefix:            {utils.MetaAny},
+		utils.AttributeFilterIndexes:   {utils.MetaAny},
+		utils.ResourceFilterIndexes:    {utils.MetaAny},
+		utils.StatFilterIndexes:        {utils.MetaAny},
+		utils.ThresholdFilterIndexes:   {utils.MetaAny},
+		utils.RouteFilterIndexes:       {utils.MetaAny},
+		utils.ChargerFilterIndexes:     {utils.MetaAny},
+		utils.DispatcherFilterIndexes:  {utils.MetaAny},
+		utils.FilterIndexPrfx:          {utils.MetaAny},
+	} {
+		if err = dm.CacheDataFromDB(key, ids, false); err != nil {
+			return
+		}
+	}
+	return
+}
