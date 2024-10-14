@@ -857,6 +857,7 @@ const CGRATES_CFG_JSON = `
 "trends":{			// TrendS config
 	"enabled": false,	// starts TrendS service: <true|false>.
 	"store_interval": "",
+	"store_uncompressed_limit": 0,	// used to compress metrics
 	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"scheduled_ids": {},
 	"thresholds_conns": [],	

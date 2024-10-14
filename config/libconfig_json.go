@@ -678,13 +678,14 @@ type StatServJsonCfg struct {
 }
 
 type TrendsJsonCfg struct {
-	Enabled          *bool
-	Stats_conns      *[]string
-	Thresholds_conns *[]string
-	Scheduled_ids    map[string][]string
-	Store_interval   *string
-	Ees_conns        *[]string
-	Ees_exporter_ids *[]string
+	Enabled                  *bool
+	Stats_conns              *[]string
+	Thresholds_conns         *[]string
+	Scheduled_ids            map[string][]string
+	Store_interval           *string
+	Store_uncompressed_limit *int
+	Ees_conns                *[]string
+	Ees_exporter_ids         *[]string
 }
 
 type RankingsJsonCfg struct {

@@ -26,13 +26,14 @@ import (
 )
 
 type TrendSCfg struct {
-	Enabled         bool
-	StatSConns      []string
-	ThresholdSConns []string
-	ScheduledIDs    map[string][]string
-	StoreInterval   time.Duration
-	EEsConns        []string
-	EEsExporterIDs  []string
+	Enabled                bool
+	StatSConns             []string
+	ThresholdSConns        []string
+	ScheduledIDs           map[string][]string
+	StoreInterval          time.Duration
+	StoreUncompressedLimit int
+	EEsConns               []string
+	EEsExporterIDs         []string
 }
 
 func (sa *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendsJsonCfg) (err error) {
@@ -68,6 +69,9 @@ func (sa *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendsJsonCfg) (err error) {
 			return err
 		}
 	}
+	if jsnCfg.Store_uncompressed_limit != nil {
+		sa.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
+	}
 	if jsnCfg.Ees_conns != nil {
 		sa.EEsConns = make([]string, len(*jsnCfg.Ees_conns))
 		for idx, connID := range *jsnCfg.Ees_conns {
@@ -85,8 +89,9 @@ func (sa *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendsJsonCfg) (err error) {
 
 func (sa *TrendSCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:       sa.Enabled,
-		utils.StoreIntervalCfg: utils.EmptyString,
+		utils.EnabledCfg:                sa.Enabled,
+		utils.StoreIntervalCfg:          utils.EmptyString,
+		utils.StoreUncompressedLimitCfg: sa.StoreUncompressedLimit,
 	}
 	if sa.StatSConns != nil {
 		statSConns := make([]string, len(sa.StatSConns))
@@ -129,8 +134,9 @@ func (sa *TrendSCfg) AsMapInterface() (initialMP map[string]any) {
 
 func (sa *TrendSCfg) Clone() (cln *TrendSCfg) {
 	cln = &TrendSCfg{
-		Enabled:       sa.Enabled,
-		StoreInterval: sa.StoreInterval,
+		Enabled:                sa.Enabled,
+		StoreInterval:          sa.StoreInterval,
+		StoreUncompressedLimit: sa.StoreUncompressedLimit,
 	}
 	if sa.StatSConns != nil {
 		cln.StatSConns = make([]string, len(sa.StatSConns))

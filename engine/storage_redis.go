@@ -963,7 +963,7 @@ func (rs *RedisStorage) RemTrendProfileDrv(tenant string, id string) (err error)
 	return rs.Cmd(nil, redis_DEL, utils.TrendsProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetTrendDrv(tenant, id string) (r *Trend, err error) {
+func (rs *RedisStorage) GetTrendDrv(tenant, id string) (tr *Trend, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redis_GET, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -971,8 +971,13 @@ func (rs *RedisStorage) GetTrendDrv(tenant, id string) (r *Trend, err error) {
 		err = utils.ErrNotFound
 		return
 	}
-	err = rs.ms.Unmarshal(values, &r)
-	return
+	if err = rs.ms.Unmarshal(values, &tr); err != nil {
+		return
+	}
+	if err = tr.uncompress(rs.ms); err != nil {
+		return nil, err
+	}
+	return tr, nil
 }
 
 func (rs *RedisStorage) SetTrendDrv(r *Trend) (err error) {
