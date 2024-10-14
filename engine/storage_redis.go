@@ -971,13 +971,8 @@ func (rs *RedisStorage) GetTrendDrv(tenant, id string) (tr *Trend, err error) {
 		err = utils.ErrNotFound
 		return
 	}
-	if err = rs.ms.Unmarshal(values, &tr); err != nil {
-		return
-	}
-	if err = tr.uncompress(rs.ms); err != nil {
-		return nil, err
-	}
-	return tr, nil
+	err = rs.ms.Unmarshal(values, &tr)
+	return tr, err
 }
 
 func (rs *RedisStorage) SetTrendDrv(r *Trend) (err error) {

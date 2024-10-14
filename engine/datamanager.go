@@ -1323,15 +1323,8 @@ func (dm *DataManager) GetTrend(tenant, id string,
 				if err != utils.ErrNotFound { // RPC error
 					return
 				}
-			} else {
-				if dm.dataDB.GetStorageType() != utils.MetaInternal {
-					if err = tr.compress(dm.ms); err != nil {
-						return
-					}
-				}
-				if err = dm.dataDB.SetTrendDrv(tr); err != nil {
-					return
-				}
+			} else if err = dm.dataDB.SetTrendDrv(tr); err != nil {
+				return
 			}
 		}
 		// have Trend or ErrNotFound
@@ -1344,6 +1337,9 @@ func (dm *DataManager) GetTrend(tenant, id string,
 			}
 			return
 		}
+	}
+	if err := tr.uncompress(dm.ms); err != nil {
+		return nil, err
 	}
 	if cacheWrite {
 		if errCh := Cache.Set(utils.CacheTrends, tntID, tr, nil,
