@@ -133,11 +133,7 @@ func testActionsStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testActionsRPCConn(t *testing.T) {
-	var err error
-	actsRPC, err = NewRPCClient(actsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	actsRPC = NewRPCClient(t, actsCfg.ListenCfg())
 }
 
 func testActionsSetSMCosts(t *testing.T) {

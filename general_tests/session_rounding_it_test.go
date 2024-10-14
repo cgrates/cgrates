@@ -179,10 +179,7 @@ func testSesRndItStartEngine(t *testing.T) {
 }
 
 func testSesRndItRPCConn(t *testing.T) {
-	var err error
-	if sesRndRPC, err = engine.NewRPCClient(sesRndCfg.ListenCfg()); err != nil {
-		t.Fatal(err)
-	}
+	sesRndRPC = engine.NewRPCClient(t, sesRndCfg.ListenCfg())
 }
 
 func testSesRndItLoadRating(t *testing.T) {

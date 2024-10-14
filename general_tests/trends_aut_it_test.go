@@ -123,11 +123,7 @@ func testtrendAuQStartEngine(t *testing.T) {
 }
 
 func testtrendAuQRpcConn(t *testing.T) {
-	var err error
-	trendAuQRpc, err = engine.NewRPCClient(trendAuQCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	trendAuQRpc = engine.NewRPCClient(t, trendAuQCfg.ListenCfg())
 }
 
 func testtrendAuQFromFolder(t *testing.T) {

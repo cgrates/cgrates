@@ -102,11 +102,7 @@ func testSesRoutesItStartEngine(t *testing.T) {
 }
 
 func testSesRoutesItRPCConn(t *testing.T) {
-	var err error
-	sesRoutesRPC, err = engine.NewRPCClient(sesRoutesCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
+	sesRoutesRPC = engine.NewRPCClient(t, sesRoutesCfg.ListenCfg())
 }
 
 func testSesRoutesItLoadFromFolder(t *testing.T) {

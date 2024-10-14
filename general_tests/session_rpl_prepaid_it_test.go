@@ -93,10 +93,7 @@ func testSeSRplPrepaidStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSeSRplPrepaidApierRpcConn(t *testing.T) {
-	var err error
-	if sesRplPrePaidRPC, err = engine.NewRPCClient(sesRplPrePaidCfg.ListenCfg()); err != nil {
-		t.Fatal(err)
-	}
+	sesRplPrePaidRPC = engine.NewRPCClient(t, sesRplPrePaidCfg.ListenCfg())
 }
 
 // Load the tariff plan, creating accounts and their balances

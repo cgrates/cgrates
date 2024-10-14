@@ -100,11 +100,7 @@ func testSesNoneReqTypeItStartEngine(t *testing.T) {
 }
 
 func testSesNoneReqTypeItRPCConn(t *testing.T) {
-	var err error
-	sesNoneReqTypeRPC, err = engine.NewRPCClient(sesNoneReqTypeCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
+	sesNoneReqTypeRPC = engine.NewRPCClient(t, sesNoneReqTypeCfg.ListenCfg())
 }
 
 func testSesNoneReqTypeItAddChargerS(t *testing.T) {

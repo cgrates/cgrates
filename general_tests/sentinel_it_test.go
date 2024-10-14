@@ -132,11 +132,7 @@ func testRedisSentinelStartEngine(t *testing.T) {
 }
 
 func testRedisSentinelRPCCon(t *testing.T) {
-	var err error
-	sentinelRPC, err = engine.NewRPCClient(sentinelConfig.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	sentinelRPC = engine.NewRPCClient(t, sentinelConfig.ListenCfg())
 }
 
 func testRedisSentinelSetGetAttribute(t *testing.T) {

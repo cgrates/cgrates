@@ -112,11 +112,7 @@ func testLoaderNoContextStartEngine(t *testing.T) {
 }
 
 func testLoaderNoContextRpcConn(t *testing.T) {
-	var err error
-	ldrCtxRPC, err = engine.NewRPCClient(ldrCtxCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	ldrCtxRPC = engine.NewRPCClient(t, ldrCtxCfg.ListenCfg())
 }
 
 func testLoaderNoContextWriteCSVs(t *testing.T) {

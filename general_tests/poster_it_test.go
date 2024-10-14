@@ -115,11 +115,7 @@ func testPosterITStartEngine(t *testing.T) {
 }
 
 func testPosterITRpcConn(t *testing.T) {
-	var err error
-	pstrRpc, err = engine.NewRPCClient(pstrCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	pstrRpc = engine.NewRPCClient(t, pstrCfg.ListenCfg())
 }
 
 func testPosterReadFolder(format string) (expEv *ees.ExportEvents, err error) {

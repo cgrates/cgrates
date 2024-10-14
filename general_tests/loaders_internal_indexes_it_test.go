@@ -102,13 +102,8 @@ func testLoadersIDBIdxItStartEngines(t *testing.T) {
 }
 
 func testLoadersIDBIdxItRPCConn(t *testing.T) {
-	var err error
-	if loadersIDBIdxRPC, err = engine.NewRPCClient(loadersIDBIdxCfg.ListenCfg()); err != nil {
-		t.Fatal(err)
-	}
-	if loadersIDBIdxRPCInternal, err = engine.NewRPCClient(loadersIDBIdxCfgInternal.ListenCfg()); err != nil {
-		t.Fatal(err)
-	}
+	loadersIDBIdxRPC = engine.NewRPCClient(t, loadersIDBIdxCfg.ListenCfg())
+	loadersIDBIdxRPCInternal = engine.NewRPCClient(t, loadersIDBIdxCfgInternal.ListenCfg())
 }
 
 func testLoadersIDBIdxItLoad(t *testing.T) {

@@ -130,11 +130,7 @@ func testV2CDRsStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testV2CDRsRpcConn(t *testing.T) {
-	var err error
-	cdrsRpc, err = engine.NewRPCClient(cdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	cdrsRpc = engine.NewRPCClient(t, cdrsCfg.ListenCfg())
 }
 
 func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {

@@ -106,11 +106,7 @@ func testTutSMGStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testTutSMGRpcConn(t *testing.T) {
-	var err error
-	tutSMGRpc, err = engine.NewRPCClient(tutSMGCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	tutSMGRpc = engine.NewRPCClient(t, tutSMGCfg.ListenCfg())
 }
 
 // Load the tariff plan, creating accounts and their balances
