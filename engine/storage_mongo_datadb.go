@@ -1612,13 +1612,8 @@ func (ms *MongoStorage) GetTrendDrv(tenant, id string) (*Trend, error) {
 		}
 		return decodeErr
 	})
-	if err != nil {
-		return nil, err
-	}
-	if err = tr.uncompress(ms.ms); err != nil {
-		return nil, err
-	}
-	return tr, nil
+
+	return tr, err
 }
 
 func (ms *MongoStorage) SetTrendDrv(tr *Trend) error {

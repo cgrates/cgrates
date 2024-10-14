@@ -123,8 +123,7 @@ func (t *Trend) Clone() (tC *Trend) {
 }
 
 func (t *Trend) compress(ms Marshaler) (err error) {
-	maxRL := config.CgrConfig().TrendSCfg().StoreUncompressedLimit
-	if maxRL > 0 && maxRL > len(t.RunTimes) {
+	if config.CgrConfig().TrendSCfg().StoreUncompressedLimit > len(t.RunTimes) {
 		return
 	}
 	t.CompressedMetrics, err = ms.Marshal(t.Metrics)
@@ -137,8 +136,7 @@ func (t *Trend) compress(ms Marshaler) (err error) {
 }
 
 func (t *Trend) uncompress(ms Marshaler) (err error) {
-	maxL := config.CgrConfig().TrendSCfg().StoreUncompressedLimit
-	if t == nil || (maxL > 0 && t.RunTimes != nil) {
+	if t == nil || t.RunTimes != nil {
 		return
 	}
 	err = ms.Unmarshal(t.CompressedMetrics, &t.Metrics)
