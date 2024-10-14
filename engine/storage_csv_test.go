@@ -394,3 +394,19 @@ func TestGetTPTrends(t *testing.T) {
 		}
 	}
 }
+
+func TestNewURLCSVStorage(t *testing.T) {
+	sep := ','
+	dataPath := "http://cgrates.com/destinations.csv;http://cgrates.com/timings.csv;http://cgrates.com/invalidpath"
+
+	csvStorage := NewURLCSVStorage(sep, dataPath)
+
+	if csvStorage == nil {
+		t.Fatal("Expected csvStorage to be initialized, but got nil")
+	}
+
+	if csvStorage.generator == nil {
+		t.Fatal("Expected csvStorage.generator to be initialized, but got nil")
+	}
+
+}
