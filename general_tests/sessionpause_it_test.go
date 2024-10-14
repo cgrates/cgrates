@@ -105,7 +105,7 @@ func testSesPauseItStartEngine(t *testing.T) {
 
 func testSesPauseItRPCConn(t *testing.T) {
 	var err error
-	sesPauseRPC, err = newRPCClient(sesPauseCfg.ListenCfg())
+	sesPauseRPC, err = engine.NewRPCClient(sesPauseCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -101,7 +101,7 @@ func testSesTntChngStartEngine(t *testing.T) {
 
 func testSesTntChngRPCConn(t *testing.T) {
 	var err error
-	sesTntChngRPC, err = newRPCClient(sesTntChngCfg.ListenCfg())
+	sesTntChngRPC, err = engine.NewRPCClient(sesTntChngCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

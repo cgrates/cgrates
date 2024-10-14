@@ -100,7 +100,7 @@ func testSes4ItStartEngine(t *testing.T) {
 
 func testSes4ItRPCConn(t *testing.T) {
 	var err error
-	ses4RPC, err = newRPCClient(ses4Cfg.ListenCfg())
+	ses4RPC, err = engine.NewRPCClient(ses4Cfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

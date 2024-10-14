@@ -215,7 +215,7 @@ func testCDRsExpStartEngine(t *testing.T) {
 
 func testCDRsExpInitRPC(t *testing.T) {
 	var err error
-	if cdrsExpRPC, err = newRPCClient(cdrsExpCfg.ListenCfg()); err != nil {
+	if cdrsExpRPC, err = engine.NewRPCClient(cdrsExpCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }

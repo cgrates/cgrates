@@ -105,7 +105,7 @@ func testA1itStartEngine(t *testing.T) {
 
 func testA1itRPCConn(t *testing.T) {
 	var err error
-	a1rpc, err = newRPCClient(a1Cfg.ListenCfg())
+	a1rpc, err = engine.NewRPCClient(a1Cfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

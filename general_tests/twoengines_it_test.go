@@ -98,11 +98,11 @@ func testTwoEnginesStartEngine(t *testing.T) {
 
 func testTwoEnginesRPC(t *testing.T) {
 	var err error
-	engineOneRpc, err = newRPCClient(engineOneCfg.ListenCfg())
+	engineOneRpc, err = engine.NewRPCClient(engineOneCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
-	engineTwoRpc, err = newRPCClient(engineTwoCfg.ListenCfg())
+	engineTwoRpc, err = engine.NewRPCClient(engineTwoCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

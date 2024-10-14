@@ -112,7 +112,7 @@ func testSessionSBkupIntrvlStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSessionSBkupIntrvlApierRpcConn(t *testing.T) {
 	var err error
-	if sBkupRPC, err = newRPCClient(sBkupCfg.ListenCfg()); err != nil {
+	if sBkupRPC, err = engine.NewRPCClient(sBkupCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }

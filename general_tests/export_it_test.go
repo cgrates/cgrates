@@ -113,7 +113,7 @@ func testExpStartEngine(t *testing.T) {
 
 func testExpRPCConn(t *testing.T) {
 	var err error
-	expRpc, err = newRPCClient(expCfg.ListenCfg())
+	expRpc, err = engine.NewRPCClient(expCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

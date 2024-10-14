@@ -146,10 +146,10 @@ func testSessionSRplStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSessionSRplApierRpcConn(t *testing.T) {
 	var err error
-	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
+	if smgRplcMstrRPC, err = engine.NewRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcSlvRPC, err = newRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
+	if smgRplcSlvRPC, err = engine.NewRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }

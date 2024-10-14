@@ -121,7 +121,7 @@ func testSesMRSItStartEngine(t *testing.T) {
 
 func testSesMRSItRPCConn(t *testing.T) {
 	var err error
-	if sesMRSRPC, err = newRPCClient(sesMRSCfg.ListenCfg()); err != nil {
+	if sesMRSRPC, err = engine.NewRPCClient(sesMRSCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }

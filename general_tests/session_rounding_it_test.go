@@ -180,7 +180,7 @@ func testSesRndItStartEngine(t *testing.T) {
 
 func testSesRndItRPCConn(t *testing.T) {
 	var err error
-	if sesRndRPC, err = newRPCClient(sesRndCfg.ListenCfg()); err != nil {
+	if sesRndRPC, err = engine.NewRPCClient(sesRndCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }

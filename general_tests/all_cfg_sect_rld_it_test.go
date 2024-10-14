@@ -150,7 +150,7 @@ func testSectStartEngine(t *testing.T) {
 
 func testSectRPCConn(t *testing.T) {
 	var err error
-	testSectRPC, err = newRPCClient(testSectCfg.ListenCfg())
+	testSectRPC, err = engine.NewRPCClient(testSectCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -94,7 +94,7 @@ func testSeSRplPrepaidStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testSeSRplPrepaidApierRpcConn(t *testing.T) {
 	var err error
-	if sesRplPrePaidRPC, err = newRPCClient(sesRplPrePaidCfg.ListenCfg()); err != nil {
+	if sesRplPrePaidRPC, err = engine.NewRPCClient(sesRplPrePaidCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }
