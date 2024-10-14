@@ -1,6 +1,6 @@
 ---
 mongodb_package_name: mongodb-org
-mongodb_version: 7.0
+mongodb_version: 8.0
 mongodb_service_name: mongod
 mongodb_service_state: started
 mongodb_service_enabled: true

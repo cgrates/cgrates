@@ -20,9 +20,11 @@ package engine
 
 import (
 	"math"
+	"slices"
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -117,6 +119,42 @@ type Trend struct {
 }
 
 func (t *Trend) Clone() (tC *Trend) {
+	return
+}
+
+func (t *Trend) compress(ms Marshaler) (err error) {
+	maxRL := config.CgrConfig().TrendSCfg().StoreUncompressedLimit
+	if maxRL > 0 && maxRL > len(t.RunTimes) {
+		return
+	}
+	t.CompressedMetrics, err = ms.Marshal(t.Metrics)
+	if err != nil {
+		return
+	}
+	t.Metrics = nil
+	t.RunTimes = nil
+	return nil
+}
+
+func (t *Trend) uncompress(ms Marshaler) (err error) {
+	maxL := config.CgrConfig().TrendSCfg().StoreUncompressedLimit
+	if t == nil || (maxL > 0 && t.RunTimes != nil) {
+		return
+	}
+	err = ms.Unmarshal(t.CompressedMetrics, &t.Metrics)
+	if err != nil {
+		return
+	}
+	t.CompressedMetrics = []byte{}
+	t.RunTimes = make([]time.Time, len(t.Metrics))
+	i := 0
+	for key := range t.Metrics {
+		t.RunTimes[i] = key
+		i++
+	}
+	slices.SortFunc(t.RunTimes, func(a, b time.Time) int {
+		return a.Compare(b)
+	})
 	return
 }
 
