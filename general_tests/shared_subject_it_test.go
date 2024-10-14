@@ -121,7 +121,7 @@ cgrates.org,call,Subject1,2014-01-14T00:00:00Z,RP_Subject1,
 cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}

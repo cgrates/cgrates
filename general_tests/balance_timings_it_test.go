@@ -121,7 +121,7 @@ HALF1,*any,*any,*any,*any,00:00:00;11:59:59
 HALF2,*any,*any,*any,*any,12:00:00;23:59:59`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -370,7 +370,7 @@ RP_1001,DR_1002_20CNT,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 	}
 	client, _ := ng.Run(t)
@@ -437,7 +437,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 		}
 		// LoadTPFromFolder
 		customTpPath := t.TempDir()
-		loadCSVs(t, client, "", customTpPath, tpFiles)
+		engine.LoadCSVs(t, client, "", customTpPath, tpFiles)
 		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1001", ActionsId: "ACT_TOPUP_RST_10"}
 		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 			t.Errorf("APIerSv1ExecuteAction failed unexpectedly: %v", err)
@@ -655,7 +655,7 @@ RP_1001,DR_1002_20CNT,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 	}
 	client, _ := ng.Run(t)
@@ -722,7 +722,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 		}
 		// LoadTPFromFolder
 		customTpPath := t.TempDir()
-		loadCSVs(t, client, "", customTpPath, tpFiles)
+		engine.LoadCSVs(t, client, "", customTpPath, tpFiles)
 		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1001", ActionsId: "ACT_TOPUP_RST_10"}
 		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 			t.Errorf("APIerSv1ExecuteAction failed unexpectedly: %v", err)

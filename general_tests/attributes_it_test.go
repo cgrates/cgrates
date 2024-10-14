@@ -1116,7 +1116,7 @@ cgrates.org,FLTR_OR_DESTINATION_MATCH,*destinations,~*req.Destination,DST_20;DST
 cgrates.org,FLTR_DESTINATION_MATCH,*destinations,~*req.Destination,DST_10,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -1300,7 +1300,7 @@ cgrates.org,ATTR_ARITH,,,,,*req.3-4,*difference,3;4,,
 cgrates.org,ATTR_ARITH,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;~*req.Elem2,,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}

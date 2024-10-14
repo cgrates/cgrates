@@ -30,6 +30,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -105,7 +106,7 @@ func TestERsLineNr(t *testing.T) {
 }`, csvFd, procFd, fwvFd, procFd, xmlFd, procFd)
 
 	buf := &bytes.Buffer{}
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		LogBuffer:  buf,
 	}

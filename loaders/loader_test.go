@@ -40,6 +40,60 @@ import (
 
 var data = engine.NewInternalDB(nil, nil, false, config.CgrConfig().DataDbCfg().Items)
 
+const (
+	ResourcesCSVContent = `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
+cgrates.org,ResGroup21,*string:~*req.Account:1001,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
+cgrates.org,ResGroup22,*string:~*req.Account:dan,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
+`
+	StatsCSVContent = `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
+cgrates.org,TestStats,*string:~*req.Account:1001,2014-07-29T15:00:00Z,100,1s,2,*sum#~*req.Value;*average#~*req.Value,,true,true,20,Th1;Th2
+cgrates.org,TestStats,,,,,2,*sum#~*req.Usage,,true,true,20,
+cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum#~*req.Value;*sum#~*req.Usage;*average#~*req.Value;*average#~*req.Usage,,true,true,20,Th
+cgrates.org,TestStats2,,,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,20,
+`
+	ThresholdsCSVContent = `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
+cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,2014-07-29T15:00:00Z,12,10,1s,true,10,THRESH1,true
+`
+	FiltersCSVContent = `
+#Tenant[0],ID[1],Type[2],Element[3],Values[4],ActivationInterval[5]
+cgrates.org,FLTR_1,*string,~*req.Account,1001;1002,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*prefix,~*req.Destination,10;20,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*rsr,~*req.Subject,~^1.*1$,
+cgrates.org,FLTR_1,*rsr,~*req.Destination,1002,
+cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_NL,*destinations,~*req.Destination,DST_NL,2014-07-29T15:00:00Z
+`
+	RoutesCSVContent = `
+#Tenant[0],ID[1],FilterIDs[2],ActivationInterval[3],Sorting[4],SortingParameters[5],RouteID[6],RouteFilterIDs[7],RouteAccountIDs[8],RouteRatingPlanIDs[9],RouteResourceIDs[10],RouteStatIDs[11],RouteWeight[12],RouteBlocker[13],RouteParameters[14],Weight[15]
+cgrates.org,RoutePrf1,*string:~*req.Account:dan,2014-07-29T15:00:00Z,*lc,,route1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,10,true,param1,20
+cgrates.org,RoutePrf1,,,,,route1,,,RPL_2,ResGroup2,,10,,,
+cgrates.org,RoutePrf1,,,,,route1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
+cgrates.org,RoutePrf1,,,,,route1,,,,ResGroup4,Stat3,10,,,
+`
+	AttributesCSVContent = `
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
+cgrates.org,ALS1,con1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true,20
+cgrates.org,ALS1,con2;con3,,,,*req.Field2,*variable,Sub2,true,20
+`
+	ChargersCSVContent = `
+#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,Charger1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_SIMPLEAUTH,20
+`
+	DispatcherCSVContent = `
+#Tenant,ID,FilterIDs,ActivationInterval,Strategy,Hosts,Weight
+cgrates.org,D1,*any,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*first,,C1,*gt:~*req.Usage:10,10,false,192.168.56.203,20
+cgrates.org,D1,,,,*first,,C2,*lt:~*req.Usage:10,10,false,192.168.56.204,
+`
+	DispatcherHostCSVContent = `
+#Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],MaxReconnectInterval[6],ConnectTimeout[7],ReplyTimeout[8],Tls[9],ClientKey[10],ClientCertificate[11],CaCertificate[12]
+cgrates.org,ALL,127.0.0.1:6012,*json,1,3,5m,1m,2m,false,,,
+`
+)
+
 func TestLoaderProcessContentSingleFile(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
@@ -86,7 +140,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(AttributesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -103,7 +157,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 
 	//processContent successfully when dryrun is false
 	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr = io.NopCloser(strings.NewReader(AttributesCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -152,7 +206,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 	//cannot set AttributeProfile when dataManager is nil
 	ldr.dm = nil
 	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr = io.NopCloser(strings.NewReader(AttributesCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -286,7 +340,7 @@ func TestLoaderProcessResource(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.ResourcesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(ResourcesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -377,7 +431,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.5", utils.InfieldSep)},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
+	rdr := io.NopCloser(strings.NewReader(FiltersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -394,7 +448,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 
 	//processContent when dryrun is false
 	ldr.dryRun = false
-	rdr = io.NopCloser(strings.NewReader(engine.FiltersCSVContent))
+	rdr = io.NopCloser(strings.NewReader(FiltersCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -528,7 +582,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.10", utils.InfieldSep)},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
+	rdr := io.NopCloser(strings.NewReader(ThresholdsCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -569,7 +623,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 
 	//cannot set thresholdProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.ThresholdsCSVContent))
+	rdr = io.NopCloser(strings.NewReader(ThresholdsCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -635,7 +689,7 @@ func TestLoaderProcessStats(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.12", utils.InfieldSep)},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.StatsCSVContent))
+	rdr := io.NopCloser(strings.NewReader(StatsCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -683,7 +737,7 @@ func TestLoaderProcessStats(t *testing.T) {
 
 	//cannot set statsProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.StatsCSVContent))
+	rdr = io.NopCloser(strings.NewReader(StatsCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -807,7 +861,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.15", utils.InfieldSep)},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.RoutesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(RoutesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -887,7 +941,7 @@ func TestLoaderProcessRoutes(t *testing.T) {
 
 	//cannot set RoutesProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.RoutesCSVContent))
+	rdr = io.NopCloser(strings.NewReader(RoutesCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -934,7 +988,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 				Value: config.NewRSRParsersMustCompile("~*req.6", utils.InfieldSep)},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.ChargersCSVContent))
+	rdr := io.NopCloser(strings.NewReader(ChargersCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -970,7 +1024,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 
 	//cannot set chargerProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.ChargersCSVContent))
+	rdr = io.NopCloser(strings.NewReader(ChargersCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1074,7 +1128,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 			},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
+	rdr := io.NopCloser(strings.NewReader(DispatcherCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1134,7 +1188,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 
 	//cannot set DispatchersProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.DispatcherCSVContent))
+	rdr = io.NopCloser(strings.NewReader(DispatcherCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1251,7 +1305,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 			},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	rdr := io.NopCloser(strings.NewReader(DispatcherHostCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1295,7 +1349,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 
 	//cannot set DispatcherHostProfile when dryrun is true
 	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	rdr = io.NopCloser(strings.NewReader(DispatcherHostCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1331,7 +1385,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 				Mandatory: true},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr := io.NopCloser(strings.NewReader(AttributesCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -1399,7 +1453,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 
 	//cannot remove when dryrun is true
 	ldr.dryRun = true
-	rdr = io.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	rdr = io.NopCloser(strings.NewReader(AttributesCSVContent))
 	csvRdr = csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
@@ -2842,7 +2896,7 @@ func TestProcessContentEmptyDataBase(t *testing.T) {
 			},
 		},
 	}
-	rdr := io.NopCloser(strings.NewReader(engine.DispatcherHostCSVContent))
+	rdr := io.NopCloser(strings.NewReader(DispatcherHostCSVContent))
 	csvRdr := csv.NewReader(rdr)
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{

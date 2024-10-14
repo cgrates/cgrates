@@ -169,7 +169,7 @@ func testLoaderRPCConn(t *testing.T) {
 func testLoaderPopulateData(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/In", fileName)); err != nil {
@@ -189,8 +189,8 @@ func testLoaderVerifyOutDir(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	if outContent1, err := os.ReadFile(path.Join("/tmp/Out", utils.AttributesCsv)); err != nil {
 		t.Error(err)
-	} else if engine.AttributesCSVContent != string(outContent1) {
-		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
+	} else if AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", AttributesCSVContent, string(outContent1))
 	}
 }
 
@@ -240,7 +240,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 func testLoaderPopulateDataWithoutMoving(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/LoaderIn", fileName)); err != nil {
@@ -261,15 +261,15 @@ func testLoaderVerifyOutDirWithoutMoving(t *testing.T) {
 	// we expect that after the LoaderS process the file leave in in the input folder
 	if outContent1, err := os.ReadFile(path.Join("/tmp/LoaderIn", utils.AttributesCsv)); err != nil {
 		t.Error(err)
-	} else if engine.AttributesCSVContent != string(outContent1) {
-		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
+	} else if AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", AttributesCSVContent, string(outContent1))
 	}
 }
 
 func testLoaderPopulateDataWithSubpath(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.MkdirAll("/tmp/SubpathWithoutMove/folder1", 0755); err != nil {
@@ -293,15 +293,15 @@ func testLoaderVerifyOutDirWithSubpath(t *testing.T) {
 	// we expect that after the LoaderS process the file leave in in the input folder
 	if outContent1, err := os.ReadFile(path.Join("/tmp/SubpathWithoutMove/folder1", utils.AttributesCsv)); err != nil {
 		t.Error(err)
-	} else if engine.AttributesCSVContent != string(outContent1) {
-		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
+	} else if AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", AttributesCSVContent, string(outContent1))
 	}
 }
 
 func testLoaderPopulateDataWithSubpathWithMove(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.MkdirAll("/tmp/SubpathLoaderWithMove/folder1", 0755); err != nil {
@@ -324,15 +324,15 @@ func testLoaderVerifyOutDirWithSubpathWithMove(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	if outContent1, err := os.ReadFile(path.Join("/tmp/SubpathOut/folder1", utils.AttributesCsv)); err != nil {
 		t.Error(err)
-	} else if engine.AttributesCSVContent != string(outContent1) {
-		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
+	} else if AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", AttributesCSVContent, string(outContent1))
 	}
 }
 
 func testLoaderPopulateDataForTemplateLoader(t *testing.T) {
 	fileName := utils.AttributesCsv
 	tmpFilePath := path.Join("/tmp/", fileName)
-	if err := os.WriteFile(tmpFilePath, []byte(engine.AttributesCSVContent), os.ModePerm); err != nil {
+	if err := os.WriteFile(tmpFilePath, []byte(AttributesCSVContent), os.ModePerm); err != nil {
 		t.Fatal(err.Error())
 	}
 	if err := os.MkdirAll("/tmp/templateLoaderIn", 0755); err != nil {
@@ -355,8 +355,8 @@ func testLoaderVerifyOutDirForTemplateLoader(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	if outContent1, err := os.ReadFile(path.Join("/tmp/templateLoaderOut", utils.AttributesCsv)); err != nil {
 		t.Error(err)
-	} else if engine.AttributesCSVContent != string(outContent1) {
-		t.Errorf("Expecting: %q, received: %q", engine.AttributesCSVContent, string(outContent1))
+	} else if AttributesCSVContent != string(outContent1) {
+		t.Errorf("Expecting: %q, received: %q", AttributesCSVContent, string(outContent1))
 	}
 }
 

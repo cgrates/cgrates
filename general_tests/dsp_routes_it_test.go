@@ -123,11 +123,11 @@ func TestDispatcherRoutesNotFound(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 
-	host1 := TestEngine{ // first engine, port 4012
+	host1 := engine.TestEngine{ // first engine, port 4012
 		ConfigJSON: fmt.Sprintf(hostCfg, "host1", 40),
 	}
 	ng1Client, _ := host1.Run(t)
-	host2 := TestEngine{ // second engine, port 6012
+	host2 := engine.TestEngine{ // second engine, port 6012
 		ConfigJSON: fmt.Sprintf(hostCfg, "host2", 60),
 	}
 	ng2Client, _ := host2.Run(t)
@@ -150,13 +150,13 @@ func TestDispatcherRoutes(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 
-	setter := TestEngine{ // engine used to set dispatcher hosts/profiles (:2012)
+	setter := engine.TestEngine{ // engine used to set dispatcher hosts/profiles (:2012)
 		ConfigJSON: hostSetterCfg,
 	}
 	setterClient, _ := setter.Run(t)
 
 	// Starting only the second dispatcher engine, for now.
-	host2 := TestEngine{
+	host2 := engine.TestEngine{
 		ConfigJSON:     fmt.Sprintf(hostCfg, "host2", 60),
 		PreserveDataDB: true,
 		PreserveStorDB: true,
@@ -208,7 +208,7 @@ func TestDispatcherRoutes(t *testing.T) {
 	getCacheItem(t, ng2Client, false, utils.CacheDispatchers, "cgrates.org:dsp_test", map[string]any{})
 
 	// Start the first engine.
-	host1 := TestEngine{
+	host1 := engine.TestEngine{
 		ConfigJSON:     fmt.Sprintf(hostCfg, "host1", 40),
 		PreserveDataDB: true,
 		PreserveStorDB: true,

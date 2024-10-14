@@ -96,7 +96,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	testNg := TestEngine{
+	testNg := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -199,7 +199,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -324,7 +324,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -465,7 +465,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -568,7 +568,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -693,7 +693,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -837,7 +837,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -941,7 +941,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -1067,7 +1067,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -1209,7 +1209,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -1313,7 +1313,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -1439,7 +1439,7 @@ RP_ANY,DR_ANY,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 	}
 
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}

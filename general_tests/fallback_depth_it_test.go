@@ -112,7 +112,7 @@ cgrates.org,call,DEFAULT,,RP_DEFAULT,`,
 	}
 
 	buf := &bytes.Buffer{}
-	ng := TestEngine{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 		LogBuffer:  buf,
