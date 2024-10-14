@@ -99,7 +99,7 @@ func testV1RsStartEngine(t *testing.T) {
 
 func testV1RsRpcConn(t *testing.T) {
 	var err error
-	rlsV1Rpc, err = newRPCClient(rlsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	rlsV1Rpc, err = engine.NewRPCClient(rlsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

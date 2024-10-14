@@ -119,7 +119,7 @@ func testRpcdrsStartEngine(t *testing.T) {
 
 func testRpcdrsRpcConn(t *testing.T) {
 	var err error
-	rpcdrsRpc, err = newRPCClient(rpcdrsCfg.ListenCfg())
+	rpcdrsRpc, err = engine.NewRPCClient(rpcdrsCfg.ListenCfg())
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -370,7 +370,7 @@ cgrates.org,STAT_AGG,,2014-07-29T15:00:00Z,0,-1,0,*tcd;*tcc;*sum#1,,false,false,
 		t.Fatal(err)
 	}
 
-	rpcdrsRpc, err = newRPCClient(rpcdrsCfg.ListenCfg())
+	rpcdrsRpc, err = engine.NewRPCClient(rpcdrsCfg.ListenCfg())
 	if err != nil {
 		t.Fatalf("could not connect to cgr-engine: %v", err)
 	}

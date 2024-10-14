@@ -121,7 +121,7 @@ func testV1CDRsStartEngine(t *testing.T) {
 
 func testV1CDRsRpcConn(t *testing.T) {
 	var err error
-	pecdrsRpc, err = newRPCClient(pecdrsCfg.ListenCfg())
+	pecdrsRpc, err = engine.NewRPCClient(pecdrsCfg.ListenCfg())
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

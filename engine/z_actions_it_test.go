@@ -116,7 +116,7 @@ func testActionsitStartEngine(t *testing.T) {
 func testActionsitRpcConn(t *testing.T) {
 	var err error
 	// time.Sleep(500 * time.Millisecond)
-	actsLclRpc, err = newRPCClient(actsLclCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	actsLclRpc, err = NewRPCClient(actsLclCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

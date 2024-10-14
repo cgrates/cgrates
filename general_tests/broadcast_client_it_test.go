@@ -112,11 +112,11 @@ func testbrodcastItStartEngine(t *testing.T) {
 
 func testbrodcastItRPCConn(t *testing.T) {
 	var err error
-	brodcastRPC, err = newRPCClient(brodcastCfg.ListenCfg())
+	brodcastRPC, err = engine.NewRPCClient(brodcastCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
-	brodcastInternalRPC, err = newRPCClient(brodcastInternalCfg.ListenCfg())
+	brodcastInternalRPC, err = engine.NewRPCClient(brodcastInternalCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

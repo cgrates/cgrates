@@ -87,7 +87,7 @@ func testCdrsIntStartEngine(t *testing.T) {
 
 func testCdrsIntRpcConn(t *testing.T) {
 	var err error
-	cdrsIntRPC, err = newRPCClient(cdrsIntCfg.ListenCfg())
+	cdrsIntRPC, err = engine.NewRPCClient(cdrsIntCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

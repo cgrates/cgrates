@@ -124,7 +124,7 @@ func testSesExpItStartEngine(t *testing.T) {
 
 func testSesExpItRPCConn(t *testing.T) {
 	var err error
-	if sesExpRPC, err = newRPCClient(sesExpCfg.ListenCfg()); err != nil {
+	if sesExpRPC, err = engine.NewRPCClient(sesExpCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }

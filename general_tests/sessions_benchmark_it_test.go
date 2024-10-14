@@ -109,7 +109,7 @@ func testSesPItStartEngineWithProfiling(t *testing.T) {
 
 func testSesPItRPCConn(t *testing.T) {
 	var err error
-	sesPRPC, err = newRPCClient(sesPCfg.ListenCfg())
+	sesPRPC, err = engine.NewRPCClient(sesPCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

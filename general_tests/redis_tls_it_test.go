@@ -99,7 +99,7 @@ func testRedisTLSStartEngine(t *testing.T) {
 
 func testRedisTLSRPCCon(t *testing.T) {
 	var err error
-	redisTLSRPC, err = newRPCClient(redisTLSCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
+	redisTLSRPC, err = engine.NewRPCClient(redisTLSCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

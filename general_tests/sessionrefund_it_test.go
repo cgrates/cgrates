@@ -104,7 +104,7 @@ func testSrItStartEngine(t *testing.T) {
 
 func testSrItRPCConn(t *testing.T) {
 	var err error
-	srrpc, err = newRPCClient(srCfg.ListenCfg())
+	srrpc, err = engine.NewRPCClient(srCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

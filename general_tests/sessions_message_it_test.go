@@ -100,7 +100,7 @@ func testSesMFDItStartEngine(t *testing.T) {
 
 func testSesMFDItRPCConn(t *testing.T) {
 	var err error
-	sesMFDRPC, err = newRPCClient(sesMFDCfg.ListenCfg())
+	sesMFDRPC, err = engine.NewRPCClient(sesMFDCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

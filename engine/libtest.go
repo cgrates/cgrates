@@ -349,7 +349,7 @@ func LoadAllDataDBToCache(dm *DataManager) (err error) {
 	return
 }
 
-func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
+func NewRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	switch *utils.Encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
@@ -408,7 +408,7 @@ func (ng TestEngine) Run(t *testing.T) (*birpc.Client, *config.CGRConfig) {
 
 	startEngine(t, cfg, ng.LogBuffer)
 
-	client, err := newRPCClient(cfg.ListenCfg())
+	client, err := NewRPCClient(cfg.ListenCfg())
 	if err != nil {
 		t.Fatalf("could not connect to cgr-engine: %v", err)
 	}

@@ -103,7 +103,7 @@ func testAttrWDcStartEngine(t *testing.T) {
 
 func testAttrWDcRPCConn(t *testing.T) {
 	var err error
-	attrWDcRpc, err = newRPCClient(attrWDcCfg.ListenCfg())
+	attrWDcRpc, err = engine.NewRPCClient(attrWDcCfg.ListenCfg())
 	if err != nil {
 		t.Error(err)
 	}
