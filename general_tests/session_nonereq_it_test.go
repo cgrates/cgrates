@@ -74,6 +74,7 @@ func TestSesNoneReqTypeItSessions(t *testing.T) {
 }
 
 func testSesNoneReqTypeItLoadConfig(t *testing.T) {
+	var err error
 	sesNoneReqTypeCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesNoneReqTypeCfgDir)
 	if sesNoneReqTypeCfg, err = config.NewCGRConfigFromPath(sesNoneReqTypeCfgPath); err != nil {
 		t.Error(err)

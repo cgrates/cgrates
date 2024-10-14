@@ -74,6 +74,7 @@ func TestSesCdrsTntChange(t *testing.T) {
 }
 
 func testSesTntChngCdrsLoadConfig(t *testing.T) {
+	var err error
 	sesTntChngCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesTntChngCfgDir)
 	if sesTntChngCfg, err = config.NewCGRConfigFromPath(sesTntChngCfgPath); err != nil {
 		t.Error(err)

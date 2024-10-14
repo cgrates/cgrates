@@ -76,6 +76,7 @@ func TestSesRoutesItSessions(t *testing.T) {
 }
 
 func testSesRoutesItLoadConfig(t *testing.T) {
+	var err error
 	sesRoutesCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesRoutesCfgDir)
 	if sesRoutesCfg, err = config.NewCGRConfigFromPath(sesRoutesCfgPath); err != nil {
 		t.Error(err)

@@ -148,7 +148,7 @@ func TestStatsEEsExport(t *testing.T) {
 
 	t.Run("CheckExportedStats", func(t *testing.T) {
 		var eventType any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -161,7 +161,7 @@ func TestStatsEEsExport(t *testing.T) {
 		}
 
 		var exporterID any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -174,7 +174,7 @@ func TestStatsEEsExport(t *testing.T) {
 		}
 
 		var statID any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,
@@ -188,7 +188,7 @@ func TestStatsEEsExport(t *testing.T) {
 	})
 
 	var averageCallCost any
-	if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+	if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheUCH,
@@ -201,7 +201,7 @@ func TestStatsEEsExport(t *testing.T) {
 	}
 
 	var totalCallDuration any
-	if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+	if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheUCH,
@@ -214,7 +214,7 @@ func TestStatsEEsExport(t *testing.T) {
 	}
 
 	var sumUsage any
-	if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+	if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheUCH,
@@ -227,7 +227,7 @@ func TestStatsEEsExport(t *testing.T) {
 	}
 
 	var answerSeizureRatio any
-	if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+	if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 		Tenant: "cgrates.org",
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheUCH,

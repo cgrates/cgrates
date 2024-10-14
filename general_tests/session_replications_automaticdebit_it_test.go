@@ -110,6 +110,7 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 
 // Init Config
 func testSessionSRplInitCfg(t *testing.T) {
+	var err error
 	smgRplcMasterCfgPath = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcMasterCfgDIR)
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
@@ -132,6 +133,7 @@ func testSessionSRplResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testSessionSRplStartEngine(t *testing.T) {
+	var err error
 	if _, err = engine.StopStartEngine(smgRplcSlaveCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -143,6 +145,7 @@ func testSessionSRplStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessionSRplApierRpcConn(t *testing.T) {
+	var err error
 	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
@@ -314,6 +317,7 @@ func testSessionSRplActivateSlave(t *testing.T) {
 	}
 	var aSessions2 []*sessions.ExternalSession
 	// start the initial engine so the replication can happen normally
+	var err error
 	if masterEngine, err = engine.StartEngine(smgRplcMasterCfgPath, 10); err != nil {
 		t.Fatal(err)
 	}

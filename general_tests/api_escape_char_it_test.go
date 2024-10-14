@@ -90,8 +90,7 @@ func TestEscapeCharacters(t *testing.T) {
 		},
 	}
 	var reply string
-	err = client.Call(context.Background(), utils.APIerSv1SetAttributeProfile, attrPrf, &reply)
-	if err != nil {
+	if err := client.Call(context.Background(), utils.APIerSv1SetAttributeProfile, attrPrf, &reply); err != nil {
 		t.Fatal(err)
 	}
 

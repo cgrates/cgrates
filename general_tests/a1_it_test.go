@@ -78,6 +78,7 @@ func TestA1It(t *testing.T) {
 }
 
 func testA1itLoadConfig(t *testing.T) {
+	var err error
 	a1CfgPath = path.Join(*utils.DataDir, "conf", "samples", a1ConfigDir)
 	if a1Cfg, err = config.NewCGRConfigFromPath(a1CfgPath); err != nil {
 		t.Error(err)

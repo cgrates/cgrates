@@ -75,6 +75,7 @@ func TestSesIt(t *testing.T) {
 
 // test for 0 balance with session terminate with 1s usage
 func testSesItLoadConfig(t *testing.T) {
+	var err error
 	sesCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesCfgDIR)
 	if sesCfg, err = config.NewCGRConfigFromPath(sesCfgPath); err != nil {
 		t.Error(err)

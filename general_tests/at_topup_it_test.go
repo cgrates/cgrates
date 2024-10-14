@@ -178,7 +178,7 @@ TRIGGER_1001,,*balance_expired,,true,0,,,main,*data,,,,,,,,,,ACT_TOPUP_INITIAL,`
 		}
 
 		var count any
-		if err = client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
+		if err := client.Call(context.Background(), utils.CacheSv1GetItem, &utils.ArgsGetCacheItemWithAPIOpts{
 			Tenant: "cgrates.org",
 			ArgsGetCacheItem: utils.ArgsGetCacheItem{
 				CacheID: utils.CacheUCH,

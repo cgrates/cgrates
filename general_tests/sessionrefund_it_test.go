@@ -77,6 +77,7 @@ func TestSrIt(t *testing.T) {
 }
 
 func testSrItLoadConfig(t *testing.T) {
+	var err error
 	srCfgPath = path.Join(*utils.DataDir, "conf", "samples", srCfgDIR)
 	if srCfg, err = config.NewCGRConfigFromPath(srCfgPath); err != nil {
 		t.Error(err)

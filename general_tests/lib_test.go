@@ -28,10 +28,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	err error
-)
-
 func newRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
 	switch *utils.Encoding {
 	case utils.MetaJSON:

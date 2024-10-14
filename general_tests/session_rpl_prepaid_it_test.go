@@ -67,6 +67,7 @@ func TestSeSRplPrepaid(t *testing.T) {
 }
 
 func testSeSRplPrepaidInitCfg(t *testing.T) {
+	var err error
 	sesRplPrePaidCfgPath = path.Join(*utils.DataDir, "conf", "samples", sesRplPrePaidCfgDIR)
 	if sesRplPrePaidCfg, err = config.NewCGRConfigFromPath(sesRplPrePaidCfgPath); err != nil {
 		t.Fatal(err)
@@ -92,6 +93,7 @@ func testSeSRplPrepaidStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSeSRplPrepaidApierRpcConn(t *testing.T) {
+	var err error
 	if sesRplPrePaidRPC, err = newRPCClient(sesRplPrePaidCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
@@ -142,7 +144,7 @@ func testSeSRplPrepaidTPFromFolder(t *testing.T) {
 
 func testSeSRplPrepaidActivateSessions(t *testing.T) {
 	var reply string
-	if err = sesRplPrePaidRPC.Call(context.Background(), utils.SessionSv1SetPassiveSession, sessions.Session{
+	if err := sesRplPrePaidRPC.Call(context.Background(), utils.SessionSv1SetPassiveSession, sessions.Session{
 		CGRID:         "ede927f8e42318a8db02c0f74adc2d9e16770339",
 		Tenant:        "cgrates.org",
 		ResourceID:    "testSeSRplPrepaidActivateSessions",

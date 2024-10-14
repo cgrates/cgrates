@@ -120,6 +120,7 @@ func TestSectChange(t *testing.T) {
 }
 
 func testSectLoadConfig(t *testing.T) {
+	var err error
 	testSectCfgPath = path.Join(*utils.DataDir, "conf", "samples", testSectCfgDir)
 	if testSectCfg, err = config.NewCGRConfigFromPath(testSectCfgPath); err != nil {
 		t.Error(err)
