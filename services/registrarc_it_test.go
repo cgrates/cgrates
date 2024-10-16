@@ -21,7 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"path"
+	"os"
+	"path/filepath"
 	"runtime"
 	"sync"
 	"testing"
@@ -69,10 +70,47 @@ func TestDispatcherHReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 
+	cfgPath := t.TempDir()
+	filePath := filepath.Join(cfgPath, "cgrates.json")
+	if err := os.WriteFile(filePath, []byte(`{
+"general": {
+        "node_id": "ALL"
+},
+"listen": {
+        "rpc_json": ":6012",
+        "rpc_gob": ":6013",
+        "http": ":6080"
+},
+"rpc_conns": {
+        "dispConn": {
+                "strategy": "*first",
+                "conns": [{
+                        "address": "http://127.0.0.1:2080/registrar",
+                        "transport": "*http_jsonrpc"
+                }]
+        }
+},
+"registrarc": {
+        "dispatchers": {
+                "enabled": true,
+                "registrars_conns": ["dispConn"],
+                "hosts": [{
+                        "Tenant": "*default",
+                        "ID": "hostB",
+                        "transport": "*json",
+                        "tls": false
+                }],
+                "refresh_interval": "1s"
+        }
+}
+}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
 	var reply string
 	if err := cfg.V1ReloadConfig(context.Background(),
 		&config.ReloadArgs{
-			Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "registrarc", "all_mongo"),
+			Path:    cfgPath,
 			Section: config.RegistrarCJson,
 		}, &reply); err != nil {
 		t.Fatal(err)
