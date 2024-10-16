@@ -74,7 +74,7 @@ RUN apt-get clean && \
 RUN touch /logs/mariadb.log /logs/mariadb_script.log /logs/rabbitmq.log 
 RUN chmod 777  /logs/mariadb.log /logs/mariadb_script.log /logs/rabbitmq.log
 
-RUN wget -O go.tgz "https://storage.googleapis.com/golang/go1.22.5.linux-amd64.tar.gz" --progress=dot:giga
+RUN wget -O go.tgz "https://storage.googleapis.com/golang/go1.23.2.linux-amd64.tar.gz" --progress=dot:giga
 RUN tar -C /usr/local -xzf go.tgz
 RUN rm go.tgz
 

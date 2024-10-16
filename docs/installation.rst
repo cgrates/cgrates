@@ -145,8 +145,8 @@ To install the latest Go version at the time of writing this documentation, run:
    # sudo dnf install -y wget tar for .rpm distros
    sudo rm -rf /usr/local/go
    cd /tmp
-   wget https://go.dev/dl/go1.22.5.linux-amd64.tar.gz
-   sudo tar -C /usr/local -xzf go1.22.5.linux-amd64.tar.gz
+   wget https://go.dev/dl/go1.23.2.linux-amd64.tar.gz
+   sudo tar -C /usr/local -xzf go1.23.2.linux-amd64.tar.gz
    export PATH=$PATH:/usr/local/go/bin
 
 Installation:
