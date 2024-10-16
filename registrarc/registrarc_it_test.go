@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -22,168 +21,156 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package registrarc
 
 import (
-	"bytes"
-	"os/exec"
-	"path"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc/context"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	dspDir     string
-	dspCfgPath string
-	dspCfg     *config.CGRConfig
-	dspCmd     *exec.Cmd
-	dspRPC     *birpc.Client
-
-	allDir     string
-	allCfgPath string
-	allCmd     *exec.Cmd
-
-	all2Dir     string
-	all2CfgPath string
-	all2Cmd     *exec.Cmd
-
-	dsphTest = []func(t *testing.T){
-		testDsphInitCfg,
-		testDsphInitDB,
-		testDsphStartEngine,
-		testDsphLoadData,
-		testDsphBeforeDsphStart,
-		testDsphStartAll2,
-		testDsphStartAll,
-		testDsphStopEngines,
-		testDsphStopDispatcher,
+func TestRegistrarC(t *testing.T) {
+	dbCfg := engine.DBCfg{
+		StorDB: &engine.DBParams{
+			Type: utils.StringPointer(utils.MetaInternal),
+		},
 	}
-)
-
-func TestDspHosts(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaMySQL:
-		allDir = "all_mysql"
-		all2Dir = "all2_mysql"
-		dspDir = "dispatchers_mysql"
 	case utils.MetaMongo:
-		allDir = "all_mongo"
-		all2Dir = "all2_mongo"
-		dspDir = "dispatchers_mongo"
+		dbCfg.DataDB = engine.MongoDBCfg.DataDB
 	case utils.MetaInternal, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range dsphTest {
-		t.Run(dspDir, stest)
-	}
-}
 
-func testDsphInitCfg(t *testing.T) {
-	dspCfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", dspDir)
-	allCfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", allDir)
-	all2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "registrarc", all2Dir)
-	var err error
-	if dspCfg, err = config.NewCGRConfigFromPath(dspCfgPath); err != nil {
-		t.Error(err)
+	const (
+		dspCfg = `{
+"general": {
+	"node_id": "dispatcher",
+	"reconnects": 1
+},
+"caches": {
+	"partitions": {
+		"*dispatcher_hosts": {
+			"limit": -1,
+			"ttl": "150ms"
+		}
 	}
+},
+"dispatchers": {
+	"enabled": true
 }
-
-func testDsphInitDB(t *testing.T) {
-	if err := engine.InitDataDb(dspCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDb(dspCfg); err != nil {
-		t.Fatal(err)
-	}
+}`
+		workerCfg = `{
+"general": {
+        "node_id": "%s"
+},
+"listen": {
+        "rpc_json": ":%[2]d12",
+        "rpc_gob": ":%[2]d13",
+        "http": ":%[2]d80"
+},
+"rpc_conns": {
+        "dispConn": {
+                "strategy": "*first",
+                "conns": [{
+                        "address": "http://127.0.0.1:2080/registrar",
+                        "transport": "*http_jsonrpc"
+                }]
+        }
+},
+"registrarc": {
+        "dispatchers": {
+                "enabled": true,
+                "registrars_conns": ["dispConn"],
+                "hosts": [{
+                        "Tenant": "*default",
+                        "ID": "hostB",
+                        "transport": "*json",
+                        "tls": false
+                }],
+                "refresh_interval": "1s"
+        }
 }
+}`
+	)
 
-func testDsphStartEngine(t *testing.T) {
-	var err error
-	if dspCmd, err = engine.StopStartEngine(dspCfgPath, *utils.WaitRater); err != nil {
-		t.Fatal(err)
+	disp := engine.TestEngine{
+		ConfigJSON: dspCfg,
+		DBCfg:      dbCfg,
 	}
-	dspRPC, err = newRPCClient(dspCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
-}
+	client, cfg := disp.Run(t)
 
-func testDsphLoadData(t *testing.T) {
-	loader := exec.Command("cgr-loader", "-config_path", dspCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "registrarc"), "-caches_address=")
-	output := bytes.NewBuffer(nil)
-	outerr := bytes.NewBuffer(nil)
-	loader.Stdout = output
-	loader.Stderr = outerr
-	if err := loader.Run(); err != nil {
-		t.Log(loader.Args)
-		t.Log(output.String())
-		t.Log(outerr.String())
-		t.Fatal(err)
+	tpFiles := map[string]string{
+		utils.DispatcherProfilesCsv: `#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
+cgrates.org,dsp_test,,,,*weight,,hostA,,20,,,
+cgrates.org,dsp_test,,,,,,hostB,,10,,,`,
 	}
-}
 
-func testDsphGetNodeID() (id string, err error) {
-	var status map[string]any
-	if err = dspRPC.Call(context.Background(), utils.DispatcherSv1RemoteStatus, utils.TenantWithAPIOpts{
-		Tenant:  "cgrates.org",
-		APIOpts: map[string]any{},
-	}, &status); err != nil {
-		return
-	}
-	return utils.IfaceAsString(status[utils.NodeID]), nil
-}
+	engine.LoadCSVsWithCGRLoader(t, cfg.ConfigPath, "", nil, tpFiles, "-caches_address=")
 
-func testDsphBeforeDsphStart(t *testing.T) {
-	if _, err := testDsphGetNodeID(); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
-		t.Errorf("Expected error: %s received: %v", utils.ErrDSPHostNotFound, err)
+	checkNodeID := func(t *testing.T, expected string) {
+		t.Helper()
+		var status map[string]any
+		err := client.Call(context.Background(), utils.CoreSv1Status,
+			utils.TenantWithAPIOpts{
+				Tenant:  "cgrates.org",
+				APIOpts: map[string]any{},
+			}, &status)
+		if err != nil && expected != "" {
+			t.Fatalf("DispatcherSv1.RemoteStatus unexpected err: %v", err)
+		}
+		nodeID := utils.IfaceAsString(status[utils.NodeID])
+		if expected == "" &&
+			(err == nil || err.Error() != utils.ErrDSPHostNotFound.Error()) {
+			t.Errorf("DispatcherSv1.RemoteStatus err=%q, want %q", err, utils.ErrDSPHostNotFound)
+		}
+		if nodeID != expected {
+			t.Errorf("DispatcherSv1.RemoteStatus nodeID=%q, want %q", nodeID, expected)
+		}
 	}
-}
 
-func testDsphStartAll2(t *testing.T) {
-	var err error
-	if all2Cmd, err = engine.StartEngine(all2CfgPath, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-	if nodeID, err := testDsphGetNodeID(); err != nil {
-		t.Fatal(err)
-	} else if nodeID != "ALL2" {
-		t.Errorf("Expected nodeID: %q ,received: %q", "ALL2", nodeID)
-	}
-}
+	/*
+		Currently, only a dispatcher profile can be found in dataDB.
+		It references 2 hosts that don't exist yet: hostA (weight=20) and hostB (weight=10).
+		Its sorting strategy is "*weight".
+	*/
 
-func testDsphStartAll(t *testing.T) {
-	var err error
-	if allCmd, err = engine.StartEngine(allCfgPath, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-	if nodeID, err := testDsphGetNodeID(); err != nil {
-		t.Fatal(err)
-	} else if nodeID != "ALL" {
-		t.Errorf("Expected nodeID: %q ,received: %q", "ALL", nodeID)
-	}
-}
+	checkNodeID(t, "") // no hosts registered yet; will fail
 
-func testDsphStopEngines(t *testing.T) {
-	if err := allCmd.Process.Kill(); err != nil {
-		t.Fatal(err)
-	}
-	if err := all2Cmd.Process.Kill(); err != nil {
-		t.Fatal(err)
-	}
-	time.Sleep(2 * time.Second)
-	if _, err := testDsphGetNodeID(); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
-		t.Errorf("Expected error: %s received: %v", utils.ErrDSPHostNotFound, err)
-	}
-}
+	// Workers will be automatically closed at the end of the subtest.
+	t.Run("start workers and dispatch", func(t *testing.T) {
+		workerB := engine.TestEngine{
+			ConfigJSON:     fmt.Sprintf(workerCfg, "workerB", 70),
+			DBCfg:          dbCfg,
+			PreserveDataDB: true,
+			PreserveStorDB: true,
+		}
+		workerB.Run(t)
 
-func testDsphStopDispatcher(t *testing.T) {
-	if err := engine.KillEngine(*utils.WaitRater); err != nil {
-		t.Error(err)
-	}
+		// workerB is now active and has registered hostB.
+		// The status request will be dispatched to hostB, because
+		// hostA, which should have had priority, has not yet been
+		// registered.
+		checkNodeID(t, "workerB")
+
+		workerA := engine.TestEngine{
+			ConfigJSON:     fmt.Sprintf(workerCfg, "workerA", 60),
+			DBCfg:          dbCfg,
+			PreserveDataDB: true,
+			PreserveStorDB: true,
+		}
+		workerA.Run(t)
+
+		// workerA is now active and has overwritten hostB's port with
+		// its own, instead of registering hostA. The request will be
+		// dispatched based on hostB again.
+		checkNodeID(t, "workerA")
+	})
+
+	time.Sleep(150 * time.Millisecond) // wait for cached hosts to expire
+	checkNodeID(t, "")                 // no hosts left
 }

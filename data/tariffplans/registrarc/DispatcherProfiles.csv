@@ -1,3 +1,0 @@
-#Tenant,ID,Subsystems,FilterIDs,ActivationInterval,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters,Weight
-cgrates.org,DSP1,*any,,,*weight,,ALL,,20,false,,10
-cgrates.org,DSP1,,,,,,ALL2,,10,,,
