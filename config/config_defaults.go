@@ -858,7 +858,17 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,	// starts TrendS service: <true|false>.
 	"store_interval": "",
 	"store_uncompressed_limit": 0,	// used to compress metrics
-	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"stats_conns": [],	// connections to StatS, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"scheduled_ids": {},
+	"thresholds_conns": [],	
+ 	"ees_conns": [],			 
+	"ees_exporter_ids": []                     
+},
+
+ "rankings":{			// RankingS config
+	"enabled": false,	// starts  RankingS service: <true|false>.
+	"store_interval": "",
+ 	"stats_conns": [],	// connections to StatS, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"scheduled_ids": {},
 	"thresholds_conns": [],	
  	"ees_conns": [],			 

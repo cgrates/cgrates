@@ -21,6 +21,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -38,7 +39,6 @@ func TestRankingSCfgLoadFromJSONCfg(t *testing.T) {
 			expectedCfg: RankingSCfg{},
 			expectErr:   false,
 		},
-
 		{
 			name: "enabled true, no stats conns",
 			jsnCfg: &RankingsJsonCfg{
@@ -50,7 +50,6 @@ func TestRankingSCfgLoadFromJSONCfg(t *testing.T) {
 			},
 			expectErr: false,
 		},
-
 		{
 			name: "enabled false with stats conns",
 			jsnCfg: &RankingsJsonCfg{
@@ -60,6 +59,60 @@ func TestRankingSCfgLoadFromJSONCfg(t *testing.T) {
 			expectedCfg: RankingSCfg{
 				Enabled:    false,
 				StatSConns: []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			},
+			expectErr: false,
+		},
+		{
+			name: "thresholds conns with meta internal",
+			jsnCfg: &RankingsJsonCfg{
+				Thresholds_conns: &[]string{"threshold1", utils.MetaInternal},
+			},
+			expectedCfg: RankingSCfg{
+				ThresholdSConns: []string{"threshold1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+			},
+			expectErr: false,
+		},
+		{
+			name: "scheduled IDs",
+			jsnCfg: &RankingsJsonCfg{
+				Scheduled_ids: map[string][]string{
+					"tenant1": {"id1", "id2"},
+				},
+			},
+			expectedCfg: RankingSCfg{
+				ScheduledIDs: map[string][]string{
+					"tenant1": {"id1", "id2"},
+				},
+			},
+			expectErr: false,
+		},
+		{
+			name: "store interval valid in seconds",
+			jsnCfg: &RankingsJsonCfg{
+				Store_interval: utils.StringPointer("30s"),
+			},
+			expectedCfg: RankingSCfg{
+				StoreInterval: 30 * time.Second,
+			},
+			expectErr: false,
+		},
+		{
+			name: "ees conns with meta internal",
+			jsnCfg: &RankingsJsonCfg{
+				Ees_conns: &[]string{"ees1", utils.MetaInternal},
+			},
+			expectedCfg: RankingSCfg{
+				EEsConns: []string{"ees1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
+			},
+			expectErr: false,
+		},
+		{
+			name: "ees exporter IDs",
+			jsnCfg: &RankingsJsonCfg{
+				Ees_exporter_ids: &[]string{"exporter1", "exporter2"},
+			},
+			expectedCfg: RankingSCfg{
+				EEsExporterIDs: []string{"exporter1", "exporter2"},
 			},
 			expectErr: false,
 		},
@@ -82,6 +135,164 @@ func TestRankingSCfgLoadFromJSONCfg(t *testing.T) {
 	}
 }
 
+func TestRankingSCfgLoadFromJSONCfgStoreInterval(t *testing.T) {
+	tests := []struct {
+		name          string
+		storeInterval string
+		expectError   bool
+		expectedValue time.Duration
+	}{
+		{
+			name:          "valid duration",
+			storeInterval: "5s",
+			expectError:   false,
+			expectedValue: 5 * time.Second,
+		},
+		{
+			name:          "valid duration with nanoseconds",
+			storeInterval: "2.5s",
+			expectError:   false,
+			expectedValue: 2500 * time.Millisecond,
+		},
+		{
+			name:          "invalid duration",
+			storeInterval: "invalid",
+			expectError:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			jsnCfg := &RankingsJsonCfg{
+				Store_interval: &tt.storeInterval,
+			}
+			sgsCfg := &RankingSCfg{}
+
+			err := sgsCfg.loadFromJSONCfg(jsnCfg)
+
+			if tt.expectError {
+				if err == nil {
+					t.Errorf("Expected error, but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if sgsCfg.StoreInterval != tt.expectedValue {
+					t.Errorf("Expected StoreInterval = %v, got %v", tt.expectedValue, sgsCfg.StoreInterval)
+				}
+			}
+		})
+	}
+}
+
+func TestRankingSCfgAsMapInterface(t *testing.T) {
+	tests := []struct {
+		name        string
+		rankingSCfg RankingSCfg
+		expectedMap map[string]any
+	}{
+		{
+			name: "enabled true, no stat conns",
+			rankingSCfg: RankingSCfg{
+				Enabled:    true,
+				StatSConns: nil,
+			},
+			expectedMap: map[string]any{
+				utils.EnabledCfg:        true,
+				utils.StoreIntervalCfg:  utils.EmptyString,
+				utils.EEsExporterIDsCfg: []string{},
+			},
+		},
+		{
+			name: "enabled false, stat conns with MetaInternal",
+			rankingSCfg: RankingSCfg{
+				Enabled:    false,
+				StatSConns: []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+			},
+			expectedMap: map[string]any{
+				utils.EnabledCfg:        false,
+				utils.StatSConnsCfg:     []string{"conn1", utils.MetaInternal},
+				utils.StoreIntervalCfg:  utils.EmptyString,
+				utils.EEsExporterIDsCfg: []string{},
+			},
+		},
+		{
+			name: "stat conns without MetaInternal",
+			rankingSCfg: RankingSCfg{
+				Enabled:    false,
+				StatSConns: []string{"conn1", "conn2"},
+			},
+			expectedMap: map[string]any{
+				utils.EnabledCfg:        false,
+				utils.StatSConnsCfg:     []string{"conn1", "conn2"},
+				utils.StoreIntervalCfg:  utils.EmptyString,
+				utils.EEsExporterIDsCfg: []string{},
+			},
+		},
+		{
+			name: "threshold conns with MetaInternal",
+			rankingSCfg: RankingSCfg{
+				Enabled:         false,
+				ThresholdSConns: []string{"threshold1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+			},
+			expectedMap: map[string]any{
+				utils.EnabledCfg:         false,
+				utils.ThresholdSConnsCfg: []string{"threshold1", utils.MetaInternal},
+				utils.StoreIntervalCfg:   utils.EmptyString,
+				utils.EEsExporterIDsCfg:  []string{},
+			},
+		},
+		{
+			name: "scheduled IDs",
+			rankingSCfg: RankingSCfg{
+				Enabled:      false,
+				ScheduledIDs: map[string][]string{"schedule1": {"id1", "id2"}},
+			},
+			expectedMap: map[string]any{
+				utils.EnabledCfg:        false,
+				utils.ScheduledIDsCfg:   map[string][]string{"schedule1": {"id1", "id2"}},
+				utils.StoreIntervalCfg:  utils.EmptyString,
+				utils.EEsExporterIDsCfg: []string{},
+			},
+		},
+		{
+			name: "ees conns with MetaInternal",
+			rankingSCfg: RankingSCfg{
+				Enabled:  false,
+				EEsConns: []string{"ees1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
+			},
+			expectedMap: map[string]any{
+				utils.EnabledCfg:        false,
+				utils.EEsConnsCfg:       []string{"ees1", utils.MetaInternal},
+				utils.StoreIntervalCfg:  utils.EmptyString,
+				utils.EEsExporterIDsCfg: []string{},
+			},
+		},
+		{
+			name: "ees exporter IDs",
+			rankingSCfg: RankingSCfg{
+				Enabled:        false,
+				EEsExporterIDs: []string{"exp1", "exp2"},
+			},
+			expectedMap: map[string]any{
+				utils.EnabledCfg:        false,
+				utils.StoreIntervalCfg:  utils.EmptyString,
+				utils.EEsExporterIDsCfg: []string{"exp1", "exp2"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.rankingSCfg.AsMapInterface()
+			if !reflect.DeepEqual(result, tt.expectedMap) {
+				t.Errorf("AsMapInterface() = %v, want %v", result, tt.expectedMap)
+			}
+		})
+	}
+}
+
 func TestRankingSCfgClone(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -99,7 +310,6 @@ func TestRankingSCfgClone(t *testing.T) {
 				StatSConns: nil,
 			},
 		},
-
 		{
 			name: "enabled false, stat conns present",
 			originalCfg: RankingSCfg{
@@ -109,6 +319,46 @@ func TestRankingSCfgClone(t *testing.T) {
 			expectedClone: RankingSCfg{
 				Enabled:    false,
 				StatSConns: []string{"conn1", "conn2"},
+			},
+		},
+		{
+			name: "threshold conns present",
+			originalCfg: RankingSCfg{
+				ThresholdSConns: []string{"threshold1", "threshold2"},
+			},
+			expectedClone: RankingSCfg{
+				ThresholdSConns: []string{"threshold1", "threshold2"},
+			},
+		},
+		{
+			name: "scheduled IDs present",
+			originalCfg: RankingSCfg{
+				ScheduledIDs: map[string][]string{
+					"schedule1": {"id1", "id2"},
+				},
+			},
+			expectedClone: RankingSCfg{
+				ScheduledIDs: map[string][]string{
+					"schedule1": {"id1", "id2"},
+				},
+			},
+		},
+		{
+			name: "EEs conns present",
+			originalCfg: RankingSCfg{
+				EEsConns: []string{"ees1", "ees2"},
+			},
+			expectedClone: RankingSCfg{
+				EEsConns: []string{"ees1", "ees2"},
+			},
+		},
+		{
+			name: "EEs exporter IDs present",
+			originalCfg: RankingSCfg{
+				EEsExporterIDs: []string{"exporter1", "exporter2"},
+			},
+			expectedClone: RankingSCfg{
+				EEsExporterIDs: []string{"exporter1", "exporter2"},
 			},
 		},
 	}
@@ -124,59 +374,25 @@ func TestRankingSCfgClone(t *testing.T) {
 			if clone.StatSConns != nil && tt.originalCfg.StatSConns != nil && &clone.StatSConns[0] == &tt.originalCfg.StatSConns[0] {
 				t.Errorf("StatSConns points to the same slice, expected a deep copy")
 			}
-		})
-	}
-}
 
-func TestRankingSCfgAsMapInterface(t *testing.T) {
+			if clone.ThresholdSConns != nil && tt.originalCfg.ThresholdSConns != nil && &clone.ThresholdSConns[0] == &tt.originalCfg.ThresholdSConns[0] {
+				t.Errorf("ThresholdSConns points to the same slice, expected a deep copy")
+			}
 
-	tests := []struct {
-		name        string
-		rankingSCfg RankingSCfg
-		expectedMap map[string]any
-	}{
-		{
-			name: "enabled true, no stat conns",
-			rankingSCfg: RankingSCfg{
-				Enabled:    true,
-				StatSConns: nil,
-			},
-			expectedMap: map[string]any{
-				utils.EnabledCfg: true,
-			},
-		},
+			if clone.ScheduledIDs != nil && tt.originalCfg.ScheduledIDs != nil {
+				for key := range clone.ScheduledIDs {
+					if &clone.ScheduledIDs[key][0] == &tt.originalCfg.ScheduledIDs[key][0] {
+						t.Errorf("ScheduledIDs points to the same slice for key %v, expected a deep copy", key)
+					}
+				}
+			}
 
-		{
-			name: "enabled false, stat conns with MetaInternal",
-			rankingSCfg: RankingSCfg{
-				Enabled:    false,
-				StatSConns: []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-			},
-			expectedMap: map[string]any{
-				utils.EnabledCfg:    false,
-				utils.StatSConnsCfg: []string{"conn1", utils.MetaInternal},
-			},
-		},
+			if clone.EEsConns != nil && tt.originalCfg.EEsConns != nil && &clone.EEsConns[0] == &tt.originalCfg.EEsConns[0] {
+				t.Errorf("EEsConns points to the same slice, expected a deep copy")
+			}
 
-		{
-			name: "stat conns without MetaInternal",
-			rankingSCfg: RankingSCfg{
-				Enabled:    false,
-				StatSConns: []string{"conn1", "conn2"},
-			},
-			expectedMap: map[string]any{
-				utils.EnabledCfg:    false,
-				utils.StatSConnsCfg: []string{"conn1", "conn2"},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := tt.rankingSCfg.AsMapInterface()
-
-			if !reflect.DeepEqual(result, tt.expectedMap) {
-				t.Errorf("AsMapInterface() = %v, want %v", result, tt.expectedMap)
+			if clone.EEsExporterIDs != nil && tt.originalCfg.EEsExporterIDs != nil && &clone.EEsExporterIDs[0] == &tt.originalCfg.EEsExporterIDs[0] {
+				t.Errorf("EEsExporterIDs points to the same slice, expected a deep copy")
 			}
 		})
 	}
