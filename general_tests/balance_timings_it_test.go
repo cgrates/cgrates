@@ -436,8 +436,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 			t.Errorf("Unexpected reply returned: %s", reply)
 		}
 		// LoadTPFromFolder
-		customTpPath := t.TempDir()
-		engine.LoadCSVs(t, client, "", customTpPath, tpFiles)
+		engine.LoadCSVs(t, client, "", tpFiles)
 		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1001", ActionsId: "ACT_TOPUP_RST_10"}
 		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 			t.Errorf("APIerSv1ExecuteAction failed unexpectedly: %v", err)
@@ -721,8 +720,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_1001,`,
 			t.Errorf("Unexpected reply returned: %s", reply)
 		}
 		// LoadTPFromFolder
-		customTpPath := t.TempDir()
-		engine.LoadCSVs(t, client, "", customTpPath, tpFiles)
+		engine.LoadCSVs(t, client, "", tpFiles)
 		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1001", ActionsId: "ACT_TOPUP_RST_10"}
 		if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 			t.Errorf("APIerSv1ExecuteAction failed unexpectedly: %v", err)
