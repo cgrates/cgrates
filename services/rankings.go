@@ -61,63 +61,71 @@ type RankingService struct {
 	connChan    chan birpc.ClientConnector
 	anz         *AnalyzerService
 	srvDep      map[string]*sync.WaitGroup
+	rks         *engine.RankingS
 }
 
 // Start should handle the sercive start
-func (rg *RankingService) Start() error {
-	if rg.IsRunning() {
+func (rk *RankingService) Start() error {
+	if rk.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	rg.srvDep[utils.DataDB].Add(1)
-	<-rg.cacheS.GetPrecacheChannel(utils.CacheRankingProfiles)
-	<-rg.cacheS.GetPrecacheChannel(utils.CacheRankingFilterIndexes)
+	rk.srvDep[utils.DataDB].Add(1)
+	<-rk.cacheS.GetPrecacheChannel(utils.CacheRankingProfiles)
+	<-rk.cacheS.GetPrecacheChannel(utils.CacheRankingFilterIndexes)
 
-	filterS := <-rg.filterSChan
-	rg.filterSChan <- filterS
-	dbchan := rg.dm.GetDMChan()
+	filterS := <-rk.filterSChan
+	rk.filterSChan <- filterS
+	dbchan := rk.dm.GetDMChan()
 	datadb := <-dbchan
 	dbchan <- datadb
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.RankingS))
+
+	rk.rks = engine.NewRankingS(datadb, rk.connMgr, filterS, rk.cfg)
+	if err := rk.rks.StartRankingS(); err != nil {
+		return err
+	}
 	srv, err := engine.NewService(v1.NewRankingSv1())
 	if err != nil {
 		return err
 	}
-	if !rg.cfg.DispatcherSCfg().Enabled {
-		rg.server.RpcRegister(srv)
+	if !rk.cfg.DispatcherSCfg().Enabled {
+		rk.server.RpcRegister(srv)
 	}
-	rg.connChan <- rg.anz.GetInternalCodec(srv, utils.StatS)
+	rk.connChan <- rk.anz.GetInternalCodec(srv, utils.StatS)
 	return nil
 }
 
 // Reload handles the change of config
-func (rg *RankingService) Reload() (err error) {
+func (rk *RankingService) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (rg *RankingService) Shutdown() (err error) {
-	defer rg.srvDep[utils.DataDB].Done()
-	rg.Lock()
-	defer rg.Unlock()
-	<-rg.connChan
+func (rk *RankingService) Shutdown() (err error) {
+	defer rk.srvDep[utils.DataDB].Done()
+	rk.Lock()
+	defer rk.Unlock()
+	rk.rks.StopRankingS()
+	rk.rks = nil
+	<-rk.connChan
 	return
 }
 
 // IsRunning returns if the service is running
-func (rg *RankingService) IsRunning() bool {
-	rg.RLock()
-	defer rg.RUnlock()
-	return false
+func (rk *RankingService) IsRunning() bool {
+	rk.RLock()
+	defer rk.RUnlock()
+	return rk.rks != nil
 }
 
 // ServiceName returns the service name
-func (rg *RankingService) ServiceName() string {
+func (rk *RankingService) ServiceName() string {
 	return utils.RankingS
 }
 
 // ShouldRun returns if the service should be running
-func (rg *RankingService) ShouldRun() bool {
-	return rg.cfg.RankingSCfg().Enabled
+func (rk *RankingService) ShouldRun() bool {
+	return rk.cfg.RankingSCfg().Enabled
 }

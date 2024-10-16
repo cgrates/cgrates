@@ -13,12 +13,13 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>
+along with this program.  If not, see <htrkP://www.gnu.org/licenses/>
 */
 
 package engine
 
 import (
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -40,6 +41,58 @@ type RankingProfile struct {
 	ThresholdIDs      []string
 }
 
-func (sgp *RankingProfile) TenantID() string {
-	return utils.ConcatenatedKey(sgp.Tenant, sgp.ID)
+func (rkp *RankingProfile) TenantID() string {
+	return utils.ConcatenatedKey(rkp.Tenant, rkp.ID)
+}
+
+// Clone will clone a RankingProfile
+func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
+	cln = &RankingProfile{
+		Tenant:        rkP.Tenant,
+		ID:            rkP.ID,
+		QueryInterval: rkP.QueryInterval,
+		Sorting:       rkP.Sorting,
+	}
+	if rkP.StatIDs != nil {
+		copy(cln.StatIDs, rkP.StatIDs)
+	}
+	if rkP.MetricIDs != nil {
+		copy(cln.MetricIDs, rkP.MetricIDs)
+	}
+	if rkP.SortingParameters != nil {
+		copy(cln.SortingParameters, rkP.SortingParameters)
+	}
+	if rkP.ThresholdIDs != nil {
+		copy(cln.ThresholdIDs, rkP.ThresholdIDs)
+	}
+	return
+}
+
+// NewRankingFromProfile is a constructor for an empty ranking out of it's profile
+func NewRankingFromProfile(rkP *RankingProfile) *Ranking {
+	return &Ranking{
+		Tenant:      rkP.Tenant,
+		ID:          rkP.ID,
+		StatMetrics: make(map[string]map[string]float64),
+
+		rkPrfl:    rkP,
+		metricIDs: utils.NewStringSet(rkP.MetricIDs),
+	}
+}
+
+// Ranking is one unit out of a profile
+type Ranking struct {
+	rMux sync.RWMutex
+
+	Tenant            string
+	ID                string
+	StatMetrics       map[string]map[string]float64 // map[statID]map[metricID]metricValue
+	Sorting           string
+	SortingParameters []string
+
+	SortedStatIDs []string
+
+	rkPrfl    *RankingProfile // store here the ranking profile so we can have it at hands further
+	metricIDs utils.StringSet // convert the metricIDs here for faster matching
+
 }

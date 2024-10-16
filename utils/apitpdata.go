@@ -1660,7 +1660,7 @@ type ArgScheduleTrendQueries struct {
 }
 type ArgScheduledTrends struct {
 	TenantIDWithAPIOpts
-	TrendIDPrefix []string
+	TrendIDPrefixes []string
 }
 
 type ArgGetTrend struct {
@@ -1675,5 +1675,21 @@ type ArgGetTrend struct {
 type ScheduledTrend struct {
 	TrendID string
 	Next    time.Time
-	Prev    time.Time
+	Previous time.Time
+}
+
+type ArgScheduleRankingQueries struct {
+	TenantIDWithAPIOpts
+	RankingIDs []string
+}
+
+type ArgScheduledRankings struct {
+	TenantIDWithAPIOpts
+	RankingIDPrefixes []string
+}
+
+type ScheduledRanking struct {
+	RankingID string
+	Next      time.Time
+	Previous  time.Time
 }

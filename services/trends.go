@@ -112,6 +112,7 @@ func (tr *TrendService) Shutdown() (err error) {
 	tr.Lock()
 	defer tr.Unlock()
 	tr.trs.StopTrendS()
+	tr.trs = nil
 	<-tr.connChan
 	return
 }

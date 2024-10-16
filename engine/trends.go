@@ -82,7 +82,7 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 		&floatMetrics); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
-				"<%s> computing trend for with id: <%s:%s> stats <%s> error: <%s>",
+				"<%s> computing trend with id: <%s:%s> for stats <%s> error: <%s>",
 				utils.TrendS, tP.Tenant, tP.ID, tP.StatID, err.Error()))
 		return
 	}
@@ -538,11 +538,11 @@ func (tS *TrendS) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgSche
 	}
 	var scheduledTrends []utils.ScheduledTrend
 	var entryIds map[string]cron.EntryID
-	if len(args.TrendIDPrefix) == 0 {
+	if len(args.TrendIDPrefixes) == 0 {
 		entryIds = trendIDsMp
 	} else {
 		entryIds = make(map[string]cron.EntryID)
-		for _, tID := range args.TrendIDPrefix {
+		for _, tID := range args.TrendIDPrefixes {
 			for key, entryID := range trendIDsMp {
 				if strings.HasPrefix(key, tID) {
 					entryIds[key] = entryID
@@ -560,9 +560,9 @@ func (tS *TrendS) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgSche
 			continue
 		}
 		scheduledTrends = append(scheduledTrends, utils.ScheduledTrend{
-			TrendID: id,
-			Next:    entry.Next,
-			Prev:    entry.Prev,
+			TrendID:  id,
+			Next:     entry.Next,
+			Previous: entry.Prev,
 		})
 	}
 	slices.SortFunc(scheduledTrends, func(a, b utils.ScheduledTrend) int {
