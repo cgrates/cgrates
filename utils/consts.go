@@ -1017,6 +1017,8 @@ const (
 	MetaSessionsBackup      = "*sessions_backup"
 	MetaLoadIDs             = "*load_ids"
 	MetaNodeID              = "*node_id"
+	MetaAscending           = "*ascending"
+	MetaDescending          = "*descending"
 )
 
 // MetaMetrics

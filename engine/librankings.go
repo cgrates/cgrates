@@ -96,3 +96,42 @@ type Ranking struct {
 	metricIDs utils.StringSet // convert the metricIDs here for faster matching
 
 }
+
+type rankingSorter interface {
+	sortStatIDs() []string // sortStatIDs returns the sorted list of statIDs
+}
+
+// rankingSortStats will return the list of sorted statIDs out of the sortingData map
+func rankingSortStats(sortingType string, sortingParams []string, statMetrics map[string]map[string]float64) (sortedStatIDs []string, err error) {
+	var rnkSrtr rankingSorter
+	if rnkSrtr, err = newRankingSorter(sortingType, sortingParams, statMetrics); err != nil {
+		return
+	}
+	return rnkSrtr.sortStatIDs(), nil
+}
+
+// newRankingSorter is the constructor for various ranking sorters
+//
+//	returns error if the sortingType is not implemented
+func newRankingSorter(sortingType string, sortingParams []string,
+	statMetrics map[string]map[string]float64) (rkStr rankingSorter, err error) {
+	switch sortingType {
+	default:
+		err = utils.ErrPrefixNotErrNotImplemented(sortingType)
+		return
+	case utils.MetaDescending:
+		return &rankingDescSorter{sortingParams, statMetrics}, nil
+
+	}
+	return
+}
+
+// rankingDescSorter will sort data descendently for metrics in sortingParams or randomly if all equal
+type rankingDescSorter struct {
+	sortingParams []string
+	statMetrics   map[string]map[string]float64
+}
+
+func (rkDsrtr *rankingDescSorter) sortStatIDs() (statIDs []string) {
+	return
+}
