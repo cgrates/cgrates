@@ -94,3 +94,7 @@ func (trs *TrendSv1) GetTrend(ctx *context.Context, args *utils.ArgGetTrend, tre
 func (trs *TrendSv1) GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) error {
 	return trs.trS.V1GetScheduledTrends(ctx, args, schedTrends)
 }
+
+func (trs *TrendSv1) GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *engine.TrendSummary) error {
+	return trs.trS.V1GetTrendSummary(ctx, arg, reply)
+}

@@ -169,6 +169,7 @@ type FilterSJsonCfg struct {
 	Stats_conns     *[]string
 	Resources_conns *[]string
 	Apiers_conns    *[]string
+	Trends_conns    *[]string
 }
 
 // Rater config section
