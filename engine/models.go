@@ -288,12 +288,13 @@ type RankingsMdl struct {
 	Tpid              string
 	Tenant            string `index:"0" re:".*"`
 	ID                string `index:"1" re:".*"`
-	QueryInterval     string `index:"2" re:".*"`
+	Schedule          string `index:"2" re:".*"`
 	StatIDs           string `index:"3" re:".*"`
 	MetricIDs         string `index:"4" re:".*"`
 	Sorting           string `index:"5" re:".*"`
 	SortingParameters string `index:"6" re:".*"`
-	ThresholdIDs      string `index:"7" re:".*"`
+	Stored            bool   `index:"7" re:".*"`
+	ThresholdIDs      string `index:"8" re:".*"`
 	CreatedAt         time.Time
 }
 

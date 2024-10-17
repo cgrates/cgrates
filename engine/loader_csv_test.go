@@ -237,8 +237,8 @@ cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum#~*req.Value;*su
 cgrates.org,TestStats2,,,,,2,*sum#~*req.Cost;*average#~*req.Cost,,true,true,20,
 `
 	RankingsCSVContent = `
-#Tenant[0],Id[1],QueryInterval[2],StatIDs[2],MetricIDs[3],Sorting[4],SortingParameters[5],ThresholdIDs[6]
-cgrates.org,Ranking1,15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,THD1;THD2
+#Tenant[0],Id[1],Schedule[2],StatIDs[3],MetricIDs[4],Sorting[5],SortingParameters[6],StoredThresholdIDs[7]
+cgrates.org,Ranking1,@every 5m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,true,THD1;THD2
 `
 	TrendsCSVContent = `
 #Tenant[0],Id[1],Schedule[2],StatID[3],Metrics[4],TTL[5],QueueLength[6],MinItems[7],CorrelationType[8],Tolerance[9],Stored[10],ThresholdIDs[11]
@@ -1337,14 +1337,14 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 func TestLoadRankingProfiles(t *testing.T) {
 	eRankings := map[utils.TenantID]*utils.TPRankingProfile{
 		{Tenant: "cgrates.org", ID: "Ranking1"}: {
-			TPid:          testTPID,
-			Tenant:        "cgrates.org",
-			ID:            "Ranking1",
-			QueryInterval: "15m",
-			StatIDs:       []string{"Stats2", "Stats3", "Stats4"},
-			MetricIDs:     []string{"Metric1", "Metric3"},
-			Sorting:       "*asc",
-			ThresholdIDs:  []string{"THD1", "THD2"},
+			TPid:         testTPID,
+			Tenant:       "cgrates.org",
+			ID:           "Ranking1",
+			Schedule:     "15m",
+			StatIDs:      []string{"Stats2", "Stats3", "Stats4"},
+			MetricIDs:    []string{"Metric1", "Metric3"},
+			Sorting:      "*asc",
+			ThresholdIDs: []string{"THD1", "THD2"},
 		},
 	}
 	rgkey := utils.TenantID{Tenant: "cgrates.org", ID: "RANKING1"}

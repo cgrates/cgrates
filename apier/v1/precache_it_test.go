@@ -43,7 +43,7 @@ var (
 	precacheConfigDIR string //run tests for specific configuration
 
 	// use this flag to test the APIBan implementation for precache
-	apiBan = flag.Bool("apiban", true, "used to control if we run the apiban tests")
+	apiBan = flag.Bool("apiban", false, "used to control if we run the apiban tests")
 
 	sTestsPrecache = []func(t *testing.T){
 		testPrecacheInitCfg,

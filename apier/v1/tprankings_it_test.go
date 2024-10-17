@@ -122,13 +122,13 @@ func testTPRankingsGetTPRankingBeforeSet(t *testing.T) {
 
 func testTPRankingsSetTPRanking(t *testing.T) {
 	tpRanking = &utils.TPRankingProfile{
-		Tenant:        "cgrates.org",
-		TPid:          "TPS1",
-		ID:            "Ranking1",
-		QueryInterval: "1m",
-		Sorting:       "*asc",
-		StatIDs:       []string{"Stat1"},
-		ThresholdIDs:  []string{"ThreshValue", "ThreshValueTwo"},
+		Tenant:       "cgrates.org",
+		TPid:         "TPS1",
+		ID:           "Ranking1",
+		Schedule:     "1m",
+		Sorting:      "*asc",
+		StatIDs:      []string{"Stat1"},
+		ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
 	}
 	sort.Strings(tpRanking.ThresholdIDs)
 	var result string

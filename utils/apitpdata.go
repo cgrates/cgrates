@@ -1044,11 +1044,12 @@ type TPRankingProfile struct {
 	TPid              string
 	Tenant            string
 	ID                string
-	QueryInterval     string
+	Schedule          string
 	StatIDs           []string
 	MetricIDs         []string
 	Sorting           string
 	SortingParameters []string
+	Stored            bool
 	ThresholdIDs      []string
 }
 
@@ -1673,8 +1674,8 @@ type ArgGetTrend struct {
 }
 
 type ScheduledTrend struct {
-	TrendID string
-	Next    time.Time
+	TrendID  string
+	Next     time.Time
 	Previous time.Time
 }
 

@@ -136,7 +136,7 @@ func (t *Trend) compress(ms Marshaler) (err error) {
 }
 
 func (t *Trend) uncompress(ms Marshaler) (err error) {
-	if t == nil || t.RunTimes != nil {
+	if t == nil || t.CompressedMetrics == nil {
 		return
 	}
 	err = ms.Unmarshal(t.CompressedMetrics, &t.Metrics)

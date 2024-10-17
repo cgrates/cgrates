@@ -5949,10 +5949,12 @@ func TestCSVHeaders(t *testing.T) {
 	expected := []string{
 		"#" + utils.Tenant,
 		utils.ID,
+		utils.Schedule,
 		utils.StatIDs,
 		utils.MetricIDs,
 		utils.Sorting,
 		utils.SortingParameters,
+		utils.Stored,
 		utils.ThresholdIDs,
 	}
 	var tps RankingsMdls
@@ -6004,7 +6006,7 @@ func TestRankingProfileToAPI(t *testing.T) {
 		MetricIDs:         []string{"metric1", "metric2"},
 		SortingParameters: []string{"sort1", "sort2"},
 		ThresholdIDs:      []string{"threshold1", "threshold2"},
-		QueryInterval:     30 * time.Minute,
+		Schedule:          "@every 30m",
 	}
 
 	expected := &utils.TPRankingProfile{
@@ -6014,7 +6016,7 @@ func TestRankingProfileToAPI(t *testing.T) {
 		MetricIDs:         []string{"metric1", "metric2"},
 		SortingParameters: []string{"sort1", "sort2"},
 		ThresholdIDs:      []string{"threshold1", "threshold2"},
-		QueryInterval:     "30m0s",
+		Schedule:          "@every 30m",
 	}
 	result := RankingProfileToAPI(sg)
 	if result.Tenant != expected.Tenant {
@@ -6059,8 +6061,8 @@ func TestRankingProfileToAPI(t *testing.T) {
 			}
 		}
 	}
-	if result.QueryInterval != expected.QueryInterval {
-		t.Errorf("Expected QueryInterval %s, got %s", expected.QueryInterval, result.QueryInterval)
+	if result.Schedule != expected.Schedule {
+		t.Errorf("Expected QueryInterval %s, got %s", expected.Schedule, result.Schedule)
 	}
 }
 
@@ -6081,7 +6083,7 @@ func TestAPItoModelTPRanking(t *testing.T) {
 				TPid:              "tpid1",
 				Tenant:            "cgrates.org",
 				ID:                "id1",
-				QueryInterval:     "1h",
+				Schedule:          "1h",
 				Sorting:           "asc",
 				ThresholdIDs:      []string{"threshold1", "threshold2"},
 				MetricIDs:         []string{"metric1", "metric2"},
@@ -6093,7 +6095,7 @@ func TestAPItoModelTPRanking(t *testing.T) {
 					Tpid:              "tpid1",
 					Tenant:            "cgrates.org",
 					ID:                "id1",
-					QueryInterval:     "1h",
+					Schedule:          "1h",
 					Sorting:           "asc",
 					StatIDs:           "",
 					ThresholdIDs:      "threshold1" + utils.InfieldSep + "threshold2",

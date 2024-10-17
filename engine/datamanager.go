@@ -1338,7 +1338,7 @@ func (dm *DataManager) GetTrend(tenant, id string,
 			return
 		}
 	}
-	if err := tr.uncompress(dm.ms); err != nil {
+	if err = tr.uncompress(dm.ms); err != nil {
 		return nil, err
 	}
 	if cacheWrite {
