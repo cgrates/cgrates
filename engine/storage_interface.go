@@ -104,6 +104,9 @@ type DataDB interface {
 	SetRankingProfileDrv(sq *RankingProfile) (err error)
 	GetRankingProfileDrv(tenant string, id string) (sq *RankingProfile, err error)
 	RemRankingProfileDrv(tenant string, id string) (err error)
+	GetRankingDrv(string, string) (*Ranking, error)
+	SetRankingDrv(*Ranking) error
+	RemoveRankingDrv(string, string) error
 	SetTrendProfileDrv(tr *TrendProfile) (err error)
 	GetTrendProfileDrv(tenant string, id string) (sq *TrendProfile, err error)
 	RemTrendProfileDrv(tenant string, id string) (err error)

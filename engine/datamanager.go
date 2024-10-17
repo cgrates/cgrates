@@ -1480,7 +1480,6 @@ func (dm *DataManager) GetTrendProfileIDs(tenants []string) (tps map[string][]st
 		tps[tenant] = append(tps[tenant], id)
 	}
 	return
-
 }
 
 func (dm *DataManager) SetTrendProfile(trp *TrendProfile) (err error) {
@@ -1590,6 +1589,38 @@ func (dm *DataManager) GetRankingProfile(tenant, id string, cacheRead, cacheWrit
 	return
 }
 
+func (dm *DataManager) GetRankingProfileIDs(tenants []string) (rns map[string][]string, err error) {
+	prfx := utils.RankingsProfilePrefix
+	var keys []string
+	if len(tenants) == 0 {
+		keys, err = dm.dataDB.GetKeysForPrefix(prfx)
+		if err != nil {
+			return
+		}
+	} else {
+		for _, tenant := range tenants {
+			var tntkeys []string
+			tntPrfx := prfx + tenant + utils.ConcatenatedKeySep
+			tntkeys, err = dm.dataDB.GetKeysForPrefix(tntPrfx)
+			if err != nil {
+				return
+			}
+			keys = append(keys, tntkeys...)
+		}
+	}
+	if len(keys) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	rns = make(map[string][]string)
+	for _, key := range keys {
+		indx := strings.Index(key, utils.ConcatenatedKeySep)
+		tenant := key[len(utils.RankingsProfilePrefix):indx]
+		id := key[indx+1:]
+		rns[tenant] = append(rns[tenant], id)
+	}
+	return
+}
+
 func (dm *DataManager) SetRankingProfile(sgp *RankingProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
@@ -1629,6 +1660,97 @@ func (dm *DataManager) RemoveRankingProfile(tenant, id string) (err error) {
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RankingsProfilePrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1RemoveRankingProfile,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	return
+}
+func (dm *DataManager) GetRanking(tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rn *Ranking, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheRankings, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*Ranking), nil
+		}
+	}
+	if dm == nil {
+		err = utils.ErrNoDatabaseConn
+		return
+	}
+	if rn, err = dm.dataDB.GetRankingDrv(tenant, id); err != nil {
+		if err != utils.ErrNotFound { // database error
+			return
+		}
+		// ErrNotFound
+		if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankings]; itm.Remote {
+			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
+				utils.ReplicatorSv1GetRanking, &utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{Tenant: tenant, ID: id},
+					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
+						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
+							config.CgrConfig().GeneralCfg().NodeID)),
+				}, &rn); err == nil {
+				err = dm.dataDB.SetRankingDrv(rn)
+			}
+		}
+		if err != nil {
+			err = utils.CastRPCErr(err)
+			if err == utils.ErrNotFound && cacheWrite {
+				if errCh := Cache.Set(utils.CacheRankings, tntID, nil, nil, cacheCommit(transactionID), transactionID); errCh != nil {
+					return nil, errCh
+				}
+			}
+			return nil, err
+		}
+		if cacheWrite {
+			if errCh := Cache.Set(utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
+				return nil, errCh
+			}
+		}
+	}
+	return
+}
+
+// SetRanking stores Ranking in dataDB
+func (dm *DataManager) SetRanking(rn *Ranking) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.DataDB().SetRankingDrv(rn); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]; itm.Replicate {
+		if err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RankingPrefix, rn.TenantID(), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1SetRanking,
+			&RankingWithAPIOpts{
+				Ranking: rn,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)}); err != nil {
+			return
+		}
+	}
+	return
+}
+
+// RemoveRanking removes the stored Ranking
+func (dm *DataManager) RemoveRanking(tenant, id string) (err error) {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err = dm.DataDB().RemoveRankingDrv(tenant, id); err != nil {
+		return
+	}
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankings]; itm.Replicate {
+		replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+			config.CgrConfig().DataDbCfg().RplFiltered,
+			utils.RankingPrefix, utils.ConcatenatedKey(tenant, id), // this are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveRanking,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{Tenant: tenant, ID: id},
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,

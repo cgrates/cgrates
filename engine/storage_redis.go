@@ -1010,6 +1010,30 @@ func (rs *RedisStorage) RemRankingProfileDrv(tenant string, id string) (err erro
 	return rs.Cmd(nil, redis_DEL, utils.RankingsProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
+func (rs *RedisStorage) GetRankingDrv(tenant, id string) (rn *Ranking, err error) {
+	var values []byte
+	if err = rs.Cmd(&values, redis_GET, utils.RankingPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+		return
+	} else if len(values) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	err = rs.ms.Unmarshal(values, &rn)
+	return rn, err
+}
+
+func (rs *RedisStorage) SetRankingDrv(rn *Ranking) (err error) {
+	var result []byte
+	if result, err = rs.ms.Marshal(rn); err != nil {
+		return
+	}
+	return rs.Cmd(nil, redis_SET, utils.RankingPrefix+utils.ConcatenatedKey(rn.Tenant, rn.ID), string(result))
+}
+
+func (rs *RedisStorage) RemoveRankingDrv(tenant, id string) (err error) {
+	return rs.Cmd(nil, redis_DEL, utils.RankingPrefix+utils.ConcatenatedKey(tenant, id))
+}
+
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB
 func (rs *RedisStorage) GetThresholdProfileDrv(tenant, ID string) (tp *ThresholdProfile, err error) {
 	var values []byte
