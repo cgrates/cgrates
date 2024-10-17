@@ -36,9 +36,21 @@ func TestRankingDescSorterSortStatIDs(t *testing.T) {
 	if statIDs := rdscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
 		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
 	}
-	sortMetrics = []string{"*tcc", "*acc"} // changed the order of checks, stats4 should come first
+	sortMetrics = []string{"*acc:false", "*tcc"} // changed the order of checks, stats4 should come first
+	rdscSrtr = newRankingDescSorter(sortMetrics, statMetrics)
+	eStatIDs = []string{"STATS3", "STATS2", "STATS1", "STATS4"}
+	if statIDs := rdscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
+		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
+	}
+	sortMetrics = []string{"*tcc", "*acc:true"} // changed the order of checks, stats4 should come first
 	rdscSrtr = newRankingDescSorter(sortMetrics, statMetrics)
 	eStatIDs = []string{"STATS4", "STATS3", "STATS2", "STATS1"}
+	if statIDs := rdscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
+		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
+	}
+	sortMetrics = []string{"*tcc:false", "*acc"} // reversed *tcc which should consider ascendent instead of descendent
+	rdscSrtr = newRankingDescSorter(sortMetrics, statMetrics)
+	eStatIDs = []string{"STATS1", "STATS2", "STATS3", "STATS4"}
 	if statIDs := rdscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
 		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
 	}
@@ -57,9 +69,21 @@ func TestRankingAscSorterSortStatIDs(t *testing.T) {
 	if statIDs := rtAscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
 		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
 	}
-	sortMetrics = []string{"*tcc", "*acc"}
+	sortMetrics = []string{"*acc:false", "*tcc"}
 	rtAscSrtr = newRankingAscSorter(sortMetrics, statMetrics)
 	eStatIDs = []string{"STATS1", "STATS2", "STATS3", "STATS4"}
+	if statIDs := rtAscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
+		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
+	}
+	sortMetrics = []string{"*tcc", "*acc:true"}
+	rtAscSrtr = newRankingAscSorter(sortMetrics, statMetrics)
+	eStatIDs = []string{"STATS1", "STATS2", "STATS3", "STATS4"}
+	if statIDs := rtAscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
+		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
+	}
+	sortMetrics = []string{"*tcc:false", "*acc"}
+	rtAscSrtr = newRankingAscSorter(sortMetrics, statMetrics)
+	eStatIDs = []string{"STATS4", "STATS3", "STATS2", "STATS1"}
 	if statIDs := rtAscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
 		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
 	}

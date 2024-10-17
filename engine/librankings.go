@@ -20,6 +20,7 @@ package engine
 
 import (
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/cgrates/cgrates/utils"
@@ -131,8 +132,18 @@ func newRankingSorter(sortingType string, sortingParams []string,
 // newRankingDescSorter is a constructor for rankingDescSorter
 func newRankingDescSorter(sortingParams []string,
 	statMetrics map[string]map[string]float64) (rkDsrtr *rankingDescSorter) {
+	clnSp := make([]string, len(sortingParams))
+	sPReversed := make(utils.StringSet)
+	for i, sP := range sortingParams { // clean the sortingParams, out of param:false or param:true definitions
+		sPSlc := strings.Split(sP, utils.InInFieldSep)
+		clnSp[i] = sPSlc[0]
+		if len(sPSlc) > 1 && sPSlc[1] == utils.FalseStr {
+			sPReversed.Add(sPSlc[0]) // param defined as param:false which should be added to reversing comparison
+		}
+	}
 	rkDsrtr = &rankingDescSorter{
-		sortingParams,
+		clnSp,
+		sPReversed,
 		statMetrics,
 		make([]string, 0, len(statMetrics))}
 	for statID := range rkDsrtr.statMetrics {
@@ -143,8 +154,9 @@ func newRankingDescSorter(sortingParams []string,
 
 // rankingDescSorter will sort data descendent for metrics in sortingParams or random if all equal
 type rankingDescSorter struct {
-	sortingParams []string
-	statMetrics   map[string]map[string]float64
+	sMetricIDs  []string
+	sMetricRev  utils.StringSet // list of exceptios for sortingParams, reverting the sorting logic
+	statMetrics map[string]map[string]float64
 
 	statIDs []string // list of keys of the statMetrics
 }
@@ -155,7 +167,7 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 		return rkDsrtr.statIDs
 	}
 	sort.Slice(rkDsrtr.statIDs, func(i, j int) bool {
-		for _, metricID := range rkDsrtr.sortingParams {
+		for _, metricID := range rkDsrtr.sMetricIDs {
 			val1, hasMetric1 := rkDsrtr.statMetrics[rkDsrtr.statIDs[i]][metricID]
 			if !hasMetric1 {
 				return false
@@ -168,10 +180,11 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 			if val1 == val2 {
 				continue
 			}
-			if val1 > val2 {
-				return true
+			ret := val1 > val2
+			if rkDsrtr.sMetricRev.Has(metricID) {
+				ret = !ret
 			}
-			return false
+			return ret
 		}
 		//in case that we have the same value for all params we return randomly
 		return utils.BoolGenerator().RandomBool()
@@ -182,8 +195,18 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 // newRankingAscSorter is a constructor for rankingAscSorter
 func newRankingAscSorter(sortingParams []string,
 	statMetrics map[string]map[string]float64) (rkASrtr *rankingAscSorter) {
+	clnSp := make([]string, len(sortingParams))
+	sPReversed := make(utils.StringSet)
+	for i, sP := range sortingParams { // clean the sortingParams, out of param:false or param:true definitions
+		sPSlc := strings.Split(sP, utils.InInFieldSep)
+		clnSp[i] = sPSlc[0]
+		if len(sPSlc) > 1 && sPSlc[1] == utils.FalseStr {
+			sPReversed.Add(sPSlc[0]) // param defined as param:false which should be added to reversing comparison
+		}
+	}
 	rkASrtr = &rankingAscSorter{
-		sortingParams,
+		clnSp,
+		sPReversed,
 		statMetrics,
 		make([]string, 0, len(statMetrics))}
 	for statID := range rkASrtr.statMetrics {
@@ -194,8 +217,9 @@ func newRankingAscSorter(sortingParams []string,
 
 // rankingAscSorter will sort data ascendent for metrics in sortingParams or randomly if all equal
 type rankingAscSorter struct {
-	sortingParams []string
-	statMetrics   map[string]map[string]float64
+	sMetricIDs  []string
+	sMetricRev  utils.StringSet // list of exceptios for sortingParams, reverting the sorting logic
+	statMetrics map[string]map[string]float64
 
 	statIDs []string // list of keys of the statMetrics
 }
@@ -206,7 +230,7 @@ func (rkASrtr *rankingAscSorter) sortStatIDs() []string {
 		return rkASrtr.statIDs
 	}
 	sort.Slice(rkASrtr.statIDs, func(i, j int) bool {
-		for _, metricID := range rkASrtr.sortingParams {
+		for _, metricID := range rkASrtr.sMetricIDs {
 			val1, hasMetric1 := rkASrtr.statMetrics[rkASrtr.statIDs[i]][metricID]
 			if !hasMetric1 {
 				return false
@@ -219,10 +243,11 @@ func (rkASrtr *rankingAscSorter) sortStatIDs() []string {
 			if val1 == val2 {
 				continue
 			}
-			if val2 > val1 {
-				return true
+			ret := val2 > val1
+			if rkASrtr.sMetricRev.Has(metricID) {
+				ret = !ret // reversed logic in case of metric:false in params
 			}
-			return false
+			return ret
 		}
 		//in case that we have the same value for all params we return randomly
 		return utils.BoolGenerator().RandomBool()
