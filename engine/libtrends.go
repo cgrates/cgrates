@@ -122,6 +122,27 @@ func (t *Trend) Clone() (tC *Trend) {
 	return
 }
 
+// AsTrendSummary transforms the trend into TrendSummary
+func (t *Trend) AsTrendSummary() (ts *TrendSummary) {
+	ts = &TrendSummary{
+		Tenant:  t.Tenant,
+		ID:      t.ID,
+		Metrics: make(map[string]*MetricWithTrend),
+	}
+	if len(t.RunTimes) != 0 {
+		ts.Time = t.RunTimes[len(t.RunTimes)-1]
+		for mID, mWt := range t.Metrics[ts.Time] {
+			ts.Metrics[mID] = &MetricWithTrend{
+				ID:          mWt.ID,
+				Value:       mWt.Value,
+				TrendGrowth: mWt.TrendGrowth,
+				TrendLabel:  mWt.TrendLabel,
+			}
+		}
+	}
+	return
+}
+
 func (t *Trend) compress(ms Marshaler) (err error) {
 	if config.CgrConfig().TrendSCfg().StoreUncompressedLimit > len(t.RunTimes) {
 		return
@@ -277,4 +298,12 @@ type MetricWithTrend struct {
 
 func (tr *Trend) TenantID() string {
 	return utils.ConcatenatedKey(tr.Tenant, tr.ID)
+}
+
+// TrendSummary represents the last trend computed
+type TrendSummary struct {
+	Tenant  string
+	ID      string
+	Time    time.Time
+	Metrics map[string]*MetricWithTrend
 }

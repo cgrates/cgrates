@@ -180,22 +180,15 @@ func (tS *TrendS) processThresholds(trnd *Trend) (err error) {
 		copy(thIDs, trnd.tPrfl.ThresholdIDs)
 	}
 	opts[utils.OptsThresholdsProfileIDs] = thIDs
-	mtrx := make(map[string]*MetricWithTrend)
-	for mtID, mtWT := range trnd.Metrics[trnd.RunTimes[len(trnd.RunTimes)-1]] {
-		mtrx[mtID] = &MetricWithTrend{
-			ID:          mtWT.ID,
-			Value:       mtWT.Value,
-			TrendGrowth: mtWT.TrendGrowth,
-			TrendLabel:  mtWT.TrendLabel,
-		}
-	}
+	ts := trnd.AsTrendSummary()
 	trndEv := &utils.CGREvent{
 		Tenant:  trnd.Tenant,
 		ID:      utils.GenUUID(),
 		APIOpts: opts,
 		Event: map[string]any{
 			utils.TrendID: trnd.ID,
-			utils.Metrics: mtrx,
+			utils.Time:    ts.Time,
+			utils.Metrics: ts.Metrics,
 		},
 	}
 	var withErrs bool
@@ -225,15 +218,7 @@ func (tS *TrendS) processEEs(trnd *Trend) (err error) {
 	opts := map[string]any{
 		utils.MetaEventType: utils.TrendUpdate,
 	}
-	mtrx := make(map[string]*MetricWithTrend)
-	for mtID, mtWT := range trnd.Metrics[trnd.RunTimes[len(trnd.RunTimes)-1]] {
-		mtrx[mtID] = &MetricWithTrend{
-			ID:          mtWT.ID,
-			Value:       mtWT.Value,
-			TrendGrowth: mtWT.TrendGrowth,
-			TrendLabel:  mtWT.TrendLabel,
-		}
-	}
+	ts := trnd.AsTrendSummary()
 	trndEv := &CGREventWithEeIDs{
 		CGREvent: &utils.CGREvent{
 			Tenant:  trnd.Tenant,
@@ -241,7 +226,8 @@ func (tS *TrendS) processEEs(trnd *Trend) (err error) {
 			APIOpts: opts,
 			Event: map[string]any{
 				utils.TrendID: trnd.ID,
-				utils.Metrics: mtrx,
+				utils.Time:    ts.Time,
+				utils.Metrics: ts.Metrics,
 			},
 		},
 		EeIDs: tS.cgrcfg.TrendSCfg().EEsExporterIDs,
