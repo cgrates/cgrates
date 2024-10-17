@@ -1463,8 +1463,8 @@ func StatQueueProfileToAPI(st *StatQueueProfile) (tpST *utils.TPStatProfile) {
 type RankingsMdls []*RankingsMdl
 
 func (tps RankingsMdls) CSVHeader() (result []string) {
-	return []string{"#" + utils.Tenant, utils.ID, utils.StatIDs,
-		utils.MetricIDs, utils.Sorting, utils.SortingParameters,
+	return []string{"#" + utils.Tenant, utils.ID, utils.Schedule, utils.StatIDs,
+		utils.MetricIDs, utils.Sorting, utils.SortingParameters, utils.Stored,
 		utils.ThresholdIDs}
 }
 
@@ -1473,24 +1473,28 @@ func (models RankingsMdls) AsTPRanking() (result []*utils.TPRankingProfile) {
 	metricsMap := make(map[string]utils.StringSet)
 	sortingParameterMap := make(map[string]utils.StringSet)
 	statsMap := make(map[string]utils.StringSet)
-	msg := make(map[string]*utils.TPRankingProfile)
+	mrg := make(map[string]*utils.TPRankingProfile)
 	for _, model := range models {
 		key := &utils.TenantID{Tenant: model.Tenant, ID: model.ID}
-		sg, found := msg[key.TenantID()]
+		rg, found := mrg[key.TenantID()]
 		if !found {
-			sg = &utils.TPRankingProfile{
-				Tenant:        model.Tenant,
-				TPid:          model.Tpid,
-				ID:            model.ID,
-				QueryInterval: model.QueryInterval,
-				Sorting:       model.Sorting,
+			rg = &utils.TPRankingProfile{
+				Tenant:   model.Tenant,
+				TPid:     model.Tpid,
+				ID:       model.ID,
+				Schedule: model.Schedule,
+				Sorting:  model.Sorting,
+				Stored:   model.Stored,
 			}
 		}
-		if model.QueryInterval != utils.EmptyString {
-			sg.QueryInterval = model.QueryInterval
+		if model.Schedule != utils.EmptyString {
+			rg.Schedule = model.Schedule
 		}
 		if model.Sorting != utils.EmptyString {
-			sg.QueryInterval = model.QueryInterval
+			rg.Sorting = model.Sorting
+		}
+		if model.Stored {
+			rg.Stored = model.Stored
 		}
 		if model.StatIDs != utils.EmptyString {
 			if _, has := statsMap[key.TenantID()]; !has {
@@ -1516,12 +1520,12 @@ func (models RankingsMdls) AsTPRanking() (result []*utils.TPRankingProfile) {
 			}
 			metricsMap[key.TenantID()].AddSlice(strings.Split(model.MetricIDs, utils.InfieldSep))
 		}
-		msg[key.TenantID()] = sg
+		mrg[key.TenantID()] = rg
 	}
-	result = make([]*utils.TPRankingProfile, len(msg))
+	result = make([]*utils.TPRankingProfile, len(mrg))
 	i := 0
-	for tntID, sg := range msg {
-		result[i] = sg
+	for tntID, rg := range mrg {
+		result[i] = rg
 		result[i].StatIDs = statsMap[tntID].AsSlice()
 		result[i].MetricIDs = metricsMap[tntID].AsSlice()
 		result[i].SortingParameters = sortingParameterMap[tntID].AsSlice()
@@ -1531,32 +1535,33 @@ func (models RankingsMdls) AsTPRanking() (result []*utils.TPRankingProfile) {
 	return
 }
 
-func APItoModelTPRanking(tpSG *utils.TPRankingProfile) (mdls RankingsMdls) {
-	if tpSG == nil {
+func APItoModelTPRanking(tpRG *utils.TPRankingProfile) (mdls RankingsMdls) {
+	if tpRG == nil {
 		return
 	}
-	if len(tpSG.StatIDs) == 0 {
+	if len(tpRG.StatIDs) == 0 {
 		mdl := &RankingsMdl{
-			Tpid:          tpSG.TPid,
-			Tenant:        tpSG.Tenant,
-			ID:            tpSG.ID,
-			QueryInterval: tpSG.QueryInterval,
-			Sorting:       tpSG.Sorting,
+			Tpid:     tpRG.TPid,
+			Tenant:   tpRG.Tenant,
+			ID:       tpRG.ID,
+			Schedule: tpRG.Schedule,
+			Sorting:  tpRG.Sorting,
+			Stored:   tpRG.Stored,
 		}
 
-		for i, val := range tpSG.ThresholdIDs {
+		for i, val := range tpRG.ThresholdIDs {
 			if i != 0 {
 				mdl.ThresholdIDs += utils.InfieldSep
 			}
 			mdl.ThresholdIDs += val
 		}
-		for i, metric := range tpSG.MetricIDs {
+		for i, metric := range tpRG.MetricIDs {
 			if i != 0 {
 				mdl.MetricIDs += utils.InfieldSep
 			}
 			mdl.MetricIDs += metric
 		}
-		for i, sorting := range tpSG.SortingParameters {
+		for i, sorting := range tpRG.SortingParameters {
 			if i != 0 {
 				mdl.SortingParameters += utils.InfieldSep
 			}
@@ -1565,28 +1570,28 @@ func APItoModelTPRanking(tpSG *utils.TPRankingProfile) (mdls RankingsMdls) {
 
 		mdls = append(mdls, mdl)
 	}
-	for i, stat := range tpSG.StatIDs {
+	for i, stat := range tpRG.StatIDs {
 		mdl := &RankingsMdl{
-			Tpid:   tpSG.TPid,
-			Tenant: tpSG.Tenant,
-			ID:     tpSG.ID,
+			Tpid:   tpRG.TPid,
+			Tenant: tpRG.Tenant,
+			ID:     tpRG.ID,
 		}
 		if i == 0 {
-			mdl.QueryInterval = tpSG.QueryInterval
-			mdl.Sorting = tpSG.Sorting
-			for i, val := range tpSG.ThresholdIDs {
+			mdl.Schedule = tpRG.Schedule
+			mdl.Sorting = tpRG.Sorting
+			for i, val := range tpRG.ThresholdIDs {
 				if i != 0 {
 					mdl.ThresholdIDs += utils.InfieldSep
 				}
 				mdl.ThresholdIDs += val
 			}
-			for i, metric := range tpSG.MetricIDs {
+			for i, metric := range tpRG.MetricIDs {
 				if i != 0 {
 					mdl.MetricIDs += utils.InfieldSep
 				}
 				mdl.MetricIDs += metric
 			}
-			for i, sorting := range tpSG.SortingParameters {
+			for i, sorting := range tpRG.SortingParameters {
 				if i != 0 {
 					mdl.SortingParameters += utils.InfieldSep
 				}
@@ -1599,44 +1604,41 @@ func APItoModelTPRanking(tpSG *utils.TPRankingProfile) (mdls RankingsMdls) {
 	return
 }
 
-func APItoRanking(tpSG *utils.TPRankingProfile) (sg *RankingProfile, err error) {
-	sg = &RankingProfile{
-		Tenant:            tpSG.Tenant,
-		ID:                tpSG.ID,
-		StatIDs:           make([]string, len(tpSG.StatIDs)),
-		MetricIDs:         make([]string, len(tpSG.MetricIDs)),
-		Sorting:           tpSG.Sorting,
-		SortingParameters: make([]string, len(tpSG.SortingParameters)),
-		ThresholdIDs:      make([]string, len(tpSG.ThresholdIDs)),
+func APItoRanking(tpRG *utils.TPRankingProfile) (rg *RankingProfile, err error) {
+	rg = &RankingProfile{
+		Tenant:            tpRG.Tenant,
+		ID:                tpRG.ID,
+		Schedule:          tpRG.Schedule,
+		Sorting:           tpRG.Sorting,
+		Stored:            tpRG.Stored,
+		StatIDs:           make([]string, len(tpRG.StatIDs)),
+		MetricIDs:         make([]string, len(tpRG.MetricIDs)),
+		SortingParameters: make([]string, len(tpRG.SortingParameters)),
+		ThresholdIDs:      make([]string, len(tpRG.ThresholdIDs)),
 	}
-
-	if tpSG.QueryInterval != utils.EmptyString {
-		if sg.QueryInterval, err = utils.ParseDurationWithNanosecs(tpSG.QueryInterval); err != nil {
-			return nil, err
-		}
-	}
-	copy(sg.StatIDs, tpSG.StatIDs)
-	copy(sg.ThresholdIDs, tpSG.ThresholdIDs)
-	copy(sg.MetricIDs, tpSG.MetricIDs)
-	return sg, nil
+	copy(rg.StatIDs, tpRG.StatIDs)
+	copy(rg.ThresholdIDs, tpRG.ThresholdIDs)
+	copy(rg.SortingParameters, tpRG.SortingParameters)
+	copy(rg.MetricIDs, tpRG.MetricIDs)
+	return rg, nil
 }
 
-func RankingProfileToAPI(sg *RankingProfile) (tpSG *utils.TPRankingProfile) {
-	tpSG = &utils.TPRankingProfile{
-		Tenant:            sg.Tenant,
-		ID:                sg.ID,
-		StatIDs:           make([]string, len(sg.StatIDs)),
-		MetricIDs:         make([]string, len(sg.MetricIDs)),
-		SortingParameters: make([]string, len(sg.SortingParameters)),
-		ThresholdIDs:      make([]string, len(sg.ThresholdIDs)),
+func RankingProfileToAPI(rg *RankingProfile) (tpRG *utils.TPRankingProfile) {
+	tpRG = &utils.TPRankingProfile{
+		Tenant:            rg.Tenant,
+		ID:                rg.ID,
+		Schedule:          rg.Schedule,
+		Sorting:           rg.Sorting,
+		Stored:            rg.Stored,
+		StatIDs:           make([]string, len(rg.StatIDs)),
+		MetricIDs:         make([]string, len(rg.MetricIDs)),
+		SortingParameters: make([]string, len(rg.SortingParameters)),
+		ThresholdIDs:      make([]string, len(rg.ThresholdIDs)),
 	}
-	if sg.QueryInterval != time.Duration(0) {
-		tpSG.QueryInterval = sg.QueryInterval.String()
-	}
-	copy(tpSG.StatIDs, sg.StatIDs)
-	copy(tpSG.ThresholdIDs, sg.ThresholdIDs)
-	copy(tpSG.MetricIDs, sg.MetricIDs)
-	copy(tpSG.SortingParameters, sg.SortingParameters)
+	copy(tpRG.StatIDs, rg.StatIDs)
+	copy(tpRG.ThresholdIDs, rg.ThresholdIDs)
+	copy(tpRG.MetricIDs, rg.MetricIDs)
+	copy(tpRG.SortingParameters, rg.SortingParameters)
 	return
 }
 

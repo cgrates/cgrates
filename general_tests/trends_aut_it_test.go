@@ -151,17 +151,17 @@ func testScheduledTrends(t *testing.T) {
 
 	// getting all scheduled trends for a tenant
 	var schedTrends []utils.ScheduledTrend
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefix: []string{}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefixes: []string{}}, &schedTrends); err != nil {
 		t.Error(err)
 	} else if len(schedTrends) != 3 {
 		t.Errorf("expected 3 schedTrends, got %d", len(schedTrends))
 	}
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant1"}}, TrendIDPrefix: []string{}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant1"}}, TrendIDPrefixes: []string{}}, &schedTrends); err != nil {
 		t.Error(err)
 	} else if len(schedTrends) != 2 {
 		t.Errorf("expected 2 schedTrends, got %d", len(schedTrends))
 	}
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant2"}}, TrendIDPrefix: []string{}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant2"}}, TrendIDPrefixes: []string{}}, &schedTrends); err != nil {
 		t.Error(err)
 	} else if len(schedTrends) != 2 {
 		t.Errorf("expected 2 schedTrends, got %d", len(schedTrends))
@@ -179,9 +179,9 @@ func testScheduledTrends(t *testing.T) {
 		},
 	}
 
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefix: []string{"TREND"}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefixes: []string{"TREND"}}, &schedTrends); err != nil {
 		t.Error(err)
-	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(4*time.Second), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Prev")); diff != utils.EmptyString {
+	} else if diff := cmp.Diff(schedTrends[0], expTrends[0], cmpopts.EquateApproxTime(4*time.Second), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Previous")); diff != utils.EmptyString {
 		t.Errorf("unexpected scheduled trends (-want +got)\n%s", diff)
 	}
 
@@ -191,9 +191,9 @@ func testScheduledTrends(t *testing.T) {
 		},
 	}
 
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant1"}}, TrendIDPrefix: []string{"TR_1"}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant1"}}, TrendIDPrefixes: []string{"TR_1"}}, &schedTrends); err != nil {
 		t.Error(err)
-	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Next"), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Prev")); diff != utils.EmptyString {
+	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Next"), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Previous")); diff != utils.EmptyString {
 		t.Errorf("unexpected scheduled trends (-want +got)\n%s", diff)
 	}
 
@@ -203,17 +203,17 @@ func testScheduledTrends2(t *testing.T) {
 
 	// getting all scheduled trends for a tenant
 	var schedTrends []utils.ScheduledTrend
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefix: []string{}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefixes: []string{}}, &schedTrends); err != nil {
 		t.Error(err)
 	} else if len(schedTrends) != 1 {
 		t.Errorf("expected 1 schedTrends, got %d", len(schedTrends))
 	}
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant1"}}, TrendIDPrefix: []string{}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant1"}}, TrendIDPrefixes: []string{}}, &schedTrends); err != nil {
 		t.Error(err)
 	} else if len(schedTrends) != 1 {
 		t.Errorf("expected 1 schedTrends, got %d", len(schedTrends))
 	}
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant2"}}, TrendIDPrefix: []string{}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant2"}}, TrendIDPrefixes: []string{}}, &schedTrends); err != nil {
 		t.Error(err)
 	} else if len(schedTrends) != 2 {
 		t.Errorf("expected 2 schedTrends, got %d", len(schedTrends))
@@ -225,9 +225,9 @@ func testScheduledTrends2(t *testing.T) {
 			Next:    time.Now().Add(1 * time.Minute),
 		},
 	}
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefix: []string{}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}, TrendIDPrefixes: []string{}}, &schedTrends); err != nil {
 		t.Error(err)
-	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(1*time.Minute), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Prev")); diff != utils.EmptyString {
+	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(1*time.Minute), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Previous")); diff != utils.EmptyString {
 		t.Errorf("unexpected scheduled trends (-want +got)\n%s", diff)
 	}
 
@@ -237,9 +237,9 @@ func testScheduledTrends2(t *testing.T) {
 			Next:    time.Now().Add(5 * time.Minute),
 		},
 	}
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant1"}}, TrendIDPrefix: []string{}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant1"}}, TrendIDPrefixes: []string{}}, &schedTrends); err != nil {
 		t.Error(err)
-	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(5*time.Minute), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Prev")); diff != utils.EmptyString {
+	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(5*time.Minute), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Previous")); diff != utils.EmptyString {
 		t.Errorf("unexpected scheduled trends (-want +got)\n%s", diff)
 	}
 
@@ -255,9 +255,9 @@ func testScheduledTrends2(t *testing.T) {
 		},
 	}
 
-	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant2"}}, TrendIDPrefix: []string{"Trend_avg"}}, &schedTrends); err != nil {
+	if err := trendAuQRpc.Call(context.Background(), utils.TrendSv1GetScheduledTrends, &utils.ArgScheduledTrends{TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "tenant2"}}, TrendIDPrefixes: []string{"Trend_avg"}}, &schedTrends); err != nil {
 		t.Error(err)
-	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(10*time.Minute), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Prev")); diff != utils.EmptyString {
+	} else if diff := cmp.Diff(schedTrends, expTrends, cmpopts.EquateApproxTime(10*time.Minute), cmpopts.IgnoreFields(utils.ScheduledTrend{}, "Previous")); diff != utils.EmptyString {
 		t.Errorf("unexpected scheduled trends (-want +got)\n%s", diff)
 	}
 

@@ -1,2 +1,2 @@
-#Tenant[0],Id[1],QueryInterval[2],StatIDs[2],MetricIDs[3],Sorting[4],SortingParameters[5],ThresholdIDs[6]
-cgrates.org,RANK1,15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,TD1;THD2
+#Tenant[0],Id[1],Schedule[2],StatIDs[3],MetricIDs[4],Sorting[5],SortingParameters[6],Stored[7],ThresholdIDs[8]
+cgrates.org,RANK1,@every 15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,true,THD1;THD2

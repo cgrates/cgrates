@@ -13,14 +13,13 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <htrkP://www.gnu.org/licenses/>
+along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package engine
 
 import (
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -33,11 +32,12 @@ type RankingProfileWithAPIOpts struct {
 type RankingProfile struct {
 	Tenant            string
 	ID                string
-	QueryInterval     time.Duration
+	Schedule          string
 	StatIDs           []string
 	MetricIDs         []string
 	Sorting           string
 	SortingParameters []string
+	Stored            bool
 	ThresholdIDs      []string
 }
 
@@ -48,10 +48,10 @@ func (rkp *RankingProfile) TenantID() string {
 // Clone will clone a RankingProfile
 func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 	cln = &RankingProfile{
-		Tenant:        rkP.Tenant,
-		ID:            rkP.ID,
-		QueryInterval: rkP.QueryInterval,
-		Sorting:       rkP.Sorting,
+		Tenant:   rkP.Tenant,
+		ID:       rkP.ID,
+		Schedule: rkP.Schedule,
+		Sorting:  rkP.Sorting,
 	}
 	if rkP.StatIDs != nil {
 		copy(cln.StatIDs, rkP.StatIDs)
@@ -123,7 +123,6 @@ func newRankingSorter(sortingType string, sortingParams []string,
 		return &rankingDescSorter{sortingParams, statMetrics}, nil
 
 	}
-	return
 }
 
 // rankingDescSorter will sort data descendently for metrics in sortingParams or randomly if all equal

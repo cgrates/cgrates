@@ -23,7 +23,6 @@ package v1
 import (
 	"path"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -126,11 +125,11 @@ func testRankingSRPCConn(t *testing.T) {
 func testRankingSLoadAdd(t *testing.T) {
 	rankingProfile := &engine.RankingProfileWithAPIOpts{
 		RankingProfile: &engine.RankingProfile{
-			Tenant:        "cgrates.org",
-			ID:            "SG_Sum",
-			QueryInterval: 2 * time.Minute,
-			StatIDs:       []string{"SQProfile1"},
-			MetricIDs:     []string{"*sum"},
+			Tenant:    "cgrates.org",
+			ID:        "SG_Sum",
+			Schedule:  "@every 15m",
+			StatIDs:   []string{"SQProfile1"},
+			MetricIDs: []string{"*sum"},
 		},
 	}
 
@@ -150,13 +149,13 @@ func testRankingSSetRankingProfile(t *testing.T) {
 	)
 	rankingProfile = &engine.RankingProfileWithAPIOpts{
 		RankingProfile: &engine.RankingProfile{
-			Tenant:        "cgrates.org",
-			ID:            "Ranking1",
-			QueryInterval: time.Second * 15,
-			StatIDs:       []string{"SQ1", "SQ2"},
-			MetricIDs:     []string{"*acc", "*sum"},
-			Sorting:       "*asc",
-			ThresholdIDs:  []string{"THD1", "THD2"}},
+			Tenant:       "cgrates.org",
+			ID:           "Ranking1",
+			Schedule:     "@every 15m",
+			StatIDs:      []string{"SQ1", "SQ2"},
+			MetricIDs:    []string{"*acc", "*sum"},
+			Sorting:      "*asc",
+			ThresholdIDs: []string{"THD1", "THD2"}},
 	}
 	if err := rankingRPC.Call(context.Background(), utils.APIerSv1GetRankingProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Ranking1"}, &reply); err == nil ||
