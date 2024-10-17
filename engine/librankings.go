@@ -71,15 +71,20 @@ func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 }
 
 // NewRankingFromProfile is a constructor for an empty ranking out of it's profile
-func NewRankingFromProfile(rkP *RankingProfile) *Ranking {
-	return &Ranking{
+func NewRankingFromProfile(rkP *RankingProfile) (rk *Ranking) {
+	rk = &Ranking{
 		Tenant:      rkP.Tenant,
 		ID:          rkP.ID,
+		Sorting:     rkP.Sorting,
 		StatMetrics: make(map[string]map[string]float64),
 
 		rkPrfl:    rkP,
 		metricIDs: utils.NewStringSet(rkP.MetricIDs),
 	}
+	if rkP.SortingParameters != nil {
+		copy(rk.SortingParameters, rkP.SortingParameters)
+	}
+	return
 }
 
 type RankingWithAPIOpts struct {
