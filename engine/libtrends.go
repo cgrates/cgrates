@@ -123,7 +123,7 @@ func (t *Trend) Clone() (tC *Trend) {
 }
 
 // AsTrendSummary transforms the trend into TrendSummary
-func (t *Trend) AsTrendSummary() (ts *TrendSummary) {
+func (t *Trend) asTrendSummary() (ts *TrendSummary) {
 	ts = &TrendSummary{
 		Tenant:  t.Tenant,
 		ID:      t.ID,

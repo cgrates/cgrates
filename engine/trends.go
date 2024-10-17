@@ -180,7 +180,9 @@ func (tS *TrendS) processThresholds(trnd *Trend) (err error) {
 		copy(thIDs, trnd.tPrfl.ThresholdIDs)
 	}
 	opts[utils.OptsThresholdsProfileIDs] = thIDs
-	ts := trnd.AsTrendSummary()
+	trnd.tMux.RLock()
+	ts := trnd.asTrendSummary()
+	trnd.tMux.RUnlock()
 	trndEv := &utils.CGREvent{
 		Tenant:  trnd.Tenant,
 		ID:      utils.GenUUID(),
@@ -218,7 +220,9 @@ func (tS *TrendS) processEEs(trnd *Trend) (err error) {
 	opts := map[string]any{
 		utils.MetaEventType: utils.TrendUpdate,
 	}
-	ts := trnd.AsTrendSummary()
+	trnd.tMux.RLock()
+	ts := trnd.asTrendSummary()
+	trnd.tMux.RUnlock()
 	trndEv := &CGREventWithEeIDs{
 		CGREvent: &utils.CGREvent{
 			Tenant:  trnd.Tenant,
