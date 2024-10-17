@@ -148,7 +148,7 @@ func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 
 func TestDynamicDPFieldAsInterface(t *testing.T) {
 
-	dDP := newDynamicDP(nil, nil, nil, "cgrates.org", &Account{})
+	dDP := newDynamicDP(nil, nil, nil, nil, "cgrates.org", &Account{})
 
 	if _, err := dDP.fieldAsInterface([]string{"field"}); err == nil {
 		t.Error(err)

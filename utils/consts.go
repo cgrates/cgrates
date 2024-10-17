@@ -1718,6 +1718,7 @@ const (
 	TrendSv1ScheduleQueries    = "TrendSv1.ScheduleQueries"
 	TrendSv1GetTrend           = "TrendSv1.GetTrend"
 	TrendSv1GetScheduledTrends = "TrendSv1.GetScheduledTrends"
+	TrendSv1GetTrendSummary    = "TrendSv1.GetTrendSummary"
 )
 
 // RankingS APIs
@@ -2263,6 +2264,7 @@ const (
 	StatSConnsCfg     = "stats_conns"
 	ResourceSConnsCfg = "resources_conns"
 	ApierSConnsCfg    = "apiers_conns"
+	TrendSConnsCfg    = "trends_conns"
 )
 
 // RalsCfg

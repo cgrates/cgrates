@@ -342,6 +342,7 @@ const CGRATES_CFG_JSON = `
 	"stats_conns": [],	// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],	// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"apiers_conns": [],	// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"trends_conns": [],	// connections to TrendS for <*trends> filters, empty to disable trends functionality: <""|*internal|$rpc_conns_id>
 },
 
 

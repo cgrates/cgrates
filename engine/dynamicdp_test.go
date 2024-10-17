@@ -35,7 +35,7 @@ import (
 func TestDynamicDpFieldAsInterface(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	ms := utils.MapStorage{}
-	dDp := newDynamicDP([]string{}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}, []string{}, "cgrates.org", ms)
+	dDp := newDynamicDP([]string{}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}, []string{}, []string{}, "cgrates.org", ms)
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{

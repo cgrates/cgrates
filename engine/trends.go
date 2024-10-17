@@ -135,7 +135,6 @@ func (tS *TrendS) computeTrend(tP *TrendProfile) {
 		trnd.Metrics[now][mWt.ID] = mWt
 		trnd.indexesAppendMetric(mWt, now)
 	}
-
 	if err = tS.storeTrend(trnd); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
@@ -180,9 +179,7 @@ func (tS *TrendS) processThresholds(trnd *Trend) (err error) {
 		copy(thIDs, trnd.tPrfl.ThresholdIDs)
 	}
 	opts[utils.OptsThresholdsProfileIDs] = thIDs
-	trnd.tMux.RLock()
 	ts := trnd.asTrendSummary()
-	trnd.tMux.RUnlock()
 	trndEv := &utils.CGREvent{
 		Tenant:  trnd.Tenant,
 		ID:      utils.GenUUID(),
@@ -220,9 +217,7 @@ func (tS *TrendS) processEEs(trnd *Trend) (err error) {
 	opts := map[string]any{
 		utils.MetaEventType: utils.TrendUpdate,
 	}
-	trnd.tMux.RLock()
 	ts := trnd.asTrendSummary()
-	trnd.tMux.RUnlock()
 	trndEv := &CGREventWithEeIDs{
 		CGREvent: &utils.CGREvent{
 			Tenant:  trnd.Tenant,
@@ -560,4 +555,16 @@ func (tS *TrendS) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgSche
 	})
 	*schedTrends = scheduledTrends
 	return nil
+}
+
+func (tS *TrendS) V1GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *TrendSummary) (err error) {
+	var trnd *Trend
+	if trnd, err = tS.dm.GetTrend(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+		return
+	}
+	trnd.tMux.RLock()
+	trndS := trnd.asTrendSummary()
+	trnd.tMux.RUnlock()
+	*reply = *trndS
+	return
 }
