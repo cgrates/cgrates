@@ -82,6 +82,11 @@ func NewRankingFromProfile(rkP *RankingProfile) *Ranking {
 	}
 }
 
+type RankingWithAPIOpts struct {
+	*Ranking
+	APIOpts map[string]any
+}
+
 // Ranking is one unit out of a profile
 type Ranking struct {
 	rMux sync.RWMutex
@@ -97,6 +102,10 @@ type Ranking struct {
 	rkPrfl    *RankingProfile // store here the ranking profile so we can have it at hands further
 	metricIDs utils.StringSet // convert the metricIDs here for faster matching
 
+}
+
+func (r *Ranking) TenantID() string {
+	return utils.ConcatenatedKey(r.Tenant, r.ID)
 }
 
 type rankingSorter interface {

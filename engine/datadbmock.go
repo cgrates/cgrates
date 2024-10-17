@@ -389,6 +389,18 @@ func (dbM *DataDBMock) RemoveTrendDrv(string, string) error {
 	return utils.ErrNotImplemented
 }
 
+func (dbM *DataDBMock) GetRankingDrv(tenant, id string) (*Ranking, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetRankingDrv(*Ranking) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveRankingDrv(string, string) error {
+	return utils.ErrNotImplemented
+}
+
 func (dbM *DataDBMock) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error) {
 	return nil, utils.ErrNotImplemented
 }

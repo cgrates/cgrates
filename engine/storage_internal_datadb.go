@@ -648,6 +648,26 @@ func (iDB *InternalDB) GetRankingProfileDrv(tenant, id string) (sg *RankingProfi
 	return x.(*RankingProfile), nil
 }
 
+func (iDB *InternalDB) GetRankingDrv(tenant, id string) (rn *Ranking, err error) {
+	x, ok := iDB.db.Get(utils.CacheRankings, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*Ranking), nil
+}
+
+func (iDB *InternalDB) SetRankingDrv(rn *Ranking) (err error) {
+	iDB.db.Set(utils.CacheRankings, rn.TenantID(), rn, nil,
+		true, utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) RemoveRankingDrv(tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheRankings, utils.ConcatenatedKey(tenant, id),
+		true, utils.NonTransactional)
+	return
+}
+
 func (iDB *InternalDB) GetThresholdProfileDrv(tenant, id string) (tp *ThresholdProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {

@@ -142,6 +142,22 @@ func (rplSv1 *ReplicatorSv1) GetRankingProfile(ctx *context.Context, tntID *util
 	return nil
 }
 
+// GetRanking is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetRanking(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Ranking) error {
+	engine.UpdateReplicationFilters(utils.RankingPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetRankingDrv(tntID.Tenant, tntID.ID)
+	if err != nil {
+		return err
+	}
+	reply.ID = rcv.ID
+	reply.Tenant = rcv.Tenant
+	reply.Sorting = rcv.Sorting
+	reply.StatMetrics = rcv.StatMetrics
+	reply.SortedStatIDs = rcv.SortedStatIDs
+	reply.SortingParameters = rcv.SortingParameters
+	return nil
+}
+
 // GetTrend is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetTrend(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Trend) error {
 	engine.UpdateReplicationFilters(utils.TrendPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
@@ -447,6 +463,19 @@ func (rplSv1 *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, sq *engin
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sq.APIOpts[utils.CacheOpt]),
 		sq.Tenant, utils.CacheStatQueueProfiles, sq.TenantID(), utils.EmptyString, &sq.FilterIDs, nil, sq.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// SetRanking is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetRanking(ctx *context.Context, arg *engine.RankingWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetRankingDrv(arg.Ranking); err != nil {
+		return
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(arg.APIOpts[utils.CacheOpt]),
+		arg.Tenant, utils.CacheRankings, arg.TenantID(), utils.EmptyString, nil, nil, arg.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -897,6 +926,19 @@ func (rplSv1 *ReplicatorSv1) RemoveRankingProfile(ctx *context.Context, args *ut
 
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
 		args.Tenant, utils.CacheRankingProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveRanking is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveRanking(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemoveRankingDrv(args.Tenant, args.ID); err != nil {
+		return
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheTrends, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
