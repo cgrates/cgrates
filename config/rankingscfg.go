@@ -19,14 +19,20 @@ package config
 
 import (
 	"slices"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type RankingSCfg struct {
-	Enabled    bool
-	StatSConns []string
+	Enabled         bool
+	StatSConns      []string
+	ThresholdSConns []string
+	ScheduledIDs    map[string][]string
+	StoreInterval   time.Duration
+	EEsConns        []string
+	EEsExporterIDs  []string
 }
 
 func (rnk *RankingSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
@@ -47,15 +53,46 @@ func (rnk *RankingSCfg) loadFromJSONCfg(jsnCfg *RankingSJsonCfg) (err error) {
 	if jsnCfg.Stats_conns != nil {
 		rnk.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
 	}
+	if jsnCfg.Thresholds_conns != nil {
+		rnk.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+	}
+	if jsnCfg.Scheduled_ids != nil {
+		rnk.ScheduledIDs = jsnCfg.Scheduled_ids
+	}
+	if jsnCfg.Store_interval != nil {
+		if rnk.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
+			return
+		}
+	}
+	if jsnCfg.Ees_conns != nil {
+		rnk.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	}
+	if jsnCfg.Ees_exporter_ids != nil {
+		rnk.EEsExporterIDs = append(rnk.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
+	}
 	return
 }
 
 func (rnk *RankingSCfg) AsMapInterface(string) any {
 	mp := map[string]any{
-		utils.EnabledCfg: rnk.Enabled,
+		utils.EnabledCfg:        rnk.Enabled,
+		utils.StoreIntervalCfg:  utils.EmptyString,
+		utils.EEsExporterIDsCfg: slices.Clone(rnk.EEsExporterIDs),
 	}
 	if rnk.StatSConns != nil {
 		mp[utils.StatSConnsCfg] = getInternalJSONConns(rnk.StatSConns)
+	}
+	if rnk.ThresholdSConns != nil {
+		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(rnk.ThresholdSConns)
+	}
+	if rnk.ScheduledIDs != nil {
+		mp[utils.ScheduledIDsCfg] = rnk.ScheduledIDs
+	}
+	if rnk.StoreInterval != 0 {
+		mp[utils.StoreIntervalCfg] = rnk.StoreInterval.String()
+	}
+	if rnk.EEsConns != nil {
+		mp[utils.EEsConnsCfg] = getInternalJSONConns(rnk.EEsConns)
 	}
 	return mp
 }
@@ -65,17 +102,38 @@ func (rnk RankingSCfg) CloneSection() Section { return rnk.Clone() }
 
 func (rnk *RankingSCfg) Clone() (cln *RankingSCfg) {
 	cln = &RankingSCfg{
-		Enabled: rnk.Enabled,
+		Enabled:       rnk.Enabled,
+		StoreInterval: rnk.StoreInterval,
 	}
 	if rnk.StatSConns != nil {
 		cln.StatSConns = slices.Clone(rnk.StatSConns)
+	}
+	if rnk.ThresholdSConns != nil {
+		cln.ThresholdSConns = slices.Clone(rnk.ThresholdSConns)
+	}
+	if rnk.ScheduledIDs != nil {
+		cln.ScheduledIDs = make(map[string][]string)
+		for key, value := range rnk.ScheduledIDs {
+			cln.ScheduledIDs[key] = slices.Clone(value)
+		}
+	}
+	if rnk.EEsConns != nil {
+		cln.EEsConns = slices.Clone(rnk.EEsConns)
+	}
+	if rnk.EEsExporterIDs != nil {
+		cln.EEsExporterIDs = slices.Clone(rnk.EEsExporterIDs)
 	}
 	return
 }
 
 type RankingSJsonCfg struct {
-	Enabled     *bool
-	Stats_conns *[]string
+	Enabled          *bool
+	Stats_conns      *[]string
+	Thresholds_conns *[]string
+	Scheduled_ids    map[string][]string
+	Store_interval   *string
+	Ees_conns        *[]string
+	Ees_exporter_ids *[]string
 }
 
 func diffRankingsJsonCfg(d *RankingSJsonCfg, v1, v2 *RankingSCfg) *RankingSJsonCfg {
@@ -88,5 +146,18 @@ func diffRankingsJsonCfg(d *RankingSJsonCfg, v1, v2 *RankingSCfg) *RankingSJsonC
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
 		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
 	}
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
+		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+	}
+	if v1.StoreInterval != v2.StoreInterval {
+		d.Store_interval = utils.StringPointer(v2.StoreInterval.String())
+	}
+	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
+		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+	}
+	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
+		d.Ees_exporter_ids = &v2.EEsExporterIDs
+	}
+	d.Scheduled_ids = diffMapStringSlice(d.Scheduled_ids, v1.ScheduledIDs, v2.ScheduledIDs)
 	return d
 }

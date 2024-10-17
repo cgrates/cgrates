@@ -1187,6 +1187,11 @@ const CGRATES_CFG_JSON = `
 "rankings":{								// RankingS config
 	"enabled": false,						// starts RankingS service: <true|false>.
 	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],
+	"scheduled_ids": {},
+	"store_interval": "",
+	"ees_conns": [],
+	"ees_exporter_ids": []
 },
 
 "routes": {									// RouteS config
