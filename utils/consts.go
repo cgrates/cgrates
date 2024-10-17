@@ -1019,6 +1019,8 @@ const (
 	MetaNodeID              = "*node_id"
 	MetaAscending           = "*ascending"
 	MetaDescending          = "*descending"
+	MetaDesc                = "*desc"
+	MetaAsc                 = "*asc"
 )
 
 // MetaMetrics

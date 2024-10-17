@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"sort"
 	"sync"
 
 	"github.com/cgrates/cgrates/utils"
@@ -102,7 +103,8 @@ type rankingSorter interface {
 }
 
 // rankingSortStats will return the list of sorted statIDs out of the sortingData map
-func rankingSortStats(sortingType string, sortingParams []string, statMetrics map[string]map[string]float64) (sortedStatIDs []string, err error) {
+func rankingSortStats(sortingType string, sortingParams []string,
+	statMetrics map[string]map[string]float64) (sortedStatIDs []string, err error) {
 	var rnkSrtr rankingSorter
 	if rnkSrtr, err = newRankingSorter(sortingType, sortingParams, statMetrics); err != nil {
 		return
@@ -119,18 +121,59 @@ func newRankingSorter(sortingType string, sortingParams []string,
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(sortingType)
 		return
-	case utils.MetaDescending:
-		return &rankingDescSorter{sortingParams, statMetrics}, nil
-
+	case utils.MetaDesc:
+		return newRankingDescSorter(sortingParams, statMetrics), nil
 	}
+	return
+}
+
+// newRankingDescSorter is a constructor for rankingDescSorter
+func newRankingDescSorter(sortingParams []string,
+	statMetrics map[string]map[string]float64) (rkDsrtr *rankingDescSorter) {
+	rkDsrtr = &rankingDescSorter{
+		sortingParams,
+		statMetrics,
+		make([]string, 0, len(statMetrics))}
+	for statID := range rkDsrtr.statMetrics {
+		rkDsrtr.statIDs = append(rkDsrtr.statIDs, statID)
+	}
+	return
 }
 
 // rankingDescSorter will sort data descendently for metrics in sortingParams or randomly if all equal
 type rankingDescSorter struct {
 	sortingParams []string
 	statMetrics   map[string]map[string]float64
+
+	statIDs []string // list of keys of the statMetrics
 }
 
-func (rkDsrtr *rankingDescSorter) sortStatIDs() (statIDs []string) {
-	return
+// sortStatIDs implements rankingSorter interface
+func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
+	if len(rkDsrtr.statIDs) == 0 {
+		return rkDsrtr.statIDs
+	}
+	sort.Slice(rkDsrtr.statIDs, func(i, j int) bool {
+		for _, metricID := range rkDsrtr.sortingParams {
+			val1, hasMetric1 := rkDsrtr.statMetrics[rkDsrtr.statIDs[i]][metricID]
+			if !hasMetric1 {
+				return false
+			}
+			val2, hasMetric2 := rkDsrtr.statMetrics[rkDsrtr.statIDs[j]][metricID]
+			if !hasMetric2 {
+				return true
+			}
+			//in case we have the same value for the current metricID we skip to the next one
+			if val1 == val2 {
+				continue
+			}
+			if val1 > val2 {
+				return true
+			}
+			return false
+		}
+		//in case that we have the same value for all params we return randomly
+		return utils.BoolGenerator().RandomBool()
+	})
+	return rkDsrtr.statIDs
 }
