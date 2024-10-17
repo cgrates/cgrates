@@ -43,3 +43,24 @@ func TestRankingDescSorterSortStatIDs(t *testing.T) {
 		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
 	}
 }
+
+func TestRankingAscSorterSortStatIDs(t *testing.T) {
+	statMetrics := map[string]map[string]float64{
+		"STATS1": {"*acc": 12.1, "*tcc": 24.2},
+		"STATS2": {"*acc": 12.1, "*tcc": 24.3},
+		"STATS3": {"*acc": 10.1, "*tcc": 25.3},
+		"STATS4": {"*tcc": 26.3},
+	}
+	sortMetrics := []string{"*acc", "*tcc"}
+	rtAscSrtr := newRankingAscSorter(sortMetrics, statMetrics)
+	eStatIDs := []string{"STATS3", "STATS1", "STATS2", "STATS4"}
+	if statIDs := rtAscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
+		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
+	}
+	sortMetrics = []string{"*tcc", "*acc"}
+	rtAscSrtr = newRankingAscSorter(sortMetrics, statMetrics)
+	eStatIDs = []string{"STATS1", "STATS2", "STATS3", "STATS4"}
+	if statIDs := rtAscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
+		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
+	}
+}

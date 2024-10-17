@@ -123,8 +123,9 @@ func newRankingSorter(sortingType string, sortingParams []string,
 		return
 	case utils.MetaDesc:
 		return newRankingDescSorter(sortingParams, statMetrics), nil
+	case utils.MetaAsc:
+		return newRankingAscSorter(sortingParams, statMetrics), nil
 	}
-	return
 }
 
 // newRankingDescSorter is a constructor for rankingDescSorter
@@ -140,7 +141,7 @@ func newRankingDescSorter(sortingParams []string,
 	return
 }
 
-// rankingDescSorter will sort data descendently for metrics in sortingParams or randomly if all equal
+// rankingDescSorter will sort data descendent for metrics in sortingParams or random if all equal
 type rankingDescSorter struct {
 	sortingParams []string
 	statMetrics   map[string]map[string]float64
@@ -176,4 +177,55 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 		return utils.BoolGenerator().RandomBool()
 	})
 	return rkDsrtr.statIDs
+}
+
+// newRankingAscSorter is a constructor for rankingAscSorter
+func newRankingAscSorter(sortingParams []string,
+	statMetrics map[string]map[string]float64) (rkASrtr *rankingAscSorter) {
+	rkASrtr = &rankingAscSorter{
+		sortingParams,
+		statMetrics,
+		make([]string, 0, len(statMetrics))}
+	for statID := range rkASrtr.statMetrics {
+		rkASrtr.statIDs = append(rkASrtr.statIDs, statID)
+	}
+	return
+}
+
+// rankingAscSorter will sort data ascendent for metrics in sortingParams or randomly if all equal
+type rankingAscSorter struct {
+	sortingParams []string
+	statMetrics   map[string]map[string]float64
+
+	statIDs []string // list of keys of the statMetrics
+}
+
+// sortStatIDs implements rankingSorter interface
+func (rkASrtr *rankingAscSorter) sortStatIDs() []string {
+	if len(rkASrtr.statIDs) == 0 {
+		return rkASrtr.statIDs
+	}
+	sort.Slice(rkASrtr.statIDs, func(i, j int) bool {
+		for _, metricID := range rkASrtr.sortingParams {
+			val1, hasMetric1 := rkASrtr.statMetrics[rkASrtr.statIDs[i]][metricID]
+			if !hasMetric1 {
+				return false
+			}
+			val2, hasMetric2 := rkASrtr.statMetrics[rkASrtr.statIDs[j]][metricID]
+			if !hasMetric2 {
+				return true
+			}
+			//in case we have the same value for the current metricID we skip to the next one
+			if val1 == val2 {
+				continue
+			}
+			if val2 > val1 {
+				return true
+			}
+			return false
+		}
+		//in case that we have the same value for all params we return randomly
+		return utils.BoolGenerator().RandomBool()
+	})
+	return rkASrtr.statIDs
 }
