@@ -28,16 +28,17 @@ func TestRankingDescSorterSortStatIDs(t *testing.T) {
 		"STATS1": {"*acc": 12.1, "*tcc": 24.2},
 		"STATS2": {"*acc": 12.1, "*tcc": 24.3},
 		"STATS3": {"*acc": 10.1, "*tcc": 25.3},
+		"STATS4": {"*tcc": 26.3},
 	}
 	sortMetrics := []string{"*acc", "*tcc"}
-	rdscSrtr := newRankingDescSorter(sortMetrics,statMetrics)
-	eStatIDs := []string{"STATS2", "STATS1", "STATS3"}
+	rdscSrtr := newRankingDescSorter(sortMetrics, statMetrics)
+	eStatIDs := []string{"STATS2", "STATS1", "STATS3", "STATS4"}
 	if statIDs := rdscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
 		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
 	}
-	sortMetrics = []string{"*tcc", "*acc"} // changed the order of checks, stats3 should come first
-	rdscSrtr = newRankingDescSorter(sortMetrics,statMetrics)
-	eStatIDs = []string{"STATS3", "STATS2", "STATS1"}
+	sortMetrics = []string{"*tcc", "*acc"} // changed the order of checks, stats4 should come first
+	rdscSrtr = newRankingDescSorter(sortMetrics, statMetrics)
+	eStatIDs = []string{"STATS4", "STATS3", "STATS2", "STATS1"}
 	if statIDs := rdscSrtr.sortStatIDs(); !reflect.DeepEqual(eStatIDs, statIDs) {
 		t.Errorf("Expecting: %v, received %v", eStatIDs, statIDs)
 	}
