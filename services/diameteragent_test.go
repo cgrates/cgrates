@@ -44,7 +44,7 @@ func TestNewDiameterAgent(t *testing.T) {
 	connMgr := &engine.ConnManager{}
 	srvDep := make(map[string]*sync.WaitGroup)
 
-	service := NewDiameterAgent(cfg, filterSChan, shdChan, connMgr, srvDep)
+	service := NewDiameterAgent(cfg, filterSChan, shdChan, connMgr, nil, srvDep)
 
 	da, ok := service.(*DiameterAgent)
 	if !ok {

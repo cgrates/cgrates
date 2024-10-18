@@ -535,7 +535,6 @@ type DiameterAgentJsonCfg struct {
 	Origin_realm         *string
 	Vendor_id            *int
 	Product_name         *string
-	Concurrent_requests  *int
 	Synced_conn_requests *bool
 	Asr_template         *string
 	Rar_template         *string
