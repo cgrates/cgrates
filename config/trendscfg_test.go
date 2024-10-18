@@ -140,6 +140,7 @@ func TestTrendSLoadFromJSONCfgEesExporterIDs(t *testing.T) {
 
 func TestTrendSCfgAsMapInterface(t *testing.T) {
 	storeInterval := 10 * time.Second
+	storeUncompressedLimit := 500
 	eesExporterIDs := []string{"exporter1", "exporter2"}
 	statSConns := []string{"statConn1"}
 	thresholdSConns := []string{"thresholdConn1"}
@@ -147,37 +148,37 @@ func TestTrendSCfgAsMapInterface(t *testing.T) {
 	eesConns := []string{"eesConn1"}
 
 	trendCfg := TrendSCfg{
-		Enabled:         true,
-		StatSConns:      statSConns,
-		ThresholdSConns: thresholdSConns,
-		ScheduledIDs:    scheduledIDs,
-		StoreInterval:   storeInterval,
-		EEsConns:        eesConns,
-		EEsExporterIDs:  eesExporterIDs,
+		Enabled:                true,
+		StatSConns:             statSConns,
+		ThresholdSConns:        thresholdSConns,
+		ScheduledIDs:           scheduledIDs,
+		StoreInterval:          storeInterval,
+		StoreUncompressedLimit: storeUncompressedLimit,
+		EEsConns:               eesConns,
+		EEsExporterIDs:         eesExporterIDs,
 	}
-
 	expectedMap := map[string]any{
-		utils.EnabledCfg:         true,
-		utils.StoreIntervalCfg:   storeInterval.String(),
-		utils.StatSConnsCfg:      getInternalJSONConns(statSConns),
-		utils.ThresholdSConnsCfg: getInternalJSONConns(thresholdSConns),
-		utils.ScheduledIDsCfg:    scheduledIDs,
-		utils.EEsConnsCfg:        getInternalJSONConns(eesConns),
-		utils.EEsExporterIDsCfg:  eesExporterIDs,
+		utils.EnabledCfg:                true,
+		utils.StoreIntervalCfg:          storeInterval.String(),
+		utils.StoreUncompressedLimitCfg: storeUncompressedLimit,
+		utils.StatSConnsCfg:             getInternalJSONConns(statSConns),
+		utils.ThresholdSConnsCfg:        getInternalJSONConns(thresholdSConns),
+		utils.ScheduledIDsCfg:           scheduledIDs,
+		utils.EEsConnsCfg:               getInternalJSONConns(eesConns),
+		utils.EEsExporterIDsCfg:         eesExporterIDs,
 	}
-
 	result := trendCfg.AsMapInterface("").(map[string]any)
-
 	if !reflect.DeepEqual(result, expectedMap) {
 		t.Errorf("Expected: %+v, got: %+v", expectedMap, result)
 	}
-
 	trendCfg.StoreInterval = 0
 	expectedMap[utils.StoreIntervalCfg] = utils.EmptyString
 	result = trendCfg.AsMapInterface("").(map[string]any)
-
 	if result[utils.StoreIntervalCfg] != utils.EmptyString {
 		t.Errorf("Expected StoreInterval to be '%s', but got: %v", utils.EmptyString, result[utils.StoreIntervalCfg])
+	}
+	if result[utils.StoreUncompressedLimitCfg] != storeUncompressedLimit {
+		t.Errorf("Expected StoreUncompressedLimit to be %d, but got: %v", storeUncompressedLimit, result[utils.StoreUncompressedLimitCfg])
 	}
 }
 
@@ -264,13 +265,14 @@ func TestDiffTrendSJsonCfg(t *testing.T) {
 
 func TestTrendSCfgClone(t *testing.T) {
 	original := &TrendSCfg{
-		Enabled:         true,
-		StatSConns:      []string{"conn1", "conn2"},
-		ThresholdSConns: []string{"thresh1", "thresh2"},
-		ScheduledIDs:    map[string][]string{"tenant1": {"id1", "id2"}, "tenant2": {"id3"}},
-		StoreInterval:   30 * time.Second,
-		EEsConns:        []string{"eeconn1", "eeconn2"},
-		EEsExporterIDs:  []string{"exporter1", "exporter2"},
+		Enabled:                true,
+		StatSConns:             []string{"conn1", "conn2"},
+		ThresholdSConns:        []string{"thresh1", "thresh2"},
+		ScheduledIDs:           map[string][]string{"tenant1": {"id1", "id2"}, "tenant2": {"id3"}},
+		StoreInterval:          30 * time.Second,
+		StoreUncompressedLimit: 500,
+		EEsConns:               []string{"eeconn1", "eeconn2"},
+		EEsExporterIDs:         []string{"exporter1", "exporter2"},
 	}
 
 	cloned := original.Clone()
@@ -278,19 +280,20 @@ func TestTrendSCfgClone(t *testing.T) {
 	if cloned.Enabled != original.Enabled {
 		t.Errorf("Enabled field mismatch: expected %v, got %v", original.Enabled, cloned.Enabled)
 	}
-
 	if !reflect.DeepEqual(cloned.StatSConns, original.StatSConns) {
 		t.Errorf("StatSConns mismatch: expected %v, got %v", original.StatSConns, cloned.StatSConns)
 	}
 	if !reflect.DeepEqual(cloned.ThresholdSConns, original.ThresholdSConns) {
 		t.Errorf("ThresholdSConns mismatch: expected %v, got %v", original.ThresholdSConns, cloned.ThresholdSConns)
 	}
-
 	if !reflect.DeepEqual(cloned.ScheduledIDs, original.ScheduledIDs) {
 		t.Errorf("ScheduledIDs mismatch: expected %v, got %v", original.ScheduledIDs, cloned.ScheduledIDs)
 	}
 	if cloned.StoreInterval != original.StoreInterval {
 		t.Errorf("StoreInterval mismatch: expected %v, got %v", original.StoreInterval, cloned.StoreInterval)
+	}
+	if cloned.StoreUncompressedLimit != original.StoreUncompressedLimit {
+		t.Errorf("StoreUncompressedLimit mismatch: expected %v, got %v", original.StoreUncompressedLimit, cloned.StoreUncompressedLimit)
 	}
 	if !reflect.DeepEqual(cloned.EEsConns, original.EEsConns) {
 		t.Errorf("EEsConns mismatch: expected %v, got %v", original.EEsConns, cloned.EEsConns)
@@ -304,6 +307,7 @@ func TestTrendSCfgClone(t *testing.T) {
 	cloned.ThresholdSConns[0] = "modified_thresh"
 	cloned.ScheduledIDs["tenant1"][0] = "modified_id"
 	cloned.StoreInterval = 45 * time.Second
+	cloned.StoreUncompressedLimit = 1000
 	cloned.EEsConns[0] = "modified_eeconn"
 	cloned.EEsExporterIDs[0] = "modified_exporter"
 
@@ -321,6 +325,9 @@ func TestTrendSCfgClone(t *testing.T) {
 	}
 	if cloned.StoreInterval == original.StoreInterval {
 		t.Error("Modifying cloned.StoreInterval should not affect original.StoreInterval")
+	}
+	if cloned.StoreUncompressedLimit == original.StoreUncompressedLimit {
+		t.Error("Modifying cloned.StoreUncompressedLimit should not affect original.StoreUncompressedLimit")
 	}
 	if reflect.DeepEqual(cloned.EEsConns, original.EEsConns) {
 		t.Error("Modifying cloned.EEsConns should not affect original.EEsConns")
@@ -469,5 +476,68 @@ func TestDiffTrendsJsonCfgEEsExporterIDs(t *testing.T) {
 	d = diffTrendsJsonCfg(nil, v1, v2)
 	if d.Ees_exporter_ids != nil {
 		t.Errorf("Expected Ees_exporter_ids to be nil, but got: %v", d.Ees_exporter_ids)
+	}
+}
+
+func TestTrendSCfgLoadFromJSONCfgStoreUncompressedLimit(t *testing.T) {
+	tests := []struct {
+		name          string
+		initialLimit  int
+		jsonLimit     *int
+		expectedLimit int
+	}{
+		{
+			name:          "StoreUncompressedLimit is set",
+			initialLimit:  0,
+			jsonLimit:     utils.IntPointer(1000),
+			expectedLimit: 1000,
+		},
+		{
+			name:          "StoreUncompressedLimit is nil",
+			initialLimit:  500,
+			jsonLimit:     nil,
+			expectedLimit: 500,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			trendSCfg := &TrendSCfg{
+				StoreUncompressedLimit: tt.initialLimit,
+			}
+
+			jsnCfg := &TrendSJsonCfg{
+				Store_uncompressed_limit: tt.jsonLimit,
+			}
+
+			err := trendSCfg.loadFromJSONCfg(jsnCfg)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if trendSCfg.StoreUncompressedLimit != tt.expectedLimit {
+				t.Errorf("Expected StoreUncompressedLimit to be %d, got %d", tt.expectedLimit, trendSCfg.StoreUncompressedLimit)
+			}
+		})
+	}
+}
+
+func TestDiffTrendsJsonCfgStoreUncompressedLimit(t *testing.T) {
+	v1 := &TrendSCfg{
+		StoreUncompressedLimit: 500,
+	}
+	v2 := &TrendSCfg{
+		StoreUncompressedLimit: 1000,
+	}
+	diff := diffTrendsJsonCfg(nil, v1, v2)
+	if diff.Store_uncompressed_limit == nil {
+		t.Error("Expected Store_uncompressed_limit to be set, but got nil")
+	} else if *diff.Store_uncompressed_limit != v2.StoreUncompressedLimit {
+		t.Errorf("Store_uncompressed_limit mismatch: expected %v, got %v", v2.StoreUncompressedLimit, *diff.Store_uncompressed_limit)
+	}
+	v2.StoreUncompressedLimit = 500
+	diff = diffTrendsJsonCfg(nil, v1, v2)
+	if diff.Store_uncompressed_limit != nil {
+		t.Errorf("Expected Store_uncompressed_limit to be nil when limits are the same, but got %v", *diff.Store_uncompressed_limit)
 	}
 }
