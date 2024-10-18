@@ -1176,23 +1176,26 @@ const CGRATES_CFG_JSON = `
 
 "trends":{									// TrendS config
 	"enabled": false,						// starts TrendS service: <true|false>.
+	"store_interval": "",                   // dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"store_uncompressed_limit": 0,	        // used to compress metrics
 	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+	"scheduled_ids": {},                    // autoload these trend ids on start
 	"thresholds_conns": [],					// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"scheduled_ids": {},
-	"store_interval": "",
-	"ees_conns": [],			 
-	"ees_exporter_ids": []                      
+	"ees_conns": [],			            // connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+	"ees_exporter_ids": []                  // list of EventExporter profiles to use for real-time trendSummary exports                  
 },
+
 
 "rankings":{								// RankingS config
 	"enabled": false,						// starts RankingS service: <true|false>.
+	"store_interval": "",                   // dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-	"thresholds_conns": [],
-	"scheduled_ids": {},
-	"store_interval": "",
-	"ees_conns": [],
-	"ees_exporter_ids": []
+	"scheduled_ids": {},                    // autoload these ranking ids on start
+	"thresholds_conns": [],                 // connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+	"ees_conns": [],                        // connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+	"ees_exporter_ids": []                  // list of EventExporter profiles to use for real-time rankingSummary exports
 },
+
 
 "routes": {									// RouteS config
 	"enabled": false,						// starts RouteS service: <true|false>.
