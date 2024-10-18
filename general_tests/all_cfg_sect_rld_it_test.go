@@ -723,7 +723,6 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 			"origin_realm": "cgrates.org",
 			"vendor_id": 1,
 			"product_name": "CGRateS",
-			"concurrent_requests": -1,
 			"synced_conn_requests": false,
 			"asr_template": "asr_template",
 			"rar_template": "rar_template",
@@ -749,7 +748,7 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"diameter_agent\":{\"asr_template\":\"asr_template\",\"concurrent_requests\":-1,\"dictionaries_path\":\"/usr/share/cgrates/diameter/dict/\",\"enabled\":true,\"forced_disconnect\":\"*none\",\"listen\":\"127.0.0.1:3868\",\"listen_net\":\"tcp\",\"origin_host\":\"CGR-DA\",\"origin_realm\":\"cgrates.org\",\"product_name\":\"CGRateS\",\"rar_template\":\"rar_template\",\"request_processors\":[{\"filters\":[],\"flags\":[\"1\"],\"id\":\"cgrates\",\"reply_fields\":[{\"path\":\"randomPath\",\"tag\":\"randomPath\"}],\"request_fields\":[{\"path\":\"randomPath\",\"tag\":\"randomPath\"}],\"tenant\":\"1\",\"timezone\":\"\"}],\"sessions_conns\":[\"*birpc_internal\"],\"synced_conn_requests\":false,\"vendor_id\":1}}"
+	cfgStr := `{"diameter_agent":{"asr_template":"asr_template","dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":true,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"rar_template","request_processors":[{"filters":[],"flags":["1"],"id":"cgrates","reply_fields":[{"path":"randomPath","tag":"randomPath"}],"request_fields":[{"path":"randomPath","tag":"randomPath"}],"tenant":"1","timezone":""}],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":1}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:  "cgrates.org",

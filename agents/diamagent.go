@@ -48,11 +48,12 @@ const (
 
 // NewDiameterAgent initializes a new DiameterAgent
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) (*DiameterAgent, error) {
+	connMgr *engine.ConnManager, caps *engine.Caps) (*DiameterAgent, error) {
 	da := &DiameterAgent{
 		cgrCfg:  cgrCfg,
 		filterS: filterS,
 		connMgr: connMgr,
+		caps:    caps,
 		raa:     make(map[string]chan *diam.Message),
 		dpa:     make(map[string]chan *diam.Message),
 		peers:   make(map[string]diam.Conn),
@@ -89,18 +90,17 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 
 // DiameterAgent describes the diameter server
 type DiameterAgent struct {
-	cgrCfg   *config.CGRConfig
-	filterS  *engine.FilterS
-	connMgr  *engine.ConnManager
-	aReqs    int
-	aReqsLck sync.RWMutex
-	raa      map[string]chan *diam.Message
-	raaLck   sync.RWMutex
+	cgrCfg  *config.CGRConfig
+	filterS *engine.FilterS
+	connMgr *engine.ConnManager
+	caps    *engine.Caps
 
+	raaLck   sync.RWMutex
+	raa      map[string]chan *diam.Message
 	peersLck sync.Mutex
 	peers    map[string]diam.Conn // peer index by OriginHost;OriginRealm
-	dpa      map[string]chan *diam.Message
 	dpaLck   sync.RWMutex
+	dpa      map[string]chan *diam.Message
 
 	ctx *context.Context
 }
@@ -170,7 +170,7 @@ func (da *DiameterAgent) handlers() diam.Handler {
 		dSM.HandleFunc(raa, da.handleRAA)
 		dSM.HandleFunc(dpa, da.handleDPA)
 	} else {
-		dSM.HandleFunc(all, da.handleMessageAsync)
+		dSM.HandleFunc(all, func(c diam.Conn, m *diam.Message) { go da.handleMessage(c, m) })
 		dSM.HandleFunc(raa, func(c diam.Conn, m *diam.Message) { go da.handleRAA(c, m) })
 		dSM.HandleFunc(dpa, func(c diam.Conn, m *diam.Message) { go da.handleDPA(c, m) })
 	}
@@ -181,11 +181,6 @@ func (da *DiameterAgent) handlers() diam.Handler {
 		}
 	}()
 	return dSM
-}
-
-// handleMessageAsync will dispatch the message into it's own goroutine
-func (da *DiameterAgent) handleMessageAsync(c diam.Conn, m *diam.Message) {
-	go da.handleMessage(c, m)
 }
 
 // handleALL is the handler of all messages coming in via Diameter
@@ -251,24 +246,12 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			return
 		}
 	}
-	// handle MaxActiveReqs
-	if da.cgrCfg.DiameterAgentCfg().ConcurrentReqs != -1 {
-		da.aReqsLck.Lock()
-		if da.aReqs == da.cgrCfg.DiameterAgentCfg().ConcurrentReqs {
-			utils.Logger.Err(
-				fmt.Sprintf("<%s> denying request due to maximum active requests reached: %d, message: %s",
-					utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().ConcurrentReqs, m))
-			writeOnConn(c, diamErr)
-			da.aReqsLck.Unlock()
+	if da.caps.IsLimited() {
+		if err := da.caps.Allocate(); err != nil {
+			writeOnConn(c, diamBareErr(m, diam.TooBusy))
 			return
 		}
-		da.aReqs++
-		da.aReqsLck.Unlock()
-		defer func() { // schedule decrement when returning out of function
-			da.aReqsLck.Lock()
-			da.aReqs--
-			da.aReqsLck.Unlock()
-		}()
+		defer da.caps.Deallocate()
 	}
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	opts := utils.MapStorage{}
