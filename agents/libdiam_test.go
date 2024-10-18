@@ -1209,45 +1209,6 @@ func TestLibDiamHeaderLen(t *testing.T) {
 	}
 }
 
-func TestLibdiamDiamBareErr(t *testing.T) {
-	testMessage := &diam.Message{
-		Header: &diam.Header{
-			CommandFlags: 0,
-		},
-	}
-	resCode := uint32(200)
-	returnedMessage := diamBareErr(testMessage, resCode)
-	if returnedMessage == nil {
-		t.Error("Expected a non-nil message, got nil")
-		return
-	}
-	if returnedMessage.Header.CommandFlags != diam.ErrorFlag {
-		t.Errorf("Expected CommandFlags to be %d, got %d", diam.ErrorFlag, returnedMessage.Header.CommandFlags)
-	}
-}
-
-func TestLibdiamDiamErr(t *testing.T) {
-	tMessage := &diam.Message{
-		Header: &diam.Header{
-			CommandFlags: 0,
-		},
-	}
-	resCode := uint32(200)
-	reqVars := &utils.DataNode{}
-	tpl := []*config.FCTemplate{}
-	tnt := "cgrates.org"
-	tmz := "UTC"
-	filterS := &engine.FilterS{}
-	returnedMessage, err := diamErr(tMessage, resCode, reqVars, tpl, tnt, tmz, filterS)
-	if err != nil {
-		t.Errorf("Expected no error, but got: %v", err)
-	}
-	if returnedMessage == nil {
-		t.Error("Expected a non-nil diam.Message, got nil")
-	}
-
-}
-
 func TestLibDiamAVPAsString(t *testing.T) {
 	testCases := []struct {
 		name      string

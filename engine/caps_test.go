@@ -183,3 +183,13 @@ func TestCapsStatsGetAverageOnEvict(t *testing.T) {
 	}
 	Cache = tmp
 }
+
+func BenchmarkCaps(b *testing.B) {
+	caps := NewCaps(10, utils.MetaBusy)
+	for i := 0; i < b.N; i++ {
+		if caps.IsLimited() {
+			caps.Allocate()
+			caps.Deallocate()
+		}
+	}
+}

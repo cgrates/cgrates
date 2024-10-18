@@ -65,7 +65,6 @@
 	"origin_realm": "diameter.test",							
 	"vendor_id": 0,											
 	"product_name": "CGRateS",								
-	"concurrent_requests": -1,
 	"synced_conn_requests": false,							
 	"asr_template": "*asr",
 	"rar_template": "*rar",

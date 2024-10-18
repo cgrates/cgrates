@@ -159,26 +159,6 @@ func TestDiamItBiRPC(t *testing.T) {
 	}
 }
 
-func TestDiamItMaxConn(t *testing.T) {
-	switch *utils.DBType {
-	case utils.MetaInternal:
-		diamConfigDIR = "diamagentmaxconn_internal"
-	case utils.MetaMySQL:
-		diamConfigDIR = "diamagentmaxconn_mysql"
-	case utils.MetaMongo:
-		diamConfigDIR = "diamagentmaxconn_mongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, stest := range sTestsDiam[:7] {
-		t.Run(diamConfigDIR, stest)
-	}
-	t.Run(diamConfigDIR, testDiamItDryRunMaxConn)
-	t.Run(diamConfigDIR, testDiamItKillEngine)
-}
-
 func TestDiamItSessionDisconnect(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -522,75 +502,6 @@ func testDiamItDryRun(t *testing.T) {
 		}
 		eVal = "6" // sum of items
 		if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
-			t.Error(err)
-		} else if len(avps) == 0 {
-			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
-			t.Errorf("expecting: %s, received: <%s>", eVal, val)
-		}
-	}
-}
-
-func testDiamItDryRunMaxConn(t *testing.T) {
-	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
-	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
-	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
-	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-	ccr.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-	ccr.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
-	ccr.NewAVP(avp.UserName, avp.Mbit, 0, datatype.UTF8String("CGR-DA"))
-	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
-	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("TestDiamItDryRun")) // Match specific DryRun profile
-	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
-	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
-	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))
-	ccr.NewAVP(avp.TerminationCause, avp.Mbit, 0, datatype.Enumerated(1))
-	if _, err := ccr.NewAVP("Framed-IP-Address", avp.Mbit, 0, datatype.UTF8String("10.228.16.4")); err != nil {
-		t.Error(err)
-	}
-	for i := 0; i < *interations; i++ {
-		if err := diamClnt.SendMessage(ccr); err != nil {
-			t.Error(err)
-		}
-		msg := diamClnt.ReceivedMessage(rplyTimeout)
-		if msg == nil {
-			t.Fatal("No message returned")
-		}
-		// Result-Code
-		eVal := "5012"
-		if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
-			t.Error(err)
-		} else if len(avps) == 0 {
-			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
-			t.Errorf("expecting: %s, received: <%s>", eVal, val)
-		}
-		eVal = "cgrates;1451911932;00082"
-		if avps, err := msg.FindAVPsWithPath([]any{"Session-Id"}, dict.UndefinedVendorID); err != nil {
-			t.Error(err)
-		} else if len(avps) == 0 {
-			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
-			t.Errorf("expecting: %s, received: <%s>", eVal, val)
-		}
-		eVal = "CGR-DA"
-		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Host"}, dict.UndefinedVendorID); err != nil {
-			t.Error(err)
-		} else if len(avps) == 0 {
-			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
-			t.Errorf("expecting: %s, received: <%s>", eVal, val)
-		}
-		eVal = "cgrates.org"
-		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Realm"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
