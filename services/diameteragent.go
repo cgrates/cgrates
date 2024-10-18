@@ -31,13 +31,14 @@ import (
 
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &DiameterAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     connMgr,
+		caps:        caps,
 		srvDep:      srvDep,
 	}
 }
@@ -52,6 +53,7 @@ type DiameterAgent struct {
 
 	da      *agents.DiameterAgent
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 
 	lnet  string
 	laddr string
@@ -70,10 +72,10 @@ func (da *DiameterAgent) Start() (err error) {
 
 	da.Lock()
 	defer da.Unlock()
-	return da.start(filterS)
+	return da.start(filterS, da.caps)
 }
 
-func (da *DiameterAgent) start(filterS *engine.FilterS) error {
+func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps) error {
 	var err error
 	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr)
 	if err != nil {
@@ -85,7 +87,7 @@ func (da *DiameterAgent) start(filterS *engine.FilterS) error {
 	da.laddr = da.cfg.DiameterAgentCfg().Listen
 	da.stopChan = make(chan struct{})
 	go func(d *agents.DiameterAgent) {
-		lnsErr := d.ListenAndServe(da.stopChan)
+		lnsErr := d.ListenAndServe(caps, da.stopChan)
 		if lnsErr != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s",
 				utils.DiameterAgent, lnsErr))
@@ -106,7 +108,7 @@ func (da *DiameterAgent) Reload() (err error) {
 	close(da.stopChan)
 	filterS := <-da.filterSChan
 	da.filterSChan <- filterS
-	return da.start(filterS)
+	return da.start(filterS, da.caps)
 }
 
 // Shutdown stops the service

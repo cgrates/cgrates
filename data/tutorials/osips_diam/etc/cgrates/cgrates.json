@@ -47,7 +47,7 @@
 
 "attributes": {
     "enabled": true,
-    "string_indexed_fields": ["*req.Account"]	
+    "string_indexed_fields": ["*req.Account"]
 },
 
 "apiers": {
@@ -56,17 +56,16 @@
 }, 
 
 "diameter_agent": {
-	"enabled": true,										
-	"listen": "192.168.122.42:3868",								
-	"listen_net": "tcp",									
+	"enabled": true,
+	"listen": "192.168.122.42:3868",
+	"listen_net": "tcp",
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",
 	"sessions_conns": ["*bijson_localhost"],
 	"origin_host": "server.diameter.test",
-	"origin_realm": "diameter.test",							
-	"vendor_id": 0,											
-	"product_name": "CGRateS",								
-	"concurrent_requests": -1,
-	"synced_conn_requests": false,							
+	"origin_realm": "diameter.test",
+	"vendor_id": 0,
+	"product_name": "CGRateS",
+	"synced_conn_requests": false,
 	"asr_template": "*asr",
 	"rar_template": "*rar",
 	"forced_disconnect": "*asr"
