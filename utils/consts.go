@@ -514,6 +514,7 @@ const (
 	StatID                = "StatID"
 	StatIDs               = "StatIDs"
 	SortedStatIDs         = "SortedStatIDs"
+	LastUpdate            = "LastUpdate"
 	TrendID               = "TrendID"
 	RankingID             = "RankingID"
 	BalanceType           = "BalanceType"

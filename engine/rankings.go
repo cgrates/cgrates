@@ -88,6 +88,9 @@ func (rkS *RankingS) computeRanking(rkP *RankingProfile) {
 	if rk.rkPrfl == nil {
 		rk.rkPrfl = rkP
 	}
+	rk.LastUpdate = time.Now()
+	rk.Metrics = make(map[string]map[string]float64) // reset previous values
+	rk.SortedStatIDs = make([]string, 0)
 	for _, statID := range rkP.StatIDs {
 		var floatMetrics map[string]float64
 		if err := rkS.connMgr.Call(context.Background(), rkS.cgrcfg.RankingSCfg().StatSConns,
@@ -107,15 +110,17 @@ func (rkS *RankingS) computeRanking(rkP *RankingProfile) {
 				}
 			}
 		}
+
 		if len(floatMetrics) != 0 {
-			rk.StatMetrics[statID] = make(map[string]float64)
+			rk.Metrics[statID] = make(map[string]float64)
 		}
 		for metricID, val := range floatMetrics {
-			rk.StatMetrics[statID][metricID] = val
+			rk.Metrics[statID][metricID] = val
 		}
 	}
+
 	if rk.SortedStatIDs, err = rankingSortStats(rkP.Sorting,
-		rkP.SortingParameters, rk.StatMetrics); err != nil {
+		rkP.SortingParameters, rk.Metrics); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> sorting stats for Ranking with ID: <%s:%s> error: <%s>",
@@ -170,6 +175,7 @@ func (rkS *RankingS) processThresholds(rk *Ranking) (err error) {
 		APIOpts: opts,
 		Event: map[string]any{
 			utils.RankingID:     rk.ID,
+			utils.LastUpdate:    rk.LastUpdate,
 			utils.SortedStatIDs: copy([]string{}, rk.SortedStatIDs),
 		},
 	}
@@ -205,6 +211,7 @@ func (rkS *RankingS) processEEs(rk *Ranking) (err error) {
 		APIOpts: opts,
 		Event: map[string]any{
 			utils.RankingID:     rk.ID,
+			utils.LastUpdate:    rk.LastUpdate,
 			utils.SortedStatIDs: copy([]string{}, rk.SortedStatIDs),
 		},
 	}
@@ -445,11 +452,11 @@ func (rkS *RankingS) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithA
 	defer rk.rMux.RUnlock()
 	retRanking.Tenant = rk.Tenant // avoid vet complaining for mutex copying
 	retRanking.ID = rk.ID
-	retRanking.StatMetrics = make(map[string]map[string]float64)
-	for statID, metrics := range rk.StatMetrics {
-		retRanking.StatMetrics[statID] = make(map[string]float64)
+	retRanking.Metrics = make(map[string]map[string]float64)
+	for statID, metrics := range rk.Metrics {
+		retRanking.Metrics[statID] = make(map[string]float64)
 		for metricID, val := range metrics {
-			retRanking.StatMetrics[statID][metricID] = val
+			retRanking.Metrics[statID][metricID] = val
 		}
 	}
 	retRanking.Sorting = rk.Sorting

@@ -22,6 +22,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -31,16 +32,17 @@ type RankingProfileWithAPIOpts struct {
 	APIOpts map[string]any
 }
 
+// RankingProfile represents one profile querying StatS and sorting them.
 type RankingProfile struct {
-	Tenant            string
-	ID                string
-	Schedule          string
-	StatIDs           []string
-	MetricIDs         []string
-	Sorting           string
-	SortingParameters []string
-	Stored            bool
-	ThresholdIDs      []string
+	Tenant            string   // Tenant this profile belongs to
+	ID                string   // Profile identification
+	Schedule          string   // Cron schedule this profile should run at
+	StatIDs           []string // List of stat instances to query
+	MetricIDs         []string // Filter out only specific metrics in reply for sorting
+	Sorting           string   // Sorting strategy. Possible values: <*asc|*desc>
+	SortingParameters []string // Sorting parameters: depending on sorting type, list of metric ids for now with optional true or false in case of reverse logic is desired
+	Stored            bool     // Offline storage activation for this profile
+	ThresholdIDs      []string // List of threshold IDs to limit this Ranking to. *none to disable threshold processing for it.
 }
 
 func (rkp *RankingProfile) TenantID() string {
@@ -73,10 +75,10 @@ func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 // NewRankingFromProfile is a constructor for an empty ranking out of it's profile
 func NewRankingFromProfile(rkP *RankingProfile) (rk *Ranking) {
 	rk = &Ranking{
-		Tenant:      rkP.Tenant,
-		ID:          rkP.ID,
-		Sorting:     rkP.Sorting,
-		StatMetrics: make(map[string]map[string]float64),
+		Tenant:  rkP.Tenant,
+		ID:      rkP.ID,
+		Sorting: rkP.Sorting,
+		Metrics: make(map[string]map[string]float64),
 
 		rkPrfl:    rkP,
 		metricIDs: utils.NewStringSet(rkP.MetricIDs),
@@ -98,7 +100,8 @@ type Ranking struct {
 
 	Tenant            string
 	ID                string
-	StatMetrics       map[string]map[string]float64 // map[statID]map[metricID]metricValue
+	LastUpdate        time.Time
+	Metrics           map[string]map[string]float64 // map[statID]map[metricID]metricValue
 	Sorting           string
 	SortingParameters []string
 
@@ -113,15 +116,26 @@ func (r *Ranking) TenantID() string {
 	return utils.ConcatenatedKey(r.Tenant, r.ID)
 }
 
+// asRankingSummary converts the Ranking instance into a RankingSummary one
+func (rk *Ranking) asRankingSummary() (rkSm *RankingSummary) {
+	rkSm = &RankingSummary{
+		Tenant:     rk.Tenant,
+		ID:         rk.ID,
+		LastUpdate: rk.LastUpdate,
+	}
+	copy(rkSm.SortedStatIDs, rk.SortedStatIDs)
+	return
+}
+
 type rankingSorter interface {
 	sortStatIDs() []string // sortStatIDs returns the sorted list of statIDs
 }
 
 // rankingSortStats will return the list of sorted statIDs out of the sortingData map
 func rankingSortStats(sortingType string, sortingParams []string,
-	statMetrics map[string]map[string]float64) (sortedStatIDs []string, err error) {
+	Metrics map[string]map[string]float64) (sortedStatIDs []string, err error) {
 	var rnkSrtr rankingSorter
-	if rnkSrtr, err = newRankingSorter(sortingType, sortingParams, statMetrics); err != nil {
+	if rnkSrtr, err = newRankingSorter(sortingType, sortingParams, Metrics); err != nil {
 		return
 	}
 	return rnkSrtr.sortStatIDs(), nil
@@ -131,21 +145,21 @@ func rankingSortStats(sortingType string, sortingParams []string,
 //
 //	returns error if the sortingType is not implemented
 func newRankingSorter(sortingType string, sortingParams []string,
-	statMetrics map[string]map[string]float64) (rkStr rankingSorter, err error) {
+	Metrics map[string]map[string]float64) (rkStr rankingSorter, err error) {
 	switch sortingType {
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(sortingType)
 		return
 	case utils.MetaDesc:
-		return newRankingDescSorter(sortingParams, statMetrics), nil
+		return newRankingDescSorter(sortingParams, Metrics), nil
 	case utils.MetaAsc:
-		return newRankingAscSorter(sortingParams, statMetrics), nil
+		return newRankingAscSorter(sortingParams, Metrics), nil
 	}
 }
 
 // newRankingDescSorter is a constructor for rankingDescSorter
 func newRankingDescSorter(sortingParams []string,
-	statMetrics map[string]map[string]float64) (rkDsrtr *rankingDescSorter) {
+	Metrics map[string]map[string]float64) (rkDsrtr *rankingDescSorter) {
 	clnSp := make([]string, len(sortingParams))
 	sPReversed := make(utils.StringSet)
 	for i, sP := range sortingParams { // clean the sortingParams, out of param:false or param:true definitions
@@ -158,9 +172,9 @@ func newRankingDescSorter(sortingParams []string,
 	rkDsrtr = &rankingDescSorter{
 		clnSp,
 		sPReversed,
-		statMetrics,
-		make([]string, 0, len(statMetrics))}
-	for statID := range rkDsrtr.statMetrics {
+		Metrics,
+		make([]string, 0, len(Metrics))}
+	for statID := range rkDsrtr.Metrics {
 		rkDsrtr.statIDs = append(rkDsrtr.statIDs, statID)
 	}
 	return
@@ -168,11 +182,11 @@ func newRankingDescSorter(sortingParams []string,
 
 // rankingDescSorter will sort data descendent for metrics in sortingParams or random if all equal
 type rankingDescSorter struct {
-	sMetricIDs  []string
-	sMetricRev  utils.StringSet // list of exceptios for sortingParams, reverting the sorting logic
-	statMetrics map[string]map[string]float64
+	sMetricIDs []string
+	sMetricRev utils.StringSet // list of exceptios for sortingParams, reverting the sorting logic
+	Metrics    map[string]map[string]float64
 
-	statIDs []string // list of keys of the statMetrics
+	statIDs []string // list of keys of the Metrics
 }
 
 // sortStatIDs implements rankingSorter interface
@@ -182,11 +196,11 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 	}
 	sort.Slice(rkDsrtr.statIDs, func(i, j int) bool {
 		for _, metricID := range rkDsrtr.sMetricIDs {
-			val1, hasMetric1 := rkDsrtr.statMetrics[rkDsrtr.statIDs[i]][metricID]
+			val1, hasMetric1 := rkDsrtr.Metrics[rkDsrtr.statIDs[i]][metricID]
 			if !hasMetric1 {
 				return false
 			}
-			val2, hasMetric2 := rkDsrtr.statMetrics[rkDsrtr.statIDs[j]][metricID]
+			val2, hasMetric2 := rkDsrtr.Metrics[rkDsrtr.statIDs[j]][metricID]
 			if !hasMetric2 {
 				return true
 			}
@@ -208,7 +222,7 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 
 // newRankingAscSorter is a constructor for rankingAscSorter
 func newRankingAscSorter(sortingParams []string,
-	statMetrics map[string]map[string]float64) (rkASrtr *rankingAscSorter) {
+	Metrics map[string]map[string]float64) (rkASrtr *rankingAscSorter) {
 	clnSp := make([]string, len(sortingParams))
 	sPReversed := make(utils.StringSet)
 	for i, sP := range sortingParams { // clean the sortingParams, out of param:false or param:true definitions
@@ -221,9 +235,9 @@ func newRankingAscSorter(sortingParams []string,
 	rkASrtr = &rankingAscSorter{
 		clnSp,
 		sPReversed,
-		statMetrics,
-		make([]string, 0, len(statMetrics))}
-	for statID := range rkASrtr.statMetrics {
+		Metrics,
+		make([]string, 0, len(Metrics))}
+	for statID := range rkASrtr.Metrics {
 		rkASrtr.statIDs = append(rkASrtr.statIDs, statID)
 	}
 	return
@@ -231,11 +245,11 @@ func newRankingAscSorter(sortingParams []string,
 
 // rankingAscSorter will sort data ascendent for metrics in sortingParams or randomly if all equal
 type rankingAscSorter struct {
-	sMetricIDs  []string
-	sMetricRev  utils.StringSet // list of exceptios for sortingParams, reverting the sorting logic
-	statMetrics map[string]map[string]float64
+	sMetricIDs []string
+	sMetricRev utils.StringSet // list of exceptios for sortingParams, reverting the sorting logic
+	Metrics    map[string]map[string]float64
 
-	statIDs []string // list of keys of the statMetrics
+	statIDs []string // list of keys of the Metrics
 }
 
 // sortStatIDs implements rankingSorter interface
@@ -245,11 +259,11 @@ func (rkASrtr *rankingAscSorter) sortStatIDs() []string {
 	}
 	sort.Slice(rkASrtr.statIDs, func(i, j int) bool {
 		for _, metricID := range rkASrtr.sMetricIDs {
-			val1, hasMetric1 := rkASrtr.statMetrics[rkASrtr.statIDs[i]][metricID]
+			val1, hasMetric1 := rkASrtr.Metrics[rkASrtr.statIDs[i]][metricID]
 			if !hasMetric1 {
 				return false
 			}
-			val2, hasMetric2 := rkASrtr.statMetrics[rkASrtr.statIDs[j]][metricID]
+			val2, hasMetric2 := rkASrtr.Metrics[rkASrtr.statIDs[j]][metricID]
 			if !hasMetric2 {
 				return true
 			}
@@ -267,4 +281,12 @@ func (rkASrtr *rankingAscSorter) sortStatIDs() []string {
 		return utils.BoolGenerator().RandomBool()
 	})
 	return rkASrtr.statIDs
+}
+
+// RankingSummary is the event sent to TrendS and EEs
+type RankingSummary struct {
+	Tenant        string
+	ID            string
+	LastUpdate    time.Time
+	SortedStatIDs []string
 }
