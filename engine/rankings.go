@@ -513,3 +513,16 @@ func (rkS *RankingS) V1GetSchedule(ctx *context.Context, args *utils.ArgSchedule
 	*schedRankings = scheduledRankings
 	return nil
 }
+
+// V1GetRankingSummary returns a summary of ascending/descending stat of the last updated ranking
+func (rS *RankingS) V1GetRankingSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *RankingSummary) (err error) {
+	var rnk *Ranking
+	if rnk, err = rS.dm.GetRanking(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+		return
+	}
+	rnk.rMux.RLock()
+	rnkS := rnk.asRankingSummary()
+	rnk.rMux.RUnlock()
+	*reply = *rnkS
+	return
+}

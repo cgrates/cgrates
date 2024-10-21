@@ -128,8 +128,17 @@ func (apierSv1 *APIerSv1) RemoveRankingProfile(ctx *context.Context, args *utils
 }
 
 // NewRankingSv1 initializes RankingSV1
-func NewRankingSv1() *RankingSv1 {
-	return &RankingSv1{}
+func NewRankingSv1(rnks *engine.RankingS) *RankingSv1 {
+	return &RankingSv1{
+		rnkS: rnks,
+	}
 }
 
-type RankingSv1 struct{}
+type RankingSv1 struct {
+	rnkS *engine.RankingS
+}
+
+// GetRankingSummary returns summary of the last updated ranking
+func (rnks *RankingSv1) GetRankingSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *engine.RankingSummary) error {
+	return rnks.rnkS.V1GetRankingSummary(ctx, arg, reply)
+}
