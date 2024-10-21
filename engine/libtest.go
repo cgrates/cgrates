@@ -622,4 +622,10 @@ var (
 			Password: utils.StringPointer(""),
 		},
 	}
+	PostgresDBCfg = DBCfg{
+		StorDB: &DBParams{
+			Type: utils.StringPointer(utils.MetaPostgres),
+			Port: utils.IntPointer(5432),
+		},
+	}
 )
