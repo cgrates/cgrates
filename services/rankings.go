@@ -86,7 +86,7 @@ func (rk *RankingService) Start() error {
 	if err := rk.rks.StartRankingS(); err != nil {
 		return err
 	}
-	srv, err := engine.NewService(v1.NewRankingSv1())
+	srv, err := engine.NewService(v1.NewRankingSv1(rk.rks))
 	if err != nil {
 		return err
 	}

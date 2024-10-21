@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -115,5 +116,13 @@ func TestIsRunning(t *testing.T) {
 	result := rg.IsRunning()
 	if result != false {
 		t.Errorf("Expected IsRunning to return false, got %v", result)
+	}
+}
+
+func TestNewRankingSv1(t *testing.T) {
+	rankingS := &engine.RankingS{}
+	rankingSv1 := v1.NewRankingSv1(rankingS)
+	if rankingSv1 == nil {
+		t.Fatal("Expected a non-nil RankingSv1 instance, got nil")
 	}
 }

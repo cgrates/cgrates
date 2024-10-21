@@ -26,9 +26,13 @@ import (
 )
 
 func TestNewRankingSv1(t *testing.T) {
-	rankingSvc := NewRankingSv1()
+	rankingS := &engine.RankingS{}
+	rankingSvc := NewRankingSv1(rankingS)
 	if rankingSvc == nil {
 		t.Errorf("NewRankingSv1() returned nil")
+	}
+	if rankingSvc.rnkS != rankingS {
+		t.Errorf("NewRankingSv1() did not correctly set rnkS field")
 	}
 }
 
