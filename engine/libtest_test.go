@@ -61,6 +61,7 @@ func TestGetDefaultEmptyCacheStats(t *testing.T) {
 		utils.CacheStatFilterIndexes,
 		utils.CacheStatQueueProfiles,
 		utils.CacheStatQueues,
+		utils.CacheRankings,
 		utils.CacheRankingProfiles,
 		utils.CacheSTIR,
 		utils.CacheRouteFilterIndexes,

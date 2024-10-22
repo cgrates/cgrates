@@ -1,0 +1,31 @@
+{
+    "general": {
+        "log_level": 7,
+    },
+    "data_db": {
+        "db_type": "mongo",
+        "db_name": "10",
+        "db_port": 27017,
+    },
+    "stor_db": {
+        "db_type": "mongo",
+        "db_name": "cgrates",
+        "db_port": 27017,
+        "db_password": "",
+    },
+    "rankings": {
+        "enabled": true,		
+	"store_interval": "-1",					
+	"scheduled_ids": {},		
+        "stats_conns": [
+            "*localhost"
+        ]
+    },
+    "stats": {
+        "enabled": true,
+        "store_interval": "-1",
+    },
+    "apiers": {
+        "enabled": true,
+    }
+}

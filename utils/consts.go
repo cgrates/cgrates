@@ -38,7 +38,7 @@ var (
 
 	DataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
 		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
-		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheRankingProfiles, CacheStatQueues,
+		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheRankingProfiles, CacheRankings, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheTrendProfiles, CacheTrends,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
 		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
@@ -70,6 +70,7 @@ var (
 		CacheStatQueueProfiles:       StatQueueProfilePrefix,
 		CacheStatQueues:              StatQueuePrefix,
 		CacheRankingProfiles:         RankingsProfilePrefix,
+		CacheRankings:                RankingPrefix,
 		CacheTrendProfiles:           TrendsProfilePrefix,
 		CacheTrends:                  TrendPrefix,
 		CacheThresholdProfiles:       ThresholdProfilePrefix,
@@ -1729,6 +1730,9 @@ const (
 	APIerSv1GetRankingProfile    = "APIerSv1.GetRankingProfile"
 	APIerSv1GetRankingProfileIDs = "APIerSv1.GetRankingProfileIDs"
 	RankingSv1Ping               = "RankingSv1.Ping"
+	RankingSv1GetRanking         = "RankingSv1.GetRanking"
+	RankingSv1GetSchedule        = "RankingSv1.GetSchedule"
+	RankingSv1ScheduleQueries    = "RankingSv1.ScheduleQueries"
 )
 
 // ResourceS APIs

@@ -58,15 +58,20 @@ func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 		Sorting:  rkP.Sorting,
 	}
 	if rkP.StatIDs != nil {
+		cln.StatIDs = make([]string, len(rkP.StatIDs))
 		copy(cln.StatIDs, rkP.StatIDs)
 	}
 	if rkP.MetricIDs != nil {
+		cln.MetricIDs = make([]string, len(rkP.MetricIDs))
 		copy(cln.MetricIDs, rkP.MetricIDs)
 	}
 	if rkP.SortingParameters != nil {
+
+		cln.SortingParameters = make([]string, len(rkP.SortingParameters))
 		copy(cln.SortingParameters, rkP.SortingParameters)
 	}
 	if rkP.ThresholdIDs != nil {
+		cln.ThresholdIDs = make([]string, len(rkP.ThresholdIDs))
 		copy(cln.ThresholdIDs, rkP.ThresholdIDs)
 	}
 	return
@@ -84,6 +89,7 @@ func NewRankingFromProfile(rkP *RankingProfile) (rk *Ranking) {
 		metricIDs: utils.NewStringSet(rkP.MetricIDs),
 	}
 	if rkP.SortingParameters != nil {
+		rk.SortingParameters = make([]string, len(rkP.SortingParameters))
 		copy(rk.SortingParameters, rkP.SortingParameters)
 	}
 	return
@@ -123,6 +129,7 @@ func (rk *Ranking) asRankingSummary() (rkSm *RankingSummary) {
 		ID:         rk.ID,
 		LastUpdate: rk.LastUpdate,
 	}
+	rkSm.SortedStatIDs = make([]string, len(rk.SortedStatIDs))
 	copy(rkSm.SortedStatIDs, rk.SortedStatIDs)
 	return
 }
