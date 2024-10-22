@@ -118,7 +118,6 @@ func (rkS *RankingS) computeRanking(rkP *RankingProfile) {
 			rk.Metrics[statID][metricID] = val
 		}
 	}
-
 	if rk.SortedStatIDs, err = rankingSortStats(rkP.Sorting,
 		rkP.SortingParameters, rk.Metrics); err != nil {
 		utils.Logger.Warning(
@@ -169,6 +168,8 @@ func (rkS *RankingS) processThresholds(rk *Ranking) (err error) {
 		copy(thIDs, rk.rkPrfl.ThresholdIDs)
 	}
 	opts[utils.OptsThresholdsProfileIDs] = thIDs
+	sortedStatIDs := make([]string, len(rk.SortedStatIDs))
+	copy(sortedStatIDs, rk.SortedStatIDs)
 	ev := &utils.CGREvent{
 		Tenant:  rk.Tenant,
 		ID:      utils.GenUUID(),
@@ -176,7 +177,7 @@ func (rkS *RankingS) processThresholds(rk *Ranking) (err error) {
 		Event: map[string]any{
 			utils.RankingID:     rk.ID,
 			utils.LastUpdate:    rk.LastUpdate,
-			utils.SortedStatIDs: copy([]string{}, rk.SortedStatIDs),
+			utils.SortedStatIDs: sortedStatIDs,
 		},
 	}
 	var withErrs bool
@@ -205,6 +206,8 @@ func (rkS *RankingS) processEEs(rk *Ranking) (err error) {
 	opts := map[string]any{
 		utils.MetaEventType: utils.RankingUpdate,
 	}
+	sortedStatIDs := make([]string, len(rk.SortedStatIDs))
+	copy(sortedStatIDs, rk.SortedStatIDs)
 	ev := &utils.CGREvent{
 		Tenant:  rk.Tenant,
 		ID:      utils.GenUUID(),
@@ -212,7 +215,7 @@ func (rkS *RankingS) processEEs(rk *Ranking) (err error) {
 		Event: map[string]any{
 			utils.RankingID:     rk.ID,
 			utils.LastUpdate:    rk.LastUpdate,
-			utils.SortedStatIDs: copy([]string{}, rk.SortedStatIDs),
+			utils.SortedStatIDs: sortedStatIDs,
 		},
 	}
 	var withErrs bool
@@ -372,7 +375,7 @@ func (rkS *RankingS) scheduleAutomaticQueries() error {
 		}
 	}
 	if tnts != nil {
-		qrydData, err := rkS.dm.GetTrendProfileIDs(tnts)
+		qrydData, err := rkS.dm.GetRankingProfileIDs(tnts)
 		if err != nil {
 			return err
 		}
@@ -409,7 +412,7 @@ func (rkS *RankingS) scheduleRankingQueries(_ *context.Context,
 					"<%s> failed retrieving RankingProfile with id: <%s:%s> for scheduling, error: <%s>",
 					utils.RankingS, tnt, rkID, err.Error()))
 			partial = true
-		} else if entryID, err := rkS.crn.AddFunc(utils.EmptyString,
+		} else if entryID, err := rkS.crn.AddFunc(rkP.Schedule,
 			func() { rkS.computeRanking(rkP.Clone()) }); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
@@ -420,8 +423,8 @@ func (rkS *RankingS) scheduleRankingQueries(_ *context.Context,
 			rkS.crnTQsMux.Lock()
 			rkS.crnTQs[rkP.Tenant][rkP.ID] = entryID
 			rkS.crnTQsMux.Unlock()
+			scheduled++
 		}
-		scheduled += 1
 	}
 	if partial {
 		return 0, utils.ErrPartiallyExecuted
@@ -459,8 +462,13 @@ func (rkS *RankingS) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithA
 			retRanking.Metrics[statID][metricID] = val
 		}
 	}
+	retRanking.LastUpdate = rk.LastUpdate
 	retRanking.Sorting = rk.Sorting
+
+	retRanking.SortingParameters = make([]string, len(rk.SortingParameters))
 	copy(retRanking.SortingParameters, rk.SortingParameters)
+
+	retRanking.SortedStatIDs = make([]string, len(rk.SortedStatIDs))
 	copy(retRanking.SortedStatIDs, rk.SortedStatIDs)
 	return
 }
@@ -473,18 +481,18 @@ func (rkS *RankingS) V1GetSchedule(ctx *context.Context, args *utils.ArgSchedule
 	}
 	rkS.crnTQsMux.RLock()
 	defer rkS.crnTQsMux.RUnlock()
-	trendIDsMp, has := rkS.crnTQs[tnt]
+	rankingIDsMp, has := rkS.crnTQs[tnt]
 	if !has {
 		return utils.ErrNotFound
 	}
 	var scheduledRankings []utils.ScheduledRanking
 	var entryIds map[string]cron.EntryID
 	if len(args.RankingIDPrefixes) == 0 {
-		entryIds = trendIDsMp
+		entryIds = rankingIDsMp
 	} else {
 		entryIds = make(map[string]cron.EntryID)
 		for _, rkID := range args.RankingIDPrefixes {
-			for key, entryID := range trendIDsMp {
+			for key, entryID := range rankingIDsMp {
 				if strings.HasPrefix(key, rkID) {
 					entryIds[key] = entryID
 				}
