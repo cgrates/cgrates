@@ -60,6 +60,7 @@ var (
 		utils.StatQueueProfilePrefix:   {},
 		utils.ThresholdPrefix:          {},
 		utils.ThresholdProfilePrefix:   {},
+		utils.RankingPrefix:            {},
 		utils.RankingsProfilePrefix:    {},
 		utils.FilterPrefix:             {},
 		utils.RouteProfilePrefix:       {},
@@ -193,6 +194,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.RankingsProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetRankingProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.RankingPrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetRanking(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.TimingsPrefix:
 			_, err = dm.GetTiming(dataID, true, utils.NonTransactional)
 		case utils.ThresholdProfilePrefix:
@@ -205,6 +209,12 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, thresholdLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
+		case utils.TrendsProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetTrendProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.TrendPrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetTrend(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -1608,9 +1618,9 @@ func (dm *DataManager) GetRankingProfileIDs(tenants []string) (rns map[string][]
 			keys = append(keys, tntkeys...)
 		}
 	}
-	if len(keys) == 0 {
-		return nil, utils.ErrNotFound
-	}
+	// if len(keys) == 0 {
+	// 	return nil, utils.ErrNotFound
+	// }
 	rns = make(map[string][]string)
 	for _, key := range keys {
 		indx := strings.Index(key, utils.ConcatenatedKeySep)
@@ -1621,22 +1631,32 @@ func (dm *DataManager) GetRankingProfileIDs(tenants []string) (rns map[string][]
 	return
 }
 
-func (dm *DataManager) SetRankingProfile(sgp *RankingProfile) (err error) {
+func (dm *DataManager) SetRankingProfile(rnp *RankingProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().SetRankingProfileDrv(sgp); err != nil {
+	oldRnk, err := dm.GetRankingProfile(rnp.Tenant, rnp.ID, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().SetRankingProfileDrv(rnp); err != nil {
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
 		err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
-			utils.RankingsProfilePrefix, sgp.TenantID(),
+			utils.RankingsProfilePrefix, rnp.TenantID(),
 			utils.ReplicatorSv1SetRankingProfile,
 			&RankingProfileWithAPIOpts{
-				RankingProfile: sgp,
+				RankingProfile: rnp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+	}
+	if oldRnk == nil || oldRnk.Sorting != rnp.Sorting ||
+		oldRnk.Schedule != rnp.Schedule {
+		if err = dm.SetRanking(NewRankingFromProfile(rnp)); err != nil {
+			return
+		}
 	}
 	return
 }
@@ -1723,7 +1743,7 @@ func (dm *DataManager) SetRanking(rn *Ranking) (err error) {
 	if err = dm.DataDB().SetRankingDrv(rn); err != nil {
 		return
 	}
-	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]; itm.Replicate {
+	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankings]; itm.Replicate {
 		if err = replicate(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.RankingPrefix, rn.TenantID(), // this are used to get the host IDs from cache

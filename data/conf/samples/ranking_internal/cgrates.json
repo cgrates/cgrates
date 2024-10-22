@@ -1,0 +1,26 @@
+{
+    "general": {
+        "log_level": 7,
+    },
+    "data_db": {
+        "db_type": "*internal",
+    },
+    "stor_db": {
+        "db_type": "*internal",
+    },
+    "rankings": {
+        "enabled": true,
+        "store_interval": "-1",
+        "scheduled_ids": {},
+        "stats_conns": [
+            "*localhost"
+        ]
+    },
+    "stats": {
+        "enabled": true,
+        "store_interval": "-1",
+    },
+    "apiers": {
+        "enabled": true,
+    }
+}

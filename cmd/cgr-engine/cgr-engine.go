@@ -588,7 +588,7 @@ func main() {
 		internalStatSChan, connManager, anz, srvDep)
 	trS := services.NewTrendService(cfg, dmService, cacheS, filterSChan, server,
 		internalTrendSChan, connManager, anz, srvDep)
-	sgS := services.NewRankingService(cfg, dmService, cacheS, filterSChan, server,
+	rnS := services.NewRankingService(cfg, dmService, cacheS, filterSChan, server,
 		internalRankingSChan, connManager, anz, srvDep)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		internalResourceSChan, connManager, anz, srvDep)
@@ -615,7 +615,7 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz, srvDep)
 
-	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, sgS, reS, routeS, schS, rals,
+	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, rnS, reS, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
@@ -660,6 +660,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSessionSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.StatSv1, internalStatSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.TrendSv1, internalTrendSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.RankingSv1, internalRankingSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.RouteSv1, internalRouteSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, internalThresholdSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)

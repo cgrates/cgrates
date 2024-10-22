@@ -71,14 +71,12 @@ func (rk *RankingService) Start() error {
 	}
 	rk.srvDep[utils.DataDB].Add(1)
 	<-rk.cacheS.GetPrecacheChannel(utils.CacheRankingProfiles)
-	<-rk.cacheS.GetPrecacheChannel(utils.CacheRankingFilterIndexes)
-
+	<-rk.cacheS.GetPrecacheChannel(utils.CacheRankings)
 	filterS := <-rk.filterSChan
 	rk.filterSChan <- filterS
 	dbchan := rk.dm.GetDMChan()
 	datadb := <-dbchan
 	dbchan <- datadb
-
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.RankingS))
 

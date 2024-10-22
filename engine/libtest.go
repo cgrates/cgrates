@@ -281,6 +281,7 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 		utils.CacheStatFilterIndexes:       {},
 		utils.CacheStatQueueProfiles:       {},
 		utils.CacheStatQueues:              {},
+		utils.CacheRankings:                {},
 		utils.CacheRankingProfiles:         {},
 		utils.CacheSTIR:                    {},
 		utils.CacheRouteFilterIndexes:      {},
@@ -351,7 +352,7 @@ type TestEngine struct {
 func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
 	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
-	flushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
+	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
 	if ng.PreStartHook != nil {
 		ng.PreStartHook(t, cfg)
 	}
@@ -525,7 +526,7 @@ func LoadCSVs(t testing.TB, client *birpc.Client, tpPath string, csvFiles map[st
 }
 
 // flushDBs resets the databases specified in the configuration if the corresponding flags are true.
-func flushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
+func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
 	t.Helper()
 	if flushDataDB {
 		if err := InitDataDb(cfg); err != nil {

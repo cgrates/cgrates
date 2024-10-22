@@ -1472,6 +1472,7 @@ func (models RankingsMdls) AsTPRanking() (result []*utils.TPRankingProfile) {
 	thresholdMap := make(map[string]utils.StringSet)
 	metricsMap := make(map[string]utils.StringSet)
 	sortingParameterMap := make(map[string]utils.StringSet)
+	sortingParameterSlice := make(map[string][]string)
 	statsMap := make(map[string]utils.StringSet)
 	mrg := make(map[string]*utils.TPRankingProfile)
 	for _, model := range models {
@@ -1511,9 +1512,17 @@ func (models RankingsMdls) AsTPRanking() (result []*utils.TPRankingProfile) {
 		if model.SortingParameters != utils.EmptyString {
 			if _, has := sortingParameterMap[key.TenantID()]; !has {
 				sortingParameterMap[key.TenantID()] = make(utils.StringSet)
+				sortingParameterSlice[key.TenantID()] = make([]string, 0)
 			}
-			sortingParameterMap[key.TenantID()].AddSlice(strings.Split(model.SortingParameters, utils.InfieldSep))
+			spltSl := strings.Split(model.SortingParameters, utils.InfieldSep)
+			for _, splt := range spltSl {
+				if _, has := sortingParameterMap[key.TenantID()][splt]; !has {
+					sortingParameterMap[key.TenantID()].Add(splt)
+					sortingParameterSlice[key.TenantID()] = append(sortingParameterSlice[key.TenantID()], splt)
+				}
+			}
 		}
+
 		if model.MetricIDs != utils.EmptyString {
 			if _, has := metricsMap[key.TenantID()]; !has {
 				metricsMap[key.TenantID()] = make(utils.StringSet)
@@ -1528,7 +1537,7 @@ func (models RankingsMdls) AsTPRanking() (result []*utils.TPRankingProfile) {
 		result[i] = rg
 		result[i].StatIDs = statsMap[tntID].AsSlice()
 		result[i].MetricIDs = metricsMap[tntID].AsSlice()
-		result[i].SortingParameters = sortingParameterMap[tntID].AsSlice()
+		result[i].SortingParameters = sortingParameterSlice[tntID]
 		result[i].ThresholdIDs = thresholdMap[tntID].AsOrderedSlice()
 		i++
 	}
