@@ -429,6 +429,7 @@
 
 // 				// Kafka
 // 				// "kafkaTopic": "cgrates",	// the topic from were the events are read
+// 				// "kafkaBatchSize": 100,	// limit on how many messages will be buffered before being sent
 // 				// "kafkaGroupID": "cgrates",	// the group that reads the events
 // 				// "kafkaMaxWait": "1ms",	// the maximum amount of time to wait for new data to come
 // 				// "kafkaTLS": false,		// if set to true it will try to authenticate the server
@@ -1154,14 +1155,26 @@
 
 // "trends":{									// TrendS config
 // 	"enabled": false,						// starts TrendS service: <true|false>.
+// 	"store_interval": "",                   // dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+// 	"store_uncompressed_limit": 0,	        // used to compress metrics
 // 	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"scheduled_ids": {},                    // autoload these trend ids on start
 // 	"thresholds_conns": [],					// connections to ThresholdS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"ees_conns": [],			            // connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+// 	"ees_exporter_ids": []                  // list of EventExporter profiles to use for real-time trendSummary exports                  
 // },
+
 
 // "rankings":{								// RankingS config
 // 	"enabled": false,						// starts RankingS service: <true|false>.
+// 	"store_interval": "",                   // dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 // 	"stats_conns": [],						// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"scheduled_ids": {},                    // autoload these ranking ids on start
+// 	"thresholds_conns": [],                 // connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+// 	"ees_conns": [],                        // connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+// 	"ees_exporter_ids": []                  // list of EventExporter profiles to use for real-time rankingSummary exports
 // },
+
 
 // "routes": {									// RouteS config
 // 	"enabled": false,						// starts RouteS service: <true|false>.
