@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -230,6 +231,75 @@ func TestNewRankingFromProfile(t *testing.T) {
 		rk.rkPrfl != expectedRk.rkPrfl ||
 		!reflect.DeepEqual(rk.metricIDs, expectedRk.metricIDs) {
 		t.Errorf("NewRankingFromProfile returned unexpected Ranking object")
+	}
+
+}
+
+func TestRankingSortStatss(t *testing.T) {
+	metrics := map[string]map[string]float64{
+		"STAT1": {"metric1": 10.1, "metric2": 5.2},
+		"STAT2": {"metric1": 9.1, "metric2": 6.2},
+		"STAT3": {"metric1": 11.1, "metric2": 4.2},
+	}
+
+	_, err := rankingSortStats("valid", []string{"metric1"}, metrics)
+	if err != nil {
+		expectedErr := "NOT_IMPLEMENTED:valid"
+		if err.Error() != expectedErr {
+			t.Errorf("expected error %v, got %v", expectedErr, err)
+		}
+	}
+
+	_, err = rankingSortStats("invalid", []string{"metric1"}, metrics)
+	if err == nil {
+		t.Errorf("expected an error for invalid sorting type, but got nil")
+	}
+}
+
+func TestRankingAscSorterEmptyStatIDs(t *testing.T) {
+	rkASrtr := &rankingAscSorter{
+		statIDs:    []string{},
+		Metrics:    make(map[string]map[string]float64),
+		sMetricIDs: []string{},
+		sMetricRev: utils.StringSet{},
+	}
+
+	sortedStatIDs := rkASrtr.sortStatIDs()
+
+	if len(sortedStatIDs) != 0 {
+		t.Errorf("expected sortedStatIDs to be empty, got %v", sortedStatIDs)
+	}
+}
+
+func TestRankingDescSorterEmptyStatIDs(t *testing.T) {
+	rkDsrtr := &rankingDescSorter{
+		statIDs:    []string{},
+		Metrics:    make(map[string]map[string]float64),
+		sMetricIDs: []string{},
+		sMetricRev: utils.StringSet{},
+	}
+
+	sortedStatIDs := rkDsrtr.sortStatIDs()
+
+	if len(sortedStatIDs) != 0 {
+		t.Errorf("expected sortedStatIDs to be empty, got %v", sortedStatIDs)
+	}
+}
+
+func TestRankingSortStats(t *testing.T) {
+	sortingType := "sorting"
+	sortingParams := []string{"param1", "param2"}
+	Metrics := map[string]map[string]float64{
+
+		"STATS1": {"*acc": 12.1, "*tcc": 24.2},
+		"STATS2": {"*acc": 12.1, "*tcc": 24.3},
+		"STATS3": {"*acc": 10.1, "*tcc": 25.3},
+	}
+
+	_, err := rankingSortStats(sortingType, sortingParams, Metrics)
+
+	if err != nil {
+		errors.New("NOT_IMPLEMENTED:sorting")
 	}
 
 }
