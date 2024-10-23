@@ -58,7 +58,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf/samples/ers_nats"),
-		PreStartHook: func(t *testing.T, c *config.CGRConfig) {
+		PreStartHook: func(t testing.TB, c *config.CGRConfig) {
 			nc := connectToNATSServer(t, "nats://127.0.0.1:4222")
 
 			// Initialize a stream manager and create a stream.
@@ -276,7 +276,7 @@ resolver_preload: {
 
 			ng := engine.TestEngine{
 				ConfigJSON: fmt.Sprintf(natsCfg, tc.sourcePath, tc.readerOpts),
-				PreStartHook: func(t *testing.T, c *config.CGRConfig) {
+				PreStartHook: func(t testing.TB, c *config.CGRConfig) {
 					rdrOpts := c.ERsCfg().ReaderCfg("nats_reader").Opts.NATS
 					nop, err := GetNatsOpts(rdrOpts, c.GeneralCfg().NodeID, time.Second)
 					if err != nil {
@@ -421,7 +421,7 @@ resolver_preload: {
 
 			ng := engine.TestEngine{
 				ConfigJSON: fmt.Sprintf(natsCfg, tc.sourcePath, tc.readerOpts),
-				PreStartHook: func(t *testing.T, c *config.CGRConfig) {
+				PreStartHook: func(t testing.TB, c *config.CGRConfig) {
 					rdrOpts := c.ERsCfg().ReaderCfg("nats_reader").Opts.NATS
 					nop, err := GetNatsOpts(rdrOpts, c.GeneralCfg().NodeID, time.Second)
 					if err != nil {
@@ -461,7 +461,7 @@ resolver_preload: {
 	}
 }
 
-func connectToNATSServer(t *testing.T, url string, opts ...nats.Option) *nats.Conn {
+func connectToNATSServer(t testing.TB, url string, opts ...nats.Option) *nats.Conn {
 	t.Helper()
 	deadline := time.Now().Add(500 * time.Millisecond)
 	time.Sleep(5 * time.Millisecond) // takes around 5ms for the server to be available

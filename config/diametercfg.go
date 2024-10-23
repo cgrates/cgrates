@@ -34,7 +34,6 @@ type DiameterAgentCfg struct {
 	OriginRealm       string
 	VendorID          int
 	ProductName       string
-	ConcurrentReqs    int // limit the maximum number of requests processed
 	SyncedConnReqs    bool
 	ASRTemplate       string
 	RARTemplate       string
@@ -81,9 +80,6 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	if jsnCfg.Product_name != nil {
 		da.ProductName = *jsnCfg.Product_name
 	}
-	if jsnCfg.Concurrent_requests != nil {
-		da.ConcurrentReqs = *jsnCfg.Concurrent_requests
-	}
 	if jsnCfg.Synced_conn_requests != nil {
 		da.SyncedConnReqs = *jsnCfg.Synced_conn_requests
 	}
@@ -121,19 +117,18 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 // AsMapInterface returns the config as a map[string]any
 func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:            da.Enabled,
-		utils.ListenNetCfg:          da.ListenNet,
-		utils.ListenCfg:             da.Listen,
-		utils.DictionariesPathCfg:   da.DictionariesPath,
-		utils.OriginHostCfg:         da.OriginHost,
-		utils.OriginRealmCfg:        da.OriginRealm,
-		utils.VendorIDCfg:           da.VendorID,
-		utils.ProductNameCfg:        da.ProductName,
-		utils.ConcurrentRequestsCfg: da.ConcurrentReqs,
-		utils.SyncedConnReqsCfg:     da.SyncedConnReqs,
-		utils.ASRTemplateCfg:        da.ASRTemplate,
-		utils.RARTemplateCfg:        da.RARTemplate,
-		utils.ForcedDisconnectCfg:   da.ForcedDisconnect,
+		utils.EnabledCfg:          da.Enabled,
+		utils.ListenNetCfg:        da.ListenNet,
+		utils.ListenCfg:           da.Listen,
+		utils.DictionariesPathCfg: da.DictionariesPath,
+		utils.OriginHostCfg:       da.OriginHost,
+		utils.OriginRealmCfg:      da.OriginRealm,
+		utils.VendorIDCfg:         da.VendorID,
+		utils.ProductNameCfg:      da.ProductName,
+		utils.SyncedConnReqsCfg:   da.SyncedConnReqs,
+		utils.ASRTemplateCfg:      da.ASRTemplate,
+		utils.RARTemplateCfg:      da.RARTemplate,
+		utils.ForcedDisconnectCfg: da.ForcedDisconnect,
 	}
 
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
@@ -168,7 +163,6 @@ func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
 		OriginRealm:      da.OriginRealm,
 		VendorID:         da.VendorID,
 		ProductName:      da.ProductName,
-		ConcurrentReqs:   da.ConcurrentReqs,
 		SyncedConnReqs:   da.SyncedConnReqs,
 		ASRTemplate:      da.ASRTemplate,
 		RARTemplate:      da.RARTemplate,

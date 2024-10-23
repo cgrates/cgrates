@@ -59,7 +59,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep)
-	diamSrv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	diamSrv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(diamSrv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
@@ -124,7 +124,7 @@ func TestDiameterAgentReload2(t *testing.T) {
 	}
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -145,6 +145,7 @@ func TestDiameterAgentReload3(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
+	caps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
 	chS := engine.NewCacheS(cfg, nil, nil)
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSrv, err := engine.NewService(chS)
@@ -153,13 +154,13 @@ func TestDiameterAgentReload3(t *testing.T) {
 	}
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDiameterAgent(cfg, filterSChan, shdChan, nil, caps, srvDep)
 
 	cfg.DiameterAgentCfg().ListenNet = "bad"
 	cfg.DiameterAgentCfg().DictionariesPath = ""
 
-	err = srv.(*DiameterAgent).start(nil)
-	if err != nil {
+	da := srv.(*DiameterAgent)
+	if err = da.start(nil, da.caps); err != nil {
 		t.Fatal(err)
 	}
 	cfg.DiameterAgentCfg().Enabled = false
