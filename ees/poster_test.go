@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/segmentio/kafka-go"
 )
 
 func TestAMQPeeParseURL(t *testing.T) {
@@ -57,12 +58,21 @@ func TestKafkaParseURL(t *testing.T) {
 			KafkaTopic: utils.StringPointer("cdr_billing"),
 		},
 	}
-	exp := &KafkaEE{
-		cfg:   cfg,
-		topic: "cdr_billing",
-		reqs:  newConcReq(0),
+	want := &KafkaEE{
+		cfg:  cfg,
+		reqs: newConcReq(0),
+		writer: &kafka.Writer{
+			Addr:        kafka.TCP("127.0.0.1:9092"),
+			Topic:       "cdr_billing",
+			MaxAttempts: 1,
+			Transport:   &kafka.Transport{},
+		},
 	}
-	if kfk := NewKafkaEE(cfg, nil); !reflect.DeepEqual(exp, kfk) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(kfk))
+	got, err := NewKafkaEE(cfg, nil)
+	if err != nil {
+		t.Fatalf("NewKafkaEE() failed unexpectedly: %v", err)
+	}
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("NewKafkaEE() = %+v, want %+v", got, want)
 	}
 }

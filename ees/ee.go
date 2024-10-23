@@ -71,7 +71,7 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
 	case utils.MetaSQSjsonMap:
 		return NewSQSee(cfg, dc), nil
 	case utils.MetaKafkajsonMap:
-		return NewKafkaEE(cfg, dc), nil
+		return NewKafkaEE(cfg, dc)
 	case utils.MetaVirt:
 		return NewVirtualEE(cfg, dc), nil
 	case utils.MetaElastic:
