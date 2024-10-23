@@ -107,11 +107,7 @@ func testSessionsVoiceStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessionsVoiceApierRpcConn(t *testing.T) {
-	var err error
-	sessionsRPC, err = engine.NewRPCClient(voiceCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	sessionsRPC = engine.NewRPCClient(t, voiceCfg.ListenCfg(), *utils.Encoding)
 }
 
 /*

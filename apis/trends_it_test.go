@@ -117,11 +117,7 @@ func testTrendsStartEngine(t *testing.T) {
 }
 
 func testTrendsRPCConn(t *testing.T) {
-	var err error
-	trRPC, err = engine.NewRPCClient(trCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	trRPC = engine.NewRPCClient(t, trCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testTrendsGetTrendProfileBeforeSet(t *testing.T) {

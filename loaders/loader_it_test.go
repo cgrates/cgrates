@@ -154,10 +154,7 @@ func testLoaderStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testLoaderRPCConn(t *testing.T) {
-	var err error
-	if loaderRPC, err = engine.NewRPCClient(loaderCfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal(err)
-	}
+	loaderRPC = engine.NewRPCClient(t, loaderCfg.ListenCfg(), *utils.Encoding)
 }
 
 func populateData(inPath string) func(t *testing.T) {

@@ -114,11 +114,7 @@ func testEEsBlockerStartEngine(t *testing.T) {
 }
 
 func testEEsBlockerRpcConn(t *testing.T) {
-	var err error
-	eesBlockerRPC, err = engine.NewRPCClient(eesBlockerCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	eesBlockerRPC = engine.NewRPCClient(t, eesBlockerCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testEEsBlockerExportEvent(t *testing.T) {

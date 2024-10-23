@@ -99,11 +99,7 @@ func testCGRLoaderStartEngine(t *testing.T) {
 }
 
 func testCGRLoaderRpcConn(t *testing.T) {
-	var err error
-	cgrloaderRPC, err = engine.NewRPCClient(cgrloaderCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	cgrloaderRPC = engine.NewRPCClient(t, cgrloaderCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testCGRLoaderLoadData(t *testing.T) {

@@ -110,11 +110,7 @@ func testCgrLdrStartEngine(t *testing.T) {
 }
 
 func testCgrLdrRPCConn(t *testing.T) {
-	var err error
-	cgrLdrBIRPC, err = engine.NewRPCClient(cgrLdrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	cgrLdrBIRPC = engine.NewRPCClient(t, cgrLdrCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {

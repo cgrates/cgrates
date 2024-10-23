@@ -114,10 +114,7 @@ func testLdro2nRtStartEngine(t *testing.T) {
 }
 
 func testLdro2nRtRPCConn(t *testing.T) {
-	var err error
-	if testLdro2nRtRPC, err = engine.NewRPCClient(testLdro2nRtCfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal(err)
-	}
+	testLdro2nRtRPC = engine.NewRPCClient(t, testLdro2nRtCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testLdro2nRtLoadTP(t *testing.T) {

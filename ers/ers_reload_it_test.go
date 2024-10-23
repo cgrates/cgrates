@@ -105,11 +105,7 @@ func testReloadITStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testReloadITRpcConn(t *testing.T) {
-	var err error
-	reloadRPC, err = engine.NewRPCClient(reloadCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	reloadRPC = engine.NewRPCClient(t, reloadCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testReloadVerifyDisabledReaders(t *testing.T) {

@@ -98,11 +98,7 @@ func testAMQPv1StartEngine(t *testing.T) {
 }
 
 func testAMQPv1RPCConn(t *testing.T) {
-	var err error
-	amqpv1RPC, err = engine.NewRPCClient(amqpv1Cfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	amqpv1RPC = engine.NewRPCClient(t, amqpv1Cfg.ListenCfg(), *utils.Encoding)
 }
 
 func testAMQPv1ExportEvent(t *testing.T) {

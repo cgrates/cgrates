@@ -136,20 +136,10 @@ func testFltrRplStartEngine(t *testing.T) {
 }
 
 func testFltrRplRPCConn(t *testing.T) {
-	var err error
-	tmp := *utils.Encoding
 	// run only under *gob encoding
-	*utils.Encoding = utils.MetaGOB
-	if fltrRplInternalRPC, err = engine.NewRPCClient(fltrRplInternalCfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal(err)
-	}
-	if fltrRplEngine1RPC, err = engine.NewRPCClient(fltrRplEngine1Cfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal(err)
-	}
-	if fltrRplEngine2RPC, err = engine.NewRPCClient(fltrRplEngine2Cfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal(err)
-	}
-	*utils.Encoding = tmp
+	fltrRplInternalRPC = engine.NewRPCClient(t, fltrRplInternalCfg.ListenCfg(), utils.MetaGOB)
+	fltrRplEngine1RPC = engine.NewRPCClient(t, fltrRplEngine1Cfg.ListenCfg(), utils.MetaGOB)
+	fltrRplEngine2RPC = engine.NewRPCClient(t, fltrRplEngine2Cfg.ListenCfg(), utils.MetaGOB)
 }
 
 func testFltrRplAttributeProfile(t *testing.T) {

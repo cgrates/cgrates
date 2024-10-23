@@ -105,11 +105,7 @@ func testV1AccStartEngine(t *testing.T) {
 }
 
 func testV1AccRpcConn(t *testing.T) {
-	var err error
-	accRpc, err = engine.NewRPCClient(accCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	accRpc = engine.NewRPCClient(t, accCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testV1AccGetAccountBeforeSet(t *testing.T) {

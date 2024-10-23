@@ -111,11 +111,7 @@ func testCacheSStartEngine(t *testing.T) {
 }
 
 func testCacheSRpcConn(t *testing.T) {
-	var err error
-	chcRPC, err = engine.NewRPCClient(chcCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to RPC: ", err.Error())
-	}
+	chcRPC = engine.NewRPCClient(t, chcCfg.ListenCfg(), *utils.Encoding)
 }
 
 // Set an attribute profile and rate profile to test cache's apis

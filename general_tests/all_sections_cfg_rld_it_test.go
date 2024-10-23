@@ -126,11 +126,7 @@ func testSectStartEngine(t *testing.T) {
 }
 
 func testSectRPCConn(t *testing.T) {
-	var err error
-	testSectRPC, err = engine.NewRPCClient(testSectCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testSectRPC = engine.NewRPCClient(t, testSectCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testSectConfigSReloadGeneral(t *testing.T) {

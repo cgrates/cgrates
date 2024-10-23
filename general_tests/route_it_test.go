@@ -107,11 +107,7 @@ func testV1SplSStartEngine(t *testing.T) {
 }
 
 func testV1SplSRpcConn(t *testing.T) {
-	var err error
-	splSv1Rpc, err = engine.NewRPCClient(splSv1Cfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	splSv1Rpc = engine.NewRPCClient(t, splSv1Cfg.ListenCfg(), *utils.Encoding)
 }
 
 func testV1SplSLoadTarrifPlans(t *testing.T) {

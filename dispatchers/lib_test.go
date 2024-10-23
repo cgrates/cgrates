@@ -74,9 +74,7 @@ func (d *testDispatcher) startEngine(t *testing.T) {
 		t.Fatalf("Error at engine start:%v\n", err)
 	}
 	// }
-	if d.RPC, err = engine.NewRPCClient(d.Cfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatalf("Error at dialing rcp client:%v\n", err)
-	}
+	d.RPC = engine.NewRPCClient(t, d.Cfg.ListenCfg(), *utils.Encoding)
 }
 
 func (d *testDispatcher) stopEngine(t *testing.T) {

@@ -113,11 +113,7 @@ func testV1FltrStartEngine(t *testing.T) {
 }
 
 func testV1FltrRpcConn(t *testing.T) {
-	var err error
-	fltrRpc, err = engine.NewRPCClient(fltrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	fltrRpc = engine.NewRPCClient(t, fltrCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testV1FltrLoadTarrifPlans(t *testing.T) {

@@ -121,11 +121,7 @@ func testRateConfigSReloadRates(t *testing.T) {
 }
 
 func testRateRPCConn(t *testing.T) {
-	var err error
-	testRateRPC, err = engine.NewRPCClient(testRateCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testRateRPC = engine.NewRPCClient(t, testRateCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testRateStopCgrEngine(t *testing.T) {

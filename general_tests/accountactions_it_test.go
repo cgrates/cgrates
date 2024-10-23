@@ -103,11 +103,7 @@ func testAccActionsStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testAccActionsRPCConn(t *testing.T) {
-	var err error
-	accSRPC, err = engine.NewRPCClient(accPrfCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	accSRPC = engine.NewRPCClient(t, accPrfCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testAccActionsSetActionProfile(t *testing.T) {

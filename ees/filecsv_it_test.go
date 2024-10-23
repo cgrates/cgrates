@@ -100,11 +100,7 @@ func testCsvStartEngine(t *testing.T) {
 }
 
 func testCsvRPCConn(t *testing.T) {
-	var err error
-	csvRpc, err = engine.NewRPCClient(csvCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	csvRpc = engine.NewRPCClient(t, csvCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testCsvExportEvent(t *testing.T) {

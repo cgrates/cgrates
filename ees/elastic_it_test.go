@@ -100,11 +100,7 @@ func testElasticStartEngine(t *testing.T) {
 }
 
 func testElasticRPCConn(t *testing.T) {
-	var err error
-	elasticRpc, err = engine.NewRPCClient(elasticCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	elasticRpc = engine.NewRPCClient(t, elasticCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testElasticStartElasticsearch(t *testing.T) {

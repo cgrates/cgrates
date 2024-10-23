@@ -109,11 +109,7 @@ func testAnalyzerSStartEngine(t *testing.T) {
 }
 
 func testAnzBiSRPCConn(t *testing.T) {
-	var err error
-	anzBiRPC, err = engine.NewRPCClient(anzCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	anzBiRPC = engine.NewRPCClient(t, anzCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testAnalyzerSLoad(t *testing.T) {

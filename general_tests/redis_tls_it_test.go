@@ -98,11 +98,7 @@ func testRedisTLSStartEngine(t *testing.T) {
 }
 
 func testRedisTLSRPCCon(t *testing.T) {
-	var err error
-	redisTLSRPC, err = engine.NewRPCClient(redisTLSCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	redisTLSRPC = engine.NewRPCClient(t, redisTLSCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testRedisTLSSetGetAttribute(t *testing.T) {

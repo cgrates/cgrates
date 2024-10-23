@@ -120,11 +120,7 @@ func testCfgStartEngine(t *testing.T) {
 }
 
 func testCfgRPCConn(t *testing.T) {
-	var err error
-	cfgRPC, err = engine.NewRPCClient(cfgCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfgRPC = engine.NewRPCClient(t, cfgCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testCfgGetConfigInvalidSection(t *testing.T) {
@@ -416,11 +412,7 @@ func testCfgStartEngineStore(t *testing.T) {
 }
 
 func testCfgRPCConnStore(t *testing.T) {
-	var err error
-	cfgRPC, err = engine.NewRPCClient(cfgCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	cfgRPC = engine.NewRPCClient(t, cfgCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testCfgDataDBConnStore(t *testing.T) {

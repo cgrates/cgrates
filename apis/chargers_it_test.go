@@ -126,11 +126,7 @@ func testChargersStartEngine(t *testing.T) {
 }
 
 func testChargersSRPCConn(t *testing.T) {
-	var err error
-	chargersRPC, err = engine.NewRPCClient(chargersCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	chargersRPC = engine.NewRPCClient(t, chargersCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testChargersGetChargerProfileBeforeSet(t *testing.T) {
