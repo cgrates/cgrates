@@ -125,16 +125,9 @@ func testGOCSStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testGOCSApierRpcConn(t *testing.T) {
-	var err error
-	if auRPC, err = engine.NewRPCClient(auCfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal(err)
-	}
-	if usRPC, err = engine.NewRPCClient(usCfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal(err)
-	}
-	if dspRPC, err = engine.NewRPCClient(dspCfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal(err)
-	}
+	auRPC = engine.NewRPCClient(t, auCfg.ListenCfg(), *utils.Encoding)
+	usRPC = engine.NewRPCClient(t, usCfg.ListenCfg(), *utils.Encoding)
+	dspRPC = engine.NewRPCClient(t, dspCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testGOCSLoadData(t *testing.T) {

@@ -89,11 +89,7 @@ func testHTTPPostStartEngine(t *testing.T) {
 }
 
 func testHTTPPostRPCConn(t *testing.T) {
-	var err error
-	httpPostRpc, err = engine.NewRPCClient(httpPostCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	httpPostRpc = engine.NewRPCClient(t, httpPostCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testHTTPStartHTTPServer(t *testing.T) {

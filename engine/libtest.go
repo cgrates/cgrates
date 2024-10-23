@@ -22,7 +22,6 @@ package engine
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -317,16 +316,23 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 	}
 }
 
-// NewRPCClient establishes a connection to cgr-engine and returns the client.
-func NewRPCClient(cfg *config.ListenCfg, encoding string) (*birpc.Client, error) {
+// NewRPCClient creates and returns a new RPC client for cgr-engine.
+func NewRPCClient(t *testing.T, cfg *config.ListenCfg, encoding string) *birpc.Client {
+	t.Helper()
+	var err error
+	var client *birpc.Client
 	switch encoding {
 	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+		client, err = jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
+		client, err = birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
-		return nil, errors.New("invalid encoding")
+		t.Fatalf("unsupported RPC encoding: %s", encoding)
 	}
+	if err != nil {
+		t.Fatalf("unable to connect to cgr-engine: %v", err)
+	}
+	return client
 }
 
 // TestEnvironment holds the setup parameters and configurations
@@ -379,11 +385,7 @@ func (env TestEnvironment) Setup(t *testing.T, ctx *context.Context) (*birpc.Cli
 	}
 	startEngine(t, ctx, cfg, env.LogBuffer)
 
-	client, err := NewRPCClient(cfg.ListenCfg(), env.Encoding)
-	if err != nil {
-		t.Fatalf("could not connect to cgr-engine: %v", err)
-	}
-
+	client := NewRPCClient(t, cfg.ListenCfg(), env.Encoding)
 	loadCSVs(t, env.TpPath, env.TpFiles)
 
 	return client, cfg

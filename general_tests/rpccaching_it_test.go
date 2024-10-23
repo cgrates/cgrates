@@ -113,11 +113,7 @@ func testRPCMethodsStartEngine(t *testing.T) {
 }
 
 func testRPCMethodsRpcConn(t *testing.T) {
-	var err error
-	rpcRpc, err = engine.NewRPCClient(rpcCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	rpcRpc = engine.NewRPCClient(t, rpcCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testRPCMethodsFromFolder(t *testing.T) {

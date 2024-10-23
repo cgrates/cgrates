@@ -90,11 +90,7 @@ func testKafkaStartEngine(t *testing.T) {
 }
 
 func testKafkaRPCConn(t *testing.T) {
-	var err error
-	kafkaRpc, err = engine.NewRPCClient(kafkaCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	kafkaRpc = engine.NewRPCClient(t, kafkaCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testKafkaCreateTopic(t *testing.T) {

@@ -88,11 +88,7 @@ func testFwvStartEngine(t *testing.T) {
 }
 
 func testFwvRPCConn(t *testing.T) {
-	var err error
-	fwvRpc, err = engine.NewRPCClient(fwvCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	fwvRpc = engine.NewRPCClient(t, fwvCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testFwvExportEvent(t *testing.T) {

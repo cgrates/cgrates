@@ -143,10 +143,7 @@ func testCoreItStartEngineByExecWithCPUProfiling(t *testing.T) {
 }
 
 func testCoreItRPCConn(t *testing.T) {
-	var err error
-	if coreSBiRpc, err = engine.NewRPCClient(coreSCfg.ListenCfg(), *utils.Encoding); err != nil {
-		t.Error(err)
-	}
+	coreSBiRpc = engine.NewRPCClient(t, coreSCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testCoreItStartCPUProfilingErrorAlreadyStarted(t *testing.T) {

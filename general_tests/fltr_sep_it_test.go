@@ -106,11 +106,7 @@ func testFltrSepStartEngine(t *testing.T) {
 }
 
 func testFltrSepRpcConn(t *testing.T) {
-	var err error
-	fltrSepRPC, err = engine.NewRPCClient(fltrSepCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	fltrSepRPC = engine.NewRPCClient(t, fltrSepCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testFltrSepWriteCSVs(t *testing.T) {

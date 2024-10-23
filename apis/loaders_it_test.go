@@ -137,11 +137,7 @@ func testLoadersStartEngine(t *testing.T) {
 }
 
 func testLoadersRPCConn(t *testing.T) {
-	var err error
-	ldrRPC, err = engine.NewRPCClient(ldrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	ldrRPC = engine.NewRPCClient(t, ldrCfg.ListenCfg(), *utils.Encoding)
 }
 
 // Kill the engine when it is about to be finished

@@ -153,10 +153,7 @@ func testPreloadITStartEngine(t *testing.T) {
 }
 
 func testPreloadITRPCConn(t *testing.T) {
-	var err error
-	if preloadRPC, err = engine.NewRPCClient(preloadCFG.ListenCfg(), *utils.Encoding); err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	preloadRPC = engine.NewRPCClient(t, preloadCFG.ListenCfg(), *utils.Encoding)
 }
 
 func testPreloadITVerifyRateProfile(t *testing.T) {

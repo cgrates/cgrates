@@ -104,10 +104,7 @@ func testRPCStartEngine(t *testing.T) {
 	if _, err = engine.StopStartEngine(rpcsCfgPath, *utils.WaitRater); err != nil {
 		t.Fatal(err)
 	}
-	rpcsRPC, err = engine.NewRPCClient(rpcsCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	rpcsRPC = engine.NewRPCClient(t, rpcsCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testRPCLoadData(t *testing.T) {

@@ -120,11 +120,7 @@ func testFiltersStartEngine(t *testing.T) {
 }
 
 func testFiltersRPCConn(t *testing.T) {
-	var err error
-	fltrRPC, err = engine.NewRPCClient(fltrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	fltrRPC = engine.NewRPCClient(t, fltrCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testFiltersGetFilterBeforeSet(t *testing.T) {

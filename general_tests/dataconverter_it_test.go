@@ -105,11 +105,7 @@ func testDCStartEngine(t *testing.T) {
 }
 
 func testDCRpcConn(t *testing.T) {
-	var err error
-	dcRPC, err = engine.NewRPCClient(dcCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	dcRPC = engine.NewRPCClient(t, dcCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testDCCreateFolders(t *testing.T) {

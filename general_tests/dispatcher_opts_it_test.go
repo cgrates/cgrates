@@ -128,11 +128,7 @@ func testDispatcherOptsAdminStartEngine(t *testing.T) {
 }
 
 func testDispatcherOptsAdminRPCConn(t *testing.T) {
-	var err error
-	adminsRPC, err = engine.NewRPCClient(adminsCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	adminsRPC = engine.NewRPCClient(t, adminsCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testDispatcherOptsDSPInitCfg(t *testing.T) {
@@ -153,11 +149,7 @@ func testDispatcherOptsDSPStartEngine(t *testing.T) {
 }
 
 func testDispatcherOptsDSPRPCConn(t *testing.T) {
-	var err error
-	dspOptsRPC, err = engine.NewRPCClient(dspOptsCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	dspOptsRPC = engine.NewRPCClient(t, dspOptsCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testDispatcherOptsCoreStatus(t *testing.T) {

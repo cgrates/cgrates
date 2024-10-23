@@ -135,11 +135,7 @@ func testExpStartEngineChangedLoderDirectory(t *testing.T) {
 }
 
 func testExpRPCConn(t *testing.T) {
-	var err error
-	expRpc, err = engine.NewRPCClient(expCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	expRpc = engine.NewRPCClient(t, expCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testExpLoadTPFromFolder(t *testing.T) {

@@ -96,11 +96,7 @@ func testSQSStartEngine(t *testing.T) {
 }
 
 func testSQSRPCConn(t *testing.T) {
-	var err error
-	sqsRPC, err = engine.NewRPCClient(sqsCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	sqsRPC = engine.NewRPCClient(t, sqsCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testSQSExportEvent(t *testing.T) {

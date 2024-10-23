@@ -101,11 +101,7 @@ func testSrvMngStartEngine(t *testing.T) {
 }
 
 func testSrvMngSRPCConn(t *testing.T) {
-	var err error
-	srvMngRPC, err = engine.NewRPCClient(srvMngCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	srvMngRPC = engine.NewRPCClient(t, srvMngCfg.ListenCfg(), *utils.Encoding)
 }
 
 // Kill the engine when it is about to be finished

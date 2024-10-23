@@ -118,15 +118,8 @@ func testRPCExpStartEngine(t *testing.T) {
 }
 
 func testRPCExpRPCConn(t *testing.T) {
-	var err error
-	ng1RPC, err = engine.NewRPCClient(ng1Cfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
-	ng2RPC, err = engine.NewRPCClient(ng2Cfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	ng1RPC = engine.NewRPCClient(t, ng1Cfg.ListenCfg(), *utils.Encoding)
+	ng2RPC = engine.NewRPCClient(t, ng2Cfg.ListenCfg(), *utils.Encoding)
 }
 func testRPCExpSetThresholdProfilesBeforeProcessEv(t *testing.T) {
 	thPrf1 := &engine.ThresholdProfileWithAPIOpts{

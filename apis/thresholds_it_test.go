@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -120,11 +119,7 @@ func testThresholdsStartEngine(t *testing.T) {
 }
 
 func testThresholdsRPCConn(t *testing.T) {
-	var err error
-	thRPC, err = engine.NewRPCClient(thCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	thRPC = engine.NewRPCClient(t, thCfg.ListenCfg(), *utils.Encoding)
 }
 
 // Kill the engine when it is about to be finished

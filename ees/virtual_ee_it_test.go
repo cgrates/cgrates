@@ -88,11 +88,7 @@ func testVirtStartEngine(t *testing.T) {
 }
 
 func testVirtRPCConn(t *testing.T) {
-	var err error
-	virtRpc, err = engine.NewRPCClient(virtCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	virtRpc = engine.NewRPCClient(t, virtCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testVirtExportSupplierEvent(t *testing.T) {

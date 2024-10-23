@@ -95,15 +95,8 @@ func testTwoEnginesStartEngine(t *testing.T) {
 }
 
 func testTwoEnginesRPC(t *testing.T) {
-	var err error
-	engineOneRpc, err = engine.NewRPCClient(engineOneCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
-	engineTwoRpc, err = engine.NewRPCClient(engineTwoCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	engineOneRpc = engine.NewRPCClient(t, engineOneCfg.ListenCfg(), *utils.Encoding)
+	engineTwoRpc = engine.NewRPCClient(t, engineTwoCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testTwoEnginesCheckCacheBeforeSet(t *testing.T) {

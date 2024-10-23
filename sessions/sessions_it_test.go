@@ -101,11 +101,7 @@ func testSessionsItStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessionsItApierRpcConn(t *testing.T) {
-	var err error
-	sItRPC, err = engine.NewRPCClient(sItCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	sItRPC = engine.NewRPCClient(t, sItCfg.ListenCfg(), *utils.Encoding)
 }
 
 /*

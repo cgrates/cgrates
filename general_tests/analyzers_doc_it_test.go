@@ -111,11 +111,7 @@ func testAnzDocInitCfg(t *testing.T) {
 }
 
 func testAnzDocRPCConn(t *testing.T) {
-	var err error
-	anzDocRPC, err = engine.NewRPCClient(anzDocCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	anzDocRPC = engine.NewRPCClient(t, anzDocCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testAnzDocKillEngine(t *testing.T) {

@@ -138,11 +138,7 @@ func testSqlEeStartEngine(t *testing.T) {
 }
 
 func testSqlEeRPCConn(t *testing.T) {
-	var err error
-	sqlEeRpc, err = engine.NewRPCClient(sqlEeCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	sqlEeRpc = engine.NewRPCClient(t, sqlEeCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testSqlEeExportEventFull(t *testing.T) {

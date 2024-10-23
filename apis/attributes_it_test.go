@@ -151,11 +151,7 @@ func testAttributesStartEngine(t *testing.T) {
 }
 
 func testAttributesRPCConn(t *testing.T) {
-	var err error
-	attrRPC, err = engine.NewRPCClient(attrCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	attrRPC = engine.NewRPCClient(t, attrCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testAttributesGetAttributeProfileBeforeSet(t *testing.T) {

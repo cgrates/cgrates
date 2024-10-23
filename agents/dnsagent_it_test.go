@@ -120,11 +120,7 @@ func testDNSitStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testDNSitApierRpcConn(t *testing.T) {
-	var err error
-	dnsRPC, err = engine.NewRPCClient(dnsCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	dnsRPC = engine.NewRPCClient(t, dnsCfg.ListenCfg(), *utils.Encoding)
 }
 
 // Load the tariff plan, creating accounts and their balances

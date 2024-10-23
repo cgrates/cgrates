@@ -116,11 +116,7 @@ func testRankingsStartEngine(t *testing.T) {
 }
 
 func testRankingsRPCConn(t *testing.T) {
-	var err error
-	raRPC, err = engine.NewRPCClient(raCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	raRPC = engine.NewRPCClient(t, raCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testRankingsGetRankingProfileBeforeSet(t *testing.T) {

@@ -88,11 +88,7 @@ func testHTTPJsonMapStartEngine(t *testing.T) {
 }
 
 func testHTTPJsonMapRPCConn(t *testing.T) {
-	var err error
-	httpJSONMapRpc, err = engine.NewRPCClient(httpJSONMapCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	httpJSONMapRpc = engine.NewRPCClient(t, httpJSONMapCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testHTTPJsonMapStartHTTPServer(t *testing.T) {

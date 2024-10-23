@@ -124,11 +124,7 @@ func testTPeSStartEngine(t *testing.T) {
 }
 
 func testTPeSRPCConn(t *testing.T) {
-	var err error
-	tpeSRPC, err = engine.NewRPCClient(tpesCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	tpeSRPC = engine.NewRPCClient(t, tpesCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testTPeSPing(t *testing.T) {

@@ -122,10 +122,7 @@ func testAnalyzerSRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	anzRPC, err = engine.NewRPCClient(anzCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	anzRPC = engine.NewRPCClient(t, anzCfg.ListenCfg(), *utils.Encoding)
 	anzBiRPC, err = utils.NewBiJSONrpcClient(anzCfg.SessionSCfg().ListenBijson, srv)
 	if err != nil {
 		t.Fatal(err)

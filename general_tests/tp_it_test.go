@@ -107,11 +107,7 @@ func testTpStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testTpRpcConn(t *testing.T) {
-	var err error
-	tpRPC, err = engine.NewRPCClient(tpCfg.ListenCfg(), *utils.Encoding) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	tpRPC = engine.NewRPCClient(t, tpCfg.ListenCfg(), *utils.Encoding)
 }
 
 // Load the tariff plan, creating accounts and their balances

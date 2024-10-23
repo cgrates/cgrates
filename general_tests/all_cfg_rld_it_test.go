@@ -90,11 +90,7 @@ func testStartEngine(t *testing.T) {
 }
 
 func testRPCConn(t *testing.T) {
-	var err error
-	testRPC, err = engine.NewRPCClient(testCfg.ListenCfg(), *utils.Encoding)
-	if err != nil {
-		t.Fatal(err)
-	}
+	testRPC = engine.NewRPCClient(t, testCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testConfigSReload(t *testing.T) {
