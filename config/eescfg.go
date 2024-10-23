@@ -189,6 +189,7 @@ type EventExporterOpts struct {
 	SQLDBName                   *string
 	PgSSLMode                   *string
 	KafkaTopic                  *string
+	KafkaBatchSize              *int
 	KafkaTLS                    *bool
 	KafkaCAPath                 *string
 	KafkaSkipTLSVerify          *bool
@@ -382,6 +383,9 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.KafkaTopic != nil {
 		eeOpts.KafkaTopic = jsnCfg.KafkaTopic
+	}
+	if jsnCfg.KafkaBatchSize != nil {
+		eeOpts.KafkaBatchSize = jsnCfg.KafkaBatchSize
 	}
 	if jsnCfg.KafkaTLS != nil {
 		eeOpts.KafkaTLS = jsnCfg.KafkaTLS
@@ -675,6 +679,10 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		cln.KafkaTopic = new(string)
 		*cln.KafkaTopic = *eeOpts.KafkaTopic
 	}
+	if eeOpts.KafkaBatchSize != nil {
+		cln.KafkaBatchSize = new(int)
+		*cln.KafkaBatchSize = *eeOpts.KafkaBatchSize
+	}
 	if eeOpts.KafkaTLS != nil {
 		cln.KafkaTLS = new(bool)
 		*cln.KafkaTLS = *eeOpts.KafkaTLS
@@ -954,6 +962,9 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	if optsEes.KafkaTopic != nil {
 		opts[utils.KafkaTopic] = *optsEes.KafkaTopic
 	}
+	if optsEes.KafkaBatchSize != nil {
+		opts[utils.KafkaBatchSize] = *optsEes.KafkaBatchSize
+	}
 	if optsEes.KafkaTLS != nil {
 		opts[utils.KafkaTLS] = *optsEes.KafkaTLS
 	}
@@ -1094,6 +1105,7 @@ type EventExporterOptsJson struct {
 	SQLDBName                   *string           `json:"sqlDBName"`
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
+	KafkaBatchSize              *int              `json:"kafkaBatchSize"`
 	KafkaTLS                    *bool             `json:"kafkaTLS"`
 	KafkaCAPath                 *string           `json:"kafkaCAPath"`
 	KafkaSkipTLSVerify          *bool             `json:"kafkaSkipTLSVerify"`
@@ -1304,6 +1316,14 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 		}
 	} else {
 		d.KafkaTopic = nil
+	}
+	if v2.KafkaBatchSize != nil {
+		if v1.KafkaBatchSize == nil ||
+			*v1.KafkaBatchSize != *v2.KafkaBatchSize {
+			d.KafkaBatchSize = v2.KafkaBatchSize
+		}
+	} else {
+		d.KafkaBatchSize = nil
 	}
 	if v2.KafkaTLS != nil {
 		if v1.KafkaTLS == nil ||
