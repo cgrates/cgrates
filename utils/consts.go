@@ -2599,6 +2599,7 @@ const (
 	KafkaDefaultMaxWait = time.Millisecond
 
 	KafkaTopic         = "kafkaTopic"
+	KafkaBatchSize     = "kafkaBatchSize"
 	KafkaTLS           = "kafkaTLS"
 	KafkaCAPath        = "kafkaCAPath"
 	KafkaSkipTLSVerify = "kafkaSkipTLSVerify"
