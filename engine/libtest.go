@@ -22,6 +22,7 @@ package engine
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -335,12 +336,13 @@ func NewRPCClient(t *testing.T, cfg *config.ListenCfg, encoding string) *birpc.C
 	return client
 }
 
-// TestEnvironment holds the setup parameters and configurations
+// TestEngine holds the setup parameters and configurations
 // required for running integration tests.
-type TestEnvironment struct {
+type TestEngine struct {
 	ConfigPath     string            // path to the main configuration file
-	ConfigJSON     string            // configuration JSON content (used if ConfigPath is empty)
-	Encoding       string            // data encoding type (e.g., JSON, GOB)
+	ConfigJSON     string            // JSON cfg content (standalone/overwrites static configs)
+	DBCfg          DBCfg             // custom db settings for dynamic setup (overrides static config)
+	Encoding       string            // data encoding type (e.g. JSON, GOB)
 	LogBuffer      io.Writer         // captures log output of the test environment
 	PreserveDataDB bool              // prevents automatic data_db flush when set
 	PreserveStorDB bool              // prevents automatic stor_db flush when set
@@ -352,43 +354,101 @@ type TestEnvironment struct {
 	PreStartHook func(*testing.T, *config.CGRConfig)
 }
 
-// Setup initializes the testing environment using the provided configuration. It loads the configuration
-// from a specified path or creates a new one if the path is not provided. The method starts the engine,
-// establishes an RPC client connection, and loads CSV data if provided. It returns an RPC client and the
-// configuration.
-func (env TestEnvironment) Setup(t *testing.T, ctx *context.Context) (*birpc.Client, *config.CGRConfig) {
+// Run initializes a cgr-engine instance for testing. It calls t.Fatal on any setup failure.
+func (ng TestEngine) Run(t *testing.T, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
+	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
+	flushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
+	if ng.PreStartHook != nil {
+		ng.PreStartHook(t, cfg)
+	}
+	startEngine(t, cfg, ng.LogBuffer)
+	client := NewRPCClient(t, cfg.ListenCfg(), ng.Encoding)
+	loadCSVs(t, ng.TpPath, ng.TpFiles)
+	return client, cfg
+}
 
-	// Parse config files.
-	var cfgPath string
-	switch {
-	case env.ConfigJSON != "":
-		cfgPath = t.TempDir()
-		filePath := filepath.Join(cfgPath, "cgrates.json")
-		if err := os.WriteFile(filePath, []byte(env.ConfigJSON), 0644); err != nil {
-			t.Fatal(err)
-		}
-	case env.ConfigPath != "":
-		cfgPath = env.ConfigPath
-	default:
+// DBParams contains database connection parameters.
+type DBParams struct {
+	Type     *string `json:"db_type,omitempty"`
+	Host     *string `json:"db_host,omitempty"`
+	Port     *int    `json:"db_port,omitempty"`
+	Name     *string `json:"db_name,omitempty"`
+	User     *string `json:"db_user,omitempty"`
+	Password *string `json:"db_password,omitempty"`
+}
+
+// DBCfg holds the configurations for data_db and/or stor_db.
+type DBCfg struct {
+	DataDB *DBParams `json:"data_db,omitempty"`
+	StorDB *DBParams `json:"stor_db,omitempty"`
+}
+
+// parseCfg initializes and returns a CGRConfig. It handles both static and
+// dynamic configs, including custom DB settings. For dynamic configs, it
+// creates temporary configuration files in a new directory.
+func parseCfg(t *testing.T, cfgPath, cfgJSON string, dbCfg DBCfg) (cfg *config.CGRConfig) {
+	t.Helper()
+	if cfgPath == "" && cfgJSON == "" {
 		t.Fatal("missing config source")
 	}
-	cfg, err := config.NewCGRConfigFromPath(ctx, cfgPath)
-	if err != nil {
-		t.Fatalf("could not init config from path %s: %v", cfgPath, err)
+
+	// Defer CGRConfig constructor to avoid repetition.
+	// cfg (named return) will be set by the deferred function.
+	// cfgPath is guaranteed non-empty on successful return.
+	defer func() {
+		t.Helper()
+		var err error
+		cfg, err = config.NewCGRConfigFromPath(context.TODO(), cfgPath)
+		if err != nil {
+			t.Fatalf("could not init config from path %s: %v", cfgPath, err)
+		}
+	}()
+
+	hasCustomDBConfig := dbCfg.DataDB != nil || dbCfg.StorDB != nil
+	if cfgPath != "" && cfgJSON == "" && !hasCustomDBConfig {
+		// Config file already exists and is static; no need for
+		// further processing.
+		return
 	}
 
-	flushDBs(t, cfg, !env.PreserveDataDB, !env.PreserveStorDB)
+	// Reaching this point means the configuration is at least partially dynamic.
 
-	if env.PreStartHook != nil {
-		env.PreStartHook(t, cfg)
+	tmp := t.TempDir()
+	if cfgPath != "" {
+		// An existing configuration directory is specified. Since
+		// configuration is not completely static, it's better to copy
+		// its contents to the temporary directory instead.
+		if err := os.CopyFS(tmp, os.DirFS(cfgPath)); err != nil {
+			t.Fatal(err)
+		}
 	}
-	startEngine(t, ctx, cfg, env.LogBuffer)
+	cfgPath = tmp
 
-	client := NewRPCClient(t, cfg.ListenCfg(), env.Encoding)
-	loadCSVs(t, env.TpPath, env.TpFiles)
+	if hasCustomDBConfig {
+		// Create a new JSON configuration file based on the DBConfigs object.
+		b, err := json.Marshal(dbCfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dbFilePath := filepath.Join(cfgPath, "zzz_dynamic_db.json")
+		if err := os.WriteFile(dbFilePath, b, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
 
-	return client, cfg
+	if cfgJSON != "" {
+		// A JSON configuration string has been passed to the object.
+		// It can be standalone or used to overwrite sections from an
+		// existing configuration file. In case it's the latter, ensure
+		// the file is processed towards the end.
+		filePath := filepath.Join(cfgPath, "zzz_dynamic_cgrates.json")
+		if err := os.WriteFile(filePath, []byte(cfgJSON), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	return
 }
 
 // loadCSVs loads tariff plan data from CSV files. The CSV files are created based on the csvFiles map, where
@@ -421,21 +481,22 @@ func flushDBs(t *testing.T, cfg *config.CGRConfig, flushDataDB, flushStorDB bool
 	}
 }
 
-// startEngine starts the CGR engine process with the provided configuration. It writes engine logs to the provided
-// logBuffer (if any) and waits for the engine to be ready. If the passed context were to be cancelled, the engine
-// would also shut down.
-func startEngine(t *testing.T, ctx *context.Context, cfg *config.CGRConfig, logBuffer io.Writer) {
+// startEngine starts the CGR engine process with the provided configuration
+// and flags. It writes engine logs to the provided logBuffer (if any).
+func startEngine(t *testing.T, cfg *config.CGRConfig, logBuffer io.Writer, extraFlags ...string) {
 	t.Helper()
 	binPath, err := exec.LookPath("cgr-engine")
 	if err != nil {
 		t.Fatal(err)
 	}
-	engine := exec.CommandContext(
-		ctx,
-		binPath,
-		"-config_path", cfg.ConfigPath,
-		"-logger", utils.MetaStdLog,
-	)
+	flags := []string{"-config_path", cfg.ConfigPath}
+	if logBuffer != nil {
+		flags = append(flags, "-logger", utils.MetaStdLog)
+	}
+	if len(extraFlags) != 0 {
+		flags = append(flags, extraFlags...)
+	}
+	engine := exec.Command(binPath, flags...)
 	if logBuffer != nil {
 		engine.Stdout = logBuffer
 		engine.Stderr = logBuffer
@@ -448,14 +509,59 @@ func startEngine(t *testing.T, ctx *context.Context, cfg *config.CGRConfig, logB
 			t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
 		}
 	})
-	fib := utils.FibDuration(time.Millisecond, 0)
+	backoff := utils.FibDuration(time.Millisecond, 0)
 	for i := 0; i < 16; i++ {
-		time.Sleep(fib())
+		time.Sleep(backoff())
 		if _, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err == nil {
 			break
 		}
 	}
 	if err != nil {
-		t.Fatalf("starting cgr-engine on port %s failed: %v", cfg.ListenCfg().RPCJSONListen, err)
+		t.Fatalf("failed to start cgr-engine: %v", err)
 	}
 }
+
+func WaitForService(t *testing.T, ctx *context.Context, client *birpc.Client, service string) {
+	t.Helper()
+	method := service + ".Ping"
+	backoff := utils.FibDuration(time.Millisecond, 0)
+	var reply any
+	for {
+		select {
+		case <-ctx.Done():
+			t.Fatalf("%s service did not become available: %v", service, ctx.Err())
+		default:
+			err := client.Call(context.Background(), method, nil, &reply)
+			if err == nil && reply == utils.Pong {
+				return
+			}
+			time.Sleep(backoff())
+		}
+	}
+}
+
+// Default DB configurations. For Redis/MySQL, it's missing because
+// it's the default.
+var (
+	InternalDBCfg = DBCfg{
+		DataDB: &DBParams{
+			Type: utils.StringPointer(utils.MetaInternal),
+		},
+		StorDB: &DBParams{
+			Type: utils.StringPointer(utils.MetaInternal),
+		},
+	}
+	MongoDBCfg = DBCfg{
+		DataDB: &DBParams{
+			Type: utils.StringPointer(utils.MetaMongo),
+			Port: utils.IntPointer(27017),
+			Name: utils.StringPointer("10"),
+		},
+		StorDB: &DBParams{
+			Type:     utils.StringPointer(utils.MetaMongo),
+			Port:     utils.IntPointer(27017),
+			Name:     utils.StringPointer("cgrates"),
+			Password: utils.StringPointer(""),
+		},
+	}
+)

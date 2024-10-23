@@ -56,7 +56,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 
 	var js jetstream.JetStream // to reuse jetstream instance
 
-	testEnv := engine.TestEnvironment{
+	testEnv := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf/samples/ers_nats"),
 		Encoding:   *utils.Encoding,
 		PreStartHook: func(t *testing.T, c *config.CGRConfig) {
@@ -81,7 +81,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 			})
 		},
 	}
-	testEnv.Setup(t, context.Background())
+	testEnv.Run(t)
 
 	// Publish CDRs asynchronously to the nats subject.
 	cdr := make(map[string]any)
@@ -275,7 +275,7 @@ resolver_preload: {
 			t.Cleanup(func() { cmd.Process.Kill() })
 			var nc *nats.Conn // to reuse nats conn
 
-			testEnv := engine.TestEnvironment{
+			testEnv := engine.TestEngine{
 				ConfigJSON: fmt.Sprintf(natsCfg, tc.sourcePath, tc.readerOpts),
 				Encoding:   utils.MetaJSON,
 				PreStartHook: func(t *testing.T, c *config.CGRConfig) {
@@ -287,7 +287,7 @@ resolver_preload: {
 					nc = connectToNATSServer(t, tc.sourcePath, nop...)
 				},
 			}
-			client, _ := testEnv.Setup(t, context.Background())
+			client, _ := testEnv.Run(t)
 
 			// For non-jetstream connections, we need to make sure the
 			// engine is ready to read published messages right away.
@@ -421,7 +421,7 @@ resolver_preload: {
 			t.Cleanup(func() { cmd.Process.Kill() })
 			var js jetstream.JetStream // to reuse jetstream instance
 
-			testEnv := engine.TestEnvironment{
+			testEnv := engine.TestEngine{
 				ConfigJSON: fmt.Sprintf(natsCfg, tc.sourcePath, tc.readerOpts),
 				Encoding:   utils.MetaJSON,
 				PreStartHook: func(t *testing.T, c *config.CGRConfig) {
@@ -450,7 +450,7 @@ resolver_preload: {
 					})
 				},
 			}
-			client, _ := testEnv.Setup(t, context.Background())
+			client, _ := testEnv.Run(t)
 
 			for i := 0; i < 3; i++ {
 				key := fmt.Sprintf("key%d", i+1)

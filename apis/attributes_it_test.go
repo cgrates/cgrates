@@ -2248,13 +2248,13 @@ cgrates.org,ATTR_ARITH,,,,,,*req.3-4,*difference,3;4
 cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;~*req.Elem2`,
 	}
 
-	testEnv := engine.TestEnvironment{
+	testEnv := engine.TestEngine{
 		ConfigJSON: content,
 		TpPath:     tpInDir,
 		TpFiles:    tpFiles,
 		Encoding:   *utils.Encoding,
 	}
-	client, _ := testEnv.Setup(t, context.Background())
+	client, _ := testEnv.Run(t)
 
 	t.Run("SetAttributesThroughAPI", func(t *testing.T) {
 		var reply string

@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"bytes"
 	"fmt"
 	"net"
 	"strconv"
@@ -39,8 +38,10 @@ import (
 // TestKafkaSSL tests exporting to and reading from a kafka broker through an SSL connection.
 // Steps to set up a local kafka server with SSL setup can be found at the bottom of the file.
 func TestKafkaSSL(t *testing.T) {
+	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
+		dbCfg = engine.InternalDBCfg
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -53,12 +54,6 @@ func TestKafkaSSL(t *testing.T) {
 	processedTopic := "processed"
 
 	content := fmt.Sprintf(`{
-"data_db": {
-	"db_type": "*internal"
-},
-"stor_db": {
-	"db_type": "*internal"
-},
 "ees": {
 	"enabled": true,
 	// "cache": {
@@ -139,13 +134,12 @@ func TestKafkaSSL(t *testing.T) {
 }
 }`, brokerSSLURL, mainTopic, brokerPlainURL, processedTopic, brokerSSLURL, mainTopic)
 
-	ng := engine.TestEnvironment{
+	ng := engine.TestEngine{
 		ConfigJSON: content,
 		Encoding:   *utils.Encoding,
-		LogBuffer:  &bytes.Buffer{},
+		DBCfg:      dbCfg,
 	}
-	defer fmt.Println(ng.LogBuffer)
-	client, _ := ng.Setup(t, context.Background())
+	client, _ := ng.Run(t)
 
 	createKafkaTopics(t, brokerPlainURL, true, mainTopic, processedTopic)
 
