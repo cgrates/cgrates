@@ -189,7 +189,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> decoding app: %d, err: %s",
 			utils.DiameterAgent, m.Header.ApplicationID, err.Error()))
-		writeOnConn(c, diamErrMsg(m, diam.NoCommonApplication, ""))
+		writeOnConn(c, diamErrMsg(m, diam.NoCommonApplication, err.Error()))
 		return
 	}
 	dCmd, err := m.Dictionary().FindCommand(
@@ -198,7 +198,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> decoding app: %d, command %d, err: %s",
 			utils.DiameterAgent, m.Header.ApplicationID, m.Header.CommandCode, err.Error()))
-		writeOnConn(c, diamErrMsg(m, diam.CommandUnsupported, ""))
+		writeOnConn(c, diamErrMsg(m, diam.CommandUnsupported, err.Error()))
 		return
 	}
 	diamDP := newDADataProvider(c, m)
@@ -214,10 +214,9 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			utils.RemoteHost:  utils.NewLeafNode(c.RemoteAddr().String()),
 		},
 	}
-	handleErr := newDiamErrHandler(m, reqVars, da.cgrCfg, da.filterS)
 	if da.caps.IsLimited() {
 		if err := da.caps.Allocate(); err != nil {
-			handleErr(c, diam.TooBusy)
+			diamErr(c, m, diam.TooBusy, reqVars, da.cgrCfg, da.filterS)
 			return
 		}
 		defer da.caps.Deallocate()
@@ -231,14 +230,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving Session-Id err: %s, message: %s",
 					utils.DiameterAgent, err.Error(), m))
-			handleErr(c, diam.UnableToComply)
+			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
 			return
 		}
 		// cache message data needed for building up the ASR
 		if errCh := engine.Cache.Set(utils.CacheDiameterMessages, sessID, &diamMsgData{c, m, reqVars},
 			nil, true, utils.NonTransactional); errCh != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed message: %s to set Cache: %s", utils.DiameterAgent, m, errCh.Error()))
-			handleErr(c, diam.UnableToComply)
+			diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
 			return
 		}
 	}
@@ -276,14 +275,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing message: %s",
 				utils.DiameterAgent, err.Error(), m))
-		handleErr(c, diam.UnableToComply)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
 		return
 	}
 	if !processed {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> no request processor enabled, ignoring message %s from %s",
 				utils.DiameterAgent, m, c.RemoteAddr()))
-		handleErr(c, diam.UnableToComply)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
 		return
 	}
 	a, err := diamAnswer(m, 0, false,
@@ -292,7 +291,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> err: %s, replying to message: %+v",
 				utils.DiameterAgent, err.Error(), m))
-		handleErr(c, diam.UnableToComply)
+		diamErr(c, m, diam.UnableToComply, reqVars, da.cgrCfg, da.filterS)
 		return
 	}
 	writeOnConn(c, a)
