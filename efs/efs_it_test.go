@@ -236,13 +236,13 @@ func TestEFsReplayEvents(t *testing.T) {
 }
 }`, failedDir)
 
-	testEnv := engine.TestEnvironment{
+	testEnv := engine.TestEngine{
 		ConfigJSON: content,
 		// LogBuffer:  &bytes.Buffer{},
 		Encoding: *utils.Encoding,
 	}
 	// defer fmt.Println(testEnv.LogBuffer)
-	client, _ := testEnv.Setup(t, context.Background())
+	client, _ := testEnv.Run(t)
 	// helper to sort slices
 	less := func(a, b string) bool { return a < b }
 	// amount of events to export/replay
