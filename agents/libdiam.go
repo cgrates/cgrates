@@ -454,28 +454,35 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 	return
 }
 
-func newDiamErrHandler(m *diam.Message, reqVars *utils.DataNode, cfg *config.CGRConfig,
-	filterS *engine.FilterS) func(c diam.Conn, resCode uint32) {
-	return func(c diam.Conn, resCode uint32) {
-		tnt := cfg.GeneralCfg().DefaultTenant
-		tmz := cfg.GeneralCfg().DefaultTimezone
-		aReq := NewAgentRequest(newDADataProvider(nil, m), reqVars,
-			nil, nil, nil, nil, tnt, tmz, filterS, nil)
-		if err := aReq.SetFields(cfg.TemplatesCfg()[utils.MetaErr]); err != nil {
-			writeOnConn(c, diamErrMsg(m, diam.UnableToComply,
-				fmt.Sprintf("failed to parse *err template: %v", err)))
-			return
-		}
-		diamAns, err := diamAnswer(m, resCode, true, aReq.Reply, tmz)
-		if err != nil {
-			writeOnConn(c, diamErrMsg(m, diam.UnableToComply,
-				fmt.Sprintf("failed to construct error response: %v", err)))
-			return
-		}
-		writeOnConn(c, diamAns)
+// diamErr handles Diameter error scenarios by attempting to build a customized error answer
+// based on the *err template.
+func diamErr(c diam.Conn, m *diam.Message, resCode uint32, reqVars *utils.DataNode, cfg *config.CGRConfig,
+	filterS *engine.FilterS) {
+	tnt := cfg.GeneralCfg().DefaultTenant
+	tmz := cfg.GeneralCfg().DefaultTimezone
+	aReq := NewAgentRequest(newDADataProvider(nil, m), reqVars,
+		nil, nil, nil, nil, tnt, tmz, filterS, nil)
+	if err := aReq.SetFields(cfg.TemplatesCfg()[utils.MetaErr]); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> message: %s - failed to parse *err template: %v",
+			utils.DiameterAgent, m, err))
+		writeOnConn(c, diamErrMsg(m, diam.UnableToComply,
+			fmt.Sprintf("failed to parse *err template: %v", err)))
+		return
 	}
+	diamAns, err := diamAnswer(m, resCode, true, aReq.Reply, tmz)
+	if err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> message: %s - failed to build error answer: %v",
+			utils.DiameterAgent, m, err))
+		writeOnConn(c, diamErrMsg(m, diam.UnableToComply,
+			fmt.Sprintf("failed to build error answer: %v", err)))
+		return
+	}
+	writeOnConn(c, diamAns)
 }
 
+// diamErrMsg creates a Diameter error answer with the given result code and optional error message.
 func diamErrMsg(m *diam.Message, resCode uint32, msg string) *diam.Message {
 	ans := m.Answer(resCode)
 	ans.Header.CommandFlags = diam.ErrorFlag
