@@ -349,3 +349,160 @@ func TestTrendCompile(t *testing.T) {
 		t.Error("Expected mTotals to be initialized, but it is nil")
 	}
 }
+
+func TestUncompressAndSortRunTimes(t *testing.T) {
+
+	trend := &Trend{
+		CompressedMetrics: []byte(`{
+            "2024-10-24T10:00:00Z": {
+                "metric1": {
+                    "ID": "metric1",
+                    "Value": 75.0,
+                    "TrendGrowth": 5.0,
+                    "TrendLabel": "*positive"
+                }
+            },
+            "2024-10-24T11:00:00Z": {
+                "metric2": {
+                    "ID": "metric2",
+                    "Value": 65.0,
+                    "TrendGrowth": -3.0,
+                    "TrendLabel": "*negative"
+                }
+            },
+            "2024-10-24T12:00:00Z": {
+                "metric3": {
+                    "ID": "metric3",
+                    "Value": 65.0,
+                    "TrendGrowth": 0.0,
+                    "TrendLabel": "*constant"
+                }
+            }
+        }`),
+		Metrics: make(map[time.Time]map[string]*MetricWithTrend),
+	}
+
+	marshaler := &JSONMarshaler{}
+
+	err := trend.uncompress(marshaler)
+	if err != nil {
+		t.Fatalf("Expected no error, got <%+v>", err)
+	}
+
+	if len(trend.RunTimes) == 0 {
+		t.Fatalf("Expected RunTimes to be populated, got empty slice")
+	}
+
+	if len(trend.Metrics) == 0 {
+		t.Fatalf("Expected Metrics to be populated, got empty map")
+	}
+
+	for i := 1; i < len(trend.RunTimes); i++ {
+		if trend.RunTimes[i].Before(trend.RunTimes[i-1]) {
+			t.Errorf("RunTimes are not sorted: %v at index %d is before %v at index %d", trend.RunTimes[i], i, trend.RunTimes[i-1], i-1)
+		}
+	}
+
+	if metric, exists := trend.Metrics[trend.RunTimes[0]]["metric1"]; exists {
+		if metric.ID != "metric1" || metric.Value != 75.0 || metric.TrendGrowth != 5.0 || metric.TrendLabel != "*positive" {
+			t.Errorf("Metric1 data does not match expected values: %+v", metric)
+		}
+	} else {
+		t.Errorf("Expected metric1 not found in Metrics")
+	}
+
+	if metric, exists := trend.Metrics[trend.RunTimes[1]]["metric2"]; exists {
+		if metric.ID != "metric2" || metric.Value != 65.0 || metric.TrendGrowth != -3.0 || metric.TrendLabel != "*negative" {
+			t.Errorf("Metric2 data does not match expected values: %+v", metric)
+		}
+	} else {
+		t.Errorf("Expected metric2 not found in Metrics")
+	}
+
+	if metric, exists := trend.Metrics[trend.RunTimes[2]]["metric3"]; exists {
+		if metric.ID != "metric3" || metric.Value != 65.0 || metric.TrendGrowth != 0.0 || metric.TrendLabel != "*constant" {
+			t.Errorf("Metric3 data does not match expected values: %+v", metric)
+		}
+	} else {
+		t.Errorf("Expected metric3 not found in Metrics")
+	}
+}
+
+func TestTrendCompressSuccess(t *testing.T) {
+	marshaler := &JSONMarshaler{}
+
+	metrics := map[time.Time]map[string]*MetricWithTrend{
+		time.Now(): {
+			"metric1": {ID: "metric1", Value: 1.0, TrendGrowth: 0.1, TrendLabel: "*positive"},
+		},
+	}
+
+	trend := &Trend{
+		Metrics:  metrics,
+		RunTimes: []time.Time{time.Now()},
+	}
+
+	err := trend.compress(marshaler)
+	if err != nil {
+		t.Errorf("Expected no error, got <%+v>", err)
+	}
+
+	if trend.CompressedMetrics == nil {
+		t.Errorf("Expected CompressedMetrics to be populated, got: %+v", trend.CompressedMetrics)
+	}
+
+	if trend.Metrics != nil {
+		t.Errorf("Expected Metrics to be nil after compression, got: %+v", trend.Metrics)
+	}
+	if trend.RunTimes != nil {
+		t.Errorf("Expected RunTimes to be nil after compression, got: %+v", trend.RunTimes)
+	}
+}
+
+func TestTrendUncompressNil(t *testing.T) {
+	marshaler := &JSONMarshaler{}
+
+	var trend *Trend
+	err := trend.uncompress(marshaler)
+	if err != nil {
+		t.Errorf("Expected no error when Trend is nil, got <%+v>", err)
+	}
+
+	trend = &Trend{CompressedMetrics: nil}
+	err = trend.uncompress(marshaler)
+	if err != nil {
+		t.Errorf("Expected no error when CompressedMetrics is nil, got <%+v>", err)
+	}
+}
+
+func TestTrendUncompressSuccess(t *testing.T) {
+	marshaler := &JSONMarshaler{}
+
+	metrics := map[time.Time]map[string]*MetricWithTrend{
+		time.Now(): {
+			"metric1": {ID: "metric1", Value: 1.0, TrendGrowth: 0.1, TrendLabel: "*positive"},
+		},
+	}
+
+	compressedMetrics, err := marshaler.Marshal(metrics)
+	if err != nil {
+		t.Fatalf("Failed to marshal metrics: %v", err)
+	}
+
+	trend := &Trend{
+		CompressedMetrics: compressedMetrics,
+	}
+
+	err = trend.uncompress(marshaler)
+	if err != nil {
+		t.Errorf("Expected no error, got <%+v>", err)
+	}
+
+	if trend.Metrics == nil {
+		t.Errorf("Expected Metrics to be populated, got: %+v", trend.Metrics)
+	}
+
+	if len(trend.Metrics) != len(metrics) {
+		t.Errorf("Expected Metrics length to be %d, got: %d", len(metrics), len(trend.Metrics))
+	}
+}
