@@ -1,0 +1,5 @@
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
+cgrates.org,Stats1,*string:~*req.Account:1001,,,,,*acc;*acd;*pdd,,,,,
+cgrates.org,Stats2,*string:~*req.Account:1002,,,,,*acc;*acd;*pdd,,,,,
+cgrates.org,Stats3,*string:~*req.Account:1003,,,,,*acc;*acd;*pdd,,,,,
+cgrates.org,Stats4,*string:~*req.Account:1004,,,,,*acc;*acd;*pdd,,,,,

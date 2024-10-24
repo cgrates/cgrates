@@ -142,3 +142,15 @@ type RankingSv1 struct {
 func (rnks *RankingSv1) GetRankingSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *engine.RankingSummary) error {
 	return rnks.rnkS.V1GetRankingSummary(ctx, arg, reply)
 }
+
+func (rnkS *RankingSv1) GetRanking(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.Ranking) (err error) {
+	return rnkS.rnkS.V1GetRanking(ctx, arg, reply)
+}
+
+func (rnkS *RankingSv1) GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
+	return rnkS.rnkS.V1GetSchedule(ctx, args, schedRankings)
+}
+
+func (rnkS *RankingSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
+	return rnkS.rnkS.V1ScheduleQueries(ctx, args, scheduled)
+}

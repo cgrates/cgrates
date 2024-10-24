@@ -163,7 +163,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 34
+	expStats[utils.CacheLoadIDs].Items = 35
 	expStats[utils.CacheTimings].Items = 12
 	expStats[utils.CacheThresholdFilterIndexes].Items = 5
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
@@ -178,6 +178,8 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 	expStats[utils.CacheRankingProfiles].Items = 1
+	expStats[utils.CacheTrendProfiles].Items = 1
+	expStats[utils.CacheTrends].Items = 1
 
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error(err)
@@ -232,7 +234,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 34
+	expStats[utils.CacheLoadIDs].Items = 35
 	expStats[utils.CacheTimings].Items = 12
 	expStats[utils.CacheThresholdFilterIndexes].Items = 5
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
@@ -247,6 +249,8 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 	expStats[utils.CacheRankingProfiles].Items = 1
+	expStats[utils.CacheTrends].Items = 1
+	expStats[utils.CacheTrendProfiles].Items = 1
 
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithAPIOpts{}, &rcvStats); err != nil {
 		t.Error(err)

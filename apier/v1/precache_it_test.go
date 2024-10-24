@@ -228,6 +228,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 		utils.MetaAPIBan:                {},
 		utils.CacheReplicationHosts:     {},
 		utils.CacheRadiusPackets:        {},
+		utils.CacheRankings:             {},
 		utils.CacheRankingProfiles:      {},
 		utils.CacheTrends:               {},
 		utils.CacheTrendProfiles:        {},

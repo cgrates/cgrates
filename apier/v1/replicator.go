@@ -152,6 +152,7 @@ func (rplSv1 *ReplicatorSv1) GetRanking(ctx *context.Context, tntID *utils.Tenan
 	reply.ID = rcv.ID
 	reply.Tenant = rcv.Tenant
 	reply.Sorting = rcv.Sorting
+	reply.LastUpdate = rcv.LastUpdate
 	reply.Metrics = rcv.Metrics
 	reply.SortedStatIDs = rcv.SortedStatIDs
 	reply.SortingParameters = rcv.SortingParameters

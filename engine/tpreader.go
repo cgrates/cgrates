@@ -1633,9 +1633,9 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	if verbose {
 		log.Print("RankingProfiles:")
 	}
-	for _, tpSG := range tpr.rgProfiles {
+	for _, tpRN := range tpr.rgProfiles {
 		var sg *RankingProfile
-		if sg, err = APItoRanking(tpSG); err != nil {
+		if sg, err = APItoRanking(tpRN); err != nil {
 			return
 		}
 		if err = tpr.dm.SetRankingProfile(sg); err != nil {

@@ -999,6 +999,7 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		ChargerFilterIndexIDs:    []string{MetaAny},
 		DispatcherFilterIndexIDs: []string{MetaAny},
 		FilterIndexIDs:           []string{MetaAny},
+		RankingIDs:               []string{MetaAny},
 		RankingProfileIDs:        []string{MetaAny},
 	}
 	eMap := NewAttrReloadCacheWithOpts()
