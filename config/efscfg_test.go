@@ -26,6 +26,7 @@ import (
 )
 
 func TestEFsCfgLoad(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
 	m := &mockDb{}
 	efsCfg := &EFsCfg{}
 	if err := efsCfg.Load(context.Background(), m, cfg); err != utils.ErrNotImplemented {

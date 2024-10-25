@@ -98,7 +98,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 }
 
 func TestConfigSanityLoaders(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.loaderCfg = LoaderSCfgs{
 		&LoaderSCfg{
 			Enabled: true,
@@ -195,7 +195,7 @@ func TestConfigSanityLoaders(t *testing.T) {
 }
 
 func TestConfigSanitySessionS(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.sessionSCfg = &SessionSCfg{
 		Enabled:           true,
 		TerminateAttempts: 0,
@@ -312,7 +312,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 }
 
 func TestConfigSanityFreeSWITCHAgent(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.fsAgentCfg = &FsAgentCfg{
 		Enabled: true,
 	}
@@ -338,7 +338,7 @@ func TestConfigSanityFreeSWITCHAgent(t *testing.T) {
 }
 
 func TestConfigSanityKamailioAgent(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.kamAgentCfg = &KamAgentCfg{
 		Enabled: true,
 	}
@@ -360,7 +360,7 @@ func TestConfigSanityKamailioAgent(t *testing.T) {
 }
 
 func TestConfigSanityAsteriskAgent(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.asteriskAgentCfg = &AsteriskAgentCfg{
 		Enabled: true,
 	}
@@ -382,7 +382,7 @@ func TestConfigSanityAsteriskAgent(t *testing.T) {
 }
 
 func TestConfigSanityDAgent(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 
 	cfg.templates = FCTemplates{
 		utils.MetaEEs: {
@@ -517,7 +517,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 }
 
 func TestConfigSanityRadiusAgent(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.radiusAgentCfg = &RadiusAgentCfg{
 		Enabled: true,
 		RequestProcessors: []*RequestProcessor{
@@ -618,7 +618,7 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 }
 
 func TestConfigSanityDNSAgent(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.dnsAgentCfg = &DNSAgentCfg{
 		Enabled: true,
 		RequestProcessors: []*RequestProcessor{
@@ -1004,7 +1004,7 @@ func TestConfigSanityChargerS(t *testing.T) {
 }
 
 func TestConfigSanityResourceLimiter(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.resourceSCfg = &ResourceSConfig{
 		Enabled:         true,
 		ThresholdSConns: []string{utils.MetaInternal},
@@ -1021,7 +1021,7 @@ func TestConfigSanityResourceLimiter(t *testing.T) {
 }
 
 func TestConfigSanityStatS(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.statsCfg = &StatSCfg{
 		Enabled:         true,
 		ThresholdSConns: []string{utils.MetaInternal},
@@ -1038,7 +1038,7 @@ func TestConfigSanityStatS(t *testing.T) {
 }
 
 func TestConfigSanityRouteS(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.routeSCfg.Enabled = true
 
 	cfg.routeSCfg.ResourceSConns = []string{utils.MetaInternal}
@@ -1079,7 +1079,7 @@ func TestConfigSanityRouteS(t *testing.T) {
 }
 
 func TestConfigSanityEventReader(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.ersCfg = &ERsCfg{
 		Enabled:       true,
 		SessionSConns: []string{"unexistedConn"},
@@ -1574,7 +1574,7 @@ func TestConfigSanityAnalyzer(t *testing.T) {
 }
 
 func TestConfigSanityDataDB(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.dataDbCfg.Type = utils.MetaInternal
 
 	cfg.cacheCfg = &CacheCfg{
@@ -1671,7 +1671,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 }
 
 func TestConfigSanityAPIer(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.admS.AttributeSConns = []string{utils.MetaInternal}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <AdminS> component" {
@@ -1697,7 +1697,7 @@ func TestConfigSanityAPIer(t *testing.T) {
 }
 
 func TestConfigSanityDispatcher(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.dispatcherSCfg = &DispatcherSCfg{
 		Enabled:         true,
 		AttributeSConns: []string{utils.MetaDispatchers},
@@ -1713,7 +1713,7 @@ func TestConfigSanityDispatcher(t *testing.T) {
 }
 
 func TestConfigSanityCacheS(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 
 	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{"wrong_partition_name": {Limit: 10}}
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<CacheS> partition <wrong_partition_name> not defined" {
@@ -1727,7 +1727,7 @@ func TestConfigSanityCacheS(t *testing.T) {
 }
 
 func TestConfigSanityFilterS(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.filterSCfg.StatSConns = []string{utils.MetaInternal}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<StatS> not enabled but requested by <FilterS> component" {
@@ -1765,7 +1765,7 @@ func TestConfigSanityFilterS(t *testing.T) {
 }
 
 func TestConfigSanityErs(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.ersCfg.Enabled = true
 
 	cfg.ersCfg.SessionSConns = []string{}
@@ -1847,7 +1847,7 @@ func TestCGRConfigcheckConfigSanitySessionSErr(t *testing.T) {
 
 func TestCGRConfigcheckConfigSanityAdminSErrExportersCSV(t *testing.T) {
 
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{
 		utils.CacheClosedSessions: {
 			Limit: 1,
@@ -1898,7 +1898,7 @@ func TestCGRConfigcheckConfigSanityAdminSErrExportersCSV(t *testing.T) {
 }
 func TestCGRConfigcheckConfigSanityEEsCfgExportersFWV(t *testing.T) {
 
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{
 		utils.CacheClosedSessions: {
 			Limit: 1,
@@ -1945,7 +1945,7 @@ func TestCGRConfigcheckConfigSanityEEsCfgExportersFWV(t *testing.T) {
 }
 func TestCGRConfigcheckConfigSanityCacheSErr(t *testing.T) {
 
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{
 
 		utils.CacheResourceProfiles: {
@@ -1963,7 +1963,7 @@ func TestCGRConfigcheckConfigSanityCacheSErr(t *testing.T) {
 }
 func TestCGRConfigcheckConfigSanityCacheSIdErr(t *testing.T) {
 
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.cacheCfg.RemoteConns = []string{"remote conn"}
 	cfg.attributeSCfg = &AttributeSCfg{
 		Enabled: true,
@@ -1983,7 +1983,7 @@ func TestCGRConfigcheckConfigSanityCacheSIdErr(t *testing.T) {
 }
 func TestCGRConfigcheckConfigSanityCacheSTransportErr(t *testing.T) {
 
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.cacheCfg.RemoteConns = []string{"con1"}
 	cfg.admS.ActionSConns = []string{utils.MetaInternal}
 	cfg.actionSCfg = &ActionSCfg{Enabled: true}
@@ -2004,7 +2004,7 @@ func TestCGRConfigcheckConfigSanityCacheSTransportErr(t *testing.T) {
 }
 func TestCGRConfigcheckConfigSanityCacheSPartitionErr(t *testing.T) {
 
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.cacheCfg = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
 			utils.CacheRPCConnections: {
@@ -2020,7 +2020,7 @@ func TestCGRConfigcheckConfigSanityCacheSPartitionErr(t *testing.T) {
 }
 func TestCGRConfigcheckConfigSanityEEsErr(t *testing.T) {
 
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	cfg.eesCfg = &EEsCfg{Enabled: false}
 	cfg.analyzerSCfg = &AnalyzerSCfg{
 		Enabled:         true,
@@ -2036,7 +2036,7 @@ func TestCGRConfigcheckConfigSanityEEsErr(t *testing.T) {
 	}
 }
 func TestCGRConfigcheckConfigSanityAnalyzerSErr(t *testing.T) {
-
+	cfg := NewDefaultCGRConfig()
 	cfg.eesCfg = &EEsCfg{Enabled: true}
 	cfg.analyzerSCfg = &AnalyzerSCfg{
 		Enabled:   true,
