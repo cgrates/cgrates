@@ -1454,3 +1454,46 @@ func TestRatingMatchedFiltersFieldAsInterface(t *testing.T) {
 		})
 	}
 }
+
+func TestFieldAsInterfaces(t *testing.T) {
+	tests := []struct {
+		name       string
+		accounting Accounting
+		fldPath    []string
+		expectErr  bool
+	}{
+		{
+			name:       "Non-existent path",
+			accounting: Accounting{"balance1": &BalanceCharge{AccountID: "1"}},
+			fldPath:    []string{"balance2"},
+			expectErr:  true,
+		},
+		{
+			name:       "Nil value in map",
+			accounting: Accounting{"balance1": nil},
+			fldPath:    []string{"balance1"},
+			expectErr:  true,
+		},
+		{
+			name:       "Valid key with non-nil value",
+			accounting: Accounting{"balance1": &BalanceCharge{AccountID: "1"}},
+			fldPath:    []string{"balance1"},
+			expectErr:  false,
+		},
+		{
+			name:       "Nil Accounting map",
+			accounting: nil,
+			fldPath:    []string{"balance1"},
+			expectErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := tt.accounting.FieldAsInterface(tt.fldPath)
+			if (err != nil) != tt.expectErr {
+				t.Errorf("expected error: %v, got: %v", tt.expectErr, err)
+			}
+		})
+	}
+}

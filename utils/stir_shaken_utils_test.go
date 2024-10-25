@@ -20,7 +20,11 @@ package utils
 
 import (
 	"bytes"
+	"io"
 	"math"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -111,5 +115,88 @@ func TestGetReaderFromPathError(t *testing.T) {
 	_, err := GetReaderFromPath("string", time.Duration(10))
 	if err == nil || err.Error() != "open string: no such file or directory" {
 		t.Errorf("Expected <open string: no such file or directory>, received <%v>", err)
+	}
+}
+
+func TestGetReaderFromPath(t *testing.T) {
+	tests := []struct {
+		name       string
+		path       string
+		timeout    time.Duration
+		expectErr  bool
+		expectData string
+	}{
+		{
+			name:       "Valid file path",
+			path:       "testfile.txt",
+			timeout:    1 * time.Second,
+			expectErr:  false,
+			expectData: "This is a test file.",
+		},
+		{
+			name:      "Invalid file path",
+			path:      "invalidfile.txt",
+			timeout:   1 * time.Second,
+			expectErr: true,
+		},
+		{
+			name:      "Valid HTTP URL",
+			path:      "http://cgrates.com",
+			timeout:   1 * time.Second,
+			expectErr: false,
+		},
+		{
+			name:      "HTTP URL returns non-200 status",
+			path:      "http://cgrates.com/non200",
+			timeout:   1 * time.Second,
+			expectErr: true,
+		},
+	}
+
+	testFileName := "testfile.txt"
+	err := os.WriteFile(testFileName, []byte("This is a test file."), 0644)
+	if err != nil {
+		t.Fatalf("failed to create test file: %v", err)
+	}
+	defer os.Remove(testFileName)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/non200" {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.Write([]byte("test"))
+	}))
+	defer ts.Close()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.path == "http://cgrates.com" {
+				tt.path = ts.URL
+			} else if tt.path == "http://cgrates.com/non200" {
+				tt.path = ts.URL + "/non200"
+			}
+
+			reader, err := GetReaderFromPath(tt.path, tt.timeout)
+
+			if (err != nil) != tt.expectErr {
+				t.Errorf("expected error: %v, got: %v", tt.expectErr, err)
+				return
+			}
+
+			if !tt.expectErr && reader != nil {
+				defer reader.Close()
+
+				data, err := io.ReadAll(reader)
+				if err != nil {
+					t.Errorf("failed to read from reader: %v", err)
+					return
+				}
+
+				if string(data) != tt.expectData && tt.expectData != "" {
+					t.Errorf("expected data: %s, got: %s", tt.expectData, string(data))
+				}
+			}
+		})
 	}
 }

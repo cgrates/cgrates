@@ -1026,3 +1026,156 @@ func TestNewAttrReloadCacheWithOptsFromMap(t *testing.T) {
 	}
 
 }
+
+func TestIsActiveAt(t *testing.T) {
+	tests := []struct {
+		name      string
+		timing    TPTiming
+		checkTime time.Time
+		expected  bool
+	}{
+		{
+			name: "Active timing",
+			timing: TPTiming{
+				Years:     Years{2024},
+				Months:    Months{time.January},
+				MonthDays: MonthDays{15},
+				WeekDays:  WeekDays{time.Monday},
+				StartTime: "09:00:00",
+				EndTime:   "17:00:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC),
+			expected:  true,
+		},
+		{
+			name: "Inactive year",
+			timing: TPTiming{
+				Years:     Years{2023},
+				Months:    Months{time.January},
+				MonthDays: MonthDays{15},
+				WeekDays:  WeekDays{time.Monday},
+				StartTime: "09:00:00",
+				EndTime:   "17:00:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC),
+			expected:  false,
+		},
+		{
+			name: "Inactive month",
+			timing: TPTiming{
+				Years:     Years{2024},
+				Months:    Months{time.February},
+				MonthDays: MonthDays{15},
+				WeekDays:  WeekDays{time.Monday},
+				StartTime: "09:00:00",
+				EndTime:   "17:00:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC),
+			expected:  false,
+		},
+		{
+			name: "Inactive day",
+			timing: TPTiming{
+				Years:     Years{2024},
+				Months:    Months{time.January},
+				MonthDays: MonthDays{16},
+				WeekDays:  WeekDays{time.Monday},
+				StartTime: "09:00:00",
+				EndTime:   "17:00:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC),
+			expected:  false,
+		},
+		{
+			name: "Inactive weekday",
+			timing: TPTiming{
+				Years:     Years{2024},
+				Months:    Months{time.January},
+				MonthDays: MonthDays{15},
+				WeekDays:  WeekDays{time.Wednesday},
+				StartTime: "09:00:00",
+				EndTime:   "17:00:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC),
+			expected:  false,
+		},
+		{
+			name: "Before start time",
+			timing: TPTiming{
+				Years:     Years{2024},
+				Months:    Months{time.January},
+				MonthDays: MonthDays{15},
+				WeekDays:  WeekDays{time.Monday},
+				StartTime: "12:00:00",
+				EndTime:   "17:00:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 11, 0, 0, 0, time.UTC),
+			expected:  false,
+		},
+		{
+			name: "After end time",
+			timing: TPTiming{
+				Years:     Years{2024},
+				Months:    Months{time.January},
+				MonthDays: MonthDays{15},
+				WeekDays:  WeekDays{time.Monday},
+				StartTime: "09:00:00",
+				EndTime:   "12:00:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 13, 0, 0, 0, time.UTC),
+			expected:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.timing.IsActiveAt(tt.checkTime)
+			if result != tt.expected {
+				t.Errorf("expected %v, got %v", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestGetRightMargin(t *testing.T) {
+	tests := []struct {
+		name      string
+		timing    TPTiming
+		checkTime time.Time
+		expected  time.Time
+	}{
+		{
+			name: "With specific end time",
+			timing: TPTiming{
+				EndTime: "15:30:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC),
+			expected:  time.Date(2024, time.January, 15, 15, 30, 0, 0, time.UTC),
+		},
+		{
+			name: "With default end of the day",
+			timing: TPTiming{
+				EndTime: "",
+			},
+			checkTime: time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC),
+			expected:  time.Date(2024, time.January, 15, 23, 59, 59, 0, time.UTC).Add(time.Second),
+		},
+		{
+			name: "With second specific end time",
+			timing: TPTiming{
+				EndTime: "12:00:00",
+			},
+			checkTime: time.Date(2024, time.January, 15, 10, 0, 0, 0, time.UTC),
+			expected:  time.Date(2024, time.January, 15, 12, 0, 0, 0, time.UTC),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.timing.getRightMargin(tt.checkTime)
+			if result != tt.expected {
+				t.Errorf("expected %v, got %v", tt.expected, result)
+			}
+		})
+	}
+}
