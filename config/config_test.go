@@ -32,8 +32,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var cfg *CGRConfig
-
 func TestNewDefaultConfigError(t *testing.T) {
 	if _, err := newCGRConfig([]byte(CGRATES_CFG_JSON)); err != nil {
 		t.Error(err)
@@ -61,7 +59,7 @@ func TestNewCgrConfigFromBytesDecodeError(t *testing.T) {
 }
 
 func TestCgrCfgConfigSharing(t *testing.T) {
-	cfg = NewDefaultCGRConfig()
+	cfg := NewDefaultCGRConfig()
 	SetCgrConfig(cfg)
 	cfgReturn := CgrConfig()
 	if !reflect.DeepEqual(cfgReturn, cfg) {
