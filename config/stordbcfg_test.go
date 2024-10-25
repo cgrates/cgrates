@@ -78,7 +78,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.Opts, jsonCfg.storDbCfg.Opts) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(expected.Opts), utils.ToJSON(jsonCfg.storDbCfg.Opts))
@@ -91,7 +91,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 	newCfgJSON := cfgJSON
 
 	cfgJSON = nil
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 
@@ -100,7 +100,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 	}
 
 	experr := `time: invalid duration "error"`
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err == nil || err.Error() != experr {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
@@ -108,7 +108,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		MongoQueryTimeout: utils.StringPointer("error"),
 	}
 
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err == nil || err.Error() != experr {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(newCfgJSON); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
@@ -135,7 +135,7 @@ func TestStoreDbCfgloadFromJsonCfgCase2(t *testing.T) {
 	}
 	expected := "Replication connection ID needs to be different than *internal "
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
 	}
 }
@@ -146,7 +146,7 @@ func TestStoreDbCfgloadFromJsonCfgCase3(t *testing.T) {
 	}
 	expected := "Remote connection ID needs to be different than *internal "
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.storDbCfg.loadFromJSONCfg(storDbJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", storDbJSON, expected)
 	}
 }
@@ -173,7 +173,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err := dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -191,7 +191,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err := dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)
@@ -209,7 +209,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err := dbcfg.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , received: %+v", expected, dbcfg)

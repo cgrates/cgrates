@@ -88,14 +88,14 @@ func TestSureTaxCfgloadFromJsonCfgCase1(t *testing.T) {
 		TaxExemptionCodeList: NewRSRParsersMustCompile(utils.EmptyString, utils.InfieldSep),
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.sureTaxCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sureTaxCfg))
 	}
 
 	cfgJSON = nil
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 }
@@ -106,7 +106,7 @@ func TestSureTaxCfgloadFromJsonCfgCase2(t *testing.T) {
 	}
 	expected := "time: invalid location name"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -117,7 +117,7 @@ func TestSureTaxCfgloadFromJsonCfgCase3(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -128,7 +128,7 @@ func TestSureTaxCfgloadFromJsonCfgCase4(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -139,7 +139,7 @@ func TestSureTaxCfgloadFromJsonCfgCase5(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -150,7 +150,7 @@ func TestSureTaxCfgloadFromJsonCfgCase6(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -161,7 +161,7 @@ func TestSureTaxCfgloadFromJsonCfgCase7(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -172,7 +172,7 @@ func TestSureTaxCfgloadFromJsonCfgCase8(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -183,7 +183,7 @@ func TestSureTaxCfgloadFromJsonCfgCase9(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -194,7 +194,7 @@ func TestSureTaxCfgloadFromJsonCfgCase10(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -205,7 +205,7 @@ func TestSureTaxCfgloadFromJsonCfgCase11(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -216,7 +216,7 @@ func TestSureTaxCfgloadFromJsonCfgCase12(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -227,7 +227,7 @@ func TestSureTaxCfgloadFromJsonCfgCase13(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -238,7 +238,7 @@ func TestSureTaxCfgloadFromJsonCfgCase14(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -249,7 +249,7 @@ func TestSureTaxCfgloadFromJsonCfgCase15(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -260,7 +260,7 @@ func TestSureTaxCfgloadFromJsonCfgCase16(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -271,7 +271,7 @@ func TestSureTaxCfgloadFromJsonCfgCase17(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -282,7 +282,7 @@ func TestSureTaxCfgloadFromJsonCfgCase18(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.sureTaxCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

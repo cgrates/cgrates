@@ -68,13 +68,13 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.generalCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.generalCfg))
 	}
 	cfgJSON = nil
-	if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 }
@@ -85,7 +85,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -93,7 +93,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 		Reply_timeout: utils.StringPointer("1ss"),
 	}
 	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
+	if err := jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON1); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -101,7 +101,7 @@ func TestGeneralParseDurationCfgloadFromJsonCfg(t *testing.T) {
 		Locking_timeout: utils.StringPointer("1ss"),
 	}
 	jsonCfg = NewDefaultCGRConfig()
-	if err = jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
+	if err := jsonCfg.generalCfg.loadFromJSONCfg(cfgJSON3); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %v", expected, err)
 	}
 
@@ -432,7 +432,7 @@ func TestGeneralCfgloadFromJsonCfgMaxReconnInterval(t *testing.T) {
 
 	expected := `time: invalid duration "invalid time"`
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err.Error() != expected {
+	if err := jsnCfg.generalCfg.loadFromJSONCfg(cfgJSON); err.Error() != expected {
 		t.Errorf("Expected error <%v>, Received error <%v>", expected, err.Error())
 	}
 }

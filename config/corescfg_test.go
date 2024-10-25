@@ -53,7 +53,7 @@ func TestCoreSloadFromJsonCfg(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = alS.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err := alS.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, alS) {
 		t.Errorf("Expected: %+v , received: %+v", expected, alS)
@@ -63,13 +63,13 @@ func TestCoreSloadFromJsonCfg(t *testing.T) {
 	coresJSONCfg := &CoreSJsonCfg{
 		Caps_stats_interval: utils.StringPointer("1ss"),
 	}
-	if err = alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
+	if err := alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %s,received: %v", expErr, err)
 	}
 	coresJSONCfg = &CoreSJsonCfg{
 		Shutdown_timeout: utils.StringPointer("1ss"),
 	}
-	if err = alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
+	if err := alS.loadFromJSONCfg(coresJSONCfg); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %s,received: %v", expErr, err)
 	}
 }
@@ -92,7 +92,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
-	} else if err = alS.Load(context.Background(), jsnCfg, nil); err != nil {
+	} else if err := alS.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
 	} else if rcv := alS.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))

@@ -95,7 +95,7 @@ func TestNewCGRConfigFromPathWithoutEnv(t *testing.T) {
   }`
 	cfg := NewDefaultCGRConfig()
 
-	if err = loadConfigFromReader(context.Background(), strings.NewReader(cfgsJSONStr), cfg.sections, true, cfg); err != nil {
+	if err := loadConfigFromReader(context.Background(), strings.NewReader(cfgsJSONStr), cfg.sections, true, cfg); err != nil {
 		t.Fatal(err)
 	}
 	exp := "*env:NODE_ID"

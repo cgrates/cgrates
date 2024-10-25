@@ -71,13 +71,13 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.rateSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.rateSCfg))
 	}
 	cfgJSON = nil
-	if err = jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsonCfg.rateSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 }

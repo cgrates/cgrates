@@ -48,14 +48,14 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 		Timezone:      "Local",
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.kamAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.kamAgentCfg))
 	}
 
 	cfgJSON = nil
-	if err = jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := jsnCfg.kamAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 }
@@ -80,7 +80,7 @@ func TestKamConnCfgloadFromJsonCfg(t *testing.T) {
 		Address:    "127.0.0.1:8448",
 		Reconnects: 5,
 	}
-	if err = kamcocfg.loadFromJSONCfg(json); err != nil {
+	if err := kamcocfg.loadFromJSONCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, kamcocfg) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(kamcocfg))
@@ -338,7 +338,7 @@ func TestKamConnCfgloadFromJsonCfgMaxReconnErr(t *testing.T) {
 		Max_reconnect_interval: utils.StringPointer("invalid duration"),
 	}
 	expErr := `time: invalid duration "invalid duration"`
-	if err = kamcocfg.loadFromJSONCfg(json); err.Error() != expErr {
+	if err := kamcocfg.loadFromJSONCfg(json); err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
 	}
 }

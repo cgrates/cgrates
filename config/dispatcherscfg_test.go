@@ -52,13 +52,13 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.dispatcherSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.dispatcherSCfg))
 	}
 	jsonCfg = nil
-	if err = jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.dispatcherSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	}
 }
