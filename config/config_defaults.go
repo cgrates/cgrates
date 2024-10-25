@@ -160,21 +160,23 @@ const CGRATES_CFG_JSON = `
 
 	},
 	"opts":{
-		"redisMaxConns": 10,		// the connection pool size
-		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
-		"redisSentinel": "",		// the name of sentinel when used
-		"redisCluster": false,		// if enabled the datadb will try to connect to the redis cluster
-		"redisClusterSync": "5s",	// the sync interval for the redis cluster
-		"redisClusterOndownDelay": "0",	// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
-		"redisTLS": false,		// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-		"redisClientCertificate": "",	// path to client certificate
-		"redisClientKey": "",		// path to client key
-		"redisCACertificate": "",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
-		"mongoQueryTimeout": "10s",	// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"redisMaxConns": 10,			// the connection pool size
+		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
+		"redisSentinel": "",			// the name of sentinel when used
+		"redisCluster": false,			// if enabled the datadb will try to connect to the redis cluster
+		"redisClusterSync": "5s",		// the sync interval for the redis cluster
+		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",		// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",		// the amount of wait time until timeout for writing operations
+		"redisPoolPipelineWindow": "150µs",	// duration after which internal pipelines are flushed (0 disables implicit pipelining)
+		"redisPoolPipelineLimit": 0,        	// maximum number of commands that can be pipelined before flushing (0 means no limit)
+		"redisTLS": false,			// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+		"redisClientCertificate": "",		// path to client certificate
+		"redisClientKey": "",			// path to client key
+		"redisCACertificate": "",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"mongoQueryTimeout": "10s",		// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
 	}
 },
 
@@ -1581,21 +1583,23 @@ const CGRATES_CFG_JSON = `
 	"out_datadb_encoding" : "msgpack",
 	"users_filters":[],
 	"out_datadb_opts":{
-		"redisMaxConns": 10,		// the connection pool size
-		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
+		"redisMaxConns": 10,			// the connection pool size
+		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",
 		"redisCluster": false,
 		"redisClusterSync": "5s",
 		"redisClusterOndownDelay": "0",
-		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
-		"redisTLS": false,		// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
-		"redisClientCertificate":"",	// path to client certificate
-		"redisClientKey":"",		// path to client key
-		"redisCACertificate":"",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
-		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",		// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",		// the amount of wait time until timeout for writing operations
+		"redisPoolPipelineWindow": "150µs",	// duration after which internal pipelines are flushed (0 disables implicit pipelining)
+		"redisPoolPipelineLimit": 0,        	// maximum number of commands that can be pipelined before flushing (0 means no limit)
+		"redisTLS": false,			// enable TLS when connecting to Redis and use the redisClientCertificate, redisClientKey and redisCACertificate for TLS connection
+		"redisClientCertificate":"",		// path to client certificate
+		"redisClientKey":"",			// path to client key
+		"redisCACertificate":"",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"mongoQueryTimeout":"10s",		// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
 	},
 },
 
@@ -1950,21 +1954,23 @@ const CGRATES_CFG_JSON = `
 	"db_user": "",		 		// username to use when connecting to data_db
 	"db_password": "", 			// password to use when connecting to data_db
 	"opts":{
-		"redisMaxConns": 10,		// the connection pool size
-		"redisConnectAttempts": 20,	// the maximum amount of dial attempts
-		"redisSentinel": "",		// the name of sentinel when used
-		"redisCluster": false,		// if enabled the datadb will try to connect to the redis cluster
-		"redisClusterSync": "5s",	// the sync interval for the redis cluster
-		"redisClusterOndownDelay": "0",	// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
-		"redisConnectTimeout": "0",	// the amount of wait time until timeout for a connection attempt
-		"redisReadTimeout": "0",	// the amount of wait time until timeout for reading operations
-		"redisWriteTimeout": "0",   	// the amount of wait time until timeout for writing operations
-		"redisTLS": false,		// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
-		"redisClientCertificate":"",	// path to client certificate
-		"redisClientKey":"",		// path to client key
-		"redisCACertificate":"",	// path to CA certificate (populate for self-signed certificate otherwise let it empty)
-		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
+		"redisMaxConns": 10,			// the connection pool size
+		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
+		"redisSentinel": "",			// the name of sentinel when used
+		"redisCluster": false,			// if enabled the datadb will try to connect to the redis cluster
+		"redisClusterSync": "5s",		// the sync interval for the redis cluster
+		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
+		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
+		"redisReadTimeout": "0",		// the amount of wait time until timeout for reading operations
+		"redisWriteTimeout": "0",		// the amount of wait time until timeout for writing operations
+		"redisPoolPipelineWindow": "150µs",	// duration after which internal pipelines are flushed (0 disables implicit pipelining)
+		"redisPoolPipelineLimit": 0,        	// maximum number of commands that can be pipelined before flushing (0 means no limit)
+		"redisTLS": false,			// if true it will use a tls connection and use the redisClientCertificate, redisClientKey and redisCACertificate for tls connection
+		"redisClientCertificate":"",		// path to client certificate
+		"redisClientKey":"",			// path to client key
+		"redisCACertificate":"",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
+		"mongoQueryTimeout":"10s",		// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
 	}
 },
 

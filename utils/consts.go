@@ -1914,6 +1914,8 @@ const (
 	RedisConnectTimeoutCfg     = "redisConnectTimeout"
 	RedisReadTimeoutCfg        = "redisReadTimeout"
 	RedisWriteTimeoutCfg       = "redisWriteTimeout"
+	RedisPoolPipelineWindowCfg = "redisPoolPipelineWindow"
+	RedisPoolPipelineLimitCfg  = "redisPoolPipelineLimit"
 	RedisTLSCfg                = "redisTLS"
 	RedisClientCertificateCfg  = "redisClientCertificate"
 	RedisClientKeyCfg          = "redisClientKey"

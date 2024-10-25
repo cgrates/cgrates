@@ -57,6 +57,8 @@ type DataDBOpts struct {
 	RedisConnectTimeout     time.Duration
 	RedisReadTimeout        time.Duration
 	RedisWriteTimeout       time.Duration
+	RedisPoolPipelineWindow time.Duration
+	RedisPoolPipelineLimit  int
 	RedisTLS                bool
 	RedisClientCertificate  string
 	RedisClientKey          string
@@ -144,6 +146,14 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 		if dbOpts.RedisWriteTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisWriteTimeout); err != nil {
 			return
 		}
+	}
+	if jsnCfg.RedisPoolPipelineWindow != nil {
+		if dbOpts.RedisPoolPipelineWindow, err = utils.ParseDurationWithNanosecs(*jsnCfg.RedisPoolPipelineWindow); err != nil {
+			return
+		}
+	}
+	if jsnCfg.RedisPoolPipelineLimit != nil {
+		dbOpts.RedisPoolPipelineLimit = *jsnCfg.RedisPoolPipelineLimit
 	}
 	if jsnCfg.RedisTLS != nil {
 		dbOpts.RedisTLS = *jsnCfg.RedisTLS
@@ -258,6 +268,8 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 		RedisConnectTimeout:     dbOpts.RedisConnectTimeout,
 		RedisReadTimeout:        dbOpts.RedisReadTimeout,
 		RedisWriteTimeout:       dbOpts.RedisWriteTimeout,
+		RedisPoolPipelineWindow: dbOpts.RedisPoolPipelineWindow,
+		RedisPoolPipelineLimit:  dbOpts.RedisPoolPipelineLimit,
 		RedisTLS:                dbOpts.RedisTLS,
 		RedisClientCertificate:  dbOpts.RedisClientCertificate,
 		RedisClientKey:          dbOpts.RedisClientKey,
@@ -306,6 +318,8 @@ func (dbcfg DataDbCfg) AsMapInterface(string) any {
 		utils.RedisConnectTimeoutCfg:     dbcfg.Opts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
+		utils.RedisPoolPipelineWindowCfg: dbcfg.Opts.RedisPoolPipelineWindow.String(),
+		utils.RedisPoolPipelineLimitCfg:  dbcfg.Opts.RedisPoolPipelineLimit,
 		utils.RedisTLSCfg:                dbcfg.Opts.RedisTLS,
 		utils.RedisClientCertificateCfg:  dbcfg.Opts.RedisClientCertificate,
 		utils.RedisClientKeyCfg:          dbcfg.Opts.RedisClientKey,
@@ -487,6 +501,8 @@ type DBOptsJson struct {
 	RedisConnectTimeout     *string           `json:"redisConnectTimeout"`
 	RedisReadTimeout        *string           `json:"redisReadTimeout"`
 	RedisWriteTimeout       *string           `json:"redisWriteTimeout"`
+	RedisPoolPipelineWindow *string           `json:"redisPoolPipelineWindow"`
+	RedisPoolPipelineLimit  *int              `json:"redisPoolPipelineLimit"`
 	RedisTLS                *bool             `json:"redisTLS"`
 	RedisClientCertificate  *string           `json:"redisClientCertificate"`
 	RedisClientKey          *string           `json:"redisClientKey"`
@@ -550,6 +566,12 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	}
 	if v1.RedisWriteTimeout != v2.RedisWriteTimeout {
 		d.RedisWriteTimeout = utils.StringPointer(v2.RedisWriteTimeout.String())
+	}
+	if v1.RedisPoolPipelineWindow != v2.RedisPoolPipelineWindow {
+		d.RedisPoolPipelineWindow = utils.StringPointer(v2.RedisPoolPipelineWindow.String())
+	}
+	if v1.RedisPoolPipelineLimit != v2.RedisPoolPipelineLimit {
+		d.RedisPoolPipelineLimit = utils.IntPointer(v2.RedisPoolPipelineLimit)
 	}
 	if v1.RedisTLS != v2.RedisTLS {
 		d.RedisTLS = utils.BoolPointer(v2.RedisTLS)

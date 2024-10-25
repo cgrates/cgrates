@@ -100,6 +100,8 @@ func (mg MigratorCgrCfg) AsMapInterface(string) any {
 		utils.RedisConnectTimeoutCfg:     mg.OutDataDBOpts.RedisConnectTimeout.String(),
 		utils.RedisReadTimeoutCfg:        mg.OutDataDBOpts.RedisReadTimeout.String(),
 		utils.RedisWriteTimeoutCfg:       mg.OutDataDBOpts.RedisWriteTimeout.String(),
+		utils.RedisPoolPipelineWindowCfg: mg.OutDataDBOpts.RedisPoolPipelineWindow.String(),
+		utils.RedisPoolPipelineLimitCfg:  mg.OutDataDBOpts.RedisPoolPipelineLimit,
 		utils.RedisTLSCfg:                mg.OutDataDBOpts.RedisTLS,
 		utils.RedisClientCertificateCfg:  mg.OutDataDBOpts.RedisClientCertificate,
 		utils.RedisClientKeyCfg:          mg.OutDataDBOpts.RedisClientKey,
