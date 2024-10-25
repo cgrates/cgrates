@@ -52,9 +52,7 @@ func TestEventExporterSCoverage(t *testing.T) {
 		intConnChan: make(chan birpc.ClientConnector, 1),
 		anz:         anz,
 		srvDep:      srvDep,
-		rldChan:     make(chan struct{}, 1),
 		eeS:         &ees.EeS{},
-		stopChan:    make(chan struct{}, 1),
 	}
 	if !srv2.IsRunning() {
 		t.Errorf("Expected service to be running")
