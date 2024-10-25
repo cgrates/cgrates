@@ -33,7 +33,7 @@ import (
 // go test -bench RedisGetKeysForPrefix -run=^# -count 3 -benchtime=10s
 func BenchmarkRedisGetKeysForPrefix(b *testing.B) {
 	rs, _ := NewRedisStorage("127.0.0.1:6379", 10, "cgrates", "", "json", 10, 20,
-		"", false, 5*time.Second, 0, 0, 0, 0, false, "", "", "")
+		"", false, 5*time.Second, 0, 0, 0, 0, 150*time.Microsecond, 0, false, "", "", "")
 	chargerProfile := &ChargerProfile{
 		ID:        "TestA_CHARGER1",
 		Tenant:    "cgrates.org",

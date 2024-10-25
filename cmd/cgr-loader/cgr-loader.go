@@ -74,6 +74,10 @@ var (
 		"The amount of wait time until timeout for reading operations")
 	dbRedisWriteTimeout = cgrLoaderFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
+	dbRedisPoolPipelineWindow = cgrLoaderFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow,
+		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
+	dbRedisPoolPipelineLimit = cgrLoaderFlags.Int(utils.RedisPoolPipelineLimitCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineLimit,
+		"Maximum number of commands that can be pipelined before flushing. Zero means no limit.")
 	dbRedisTls               = cgrLoaderFlags.Bool(utils.RedisTLSCfg, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrLoaderFlags.String(utils.RedisClientCertificateCfg, utils.EmptyString, "Path to the client certificate")
 	dbRedisClientKey         = cgrLoaderFlags.String(utils.RedisClientKeyCfg, utils.EmptyString, "Path to the client key")
@@ -188,6 +192,12 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 	}
 	if *dbRedisWriteTimeout != dfltCfg.DataDbCfg().Opts.RedisWriteTimeout {
 		ldrCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
+	}
+	if *dbRedisPoolPipelineWindow != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow {
+		ldrCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
+	}
+	if *dbRedisPoolPipelineLimit != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineLimit {
+		ldrCfg.DataDbCfg().Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
 	}
 	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
 		ldrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout

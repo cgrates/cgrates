@@ -67,6 +67,7 @@ func TestLoadConfig(t *testing.T) {
 			RedisClusterSync:        5 * time.Second,
 			RedisClusterOndownDelay: 0,
 			RedisCluster:            false,
+			RedisPoolPipelineWindow: 150 * time.Microsecond,
 			RedisTLS:                false,
 		},
 		RmtConns: []string{},
