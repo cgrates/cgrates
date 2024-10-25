@@ -70,9 +70,9 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 		ReplicationConns: []string{"conn1", "conn2"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.cacheCfg.loadFromJSONCfg(nil); err != nil {
+	if err := jsnCfg.cacheCfg.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
-	} else if err = jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	} else if err := jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(expected.Partitions[utils.MetaDispatchers], jsnCfg.cacheCfg.Partitions[utils.MetaDispatchers]) {
@@ -90,7 +90,7 @@ func TestReplicationConnsLoadFromJsonCfg(t *testing.T) {
 	}
 	expErrMessage := "replication connection ID needs to be different than *internal"
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
+	if err := jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
 		t.Errorf("Expected %+v , recevied %+v", expErrMessage, err)
 	}
 }
@@ -128,7 +128,7 @@ func TestCacheParamCfgloadFromJsonCfg2(t *testing.T) {
 	}
 	expErrMessage := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
+	if err := jsnCfg.cacheCfg.loadFromJSONCfg(jsonCfg); err == nil || err.Error() != expErrMessage {
 		t.Errorf("Expected %+v \n, recevied %+v", expErrMessage, err)
 	}
 }

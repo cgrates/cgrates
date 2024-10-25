@@ -58,13 +58,13 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	cfg := NewDefaultCGRConfig()
-	if err = cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfg.migratorCgrCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.migratorCgrCfg))
 	}
 	cfgJSON = nil
-	if err = cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := cfg.migratorCgrCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 }

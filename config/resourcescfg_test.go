@@ -56,13 +56,13 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		},
 	}
 	cfg := NewDefaultCGRConfig()
-	if err = cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cfg.resourceSCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(cfg.resourceSCfg))
 	}
 	cfgJSON = nil
-	if err = cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
+	if err := cfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 }
@@ -122,7 +122,7 @@ func TestResourceSConfigloadFromJsonCfgCase2(t *testing.T) {
 	}
 	expected := "time: unknown unit \"ss\" in duration \"2ss\""
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
+	if err := jsonCfg.resourceSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

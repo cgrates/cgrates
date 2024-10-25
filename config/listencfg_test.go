@@ -42,13 +42,13 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 		HTTPTLSListen:    "127.0.0.1:2280",
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.listenCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.listenCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.listenCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.listenCfg))
 	}
 	jsonCfg = nil
-	if err = jsnCfg.listenCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.listenCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	}
 }

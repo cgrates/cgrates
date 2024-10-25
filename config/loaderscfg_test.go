@@ -994,7 +994,7 @@ func TestLoaderSCfgloadFromJsonCfgCase4(t *testing.T) {
 	}
 	expected := "no template with id: <>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1045,7 +1045,7 @@ func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, msgTemplates, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, msgTemplates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.loaderCfg[0].Data[1].Fields[0], expectedFields[0].Data[0].Fields[0]) {
 		t.Errorf("Expected %+v,\n received %+v", utils.ToJSON(expectedFields[0].Data[0].Fields[0]), utils.ToJSON(jsonCfg.loaderCfg[0].Data[1].Fields[0]))
@@ -1057,7 +1057,7 @@ func TestLoaderSCfgloadFromJsonCfgCase6(t *testing.T) {
 		Data: &[]*LoaderJsonDataType{nil},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -2555,7 +2555,7 @@ func TestLockFolderRelativePath(t *testing.T) {
 		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
 	expPath := path.Join(ldr.LockFilePath)
-	if err = ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if ldr.LockFilePath != expPath {
 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
@@ -2578,7 +2578,7 @@ func TestLockFolderNonRelativePath(t *testing.T) {
 		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
 	expPath := path.Join("/tmp/", utils.ResourcesCsv)
-	if err = ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if ldr.LockFilePath != expPath {
 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
@@ -2601,7 +2601,7 @@ func TestLockFolderIsDir(t *testing.T) {
 	}
 	expPath := path.Join("/tmp")
 
-	if err = ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
 		t.Error(err)
 	} else if ldr.LockFilePath != expPath {
 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)

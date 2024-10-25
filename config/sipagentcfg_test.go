@@ -81,13 +81,13 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		r.ComputePath()
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsonCfg.sipAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.sipAgentCfg))
 	}
 	cfgJSONS = nil
-	if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSONS, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	}
 }
@@ -98,7 +98,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.sipAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -127,7 +127,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(sipAgent, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err := jsonCfg.sipAgentCfg.loadFromJSONCfg(sipAgent, jsonCfg.generalCfg.RSRSep); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.RequestProcessors[0].ID, jsonCfg.sipAgentCfg.RequestProcessors[0].ID) {
 		t.Errorf("Expected %+v, received %+v", expected.RequestProcessors[0].ID, jsonCfg.sipAgentCfg.RequestProcessors[0].ID)
@@ -142,7 +142,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err = jsonCfg.sipAgentCfg.loadFromJSONCfg(sipAgent, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.sipAgentCfg.loadFromJSONCfg(sipAgent, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

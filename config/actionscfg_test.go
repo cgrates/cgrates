@@ -66,14 +66,14 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err = jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.actionSCfg) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expected), utils.ToJSON(jsnCfg.actionSCfg))
 	}
 
 	jsonCfg = nil
-	if err = jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
+	if err := jsnCfg.actionSCfg.loadFromJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	}
 }

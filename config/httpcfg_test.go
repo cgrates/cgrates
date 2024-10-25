@@ -73,7 +73,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected.ClientOpts.DialContext = expected.dialer.DialContext
 	cfgJsn := NewDefaultCGRConfig()
-	if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
+	if err := cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected.AsMapInterface(utils.InfieldSep),
 		cfgJsn.httpCfg.AsMapInterface(utils.InfieldSep)) {
@@ -83,7 +83,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	}
 
 	cfgJSONStr = nil
-	if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
+	if err := cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
 		t.Error(err)
 	}
 }
@@ -487,7 +487,7 @@ func TestHTTPCfgloadFromJsonCfgClientOptsErr(t *testing.T) {
 	}
 	expErr := `time: invalid duration "invalid value"`
 	cfgJsn := NewDefaultCGRConfig()
-	if err = cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err.Error() != expErr {
+	if err := cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
 	}
 }
