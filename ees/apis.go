@@ -48,7 +48,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 	var metricMapLock sync.RWMutex
 	metricsMap := make(map[string]utils.MapStorage)
 	_, hasVerbose := cgrEv.APIOpts[utils.OptsEEsVerbose]
-	for cfgIdx, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
+	for _, eeCfg := range eeS.cfg.EEsNoLksCfg().Exporters {
 		if eeCfg.Type == utils.MetaNone || // ignore *none type exporter
 			lenExpIDs != 0 && !expIDs.Has(eeCfg.ID) {
 			continue
@@ -76,9 +76,9 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 			}
 		}
 
-		eeS.eesMux.RLock()
-		eeCache, hasCache := eeS.eesChs[eeCfg.Type]
-		eeS.eesMux.RUnlock()
+		eeS.mu.RLock()
+		eeCache, hasCache := eeS.exporterCache[eeCfg.Type]
+		eeS.mu.RUnlock()
 		var isCached bool
 		var ee EventExporter
 		if hasCache {
@@ -88,11 +88,11 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 			}
 		}
 		if !isCached {
-			if ee, err = NewEventExporter(eeS.cfg.EEsCfg().Exporters[cfgIdx], eeS.cfg, eeS.fltrS, eeS.connMgr); err != nil {
+			if ee, err = NewEventExporter(eeCfg, eeS.cfg, eeS.fltrS, eeS.connMgr); err != nil {
 				return
 			}
 			if hasCache {
-				eeS.eesMux.Lock()
+				eeS.mu.Lock()
 				if _, has := eeCache.Get(eeCfg.ID); !has {
 					eeCache.Set(eeCfg.ID, ee, nil)
 				} else {
@@ -100,7 +100,7 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 					// the meantime. Mark this instance to be closed after the export.
 					hasCache = false
 				}
-				eeS.eesMux.Unlock()
+				eeS.mu.Unlock()
 			}
 		}
 
