@@ -28,6 +28,7 @@ type FilterSCfg struct {
 	ResourceSConns []string
 	ApierSConns    []string
 	TrendSConns    []string
+	RankingSConns  []string
 }
 
 func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -70,6 +71,15 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 			fSCfg.TrendSConns[idx] = connID
 			if connID == utils.MetaInternal {
 				fSCfg.TrendSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)
+			}
+		}
+	}
+	if jsnCfg.Rankings_conns != nil {
+		fSCfg.RankingSConns = make([]string, len(*jsnCfg.Rankings_conns))
+		for idx, connID := range *jsnCfg.Rankings_conns {
+			fSCfg.RankingSConns[idx] = connID
+			if connID == utils.MetaInternal {
+				fSCfg.RankingSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)
 			}
 		}
 	}
@@ -119,6 +129,16 @@ func (fSCfg *FilterSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.TrendSConnsCfg] = trendsConns
 	}
+	if fSCfg.RankingSConns != nil {
+		rankingsConns := make([]string, len(fSCfg.RankingSConns))
+		for i, item := range fSCfg.RankingSConns {
+			rankingsConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings) {
+				rankingsConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.RankingSConnsCfg] = rankingsConns
+	}
 	return
 }
 
@@ -140,6 +160,10 @@ func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
 	if fSCfg.TrendSConns != nil {
 		cln.TrendSConns = make([]string, len(fSCfg.TrendSConns))
 		copy(cln.TrendSConns, fSCfg.TrendSConns)
+	}
+	if fSCfg.RankingSConns != nil {
+		cln.RankingSConns = make([]string, len(fSCfg.RankingSConns))
+		copy(cln.RankingSConns, fSCfg.RankingSConns)
 	}
 	return
 }

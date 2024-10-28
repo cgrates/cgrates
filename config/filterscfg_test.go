@@ -30,12 +30,14 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 		Resources_conns: &[]string{utils.MetaInternal, "*conn1"},
 		Apiers_conns:    &[]string{utils.MetaInternal, "*conn1"},
 		Trends_conns:    &[]string{utils.MetaInternal, "*conn1"},
+		Rankings_conns:  &[]string{utils.MetaInternal, "*conn1"},
 	}
 	expected := &FilterSCfg{
 		StatSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		ResourceSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		ApierSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier), "*conn1"},
 		TrendSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends), "*conn1"},
+		RankingSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings), "*conn1"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err := jsnCfg.filterSCfg.loadFromJSONCfg(cfgJSONS); err != nil {
@@ -52,6 +54,7 @@ func TestFilterSCfgAsMapInterface(t *testing.T) {
 			"resources_conns": ["*internal:*resources", "*conn1"],
             "apiers_conns": ["*internal:*apier", "*conn1"],
 			"trends_conns": ["*internal:*trends", "*conn1"],
+			"rankings_conns": ["*internal:*rankings","*conn1"]
 	},
 }`
 	eMap := map[string]any{
@@ -59,6 +62,7 @@ func TestFilterSCfgAsMapInterface(t *testing.T) {
 		utils.ResourceSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.ApierSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.TrendSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.RankingSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -76,6 +80,7 @@ func TestFilterSCfgAsMapInterface2(t *testing.T) {
 		utils.ResourceSConnsCfg: []string{},
 		utils.ApierSConnsCfg:    []string{},
 		utils.TrendSConnsCfg:    []string{},
+		utils.RankingSConnsCfg:  []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

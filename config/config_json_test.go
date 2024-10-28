@@ -1175,6 +1175,7 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 		Resources_conns: &[]string{},
 		Apiers_conns:    &[]string{},
 		Trends_conns:    &[]string{},
+		Rankings_conns:  &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

@@ -139,7 +139,7 @@ type RankingSv1 struct {
 }
 
 // GetRankingSummary returns summary of the last updated ranking
-func (rnks *RankingSv1) GetRankingSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *engine.RankingSummary) error {
+func (rnks *RankingSv1) GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.RankingSummary) error {
 	return rnks.rnkS.V1GetRankingSummary(ctx, arg, reply)
 }
 

@@ -29,13 +29,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newDynamicDP(resConns, stsConns, apiConns, trdConns []string,
+func newDynamicDP(resConns, stsConns, apiConns, trdConns, rnkConns []string,
 	tenant string, initialDP utils.DataProvider) *dynamicDP {
 	return &dynamicDP{
 		resConns:  resConns,
 		stsConns:  stsConns,
 		apiConns:  apiConns,
 		trdConns:  trdConns,
+		rnkConns:  rnkConns,
 		tenant:    tenant,
 		initialDP: initialDP,
 		cache:     utils.MapStorage{},
@@ -47,6 +48,7 @@ type dynamicDP struct {
 	stsConns  []string
 	apiConns  []string
 	trdConns  []string
+	rnkConns  []string
 	tenant    string
 	initialDP utils.DataProvider
 
@@ -145,12 +147,21 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 		}
 		return dDP.cache.FieldAsInterface(fldPath)
 	case utils.MetaTrends:
-		//sample of fieldName : ~*trends.TrendID.*acd.Value
+		//sample of fieldName : ~*trends.TrendID.Metrics.*acd.Value
 		var trendSum TrendSummary
 		if err := connMgr.Call(context.TODO(), dDP.trdConns, utils.TrendSv1GetTrendSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &trendSum); err != nil {
 			return nil, err
 		}
 		dp := config.NewObjectDP(trendSum)
+		dDP.cache.Set(fldPath[:2], dp)
+		return dp.FieldAsInterface(fldPath[2:])
+	case utils.MetaRankings:
+		// sample of fieldName : ~*rankings.RankingID.SortedStatIDs[0]
+		var rankingSum RankingSummary
+		if err := connMgr.Call(context.TODO(), dDP.rnkConns, utils.RankingSv1GetRankingSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &rankingSum); err != nil {
+			return nil, err
+		}
+		dp := config.NewObjectDP(rankingSum)
 		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaLibPhoneNumber:

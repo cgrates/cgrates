@@ -1733,6 +1733,7 @@ const (
 	RankingSv1GetRanking         = "RankingSv1.GetRanking"
 	RankingSv1GetSchedule        = "RankingSv1.GetSchedule"
 	RankingSv1ScheduleQueries    = "RankingSv1.ScheduleQueries"
+	RankingSv1GetRankingSummary  = "RankingSv1.GetRankingSummary"
 )
 
 // ResourceS APIs
@@ -2270,6 +2271,7 @@ const (
 	ResourceSConnsCfg = "resources_conns"
 	ApierSConnsCfg    = "apiers_conns"
 	TrendSConnsCfg    = "trends_conns"
+	RankingSConnsCfg  = "rankings_conns"
 )
 
 // RalsCfg
