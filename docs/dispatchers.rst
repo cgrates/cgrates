@@ -15,7 +15,7 @@ Authorization
 
 Optional step when :ref:`AttributeS <attributes>` connections are configured:
 
-- Looks for ```*apiKey``` in APIOpts (returns mandatory missing error if not present)
+- Looks for ``*apiKey`` in APIOpts (returns mandatory missing error if not present)
 - Sends key to AttributeS, which adds it as "APIKey" to the Event
 - AttributeS processes the event and adds allowed methods to APIMethods (e.g., "method1&method2&method3")
 - Checks if the requested method is in the allowed list
@@ -27,11 +27,11 @@ Dispatch
 The dispatcher processes requests through these steps:
 
 * Check for bypass conditions:
-   * Presence of ```*dispatchers: false``` in APIOpts
-   * Request source is another dispatcher and ```prevent_loops``` is enabled
+   * Presence of ``*dispatchers: false`` in APIOpts
+   * Request source is another dispatcher and ``prevent_loops`` is enabled
 
 * Check cached routes:
-   * Search for ```*routeID``` in APIOpts
+   * Search for ``*routeID`` in APIOpts
    * If found, use cached dispatch data (tenant, profile ID, host ID)
    * Fall back to full dispatch on network errors or timeouts
 
@@ -53,13 +53,13 @@ Used for ratio-based request distribution. Hosts are sorted in three steps:
 2. Secondary sorting by load ratio (current active requests/configured ratio), where lower ratios have priority
 3. Final sorting based on the specified strategy:
 
-   * *random: Randomizes host selection 
-   * *round_robin: Sequential host selection with weight consideration
-   * *weight: Skips final sorting, maintains weight and load-based ordering
+   * ``*random``: Randomizes host selection 
+   * ``*round_robin``: Sequential host selection with weight consideration
+   * ``*weight``: Skips final sorting, maintains weight and load-based ordering
 
 Configuration through:
 
-- ```*defaultRatio``` in StrategyParams
+- ``*defaultRatio`` in StrategyParams
 - Direct ratio specification in Host configuration
 
 
@@ -73,9 +73,9 @@ Broadcast Dispatchers
 
 Handles scenarios requiring multi-host distribution. Supports three broadcast strategies:
 
-* *broadcast: Sends to all hosts, uses first response
-* *broadcast_sync: Sends to all hosts, waits for all responses
-* *broadcast_async: Sends to all hosts without waiting (fire-and-forget)
+* ``*broadcast``: Sends to all hosts, uses first response
+* ``*broadcast_sync``: Sends to all hosts, waits for all responses
+* ``*broadcast_async``: Sends to all hosts without waiting (fire-and-forget)
 
 Parameters
 ----------
