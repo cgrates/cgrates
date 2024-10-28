@@ -2810,7 +2810,7 @@ func TestFilterStats(t *testing.T) {
 		},
 	}
 	initDP := utils.MapStorage{}
-	dp := newDynamicDP(nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}, nil, nil, "cgrates.org", initDP)
+	dp := newDynamicDP(nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}, nil, nil, nil, "cgrates.org", initDP)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -2911,7 +2911,7 @@ func TestFilterTrends(t *testing.T) {
 		},
 	}
 	initDP := utils.MapStorage{}
-	dp := newDynamicDP(nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}, "cgrates.org", initDP)
+	dp := newDynamicDP(nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}, nil, "cgrates.org", initDP)
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			fl, err := NewFilterFromInline("cgrates.org", tc.filter)
@@ -2925,6 +2925,70 @@ func TestFilterTrends(t *testing.T) {
 			}
 			if pass != tc.shouldPass {
 				t.Errorf("rule.Pass() expected: %t ,got: %t", tc.shouldPass, pass)
+			}
+		})
+	}
+}
+
+func TestFilterRanking(t *testing.T) {
+	tmpConn := connMgr
+	defer func() {
+		connMgr = tmpConn
+	}()
+	clientConn := make(chan context.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.RankingSv1GetRankingSummary: func(ctx *context.Context, args any, reply any) error {
+				argTntID, ok := args.(*utils.TenantIDWithAPIOpts)
+				if !ok {
+					return fmt.Errorf("wrong args")
+				}
+				if argTntID.ID == "Ranking1" && argTntID.Tenant == "cgrates.org" {
+					rn := Ranking{
+						Tenant:        "cgrates.org",
+						ID:            "Ranking1",
+						LastUpdate:    time.Now(),
+						SortedStatIDs: []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
+					}
+					rnS := rn.asRankingSummary()
+					*reply.(*RankingSummary) = *rnS
+					return nil
+				}
+				return utils.ErrNotFound
+			},
+		}}
+
+	connMgr = NewConnManager(config.NewDefaultCGRConfig(), map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings): clientConn,
+	})
+	now := time.Now().Add(-2 * time.Second).Format(time.RFC3339)
+	testCases := []struct {
+		name   string
+		filter string
+		pass   bool
+	}{
+		{name: "RankingPassID", filter: "*string:~*rankings.Ranking1.ID:Ranking1", pass: true},
+		{name: "RankingPassLastUpdate", filter: fmt.Sprintf("*ai:~*rankings.Ranking1.LastUpdate:%s", now), pass: true},
+		{name: "RankingPassFirstSortedStatIDs", filter: "*string:~*rankings.Ranking1.SortedStatIDs[0]:Stat5", pass: true},
+		{name: "RankingPassLastSortedStatIDs", filter: "*string:~*rankings.Ranking1.SortedStatIDs[6]:Stat2", pass: true},
+		{name: "RankingFailSortedStatIDsIdx", filter: "*string:~*rankings.Ranking1.SortedStatIDs[1]:Stat4", pass: false},
+	}
+
+	initDP := utils.MapStorage{}
+	dp := newDynamicDP(nil, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}, "cgrates.org", initDP)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fl, err := NewFilterFromInline(dp.tenant, tc.filter)
+			if err != nil {
+				t.Fatal(err)
+			}
+			rule := fl.Rules[0]
+			pass, err := rule.Pass(dp)
+			if err != nil {
+				t.Fatalf("rule.Pass() unexpected error: %v", err)
+			}
+			if pass != tc.pass {
+				t.Errorf("rule.Pass() expected: %t ,got: %t", tc.pass, pass)
 			}
 		})
 	}

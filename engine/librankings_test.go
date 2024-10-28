@@ -91,6 +91,61 @@ func TestRankingAscSorterSortStatIDs(t *testing.T) {
 	}
 }
 
+func TestRankingMixedOrder(t *testing.T) {
+	statmetrics := map[string]map[string]float64{
+		"Stat1": {"*acc": 13},
+		"Stat2": {"*acc": 14},
+		"Stat3": {"*acc": 12.1, "*pdd": 900},
+		"Stat4": {"*acc": 12.1, "*pdd": 1000},
+		"Stat5": {"*acc": 10, "*pdd": 700, "*tcc": 120},
+		"Stat6": {"*acc": 10, "*pdd": 700, "*tcc": 121},
+		"Stat7": {"*acc": 10, "*pdd": 600, "*tcc": 123},
+	}
+
+	testCases := []struct {
+		name       string
+		sortMetric []string
+		sorter     string
+		statIDs    []string
+		expErr     error
+	}{
+		{
+			name:       "TestSortStatsAsc",
+			sortMetric: []string{"*acc", "*pdd:false", "*tcc"},
+			sorter:     "*asc",
+			statIDs:    []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
+		},
+		// {
+		// 	name:       "TestSortStatsDesc",
+		// 	sortMetric: []string{"*tcc", "*pdd:false", "*acc"},
+		// 	sorter:     "*desc",
+		// 	statIDs:    []string{"Stat7", "Stat6", "Stat5", "Stat3", "Stat4", "Stat2", "Stat1"},
+		// },
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			rs, err := newRankingSorter(tc.sorter, tc.sortMetric, statmetrics)
+			if tc.expErr != nil {
+				if err == nil {
+					t.Error("Expected error, got nil")
+				}
+				if tc.expErr.Error() != err.Error() {
+					t.Errorf("Expected error: %v, got: %v", tc.expErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+			if resStatIDs := rs.sortStatIDs(); !reflect.DeepEqual(resStatIDs, tc.statIDs) {
+				t.Errorf("Expecting: %v, received %v", tc.statIDs, resStatIDs)
+			}
+		})
+	}
+
+}
+
 func TestTenantID(t *testing.T) {
 	ranking := &Ranking{
 		Tenant: "tenant1",

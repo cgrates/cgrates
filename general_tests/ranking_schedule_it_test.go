@@ -51,7 +51,7 @@ func TestRankingSchedule(t *testing.T) {
 		ConfigPath:     path.Join(*utils.DataDir, "conf", "samples", rnkConfigDir),
 		PreserveStorDB: true,
 		PreserveDataDB: true,
-		PreStartHook: func(t *testing.T, c *config.CGRConfig) {
+		PreStartHook: func(t testing.TB, c *config.CGRConfig) {
 			engine.FlushDBs(t, c, true, true)
 			engine.LoadCSVsWithCGRLoader(t, c.ConfigPath, path.Join(*utils.DataDir, "tariffplans", "tutrankings"), nil, nil, "-caches_address=")
 		},
