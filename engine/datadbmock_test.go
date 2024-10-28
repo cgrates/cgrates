@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1102,5 +1103,140 @@ func TestRemAccountActionPlansDrv(t *testing.T) {
 	err := mock.RemAccountActionPlansDrv("AccountID")
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error to be %v, got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemoveRankingDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+
+	err := dbMock.RemoveRankingDrv("Rank1", "Rank2")
+
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v but got %v", utils.ErrNotImplemented, err)
+	}
+
+	err = dbMock.RemoveRankingDrv("Rank1", "Rank2")
+
+	err = dbMock.RemoveRankingDrv("Rank3", "Rank4")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetRankingDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+
+	err := dbMock.SetRankingDrv(&Ranking{ID: "Ranking"})
+
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v but got %v", utils.ErrNotImplemented, err)
+	}
+
+	err = dbMock.SetRankingDrv(&Ranking{ID: "Ranking"})
+
+	err = dbMock.SetRankingDrv(&Ranking{ID: "Ranking2"})
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestRemRankingProfileDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+
+	err := dbMock.RemRankingProfileDrv("cgrates.org", "rankingID1")
+
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+
+	dbMock.RemRankingProfileDrvF = func(tenant string, id string) error {
+		if tenant == "cgrates.org" && id == "rankingID1" {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	}
+
+	err = dbMock.RemRankingProfileDrv("cgrates.org", "rankingID1")
+
+	if err != nil {
+		t.Errorf("Expected no error but got %v", err)
+	}
+
+	err = dbMock.RemRankingProfileDrv("cgrates.org", "rankingID2")
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v, but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestGetAccountActionPlansDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	acntID := "ID"
+	apIDs, err := dbMock.GetAccountActionPlansDrv(acntID)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v but got %v", utils.ErrNotImplemented, err)
+	}
+	if apIDs != nil {
+		t.Errorf("Expected apIDs to be nil but got %v", apIDs)
+	}
+}
+
+func TestAccountSetActionPlansDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	acntID := "ID"
+	apIDs := []string{"plan1", "plan2"}
+	err := dbMock.SetAccountActionPlansDrv(acntID, apIDs)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v but got %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestSetResourceDrv(t *testing.T) {
+	dbMock := &DataDBMock{}
+	resource := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "ID",
+		Usages: map[string]*ResourceUsage{
+			"usage1": {
+				Tenant:     "cgrates.org",
+				ID:         "ID",
+				ExpiryTime: time.Now().Add(24 * time.Hour),
+				Units:      100.0,
+			},
+		},
+		TTLIdx: []string{"resource1", "resource2"},
+		ttl:    nil,
+		tUsage: nil,
+		dirty:  nil,
+		rPrf:   nil,
+	}
+
+	err := dbMock.SetResourceDrv(resource)
+
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v but got %v", utils.ErrNotImplemented, err)
+	}
+
+	dbMock.SetResourceDrvF = func(r *Resource) error {
+		if r.ID == "ID" {
+			return nil
+		}
+		return utils.ErrNotImplemented
+	}
+
+	err = dbMock.SetResourceDrv(resource)
+
+	if err != nil {
+		t.Errorf("Expected no error but got %v", err)
+	}
+
+	tResource := &Resource{
+		Tenant: "cgrates.org",
+		ID:     "ID1",
+		Usages: nil,
+	}
+
+	err = dbMock.SetResourceDrv(tResource)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected error %v but got %v", utils.ErrNotImplemented, err)
 	}
 }
