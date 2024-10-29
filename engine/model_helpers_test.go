@@ -6226,3 +6226,53 @@ func TestAPItoModelTrends(t *testing.T) {
 		})
 	}
 }
+
+func TestTrendProfileToAPIs(t *testing.T) {
+	sampleProfile := &TrendProfile{
+		Tenant:          "tenant",
+		ID:              "1",
+		Schedule:        "schedule",
+		StatID:          "1001",
+		ThresholdIDs:    []string{"threshold1", "threshold2"},
+		Metrics:         []string{"metric1", "metric2"},
+		QueueLength:     10,
+		MinItems:        5,
+		CorrelationType: "last",
+		Tolerance:       0.1,
+		Stored:          true,
+		TTL:             time.Hour * 24,
+	}
+
+	apiProfile := TrendProfileToAPI(sampleProfile)
+
+	if apiProfile.Tenant != sampleProfile.Tenant {
+		t.Errorf("Expected Tenant to be %s, got %s", sampleProfile.Tenant, apiProfile.Tenant)
+	}
+	if apiProfile.ID != sampleProfile.ID {
+		t.Errorf("Expected ID to be %s, got %s", sampleProfile.ID, apiProfile.ID)
+	}
+	if apiProfile.Schedule != sampleProfile.Schedule {
+		t.Errorf("Expected Schedule to be %s, got %s", sampleProfile.Schedule, apiProfile.Schedule)
+	}
+	if apiProfile.StatID != sampleProfile.StatID {
+		t.Errorf("Expected StatID to be %s, got %s", sampleProfile.StatID, apiProfile.StatID)
+	}
+
+	if len(apiProfile.ThresholdIDs) != len(sampleProfile.ThresholdIDs) {
+		t.Errorf("Expected ThresholdIDs to have length %d, got %d", len(sampleProfile.ThresholdIDs), len(apiProfile.ThresholdIDs))
+	}
+	if len(apiProfile.Metrics) != len(sampleProfile.Metrics) {
+		t.Errorf("Expected Metrics to have length %d, got %d", len(sampleProfile.Metrics), len(apiProfile.Metrics))
+	}
+
+	if sampleProfile.TTL == time.Duration(0) {
+		if apiProfile.TTL != "" {
+			t.Errorf("Expected TTL to be empty string for zero duration, got %s", apiProfile.TTL)
+		}
+	} else {
+		if apiProfile.TTL != sampleProfile.TTL.String() {
+			t.Errorf("Expected TTL to be %s, got %s", sampleProfile.TTL.String(), apiProfile.TTL)
+		}
+	}
+
+}

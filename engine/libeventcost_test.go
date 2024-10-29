@@ -1497,3 +1497,112 @@ func TestFieldAsInterfaces(t *testing.T) {
 		})
 	}
 }
+
+func TestBalanceCharge(t *testing.T) {
+	balanceCharge := BalanceCharge{
+		AccountID:     "account123",
+		BalanceUUID:   "uuid",
+		RatingID:      "ID1001",
+		Units:         10.0,
+		BalanceFactor: 0.5,
+		ExtraChargeID: "1",
+	}
+
+	tests := []struct {
+		path   []string
+		expect interface{}
+	}{
+		{[]string{"AccountID"}, "account123"},
+		{[]string{"BalanceUUID"}, "uuid"},
+		{[]string{"RatingID"}, "ID1001"},
+		{[]string{"Units"}, 10.0},
+		{[]string{"BalanceFactor"}, 0.5},
+		{[]string{"ExtraChargeID"}, "1"},
+	}
+
+	for _, test := range tests {
+		val, err := balanceCharge.FieldAsInterface(test.path)
+		if err != nil {
+			t.Errorf("Unexpected error for path %v: %v", test.path, err)
+			continue
+		}
+		if val != test.expect {
+			t.Errorf("Expected %v for path %v, got %v", test.expect, test.path, val)
+		}
+	}
+
+	_, err := balanceCharge.FieldAsInterface([]string{"invalid_field"})
+	if err == nil {
+		t.Error("Expected error for invalid field path")
+	}
+
+	_, err = balanceCharge.FieldAsInterface([]string{})
+	if err == nil {
+		t.Error("Expected error for empty field path")
+	}
+
+	balanceCharge.BalanceFactor = 0
+	val, err := balanceCharge.FieldAsInterface([]string{"BalanceFactor"})
+	if err != nil {
+		t.Errorf("Unexpected error for BalanceFactor: %v", err)
+	}
+	if val != 1.0 {
+		t.Errorf("Expected 1.0 for BalanceFactor, got %v", val)
+	}
+}
+
+func TestRatingFieldAsInterface(t *testing.T) {
+	rating := Rating{
+		"rating1": &RatingUnit{
+			ConnectFee:       1.23,
+			RoundingMethod:   "ROUNDING",
+			RoundingDecimals: 2,
+			MaxCost:          100,
+			MaxCostStrategy:  "CAP",
+			TimingID:         "timing1",
+			RatesID:          "rates1",
+			RatingFiltersID:  "filters1",
+		},
+	}
+
+	tests := []struct {
+		path   []string
+		expect interface{}
+	}{
+		{[]string{"rating1"}, rating["rating1"]},
+		{[]string{"rating1", "ConnectFee"}, 1.23},
+		{[]string{"rating1", "RoundingMethod"}, "ROUNDING"},
+		{[]string{"rating1", "RoundingDecimals"}, 2},
+		{[]string{"rating1", "MaxCost"}, 100.0},
+		{[]string{"rating1", "MaxCostStrategy"}, "CAP"},
+		{[]string{"rating1", "TimingID"}, "timing1"},
+		{[]string{"rating1", "RatesID"}, "rates1"},
+		{[]string{"rating1", "RatingFiltersID"}, "filters1"},
+	}
+
+	for _, test := range tests {
+		val, err := rating.FieldAsInterface(test.path)
+		if err != nil {
+			t.Errorf("Unexpected error for path %v: %v", test.path, err)
+			continue
+		}
+		if !reflect.DeepEqual(val, test.expect) {
+			t.Errorf("Expected %v for path %v, got %v", test.expect, test.path, val)
+		}
+	}
+
+	_, err := rating.FieldAsInterface([]string{"invalid_rating"})
+	if err == nil {
+		t.Error("Expected error for invalid rating ID")
+	}
+
+	_, err = rating.FieldAsInterface([]string{})
+	if err == nil {
+		t.Error("Expected error for empty field path")
+	}
+
+	_, err = rating.FieldAsInterface([]string{"rating1", "invalid_field"})
+	if err == nil {
+		t.Error("Expected error for invalid field within rating")
+	}
+}
