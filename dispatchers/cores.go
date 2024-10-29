@@ -21,6 +21,7 @@ package dispatchers
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -90,16 +91,13 @@ func (dS *DispatcherService) CoreSv1StartCPUProfiling(ctx *context.Context, args
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartCPUProfiling, args, reply)
 }
-func (dS *DispatcherService) CoreSv1StartMemoryProfiling(ctx *context.Context, args *utils.MemoryPrf, reply *string) (err error) {
+func (dS *DispatcherService) CoreSv1StartMemoryProfiling(ctx *context.Context, args cores.MemoryProfilingParams, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
+	if len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
 	ev := make(map[string]any)
-	opts := make(map[string]any)
-	if args != nil {
-		opts = args.APIOpts
-	}
+	opts := args.APIOpts
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartMemoryProfiling, args, reply)
 }
 func (dS *DispatcherService) CoreSv1Status(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
@@ -126,15 +124,12 @@ func (dS *DispatcherService) CoreSv1StopCPUProfiling(ctx *context.Context, args 
 	}
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StopCPUProfiling, args, reply)
 }
-func (dS *DispatcherService) CoreSv1StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
+func (dS *DispatcherService) CoreSv1StopMemoryProfiling(ctx *context.Context, args utils.TenantWithAPIOpts, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
+	if len(args.Tenant) != 0 {
 		tnt = args.Tenant
 	}
 	ev := make(map[string]any)
-	opts := make(map[string]any)
-	if args != nil {
-		opts = args.APIOpts
-	}
+	opts := args.APIOpts
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StopMemoryProfiling, args, reply)
 }

@@ -35,15 +35,12 @@ func TestNewCoreService(t *testing.T) {
 	stopchan := make(chan struct{}, 1)
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopchan)
-	stopMemChan := make(chan struct{})
 	expected := &CoreS{
-		stopMemPrf: stopchan,
-		cfg:        cfgDflt,
-		CapsStats:  sts,
-		fileMEM:    "/tmp",
-		caps:       caps,
+		cfg:       cfgDflt,
+		CapsStats: sts,
+		caps:      caps,
 	}
-	rcv := NewCoreService(cfgDflt, caps, nil, "/tmp", stopMemChan, stopchan, nil, nil)
+	rcv := NewCoreService(cfgDflt, caps, nil, stopchan, nil, nil)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
@@ -56,7 +53,7 @@ func TestNewCoreService(t *testing.T) {
 func TestCoreServiceStatus(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CoreSCfg().CapsStatsInterval = 1
-	cores := NewCoreService(cfg, engine.NewCaps(1, utils.MetaBusy), nil, "/tmp", nil, nil, nil, func() {})
+	cores := NewCoreService(cfg, engine.NewCaps(1, utils.MetaBusy), nil, nil, nil, func() {})
 
 	var reply map[string]any
 	cfgVrs, err := utils.GetCGRVersion()

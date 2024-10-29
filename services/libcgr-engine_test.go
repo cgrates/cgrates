@@ -20,101 +20,142 @@ package services
 
 import (
 	"path"
+	"reflect"
 	"testing"
 	"time"
 )
 
-// if the flag change this should fail
-// do not use constants in this test
+// If any flag changes, this test should fail.
+// Do not use constants in this test to ensure these changes are detected.
 func TestCgrEngineFlags(t *testing.T) {
-	cgrEngineFlags := NewCGREngineFlags()
-	if err := cgrEngineFlags.Parse([]string{"-config_path", path.Join("/conf", "samples", "tutorial")}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.CfgPath != "/conf/samples/tutorial" {
-		t.Errorf("Expected /conf/samples/tutorial, received %+v", *cgrEngineFlags.CfgPath)
+	ngFlags := NewCGREngineFlags()
+	tests := []struct {
+		name       string
+		flags      []string
+		flagVar    any
+		defaultVal any
+		want       any
+	}{
+		{
+			name:       "cfgPath",
+			flags:      []string{"-config_path", path.Join("/usr", "share", "cgrates", "conf", "samples", "tutorial")},
+			flagVar:    ngFlags.CfgPath,
+			defaultVal: "/etc/cgrates/",
+			want:       "/usr/share/cgrates/conf/samples/tutorial",
+		},
+		{
+			name:       "version",
+			flags:      []string{"-version"},
+			flagVar:    ngFlags.Version,
+			defaultVal: false,
+			want:       true,
+		},
+		{
+			name:       "pidFile",
+			flags:      []string{"-pid", "/run/cgrates/cgrates.pid"},
+			flagVar:    ngFlags.PidFile,
+			defaultVal: "",
+			want:       "/run/cgrates/cgrates.pid",
+		},
+		{
+			name:       "cpuProfDir",
+			flags:      []string{"-cpuprof_dir", "/tmp/profiling"},
+			flagVar:    ngFlags.CpuPrfDir,
+			defaultVal: "",
+			want:       "/tmp/profiling",
+		},
+		{
+			name:       "memProfDir",
+			flags:      []string{"-memprof_dir", "/tmp/profiling"},
+			flagVar:    ngFlags.MemPrfDir,
+			defaultVal: "",
+			want:       "/tmp/profiling",
+		},
+		{
+			name:       "memProfInterval",
+			flags:      []string{"-memprof_interval", "1s"},
+			flagVar:    ngFlags.MemPrfInterval,
+			defaultVal: 15 * time.Second,
+			want:       time.Second,
+		},
+		{
+			name:       "memProfMaxFiles",
+			flags:      []string{"-memprof_maxfiles", "3"},
+			flagVar:    ngFlags.MemPrfMaxF,
+			defaultVal: 1,
+			want:       3,
+		},
+		{
+			name:       "memProfTimestamp",
+			flags:      []string{"-memprof_timestamp"},
+			flagVar:    ngFlags.MemPrfTS,
+			defaultVal: false,
+			want:       true,
+		},
+		{
+			name:       "scheduledShutdown",
+			flags:      []string{"-scheduled_shutdown", "1h"},
+			flagVar:    ngFlags.ScheduledShutDown,
+			defaultVal: "",
+			want:       "1h",
+		},
+		{
+			name:       "singleCPU",
+			flags:      []string{"-singlecpu"},
+			flagVar:    ngFlags.Singlecpu,
+			defaultVal: false,
+			want:       true,
+		},
+		{
+			name:       "syslogger",
+			flags:      []string{"-logger", "*stdout"},
+			flagVar:    ngFlags.SysLogger,
+			defaultVal: "",
+			want:       "*stdout",
+		},
+		{
+			name:       "nodeID",
+			flags:      []string{"-node_id", "CGRateS.org"},
+			flagVar:    ngFlags.NodeID,
+			defaultVal: "",
+			want:       "CGRateS.org",
+		},
+		{
+			name:       "logLevel",
+			flags:      []string{"-log_level", "7"},
+			flagVar:    ngFlags.LogLevel,
+			defaultVal: -1,
+			want:       7,
+		},
+		{
+			name:       "preload",
+			flags:      []string{"-preload", "TestPreloadID"},
+			flagVar:    ngFlags.Preload,
+			defaultVal: "",
+			want:       "TestPreloadID",
+		},
+		{
+			name:       "check_config",
+			flags:      []string{"-check_config", "true"},
+			flagVar:    ngFlags.CheckConfig,
+			defaultVal: false,
+			want:       true,
+		},
 	}
 
-	if err := cgrEngineFlags.Parse([]string{"-version", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.Version != true {
-		t.Errorf("Expected true, received %+v", *cgrEngineFlags.Version)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-check_config", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.CheckConfig != true {
-		t.Errorf("Expected true, received %+v", *cgrEngineFlags.CheckConfig)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-pid", "usr/share/cgrates/cgrates.json"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.PidFile != "usr/share/cgrates/cgrates.json" {
-		t.Errorf("Expected usr/share/cgrates/cgrates.json, received %+v", *cgrEngineFlags.PidFile)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-httprof_path", "http://example.com/"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.HttpPrfPath != "http://example.com/" {
-		t.Errorf("Expected http://example.com/, received %+v", *cgrEngineFlags.HttpPrfPath)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-cpuprof_dir", "1"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.CpuPrfDir != "1" {
-		t.Errorf("Expected 1, received %+v", *cgrEngineFlags.CpuPrfDir)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-memprof_dir", "true"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.MemPrfDir != "true" {
-		t.Errorf("Expected true received %+v", *cgrEngineFlags.MemPrfDir)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-memprof_interval", "1s"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.MemPrfInterval != time.Second {
-		t.Errorf("Expected 1s, received %+v", *cgrEngineFlags.MemPrfInterval)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-memprof_nrfiles", "3"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.MemPrfNoF != 3 {
-		t.Errorf("Expected 3, received %+v", *cgrEngineFlags.MemPrfNoF)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-scheduled_shutdown", "1h"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.ScheduledShutDown != "1h" {
-		t.Errorf("Expected 1h, received %+v", *cgrEngineFlags.ScheduledShutDown)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-singlecpu"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.Singlecpu != true {
-		t.Errorf("Expected true, received %+v", *cgrEngineFlags.Singlecpu)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-logger", "*cgrEngineFlags.stdout"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.SysLogger != "*cgrEngineFlags.stdout" {
-		t.Errorf("Expected *cgrEngineFlags.stdout, received %+v", *cgrEngineFlags.SysLogger)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-node_id", "CGRates.org"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.NodeID != "CGRates.org" {
-		t.Errorf("Expected CGRates.org, received %+v", *cgrEngineFlags.NodeID)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-log_level", "7"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.LogLevel != 7 {
-		t.Errorf("Expected 7, received %+v", *cgrEngineFlags.LogLevel)
-	}
-
-	if err := cgrEngineFlags.Parse([]string{"-preload", "TestPreloadID"}); err != nil {
-		t.Fatal(err)
-	} else if *cgrEngineFlags.Preload != "TestPreloadID" {
-		t.Errorf("Expected 7, received %+v", *cgrEngineFlags.Preload)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			flagVal := reflect.ValueOf(tt.flagVar).Elem().Interface()
+			if flagVal != tt.defaultVal {
+				t.Errorf("%s=%v, want default value %v", tt.name, flagVal, tt.defaultVal)
+			}
+			if err := ngFlags.Parse(tt.flags); err != nil {
+				t.Errorf("cgrEngineFlags.Parse(%v) returned unexpected error: %v", tt.flags, err)
+			}
+			flagVal = reflect.ValueOf(tt.flagVar).Elem().Interface()
+			if flagVal != tt.want {
+				t.Errorf("%s=%v, want %v", tt.name, flagVal, tt.want)
+			}
+		})
 	}
 }

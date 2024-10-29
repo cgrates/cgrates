@@ -362,7 +362,7 @@ func (ng TestEngine) Run(t *testing.T, extraFlags ...string) (*birpc.Client, *co
 	if ng.PreStartHook != nil {
 		ng.PreStartHook(t, cfg)
 	}
-	startEngine(t, cfg, ng.LogBuffer)
+	startEngine(t, cfg, ng.LogBuffer, extraFlags...)
 	client := NewRPCClient(t, cfg.ListenCfg(), ng.Encoding)
 	loadCSVs(t, ng.TpPath, ng.TpFiles)
 	return client, cfg

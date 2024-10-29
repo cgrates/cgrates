@@ -49,10 +49,11 @@ func NewCGREngineFlags() *CGREngineFlags {
 		Version:           fs.Bool(utils.VersionCgr, false, "Prints the application version."),
 		PidFile:           fs.String(utils.PidCgr, utils.EmptyString, "Write pid file"),
 		HttpPrfPath:       fs.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling"),
-		CpuPrfDir:         fs.String(utils.CpuProfDirCgr, utils.EmptyString, "write cpu profile to files"),
-		MemPrfDir:         fs.String(utils.MemProfDirCgr, utils.EmptyString, "write memory profile to file"),
-		MemPrfInterval:    fs.Duration(utils.MemProfIntervalCgr, 5*time.Second, "Time between memory profile saves"),
-		MemPrfNoF:         fs.Int(utils.MemProfNrFilesCgr, 1, "Number of memory profile to write"),
+		CpuPrfDir:         fs.String(utils.CpuProfDirCgr, utils.EmptyString, "Directory for CPU profiles"),
+		MemPrfDir:         fs.String(utils.MemProfDirCgr, utils.EmptyString, "Directory for memory profiles"),
+		MemPrfInterval:    fs.Duration(utils.MemProfIntervalCgr, 15*time.Second, "Interval between memory profile saves"),
+		MemPrfMaxF:        fs.Int(utils.MemProfMaxFilesCgr, 1, "Number of memory profiles to keep (most recent)"),
+		MemPrfTS:          fs.Bool(utils.MemProfTimestampCgr, false, "Add timestamp to memory profile files"),
 		ScheduledShutDown: fs.String(utils.ScheduledShutdownCgr, utils.EmptyString, "shutdown the engine after this duration"),
 		Singlecpu:         fs.Bool(utils.SingleCpuCgr, false, "Run on single CPU core"),
 		SysLogger:         fs.String(utils.LoggerCfg, utils.EmptyString, "logger <*syslog|*stdout>"),
@@ -73,7 +74,8 @@ type CGREngineFlags struct {
 	CpuPrfDir         *string
 	MemPrfDir         *string
 	MemPrfInterval    *time.Duration
-	MemPrfNoF         *int
+	MemPrfMaxF        *int
+	MemPrfTS          *bool
 	ScheduledShutDown *string
 	Singlecpu         *bool
 	SysLogger         *string

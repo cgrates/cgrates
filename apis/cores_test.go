@@ -33,7 +33,7 @@ import (
 func TestCoreSStatus(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -48,7 +48,7 @@ func TestCoreSStatus(t *testing.T) {
 func TestCoreSSleep(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.DurationArgs{
 		Duration: 1 * time.Millisecond,
@@ -65,7 +65,7 @@ func TestCoreSShutdown(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
 	var closed bool
-	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, nil, func() { closed = true })
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, func() { closed = true })
 	cS := NewCoreSv1(coreService)
 	arg := &utils.CGREvent{}
 	var reply string
@@ -82,7 +82,7 @@ func TestCoreSShutdown(t *testing.T) {
 func TestStartCPUProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
 	args := &utils.DirectoryArgs{
 		DirPath: "dir_path",
@@ -100,49 +100,31 @@ func TestStartCPUProfiling(t *testing.T) {
 func TestStopCPUProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
 		APIOpts: map[string]any{},
 	}
 	var reply string
-	errExp := " cannot stop because CPUProfiling is not active"
+	errExp := "stop CPU profiling: not started yet"
 	if err := cS.StopCPUProfiling(context.Background(), args, &reply); err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
 
-// func TestStartMemoryProfiling(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	caps := engine.NewCaps(2, utils.MetaTopUp)
-// 	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, new(sync.WaitGroup), nil)
-// 	cS := NewCoreSv1(coreService)
-// 	args := &utils.MemoryPrf{
-// 		Tenant:   "cgrates.org",
-// 		DirPath:  "dir_path",
-// 		Interval: 4 * time.Millisecond,
-// 		NrFiles:  2,
-// 	}
-
-// 	var reply string
-// 	if err := cS.StartMemoryProfiling(context.Background(), args, &reply); err != nil {
-// 		t.Error(err)
-// 	}
-// }
-
 func TestStopMemoryProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, utils.EmptyString, make(chan struct{}), nil, new(sync.WaitGroup), nil)
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), new(sync.WaitGroup), nil)
 	cS := NewCoreSv1(coreService)
-	args := &utils.TenantWithAPIOpts{
-		Tenant:  "cgrates.org",
-		APIOpts: map[string]any{},
-	}
 	var reply string
-	errExp := "Memory Profiling is not started"
-	if err := cS.StopMemoryProfiling(context.Background(), args, &reply); err.Error() != errExp {
+	errExp := "stop memory profiling: not started yet"
+	if err := cS.StopMemoryProfiling(context.Background(),
+		utils.TenantWithAPIOpts{
+			Tenant:  "cgrates.org",
+			APIOpts: map[string]any{},
+		}, &reply); err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
