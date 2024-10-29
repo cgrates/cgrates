@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -4974,5 +4975,52 @@ func TestEvenCostProcessEventCostField(t *testing.T) {
 			}
 
 		})
+	}
+}
+
+func TestConvertToEventCost(t *testing.T) {
+	eventCost := &EventCost{
+		CGRID:     "cgrid",
+		RunID:     "run_id",
+		StartTime: time.Now(),
+	}
+	convertedEventCost, err := ConvertToEventCost(eventCost)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if convertedEventCost != eventCost {
+		t.Error("Expected identical EventCost objects")
+	}
+
+	eventCostJSON, _ := json.Marshal(eventCost)
+	convertedEventCost, err = ConvertToEventCost(string(eventCostJSON))
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	tStruct := struct {
+		CGRID string `json:"CGRID"`
+		RunID string `json:"RunID"`
+	}{
+		CGRID: "cgrid",
+		RunID: "run_id",
+	}
+	convertedEventCost, err = ConvertToEventCost(tStruct)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if convertedEventCost.CGRID != "cgrid" || convertedEventCost.RunID != "run_id" {
+		t.Error("Expected correct values for CGRID and RunID")
+	}
+
+	_, err = ConvertToEventCost(123)
+	if err == nil {
+		t.Error("Expected error for invalid input type")
+	}
+
+	invalidJSON := []byte("invalid_json")
+	_, err = ConvertToEventCost(invalidJSON)
+	if err == nil {
+		t.Error("Expected error for invalid JSON")
 	}
 }
