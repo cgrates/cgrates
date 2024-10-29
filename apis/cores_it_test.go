@@ -21,337 +21,301 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
-	"fmt"
-	"net/rpc/jsonrpc"
+	"io/fs"
 	"os"
-	"os/exec"
-	"path"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc/context"
-
-	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/utils"
-
-	"github.com/cgrates/cgrates/config"
 )
 
-var (
-	coreSCfgPath string
-	coreSCfg     *config.CGRConfig
-	coreSBiRpc   *birpc.Client
-	coreSConfDIR string //run tests for specific configuration
-	argPath      string
-	sTestCoreIt  = []func(t *testing.T){
-		testCoreItLoadCofig,
-		testCoreItInitDataDB,
-		testCoreItInitStorDB,
-
-		//engine separate with cpu
-		testCoreItStartEngineByExecWithCPUProfiling,
-		testCoreItRPCConn,
-		testCoreItStartCPUProfilingErrorAlreadyStarted,
-		testCoreItSleep,
-		testCoreItStopCPUProfiling,
-		//status api
-		testCoreItStatus,
-		testCoreItKillEngine,
-
-		//engine separate with memory
-		testCoreItStartEngineByExecWIthMemProfiling,
-		testCoreItRPCConn,
-		testCoreItStartMemProfilingErrorAlreadyStarted,
-		testCoreItSleep,
-		testCoreItStopMemoryProfiling,
-		testCoreItKillEngine,
-		testCoreItCheckFinalMemProfiling,
-		// test CPU and Memory just by APIs
-		testCoreItStartEngine,
-		testCoreItRPCConn,
-
-		//CPUProfiles apis
-		testCoreItStopCPUProfilingBeforeStart,
-		testCoreItStartCPUProfiling,
-		testCoreItSleep,
-		testCoreItStopCPUProfiling,
-
-		//MemoryProfiles apis
-		testCoreItStopMemProfilingBeforeStart,
-		testCoreItStartMemoryProfiling,
-		testCoreItSleep,
-		testCoreItStopMemoryProfiling,
-		testCoreItKillEngine,
-		testCoreItCheckFinalMemProfiling,
-	}
-)
-
-func TestITCoreIt(t *testing.T) {
-	argPath = "/tmp"
+func TestCoreSProfilingFlags(t *testing.T) {
+	var dbCfg engine.DBCfg
 	switch *utils.DBType {
-	case utils.MetaInternal, utils.MetaMySQL, utils.MetaMongo:
-		coreSConfDIR = "core_config"
-	case utils.MetaPostgres:
+	case utils.MetaInternal:
+		dbCfg = engine.InternalDBCfg
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
 	}
-	for _, test := range sTestCoreIt {
-		t.Run("CoreIt integration tests", test)
-	}
-}
 
-func testCoreItLoadCofig(t *testing.T) {
-	coreSCfgPath = path.Join(*utils.DataDir, "conf", "samples", coreSConfDIR)
-	var err error
-	if coreSCfg, err = config.NewCGRConfigFromPath(context.Background(), coreSCfgPath); err != nil {
-		t.Error(err)
-	}
+	cfgJSON := `{
+"general": {
+	"node_id": "apis_cores_test"
 }
+}`
 
-func testCoreItInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(coreSCfg); err != nil {
-		t.Error(err)
-	}
-}
+	profDir := t.TempDir()
 
-func testCoreItInitStorDB(t *testing.T) {
-	if err := engine.InitStorDB(coreSCfg); err != nil {
-		t.Error(err)
-	}
-}
+	// NOTE: This will be executed after the cgr-engine process is killed.
+	t.Cleanup(func() {
+		checkMemProfiles(t, profDir, 3) // max files=2 + final heap profile
+	})
 
-func testCoreItStartEngineByExecWithCPUProfiling(t *testing.T) {
-	engine := exec.Command("cgr-engine", "-config_path", coreSCfgPath, "-cpuprof_dir", argPath)
-	if err := engine.Start(); err != nil {
-		t.Error(err)
+	ng := engine.TestEngine{
+		ConfigJSON: cfgJSON,
+		Encoding:   *utils.Encoding,
+		DBCfg:      dbCfg,
 	}
-	fib := utils.FibDuration(time.Millisecond, 0)
-	var connected bool
-	for i := 0; i < 16; i++ {
-		time.Sleep(fib())
-		if _, err := jsonrpc.Dial(utils.TCP, coreSCfg.ListenCfg().RPCJSONListen); err != nil {
-			t.Log(err)
-		} else {
-			connected = true
-			break
+	client, _ := ng.Run(t,
+		"-cpuprof_dir", profDir,
+		"-memprof_dir", profDir, "-memprof_interval", "50ms", "-memprof_maxfiles", "2", "-memprof_timestamp")
+
+	t.Run("err cpu prof already started", func(t *testing.T) {
+		expectedErr := "start CPU profiling: already started"
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
+			&utils.DirectoryArgs{
+				DirPath: profDir,
+			}, &reply); err == nil || err.Error() != expectedErr {
+			t.Errorf("%s err=%v, want %v", utils.CoreSv1StartCPUProfiling, err, expectedErr)
 		}
-	}
-	if !connected {
-		t.Errorf("engine did not open port <%s>", coreSCfg.ListenCfg().RPCJSONListen)
-	}
-}
+	})
 
-func testCoreItRPCConn(t *testing.T) {
-	coreSBiRpc = engine.NewRPCClient(t, coreSCfg.ListenCfg(), *utils.Encoding)
-}
-
-func testCoreItStartCPUProfilingErrorAlreadyStarted(t *testing.T) {
-	var reply string
-	dirPath := &utils.DirectoryArgs{
-		DirPath: argPath,
-	}
-	expectedErr := "CPU profiling already started"
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
-		dirPath, &reply); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
-}
-
-func testCoreItStartEngine(t *testing.T) {
-	if _, err := engine.StartEngine(coreSCfgPath, *utils.WaitRater); err != nil {
-		t.Error(err)
-	}
-}
-
-func testCoreItStopMemProfilingBeforeStart(t *testing.T) {
-	var reply string
-	expectedErr := "Memory Profiling is not started"
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
-		new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+q, received %+q", expectedErr, err)
-	}
-}
-
-func testCoreItStartEngineByExecWIthMemProfiling(t *testing.T) {
-	engine := exec.Command("cgr-engine", "-config_path", coreSCfgPath,
-		"-memprof_dir", argPath, "-memprof_interval", "100ms", "-memprof_nrfiles", "2")
-	if err := engine.Start(); err != nil {
-		t.Error(err)
-	}
-	fib := utils.FibDuration(time.Millisecond, 0)
-	var connected bool
-	for i := 0; i < 16; i++ {
-		time.Sleep(fib())
-		if _, err := jsonrpc.Dial(utils.TCP, coreSCfg.ListenCfg().RPCJSONListen); err != nil {
-			t.Log(err)
-		} else {
-			connected = true
-			break
+	t.Run("err mem prof already started", func(t *testing.T) {
+		expErr := "start memory profiling: already started"
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
+			cores.MemoryProfilingParams{
+				DirPath:      profDir,
+				Interval:     100 * time.Millisecond,
+				MaxFiles:     2,
+				UseTimestamp: true,
+			}, &reply); err == nil || err.Error() != expErr {
+			t.Errorf("%s err=%v, want %v", utils.CoreSv1StartMemoryProfiling, err, expErr)
 		}
-	}
-	if !connected {
-		t.Errorf("engine did not open port <%s>", coreSCfg.ListenCfg().RPCJSONListen)
-	}
-}
+	})
 
-func testCoreItStopMemoryProfiling(t *testing.T) {
-	var reply string
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
-		new(utils.TenantWithAPIOpts), &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Unexpected reply returned")
-	}
+	// Test the sleep api here, instead of starting another engine. This
+	// will allow the heap profiles to be generated as well.
+	t.Run("sleep", func(t *testing.T) {
+		args := &utils.DurationArgs{
+			Duration: 150 * time.Millisecond,
+		}
+		before := time.Now()
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1Sleep,
+			args, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("%s - unexpected reply returned: %s", utils.CoreSv1Sleep, reply)
+		}
+		got := time.Since(before)
+		want := args.Duration
+		margin := 10 * time.Millisecond
+		if diff := got - want; diff < 0 || diff > margin {
+			t.Errorf("%s - slept for %s, wanted to sleep around %s (diff %v, margin %v)",
+				utils.CoreSv1Sleep, got, want, diff, margin)
+		}
+	})
 
-	//mem_prof1, mem_prof2
-	for i := 1; i <= 2; i++ {
-		file, err := os.Open(path.Join(argPath, fmt.Sprintf("mem%v.prof", i)))
+	t.Run("status", func(t *testing.T) {
+		want := "apis_cores_test"
+		var reply map[string]any
+		if err := client.Call(context.Background(), utils.CoreSv1Status,
+			&utils.TenantIDWithAPIOpts{}, &reply); err != nil {
+			t.Fatal(err)
+		} else if got := reply[utils.NodeID]; got != want {
+			t.Errorf("%s nodeID=%v, want %v", utils.CoreSv1Status, got, want)
+		}
+	})
+
+	t.Run("check cpu prof file", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
+			new(utils.TenantIDWithAPIOpts), &reply); err != nil {
+			t.Error(err)
+		}
+		cpuProfPath := filepath.Join(profDir, utils.CpuPathCgr)
+		fi, err := os.Stat(cpuProfPath)
 		if err != nil {
 			t.Error(err)
+		} else if size := fi.Size(); size < int64(300) {
+			t.Errorf("Size of CPUProfile %v is lower that expected", size)
 		}
-		defer file.Close()
+	})
 
-		//compare the size
-		size, err := file.Stat()
+	// TODO: Expecting the same result even if not manually stopping the
+	// memory profiling. Test it just to be sure.
+	t.Run("stop mem profiling", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
+			new(utils.TenantWithAPIOpts), &reply); err != nil {
+			t.Errorf("%s unexpected err=%v", utils.CoreSv1StopMemoryProfiling, err)
+		}
+		time.Sleep(10 * time.Millisecond) // wait for the final mem prof file to be written
+	})
+}
+
+func TestCoreSProfilingAPI(t *testing.T) {
+	var dbCfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		dbCfg = engine.InternalDBCfg
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	profDir := t.TempDir()
+
+	// NOTE: This will be executed after the cgr-engine process is killed.
+	t.Cleanup(func() {
+		checkMemProfiles(t, profDir, 3) // max files=2 + final heap profile
+	})
+
+	ng := engine.TestEngine{
+		ConfigJSON: "{}",
+		Encoding:   *utils.Encoding,
+		DBCfg:      dbCfg,
+	}
+	client, _ := ng.Run(t)
+
+	t.Run("err cpu prof stop before start", func(t *testing.T) {
+		expectedErr := "stop CPU profiling: not started yet"
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
+			new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
+			t.Errorf("%s err=%v, want %v", utils.CoreSv1StopCPUProfiling, err, expectedErr)
+		}
+	})
+
+	t.Run("start cpu profiling", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
+			&utils.DirectoryArgs{
+				DirPath: profDir,
+			}, &reply); err != nil {
+			t.Errorf("%s unexpected err=%v", utils.CoreSv1StartCPUProfiling, err)
+		}
+	})
+
+	t.Run("check cpu prof file", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
+			new(utils.TenantIDWithAPIOpts), &reply); err != nil {
+			t.Error(err)
+		}
+		cpuProfPath := filepath.Join(profDir, utils.CpuPathCgr)
+		fi, err := os.Stat(cpuProfPath)
 		if err != nil {
 			t.Error(err)
-		} else if size.Size() < int64(415) {
-			t.Errorf("Size of MemoryProfile %v is lower that expected", size.Size())
+		} else if size := fi.Size(); size < int64(300) {
+			t.Errorf("Size of CPUProfile %v is lower that expected", size)
 		}
-		//after we checked that CPUProfile was made successfully, can delete it
-		if err := os.Remove(path.Join(argPath, fmt.Sprintf("mem%v.prof", i))); err != nil {
-			t.Error(err)
+	})
+
+	t.Run("err mem prof stop before start", func(t *testing.T) {
+		var reply string
+		expectedErr := "stop memory profiling: not started yet"
+		if err := client.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
+			new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
+			t.Errorf("%s err=%v, want %v", utils.CoreSv1StopMemoryProfiling, err, expectedErr)
 		}
-	}
+	})
+
+	t.Run("start mem profiling", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
+			cores.MemoryProfilingParams{
+				DirPath:      profDir,
+				Interval:     50 * time.Millisecond,
+				MaxFiles:     2,
+				UseTimestamp: true,
+			}, &reply); err != nil {
+			t.Errorf("%s unexpected err=%v", utils.CoreSv1StartMemoryProfiling, err)
+		}
+	})
+
+	// TODO: Expecting the same result even if not manually stopping the
+	// memory profiling. Test it just to be sure.
+	t.Run("stop mem profiling", func(t *testing.T) {
+		time.Sleep(200 * time.Millisecond) // wait for the heap profiles to be generated
+		var reply string
+		if err := client.Call(context.Background(), utils.CoreSv1StopMemoryProfiling,
+			new(utils.TenantWithAPIOpts), &reply); err != nil {
+			t.Errorf("%s unexpected err=%v", utils.CoreSv1StopMemoryProfiling, err)
+		}
+		time.Sleep(10 * time.Millisecond) // wait for the final mem prof file to be written
+	})
 }
 
-func testCoreItCheckFinalMemProfiling(t *testing.T) {
-	// as the engine was killed, mem_final.prof was created and we must check it
-	file, err := os.Open(path.Join(argPath, fmt.Sprintf(utils.MemProfFileCgr)))
-	if err != nil {
-		t.Error(err)
-	}
-	defer file.Close()
+func checkMemProfiles(t *testing.T, memDirPath string, wantCount int) {
+	t.Helper()
+	hasFinal := false
+	memFileCount := 0
+	_ = filepath.WalkDir(memDirPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			t.Logf("failed to access path %s: %v", path, err)
+			return nil // skip paths that cause an error
+		}
+		defer func() {
+		}()
+		switch {
+		case d.IsDir():
+			// Memory profiles should be directly under 'memDirPath', skip all directories (excluding 'memDirPath')
+			// and their contents.
+			if path == memDirPath {
+				return nil
+			}
+			return filepath.SkipDir
+		case !strings.HasPrefix(d.Name(), "mem_") || !strings.HasSuffix(d.Name(), ".prof"):
+			return nil // skip files that don't have 'mem_*.prof' format
+		case d.Name() == utils.MemProfFinalFile:
+			hasFinal = true
+			fallthrough // test should be the same as for a normal mem file
+		default: // files with format 'mem_*.prof'
+			fi, err := d.Info()
+			if err != nil {
+				t.Errorf("failed to retrieve FileInfo from %q: %v", path, err)
+			}
+			if fi.Size() == 0 {
+				t.Errorf("memory profile file %q is empty", path)
+			}
+			if d.Name() != utils.MemProfFinalFile {
+				// Check that date within file name is from within this minute.
+				layout := "20060102150405"
+				timestamp := strings.TrimPrefix(d.Name(), "mem_")
+				timestamp = strings.TrimSuffix(timestamp, ".prof")
+				date, extra, has := strings.Cut(timestamp, "_")
+				if !has {
+					t.Errorf("expected timestamp to have '<date>_<milliseconds>' format, got: %s", timestamp)
+				}
+				parsedTime, err := time.ParseInLocation(layout, date, time.Local)
+				if err != nil {
+					t.Errorf("time.Parse(%q,%q) returned unexpected err: %v", layout, date, err)
+				}
 
-	//compare the size
-	size, err := file.Stat()
-	if err != nil {
-		t.Error(err)
-	} else if size.Size() < int64(415) {
-		t.Errorf("Size of MemoryProfile %v is lower that expected", size.Size())
-	}
-	//after we checked that CPUProfile was made successfully, can delete it
-	if err := os.Remove(path.Join(argPath, fmt.Sprintf(utils.MemProfFileCgr))); err != nil {
-		t.Error(err)
-	}
-}
+				// Convert 'extra' to microseconds and add to the parsed time.
+				microSCount, err := strconv.Atoi(extra)
+				if err != nil {
+					t.Errorf("strconv.Atoi(%q) returned unexpected err: %v", extra, err)
+				}
+				parsedTime.Add(time.Duration(microSCount) * time.Microsecond)
 
-func testCoreItStartMemProfilingErrorAlreadyStarted(t *testing.T) {
-	var reply string
-	args := &utils.MemoryPrf{
-		DirPath:  argPath,
-		Interval: 100 * time.Millisecond,
-		NrFiles:  2,
-	}
-	expErr := "Memory Profiling already started"
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
-		args, &reply); err == nil || err.Error() != expErr {
-		t.Errorf("Expected %+v, received %+v", expErr, err)
-	}
-}
+				now := time.Now()
+				oneMinuteEarlier := now.Add(-time.Minute)
+				if parsedTime.Before(oneMinuteEarlier) || parsedTime.After(now) {
+					t.Errorf("file name (%s) timestamp not from within last minute", d.Name())
+				}
+			}
+			memFileCount++
+		}
+		return nil
+	})
 
-func testCoreItStopCPUProfilingBeforeStart(t *testing.T) {
-	var reply string
-	expectedErr := " cannot stop because CPUProfiling is not active"
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
-		new(utils.TenantWithAPIOpts), &reply); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+q, received %+q", expectedErr, err)
+	if wantCount != 0 && !hasFinal {
+		t.Error("final mem file is missing")
 	}
-}
-
-func testCoreItStartCPUProfiling(t *testing.T) {
-	var reply string
-	dirPath := &utils.DirectoryArgs{
-		DirPath: argPath,
+	if memFileCount != wantCount {
+		t.Errorf("memory file count = %d, want %d (including final mem profile)", memFileCount, wantCount)
 	}
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
-		dirPath, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Unexpected reply returned")
-	}
-}
-
-func testCoreItSleep(t *testing.T) {
-	args := &utils.DurationArgs{
-		Duration: 600 * time.Millisecond,
-	}
-	var reply string
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1Sleep,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Unexpected reply returned")
-	}
-}
-
-func testCoreItStopCPUProfiling(t *testing.T) {
-	var reply string
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
-		new(utils.TenantIDWithAPIOpts), &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Unexpected reply returned")
-	}
-	file, err := os.Open(path.Join(argPath, utils.CpuPathCgr))
-	if err != nil {
-		t.Error(err)
-	}
-	defer file.Close()
-
-	//compare the size
-	size, err := file.Stat()
-	if err != nil {
-		t.Error(err)
-	} else if size.Size() < int64(415) {
-		t.Errorf("Size of CPUProfile %v is lower that expected", size.Size())
-	}
-	//after we checked that CPUProfile was made successfully, can delete it
-	if err := os.Remove(path.Join(argPath, utils.CpuPathCgr)); err != nil {
-		t.Error(err)
-	}
-}
-
-func testCoreItStartMemoryProfiling(t *testing.T) {
-	var reply string
-	args := &utils.MemoryPrf{
-		DirPath:  argPath,
-		Interval: 100 * time.Millisecond,
-		NrFiles:  2,
-	}
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1StartMemoryProfiling,
-		args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Unexpected reply returned")
-	}
-}
-
-func testCoreItStatus(t *testing.T) {
-	args := &utils.TenantIDWithAPIOpts{}
-	var reply map[string]any
-	if err := coreSBiRpc.Call(context.Background(), utils.CoreSv1Status,
-		args, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply[utils.NodeID] != "Cores_apis_test" {
-		t.Errorf("Expected ALL2 but received %v", reply[utils.NodeID])
-	}
-}
-
-func testCoreItKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*utils.WaitRater); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(500 * time.Millisecond)
 }

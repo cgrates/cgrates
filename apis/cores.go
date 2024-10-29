@@ -46,29 +46,27 @@ func (cS *CoreSv1) Shutdown(ctx *context.Context, args *utils.CGREvent, reply *s
 	return cS.cS.V1Shutdown(ctx, args, reply)
 }
 
-// StartCPUProfiling is used to start CPUProfiling in the given path
+// StartCPUProfiling starts CPU profiling and saves the profile to the specified path.
 func (cS *CoreSv1) StartCPUProfiling(ctx *context.Context, args *utils.DirectoryArgs, reply *string) error {
 	return cS.cS.V1StartCPUProfiling(ctx, args, reply)
 }
 
-// StopCPUProfiling is used to stop CPUProfiling. The file should be written on the path
-// where the CPUProfiling already started
+// StopCPUProfiling stops CPU Profiling.
 func (cS *CoreSv1) StopCPUProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
 	return cS.cS.V1StopCPUProfiling(ctx, args, reply)
 }
 
-// StartMemoryProfiling is used to start MemoryProfiling in the given path
-func (cS *CoreSv1) StartMemoryProfiling(ctx *context.Context, args *utils.MemoryPrf, reply *string) error {
-	return cS.cS.V1StartMemoryProfiling(ctx, args, reply)
+// StartMemoryProfiling starts memory profiling in the specified directory.
+func (cS *CoreSv1) StartMemoryProfiling(ctx *context.Context, params cores.MemoryProfilingParams, reply *string) error {
+	return cS.cS.V1StartMemoryProfiling(ctx, params, reply)
 }
 
-// StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
-// where the MemoryProfiling already started
-func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
-	return cS.cS.V1StopMemoryProfiling(ctx, args, reply)
+// StopMemoryProfiling stops memory profiling.
+func (cS *CoreSv1) StopMemoryProfiling(ctx *context.Context, params utils.TenantWithAPIOpts, reply *string) error {
+	return cS.cS.V1StopMemoryProfiling(ctx, params, reply)
 }
 
-// Panic is used print the Message sent as a panic
+// Panic is used print the Message sent as a panic.
 func (cS *CoreSv1) Panic(ctx *context.Context, args *utils.PanicMessageArgs, reply *string) error {
 	return cS.cS.V1Panic(ctx, args, reply)
 }

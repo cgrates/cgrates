@@ -39,8 +39,7 @@ func TestCoreSCoverage(t *testing.T) {
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewCoreService(cfg, caps, server,
-		internalCoreSChan, anz, nil, utils.EmptyString, nil, nil, srvDep)
+	srv := NewCoreService(cfg, caps, server, internalCoreSChan, anz, nil, nil, srvDep)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
 	}

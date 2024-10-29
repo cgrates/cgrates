@@ -20,9 +20,8 @@ package services
 
 import (
 	"fmt"
-	"io"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"sync"
@@ -98,9 +97,8 @@ type CGREngine struct {
 	cM         *engine.ConnManager
 	server     *cores.Server
 
-	caps       *engine.Caps
-	memPrfStop chan struct{}
-	cpuPrfF    io.Closer
+	caps    *engine.Caps
+	cpuPrfF *os.File
 
 	// services
 	gvS    servmanager.Service
@@ -132,7 +130,7 @@ func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefi
 	cgr.cM.AddInternalConn(connName, apiPrefix, iConnCh)
 }
 
-func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPrfDir string, memPrfStop chan struct{}) (err error) {
+func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl *os.File) {
 	if len(cgr.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cgr.server.RegisterHTTPFunc(cgr.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
 	}
@@ -205,10 +203,7 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 	cgr.anzS = NewAnalyzerService(cgr.cfg, cgr.server,
 		cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep) // init AnalyzerS
 
-	cgr.coreS = NewCoreService(cgr.cfg, cgr.caps, cgr.server,
-		iCoreSv1Ch, cgr.anzS, cpuPrfFl, memPrfDir, memPrfStop,
-		cgr.shdWg, cgr.srvDep) // init CoreSv1
-	cgr.memPrfStop = memPrfStop
+	cgr.coreS = NewCoreService(cgr.cfg, cgr.caps, cgr.server, iCoreSv1Ch, cgr.anzS, cpuPrfFl, cgr.shdWg, cgr.srvDep) // init CoreSv1
 	cgr.cpuPrfF = cpuPrfFl
 
 	cgr.cacheS = NewCacheService(cgr.cfg, cgr.dmS, cgr.cM,
@@ -271,10 +266,9 @@ func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl io.Closer, memPr
 		NewTPeService(cgr.cfg, cgr.cM, cgr.dmS, cgr.server, cgr.srvDep),
 	)
 
-	return
 }
 
-func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFunc, preload string) (err error) {
+func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFunc, preload string, memProfParams cores.MemoryProfilingParams) (err error) {
 	defer func() {
 		if err != nil {
 			cgr.srvManager.ShutdownServices()
@@ -342,6 +336,12 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 	// Serve rpc connections
 	cgrStartRPC(ctx, shtDw, cgr.cfg, cgr.server, cgr.iDispatcherSCh)
 
+	// TODO: find a better location for this if block
+	if memProfParams.DirPath != "" {
+		if err := cgr.coreS.cS.StartMemoryProfiling(memProfParams); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+		}
+	}
 	return
 }
 
@@ -349,17 +349,10 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 	cgr.shdWg.Add(1)
 	go cgrSingnalHandler(ctx, shtDw, cgr.cfg, cgr.shdWg)
 
-	var memPrfStop chan struct{}
-	if *flags.MemPrfDir != utils.EmptyString {
-		cgr.shdWg.Add(1)
-		memPrfStop = make(chan struct{})
-		go cores.MemProfiling(*flags.MemPrfDir, *flags.MemPrfInterval, *flags.MemPrfNoF, cgr.shdWg, memPrfStop, shtDw)
-	}
-
-	var cpuPrfF io.Closer
+	var cpuPrfF *os.File
 	if *flags.CpuPrfDir != utils.EmptyString {
-		if cpuPrfF, err = cores.StartCPUProfiling(
-			path.Join(*flags.CpuPrfDir, utils.CpuPathCgr)); err != nil {
+		cpuPath := filepath.Join(*flags.CpuPrfDir, utils.CpuPathCgr)
+		if cpuPrfF, err = cores.StartCPUProfiling(cpuPath); err != nil {
 			return
 		}
 	}
@@ -392,15 +385,11 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 	}
 	efs.SetFailedPostCacheTTL(cgr.cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
-
-	return cgr.InitServices(*flags.HttpPrfPath, cpuPrfF, *flags.MemPrfDir, memPrfStop)
+	cgr.InitServices(*flags.HttpPrfPath, cpuPrfF)
+	return nil
 }
 
-func (cgr *CGREngine) Stop(memPrfDir, pidFile string) {
-	if cgr.memPrfStop != nil && cgr.coreS == nil {
-		close(cgr.memPrfStop)
-	}
-
+func (cgr *CGREngine) Stop(pidFile string) {
 	ctx, cancel := context.WithTimeout(context.Background(), cgr.cfg.CoreSCfg().ShutdownTimeout*10)
 	go func() {
 		cgr.shdWg.Wait()
@@ -411,10 +400,6 @@ func (cgr *CGREngine) Stop(memPrfDir, pidFile string) {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown all subsystems in the given time",
 			utils.ServiceManager))
 	}
-
-	if memPrfDir != utils.EmptyString { // write last memory profiling
-		cores.MemProfFile(path.Join(memPrfDir, utils.MemProfFileCgr))
-	}
 	if pidFile != utils.EmptyString {
 		if err := os.Remove(pidFile); err != nil {
 			utils.Logger.Warning("Could not remove pid file: " + err.Error())
@@ -422,7 +407,13 @@ func (cgr *CGREngine) Stop(memPrfDir, pidFile string) {
 	}
 	if cgr.cpuPrfF != nil && cgr.coreS == nil {
 		pprof.StopCPUProfile()
-		cgr.cpuPrfF.Close()
+		if err := cgr.cpuPrfF.Close(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+		}
 	}
+
+	// TODO: check if there's any need to manually stop memory profiling.
+	// It should be stopped automatically during CoreS service shutdown.
+
 	utils.Logger.Info("<CoreS> stopped all components. CGRateS shutdown!")
 }

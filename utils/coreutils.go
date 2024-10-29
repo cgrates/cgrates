@@ -832,14 +832,6 @@ type GetIndexesArg struct {
 	APIOpts    map[string]any
 }
 
-type MemoryPrf struct {
-	Tenant   string
-	DirPath  string
-	Interval time.Duration
-	NrFiles  int
-	APIOpts  map[string]any
-}
-
 type PanicMessageArgs struct {
 	Tenant  string
 	APIOpts map[string]any

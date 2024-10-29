@@ -64,12 +64,18 @@ func RunCGREngine(fs []string) (err error) {
 	cps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
 	server := cores.NewServer(cps)
 	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup), server, cps)
-	defer cgr.Stop(*flags.MemPrfDir, *flags.PidFile)
+	defer cgr.Stop(*flags.PidFile)
 
 	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {
 		return
 	}
-	if err = cgr.StartServices(ctx, cancel, *flags.Preload); err != nil {
+	if err = cgr.StartServices(ctx, cancel, *flags.Preload,
+		cores.MemoryProfilingParams{
+			DirPath:      *flags.MemPrfDir,
+			MaxFiles:     *flags.MemPrfMaxF,
+			Interval:     *flags.MemPrfInterval,
+			UseTimestamp: *flags.MemPrfTS,
+		}); err != nil {
 		return
 	}
 	<-ctx.Done()

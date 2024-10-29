@@ -20,7 +20,7 @@ package services
 
 import (
 	"fmt"
-	"io"
+	"os"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -34,62 +34,60 @@ import (
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
-	fileCpu io.Closer, fileMEM string, stopMemPrf chan struct{},
-	shdWg *sync.WaitGroup, srvDep map[string]*sync.WaitGroup) *CoreService {
+	fileCPU *os.File, shdWg *sync.WaitGroup,
+	srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
-		shdWg:      shdWg,
-		stopMemPrf: stopMemPrf,
-		connChan:   internalCoreSChan,
-		cfg:        cfg,
-		caps:       caps,
-		fileCpu:    fileCpu,
-		fileMem:    fileMEM,
-		server:     server,
-		anz:        anz,
-		srvDep:     srvDep,
-		csCh:       make(chan *cores.CoreS, 1),
+		shdWg:    shdWg,
+		connChan: internalCoreSChan,
+		cfg:      cfg,
+		caps:     caps,
+		fileCPU:  fileCPU,
+		server:   server,
+		anz:      anz,
+		srvDep:   srvDep,
+		csCh:     make(chan *cores.CoreS, 1),
 	}
 }
 
 // CoreService implements Service interface
 type CoreService struct {
-	sync.RWMutex
-	cfg        *config.CGRConfig
-	server     *cores.Server
-	caps       *engine.Caps
-	stopChan   chan struct{}
-	shdWg      *sync.WaitGroup
-	stopMemPrf chan struct{}
-	fileCpu    io.Closer
-	fileMem    string
-	cS         *cores.CoreS
-	connChan   chan birpc.ClientConnector
-	anz        *AnalyzerService
-	srvDep     map[string]*sync.WaitGroup
-	csCh       chan *cores.CoreS
+	mu       sync.RWMutex
+	cfg      *config.CGRConfig
+	server   *cores.Server
+	caps     *engine.Caps
+	stopChan chan struct{}
+	shdWg    *sync.WaitGroup
+	fileCPU  *os.File
+	cS       *cores.CoreS
+	connChan chan birpc.ClientConnector
+	anz      *AnalyzerService
+	srvDep   map[string]*sync.WaitGroup
+	csCh     chan *cores.CoreS
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start(_ *context.Context, shtDw context.CancelFunc) (_ error) {
+func (cS *CoreService) Start(_ *context.Context, shtDw context.CancelFunc) error {
 	if cS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cS.Lock()
-	defer cS.Unlock()
+	cS.mu.Lock()
+	defer cS.mu.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCpu, cS.fileMem, cS.stopChan, cS.stopMemPrf, cS.shdWg, shtDw)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, shtDw)
 	cS.csCh <- cS.cS
-	srv, _ := engine.NewService(cS.cS)
-	// srv, _ := birpc.NewService(apis.NewCoreSv1(cS.cS), utils.EmptyString, false)
+	srv, err := engine.NewService(cS.cS)
+	if err != nil {
+		return err
+	}
 	if !cS.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
 			cS.server.RpcRegister(s)
 		}
 	}
 	cS.connChan <- cS.anz.GetInternalCodec(srv, utils.CoreS)
-	return
+	return nil
 }
 
 // Reload handles the change of config
@@ -98,23 +96,25 @@ func (cS *CoreService) Reload(*context.Context, context.CancelFunc) error {
 }
 
 // Shutdown stops the service
-func (cS *CoreService) Shutdown() (_ error) {
-	cS.Lock()
-	defer cS.Unlock()
+func (cS *CoreService) Shutdown() error {
+	cS.mu.Lock()
+	defer cS.mu.Unlock()
 	cS.cS.Shutdown()
 	close(cS.stopChan)
+	cS.cS.StopCPUProfiling()
+	cS.cS.StopMemoryProfiling()
 	cS.cS = nil
 	<-cS.connChan
 	<-cS.csCh
 	cS.server.RpcUnregisterName(utils.CoreSv1)
-	return
+	return nil
 }
 
 // IsRunning returns if the service is running
 func (cS *CoreService) IsRunning() bool {
-	cS.RLock()
-	defer cS.RUnlock()
-	return cS != nil && cS.cS != nil
+	cS.mu.RLock()
+	defer cS.mu.RUnlock()
+	return cS.cS != nil
 }
 
 // ServiceName returns the service name
@@ -129,9 +129,9 @@ func (cS *CoreService) ShouldRun() bool {
 
 // GetCoreS returns the coreS
 func (cS *CoreService) WaitForCoreS(ctx *context.Context) (cs *cores.CoreS, err error) {
-	cS.RLock()
+	cS.mu.RLock()
 	cSCh := cS.csCh
-	cS.RUnlock()
+	cS.mu.RUnlock()
 	select {
 	case <-ctx.Done():
 		err = ctx.Err()

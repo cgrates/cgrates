@@ -21,9 +21,8 @@ package cores
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
-	"path"
+	"path/filepath"
 	"runtime"
 	"runtime/pprof"
 	"sync"
@@ -35,34 +34,36 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU io.Closer, fileMem string, stopChan chan struct{},
-	stopMemPrf chan struct{}, shdWg *sync.WaitGroup, shtDw context.CancelFunc) *CoreS {
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU *os.File, stopChan chan struct{},
+	shdWg *sync.WaitGroup, shtDw context.CancelFunc) *CoreS {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
 		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
 	}
 	return &CoreS{
-		shdWg:      shdWg,
-		stopMemPrf: stopMemPrf,
-		shtDw:      shtDw,
-		cfg:        cfg,
-		CapsStats:  st,
-		fileCPU:    fileCPU,
-		fileMEM:    fileMem,
-		caps:       caps,
+		shdWg:     shdWg,
+		shtDw:     shtDw,
+		cfg:       cfg,
+		CapsStats: st,
+		fileCPU:   fileCPU,
+		caps:      caps,
 	}
 }
 
 type CoreS struct {
-	cfg        *config.CGRConfig
-	CapsStats  *engine.CapsStats
-	shdWg      *sync.WaitGroup
-	stopMemPrf chan struct{}
-	fileMEM    string
-	fileCPU    io.Closer
-	fileMx     sync.Mutex
-	shtDw      context.CancelFunc
-	caps       *engine.Caps
+	cfg       *config.CGRConfig
+	CapsStats *engine.CapsStats
+	shdWg     *sync.WaitGroup
+	shtDw     context.CancelFunc
+
+	memProfMux   sync.Mutex
+	finalMemProf string        // full path of the final memory profile created on stop/shutdown
+	stopMemProf  chan struct{} // signal end of memory profiling
+
+	fileCPUMux sync.Mutex
+	fileCPU    *os.File
+
+	caps *engine.Caps
 }
 
 func (cS *CoreS) ShutdownEngine() {
@@ -72,69 +73,214 @@ func (cS *CoreS) ShutdownEngine() {
 // Shutdown is called to shutdown the service
 func (cS *CoreS) Shutdown() {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
-	if cS.stopMemPrf != nil {
-		close(cS.stopMemPrf)
-		cS.stopMemPrf = nil
-	}
-	cS.StopCPUProfiling()
+
+	// safe to ignore errors (irrelevant)
+	_ = cS.StopMemoryProfiling()
+	_ = cS.StopCPUProfiling()
+
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
 }
 
-// stopChanMemProf will stop the MemoryProfiling Channel in order to create
-// the final MemoryProfiling when CoreS subsystem will stop.
-func (cS *CoreS) stopChanMemProf() {
-	if cS.stopMemPrf != nil {
-		MemProfFile(cS.fileMEM)
-		close(cS.stopMemPrf)
-		cS.stopMemPrf = nil
+// StartCPUProfiling starts CPU profiling and saves the profile to the specified path.
+func (cS *CoreS) StartCPUProfiling(path string) error {
+	if path == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing("DirPath")
 	}
+	cS.fileCPUMux.Lock()
+	defer cS.fileCPUMux.Unlock()
+
+	if cS.fileCPU != nil {
+		// Check if the profiling is already active by calling Stat() on the file handle.
+		// If Stat() returns nil, it means profiling is already active.
+		if _, err := cS.fileCPU.Stat(); err == nil {
+			return errors.New("start CPU profiling: already started")
+		}
+	}
+	file, err := StartCPUProfiling(path)
+	if err != nil {
+		return err
+	}
+	cS.fileCPU = file
+	return nil
 }
 
-func StartCPUProfiling(path string) (file io.WriteCloser, err error) {
-	file, err = os.Create(path)
+// StartCPUProfiling creates a file and passes it to pprof.StartCPUProfile. It returns the file
+// to be able to verify the status of profiling and close it after profiling is stopped.
+func StartCPUProfiling(path string) (*os.File, error) {
+	f, err := os.Create(path)
 	if err != nil {
 		return nil, fmt.Errorf("could not create CPU profile: %v", err)
 	}
-	err = pprof.StartCPUProfile(file)
-	return
+	if err := pprof.StartCPUProfile(f); err != nil {
+		if err := f.Close(); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+		}
+		return nil, fmt.Errorf("could not start CPU profile: %v", err)
+	}
+	return f, nil
 }
 
-func MemProfFile(memProfPath string) bool {
-	f, err := os.Create(memProfPath)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<memProfile> could not create memory profile file: %s", err))
-		return false
+// StopCPUProfiling stops CPU profiling and closes the profile file.
+func (cS *CoreS) StopCPUProfiling() error {
+	cS.fileCPUMux.Lock()
+	defer cS.fileCPUMux.Unlock()
+	pprof.StopCPUProfile()
+	if cS.fileCPU == nil {
+		return errors.New("stop CPU profiling: not started yet")
 	}
-	runtime.GC() // get up-to-date statistics
-	if err := pprof.WriteHeapProfile(f); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<memProfile> could not write memory profile: %s", err))
-		f.Close()
-		return false
+	if err := cS.fileCPU.Close(); err != nil {
+		if errors.Is(err, os.ErrClosed) {
+			return errors.New("stop CPU profiling: already stopped")
+		}
+		return fmt.Errorf("could not close profile file: %v", err)
 	}
-	f.Close()
-	return true
+	return nil
 }
 
-func MemProfiling(memProfDir string, interval time.Duration, nrFiles int, shdWg *sync.WaitGroup, stopChan chan struct{}, shDw context.CancelFunc) {
-	tm := time.NewTimer(interval)
-	for i := 1; ; i++ {
+// MemoryProfilingParams represents the parameters for memory profiling.
+type MemoryProfilingParams struct {
+	Tenant   string
+	DirPath  string        // directory path where memory profiles will be saved
+	Interval time.Duration // duration between consecutive memory profile captures
+	MaxFiles int           // maximum number of profile files to retain
+
+	// UseTimestamp determines if the filename includes a timestamp.
+	// The format is 'mem_20060102150405[_<microseconds>].prof'.
+	// Microseconds are included if the interval is less than one second to avoid duplicate names.
+	// If false, filenames follow an incremental format: 'mem_<n>.prof'.
+	UseTimestamp bool
+
+	APIOpts map[string]any
+}
+
+// StartMemoryProfiling starts memory profiling in the specified directory.
+func (cS *CoreS) StartMemoryProfiling(params MemoryProfilingParams) error {
+	if params.Interval <= 0 {
+		params.Interval = 15 * time.Second
+	}
+	if params.MaxFiles < 0 {
+		// consider any negative number to mean unlimited files
+		params.MaxFiles = 0
+	}
+
+	cS.memProfMux.Lock()
+	defer cS.memProfMux.Unlock()
+
+	// Check if profiling is already started.
+	select {
+	case <-cS.stopMemProf: // triggered only on channel closed
+	default:
+		if cS.stopMemProf != nil {
+			// stopMemProf being not closed and different from nil means that the profiling loop is already active.
+			return errors.New("start memory profiling: already started")
+		}
+	}
+
+	utils.Logger.Info(fmt.Sprintf(
+		"<%s> starting memory profiling loop, writing to directory %q", utils.CoreS, params.DirPath))
+	cS.stopMemProf = make(chan struct{})
+	cS.finalMemProf = filepath.Join(params.DirPath, utils.MemProfFinalFile)
+	cS.shdWg.Add(1)
+	go cS.profileMemory(params)
+	return nil
+}
+
+// newMemProfNameFunc returns a closure that generates memory profile filenames.
+func newMemProfNameFunc(interval time.Duration, useTimestamp bool) func() string {
+	if !useTimestamp {
+		i := 0
+		return func() string {
+			i++
+			return fmt.Sprintf("mem_%d.prof", i)
+		}
+	}
+	if interval < time.Second {
+		return func() string {
+			now := time.Now()
+			return fmt.Sprintf("mem_%s_%d.prof", now.Format("20060102150405"), now.Nanosecond()/1e3)
+		}
+	}
+
+	return func() string {
+		return fmt.Sprintf("mem_%s.prof", time.Now().Format("20060102150405"))
+	}
+}
+
+// profileMemory runs the memory profiling loop, writing profiles to files at the specified interval.
+func (cS *CoreS) profileMemory(params MemoryProfilingParams) {
+	defer cS.shdWg.Done()
+	fileName := newMemProfNameFunc(params.Interval, params.UseTimestamp)
+	ticker := time.NewTicker(params.Interval)
+	defer ticker.Stop()
+	files := make([]string, 0, params.MaxFiles)
+	for {
 		select {
-		case <-stopChan:
-			tm.Stop()
-			shdWg.Done()
+		case <-ticker.C:
+			path := filepath.Join(params.DirPath, fileName())
+			if err := writeHeapProfile(path); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+				cS.StopMemoryProfiling()
+			}
+			if params.MaxFiles == 0 {
+				// no file limit
+				continue
+			}
+			if len(files) == params.MaxFiles {
+				oldest := files[0]
+				utils.Logger.Info(fmt.Sprintf("<%s> removing old heap profile file %q", utils.CoreS, oldest))
+				files = files[1:] // remove oldest file from the list
+				if err := os.Remove(oldest); err != nil {
+					utils.Logger.Warning(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+				}
+			}
+			files = append(files, path)
+		case <-cS.stopMemProf:
+			if err := writeHeapProfile(cS.finalMemProf); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+			}
 			return
-		case <-tm.C:
 		}
-		if !MemProfFile(path.Join(memProfDir, fmt.Sprintf("mem%v.prof", i))) {
-			shDw()
-			shdWg.Done()
-			return
-		}
-		if i%nrFiles == 0 {
-			i = 0 // reset the counting
-		}
-		tm.Reset(interval)
 	}
+}
+
+// writeHeapProfile writes the heap profile to the specified path.
+func writeHeapProfile(path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return fmt.Errorf("could not create memory profile: %v", err)
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> could not close file %q: %v", utils.CoreS, f.Name(), err))
+		}
+	}()
+	utils.Logger.Info(fmt.Sprintf("<%s> writing heap profile to %q", utils.CoreS, path))
+	if err := pprof.WriteHeapProfile(f); err != nil {
+		return fmt.Errorf("could not write memory profile: %v", err)
+	}
+	return nil
+}
+
+// StopMemoryProfiling stops memory profiling.
+func (cS *CoreS) StopMemoryProfiling() error {
+	cS.memProfMux.Lock()
+	defer cS.memProfMux.Unlock()
+
+	// Check if profiling is already stopped to prevent a channel close panic.
+	select {
+	case <-cS.stopMemProf: // triggered only on channel closed
+		return errors.New("stop memory profiling: already stopped")
+	default: // prevents blocking
+		if cS.stopMemProf == nil {
+			// stopMemProf being nil means that StartMemoryProfiling has never been called. There is nothing to stop.
+			return errors.New("stop memory profiling: not started yet")
+		}
+	}
+
+	utils.Logger.Info(fmt.Sprintf("<%s> stopping memory profiling loop", utils.CoreS))
+	close(cS.stopMemProf)
+	return nil
 }
 
 // V1Status returns the status of the engine
@@ -161,65 +307,7 @@ func (cS *CoreS) V1Status(_ *context.Context, _ *utils.TenantWithAPIOpts, reply 
 	return
 }
 
-// StartCPUProfiling is used to start CPUProfiling in the given path
-func (cS *CoreS) StartCPUProfiling(argPath string) (err error) {
-	cS.fileMx.Lock()
-	defer cS.fileMx.Unlock()
-	if cS.fileCPU != nil {
-		return fmt.Errorf("CPU profiling already started")
-	}
-	if argPath == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing("Path")
-	}
-	cS.fileCPU, err = StartCPUProfiling(argPath)
-	return
-}
-
-// StopCPUProfiling is used to stop CPUProfiling in the given path
-func (cS *CoreS) StopCPUProfiling() (err error) {
-	cS.fileMx.Lock()
-	defer cS.fileMx.Unlock()
-	if cS.fileCPU != nil {
-		pprof.StopCPUProfile()
-		err = cS.fileCPU.Close()
-		cS.fileCPU = nil
-		return
-	}
-	return fmt.Errorf(" cannot stop because CPUProfiling is not active")
-}
-
-// StartMemoryProfiling is used to start MemoryProfiling in the given path
-func (cS *CoreS) StartMemoryProfiling(args *utils.MemoryPrf) (err error) {
-	if args.DirPath == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing("Path")
-	}
-	if cS.stopMemPrf != nil {
-		return errors.New("Memory Profiling already started")
-	}
-	if args.Interval <= 0 {
-		args.Interval = 5 * time.Second
-	}
-	if args.NrFiles == 0 {
-		args.NrFiles = 1
-	}
-	cS.shdWg.Add(1)
-	cS.stopMemPrf = make(chan struct{})
-	cS.fileMEM = args.DirPath
-	go MemProfiling(args.DirPath, args.Interval, args.NrFiles, cS.shdWg, cS.stopMemPrf, cS.shtDw)
-	return
-}
-
-// StopMemoryProfiling is used to stop MemoryProfiling
-func (cS *CoreS) StopMemoryProfiling() (err error) {
-	if cS.stopMemPrf == nil {
-		return errors.New("Memory Profiling is not started")
-	}
-	cS.fileMEM = path.Join(cS.fileMEM, utils.MemProfFileCgr)
-	cS.stopChanMemProf()
-	return
-}
-
-// Sleep is used to test the concurrent requests mechanism
+// Sleep is used to test the concurrent requests mechanism.
 func (cS *CoreS) V1Sleep(_ *context.Context, arg *utils.DurationArgs, reply *string) error {
 	time.Sleep(arg.Duration)
 	*reply = utils.OK
@@ -232,17 +320,16 @@ func (cS *CoreS) V1Shutdown(_ *context.Context, _ *utils.CGREvent, reply *string
 	return nil
 }
 
-// StartCPUProfiling is used to start CPUProfiling in the given path
+// V1StartCPUProfiling starts CPU profiling and saves the profile to the specified path.
 func (cS *CoreS) V1StartCPUProfiling(_ *context.Context, args *utils.DirectoryArgs, reply *string) error {
-	if err := cS.StartCPUProfiling(path.Join(args.DirPath, utils.CpuPathCgr)); err != nil {
+	if err := cS.StartCPUProfiling(filepath.Join(args.DirPath, utils.CpuPathCgr)); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// StopCPUProfiling is used to stop CPUProfiling. The file should be written on the path
-// where the CPUProfiling already started
+// V1StopCPUProfiling stops CPU Profiling.
 func (cS *CoreS) V1StopCPUProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
 	if err := cS.StopCPUProfiling(); err != nil {
 		return err
@@ -251,18 +338,20 @@ func (cS *CoreS) V1StopCPUProfiling(_ *context.Context, _ *utils.TenantWithAPIOp
 	return nil
 }
 
-// StartMemoryProfiling is used to start MemoryProfiling in the given path
-func (cS *CoreS) V1StartMemoryProfiling(_ *context.Context, args *utils.MemoryPrf, reply *string) error {
-	if err := cS.StartMemoryProfiling(args); err != nil {
+// V1StartMemoryProfiling starts memory profiling in the specified directory.
+func (cS *CoreS) V1StartMemoryProfiling(_ *context.Context, params MemoryProfilingParams, reply *string) error {
+	if params.DirPath == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing("DirPath")
+	}
+	if err := cS.StartMemoryProfiling(params); err != nil {
 		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// StopMemoryProfiling is used to stop MemoryProfiling. The file should be written on the path
-// where the MemoryProfiling already started
-func (cS *CoreS) V1StopMemoryProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
+// V1StopMemoryProfiling stops memory profiling.
+func (cS *CoreS) V1StopMemoryProfiling(_ *context.Context, _ utils.TenantWithAPIOpts, reply *string) error {
 	if err := cS.StopMemoryProfiling(); err != nil {
 		return err
 	}

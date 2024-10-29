@@ -58,7 +58,7 @@ func TestPopulateCostForRoutesConnRefused(t *testing.T) {
 	cfg.RouteSCfg().RateSConns = []string{"*localhost"}
 	_, err := populateCostForRoutes(context.Background(), cfg, connMgr, fltrS, routes, ev, extraOpts)
 	errExpect := "RATES_ERROR:dial tcp 127.0.0.1:2012: connect: connection refused"
-	if err.Error() != errExpect {
+	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v\n but received %v", errExpect, err)
 	}
 }
