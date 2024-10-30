@@ -46,6 +46,16 @@ Predefined Connection Pools
 \*bijson_localhost
     Bidirectional JSON-RPC connection to local cgr-engine on port 2014
 
+Bidirectional Communication with SessionS
+-----------------------------------------
+
+Bidirectional connections are specifically designed and used for communication between agents and the :ref:`SessionS <sessions>` component. While agents can send requests using standard connections, bidirectional connections are necessary when SessionS needs to communicate back to the agents. 
+
+When using bidirectional connections, SessionS maintains references to all connected agents, allowing it to send requests back to specific agents when needed (for example, to force disconnect a session or query active sessions).
+
+.. note::
+    Bidirectional connections (``*birpc_internal``, ``*birpc_json``, ``*birpc_gob``) are exclusively used for Agent-SessionS communication. All other service interactions use standard one-way connections.
+
 
 Parameters
 ----------
@@ -78,10 +88,10 @@ Connection Parameters
 ^^^^^^^^^^^^^^^^^^^^^
 
 Address
-    Network address or ``*internal``
+    Network address, ``*internal``, or ``*birpc_internal``
 
 Transport
-    Protocol (``*json``, ``*gob``, ``*birpc_json``, ``*birpc_gob``). Defaults to ``*gob``
+    Protocol (``*json``, ``*gob``, ``*birpc_json``, ``*birpc_gob``, ``*http_jsonrpc``). When using ``*internal`` or ``*birpc_internal`` addresses, defaults to the address value. Otherwise defaults to ``*gob``.
 
 ConnectAttempts
     Number of initial connection attempts
@@ -114,14 +124,17 @@ CaCertificate
 Transport Performance
 ---------------------
 
-\*internal
+\*internal, \*birpc_internal
     In-process communication (by far the fastest)
 
-\*gob
+\*gob, \*birpc_gob
     Binary protocol that provides better performance at the cost of being harder to troubleshoot
 
-\*json
+\*json, \*birpc_json
     Standard JSON protocol - slower but easier to debug since you can read the traffic
+
+\*http_jsonrpc
+    HTTP-based JSON-RPC protocol - slower than direct JSON-RPC due to HTTP overhead, but can integrate with web infrastructure and provides easy debugging through standard HTTP tools
 
 .. note::
     While the "transport" parameter name is used in the configuration, it actually specifies the codec (*json, *gob) used for data encoding. All network connections use TCP, while internal ones skip networking completely.
