@@ -3768,3 +3768,92 @@ func TestProcessFile(t *testing.T) {
 		t.Errorf("File was not added to ldr.rdrs")
 	}
 }
+
+func TestLoaderMoveFiles(t *testing.T) {
+	inDir := t.TempDir()
+	outDir := t.TempDir()
+
+	testFileNames := []string{"file1.csv", "file2.csv", "lockfile"}
+	for _, name := range testFileNames {
+		filePath := path.Join(inDir, name)
+		if _, err := os.Create(filePath); err != nil {
+			t.Fatalf("Failed to create test file %s: %v", name, err)
+		}
+	}
+
+	loader := &Loader{
+		tpInDir:      inDir,
+		tpOutDir:     outDir,
+		lockFilepath: "lockfile",
+	}
+
+	if err := loader.moveFiles(); err != nil {
+		t.Errorf("moveFiles returned an error: %v", err)
+	}
+
+	for _, name := range testFileNames {
+		filePath := path.Join(outDir, name)
+		if name != loader.lockFilepath {
+			if _, err := os.Stat(filePath); os.IsNotExist(err) {
+				t.Errorf("Expected file %s to be in output directory, but it was not found", name)
+			}
+		} else {
+			if _, err := os.Stat(path.Join(inDir, name)); os.IsNotExist(err) {
+				t.Errorf("Expected lock file %s to remain in input directory, but it was moved", name)
+			}
+		}
+	}
+}
+
+func TestLoaderUnlockFolder(t *testing.T) {
+	tempDir := t.TempDir()
+	lockFilePath := path.Join(tempDir, "lockfile")
+
+	if _, err := os.Create(lockFilePath); err != nil {
+		t.Fatalf("Failed to create lock file: %v", err)
+	}
+
+	loader := &Loader{
+		lockFilepath: lockFilePath,
+	}
+
+	if err := loader.unlockFolder(); err != nil {
+		t.Errorf("unlockFolder returned an error: %v", err)
+	}
+
+	if _, err := os.Stat(lockFilePath); !os.IsNotExist(err) {
+		t.Errorf("Expected lock file to be removed, but it still exists")
+	}
+
+	loader.lockFilepath = ""
+	if err := loader.unlockFolder(); err != nil {
+		t.Errorf("unlockFolder returned an error with empty lockFilepath: %v", err)
+	}
+}
+
+func TestLoaderLockFolder(t *testing.T) {
+	tempDir := t.TempDir()
+	lockFilePath := path.Join(tempDir, "lockfile")
+
+	loader := &Loader{
+		lockFilepath: lockFilePath,
+	}
+
+	if err := loader.lockFolder(); err != nil {
+		t.Errorf("lockFolder returned an error: %v", err)
+	}
+
+	if _, err := os.Stat(lockFilePath); os.IsNotExist(err) {
+		t.Errorf("Expected lock file to be created, but it was not found")
+	}
+
+	loader.lockFilepath = ""
+	if err := loader.lockFolder(); err != nil {
+		t.Errorf("lockFolder returned an error with empty lockFilepath: %v", err)
+	}
+
+	emptyLockFilePath := path.Join(tempDir, "nonexistent_lockfile")
+	if _, err := os.Stat(emptyLockFilePath); err == nil {
+		t.Errorf("Expected no lock file to be created for empty lockFilepath, but it exists")
+	}
+}
