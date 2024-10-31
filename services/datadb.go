@@ -29,13 +29,14 @@ import (
 )
 
 // NewDataDBService returns the DataDB Service
-func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
+func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVersions bool,
 	srvDep map[string]*sync.WaitGroup) *DataDBService {
 	return &DataDBService{
-		cfg:     cfg,
-		dbchan:  make(chan *engine.DataManager, 1),
-		connMgr: connMgr,
-		srvDep:  srvDep,
+		cfg:         cfg,
+		dbchan:      make(chan *engine.DataManager, 1),
+		connMgr:     connMgr,
+		setVersions: setVersions,
+		srvDep:      srvDep,
 	}
 }
 
@@ -46,12 +47,14 @@ type DataDBService struct {
 	oldDBCfg *config.DataDbCfg
 	connMgr  *engine.ConnManager
 
-	dm     *engine.DataManager
-	dbchan chan *engine.DataManager
+	dm          *engine.DataManager
+	dbchan      chan *engine.DataManager
+	setVersions bool
+
 	srvDep map[string]*sync.WaitGroup
 }
 
-// Start should handle the sercive start
+// Start handles the service start.
 func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
@@ -59,8 +62,7 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
-	var d engine.DataDBDriver
-	d, err = engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
+	dbConn, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
 		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
 		db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
 		db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
@@ -69,10 +71,17 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
-	db.dm = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
-	if err = engine.CheckVersions(db.dm.DataDB()); err != nil {
-		return
+	db.dm = engine.NewDataManager(dbConn, db.cfg.CacheCfg(), db.connMgr)
+
+	if db.setVersions {
+		err = engine.OverwriteDBVersions(dbConn)
+	} else {
+		err = engine.CheckVersions(db.dm.DataDB())
 	}
+	if err != nil {
+		return err
+	}
+
 	db.dbchan <- db.dm
 	return
 }
@@ -121,7 +130,7 @@ func (db *DataDBService) Shutdown() (_ error) {
 func (db *DataDBService) IsRunning() bool {
 	db.RLock()
 	defer db.RUnlock()
-	return db != nil && db.dm != nil && db.dm.DataDB() != nil
+	return db.dm != nil && db.dm.DataDB() != nil
 }
 
 // ServiceName returns the service name

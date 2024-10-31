@@ -52,7 +52,7 @@ func TestDataDBReload(t *testing.T) {
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
+	db := NewDataDBService(cfg, cM, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srvMngr.AddServices(NewAttributeService(cfg, db,
 		css, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep),
@@ -183,7 +183,7 @@ func TestDataDBReloadBadType(t *testing.T) {
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
+	db := NewDataDBService(cfg, cM, false, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
 		Type: utils.MetaMongo,
 		Host: "127.0.0.1",
@@ -236,7 +236,7 @@ func TestDataDBReloadErrorMarsheler(t *testing.T) {
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
+	db := NewDataDBService(cfg, cM, false, srvDep)
 
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -325,7 +325,7 @@ func TestDataDBStartVersion(t *testing.T) {
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
+	db := NewDataDBService(cfg, cM, false, srvDep)
 	ctx, cancel := context.WithCancel(context.TODO())
 	err = db.Start(ctx, cancel)
 	if err == nil || err.Error() != "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>" {
@@ -377,7 +377,7 @@ func TestDataDBReloadCastError(t *testing.T) {
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
+	db := NewDataDBService(cfg, cM, false, srvDep)
 	db.oldDBCfg = &config.DataDbCfg{
 		Type: utils.MetaMongo,
 		Host: "127.0.0.1",
@@ -427,7 +427,7 @@ func TestDataDBStartAttributeSCfgErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
+	db := NewDataDBService(cfg, cM, false, srvDep)
 	cfg.DataDbCfg().Type = "badtype"
 	cfg.AttributeSCfg().Enabled = true
 	cfg.SessionSCfg().ListenBijson = ""
@@ -442,7 +442,7 @@ func TestDataDBReloadError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
+	db := NewDataDBService(cfg, cM, false, srvDep)
 	cfg.GeneralCfg().DBDataEncoding = utils.JSON
 	db.oldDBCfg = &config.DataDbCfg{
 		Type: utils.MetaMongo,
