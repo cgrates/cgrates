@@ -35,6 +35,7 @@ type HTTPCfg struct {
 	WSURL             string            // WebSocket relative URL ("" to disable)
 	FreeswitchCDRsURL string            // Freeswitch CDRS relative URL ("" to disable)
 	CDRsURL           string            // CDRS relative URL ("" to disable)
+	PprofPath         string            // runtime profiling url path ("" to disable)
 	UseBasicAuth      bool              // Use basic auth for HTTP API
 	AuthUsers         map[string]string // Basic auth user:password map (base64 passwords)
 	ClientOpts        *http.Transport
@@ -128,35 +129,38 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 	if jsnHTTPCfg == nil {
 		return
 	}
-	if jsnHTTPCfg.Json_rpc_url != nil {
-		httpcfg.JsonRPCURL = *jsnHTTPCfg.Json_rpc_url
+	if jsnHTTPCfg.JSONRPCURL != nil {
+		httpcfg.JsonRPCURL = *jsnHTTPCfg.JSONRPCURL
 	}
-	if jsnHTTPCfg.Registrars_url != nil {
-		httpcfg.RegistrarSURL = *jsnHTTPCfg.Registrars_url
+	if jsnHTTPCfg.RegistrarsURL != nil {
+		httpcfg.RegistrarSURL = *jsnHTTPCfg.RegistrarsURL
 	}
-	if jsnHTTPCfg.Prometheus_url != nil {
-		httpcfg.PrometheusURL = *jsnHTTPCfg.Prometheus_url
+	if jsnHTTPCfg.PrometheusURL != nil {
+		httpcfg.PrometheusURL = *jsnHTTPCfg.PrometheusURL
 	}
-	if jsnHTTPCfg.Ws_url != nil {
-		httpcfg.WSURL = *jsnHTTPCfg.Ws_url
+	if jsnHTTPCfg.WSURL != nil {
+		httpcfg.WSURL = *jsnHTTPCfg.WSURL
 	}
-	if jsnHTTPCfg.Freeswitch_cdrs_url != nil {
-		httpcfg.FreeswitchCDRsURL = *jsnHTTPCfg.Freeswitch_cdrs_url
+	if jsnHTTPCfg.FreeswitchCDRsURL != nil {
+		httpcfg.FreeswitchCDRsURL = *jsnHTTPCfg.FreeswitchCDRsURL
 	}
-	if jsnHTTPCfg.Http_Cdrs != nil {
-		httpcfg.CDRsURL = *jsnHTTPCfg.Http_Cdrs
+	if jsnHTTPCfg.HTTPCDRs != nil {
+		httpcfg.CDRsURL = *jsnHTTPCfg.HTTPCDRs
 	}
-	if jsnHTTPCfg.Use_basic_auth != nil {
-		httpcfg.UseBasicAuth = *jsnHTTPCfg.Use_basic_auth
+	if jsnHTTPCfg.PprofPath != nil {
+		httpcfg.PprofPath = *jsnHTTPCfg.PprofPath
 	}
-	if jsnHTTPCfg.Auth_users != nil {
-		httpcfg.AuthUsers = *jsnHTTPCfg.Auth_users
+	if jsnHTTPCfg.UseBasicAuth != nil {
+		httpcfg.UseBasicAuth = *jsnHTTPCfg.UseBasicAuth
 	}
-	if jsnHTTPCfg.Client_opts != nil {
-		if err = newDialer(httpcfg.dialer, jsnHTTPCfg.Client_opts); err != nil {
+	if jsnHTTPCfg.AuthUsers != nil {
+		httpcfg.AuthUsers = *jsnHTTPCfg.AuthUsers
+	}
+	if jsnHTTPCfg.ClientOpts != nil {
+		if err = newDialer(httpcfg.dialer, jsnHTTPCfg.ClientOpts); err != nil {
 			return
 		}
-		err = loadTransportFromJSONCfg(httpcfg.ClientOpts, httpcfg.dialer, jsnHTTPCfg.Client_opts)
+		err = loadTransportFromJSONCfg(httpcfg.ClientOpts, httpcfg.dialer, jsnHTTPCfg.ClientOpts)
 	}
 	return
 }
@@ -189,6 +193,7 @@ func (httpcfg HTTPCfg) AsMapInterface(string) any {
 		utils.HTTPWSURLCfg:             httpcfg.WSURL,
 		utils.HTTPFreeswitchCDRsURLCfg: httpcfg.FreeswitchCDRsURL,
 		utils.HTTPCDRsURLCfg:           httpcfg.CDRsURL,
+		utils.PprofPathCfg:             httpcfg.PprofPath,
 		utils.HTTPUseBasicAuthCfg:      httpcfg.UseBasicAuth,
 		utils.HTTPAuthUsersCfg:         httpcfg.AuthUsers,
 		utils.HTTPClientOptsCfg:        clientOpts,
@@ -213,6 +218,7 @@ func (httpcfg HTTPCfg) Clone() (cln *HTTPCfg) {
 		WSURL:             httpcfg.WSURL,
 		FreeswitchCDRsURL: httpcfg.FreeswitchCDRsURL,
 		CDRsURL:           httpcfg.CDRsURL,
+		PprofPath:         httpcfg.PprofPath,
 		UseBasicAuth:      httpcfg.UseBasicAuth,
 		AuthUsers:         make(map[string]string),
 		ClientOpts:        httpcfg.ClientOpts.Clone(),
@@ -243,15 +249,16 @@ type HTTPClientOptsJson struct {
 
 // HTTP config section
 type HTTPJsonCfg struct {
-	Json_rpc_url        *string
-	Registrars_url      *string
-	Prometheus_url      *string
-	Ws_url              *string
-	Freeswitch_cdrs_url *string
-	Http_Cdrs           *string
-	Use_basic_auth      *bool
-	Auth_users          *map[string]string
-	Client_opts         *HTTPClientOptsJson
+	JSONRPCURL        *string             `json:"json_rpc_url"`
+	RegistrarsURL     *string             `json:"registrars_url"`
+	PrometheusURL     *string             `json:"prometheus_url"`
+	WSURL             *string             `json:"ws_url"`
+	FreeswitchCDRsURL *string             `json:"freeswitch_cdrs_url"`
+	HTTPCDRs          *string             `json:"http_cdrs"`
+	PprofPath         *string             `json:"pprof_path"`
+	UseBasicAuth      *bool               `json:"use_basic_auth"`
+	AuthUsers         *map[string]string  `json:"auth_users"`
+	ClientOpts        *HTTPClientOptsJson `json:"client_opts"`
 }
 
 func diffHTTPClientOptsJsonCfgDialer(d *HTTPClientOptsJson, v1, v2 *net.Dialer) *HTTPClientOptsJson {
@@ -317,30 +324,33 @@ func diffHTTPJsonCfg(d *HTTPJsonCfg, v1, v2 *HTTPCfg) *HTTPJsonCfg {
 	}
 
 	if v1.JsonRPCURL != v2.JsonRPCURL {
-		d.Json_rpc_url = utils.StringPointer(v2.JsonRPCURL)
+		d.JSONRPCURL = utils.StringPointer(v2.JsonRPCURL)
 	}
 	if v1.RegistrarSURL != v2.RegistrarSURL {
-		d.Registrars_url = utils.StringPointer(v2.RegistrarSURL)
+		d.RegistrarsURL = utils.StringPointer(v2.RegistrarSURL)
 	}
 	if v1.PrometheusURL != v2.PrometheusURL {
-		d.Prometheus_url = utils.StringPointer(v2.PrometheusURL)
+		d.PrometheusURL = utils.StringPointer(v2.PrometheusURL)
 	}
 	if v1.WSURL != v2.WSURL {
-		d.Ws_url = utils.StringPointer(v2.WSURL)
+		d.WSURL = utils.StringPointer(v2.WSURL)
 	}
 	if v1.FreeswitchCDRsURL != v2.FreeswitchCDRsURL {
-		d.Freeswitch_cdrs_url = utils.StringPointer(v2.FreeswitchCDRsURL)
+		d.FreeswitchCDRsURL = utils.StringPointer(v2.FreeswitchCDRsURL)
 	}
 	if v1.CDRsURL != v2.CDRsURL {
-		d.Http_Cdrs = utils.StringPointer(v2.CDRsURL)
+		d.HTTPCDRs = utils.StringPointer(v2.CDRsURL)
+	}
+	if v1.PprofPath != v2.PprofPath {
+		d.PprofPath = utils.StringPointer(v2.PprofPath)
 	}
 	if v1.UseBasicAuth != v2.UseBasicAuth {
-		d.Use_basic_auth = utils.BoolPointer(v2.UseBasicAuth)
+		d.UseBasicAuth = utils.BoolPointer(v2.UseBasicAuth)
 	}
 	if !utils.MapStringStringEqual(v1.AuthUsers, v2.AuthUsers) {
-		d.Auth_users = &v2.AuthUsers
+		d.AuthUsers = &v2.AuthUsers
 	}
-	d.Client_opts = diffHTTPClientOptsJsonCfg(d.Client_opts, v1.ClientOpts, v2.ClientOpts)
-	d.Client_opts = diffHTTPClientOptsJsonCfgDialer(d.Client_opts, v1.dialer, v2.dialer)
+	d.ClientOpts = diffHTTPClientOptsJsonCfg(d.ClientOpts, v1.ClientOpts, v2.ClientOpts)
+	d.ClientOpts = diffHTTPClientOptsJsonCfgDialer(d.ClientOpts, v1.dialer, v2.dialer)
 	return d
 }

@@ -1785,15 +1785,16 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 
 func TestDfHttpJsonCfg(t *testing.T) {
 	eCfg := &HTTPJsonCfg{
-		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
-		Registrars_url:      utils.StringPointer("/registrar"),
-		Prometheus_url:      utils.StringPointer("/prometheus"),
-		Ws_url:              utils.StringPointer("/ws"),
-		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
-		Http_Cdrs:           utils.StringPointer("/cdr_http"),
-		Use_basic_auth:      utils.BoolPointer(false),
-		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
-		Client_opts: &HTTPClientOptsJson{
+		JSONRPCURL:        utils.StringPointer("/jsonrpc"),
+		RegistrarsURL:     utils.StringPointer("/registrar"),
+		PrometheusURL:     utils.StringPointer("/prometheus"),
+		WSURL:             utils.StringPointer("/ws"),
+		FreeswitchCDRsURL: utils.StringPointer("/freeswitch_json"),
+		HTTPCDRs:          utils.StringPointer("/cdr_http"),
+		PprofPath:         utils.StringPointer("/debug/pprof/"),
+		UseBasicAuth:      utils.BoolPointer(false),
+		AuthUsers:         utils.MapStringStringPointer(map[string]string{}),
+		ClientOpts: &HTTPClientOptsJson{
 			SkipTLSVerification:   utils.BoolPointer(false),
 			TLSHandshakeTimeout:   utils.StringPointer("10s"),
 			DisableKeepAlives:     utils.BoolPointer(false),
