@@ -312,3 +312,113 @@ func TestRerateCDRs(t *testing.T) {
 		}
 	})
 }
+
+func TestRerateCDRsNoRefund(t *testing.T) {
+	var cfgDir string
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		cfgDir = "rerate_cdrs_internal"
+	case utils.MetaMySQL:
+		cfgDir = "rerate_cdrs_mysql"
+	case utils.MetaMongo:
+		cfgDir = "rerate_cdrs_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	ng := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", cfgDir),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "reratecdrs"),
+	}
+	client, _ := ng.Run(t)
+	CGRID := utils.GenUUID()
+	t.Run("ProcessFirstCDR", func(t *testing.T) {
+		var reply string
+		err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{
+				Flags: []string{utils.MetaRALs},
+				CGREvent: utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event1",
+					Event: map[string]any{
+						utils.RunID:        "run_1",
+						utils.CGRID:        CGRID,
+						utils.Tenant:       "cgrates.org",
+						utils.Category:     "call",
+						utils.ToR:          utils.MetaVoice,
+						utils.OriginID:     "processCDR1",
+						utils.OriginHost:   "OriginHost1",
+						utils.RequestType:  utils.MetaRated,
+						utils.AccountField: "1001",
+						utils.Destination:  "1002",
+						utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
+						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
+						utils.Usage:        2 * time.Minute,
+					},
+				},
+			}, &reply)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var cdrs []*engine.CDR
+		err = client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				RunIDs: []string{"run_1"},
+			}}, &cdrs)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if cdrs[0].Usage != 2*time.Minute {
+			t.Errorf("expected usage to be <%+v>, received <%+v>", 2*time.Minute, cdrs[0].Usage)
+		} else if cdrs[0].Cost != 1.2 {
+			t.Errorf("expected cost to be <%+v>, received <%+v>", 0.6, cdrs[0].Cost)
+		}
+	})
+	t.Run("UpdateTariffplans", func(t *testing.T) {
+		newtpFiles := map[string]string{
+			utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_ANY,0,1.7,60s,1s,0s`,
+			utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_ANY,*any,RT_ANY,*up,2,0,`,
+			utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+RP_ANY,DR_ANY,*any,10`,
+		}
+		engine.LoadCSVs(t, client, "", newtpFiles)
+
+		var reply string
+		if err := client.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
+		}
+	})
+
+	t.Run("RerateCDRs", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
+			Flags: []string{utils.MetaRerate},
+			RPCCDRsFilter: utils.RPCCDRsFilter{
+				OrderBy: utils.AnswerTime,
+				CGRIDs:  []string{CGRID},
+			}}, &reply); err != nil {
+			t.Fatal(err)
+		}
+
+		var cdrs []*engine.CDR
+		err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				CGRIDs:  []string{CGRID},
+				OrderBy: utils.AnswerTime,
+			}}, &cdrs)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if cdrs[0].Cost != 3.4 {
+			t.Errorf("expected cost to be <%+v>, received <%+v>", 3.4, cdrs[0].Cost)
+		}
+	})
+
+}

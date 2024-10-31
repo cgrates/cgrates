@@ -337,7 +337,7 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (rfnd
 		return // non refundable
 	}
 	cd := ec.AsRefundIncrements(tor)
-	if cd == nil || len(cd.Increments) == 0 {
+	if len(cd.Increments) == 0 {
 		return
 	}
 	var acnt Account
@@ -738,6 +738,9 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args *cdrProcessingA
 	}
 	if args.ralS {
 		for i, cdr := range cdrs {
+			if !utils.AccountableRequestTypes.Has(cdr.RequestType) {
+				cdr.CostDetails = nil
+			}
 			for j, rtCDR := range cdrS.rateCDRWithErr(
 				&CDRWithAPIOpts{
 					CDR:     cdr,
