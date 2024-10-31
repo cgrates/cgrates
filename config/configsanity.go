@@ -881,7 +881,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 
 	// StorDB sanity checks
-	if cfg.storDbCfg.Type == utils.Postgres {
+	if cfg.storDbCfg.Type == utils.MetaPostgres {
 		if !slices.Contains([]string{utils.PostgresSSLModeDisable, utils.PostgresSSLModeAllow,
 			utils.PostgresSSLModePrefer, utils.PostgresSSLModeRequire, utils.PostgresSSLModeVerifyCa,
 			utils.PostgresSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {

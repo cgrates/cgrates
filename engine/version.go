@@ -182,7 +182,7 @@ func CurrentDBVersions(storType string, isDataDB bool) Versions {
 		return CurrentAllDBVersions()
 	case utils.MetaRedis:
 		return CurrentDataDBVersions()
-	case utils.Postgres, utils.MySQL:
+	case utils.MetaPostgres, utils.MetaMySQL:
 		return CurrentStorDBVersions()
 	}
 	return nil
