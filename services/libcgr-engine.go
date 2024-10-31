@@ -48,7 +48,6 @@ func NewCGREngineFlags() *CGREngineFlags {
 		CfgPath:           fs.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path."),
 		Version:           fs.Bool(utils.VersionCgr, false, "Prints the application version."),
 		PidFile:           fs.String(utils.PidCgr, utils.EmptyString, "Write pid file"),
-		HttpPrfPath:       fs.String(utils.HttpPrfPthCgr, utils.EmptyString, "http address used for program profiling"),
 		CpuPrfDir:         fs.String(utils.CpuProfDirCgr, utils.EmptyString, "Directory for CPU profiles"),
 		MemPrfDir:         fs.String(utils.MemProfDirCgr, utils.EmptyString, "Directory for memory profiles"),
 		MemPrfInterval:    fs.Duration(utils.MemProfIntervalCgr, 15*time.Second, "Interval between memory profile saves"),
@@ -70,7 +69,6 @@ type CGREngineFlags struct {
 	CfgPath           *string
 	Version           *bool
 	PidFile           *string
-	HttpPrfPath       *string
 	CpuPrfDir         *string
 	MemPrfDir         *string
 	MemPrfInterval    *time.Duration

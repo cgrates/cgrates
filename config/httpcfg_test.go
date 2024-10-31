@@ -30,14 +30,14 @@ import (
 
 func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := &HTTPJsonCfg{
-		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
-		Ws_url:              utils.StringPointer("/ws"),
-		Prometheus_url:      utils.StringPointer("/metrics"),
-		Registrars_url:      utils.StringPointer("/randomUrl"),
-		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
-		Http_Cdrs:           utils.StringPointer("/cdr_http"),
-		Use_basic_auth:      utils.BoolPointer(false),
-		Auth_users:          utils.MapStringStringPointer(map[string]string{}),
+		JSONRPCURL:        utils.StringPointer("/jsonrpc"),
+		WSURL:             utils.StringPointer("/ws"),
+		PrometheusURL:     utils.StringPointer("/metrics"),
+		RegistrarsURL:     utils.StringPointer("/randomUrl"),
+		FreeswitchCDRsURL: utils.StringPointer("/freeswitch_json"),
+		HTTPCDRs:          utils.StringPointer("/cdr_http"),
+		UseBasicAuth:      utils.BoolPointer(false),
+		AuthUsers:         utils.MapStringStringPointer(map[string]string{}),
 	}
 	expected := &HTTPCfg{
 		JsonRPCURL:        "/jsonrpc",
@@ -46,6 +46,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		RegistrarSURL:     "/randomUrl",
 		FreeswitchCDRsURL: "/freeswitch_json",
 		CDRsURL:           "/cdr_http",
+		PprofPath:         "/debug/pprof/",
 		UseBasicAuth:      false,
 		AuthUsers:         map[string]string{},
 		ClientOpts: &http.Transport{
@@ -99,6 +100,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 		utils.HTTPWSURLCfg:             "/ws",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
+		utils.PprofPathCfg:             "/debug/pprof/",
 		utils.HTTPUseBasicAuthCfg:      false,
 		utils.HTTPAuthUsersCfg:         map[string]string{},
 		utils.HTTPClientOptsCfg: map[string]any{
@@ -141,6 +143,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 		utils.HTTPWSURLCfg:             "",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
+		utils.PprofPathCfg:             "/debug/pprof/",
 		utils.HTTPUseBasicAuthCfg:      true,
 		utils.HTTPAuthUsersCfg: map[string]string{
 			"user1": "authenticated",
@@ -253,19 +256,19 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 	}
 
 	expected := &HTTPJsonCfg{
-		Json_rpc_url:        utils.StringPointer("JsonRpcUrl2"),
-		Registrars_url:      utils.StringPointer("RegistrarSUrl2"),
-		Ws_url:              utils.StringPointer("WsUrl2"),
-		Freeswitch_cdrs_url: utils.StringPointer("FsCdrsUrl2"),
-		Http_Cdrs:           utils.StringPointer("CdrsUrl2"),
-		Use_basic_auth:      utils.BoolPointer(false),
-		Auth_users: &map[string]string{
+		JSONRPCURL:        utils.StringPointer("JsonRpcUrl2"),
+		RegistrarsURL:     utils.StringPointer("RegistrarSUrl2"),
+		WSURL:             utils.StringPointer("WsUrl2"),
+		FreeswitchCDRsURL: utils.StringPointer("FsCdrsUrl2"),
+		HTTPCDRs:          utils.StringPointer("CdrsUrl2"),
+		UseBasicAuth:      utils.BoolPointer(false),
+		AuthUsers: &map[string]string{
 			"User2": "passUser2",
 		},
-		Client_opts: &HTTPClientOptsJson{
+		ClientOpts: &HTTPClientOptsJson{
 			MaxIdleConns: utils.IntPointer(100),
 		},
-		Prometheus_url: utils.StringPointer("PrometheusURL2"),
+		PrometheusURL: utils.StringPointer("PrometheusURL2"),
 	}
 
 	rcv := diffHTTPJsonCfg(d, v1, v2)
@@ -275,7 +278,7 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &HTTPJsonCfg{
-		Client_opts: &HTTPClientOptsJson{},
+		ClientOpts: &HTTPClientOptsJson{},
 	}
 	rcv = diffHTTPJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
@@ -481,7 +484,7 @@ func TestLoadTransportFromJSONCfgExpectContinueTimeout(t *testing.T) {
 
 func TestHTTPCfgloadFromJsonCfgClientOptsErr(t *testing.T) {
 	cfgJSONStr := &HTTPJsonCfg{
-		Client_opts: &HTTPClientOptsJson{
+		ClientOpts: &HTTPClientOptsJson{
 			DialTimeout: utils.StringPointer("invalid value"),
 		},
 	}

@@ -26,6 +26,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/pprof"
+	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -114,28 +115,6 @@ func (s *Server) BiRPCUnregisterName(name string) {
 	s.birpcSrv.UnregisterName(name)
 }
 
-func registerProfiler(addr string, mux *http.ServeMux) {
-	mux.HandleFunc(addr, pprof.Index)
-	mux.HandleFunc(addr+"cmdline", pprof.Cmdline)
-	mux.HandleFunc(addr+"profile", pprof.Profile)
-	mux.HandleFunc(addr+"symbol", pprof.Symbol)
-	mux.HandleFunc(addr+"trace", pprof.Trace)
-	mux.Handle(addr+"goroutine", pprof.Handler("goroutine"))
-	mux.Handle(addr+"heap", pprof.Handler("heap"))
-	mux.Handle(addr+"threadcreate", pprof.Handler("threadcreate"))
-	mux.Handle(addr+"block", pprof.Handler("block"))
-	mux.Handle(addr+"allocs", pprof.Handler("allocs"))
-	mux.Handle(addr+"mutex", pprof.Handler("mutex"))
-}
-
-func (s *Server) RegisterProfiler(addr string) {
-	if addr[len(addr)-1] != '/' {
-		addr = addr + "/"
-	}
-	registerProfiler(addr, s.httpMux)
-	registerProfiler(addr, s.httpsMux)
-}
-
 func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	rmtIP, _ := utils.GetRemoteIP(r)
@@ -173,10 +152,11 @@ func (s *Server) ServeGOB(ctx *context.Context, shtdwnEngine context.CancelFunc,
 	})
 }
 
-func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc, addr, jsonRPCURL, wsRPCURL, promURL string,
+func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc,
+	addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string) {
 	s.Lock()
-	s.httpEnabled = s.httpEnabled || jsonRPCURL != "" || wsRPCURL != ""
+	s.httpEnabled = s.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
 	enabled := s.httpEnabled
 	s.Unlock()
 	if !enabled {
@@ -206,6 +186,25 @@ func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc, addr, jsonRPCURL, ws
 			s.httpMux.HandleFunc(promURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpMux.Handle(promURL, wsHandler)
+		}
+	}
+	if pprofPath != "" {
+		if !strings.HasSuffix(pprofPath, "/") {
+			pprofPath += "/"
+		}
+		utils.Logger.Info(fmt.Sprintf("<HTTP> profiling endpoints registered at %q", pprofPath))
+		if useBasicAuth {
+			s.httpMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
+			s.httpMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
+		} else {
+			s.httpMux.HandleFunc(pprofPath, pprof.Index)
+			s.httpMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
+			s.httpMux.HandleFunc(pprofPath+"profile", pprof.Profile)
+			s.httpMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
+			s.httpMux.HandleFunc(pprofPath+"trace", pprof.Trace)
 		}
 	}
 	if useBasicAuth {
@@ -287,10 +286,10 @@ func (s *Server) ServeJSONTLS(ctx *context.Context, shtdwnEngine context.CancelF
 
 func (s *Server) ServeHTTPS(shtdwnEngine context.CancelFunc,
 	addr, serverCrt, serverKey, caCert string, serverPolicy int,
-	serverName string, jsonRPCURL string, wsRPCURL string,
+	serverName, jsonRPCURL, wsRPCURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string) {
 	s.Lock()
-	s.httpEnabled = s.httpEnabled || jsonRPCURL != "" || wsRPCURL != ""
+	s.httpEnabled = s.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
 	enabled := s.httpEnabled
 	s.Unlock()
 	if !enabled {
@@ -311,6 +310,25 @@ func (s *Server) ServeHTTPS(shtdwnEngine context.CancelFunc,
 			s.httpsMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpsMux.Handle(wsRPCURL, wsHandler)
+		}
+	}
+	if pprofPath != "" {
+		if !strings.HasSuffix(pprofPath, "/") {
+			pprofPath += "/"
+		}
+		utils.Logger.Info(fmt.Sprintf("<HTTPS> profiling endpoints registered at %q", pprofPath))
+		if useBasicAuth {
+			s.httpsMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
+			s.httpsMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
+			s.httpsMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
+			s.httpsMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
+			s.httpsMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
+		} else {
+			s.httpsMux.HandleFunc(pprofPath, pprof.Index)
+			s.httpsMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
+			s.httpsMux.HandleFunc(pprofPath+"profile", pprof.Profile)
+			s.httpsMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
+			s.httpsMux.HandleFunc(pprofPath+"trace", pprof.Trace)
 		}
 	}
 	if useBasicAuth {
@@ -369,6 +387,7 @@ func (s *Server) StartServer(ctx *context.Context, shtdwnEngine context.CancelFu
 			cfg.HTTPCfg().JsonRPCURL,
 			cfg.HTTPCfg().WSURL,
 			cfg.HTTPCfg().PrometheusURL,
+			cfg.HTTPCfg().PprofPath,
 			cfg.HTTPCfg().UseBasicAuth,
 			cfg.HTTPCfg().AuthUsers,
 		)
@@ -413,6 +432,7 @@ func (s *Server) StartServer(ctx *context.Context, shtdwnEngine context.CancelFu
 				cfg.TLSCfg().ServerName,
 				cfg.HTTPCfg().JsonRPCURL,
 				cfg.HTTPCfg().WSURL,
+				cfg.HTTPCfg().PprofPath,
 				cfg.HTTPCfg().UseBasicAuth,
 				cfg.HTTPCfg().AuthUsers,
 			)

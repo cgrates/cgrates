@@ -130,15 +130,12 @@ func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefi
 	cgr.cM.AddInternalConn(connName, apiPrefix, iConnCh)
 }
 
-func (cgr *CGREngine) InitServices(httpPrfPath string, cpuPrfFl *os.File) {
+func (cgr *CGREngine) InitServices(cpuPrfFl *os.File) {
 	if len(cgr.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cgr.server.RegisterHTTPFunc(cgr.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
 	}
 	if cgr.cfg.ConfigSCfg().Enabled {
 		cgr.server.RegisterHTTPFunc(cgr.cfg.ConfigSCfg().URL, config.HandlerConfigS)
-	}
-	if httpPrfPath != utils.EmptyString {
-		cgr.server.RegisterProfiler(httpPrfPath)
 	}
 
 	// init the channel here because we need to pass them to connManager
@@ -385,7 +382,7 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 	}
 	efs.SetFailedPostCacheTTL(cgr.cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
-	cgr.InitServices(*flags.HttpPrfPath, cpuPrfF)
+	cgr.InitServices(cpuPrfF)
 	return nil
 }
 

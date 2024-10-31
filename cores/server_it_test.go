@@ -151,6 +151,7 @@ func testServeHHTPFail(t *testing.T) {
 		cfgDflt.HTTPCfg().JsonRPCURL,
 		cfgDflt.HTTPCfg().WSURL,
 		cfgDflt.HTTPCfg().PrometheusURL,
+		cfgDflt.HTTPCfg().PprofPath,
 		cfgDflt.HTTPCfg().UseBasicAuth,
 		cfgDflt.HTTPCfg().AuthUsers,
 	)
