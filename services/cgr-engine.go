@@ -354,9 +354,9 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 		}
 	}
 
-	if *flags.ScheduledShutDown != utils.EmptyString {
+	if *flags.ScheduledShutdown != utils.EmptyString {
 		var shtDwDur time.Duration
-		if shtDwDur, err = utils.ParseDurationWithNanosecs(*flags.ScheduledShutDown); err != nil {
+		if shtDwDur, err = utils.ParseDurationWithNanosecs(*flags.ScheduledShutdown); err != nil {
 			return
 		}
 		cgr.shdWg.Add(1)
@@ -374,7 +374,7 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 
 	// init syslog
 	if utils.Logger, err = engine.NewLogger(ctx,
-		utils.FirstNonEmpty(*flags.SysLogger, cgr.cfg.LoggerCfg().Type),
+		utils.FirstNonEmpty(*flags.Logger, cgr.cfg.LoggerCfg().Type),
 		cgr.cfg.GeneralCfg().DefaultTenant,
 		cgr.cfg.GeneralCfg().NodeID,
 		cgr.cM, cgr.cfg); err != nil {
