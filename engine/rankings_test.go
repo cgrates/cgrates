@@ -254,3 +254,69 @@ func TestV1ScheduleQueriesInvalidRankingID(t *testing.T) {
 		t.Errorf("expected scheduled to be 0 but got %d", scheduled)
 	}
 }
+
+func TestStoreRanking(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	rkg := NewRankingS(dm, nil, nil, cfg)
+
+	ranking := &Ranking{
+		rkPrfl: &RankingProfile{
+			Tenant:            "cgrates.org",
+			ID:                "ID1",
+			Schedule:          "@every 1s",
+			StatIDs:           []string{"stat1", "stat2"},
+			MetricIDs:         []string{"metric1", "metric2"},
+			Sorting:           "asc",
+			SortingParameters: []string{"metric1:true"},
+			Stored:            true,
+			ThresholdIDs:      []string{"threshold1"},
+		},
+	}
+
+	cfg.RankingSCfg().StoreInterval = 0
+	if err := rkg.storeRanking(ranking); err != nil {
+		t.Errorf("Expected no error when StoreInterval is 0, but got: %v", err)
+	}
+	if len(rkg.storedRankings) != 0 {
+		t.Error("Expected storedRankings to be empty when StoreInterval is 0")
+	}
+
+	cfg.RankingSCfg().StoreInterval = -1
+	if err := rkg.storeRanking(ranking); err != nil {
+		t.Errorf("Expected no error when StoreInterval is -1, but got: %v", err)
+	}
+
+	cfg.RankingSCfg().StoreInterval = time.Second
+	if err := rkg.storeRanking(ranking); err != nil {
+		t.Errorf("Expected no error when StoreInterval is positive, but got: %v", err)
+	}
+
+}
+
+func TestRankingsStartRankings(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RankingSCfg().Enabled = true
+	cfg.RankingSCfg().StoreInterval = time.Second
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	rkg := NewRankingS(dm, nil, nil, cfg)
+	dm.SetRanking(&Ranking{})
+
+	dm.SetRankingProfile(&RankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID1",
+		Schedule:          "@every 1s",
+		StatIDs:           []string{"stat1", "stat2"},
+		MetricIDs:         []string{"metric1", "metric2"},
+		Sorting:           "asc",
+		SortingParameters: []string{"metric1:true"},
+		Stored:            true,
+		ThresholdIDs:      []string{"threshold1"}})
+
+	if err := rkg.StartRankingS(); err != nil {
+		t.Error(err)
+	}
+
+}

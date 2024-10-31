@@ -20,8 +20,10 @@ package engine
 
 import (
 	"errors"
+	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -29,6 +31,207 @@ import (
 	"github.com/cgrates/cron"
 )
 
+func TestStartTrendS(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.TrendSCfg().Enabled = true
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	tS := NewTrendS(dm, nil, nil, cfg)
+	dm.SetTrendProfile(&TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "ID1",
+		Schedule:        "@every 1s",
+		StatID:          "stat1",
+		Metrics:         []string{"metric1", "metric2"},
+		TTL:             time.Minute,
+		QueueLength:     10,
+		MinItems:        5,
+		CorrelationType: "*last",
+		Tolerance:       0.1,
+		Stored:          true,
+		ThresholdIDs:    []string{"threshold1"},
+	})
+	if err := tS.StartTrendS(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestStoreTrend(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	tS := &TrendS{
+		cgrcfg:       cfg,
+		dm:           dm,
+		storedTrends: make(utils.StringSet),
+	}
+
+	trendProfile := &TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "trendID1",
+		Schedule:        "@every 1s",
+		StatID:          "stat1",
+		Metrics:         []string{"metric1", "metric2"},
+		TTL:             time.Minute,
+		QueueLength:     100,
+		MinItems:        10,
+		CorrelationType: "average",
+		Tolerance:       0.05,
+		Stored:          true,
+		ThresholdIDs:    []string{"threshold1"},
+	}
+
+	trend := &Trend{
+		Tenant:   "cgrates.org",
+		ID:       "trendID1",
+		tPrfl:    trendProfile,
+		Metrics:  make(map[time.Time]map[string]*MetricWithTrend),
+		RunTimes: []time.Time{},
+		mLast:    make(map[string]time.Time),
+		mCounts:  make(map[string]int),
+		mTotals:  make(map[string]float64),
+	}
+
+	cfg.TrendSCfg().StoreInterval = 0
+	if err := tS.storeTrend(trend); err != nil {
+		t.Errorf("Expected no error when StoreInterval is 0, but got: %v", err)
+	}
+	if len(tS.storedTrends) != 0 {
+		t.Error("Expected storedTrends to be empty when StoreInterval is 0")
+	}
+	cfg.TrendSCfg().StoreInterval = -1
+	if err := tS.storeTrend(trend); err != nil {
+		t.Errorf("Expected no error when StoreInterval is -1, but got: %v", err)
+	}
+	cfg.TrendSCfg().StoreInterval = time.Second
+	if err := tS.storeTrend(trend); err != nil {
+		t.Errorf("Expected no error when StoreInterval is positive, but got: %v", err)
+	}
+}
+
+func TestStoreTrends(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	tS := &TrendS{
+		cgrcfg:       cfg,
+		dm:           dm,
+		storedTrends: make(utils.StringSet),
+	}
+
+	trendID := "trendID1"
+	tS.storedTrends.Add(trendID)
+
+	tS.storeTrends()
+
+	if len(tS.storedTrends) == 0 {
+		t.Error("Expected storedTrends to not be empty")
+	}
+}
+
+func TestV1GetTrendSummary(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	tS := &TrendS{
+		dm: dm,
+	}
+
+	trendID := "trendID1"
+	tenantID := "cgrates.org"
+	trend := &Trend{
+		Tenant: tenantID,
+		ID:     trendID,
+	}
+	if err := dm.SetTrend(trend); err != nil {
+		t.Fatalf("Failed to set trend in data manager: %v", err)
+	}
+
+	arg := utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: tenantID,
+			ID:     trendID,
+		},
+		APIOpts: make(map[string]any),
+	}
+	var reply TrendSummary
+
+	err := tS.V1GetTrendSummary(nil, arg, &reply)
+
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+
+	if reply.Tenant != tenantID || reply.ID != trendID {
+		t.Errorf("Expected reply to have Tenant: %s and ID: %s, but got Tenant: %s and ID: %s",
+			tenantID, trendID, reply.Tenant, reply.ID)
+	}
+}
+
+func TestV1GetTrend(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.TrendSCfg().Enabled = true
+
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	tS := NewTrendS(dm, nil, nil, cfg)
+
+	dm.SetTrendProfile(&TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "ID1",
+		Schedule:        "@every 1s",
+		StatID:          "stat1",
+		Metrics:         []string{"metric1", "metric2"},
+		TTL:             time.Minute,
+		QueueLength:     10,
+		MinItems:        5,
+		CorrelationType: "*last",
+		Tolerance:       0.1,
+		Stored:          true,
+		ThresholdIDs:    []string{"threshold1"},
+	})
+
+	args := &utils.ArgGetTrend{
+		TenantWithAPIOpts: utils.TenantWithAPIOpts{
+			Tenant: "cgrates.org",
+		},
+		ID: "",
+	}
+	var retTrend Trend
+	err := tS.V1GetTrend(nil, args, &retTrend)
+
+	if err == nil || !strings.Contains(err.Error(), "mandatory") {
+		errors.New("MANDATORY_IE_MISSING: [ID]")
+	}
+
+	args.ID = "ID1"
+	err = tS.V1GetTrend(nil, args, &retTrend)
+
+	if err != nil {
+		errors.New("NOT_FOUND")
+	}
+
+	args.RunIndexStart = 5
+	args.RunIndexEnd = 10
+	err = tS.V1GetTrend(nil, args, &retTrend)
+
+	if err != utils.ErrNotFound {
+		t.Errorf("Expected not found error for out of bounds run times, but got: %v", err)
+	}
+
+	args.RunIndexStart = 0
+	args.RunIndexEnd = len(retTrend.RunTimes)
+
+	err = tS.V1GetTrend(nil, args, &retTrend)
+
+	if err != nil {
+		errors.New("NOT_FOUND")
+	}
+
+}
 func TestTrendProfileTenantID(t *testing.T) {
 	profile := &TrendProfile{
 		Tenant: "cgrates.org",
