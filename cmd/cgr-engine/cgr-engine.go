@@ -35,9 +35,7 @@ import (
 
 func RunCGREngine(fs []string) (err error) {
 	flags := services.NewCGREngineFlags()
-	if err = flags.Parse(fs); err != nil {
-		return
-	}
+	flags.Parse(fs)
 	var vers string
 	if vers, err = utils.GetCGRVersion(); err != nil {
 		return

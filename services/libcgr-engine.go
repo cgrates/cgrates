@@ -42,7 +42,7 @@ import (
 )
 
 func NewCGREngineFlags() *CGREngineFlags {
-	fs := flag.NewFlagSet(utils.CgrEngine, flag.ContinueOnError)
+	fs := flag.NewFlagSet(utils.CgrEngine, flag.ExitOnError)
 	return &CGREngineFlags{
 		FlagSet:           fs,
 		CfgPath:           fs.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path."),
