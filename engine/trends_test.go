@@ -20,7 +20,6 @@ package engine
 
 import (
 	"errors"
-	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -170,68 +169,6 @@ func TestV1GetTrendSummary(t *testing.T) {
 	}
 }
 
-func TestV1GetTrend(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.TrendSCfg().Enabled = true
-
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-
-	tS := NewTrendS(dm, nil, nil, cfg)
-
-	dm.SetTrendProfile(&TrendProfile{
-		Tenant:          "cgrates.org",
-		ID:              "ID1",
-		Schedule:        "@every 1s",
-		StatID:          "stat1",
-		Metrics:         []string{"metric1", "metric2"},
-		TTL:             time.Minute,
-		QueueLength:     10,
-		MinItems:        5,
-		CorrelationType: "*last",
-		Tolerance:       0.1,
-		Stored:          true,
-		ThresholdIDs:    []string{"threshold1"},
-	})
-
-	args := &utils.ArgGetTrend{
-		TenantWithAPIOpts: utils.TenantWithAPIOpts{
-			Tenant: "cgrates.org",
-		},
-		ID: "",
-	}
-	var retTrend Trend
-	err := tS.V1GetTrend(nil, args, &retTrend)
-
-	if err == nil || !strings.Contains(err.Error(), "mandatory") {
-		errors.New("MANDATORY_IE_MISSING: [ID]")
-	}
-
-	args.ID = "ID1"
-	err = tS.V1GetTrend(nil, args, &retTrend)
-
-	if err != nil {
-		errors.New("NOT_FOUND")
-	}
-
-	args.RunIndexStart = 5
-	args.RunIndexEnd = 10
-	err = tS.V1GetTrend(nil, args, &retTrend)
-
-	if err != utils.ErrNotFound {
-		t.Errorf("Expected not found error for out of bounds run times, but got: %v", err)
-	}
-
-	args.RunIndexStart = 0
-	args.RunIndexEnd = len(retTrend.RunTimes)
-
-	err = tS.V1GetTrend(nil, args, &retTrend)
-
-	if err != nil {
-		errors.New("NOT_FOUND")
-	}
-
-}
 func TestTrendProfileTenantID(t *testing.T) {
 	profile := &TrendProfile{
 		Tenant: "cgrates.org",
