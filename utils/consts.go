@@ -2717,7 +2717,7 @@ const (
 	MemProfMaxFilesCgr   = "memprof_maxfiles"
 	MemProfTimestampCgr  = "memprof_timestamp"
 	ScheduledShutdownCgr = "scheduled_shutdown"
-	SingleCpuCgr         = "singlecpu"
+	SingleCpuCgr         = "single_cpu"
 	PreloadCgr           = "preload"
 	SetVersionsCgr       = "set_versions"
 	MemProfFinalFile     = "mem_final.prof"

@@ -45,20 +45,20 @@ func NewCGREngineFlags() *CGREngineFlags {
 	fs := flag.NewFlagSet(utils.CgrEngine, flag.ExitOnError)
 	return &CGREngineFlags{
 		FlagSet:           fs,
-		CfgPath:           fs.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path."),
-		Version:           fs.Bool(utils.VersionCgr, false, "Prints the application version."),
-		PidFile:           fs.String(utils.PidCgr, utils.EmptyString, "Write pid file"),
+		CfgPath:           fs.String(utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path"),
+		Version:           fs.Bool(utils.VersionCgr, false, "Print application version and exit"),
+		PidFile:           fs.String(utils.PidCgr, utils.EmptyString, "Path to write the PID file"),
 		CpuPrfDir:         fs.String(utils.CpuProfDirCgr, utils.EmptyString, "Directory for CPU profiles"),
 		MemPrfDir:         fs.String(utils.MemProfDirCgr, utils.EmptyString, "Directory for memory profiles"),
 		MemPrfInterval:    fs.Duration(utils.MemProfIntervalCgr, 15*time.Second, "Interval between memory profile saves"),
 		MemPrfMaxF:        fs.Int(utils.MemProfMaxFilesCgr, 1, "Number of memory profiles to keep (most recent)"),
 		MemPrfTS:          fs.Bool(utils.MemProfTimestampCgr, false, "Add timestamp to memory profile files"),
-		ScheduledShutDown: fs.String(utils.ScheduledShutdownCgr, utils.EmptyString, "shutdown the engine after this duration"),
-		Singlecpu:         fs.Bool(utils.SingleCpuCgr, false, "Run on single CPU core"),
-		SysLogger:         fs.String(utils.LoggerCfg, utils.EmptyString, "logger <*syslog|*stdout>"),
-		NodeID:            fs.String(utils.NodeIDCfg, utils.EmptyString, "The node ID of the engine"),
-		LogLevel:          fs.Int(utils.LogLevelCfg, -1, "Log level (0-emergency to 7-debug)"),
-		Preload:           fs.String(utils.PreloadCgr, utils.EmptyString, "LoaderIDs used to load the data before the engine starts"),
+		ScheduledShutdown: fs.String(utils.ScheduledShutdownCgr, utils.EmptyString, "Shutdown the engine after the specified duration"),
+		SingleCPU:         fs.Bool(utils.SingleCpuCgr, false, "Run on a single CPU core"),
+		Logger:            fs.String(utils.LoggerCfg, utils.EmptyString, "Logger type <*syslog|*stdout|*kafkaLog>"),
+		NodeID:            fs.String(utils.NodeIDCfg, utils.EmptyString, "Node ID of the engine"),
+		LogLevel:          fs.Int(utils.LogLevelCfg, -1, "Log level (0=emergency to 7=debug)"),
+		Preload:           fs.String(utils.PreloadCgr, utils.EmptyString, "Loader IDs used to load data before engine starts"),
 		CheckConfig:       fs.Bool(utils.CheckCfgCgr, false, "Verify the config without starting the engine"),
 		SetVersions:       fs.Bool(utils.SetVersionsCgr, false, "Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)"),
 	}
@@ -75,9 +75,9 @@ type CGREngineFlags struct {
 	MemPrfInterval    *time.Duration
 	MemPrfMaxF        *int
 	MemPrfTS          *bool
-	ScheduledShutDown *string
-	Singlecpu         *bool
-	SysLogger         *string
+	ScheduledShutdown *string
+	SingleCPU         *bool
+	Logger            *string
 	NodeID            *string
 	LogLevel          *int
 	Preload           *string
