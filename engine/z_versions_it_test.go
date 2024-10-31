@@ -113,13 +113,13 @@ func testVersion(t *testing.T) {
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
+		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	case utils.MetaMongo, utils.MetaRedis:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
 		testVersion[utils.Accounts] = 1
 
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
+		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	}
 
 	//dataDB
@@ -154,11 +154,11 @@ func testVersion(t *testing.T) {
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
+		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	case utils.MetaMongo, utils.MetaPostgres, utils.MetaMySQL:
 		testVersion = allVersions
 		testVersion[utils.CostDetails] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>"
+		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*cost_details>"
 	}
 
 }
@@ -177,7 +177,7 @@ func testUpdateVersionsAccounts(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
@@ -197,7 +197,7 @@ func testUpdateVersionsActions(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*actions>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*actions>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
@@ -217,7 +217,7 @@ func testUpdateVersionsChargers(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*chargers>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*chargers>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
@@ -256,7 +256,7 @@ func testUpdateVersionsAttributes(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*attributes>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*attributes>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
@@ -276,7 +276,7 @@ func testUpdateVersionsDispatchers(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*dispatchers>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*dispatchers>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
@@ -316,7 +316,7 @@ func testUpdateVersionsRQF(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*filters>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*filters>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
@@ -356,7 +356,7 @@ func testUpdateVersionsRoutes(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*routes>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*routes>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
@@ -376,7 +376,7 @@ func testUpdateVersionsStats(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*stats>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*stats>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
@@ -416,7 +416,7 @@ func testUpdateVersionsThresholds(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	errExpect := "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*thresholds>\n"
+	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*thresholds>\n"
 	if output.String() != errExpect {
 		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
 	}
