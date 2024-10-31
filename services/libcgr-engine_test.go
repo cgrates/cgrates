@@ -141,6 +141,13 @@ func TestCgrEngineFlags(t *testing.T) {
 			defaultVal: false,
 			want:       true,
 		},
+		{
+			name:       "setVersions",
+			flags:      []string{"-set_versions"},
+			flagVar:    ngFlags.SetVersions,
+			defaultVal: false,
+			want:       true,
+		},
 	}
 
 	for _, tt := range tests {

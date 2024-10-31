@@ -60,6 +60,7 @@ func NewCGREngineFlags() *CGREngineFlags {
 		LogLevel:          fs.Int(utils.LogLevelCfg, -1, "Log level (0-emergency to 7-debug)"),
 		Preload:           fs.String(utils.PreloadCgr, utils.EmptyString, "LoaderIDs used to load the data before the engine starts"),
 		CheckConfig:       fs.Bool(utils.CheckCfgCgr, false, "Verify the config without starting the engine"),
+		SetVersions:       fs.Bool(utils.SetVersionsCgr, false, "Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)"),
 	}
 }
 
@@ -81,6 +82,7 @@ type CGREngineFlags struct {
 	LogLevel          *int
 	Preload           *string
 	CheckConfig       *bool
+	SetVersions       *bool
 }
 
 func cgrSingnalHandler(ctx *context.Context, shutdown context.CancelFunc,

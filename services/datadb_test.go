@@ -36,7 +36,7 @@ func TestDataDBCoverage(t *testing.T) {
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg)
-	db := NewDataDBService(cfg, cM, srvDep)
+	db := NewDataDBService(cfg, cM, false, srvDep)
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}

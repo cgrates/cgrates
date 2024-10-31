@@ -38,7 +38,7 @@ func TestThresholdSCoverage(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	chS := NewCacheService(cfg, db, nil, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	if tS.IsRunning() {

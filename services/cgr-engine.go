@@ -130,7 +130,7 @@ func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefi
 	cgr.cM.AddInternalConn(connName, apiPrefix, iConnCh)
 }
 
-func (cgr *CGREngine) InitServices(cpuPrfFl *os.File) {
+func (cgr *CGREngine) InitServices(setVersions bool, cpuPrfFl *os.File) {
 	if len(cgr.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cgr.server.RegisterHTTPFunc(cgr.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
 	}
@@ -195,8 +195,8 @@ func (cgr *CGREngine) InitServices(cpuPrfFl *os.File) {
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaERs), utils.ErSv1, iERsCh)
 
 	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep)
-	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, cgr.srvDep)
-	cgr.sdbS = NewStorDBService(cgr.cfg, cgr.srvDep)
+	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, setVersions, cgr.srvDep)
+	cgr.sdbS = NewStorDBService(cgr.cfg, setVersions, cgr.srvDep)
 	cgr.anzS = NewAnalyzerService(cgr.cfg, cgr.server,
 		cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep) // init AnalyzerS
 
@@ -382,7 +382,7 @@ func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags
 	}
 	efs.SetFailedPostCacheTTL(cgr.cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
-	cgr.InitServices(cpuPrfF)
+	cgr.InitServices(*flags.SetVersions, cpuPrfF)
 	return nil
 }
 

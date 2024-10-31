@@ -29,11 +29,12 @@ import (
 )
 
 // NewStorDBService returns the StorDB Service
-func NewStorDBService(cfg *config.CGRConfig,
+func NewStorDBService(cfg *config.CGRConfig, setVersions bool,
 	srvDep map[string]*sync.WaitGroup) *StorDBService {
 	return &StorDBService{
-		cfg:    cfg,
-		srvDep: srvDep,
+		cfg:         cfg,
+		setVersions: setVersions,
+		srvDep:      srvDep,
 	}
 }
 
@@ -43,8 +44,9 @@ type StorDBService struct {
 	cfg      *config.CGRConfig
 	oldDBCfg *config.StorDbCfg
 
-	db        engine.StorDB
-	syncChans []chan engine.StorDB
+	db          engine.StorDB
+	syncChans   []chan engine.StorDB
+	setVersions bool
 
 	srvDep map[string]*sync.WaitGroup
 }
@@ -57,7 +59,7 @@ func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error)
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.StorDbCfg().Clone()
-	d, err := engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
+	dbConn, err := engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 		db.cfg.StorDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
 		db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
@@ -66,7 +68,17 @@ func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error)
 		utils.Logger.Crit(fmt.Sprintf("Could not configure storDB: %s exiting!", err))
 		return
 	}
-	db.db = d
+	db.db = dbConn
+
+	if db.setVersions {
+		err = engine.OverwriteDBVersions(dbConn)
+	} else {
+		err = engine.CheckVersions(db.db)
+	}
+	if err != nil {
+		return err
+	}
+
 	db.sync()
 	return
 }

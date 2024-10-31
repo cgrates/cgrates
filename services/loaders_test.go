@@ -37,7 +37,7 @@ func TestLoaderSCoverage(t *testing.T) {
 	filterSChan <- nil
 	server := cores.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
 	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
 	cM := engine.NewConnManager(cfg)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)

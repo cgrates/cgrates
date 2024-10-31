@@ -53,9 +53,9 @@ func TestCdrsReload(t *testing.T) {
 	server := cores.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, srvDep)
-	cfg.StorDbCfg().Type = utils.Internal
-	stordb := NewStorDBService(cfg, srvDep)
+	db := NewDataDBService(cfg, nil, false, srvDep)
+	cfg.StorDbCfg().Type = utils.MetaInternal
+	stordb := NewStorDBService(cfg, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	chrS := NewChargerService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
