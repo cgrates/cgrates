@@ -1,12 +1,21 @@
-name: Build & Unit Tests
+name: build & test
 
 permissions: {}
 
 on:
-  # push:
-  #   branches: [1.0]
+  push:
+    branches:
+      - 1.0
+    paths-ignore:
+      - 'docs/**'
+      - README.md
   pull_request:
-    branches: [1.0]
+    branches:
+      - 1.0
+    paths-ignore:
+      - 'docs/**'
+      - README.md
+  workflow_dispatch:
 
 jobs:
   # check-if-duplicate-action:
@@ -30,18 +39,17 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.21.3"
+          go-version: "1.23.x"
 
       - name: Go Format
         run: gofmt -s -w . && git diff --exit-code
 
       - name: Go Vet
-        continue-on-error: true # option will soon be removed
         run: go vet ./...
 
       - name: Go Tidy
