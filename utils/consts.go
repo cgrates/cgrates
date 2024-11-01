@@ -326,19 +326,11 @@ const (
 	MetaRaw   = "*raw"
 	CreatedAt = "CreatedAt"
 	UpdatedAt = "UpdatedAt"
-	NodeID    = "NodeID"
 	//ExportLogger
 	Message   = "Message"
 	Severity  = "Severity"
 	Timestamp = "Timestamp"
-	//cores consts
-	ActiveGoroutines = "ActiveGoroutines"
-	MemoryUsage      = "MemoryUsage"
-	RunningSince     = "RunningSince"
-	GoVersion        = "GoVersion"
-	CAPSAllocated    = "CAPSAllocated"
-	CAPSPeak         = "CAPSPeak"
-	//
+
 	XML                      = "xml"
 	MetaGOB                  = "*gob"
 	MetaJSON                 = "*json"
@@ -903,6 +895,24 @@ const (
 	DNSRdlength           = "Rdlength"
 	DNSData               = "Data"
 	MetaTntID             = "*tntID"
+)
+
+// CoreSv1.Status metrics
+const (
+	PID            = "pid"
+	NodeID         = "node_id"
+	GoVersion      = "go_version"
+	VersionLower   = "version"
+	Goroutines     = "goroutines"
+	OSThreadsInUse = "os_threads_in_use"
+	CAPSAllocated  = "caps_allocated"
+	CAPSPeak       = "caps_peak"
+	RunningSince   = "running_since"
+	OpenFiles      = "open_files"
+	CPUTime        = "cpu_time"
+	ActiveMemory   = "active_memory"
+	SystemMemory   = "system_memory"
+	ResidentMemory = "resident_memory"
 )
 
 // Migrator Action

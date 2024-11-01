@@ -18,12 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdStatus{
 		name:      "status",
 		rpcMethod: utils.CoreSv1Status,
+		rpcParams: &cores.V1StatusParams{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -32,7 +36,7 @@ func init() {
 type CmdStatus struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantWithAPIOpts
+	rpcParams *cores.V1StatusParams
 	*CommandExecuter
 }
 
@@ -46,7 +50,7 @@ func (self *CmdStatus) RpcMethod() string {
 
 func (self *CmdStatus) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantWithAPIOpts{
+		self.rpcParams = &cores.V1StatusParams{
 			APIOpts: make(map[string]any),
 		}
 	}
@@ -60,8 +64,4 @@ func (self *CmdStatus) PostprocessRpcParams() error {
 func (self *CmdStatus) RpcResult() any {
 	var s map[string]any
 	return &s
-}
-
-func (self *CmdStatus) ClientArgs() (args []string) {
-	return
 }

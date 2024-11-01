@@ -20,7 +20,6 @@ package cores
 
 import (
 	"reflect"
-	"runtime"
 	"testing"
 	"time"
 
@@ -48,55 +47,4 @@ func TestNewCoreService(t *testing.T) {
 	rcv.shtDw = func() {}
 	rcv.Shutdown()
 	rcv.ShutdownEngine()
-}
-
-func TestCoreServiceStatus(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.CoreSCfg().CapsStatsInterval = 1
-	cores := NewCoreService(cfg, engine.NewCaps(1, utils.MetaBusy), nil, nil, nil, func() {})
-
-	var reply map[string]any
-	cfgVrs, err := utils.GetCGRVersion()
-	if err != nil {
-		t.Error(err)
-	}
-
-	expected := map[string]any{
-		utils.GoVersion:        runtime.Version(),
-		utils.RunningSince:     "TIME_CHANGED",
-		utils.VersionName:      cfgVrs,
-		utils.ActiveGoroutines: runtime.NumGoroutine(),
-		utils.MemoryUsage:      "CHANGED_MEMORY_USAGE",
-		utils.NodeID:           cfg.GeneralCfg().NodeID,
-	}
-	if err := cores.V1Status(nil, nil, &reply); err != nil {
-		t.Error(err)
-	} else {
-		reply[utils.RunningSince] = "TIME_CHANGED"
-		reply[utils.MemoryUsage] = "CHANGED_MEMORY_USAGE"
-	}
-
-	if !reflect.DeepEqual(expected[utils.GoVersion], reply[utils.GoVersion]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.GoVersion]), utils.ToJSON(reply[utils.GoVersion]))
-	}
-	if !reflect.DeepEqual(expected[utils.RunningSince], reply[utils.RunningSince]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.RunningSince]), utils.ToJSON(reply[utils.RunningSince]))
-	}
-	if !reflect.DeepEqual(expected[utils.VersionName], reply[utils.VersionName]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.VersionName]), utils.ToJSON(reply[utils.VersionName]))
-	}
-	if !reflect.DeepEqual(expected[utils.MemoryUsage], reply[utils.MemoryUsage]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.MemoryUsage]), utils.ToJSON(reply[utils.MemoryUsage]))
-	}
-	if !reflect.DeepEqual(expected[utils.NodeID], reply[utils.NodeID]) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected[utils.NodeID]), utils.ToJSON(reply[utils.NodeID]))
-	}
-	utils.GitCommitDate = "wrong format"
-	utils.GitCommitHash = "73014DAA0C1D7EDCB532D5FE600B8A20D588CDF8"
-	if err := cores.V1Status(nil, nil, &reply); err != nil {
-		t.Error(err)
-	}
-
-	utils.GitCommitDate = ""
-	utils.GitCommitHash = ""
 }
