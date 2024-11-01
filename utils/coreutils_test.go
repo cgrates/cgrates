@@ -1530,6 +1530,83 @@ func TestCoreUtilsSplitPath(t *testing.T) {
 	}
 }
 
+func TestCoreUtilsSplitPathTT(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		sep      byte
+		count    int
+		expected []string
+	}{
+		{
+			name:     "split with InInFieldSep",
+			input:    "*string:~*req.Account:1001",
+			sep:      InInFieldSep[0],
+			count:    -1,
+			expected: []string{"*string", "~*req.Account", "1001"},
+		},
+		{
+			name:     "split with NestingSep",
+			input:    "~*req.Account",
+			sep:      NestingSep[0],
+			count:    -1,
+			expected: []string{"~*req", "Account"},
+		},
+		{
+			name:     "split with InInFieldSep and empty last element",
+			input:    "*exists:~*vars.*processedProfileIDs[cgrates.org:ATTR]:",
+			sep:      InInFieldSep[0],
+			count:    -1,
+			expected: []string{"*exists", "~*vars.*processedProfileIDs[cgrates.org:ATTR]", ""},
+		},
+		{
+			name:     "split with NestingSep and complex second element",
+			input:    "~*vars.*processedProfileIDs[cgrates.org:ATTR]",
+			sep:      NestingSep[0],
+			count:    -1,
+			expected: []string{"~*vars", "*processedProfileIDs[cgrates.org:ATTR]"},
+		},
+		{
+			name:     "split with InInFieldSep and dynamic path",
+			input:    "*notexists:~*vars.*processedProfileIDs[<~*vars.apTenantID>]:",
+			sep:      InInFieldSep[0],
+			count:    -1,
+			expected: []string{"*notexists", "~*vars.*processedProfileIDs[<~*vars.apTenantID>]", ""},
+		},
+		{
+			name:     "split with NestingSep and dynamic path",
+			input:    "~*vars.*processedProfileIDs[<~*vars.apTenantID>]",
+			sep:      NestingSep[0],
+			count:    -1,
+			expected: []string{"~*vars", "*processedProfileIDs[<~*vars.apTenantID>]"},
+		},
+		{
+			name:     "split with NestingSep (contains '#')",
+			input:    "~*stats.SQ_1002.*sum#~*req.Usage",
+			sep:      NestingSep[0],
+			count:    -1,
+			expected: []string{"~*stats", "SQ_1002", "*sum#~*req.Usage"},
+		},
+		{
+			name:     "split with NestingSep (contains '#')",
+			input:    "~*stats.SQ_1002.*sum#~*req.CostDetails.Cost",
+			sep:      NestingSep[0],
+			count:    -1,
+			expected: []string{"~*stats", "SQ_1002", "*sum#~*req.CostDetails.Cost"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := SplitPath(tt.input, tt.sep, tt.count)
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("SplitPath(%q, %q, %d) = %v, want %v",
+					tt.input, tt.sep, tt.count, result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestFibDuration(t *testing.T) {
 	// fib := Fib()
 	// if tmp := fib(); tmp != 1 {
