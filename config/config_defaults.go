@@ -189,7 +189,12 @@ const CGRATES_CFG_JSON = `
 		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
 		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 		"mysqlDSNParams":{},		// DSN params for opening db
-		"pgSSLMode":"disable",		// ssl mode in case of *postgres
+		"pgSSLMode": "disable",		// determines whether or with what priority a secure SSL TCP/IP connection will be negotiated with the server
+		//"pgSSLCert": "",		// file name of the client SSL certificate, replacing the default ~/.postgresql/postgresql.crt
+		//"pgSSLKey": "",		// location for the secret key used for the client certificate
+		//"pgSSLPassword": "",		// specifies the password for the secret key specified in pgSSLKey
+		//"pgSSLCertMode": "allow",	// determines whether a client certificate may be sent to the server, and whether the server is required to request one
+		//"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
 		"mysqlLocation": "Local",	// the location the time from mysql is retrived
 		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
 		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>

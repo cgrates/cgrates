@@ -32,29 +32,48 @@ type PostgresStorage struct {
 }
 
 // NewPostgresStorage returns the posgres storDB
-func NewPostgresStorage(host, port, name, user, password, sslmode string, maxConn, maxIdleConn int, connMaxLifetime time.Duration) (*SQLStorage, error) {
-	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", host, port, name, user, password, sslmode)
-	db, err := gorm.Open(postgres.Open(connectString), &gorm.Config{AllowGlobalUpdate: true})
+func NewPostgresStorage(host, port, name, user, password,
+	sslmode, sslcert, sslkey, sslpassword, sslcertmode, sslrootcert string,
+	maxConn, maxIdleConn int, connMaxLifetime time.Duration) (*SQLStorage, error) {
+	connStr := fmt.Sprintf(
+		"host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
+		host, port, name, user, password, sslmode)
+	if sslcert != "" {
+		connStr = connStr + " sslcert=" + sslcert
+	}
+	if sslkey != "" {
+		connStr = connStr + " sslkey=" + sslkey
+	}
+	if sslpassword != "" {
+		connStr = connStr + " sslpassword=" + sslpassword
+	}
+	if sslcertmode != "" {
+		connStr = connStr + " sslcertmode=" + sslcertmode
+	}
+	if sslrootcert != "" {
+		connStr = connStr + " sslrootcert=" + sslrootcert
+	}
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{AllowGlobalUpdate: true})
 	if err != nil {
 		return nil, err
 	}
-	postgresStorage := new(PostgresStorage)
-	if postgresStorage.DB, err = db.DB(); err != nil {
+	pgStor := new(PostgresStorage)
+	if pgStor.DB, err = db.DB(); err != nil {
 		return nil, err
 	}
-	if err = postgresStorage.DB.Ping(); err != nil {
+	if err = pgStor.DB.Ping(); err != nil {
 		return nil, err
 	}
-	postgresStorage.DB.SetMaxIdleConns(maxIdleConn)
-	postgresStorage.DB.SetMaxOpenConns(maxConn)
-	postgresStorage.DB.SetConnMaxLifetime(connMaxLifetime)
+	pgStor.DB.SetMaxIdleConns(maxIdleConn)
+	pgStor.DB.SetMaxOpenConns(maxConn)
+	pgStor.DB.SetConnMaxLifetime(connMaxLifetime)
 	//db.LogMode(true)
-	postgresStorage.db = db
+	pgStor.db = db
 	return &SQLStorage{
-		DB:      postgresStorage.DB,
-		db:      postgresStorage.db,
-		StorDB:  postgresStorage,
-		SQLImpl: postgresStorage,
+		DB:      pgStor.DB,
+		db:      pgStor.db,
+		StorDB:  pgStor,
+		SQLImpl: pgStor,
 	}, nil
 }
 
