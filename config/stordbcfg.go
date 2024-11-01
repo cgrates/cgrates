@@ -36,6 +36,11 @@ type StorDBOpts struct {
 	SQLConnMaxLifetime time.Duration
 	SQLDSNParams       map[string]string
 	PgSSLMode          string
+	PgSSLCert          string
+	PgSSLKey           string
+	PgSSLPassword      string
+	PgSSLCertMode      string
+	PgSSLRootCert      string
 	MySQLLocation      string
 	MongoQueryTimeout  time.Duration
 	MongoConnScheme    string
@@ -87,6 +92,21 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.PgSSLMode != nil {
 		dbOpts.PgSSLMode = *jsnCfg.PgSSLMode
+	}
+	if jsnCfg.PgSSLCert != nil {
+		dbOpts.PgSSLCert = *jsnCfg.PgSSLCert
+	}
+	if jsnCfg.PgSSLKey != nil {
+		dbOpts.PgSSLKey = *jsnCfg.PgSSLKey
+	}
+	if jsnCfg.PgSSLPassword != nil {
+		dbOpts.PgSSLPassword = *jsnCfg.PgSSLPassword
+	}
+	if jsnCfg.PgSSLCertMode != nil {
+		dbOpts.PgSSLCertMode = *jsnCfg.PgSSLCertMode
+	}
+	if jsnCfg.PgSSLRootCert != nil {
+		dbOpts.PgSSLRootCert = *jsnCfg.PgSSLRootCert
 	}
 	if jsnCfg.MySQLLocation != nil {
 		dbOpts.MySQLLocation = *jsnCfg.MySQLLocation
@@ -182,6 +202,11 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 		SQLConnMaxLifetime: dbOpts.SQLConnMaxLifetime,
 		SQLDSNParams:       dbOpts.SQLDSNParams,
 		PgSSLMode:          dbOpts.PgSSLMode,
+		PgSSLCert:          dbOpts.PgSSLCert,
+		PgSSLKey:           dbOpts.PgSSLKey,
+		PgSSLPassword:      dbOpts.PgSSLPassword,
+		PgSSLCertMode:      dbOpts.PgSSLCertMode,
+		PgSSLRootCert:      dbOpts.PgSSLRootCert,
 		MySQLLocation:      dbOpts.MySQLLocation,
 		MongoQueryTimeout:  dbOpts.MongoQueryTimeout,
 		MongoConnScheme:    dbOpts.MongoConnScheme,
@@ -231,6 +256,21 @@ func (dbcfg StorDbCfg) AsMapInterface(string) any {
 		utils.MongoQueryTimeoutCfg: dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.MongoConnSchemeCfg:   dbcfg.Opts.MongoConnScheme,
 	}
+	if dbcfg.Opts.PgSSLCert != "" {
+		opts[utils.PgSSLCertCfg] = dbcfg.Opts.PgSSLCert
+	}
+	if dbcfg.Opts.PgSSLKey != "" {
+		opts[utils.PgSSLKeyCfg] = dbcfg.Opts.PgSSLKey
+	}
+	if dbcfg.Opts.PgSSLPassword != "" {
+		opts[utils.PgSSLPasswordCfg] = dbcfg.Opts.PgSSLPassword
+	}
+	if dbcfg.Opts.PgSSLCertMode != "" {
+		opts[utils.PgSSLCertModeCfg] = dbcfg.Opts.PgSSLCertMode
+	}
+	if dbcfg.Opts.PgSSLRootCert != "" {
+		opts[utils.PgSSLRootCertCfg] = dbcfg.Opts.PgSSLRootCert
+	}
 	mp := map[string]any{
 		utils.DataDbTypeCfg:          utils.Meta + dbcfg.Type,
 		utils.DataDbHostCfg:          dbcfg.Host,
@@ -275,6 +315,21 @@ func diffStorDBOptsJsonCfg(d *DBOptsJson, v1, v2 *StorDBOpts) *DBOptsJson {
 	}
 	if v1.PgSSLMode != v2.PgSSLMode {
 		d.PgSSLMode = utils.StringPointer(v2.PgSSLMode)
+	}
+	if v1.PgSSLCert != v2.PgSSLCert {
+		d.PgSSLCert = utils.StringPointer(v2.PgSSLCert)
+	}
+	if v1.PgSSLKey != v2.PgSSLKey {
+		d.PgSSLKey = utils.StringPointer(v2.PgSSLKey)
+	}
+	if v1.PgSSLPassword != v2.PgSSLPassword {
+		d.PgSSLPassword = utils.StringPointer(v2.PgSSLPassword)
+	}
+	if v1.PgSSLCertMode != v2.PgSSLCertMode {
+		d.PgSSLCertMode = utils.StringPointer(v2.PgSSLCertMode)
+	}
+	if v1.PgSSLRootCert != v2.PgSSLRootCert {
+		d.PgSSLRootCert = utils.StringPointer(v2.PgSSLRootCert)
 	}
 	if v1.MySQLLocation != v2.MySQLLocation {
 		d.MySQLLocation = utils.StringPointer(v2.MySQLLocation)
