@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"reflect"
 	"slices"
 	"testing"
@@ -29,6 +30,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestSplitFilterIndexes(t *testing.T) {
@@ -3322,4 +3324,130 @@ func TestUpdateFilterIndexRatedNoRatesErr(t *testing.T) {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
 	}
 
+}
+
+func TestLibIndexRemoveFilterIndexesForFilter(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	tntCtx := "cgrates.org:*sessions"
+
+	tests := []struct {
+		name    string
+		idx     map[string]utils.StringSet // initial indexes map
+		keys    []string                   // that will be removed from the index
+		itemIDs utils.StringSet
+		want    map[string]utils.StringSet // indexes map after remove
+	}{
+		{
+			name: "remove one filter index from all profiles",
+			idx: map[string]utils.StringSet{
+				"*string:~*req.Account:1001": utils.NewStringSet([]string{"AP1", "AP2"}),
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP1", "AP2"}),
+			},
+			keys:    []string{"*string:~*req.Account:1001"},
+			itemIDs: utils.NewStringSet([]string{"AP1", "AP2"}),
+			want: map[string]utils.StringSet{
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP1", "AP2"}),
+			},
+		},
+		{
+			name: "remove one filter index from one profile",
+			idx: map[string]utils.StringSet{
+				"*string:~*req.Account:1001": utils.NewStringSet([]string{"AP1", "AP2"}),
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP1", "AP2"}),
+			},
+			keys:    []string{"*string:~*req.Account:1001"},
+			itemIDs: utils.NewStringSet([]string{"AP1"}),
+			want: map[string]utils.StringSet{
+				"*string:~*req.Account:1001": utils.NewStringSet([]string{"AP2"}),
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP1", "AP2"}),
+			},
+		},
+		{
+			name: "attempt remove non-existent filter index",
+			idx: map[string]utils.StringSet{
+				"*string:~*req.Account:1001": utils.NewStringSet([]string{"AP1", "AP2"}),
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP1", "AP2"}),
+			},
+			keys:    []string{"*string:~*req.Account:notfound"},
+			itemIDs: utils.NewStringSet([]string{"AP1", "AP2"}),
+			want: map[string]utils.StringSet{
+				"*string:~*req.Account:1001": utils.NewStringSet([]string{"AP1", "AP2"}),
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP1", "AP2"}),
+			},
+		},
+		{
+			name: "remove all filter indexes from one profile",
+			idx: map[string]utils.StringSet{
+				"*string:~*req.Account:1001": utils.NewStringSet([]string{"AP1", "AP2"}),
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP1", "AP2"}),
+			},
+			keys:    []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+			itemIDs: utils.NewStringSet([]string{"AP1"}),
+			want: map[string]utils.StringSet{
+				"*string:~*req.Account:1001": utils.NewStringSet([]string{"AP2"}),
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP2"}),
+			},
+		},
+		{
+			name: "remove all filter indexes from all profiles",
+			idx: map[string]utils.StringSet{
+				"*string:~*req.Account:1001": utils.NewStringSet([]string{"AP1", "AP2"}),
+				"*string:~*req.Account:1002": utils.NewStringSet([]string{"AP1", "AP2"}),
+			},
+			keys:    []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+			itemIDs: utils.NewStringSet([]string{"AP1", "AP2"}),
+			want:    nil,
+		},
+		{
+			name: "remove multiple filter indexes from mixed profiles",
+			idx: map[string]utils.StringSet{
+				"*string:~*req.Account:1001":     utils.NewStringSet([]string{"AP1", "AP2", "AP3"}),
+				"*string:~*req.Destination:1010": utils.NewStringSet([]string{"AP2", "AP3"}),
+				"*string:~*req.Destination:1011": utils.NewStringSet([]string{"AP1", "AP3", "AP4"}),
+				"*string:~*req.Destination:1012": utils.NewStringSet([]string{"AP2"}),
+			},
+			keys:    []string{"*string:~*req.Destination:1010", "*string:~*req.Destination:1012"},
+			itemIDs: utils.NewStringSet([]string{"AP2", "AP3"}),
+			want: map[string]utils.StringSet{
+				"*string:~*req.Account:1001":     utils.NewStringSet([]string{"AP1", "AP2", "AP3"}),
+				"*string:~*req.Destination:1011": utils.NewStringSet([]string{"AP1", "AP3", "AP4"}),
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				if err := dataDB.Flush(""); err != nil {
+					t.Logf("failed to flush dataDB: %v", err)
+				}
+			})
+			if err := dm.SetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, tntCtx, test.idx, true, ""); err != nil {
+				t.Fatalf("dm.SetFilterIndexes() returned unexpected error: %v", err)
+			}
+			if err := removeFilterIndexesForFilter(context.Background(), dm, utils.CacheAttributeFilterIndexes,
+				tntCtx, test.keys, test.itemIDs); err != nil {
+				t.Fatalf("removeFilterIndexesForFilter() returned unexpected error: %v", err)
+			}
+			got, err := dm.GetIndexes(context.Background(), utils.CacheAttributeFilterIndexes, tntCtx, "", "", true, false)
+			switch len(test.want) {
+			case 0:
+				if !errors.Is(err, utils.ErrNotFound) {
+					t.Fatalf("dm.GetFilterIndexes(%q,%q) err = %v, want %v",
+						utils.CacheAttributeFilterIndexes, tntCtx, err, utils.ErrNotFound)
+				}
+			default:
+				if err != nil {
+					t.Fatalf("dm.GetFilterIndexes(%q,%q) returned unexpected error: %v",
+						utils.CacheAttributeFilterIndexes, tntCtx, err)
+				}
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("dm.GetFilterIndexes(%q,%q) returned unexpected indexes (-want +got): \n%s",
+					utils.CacheAttributeFilterIndexes, tntCtx, diff)
+			}
+		})
+	}
 }
