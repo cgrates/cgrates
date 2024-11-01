@@ -64,66 +64,77 @@ type TrendService struct {
 }
 
 // Start should handle the sercive start
-func (tr *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if tr.IsRunning() {
+func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+	if trs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	tr.srvDep[utils.DataDB].Add(1)
-	if err = tr.cacheS.WaitToPrecache(ctx, utils.CacheTrendProfiles); err != nil {
+	trs.srvDep[utils.DataDB].Add(1)
+	if err = trs.cacheS.WaitToPrecache(ctx,
+		utils.CacheTrendProfiles,
+		utils.CacheTrends,
+	); err != nil {
 		return err
 	}
 	var datadb *engine.DataManager
-	if datadb, err = tr.dm.WaitForDM(ctx); err != nil {
+	if datadb, err = trs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
 
 	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, tr.filterSChan); err != nil {
+	if filterS, err = waitForFilterS(ctx, trs.filterSChan); err != nil {
 		return
 	}
-	tr.trs = engine.NewTrendService(datadb, tr.cfg, filterS, tr.connMgr)
+	trs.Lock()
+	defer trs.Unlock()
+	trs.trs = engine.NewTrendService(datadb, trs.cfg, filterS, trs.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TrendS))
-	srv, err := engine.NewService(tr.trs)
+	if err := trs.trs.StartTrendS(ctx); err != nil {
+		return err
+	}
+	srv, err := engine.NewService(trs.trs)
 	if err != nil {
 		return err
 	}
-	if !tr.cfg.DispatcherSCfg().Enabled {
+	if !trs.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			tr.server.RpcRegister(s)
+			trs.server.RpcRegister(s)
 		}
 	}
-	tr.connChan <- tr.anz.GetInternalCodec(srv, utils.Trends)
+	trs.connChan <- trs.anz.GetInternalCodec(srv, utils.Trends)
 	return nil
 }
 
 // Reload handles the change of config
-func (tr *TrendService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (trs *TrendService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+	trs.Lock()
+	trs.trs.Reload(ctx)
+	trs.Unlock()
 	return
 }
 
 // Shutdown stops the service
-func (tr *TrendService) Shutdown() (err error) {
-	defer tr.srvDep[utils.DataDB].Done()
-	tr.Lock()
-	defer tr.Unlock()
-	<-tr.connChan
-	tr.server.RpcUnregisterName(utils.TrendSv1)
+func (trs *TrendService) Shutdown() (err error) {
+	defer trs.srvDep[utils.DataDB].Done()
+	trs.Lock()
+	defer trs.Unlock()
+	trs.trs.StopTrendS()
+	trs.trs = nil
+	<-trs.connChan
+	trs.server.RpcUnregisterName(utils.TrendSv1)
 	return
 }
 
 // IsRunning returns if the service is running
-func (tr *TrendService) IsRunning() bool {
-	tr.RLock()
-	defer tr.RUnlock()
-	return tr != nil && tr.trs != nil
+func (trs *TrendService) IsRunning() bool {
+	return trs != nil && trs.trs != nil
 }
 
 // ServiceName returns the service name
-func (tr *TrendService) ServiceName() string {
+func (trs *TrendService) ServiceName() string {
 	return utils.TrendS
 }
 
 // ShouldRun returns if the service should be running
-func (tr *TrendService) ShouldRun() bool {
-	return tr.cfg.TrendSCfg().Enabled
+func (trs *TrendService) ShouldRun() bool {
+	return trs.cfg.TrendSCfg().Enabled
 }

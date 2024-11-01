@@ -255,11 +255,12 @@ type TPRankingProfile struct {
 	TPid              string
 	Tenant            string
 	ID                string
-	QueryInterval     string
+	Schedule          string
 	StatIDs           []string
 	MetricIDs         []string
 	Sorting           string
 	SortingParameters []string
+	Stored            bool
 	ThresholdIDs      []string
 }
 
@@ -822,4 +823,44 @@ type TPBalanceUnitFactor struct {
 
 func (unitFactor *TPBalanceUnitFactor) AsString() string {
 	return strings.Join(unitFactor.FilterIDs, ANDSep) + InfieldSep + strconv.FormatFloat(unitFactor.Factor, 'f', -1, 64)
+}
+
+type ArgScheduleTrendQueries struct {
+	TenantIDWithAPIOpts
+	TrendIDs []string
+}
+type ArgScheduledTrends struct {
+	TenantIDWithAPIOpts
+	TrendIDPrefixes []string
+}
+
+type ArgGetTrend struct {
+	TenantWithAPIOpts
+	ID            string
+	RunIndexStart int
+	RunIndexEnd   int
+	RunTimeStart  string
+	RunTimeEnd    string
+}
+
+type ScheduledTrend struct {
+	TrendID  string
+	Next     time.Time
+	Previous time.Time
+}
+
+type ArgScheduleRankingQueries struct {
+	TenantIDWithAPIOpts
+	RankingIDs []string
+}
+
+type ArgScheduledRankings struct {
+	TenantIDWithAPIOpts
+	RankingIDPrefixes []string
+}
+
+type ScheduledRanking struct {
+	RankingID string
+	Next      time.Time
+	Previous  time.Time
 }

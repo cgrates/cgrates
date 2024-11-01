@@ -172,6 +172,8 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheChargerFilterIndexes].Groups = 1
 	expectedStats[utils.CacheRankingProfiles].Items = 0
 	expectedStats[utils.CacheRankingProfiles].Groups = 0
+	expectedStats[utils.CacheRankings].Items = 0
+	expectedStats[utils.CacheRankings].Groups = 0
 	expectedStats[utils.CacheAttributeFilterIndexes].Items = 10
 	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 1
 	expectedStats[utils.CacheReverseFilterIndexes].Items = 19

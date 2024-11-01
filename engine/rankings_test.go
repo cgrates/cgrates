@@ -20,7 +20,6 @@ package engine
 
 import (
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 )
@@ -29,7 +28,6 @@ func TestTenantID(t *testing.T) {
 	rp := &RankingProfile{
 		Tenant:            "cgrates.org",
 		ID:                "01",
-		QueryInterval:     5 * time.Minute,
 		StatIDs:           []string{"stat1", "stat2"},
 		MetricIDs:         []string{"metric1"},
 		Sorting:           "asc",
@@ -50,7 +48,6 @@ func TestRankingProfileWithAPIOpts(t *testing.T) {
 	rp := &RankingProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ID",
-		QueryInterval:     5 * time.Minute,
 		StatIDs:           []string{"stat1", "stat2"},
 		MetricIDs:         []string{"metric1"},
 		Sorting:           "asc",
@@ -102,7 +99,7 @@ func TestNewRankingService(t *testing.T) {
 	filterS := &FilterS{}
 	connMgr := &ConnManager{}
 
-	rankingService := NewRankingService(dm, cgrcfg, filterS, connMgr)
+	rankingService := NewRankingS(dm, connMgr, filterS, cgrcfg)
 
 	if rankingService == nil {
 		t.Fatal("NewRankingService() returned nil")
@@ -112,12 +109,12 @@ func TestNewRankingService(t *testing.T) {
 		t.Errorf("Expected dm to be %v, got %v", dm, rankingService.dm)
 	}
 
-	if rankingService.cfg != cgrcfg {
-		t.Errorf("Expected cfg to be %v, got %v", cgrcfg, rankingService.cfg)
+	if rankingService.cgrcfg != cgrcfg {
+		t.Errorf("Expected cfg to be %v, got %v", cgrcfg, rankingService.cgrcfg)
 	}
 
-	if rankingService.fltrS != filterS {
-		t.Errorf("Expected fltrS to be %v, got %v", filterS, rankingService.fltrS)
+	if rankingService.filterS != filterS {
+		t.Errorf("Expected fltrS to be %v, got %v", filterS, rankingService.filterS)
 	}
 
 	if rankingService.connMgr != connMgr {

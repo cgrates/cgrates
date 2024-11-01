@@ -50,7 +50,7 @@ func (tpSts TPTrends) exportItems(ctx *context.Context, wrtr io.Writer, tnt stri
 	}
 	for _, trendsID := range itmIDs {
 		var trendPrf *engine.TrendProfile
-		trendPrf, err = tpSts.dm.GetTrendProfile(ctx, tnt, trendsID)
+		trendPrf, err = tpSts.dm.GetTrendProfile(ctx, tnt, trendsID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {
 				return fmt.Errorf("<%s> cannot find TrendProfile with id: <%v>", err, trendsID)

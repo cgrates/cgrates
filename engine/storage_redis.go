@@ -553,7 +553,7 @@ func (rs *RedisStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, 
 	return rs.Cmd(nil, redisDEL, utils.TrendProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetTrendDrv(tenant, id string) (r *Trend, err error) {
+func (rs *RedisStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (r *Trend, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -565,7 +565,7 @@ func (rs *RedisStorage) GetTrendDrv(tenant, id string) (r *Trend, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetTrendDrv(r *Trend) (err error) {
+func (rs *RedisStorage) SetTrendDrv(ctx *context.Context, r *Trend) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -573,7 +573,7 @@ func (rs *RedisStorage) SetTrendDrv(r *Trend) (err error) {
 	return rs.Cmd(nil, redisSET, utils.TrendPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveTrendDrv(tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
@@ -596,8 +596,33 @@ func (rs *RedisStorage) GetRankingProfileDrv(ctx *context.Context, tenant string
 	err = rs.ms.Unmarshal(values, &sg)
 	return
 }
+
 func (rs *RedisStorage) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.RankingProfilePrefix+utils.ConcatenatedKey(tenant, id))
+}
+
+func (rs *RedisStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (rn *Ranking, err error) {
+	var values []byte
+	if err = rs.Cmd(&values, redisGET, utils.RankingPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+		return
+	} else if len(values) == 0 {
+		err = utils.ErrNotFound
+		return
+	}
+	err = rs.ms.Unmarshal(values, &rn)
+	return rn, err
+}
+
+func (rs *RedisStorage) SetRankingDrv(_ *context.Context, rn *Ranking) (err error) {
+	var result []byte
+	if result, err = rs.ms.Marshal(rn); err != nil {
+		return
+	}
+	return rs.Cmd(nil, redisSET, utils.RankingPrefix+utils.ConcatenatedKey(rn.Tenant, rn.ID), string(result))
+}
+
+func (rs *RedisStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string) (err error) {
+	return rs.Cmd(nil, redisDEL, utils.RankingPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from dataDB

@@ -67,12 +67,15 @@ type DataDB interface {
 	SetRankingProfileDrv(ctx *context.Context, rp *RankingProfile) (err error)
 	GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sq *RankingProfile, err error)
 	RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error)
+	SetRankingDrv(ctx *context.Context, rn *Ranking) (err error)
+	GetRankingDrv(ctx *context.Context, tenant string, id string) (sq *Ranking, err error)
+	RemoveRankingDrv(ctx *context.Context, tenant string, id string) (err error)
 	SetTrendProfileDrv(ctx *context.Context, sq *TrendProfile) (err error)
 	GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sq *TrendProfile, err error)
 	RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error)
-	GetTrendDrv(string, string) (*Trend, error)
-	SetTrendDrv(*Trend) error
-	RemoveTrendDrv(string, string) error
+	GetTrendDrv(ctx *context.Context, tenant string, id string) (*Trend, error)
+	SetTrendDrv(ctx *context.Context, tr *Trend) error
+	RemoveTrendDrv(ctx *context.Context, tenant string, id string) error
 	GetFilterDrv(ctx *context.Context, tnt string, id string) (*Filter, error)
 	SetFilterDrv(ctx *context.Context, f *Filter) error
 	RemoveFilterDrv(ctx *context.Context, tnt string, id string) error

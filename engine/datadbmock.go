@@ -254,6 +254,19 @@ func (dbM *DataDBMock) RemRankingProfileDrv(ctx *context.Context, tenant string,
 	}
 	return utils.ErrNotImplemented
 }
+
+func (dbM *DataDBMock) GetRankingDrv(ctx *context.Context, tenant, id string) (*Ranking, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetRankingDrv(ctx *context.Context, _ *Ranking) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveRankingDrv(ctx *context.Context, _ string, _ string) error {
+	return utils.ErrNotImplemented
+}
+
 func (dbM *DataDBMock) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (sg *TrendProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
 		return dbM.GetTrendProfileDrvF(ctx, tenant, id)
@@ -486,15 +499,15 @@ func (dbM *DataDBMock) RemoveRateProfileDrv(ctx *context.Context, str1 string, s
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetTrendDrv(tenant, id string) (*Trend, error) {
+func (dbM *DataDBMock) GetTrendDrv(ctx *context.Context, tenant, id string) (*Trend, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetTrendDrv(*Trend) error {
+func (dbM *DataDBMock) SetTrendDrv(ctx *context.Context, tr *Trend) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveTrendDrv(string, string) error {
+func (dbM *DataDBMock) RemoveTrendDrv(ctx *context.Context, _ string, _ string) error {
 	return utils.ErrNotImplemented
 }
 

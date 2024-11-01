@@ -274,6 +274,26 @@ func (iDB *InternalDB) RemRankingProfileDrv(_ *context.Context, tenant, id strin
 	return nil
 }
 
+func (iDB *InternalDB) GetRankingDrv(_ *context.Context, tenant, id string) (rn *Ranking, err error) {
+	x, ok := iDB.db.Get(utils.CacheRankings, utils.ConcatenatedKey(tenant, id))
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*Ranking), nil
+}
+
+func (iDB *InternalDB) SetRankingDrv(_ *context.Context, rn *Ranking) (err error) {
+	iDB.db.Set(utils.CacheRankings, rn.TenantID(), rn, nil,
+		true, utils.NonTransactional)
+	return
+}
+
+func (iDB *InternalDB) RemoveRankingDrv(_ *context.Context, tenant, id string) (err error) {
+	iDB.db.Remove(utils.CacheRankings, utils.ConcatenatedKey(tenant, id),
+		true, utils.NonTransactional)
+	return
+}
+
 func (iDB *InternalDB) GetStatQueueDrv(_ *context.Context, tenant, id string) (sq *StatQueue, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
@@ -324,7 +344,7 @@ func (iDB *InternalDB) GetTrendProfileDrv(_ *context.Context, tenant, id string)
 	return x.(*TrendProfile), nil
 }
 
-func (iDB *InternalDB) GetTrendDrv(tenant, id string) (th *Trend, err error) {
+func (iDB *InternalDB) GetTrendDrv(_ *context.Context, tenant, id string) (th *Trend, err error) {
 	x, ok := iDB.db.Get(utils.CacheTrends, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -332,13 +352,13 @@ func (iDB *InternalDB) GetTrendDrv(tenant, id string) (th *Trend, err error) {
 	return x.(*Trend), nil
 }
 
-func (iDB *InternalDB) SetTrendDrv(tr *Trend) (err error) {
+func (iDB *InternalDB) SetTrendDrv(_ *context.Context, tr *Trend) (err error) {
 	iDB.db.Set(utils.CacheTrends, tr.TenantID(), tr, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveTrendDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveTrendDrv(_ *context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheTrends, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
