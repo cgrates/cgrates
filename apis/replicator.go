@@ -111,11 +111,15 @@ func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, tntID *ut
 // GetTrend is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetTrend(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Trend) error {
 	engine.UpdateReplicationFilters(utils.TrendPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetTrendDrv(tntID.Tenant, tntID.ID)
+	rcv, err := rplSv1.dm.DataDB().GetTrendDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
 	}
-	*reply = *rcv
+	reply.Tenant = rcv.Tenant
+	reply.ID = rcv.ID
+	reply.RunTimes = rcv.RunTimes
+	reply.CompressedMetrics = rcv.CompressedMetrics
+	reply.Metrics = rcv.Metrics
 	return nil
 }
 
@@ -295,7 +299,7 @@ func (rplSv1 *ReplicatorSv1) SetTrendProfile(ctx *context.Context, trp *engine.T
 
 // SetTrend is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) SetTrend(ctx *context.Context, tr *engine.TrendWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetTrendDrv(tr.Trend); err != nil {
+	if err = rplSv1.dm.DataDB().SetTrendDrv(ctx, tr.Trend); err != nil {
 		return
 	}
 	// delay if needed before cache call
@@ -527,7 +531,7 @@ func (rplSv1 *ReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetInd
 
 // RemoveTrend is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) RemoveTrend(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveTrendDrv(args.Tenant, args.ID); err != nil {
+	if err = rplSv1.dm.DataDB().RemoveTrendDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
 	// delay if needed before cache call

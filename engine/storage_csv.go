@@ -367,9 +367,9 @@ func (csvs *CSVStorage) GetTPRankings(tpid, tenant, id string) ([]*utils.TPRanki
 func (csvs *CSVStorage) GetTPTrends(tpid, tenant, id string) ([]*utils.TPTrendsProfile, error) {
 	var tpTrends TrendMdls
 	if err := csvs.proccesData(TrendMdl{}, csvs.trendsFn, func(tp any) {
-		tPTrends := tp.(TrendMdl)
-		tPTrends.Tpid = tpid
-		tpTrends = append(tpTrends, &tPTrends)
+		tPTrend := tp.(TrendMdl)
+		tPTrend.Tpid = tpid
+		tpTrends = append(tpTrends, &tPTrend)
 	}); err != nil {
 		return nil, err
 	}

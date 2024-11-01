@@ -212,6 +212,9 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheRankingProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false), Precache: utils.BoolPointer(false),
 				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
+			utils.CacheRankings: {Limit: utils.IntPointer(-1),
+				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false), Precache: utils.BoolPointer(false),
+				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheRPCConnections: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
@@ -518,6 +521,13 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Remote:     utils.BoolPointer(false),
 			},
 			utils.CacheRankingProfiles: {
+				Ttl:        utils.StringPointer(utils.EmptyString),
+				Static_ttl: utils.BoolPointer(false),
+				Limit:      utils.IntPointer(-1),
+				Replicate:  utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(false),
+			},
+			utils.CacheRankings: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),

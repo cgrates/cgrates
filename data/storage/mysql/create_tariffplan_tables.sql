@@ -78,6 +78,29 @@ CREATE TABLE tp_trends(
   UNIQUE KEY `unique_tp_trends` (`tpid`,`tenant`,`id`,`stat_id`)
   );
 
+--
+-- Table structure for tabls `tp_rankings`
+--
+
+DROP TABLE IF EXISTS tp_rankings;
+CREATE TABLE tp_rankings(
+ `pk` int(11) NOT NULL AUTO_INCREMENT,
+ `tpid` varchar(64) NOT NULL,
+ `tenant` varchar(64) NOT NULL,
+ `id` varchar(64) NOT NULL,
+ `schedule` varchar(32) NOT NULL,
+ `stat_ids` varchar(64) NOT NULL,
+ `metric_ids` varchar(64) NOT NULL,
+ `sorting` varchar(32) NOT NULL,
+ `sorting_parameters` varchar(64) NOT NULL,
+ `stored` BOOLEAN NOT NULL,
+ `threshold_ids` varchar(64) NOT NULL,
+ `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid`  (`tpid`),
+  UNIQUE KEY `unique_tp_rankings` (`tpid`,`tenant`,`id`,`stat_ids`)
+  );
+
 
 --
 -- Table structure for table `tp_threshold_cfgs`

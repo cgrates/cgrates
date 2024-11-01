@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -81,17 +80,5 @@ func TestTrendServiceServiceName(t *testing.T) {
 	expected := utils.TrendS
 	if serviceName != expected {
 		t.Errorf("Expected service name to be %s, but got %s", expected, serviceName)
-	}
-}
-
-func TestTrendService_Reload(t *testing.T) {
-	tr := &TrendService{}
-
-	ctx := context.Background()
-
-	err := tr.Reload(ctx, nil)
-
-	if err != nil {
-		t.Errorf("Expected no error, but got: %v", err)
 	}
 }

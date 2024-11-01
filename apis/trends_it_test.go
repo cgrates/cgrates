@@ -218,6 +218,12 @@ func testTrendsSetTrendProfiles(t *testing.T) {
 			t.Error(err)
 		}
 	}
+	if err := trRPC.Call(context.Background(), utils.CacheSv1Clear,
+		&utils.AttrCacheIDsWithAPIOpts{
+			CacheIDs: nil,
+		}, &reply); err != nil {
+		t.Error(err)
+	}
 }
 
 func testTrendsGetTrendProfileAfterSet(t *testing.T) {
@@ -334,6 +340,13 @@ func testTrendsRemoveTrendProfile(t *testing.T) {
 }
 
 func testTrendsGetTrendProfileAfterRemove(t *testing.T) {
+	var reply string
+	if err := trRPC.Call(context.Background(), utils.CacheSv1Clear,
+		&utils.AttrCacheIDsWithAPIOpts{
+			CacheIDs: nil,
+		}, &reply); err != nil {
+		t.Error(err)
+	}
 	var replyTrendProfile engine.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfile,
 		&utils.TenantIDWithAPIOpts{

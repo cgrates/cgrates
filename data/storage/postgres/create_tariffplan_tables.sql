@@ -76,6 +76,29 @@ CREATE TABLE tp_trends(
   CREATE INDEX tp_trends_idx ON tp_trends(tpid);
   CREATE INDEX tp_trends_unique ON  tp_trends("tpid","tenant","id","stat_id");
 
+
+--
+-- Table structure for table `tp_rankings`
+--
+
+DROP TABLE IF EXISTS tp_rankings;
+CREATE TABLE tp_rankings(
+  "pk"  SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "schedule" varchar(32) NOT NULL,
+  "stat_ids" varchar(64) NOT NULL,
+  "metric_ids" varchar(64) NOT NULL,
+  "sorting" varchar(32) NOT NULL,
+  "sorting_parameters" varchar(64) NOT NULL,
+  "stored" BOOLEAN NOT NULL,
+  "threshold_ids" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+);
+CREATE INDEX tp_rankings_idx ON tp_rankings (tpid);
+CREATE INDEX tp_rankings_unique ON tp_rankings  ("tpid","tenant", "id","stat_ids");
+
   
 --
 -- Table structure for table `tp_threshold_cfgs`

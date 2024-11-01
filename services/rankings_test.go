@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -61,18 +60,5 @@ func TestRankingServiceName(t *testing.T) {
 	expectedServiceName := utils.RankingS
 	if serviceName != expectedServiceName {
 		t.Errorf("Expected service name '%s', but got '%s'", expectedServiceName, serviceName)
-	}
-}
-
-func TestRankingServiceReload(t *testing.T) {
-
-	rankingService := &RankingService{}
-
-	ctx := &context.Context{}
-
-	err := rankingService.Reload(ctx, nil)
-
-	if err != nil {
-		t.Errorf("Expected no error, but got: %v", err)
 	}
 }

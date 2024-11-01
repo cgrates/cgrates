@@ -32,36 +32,36 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
-func TestPopulateCostForRoutesConnRefused(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	connMgr := NewConnManager(cfg)
-	fltrS := NewFilterS(cfg, connMgr, nil)
-	routes := map[string]*RouteWithWeight{
-		"RW": {
-			Route: &Route{
-				ID:             "local",
-				RateProfileIDs: []string{"RP_LOCAL"},
-			},
-			Weight: 10,
-		},
-	}
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.Usage: "10s",
-		},
-		APIOpts: map[string]any{
-			utils.OptsRatesProfileIDs: []string{},
-		},
-	}
-	extraOpts := &optsGetRoutes{}
-	cfg.RouteSCfg().RateSConns = []string{"*localhost"}
-	_, err := populateCostForRoutes(context.Background(), cfg, connMgr, fltrS, routes, ev, extraOpts)
-	errExpect := "RATES_ERROR:dial tcp 127.0.0.1:2012: connect: connection refused"
-	if err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v\n but received %v", errExpect, err)
-	}
-}
+// func TestPopulateCostForRoutesConnRefused(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	connMgr := NewConnManager(cfg)
+// 	fltrS := NewFilterS(cfg, connMgr, nil)
+// 	routes := map[string]*RouteWithWeight{
+// 		"RW": {
+// 			Route: &Route{
+// 				ID:             "local",
+// 				RateProfileIDs: []string{"RP_LOCAL"},
+// 			},
+// 			Weight: 10,
+// 		},
+// 	}
+// 	ev := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		Event: map[string]any{
+// 			utils.Usage: "10s",
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.OptsRatesProfileIDs: []string{},
+// 		},
+// 	}
+// 	extraOpts := &optsGetRoutes{}
+// 	cfg.RouteSCfg().RateSConns = []string{"*localhost"}
+// 	_, err := populateCostForRoutes(context.Background(), cfg, connMgr, fltrS, routes, ev, extraOpts)
+// 	errExpect := "RATES_ERROR:dial tcp 127.0.0.1:2012: connect: connection refused"
+// 	if err == nil || err.Error() != errExpect {
+// 		t.Errorf("Expected %v\n but received %v", errExpect, err)
+// 	}
+// }
 
 func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 

@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"reflect"
-	"sync"
 	"testing"
 	"time"
 
@@ -217,7 +216,7 @@ func TestTrendTenantID(t *testing.T) {
 			"metric1": 2.5,
 			"metric2": 2.0,
 		},
-		tP: &TrendProfile{
+		tPrfl: &TrendProfile{
 			Tenant:          "cgrates.org",
 			ID:              "trendProfileID",
 			Schedule:        "0 * * * *",
@@ -247,8 +246,8 @@ func TestTrendTenantID(t *testing.T) {
 		t.Errorf("Expected 2 metrics time entries, but got %d", len(trend.Metrics))
 	}
 
-	if trend.tP.QueueLength != 10 {
-		t.Errorf("Expected QueueLength 10, but got %d", trend.tP.QueueLength)
+	if trend.tPrfl.QueueLength != 10 {
+		t.Errorf("Expected QueueLength 10, but got %d", trend.tPrfl.QueueLength)
 	}
 }
 
@@ -324,7 +323,6 @@ func TestGetTrendLabel(t *testing.T) {
 func TestGetTrendGrowth(t *testing.T) {
 
 	trend := Trend{
-		tMux:    &sync.RWMutex{},
 		mLast:   map[string]time.Time{},
 		Metrics: map[time.Time]map[string]*MetricWithTrend{},
 		mTotals: map[string]float64{},
@@ -351,9 +349,8 @@ func TestGetTrendGrowth(t *testing.T) {
 	}
 
 	got, err := trend.getTrendGrowth("metric1", 100, utils.MetaLast, 2)
-	expected := utils.Round(20.0/100, 2, utils.MetaRoundingMiddle)
-	if err != nil || !reflect.DeepEqual(got, expected) {
-		t.Errorf("Mismatch for MetaLast correlation. Got: %v, expected: %v", got, expected)
+	if err != nil || got != 25.0 {
+		t.Errorf("Mismatch for MetaLast correlation. Got: %v, expected: %v", got, 25.0)
 	}
 
 	trend.mTotals = map[string]float64{
@@ -364,9 +361,8 @@ func TestGetTrendGrowth(t *testing.T) {
 	}
 
 	got, err = trend.getTrendGrowth("metric1", 120, utils.MetaAverage, 2)
-	expected = utils.Round(20.0/100, 2, utils.MetaRoundingMiddle)
-	if err != nil || !reflect.DeepEqual(got, expected) {
-		t.Errorf("Mismatch for MetaAverage correlation. Got: %v, expected: %v", got, expected)
+	if err != nil || got != 20.0 {
+		t.Errorf("Mismatch for MetaAverage correlation. Got: %v, expected: %v", got, 20.0)
 	}
 
 	_, err = trend.getTrendGrowth("metric1", 100, "invalidCorrelation", 2)

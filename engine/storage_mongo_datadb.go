@@ -66,6 +66,7 @@ const (
 	ColTrs  = "trend_profiles"
 	ColTrd  = "trends"
 	ColRgp  = "ranking_profiles"
+	ColRnk  = "rankings"
 	ColFlt  = "filters"
 	ColRts  = "route_profiles"
 	ColAttr = "attribute_profiles"
@@ -781,6 +782,38 @@ func (ms *MongoStorage) RemRankingProfileDrv(ctx *context.Context, tenant, id st
 
 }
 
+func (ms *MongoStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (*Ranking, error) {
+	rn := new(Ranking)
+	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColRnk).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(rn)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return rn, err
+}
+func (ms *MongoStorage) SetRankingDrv(ctx *context.Context, rn *Ranking) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColRnk).UpdateOne(sctx, bson.M{"tenant": rn.Tenant, "id": rn.ID},
+			bson.M{"$set": rn},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColRnk).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+}
+
 func (ms *MongoStorage) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (*TrendProfile, error) {
 	srProfile := new(TrendProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
@@ -813,9 +846,9 @@ func (ms *MongoStorage) RemTrendProfileDrv(ctx *context.Context, tenant, id stri
 	})
 }
 
-func (ms *MongoStorage) GetTrendDrv(tenant, id string) (*Trend, error) {
+func (ms *MongoStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (*Trend, error) {
 	tr := new(Trend)
-	err := ms.query(context.Background(), func(sctx mongo.SessionContext) error {
+	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColTrd).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(tr)
 		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
@@ -826,8 +859,8 @@ func (ms *MongoStorage) GetTrendDrv(tenant, id string) (*Trend, error) {
 	return tr, err
 }
 
-func (ms *MongoStorage) SetTrendDrv(tr *Trend) error {
-	return ms.query(context.Background(), func(sctx mongo.SessionContext) error {
+func (ms *MongoStorage) SetTrendDrv(ctx *context.Context, tr *Trend) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColTrd).UpdateOne(sctx, bson.M{"tenant": tr.Tenant, "id": tr.ID},
 			bson.M{"$set": tr},
 			options.Update().SetUpsert(true),
@@ -836,8 +869,8 @@ func (ms *MongoStorage) SetTrendDrv(tr *Trend) error {
 	})
 }
 
-func (ms *MongoStorage) RemoveTrendDrv(tenant, id string) error {
-	return ms.query(context.Background(), func(sctx mongo.SessionContext) error {
+func (ms *MongoStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		dr, err := ms.getCol(ColTrd).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound

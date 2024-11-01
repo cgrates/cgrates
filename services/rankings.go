@@ -71,8 +71,10 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		return utils.ErrServiceAlreadyRunning
 	}
 	ran.srvDep[utils.DataDB].Add(1)
-	ran.srvDep[utils.DataDB].Add(1)
-	if err = ran.cacheS.WaitToPrecache(ctx, utils.CacheTrendProfiles); err != nil {
+	if err = ran.cacheS.WaitToPrecache(ctx,
+		utils.CacheRankingProfiles,
+		utils.CacheRankings,
+	); err != nil {
 		return err
 	}
 	var datadb *engine.DataManager
@@ -84,10 +86,19 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if filterS, err = waitForFilterS(ctx, ran.filterSChan); err != nil {
 		return
 	}
-	ran.ran = engine.NewRankingService(datadb, ran.cfg, filterS, ran.connMgr)
+	ran.Lock()
+	defer ran.Unlock()
+	ran.ran = engine.NewRankingS(datadb, ran.connMgr, filterS, ran.cfg)
+
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.RankingS))
-	srv, _ := engine.NewService(ran.ran)
+	if err := ran.ran.StartRankingS(ctx); err != nil {
+		return err
+	}
+	srv, err := engine.NewService(ran.ran)
+	if err != nil {
+		return err
+	}
 	if !ran.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
 			ran.server.RpcRegister(s)
@@ -99,6 +110,9 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 
 // Reload handles the change of config
 func (ran *RankingService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+	ran.Lock()
+	ran.ran.Reload(ctx)
+	ran.Unlock()
 	return
 }
 
@@ -107,6 +121,8 @@ func (ran *RankingService) Shutdown() (err error) {
 	defer ran.srvDep[utils.DataDB].Done()
 	ran.Lock()
 	defer ran.Unlock()
+	ran.ran.StopRankingS()
+	ran.ran = nil
 	<-ran.connChan
 	ran.server.RpcUnregisterName(utils.RankingSv1)
 	return
@@ -114,9 +130,7 @@ func (ran *RankingService) Shutdown() (err error) {
 
 // IsRunning returns if the service is running
 func (ran *RankingService) IsRunning() bool {
-	ran.RLock()
-	defer ran.RUnlock()
-	return false
+	return ran != nil && ran.ran != nil
 }
 
 // ServiceName returns the service name

@@ -20,9 +20,11 @@ package engine
 
 import (
 	"math"
+	"slices"
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -80,32 +82,147 @@ func (srp *TrendProfile) TenantID() string {
 	return utils.ConcatenatedKey(srp.Tenant, srp.ID)
 }
 
-type TrendProfilesAPI struct {
-	Tenant string
-	TpIDs  []string
-}
-
 type TrendWithAPIOpts struct {
 	*Trend
 	APIOpts map[string]any
 }
 
+// NewTrendFromProfile is a constructor for an empty trend out of it's profile
+func NewTrendFromProfile(tP *TrendProfile) *Trend {
+	return &Trend{
+		Tenant:   tP.Tenant,
+		ID:       tP.ID,
+		RunTimes: make([]time.Time, 0),
+		Metrics:  make(map[time.Time]map[string]*MetricWithTrend),
+
+		tPrfl: tP,
+	}
+}
+
 // Trend is the unit matched by filters
 type Trend struct {
-	tMux *sync.RWMutex
+	tMux sync.RWMutex
 
 	Tenant            string
 	ID                string
 	RunTimes          []time.Time
 	Metrics           map[time.Time]map[string]*MetricWithTrend
-	CompressedMetrics []byte // if populated, Metrics will be empty
+	CompressedMetrics []byte // if populated, Metrics and RunTimes will be emty
 
 	// indexes help faster processing
 	mLast   map[string]time.Time // last time a metric was present
-	mCounts map[string]int       // number of times a metrics is present in Metrics
+	mCounts map[string]int       // number of times a metric is present in Metrics
 	mTotals map[string]float64   // cached sum, used for average calculations
 
-	tP *TrendProfile // cache here the settings
+	tPrfl *TrendProfile // store here the trend profile so we can have it at hands further
+
+}
+
+func (t *Trend) Clone() (tC *Trend) {
+	return
+}
+
+// AsTrendSummary transforms the trend into TrendSummary
+func (t *Trend) asTrendSummary() (ts *TrendSummary) {
+	ts = &TrendSummary{
+		Tenant:  t.Tenant,
+		ID:      t.ID,
+		Metrics: make(map[string]*MetricWithTrend),
+	}
+	if len(t.RunTimes) != 0 {
+		ts.Time = t.RunTimes[len(t.RunTimes)-1]
+		for mID, mWt := range t.Metrics[ts.Time] {
+			ts.Metrics[mID] = &MetricWithTrend{
+				ID:          mWt.ID,
+				Value:       mWt.Value,
+				TrendGrowth: mWt.TrendGrowth,
+				TrendLabel:  mWt.TrendLabel,
+			}
+		}
+	}
+	return
+}
+
+func (t *Trend) compress(ms utils.Marshaler) (err error) {
+	if config.CgrConfig().TrendSCfg().StoreUncompressedLimit > len(t.RunTimes) {
+		return
+	}
+	t.CompressedMetrics, err = ms.Marshal(t.Metrics)
+	if err != nil {
+		return
+	}
+	t.Metrics = nil
+	t.RunTimes = nil
+	return nil
+}
+
+func (t *Trend) uncompress(ms utils.Marshaler) (err error) {
+	if t == nil || t.CompressedMetrics == nil {
+		return
+	}
+
+	err = ms.Unmarshal(t.CompressedMetrics, &t.Metrics)
+	if err != nil {
+		return
+	}
+	t.CompressedMetrics = []byte{}
+	t.RunTimes = make([]time.Time, len(t.Metrics))
+	i := 0
+	for key := range t.Metrics {
+		t.RunTimes[i] = key
+		i++
+	}
+	slices.SortFunc(t.RunTimes, func(a, b time.Time) int {
+		return a.Compare(b)
+	})
+	return
+}
+
+// Compile is used to initialize or cleanup the Trend
+//
+//	thread safe since it should be used close to source
+func (t *Trend) Compile(cleanTtl time.Duration, qLength int) {
+	t.cleanup(cleanTtl, qLength)
+	if len(t.mTotals) == 0 { // indexes were not yet built
+		t.computeIndexes()
+	}
+}
+
+// cleanup will clean stale data out of
+func (t *Trend) cleanup(ttl time.Duration, qLength int) (altered bool) {
+	if ttl >= 0 {
+		expTime := time.Now().Add(-ttl)
+		var expIdx *int
+		for i, rT := range t.RunTimes {
+			if rT.After(expTime) {
+				continue
+			}
+			expIdx = &i
+			delete(t.Metrics, rT)
+		}
+		if expIdx != nil {
+			if len(t.RunTimes)-1 == *expIdx {
+				t.RunTimes = make([]time.Time, 0)
+			} else {
+				t.RunTimes = t.RunTimes[*expIdx+1:]
+			}
+			altered = true
+		}
+	}
+
+	diffLen := len(t.RunTimes) - qLength
+	if qLength > 0 && diffLen > 0 {
+		var rmTms []time.Time
+		rmTms, t.RunTimes = t.RunTimes[:diffLen], t.RunTimes[diffLen:]
+		for _, rmTm := range rmTms {
+			delete(t.Metrics, rmTm)
+		}
+		altered = true
+	}
+	if altered {
+		t.computeIndexes()
+	}
+	return
 }
 
 // computeIndexes should be called after each retrieval from DB
@@ -129,7 +246,7 @@ func (t *Trend) indexesAppendMetric(mWt *MetricWithTrend, rTime time.Time) {
 
 // getTrendGrowth returns the percentage growth for a specific metric
 //
-// correlation parameter will define whether the comparison is against last or average value
+// @correlation parameter will define whether the comparison is against last or average value
 // errors in case of previous
 func (t *Trend) getTrendGrowth(mID string, mVal float64, correlation string, roundDec int) (tG float64, err error) {
 	var prevVal float64
@@ -147,9 +264,9 @@ func (t *Trend) getTrendGrowth(mID string, mVal float64, correlation string, rou
 	default:
 		return -1.0, utils.ErrCorrelationUndefined
 	}
-	diffVal := mVal - prevVal
 
-	return utils.Round(diffVal/100, roundDec, utils.MetaRoundingMiddle), nil
+	diffVal := mVal - prevVal
+	return utils.Round(diffVal*100/prevVal, roundDec, utils.MetaRoundingMiddle), nil
 }
 
 // getTrendLabel identifies the trend label for the instant value of the metric
@@ -180,4 +297,12 @@ type MetricWithTrend struct {
 
 func (tr *Trend) TenantID() string {
 	return utils.ConcatenatedKey(tr.Tenant, tr.ID)
+}
+
+// TrendSummary represents the last trend computed
+type TrendSummary struct {
+	Tenant  string
+	ID      string
+	Time    time.Time
+	Metrics map[string]*MetricWithTrend
 }

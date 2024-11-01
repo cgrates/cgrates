@@ -137,6 +137,8 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
 	expStats[utils.CacheRankingProfiles].Items = 0
 	expStats[utils.CacheRankingProfiles].Groups = 0
+	expStats[utils.CacheRankings].Items = 0
+	expStats[utils.CacheRankings].Groups = 0
 	expStats[utils.CacheStatFilterIndexes].Items = 7
 	expStats[utils.CacheStatFilterIndexes].Groups = 1
 	expStats[utils.CacheRouteFilterIndexes].Items = 3
@@ -173,6 +175,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheTrendProfiles:               utils.MetaReady,
 		utils.CacheTrends:                      utils.MetaReady,
 		utils.CacheRankingProfiles:             utils.MetaReady,
+		utils.CacheRankings:                    utils.MetaReady,
 		utils.CacheFilters:                     utils.MetaReady,
 		utils.CacheRouteProfiles:               utils.MetaReady,
 		utils.CacheAttributeProfiles:           utils.MetaReady,

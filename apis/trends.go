@@ -33,7 +33,7 @@ func (adms *AdminSv1) GetTrendProfile(ctx *context.Context, arg *utils.TenantIDW
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
-	sCfg, err := adms.dm.GetTrendProfile(ctx, tnt, arg.ID)
+	sCfg, err := adms.dm.GetTrendProfile(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -82,7 +82,7 @@ func (admS *AdminSv1) GetTrendProfiles(ctx *context.Context, args *utils.ArgsIte
 	*sqPrfs = make([]*engine.TrendProfile, 0, len(sqPrfIDs))
 	for _, sqPrfID := range sqPrfIDs {
 		var sqPrf *engine.TrendProfile
-		sqPrf, err = admS.dm.GetTrendProfile(ctx, tnt, sqPrfID)
+		sqPrf, err = admS.dm.GetTrendProfile(ctx, tnt, sqPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
 		}
@@ -139,4 +139,31 @@ func (adms *AdminSv1) RemoveTrendProfile(ctx *context.Context, args *utils.Tenan
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewTrendSv1 initializes TrendSV1
+func NewTrendSv1(trS *engine.TrendS) *TrendSv1 {
+	return &TrendSv1{trS: trS}
+}
+
+// TrendSv1 exports RPC from RLs
+type TrendSv1 struct {
+	ping
+	trS *engine.TrendS
+}
+
+func (trs *TrendSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) error {
+	return trs.trS.V1ScheduleQueries(ctx, args, scheduled)
+}
+
+func (trs *TrendSv1) GetTrend(ctx *context.Context, args *utils.ArgGetTrend, trend *engine.Trend) error {
+	return trs.trS.V1GetTrend(ctx, args, trend)
+}
+
+func (trs *TrendSv1) GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) error {
+	return trs.trS.V1GetScheduledTrends(ctx, args, schedTrends)
+}
+
+func (trs *TrendSv1) GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *engine.TrendSummary) error {
+	return trs.trS.V1GetTrendSummary(ctx, arg, reply)
 }
