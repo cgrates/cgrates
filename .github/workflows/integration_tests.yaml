@@ -1,10 +1,19 @@
-name: Integration Tests
+name: integration
 
 on:
-  # push:
-  #   branches: [1.0]
+  push:
+    branches:
+      - 1.0
+    paths-ignore:
+      - 'docs/**'
+      - README.md
   pull_request:
-    branches: [1.0]
+    branches:
+      - 1.0
+    paths-ignore:
+      - 'docs/**'
+      - README.md
+  workflow_dispatch:
 
 jobs:
   # check-if-duplicate-action:
@@ -32,7 +41,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23.0"
+          go-version: "1.23.x"
 
       - name: Set up Python
         uses: actions/setup-python@v5
