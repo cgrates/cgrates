@@ -38,6 +38,7 @@ require (
 	github.com/nyaruka/phonenumbers v1.4.0
 	github.com/peterh/liner v1.2.2
 	github.com/prometheus/client_golang v1.20.2
+	github.com/prometheus/procfs v0.15.1
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/ugorji/go/codec v1.2.12
@@ -118,7 +119,6 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.57.0 // indirect
-	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect

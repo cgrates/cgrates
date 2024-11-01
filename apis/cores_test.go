@@ -35,12 +35,8 @@ func TestCoreSStatus(t *testing.T) {
 	caps := engine.NewCaps(2, utils.MetaTopUp)
 	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
-	arg := &utils.TenantWithAPIOpts{
-		Tenant:  "cgrates.org",
-		APIOpts: map[string]any{},
-	}
 	var reply map[string]any
-	if err := cS.Status(context.Background(), arg, &reply); err != nil {
+	if err := cS.Status(context.Background(), &cores.V1StatusParams{}, &reply); err != nil {
 		t.Error(err)
 	}
 }

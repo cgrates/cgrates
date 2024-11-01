@@ -100,7 +100,7 @@ func (dS *DispatcherService) CoreSv1StartMemoryProfiling(ctx *context.Context, a
 	opts := args.APIOpts
 	return dS.Dispatch(ctx, &utils.CGREvent{Tenant: tnt, Event: ev, APIOpts: opts}, utils.MetaCore, utils.CoreSv1StartMemoryProfiling, args, reply)
 }
-func (dS *DispatcherService) CoreSv1Status(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
+func (dS *DispatcherService) CoreSv1Status(ctx *context.Context, args *cores.V1StatusParams, reply *map[string]any) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args != nil && len(args.Tenant) != 0 {
 		tnt = args.Tenant

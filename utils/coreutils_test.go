@@ -29,15 +29,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func TestGetStartTime(t *testing.T) {
-	startCGRateSTime = time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
-	eOut := startCGRateSTime.Format(time.UnixDate)
-	rcv := GetStartTime()
-	if !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-	}
-}
-
 func TestFirstNonEmpty(t *testing.T) {
 	//only check with an empty string
 	rcv := FirstNonEmpty(EmptyString)

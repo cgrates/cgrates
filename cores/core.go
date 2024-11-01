@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"runtime/pprof"
 	"sync"
 	"time"
@@ -283,28 +282,42 @@ func (cS *CoreS) StopMemoryProfiling() error {
 	return nil
 }
 
-// V1Status returns the status of the engine
-func (cS *CoreS) V1Status(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *map[string]any) (err error) {
-	memstats := new(runtime.MemStats)
-	runtime.ReadMemStats(memstats)
-	response := make(map[string]any)
-	response[utils.NodeID] = cS.cfg.GeneralCfg().NodeID
-	response[utils.MemoryUsage] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
-	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
-	if response[utils.VersionName], err = utils.GetCGRVersion(); err != nil {
-		utils.Logger.Err(err.Error())
-		err = nil
+// V1StatusParams contains required parameters for a CoreSv1.Status request.
+type V1StatusParams struct {
+	Debug    bool
+	Timezone string
+	Tenant   string
+	APIOpts  map[string]any
+}
+
+// V1Status returns metrics related to the engine process.
+func (cS *CoreS) V1Status(_ *context.Context, params *V1StatusParams, reply *map[string]any) error {
+	metrics, err := computeAppMetrics()
+	if err != nil {
+		return err
 	}
-	response[utils.RunningSince] = utils.GetStartTime()
-	response[utils.GoVersion] = runtime.Version()
+	metrics.NodeID = cS.cfg.GeneralCfg().NodeID
 	if cS.cfg.CoreSCfg().Caps != 0 {
-		response[utils.CAPSAllocated] = cS.caps.Allocated()
+		metrics.CapsStats = &CapsStats{
+			Allocated: cS.caps.Allocated(),
+		}
 		if cS.cfg.CoreSCfg().CapsStatsInterval != 0 {
-			response[utils.CAPSPeak] = cS.CapsStats.GetPeak()
+			peak := cS.CapsStats.GetPeak()
+			metrics.CapsStats.Peak = &peak
 		}
 	}
-	*reply = response
-	return
+	debug := false
+	timezone := cS.cfg.GeneralCfg().DefaultTimezone
+	if params != nil {
+		debug = params.Debug
+		timezone = params.Timezone
+	}
+	metricsMap, err := metrics.ToMap(debug, timezone)
+	if err != nil {
+		return fmt.Errorf("could not convert StatusMetrics to map[string]any: %v", err)
+	}
+	*reply = metricsMap
+	return nil
 }
 
 // Sleep is used to test the concurrent requests mechanism.

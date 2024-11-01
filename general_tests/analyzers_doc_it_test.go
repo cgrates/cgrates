@@ -656,7 +656,7 @@ func testAnzDocQuery(t *testing.T) {
 	// Get results for CoreSv1.Status request replies that state a higher number of goroutines than 46
 	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
 		HeaderFilters:  `+RequestMethod:"CoreSv1.Status"`,
-		ContentFilters: []string{"*gt:~*rep.ActiveGoroutines:46"},
+		ContentFilters: []string{"*gt:~*rep.goroutines:46"},
 	}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != 1 {
