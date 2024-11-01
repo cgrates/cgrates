@@ -951,32 +951,40 @@ func GenerateDBItemOpts(apiKey, routeID, cache, rmtHost string) (mp map[string]a
 }
 
 // SplitPath splits filter rules based on the specified separator
-func SplitPath(rule string, sep byte, n int) (splt []string) {
-	var p, st int
+func SplitPath(rule string, sep byte, n int) []string {
+	var nest, pos int
 	if n <= 0 {
 		n = bytes.Count([]byte(rule), []byte{sep}) + 1
 	}
 	if n == 1 {
 		return []string{rule}
 	}
-	splt = make([]string, 0, n)
+	splt := make([]string, 0, n)
+	shouldBreak := false
 	for i, b := range rule {
 		switch byte(b) {
 		case sep:
-			if p == 0 {
-				splt = append(splt, rule[st:i])
-				st = i + 1
-				if len(splt) == n-1 {
-					splt = append(splt, rule[st:])
-					return
-				}
+			if nest != 0 {
+				continue // skip separators inside nested structures
+			}
+			splt = append(splt, rule[pos:i])
+			pos = i + 1
+			if len(splt) == n-1 {
+				shouldBreak = true
 			}
 		case IdxStart[0]:
-			p++
+			nest++ // entering nested structure
 		case IdxEnd[0]:
-			p--
+			nest-- // exiting nested structure
+		case HashtagSep[0]:
+			if sep == NestingSep[0] {
+				shouldBreak = true
+			}
+		}
+		if shouldBreak {
+			break
 		}
 	}
-	splt = append(splt, rule[st:])
-	return
+	splt = append(splt, rule[pos:]) // add last element
+	return splt
 }
