@@ -49,7 +49,7 @@ func TestDiameterAgentReload1(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
-	srv := NewDiameterAgent(cfg, filterSChan, nil, srvDep)
+	srv := NewDiameterAgent(cfg, filterSChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
@@ -102,7 +102,7 @@ func TestDiameterAgentReload2(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDiameterAgent(cfg, filterSChan, nil, srvDep)
+	srv := NewDiameterAgent(cfg, filterSChan, nil, nil, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -119,12 +119,12 @@ func TestDiameterAgentReload3(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDiameterAgent(cfg, filterSChan, nil, srvDep)
+	srv := NewDiameterAgent(cfg, filterSChan, nil, nil, srvDep)
 
 	cfg.DiameterAgentCfg().ListenNet = "bad"
 	cfg.DiameterAgentCfg().DictionariesPath = ""
 
-	err := srv.(*DiameterAgent).start(nil, func() {})
+	err := srv.(*DiameterAgent).start(nil, func() {}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

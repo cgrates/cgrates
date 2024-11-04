@@ -454,25 +454,42 @@ func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 	return
 }
 
-// negDiamAnswer is used to return the negative answer we need previous to
-func diamErr(m *diam.Message, resCode uint32,
-	reqVars *utils.DataNode,
-	tpl []*config.FCTemplate, tnt, tmz string,
-	filterS *engine.FilterS) (a *diam.Message, err error) {
-	aReq := NewAgentRequest(
-		newDADataProvider(nil, m), reqVars,
-		nil, nil, nil, nil,
-		tnt, tmz, filterS, nil)
-	if err = aReq.SetFields(tpl); err != nil {
+// diamErr handles Diameter error scenarios by attempting to build a customized error answer
+// based on the *err template.
+func diamErr(c diam.Conn, m *diam.Message, resCode uint32, reqVars *utils.DataNode, cfg *config.CGRConfig,
+	filterS *engine.FilterS) {
+	tnt := cfg.GeneralCfg().DefaultTenant
+	tmz := cfg.GeneralCfg().DefaultTimezone
+	aReq := NewAgentRequest(newDADataProvider(nil, m), reqVars,
+		nil, nil, nil, nil, tnt, tmz, filterS, nil)
+	if err := aReq.SetFields(cfg.TemplatesCfg()[utils.MetaErr]); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> message: %s - failed to parse *err template: %v",
+			utils.DiameterAgent, m, err))
+		writeOnConn(c, diamErrMsg(m, diam.UnableToComply,
+			fmt.Sprintf("failed to parse *err template: %v", err)))
 		return
 	}
-	return diamAnswer(m, resCode, true, aReq.Reply, tmz)
+	diamAns, err := diamAnswer(m, resCode, true, aReq.Reply, tmz)
+	if err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> message: %s - failed to build error answer: %v",
+			utils.DiameterAgent, m, err))
+		writeOnConn(c, diamErrMsg(m, diam.UnableToComply,
+			fmt.Sprintf("failed to build error answer: %v", err)))
+		return
+	}
+	writeOnConn(c, diamAns)
 }
 
-func diamBareErr(m *diam.Message, resCode uint32) (a *diam.Message) {
-	a = m.Answer(resCode)
-	a.Header.CommandFlags = diam.ErrorFlag
-	return
+// diamErrMsg creates a Diameter error answer with the given result code and optional error message.
+func diamErrMsg(m *diam.Message, resCode uint32, msg string) *diam.Message {
+	ans := m.Answer(resCode)
+	ans.Header.CommandFlags = diam.ErrorFlag
+	if msg != "" {
+		ans.NewAVP(avp.ErrorMessage, 0, 0, datatype.UTF8String(msg))
+	}
+	return ans
 }
 
 func disectDiamListen(addrs string) (ipAddrs []net.IP) {
