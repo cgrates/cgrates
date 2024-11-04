@@ -319,7 +319,7 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 }
 
 // NewRPCClient creates and returns a new RPC client for cgr-engine.
-func NewRPCClient(t *testing.T, cfg *config.ListenCfg, encoding string) *birpc.Client {
+func NewRPCClient(t testing.TB, cfg *config.ListenCfg, encoding string) *birpc.Client {
 	t.Helper()
 	var err error
 	var client *birpc.Client
@@ -352,11 +352,13 @@ type TestEngine struct {
 
 	// PreStartHook executes custom logic relying on CGRConfig
 	// before starting cgr-engine.
-	PreStartHook func(*testing.T, *config.CGRConfig)
+	PreStartHook func(testing.TB, *config.CGRConfig)
+
+	// TODO: add possibility to pass environment vars
 }
 
 // Run initializes a cgr-engine instance for testing. It calls t.Fatal on any setup failure.
-func (ng TestEngine) Run(t *testing.T, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
+func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
 	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
 	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
@@ -388,7 +390,7 @@ type DBCfg struct {
 // parseCfg initializes and returns a CGRConfig. It handles both static and
 // dynamic configs, including custom DB settings. For dynamic configs, it
 // creates temporary configuration files in a new directory.
-func parseCfg(t *testing.T, cfgPath, cfgJSON string, dbCfg DBCfg) (cfg *config.CGRConfig) {
+func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg) (cfg *config.CGRConfig) {
 	t.Helper()
 	if cfgPath == "" && cfgJSON == "" {
 		t.Fatal("missing config source")
@@ -455,7 +457,7 @@ func parseCfg(t *testing.T, cfgPath, cfgJSON string, dbCfg DBCfg) (cfg *config.C
 // loadCSVs loads tariff plan data from CSV files. The CSV files are created based on the csvFiles map, where
 // the key represents the file name and the value the contains its contents. Assumes the data is loaded
 // automatically (RunDelay != 0)
-func loadCSVs(t *testing.T, tpPath string, csvFiles map[string]string) {
+func loadCSVs(t testing.TB, tpPath string, csvFiles map[string]string) {
 	t.Helper()
 	if tpPath != "" {
 		for fileName, content := range csvFiles {
@@ -467,8 +469,8 @@ func loadCSVs(t *testing.T, tpPath string, csvFiles map[string]string) {
 	}
 }
 
-// flushDBs resets the databases specified in the configuration if the corresponding flags are true.
-func FlushDBs(t *testing.T, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
+// FlushDBs resets the databases specified in the configuration if the corresponding flags are true.
+func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
 	t.Helper()
 	if flushDataDB {
 		if err := InitDataDB(cfg); err != nil {
@@ -484,7 +486,7 @@ func FlushDBs(t *testing.T, cfg *config.CGRConfig, flushDataDB, flushStorDB bool
 
 // startEngine starts the CGR engine process with the provided configuration
 // and flags. It writes engine logs to the provided logBuffer (if any).
-func startEngine(t *testing.T, cfg *config.CGRConfig, logBuffer io.Writer, extraFlags ...string) {
+func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, extraFlags ...string) {
 	t.Helper()
 	binPath, err := exec.LookPath("cgr-engine")
 	if err != nil {
@@ -522,7 +524,7 @@ func startEngine(t *testing.T, cfg *config.CGRConfig, logBuffer io.Writer, extra
 	}
 }
 
-func WaitForService(t *testing.T, ctx *context.Context, client *birpc.Client, service string) {
+func WaitForService(t testing.TB, ctx *context.Context, client *birpc.Client, service string) {
 	t.Helper()
 	method := service + ".Ping"
 	backoff := utils.FibDuration(time.Millisecond, 0)
