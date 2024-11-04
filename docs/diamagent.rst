@@ -36,7 +36,6 @@ With explanations in the comments:
 	"origin_realm": "cgrates.org",		// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,						// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",			// diameter Product-Name AVP used in replies
-	"concurrent_requests": -1,			// limit the number of active requests processed by the server <-1|0-n>
 	"synced_conn_requests": false,		// process one request at the time per connection
 	"asr_template": "*asr",				// enable AbortSession message being sent to client
 	"request_processors": [		// decision logic for message processing
@@ -170,9 +169,6 @@ Most of the parameters are explained in :ref:`JSON configuration <configuration>
 
 listen_net
 	The network the *DiameterAgent* will bind to. CGRateS supports both **tcp** and **sctp** specified in Diameter_ standard.
-
-concurrent_requests
-	The maximum number of active requests processed at one time by the *DiameterAgent*. When this number is reached, new inbound requests will be rejected with *DiameterError* code until the concurrent number drops bellow again. The default value of *-1* imposes no limits.
 
 asr_template
 	The template (out of templates config section) used to build the AbortSession message. If not specified the ASR message is never sent out.

@@ -21,41 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package agents
 
-// import (
-// 	"flag"
-// 	"fmt"
-// 	"net/rpc"
-// 	"os/exec"
-// 	"path"
-// 	"strings"
-// 	"sync"
-// 	"testing"
-// 	"time"
-
-// 	"github.com/cgrates/birpc/context"
-// 	"github.com/cgrates/cgrates/apis"
-// 	"github.com/cgrates/cgrates/config"
-// 	"github.com/cgrates/cgrates/engine"
-// 	"github.com/cgrates/cgrates/utils"
-// 	"github.com/fiorix/go-diameter/v4/diam"
-// 	"github.com/fiorix/go-diameter/v4/diam/avp"
-// 	"github.com/fiorix/go-diameter/v4/diam/datatype"
-// 	"github.com/fiorix/go-diameter/v4/diam/dict"
-// )
-
 // var (
 // 	interations  = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
 // 	replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
-
+//
 // 	daCfgPath, diamConfigDIR string
 // 	daCfg                    *config.CGRConfig
 // 	apierRpc                 *rpc.Client
 // 	diamClnt                 *DiameterClient
-
+//
 // 	rplyTimeout time.Duration
-
+//
 // 	isDispatcherActive bool
-
+//
 // 	sTestsDiam = []func(t *testing.T){
 // 		testDiamItInitCfg,
 // 		testDiamItResetDataDb,
@@ -66,24 +44,24 @@ package agents
 // 		testDiamItDryRun,
 // 		testDiamItCCRInit,
 // 		testDiamItCCRUpdate,
-
+//
 // 		testDiamItRAR,
-
+//
 // 		testDiamItCCRTerminate,
 // 		testDiamItCCRSMS,
 // 		testDiamItCCRMMS,
-
+//
 // 		testDiamItEmulateTerminate,
-
+//
 // 		testDiamItTemplateErr,
 // 		testDiamItCCRInitWithForceDuration,
-
+//
 // 		testDiamItDRR,
-
+//
 // 		testDiamItKillEngine,
 // 	}
 // )
-
+//
 // // Test start here
 // func TestDiamItTcp(t *testing.T) {
 // 	switch *utils.DBType {
@@ -102,7 +80,7 @@ package agents
 // 		t.Run(diamConfigDIR, stest)
 // 	}
 // }
-
+//
 // func TestDiamItDispatcher(t *testing.T) {
 // 	if *utils.Encoding == utils.MetaGOB {
 // 		t.SkipNow()
@@ -118,7 +96,7 @@ package agents
 // 	}
 // 	isDispatcherActive = false
 // }
-
+//
 // func TestDiamItSctp(t *testing.T) {
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
@@ -136,7 +114,7 @@ package agents
 // 		t.Run(diamConfigDIR, stest)
 // 	}
 // }
-
+//
 // func TestDiamItBiRPC(t *testing.T) {
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
@@ -155,27 +133,7 @@ package agents
 // 		t.Run(diamConfigDIR, stest)
 // 	}
 // }
-
-// func TestDiamItMaxConn(t *testing.T) {
-// 	switch *utils.DBType {
-// 	case utils.MetaInternal:
-// 		diamConfigDIR = "diamagentmaxconn_internal"
-// 	case utils.MetaMySQL:
-// 		diamConfigDIR = "diamagentmaxconn_mysql"
-// 	case utils.MetaMongo:
-// 		diamConfigDIR = "diamagentmaxconn_mongo"
-// 	case utils.MetaPostgres:
-// 		t.SkipNow()
-// 	default:
-// 		t.Fatal("Unknown Database type")
-// 	}
-// 	for _, stest := range sTestsDiam[:7] {
-// 		t.Run(diamConfigDIR, stest)
-// 	}
-// 	t.Run(diamConfigDIR, testDiamItDryRunMaxConn)
-// 	t.Run(diamConfigDIR, testDiamItKillEngine)
-// }
-
+//
 // func TestDiamItSessionDisconnect(t *testing.T) {
 // 	switch *utils.DBType {
 // 	case utils.MetaInternal:
@@ -189,14 +147,14 @@ package agents
 // 	default:
 // 		t.Fatal("Unknown Database type")
 // 	}
-
+//
 // 	for _, stest := range sTestsDiam[:7] {
 // 		t.Run(diamConfigDIR, stest)
 // 	}
 // 	t.Run(diamConfigDIR, testDiamInitWithSessionDisconnect)
 // 	t.Run(diamConfigDIR, testDiamItKillEngine)
 // }
-
+//
 // func testDiamItInitCfg(t *testing.T) {
 // 	daCfgPath = path.Join(*utils.DataDir, "conf", "samples", diamConfigDIR)
 // 	// Init config first
@@ -210,7 +168,7 @@ package agents
 // 		daCfg.ListenCfg().RPCJSONListen = ":6012"
 // 	}
 // }
-
+//
 // func testDiamItResetAllDB(t *testing.T) {
 // 	cfgPath1 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all")
 // 	allCfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath1)
@@ -220,7 +178,7 @@ package agents
 // 	if err := engine.InitDataDB(allCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
-
+//
 // 	cfgPath2 := path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all2")
 // 	allCfg2, err := config.NewCGRConfigFromPath(context.Background(), cfgPath2)
 // 	if err != nil {
@@ -229,23 +187,23 @@ package agents
 // 	if err := engine.InitDataDB(allCfg2); err != nil {
 // 		t.Fatal(err)
 // 	}
-
+//
 // }
-
+//
 // // Remove data in both rating and accounting db
 // func testDiamItResetDataDb(t *testing.T) {
 // 	if err := engine.InitDataDB(daCfg); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
-
+//
 // // Start CGR Engine
 // func testDiamItStartEngine(t *testing.T) {
 // 	if _, err := engine.StartEngine(daCfgPath, 500); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
-
+//
 // func testDiamItConnectDiameterClient(t *testing.T) {
 // 	diamClnt, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "INTEGRATION_TESTS",
 // 		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorID,
@@ -255,7 +213,7 @@ package agents
 // 		t.Fatal(err)
 // 	}
 // }
-
+//
 // // Connect rpc client to rater
 // func testDiamItApierRpcConn(t *testing.T) {
 // 	var err error
@@ -264,7 +222,7 @@ package agents
 // 		t.Fatal(err)
 // 	}
 // }
-
+//
 // // Load the tariff plan, creating accounts and their balances
 // func testDiamItTPFromFolder(t *testing.T) {
 // 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
@@ -277,7 +235,7 @@ package agents
 // 	}
 // 	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 // }
-
+//
 // func testDiamItTPLoadData(t *testing.T) {
 // 	wchan := make(chan struct{}, 1)
 // 	go func() {
@@ -286,7 +244,7 @@ package agents
 // 			t.Error(err)
 // 		}
 // 		loader := exec.Command(loaderPath, "-config_path", daCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "dispatchers"))
-
+//
 // 		if err := loader.Start(); err != nil {
 // 			t.Error(err)
 // 		}
@@ -299,7 +257,7 @@ package agents
 // 		t.Errorf("cgr-loader failed: ")
 // 	}
 // }
-
+//
 // func testDiamItDryRun(t *testing.T) {
 // 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
@@ -392,7 +350,7 @@ package agents
 // 			t.Fatal("The mesage to diameter should not be nil")
 // 		}
 // 		// ============================================
-
+//
 // 		if err := diamClnt.SendMessage(ccr); err != nil {
 // 			t.Error(err)
 // 		}
@@ -411,7 +369,7 @@ package agents
 // 		} else if val != eVal {
 // 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 		}
-
+//
 // 		eVal = "cgrates;1451911932;00082"
 // 		if avps, err := msg.FindAVPsWithPath([]any{"Session-Id"}, dict.UndefinedVendorID); err != nil {
 // 			t.Error(err)
@@ -516,76 +474,7 @@ package agents
 // 		}
 // 	}
 // }
-
-// func testDiamItDryRunMaxConn(t *testing.T) {
-// 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
-// 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
-// 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
-// 	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-// 	ccr.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-// 	ccr.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
-// 	ccr.NewAVP(avp.UserName, avp.Mbit, 0, datatype.UTF8String("CGR-DA"))
-// 	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
-// 	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("TestDiamItDryRun")) // Match specific DryRun profile
-// 	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
-// 	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
-// 	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))
-// 	ccr.NewAVP(avp.TerminationCause, avp.Mbit, 0, datatype.Enumerated(1))
-// 	if _, err := ccr.NewAVP("Framed-IP-Address", avp.Mbit, 0, datatype.UTF8String("10.228.16.4")); err != nil {
-// 		t.Error(err)
-// 	}
-// 	for i := 0; i < *interations; i++ {
-// 		if err := diamClnt.SendMessage(ccr); err != nil {
-// 			t.Error(err)
-// 		}
-// 		msg := diamClnt.ReceivedMessage(rplyTimeout)
-// 		if msg == nil {
-// 			t.Fatal("No message returned")
-// 		}
-// 		// Result-Code
-// 		eVal := "5012"
-// 		if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
-// 			t.Error(err)
-// 		} else if len(avps) == 0 {
-// 			t.Error("Missing AVP")
-// 		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-// 			t.Error(err)
-// 		} else if val != eVal {
-// 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
-// 		}
-// 		eVal = "cgrates;1451911932;00082"
-// 		if avps, err := msg.FindAVPsWithPath([]any{"Session-Id"}, dict.UndefinedVendorID); err != nil {
-// 			t.Error(err)
-// 		} else if len(avps) == 0 {
-// 			t.Error("Missing AVP")
-// 		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-// 			t.Error(err)
-// 		} else if val != eVal {
-// 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
-// 		}
-// 		eVal = "CGR-DA"
-// 		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Host"}, dict.UndefinedVendorID); err != nil {
-// 			t.Error(err)
-// 		} else if len(avps) == 0 {
-// 			t.Error("Missing AVP")
-// 		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-// 			t.Error(err)
-// 		} else if val != eVal {
-// 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
-// 		}
-// 		eVal = "cgrates.org"
-// 		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Realm"}, dict.UndefinedVendorID); err != nil {
-// 			t.Error(err)
-// 		} else if len(avps) == 0 {
-// 			t.Error("Missing AVP")
-// 		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-// 			t.Error(err)
-// 		} else if val != eVal {
-// 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
-// 		}
-// 	}
-// }
-
+//
 // func testDiamItCCRInit(t *testing.T) {
 // 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
@@ -673,7 +562,7 @@ package agents
 // 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 	}
 // }
-
+//
 // func testDiamItCCRInitWithForceDuration(t *testing.T) {
 // 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbfx1"))
@@ -748,9 +637,9 @@ package agents
 // 	} else if val != eVal {
 // 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 	}
-
+//
 // }
-
+//
 // func testDiamItCCRUpdate(t *testing.T) {
 // 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
@@ -838,7 +727,7 @@ package agents
 // 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 	}
 // }
-
+//
 // func testDiamItCCRTerminate(t *testing.T) {
 // 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
@@ -930,7 +819,7 @@ package agents
 // 		}
 // 	}
 // }
-
+//
 // func testDiamItCCRSMS(t *testing.T) {
 // 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("TestDmtAgentSendCCRSMS"))
@@ -995,10 +884,10 @@ package agents
 // 	if err := diamClnt.SendMessage(ccr); err != nil {
 // 		t.Error(err)
 // 	}
-
+//
 // 	time.Sleep(100 * time.Millisecond)
 // 	diamClnt.ReceivedMessage(rplyTimeout)
-
+//
 // 	var cdrs []*engine.CDR
 // 	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaSMS}}}
 // 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -1009,7 +898,7 @@ package agents
 // 		t.Errorf("Unexpected Usage CDR: %+v", cdrs[0])
 // 	}
 // }
-
+//
 // func testDiamItCCRMMS(t *testing.T) {
 // 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("TestDmtAgentSendCCRMMS"))
@@ -1074,10 +963,10 @@ package agents
 // 	if err := diamClnt.SendMessage(ccr); err != nil {
 // 		t.Error(err)
 // 	}
-
+//
 // 	time.Sleep(100 * time.Millisecond)
 // 	diamClnt.ReceivedMessage(rplyTimeout)
-
+//
 // 	var cdrs []*engine.CDR
 // 	args := &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.MetaMMS}}}
 // 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -1088,7 +977,7 @@ package agents
 // 		t.Errorf("Unexpected Usage CDR: %+v", cdrs[0])
 // 	}
 // }
-
+//
 // func testDiamInitWithSessionDisconnect(t *testing.T) {
 // 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
 // 		Account:     "testDiamInitWithSessionDisconnect",
@@ -1195,13 +1084,13 @@ package agents
 // 		t.Errorf("expecting: %s, received: <%s>", sessID, val)
 // 	}
 // }
-
+//
 // func testDiamItKillEngine(t *testing.T) {
 // 	if err := engine.KillEngine(1000); err != nil {
 // 		t.Error(err)
 // 	}
 // }
-
+//
 // func testDiamItRAR(t *testing.T) {
 // 	if diamConfigDIR == "dispatchers/diamagent" {
 // 		t.SkipNow()
@@ -1229,16 +1118,16 @@ package agents
 // 	if rar == nil {
 // 		t.Fatal("No message returned")
 // 	}
-
+//
 // 	raa := rar.Answer(2001)
 // 	raa.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
-
+//
 // 	if err := diamClnt.SendMessage(raa); err != nil {
 // 		t.Error(err)
 // 	}
-
+//
 // 	wait.Wait()
-
+//
 // 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
 // 	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
@@ -1312,7 +1201,7 @@ package agents
 // 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 	}
 // }
-
+//
 // func testDiamItDRR(t *testing.T) {
 // 	if diamConfigDIR == "dispatchers/diamagent" {
 // 		t.SkipNow()
@@ -1344,17 +1233,17 @@ package agents
 // 	if drr == nil {
 // 		t.Fatal("No message returned")
 // 	}
-
+//
 // 	dra := drr.Answer(2001)
 // 	// dra.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("INTEGRATION_TESTS"))
 // 	// dra.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-
+//
 // 	if err := diamClnt.SendMessage(dra); err != nil {
 // 		t.Error(err)
 // 	}
-
+//
 // 	wait.Wait()
-
+//
 // 	eVal := "1"
 // 	if avps, err := drr.FindAVPsWithPath([]any{avp.DisconnectCause}, dict.UndefinedVendorID); err != nil {
 // 		t.Error(err)
@@ -1366,7 +1255,7 @@ package agents
 // 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 	}
 // }
-
+//
 // func testDiamItTemplateErr(t *testing.T) {
 // 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("TestDmtAgentSendCCRError"))
@@ -1431,10 +1320,10 @@ package agents
 // 	if err := diamClnt.SendMessage(ccr); err != nil {
 // 		t.Error(err)
 // 	}
-
+//
 // 	time.Sleep(100 * time.Millisecond)
 // 	msg := diamClnt.ReceivedMessage(rplyTimeout)
-
+//
 // 	if msg == nil {
 // 		t.Fatal("Message should not be nil")
 // 	}
@@ -1450,7 +1339,7 @@ package agents
 // 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 	}
 // }
-
+//
 // func testDiamItEmulateTerminate(t *testing.T) {
 // 	if diamConfigDIR == "dispatchers/diamagent" {
 // 		t.SkipNow()
@@ -1469,7 +1358,7 @@ package agents
 // 				}},
 // 		},
 // 	}
-
+//
 // 	if err := apierRpc.Call(utils.AdminSv1SetChargerProfile, chargerProfile, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
@@ -1488,7 +1377,7 @@ package agents
 // 				}},
 // 		},
 // 	}
-
+//
 // 	if err := apierRpc.Call(utils.AdminSv1SetChargerProfile, chargerProfile2, &result); err != nil {
 // 		t.Error(err)
 // 	} else if result != utils.OK {
@@ -1518,7 +1407,7 @@ package agents
 // 	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(time.Hour) {
 // 		t.Errorf("Expected: %f, received: %f", float64(time.Hour), acnt.BalanceMap[utils.MetaVoice].GetTotalValue())
 // 	}
-
+//
 // 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 // 	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("bb97be2b9f37c2be9614fff71c8b1d08b1acbff8"))
 // 	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
@@ -1604,7 +1493,7 @@ package agents
 // 	} else if val != eVal {
 // 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 // 	}
-
+//
 // 	if err := apierRpc.Call(utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 // 		t.Error(err)
 // 	} else if acnt.BalanceMap[utils.MetaVoice].GetTotalValue() != float64(time.Hour) {

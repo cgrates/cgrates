@@ -267,7 +267,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl16 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl16)
 	}
-	cfgStr = `{"diameter_agent":{"asr_template":"","concurrent_requests":-1,"dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":0}}`
+	cfgStr = `{"diameter_agent":{"asr_template":"","dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":0}}`
 	var rpl17 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
