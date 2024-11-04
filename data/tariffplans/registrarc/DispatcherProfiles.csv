@@ -1,3 +1,0 @@
-#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
-cgrates.org,DSP1,,10,*weight,,ALL,,20,false,
-cgrates.org,DSP1,,,,,ALL2,,10,,
