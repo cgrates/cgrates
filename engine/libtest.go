@@ -568,3 +568,42 @@ var (
 		},
 	}
 )
+
+func LoadCSVsWithCGRLoader(t testing.TB, cfgPath, tpPath string, logBuffer io.Writer, csvFiles map[string]string, extraFlags ...string) {
+	t.Helper()
+
+	if tpPath == "" && len(csvFiles) == 0 {
+		return // nothing to load
+	}
+
+	paths := make([]string, 0, 2)
+	var customTpPath string
+	if len(csvFiles) != 0 {
+		customTpPath = t.TempDir()
+	}
+	if customTpPath != "" {
+		for fileName, content := range csvFiles {
+			filePath := path.Join(customTpPath, fileName)
+			if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+				t.Fatalf("could not write to file %s: %v", filePath, err)
+			}
+		}
+		paths = append(paths, customTpPath)
+	}
+	if tpPath != "" {
+		paths = append(paths, tpPath)
+	}
+
+	for _, path := range paths {
+		flags := []string{"-config_path", cfgPath, "-path", path}
+		flags = append(flags, extraFlags...)
+		loader := exec.Command("cgr-loader", flags...)
+		if logBuffer != nil {
+			loader.Stdout = logBuffer
+			loader.Stderr = logBuffer
+		}
+		if err := loader.Run(); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
