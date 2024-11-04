@@ -434,10 +434,16 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 		case "AP_MONTHLY":
 			// *monthly needs to match exactly the day
 			want := refTime.AddDate(0, 1, 0) // +1 month
+			if refTime.Day() == 31 {
+				if refTime.Month() != time.July && refTime.Month() != time.December {
+					want = refTime.AddDate(0, 2, 0)
+				}
+			}
 			if diff := want.Sub(got); diff < 0 || diff > 2*time.Second {
 				t.Errorf("%s scheduled date = %v, want %v (diff %v, margin 2s)",
 					schedAct.ActionPlanID, got.Format(time.StampMilli), want.Format(time.StampMilli), diff)
 			}
+
 		}
 	}
 }
