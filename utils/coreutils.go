@@ -221,13 +221,13 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	switch {
 	case tmStr == MetaUnlimited || tmStr == "":
 	// leave it at zero
-	case tmStr == "*daily":
+	case tmStr == MetaDaily:
 		return time.Now().AddDate(0, 0, 1), nil // add one day
-	case tmStr == "*monthly":
+	case tmStr == MetaMonthly:
 		return time.Now().AddDate(0, 1, 0), nil // add one month
-	case tmStr == "*monthly_estimated":
+	case tmStr == MetaMonthlyEstimated:
 		return monthlyEstimated(time.Now())
-	case tmStr == "*yearly":
+	case tmStr == MetaYearly:
 		return time.Now().AddDate(1, 0, 0), nil // add one year
 
 	case strings.HasPrefix(tmStr, "*month_end"):
@@ -301,6 +301,8 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	return nilTime, errors.New("Unsupported time format")
 }
 
+// monthlyEstimated calculates the next month's estimated end date by adjusting for month-end variations
+// and handling edge cases like different month lengths and leap years
 func monthlyEstimated(t1 time.Time) (time.Time, error) {
 	initialMnt := t1.Month()
 	tAfter := t1.AddDate(0, 1, 0)
