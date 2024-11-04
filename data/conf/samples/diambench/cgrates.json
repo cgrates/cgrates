@@ -1,0 +1,130 @@
+{
+"general": {
+	"log_level": 7
+},
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*internal"]
+},
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"]
+},
+"filters": {
+	"apiers_conns": ["*internal"]
+},
+"attributes": {
+	"enabled": true,
+	"opts": {
+		"*processRuns": 2
+	}
+},
+"sessions": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"]
+},
+"chargers": {
+	"enabled": true
+},
+"rals": {
+	"enabled": true
+},
+"cdrs": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"]
+},
+"diameter_agent": {
+	"enabled": true,
+	"listen": "0.0.0.0:3868",
+	"sessions_conns": ["*birpc_internal"],
+	"request_processors": [{
+		"id": "message",
+		"filters": [
+			"*string:~*vars.*cmd:CCR",
+			"*prefix:~*req.Service-Context-Id:message",
+			"*string:~*req.CC-Request-Type:4"
+		],
+		"flags": ["*message", "*accounts", "*cdrs", "*attributes"],
+		"request_fields": [{
+				"tag": "ToR",
+				"path": "*cgreq.ToR",
+				"type": "*constant",
+				"value": "*sms"
+			},
+			{
+				"tag": "OriginID",
+				"path": "*cgreq.OriginID",
+				"type": "*variable",
+				"value": "~*req.Session-Id",
+				"mandatory": true
+			},
+			{
+				"tag": "Category",
+				"path": "*cgreq.Category",
+				"type": "*constant",
+				"value": "sms"
+			},
+			{
+				"tag": "RequestType",
+				"path": "*cgreq.RequestType",
+				"type": "*constant",
+				"value": "*prepaid"
+			},
+			{
+				"tag": "Account",
+				"path": "*cgreq.Account",
+				"type": "*variable",
+				"mandatory": true,
+				"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
+			},
+			{
+				"tag": "Destination",
+				"path": "*cgreq.Destination",
+				"type": "*variable",
+				"mandatory": true,
+				"value": "~*req.Service-Information.SMS-Information.Recipient-Address.Address-Data"
+			},
+			{
+				"tag": "SetupTime",
+				"path": "*cgreq.SetupTime",
+				"type": "*variable",
+				"value": "~*req.Event-Timestamp",
+				"mandatory": true
+			},
+			{
+				"tag": "AnswerTime",
+				"path": "*cgreq.AnswerTime",
+				"type": "*variable",
+				"value": "~*req.Event-Timestamp",
+				"mandatory": true
+			},
+			{
+				"tag": "Usage",
+				"path": "*cgreq.Usage",
+				"type": "*variable",
+				"value": "~*req.Requested-Service-Unit.CC-Time",
+				"mandatory": true
+			}
+		],
+		"reply_fields": [{
+				"tag": "CCATemplate",
+				"type": "*template",
+				"value": "*cca"
+			},
+			{
+				"tag": "ResultCode",
+				"path": "*rep.Result-Code",
+				"filters": ["*notempty:~*cgrep.Error:"],
+				"type": "*constant",
+				"value": "5030",
+				"blocker": true
+			}
+		]
+	}]
+}
+}
