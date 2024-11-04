@@ -32,12 +32,13 @@ import (
 
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager,
+	connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &DiameterAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
+		caps:        caps,
 		srvDep:      srvDep,
 	}
 }
@@ -51,6 +52,7 @@ type DiameterAgent struct {
 
 	da      *agents.DiameterAgent
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 
 	lnet  string
 	laddr string
@@ -59,38 +61,39 @@ type DiameterAgent struct {
 }
 
 // Start should handle the sercive start
-func (da *DiameterAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (da *DiameterAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) error {
 	if da.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, da.filterSChan); err != nil {
-		return
+	filterS, err := waitForFilterS(ctx, da.filterSChan)
+	if err != nil {
+		return err
 	}
 	da.Lock()
 	defer da.Unlock()
-	return da.start(filterS, shtDwn)
+	return da.start(filterS, shtDwn, da.caps)
 }
 
-func (da *DiameterAgent) start(filterS *engine.FilterS, shtDwn context.CancelFunc) (err error) {
-	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr)
+func (da *DiameterAgent) start(filterS *engine.FilterS, shtDwn context.CancelFunc, caps *engine.Caps) error {
+	var err error
+	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr, caps)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent: %v",
 			utils.DiameterAgent, err))
-		return
+		return err
 	}
 	da.lnet = da.cfg.DiameterAgentCfg().ListenNet
 	da.laddr = da.cfg.DiameterAgentCfg().Listen
 	da.stopChan = make(chan struct{})
 	go func(d *agents.DiameterAgent) {
-		if err = d.ListenAndServe(da.stopChan); err != nil {
+		if err := d.ListenAndServe(da.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
 			shtDwn()
 		}
 	}(da.da)
-	return
+	return nil
 }
 
 // Reload handles the change of config
@@ -106,7 +109,7 @@ func (da *DiameterAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc)
 	if filterS, err = waitForFilterS(ctx, da.filterSChan); err != nil {
 		return
 	}
-	return da.start(filterS, shtDwn)
+	return da.start(filterS, shtDwn, da.caps)
 }
 
 // Shutdown stops the service
@@ -122,7 +125,7 @@ func (da *DiameterAgent) Shutdown() (err error) {
 func (da *DiameterAgent) IsRunning() bool {
 	da.RLock()
 	defer da.RUnlock()
-	return da != nil && da.da != nil
+	return da.da != nil
 }
 
 // ServiceName returns the service name
