@@ -25,8 +25,8 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +38,7 @@ type ExportFailoverService struct {
 
 	cfg         *config.CGRConfig
 	connMgr     *engine.ConnManager
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	srv         *birpc.Service
 	intConnChan chan birpc.ClientConnector
 	stopChan    chan struct{}
@@ -50,7 +50,7 @@ type ExportFailoverService struct {
 // NewExportFailoverService is the constructor for the TpeService
 func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	intConnChan chan birpc.ClientConnector,
-	server *cores.Server, srvDep map[string]*sync.WaitGroup) *ExportFailoverService {
+	server *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) *ExportFailoverService {
 	return &ExportFailoverService{
 		cfg:         cfg,
 		server:      server,

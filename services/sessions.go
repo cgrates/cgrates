@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -36,7 +36,7 @@ import (
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalChan chan birpc.ClientConnector,
+	server *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SessionService{
@@ -57,7 +57,7 @@ type SessionService struct {
 	cfg         *config.CGRConfig
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	stopChan    chan struct{}
 
 	sm       *sessions.SessionS

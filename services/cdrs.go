@@ -26,8 +26,8 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/cdrs"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +36,7 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalCDRServerChan chan birpc.ClientConnector,
+	server *commonlisteners.CommonListenerS, internalCDRServerChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &CDRService{
@@ -60,7 +60,7 @@ type CDRService struct {
 	storDB *StorDBService
 
 	filterSChan chan *engine.FilterS
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 
 	cdrS     *cdrs.CDRServer
 	connChan chan birpc.ClientConnector

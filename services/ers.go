@@ -24,8 +24,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/servmanager"
@@ -37,7 +37,7 @@ func NewEventReaderService(
 	cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	server *cores.Server,
+	server *commonlisteners.CommonListenerS,
 	intConn chan birpc.ClientConnector,
 	anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -63,7 +63,7 @@ type EventReaderService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
-	server   *cores.Server
+	server   *commonlisteners.CommonListenerS
 	intConn  chan birpc.ClientConnector
 	anz      *AnalyzerService
 	srvDep   map[string]*sync.WaitGroup

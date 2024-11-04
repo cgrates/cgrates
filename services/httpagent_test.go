@@ -22,8 +22,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -31,7 +31,7 @@ import (
 // TestHTTPAgent for cover testing
 func TestHTTPAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}

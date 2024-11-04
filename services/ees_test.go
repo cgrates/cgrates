@@ -22,10 +22,10 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/ees"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,7 +37,7 @@ func TestEventExporterSCoverage(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg), server, make(chan birpc.ClientConnector, 1), anz, srvDep)

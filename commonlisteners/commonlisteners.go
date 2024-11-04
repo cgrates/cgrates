@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cores
+package commonlisteners
 
 import (
 	"crypto/tls"
@@ -39,8 +39,8 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-func NewServer(caps *engine.Caps) (s *Server) {
-	s = &Server{
+func NewServer(caps *engine.Caps) (s *CommonListenerS) {
+	s = &CommonListenerS{
 		httpMux:         http.NewServeMux(),
 		httpsMux:        http.NewServeMux(),
 		stopbiRPCServer: make(chan struct{}, 1),
@@ -54,7 +54,7 @@ func NewServer(caps *engine.Caps) (s *Server) {
 	return
 }
 
-type Server struct {
+type CommonListenerS struct {
 	sync.RWMutex
 	httpEnabled     bool
 	birpcSrv        *birpc.BirpcServer
@@ -74,23 +74,23 @@ type Server struct {
 	startSrv    sync.Once
 }
 
-func (s *Server) SetAnalyzer(anz *analyzers.AnalyzerS) {
+func (s *CommonListenerS) SetAnalyzer(anz *analyzers.AnalyzerS) {
 	s.anz = anz
 }
 
-func (s *Server) RpcRegister(rcvr any) {
+func (s *CommonListenerS) RpcRegister(rcvr any) {
 	s.rpcServer.Register(rcvr)
 }
 
-func (s *Server) RpcRegisterName(name string, rcvr any) {
+func (s *CommonListenerS) RpcRegisterName(name string, rcvr any) {
 	s.rpcServer.RegisterName(name, rcvr)
 }
 
-func (s *Server) RpcUnregisterName(name string) {
+func (s *CommonListenerS) RpcUnregisterName(name string) {
 	s.rpcServer.UnregisterName(name)
 }
 
-func (s *Server) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+func (s *CommonListenerS) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	s.httpMux.HandleFunc(pattern, handler)
 	s.httpsMux.HandleFunc(pattern, handler)
 	s.Lock()
@@ -98,7 +98,7 @@ func (s *Server) RegisterHTTPFunc(pattern string, handler func(http.ResponseWrit
 	s.Unlock()
 }
 
-func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
+func (s *CommonListenerS) RegisterHttpHandler(pattern string, handler http.Handler) {
 	s.httpMux.Handle(pattern, handler)
 	s.httpsMux.Handle(pattern, handler)
 	s.Lock()
@@ -107,15 +107,15 @@ func (s *Server) RegisterHttpHandler(pattern string, handler http.Handler) {
 }
 
 // Registers a new BiJsonRpc name
-func (s *Server) BiRPCRegisterName(name string, rcv any) {
+func (s *CommonListenerS) BiRPCRegisterName(name string, rcv any) {
 	s.birpcSrv.RegisterName(name, rcv)
 }
 
-func (s *Server) BiRPCUnregisterName(name string) {
+func (s *CommonListenerS) BiRPCUnregisterName(name string) {
 	s.birpcSrv.UnregisterName(name)
 }
 
-func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
+func (s *CommonListenerS) handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	rmtIP, _ := utils.GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
@@ -124,11 +124,11 @@ func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	r.Body.Close()
 }
 
-func (s *Server) handleWebSocket(ws *websocket.Conn) {
+func (s *CommonListenerS) handleWebSocket(ws *websocket.Conn) {
 	s.rpcServer.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
 }
 
-func (s *Server) ServeJSON(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {
+func (s *CommonListenerS) ServeJSON(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {
 	if s.rpcJSONl, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("Serve%s listen error: %s", utils.JSONCaps, err)
 		shtdwnEngine()
@@ -140,7 +140,7 @@ func (s *Server) ServeJSON(ctx *context.Context, shtdwnEngine context.CancelFunc
 	})
 }
 
-func (s *Server) ServeGOB(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {
+func (s *CommonListenerS) ServeGOB(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {
 	if s.rpcGOBl, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("Serve%s listen error: %s", utils.GOBCaps, err)
 		shtdwnEngine()
@@ -152,7 +152,7 @@ func (s *Server) ServeGOB(ctx *context.Context, shtdwnEngine context.CancelFunc,
 	})
 }
 
-func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc,
+func (s *CommonListenerS) ServeHTTP(shtdwnEngine context.CancelFunc,
 	addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string) {
 	s.Lock()
@@ -219,7 +219,7 @@ func (s *Server) ServeHTTP(shtdwnEngine context.CancelFunc,
 }
 
 // ServeBiRPC create a goroutine to listen and serve as BiRPC server
-func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis func(birpc.ClientConnector)) (err error) {
+func (s *CommonListenerS) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis func(birpc.ClientConnector)) (err error) {
 	s.birpcSrv.OnConnect(onConn)
 	s.birpcSrv.OnDisconnect(onDis)
 	if addrJSON != utils.EmptyString {
@@ -244,7 +244,7 @@ func (s *Server) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis func(birpc.C
 	return
 }
 
-func (s *Server) ServeGOBTLS(ctx *context.Context, shtdwnEngine context.CancelFunc,
+func (s *CommonListenerS) ServeGOBTLS(ctx *context.Context, shtdwnEngine context.CancelFunc,
 	addr, serverCrt, serverKey, caCert string, serverPolicy int, serverName string) (err error) {
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
@@ -264,7 +264,7 @@ func (s *Server) ServeGOBTLS(ctx *context.Context, shtdwnEngine context.CancelFu
 	})
 }
 
-func (s *Server) ServeJSONTLS(ctx *context.Context, shtdwnEngine context.CancelFunc,
+func (s *CommonListenerS) ServeJSONTLS(ctx *context.Context, shtdwnEngine context.CancelFunc,
 	addr, serverCrt, serverKey, caCert string, serverPolicy int, serverName string) (err error) {
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
@@ -284,7 +284,7 @@ func (s *Server) ServeJSONTLS(ctx *context.Context, shtdwnEngine context.CancelF
 	})
 }
 
-func (s *Server) ServeHTTPS(shtdwnEngine context.CancelFunc,
+func (s *CommonListenerS) ServeHTTPS(shtdwnEngine context.CancelFunc,
 	addr, serverCrt, serverKey, caCert string, serverPolicy int,
 	serverName, jsonRPCURL, wsRPCURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string) {
@@ -349,7 +349,7 @@ func (s *Server) ServeHTTPS(shtdwnEngine context.CancelFunc,
 	}
 }
 
-func (s *Server) Stop() {
+func (s *CommonListenerS) Stop() {
 	if s.rpcJSONl != nil {
 		s.rpcJSONl.Close()
 	}
@@ -372,12 +372,12 @@ func (s *Server) Stop() {
 }
 
 // StopBiRPC stops the go routine create with ServeBiJSON
-func (s *Server) StopBiRPC() {
+func (s *CommonListenerS) StopBiRPC() {
 	s.stopbiRPCServer <- struct{}{}
 	s.birpcSrv = birpc.NewBirpcServer()
 }
 
-func (s *Server) StartServer(ctx *context.Context, shtdwnEngine context.CancelFunc, cfg *config.CGRConfig) {
+func (s *CommonListenerS) StartServer(ctx *context.Context, shtdwnEngine context.CancelFunc, cfg *config.CGRConfig) {
 	s.startSrv.Do(func() {
 		go s.ServeJSON(ctx, shtdwnEngine, cfg.ListenCfg().RPCJSONListen)
 		go s.ServeGOB(ctx, shtdwnEngine, cfg.ListenCfg().RPCGOBListen)

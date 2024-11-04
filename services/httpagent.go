@@ -24,8 +24,8 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -33,7 +33,7 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	server *cores.Server, connMgr *engine.ConnManager,
+	server *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &HTTPAgent{
 		cfg:         cfg,
@@ -49,7 +49,7 @@ type HTTPAgent struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 
 	// we can realy stop the HTTPAgent so keep a flag
 	// if we registerd the handlers

@@ -25,8 +25,8 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +34,7 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS, server *cores.Server,
+	cacheS *CacheService, filterSChan chan *engine.FilterS, server *commonlisteners.CommonListenerS,
 	internalChargerSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ChargerService{
@@ -57,7 +57,7 @@ type ChargerService struct {
 	dm          *DataDBService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	connMgr     *engine.ConnManager
 
 	chrS     *engine.ChargerS

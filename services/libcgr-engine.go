@@ -32,8 +32,8 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/loaders"
@@ -185,7 +185,7 @@ func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS
 }
 
 func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGRConfig,
-	server *cores.Server, anz *AnalyzerService) {
+	server *commonlisteners.CommonListenerS, anz *AnalyzerService) {
 	srv, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
 	if !cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
@@ -197,7 +197,7 @@ func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGR
 
 func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
 	srvMngr *servmanager.ServiceManager, cfg *config.CGRConfig,
-	server *cores.Server, anz *AnalyzerService) {
+	server *commonlisteners.CommonListenerS, anz *AnalyzerService) {
 	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(srv)
@@ -206,7 +206,7 @@ func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
 }
 
 func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
-	cfg *config.CGRConfig, server *cores.Server, anz *AnalyzerService) {
+	cfg *config.CGRConfig, server *commonlisteners.CommonListenerS, anz *AnalyzerService) {
 	srv, _ := engine.NewServiceWithName(cfg, utils.ConfigS, true)
 	// srv, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
 	if !cfg.DispatcherSCfg().Enabled {
@@ -218,7 +218,7 @@ func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
 }
 
 func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
-	cfg *config.CGRConfig, server *cores.Server, internalDispatcherSChan chan birpc.ClientConnector) {
+	cfg *config.CGRConfig, server *commonlisteners.CommonListenerS, internalDispatcherSChan chan birpc.ClientConnector) {
 	if cfg.DispatcherSCfg().Enabled { // wait only for dispatcher as cache is allways registered before this
 		select {
 		case dispatcherS := <-internalDispatcherSChan:

@@ -26,9 +26,9 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/actions"
+	"github.com/cgrates/cgrates/commonlisteners"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +38,7 @@ import (
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	server *cores.Server, internalChan chan birpc.ClientConnector,
+	server *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ActionService{
 		connChan:    internalChan,
@@ -62,7 +62,7 @@ type ActionService struct {
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 
 	rldChan  chan struct{}
 	stopChan chan struct{}

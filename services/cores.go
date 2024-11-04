@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -32,7 +33,7 @@ import (
 )
 
 // NewCoreService returns the Core Service
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Server,
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *commonlisteners.CommonListenerS,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
 	srvDep map[string]*sync.WaitGroup) *CoreService {
@@ -53,7 +54,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *cores.Serv
 type CoreService struct {
 	mu       sync.RWMutex
 	cfg      *config.CGRConfig
-	server   *cores.Server
+	server   *commonlisteners.CommonListenerS
 	caps     *engine.Caps
 	stopChan chan struct{}
 	shdWg    *sync.WaitGroup

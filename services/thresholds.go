@@ -24,8 +24,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -35,7 +35,7 @@ import (
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	server *cores.Server, internalThresholdSChan chan birpc.ClientConnector,
+	server *commonlisteners.CommonListenerS, internalThresholdSChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
@@ -57,7 +57,7 @@ type ThresholdService struct {
 	dm          *DataDBService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	connMgr     *engine.ConnManager
 
 	thrs     *engine.ThresholdS

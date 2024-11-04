@@ -25,8 +25,8 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -35,7 +35,7 @@ import (
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalRankingSChan chan birpc.ClientConnector,
+	server *commonlisteners.CommonListenerS, internalRankingSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RankingService{
@@ -57,7 +57,7 @@ type RankingService struct {
 	dm          *DataDBService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	connMgr     *engine.ConnManager
 	connChan    chan birpc.ClientConnector
 	anz         *AnalyzerService

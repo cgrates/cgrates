@@ -29,8 +29,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -50,7 +50,7 @@ func TestThresholdSReload(t *testing.T) {
 	chSCh := make(chan *engine.CacheS, 1)
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
@@ -119,7 +119,7 @@ func TestThresholdSReload2(t *testing.T) {
 	chSCh := make(chan *engine.CacheS, 1)
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)

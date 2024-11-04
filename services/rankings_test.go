@@ -23,8 +23,8 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,7 +35,7 @@ func TestNewRankingService(t *testing.T) {
 	cacheS := &CacheService{}
 	filterSChan := make(chan *engine.FilterS)
 	birpc := make(chan birpc.ClientConnector)
-	server := &cores.Server{}
+	server := &commonlisteners.CommonListenerS{}
 	connMgr := &engine.ConnManager{}
 	anz := &AnalyzerService{}
 	srvDep := make(map[string]*sync.WaitGroup)

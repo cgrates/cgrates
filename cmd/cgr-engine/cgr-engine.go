@@ -26,6 +26,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -60,7 +61,7 @@ func RunCGREngine(fs []string) (err error) {
 		return
 	}
 	cps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
-	server := cores.NewServer(cps)
+	server := commonlisteners.NewServer(cps)
 	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup), server, cps)
 	defer cgr.Stop(*flags.PidFile)
 

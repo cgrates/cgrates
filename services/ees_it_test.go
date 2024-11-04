@@ -29,8 +29,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -52,7 +52,7 @@ func TestEventExporterSReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
@@ -130,7 +130,7 @@ func TestEventExporterSReload2(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg),
