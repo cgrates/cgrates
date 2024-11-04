@@ -24,8 +24,8 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
@@ -33,7 +33,7 @@ import (
 
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
-	filterSChan chan *engine.FilterS, server *cores.Server,
+	filterSChan chan *engine.FilterS, server *commonlisteners.CommonListenerS,
 	internalLoaderSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *LoaderService {
@@ -56,7 +56,7 @@ type LoaderService struct {
 	cfg         *config.CGRConfig
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	stopChan    chan struct{}
 
 	ldrs     *loaders.LoaderS

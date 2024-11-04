@@ -24,8 +24,8 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/tpes"
@@ -34,7 +34,7 @@ import (
 
 // NewTPeService is the constructor for the TpeService
 func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataDBService,
-	server *cores.Server, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	server *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TPeService{
 		cfg:     cfg,
 		srvDep:  srvDep,
@@ -49,7 +49,7 @@ type TPeService struct {
 	sync.RWMutex
 
 	cfg      *config.CGRConfig
-	server   *cores.Server
+	server   *commonlisteners.CommonListenerS
 	connMgr  *engine.ConnManager
 	tpes     *tpes.TPeS
 	dm       *DataDBService

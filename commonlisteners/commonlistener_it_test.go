@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cores
+package commonlisteners
 
 import (
 	"bytes"
@@ -48,7 +48,7 @@ import (
 )
 
 var (
-	server *Server
+	server *CommonListenerS
 
 	sTestsServer = []func(t *testing.T){
 		testServeJSON,

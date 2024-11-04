@@ -26,9 +26,9 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/accounts"
+	"github.com/cgrates/cgrates/commonlisteners"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +37,7 @@ import (
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, server *cores.Server,
+	connMgr *engine.ConnManager, server *commonlisteners.CommonListenerS,
 	internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AccountService{
@@ -62,7 +62,7 @@ type AccountService struct {
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 
 	rldChan  chan struct{}
 	stopChan chan struct{}

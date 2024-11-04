@@ -23,8 +23,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/servmanager"
@@ -34,7 +34,7 @@ import (
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	dmS *DataDBService, server *cores.Server,
+	dmS *DataDBService, server *commonlisteners.CommonListenerS,
 	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RateService{
@@ -58,7 +58,7 @@ type RateService struct {
 	filterSChan chan *engine.FilterS
 	dmS         *DataDBService
 	cacheS      *CacheService
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 
 	rldChan  chan struct{}
 	stopChan chan struct{}

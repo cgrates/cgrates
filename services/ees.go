@@ -24,8 +24,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -34,7 +34,7 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, server *cores.Server, intConnChan chan birpc.ClientConnector,
+	connMgr *engine.ConnManager, server *commonlisteners.CommonListenerS, intConnChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
@@ -54,7 +54,7 @@ type EventExporterService struct {
 	cfg         *config.CGRConfig
 	filterSChan chan *engine.FilterS
 	connMgr     *engine.ConnManager
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	intConnChan chan birpc.ClientConnector
 
 	eeS    *ees.EeS

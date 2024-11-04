@@ -22,8 +22,8 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
@@ -31,7 +31,7 @@ import (
 )
 
 // NewRegistrarCService returns the Dispatcher Service
-func NewRegistrarCService(cfg *config.CGRConfig, server *cores.Server,
+func NewRegistrarCService(cfg *config.CGRConfig, server *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RegistrarCService{
@@ -47,7 +47,7 @@ func NewRegistrarCService(cfg *config.CGRConfig, server *cores.Server,
 type RegistrarCService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
-	server   *cores.Server
+	server   *commonlisteners.CommonListenerS
 	connMgr  *engine.ConnManager
 	stopChan chan struct{}
 	rldChan  chan struct{}

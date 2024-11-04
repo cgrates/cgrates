@@ -23,8 +23,8 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,7 +34,7 @@ func TestNewTrendService(t *testing.T) {
 	dm := &DataDBService{}
 	cacheS := &CacheService{}
 	filterSChan := make(chan *engine.FilterS)
-	server := &cores.Server{}
+	server := &commonlisteners.CommonListenerS{}
 	internalTrendSChan := make(chan birpc.ClientConnector)
 	connMgr := &engine.ConnManager{}
 	anz := &AnalyzerService{}

@@ -25,14 +25,14 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server,
+func NewAnalyzerService(cfg *config.CGRConfig, server *commonlisteners.CommonListenerS,
 	filterSChan chan *engine.FilterS,
 	internalAnalyzerSChan chan birpc.ClientConnector,
 	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
@@ -49,7 +49,7 @@ func NewAnalyzerService(cfg *config.CGRConfig, server *cores.Server,
 type AnalyzerService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
 	ctx         *context.Context
 	cancelFunc  context.CancelFunc

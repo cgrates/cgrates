@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -33,7 +34,7 @@ import (
 func TestCoreSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(1, "test_caps")
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	internalCoreSChan := make(chan birpc.ClientConnector, 1)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil

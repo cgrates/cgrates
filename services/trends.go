@@ -24,8 +24,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +34,7 @@ import (
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalTrendSChan chan birpc.ClientConnector,
+	server *commonlisteners.CommonListenerS, internalTrendSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TrendService{
@@ -54,7 +54,7 @@ type TrendService struct {
 	cfg         *config.CGRConfig
 	dm          *DataDBService
 	cacheS      *CacheService
-	server      *cores.Server
+	server      *commonlisteners.CommonListenerS
 	connMgr     *engine.ConnManager
 	filterSChan chan *engine.FilterS
 	connChan    chan birpc.ClientConnector

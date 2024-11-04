@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -31,7 +32,7 @@ import (
 
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
-	server *cores.Server, internalChan chan birpc.ClientConnector,
+	server *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
 	srvDep map[string]*sync.WaitGroup) *CacheService {
@@ -53,7 +54,7 @@ type CacheService struct {
 	cfg     *config.CGRConfig
 	anz     *AnalyzerService
 	cores   *CoreService
-	server  *cores.Server
+	server  *commonlisteners.CommonListenerS
 	dm      *DataDBService
 	connMgr *engine.ConnManager
 	rpc     chan birpc.ClientConnector

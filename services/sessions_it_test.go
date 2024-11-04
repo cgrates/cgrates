@@ -30,8 +30,8 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -63,7 +63,7 @@ func TestSessionSReload1(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 
 	clientConect := make(chan birpc.ClientConnector, 1)
@@ -153,7 +153,7 @@ func TestSessionSReload2(t *testing.T) {
 	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
 
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
@@ -199,7 +199,7 @@ func TestSessionSReload3(t *testing.T) {
 	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
 
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)

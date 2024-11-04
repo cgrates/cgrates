@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/efs"
@@ -40,7 +41,7 @@ import (
 )
 
 func NewCGREngine(cfg *config.CGRConfig, cM *engine.ConnManager, shdWg *sync.WaitGroup,
-	server *cores.Server, caps *engine.Caps) *CGREngine {
+	server *commonlisteners.CommonListenerS, caps *engine.Caps) *CGREngine {
 	return &CGREngine{
 		cfg:        cfg,   // Engine configuration
 		cM:         cM,    // connection manager
@@ -95,7 +96,7 @@ type CGREngine struct {
 	srvDep     map[string]*sync.WaitGroup
 	shdWg      *sync.WaitGroup
 	cM         *engine.ConnManager
-	server     *cores.Server
+	server     *commonlisteners.CommonListenerS
 
 	caps    *engine.Caps
 	cpuPrfF *os.File

@@ -22,7 +22,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/ers"
 
 	"github.com/cgrates/cgrates/config"
@@ -37,7 +37,7 @@ func TestEventReaderSCoverage(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	server := cores.NewServer(nil)
+	server := commonlisteners.NewServer(nil)
 	srv := NewEventReaderService(cfg, filterSChan, nil, server, nil, nil, srvDep)
 
 	if srv.IsRunning() {
