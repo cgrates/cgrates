@@ -269,161 +269,6 @@ func TestCacheGetCloned(t *testing.T) {
 	}
 }
 
-func TestActionTimingGetNextStartTime(t *testing.T) {
-	t1 := time.Date(2020, 2, 7, 14, 25, 0, 0, time.UTC)
-	at := &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "00:00:00"}}}
-	exp := time.Date(2020, 2, 29, 0, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-
-	t1 = time.Date(2020, 2, 17, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{16},
-				StartTime: "00:00:00"}}}
-	exp = time.Date(2020, 3, 16, 0, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-
-	t1 = time.Date(2020, 12, 17, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{16},
-				StartTime: "00:00:00"}}}
-	exp = time.Date(2021, 1, 16, 0, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-
-	t1 = time.Date(2020, 12, 17, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "00:00:00"}}}
-	exp = time.Date(2020, 12, 31, 0, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-
-	t1 = time.Date(2020, 7, 31, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "15:00:00"}}}
-	exp = time.Date(2020, 7, 31, 15, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-
-	t1 = time.Date(2020, 2, 17, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{17},
-				StartTime: "15:00:00"}}}
-	exp = time.Date(2020, 2, 17, 15, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-
-	t1 = time.Date(2020, 2, 17, 15, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{17},
-				StartTime: "10:00:00"}}}
-	exp = time.Date(2020, 3, 17, 10, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-	t1 = time.Date(2020, 9, 29, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "00:00:00"}}}
-	exp = time.Date(2020, 9, 30, 0, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-	t1 = time.Date(2020, 9, 30, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "00:00:00"}}}
-	exp = time.Date(2020, 10, 31, 0, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-
-	t1 = time.Date(2020, 9, 30, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "15:00:00",
-			}}}
-	exp = time.Date(2020, 9, 30, 15, 0, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-
-	t1 = time.Date(2020, 9, 30, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "14:25:01"}}}
-	exp = time.Date(2020, 9, 30, 14, 25, 1, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-	t1 = time.Date(2020, 12, 31, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "14:25:01"}}}
-	exp = time.Date(2020, 12, 31, 14, 25, 1, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-	t1 = time.Date(2020, 12, 31, 14, 25, 0, 0, time.UTC)
-	at = &ActionTiming{
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				ID:        utils.MetaMonthlyEstimated,
-				MonthDays: utils.MonthDays{31},
-				StartTime: "14:25:00"}}}
-	exp = time.Date(2021, 1, 31, 14, 25, 0, 0, time.UTC)
-	if st := at.GetNextStartTime(t1); !st.Equal(exp) {
-		t.Errorf("Expecting: %+v, received: %+v", exp, st)
-	}
-}
-
 func TestActionTimingExErr(t *testing.T) {
 	tmpDm := dm
 	tmp := Cache
@@ -479,5 +324,311 @@ func TestActionTimingExErr(t *testing.T) {
 func TestGetDayOrEndOfMonth(t *testing.T) {
 	if val := getDayOrEndOfMonth(31, time.Date(2022, 12, 22, 12, 0, 0, 0, time.UTC)); val != 31 {
 		t.Errorf("Should Receive Last Day %v", val)
+	}
+}
+
+func TestActionTimingGetNextStartTimesMonthlyEstimated(t *testing.T) {
+	tests := []struct {
+		name     string
+		t1       time.Time
+		at       *ActionTiming
+		expected time.Time
+	}{
+		{
+			name: "February 7 to February 29",
+			t1:   time.Date(2020, 2, 7, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 2, 29, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "February 17 to March 16",
+			t1:   time.Date(2020, 2, 17, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{16},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 3, 16, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "December 17 to January 16",
+			t1:   time.Date(2020, 12, 17, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{16},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2021, 1, 16, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "December 17 to December 31",
+			t1:   time.Date(2020, 12, 17, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 12, 31, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "July 31 same day",
+			t1:   time.Date(2020, 7, 31, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "15:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 7, 31, 15, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "February 17 same day",
+			t1:   time.Date(2020, 2, 17, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{17},
+						StartTime: "15:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 2, 17, 15, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "February 17 to March 17",
+			t1:   time.Date(2020, 2, 17, 15, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{17},
+						StartTime: "10:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 3, 17, 10, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "September 29 to September 30",
+			t1:   time.Date(2020, 9, 29, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 9, 30, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "September 30 to October 31",
+			t1:   time.Date(2020, 9, 30, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 10, 31, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "September 30 same day",
+			t1:   time.Date(2020, 9, 30, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "15:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 9, 30, 15, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "September 30 same second",
+			t1:   time.Date(2020, 9, 30, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "14:25:01",
+					},
+				},
+			},
+			expected: time.Date(2020, 9, 30, 14, 25, 1, 0, time.UTC),
+		},
+		{
+			name: "December 31 same second",
+			t1:   time.Date(2020, 12, 31, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "14:25:01",
+					},
+				},
+			},
+			expected: time.Date(2020, 12, 31, 14, 25, 1, 0, time.UTC),
+		},
+		{
+			name: "December 31 to January 31",
+			t1:   time.Date(2020, 12, 31, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+						StartTime: "14:25:00",
+					},
+				},
+			},
+			expected: time.Date(2021, 1, 31, 14, 25, 0, 0, time.UTC),
+		},
+		// {
+		// 	name: "Non-Leap Year: January 29 to Feb 28",
+		// 	t1:   time.Date(2021, 1, 29, 0, 0, 0, 0, time.UTC),
+		// 	at: &ActionTiming{
+		// 		Timing: &RateInterval{
+		// 			Timing: &RITiming{
+		// 				ID:        utils.MetaMonthlyEstimated,
+		// 				MonthDays: utils.MonthDays{29},
+		// 			},
+		// 		},
+		// 	},
+		// 	expected: time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
+		// },
+
+		{
+			name: "Non-Leap Year: February 28 to March 28",
+			t1:   time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{28},
+					},
+				},
+			},
+			expected: time.Date(2021, 3, 28, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "October 31 to November 30",
+			t1:   time.Date(2021, 10, 31, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{30},
+					},
+				},
+			},
+			expected: time.Date(2021, 11, 30, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "Leap Year: January 29 to February 29",
+			t1:   time.Date(2020, 1, 29, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{29},
+					},
+				},
+			},
+			expected: time.Date(2020, 2, 29, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "Leap Year: February 29 to March 29",
+			t1:   time.Date(2020, 2, 29, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{29},
+					},
+				},
+			},
+			expected: time.Date(2020, 3, 29, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "Leap Year: February 29 to March 30",
+			t1:   time.Date(2020, 2, 29, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{30},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 3, 30, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "November 30 to December 31",
+			t1:   time.Date(2021, 11, 30, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+					},
+				},
+			},
+			expected: time.Date(2021, 12, 31, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "September 29 to September 30",
+			t1:   time.Date(2021, 9, 29, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{31},
+					},
+				},
+			},
+			expected: time.Date(2021, 9, 30, 0, 0, 0, 0, time.UTC),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if st := tt.at.GetNextStartTime(tt.t1); !st.Equal(tt.expected) {
+				t.Errorf("Expecting: %+v, received: %+v", tt.expected, st)
+			}
+		})
 	}
 }
