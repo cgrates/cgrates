@@ -362,6 +362,12 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	t.Helper()
 	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
 	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
+	if ng.TpPath != "" || len(ng.TpFiles) != 0 {
+		if ng.TpPath == "" {
+			ng.TpPath = t.TempDir()
+		}
+		setupLoader(t, ng.TpPath, cfg.ConfigPath)
+	}
 	if ng.PreStartHook != nil {
 		ng.PreStartHook(t, cfg)
 	}
@@ -454,9 +460,33 @@ func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg) (cfg *config.C
 	return
 }
 
-// loadCSVs loads tariff plan data from CSV files. The CSV files are created based on the csvFiles map, where
-// the key represents the file name and the value the contains its contents. Assumes the data is loaded
-// automatically (RunDelay != 0)
+// setupLoader configures the *default loader to automatically load from the
+// specified path.
+func setupLoader(t testing.TB, tpPath, cfgPath string) {
+	t.Helper()
+	loadersJSON := fmt.Sprintf(`{
+"loaders": [{
+	"id": "*default",
+	"enabled": true,
+	"run_delay": "-1",
+	"tp_in_dir": "%s",
+	"tp_out_dir": "",
+	"action": "*store",
+	"opts": {
+		"*stopOnError": true
+	}
+}]
+}`, tpPath)
+	filePath := filepath.Join(cfgPath, "zzz_dynamic_loader.json")
+	if err := os.WriteFile(filePath, []byte(loadersJSON), 0644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// loadCSVs loads tariff plan data from CSV files. The CSV files are created
+// based on the csvFiles map, where the key represents the file name and the
+// value the contains its contents. Assumes the data is loaded automatically
+// (RunDelay != 0)
 func loadCSVs(t testing.TB, tpPath string, csvFiles map[string]string) {
 	t.Helper()
 	if tpPath != "" {
@@ -469,7 +499,8 @@ func loadCSVs(t testing.TB, tpPath string, csvFiles map[string]string) {
 	}
 }
 
-// FlushDBs resets the databases specified in the configuration if the corresponding flags are true.
+// FlushDBs resets the databases specified in the configuration if the
+// corresponding flags are true.
 func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
 	t.Helper()
 	if flushDataDB {

@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apis
 
 import (
-	"fmt"
 	"path"
 	"reflect"
 	"slices"
@@ -2196,47 +2195,24 @@ func testAttributesKillEngine(t *testing.T) {
 }
 
 func TestAttributesArith(t *testing.T) {
+	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
+		dbCfg = engine.InternalDBCfg
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
 
-	tpInDir := t.TempDir()
-
-	content := fmt.Sprintf(`{
-
-"general": {
-	"log_level": 7
-},
-"data_db": {
-	"db_type": "*internal"
-},
-"stor_db": {
-	"db_type": "*internal"
-},
+	content := `{
 "attributes": {
 	"enabled": true
 },
 "admins": {
 	"enabled": true
-},
-"loaders": [
-	{
-		"id": "*default",
-		"enabled": true,
-		"run_delay": "-1",
-		"tp_in_dir": "%s",
-		"tp_out_dir": "",
-		"action": "*store",
-		"opts": {
-			"*stopOnError": true
-		}
-	}
-]
-}`, tpInDir)
+}
+}`
 
 	tpFiles := map[string]string{
 		utils.AttributesCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
@@ -2250,8 +2226,8 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 
 	testEnv := engine.TestEngine{
 		ConfigJSON: content,
-		TpPath:     tpInDir,
 		TpFiles:    tpFiles,
+		DBCfg:      dbCfg,
 		Encoding:   *utils.Encoding,
 	}
 	client, _ := testEnv.Run(t)
@@ -2302,7 +2278,7 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 			Tenant: "cgrates.org",
 			ID:     "event_test",
 			Event: map[string]any{
-				"AttrSource": "csv",
+				"AttrSource": "api",
 				"Elem1":      "3",
 				"Elem2":      "4",
 			},
@@ -2310,7 +2286,7 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 		expected := engine.AttrSProcessEventReply{
 			AlteredFields: []*engine.FieldsAltered{
 				{
-					MatchedProfileID: "cgrates.org:ATTR_ARITH",
+					MatchedProfileID: "cgrates.org:ATTR_API",
 					Fields:           []string{"*req.12/4", "*req.3*4", "*req.3+4", "*req.3-4", "*req.MultiplyBetweenVariables"},
 				},
 			},
@@ -2318,7 +2294,7 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 				Tenant: "cgrates.org",
 				ID:     "event_test",
 				Event: map[string]any{
-					"AttrSource":               "csv",
+					"AttrSource":               "api",
 					"Elem1":                    "3",
 					"Elem2":                    "4",
 					"12/4":                     "3",
@@ -2344,15 +2320,15 @@ cgrates.org,ATTR_ARITH,,,,,,*req.MultiplyBetweenVariables,*multiply,~*req.Elem1;
 			}
 		}
 
-		ev.Event["AttrSource"] = "api"
+		ev.Event["AttrSource"] = "csv"
 		expected.AlteredFields = []*engine.FieldsAltered{
 			{
-				MatchedProfileID: "cgrates.org:ATTR_API",
+				MatchedProfileID: "cgrates.org:ATTR_ARITH",
 				Fields:           []string{"*req.12/4", "*req.3*4", "*req.3+4", "*req.3-4", "*req.MultiplyBetweenVariables"},
 			},
 		}
 		expected.CGREvent.Event = map[string]any{
-			"AttrSource":               "api",
+			"AttrSource":               "csv",
 			"Elem1":                    "3",
 			"Elem2":                    "4",
 			"12/4":                     "3",
