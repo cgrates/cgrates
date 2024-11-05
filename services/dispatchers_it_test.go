@@ -52,17 +52,17 @@ func TestDispatcherSReload(t *testing.T) {
 	css := &CacheService{cacheCh: chSCh}
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewDispatcherService(cfg, db, css, filterSChan, server,
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewDispatcherService(cfg, db, css, filterSChan, cls,
 		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
-	attrS := NewAttributeService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srv, srvDep)
+	attrS := NewAttributeService(cfg, db, css, filterSChan, cls, make(chan birpc.ClientConnector, 1), anz, srv, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(attrS, srv,
-		NewLoaderService(cfg, db, filterSChan, server,
+		NewLoaderService(cfg, db, filterSChan, cls,
 			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())
 	srvMngr.StartServices(ctx, cancel)

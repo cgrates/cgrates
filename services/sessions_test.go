@@ -47,11 +47,11 @@ func TestSessionSCoverage(t *testing.T) {
 	cfg.CdrsCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, nil, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, nil, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -59,7 +59,7 @@ func TestSessionSCoverage(t *testing.T) {
 	srv2 := SessionService{
 		cfg:      cfg,
 		dm:       db,
-		server:   server,
+		server:   cls,
 		connChan: make(chan birpc.ClientConnector, 1),
 		connMgr:  nil,
 		anz:      anz,

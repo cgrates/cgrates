@@ -39,8 +39,8 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-func NewServer(caps *engine.Caps) (s *CommonListenerS) {
-	s = &CommonListenerS{
+func NewCommonListenerS(caps *engine.Caps) *CommonListenerS {
+	c := &CommonListenerS{
 		httpMux:         http.NewServeMux(),
 		httpsMux:        http.NewServeMux(),
 		stopbiRPCServer: make(chan struct{}, 1),
@@ -49,9 +49,13 @@ func NewServer(caps *engine.Caps) (s *CommonListenerS) {
 		rpcServer: birpc.NewServer(),
 		birpcSrv:  birpc.NewBirpcServer(),
 	}
-	s.httpServer = &http.Server{Handler: s.httpMux}
-	s.httpsServer = &http.Server{Handler: s.httpsMux}
-	return
+	c.httpServer = &http.Server{
+		Handler: c.httpMux,
+	}
+	c.httpsServer = &http.Server{
+		Handler: c.httpsMux,
+	}
+	return c
 }
 
 type CommonListenerS struct {
@@ -74,118 +78,118 @@ type CommonListenerS struct {
 	startSrv    sync.Once
 }
 
-func (s *CommonListenerS) SetAnalyzer(anz *analyzers.AnalyzerS) {
-	s.anz = anz
+func (c *CommonListenerS) SetAnalyzer(anz *analyzers.AnalyzerS) {
+	c.anz = anz
 }
 
-func (s *CommonListenerS) RpcRegister(rcvr any) {
-	s.rpcServer.Register(rcvr)
+func (c *CommonListenerS) RpcRegister(rcvr any) {
+	c.rpcServer.Register(rcvr)
 }
 
-func (s *CommonListenerS) RpcRegisterName(name string, rcvr any) {
-	s.rpcServer.RegisterName(name, rcvr)
+func (c *CommonListenerS) RpcRegisterName(name string, rcvr any) {
+	c.rpcServer.RegisterName(name, rcvr)
 }
 
-func (s *CommonListenerS) RpcUnregisterName(name string) {
-	s.rpcServer.UnregisterName(name)
+func (c *CommonListenerS) RpcUnregisterName(name string) {
+	c.rpcServer.UnregisterName(name)
 }
 
-func (s *CommonListenerS) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
-	s.httpMux.HandleFunc(pattern, handler)
-	s.httpsMux.HandleFunc(pattern, handler)
-	s.Lock()
-	s.httpEnabled = true
-	s.Unlock()
+func (c *CommonListenerS) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+	c.httpMux.HandleFunc(pattern, handler)
+	c.httpsMux.HandleFunc(pattern, handler)
+	c.Lock()
+	c.httpEnabled = true
+	c.Unlock()
 }
 
-func (s *CommonListenerS) RegisterHttpHandler(pattern string, handler http.Handler) {
-	s.httpMux.Handle(pattern, handler)
-	s.httpsMux.Handle(pattern, handler)
-	s.Lock()
-	s.httpEnabled = true
-	s.Unlock()
+func (c *CommonListenerS) RegisterHttpHandler(pattern string, handler http.Handler) {
+	c.httpMux.Handle(pattern, handler)
+	c.httpsMux.Handle(pattern, handler)
+	c.Lock()
+	c.httpEnabled = true
+	c.Unlock()
 }
 
 // Registers a new BiJsonRpc name
-func (s *CommonListenerS) BiRPCRegisterName(name string, rcv any) {
-	s.birpcSrv.RegisterName(name, rcv)
+func (c *CommonListenerS) BiRPCRegisterName(name string, rcv any) {
+	c.birpcSrv.RegisterName(name, rcv)
 }
 
-func (s *CommonListenerS) BiRPCUnregisterName(name string) {
-	s.birpcSrv.UnregisterName(name)
+func (c *CommonListenerS) BiRPCUnregisterName(name string) {
+	c.birpcSrv.UnregisterName(name)
 }
 
-func (s *CommonListenerS) handleRequest(w http.ResponseWriter, r *http.Request) {
+func (c *CommonListenerS) handleRequest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	rmtIP, _ := utils.GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
-	res := newRPCRequest(s.rpcServer, r.Body, rmtAddr, s.caps, s.anz).Call()
+	res := newRPCRequest(c.rpcServer, r.Body, rmtAddr, c.caps, c.anz).Call()
 	io.Copy(w, res)
 	r.Body.Close()
 }
 
-func (s *CommonListenerS) handleWebSocket(ws *websocket.Conn) {
-	s.rpcServer.ServeCodec(newCapsJSONCodec(ws, s.caps, s.anz))
+func (c *CommonListenerS) handleWebSocket(ws *websocket.Conn) {
+	c.rpcServer.ServeCodec(newCapsJSONCodec(ws, c.caps, c.anz))
 }
 
-func (s *CommonListenerS) ServeJSON(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {
-	if s.rpcJSONl, err = net.Listen(utils.TCP, addr); err != nil {
+func (c *CommonListenerS) ServeJSON(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {
+	if c.rpcJSONl, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("Serve%s listen error: %s", utils.JSONCaps, err)
 		shtdwnEngine()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s server at <%s>.", utils.JSONCaps, addr))
-	return acceptRPC(ctx, shtdwnEngine, s.rpcServer, s.rpcJSONl, utils.JSONCaps, func(conn conn) birpc.ServerCodec {
-		return newCapsJSONCodec(conn, s.caps, s.anz)
+	return acceptRPC(ctx, shtdwnEngine, c.rpcServer, c.rpcJSONl, utils.JSONCaps, func(conn conn) birpc.ServerCodec {
+		return newCapsJSONCodec(conn, c.caps, c.anz)
 	})
 }
 
-func (s *CommonListenerS) ServeGOB(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {
-	if s.rpcGOBl, err = net.Listen(utils.TCP, addr); err != nil {
+func (c *CommonListenerS) ServeGOB(ctx *context.Context, shtdwnEngine context.CancelFunc, addr string) (err error) {
+	if c.rpcGOBl, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("Serve%s listen error: %s", utils.GOBCaps, err)
 		shtdwnEngine()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s server at <%s>.", utils.GOBCaps, addr))
-	return acceptRPC(ctx, shtdwnEngine, s.rpcServer, s.rpcGOBl, utils.GOBCaps, func(conn conn) birpc.ServerCodec {
-		return newCapsGOBCodec(conn, s.caps, s.anz)
+	return acceptRPC(ctx, shtdwnEngine, c.rpcServer, c.rpcGOBl, utils.GOBCaps, func(conn conn) birpc.ServerCodec {
+		return newCapsGOBCodec(conn, c.caps, c.anz)
 	})
 }
 
-func (s *CommonListenerS) ServeHTTP(shtdwnEngine context.CancelFunc,
+func (c *CommonListenerS) ServeHTTP(shtdwnEngine context.CancelFunc,
 	addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string) {
-	s.Lock()
-	s.httpEnabled = s.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
-	enabled := s.httpEnabled
-	s.Unlock()
+	c.Lock()
+	c.httpEnabled = c.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
+	enabled := c.httpEnabled
+	c.Unlock()
 	if !enabled {
 		return
 	}
 	if jsonRPCURL != "" {
 		utils.Logger.Info("<HTTP> enabling handler for JSON-RPC")
 		if useBasicAuth {
-			s.httpMux.HandleFunc(jsonRPCURL, use(s.handleRequest, basicAuth(userList)))
+			c.httpMux.HandleFunc(jsonRPCURL, use(c.handleRequest, basicAuth(userList)))
 		} else {
-			s.httpMux.HandleFunc(jsonRPCURL, s.handleRequest)
+			c.httpMux.HandleFunc(jsonRPCURL, c.handleRequest)
 		}
 	}
 	if wsRPCURL != "" {
 		utils.Logger.Info("<HTTP> enabling handler for WebSocket connections")
-		wsHandler := websocket.Handler(s.handleWebSocket)
+		wsHandler := websocket.Handler(c.handleWebSocket)
 		if useBasicAuth {
-			s.httpMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
+			c.httpMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
-			s.httpMux.Handle(wsRPCURL, wsHandler)
+			c.httpMux.Handle(wsRPCURL, wsHandler)
 		}
 	}
 	if promURL != "" {
 		utils.Logger.Info("<HTTP> enabling handler for Prometheus connections")
 		wsHandler := promhttp.Handler()
 		if useBasicAuth {
-			s.httpMux.HandleFunc(promURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
+			c.httpMux.HandleFunc(promURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
-			s.httpMux.Handle(promURL, wsHandler)
+			c.httpMux.Handle(promURL, wsHandler)
 		}
 	}
 	if pprofPath != "" {
@@ -194,64 +198,64 @@ func (s *CommonListenerS) ServeHTTP(shtdwnEngine context.CancelFunc,
 		}
 		utils.Logger.Info(fmt.Sprintf("<HTTP> profiling endpoints registered at %q", pprofPath))
 		if useBasicAuth {
-			s.httpMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
-			s.httpMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
-			s.httpMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
-			s.httpMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
-			s.httpMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
+			c.httpMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
+			c.httpMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
+			c.httpMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
+			c.httpMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
+			c.httpMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
 		} else {
-			s.httpMux.HandleFunc(pprofPath, pprof.Index)
-			s.httpMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
-			s.httpMux.HandleFunc(pprofPath+"profile", pprof.Profile)
-			s.httpMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
-			s.httpMux.HandleFunc(pprofPath+"trace", pprof.Trace)
+			c.httpMux.HandleFunc(pprofPath, pprof.Index)
+			c.httpMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
+			c.httpMux.HandleFunc(pprofPath+"profile", pprof.Profile)
+			c.httpMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
+			c.httpMux.HandleFunc(pprofPath+"trace", pprof.Trace)
 		}
 	}
 	if useBasicAuth {
 		utils.Logger.Info("<HTTP> enabling basic auth")
 	}
 	utils.Logger.Info(fmt.Sprintf("<HTTP> start listening at <%s>", addr))
-	s.httpServer.Addr = addr
-	if err := s.httpServer.ListenAndServe(); err != nil {
+	c.httpServer.Addr = addr
+	if err := c.httpServer.ListenAndServe(); err != nil {
 		log.Println(fmt.Sprintf("<HTTP>Error: %s when listening ", err))
 		shtdwnEngine()
 	}
 }
 
 // ServeBiRPC create a goroutine to listen and serve as BiRPC server
-func (s *CommonListenerS) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis func(birpc.ClientConnector)) (err error) {
-	s.birpcSrv.OnConnect(onConn)
-	s.birpcSrv.OnDisconnect(onDis)
+func (c *CommonListenerS) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis func(birpc.ClientConnector)) (err error) {
+	c.birpcSrv.OnConnect(onConn)
+	c.birpcSrv.OnDisconnect(onDis)
 	if addrJSON != utils.EmptyString {
 		var ljson net.Listener
-		if ljson, err = listenBiRPC(s.birpcSrv, addrJSON, utils.JSONCaps, func(conn conn) birpc.BirpcCodec {
-			return newCapsBiRPCJSONCodec(conn, s.caps, s.anz)
-		}, s.stopbiRPCServer); err != nil {
+		if ljson, err = listenBiRPC(c.birpcSrv, addrJSON, utils.JSONCaps, func(conn conn) birpc.BirpcCodec {
+			return newCapsBiRPCJSONCodec(conn, c.caps, c.anz)
+		}, c.stopbiRPCServer); err != nil {
 			return
 		}
 		defer ljson.Close()
 	}
 	if addrGOB != utils.EmptyString {
 		var lgob net.Listener
-		if lgob, err = listenBiRPC(s.birpcSrv, addrGOB, utils.GOBCaps, func(conn conn) birpc.BirpcCodec {
-			return newCapsBiRPCGOBCodec(conn, s.caps, s.anz)
-		}, s.stopbiRPCServer); err != nil {
+		if lgob, err = listenBiRPC(c.birpcSrv, addrGOB, utils.GOBCaps, func(conn conn) birpc.BirpcCodec {
+			return newCapsBiRPCGOBCodec(conn, c.caps, c.anz)
+		}, c.stopbiRPCServer); err != nil {
 			return
 		}
 		defer lgob.Close()
 	}
-	<-s.stopbiRPCServer // wait until server is stopped to close the listener
+	<-c.stopbiRPCServer // wait until server is stopped to close the listener
 	return
 }
 
-func (s *CommonListenerS) ServeGOBTLS(ctx *context.Context, shtdwnEngine context.CancelFunc,
+func (c *CommonListenerS) ServeGOBTLS(ctx *context.Context, shtdwnEngine context.CancelFunc,
 	addr, serverCrt, serverKey, caCert string, serverPolicy int, serverName string) (err error) {
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
 		shtdwnEngine()
 		return
 	}
-	s.rpcGOBlTLS, err = tls.Listen(utils.TCP, addr, config)
+	c.rpcGOBlTLS, err = tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
 		shtdwnEngine()
@@ -259,19 +263,19 @@ func (s *CommonListenerS) ServeGOBTLS(ctx *context.Context, shtdwnEngine context
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s TLS server at <%s>.", utils.GOBCaps, addr))
 
-	return acceptRPC(ctx, shtdwnEngine, s.rpcServer, s.rpcGOBlTLS, utils.GOBCaps, func(conn conn) birpc.ServerCodec {
-		return newCapsGOBCodec(conn, s.caps, s.anz)
+	return acceptRPC(ctx, shtdwnEngine, c.rpcServer, c.rpcGOBlTLS, utils.GOBCaps, func(conn conn) birpc.ServerCodec {
+		return newCapsGOBCodec(conn, c.caps, c.anz)
 	})
 }
 
-func (s *CommonListenerS) ServeJSONTLS(ctx *context.Context, shtdwnEngine context.CancelFunc,
+func (c *CommonListenerS) ServeJSONTLS(ctx *context.Context, shtdwnEngine context.CancelFunc,
 	addr, serverCrt, serverKey, caCert string, serverPolicy int, serverName string) (err error) {
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
 		shtdwnEngine()
 		return
 	}
-	s.rpcJSONlTLS, err = tls.Listen(utils.TCP, addr, config)
+	c.rpcJSONlTLS, err = tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
 		shtdwnEngine()
@@ -279,37 +283,37 @@ func (s *CommonListenerS) ServeJSONTLS(ctx *context.Context, shtdwnEngine contex
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s TLS server at <%s>.", utils.JSONCaps, addr))
 
-	return acceptRPC(ctx, shtdwnEngine, s.rpcServer, s.rpcJSONlTLS, utils.JSONCaps, func(conn conn) birpc.ServerCodec {
-		return newCapsGOBCodec(conn, s.caps, s.anz)
+	return acceptRPC(ctx, shtdwnEngine, c.rpcServer, c.rpcJSONlTLS, utils.JSONCaps, func(conn conn) birpc.ServerCodec {
+		return newCapsGOBCodec(conn, c.caps, c.anz)
 	})
 }
 
-func (s *CommonListenerS) ServeHTTPS(shtdwnEngine context.CancelFunc,
+func (c *CommonListenerS) ServeHTTPS(shtdwnEngine context.CancelFunc,
 	addr, serverCrt, serverKey, caCert string, serverPolicy int,
 	serverName, jsonRPCURL, wsRPCURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string) {
-	s.Lock()
-	s.httpEnabled = s.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
-	enabled := s.httpEnabled
-	s.Unlock()
+	c.Lock()
+	c.httpEnabled = c.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
+	enabled := c.httpEnabled
+	c.Unlock()
 	if !enabled {
 		return
 	}
 	if jsonRPCURL != "" {
 		utils.Logger.Info("<HTTPS> enabling handler for JSON-RPC")
 		if useBasicAuth {
-			s.httpsMux.HandleFunc(jsonRPCURL, use(s.handleRequest, basicAuth(userList)))
+			c.httpsMux.HandleFunc(jsonRPCURL, use(c.handleRequest, basicAuth(userList)))
 		} else {
-			s.httpsMux.HandleFunc(jsonRPCURL, s.handleRequest)
+			c.httpsMux.HandleFunc(jsonRPCURL, c.handleRequest)
 		}
 	}
 	if wsRPCURL != "" {
 		utils.Logger.Info("<HTTPS> enabling handler for WebSocket connections")
-		wsHandler := websocket.Handler(s.handleWebSocket)
+		wsHandler := websocket.Handler(c.handleWebSocket)
 		if useBasicAuth {
-			s.httpsMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
+			c.httpsMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
-			s.httpsMux.Handle(wsRPCURL, wsHandler)
+			c.httpsMux.Handle(wsRPCURL, wsHandler)
 		}
 	}
 	if pprofPath != "" {
@@ -318,17 +322,17 @@ func (s *CommonListenerS) ServeHTTPS(shtdwnEngine context.CancelFunc,
 		}
 		utils.Logger.Info(fmt.Sprintf("<HTTPS> profiling endpoints registered at %q", pprofPath))
 		if useBasicAuth {
-			s.httpsMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
-			s.httpsMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
-			s.httpsMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
-			s.httpsMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
-			s.httpsMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
+			c.httpsMux.HandleFunc(pprofPath, use(pprof.Index, basicAuth(userList)))
+			c.httpsMux.HandleFunc(pprofPath+"cmdline", use(pprof.Cmdline, basicAuth(userList)))
+			c.httpsMux.HandleFunc(pprofPath+"profile", use(pprof.Profile, basicAuth(userList)))
+			c.httpsMux.HandleFunc(pprofPath+"symbol", use(pprof.Symbol, basicAuth(userList)))
+			c.httpsMux.HandleFunc(pprofPath+"trace", use(pprof.Trace, basicAuth(userList)))
 		} else {
-			s.httpsMux.HandleFunc(pprofPath, pprof.Index)
-			s.httpsMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
-			s.httpsMux.HandleFunc(pprofPath+"profile", pprof.Profile)
-			s.httpsMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
-			s.httpsMux.HandleFunc(pprofPath+"trace", pprof.Trace)
+			c.httpsMux.HandleFunc(pprofPath, pprof.Index)
+			c.httpsMux.HandleFunc(pprofPath+"cmdline", pprof.Cmdline)
+			c.httpsMux.HandleFunc(pprofPath+"profile", pprof.Profile)
+			c.httpsMux.HandleFunc(pprofPath+"symbol", pprof.Symbol)
+			c.httpsMux.HandleFunc(pprofPath+"trace", pprof.Trace)
 		}
 	}
 	if useBasicAuth {
@@ -339,49 +343,49 @@ func (s *CommonListenerS) ServeHTTPS(shtdwnEngine context.CancelFunc,
 		shtdwnEngine()
 		return
 	}
-	s.httpsServer.Addr = addr
-	s.httpsServer.TLSConfig = config
+	c.httpsServer.Addr = addr
+	c.httpsServer.TLSConfig = config
 	utils.Logger.Info(fmt.Sprintf("<HTTPS> start listening at <%s>", addr))
 
-	if err := s.httpsServer.ListenAndServeTLS(serverCrt, serverKey); err != nil {
+	if err := c.httpsServer.ListenAndServeTLS(serverCrt, serverKey); err != nil {
 		log.Println(fmt.Sprintf("<HTTPS>Error: %s when listening ", err))
 		shtdwnEngine()
 	}
 }
 
-func (s *CommonListenerS) Stop() {
-	if s.rpcJSONl != nil {
-		s.rpcJSONl.Close()
+func (c *CommonListenerS) Stop() {
+	if c.rpcJSONl != nil {
+		c.rpcJSONl.Close()
 	}
-	if s.rpcGOBl != nil {
-		s.rpcGOBl.Close()
+	if c.rpcGOBl != nil {
+		c.rpcGOBl.Close()
 	}
-	if s.rpcJSONlTLS != nil {
-		s.rpcJSONlTLS.Close()
+	if c.rpcJSONlTLS != nil {
+		c.rpcJSONlTLS.Close()
 	}
-	if s.rpcGOBlTLS != nil {
-		s.rpcGOBlTLS.Close()
+	if c.rpcGOBlTLS != nil {
+		c.rpcGOBlTLS.Close()
 	}
-	if s.httpServer != nil {
-		s.httpServer.Shutdown(context.Background())
+	if c.httpServer != nil {
+		c.httpServer.Shutdown(context.Background())
 	}
-	if s.httpsServer != nil {
-		s.httpsServer.Shutdown(context.Background())
+	if c.httpsServer != nil {
+		c.httpsServer.Shutdown(context.Background())
 	}
-	s.StopBiRPC()
+	c.StopBiRPC()
 }
 
 // StopBiRPC stops the go routine create with ServeBiJSON
-func (s *CommonListenerS) StopBiRPC() {
-	s.stopbiRPCServer <- struct{}{}
-	s.birpcSrv = birpc.NewBirpcServer()
+func (c *CommonListenerS) StopBiRPC() {
+	c.stopbiRPCServer <- struct{}{}
+	c.birpcSrv = birpc.NewBirpcServer()
 }
 
-func (s *CommonListenerS) StartServer(ctx *context.Context, shtdwnEngine context.CancelFunc, cfg *config.CGRConfig) {
-	s.startSrv.Do(func() {
-		go s.ServeJSON(ctx, shtdwnEngine, cfg.ListenCfg().RPCJSONListen)
-		go s.ServeGOB(ctx, shtdwnEngine, cfg.ListenCfg().RPCGOBListen)
-		go s.ServeHTTP(
+func (c *CommonListenerS) StartServer(ctx *context.Context, shtdwnEngine context.CancelFunc, cfg *config.CGRConfig) {
+	c.startSrv.Do(func() {
+		go c.ServeJSON(ctx, shtdwnEngine, cfg.ListenCfg().RPCJSONListen)
+		go c.ServeGOB(ctx, shtdwnEngine, cfg.ListenCfg().RPCGOBListen)
+		go c.ServeHTTP(
 			shtdwnEngine,
 			cfg.ListenCfg().HTTPListen,
 			cfg.HTTPCfg().JsonRPCURL,
@@ -400,7 +404,7 @@ func (s *CommonListenerS) StartServer(ctx *context.Context, shtdwnEngine context
 			return
 		}
 		if cfg.ListenCfg().RPCGOBTLSListen != utils.EmptyString {
-			go s.ServeGOBTLS(
+			go c.ServeGOBTLS(
 				ctx, shtdwnEngine,
 				cfg.ListenCfg().RPCGOBTLSListen,
 				cfg.TLSCfg().ServerCerificate,
@@ -411,7 +415,7 @@ func (s *CommonListenerS) StartServer(ctx *context.Context, shtdwnEngine context
 			)
 		}
 		if cfg.ListenCfg().RPCJSONTLSListen != utils.EmptyString {
-			go s.ServeJSONTLS(
+			go c.ServeJSONTLS(
 				ctx, shtdwnEngine,
 				cfg.ListenCfg().RPCJSONTLSListen,
 				cfg.TLSCfg().ServerCerificate,
@@ -422,7 +426,7 @@ func (s *CommonListenerS) StartServer(ctx *context.Context, shtdwnEngine context
 			)
 		}
 		if cfg.ListenCfg().HTTPTLSListen != utils.EmptyString {
-			go s.ServeHTTPS(
+			go c.ServeHTTPS(
 				shtdwnEngine,
 				cfg.ListenCfg().HTTPTLSListen,
 				cfg.TLSCfg().ServerCerificate,

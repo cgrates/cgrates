@@ -42,7 +42,7 @@ func TestRateSReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
@@ -53,10 +53,10 @@ func TestRateSReload(t *testing.T) {
 	chSCh := make(chan *engine.CacheS, 1)
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	rS := NewRateService(cfg, css, filterSChan, db, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	rS := NewRateService(cfg, css, filterSChan, db, cls, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	srvMngr.AddServices(rS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())
 	srvMngr.StartServices(ctx, cancel)
 	if rS.IsRunning() {

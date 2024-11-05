@@ -42,17 +42,17 @@ func TestDiameterAgentReload1(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1),
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	srv := NewDiameterAgent(cfg, filterSChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())
 	srvMngr.StartServices(ctx, cancel)
 	if srv.IsRunning() {

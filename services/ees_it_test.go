@@ -52,7 +52,7 @@ func TestEventExporterSReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdWg := new(sync.WaitGroup)
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
@@ -62,14 +62,14 @@ func TestEventExporterSReload(t *testing.T) {
 	chSCh := make(chan *engine.CacheS, 1)
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	attrS := NewAttributeService(cfg, db,
-		css, filterSChan, server, make(chan birpc.ClientConnector, 1),
+		css, filterSChan, cls, make(chan birpc.ClientConnector, 1),
 		anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg),
-		server, make(chan birpc.ClientConnector, 2), anz, srvDep)
+		cls, make(chan birpc.ClientConnector, 2), anz, srvDep)
 	srvMngr.AddServices(ees, attrS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())
 	srvMngr.StartServices(ctx, cancel)
 	if ees.IsRunning() {
@@ -130,11 +130,11 @@ func TestEventExporterSReload2(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	ees := NewEventExporterService(cfg, filterSChan, engine.NewConnManager(cfg),
-		server, make(chan birpc.ClientConnector, 2), anz, srvDep)
+		cls, make(chan birpc.ClientConnector, 2), anz, srvDep)
 	if ees.IsRunning() {
 		t.Fatalf("Expected service to be down")
 	}

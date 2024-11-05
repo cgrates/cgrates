@@ -36,14 +36,14 @@ func TestActionSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	actRPC := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	chS := NewCacheService(cfg, db, nil, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	actS := NewActionService(cfg, db,
-		chS, filterSChan, nil, server, actRPC,
+		chS, filterSChan, nil, cls, actRPC,
 		anz, srvDep)
 	if actS == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(actS))
@@ -57,7 +57,7 @@ func TestActionSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      server,
+		server:      cls,
 		rldChan:     testChan,
 		stopChan:    make(chan struct{}, 1),
 		connChan:    actRPC,

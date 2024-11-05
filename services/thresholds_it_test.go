@@ -50,15 +50,15 @@ func TestThresholdSReload(t *testing.T) {
 	chSCh := make(chan *engine.CacheS, 1)
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	tS := NewThresholdService(cfg, db, css, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	tS := NewThresholdService(cfg, db, css, filterSChan, nil, cls, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(tS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	srvMngr.StartServices(ctx, cancel)
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -119,15 +119,15 @@ func TestThresholdSReload2(t *testing.T) {
 	chSCh := make(chan *engine.CacheS, 1)
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	tS := NewThresholdService(cfg, db, css, filterSChan, nil, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	tS := NewThresholdService(cfg, db, css, filterSChan, nil, cls, make(chan birpc.ClientConnector, 1), anz, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(tS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	srvMngr.StartServices(ctx, cancel)
 	if tS.IsRunning() {
 		t.Errorf("Expected service to be down")

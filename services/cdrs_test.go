@@ -35,14 +35,14 @@ func TestCdrsCoverage(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	cfg.ChargerSCfg().Enabled = true
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	stordb := NewStorDBService(cfg, false, srvDep)
-	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, cls,
 		cdrsRPC, nil, anz, srvDep)
 	if cdrS.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -54,7 +54,7 @@ func TestCdrsCoverage(t *testing.T) {
 		dm:          db,
 		storDB:      stordb,
 		filterSChan: filterSChan,
-		server:      server,
+		server:      cls,
 		connChan:    make(chan birpc.ClientConnector, 1),
 		connMgr:     nil,
 		stopChan:    make(chan struct{}, 1),

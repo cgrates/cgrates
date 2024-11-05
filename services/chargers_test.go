@@ -37,12 +37,12 @@ func TestChargerSCoverage(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	chS := NewCacheService(cfg, db, nil, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
 	chrS1 := NewChargerService(cfg, db, chS,
-		filterSChan, server, make(chan birpc.ClientConnector, 1),
+		filterSChan, cls, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	if chrS1.IsRunning() {
 		t.Errorf("Expected service to be down")
@@ -53,7 +53,7 @@ func TestChargerSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      server,
+		server:      cls,
 		connMgr:     nil,
 		anz:         anz,
 		srvDep:      srvDep,

@@ -47,18 +47,18 @@ func TestAttributeSReload(t *testing.T) {
 	chSCh := make(chan *engine.CacheS, 1)
 	chSCh <- chS
 	css := &CacheService{cacheCh: chSCh}
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	attrRPC := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	attrS := NewAttributeService(cfg, db,
-		css, filterSChan, server, attrRPC,
+		css, filterSChan, cls, attrRPC,
 		anz, &DispatcherService{srvsReload: make(map[string]chan struct{})}, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(attrS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())
 	srvMngr.StartServices(ctx, cancel)
 	if attrS.IsRunning() {

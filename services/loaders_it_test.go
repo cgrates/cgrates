@@ -70,14 +70,14 @@ func TestLoaderSReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	conMngr := engine.NewConnManager(cfg)
 	srv := NewLoaderService(cfg, db, filterSChan,
-		server, make(chan birpc.ClientConnector, 1),
+		cls, make(chan birpc.ClientConnector, 1),
 		conMngr, anz, srvDep)
 	srvMngr.AddServices(srv, db)
 	ctx, cancel := context.WithCancel(context.TODO())
@@ -150,13 +150,13 @@ func TestLoaderSReload2(t *testing.T) {
 	}
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	db.dbchan <- new(engine.DataManager)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewLoaderService(cfg, db, filterSChan,
-		server, make(chan birpc.ClientConnector, 1),
+		cls, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	ctx, cancel := context.WithCancel(context.TODO())
 	err := srv.Start(ctx, cancel)
@@ -175,13 +175,13 @@ func TestLoaderSReload3(t *testing.T) {
 	cfg.LoaderCfg()[0].RunDelay = -1
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	db.dbchan <- new(engine.DataManager)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	srv := NewLoaderService(cfg, db, filterSChan,
-		server, make(chan birpc.ClientConnector, 1),
+		cls, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	ctx, cancel := context.WithCancel(context.TODO())
 	err := srv.Start(ctx, cancel)

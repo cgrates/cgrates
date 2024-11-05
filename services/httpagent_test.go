@@ -31,12 +31,12 @@ import (
 // TestHTTPAgent for cover testing
 func TestHTTPAgentCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cM := engine.NewConnManager(cfg)
-	srv := NewHTTPAgent(cfg, filterSChan, server, cM, srvDep)
+	srv := NewHTTPAgent(cfg, filterSChan, cls, cM, srvDep)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
 	}
@@ -46,7 +46,7 @@ func TestHTTPAgentCoverage(t *testing.T) {
 	srv2 := &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		server:      server,
+		server:      cls,
 		started:     true,
 		connMgr:     cM,
 		srvDep:      srvDep,

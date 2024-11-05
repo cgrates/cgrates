@@ -37,12 +37,12 @@ func TestStatSCoverage(t *testing.T) {
 	cfg.ThresholdSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	chS := NewCacheService(cfg, db, nil, server, make(chan context.ClientConnector, 1), anz, nil, srvDep)
-	sS := NewStatService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+	sS := NewStatService(cfg, db, chS, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	if sS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
@@ -51,7 +51,7 @@ func TestStatSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      server,
+		server:      cls,
 		connMgr:     nil,
 		sts:         &engine.StatS{},
 		connChan:    make(chan birpc.ClientConnector, 1),
