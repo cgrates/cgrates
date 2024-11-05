@@ -59,8 +59,9 @@ func NewCommonListenerS(caps *engine.Caps) *CommonListenerS {
 }
 
 type CommonListenerS struct {
-	sync.RWMutex
-	httpEnabled     bool
+	mu          sync.Mutex // mutex for httpEnabled field
+	httpEnabled bool
+
 	birpcSrv        *birpc.BirpcServer
 	stopbiRPCServer chan struct{} // used in order to fully stop the biRPC
 	httpsMux        *http.ServeMux
@@ -97,17 +98,17 @@ func (c *CommonListenerS) RpcUnregisterName(name string) {
 func (c *CommonListenerS) RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
 	c.httpMux.HandleFunc(pattern, handler)
 	c.httpsMux.HandleFunc(pattern, handler)
-	c.Lock()
+	c.mu.Lock()
 	c.httpEnabled = true
-	c.Unlock()
+	c.mu.Unlock()
 }
 
 func (c *CommonListenerS) RegisterHttpHandler(pattern string, handler http.Handler) {
 	c.httpMux.Handle(pattern, handler)
 	c.httpsMux.Handle(pattern, handler)
-	c.Lock()
+	c.mu.Lock()
 	c.httpEnabled = true
-	c.Unlock()
+	c.mu.Unlock()
 }
 
 // Registers a new BiJsonRpc name
@@ -159,10 +160,10 @@ func (c *CommonListenerS) ServeGOB(ctx *context.Context, shtdwnEngine context.Ca
 func (c *CommonListenerS) ServeHTTP(shtdwnEngine context.CancelFunc,
 	addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string) {
-	c.Lock()
+	c.mu.Lock()
 	c.httpEnabled = c.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
 	enabled := c.httpEnabled
-	c.Unlock()
+	c.mu.Unlock()
 	if !enabled {
 		return
 	}
@@ -292,10 +293,10 @@ func (c *CommonListenerS) ServeHTTPS(shtdwnEngine context.CancelFunc,
 	addr, serverCrt, serverKey, caCert string, serverPolicy int,
 	serverName, jsonRPCURL, wsRPCURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string) {
-	c.Lock()
+	c.mu.Lock()
 	c.httpEnabled = c.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
 	enabled := c.httpEnabled
-	c.Unlock()
+	c.mu.Unlock()
 	if !enabled {
 		return
 	}
