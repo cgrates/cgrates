@@ -324,6 +324,14 @@ func newProfileFunc(lType string) func() profile {
 				Balances: make(map[string]*utils.Balance),
 			}
 		}
+	case utils.MetaTrends:
+		return func() profile {
+			return new(engine.TrendProfile)
+		}
+	case utils.MetaRankings:
+		return func() profile {
+			return new(engine.RankingProfile)
+		}
 	default:
 		return func() profile { return nil }
 	}

@@ -40,6 +40,7 @@ func NewTrendService(dm *DataManager,
 		fltrS:          filterS,
 		connMgr:        connMgr,
 		loopStopped:    make(chan struct{}),
+		crn:            cron.New(),
 		crnTQs:         make(map[string]map[string]cron.EntryID),
 		crnTQsMux:      new(sync.RWMutex),
 		storedTrends:   make(utils.StringSet),
@@ -468,7 +469,7 @@ func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTr
 	retTrend.ID = trnd.ID
 	startIdx := arg.RunIndexStart
 	if startIdx > len(trnd.RunTimes) {
-		startIdx = len(trnd.RunTimes) - 1
+		startIdx = len(trnd.RunTimes)
 	}
 	endIdx := arg.RunIndexEnd
 	if endIdx > len(trnd.RunTimes) ||
@@ -493,7 +494,7 @@ func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTr
 	}
 	retTrend.RunTimes = make([]time.Time, 0, len(runTimes))
 	for _, runTime := range runTimes {
-		if runTime.After(tStart) && runTime.Before(tEnd) {
+		if !runTime.Before(tStart) && runTime.Before(tEnd) {
 			retTrend.RunTimes = append(retTrend.RunTimes, runTime)
 		}
 	}

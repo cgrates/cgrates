@@ -51,6 +51,10 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, wi
 		return dm.RemoveStatQueueProfile(ctx, tnt, id, withIndex)
 	case utils.MetaThresholds:
 		return dm.RemoveThresholdProfile(ctx, tnt, id, withIndex)
+	case utils.MetaTrends:
+		return dm.RemoveTrendProfile(ctx, tnt, id)
+	case utils.MetaRankings:
+		return dm.RemoveRankingProfile(ctx, tnt, id)
 	case utils.MetaRoutes:
 		return dm.RemoveRouteProfile(ctx, tnt, id, withIndex)
 	case utils.MetaChargers:
@@ -113,6 +117,10 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 		return dm.SetActionProfile(ctx, data.(*engine.ActionProfile), withIndex)
 	case utils.MetaAccounts:
 		return dm.SetAccount(ctx, data.(*utils.Account), withIndex)
+	case utils.MetaTrends:
+		return dm.SetTrendProfile(ctx, data.(*engine.TrendProfile))
+	case utils.MetaRankings:
+		return dm.SetRankingProfile(ctx, data.(*engine.RankingProfile))
 	}
 	return
 }
@@ -135,6 +143,10 @@ func dryRun(ctx *context.Context, lType, ldrID string, obj profile) (err error) 
 		msg = "<%s-%s> DRY_RUN: StatsQueueProfile: %s"
 	case utils.MetaThresholds:
 		msg = "<%s-%s> DRY_RUN: ThresholdProfile: %s"
+	case utils.MetaTrends:
+		msg = "<%s-%s> DRY_RUN: TrendProfile: %s"
+	case utils.MetaRankings:
+		msg = "<%s-%s> DRY_RUN: RankingProfile: %s"
 	case utils.MetaRoutes:
 		msg = "<%s-%s> DRY_RUN: RouteProfile: %s"
 	case utils.MetaChargers:
@@ -218,6 +230,12 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 		cacheIDs = []string{utils.CacheThresholdFilterIndexes}
 		cacheArgs[utils.CacheThresholdProfiles] = []string{tntId}
 		cacheArgs[utils.CacheThresholds] = []string{tntId}
+	case utils.MetaTrends:
+		cacheArgs[utils.CacheTrendProfiles] = []string{tntId}
+		cacheArgs[utils.CacheTrends] = []string{tntId}
+	case utils.MetaRankings:
+		cacheArgs[utils.CacheRankingProfiles] = []string{tntId}
+		cacheArgs[utils.CacheRankings] = []string{tntId}
 	case utils.MetaRoutes:
 		cacheIDs = []string{utils.CacheRouteFilterIndexes}
 		cacheArgs[utils.CacheRouteProfiles] = []string{tntId}

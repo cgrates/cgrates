@@ -453,6 +453,7 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		ThresholdIDs:         []string{MetaAny},
 		ThresholdProfileIDs:  []string{MetaAny},
 		TrendIDs:             []string{MetaAny},
+		RankingIDs:           []string{MetaAny},
 		TrendProfileIDs:      []string{MetaAny},
 		FilterIDs:            []string{MetaAny},
 		RouteProfileIDs:      []string{MetaAny},
@@ -493,6 +494,7 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		ThresholdProfileIDs:          arg[CacheThresholdProfiles],
 		ThresholdIDs:                 arg[CacheThresholds],
 		RankingProfileIDs:            arg[CacheRankingProfiles],
+		RankingIDs:                   arg[CacheRankings],
 		FilterIDs:                    arg[CacheFilters],
 		RouteProfileIDs:              arg[CacheRouteProfiles],
 		AttributeProfileIDs:          arg[CacheAttributeProfiles],
@@ -533,6 +535,7 @@ type AttrReloadCacheWithAPIOpts struct {
 	TrendIDs             []string `json:",omitempty"`
 	TrendProfileIDs      []string `json:",omitempty"`
 	RankingProfileIDs    []string `json:",omitempty"`
+	RankingIDs           []string `json:",omitempty"`
 	FilterIDs            []string `json:",omitempty"`
 	RouteProfileIDs      []string `json:",omitempty"`
 	AttributeProfileIDs  []string `json:",omitempty"`
@@ -573,6 +576,7 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheAttributeProfiles:           a.AttributeProfileIDs,
 		CacheChargerProfiles:             a.ChargerProfileIDs,
 		CacheRankingProfiles:             a.RankingProfileIDs,
+		CacheRankings:                    a.RankingIDs,
 		CacheDispatcherProfiles:          a.DispatcherProfileIDs,
 		CacheDispatcherHosts:             a.DispatcherHostIDs,
 		CacheDispatchers:                 a.Dispatchers,

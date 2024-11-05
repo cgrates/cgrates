@@ -1,0 +1,3 @@
+#Tenant[0],Id[1],Schedule[2],StatID[3],Metrics[4],TTL[5],QueueLength[6],MinItems[7],CorrelationType[8],Tolerance[9],Stored[10],ThresholdIDs[11]
+cgrates.org,TREND_1,@every 1s,Stats1_1,*acc,-1,-1,1,*last,1,false,*none
+cgrates.org,TREND_2,@every 1s,Stats1_2,*tcc,-1,-1,1,*last,1,false,*none

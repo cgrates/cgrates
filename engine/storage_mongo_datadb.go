@@ -474,6 +474,8 @@ func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTps, utils.ThresholdProfilePrefix, tntID)
 		case utils.RankingProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRgp, utils.RankingProfilePrefix, tntID)
+		case utils.RankingPrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRnk, utils.RankingPrefix, tntID)
 		case utils.TrendProfilePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColTrs, utils.TrendProfilePrefix, tntID)
 		case utils.TrendPrefix:

@@ -25,7 +25,7 @@ const CGRATES_CFG_JSON = `
 // Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 // Copyright (C) ITsysCOM GmbH
 //
-// This file contains the default configuration hardcoded into CGRateS.
+// This file contains the default conpiersiguration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
@@ -1314,7 +1314,9 @@ const CGRATES_CFG_JSON = `
 			"*dispatcher_hosts":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*rate_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*action_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false}
+			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false},
+			"*trends":{"limit": -1, "ttl": "5s", "static_ttl": false},
+			"*rankings":{"limit": -1, "ttl": "5s", "static_ttl": false}
 		},
 		"data":[					// data profiles to load
 			{
@@ -1393,6 +1395,39 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.7"},
 					{"tag": "ActionProfileIDs", "path": "ActionProfileIDs", "type": "*variable", "value": "~*req.8"},
 					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~*req.9"}
+				]
+			},
+			{
+				"type": "*trends",		// data source type
+				"file_name": "Trends.csv",	// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+					{"tag": "Schedule", "path": "Schedule", "type": "*variable", "value": "~*req.2"},
+					{"tag": "StatID", "path": "StatID", "type": "*variable", "value": "~*req.3"},
+					{"tag": "Metrics", "path": "Metrics", "type": "*variable", "value": "~*req.4"},
+					{"tag": "TTL", "path": "TTL", "type": "*variable", "value": "~*req.5"},
+					{"tag": "QueueLength", "path": "QueueLength", "type": "*variable", "value": "~*req.6"},
+					{"tag": "MinItems", "path": "MinItems", "type": "*variable", "value": "~*req.7"},
+					{"tag": "CorrelationType", "path": "CorrelationType", "type": "*variable", "value": "~*req.8"},
+					{"tag": "Tolerance", "path": "Tolerance", "type": "*variable", "value": "~*req.9"},
+					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.10"},
+					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.11"}
+				]
+			},
+			{
+				"type": "*rankings",		// data source type
+				"file_name": "Rankings.csv",	// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+					{"tag": "Schedule", "path": "Schedule", "type": "*variable", "value": "~*req.2"},
+					{"tag": "StatIDs", "path": "StatIDs", "type": "*variable", "value": "~*req.3"},
+					{"tag": "MetricIDs", "path": "MetricIDs", "type": "*variable", "value": "~*req.4"},
+					{"tag": "Sorting", "path": "Sorting", "type": "*variable", "value": "~*req.5"},
+					{"tag": "SortingParameters", "path": "SortingParameters", "type": "*variable", "value": "~*req.6"},
+					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.7"},
+					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.8"}
 				]
 			},
 			{

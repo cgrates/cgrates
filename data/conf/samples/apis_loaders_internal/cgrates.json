@@ -51,6 +51,16 @@
           "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}],
       },
       {
+        "type": "*trends",						
+        "file_name": "Trends.csv",				
+        "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}],
+    },
+    {
+        "type": "*rankings",						
+        "file_name": "Rankings.csv",				
+        "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}],
+    },
+      {
           "type": "*routes",						
           "file_name": "Routes.csv",				
           "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}],
