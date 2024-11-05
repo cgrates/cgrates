@@ -44,7 +44,7 @@ func TestNewAnalyzerService(t *testing.T) {
 	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestAnalyzerSLogTraffic(t *testing.T) {
 	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +133,7 @@ func TestAnalyzersDeleteHits(t *testing.T) {
 	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,7 +166,7 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 	anz.ListenAndServe(context.Background())
 
 	cfg.AnalyzerSCfg().CleanupInterval = 1
-	anz, err = NewAnalyzerService(cfg)
+	anz, err = NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +191,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Fatal(err)
 	}
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerS(cfg)
 
 	if err != nil {
 		t.Fatal(err)
@@ -448,7 +448,7 @@ func TestAnalyzerSLogTrafficInternalDB(t *testing.T) {
 	cfg.AnalyzerSCfg().DBPath = utils.EmptyString
 	cfg.AnalyzerSCfg().IndexType = utils.MetaInternal
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
-	anz, err := NewAnalyzerService(cfg)
+	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

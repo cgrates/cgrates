@@ -60,7 +60,7 @@ func TestAnalyzerCoverage(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(rpcClientCnctr), utils.ToJSON(getIntrnCdc))
 	}
 
-	anz2.anz, _ = analyzers.NewAnalyzerService(cfg)
+	anz2.anz, _ = analyzers.NewAnalyzerS(cfg)
 	if !anz2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
