@@ -35,12 +35,12 @@ func TestLoaderSCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	internalLoaderSChan := make(chan birpc.ClientConnector, 1)
 	cM := engine.NewConnManager(cfg)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	cfg.LoaderCfg()[0] = &config.LoaderSCfg{
 		ID:             "test_id",
 		Enabled:        true,
@@ -54,7 +54,7 @@ func TestLoaderSCoverage(t *testing.T) {
 		Data:           nil,
 	}
 	srv := NewLoaderService(cfg, db,
-		filterSChan, server, internalLoaderSChan,
+		filterSChan, cls, internalLoaderSChan,
 		cM, anz, srvDep)
 	if srv == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))

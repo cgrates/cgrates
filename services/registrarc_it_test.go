@@ -50,15 +50,15 @@ func TestDispatcherHReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	connMngr := engine.NewConnManager(cfg)
-	srv := NewRegistrarCService(cfg, server, connMngr, anz, srvDep)
+	srv := NewRegistrarCService(cfg, cls, connMngr, anz, srvDep)
 	srvMngr.AddServices(srv,
-		NewLoaderService(cfg, db, filterSChan, server,
+		NewLoaderService(cfg, db, filterSChan, cls,
 			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())
 	srvMngr.StartServices(ctx, cancel)

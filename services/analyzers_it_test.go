@@ -46,15 +46,15 @@ func TestAnalyzerSReload(t *testing.T) {
 	shdWg := new(sync.WaitGroup)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	anzRPC := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, anzRPC, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, anzRPC, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(anz,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())
 	srvMngr.StartServices(ctx, cancel)
 	if anz.IsRunning() {
@@ -109,10 +109,10 @@ func TestAnalyzerSReload2(t *testing.T) {
 	}
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anzRPC := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, anzRPC, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, anzRPC, srvDep)
 	// anz.stopChan = make(chan struct{})
 	// anz.start()
 	// close(anz.stopChan)
@@ -136,10 +136,10 @@ func TestAnalyzerSReload3(t *testing.T) {
 	cfg.AnalyzerSCfg().IndexType = ""
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	anzRPC := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, anzRPC, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, anzRPC, srvDep)
 	// anz.stopChan = make(chan struct{})
 	ctx, cancel := context.WithCancel(context.TODO())
 	anz.Start(ctx, cancel)

@@ -42,7 +42,7 @@ func TestNewServer(t *testing.T) {
 		httpsMux: http.NewServeMux(),
 		caps:     caps,
 	}
-	rcv := NewServer(caps)
+	rcv := NewCommonListenerS(caps)
 	rcv.stopbiRPCServer = nil
 	rcv.httpServer = nil
 	rcv.httpsServer = nil
@@ -68,7 +68,7 @@ func TestRegisterHTTPFunc(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = 1
 	caps := engine.NewCaps(0, utils.MetaBusy)
-	rcv := NewServer(caps)
+	rcv := NewCommonListenerS(caps)
 
 	cfgDflt.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	if err := os.RemoveAll(cfgDflt.AnalyzerSCfg().DBPath); err != nil {

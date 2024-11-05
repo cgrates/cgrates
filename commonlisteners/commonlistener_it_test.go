@@ -101,7 +101,7 @@ func testHandleRequest(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	cfgDflt.CoreSCfg().CapsStatsInterval = 1
 	caps := engine.NewCaps(0, utils.MetaBusy)
-	rcv := NewServer(caps)
+	rcv := NewCommonListenerS(caps)
 
 	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc",
 		bytes.NewBuffer([]byte("1")))
@@ -118,7 +118,7 @@ func testHandleRequest(t *testing.T) {
 
 func testServeJSON(t *testing.T) {
 	caps := engine.NewCaps(100, utils.MetaBusy)
-	server = NewServer(caps)
+	server = NewCommonListenerS(caps)
 	server.RpcRegister(new(mockRegister))
 
 	buff := new(bytes.Buffer)
@@ -139,7 +139,7 @@ func testServeJSON(t *testing.T) {
 func testServeHHTPFail(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
-	server = NewServer(caps)
+	server = NewCommonListenerS(caps)
 	server.RpcRegister(new(mockRegister))
 	var closed bool
 	ch := make(chan struct{})
@@ -172,7 +172,7 @@ func testServeHHTPFail(t *testing.T) {
 func testServeBiJSONInvalidPort(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
-	server = NewServer(caps)
+	server = NewCommonListenerS(caps)
 	server.RpcRegister(new(mockRegister))
 
 	data := engine.NewInternalDB(nil, nil, cfgDflt.DataDbCfg().Items)
@@ -192,7 +192,7 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 func testServeBiGoBInvalidPort(t *testing.T) {
 	cfgDflt := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(100, utils.MetaBusy)
-	server = NewServer(caps)
+	server = NewCommonListenerS(caps)
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = birpc.NewBirpcServer()
 
@@ -225,7 +225,7 @@ TEST
 	file.Close()
 
 	caps := engine.NewCaps(100, utils.MetaBusy)
-	server = NewServer(caps)
+	server = NewCommonListenerS(caps)
 	server.RpcRegister(new(mockRegister))
 
 	expectedErr := "Cannot append certificate authority"
@@ -262,7 +262,7 @@ func (*mockListenError) Accept() (net.Conn, error) {
 
 func testRpcRegisterActions(t *testing.T) {
 	caps := engine.NewCaps(0, utils.MetaBusy)
-	server := NewServer(caps)
+	server := NewCommonListenerS(caps)
 
 	r, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc",
 		bytes.NewBuffer([]byte("1")))
@@ -293,7 +293,7 @@ func testRpcRegisterActions(t *testing.T) {
 
 func testWebSocket(t *testing.T) {
 	caps := engine.NewCaps(100, utils.MetaBusy)
-	server = NewServer(caps)
+	server = NewCommonListenerS(caps)
 	server.RpcRegisterName("mockRegister", new(mockRegister))
 
 	s := httptest.NewServer(websocket.Handler(server.handleWebSocket))

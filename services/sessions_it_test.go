@@ -63,7 +63,7 @@ func TestSessionSReload1(t *testing.T) {
 	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 
 	clientConect := make(chan birpc.ClientConnector, 1)
@@ -94,11 +94,11 @@ func TestSessionSReload1(t *testing.T) {
 	}
 	conMng := engine.NewConnManager(cfg)
 	conMng.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), utils.ChargerSv1, clientConect)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, conMng, false, srvDep)
 	db.dbchan = make(chan *engine.DataManager, 1)
 	db.dbchan <- nil
-	srv := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), conMng, anz, srvDep)
+	srv := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), conMng, anz, srvDep)
 	ctx, cancel := context.WithCancel(context.TODO())
 	err := srv.Start(ctx, cancel)
 	if err != nil {
@@ -153,12 +153,12 @@ func TestSessionSReload2(t *testing.T) {
 	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
 
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg)
 
 	srv.(*SessionService).sm = &sessions.SessionS{}
@@ -199,13 +199,13 @@ func TestSessionSReload3(t *testing.T) {
 	internalChan := make(chan birpc.ClientConnector, 1)
 	internalChan <- nil
 
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
 
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	srv := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	engine.NewConnManager(cfg)
 	err2 := srv.(*SessionService).start(func() {})
 	if err2 != nil {

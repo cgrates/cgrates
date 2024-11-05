@@ -59,17 +59,17 @@ func TestEventReaderSReload(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}()
 	shdWg := new(sync.WaitGroup)
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	sS := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	intERsConn := make(chan birpc.ClientConnector, 1)
-	erS := NewEventReaderService(cfg, filterSChan, nil, server, intERsConn, anz, srvDep)
+	erS := NewEventReaderService(cfg, filterSChan, nil, cls, intERsConn, anz, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(erS, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	srvMngr.StartServices(ctx, cancel)
 	if erS.IsRunning() {
 		t.Fatal("Expected service to be down")
@@ -128,8 +128,8 @@ func TestEventReaderSReload2(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	server := commonlisteners.NewServer(nil)
-	erS := NewEventReaderService(cfg, filterSChan, nil, server, nil, nil, srvDep)
+	cls := commonlisteners.NewCommonListenerS(nil)
+	erS := NewEventReaderService(cfg, filterSChan, nil, cls, nil, nil, srvDep)
 	ers := ers.NewERService(cfg, nil, nil)
 
 	runtime.Gosched()

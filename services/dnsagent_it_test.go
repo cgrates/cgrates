@@ -66,12 +66,12 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	engine.NewConnManager(cfg)
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	server := commonlisteners.NewServer(nil)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1),
+	cls := commonlisteners.NewCommonListenerS(nil)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	runtime.Gosched()
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if err := srv.Shutdown(); err != nil {
@@ -109,17 +109,17 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	}()
 	shdWg := new(sync.WaitGroup)
 
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1),
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1),
 		nil, anz, srvDep)
 	srv := NewDNSAgent(cfg, filterSChan, nil, srvDep)
 	engine.NewConnManager(cfg)
 	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	srvMngr.StartServices(ctx, cancel)
 	time.Sleep(100 * time.Millisecond)
 	if srv.IsRunning() {

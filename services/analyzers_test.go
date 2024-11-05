@@ -36,17 +36,17 @@ func TestAnalyzerCoverage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	connChan := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, server, filterSChan, connChan, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, connChan, srvDep)
 	if anz == nil {
 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(anz))
 	}
 	anz2 := &AnalyzerService{
 		RWMutex:     sync.RWMutex{},
 		cfg:         cfg,
-		server:      server,
+		server:      cls,
 		filterSChan: filterSChan,
 		connChan:    connChan,
 		srvDep:      srvDep,

@@ -61,8 +61,8 @@ func RunCGREngine(fs []string) (err error) {
 		return
 	}
 	cps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
-	server := commonlisteners.NewServer(cps)
-	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup), server, cps)
+	cls := commonlisteners.NewCommonListenerS(cps)
+	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup), cls, cps)
 	defer cgr.Stop(*flags.PidFile)
 
 	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {

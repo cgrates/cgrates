@@ -50,19 +50,19 @@ func TestCdrsReload(t *testing.T) {
 	css := &CacheService{cacheCh: chSCh}
 
 	cfg.ChargerSCfg().Enabled = true
-	server := commonlisteners.NewServer(nil)
+	cls := commonlisteners.NewCommonListenerS(nil)
 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	cfg.StorDbCfg().Type = utils.MetaInternal
 	stordb := NewStorDBService(cfg, false, srvDep)
-	anz := NewAnalyzerService(cfg, server, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	chrS := NewChargerService(cfg, db, css, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+	chrS := NewChargerService(cfg, db, css, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	cdrsRPC := make(chan birpc.ClientConnector, 1)
-	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
+	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, cls,
 		cdrsRPC, nil, anz, srvDep)
 	srvMngr.AddServices(cdrS, chrS,
-		NewLoaderService(cfg, db, filterSChan, server,
+		NewLoaderService(cfg, db, filterSChan, cls,
 			make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
 	ctx, cancel := context.WithCancel(context.TODO())
 	srvMngr.StartServices(ctx, cancel)
