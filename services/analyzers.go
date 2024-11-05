@@ -67,7 +67,7 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 
 	anz.Lock()
 	defer anz.Unlock()
-	if anz.anz, err = analyzers.NewAnalyzerService(anz.cfg); err != nil {
+	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}

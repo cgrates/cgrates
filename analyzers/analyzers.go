@@ -39,8 +39,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewAnalyzerService initializes a AnalyzerService
-func NewAnalyzerService(cfg *config.CGRConfig) (aS *AnalyzerS, err error) {
+// NewAnalyzerS initializes a AnalyzerService
+func NewAnalyzerS(cfg *config.CGRConfig) (aS *AnalyzerS, err error) {
 	aS = &AnalyzerS{
 		cfg: cfg,
 	}

@@ -53,7 +53,7 @@ func TestNewServer(t *testing.T) {
 	}
 
 	cfgDflt.AnalyzerSCfg().DBPath = "/tmp/analyzers"
-	analz, err := analyzers.NewAnalyzerService(cfgDflt)
+	analz, err := analyzers.NewAnalyzerS(cfgDflt)
 	if err != nil {
 		t.Error(err)
 	}
@@ -77,7 +77,7 @@ func TestRegisterHTTPFunc(t *testing.T) {
 	if err := os.MkdirAll(cfgDflt.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	analz, err := analyzers.NewAnalyzerService(cfgDflt)
+	analz, err := analyzers.NewAnalyzerS(cfgDflt)
 	if err != nil {
 		t.Error(err)
 	}
