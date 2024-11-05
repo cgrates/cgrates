@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -298,4 +297,114 @@ type RankingSummary struct {
 	ID            string
 	LastUpdate    time.Time
 	SortedStatIDs []string
+}
+
+func (tp *RankingProfile) Set(path []string, val any, _ bool, _ string) (err error) {
+	if len(path) != 1 {
+		return utils.ErrWrongPath
+	}
+
+	switch path[0] {
+	default:
+		return utils.ErrWrongPath
+	case utils.Tenant:
+		tp.Tenant = utils.IfaceAsString(val)
+	case utils.ID:
+		tp.ID = utils.IfaceAsString(val)
+	case utils.Schedule:
+		tp.Schedule = utils.IfaceAsString(val)
+	case utils.StatIDs:
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.StatIDs = append(tp.StatIDs, valA...)
+	case utils.MetricIDs:
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.MetricIDs = append(tp.MetricIDs, valA...)
+	case utils.Sorting:
+		tp.Sorting = utils.IfaceAsString(val)
+	case utils.SortingParameters:
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.SortingParameters = append(tp.SortingParameters, valA...)
+	case utils.Stored:
+		tp.Stored, err = utils.IfaceAsBool(val)
+	case utils.ThresholdIDs:
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.ThresholdIDs = append(tp.ThresholdIDs, valA...)
+	}
+	return
+}
+
+func (tp *RankingProfile) Merge(v2 any) {
+	vi := v2.(*RankingProfile)
+	if len(vi.Tenant) != 0 {
+		tp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		tp.ID = vi.ID
+	}
+	if len(vi.Schedule) != 0 {
+		tp.Schedule = vi.Schedule
+	}
+	tp.StatIDs = append(tp.StatIDs, vi.StatIDs...)
+	tp.MetricIDs = append(tp.MetricIDs, vi.MetricIDs...)
+	tp.SortingParameters = append(tp.SortingParameters, vi.SortingParameters...)
+	tp.ThresholdIDs = append(tp.ThresholdIDs, vi.ThresholdIDs...)
+	if len(vi.Sorting) != 0 {
+		tp.Sorting = vi.Sorting
+	}
+	if vi.Stored {
+		tp.Stored = vi.Stored
+	}
+}
+
+func (tp *RankingProfile) String() string { return utils.ToJSON(tp) }
+func (tp *RankingProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val any
+	if val, err = tp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (tp *RankingProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if idx != nil {
+			switch fld {
+			case utils.StatIDs:
+				if *idx < len(tp.StatIDs) {
+					return tp.StatIDs[*idx], nil
+				}
+			case utils.MetricIDs:
+				if *idx < len(tp.MetricIDs) {
+					return tp.MetricIDs[*idx], nil
+				}
+			case utils.SortingParameters:
+				if *idx < len(tp.SortingParameters) {
+					return tp.SortingParameters[*idx], nil
+				}
+			case utils.ThresholdIDs:
+				if *idx < len(tp.ThresholdIDs) {
+					return tp.ThresholdIDs[*idx], nil
+				}
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.Tenant:
+		return tp.Tenant, nil
+	case utils.ID:
+		return tp.ID, nil
+	case utils.Schedule:
+		return tp.Schedule, nil
+	case utils.Sorting:
+		return tp.Sorting, nil
+	case utils.Stored:
+		return tp.Stored, nil
+	}
 }

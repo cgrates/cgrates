@@ -45,7 +45,6 @@ var (
 		utils.ActionPlanIndexes:             {},
 		utils.FilterIndexPrfx:               {},
 		utils.AccountFilterIndexPrfx:        {},
-		utils.RankingProfilePrefix:          {},
 	}
 	cachePrefixMap = utils.StringSet{
 		utils.ResourceProfilesPrefix:        {},
@@ -57,6 +56,7 @@ var (
 		utils.TrendPrefix:                   {},
 		utils.TrendProfilePrefix:            {},
 		utils.RankingProfilePrefix:          {},
+		utils.RankingPrefix:                 {},
 		utils.FilterPrefix:                  {},
 		utils.RouteProfilePrefix:            {},
 		utils.AttributeProfilePrefix:        {},
@@ -183,6 +183,9 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, rankingProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetRankingProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
+		case utils.TrendProfilePrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetTrendProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.ThresholdPrefix:
 			tntID := utils.NewTenantID(dataID)
 			lkID := guardian.Guardian.GuardIDs("", config.CgrConfig().GeneralCfg().LockingTimeout, thresholdLockKey(tntID.Tenant, tntID.ID))

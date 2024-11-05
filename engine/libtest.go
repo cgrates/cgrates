@@ -373,6 +373,9 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	}
 	startEngine(t, cfg, ng.LogBuffer, extraFlags...)
 	client := NewRPCClient(t, cfg.ListenCfg(), ng.Encoding)
+	if ng.TpPath == "" {
+		ng.TpPath = cfg.LoaderCfg()[0].TpInDir
+	}
 	loadCSVs(t, ng.TpPath, ng.TpFiles)
 	return client, cfg
 }
@@ -496,6 +499,9 @@ func loadCSVs(t testing.TB, tpPath string, csvFiles map[string]string) {
 				t.Fatalf("could not write to file %s: %v", filePath, err)
 			}
 		}
+		t.Cleanup(func() {
+
+		})
 	}
 }
 

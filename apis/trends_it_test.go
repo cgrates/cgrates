@@ -73,11 +73,11 @@ var (
 func TestTrendsIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		trConfigDIR = "trends_internal"
+		trConfigDIR = "tutinternal"
 	case utils.MetaMongo:
-		trConfigDIR = "trends_mongo"
+		trConfigDIR = "tutmongo"
 	case utils.MetaMySQL:
-		trConfigDIR = "trends_mysql"
+		trConfigDIR = "tutmysql"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:

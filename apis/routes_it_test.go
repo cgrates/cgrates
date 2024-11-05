@@ -91,7 +91,7 @@ func TestRoutesIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsRa {
+	for _, stest := range sTestsRo {
 		t.Run(raConfigDIR, stest)
 	}
 }

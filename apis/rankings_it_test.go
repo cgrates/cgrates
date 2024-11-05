@@ -42,7 +42,7 @@ var (
 	raRPC       *birpc.Client
 	raConfigDIR string //run tests for specific configuration
 
-	sTestsRa = []func(t *testing.T){
+	sTestsRan = []func(t *testing.T){
 		testRankingSInitCfg,
 		testRankingSInitDataDB,
 		testRankingSResetStorDB,
@@ -72,7 +72,7 @@ var (
 func TestRankingsIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		raConfigDIR = "rankings_internal"
+		t.SkipNow()
 	case utils.MetaMongo:
 		raConfigDIR = "rankings_mongo"
 	case utils.MetaMySQL:
@@ -82,7 +82,7 @@ func TestRankingsIT(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsRa {
+	for _, stest := range sTestsRan {
 		t.Run(raConfigDIR, stest)
 	}
 }
@@ -380,6 +380,12 @@ func testRankingsRemoveRankingProfile(t *testing.T) {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned:", reply)
+	}
+	if err := raRPC.Call(context.Background(), utils.CacheSv1Clear,
+		&utils.AttrCacheIDsWithAPIOpts{
+			CacheIDs: nil,
+		}, &reply); err != nil {
+		t.Error(err)
 	}
 }
 

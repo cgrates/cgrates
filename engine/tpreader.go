@@ -132,11 +132,11 @@ func (tpr *TpReader) LoadRankingsFiltered(tag string) error {
 	if err != nil {
 		return err
 	}
-	mapSgs := make(map[utils.TenantID]*utils.TPRankingProfile)
-	for _, sg := range tps {
-		mapSgs[utils.TenantID{Tenant: sg.Tenant, ID: sg.ID}] = sg
+	mapRgs := make(map[utils.TenantID]*utils.TPRankingProfile)
+	for _, rg := range tps {
+		mapRgs[utils.TenantID{Tenant: rg.Tenant, ID: rg.ID}] = rg
 	}
-	tpr.rgProfiles = mapSgs
+	tpr.rgProfiles = mapRgs
 	return nil
 }
 
@@ -371,6 +371,12 @@ func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadStats(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
+	if err = tpr.LoadRankings(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadTrends(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
 	if err = tpr.LoadThresholds(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
@@ -483,6 +489,44 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 	if len(tpr.thProfiles) != 0 {
 		loadIDs[utils.CacheThresholdProfiles] = loadID
 		loadIDs[utils.CacheThresholds] = loadID
+	}
+	if verbose {
+		log.Print("TrendProfiles:")
+	}
+	for _, tpTR := range tpr.trProfiles {
+		var tr *TrendProfile
+		if tr, err = APItoTrends(tpTR); err != nil {
+			return
+		}
+		if err = tpr.dm.SetTrendProfile(context.TODO(), tr); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", tr.TenantID())
+		}
+	}
+	if len(tpr.trProfiles) != 0 {
+		loadIDs[utils.CacheTrendProfiles] = loadID
+		loadIDs[utils.CacheTrends] = loadID
+	}
+	if verbose {
+		log.Print("RankingProfiles:")
+	}
+	for _, tpRN := range tpr.rgProfiles {
+		var rn *RankingProfile
+		if rn, err = APItoRanking(tpRN); err != nil {
+			return
+		}
+		if err = tpr.dm.SetRankingProfile(context.TODO(), rn); err != nil {
+			return
+		}
+		if verbose {
+			log.Print("\t", rn.TenantID())
+		}
+	}
+	if len(tpr.rgProfiles) != 0 {
+		loadIDs[utils.CacheRankingProfiles] = loadID
+		loadIDs[utils.CacheRankings] = loadID
 	}
 	if verbose {
 		log.Print("RouteProfiles:")
@@ -649,6 +693,10 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("RateProfiles: ", len(tpr.rateProfiles))
 	// Action profiles
 	log.Print("ActionProfiles: ", len(tpr.actionProfiles))
+	// Trend profiles
+	log.Print("TrendProfiles: ", len(tpr.trProfiles))
+	// Ranking profiles
+	log.Print("RankingProfiles: ", len(tpr.rgProfiles))
 }
 
 // GetLoadedIds returns the identities loaded for a specific category, useful for cache reloads

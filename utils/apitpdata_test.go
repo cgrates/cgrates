@@ -143,6 +143,7 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		ActionProfilesFilterIndexIDs: []string{MetaAny},
 		AccountsFilterIndexIDs:       []string{MetaAny},
 		RankingProfileIDs:            []string{MetaAny},
+		RankingIDs:                   []string{MetaAny},
 	}
 	eMap := NewAttrReloadCacheWithOpts()
 	if !reflect.DeepEqual(eMap, newAttrReloadCache) {

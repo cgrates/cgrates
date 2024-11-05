@@ -38,14 +38,15 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TrendService{
-		connChan: internalTrendSChan,
-		cfg:      cfg,
-		dm:       dm,
-		cacheS:   cacheS,
-		clSChan:  clSChan,
-		connMgr:  connMgr,
-		anzChan:  anzChan,
-		srvDep:   srvDep,
+		connChan:    internalTrendSChan,
+		cfg:         cfg,
+		dm:          dm,
+		cacheS:      cacheS,
+		clSChan:     clSChan,
+		connMgr:     connMgr,
+		anzChan:     anzChan,
+		srvDep:      srvDep,
+		filterSChan: filterSChan,
 	}
 }
 

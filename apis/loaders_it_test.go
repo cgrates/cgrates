@@ -320,6 +320,24 @@ cgrates.org,RoutePrf2,*string:~*req.Account:1002,;20,,*lc,,route1,fltr3,Account3
 		t.Fatal(err)
 	}
 
+	// Create and populate Trends.csv
+	if err := writeFile(utils.TrendsCsv, `
+#Tenant[0],Id[1],Schedule[2],StatID[3],Metrics[4],TTL[5],QueueLength[6],MinItems[7],CorrelationType[8],Tolerance[9],Stored[10],ThresholdIDs[11]
+cgrates.org,TREND_1,@every 1s,Stats1_1,*acc,-1,-1,1,*last,1,false,*none
+cgrates.org,TREND_2,@every 1s,Stats1_2,*tcc,-1,-1,1,*last,1,false,*none
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate Rankings.csv
+	if err := writeFile(utils.RankingsCsv, `
+#Tenant[0],Id[1],Schedule[2],StatIDs[3],MetricIDs[4],Sorting[5],SortingParameters[6],Stored[7],ThresholdIDs[8]
+cgrates.org,RANK1,@every 1s,Stats1;Stats2;Stats3;Stats4,,*asc;*acc;*pdd,false;*acd,,
+cgrates.org,RANK2,@every 1s,Stats3;Stats4;Stats1;Stats2,,*desc;*acc;*pdd,false;*acd,,
+`); err != nil {
+		t.Fatal(err)
+	}
+
 	// Create and populate Stats.csv
 	if err := writeFile(utils.StatsCsv, `
 #Tenant[0],ID[1],FilterIDs[2],Weights[3],Blockers[4],QueueLength[5],TTL[6],MinItems[7],Stored[8],ThresholdIDs[9],MetricIDs[10],MetricFilterIDs[11],MetricBlockers[12]

@@ -388,8 +388,8 @@ type CGRConfig struct {
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
-	utils.MetaResources, utils.MetaFilters, utils.MetaStats,
-	utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers,
+	utils.MetaResources, utils.MetaFilters, utils.MetaStats, utils.MetaTrends,
+	utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers, utils.MetaRankings,
 	utils.MetaDispatchers, utils.MetaDispatcherHosts, utils.MetaRateProfiles,
 	utils.MetaAccounts, utils.MetaActionProfiles})
 

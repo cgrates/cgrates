@@ -306,3 +306,130 @@ type TrendSummary struct {
 	Time    time.Time
 	Metrics map[string]*MetricWithTrend
 }
+
+func (tp *TrendProfile) Set(path []string, val any, _ bool, _ string) (err error) {
+	if len(path) != 1 {
+		return utils.ErrWrongPath
+	}
+
+	switch path[0] {
+	default:
+		return utils.ErrWrongPath
+	case utils.Tenant:
+		tp.Tenant = utils.IfaceAsString(val)
+	case utils.ID:
+		tp.ID = utils.IfaceAsString(val)
+	case utils.Schedule:
+		tp.Schedule = utils.IfaceAsString(val)
+	case utils.StatID:
+		tp.StatID = utils.IfaceAsString(val)
+	case utils.Metrics:
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.Metrics = append(tp.Metrics, valA...)
+	case utils.TTL:
+		tp.TTL, err = utils.IfaceAsDuration(val)
+	case utils.QueueLength:
+		tp.QueueLength, err = utils.IfaceAsInt(val)
+	case utils.MinItems:
+		tp.MinItems, err = utils.IfaceAsInt(val)
+	case utils.CorrelationType:
+		tp.CorrelationType = utils.IfaceAsString(val)
+	case utils.Tolerance:
+		tp.Tolerance, err = utils.IfaceAsFloat64(val)
+	case utils.Stored:
+		tp.Stored, err = utils.IfaceAsBool(val)
+	case utils.ThresholdIDs:
+		var valA []string
+		valA, err = utils.IfaceAsStringSlice(val)
+		tp.ThresholdIDs = append(tp.ThresholdIDs, valA...)
+	}
+	return
+}
+
+func (tp *TrendProfile) Merge(v2 any) {
+	vi := v2.(*TrendProfile)
+	if len(vi.Tenant) != 0 {
+		tp.Tenant = vi.Tenant
+	}
+	if len(vi.ID) != 0 {
+		tp.ID = vi.ID
+	}
+	if len(vi.Schedule) != 0 {
+		tp.Schedule = vi.Schedule
+	}
+	if len(vi.StatID) != 0 {
+		tp.StatID = vi.StatID
+	}
+	tp.Metrics = append(tp.Metrics, vi.Metrics...)
+	tp.ThresholdIDs = append(tp.ThresholdIDs, vi.ThresholdIDs...)
+	if vi.Stored {
+		tp.Stored = vi.Stored
+	}
+	if vi.TTL != 0 {
+		tp.TTL = vi.TTL
+	}
+	if vi.QueueLength != 0 {
+		tp.QueueLength = vi.QueueLength
+	}
+	if vi.MinItems != 0 {
+		tp.MinItems = vi.MinItems
+	}
+	if len(vi.CorrelationType) != 0 {
+		tp.CorrelationType = vi.CorrelationType
+	}
+	if vi.Tolerance != 0 {
+		tp.Tolerance = vi.Tolerance
+	}
+}
+
+func (tp *TrendProfile) String() string { return utils.ToJSON(tp) }
+func (tp *TrendProfile) FieldAsString(fldPath []string) (_ string, err error) {
+	var val any
+	if val, err = tp.FieldAsInterface(fldPath); err != nil {
+		return
+	}
+	return utils.IfaceAsString(val), nil
+}
+func (tp *TrendProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	switch fldPath[0] {
+	default:
+		fld, idx := utils.GetPathIndex(fldPath[0])
+		if idx != nil {
+			switch fld {
+			case utils.Metrics:
+				if *idx < len(tp.Metrics) {
+					return tp.Metrics[*idx], nil
+				}
+			case utils.ThresholdIDs:
+				if *idx < len(tp.ThresholdIDs) {
+					return tp.ThresholdIDs[*idx], nil
+				}
+			}
+		}
+		return nil, utils.ErrNotFound
+	case utils.Tenant:
+		return tp.Tenant, nil
+	case utils.ID:
+		return tp.ID, nil
+	case utils.Schedule:
+		return tp.Schedule, nil
+	case utils.StatID:
+		return tp.StatID, nil
+	case utils.TTL:
+		return tp.TTL, nil
+	case utils.QueueLength:
+		return tp.QueueLength, nil
+	case utils.MinItems:
+		return tp.MinItems, nil
+	case utils.CorrelationType:
+		return tp.CorrelationType, nil
+	case utils.Tolerance:
+		return tp.Tolerance, nil
+	case utils.Stored:
+		return tp.Stored, nil
+	}
+}
