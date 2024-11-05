@@ -20,6 +20,7 @@ package engine
 
 import (
 	"reflect"
+	"slices"
 	"sync"
 	"testing"
 	"time"
@@ -295,28 +296,82 @@ func TestStoreRanking(t *testing.T) {
 
 }
 
-func TestRankingsStartRankings(t *testing.T) {
+func TestRankingsStoreRankings(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RankingSCfg().Enabled = true
-	cfg.RankingSCfg().StoreInterval = time.Second
+	cfg.RankingSCfg().StoreInterval = time.Millisecond * 1300
+	cfg.RankingSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-	rkg := NewRankingS(dm, nil, nil, cfg)
-	dm.SetRanking(&Ranking{})
+	conn := make(chan context.ClientConnector, 1)
+	conn <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueFloatMetrics: func(ctx *context.Context, args, reply any) error {
+				if args.(*utils.TenantIDWithAPIOpts).ID == "stat1" {
+					*reply.(*map[string]float64) = map[string]float64{
+						utils.MetaTCD: float64(20 * time.Second),
+						utils.MetaACC: 22.2,
+					}
+				} else if args.(*utils.TenantIDWithAPIOpts).ID == "stat2" {
+					*reply.(*map[string]float64) = map[string]float64{
+						utils.MetaTCD: float64(23 * time.Second),
+						utils.MetaACC: 22.2,
+					}
+				}
+				return nil
+			},
+		},
+	}
+	connMgr = NewConnManager(config.NewDefaultCGRConfig(), map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats): conn,
+	})
+	rkg := NewRankingS(dm, connMgr, nil, cfg)
 
-	dm.SetRankingProfile(&RankingProfile{
+	rankingProfile := &RankingProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ID1",
 		Schedule:          "@every 1s",
 		StatIDs:           []string{"stat1", "stat2"},
-		MetricIDs:         []string{"metric1", "metric2"},
-		Sorting:           "asc",
-		SortingParameters: []string{"metric1:true"},
+		MetricIDs:         []string{},
+		Sorting:           "*desc",
+		SortingParameters: []string{utils.MetaTCD, utils.MetaACC},
 		Stored:            true,
-		ThresholdIDs:      []string{"threshold1"}})
+	}
+	dm.SetRankingProfile(rankingProfile)
 
 	if err := rkg.StartRankingS(); err != nil {
-		t.Error(err)
+		t.Fatalf("Unexpected error when starting rankings: %v", err)
+	}
+
+	time.Sleep(1200 * time.Millisecond)
+
+	profile, err := dm.GetRanking("cgrates.org", "ID1", false, false, "")
+	if err != nil {
+		t.Errorf("Error retrieving ranking profile: %v", err)
+	}
+	if profile == nil {
+		t.Fatal("Expected ranking profile to be present, but it was not found")
+	}
+
+	if profile.ID != "ID1" {
+		t.Errorf("Expected profile ID to be 'ID1', but got %v", profile.ID)
+	}
+	if profile.Tenant != "cgrates.org" {
+		t.Errorf("Expected tenant to be 'cgrates.org', but got %v", profile.Tenant)
+	}
+
+	if profile.Sorting != "*desc" {
+		t.Errorf("Expected sorting to be 'desc', but got %v", profile.Sorting)
+	}
+	if !slices.Equal(profile.SortedStatIDs, []string{"stat2", "stat1"}) {
+		t.Errorf("Expected SortedStatIDs to be [stat2, stat1], but got %v", profile.SortedStatIDs)
+
+	}
+	if !slices.Equal(profile.SortingParameters, profile.SortingParameters) {
+		t.Errorf("Expected SortingParameters to be ['metric1:true'], but got %v", profile.SortingParameters)
+	}
+	if !reflect.DeepEqual(profile.Metrics, map[string]map[string]float64{"stat1": {"*acc": 22.2, "*tcd": 20000000000}, "stat2": {"*acc": 22.2, "*tcd": 23000000000}}) {
+		t.Errorf("Expected sorting to be 'asc', but got %v", profile.Metrics)
 	}
 
 }
