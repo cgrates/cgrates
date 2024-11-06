@@ -516,20 +516,19 @@ func TestActionTimingGetNextStartTimesMonthlyEstimated(t *testing.T) {
 			},
 			expected: time.Date(2021, 1, 31, 14, 25, 0, 0, time.UTC),
 		},
-		// {
-		// 	name: "Non-Leap Year: January 29 to Feb 28",
-		// 	t1:   time.Date(2021, 1, 29, 0, 0, 0, 0, time.UTC),
-		// 	at: &ActionTiming{
-		// 		Timing: &RateInterval{
-		// 			Timing: &RITiming{
-		// 				ID:        utils.MetaMonthlyEstimated,
-		// 				MonthDays: utils.MonthDays{29},
-		// 			},
-		// 		},
-		// 	},
-		// 	expected: time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
-		// },
-
+		{
+			name: "Non-Leap Year: January 29 to Feb 28",
+			t1:   time.Date(2021, 1, 29, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{29},
+					},
+				},
+			},
+			expected: time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
+		},
 		{
 			name: "Non-Leap Year: February 28 to March 28",
 			t1:   time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
@@ -621,6 +620,77 @@ func TestActionTimingGetNextStartTimesMonthlyEstimated(t *testing.T) {
 				},
 			},
 			expected: time.Date(2021, 9, 30, 0, 0, 0, 0, time.UTC),
+		},
+
+		{
+			name: "Non-Leap Year: Jan 29 to Feb 28",
+			t1:   time.Date(2021, 1, 29, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{29},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "Leap Year: Jan 30 to Feb 29 ",
+			t1:   time.Date(2020, 1, 30, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{30},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2020, 2, 29, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "Non-Leap Year: Jan 30 to Feb 28 ",
+			t1:   time.Date(2021, 1, 30, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{30},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "Non-Leap Year: Jan 15 to Feb 15 ",
+			t1:   time.Date(2021, 1, 15, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{15},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2021, 2, 15, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "Jan 14 to Jan 15 ",
+			t1:   time.Date(2021, 1, 14, 0, 0, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						MonthDays: utils.MonthDays{15},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: time.Date(2021, 1, 15, 0, 0, 0, 0, time.UTC),
 		},
 	}
 
