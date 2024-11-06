@@ -1915,3 +1915,98 @@ func TestCoreutilsParseHierarchyPath(t *testing.T) {
 		}
 	}
 }
+
+func TestMonthlyEstimatedCases(t *testing.T) {
+	tests := []struct {
+		name     string
+		t1       time.Time
+		expected time.Time
+	}{
+		{
+			name:     "Non-Leap Year: January 31 to February 28",
+			t1:       time.Date(2021, 1, 31, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "Leap Year: January 29 to February 29",
+			t1:       time.Date(2020, 1, 29, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2020, 2, 29, 0, 0, 0, 0, time.UTC),
+		},
+
+		{
+			name:     "Non-Leap Year: February 28 to March 28",
+			t1:       time.Date(2021, 2, 28, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2021, 3, 28, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "October 31 to November 30",
+			t1:       time.Date(2021, 10, 31, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2021, 11, 30, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "November 30 to December 30",
+			t1:       time.Date(2021, 11, 30, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2021, 12, 30, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "November 25 to December 25",
+			t1:       time.Date(2021, 11, 25, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2021, 12, 25, 0, 0, 0, 0, time.UTC),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := monthlyEstimated(tt.t1)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if !got.Equal(tt.expected) {
+				t.Errorf("Expected: %v, got: %v", tt.expected, got)
+			}
+		})
+	}
+}
+
+func TestGetEndOfMonth(t *testing.T) {
+	tests := []struct {
+		name     string
+		ref      time.Time
+		expected time.Time
+	}{
+		{
+			name:     "End of January (non-leap year)",
+			ref:      time.Date(2023, time.January, 15, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2023, time.January, 31, 23, 59, 59, 0, time.UTC),
+		},
+		{
+			name:     "End of February (non-leap year)",
+			ref:      time.Date(2023, time.February, 10, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2023, time.February, 28, 23, 59, 59, 0, time.UTC),
+		},
+		{
+			name:     "End of February (leap year)",
+			ref:      time.Date(2024, time.February, 10, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2024, time.February, 29, 23, 59, 59, 0, time.UTC),
+		},
+		{
+			name:     "End of December",
+			ref:      time.Date(2023, time.December, 25, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2023, time.December, 31, 23, 59, 59, 0, time.UTC),
+		},
+		{
+			name:     "End of April ",
+			ref:      time.Date(2023, time.April, 15, 0, 0, 0, 0, time.UTC),
+			expected: time.Date(2023, time.April, 30, 23, 59, 59, 0, time.UTC),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := GetEndOfMonth(tt.ref)
+			if !result.Equal(tt.expected) {
+				t.Errorf("GetEndOfMonth(%v) = %v, want %v", tt.ref, result, tt.expected)
+			}
+		})
+	}
+}

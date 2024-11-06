@@ -117,35 +117,48 @@ func getDayOrEndOfMonth(day int, t1 time.Time) int {
 	return day
 }
 
-func (at *ActionTiming) GetNextStartTime(t1 time.Time) (t time.Time) {
+func (at *ActionTiming) GetNextStartTime(refTime time.Time) time.Time {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
-	i := at.Timing
-	if i == nil || i.Timing == nil {
-		return
+	rateIvl := at.Timing
+	if rateIvl == nil || rateIvl.Timing == nil {
+		return time.Time{}
 	}
 	// Normalize
-	if i.Timing.StartTime == "" {
-		i.Timing.StartTime = "00:00:00"
+	if rateIvl.Timing.StartTime == "" {
+		rateIvl.Timing.StartTime = "00:00:00"
 	}
-	if len(i.Timing.Years) > 0 && len(i.Timing.Months) == 0 {
-		i.Timing.Months = append(i.Timing.Months, 1)
+	if len(rateIvl.Timing.Years) > 0 && len(rateIvl.Timing.Months) == 0 {
+		rateIvl.Timing.Months = append(rateIvl.Timing.Months, 1)
 	}
-	if len(i.Timing.Months) > 0 && len(i.Timing.MonthDays) == 0 {
-		i.Timing.MonthDays = append(i.Timing.MonthDays, 1)
+	if len(rateIvl.Timing.Months) > 0 && len(rateIvl.Timing.MonthDays) == 0 {
+		rateIvl.Timing.MonthDays = append(rateIvl.Timing.MonthDays, 1)
 	}
-	at.stCache = cronexpr.MustParse(i.Timing.CronString()).Next(t1)
-	if i.Timing.ID == utils.MetaMonthlyEstimated {
-		// substract a month from at.stCache only if we skip 2 months
-		// or we skip a month because mentioned MonthDay is after the last day of the current month
-		if at.stCache.Month() == t1.Month()+2 ||
-			(utils.GetEndOfMonth(t1).Day() < at.Timing.Timing.MonthDays[0] &&
-				at.stCache.Month() == t1.Month()+1) {
-			lastDay := utils.GetEndOfMonth(at.stCache).Day()
-			// only change the time if the new one is after t1
-			if tmp := at.stCache.AddDate(0, 0, -lastDay); tmp.After(t1) {
-				at.stCache = tmp
+	at.stCache = cronexpr.MustParse(rateIvl.Timing.CronString()).Next(refTime)
+	if rateIvl.Timing.ID == utils.MetaMonthlyEstimated {
+		// When target day doesn't exist in a month, fall back to that month's last day
+		// instead of skipping to next occurrence.
+		currentMonth := refTime.Month()
+		targetMonthDay := rateIvl.Timing.MonthDays[0]
+		oneMonthSkip := utils.GetEndOfMonth(refTime).Day() < targetMonthDay &&
+			at.stCache.Month() == currentMonth+1
+		twoMonthSkip := at.stCache.Month() == currentMonth+2
+		if oneMonthSkip || twoMonthSkip {
+			daysToSubtract := utils.GetEndOfMonth(at.stCache).Day()
+
+			// When transitioning from Jan to Feb, subtract the
+			// actual desired day instead of Mar's last day.
+			// This fixes cases like:
+			// - Jan 29 -> Mar 29 (should be Feb 28 in non-leap years)
+			// - Jan 30 -> Mar 30 (should be Feb 28/29)
+			if currentMonth == time.January {
+				daysToSubtract = targetMonthDay
+			}
+
+			adjustedTime := at.stCache.AddDate(0, 0, -daysToSubtract)
+			if adjustedTime.After(refTime) {
+				at.stCache = adjustedTime
 			}
 		}
 	}
