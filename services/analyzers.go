@@ -54,7 +54,9 @@ type AnalyzerService struct {
 	ctx         *context.Context
 	cancelFunc  context.CancelFunc
 
-	anz      *analyzers.AnalyzerS
+	anz     *analyzers.AnalyzerS
+	started chan struct{}
+
 	connChan chan birpc.ClientConnector
 	srvDep   map[string]*sync.WaitGroup
 }
@@ -67,10 +69,12 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 
 	anz.Lock()
 	defer anz.Unlock()
+	anz.started = make(chan struct{})
 	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}
+	close(anz.started)
 	anz.ctx, anz.cancelFunc = context.WithCancel(ctx)
 	go func(a *analyzers.AnalyzerS) {
 		if err := a.ListenAndServe(anz.ctx); err != nil {
@@ -119,6 +123,12 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.server.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
+
+	// Close the channel before making it nil to prevent stale goroutines
+	// in case there are other services waiting on AnalyzerS.
+	close(anz.started)
+
+	anz.started = nil
 	<-anz.connChan
 	anz.Unlock()
 	anz.server.RpcUnregisterName(utils.AnalyzerSv1)
@@ -129,7 +139,7 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 func (anz *AnalyzerService) IsRunning() bool {
 	anz.RLock()
 	defer anz.RUnlock()
-	return anz != nil && anz.anz != nil
+	return anz.anz != nil
 }
 
 // ServiceName returns the service name
@@ -148,4 +158,17 @@ func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string)
 		return c
 	}
 	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
+}
+
+// WaitForAnalyzerS waits for the AnalyzerS structure to be initialized.
+func (a *AnalyzerService) WaitForAnalyzerS(ctx *context.Context) error {
+	if a.started == nil { // AnalyzerS is disabled
+		return nil
+	}
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-a.started:
+	}
+	return nil
 }

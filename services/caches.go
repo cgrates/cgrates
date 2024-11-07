@@ -69,6 +69,9 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 	if dm, err = cS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
+	if err = cS.anz.WaitForAnalyzerS(ctx); err != nil {
+		return
+	}
 	var cs *cores.CoreS
 	if cs, err = cS.cores.WaitForCoreS(ctx); err != nil {
 		return

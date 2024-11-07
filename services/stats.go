@@ -71,6 +71,7 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	if sts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+
 	sts.srvDep[utils.DataDB].Add(1)
 	if err = sts.cacheS.WaitToPrecache(ctx,
 		utils.CacheStatQueueProfiles,
@@ -78,14 +79,15 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 		utils.CacheStatFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, sts.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = sts.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = sts.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

@@ -71,12 +71,16 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if ldrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ldrs.filterSChan); err != nil {
 		return
 	}
 	var datadb *engine.DataManager
 	if datadb, err = ldrs.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = ldrs.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

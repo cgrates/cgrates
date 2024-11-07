@@ -116,14 +116,15 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 		utils.CacheRateFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, rs.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = rs.dmS.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = rs.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

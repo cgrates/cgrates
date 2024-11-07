@@ -77,14 +77,15 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		utils.CacheChargerFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, chrS.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = chrS.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = chrS.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

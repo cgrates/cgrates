@@ -81,9 +81,11 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	if filterS, err = waitForFilterS(ctx, apiService.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = apiService.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = apiService.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

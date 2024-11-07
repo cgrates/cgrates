@@ -68,6 +68,7 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	if trs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+
 	trs.srvDep[utils.DataDB].Add(1)
 	if err = trs.cacheS.WaitToPrecache(ctx,
 		utils.CacheTrendProfiles,
@@ -79,11 +80,14 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	if datadb, err = trs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, trs.filterSChan); err != nil {
 		return
 	}
+	if err = trs.anz.WaitForAnalyzerS(ctx); err != nil {
+		return
+	}
+
 	trs.Lock()
 	defer trs.Unlock()
 	trs.trs = engine.NewTrendService(datadb, trs.cfg, filterS, trs.connMgr)

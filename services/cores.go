@@ -67,9 +67,13 @@ type CoreService struct {
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start(_ *context.Context, shtDw context.CancelFunc) error {
+func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) error {
 	if cS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
+	}
+
+	if err := cS.anz.WaitForAnalyzerS(ctx); err != nil {
+		return err
 	}
 
 	cS.mu.Lock()
