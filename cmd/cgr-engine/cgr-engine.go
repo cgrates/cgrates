@@ -23,13 +23,10 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -60,9 +57,7 @@ func RunCGREngine(fs []string) (err error) {
 	if cfg, err = services.InitConfigFromPath(ctx, *flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
 		return
 	}
-	cps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
-	cls := commonlisteners.NewCommonListenerS(cps)
-	cgr := services.NewCGREngine(cfg, engine.NewConnManager(cfg), new(sync.WaitGroup), cls, cps)
+	cgr := services.NewCGREngine(cfg)
 	defer cgr.Stop(*flags.PidFile)
 
 	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {
