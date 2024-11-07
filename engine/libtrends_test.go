@@ -370,3 +370,43 @@ func TestGetTrendGrowth(t *testing.T) {
 		t.Errorf("Expected error ErrCorrelationUndefined, got: %v", err)
 	}
 }
+
+func TestNewTrendFromProfile(t *testing.T) {
+	profile := &TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "trendProfileID",
+		Schedule:        "@every 1sec",
+		StatID:          "statID1",
+		QueueLength:     10,
+		TTL:             5 * time.Minute,
+		MinItems:        1,
+		CorrelationType: "average",
+		Tolerance:       0.1,
+		Stored:          true,
+		ThresholdIDs:    []string{"threshold1", "threshold2"},
+	}
+
+	trend := NewTrendFromProfile(profile)
+
+	if trend.Tenant != profile.Tenant {
+		t.Errorf("Expected Tenant %s, got %s", profile.Tenant, trend.Tenant)
+	}
+	if trend.ID != profile.ID {
+		t.Errorf("Expected ID %s, got %s", profile.ID, trend.ID)
+	}
+	if trend.RunTimes == nil {
+		t.Errorf("Expected RunTimes to be initialized, got nil")
+	}
+	if len(trend.RunTimes) != 0 {
+		t.Errorf("Expected RunTimes to be empty, got length %d", len(trend.RunTimes))
+	}
+	if trend.Metrics == nil {
+		t.Errorf("Expected Metrics to be initialized, got nil")
+	}
+	if len(trend.Metrics) != 0 {
+		t.Errorf("Expected Metrics to be empty, got length %d", len(trend.Metrics))
+	}
+	if trend.tPrfl != profile {
+		t.Errorf("Expected tPrfl to point to the original profile, got a different value")
+	}
+}
