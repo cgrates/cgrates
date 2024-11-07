@@ -71,22 +71,23 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if reS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	reS.srvDep[utils.DataDB].Add(1)
 
+	reS.srvDep[utils.DataDB].Add(1)
 	if err = reS.cacheS.WaitToPrecache(ctx,
 		utils.CacheResourceProfiles,
 		utils.CacheResources,
 		utils.CacheResourceFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, reS.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = reS.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = reS.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

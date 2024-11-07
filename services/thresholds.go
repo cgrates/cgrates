@@ -71,6 +71,7 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	if thrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+
 	thrs.srvDep[utils.DataDB].Add(1)
 	if err = thrs.cacheS.WaitToPrecache(ctx,
 		utils.CacheThresholdProfiles,
@@ -78,14 +79,15 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 		utils.CacheThresholdFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, thrs.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = thrs.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = thrs.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

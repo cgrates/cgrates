@@ -83,9 +83,11 @@ func (cdrSrv *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err
 	if filterS, err = waitForFilterS(ctx, cdrSrv.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = cdrSrv.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = cdrSrv.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

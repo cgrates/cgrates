@@ -79,14 +79,15 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 		utils.CacheAttributeFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, attrS.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = attrS.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = attrS.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

@@ -70,6 +70,7 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if ran.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+
 	ran.srvDep[utils.DataDB].Add(1)
 	if err = ran.cacheS.WaitToPrecache(ctx,
 		utils.CacheRankingProfiles,
@@ -81,11 +82,14 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if datadb, err = ran.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ran.filterSChan); err != nil {
 		return
 	}
+	if err = ran.anz.WaitForAnalyzerS(ctx); err != nil {
+		return
+	}
+
 	ran.Lock()
 	defer ran.Unlock()
 	ran.ran = engine.NewRankingS(datadb, ran.connMgr, filterS, ran.cfg)

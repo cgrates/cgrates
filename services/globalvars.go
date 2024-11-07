@@ -25,13 +25,12 @@ import (
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewGlobalVarS .
 func NewGlobalVarS(cfg *config.CGRConfig,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) *GlobalVarS {
 	return &GlobalVarS{
 		cfg:    cfg,
 		srvDep: srvDep,

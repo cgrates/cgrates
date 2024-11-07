@@ -80,11 +80,14 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	if filterS, err = waitForFilterS(ctx, smg.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = smg.dm.WaitForDM(ctx); err != nil {
 		return
 	}
+	if err = smg.anz.WaitForAnalyzerS(ctx); err != nil {
+		return
+	}
+
 	smg.Lock()
 	defer smg.Unlock()
 

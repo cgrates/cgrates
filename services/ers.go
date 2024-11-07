@@ -74,8 +74,12 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	if erS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, erS.filterSChan); err != nil {
+		return
+	}
+	if err = erS.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 

@@ -109,6 +109,9 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	if err != nil {
 		return err
 	}
+	if err := es.anz.WaitForAnalyzerS(ctx); err != nil {
+		return err
+	}
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EEs))
 

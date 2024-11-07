@@ -102,7 +102,7 @@ type CGREngine struct {
 	cpuPrfF *os.File
 
 	// services
-	gvS    servmanager.Service
+	gvS    *GlobalVarS
 	dmS    *DataDBService
 	sdbS   *StorDBService
 	anzS   *AnalyzerService

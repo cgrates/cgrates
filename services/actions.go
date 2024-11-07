@@ -84,16 +84,18 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		utils.CacheActionProfilesFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, acts.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = acts.dm.WaitForDM(ctx); err != nil {
 		return
 	}
+	if err = acts.anz.WaitForAnalyzerS(ctx); err != nil {
+		return
+	}
+
 	acts.Lock()
 	defer acts.Unlock()
 	acts.acts = actions.NewActionS(acts.cfg, filterS, datadb, acts.connMgr)

@@ -78,16 +78,18 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		utils.CacheRouteFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, routeS.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = routeS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
+	if err = routeS.anz.WaitForAnalyzerS(ctx); err != nil {
+		return
+	}
+
 	routeS.Lock()
 	defer routeS.Unlock()
 	routeS.routeS = engine.NewRouteService(datadb, filterS, routeS.cfg, routeS.connMgr)

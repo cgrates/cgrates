@@ -84,14 +84,15 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		utils.CacheAccountsFilterIndexes); err != nil {
 		return
 	}
-
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, acts.filterSChan); err != nil {
 		return
 	}
-
 	var datadb *engine.DataManager
 	if datadb, err = acts.dm.WaitForDM(ctx); err != nil {
+		return
+	}
+	if err = acts.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 
