@@ -190,6 +190,9 @@ func (eeS *EventExporterS) V1ProcessEvent(ctx *context.Context, cgrEv *engine.CG
 		}
 
 		exportEvent := cgrEv.CGREvent
+		if !eeCfg.Synchronous {
+			exportEvent = exportEvent.Clone()
+		}
 		if eeCfg.Flags.GetBool(utils.MetaAttributes) {
 			if exportEvent, err = eeS.attrSProcessEvent(
 				cgrEv.CGREvent,
