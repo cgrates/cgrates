@@ -47,7 +47,7 @@ func TestFsAgentV1AlterSession(t *testing.T) {
 	ctx := context.Background()
 	cgrEv := utils.CGREvent{}
 	fss := &FSsessions{}
-	err := fss.V1AlterSession(ctx, cgrEv, nil)
+	err := fss.V1AlterSession(ctx, &cgrEv, nil)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error: %v, got: %v", utils.ErrNotImplemented, err)
 	}
@@ -189,7 +189,7 @@ func TestFsAgentV1DisconnectSession(t *testing.T) {
 	fsa := &FSsessions{
 		conns: []*fsock.FSock{},
 	}
-	err := fsa.V1DisconnectSession(context.Background(), utils.CGREvent{Event: mockEvent}, &testReply)
+	err := fsa.V1DisconnectSession(context.Background(), &utils.CGREvent{Event: mockEvent}, &testReply)
 	if err == nil {
 		t.Errorf("Index out of range[0,0): 0, got %v", err)
 	}
@@ -272,7 +272,7 @@ func TestFSsessionsV1AlterSession(t *testing.T) {
 	ctx := context.Background()
 	event := utils.CGREvent{}
 	reply := ""
-	err := fsSessions.V1AlterSession(ctx, event, &reply)
+	err := fsSessions.V1AlterSession(ctx, &event, &reply)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error %v, got %v", utils.ErrNotImplemented, err)
 	}

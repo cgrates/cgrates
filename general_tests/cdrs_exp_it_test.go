@@ -245,7 +245,7 @@ func testCDRsExpExportEvent(t *testing.T) {
 	if err := cdrsExpRPC.Call(context.Background(), utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags:    []string{"*export:true", utils.MetaRALs},
-			CGREvent: *cdrsExpEv,
+			CGREvent: cdrsExpEv,
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() { // some exporters will fail
 		t.Error("Unexpected error: ", err)
 	}

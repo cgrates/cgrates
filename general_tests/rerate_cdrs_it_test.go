@@ -100,7 +100,7 @@ func TestRerateCDRs(t *testing.T) {
 		err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -177,7 +177,7 @@ func TestRerateCDRs(t *testing.T) {
 		err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event2",
 					Event: map[string]any{
@@ -338,7 +338,7 @@ func TestRerateCDRsNoRefund(t *testing.T) {
 		err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{

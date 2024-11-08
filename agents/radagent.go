@@ -508,7 +508,7 @@ func (*RadiusAgent) V1GetActiveSessionIDs(_ *context.Context, _ string, _ *[]*se
 }
 
 // V1DisconnectSession remotely disconnects a session by making use of the RADIUS Disconnect Message functionality.
-func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, cgrEv *utils.CGREvent, reply *string) error {
 	ifaceOriginID, has := cgrEv.Event[utils.OriginID]
 	if !has {
 		return utils.NewErrMandatoryIeMissing(utils.OriginID)
@@ -540,7 +540,7 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREv
 }
 
 // V1AlterSession updates session authorization using RADIUS CoA functionality.
-func (ra *RadiusAgent) V1AlterSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+func (ra *RadiusAgent) V1AlterSession(_ *context.Context, cgrEv *utils.CGREvent, reply *string) error {
 	originID, err := cgrEv.FieldAsString(utils.OriginID)
 	if err != nil {
 		return fmt.Errorf("could not retrieve OriginID: %w", err)

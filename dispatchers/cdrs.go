@@ -144,7 +144,7 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(ctx *context.Context, args *engi
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs,
+	return dS.Dispatch(args.CGREvent, utils.MetaCDRs,
 		utils.CDRsV1ProcessEvent, args, reply)
 }
 
@@ -176,7 +176,7 @@ func (dS *DispatcherService) CDRsV2ProcessEvent(ctx *context.Context, args *engi
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs,
+	return dS.Dispatch(args.CGREvent, utils.MetaCDRs,
 		utils.CDRsV2ProcessEvent, args, reply)
 }
 

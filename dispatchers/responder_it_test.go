@@ -115,7 +115,7 @@ func getNodeWithRoute(route string, t *testing.T) string {
 		},
 	}
 
-	if err := dispEngine.RPC.Call(context.Background(), utils.DispatcherSv1RemotePing, pingEv, &pingReply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.DispatcherSv1RemotePing, &pingEv, &pingReply); err != nil {
 		t.Error(err)
 	} else if pingReply != utils.Pong {
 		t.Errorf("Received: %s", pingReply)
@@ -179,7 +179,7 @@ func testDspResponderBroadcast(t *testing.T) {
 			utils.OptsAPIKey: "rsp12345",
 		},
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.ResponderPing, pingEv, &pingReply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ResponderPing, &pingEv, &pingReply); err != nil {
 		t.Error(err)
 	} else if pingReply != utils.Pong {
 		t.Errorf("Received: %s", pingReply)
@@ -187,14 +187,14 @@ func testDspResponderBroadcast(t *testing.T) {
 
 	allEngine2.stopEngine(t)
 	pingReply = ""
-	if err := dispEngine.RPC.Call(context.Background(), utils.ResponderPing, pingEv, &pingReply); err == nil ||
+	if err := dispEngine.RPC.Call(context.Background(), utils.ResponderPing, &pingEv, &pingReply); err == nil ||
 		err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrPartiallyExecuted.Error(), err, pingReply)
 	}
 	allEngine.stopEngine(t)
 	time.Sleep(10 * time.Millisecond)
 	pingReply = ""
-	if err := dispEngine.RPC.Call(context.Background(), utils.ResponderPing, pingEv, &pingReply); !rpcclient.ShouldFailover(err) {
+	if err := dispEngine.RPC.Call(context.Background(), utils.ResponderPing, &pingEv, &pingReply); !rpcclient.ShouldFailover(err) {
 		t.Errorf("Expected error: %s received error: %v	 and reply %q", utils.ErrPartiallyExecuted.Error(), err, pingReply)
 	}
 	allEngine.startEngine(t)
@@ -223,7 +223,7 @@ func testDspResponderInternal(t *testing.T) {
 			utils.OptsRouteID: route,
 		},
 	}
-	if err := dispEngine.RPC.Call(context.Background(), utils.DispatcherSv1RemotePing, pingEv, &pingReply); err != nil {
+	if err := dispEngine.RPC.Call(context.Background(), utils.DispatcherSv1RemotePing, &pingEv, &pingReply); err != nil {
 		t.Error(err)
 	} else if pingReply != utils.Pong {
 		t.Errorf("Received: %s", pingReply)

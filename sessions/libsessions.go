@@ -45,9 +45,9 @@ var authReqs = engine.MapEvent{
 // BiRPCClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
 type BiRPCClient interface {
-	V1DisconnectSession(*context.Context, utils.CGREvent, *string) error
+	V1DisconnectSession(*context.Context, *utils.CGREvent, *string) error
 	V1GetActiveSessionIDs(*context.Context, string, *[]*SessionID) error
-	V1AlterSession(*context.Context, utils.CGREvent, *string) error
+	V1AlterSession(*context.Context, *utils.CGREvent, *string) error
 	V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error
 	V1WarnDisconnect(*context.Context, map[string]any, *string) error
 }

@@ -203,7 +203,7 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 
 // Will populate CGREvent with required fields restored from the channel variables
 func (smaEv *SMAsteriskEvent) RestoreAndUpdateFields(cgrEv *utils.CGREvent) error {
-	resCGREv := *cgrEv
+	resCGREv := cgrEv
 	// make sure the channel contains the channelvars field to be recovered
 	channvars, has := smaEv.ariEv["channel"].(map[string]any)["channelvars"].(map[string]any)
 	if !has {
@@ -232,12 +232,12 @@ func (smaEv *SMAsteriskEvent) RestoreAndUpdateFields(cgrEv *utils.CGREvent) erro
 	for k, v := range smaEv.opts {
 		resCGREv.APIOpts[k] = v
 	}
-	*cgrEv = resCGREv
+	cgrEv = resCGREv
 	return nil
 }
 
 func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
-	resCGREv := *cgrEv
+	resCGREv := cgrEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
 		resCGREv.Event[utils.EventName] = SMASessionStart
@@ -263,7 +263,7 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 	for k, v := range smaEv.opts {
 		resCGREv.APIOpts[k] = v
 	}
-	*cgrEv = resCGREv
+	cgrEv = resCGREv
 	return nil
 }
 
@@ -340,9 +340,9 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREvent) (args *sessions.V1InitSessionArgs) {
+func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp *utils.CGREvent) (args *sessions.V1InitSessionArgs) {
 	args = &sessions.V1InitSessionArgs{ // defaults
-		CGREvent: &cgrEvDisp,
+		CGREvent: cgrEvDisp,
 	}
 	subsystems, err := cgrEvDisp.FieldAsString(utils.CGRFlags)
 	if err != nil {
@@ -355,9 +355,9 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREvent) (args 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
+func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp *utils.CGREvent) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
-		CGREvent: &cgrEvDisp,
+		CGREvent: cgrEvDisp,
 	}
 	subsystems, err := cgrEvDisp.FieldAsString(utils.CGRFlags)
 	if err != nil {

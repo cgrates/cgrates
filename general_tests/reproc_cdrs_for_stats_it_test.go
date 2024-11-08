@@ -171,7 +171,7 @@ func testRpcdrsProcessFirstCDR(t *testing.T) {
 	err := rpcdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{utils.MetaRALs},
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Time:   utils.TimePointer(time.Now()),
@@ -249,7 +249,7 @@ func testRpcdrsProcessSecondCDR(t *testing.T) {
 	err := rpcdrsRpc.Call(context.Background(), utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{utils.MetaRALs},
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event2",
 				Time:   utils.TimePointer(time.Now()),

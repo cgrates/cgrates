@@ -51,7 +51,7 @@ func TestV1AlterSession(t *testing.T) {
 	var ctx context.Context
 	var event utils.CGREvent
 	var msg *string
-	err := ja.V1AlterSession(&ctx, event, msg)
+	err := ja.V1AlterSession(&ctx, &event, msg)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected error %v, got %v", utils.ErrNotImplemented, err)
 	}
@@ -64,7 +64,7 @@ func TestV1DisconnectSession(t *testing.T) {
 		Event: map[string]interface{}{},
 	}
 	var reply string
-	err := ja.V1DisconnectSession(&ctx, cgrEv, &reply)
+	err := ja.V1DisconnectSession(&ctx, &cgrEv, &reply)
 	if err == nil {
 		t.Fatalf("Expected, got %v", err)
 	}

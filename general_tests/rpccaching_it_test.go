@@ -688,7 +688,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 
 func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsCdrsProcessCDR",
 			Event: map[string]any{

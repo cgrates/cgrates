@@ -112,7 +112,7 @@ func TestAsteriskAgentV1DisconnectPeer(t *testing.T) {
 
 func TestAsteriskAgentV1AlterSession(t *testing.T) {
 	tAsteriskAgent := &AsteriskAgent{}
-	tCGREvent := utils.CGREvent{}
+	tCGREvent := &utils.CGREvent{}
 	tString := ""
 	err := tAsteriskAgent.V1AlterSession(nil, tCGREvent, &tString)
 	if err != utils.ErrNotImplemented {

@@ -133,7 +133,7 @@ func TestGetAccountCost(t *testing.T) {
 		err := client.Call(context.Background(), utils.APIerSV1GetAccountCost,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -175,7 +175,7 @@ func TestGetAccountCost(t *testing.T) {
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{

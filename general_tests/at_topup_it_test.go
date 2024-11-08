@@ -130,7 +130,7 @@ TRIGGER_1001,,*balance_expired,,true,0,,,main,*data,,,,,,,,,,ACT_TOPUP_INITIAL,`
 			if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 				&engine.ArgV1ProcessEvent{
 					Flags: []string{utils.MetaRALs},
-					CGREvent: utils.CGREvent{
+					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     fmt.Sprintf("event%d", i),
 						Event: map[string]any{

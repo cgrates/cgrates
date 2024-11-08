@@ -185,7 +185,7 @@ func TestDspCDRsV1ProcessEventError(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -201,7 +201,7 @@ func TestDspCDRsV1ProcessEventNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -252,7 +252,7 @@ func TestDspCDRsV2ProcessEventError(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.ArgV1ProcessEvent{
 		Flags: nil,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -269,7 +269,7 @@ func TestDspCDRsV2ProcessEventNil(t *testing.T) {
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
 	CGREvent := &engine.ArgV1ProcessEvent{
 		Flags: nil,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "tenant",
 		},
 	}
@@ -287,7 +287,7 @@ func TestDspCDRsV2ProcessEventErrorNil(t *testing.T) {
 	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
 	CGREvent := &engine.ArgV1ProcessEvent{
 		Flags:    nil,
-		CGREvent: utils.CGREvent{},
+		CGREvent: &utils.CGREvent{},
 	}
 	var reply *[]*utils.EventWithFlags
 	result := dspSrv.CDRsV2ProcessEvent(context.Background(), CGREvent, reply)

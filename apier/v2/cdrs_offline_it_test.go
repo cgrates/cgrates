@@ -307,7 +307,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	}
 
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsOfflineProcessCDR1",

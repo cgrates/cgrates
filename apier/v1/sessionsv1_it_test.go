@@ -40,7 +40,7 @@ var (
 	sSv1Cfg         *config.CGRConfig
 	sSv1BiRpc       *birpc.BirpcClient
 	sSApierRpc      *birpc.Client
-	discEvChan      = make(chan utils.CGREvent, 1)
+	discEvChan      = make(chan *utils.CGREvent, 1)
 	sSV1RequestType string
 
 	sTestSessionSv1 = []func(t *testing.T){
@@ -90,7 +90,7 @@ func testSSv1ItInitCfgDir(t *testing.T) {
 type smock struct{}
 
 func (*smock) DisconnectSession(ctx *context.Context,
-	args utils.CGREvent, reply *string) error {
+	args *utils.CGREvent, reply *string) error {
 	discEvChan <- args
 	// free the channel
 	<-discEvChan

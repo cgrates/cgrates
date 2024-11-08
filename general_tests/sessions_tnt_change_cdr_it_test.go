@@ -201,7 +201,7 @@ func testChargerSCdrsAuthProcessEventAuth(t *testing.T) {
 	}
 
 	ev := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestEv1",
 			Event: map[string]any{

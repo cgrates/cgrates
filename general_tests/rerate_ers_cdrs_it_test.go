@@ -187,7 +187,7 @@ func testRerateCDRsERsGetAccountAfterBalanceSet(t *testing.T) {
 func testRerateCDRsERsProcessEventCDR1(t *testing.T) {
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, "*export:false"},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]any{

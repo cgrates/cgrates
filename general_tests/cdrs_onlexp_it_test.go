@@ -238,7 +238,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags:    []string{"*export:false", "*chargers:false"},
-			CGREvent: *testCdr.AsCGREvent(),
+			CGREvent: testCdr.AsCGREvent(),
 		}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
@@ -283,7 +283,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	if err := cdrsMasterRpc.Call(context.Background(),
 		utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
-			CGREvent: *arg,
+			CGREvent: arg,
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error("Unexpected error: ", err)
 	}
@@ -402,7 +402,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		&engine.ArgV1ProcessEvent{
 			Flags: []string{"*export:true"},
 
-			CGREvent: *testCdr.AsCGREvent(),
+			CGREvent: testCdr.AsCGREvent(),
 		}, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error("Unexpected error: ", err)
 	}

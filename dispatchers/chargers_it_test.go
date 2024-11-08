@@ -130,7 +130,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 	}
 	var reply *engine.ChargerProfiles
 	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err != nil {
+		&args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
@@ -151,7 +151,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
 	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err != nil {
+		&args, &reply); err != nil {
 		t.Fatal(err)
 	}
 	sort.Slice(*reply, func(i, j int) bool {
@@ -196,7 +196,7 @@ func testDspCppTestAuthKey(t *testing.T) {
 	}
 	var reply *engine.ChargerProfiles
 	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
+		&args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 }
@@ -237,7 +237,7 @@ func testDspCppTestAuthKey2(t *testing.T) {
 	}
 	var reply *engine.ChargerProfiles
 	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err != nil {
+		&args, &reply); err != nil {
 		t.Fatal(err)
 	}
 	sort.Slice(*reply, func(i, j int) bool {
@@ -276,7 +276,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 	var reply *engine.ChargerProfiles
 	// To ALL2
 	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err != nil {
+		&args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
@@ -296,7 +296,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
 	if err := dispEngine.RPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err != nil {
+		&args, &reply); err != nil {
 		t.Fatal(err)
 	}
 	sort.Slice(*reply, func(i, j int) bool {

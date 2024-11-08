@@ -392,7 +392,7 @@ func (self *KamailioAgent) disconnectSession(connIdx int, dscEv *KamSessionDisco
 }
 
 // Internal method to disconnect session in Kamailio
-func (ka *KamailioAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (ka *KamailioAgent) V1DisconnectSession(ctx *context.Context, cgrEv *utils.CGREvent, reply *string) (err error) {
 	hEntry := utils.IfaceAsString(cgrEv.Event[KamHashEntry])
 	hID := utils.IfaceAsString(cgrEv.Event[KamHashID])
 	connIdxIface, has := cgrEv.Event[EvapiConnID]
@@ -459,7 +459,7 @@ func (ka *KamailioAgent) Reload() {
 }
 
 // V1AlterSession is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+func (*KamailioAgent) V1AlterSession(*context.Context, *utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

@@ -120,7 +120,7 @@ func testDspCDRsPing(t *testing.T) {
 func testDspCDRsProcessEvent(t *testing.T) {
 	var reply string
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testDspCDRsProcessEvent",
@@ -318,7 +318,7 @@ func testDspCDRsV2ProcessEvent(t *testing.T) {
 	var reply []*utils.EventWithFlags
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testDspCDRsV2ProcessEvent",
@@ -406,7 +406,7 @@ func testDspCDRsPingNoAuth(t *testing.T) {
 func testDspCDRsProcessEventNoAuth(t *testing.T) {
 	var reply string
 	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testDspCDRsProcessEvent",
@@ -579,7 +579,7 @@ func testDspCDRsV2ProcessEventNoAuth(t *testing.T) {
 	var reply []*utils.EventWithFlags
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testDspCDRsV2ProcessEventNoAuth",

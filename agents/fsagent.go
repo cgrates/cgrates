@@ -396,7 +396,7 @@ func (fsa *FSsessions) Shutdown() (err error) {
 }
 
 // V1DisconnectSession internal method to disconnect session in FreeSWITCH
-func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, cgrEv *utils.CGREvent, reply *string) (err error) {
 	ev := engine.NewMapEvent(cgrEv.Event)
 	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
 	disconnectCause := ev.GetStringIgnoreErrors(utils.DisconnectCause)
@@ -495,7 +495,7 @@ func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]an
 }
 
 // V1AlterSession is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+func (*FSsessions) V1AlterSession(*context.Context, *utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

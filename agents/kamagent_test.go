@@ -58,7 +58,7 @@ func TestKamailioAgentV1AlterSession(t *testing.T) {
 	ctx := context.Background()
 	cgrEvent := utils.CGREvent{}
 	var reply string
-	err := agent.V1AlterSession(ctx, cgrEvent, &reply)
+	err := agent.V1AlterSession(ctx, &cgrEvent, &reply)
 	if err != utils.ErrNotImplemented {
 		t.Errorf("Expected ErrNotImplemented, got %v", err)
 	}

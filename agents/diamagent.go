@@ -298,7 +298,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 }
 
 // V1DisconnectSession is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, cgrEv *utils.CGREvent, reply *string) (err error) {
 	ssID, has := cgrEv.Event[utils.OriginID]
 	if !has {
 		utils.Logger.Info(
@@ -314,7 +314,7 @@ func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.C
 	case utils.MetaASR:
 		return da.sendASR(originID, reply)
 	case utils.MetaRAR:
-		return da.V1AlterSession(ctx, utils.CGREvent{Event: cgrEv.Event}, reply)
+		return da.V1AlterSession(ctx, &utils.CGREvent{Event: cgrEv.Event}, reply)
 	default:
 		return fmt.Errorf("Unsupported request type <%s>", da.cgrCfg.DiameterAgentCfg().ForcedDisconnect)
 	}
@@ -357,7 +357,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 }
 
 // V1AlterSession  sends a rar message to diameter client
-func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv *utils.CGREvent, reply *string) (err error) {
 	originID, err := cgrEv.FieldAsString(utils.OriginID)
 	if err != nil {
 		return fmt.Errorf("could not retrieve OriginID: %w", err)

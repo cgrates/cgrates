@@ -151,7 +151,7 @@ func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 func testV2CDRsProcessCDR(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:    "testV2CDRsProcessCDR1",
@@ -341,7 +341,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 func testV2CDRsUsageNegative(t *testing.T) {
 	argsCdr := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsUsageNegative",
@@ -496,7 +496,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 
 	argsCdr := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaAttributes, utils.MetaChargers, "*stats:false", "*thresholds:false", utils.MetaStore},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.com",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsDifferentTenants",
@@ -555,7 +555,7 @@ func testV2CDRsRemoveRatingProfiles(t *testing.T) {
 func testV2CDRsProcessCDRNoRattingPlan(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR4",
@@ -778,7 +778,7 @@ func testV2CDRsSetThreshold(t *testing.T) {
 func testV2CDRsProcessCDRWithThreshold(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaThresholds, utils.MetaRALs, utils.ConcatenatedKey(utils.MetaChargers, "false")},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDRWithThreshold",
@@ -817,7 +817,7 @@ func testV2CDRsGetThreshold(t *testing.T) {
 func testv2CDRsGetCDRsDest(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaStore},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.CGRID:        "9b3cd5e698af94f8916220866c831a982ed16318",
@@ -915,7 +915,7 @@ func testV2CDRsRerate(t *testing.T) {
 
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsRerate",
@@ -947,7 +947,7 @@ func testV2CDRsRerate(t *testing.T) {
 
 	args2 := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRerate},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsRerate",
@@ -987,7 +987,7 @@ func testv2CDRsDynaPrepaid(t *testing.T) {
 
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testv2CDRsDynaPrepaid",
@@ -1081,7 +1081,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRerate},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsDuplicateCDRs",
@@ -1118,7 +1118,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 			var rplProcEv []*utils.EventWithFlags
 			args2 := &engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRerate},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					Event: map[string]any{
 						utils.OriginID:     "testV2CDRsDuplicateCDRs",

@@ -170,7 +170,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	}
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.RunID:        "testv1",
@@ -218,7 +218,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	}
 	argsEv = &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs, utils.MetaRerate},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.RunID:        "testv1",
@@ -364,7 +364,7 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -428,7 +428,7 @@ func testV1CDRsRefundCDR(t *testing.T) {
 
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRefund},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.RunID:        utils.MetaDefault,
@@ -583,7 +583,7 @@ func testV1CDRsAddBalanceForSMS(t *testing.T) {
 
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.CGRID:        "asdfas",

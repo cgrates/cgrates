@@ -40,7 +40,7 @@ var (
 	sessionsBiRPCCfgDIR  string
 	sessionsBiRPCCfg     *config.CGRConfig
 	sessionsBiRPC        *birpc.BirpcClient
-	disconnectEvChan     = make(chan utils.CGREvent, 1)
+	disconnectEvChan     = make(chan *utils.CGREvent, 1)
 	err                  error
 	sessionsTests        = []func(t *testing.T){
 		testSessionsBiRPCInitCfg,
@@ -77,7 +77,7 @@ func TestSessionsBiRPC(t *testing.T) {
 type smock struct{}
 
 func (*smock) DisconnectSession(ctx *context.Context,
-	args utils.CGREvent, reply *string) error {
+	args *utils.CGREvent, reply *string) error {
 	disconnectEvChan <- args
 	*reply = utils.OK
 	return nil
@@ -212,7 +212,7 @@ func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		t.Error("Did not receive disconnect event")
 	case disconnectEv := <-disconnectEvChan:
 		if engine.NewMapEvent(disconnectEv.Event).GetStringIgnoreErrors(utils.OriginID) != initArgs.CGREvent.Event[utils.OriginID] {
-			t.Errorf("Unexpected event received: %+v", disconnectEv)
+			t.Errorf("Unexpected event received: %+v", &disconnectEv)
 		}
 		initArgs.CGREvent.Event[utils.Usage] = disconnectEv.Event[utils.Usage]
 	}

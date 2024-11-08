@@ -20,6 +20,7 @@ package utils
 import (
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -658,4 +659,44 @@ func TestCGREventRPCClone(t *testing.T) {
 
 	}
 
+}
+
+func TestLockUnlock(t *testing.T) {
+	m := &CGREvent{}
+	m.Lock()
+	m.Tenant = "Locked Data"
+	m.Unlock()
+	if m.Tenant != "Locked Data" {
+		t.Errorf("Expected 'Locked Data', got %v", m.Tenant)
+	}
+}
+
+func TestRLockRUnlock(t *testing.T) {
+	m := &CGREvent{}
+	m.Tenant = "Test Data"
+	m.RLock()
+	data := m.Tenant
+	m.RUnlock()
+	if data != "Test Data" {
+		t.Errorf("Expected 'Test Data', got %v", data)
+	}
+}
+
+func TestConcurrentRLocks(t *testing.T) {
+	m := &CGREvent{}
+	m.Tenant = "Concurrent Test"
+
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			m.RLock()
+			if m.Tenant != "Concurrent Test" {
+				t.Errorf("Expected 'Concurrent Test', got %v", m.Tenant)
+			}
+			m.RUnlock()
+		}()
+	}
+	wg.Wait()
 }

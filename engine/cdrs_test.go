@@ -149,7 +149,7 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 	}
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -232,7 +232,7 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 func TestArgV1ProcessClone(t *testing.T) {
 	attr := &ArgV1ProcessEvent{
 		Flags: []string{"flg,flg2,flg3"},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			ID:   "TestBiRPCv1AuthorizeEventNoTenant",
 			Time: utils.TimePointer(time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC)),
 			Event: map[string]any{
@@ -614,7 +614,7 @@ func TestCDRSV2ProcessEvent(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -663,7 +663,7 @@ func TestCDRSV2ProcessEventCacheSet(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -723,7 +723,7 @@ func TestCDRSV1ProcessEvent(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -772,7 +772,7 @@ func TestCDRSV1ProcessEventCacheSet(t *testing.T) {
 	Cache = NewCacheS(cfg, dm, nil)
 	args := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -904,7 +904,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	}
 	arg := &ArgV1ProcessEvent{
 		Flags: []string{utils.MetaAttributes, utils.MetaStats, utils.MetaExport, utils.MetaStore, utils.OptsThresholdS, utils.MetaThresholds, utils.MetaStats, utils.OptsChargerS, utils.MetaChargers, utils.OptsRALs, utils.MetaRALs, utils.OptsRerate, utils.MetaRerate, utils.OptsRefund, utils.MetaRefund},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			ID: "TestV1ProcessEventNoTenant",
 			Event: map[string]any{
 				utils.CGRID:        "test1",
@@ -2377,7 +2377,7 @@ func TestCDRSGetCDRs(t *testing.T) {
 		}),
 	}
 	arg := &ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event1",
 			Event: map[string]any{
@@ -2499,28 +2499,6 @@ func TestCdrsSetCloneableEvent(t *testing.T) {
 
 	if arg.clnb {
 		t.Errorf("expected clnb to be false, got true")
-	}
-}
-
-func TestCdrsRPCClone(t *testing.T) {
-
-	arg := &ArgV1ProcessEvent{}
-
-	cloned1, err1 := arg.RPCClone()
-
-	if err1 != nil {
-		t.Errorf("unexpected error: %v", err1)
-	}
-	if cloned1 != arg {
-		t.Errorf("expected cloned object to be identical, got different objects")
-	}
-	arg.SetCloneable(true)
-	cloned2, err2 := arg.RPCClone()
-	if err2 != nil {
-		t.Errorf("unexpected error: %v", err2)
-	}
-	if cloned2 == arg {
-		t.Errorf("expected cloned object to be different, got identical objects")
 	}
 }
 

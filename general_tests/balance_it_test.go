@@ -140,7 +140,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -186,7 +186,7 @@ cgrates.org,sms,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -384,7 +384,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "CDRsV1ProcessCDR",
 					Event: map[string]any{
@@ -448,7 +448,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags:    []string{utils.MetaRefund, "*store:false"},
-				CGREvent: *cdrs[0].AsCGREvent(),
+				CGREvent: cdrs[0].AsCGREvent(),
 			}, &replyProcessEvent); err != nil {
 			t.Fatal(err)
 		}
@@ -780,7 +780,7 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags:    []string{utils.MetaRefund, "*store:false"},
-				CGREvent: *cdrs[0].AsCGREvent(),
+				CGREvent: cdrs[0].AsCGREvent(),
 			}, &replyProcessEvent); err != nil {
 			t.Fatal(err)
 		}

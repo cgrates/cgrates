@@ -160,7 +160,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaRALs},
 
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR1",
@@ -231,7 +231,7 @@ func testV2CDRsProcessCDR2(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*attributes:false", utils.MetaRALs},
 
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR2",
@@ -303,7 +303,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 func testV2CDRsProcessCDR3(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*attributes:false", "*chargers:false", "*rals:false"},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR3",
@@ -364,7 +364,7 @@ func testV2CDRsGetCdrs3(t *testing.T) {
 func testV2CDRsProcessCDR4(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaAttributes, utils.MetaRALs},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR4",
@@ -553,7 +553,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 func testV2CDRsProcessCDR5(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*store:false", "*stats:false", "*thresholds:false"},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR5",
@@ -619,7 +619,7 @@ func testV2CDRsGetThreshold1(t *testing.T) {
 func testV2CDRsProcessCDR6(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*store:false", "*stats:true", "*thresholds:true"},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR5",
@@ -678,7 +678,7 @@ func testV2CDRsProcessCDR7(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaStore, utils.MetaRALs},
 
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testV2CDRsProcessCDR7",

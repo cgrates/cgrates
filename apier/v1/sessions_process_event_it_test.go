@@ -458,7 +458,7 @@ func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 }
 
 func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
-	args := utils.CGREvent{
+	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testSSv1ItProcessCDRForSessionFromProcessEvent",
 		Event: map[string]any{

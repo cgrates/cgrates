@@ -282,7 +282,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 		return
 	}
 	// populate init session args
-	initSessionArgs := ev.V1InitSessionArgs(*cgrEvDisp)
+	initSessionArgs := ev.V1InitSessionArgs(cgrEvDisp)
 	if initSessionArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
 			utils.AsteriskAgent, ev.ChannelID()))
@@ -346,7 +346,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 		}
 	}
 	// populate terminate session args
-	tsArgs := ev.V1TerminateSessionArgs(*cgrEvDisp)
+	tsArgs := ev.V1TerminateSessionArgs(cgrEvDisp)
 	if tsArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
 			utils.AsteriskAgent, chID))
@@ -370,7 +370,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 }
 
 // V1DisconnectSession is internal method to disconnect session in asterisk
-func (sma *AsteriskAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) error {
+func (sma *AsteriskAgent) V1DisconnectSession(ctx *context.Context, cgrEv *utils.CGREvent, reply *string) error {
 	channelID := engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.OriginID)
 	sma.hangupChannel(channelID, "")
 	*reply = utils.OK
@@ -406,7 +406,7 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam s
 }
 
 // V1AlterSession is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+func (*AsteriskAgent) V1AlterSession(*context.Context, *utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

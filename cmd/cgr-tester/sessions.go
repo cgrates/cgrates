@@ -40,8 +40,8 @@ var (
 type smock struct{}
 
 func (*smock) DisconnectSession(ctx *context.Context,
-	args utils.CGREvent, reply *string) error {
-	disconnectEvChan <- args
+	args *utils.CGREvent, reply *string) error {
+	disconnectEvChan <- *args
 	*reply = utils.OK
 	return nil
 }

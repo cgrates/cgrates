@@ -40,7 +40,7 @@ var (
 	sSv1Cfg2          *config.CGRConfig
 	sSv1BiRpc2        *birpc.BirpcClient
 	sSApierRpc2       *birpc.Client
-	disconnectEvChan2 = make(chan utils.CGREvent)
+	disconnectEvChan2 = make(chan *utils.CGREvent)
 	sessionsConfDIR   string
 
 	sessionsThresholdTests = []func(t *testing.T){
@@ -86,7 +86,7 @@ func TestSessionSITtests(t *testing.T) {
 type smock2 struct{}
 
 func (*smock2) DisconnectSession(ctx *context.Context,
-	args utils.CGREvent, reply *string) error {
+	args *utils.CGREvent, reply *string) error {
 	disconnectEvChan2 <- args
 	*reply = utils.OK
 	return nil

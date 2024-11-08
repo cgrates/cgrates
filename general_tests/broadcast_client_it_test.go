@@ -146,7 +146,7 @@ func testbrodcastItProccessEvent(t *testing.T) {
 	}
 
 	var rply string
-	if err := brodcastRPC.Call(context.Background(), utils.SessionSv1ProcessCDR, args, &rply); err != nil {
+	if err := brodcastRPC.Call(context.Background(), utils.SessionSv1ProcessCDR, &args, &rply); err != nil {
 		t.Fatal(err)
 	}
 	if rply != utils.OK {

@@ -467,7 +467,7 @@ func (ja *JanusAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam strin
 	return nil
 }
 
-func (ja *JanusAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (ja *JanusAgent) V1DisconnectSession(ctx *context.Context, cgrEv *utils.CGREvent, reply *string) (err error) {
 	sessionID, err := engine.NewMapEvent(cgrEv.Event).GetTInt64(utils.OriginID)
 	if err != nil {
 		return err
@@ -484,7 +484,7 @@ func (ja *JanusAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGRE
 	return nil
 }
 
-func (ja *JanusAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+func (ja *JanusAgent) V1AlterSession(*context.Context, *utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 

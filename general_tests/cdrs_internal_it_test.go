@@ -92,7 +92,7 @@ func testCdrsIntRpcConn(t *testing.T) {
 func testCdrsIntTestTTL(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{"*store:true"},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]any{
 				utils.OriginID:     "testCdrsIntTestTTL",

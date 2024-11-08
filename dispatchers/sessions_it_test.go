@@ -565,7 +565,7 @@ func testDspSessionProcessCDR(t *testing.T) {
 
 	var rply string
 	if err := dispEngine.RPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
-		args, &rply); err != nil {
+		&args, &rply); err != nil {
 		t.Fatal(err)
 	}
 	if rply != utils.OK {

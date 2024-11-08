@@ -140,7 +140,7 @@ func testCDRsPostFailoverProcessCDR(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaExport, "*attributes:false", "*rals:false", "*chargers:false",
 			"*store:false", "*thresholds:false", "*stats:false"}, // only export the CDR
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			ID:     "1",
 			Tenant: "cgrates.org",
 			Event: map[string]any{

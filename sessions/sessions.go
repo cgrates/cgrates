@@ -366,7 +366,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 			argsProc := &engine.ArgV1ProcessEvent{
 				Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
 					fmt.Sprintf("%s:false", utils.MetaAttributes)},
-				CGREvent: *cgrEv,
+				CGREvent: cgrEv,
 			}
 			if unratedReqs.HasField( // order additional rating for unrated request types
 				engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
@@ -451,7 +451,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 					APIOpts: apiOpts,
 					Event:   event,
 				}
-				dscErr = clnt.conn.Call(context.TODO(), servMethod, dscArgs, &rply)
+				dscErr = clnt.conn.Call(context.TODO(), servMethod, &dscArgs, &rply)
 			}
 			if dscErr != nil && dscErr != utils.ErrNotImplemented {
 				utils.Logger.Warning(fmt.Sprintf(
@@ -858,7 +858,7 @@ func (s *SessionS) disconnectSession(sess *Session, rsn string) (err error) {
 			Event: sess.EventStart,
 		}
 		dscArgs.Event[utils.DisconnectCause] = rsn
-		err = clnt.conn.Call(context.TODO(), servMethod, dscArgs, &rply)
+		err = clnt.conn.Call(context.TODO(), servMethod, &dscArgs, &rply)
 	}
 	if err != nil && err != utils.ErrNotImplemented {
 		return err
@@ -3360,7 +3360,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 					return utils.NewErrAttributeS(err)
 				}
 			} else {
-				*cgrEv = *rplyAttr.CGREvent
+				cgrEv = rplyAttr.CGREvent
 				rply.Attributes[runID] = &rplyAttr
 			}
 		}
@@ -3954,7 +3954,7 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREvent, flags []string, rply *stri
 	} else { // no cached session, CDR will be handled by CDRs
 		argsProc := &engine.ArgV1ProcessEvent{
 			Flags:    flags,
-			CGREvent: *cgrEv,
+			CGREvent: cgrEv,
 		}
 		argsProc.SetCloneable(clnb)
 		return sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().CDRsConns, utils.CDRsV1ProcessEvent,
@@ -3969,7 +3969,7 @@ func (sS *SessionS) processCDR(cgrEv *utils.CGREvent, flags []string, rply *stri
 		argsProc := &engine.ArgV1ProcessEvent{
 			Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
 				fmt.Sprintf("%s:false", utils.MetaAttributes)},
-			CGREvent: *cgrEv,
+			CGREvent: cgrEv,
 		}
 		argsProc.SetCloneable(clnb)
 		if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
@@ -4208,7 +4208,7 @@ func (sS *SessionS) alterSession(ctx *context.Context, s *Session, apiOpts map[s
 	}
 
 	var rply string
-	if err = clnt.conn.Call(ctx, utils.AgentV1AlterSession, args, &rply); err == utils.ErrNotImplemented {
+	if err = clnt.conn.Call(ctx, utils.AgentV1AlterSession, &args, &rply); err == utils.ErrNotImplemented {
 		err = nil
 	}
 	return

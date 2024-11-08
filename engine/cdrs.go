@@ -381,7 +381,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
 		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
-		*cgrEv = *rplyEv.CGREvent
+		cgrEv = rplyEv.CGREvent
 		if !has && utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]) == utils.MetaCDRs {
 			delete(cgrEv.APIOpts, utils.OptsContext)
 		}
@@ -894,7 +894,7 @@ func (cdrS *CDRServer) V1ProcessCDR(ctx *context.Context, cdr *CDRWithAPIOpts, r
 // ArgV1ProcessEvent is the CGREvent with proccesing Flags
 type ArgV1ProcessEvent struct {
 	Flags []string
-	utils.CGREvent
+	*utils.CGREvent
 	clnb bool //rpcclonable
 }
 
@@ -921,7 +921,7 @@ func (attr *ArgV1ProcessEvent) Clone() *ArgV1ProcessEvent {
 	}
 	return &ArgV1ProcessEvent{
 		Flags:    flags,
-		CGREvent: *attr.CGREvent.Clone(),
+		CGREvent: attr.CGREvent.Clone(),
 	}
 }
 
@@ -960,7 +960,7 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 		return fmt.Errorf("failed to configure processing args: %v", err)
 	}
 
-	if _, err = cdrS.processEvents([]*utils.CGREvent{&arg.CGREvent}, procArgs); err != nil {
+	if _, err = cdrS.processEvents([]*utils.CGREvent{arg.CGREvent}, procArgs); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1000,7 +1000,7 @@ func (cdrS *CDRServer) V2ProcessEvent(ctx *context.Context, arg *ArgV1ProcessEve
 	}
 
 	var procEvs []*utils.EventWithFlags
-	if procEvs, err = cdrS.processEvents([]*utils.CGREvent{&arg.CGREvent}, procArgs); err != nil {
+	if procEvs, err = cdrS.processEvents([]*utils.CGREvent{arg.CGREvent}, procArgs); err != nil {
 		return
 	}
 	*evs = procEvs

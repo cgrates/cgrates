@@ -110,7 +110,7 @@ cgrates.org,data,RPF_DATA,2022-01-14T00:00:00Z,RP_DATA,`,
 		if err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -239,7 +239,7 @@ cgrates.org,data,1001,2022-01-14T00:00:00Z,RP_DATA,`,
 		if err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{

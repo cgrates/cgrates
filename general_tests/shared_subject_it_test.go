@@ -132,7 +132,7 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -169,7 +169,7 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -206,7 +206,7 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{
@@ -246,7 +246,7 @@ cgrates.org,call,Subject2,2014-01-14T00:00:00Z,RP_Subject2,`,
 		err := client.Call(context.Background(), utils.CDRsV2ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags: []string{utils.MetaRALs},
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     "event1",
 					Event: map[string]any{

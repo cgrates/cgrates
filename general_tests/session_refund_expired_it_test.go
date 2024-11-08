@@ -269,7 +269,7 @@ func testSesExpItRerate(t *testing.T) {
 	if err := sesExpRPC.Call(context.Background(), utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
 			Flags:    []string{utils.MetaRerate},
-			CGREvent: *sesExpCgrEv,
+			CGREvent: sesExpCgrEv,
 		}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
