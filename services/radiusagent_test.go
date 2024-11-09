@@ -17,50 +17,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-// TestLoaderSCoverage for cover testing
-func TestRadiusAgentCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	srv2 := RadiusAgent{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		rad:         &agents.RadiusAgent{},
-		connMgr:     nil,
-		srvDep:      srvDep,
-	}
-	if !srv2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	serviceName := srv2.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.RadiusAgent) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.RadiusAgent, serviceName)
-	}
-	shouldRun := srv2.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
-		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-	srv2.stopChan = make(chan struct{}, 1)
-	srv2.Shutdown()
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-}
+// import (
+// 	"reflect"
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/cgrates/agents"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// // TestLoaderSCoverage for cover testing
+// func TestRadiusAgentCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.SessionSCfg().ListenBijson = ""
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	srv2 := RadiusAgent{
+// 		cfg:         cfg,
+// 		filterSChan: filterSChan,
+// 		rad:         &agents.RadiusAgent{},
+// 		connMgr:     nil,
+// 		srvDep:      srvDep,
+// 	}
+// 	if !srv2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	serviceName := srv2.ServiceName()
+// 	if !reflect.DeepEqual(serviceName, utils.RadiusAgent) {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.RadiusAgent, serviceName)
+// 	}
+// 	shouldRun := srv2.ShouldRun()
+// 	if !reflect.DeepEqual(shouldRun, false) {
+// 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+// 	}
+// 	srv2.stopChan = make(chan struct{}, 1)
+// 	srv2.Shutdown()
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// }

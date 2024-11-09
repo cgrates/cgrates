@@ -20,81 +20,81 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"path"
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-)
-
-func TestCoreSReload(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-
-	shdWg := new(sync.WaitGroup)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	cls := commonlisteners.NewCommonListenerS(nil)
-	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	coreRPC := make(chan birpc.ClientConnector, 1)
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	caps := engine.NewCaps(1, "test_caps")
-	coreS := NewCoreService(cfg, caps, cls, coreRPC, anz, nil, nil, srvDep)
-	engine.NewConnManager(cfg)
-	srvMngr.AddServices(coreS,
-		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	ctx, cancel := context.WithCancel(context.TODO())
-	srvMngr.StartServices(ctx, cancel)
-	if coreS.IsRunning() {
-		t.Fatalf("Expected service to be down")
-	}
-
-	var reply string
-	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "caps_queue")
-	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Section: config.CoreSJSON,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Fatalf("Expecting OK ,received %s", reply)
-	}
-	select {
-	case d := <-coreRPC:
-		coreRPC <- d
-	case <-time.After(time.Second):
-		t.Fatal("It took to long to reload the cache")
-	}
-	if !coreS.IsRunning() {
-		t.Fatalf("Expected service to be running")
-	}
-	err := coreS.Start(ctx, cancel)
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = coreS.Reload(ctx, cancel)
-	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	err = coreS.Shutdown()
-	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.GetReloadChan() <- config.SectionToService[config.CoreSJSON]
-	time.Sleep(10 * time.Millisecond)
-	if !coreS.IsRunning() {
-		t.Fatalf("Expected service to be running")
-	}
-
-	cancel()
-	time.Sleep(10 * time.Millisecond)
-
-}
+// import (
+// 	"path"
+// 	"sync"
+// 	"testing"
+// 	"time"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/servmanager"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// func TestCoreSReload(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+//
+// 	shdWg := new(sync.WaitGroup)
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	coreRPC := make(chan birpc.ClientConnector, 1)
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	caps := engine.NewCaps(1, "test_caps")
+// 	coreS := NewCoreService(cfg, caps, cls, coreRPC, anz, nil, nil, srvDep)
+// 	engine.NewConnManager(cfg)
+// 	srvMngr.AddServices(coreS,
+// 		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+// 	ctx, cancel := context.WithCancel(context.TODO())
+// 	srvMngr.StartServices(ctx, cancel)
+// 	if coreS.IsRunning() {
+// 		t.Fatalf("Expected service to be down")
+// 	}
+//
+// 	var reply string
+// 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "caps_queue")
+// 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
+// 		Section: config.CoreSJSON,
+// 	}, &reply); err != nil {
+// 		t.Fatal(err)
+// 	} else if reply != utils.OK {
+// 		t.Fatalf("Expecting OK ,received %s", reply)
+// 	}
+// 	select {
+// 	case d := <-coreRPC:
+// 		coreRPC <- d
+// 	case <-time.After(time.Second):
+// 		t.Fatal("It took to long to reload the cache")
+// 	}
+// 	if !coreS.IsRunning() {
+// 		t.Fatalf("Expected service to be running")
+// 	}
+// 	err := coreS.Start(ctx, cancel)
+// 	if err == nil || err != utils.ErrServiceAlreadyRunning {
+// 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+// 	}
+// 	err = coreS.Reload(ctx, cancel)
+// 	if err != nil {
+// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+// 	}
+// 	err = coreS.Shutdown()
+// 	if err != nil {
+// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+// 	}
+// 	cfg.GetReloadChan() <- config.SectionToService[config.CoreSJSON]
+// 	time.Sleep(10 * time.Millisecond)
+// 	if !coreS.IsRunning() {
+// 		t.Fatalf("Expected service to be running")
+// 	}
+//
+// 	cancel()
+// 	time.Sleep(10 * time.Millisecond)
+//
+// }

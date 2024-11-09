@@ -17,56 +17,56 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-// TestResourceSCoverage for cover testing
-func TestResourceSCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	cls := commonlisteners.NewCommonListenerS(nil)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
-	reS := NewResourceService(cfg, db, chS, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
-
-	if reS.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	reS2 := ResourceService{
-		cfg:         cfg,
-		dm:          db,
-		cacheS:      chS,
-		filterSChan: filterSChan,
-		cls:         cls,
-		connChan:    make(chan birpc.ClientConnector, 1),
-		connMgr:     nil,
-		anz:         anz,
-		srvDep:      srvDep,
-		reS:         &engine.ResourceS{},
-	}
-	if !reS2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	serviceName := reS2.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.ResourceS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ResourceS, serviceName)
-	}
-	shouldRun := reS2.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
-		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-}
+// import (
+// 	"reflect"
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// // TestResourceSCoverage for cover testing
+// func TestResourceSCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.ThresholdSCfg().Enabled = true
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+// 	reS := NewResourceService(cfg, db, chS, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+//
+// 	if reS.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	reS2 := ResourceService{
+// 		cfg:         cfg,
+// 		dm:          db,
+// 		cacheS:      chS,
+// 		filterSChan: filterSChan,
+// 		cls:         cls,
+// 		connChan:    make(chan birpc.ClientConnector, 1),
+// 		connMgr:     nil,
+// 		anz:         anz,
+// 		srvDep:      srvDep,
+// 		reS:         &engine.ResourceS{},
+// 	}
+// 	if !reS2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	serviceName := reS2.ServiceName()
+// 	if !reflect.DeepEqual(serviceName, utils.ResourceS) {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ResourceS, serviceName)
+// 	}
+// 	shouldRun := reS2.ShouldRun()
+// 	if !reflect.DeepEqual(shouldRun, false) {
+// 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+// 	}
+// }

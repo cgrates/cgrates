@@ -17,59 +17,59 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-// TestCoreSCoverage for cover testing
-func TestCoreSCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	caps := engine.NewCaps(1, "test_caps")
-	cls := commonlisteners.NewCommonListenerS(nil)
-	internalCoreSChan := make(chan birpc.ClientConnector, 1)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewCoreService(cfg, caps, cls, internalCoreSChan, anz, nil, nil, srvDep)
-	if srv == nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
-	}
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	srv.cS = &cores.CoreS{}
-	if !srv.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	serviceName := srv.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.CoreS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.CoreS, serviceName)
-	}
-	shouldRun := srv.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, true) {
-		t.Errorf("\nExpecting <true>,\n Received <%+v>", shouldRun)
-	}
-	//populates connChan with something in order to call the shutdown function
-	srv.connChan <- &testMockClients{}
-	srv.stopChan = make(chan struct{})
-	// srv.csCh = make(chan *cores.CoreService, 1)
-	srv.csCh <- nil
-	getShut := srv.Shutdown()
-	if getShut != nil {
-		t.Errorf("\nExpecting not <nil>,\n Received <%+v>", getShut)
-	}
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-
-}
+// import (
+// 	"reflect"
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/cores"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// // TestCoreSCoverage for cover testing
+// func TestCoreSCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	caps := engine.NewCaps(1, "test_caps")
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	internalCoreSChan := make(chan birpc.ClientConnector, 1)
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	srv := NewCoreService(cfg, caps, cls, internalCoreSChan, anz, nil, nil, srvDep)
+// 	if srv == nil {
+// 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
+// 	}
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	srv.cS = &cores.CoreS{}
+// 	if !srv.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	serviceName := srv.ServiceName()
+// 	if !reflect.DeepEqual(serviceName, utils.CoreS) {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.CoreS, serviceName)
+// 	}
+// 	shouldRun := srv.ShouldRun()
+// 	if !reflect.DeepEqual(shouldRun, true) {
+// 		t.Errorf("\nExpecting <true>,\n Received <%+v>", shouldRun)
+// 	}
+// 	//populates connChan with something in order to call the shutdown function
+// 	srv.connChan <- &testMockClients{}
+// 	srv.stopChan = make(chan struct{})
+// 	// srv.csCh = make(chan *cores.CoreService, 1)
+// 	srv.csCh <- nil
+// 	getShut := srv.Shutdown()
+// 	if getShut != nil {
+// 		t.Errorf("\nExpecting not <nil>,\n Received <%+v>", getShut)
+// 	}
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+//
+// }

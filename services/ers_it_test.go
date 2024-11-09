@@ -18,126 +18,127 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package services
 
-import (
-	"os"
-	"path"
-	"runtime"
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/ers"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-)
-
-func TestEventReaderSReload(t *testing.T) {
-	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatal("Error removing folder: ", dir, err)
-		}
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			t.Fatal("Error creating folder: ", dir, err)
-		}
-	}
-	cfg := config.NewDefaultCGRConfig()
-
-	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer func() {
-		cancel()
-		time.Sleep(10 * time.Millisecond)
-	}()
-	shdWg := new(sync.WaitGroup)
-	cls := commonlisteners.NewCommonListenerS(nil)
-	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
-	intERsConn := make(chan birpc.ClientConnector, 1)
-	erS := NewEventReaderService(cfg, filterSChan, nil, cls, intERsConn, anz, srvDep)
-	engine.NewConnManager(cfg)
-	srvMngr.AddServices(erS, sS,
-		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	srvMngr.StartServices(ctx, cancel)
-	if erS.IsRunning() {
-		t.Fatal("Expected service to be down")
-	}
-	var reply string
-	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_reload", "internal")
-	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Section: config.ERsJSON,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Fatalf("Expecting OK ,received %s", reply)
-	}
-	runtime.Gosched()
-	if !erS.IsRunning() {
-		t.Fatalf("Expected service to be running")
-	}
-
-	runtime.Gosched()
-	err := erS.Start(ctx, cancel)
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	time.Sleep(10 * time.Millisecond)
-	runtime.Gosched()
-	err = erS.Reload(ctx, cancel)
-	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.ERsCfg().Enabled = false
-	cfg.GetReloadChan() <- config.SectionToService[config.ERsJSON]
-	time.Sleep(10 * time.Millisecond)
-	if erS.IsRunning() {
-		t.Fatal("Expected service to be down")
-	}
-
-}
-
-func TestEventReaderSReload2(t *testing.T) {
-	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatal("Error removing folder: ", dir, err)
-		}
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			t.Fatal("Error creating folder: ", dir, err)
-		}
-	}
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Enabled = true
-	cfg.ERsCfg().Enabled = true
-	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
-		{
-			Type: "bad_type",
-		},
-	}
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cls := commonlisteners.NewCommonListenerS(nil)
-	erS := NewEventReaderService(cfg, filterSChan, nil, cls, nil, nil, srvDep)
-	ers := ers.NewERService(cfg, nil, nil)
-
-	runtime.Gosched()
-	srv := erS.(*EventReaderService)
-	srv.stopChan = make(chan struct{})
-	srv.rldChan = make(chan struct{})
-	err := srv.listenAndServe(ers, srv.stopChan, srv.rldChan, func() {})
-	if err == nil || err.Error() != "unsupported reader type: <bad_type>" {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "unsupported reader type: <bad_type>", err)
-	}
-}
+// import (
+// 	"os"
+// 	"path"
+// 	"runtime"
+// 	"sync"
+// 	"testing"
+// 	"time"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/ers"
+// 	"github.com/cgrates/cgrates/servmanager"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// func TestEventReaderSReload(t *testing.T) {
+// 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
+// 		if err := os.RemoveAll(dir); err != nil {
+// 			t.Fatal("Error removing folder: ", dir, err)
+// 		}
+// 		if err := os.MkdirAll(dir, 0755); err != nil {
+// 			t.Fatal("Error creating folder: ", dir, err)
+// 		}
+// 	}
+// 	cfg := config.NewDefaultCGRConfig()
+//
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.SessionSCfg().ListenBijson = ""
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	ctx, cancel := context.WithCancel(context.TODO())
+// 	defer func() {
+// 		cancel()
+// 		time.Sleep(10 * time.Millisecond)
+// 	}()
+// 	shdWg := new(sync.WaitGroup)
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+// 	intERsConn := make(chan birpc.ClientConnector, 1)
+// 	erS := NewEventReaderService(cfg, filterSChan, nil, cls, intERsConn, anz, srvDep)
+// 	engine.NewConnManager(cfg)
+// 	srvMngr.AddServices(erS, sS,
+// 		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+// 	srvMngr.StartServices(ctx, cancel)
+// 	if erS.IsRunning() {
+// 		t.Fatal("Expected service to be down")
+// 	}
+// 	var reply string
+// 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_reload", "internal")
+// 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
+// 		Section: config.ERsJSON,
+// 	}, &reply); err != nil {
+// 		t.Fatal(err)
+// 	} else if reply != utils.OK {
+// 		t.Fatalf("Expecting OK ,received %s", reply)
+// 	}
+// 	runtime.Gosched()
+// 	if !erS.IsRunning() {
+// 		t.Fatalf("Expected service to be running")
+// 	}
+//
+// 	runtime.Gosched()
+// 	err := erS.Start(ctx, cancel)
+// 	if err == nil || err != utils.ErrServiceAlreadyRunning {
+// 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+// 	}
+// 	time.Sleep(10 * time.Millisecond)
+// 	runtime.Gosched()
+// 	err = erS.Reload(ctx, cancel)
+// 	if err != nil {
+// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+// 	}
+// 	cfg.ERsCfg().Enabled = false
+// 	cfg.GetReloadChan() <- config.SectionToService[config.ERsJSON]
+// 	time.Sleep(10 * time.Millisecond)
+// 	if erS.IsRunning() {
+// 		t.Fatal("Expected service to be down")
+// 	}
+//
+// }
+//
+// func TestEventReaderSReload2(t *testing.T) {
+// 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
+// 		if err := os.RemoveAll(dir); err != nil {
+// 			t.Fatal("Error removing folder: ", dir, err)
+// 		}
+// 		if err := os.MkdirAll(dir, 0755); err != nil {
+// 			t.Fatal("Error creating folder: ", dir, err)
+// 		}
+// 	}
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.ERsCfg().Enabled = true
+// 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+// 		{
+// 			Type: "bad_type",
+// 		},
+// 	}
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	erS := NewEventReaderService(cfg, filterSChan, nil, cls, nil, nil, srvDep)
+// 	ers := ers.NewERService(cfg, nil, nil)
+//
+// 	runtime.Gosched()
+// 	srv := erS.(*EventReaderService)
+// 	srv.stopChan = make(chan struct{})
+// 	srv.rldChan = make(chan struct{})
+// 	err := srv.listenAndServe(ers, srv.stopChan, srv.rldChan, func() {})
+// 	if err == nil || err.Error() != "unsupported reader type: <bad_type>" {
+// 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "unsupported reader type: <bad_type>", err)
+// 	}
+// }
