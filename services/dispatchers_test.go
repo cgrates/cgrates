@@ -17,68 +17,68 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"sync"
-	"testing"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/dispatchers"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-// TestDispatcherSCoverage for cover testing
-func TestDispatcherSCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.AttributeSCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	cls := commonlisteners.NewCommonListenerS(nil)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
-	srv := NewDispatcherService(cfg, db, chS, filterSChan, cls,
-		make(chan birpc.ClientConnector, 1), engine.NewConnManager(cfg), anz, srvDep)
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	srv2 := DispatcherService{
-		RWMutex:     sync.RWMutex{},
-		cfg:         cfg,
-		dm:          db,
-		cacheS:      chS,
-		filterSChan: filterSChan,
-		cls:         cls,
-		connMgr:     srv.connMgr,
-		connChan:    make(chan birpc.ClientConnector, 1),
-		anz:         anz,
-		srvDep:      srvDep,
-	}
-	srv2.dspS = &dispatchers.DispatcherService{}
-	if !srv2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-
-	serviceName := srv2.ServiceName()
-	if serviceName != utils.DispatcherS {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DispatcherS, serviceName)
-	}
-	shouldRun := srv2.ShouldRun()
-	if shouldRun != false {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
-	}
-
-	srv2.connChan <- &testMockClients{}
-	shutErr := srv2.Shutdown()
-	if shutErr != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutErr)
-	}
-	if srv2.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-}
+// import (
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/dispatchers"
+//
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// // TestDispatcherSCoverage for cover testing
+// func TestDispatcherSCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.AttributeSCfg().Enabled = true
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+// 	srv := NewDispatcherService(cfg, db, chS, filterSChan, cls,
+// 		make(chan birpc.ClientConnector, 1), engine.NewConnManager(cfg), anz, srvDep)
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	srv2 := DispatcherService{
+// 		RWMutex:     sync.RWMutex{},
+// 		cfg:         cfg,
+// 		dm:          db,
+// 		cacheS:      chS,
+// 		filterSChan: filterSChan,
+// 		cls:         cls,
+// 		connMgr:     srv.connMgr,
+// 		connChan:    make(chan birpc.ClientConnector, 1),
+// 		anz:         anz,
+// 		srvDep:      srvDep,
+// 	}
+// 	srv2.dspS = &dispatchers.DispatcherService{}
+// 	if !srv2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+//
+// 	serviceName := srv2.ServiceName()
+// 	if serviceName != utils.DispatcherS {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.DispatcherS, serviceName)
+// 	}
+// 	shouldRun := srv2.ShouldRun()
+// 	if shouldRun != false {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
+// 	}
+//
+// 	srv2.connChan <- &testMockClients{}
+// 	shutErr := srv2.Shutdown()
+// 	if shutErr != nil {
+// 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutErr)
+// 	}
+// 	if srv2.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// }

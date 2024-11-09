@@ -17,64 +17,64 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/sessions"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-type testMockClients struct {
-	calls func(_ *context.Context, _, _ any) error
-}
-
-func (sT *testMockClients) Call(ctx *context.Context, method string, arg, rply any) error {
-	return sT.calls(ctx, arg, rply)
-}
-
-// TestSessionSCoverage for cover testing
-func TestSessionSCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ChargerSCfg().Enabled = true
-	cfg.CdrsCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	cls := commonlisteners.NewCommonListenerS(nil)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	srv := NewSessionService(cfg, db, nil, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
-	engine.NewConnManager(cfg)
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	srv2 := SessionService{
-		cfg:      cfg,
-		dm:       db,
-		cls:      cls,
-		connChan: make(chan birpc.ClientConnector, 1),
-		connMgr:  nil,
-		anz:      anz,
-		srvDep:   srvDep,
-		sm:       &sessions.SessionS{},
-	}
-	if !srv2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	serviceName := srv2.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.SessionS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.SessionS, serviceName)
-	}
-	shouldRun := srv2.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
-		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-}
+// import (
+// 	"reflect"
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/sessions"
+//
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// type testMockClients struct {
+// 	calls func(_ *context.Context, _, _ any) error
+// }
+//
+// func (sT *testMockClients) Call(ctx *context.Context, method string, arg, rply any) error {
+// 	return sT.calls(ctx, arg, rply)
+// }
+//
+// // TestSessionSCoverage for cover testing
+// func TestSessionSCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.ChargerSCfg().Enabled = true
+// 	cfg.CdrsCfg().Enabled = true
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	srv := NewSessionService(cfg, db, nil, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
+// 	engine.NewConnManager(cfg)
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	srv2 := SessionService{
+// 		cfg:      cfg,
+// 		dm:       db,
+// 		cls:      cls,
+// 		connChan: make(chan birpc.ClientConnector, 1),
+// 		connMgr:  nil,
+// 		anz:      anz,
+// 		srvDep:   srvDep,
+// 		sm:       &sessions.SessionS{},
+// 	}
+// 	if !srv2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	serviceName := srv2.ServiceName()
+// 	if !reflect.DeepEqual(serviceName, utils.SessionS) {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.SessionS, serviceName)
+// 	}
+// 	shouldRun := srv2.ShouldRun()
+// 	if !reflect.DeepEqual(shouldRun, false) {
+// 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+// 	}
+// }

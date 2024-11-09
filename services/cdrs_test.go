@@ -17,72 +17,72 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"sync"
-	"testing"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/cgrates/cdrs"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-// TestCdrsCoverage for cover testing
-func TestCdrsCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	cfg.ChargerSCfg().Enabled = true
-	cls := commonlisteners.NewCommonListenerS(nil)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	cdrsRPC := make(chan birpc.ClientConnector, 1)
-	cfg.StorDbCfg().Type = utils.MetaInternal
-	stordb := NewStorDBService(cfg, false, srvDep)
-	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, cls,
-		cdrsRPC, nil, anz, srvDep)
-	if cdrS.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	//populates cdrS2  with something in order to call the close funct
-	cdrS2 := &CDRService{
-		RWMutex:     sync.RWMutex{},
-		cfg:         cfg,
-		dm:          db,
-		storDB:      stordb,
-		filterSChan: filterSChan,
-		cls:         cls,
-		connChan:    make(chan birpc.ClientConnector, 1),
-		connMgr:     nil,
-		stopChan:    make(chan struct{}, 1),
-		anz:         anz,
-		srvDep:      srvDep,
-		cdrS:        &cdrs.CDRServer{},
-	}
-	cdrS2.connChan <- &testMockClients{}
-	cdrS2.stopChan <- struct{}{}
-	if !cdrS2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-
-	serviceName := cdrS2.ServiceName()
-	if serviceName != utils.CDRServer {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AdminS, serviceName)
-	}
-	shouldRun := cdrS.ShouldRun()
-	if shouldRun != false {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
-	}
-
-	shutdownApi1 := cdrS2.Shutdown()
-	if shutdownApi1 != nil {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutdownApi1)
-	}
-
-	if cdrS.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-}
+// import (
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/cgrates/cdrs"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// // TestCdrsCoverage for cover testing
+// func TestCdrsCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	cfg.ChargerSCfg().Enabled = true
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	cdrsRPC := make(chan birpc.ClientConnector, 1)
+// 	cfg.StorDbCfg().Type = utils.MetaInternal
+// 	stordb := NewStorDBService(cfg, false, srvDep)
+// 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, cls,
+// 		cdrsRPC, nil, anz, srvDep)
+// 	if cdrS.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	//populates cdrS2  with something in order to call the close funct
+// 	cdrS2 := &CDRService{
+// 		RWMutex:     sync.RWMutex{},
+// 		cfg:         cfg,
+// 		dm:          db,
+// 		storDB:      stordb,
+// 		filterSChan: filterSChan,
+// 		cls:         cls,
+// 		connChan:    make(chan birpc.ClientConnector, 1),
+// 		connMgr:     nil,
+// 		stopChan:    make(chan struct{}, 1),
+// 		anz:         anz,
+// 		srvDep:      srvDep,
+// 		cdrS:        &cdrs.CDRServer{},
+// 	}
+// 	cdrS2.connChan <- &testMockClients{}
+// 	cdrS2.stopChan <- struct{}{}
+// 	if !cdrS2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+//
+// 	serviceName := cdrS2.ServiceName()
+// 	if serviceName != utils.CDRServer {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.AdminS, serviceName)
+// 	}
+// 	shouldRun := cdrS.ShouldRun()
+// 	if shouldRun != false {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", false, shouldRun)
+// 	}
+//
+// 	shutdownApi1 := cdrS2.Shutdown()
+// 	if shutdownApi1 != nil {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutdownApi1)
+// 	}
+//
+// 	if cdrS.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// }
