@@ -106,7 +106,7 @@ func (kam *KamailioAgent) Shutdown() (err error) {
 func (kam *KamailioAgent) IsRunning() bool {
 	kam.RLock()
 	defer kam.RUnlock()
-	return kam != nil && kam.kam != nil
+	return kam.kam != nil
 }
 
 // ServiceName returns the service name

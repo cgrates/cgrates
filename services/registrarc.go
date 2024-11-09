@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
@@ -31,12 +30,10 @@ import (
 )
 
 // NewRegistrarCService returns the Dispatcher Service
-func NewRegistrarCService(cfg *config.CGRConfig, server *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RegistrarCService{
 		cfg:     cfg,
-		server:  server,
 		connMgr: connMgr,
 		anz:     anz,
 		srvDep:  srvDep,
@@ -46,15 +43,16 @@ func NewRegistrarCService(cfg *config.CGRConfig, server *commonlisteners.CommonL
 // RegistrarCService implements Service interface
 type RegistrarCService struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	server   *commonlisteners.CommonListenerS
-	connMgr  *engine.ConnManager
+
+	anz *AnalyzerService
+
+	dspS *registrarc.RegistrarCService
+
 	stopChan chan struct{}
 	rldChan  chan struct{}
-
-	dspS   *registrarc.RegistrarCService
-	anz    *AnalyzerService
-	srvDep map[string]*sync.WaitGroup
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -94,7 +92,7 @@ func (dspS *RegistrarCService) Shutdown() (err error) {
 func (dspS *RegistrarCService) IsRunning() bool {
 	dspS.RLock()
 	defer dspS.RUnlock()
-	return dspS != nil && dspS.dspS != nil
+	return dspS.dspS != nil
 }
 
 // ServiceName returns the service name

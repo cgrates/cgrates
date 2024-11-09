@@ -34,7 +34,7 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalResourceSChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalResourceSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ResourceService{
@@ -43,7 +43,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -53,16 +53,19 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 // ResourceService implements Service interface
 type ResourceService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
+	anz         *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
 
-	reS      *engine.ResourceS
+	reS *engine.ResourceS
+	cl  *commonlisteners.CommonListenerS
+
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
-	anz      *AnalyzerService
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -73,6 +76,9 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 
 	reS.srvDep[utils.DataDB].Add(1)
+	if reS.cl, err = reS.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = reS.cacheS.WaitToPrecache(ctx,
 		utils.CacheResourceProfiles,
 		utils.CacheResources,
@@ -100,7 +106,7 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
 	if !reS.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			reS.server.RpcRegister(s)
+			reS.cl.RpcRegister(s)
 		}
 	}
 	reS.connChan <- reS.anz.GetInternalCodec(srv, utils.ResourceS)
@@ -123,7 +129,7 @@ func (reS *ResourceService) Shutdown() (err error) {
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
 	<-reS.connChan
-	reS.server.RpcUnregisterName(utils.ResourceSv1)
+	reS.cl.RpcUnregisterName(utils.ResourceSv1)
 	return
 }
 
@@ -131,7 +137,7 @@ func (reS *ResourceService) Shutdown() (err error) {
 func (reS *ResourceService) IsRunning() bool {
 	reS.RLock()
 	defer reS.RUnlock()
-	return reS != nil && reS.reS != nil
+	return reS.reS != nil
 }
 
 // ServiceName returns the service name

@@ -32,7 +32,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -184,41 +183,45 @@ func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS
 	}
 }
 
-func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGRConfig,
-	server *commonlisteners.CommonListenerS, anz *AnalyzerService) {
+func cgrInitGuardianSv1(ctx *context.Context, iGuardianSCh chan birpc.ClientConnector, cfg *config.CGRConfig,
+	cls *CommonListenerService, anz *AnalyzerService) {
+	cl, _ := cls.WaitForCLS(ctx)
 	srv, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
 	if !cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			server.RpcRegister(s)
+			cl.RpcRegister(s)
 		}
 	}
 	iGuardianSCh <- anz.GetInternalCodec(srv, utils.GuardianS)
 }
 
-func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
+func cgrInitServiceManagerV1(ctx *context.Context, iServMngrCh chan birpc.ClientConnector,
 	srvMngr *servmanager.ServiceManager, cfg *config.CGRConfig,
-	server *commonlisteners.CommonListenerS, anz *AnalyzerService) {
+	cls *CommonListenerService, anz *AnalyzerService) {
+	cl, _ := cls.WaitForCLS(ctx)
 	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
 	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(srv)
+		cl.RpcRegister(srv)
 	}
 	iServMngrCh <- anz.GetInternalCodec(srv, utils.ServiceManager)
 }
 
-func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
-	cfg *config.CGRConfig, server *commonlisteners.CommonListenerS, anz *AnalyzerService) {
+func cgrInitConfigSv1(ctx *context.Context, iConfigCh chan birpc.ClientConnector,
+	cfg *config.CGRConfig, cls *CommonListenerService, anz *AnalyzerService) {
+	cl, _ := cls.WaitForCLS(ctx)
 	srv, _ := engine.NewServiceWithName(cfg, utils.ConfigS, true)
 	// srv, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
 	if !cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			server.RpcRegister(s)
+			cl.RpcRegister(s)
 		}
 	}
 	iConfigCh <- anz.GetInternalCodec(srv, utils.ConfigSv1)
 }
 
 func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
-	cfg *config.CGRConfig, server *commonlisteners.CommonListenerS, internalDispatcherSChan chan birpc.ClientConnector) {
+	cfg *config.CGRConfig, cls *CommonListenerService, internalDispatcherSChan chan birpc.ClientConnector) {
+	cl, _ := cls.WaitForCLS(ctx)
 	if cfg.DispatcherSCfg().Enabled { // wait only for dispatcher as cache is allways registered before this
 		select {
 		case dispatcherS := <-internalDispatcherSChan:
@@ -227,7 +230,7 @@ func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
 			return
 		}
 	}
-	server.StartServer(ctx, shtdwnEngine, cfg)
+	cl.StartServer(ctx, shtdwnEngine, cfg)
 }
 
 func waitForFilterS(ctx *context.Context, fsCh chan *engine.FilterS) (filterS *engine.FilterS, err error) {

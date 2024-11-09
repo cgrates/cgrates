@@ -57,8 +57,8 @@ func TestNewTrendService(t *testing.T) {
 		t.Errorf("Expected cacheS to be %v, but got %v", cacheS, trendService.cacheS)
 	}
 
-	if trendService.server != server {
-		t.Errorf("Expected server to be %v, but got %v", server, trendService.server)
+	if trendService.cls != server {
+		t.Errorf("Expected server to be %v, but got %v", server, trendService.cls)
 	}
 	if trendService.connChan != internalTrendSChan {
 		t.Errorf("Expected connChan to be %v, but got %v", internalTrendSChan, trendService.connChan)

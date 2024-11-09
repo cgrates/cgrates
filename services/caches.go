@@ -32,7 +32,7 @@ import (
 
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
-	server *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
 	srvDep map[string]*sync.WaitGroup) *CacheService {
@@ -41,7 +41,7 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 		srvDep:  srvDep,
 		anz:     anz,
 		cores:   cores,
-		server:  server,
+		cls:     cls,
 		dm:      dm,
 		connMgr: connMgr,
 		rpc:     internalChan,
@@ -51,20 +51,26 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 
 // CacheService implements Agent interface
 type CacheService struct {
-	cfg     *config.CGRConfig
-	anz     *AnalyzerService
-	cores   *CoreService
-	server  *commonlisteners.CommonListenerS
-	dm      *DataDBService
-	connMgr *engine.ConnManager
-	rpc     chan birpc.ClientConnector
-	srvDep  map[string]*sync.WaitGroup
+	anz   *AnalyzerService
+	cores *CoreService
+	cls   *CommonListenerService
+	dm    *DataDBService
+
+	cl *commonlisteners.CommonListenerS
 
 	cacheCh chan *engine.CacheS
+	rpc     chan birpc.ClientConnector
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
 func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
+
+	if cS.cl, err = cS.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	var dm *engine.DataManager
 	if dm, err = cS.dm.WaitForDM(ctx); err != nil {
 		return
@@ -85,7 +91,7 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 	// srv, _ := birpc.NewService(apis.NewCacheSv1(engine.Cache), "", false)
 	if !cS.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			cS.server.RpcRegister(s)
+			cS.cl.RpcRegister(s)
 		}
 	}
 	cS.rpc <- cS.anz.GetInternalCodec(srv, utils.CacheS)
@@ -99,7 +105,7 @@ func (cS *CacheService) Reload(*context.Context, context.CancelFunc) (_ error) {
 
 // Shutdown stops the service
 func (cS *CacheService) Shutdown() (_ error) {
-	cS.server.RpcUnregisterName(utils.CacheSv1)
+	cS.cl.RpcUnregisterName(utils.CacheSv1)
 	return
 }
 

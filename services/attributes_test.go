@@ -51,7 +51,7 @@ func TestAttributeSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		anz:         anz,
 		srvDep:      srvDep,
 		dspS:        &DispatcherService{srvsReload: map[string]chan struct{}{}},

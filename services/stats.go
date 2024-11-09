@@ -34,7 +34,7 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalStatSChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalStatSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &StatService{
@@ -43,7 +43,7 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -53,16 +53,19 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 // StatService implements Service interface
 type StatService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
+	anz         *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	connMgr     *engine.ConnManager
 
-	sts      *engine.StatS
+	sts *engine.StatS
+	cl  *commonlisteners.CommonListenerS
+
 	connChan chan birpc.ClientConnector
-	anz      *AnalyzerService
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -73,6 +76,9 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	}
 
 	sts.srvDep[utils.DataDB].Add(1)
+	if sts.cl, err = sts.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = sts.cacheS.WaitToPrecache(ctx,
 		utils.CacheStatQueueProfiles,
 		utils.CacheStatQueues,
@@ -102,7 +108,7 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
 	if !sts.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			sts.server.RpcRegister(s)
+			sts.cl.RpcRegister(s)
 		}
 	}
 	sts.connChan <- sts.anz.GetInternalCodec(srv, utils.StatS)
@@ -125,7 +131,7 @@ func (sts *StatService) Shutdown() (err error) {
 	sts.sts.Shutdown(context.TODO())
 	sts.sts = nil
 	<-sts.connChan
-	sts.server.RpcUnregisterName(utils.StatSv1)
+	sts.cl.RpcUnregisterName(utils.StatSv1)
 	return
 }
 
@@ -133,7 +139,7 @@ func (sts *StatService) Shutdown() (err error) {
 func (sts *StatService) IsRunning() bool {
 	sts.RLock()
 	defer sts.RUnlock()
-	return sts != nil && sts.sts != nil
+	return sts.sts != nil
 }
 
 // ServiceName returns the service name

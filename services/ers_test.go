@@ -52,7 +52,7 @@ func TestEventReaderSCoverage(t *testing.T) {
 		rldChan:     make(chan struct{}, 1),
 		stopChan:    make(chan struct{}, 1),
 		connMgr:     nil,
-		server:      cls,
+		cls:         cls,
 		srvDep:      srvDep,
 	}
 	if !srv2.IsRunning() {

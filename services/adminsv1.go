@@ -34,7 +34,7 @@ import (
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig,
 	dm *DataDBService, storDB *StorDBService,
-	filterSChan chan *engine.FilterS, server *commonlisteners.CommonListenerS,
+	filterSChan chan *engine.FilterS, cls *CommonListenerService,
 	internalAPIerSv1Chan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -44,30 +44,31 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 		dm:          dm,
 		storDB:      storDB,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
 	}
 }
 
-// APIerSv1Service implements Service interface
+// AdminSv1Service implements Service interface
 type AdminSv1Service struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
 	storDB      *StorDBService
+	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	connMgr     *engine.ConnManager
 
-	api      *apis.AdminSv1
-	connChan chan birpc.ClientConnector
+	api *apis.AdminSv1
+	cl  *commonlisteners.CommonListenerS
 
 	stopChan chan struct{}
-
-	anz    *AnalyzerService
-	srvDep map[string]*sync.WaitGroup
+	connChan chan birpc.ClientConnector
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -77,6 +78,9 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if apiService.cl, err = apiService.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, apiService.filterSChan); err != nil {
 		return
@@ -105,11 +109,11 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 
 	if !apiService.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			apiService.server.RpcRegister(s)
+			apiService.cl.RpcRegister(s)
 		}
 		rpl, _ := engine.NewService(apis.NewReplicatorSv1(datadb, apiService.api))
 		for _, s := range rpl {
-			apiService.server.RpcRegister(s)
+			apiService.cl.RpcRegister(s)
 		}
 	}
 
@@ -130,7 +134,7 @@ func (apiService *AdminSv1Service) Shutdown() (err error) {
 	// close(apiService.stopChan)
 	apiService.api = nil
 	<-apiService.connChan
-	apiService.server.RpcUnregisterName(utils.AdminSv1)
+	apiService.cl.RpcUnregisterName(utils.AdminSv1)
 	apiService.Unlock()
 	return
 }

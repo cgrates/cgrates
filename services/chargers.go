@@ -34,7 +34,7 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS, server *commonlisteners.CommonListenerS,
+	cacheS *CacheService, filterSChan chan *engine.FilterS, cls *CommonListenerService,
 	internalChargerSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ChargerService{
@@ -43,7 +43,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -53,16 +53,19 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 // ChargerService implements Service interface
 type ChargerService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
 	cacheS      *CacheService
+	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	connMgr     *engine.ConnManager
 
-	chrS     *engine.ChargerS
+	chrS *engine.ChargerS
+	cl   *commonlisteners.CommonListenerS
+
 	connChan chan birpc.ClientConnector
-	anz      *AnalyzerService
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -72,6 +75,9 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if chrS.cl, err = chrS.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = chrS.cacheS.WaitToPrecache(ctx,
 		utils.CacheChargerProfiles,
 		utils.CacheChargerFilterIndexes); err != nil {
@@ -97,7 +103,7 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
 	if !chrS.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			chrS.server.RpcRegister(s)
+			chrS.cl.RpcRegister(s)
 		}
 	}
 	chrS.connChan <- chrS.anz.GetInternalCodec(srv, utils.ChargerS)
@@ -116,7 +122,7 @@ func (chrS *ChargerService) Shutdown() (err error) {
 	chrS.chrS.Shutdown()
 	chrS.chrS = nil
 	<-chrS.connChan
-	chrS.server.RpcUnregisterName(utils.ChargerSv1)
+	chrS.cl.RpcUnregisterName(utils.ChargerSv1)
 	return
 }
 
@@ -124,7 +130,7 @@ func (chrS *ChargerService) Shutdown() (err error) {
 func (chrS *ChargerService) IsRunning() bool {
 	chrS.RLock()
 	defer chrS.RUnlock()
-	return chrS != nil && chrS.chrS != nil
+	return chrS.chrS != nil
 }
 
 // ServiceName returns the service name

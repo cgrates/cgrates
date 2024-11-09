@@ -33,7 +33,7 @@ import (
 )
 
 // NewCoreService returns the Core Service
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *commonlisteners.CommonListenerS,
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, cls *CommonListenerService,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
 	srvDep map[string]*sync.WaitGroup) *CoreService {
@@ -43,7 +43,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *commonlist
 		cfg:      cfg,
 		caps:     caps,
 		fileCPU:  fileCPU,
-		server:   server,
+		cls:      cls,
 		anz:      anz,
 		srvDep:   srvDep,
 		csCh:     make(chan *cores.CoreS, 1),
@@ -52,18 +52,22 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, server *commonlist
 
 // CoreService implements Service interface
 type CoreService struct {
-	mu       sync.RWMutex
-	cfg      *config.CGRConfig
-	server   *commonlisteners.CommonListenerS
+	mu sync.RWMutex
+
+	anz *AnalyzerService
+	cls *CommonListenerService
+
+	cS *cores.CoreS
+	cl *commonlisteners.CommonListenerS
+
+	fileCPU  *os.File
 	caps     *engine.Caps
+	csCh     chan *cores.CoreS
 	stopChan chan struct{}
 	shdWg    *sync.WaitGroup
-	fileCPU  *os.File
-	cS       *cores.CoreS
 	connChan chan birpc.ClientConnector
-	anz      *AnalyzerService
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
-	csCh     chan *cores.CoreS
 }
 
 // Start should handle the service start
@@ -72,6 +76,11 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	var err error
+	cS.cl, err = cS.cls.WaitForCLS(ctx)
+	if err != nil {
+		return err
+	}
 	if err := cS.anz.WaitForAnalyzerS(ctx); err != nil {
 		return err
 	}
@@ -88,7 +97,7 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 	}
 	if !cS.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			cS.server.RpcRegister(s)
+			cS.cl.RpcRegister(s)
 		}
 	}
 	cS.connChan <- cS.anz.GetInternalCodec(srv, utils.CoreS)
@@ -111,7 +120,7 @@ func (cS *CoreService) Shutdown() error {
 	cS.cS = nil
 	<-cS.connChan
 	<-cS.csCh
-	cS.server.RpcUnregisterName(utils.CoreSv1)
+	cS.cl.RpcUnregisterName(utils.CoreSv1)
 	return nil
 }
 

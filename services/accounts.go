@@ -37,7 +37,7 @@ import (
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, server *commonlisteners.CommonListenerS,
+	connMgr *engine.ConnManager, cls *CommonListenerService,
 	internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AccountService{
@@ -47,7 +47,7 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
-		server:      server,
+		cls:         cls,
 		anz:         anz,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
@@ -57,19 +57,21 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 // AccountService implements Service interface
 type AccountService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
 	cacheS      *CacheService
+	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
-	connMgr     *engine.ConnManager
-	server      *commonlisteners.CommonListenerS
+
+	acts *accounts.AccountS
+	cl   *commonlisteners.CommonListenerS
 
 	rldChan  chan struct{}
 	stopChan chan struct{}
-
-	acts     *accounts.AccountS
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
-	anz      *AnalyzerService
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -79,6 +81,10 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	acts.cl, err = acts.cls.WaitForCLS(ctx)
+	if err != nil {
+		return err
+	}
 	if err = acts.cacheS.WaitToPrecache(ctx,
 		utils.CacheAccounts,
 		utils.CacheAccountsFilterIndexes); err != nil {
@@ -110,7 +116,7 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 
 	if !acts.cfg.DispatcherSCfg().Enabled {
-		acts.server.RpcRegister(srv)
+		acts.cl.RpcRegister(srv)
 	}
 
 	acts.connChan <- acts.anz.GetInternalCodec(srv, utils.AccountS)
@@ -131,7 +137,7 @@ func (acts *AccountService) Shutdown() (err error) {
 	acts.acts = nil
 	<-acts.connChan
 	acts.Unlock()
-	acts.server.RpcUnregisterName(utils.AccountSv1)
+	acts.cl.RpcUnregisterName(utils.AccountSv1)
 	return
 }
 
@@ -139,7 +145,7 @@ func (acts *AccountService) Shutdown() (err error) {
 func (acts *AccountService) IsRunning() bool {
 	acts.RLock()
 	defer acts.RUnlock()
-	return acts != nil && acts.acts != nil
+	return acts.acts != nil
 }
 
 // ServiceName returns the service name

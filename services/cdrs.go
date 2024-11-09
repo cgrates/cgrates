@@ -36,7 +36,7 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalCDRServerChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalCDRServerChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &CDRService{
@@ -45,7 +45,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		storDB:      storDB,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -55,93 +55,97 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 // CDRService implements Service interface
 type CDRService struct {
 	sync.RWMutex
-	cfg    *config.CGRConfig
-	dm     *DataDBService
-	storDB *StorDBService
 
+	cls         *CommonListenerService
+	dm          *DataDBService
+	storDB      *StorDBService
+	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
 
-	cdrS     *cdrs.CDRServer
+	cdrS *cdrs.CDRServer
+	cl   *commonlisteners.CommonListenerS
+
 	connChan chan birpc.ClientConnector
-	connMgr  *engine.ConnManager
-
 	stopChan chan struct{}
-	anz      *AnalyzerService
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
-func (cdrSrv *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if cdrSrv.IsRunning() {
+func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+	if cs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))
 
+	if cs.cl, err = cs.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, cdrSrv.filterSChan); err != nil {
+	if filterS, err = waitForFilterS(ctx, cs.filterSChan); err != nil {
 		return
 	}
 	var datadb *engine.DataManager
-	if datadb, err = cdrSrv.dm.WaitForDM(ctx); err != nil {
+	if datadb, err = cs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = cdrSrv.anz.WaitForAnalyzerS(ctx); err != nil {
+	if err = cs.anz.WaitForAnalyzerS(ctx); err != nil {
 		return
 	}
 
 	storDBChan := make(chan engine.StorDB, 1)
-	cdrSrv.stopChan = make(chan struct{})
-	cdrSrv.storDB.RegisterSyncChan(storDBChan)
+	cs.stopChan = make(chan struct{})
+	cs.storDB.RegisterSyncChan(storDBChan)
 
-	cdrSrv.Lock()
-	defer cdrSrv.Unlock()
+	cs.Lock()
+	defer cs.Unlock()
 
-	cdrSrv.cdrS = cdrs.NewCDRServer(cdrSrv.cfg, datadb, filterS, cdrSrv.connMgr, storDBChan)
-	go cdrSrv.cdrS.ListenAndServe(cdrSrv.stopChan)
+	cs.cdrS = cdrs.NewCDRServer(cs.cfg, datadb, filterS, cs.connMgr, storDBChan)
+	go cs.cdrS.ListenAndServe(cs.stopChan)
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")
-	srv, err := engine.NewServiceWithPing(cdrSrv.cdrS, utils.CDRsV1, utils.V1Prfx)
+	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
 	if err != nil {
 		return err
 	}
-	if !cdrSrv.cfg.DispatcherSCfg().Enabled {
-		cdrSrv.server.RpcRegister(srv)
+	if !cs.cfg.DispatcherSCfg().Enabled {
+		cs.cl.RpcRegister(srv)
 	}
-	cdrSrv.connChan <- cdrSrv.anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
+	cs.connChan <- cs.anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
 	return
 }
 
 // Reload handles the change of config
-func (cdrService *CDRService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (cs *CDRService) Reload(*context.Context, context.CancelFunc) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (cdrService *CDRService) Shutdown() (err error) {
-	cdrService.Lock()
-	close(cdrService.stopChan)
-	cdrService.cdrS = nil
-	<-cdrService.connChan
-	cdrService.Unlock()
-	cdrService.server.RpcUnregisterName(utils.CDRsV1)
+func (cs *CDRService) Shutdown() (err error) {
+	cs.Lock()
+	close(cs.stopChan)
+	cs.cdrS = nil
+	<-cs.connChan
+	cs.Unlock()
+	cs.cl.RpcUnregisterName(utils.CDRsV1)
 	return
 }
 
 // IsRunning returns if the service is running
-func (cdrService *CDRService) IsRunning() bool {
-	cdrService.RLock()
-	defer cdrService.RUnlock()
-	return cdrService != nil && cdrService.cdrS != nil
+func (cs *CDRService) IsRunning() bool {
+	cs.RLock()
+	defer cs.RUnlock()
+	return cs.cdrS != nil
 }
 
 // ServiceName returns the service name
-func (cdrService *CDRService) ServiceName() string {
+func (cs *CDRService) ServiceName() string {
 	return utils.CDRServer
 }
 
 // ShouldRun returns if the service should be running
-func (cdrService *CDRService) ShouldRun() bool {
-	return cdrService.cfg.CdrsCfg().Enabled
+func (cs *CDRService) ShouldRun() bool {
+	return cs.cfg.CdrsCfg().Enabled
 }

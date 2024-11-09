@@ -990,6 +990,7 @@ const (
 	CDRServer       = "CDRServer"
 	GuardianS       = "GuardianS"
 	ServiceManagerS = "ServiceManager"
+	CommonListenerS = "CommonListenerS"
 )
 
 // Lower service names

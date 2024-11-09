@@ -101,7 +101,7 @@ func (ast *AsteriskAgent) shutdown() {
 func (ast *AsteriskAgent) IsRunning() bool {
 	ast.RLock()
 	defer ast.RUnlock()
-	return ast != nil && ast.smas != nil
+	return ast.smas != nil
 }
 
 // ServiceName returns the service name

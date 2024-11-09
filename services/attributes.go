@@ -35,7 +35,7 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, dspS *DispatcherService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AttributeService{
@@ -44,7 +44,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		anz:         anz,
 		srvDep:      srvDep,
 		dspS:        dspS,
@@ -54,17 +54,20 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 // AttributeService implements Service interface
 type AttributeService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
-	dm          *DataDBService
-	cacheS      *CacheService
-	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
 
-	attrS    *engine.AttributeS
-	rpc      *apis.AttributeSv1         // useful on restart
+	cls         *CommonListenerService
+	dm          *DataDBService
+	anz         *AnalyzerService
+	cacheS      *CacheService
+	dspS        *DispatcherService
+	filterSChan chan *engine.FilterS
+
+	attrS *engine.AttributeS
+	cl    *commonlisteners.CommonListenerS
+	rpc   *apis.AttributeSv1 // useful on restart
+
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
-	anz      *AnalyzerService
-	dspS     *DispatcherService
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -74,6 +77,9 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if attrS.cl, err = attrS.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = attrS.cacheS.WaitToPrecache(ctx,
 		utils.CacheAttributeProfiles,
 		utils.CacheAttributeFilterIndexes); err != nil {
@@ -100,7 +106,7 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	// srv, _ := birpc.NewService(attrS.rpc, "", false)
 	if !attrS.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			attrS.server.RpcRegister(s)
+			attrS.cl.RpcRegister(s)
 		}
 	}
 	dspShtdChan := attrS.dspS.RegisterShutdownChan(attrS.ServiceName())
@@ -110,7 +116,7 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 				return
 			}
 			if attrS.IsRunning() {
-				attrS.server.RpcRegister(srv)
+				attrS.cl.RpcRegister(srv)
 			}
 
 		}
@@ -131,7 +137,7 @@ func (attrS *AttributeService) Shutdown() (err error) {
 	attrS.attrS = nil
 	attrS.rpc = nil
 	<-attrS.connChan
-	attrS.server.RpcUnregisterName(utils.AttributeSv1)
+	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
 	attrS.dspS.UnregisterShutdownChan(attrS.ServiceName())
 	attrS.Unlock()
 	return

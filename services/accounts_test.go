@@ -57,7 +57,7 @@ func TestAccountSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		rldChan:     testChan,
 		stopChan:    make(chan struct{}, 1),
 		connChan:    actRPC,
