@@ -29,12 +29,10 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -50,7 +48,6 @@ func NewCGREngine(cfg *config.CGRConfig) *CGREngine {
 		caps:       caps,  // caps is used to limit RPC CPS
 		shdWg:      shdWg, // wait for shutdown
 		srvManager: servmanager.NewServiceManager(shdWg, cM, cfg),
-		cls:        commonlisteners.NewCommonListenerS(caps),
 		srvDep: map[string]*sync.WaitGroup{
 			utils.AccountS:        new(sync.WaitGroup),
 			utils.ActionS:         new(sync.WaitGroup),
@@ -98,7 +95,6 @@ type CGREngine struct {
 	srvDep     map[string]*sync.WaitGroup
 	shdWg      *sync.WaitGroup
 	cM         *engine.ConnManager
-	cls        *commonlisteners.CommonListenerS
 
 	caps    *engine.Caps
 	cpuPrfF *os.File
@@ -107,6 +103,7 @@ type CGREngine struct {
 	gvS    *GlobalVarS
 	dmS    *DataDBService
 	sdbS   *StorDBService
+	cls    *CommonListenerService
 	anzS   *AnalyzerService
 	coreS  *CoreService
 	cacheS *CacheService
@@ -133,13 +130,6 @@ func (cgr *CGREngine) AddService(service servmanager.Service, connName, apiPrefi
 }
 
 func (cgr *CGREngine) InitServices(setVersions bool) {
-	if len(cgr.cfg.HTTPCfg().RegistrarSURL) != 0 {
-		cgr.cls.RegisterHTTPFunc(cgr.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
-	}
-	if cgr.cfg.ConfigSCfg().Enabled {
-		cgr.cls.RegisterHTTPFunc(cgr.cfg.ConfigSCfg().URL, config.HandlerConfigS)
-	}
-
 	// init the channel here because we need to pass them to connManager
 	cgr.iServeManagerCh = make(chan birpc.ClientConnector, 1)
 	cgr.iConfigCh = make(chan birpc.ClientConnector, 1)
@@ -201,14 +191,15 @@ func (cgr *CGREngine) InitServices(setVersions bool) {
 	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep)
 	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, setVersions, cgr.srvDep)
 	cgr.sdbS = NewStorDBService(cgr.cfg, setVersions, cgr.srvDep)
+	cgr.cls = NewCommonListenerService(cgr.cfg, cgr.caps, cgr.srvDep)
 	cgr.anzS = NewAnalyzerService(cgr.cfg, cgr.cls,
-		cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep) // init AnalyzerS
+		cgr.iFilterSCh, iAnalyzerSCh, cgr.srvDep)
 
-	cgr.coreS = NewCoreService(cgr.cfg, cgr.caps, cgr.cls, iCoreSv1Ch, cgr.anzS, cgr.cpuPrfF, cgr.shdWg, cgr.srvDep) // init CoreSv1
+	cgr.coreS = NewCoreService(cgr.cfg, cgr.caps, cgr.cls, iCoreSv1Ch, cgr.anzS, cgr.cpuPrfF, cgr.shdWg, cgr.srvDep)
 
 	cgr.cacheS = NewCacheService(cgr.cfg, cgr.dmS, cgr.cM,
 		cgr.cls, iCacheSCh, cgr.anzS, cgr.coreS,
-		cgr.srvDep) // init CacheS
+		cgr.srvDep)
 
 	dspS := NewDispatcherService(cgr.cfg, cgr.dmS, cgr.cacheS,
 		cgr.iFilterSCh, cgr.cls, cgr.iDispatcherSCh, cgr.cM,
@@ -219,7 +210,7 @@ func (cgr *CGREngine) InitServices(setVersions bool) {
 
 	cgr.efs = NewExportFailoverService(cgr.cfg, cgr.cM, iEFsCh, cgr.cls, cgr.srvDep)
 
-	cgr.srvManager.AddServices(cgr.gvS, cgr.coreS, cgr.cacheS,
+	cgr.srvManager.AddServices(cgr.gvS, cgr.cls, cgr.coreS, cgr.cacheS,
 		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.sdbS, cgr.efs,
 		NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.cls,
 			iAdminSCh, cgr.cM, cgr.anzS, cgr.srvDep),
@@ -257,7 +248,7 @@ func (cgr *CGREngine) InitServices(setVersions bool) {
 		NewCDRServer(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.cls, iCDRServerCh,
 			cgr.cM, cgr.anzS, cgr.srvDep),
 
-		NewRegistrarCService(cgr.cfg, cgr.cls, cgr.cM, cgr.anzS, cgr.srvDep),
+		NewRegistrarCService(cgr.cfg, cgr.cM, cgr.anzS, cgr.srvDep),
 
 		NewRateService(cgr.cfg, cgr.cacheS, cgr.iFilterSCh, cgr.dmS,
 			cgr.cls, iRateSCh, cgr.anzS, cgr.srvDep),
@@ -300,6 +291,13 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 			return
 		}
 	}
+	if cgr.cls.ShouldRun() {
+		cgr.shdWg.Add(1)
+		if err = cgr.cls.Start(ctx, shtDw); err != nil {
+			cgr.shdWg.Done()
+			return
+		}
+	}
 	if cgr.anzS.ShouldRun() {
 		cgr.shdWg.Add(1)
 		if err = cgr.anzS.Start(ctx, shtDw); err != nil {
@@ -323,9 +321,9 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 	go cgrStartFilterService(ctx, cgr.iFilterSCh, cgr.cacheS.GetCacheSChan(), cgr.cM,
 		cgr.cfg, cgr.dmS)
 
-	cgrInitServiceManagerV1(cgr.iServeManagerCh, cgr.srvManager, cgr.cfg, cgr.cls, cgr.anzS)
-	cgrInitGuardianSv1(cgr.iGuardianSCh, cgr.cfg, cgr.cls, cgr.anzS) // init GuardianSv1
-	cgrInitConfigSv1(cgr.iConfigCh, cgr.cfg, cgr.cls, cgr.anzS)
+	cgrInitServiceManagerV1(ctx, cgr.iServeManagerCh, cgr.srvManager, cgr.cfg, cgr.cls, cgr.anzS)
+	cgrInitGuardianSv1(ctx, cgr.iGuardianSCh, cgr.cfg, cgr.cls, cgr.anzS)
+	cgrInitConfigSv1(ctx, cgr.iConfigCh, cgr.cfg, cgr.cls, cgr.anzS)
 
 	if preload != utils.EmptyString {
 		if err = cgrRunPreload(ctx, cgr.cfg, preload, cgr.ldrs); err != nil {

@@ -35,7 +35,7 @@ import (
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalRankingSChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalRankingSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RankingService{
@@ -44,7 +44,7 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -53,16 +53,20 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 
 type RankingService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
+	anz         *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	connMgr     *engine.ConnManager
-	connChan    chan birpc.ClientConnector
-	anz         *AnalyzerService
-	ran         *engine.RankingS
-	srvDep      map[string]*sync.WaitGroup
+
+	ran *engine.RankingS
+	cl  *commonlisteners.CommonListenerS
+
+	connChan chan birpc.ClientConnector
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -72,6 +76,9 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	}
 
 	ran.srvDep[utils.DataDB].Add(1)
+	if ran.cl, err = ran.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = ran.cacheS.WaitToPrecache(ctx,
 		utils.CacheRankingProfiles,
 		utils.CacheRankings,
@@ -105,7 +112,7 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	}
 	if !ran.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			ran.server.RpcRegister(s)
+			ran.cl.RpcRegister(s)
 		}
 	}
 	ran.connChan <- ran.anz.GetInternalCodec(srv, utils.RankingS)
@@ -128,13 +135,13 @@ func (ran *RankingService) Shutdown() (err error) {
 	ran.ran.StopRankingS()
 	ran.ran = nil
 	<-ran.connChan
-	ran.server.RpcUnregisterName(utils.RankingSv1)
+	ran.cl.RpcUnregisterName(utils.RankingSv1)
 	return
 }
 
 // IsRunning returns if the service is running
 func (ran *RankingService) IsRunning() bool {
-	return ran != nil && ran.ran != nil
+	return ran.ran != nil
 }
 
 // ServiceName returns the service name

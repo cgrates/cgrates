@@ -33,7 +33,7 @@ import (
 
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
-	filterSChan chan *engine.FilterS, server *commonlisteners.CommonListenerS,
+	filterSChan chan *engine.FilterS, cls *CommonListenerService,
 	internalLoaderSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *LoaderService {
@@ -42,7 +42,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		stopChan:    make(chan struct{}),
 		anz:         anz,
@@ -53,16 +53,19 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 // LoaderService implements Service interface
 type LoaderService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
-	dm          *DataDBService
-	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	stopChan    chan struct{}
 
-	ldrs     *loaders.LoaderS
+	cls         *CommonListenerService
+	dm          *DataDBService
+	anz         *AnalyzerService
+	filterSChan chan *engine.FilterS
+
+	ldrs *loaders.LoaderS
+	cl   *commonlisteners.CommonListenerS
+
+	stopChan chan struct{}
 	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
-	anz      *AnalyzerService
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -72,6 +75,9 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if ldrs.cl, err = ldrs.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ldrs.filterSChan); err != nil {
 		return
@@ -99,7 +105,7 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	// srv, _ := birpc.NewService(apis.NewLoaderSv1(ldrs.ldrs), "", false)
 	if !ldrs.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			ldrs.server.RpcRegister(s)
+			ldrs.cl.RpcRegister(s)
 		}
 	}
 	ldrs.connChan <- ldrs.anz.GetInternalCodec(srv, utils.LoaderS)
@@ -132,7 +138,7 @@ func (ldrs *LoaderService) Shutdown() (_ error) {
 	ldrs.ldrs = nil
 	close(ldrs.stopChan)
 	<-ldrs.connChan
-	ldrs.server.RpcUnregisterName(utils.LoaderSv1)
+	ldrs.cl.RpcUnregisterName(utils.LoaderSv1)
 	ldrs.Unlock()
 	return
 }
@@ -141,7 +147,7 @@ func (ldrs *LoaderService) Shutdown() (_ error) {
 func (ldrs *LoaderService) IsRunning() bool {
 	ldrs.RLock()
 	defer ldrs.RUnlock()
-	return ldrs != nil && ldrs.ldrs != nil && ldrs.ldrs.Enabled()
+	return ldrs.ldrs != nil && ldrs.ldrs.Enabled()
 }
 
 // ServiceName returns the service name

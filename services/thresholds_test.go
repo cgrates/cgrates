@@ -50,7 +50,7 @@ func TestThresholdSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		thrs:        thrs1,
 		connChan:    make(chan birpc.ClientConnector, 1),
 		anz:         anz,

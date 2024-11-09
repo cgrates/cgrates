@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -34,12 +33,12 @@ import (
 
 // NewJanusAgent returns the Janus Agent
 func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
+	cls *CommonListenerService, connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &JanusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -48,22 +47,32 @@ func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 // JanusAgent implements Service interface
 type JanusAgent struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	jA          *agents.JanusAgent
+
+	jA *agents.JanusAgent
 
 	// we can realy stop the JanusAgent so keep a flag
 	// if we registerd the jandlers
 	started bool
+
 	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 }
 
 // Start should jandle the sercive start
 func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	filterS := <-ja.filterSChan
-	ja.filterSChan <- filterS
+
+	cl, err := ja.cls.WaitForCLS(ctx)
+	if err != nil {
+		return err
+	}
+	var filterS *engine.FilterS
+	if filterS, err = waitForFilterS(ctx, ja.filterSChan); err != nil {
+		return
+	}
 
 	ja.Lock()
 	if ja.started {
@@ -78,13 +87,13 @@ func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err err
 		return
 	}
 
-	ja.server.RegisterHttpHandler("POST "+ja.cfg.JanusAgentCfg().URL, http.HandlerFunc(ja.jA.CreateSession))
-	ja.server.RegisterHttpHandler("OPTIONS "+ja.cfg.JanusAgentCfg().URL, http.HandlerFunc(ja.jA.CORSOptions))
-	ja.server.RegisterHttpHandler(fmt.Sprintf("OPTIONS %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.SessionKeepalive))
-	ja.server.RegisterHttpHandler(fmt.Sprintf("OPTIONS %s/{sessionID}/", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.CORSOptions))
-	ja.server.RegisterHttpHandler(fmt.Sprintf("GET %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.PollSession))
-	ja.server.RegisterHttpHandler(fmt.Sprintf("POST %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.AttachPlugin))
-	ja.server.RegisterHttpHandler(fmt.Sprintf("POST %s/{sessionID}/{handleID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.HandlePlugin))
+	cl.RegisterHttpHandler("POST "+ja.cfg.JanusAgentCfg().URL, http.HandlerFunc(ja.jA.CreateSession))
+	cl.RegisterHttpHandler("OPTIONS "+ja.cfg.JanusAgentCfg().URL, http.HandlerFunc(ja.jA.CORSOptions))
+	cl.RegisterHttpHandler(fmt.Sprintf("OPTIONS %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.SessionKeepalive))
+	cl.RegisterHttpHandler(fmt.Sprintf("OPTIONS %s/{sessionID}/", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.CORSOptions))
+	cl.RegisterHttpHandler(fmt.Sprintf("GET %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.PollSession))
+	cl.RegisterHttpHandler(fmt.Sprintf("POST %s/{sessionID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.AttachPlugin))
+	cl.RegisterHttpHandler(fmt.Sprintf("POST %s/{sessionID}/{handleID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.HandlePlugin))
 
 	ja.started = true
 	ja.Unlock()

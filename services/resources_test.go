@@ -51,7 +51,7 @@ func TestResourceSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		connChan:    make(chan birpc.ClientConnector, 1),
 		connMgr:     nil,
 		anz:         anz,

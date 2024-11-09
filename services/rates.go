@@ -34,7 +34,7 @@ import (
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	dmS *DataDBService, server *commonlisteners.CommonListenerS,
+	dmS *DataDBService, cls *CommonListenerService,
 	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RateService{
@@ -42,7 +42,7 @@ func NewRateService(cfg *config.CGRConfig,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		dmS:         dmS,
-		server:      server,
+		cls:         cls,
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
 		anz:         anz,
@@ -54,18 +54,19 @@ func NewRateService(cfg *config.CGRConfig,
 type RateService struct {
 	sync.RWMutex
 
-	cfg         *config.CGRConfig
-	filterSChan chan *engine.FilterS
+	cls         *CommonListenerService
+	anz         *AnalyzerService
 	dmS         *DataDBService
 	cacheS      *CacheService
-	server      *commonlisteners.CommonListenerS
+	filterSChan chan *engine.FilterS
 
-	rldChan  chan struct{}
-	stopChan chan struct{}
+	rateS *rates.RateS
+	cl    *commonlisteners.CommonListenerS
 
-	rateS       *rates.RateS
+	rldChan     chan struct{}
+	stopChan    chan struct{}
 	intConnChan chan birpc.ClientConnector
-	anz         *AnalyzerService
+	cfg         *config.CGRConfig
 	srvDep      map[string]*sync.WaitGroup
 }
 
@@ -100,7 +101,7 @@ func (rs *RateService) Shutdown() (err error) {
 	rs.rateS.Shutdown() //we don't verify the error because shutdown never returns an err
 	rs.rateS = nil
 	<-rs.intConnChan
-	rs.server.RpcUnregisterName(utils.RateSv1)
+	rs.cl.RpcUnregisterName(utils.RateSv1)
 	return
 }
 
@@ -110,6 +111,9 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if rs.cl, err = rs.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = rs.cacheS.WaitToPrecache(ctx,
 		utils.CacheRateProfiles,
 		utils.CacheRateProfilesFilterIndexes,
@@ -141,7 +145,7 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	}
 	// srv, _ := birpc.NewService(apis.NewRateSv1(rs.rateS), "", false)
 	if !rs.cfg.DispatcherSCfg().Enabled {
-		rs.server.RpcRegister(srv)
+		rs.cl.RpcRegister(srv)
 	}
 	rs.intConnChan <- rs.anz.GetInternalCodec(srv, utils.RateS)
 	return

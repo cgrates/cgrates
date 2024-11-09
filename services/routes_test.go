@@ -51,7 +51,7 @@ func TestSupplierSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		connMgr:     nil,
 		routeS:      &engine.RouteS{},
 		// rpc:         nil,

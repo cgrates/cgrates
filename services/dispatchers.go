@@ -33,7 +33,7 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *DispatcherService {
 	return &DispatcherService{
@@ -42,7 +42,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -53,19 +53,21 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 // DispatcherService implements Service interface
 type DispatcherService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
+	anz         *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	connMgr     *engine.ConnManager
 
-	dspS     *dispatchers.DispatcherService
-	connChan chan birpc.ClientConnector
-	anz      *AnalyzerService
-	srvDep   map[string]*sync.WaitGroup
+	dspS *dispatchers.DispatcherService
+	cl   *commonlisteners.CommonListenerS
 
+	connChan   chan birpc.ClientConnector
+	connMgr    *engine.ConnManager
+	cfg        *config.CGRConfig
 	srvsReload map[string]chan struct{}
+	srvDep     map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -74,6 +76,9 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 	utils.Logger.Info("Starting CGRateS DispatcherS service.")
+	if dspS.cl, err = dspS.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = dspS.cacheS.WaitToPrecache(ctx,
 		utils.CacheDispatcherProfiles,
 		utils.CacheDispatcherHosts,
@@ -102,7 +107,7 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	srv, _ := engine.NewDispatcherService(dspS.dspS)
 	// srv, _ := birpc.NewService(apis.NewDispatcherSv1(dspS.dspS), "", false)
 	for _, s := range srv {
-		dspS.server.RpcRegister(s)
+		dspS.cl.RpcRegister(s)
 	}
 	dspS.connMgr.EnableDispatcher(srv)
 	// for the moment we dispable Apier through dispatcher
@@ -125,8 +130,8 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
 	<-dspS.connChan
-	dspS.server.RpcUnregisterName(utils.DispatcherSv1)
-	dspS.server.RpcUnregisterName(utils.AttributeSv1)
+	dspS.cl.RpcUnregisterName(utils.DispatcherSv1)
+	dspS.cl.RpcUnregisterName(utils.AttributeSv1)
 
 	dspS.unregisterAllDispatchedSubsystems()
 	dspS.connMgr.DisableDispatcher()
@@ -138,7 +143,7 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 func (dspS *DispatcherService) IsRunning() bool {
 	dspS.RLock()
 	defer dspS.RUnlock()
-	return dspS != nil && dspS.dspS != nil
+	return dspS.dspS != nil
 }
 
 // ServiceName returns the service name
@@ -152,7 +157,7 @@ func (dspS *DispatcherService) ShouldRun() bool {
 }
 
 func (dspS *DispatcherService) unregisterAllDispatchedSubsystems() {
-	dspS.server.RpcUnregisterName(utils.AttributeSv1)
+	dspS.cl.RpcUnregisterName(utils.AttributeSv1)
 }
 
 func (dspS *DispatcherService) RegisterShutdownChan(subsys string) (c chan struct{}) {

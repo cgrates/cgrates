@@ -124,7 +124,7 @@ func (rad *RadiusAgent) shutdown() {
 func (rad *RadiusAgent) IsRunning() bool {
 	rad.RLock()
 	defer rad.RUnlock()
-	return rad != nil && rad.rad != nil
+	return rad.rad != nil
 }
 
 // ServiceName returns the service name

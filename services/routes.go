@@ -35,7 +35,7 @@ import (
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalRouteSChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalRouteSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RouteService{
@@ -44,7 +44,7 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -54,16 +54,19 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 // RouteService implements Service interface
 type RouteService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
+	anz         *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	connMgr     *engine.ConnManager
 
-	routeS   *engine.RouteS
+	routeS *engine.RouteS
+	cl     *commonlisteners.CommonListenerS
+
 	connChan chan birpc.ClientConnector
-	anz      *AnalyzerService
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -73,6 +76,9 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if routeS.cl, err = routeS.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = routeS.cacheS.WaitToPrecache(ctx,
 		utils.CacheRouteProfiles,
 		utils.CacheRouteFilterIndexes); err != nil {
@@ -99,7 +105,7 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
 	if !routeS.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			routeS.server.RpcRegister(s)
+			routeS.cl.RpcRegister(s)
 		}
 	}
 	routeS.connChan <- routeS.anz.GetInternalCodec(srv, utils.RouteS)
@@ -118,7 +124,7 @@ func (routeS *RouteService) Shutdown() (err error) {
 	routeS.routeS.Shutdown() //we don't verify the error because shutdown never returns an error
 	routeS.routeS = nil
 	<-routeS.connChan
-	routeS.server.RpcUnregisterName(utils.RouteSv1)
+	routeS.cl.RpcUnregisterName(utils.RouteSv1)
 	return
 }
 
@@ -126,7 +132,7 @@ func (routeS *RouteService) Shutdown() (err error) {
 func (routeS *RouteService) IsRunning() bool {
 	routeS.RLock()
 	defer routeS.RUnlock()
-	return routeS != nil && routeS.routeS != nil
+	return routeS.routeS != nil
 }
 
 // ServiceName returns the service name

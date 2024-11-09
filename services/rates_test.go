@@ -52,7 +52,7 @@ func TestRateSCoverage(t *testing.T) {
 		filterSChan: filterSChan,
 		dmS:         db,
 		cacheS:      chS,
-		server:      cls,
+		cls:         cls,
 		stopChan:    make(chan struct{}),
 		intConnChan: make(chan birpc.ClientConnector, 1),
 		anz:         anz,

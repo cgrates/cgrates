@@ -59,7 +59,7 @@ func TestSessionSCoverage(t *testing.T) {
 	srv2 := SessionService{
 		cfg:      cfg,
 		dm:       db,
-		server:   cls,
+		cls:      cls,
 		connChan: make(chan birpc.ClientConnector, 1),
 		connMgr:  nil,
 		anz:      anz,

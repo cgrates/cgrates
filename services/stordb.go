@@ -153,7 +153,7 @@ func (db *StorDBService) IsRunning() bool {
 
 // isRunning returns if the service is running (not thread safe)
 func (db *StorDBService) isRunning() bool {
-	return db != nil && db.db != nil
+	return db.db != nil
 }
 
 // ServiceName returns the service name

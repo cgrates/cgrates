@@ -37,7 +37,7 @@ func NewEventReaderService(
 	cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	server *commonlisteners.CommonListenerS,
+	cls *CommonListenerService,
 	intConn chan birpc.ClientConnector,
 	anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -46,7 +46,7 @@ func NewEventReaderService(
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
-		server:      server,
+		cls:         cls,
 		intConn:     intConn,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -56,16 +56,19 @@ func NewEventReaderService(
 // EventReaderService implements Service interface
 type EventReaderService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
+	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
 
-	ers      *ers.ERService
+	ers *ers.ERService
+	cl  *commonlisteners.CommonListenerS
+
 	rldChan  chan struct{}
 	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	server   *commonlisteners.CommonListenerS
 	intConn  chan birpc.ClientConnector
-	anz      *AnalyzerService
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -75,6 +78,9 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if erS.cl, err = erS.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, erS.filterSChan); err != nil {
 		return
@@ -100,7 +106,7 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 		return err
 	}
 	if !erS.cfg.DispatcherSCfg().Enabled {
-		erS.server.RpcRegister(srv)
+		erS.cl.RpcRegister(srv)
 	}
 	erS.intConn <- erS.anz.GetInternalCodec(srv, utils.ERs)
 	return
@@ -128,7 +134,7 @@ func (erS *EventReaderService) Shutdown() (err error) {
 	defer erS.Unlock()
 	close(erS.stopChan)
 	erS.ers = nil
-	erS.server.RpcUnregisterName(utils.ErSv1)
+	erS.cl.RpcUnregisterName(utils.ErSv1)
 	return
 }
 
@@ -136,7 +142,7 @@ func (erS *EventReaderService) Shutdown() (err error) {
 func (erS *EventReaderService) IsRunning() bool {
 	erS.RLock()
 	defer erS.RUnlock()
-	return erS != nil && erS.ers != nil
+	return erS.ers != nil
 }
 
 // ServiceName returns the service name
