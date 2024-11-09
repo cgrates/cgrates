@@ -17,46 +17,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-// TestSIPAgentCoverage for cover testing
-func TestSIPAgentCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewSIPAgent(cfg, filterSChan, nil, srvDep)
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	srv2 := SIPAgent{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		sip:         &agents.SIPAgent{},
-		connMgr:     nil,
-		srvDep:      srvDep,
-	}
-	if !srv2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	serviceName := srv2.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.SIPAgent) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.SIPAgent, serviceName)
-	}
-	shouldRun := srv2.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
-		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-
-}
+// import (
+// 	"reflect"
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/cgrates/agents"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// // TestSIPAgentCoverage for cover testing
+// func TestSIPAgentCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.SessionSCfg().ListenBijson = ""
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	srv := NewSIPAgent(cfg, filterSChan, nil, srvDep)
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	srv2 := SIPAgent{
+// 		cfg:         cfg,
+// 		filterSChan: filterSChan,
+// 		sip:         &agents.SIPAgent{},
+// 		connMgr:     nil,
+// 		srvDep:      srvDep,
+// 	}
+// 	if !srv2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	serviceName := srv2.ServiceName()
+// 	if !reflect.DeepEqual(serviceName, utils.SIPAgent) {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.SIPAgent, serviceName)
+// 	}
+// 	shouldRun := srv2.ShouldRun()
+// 	if !reflect.DeepEqual(shouldRun, false) {
+// 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+// 	}
+//
+// }

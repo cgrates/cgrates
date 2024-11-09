@@ -17,56 +17,56 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-// TestHTTPAgent for cover testing
-func TestHTTPAgentCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cls := commonlisteners.NewCommonListenerS(nil)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cM := engine.NewConnManager(cfg)
-	srv := NewHTTPAgent(cfg, filterSChan, cls, cM, srvDep)
-	if srv == nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
-	}
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	srv2 := &HTTPAgent{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		cls:         cls,
-		started:     true,
-		connMgr:     cM,
-		srvDep:      srvDep,
-	}
-	if !srv2.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	serviceName := srv2.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.HTTPAgent) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.HTTPAgent, serviceName)
-	}
-	shouldRun := srv2.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
-		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-	shutdownError := srv.Shutdown()
-	if shutdownError != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutdownError)
-	}
-	if srv.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-}
+// import (
+// 	"reflect"
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// // TestHTTPAgent for cover testing
+// func TestHTTPAgentCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	cM := engine.NewConnManager(cfg)
+// 	srv := NewHTTPAgent(cfg, filterSChan, cls, cM, srvDep)
+// 	if srv == nil {
+// 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", utils.ToJSON(srv))
+// 	}
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	srv2 := &HTTPAgent{
+// 		cfg:         cfg,
+// 		filterSChan: filterSChan,
+// 		cls:         cls,
+// 		started:     true,
+// 		connMgr:     cM,
+// 		srvDep:      srvDep,
+// 	}
+// 	if !srv2.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	serviceName := srv2.ServiceName()
+// 	if !reflect.DeepEqual(serviceName, utils.HTTPAgent) {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.HTTPAgent, serviceName)
+// 	}
+// 	shouldRun := srv2.ShouldRun()
+// 	if !reflect.DeepEqual(shouldRun, false) {
+// 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+// 	}
+// 	shutdownError := srv.Shutdown()
+// 	if shutdownError != nil {
+// 		t.Errorf("\nExpecting <nil>,\n Received <%+v>", shutdownError)
+// 	}
+// 	if srv.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// }

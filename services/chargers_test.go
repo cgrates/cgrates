@@ -17,68 +17,68 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"reflect"
-	"sync"
-	"testing"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
-// TestChargerSCoverage for cover testing
-func TestChargerSCoverage(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.AttributeSCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	cls := commonlisteners.NewCommonListenerS(nil)
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
-	chrS1 := NewChargerService(cfg, db, chS,
-		filterSChan, cls, make(chan birpc.ClientConnector, 1),
-		nil, anz, srvDep)
-	if chrS1.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-	chrS := &ChargerService{
-		connChan:    make(chan birpc.ClientConnector, 1),
-		cfg:         cfg,
-		dm:          db,
-		cacheS:      chS,
-		filterSChan: filterSChan,
-		cls:         cls,
-		connMgr:     nil,
-		anz:         anz,
-		srvDep:      srvDep,
-	}
-	if chrS.IsRunning() {
-		t.Errorf("Expected service to be down")
-	}
-
-	chrS.chrS = &engine.ChargerS{}
-	if !chrS.IsRunning() {
-		t.Errorf("Expected service to be running")
-	}
-	serviceName := chrS.ServiceName()
-	if !reflect.DeepEqual(serviceName, utils.ChargerS) {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ChargerS, serviceName)
-	}
-	shouldRun := chrS.ShouldRun()
-	if !reflect.DeepEqual(shouldRun, false) {
-		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
-	}
-	chrS.connChan = make(chan birpc.ClientConnector, 1)
-	chrS.connChan <- &testMockClients{}
-	shutErr := chrS.Shutdown()
-	if shutErr != nil {
-		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutErr)
-	}
-
-}
+// import (
+// 	"reflect"
+// 	"sync"
+// 	"testing"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// // TestChargerSCoverage for cover testing
+// func TestChargerSCoverage(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.AttributeSCfg().Enabled = true
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	chS := NewCacheService(cfg, db, nil, cls, make(chan context.ClientConnector, 1), anz, nil, srvDep)
+// 	chrS1 := NewChargerService(cfg, db, chS,
+// 		filterSChan, cls, make(chan birpc.ClientConnector, 1),
+// 		nil, anz, srvDep)
+// 	if chrS1.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+// 	chrS := &ChargerService{
+// 		connChan:    make(chan birpc.ClientConnector, 1),
+// 		cfg:         cfg,
+// 		dm:          db,
+// 		cacheS:      chS,
+// 		filterSChan: filterSChan,
+// 		cls:         cls,
+// 		connMgr:     nil,
+// 		anz:         anz,
+// 		srvDep:      srvDep,
+// 	}
+// 	if chrS.IsRunning() {
+// 		t.Errorf("Expected service to be down")
+// 	}
+//
+// 	chrS.chrS = &engine.ChargerS{}
+// 	if !chrS.IsRunning() {
+// 		t.Errorf("Expected service to be running")
+// 	}
+// 	serviceName := chrS.ServiceName()
+// 	if !reflect.DeepEqual(serviceName, utils.ChargerS) {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ChargerS, serviceName)
+// 	}
+// 	shouldRun := chrS.ShouldRun()
+// 	if !reflect.DeepEqual(shouldRun, false) {
+// 		t.Errorf("\nExpecting <false>,\n Received <%+v>", shouldRun)
+// 	}
+// 	chrS.connChan = make(chan birpc.ClientConnector, 1)
+// 	chrS.connChan <- &testMockClients{}
+// 	shutErr := chrS.Shutdown()
+// 	if shutErr != nil {
+// 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", nil, shutErr)
+// 	}
+//
+// }

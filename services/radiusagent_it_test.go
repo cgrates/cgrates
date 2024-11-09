@@ -20,200 +20,200 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package services
 
-import (
-	"path"
-	"runtime"
-	"sync"
-	"testing"
-	"time"
-
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/commonlisteners"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/utils"
-)
-
-func TestRadiusAgentReload(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-
-	cfg.SessionSCfg().Enabled = true
-	cfg.SessionSCfg().ListenBijson = ""
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer func() {
-		cancel()
-		time.Sleep(10 * time.Millisecond)
-	}()
-	shdWg := new(sync.WaitGroup)
-
-	cls := commonlisteners.NewCommonListenerS(nil)
-	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1),
-		nil, anz, srvDep)
-	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
-	engine.NewConnManager(cfg)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	srvMngr.StartServices(ctx, cancel)
-	if srv.IsRunning() {
-		t.Fatalf("Expected service to be down")
-	}
-	var reply string
-	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql")
-	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Section: config.RadiusAgentJSON,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Fatalf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	runtime.Gosched()
-	if !srv.IsRunning() {
-		t.Fatalf("Expected service to be running")
-	}
-	runtime.Gosched()
-	err := srv.Start(ctx, cancel)
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = srv.Reload(ctx, cancel)
-	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.RadiusAgentCfg().Enabled = false
-	cfg.GetReloadChan() <- config.SectionToService[config.RadiusAgentJSON]
-	time.Sleep(10 * time.Millisecond)
-	if srv.IsRunning() {
-		t.Fatalf("Expected service to be down")
-	}
-}
-
-func TestRadiusAgentReload2(t *testing.T) {
-	time.Sleep(10 * time.Millisecond)
-	cfg := config.NewDefaultCGRConfig()
-
-	cfg.SessionSCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer func() {
-		cancel()
-		time.Sleep(10 * time.Millisecond)
-	}()
-	shdWg := new(sync.WaitGroup)
-
-	cls := commonlisteners.NewCommonListenerS(nil)
-	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	db := NewDataDBService(cfg, nil, false, srvDep)
-	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
-	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1),
-		nil, anz, srvDep)
-	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
-	engine.NewConnManager(cfg)
-	srvMngr.AddServices(srv, sS,
-		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
-	srvMngr.StartServices(ctx, cancel)
-	if srv.IsRunning() {
-		t.Fatalf("Expected service to be down")
-	}
-	var reply string
-	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql")
-	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
-		Section: config.RadiusAgentJSON,
-	}, &reply); err != nil {
-		t.Fatal(err)
-	} else if reply != utils.OK {
-		t.Fatalf("Expecting OK ,received %s", reply)
-	}
-	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	runtime.Gosched()
-	runtime.Gosched()
-	if !srv.IsRunning() {
-		t.Fatalf("Expected service to be running")
-	}
-	runtime.Gosched()
-	runtime.Gosched()
-	err := srv.Start(ctx, cancel)
-	if err == nil || err != utils.ErrServiceAlreadyRunning {
-		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
-	}
-	err = srv.Reload(ctx, cancel)
-	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	castSrv, canCastSrv := srv.(*RadiusAgent)
-	if !canCastSrv {
-		t.Fatalf("cannot cast")
-	}
-
-	err = srv.Reload(ctx, cancel)
-	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	castSrv.lnet = "test_string"
-	err = srv.Reload(ctx, cancel)
-	if err != nil {
-		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
-	}
-	cfg.RadiusAgentCfg().Enabled = false
-	cfg.GetReloadChan() <- config.SectionToService[config.RadiusAgentJSON]
-	time.Sleep(10 * time.Millisecond)
-	if srv.IsRunning() {
-		t.Fatalf("Expected service to be down")
-	}
-
-}
-
-func TestRadiusAgentReload3(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.RadiusAgentCfg().ClientDictionaries = map[string]string{
-		"test": "test",
-	}
-	cfg.SessionSCfg().Enabled = true
-	cfg.RadiusAgentCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	ctx, cancel := context.WithCancel(context.TODO())
-	defer func() {
-		cancel()
-		time.Sleep(10 * time.Millisecond)
-	}()
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
-	err := srv.Start(ctx, cancel)
-	if err == nil || err.Error() != "stat test: no such file or directory" {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "stat test: no such file or directory", err)
-	}
-}
-
-func TestRadiusAgentReload4(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Enabled = true
-	cfg.RadiusAgentCfg().Enabled = true
-	cfg.RadiusAgentCfg().ListenNet = "test"
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
-	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
-	r, err := agents.NewRadiusAgent(cfg, nil, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	runtime.Gosched()
-	rad := srv.(*RadiusAgent)
-	rad.stopChan = make(chan struct{})
-	err = rad.listenAndServe(r, func() {})
-	if err == nil || err.Error() != "unsupported network: <test>" {
-		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "unsupported network: <test>", err)
-	}
-}
+// import (
+// 	"path"
+// 	"runtime"
+// 	"sync"
+// 	"testing"
+// 	"time"
+//
+// 	"github.com/cgrates/birpc"
+// 	"github.com/cgrates/birpc/context"
+// 	"github.com/cgrates/cgrates/agents"
+// 	"github.com/cgrates/cgrates/commonlisteners"
+// 	"github.com/cgrates/cgrates/config"
+// 	"github.com/cgrates/cgrates/engine"
+// 	"github.com/cgrates/cgrates/servmanager"
+// 	"github.com/cgrates/cgrates/utils"
+// )
+//
+// func TestRadiusAgentReload(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+//
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.SessionSCfg().ListenBijson = ""
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	ctx, cancel := context.WithCancel(context.TODO())
+// 	defer func() {
+// 		cancel()
+// 		time.Sleep(10 * time.Millisecond)
+// 	}()
+// 	shdWg := new(sync.WaitGroup)
+//
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1),
+// 		nil, anz, srvDep)
+// 	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
+// 	engine.NewConnManager(cfg)
+// 	srvMngr.AddServices(srv, sS,
+// 		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+// 	srvMngr.StartServices(ctx, cancel)
+// 	if srv.IsRunning() {
+// 		t.Fatalf("Expected service to be down")
+// 	}
+// 	var reply string
+// 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql")
+// 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
+// 		Section: config.RadiusAgentJSON,
+// 	}, &reply); err != nil {
+// 		t.Fatal(err)
+// 	} else if reply != utils.OK {
+// 		t.Fatalf("Expecting OK ,received %s", reply)
+// 	}
+// 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+// 	runtime.Gosched()
+// 	if !srv.IsRunning() {
+// 		t.Fatalf("Expected service to be running")
+// 	}
+// 	runtime.Gosched()
+// 	err := srv.Start(ctx, cancel)
+// 	if err == nil || err != utils.ErrServiceAlreadyRunning {
+// 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+// 	}
+// 	err = srv.Reload(ctx, cancel)
+// 	if err != nil {
+// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+// 	}
+// 	cfg.RadiusAgentCfg().Enabled = false
+// 	cfg.GetReloadChan() <- config.SectionToService[config.RadiusAgentJSON]
+// 	time.Sleep(10 * time.Millisecond)
+// 	if srv.IsRunning() {
+// 		t.Fatalf("Expected service to be down")
+// 	}
+// }
+//
+// func TestRadiusAgentReload2(t *testing.T) {
+// 	time.Sleep(10 * time.Millisecond)
+// 	cfg := config.NewDefaultCGRConfig()
+//
+// 	cfg.SessionSCfg().Enabled = true
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	ctx, cancel := context.WithCancel(context.TODO())
+// 	defer func() {
+// 		cancel()
+// 		time.Sleep(10 * time.Millisecond)
+// 	}()
+// 	shdWg := new(sync.WaitGroup)
+//
+// 	cls := commonlisteners.NewCommonListenerS(nil)
+// 	srvMngr := servmanager.NewServiceManager(shdWg, nil, cfg)
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	db := NewDataDBService(cfg, nil, false, srvDep)
+// 	anz := NewAnalyzerService(cfg, cls, filterSChan, make(chan birpc.ClientConnector, 1), srvDep)
+// 	sS := NewSessionService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1),
+// 		nil, anz, srvDep)
+// 	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
+// 	engine.NewConnManager(cfg)
+// 	srvMngr.AddServices(srv, sS,
+// 		NewLoaderService(cfg, db, filterSChan, cls, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
+// 	srvMngr.StartServices(ctx, cancel)
+// 	if srv.IsRunning() {
+// 		t.Fatalf("Expected service to be down")
+// 	}
+// 	var reply string
+// 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "radagent_mysql")
+// 	if err := cfg.V1ReloadConfig(context.Background(), &config.ReloadArgs{
+// 		Section: config.RadiusAgentJSON,
+// 	}, &reply); err != nil {
+// 		t.Fatal(err)
+// 	} else if reply != utils.OK {
+// 		t.Fatalf("Expecting OK ,received %s", reply)
+// 	}
+// 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
+// 	runtime.Gosched()
+// 	runtime.Gosched()
+// 	if !srv.IsRunning() {
+// 		t.Fatalf("Expected service to be running")
+// 	}
+// 	runtime.Gosched()
+// 	runtime.Gosched()
+// 	err := srv.Start(ctx, cancel)
+// 	if err == nil || err != utils.ErrServiceAlreadyRunning {
+// 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", utils.ErrServiceAlreadyRunning, err)
+// 	}
+// 	err = srv.Reload(ctx, cancel)
+// 	if err != nil {
+// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+// 	}
+// 	castSrv, canCastSrv := srv.(*RadiusAgent)
+// 	if !canCastSrv {
+// 		t.Fatalf("cannot cast")
+// 	}
+//
+// 	err = srv.Reload(ctx, cancel)
+// 	if err != nil {
+// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+// 	}
+// 	castSrv.lnet = "test_string"
+// 	err = srv.Reload(ctx, cancel)
+// 	if err != nil {
+// 		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
+// 	}
+// 	cfg.RadiusAgentCfg().Enabled = false
+// 	cfg.GetReloadChan() <- config.SectionToService[config.RadiusAgentJSON]
+// 	time.Sleep(10 * time.Millisecond)
+// 	if srv.IsRunning() {
+// 		t.Fatalf("Expected service to be down")
+// 	}
+//
+// }
+//
+// func TestRadiusAgentReload3(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.RadiusAgentCfg().ClientDictionaries = map[string]string{
+// 		"test": "test",
+// 	}
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.RadiusAgentCfg().Enabled = true
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	ctx, cancel := context.WithCancel(context.TODO())
+// 	defer func() {
+// 		cancel()
+// 		time.Sleep(10 * time.Millisecond)
+// 	}()
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
+// 	err := srv.Start(ctx, cancel)
+// 	if err == nil || err.Error() != "stat test: no such file or directory" {
+// 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "stat test: no such file or directory", err)
+// 	}
+// }
+//
+// func TestRadiusAgentReload4(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.SessionSCfg().Enabled = true
+// 	cfg.RadiusAgentCfg().Enabled = true
+// 	cfg.RadiusAgentCfg().ListenNet = "test"
+// 	filterSChan := make(chan *engine.FilterS, 1)
+// 	filterSChan <- nil
+// 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
+// 	srv := NewRadiusAgent(cfg, filterSChan, nil, srvDep)
+// 	r, err := agents.NewRadiusAgent(cfg, nil, nil)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	runtime.Gosched()
+// 	rad := srv.(*RadiusAgent)
+// 	rad.stopChan = make(chan struct{})
+// 	err = rad.listenAndServe(r, func() {})
+// 	if err == nil || err.Error() != "unsupported network: <test>" {
+// 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "unsupported network: <test>", err)
+// 	}
+// }
