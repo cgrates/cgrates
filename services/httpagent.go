@@ -33,12 +33,12 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
+	cls *CommonListenerService, connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -47,14 +47,18 @@ func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 // HTTPAgent implements Agent interface
 type HTTPAgent struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
+
+	cl *commonlisteners.CommonListenerS
 
 	// we can realy stop the HTTPAgent so keep a flag
 	// if we registerd the handlers
 	started bool
+
 	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 }
 
@@ -64,6 +68,10 @@ func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err erro
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	cl, err := ha.cls.WaitForCLS(ctx)
+	if err != nil {
+		return err
+	}
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ha.filterSChan); err != nil {
 		return
@@ -73,7 +81,7 @@ func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err erro
 	ha.started = true
 	utils.Logger.Info(fmt.Sprintf("<%s> successfully started HTTPAgent", utils.HTTPAgent))
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
-		ha.server.RegisterHttpHandler(agntCfg.URL,
+		cl.RegisterHttpHandler(agntCfg.URL,
 			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, filterS,
 				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
@@ -99,7 +107,7 @@ func (ha *HTTPAgent) Shutdown() (err error) {
 func (ha *HTTPAgent) IsRunning() bool {
 	ha.RLock()
 	defer ha.RUnlock()
-	return ha != nil && ha.started
+	return ha.started
 }
 
 // ServiceName returns the service name

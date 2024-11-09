@@ -54,7 +54,7 @@ func TestCdrsCoverage(t *testing.T) {
 		dm:          db,
 		storDB:      stordb,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		connChan:    make(chan birpc.ClientConnector, 1),
 		connMgr:     nil,
 		stopChan:    make(chan struct{}, 1),

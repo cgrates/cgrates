@@ -34,7 +34,7 @@ import (
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalTrendSChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalTrendSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TrendService{
@@ -42,7 +42,7 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 		cfg:      cfg,
 		dm:       dm,
 		cacheS:   cacheS,
-		server:   server,
+		cls:      cls,
 		connMgr:  connMgr,
 		anz:      anz,
 		srvDep:   srvDep,
@@ -51,16 +51,20 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 
 type TrendService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
-	cacheS      *CacheService
-	server      *commonlisteners.CommonListenerS
-	connMgr     *engine.ConnManager
-	filterSChan chan *engine.FilterS
-	connChan    chan birpc.ClientConnector
-	trs         *engine.TrendS
 	anz         *AnalyzerService
-	srvDep      map[string]*sync.WaitGroup
+	cacheS      *CacheService
+	filterSChan chan *engine.FilterS
+
+	trs *engine.TrendS
+	cl  *commonlisteners.CommonListenerS
+
+	connChan chan birpc.ClientConnector
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
@@ -70,6 +74,9 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	}
 
 	trs.srvDep[utils.DataDB].Add(1)
+	if trs.cl, err = trs.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = trs.cacheS.WaitToPrecache(ctx,
 		utils.CacheTrendProfiles,
 		utils.CacheTrends,
@@ -101,7 +108,7 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	}
 	if !trs.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			trs.server.RpcRegister(s)
+			trs.cl.RpcRegister(s)
 		}
 	}
 	trs.connChan <- trs.anz.GetInternalCodec(srv, utils.Trends)
@@ -124,13 +131,13 @@ func (trs *TrendService) Shutdown() (err error) {
 	trs.trs.StopTrendS()
 	trs.trs = nil
 	<-trs.connChan
-	trs.server.RpcUnregisterName(utils.TrendSv1)
+	trs.cl.RpcUnregisterName(utils.TrendSv1)
 	return
 }
 
 // IsRunning returns if the service is running
 func (trs *TrendService) IsRunning() bool {
-	return trs != nil && trs.trs != nil
+	return trs.trs != nil
 }
 
 // ServiceName returns the service name

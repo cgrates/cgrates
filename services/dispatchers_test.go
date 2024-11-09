@@ -53,7 +53,7 @@ func TestDispatcherSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		connMgr:     srv.connMgr,
 		connChan:    make(chan birpc.ClientConnector, 1),
 		anz:         anz,

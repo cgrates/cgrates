@@ -32,14 +32,14 @@ import (
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig, server *commonlisteners.CommonListenerS,
+func NewAnalyzerService(cfg *config.CGRConfig, clSrv *CommonListenerService,
 	filterSChan chan *engine.FilterS,
 	internalAnalyzerSChan chan birpc.ClientConnector,
 	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
-		server:      server,
+		cls:         clSrv,
 		filterSChan: filterSChan,
 		srvDep:      srvDep,
 	}
@@ -48,23 +48,28 @@ func NewAnalyzerService(cfg *config.CGRConfig, server *commonlisteners.CommonLis
 // AnalyzerService implements Service interface
 type AnalyzerService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
-	server      *commonlisteners.CommonListenerS
+
+	cls         *CommonListenerService
 	filterSChan chan *engine.FilterS
-	ctx         *context.Context
-	cancelFunc  context.CancelFunc
 
-	anz     *analyzers.AnalyzerS
-	started chan struct{}
+	anz *analyzers.AnalyzerS
+	cl  *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
-	srvDep   map[string]*sync.WaitGroup
+	started    chan struct{}
+	cancelFunc context.CancelFunc
+	connChan   chan birpc.ClientConnector
+	cfg        *config.CGRConfig
+	srvDep     map[string]*sync.WaitGroup
 }
 
 // Start should handle the sercive start
 func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
 	if anz.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
+	}
+
+	if anz.cl, err = anz.cls.WaitForCLS(ctx); err != nil {
+		return
 	}
 
 	anz.Lock()
@@ -75,14 +80,15 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 		return
 	}
 	close(anz.started)
-	anz.ctx, anz.cancelFunc = context.WithCancel(ctx)
+	anzCtx, cancel := context.WithCancel(ctx)
+	anz.cancelFunc = cancel
 	go func(a *analyzers.AnalyzerS) {
-		if err := a.ListenAndServe(anz.ctx); err != nil {
+		if err := a.ListenAndServe(anzCtx); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
 			shtDwn()
 		}
 	}(anz.anz)
-	anz.server.SetAnalyzer(anz.anz)
+	anz.cl.SetAnalyzer(anz.anz)
 	go anz.start(ctx)
 	return
 }
@@ -104,7 +110,7 @@ func (anz *AnalyzerService) start(ctx *context.Context) {
 	// srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
 	if !anz.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			anz.server.RpcRegister(s)
+			anz.cl.RpcRegister(s)
 		}
 	}
 	anz.Unlock()
@@ -120,7 +126,7 @@ func (anz *AnalyzerService) Reload(*context.Context, context.CancelFunc) (err er
 func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.Lock()
 	anz.cancelFunc()
-	anz.server.SetAnalyzer(nil)
+	anz.cl.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
 
@@ -131,7 +137,7 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.started = nil
 	<-anz.connChan
 	anz.Unlock()
-	anz.server.RpcUnregisterName(utils.AnalyzerSv1)
+	anz.cl.RpcUnregisterName(utils.AnalyzerSv1)
 	return
 }
 

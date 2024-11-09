@@ -46,7 +46,7 @@ func TestAnalyzerCoverage(t *testing.T) {
 	anz2 := &AnalyzerService{
 		RWMutex:     sync.RWMutex{},
 		cfg:         cfg,
-		server:      cls,
+		cls:         cls,
 		filterSChan: filterSChan,
 		connChan:    connChan,
 		srvDep:      srvDep,

@@ -46,7 +46,7 @@ func TestHTTPAgentCoverage(t *testing.T) {
 	srv2 := &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		started:     true,
 		connMgr:     cM,
 		srvDep:      srvDep,

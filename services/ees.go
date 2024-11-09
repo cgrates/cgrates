@@ -34,13 +34,13 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, server *commonlisteners.CommonListenerS, intConnChan chan birpc.ClientConnector,
+	connMgr *engine.ConnManager, cls *CommonListenerService, intConnChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
-		server:      server,
+		cls:         cls,
 		intConnChan: intConnChan,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -51,15 +51,17 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 type EventExporterService struct {
 	mu sync.RWMutex
 
-	cfg         *config.CGRConfig
+	cls         *CommonListenerService
+	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
-	connMgr     *engine.ConnManager
-	server      *commonlisteners.CommonListenerS
-	intConnChan chan birpc.ClientConnector
 
-	eeS    *ees.EeS
-	anz    *AnalyzerService
-	srvDep map[string]*sync.WaitGroup
+	eeS *ees.EeS
+	cl  *commonlisteners.CommonListenerS
+
+	intConnChan chan birpc.ClientConnector
+	connMgr     *engine.ConnManager
+	cfg         *config.CGRConfig
+	srvDep      map[string]*sync.WaitGroup
 }
 
 // ServiceName returns the service name
@@ -76,7 +78,7 @@ func (es *EventExporterService) ShouldRun() (should bool) {
 func (es *EventExporterService) IsRunning() bool {
 	es.mu.RLock()
 	defer es.mu.RUnlock()
-	return es != nil && es.eeS != nil
+	return es.eeS != nil
 }
 
 // Reload handles the change of config
@@ -95,7 +97,7 @@ func (es *EventExporterService) Shutdown() error {
 	es.eeS.ClearExporterCache()
 	es.eeS = nil
 	<-es.intConnChan
-	es.server.RpcUnregisterName(utils.EeSv1)
+	es.cl.RpcUnregisterName(utils.EeSv1)
 	return nil
 }
 
@@ -105,6 +107,10 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	var err error
+	if es.cl, err = es.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	fltrS, err := waitForFilterS(ctx, es.filterSChan)
 	if err != nil {
 		return err
@@ -126,7 +132,7 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	srv, _ := engine.NewServiceWithPing(es.eeS, utils.EeSv1, utils.V1Prfx)
 	// srv, _ := birpc.NewService(es.rpc, "", false)
 	if !es.cfg.DispatcherSCfg().Enabled {
-		es.server.RpcRegister(srv)
+		es.cl.RpcRegister(srv)
 	}
 	es.intConnChan <- es.anz.GetInternalCodec(srv, utils.EEs)
 	return nil

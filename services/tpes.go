@@ -34,13 +34,13 @@ import (
 
 // NewTPeService is the constructor for the TpeService
 func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataDBService,
-	server *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	cls *CommonListenerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TPeService{
 		cfg:     cfg,
 		srvDep:  srvDep,
 		dm:      dm,
 		connMgr: connMgr,
-		server:  server,
+		cls:     cls,
 	}
 }
 
@@ -48,58 +48,63 @@ func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataD
 type TPeService struct {
 	sync.RWMutex
 
-	cfg      *config.CGRConfig
-	server   *commonlisteners.CommonListenerS
-	connMgr  *engine.ConnManager
-	tpes     *tpes.TPeS
-	dm       *DataDBService
-	srv      *birpc.Service
-	stopChan chan struct{}
+	cls *CommonListenerService
+	dm  *DataDBService
 
-	srvDep map[string]*sync.WaitGroup
+	tpes *tpes.TPeS
+	cl   *commonlisteners.CommonListenerS
+	srv  *birpc.Service
+
+	stopChan chan struct{}
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
+	srvDep   map[string]*sync.WaitGroup
 }
 
 // Start should handle the service start
-func (tpSrv *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+	if ts.cl, err = ts.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	var datadb *engine.DataManager
-	if datadb, err = tpSrv.dm.WaitForDM(ctx); err != nil {
+	if datadb, err = ts.dm.WaitForDM(ctx); err != nil {
 		return
 	}
 
-	tpSrv.tpes = tpes.NewTPeS(tpSrv.cfg, datadb, tpSrv.connMgr)
+	ts.tpes = tpes.NewTPeS(ts.cfg, datadb, ts.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TPeS))
-	tpSrv.stopChan = make(chan struct{})
-	tpSrv.srv, _ = birpc.NewService(apis.NewTPeSv1(tpSrv.tpes), utils.EmptyString, false)
-	tpSrv.server.RpcRegister(tpSrv.srv)
+	ts.stopChan = make(chan struct{})
+	ts.srv, _ = birpc.NewService(apis.NewTPeSv1(ts.tpes), utils.EmptyString, false)
+	ts.cl.RpcRegister(ts.srv)
 	return
 }
 
 // Reload handles the change of config
-func (tpSrv *TPeService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (ts *TPeService) Reload(*context.Context, context.CancelFunc) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (tpSrv *TPeService) Shutdown() (err error) {
-	tpSrv.srv = nil
-	close(tpSrv.stopChan)
+func (ts *TPeService) Shutdown() (err error) {
+	ts.srv = nil
+	close(ts.stopChan)
 	utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> subsystem", utils.CoreS, utils.TPeS))
 	return
 }
 
 // IsRunning returns if the service is running
-func (tpSrv *TPeService) IsRunning() bool {
-	tpSrv.Lock()
-	defer tpSrv.Unlock()
-	return tpSrv != nil && tpSrv.tpes != nil
+func (ts *TPeService) IsRunning() bool {
+	ts.Lock()
+	defer ts.Unlock()
+	return ts.tpes != nil
 }
 
 // ServiceName returns the service name
-func (tpSrv *TPeService) ServiceName() string {
+func (ts *TPeService) ServiceName() string {
 	return utils.TPeS
 }
 
 // ShouldRun returns if the service should be running
-func (tpSrv *TPeService) ShouldRun() bool {
-	return tpSrv.cfg.TpeSCfg().Enabled
+func (ts *TPeService) ShouldRun() bool {
+	return ts.cfg.TpeSCfg().Enabled
 }

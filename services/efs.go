@@ -36,24 +36,26 @@ import (
 type ExportFailoverService struct {
 	sync.Mutex
 
-	cfg         *config.CGRConfig
-	connMgr     *engine.ConnManager
-	server      *commonlisteners.CommonListenerS
-	srv         *birpc.Service
-	intConnChan chan birpc.ClientConnector
-	stopChan    chan struct{}
+	cls *CommonListenerService
 
-	efS    *efs.EfS
-	srvDep map[string]*sync.WaitGroup
+	efS *efs.EfS
+	cl  *commonlisteners.CommonListenerS
+	srv *birpc.Service
+
+	stopChan    chan struct{}
+	intConnChan chan birpc.ClientConnector
+	connMgr     *engine.ConnManager
+	cfg         *config.CGRConfig
+	srvDep      map[string]*sync.WaitGroup
 }
 
 // NewExportFailoverService is the constructor for the TpeService
 func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	intConnChan chan birpc.ClientConnector,
-	server *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) *ExportFailoverService {
+	cls *CommonListenerService, srvDep map[string]*sync.WaitGroup) *ExportFailoverService {
 	return &ExportFailoverService{
 		cfg:         cfg,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		intConnChan: intConnChan,
 		srvDep:      srvDep,
@@ -65,12 +67,15 @@ func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.Cance
 	if efServ.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
+	if efServ.cl, err = efServ.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	efServ.Lock()
 	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))
 	efServ.stopChan = make(chan struct{})
 	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
-	efServ.server.RpcRegister(efServ.srv)
+	efServ.cl.RpcRegister(efServ.srv)
 	efServ.Unlock()
 	return
 }
@@ -93,9 +98,8 @@ func (efServ *ExportFailoverService) Shutdown() (err error) {
 // IsRunning returns if the service is running
 func (efServ *ExportFailoverService) IsRunning() bool {
 	efServ.Lock()
-	run := efServ != nil && efServ.efS != nil
-	efServ.Unlock()
-	return run
+	defer efServ.Unlock()
+	return efServ.efS != nil
 }
 
 // ShouldRun returns if the service should be running

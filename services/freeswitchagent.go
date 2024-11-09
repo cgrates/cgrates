@@ -100,7 +100,7 @@ func (fS *FreeswitchAgent) Shutdown() (err error) {
 func (fS *FreeswitchAgent) IsRunning() bool {
 	fS.RLock()
 	defer fS.RUnlock()
-	return fS != nil && fS.fS != nil
+	return fS.fS != nil
 }
 
 // ServiceName returns the service name

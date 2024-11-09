@@ -35,7 +35,7 @@ import (
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	server *commonlisteners.CommonListenerS, internalThresholdSChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalThresholdSChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
@@ -43,7 +43,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		anz:         anz,
 		srvDep:      srvDep,
 		connMgr:     connMgr,
@@ -53,16 +53,19 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 // ThresholdService implements Service interface
 type ThresholdService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
+	anz         *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	connMgr     *engine.ConnManager
 
-	thrs     *engine.ThresholdS
+	thrs *engine.ThresholdS
+	cl   *commonlisteners.CommonListenerS
+
 	connChan chan birpc.ClientConnector
-	anz      *AnalyzerService
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -73,6 +76,9 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	}
 
 	thrs.srvDep[utils.DataDB].Add(1)
+	if thrs.cl, err = thrs.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = thrs.cacheS.WaitToPrecache(ctx,
 		utils.CacheThresholdProfiles,
 		utils.CacheThresholds,
@@ -101,7 +107,7 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
 	if !thrs.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			thrs.server.RpcRegister(s)
+			thrs.cl.RpcRegister(s)
 		}
 	}
 	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
@@ -124,7 +130,7 @@ func (thrs *ThresholdService) Shutdown() (_ error) {
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
 	<-thrs.connChan
-	thrs.server.RpcUnregisterName(utils.ThresholdSv1)
+	thrs.cl.RpcUnregisterName(utils.ThresholdSv1)
 	return
 }
 
@@ -132,7 +138,7 @@ func (thrs *ThresholdService) Shutdown() (_ error) {
 func (thrs *ThresholdService) IsRunning() bool {
 	thrs.RLock()
 	defer thrs.RUnlock()
-	return thrs != nil && thrs.thrs != nil
+	return thrs.thrs != nil
 }
 
 // ServiceName returns the service name

@@ -51,7 +51,7 @@ func TestStatSCoverage(t *testing.T) {
 		dm:          db,
 		cacheS:      chS,
 		filterSChan: filterSChan,
-		server:      cls,
+		cls:         cls,
 		connMgr:     nil,
 		sts:         &engine.StatS{},
 		connChan:    make(chan birpc.ClientConnector, 1),

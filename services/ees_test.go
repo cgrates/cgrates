@@ -48,7 +48,7 @@ func TestEventExporterSCoverage(t *testing.T) {
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     engine.NewConnManager(cfg),
-		server:      cls,
+		cls:         cls,
 		intConnChan: make(chan birpc.ClientConnector, 1),
 		anz:         anz,
 		srvDep:      srvDep,

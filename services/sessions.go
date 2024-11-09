@@ -36,7 +36,7 @@ import (
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
-	server *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SessionService{
@@ -44,7 +44,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -54,19 +54,20 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 // SessionService implements Service interface
 type SessionService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
+	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
-	server      *commonlisteners.CommonListenerS
-	stopChan    chan struct{}
 
-	sm       *sessions.SessionS
-	connChan chan birpc.ClientConnector
+	sm *sessions.SessionS
+	cl *commonlisteners.CommonListenerS
 
-	// in order to stop the bircp server if necesary
-	bircpEnabled bool
+	bircpEnabled bool // to stop birpc server if needed
+	stopChan     chan struct{}
+	connChan     chan birpc.ClientConnector
 	connMgr      *engine.ConnManager
-	anz          *AnalyzerService
+	cfg          *config.CGRConfig
 	srvDep       map[string]*sync.WaitGroup
 }
 
@@ -76,6 +77,9 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if smg.cl, err = smg.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, smg.filterSChan); err != nil {
 		return
@@ -102,7 +106,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	// srv, _ := birpc.NewService(apis.NewSessionSv1(smg.sm), utils.EmptyString, false) // methods with multiple options
 	if !smg.cfg.DispatcherSCfg().Enabled {
 		for _, s := range srv {
-			smg.server.RpcRegister(s)
+			smg.cl.RpcRegister(s)
 		}
 	}
 	smg.connChan <- smg.anz.GetInternalCodec(srv, utils.SessionS)
@@ -110,7 +114,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
 		smg.bircpEnabled = true
 		for n, s := range srv {
-			smg.server.BiRPCRegisterName(n, s)
+			smg.cl.BiRPCRegisterName(n, s)
 		}
 		// run this in it's own goroutine
 		go smg.start(shtDw)
@@ -119,7 +123,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 }
 
 func (smg *SessionService) start(shtDw context.CancelFunc) (err error) {
-	if err := smg.server.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
+	if err := smg.cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
 		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
 		smg.Lock()
@@ -144,12 +148,12 @@ func (smg *SessionService) Shutdown() (err error) {
 		return
 	}
 	if smg.bircpEnabled {
-		smg.server.StopBiRPC()
+		smg.cl.StopBiRPC()
 		smg.bircpEnabled = false
 	}
 	smg.sm = nil
 	<-smg.connChan
-	smg.server.RpcUnregisterName(utils.SessionSv1)
+	smg.cl.RpcUnregisterName(utils.SessionSv1)
 	// smg.server.BiRPCUnregisterName(utils.SessionSv1)
 	return
 }
@@ -158,7 +162,7 @@ func (smg *SessionService) Shutdown() (err error) {
 func (smg *SessionService) IsRunning() bool {
 	smg.RLock()
 	defer smg.RUnlock()
-	return smg != nil && smg.sm != nil
+	return smg.sm != nil
 }
 
 // ServiceName returns the service name

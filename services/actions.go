@@ -38,7 +38,7 @@ import (
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	server *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ActionService{
 		connChan:    internalChan,
@@ -47,7 +47,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		server:      server,
+		cls:         cls,
 		anz:         anz,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
@@ -57,19 +57,22 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 // ActionService implements Service interface
 type ActionService struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
+
+	cls         *CommonListenerService
 	dm          *DataDBService
+	anz         *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
-	connMgr     *engine.ConnManager
-	server      *commonlisteners.CommonListenerS
+
+	acts *actions.ActionS
+	cl   *commonlisteners.CommonListenerS
 
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
-	acts     *actions.ActionS
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
-	anz      *AnalyzerService
+	connMgr  *engine.ConnManager
+	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 }
 
@@ -79,6 +82,9 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		return utils.ErrServiceAlreadyRunning
 	}
 
+	if acts.cl, err = acts.cls.WaitForCLS(ctx); err != nil {
+		return err
+	}
 	if err = acts.cacheS.WaitToPrecache(ctx,
 		utils.CacheActionProfiles,
 		utils.CacheActionProfilesFilterIndexes); err != nil {
@@ -109,7 +115,7 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	}
 	// srv, _ := birpc.NewService(apis.NewActionSv1(acts.acts), "", false)
 	if !acts.cfg.DispatcherSCfg().Enabled {
-		acts.server.RpcRegister(srv)
+		acts.cl.RpcRegister(srv)
 	}
 	acts.connChan <- acts.anz.GetInternalCodec(srv, utils.ActionS)
 	return
@@ -129,7 +135,7 @@ func (acts *ActionService) Shutdown() (err error) {
 	acts.acts.Shutdown()
 	acts.acts = nil
 	<-acts.connChan
-	acts.server.RpcUnregisterName(utils.ActionSv1)
+	acts.cl.RpcUnregisterName(utils.ActionSv1)
 	return
 }
 
@@ -137,7 +143,7 @@ func (acts *ActionService) Shutdown() (err error) {
 func (acts *ActionService) IsRunning() bool {
 	acts.RLock()
 	defer acts.RUnlock()
-	return acts != nil && acts.acts != nil
+	return acts.acts != nil
 }
 
 // ServiceName returns the service name
