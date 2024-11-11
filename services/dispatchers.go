@@ -33,7 +33,7 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *DispatcherService {
 	return &DispatcherService{
@@ -42,7 +42,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -54,7 +54,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 type DispatcherService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -76,9 +76,8 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 	utils.Logger.Info("Starting CGRateS DispatcherS service.")
-	if dspS.cl, err = dspS.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	dspS.cl = <-dspS.clSChan
+	dspS.clSChan <- dspS.cl
 	if err = dspS.cacheS.WaitToPrecache(ctx,
 		utils.CacheDispatcherProfiles,
 		utils.CacheDispatcherHosts,

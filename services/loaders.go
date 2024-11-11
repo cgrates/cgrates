@@ -33,7 +33,7 @@ import (
 
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
-	filterSChan chan *engine.FilterS, cls *CommonListenerService,
+	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	internalLoaderSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *LoaderService {
@@ -42,7 +42,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		stopChan:    make(chan struct{}),
 		anz:         anz,
@@ -54,7 +54,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 type LoaderService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
@@ -75,9 +75,8 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if ldrs.cl, err = ldrs.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	ldrs.cl = <-ldrs.clSChan
+	ldrs.clSChan <- ldrs.cl
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ldrs.filterSChan); err != nil {
 		return

@@ -33,7 +33,7 @@ import (
 )
 
 // NewCoreService returns the Core Service
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, cls *CommonListenerService,
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS,
 	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
 	srvDep map[string]*sync.WaitGroup) *CoreService {
@@ -43,7 +43,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, cls *CommonListene
 		cfg:      cfg,
 		caps:     caps,
 		fileCPU:  fileCPU,
-		cls:      cls,
+		clSChan:  clSChan,
 		anz:      anz,
 		srvDep:   srvDep,
 		csCh:     make(chan *cores.CoreS, 1),
@@ -54,8 +54,8 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, cls *CommonListene
 type CoreService struct {
 	mu sync.RWMutex
 
-	anz *AnalyzerService
-	cls *CommonListenerService
+	anz     *AnalyzerService
+	clSChan chan *commonlisteners.CommonListenerS
 
 	cS *cores.CoreS
 	cl *commonlisteners.CommonListenerS
@@ -76,11 +76,8 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	var err error
-	cS.cl, err = cS.cls.WaitForCLS(ctx)
-	if err != nil {
-		return err
-	}
+	cS.cl = <-cS.clSChan
+	cS.clSChan <- cS.cl
 	if err := cS.anz.WaitForAnalyzerS(ctx); err != nil {
 		return err
 	}

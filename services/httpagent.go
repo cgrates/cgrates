@@ -33,12 +33,12 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, connMgr *engine.ConnManager,
+	clSChan chan *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -48,7 +48,7 @@ func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 type HTTPAgent struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
 
 	cl *commonlisteners.CommonListenerS
@@ -68,10 +68,8 @@ func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err erro
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cl, err := ha.cls.WaitForCLS(ctx)
-	if err != nil {
-		return err
-	}
+	cl := <-ha.clSChan
+	ha.clSChan <- cl
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ha.filterSChan); err != nil {
 		return

@@ -34,7 +34,7 @@ import (
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalTrendSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalTrendSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TrendService{
@@ -42,7 +42,7 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 		cfg:      cfg,
 		dm:       dm,
 		cacheS:   cacheS,
-		cls:      cls,
+		clSChan:  clSChan,
 		connMgr:  connMgr,
 		anz:      anz,
 		srvDep:   srvDep,
@@ -52,7 +52,7 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 type TrendService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -74,9 +74,8 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	}
 
 	trs.srvDep[utils.DataDB].Add(1)
-	if trs.cl, err = trs.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	trs.cl = <-trs.clSChan
+	trs.clSChan <- trs.cl
 	if err = trs.cacheS.WaitToPrecache(ctx,
 		utils.CacheTrendProfiles,
 		utils.CacheTrends,

@@ -38,7 +38,7 @@ import (
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ActionService{
 		connChan:    internalChan,
@@ -47,7 +47,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		anz:         anz,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
@@ -58,7 +58,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 type ActionService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -82,9 +82,8 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if acts.cl, err = acts.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	acts.cl = <-acts.clSChan
+	acts.clSChan <- acts.cl
 	if err = acts.cacheS.WaitToPrecache(ctx,
 		utils.CacheActionProfiles,
 		utils.CacheActionProfilesFilterIndexes); err != nil {

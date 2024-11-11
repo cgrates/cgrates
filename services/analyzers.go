@@ -32,14 +32,14 @@ import (
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig, clSrv *CommonListenerService,
+func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.CommonListenerS,
 	filterSChan chan *engine.FilterS,
 	internalAnalyzerSChan chan birpc.ClientConnector,
 	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
-		cls:         clSrv,
+		clSChan:     clSChan,
 		filterSChan: filterSChan,
 		srvDep:      srvDep,
 	}
@@ -49,7 +49,7 @@ func NewAnalyzerService(cfg *config.CGRConfig, clSrv *CommonListenerService,
 type AnalyzerService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
 
 	anz *analyzers.AnalyzerS
@@ -68,9 +68,8 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if anz.cl, err = anz.cls.WaitForCLS(ctx); err != nil {
-		return
-	}
+	anz.cl = <-anz.clSChan
+	anz.clSChan <- anz.cl
 
 	anz.Lock()
 	defer anz.Unlock()

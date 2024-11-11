@@ -37,7 +37,7 @@ import (
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, cls *CommonListenerService,
+	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
 	internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AccountService{
@@ -47,7 +47,7 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
-		cls:         cls,
+		clSChan:     clSChan,
 		anz:         anz,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
@@ -58,7 +58,7 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 type AccountService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	cacheS      *CacheService
 	anz         *AnalyzerService
@@ -81,10 +81,8 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	acts.cl, err = acts.cls.WaitForCLS(ctx)
-	if err != nil {
-		return err
-	}
+	acts.cl = <-acts.clSChan
+	acts.clSChan <- acts.cl
 	if err = acts.cacheS.WaitToPrecache(ctx,
 		utils.CacheAccounts,
 		utils.CacheAccountsFilterIndexes); err != nil {

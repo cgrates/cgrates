@@ -35,7 +35,7 @@ import (
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	cls *CommonListenerService, internalThresholdSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalThresholdSChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
@@ -43,7 +43,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		anz:         anz,
 		srvDep:      srvDep,
 		connMgr:     connMgr,
@@ -54,7 +54,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 type ThresholdService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -76,9 +76,8 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	}
 
 	thrs.srvDep[utils.DataDB].Add(1)
-	if thrs.cl, err = thrs.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	thrs.cl = <-thrs.clSChan
+	thrs.clSChan <- thrs.cl
 	if err = thrs.cacheS.WaitToPrecache(ctx,
 		utils.CacheThresholdProfiles,
 		utils.CacheThresholds,

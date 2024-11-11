@@ -35,7 +35,7 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, dspS *DispatcherService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AttributeService{
@@ -44,7 +44,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		anz:         anz,
 		srvDep:      srvDep,
 		dspS:        dspS,
@@ -55,7 +55,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 type AttributeService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -77,9 +77,8 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if attrS.cl, err = attrS.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	attrS.cl = <-attrS.clSChan
+	attrS.clSChan <- attrS.cl
 	if err = attrS.cacheS.WaitToPrecache(ctx,
 		utils.CacheAttributeProfiles,
 		utils.CacheAttributeFilterIndexes); err != nil {

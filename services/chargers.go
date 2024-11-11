@@ -34,7 +34,7 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS, cls *CommonListenerService,
+	cacheS *CacheService, filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	internalChargerSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ChargerService{
@@ -43,7 +43,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -54,7 +54,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 type ChargerService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	cacheS      *CacheService
 	anz         *AnalyzerService
@@ -75,9 +75,8 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if chrS.cl, err = chrS.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	chrS.cl = <-chrS.clSChan
+	chrS.clSChan <- chrS.cl
 	if err = chrS.cacheS.WaitToPrecache(ctx,
 		utils.CacheChargerProfiles,
 		utils.CacheChargerFilterIndexes); err != nil {

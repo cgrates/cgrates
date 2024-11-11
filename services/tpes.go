@@ -34,13 +34,13 @@ import (
 
 // NewTPeService is the constructor for the TpeService
 func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataDBService,
-	cls *CommonListenerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TPeService{
 		cfg:     cfg,
 		srvDep:  srvDep,
 		dm:      dm,
 		connMgr: connMgr,
-		cls:     cls,
+		clSChan: clSChan,
 	}
 }
 
@@ -48,8 +48,8 @@ func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataD
 type TPeService struct {
 	sync.RWMutex
 
-	cls *CommonListenerService
-	dm  *DataDBService
+	clSChan chan *commonlisteners.CommonListenerS
+	dm      *DataDBService
 
 	tpes *tpes.TPeS
 	cl   *commonlisteners.CommonListenerS
@@ -63,9 +63,8 @@ type TPeService struct {
 
 // Start should handle the service start
 func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if ts.cl, err = ts.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	ts.cl = <-ts.clSChan
+	ts.clSChan <- ts.cl
 	var datadb *engine.DataManager
 	if datadb, err = ts.dm.WaitForDM(ctx); err != nil {
 		return

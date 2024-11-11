@@ -34,7 +34,7 @@ import (
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig,
 	dm *DataDBService, storDB *StorDBService,
-	filterSChan chan *engine.FilterS, cls *CommonListenerService,
+	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	internalAPIerSv1Chan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -44,7 +44,7 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 		dm:          dm,
 		storDB:      storDB,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -55,7 +55,7 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 type AdminSv1Service struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	storDB      *StorDBService
 	anz         *AnalyzerService
@@ -78,9 +78,8 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if apiService.cl, err = apiService.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	apiService.cl = <-apiService.clSChan
+	apiService.clSChan <- apiService.cl
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, apiService.filterSChan); err != nil {
 		return

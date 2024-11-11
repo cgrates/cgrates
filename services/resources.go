@@ -34,7 +34,7 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalResourceSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalResourceSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ResourceService{
@@ -43,7 +43,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -54,7 +54,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 type ResourceService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -76,9 +76,8 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 
 	reS.srvDep[utils.DataDB].Add(1)
-	if reS.cl, err = reS.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	reS.cl = <-reS.clSChan
+	reS.clSChan <- reS.cl
 	if err = reS.cacheS.WaitToPrecache(ctx,
 		utils.CacheResourceProfiles,
 		utils.CacheResources,

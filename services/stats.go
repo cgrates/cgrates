@@ -34,7 +34,7 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalStatSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalStatSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &StatService{
@@ -43,7 +43,7 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -54,7 +54,7 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 type StatService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -76,9 +76,8 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	}
 
 	sts.srvDep[utils.DataDB].Add(1)
-	if sts.cl, err = sts.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	sts.cl = <-sts.clSChan
+	sts.clSChan <- sts.cl
 	if err = sts.cacheS.WaitToPrecache(ctx,
 		utils.CacheStatQueueProfiles,
 		utils.CacheStatQueues,
