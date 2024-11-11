@@ -274,6 +274,36 @@ func (dT *DispatcherThresholdSv1) GetThreshold(ctx *context.Context, args *utils
 	return dT.dS.ThresholdSv1GetThreshold(ctx, args, th)
 }
 
+func NewDispatcherTrendSv1(dps *dispatchers.DispatcherService) *DispatcherThresholdSv1 {
+	return &DispatcherThresholdSv1{dS: dps}
+}
+
+type DispatcherTrendSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+func (dT *DispatcherTrendSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	return dT.dS.TrendSv1Ping(ctx, args, reply)
+}
+
+func (dT *DispatcherTrendSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries,
+	reply *int) (err error) {
+	return dT.dS.TrendSv1ScheduleQueries(ctx, args, reply)
+}
+
+func (dT *DispatcherTrendSv1) GetTrend(ctx *context.Context, args *utils.ArgGetTrend, reply *engine.Trend) (err error) {
+	return dT.dS.TrendSv1GetTrend(ctx, args, reply)
+}
+
+func (dT *DispatcherTrendSv1) GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, reply *[]utils.ScheduledTrend) (err error) {
+	return dT.dS.TrendSv1GetScheduledTrends(ctx, args, reply)
+}
+
+func (dT *DispatcherTrendSv1) GetTrendSummary(ctx *context.Context, args utils.TenantIDWithAPIOpts, reply *engine.TrendSummary) error {
+
+	return dT.dS.TrendSv1GetTrendSummary(ctx, args, reply)
+}
+
 func NewDispatcherStatSv1(dps *dispatchers.DispatcherService) *DispatcherStatSv1 {
 	return &DispatcherStatSv1{dS: dps}
 }
@@ -312,6 +342,34 @@ func (dSts *DispatcherStatSv1) GetQueueIDs(ctx *context.Context, args *utils.Ten
 // GetQueueStringMetrics implements StatSv1ProcessEvent
 func (dSts *DispatcherStatSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
 	return dSts.dS.StatSv1ProcessEvent(ctx, args, reply)
+}
+
+func NewDispatcherRankingSv1(dps *dispatchers.DispatcherService) *DispatcherRankingSv1 {
+	return &DispatcherRankingSv1{ds: dps}
+}
+
+type DispatcherRankingSv1 struct {
+	ds *dispatchers.DispatcherService
+}
+
+func (dRn *DispatcherRankingSv1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dRn.ds.RankingSv1Ping(ctx, args, reply)
+}
+
+func (dRn *DispatcherRankingSv1) GetRankingSummary(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.RankingSummary) error {
+	return dRn.ds.RankingSv1GetRankingSummary(ctx, args, reply)
+}
+
+func (dRn *DispatcherRankingSv1) GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, reply *[]utils.ScheduledRanking) error {
+	return dRn.ds.RankingSv1GetSchedule(ctx, args, reply)
+}
+
+func (dRn *DispatcherRankingSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, reply *int) (err error) {
+	return dRn.ds.RankingSv1ScheduleQueries(ctx, args, reply)
+}
+
+func (dRn *DispatcherRankingSv1) GetRanking(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Ranking) (err error) {
+	return dRn.ds.RankingSv1GetRanking(ctx, args, reply)
 }
 
 func NewDispatcherResourceSv1(dps *dispatchers.DispatcherService) *DispatcherResourceSv1 {
