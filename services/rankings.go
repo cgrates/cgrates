@@ -35,7 +35,7 @@ import (
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalRankingSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalRankingSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RankingService{
@@ -44,7 +44,7 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -54,7 +54,7 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 type RankingService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -76,9 +76,8 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	}
 
 	ran.srvDep[utils.DataDB].Add(1)
-	if ran.cl, err = ran.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	ran.cl = <-ran.clSChan
+	ran.clSChan <- ran.cl
 	if err = ran.cacheS.WaitToPrecache(ctx,
 		utils.CacheRankingProfiles,
 		utils.CacheRankings,

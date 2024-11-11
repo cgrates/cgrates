@@ -30,12 +30,12 @@ import (
 )
 
 // NewCommonListenerService instantiates a new CommonListenerService.
-func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps, srvDep map[string]*sync.WaitGroup) *CommonListenerService {
+func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) *CommonListenerService {
 	return &CommonListenerService{
-		cfg:    cfg,
-		caps:   caps,
-		clsCh:  make(chan *commonlisteners.CommonListenerS, 1),
-		srvDep: srvDep,
+		cfg:     cfg,
+		caps:    caps,
+		clSChan: clSChan,
+		srvDep:  srvDep,
 	}
 }
 
@@ -45,10 +45,10 @@ type CommonListenerService struct {
 
 	cls *commonlisteners.CommonListenerS
 
-	clsCh  chan *commonlisteners.CommonListenerS
-	caps   *engine.Caps
-	cfg    *config.CGRConfig
-	srvDep map[string]*sync.WaitGroup
+	clSChan chan *commonlisteners.CommonListenerS
+	caps    *engine.Caps
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 }
 
 // Start handles the service start.
@@ -59,7 +59,7 @@ func (cl *CommonListenerService) Start(*context.Context, context.CancelFunc) err
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	cl.cls = commonlisteners.NewCommonListenerS(cl.caps)
-	cl.clsCh <- cl.cls
+	cl.clSChan <- cl.cls
 	if len(cl.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cl.cls.RegisterHTTPFunc(cl.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
 	}
@@ -79,7 +79,7 @@ func (cl *CommonListenerService) Shutdown() error {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	cl.cls = nil
-	<-cl.clsCh
+	<-cl.clSChan
 	return nil
 }
 
@@ -98,19 +98,4 @@ func (cl *CommonListenerService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (cl *CommonListenerService) ShouldRun() bool {
 	return true
-}
-
-// WaitForCLS waits for the CommonListenerS structure to be initialized.
-func (cl *CommonListenerService) WaitForCLS(ctx *context.Context) (*commonlisteners.CommonListenerS, error) {
-	cl.mu.RLock()
-	clsCh := cl.clsCh
-	cl.mu.RUnlock()
-	var cls *commonlisteners.CommonListenerS
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case cls = <-clsCh:
-		clsCh <- cls
-	}
-	return cls, nil
 }

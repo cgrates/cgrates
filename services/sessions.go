@@ -36,7 +36,7 @@ import (
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SessionService{
@@ -44,7 +44,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -55,7 +55,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 type SessionService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
@@ -77,9 +77,8 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if smg.cl, err = smg.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	smg.cl = <-smg.clSChan
+	smg.clSChan <- smg.cl
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, smg.filterSChan); err != nil {
 		return

@@ -34,13 +34,13 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, cls *CommonListenerService, intConnChan chan birpc.ClientConnector,
+	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS, intConnChan chan birpc.ClientConnector,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
-		cls:         cls,
+		clSChan:     clSChan,
 		intConnChan: intConnChan,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -51,7 +51,7 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 type EventExporterService struct {
 	mu sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
 
@@ -107,10 +107,8 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	var err error
-	if es.cl, err = es.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	es.cl = <-es.clSChan
+	es.clSChan <- es.cl
 	fltrS, err := waitForFilterS(ctx, es.filterSChan)
 	if err != nil {
 		return err

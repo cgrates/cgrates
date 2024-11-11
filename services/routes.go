@@ -35,7 +35,7 @@ import (
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalRouteSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalRouteSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RouteService{
@@ -44,7 +44,7 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -55,7 +55,7 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 type RouteService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	anz         *AnalyzerService
 	cacheS      *CacheService
@@ -76,9 +76,8 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if routeS.cl, err = routeS.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	routeS.cl = <-routeS.clSChan
+	routeS.clSChan <- routeS.cl
 	if err = routeS.cacheS.WaitToPrecache(ctx,
 		utils.CacheRouteProfiles,
 		utils.CacheRouteFilterIndexes); err != nil {

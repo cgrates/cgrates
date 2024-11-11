@@ -34,7 +34,7 @@ import (
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	dmS *DataDBService, cls *CommonListenerService,
+	dmS *DataDBService, clSChan chan *commonlisteners.CommonListenerS,
 	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RateService{
@@ -42,7 +42,7 @@ func NewRateService(cfg *config.CGRConfig,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		dmS:         dmS,
-		cls:         cls,
+		clSChan:     clSChan,
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
 		anz:         anz,
@@ -54,7 +54,7 @@ func NewRateService(cfg *config.CGRConfig,
 type RateService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	anz         *AnalyzerService
 	dmS         *DataDBService
 	cacheS      *CacheService
@@ -111,9 +111,8 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if rs.cl, err = rs.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	rs.cl = <-rs.clSChan
+	rs.clSChan <- rs.cl
 	if err = rs.cacheS.WaitToPrecache(ctx,
 		utils.CacheRateProfiles,
 		utils.CacheRateProfilesFilterIndexes,

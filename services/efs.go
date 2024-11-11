@@ -36,7 +36,7 @@ import (
 type ExportFailoverService struct {
 	sync.Mutex
 
-	cls *CommonListenerService
+	clSChan chan *commonlisteners.CommonListenerS
 
 	efS *efs.EfS
 	cl  *commonlisteners.CommonListenerS
@@ -52,10 +52,10 @@ type ExportFailoverService struct {
 // NewExportFailoverService is the constructor for the TpeService
 func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	intConnChan chan birpc.ClientConnector,
-	cls *CommonListenerService, srvDep map[string]*sync.WaitGroup) *ExportFailoverService {
+	clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) *ExportFailoverService {
 	return &ExportFailoverService{
 		cfg:         cfg,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		intConnChan: intConnChan,
 		srvDep:      srvDep,
@@ -67,9 +67,8 @@ func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.Cance
 	if efServ.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	if efServ.cl, err = efServ.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	efServ.cl = <-efServ.clSChan
+	efServ.clSChan <- efServ.cl
 	efServ.Lock()
 	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))

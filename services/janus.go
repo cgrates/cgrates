@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -33,12 +34,12 @@ import (
 
 // NewJanusAgent returns the Janus Agent
 func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, connMgr *engine.ConnManager,
+	clSChan chan *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &JanusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 	}
@@ -48,7 +49,7 @@ func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 type JanusAgent struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
 
 	jA *agents.JanusAgent
@@ -64,11 +65,8 @@ type JanusAgent struct {
 
 // Start should jandle the sercive start
 func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-
-	cl, err := ja.cls.WaitForCLS(ctx)
-	if err != nil {
-		return err
-	}
+	cl := <-ja.clSChan
+	ja.clSChan <- cl
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ja.filterSChan); err != nil {
 		return

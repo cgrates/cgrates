@@ -36,7 +36,7 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	cls *CommonListenerService, internalCDRServerChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalCDRServerChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &CDRService{
@@ -45,7 +45,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		storDB:      storDB,
 		filterSChan: filterSChan,
-		cls:         cls,
+		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -56,7 +56,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 type CDRService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	storDB      *StorDBService
 	anz         *AnalyzerService
@@ -80,9 +80,8 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))
 
-	if cs.cl, err = cs.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	cs.cl = <-cs.clSChan
+	cs.clSChan <- cs.cl
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, cs.filterSChan); err != nil {
 		return

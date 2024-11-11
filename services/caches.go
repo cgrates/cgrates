@@ -32,7 +32,7 @@ import (
 
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
-	cls *CommonListenerService, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	anz *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
 	srvDep map[string]*sync.WaitGroup) *CacheService {
@@ -41,7 +41,7 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 		srvDep:  srvDep,
 		anz:     anz,
 		cores:   cores,
-		cls:     cls,
+		clSChan: clSChan,
 		dm:      dm,
 		connMgr: connMgr,
 		rpc:     internalChan,
@@ -51,10 +51,10 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 
 // CacheService implements Agent interface
 type CacheService struct {
-	anz   *AnalyzerService
-	cores *CoreService
-	cls   *CommonListenerService
-	dm    *DataDBService
+	anz     *AnalyzerService
+	cores   *CoreService
+	clSChan chan *commonlisteners.CommonListenerS
+	dm      *DataDBService
 
 	cl *commonlisteners.CommonListenerS
 
@@ -67,10 +67,8 @@ type CacheService struct {
 
 // Start should handle the sercive start
 func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
-
-	if cS.cl, err = cS.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	cS.cl = <-cS.clSChan
+	cS.clSChan <- cS.cl
 	var dm *engine.DataManager
 	if dm, err = cS.dm.WaitForDM(ctx); err != nil {
 		return

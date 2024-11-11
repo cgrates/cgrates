@@ -37,7 +37,7 @@ func NewEventReaderService(
 	cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	cls *CommonListenerService,
+	clSChan chan *commonlisteners.CommonListenerS,
 	intConn chan birpc.ClientConnector,
 	anz *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
@@ -46,7 +46,7 @@ func NewEventReaderService(
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
-		cls:         cls,
+		clSChan:     clSChan,
 		intConn:     intConn,
 		anz:         anz,
 		srvDep:      srvDep,
@@ -57,7 +57,7 @@ func NewEventReaderService(
 type EventReaderService struct {
 	sync.RWMutex
 
-	cls         *CommonListenerService
+	clSChan     chan *commonlisteners.CommonListenerS
 	anz         *AnalyzerService
 	filterSChan chan *engine.FilterS
 
@@ -78,9 +78,8 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	if erS.cl, err = erS.cls.WaitForCLS(ctx); err != nil {
-		return err
-	}
+	erS.cl = <-erS.clSChan
+	erS.clSChan <- erS.cl
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, erS.filterSChan); err != nil {
 		return
