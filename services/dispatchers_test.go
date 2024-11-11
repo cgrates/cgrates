@@ -103,7 +103,7 @@ func TestNewDispatcherServiceMap(t *testing.T) {
 	if srvMap == nil {
 		t.Fatal("Expected non-nil map, but got nil")
 	}
-	expectedLength := 20
+	expectedLength := 22
 	if len(srvMap) != expectedLength {
 		t.Fatalf("Expected map length %d, but got %d", expectedLength, len(srvMap))
 	}
@@ -128,6 +128,8 @@ func TestNewDispatcherServiceMap(t *testing.T) {
 		utils.SchedulerSv1,
 		utils.SessionSv1,
 		utils.StatSv1,
+		utils.RankingSv1,
+		utils.TrendSv1,
 	}
 	for _, name := range expectedServiceNames {
 		if _, ok := srvMap[name]; !ok {

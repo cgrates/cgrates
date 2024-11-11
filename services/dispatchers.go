@@ -243,6 +243,18 @@ func newDispatcherServiceMap(val *dispatchers.DispatcherService) (engine.IntServ
 	}
 	srvMap[srv.Name] = srv
 
+	srv, err = birpc.NewService(v1.NewDispatcherRankingSv1(val), utils.RankingSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
+	srv, err = birpc.NewService(v1.NewDispatcherTrendSv1(val), utils.TrendSv1, true)
+	if err != nil {
+		return nil, err
+	}
+	srvMap[srv.Name] = srv
+
 	srv, err = birpc.NewService(v1.NewDispatcherResponder(val),
 		utils.Responder, true)
 	if err != nil {

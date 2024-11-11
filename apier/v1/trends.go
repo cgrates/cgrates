@@ -83,18 +83,22 @@ type TrendSv1 struct {
 	trS *engine.TrendS
 }
 
+// ScheduleQueries schedules a list of trends
 func (trs *TrendSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) error {
 	return trs.trS.V1ScheduleQueries(ctx, args, scheduled)
 }
 
+// GetTrend queries a Trend
 func (trs *TrendSv1) GetTrend(ctx *context.Context, args *utils.ArgGetTrend, trend *engine.Trend) error {
 	return trs.trS.V1GetTrend(ctx, args, trend)
 }
 
+// GetScheduledTrends returns a list of Trends already scheduled
 func (trs *TrendSv1) GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) error {
 	return trs.trS.V1GetScheduledTrends(ctx, args, schedTrends)
 }
 
+// GetTrendSummary return a Trend with only latest updated metrics
 func (trs *TrendSv1) GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *engine.TrendSummary) error {
 	return trs.trS.V1GetTrendSummary(ctx, arg, reply)
 }
