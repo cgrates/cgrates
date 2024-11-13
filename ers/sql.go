@@ -46,10 +46,10 @@ const (
 // NewSQLEventReader return a new sql event reader
 func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
-
+	fltrS *engine.FilterS, rdrExit chan struct{}, dm *engine.DataManager) (er EventReader, err error) {
 	rdr := &SQLEventReader{
 		cgrCfg:        cfg,
+		dm:            dm,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
 		rdrEvents:     rdrEvents,
@@ -70,6 +70,7 @@ func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 type SQLEventReader struct {
 	// sync.RWMutex
 	cgrCfg *config.CGRConfig
+	dm     *engine.DataManager
 	cfgIdx int // index of config instance within ERsCfg.Readers
 	fltrS  *engine.FilterS
 
@@ -99,7 +100,7 @@ func (rdr *SQLEventReader) openDB(dialect gorm.Dialector) (err error) {
 		return
 	}
 	sqlDB.SetMaxOpenConns(10)
-	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
+	if rdr.Config().RunDelay <= 0 { // 0 disables the automatic read, maybe done per API
 		return
 	}
 	go rdr.readLoop(db, sqlDB) // read until the connection is closed
@@ -121,6 +122,141 @@ func (rdr *SQLEventReader) Serve() (err error) {
 	return
 }
 
+// Creates mysql conditions used in WHERE statement out of filters
+func valueQry(ruleType, elem, field string, values []string, not bool) (conditions []string) {
+	// here are for the filters that their values are empty: *exists, *notexists, *empty, *notempty..
+	if len(values) == 0 {
+		switch ruleType {
+		case utils.MetaExists, utils.MetaNotExists:
+			if not {
+				if elem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf(" %s IS NOT NULL", field))
+					return
+				}
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.%s') IS NOT NULL", elem, field))
+				return
+			}
+			if elem == utils.EmptyString {
+				conditions = append(conditions, fmt.Sprintf(" %s IS NULL", field))
+				return
+			}
+			conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.%s') IS NULL", elem, field))
+		case utils.MetaEmpty, utils.MetaNotEmpty:
+			if not {
+				if elem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf(" %s != ''", field))
+					return
+				}
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.%s') != ''", elem, field))
+				return
+			}
+			if elem == utils.EmptyString {
+				conditions = append(conditions, fmt.Sprintf(" %s == ''", field))
+				return
+			}
+			conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.%s') == ''", elem, field))
+		}
+		return
+	}
+	// here are for the filters that can have more than one value: *string, *prefix, *suffix ..
+	for _, value := range values {
+		switch value { // in case we have boolean values, it should be queried over 1 or 0
+		case "true":
+			value = "1"
+		case "false":
+			value = "0"
+		}
+		var singleCond string
+		switch ruleType {
+		case utils.MetaString, utils.MetaNotString, utils.MetaEqual, utils.MetaNotEqual:
+			if not {
+				if elem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf(" %s != '%s'", field, value))
+					continue
+				}
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.%s') != '%s'",
+					elem, field, value))
+				continue
+			}
+			if elem == utils.EmptyString {
+				singleCond = fmt.Sprintf(" %s = '%s'", field, value)
+			} else {
+				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.%s') = '%s'", elem, field, value)
+			}
+		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
+			if ruleType == utils.MetaGreaterOrEqual {
+				if elem == utils.EmptyString {
+					singleCond = fmt.Sprintf(" %s >= %s", field, value)
+				} else {
+					singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.%s') >= %s", elem, field, value)
+				}
+			} else if ruleType == utils.MetaGreaterThan {
+				if elem == utils.EmptyString {
+					singleCond = fmt.Sprintf(" %s > %s", field, value)
+				} else {
+					singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.%s') > %s", elem, field, value)
+				}
+			} else if ruleType == utils.MetaLessOrEqual {
+				if elem == utils.EmptyString {
+					singleCond = fmt.Sprintf(" %s <= %s", field, value)
+				} else {
+					singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.%s') <= %s", elem, field, value)
+				}
+			} else if ruleType == utils.MetaLessThan {
+				if elem == utils.EmptyString {
+					singleCond = fmt.Sprintf(" %s < %s", field, value)
+				} else {
+					singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.%s') < %s", elem, field, value)
+				}
+			}
+		case utils.MetaPrefix, utils.MetaNotPrefix:
+			if not {
+				if elem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf(" %s NOT LIKE '%s%%'", field, value))
+					continue
+				}
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.%s') NOT LIKE '%s%%'", elem, field, value))
+				continue
+			}
+			if elem == utils.EmptyString {
+				singleCond = fmt.Sprintf(" %s LIKE '%s%%'", field, value)
+			} else {
+				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.%s') LIKE '%s%%'", elem, field, value)
+			}
+		case utils.MetaSuffix, utils.MetaNotSuffix:
+			if not {
+				if elem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf(" %s NOT LIKE '%%%s'", field, value))
+					continue
+				}
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.%s') NOT LIKE '%%%s'", elem, field, value))
+				continue
+			}
+			if elem == utils.EmptyString {
+				singleCond = fmt.Sprintf(" %s LIKE '%%%s'", field, value)
+			} else {
+				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.%s') LIKE '%%%s'", elem, field, value)
+			}
+		case utils.MetaRegex, utils.MetaNotRegex:
+			if not {
+				if elem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf(" %s NOT REGEXP '%s'", field, value))
+					continue
+				}
+				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.%s') NOT REGEXP '%s'", elem, field, value))
+				continue
+			}
+			if elem == utils.EmptyString {
+				singleCond = fmt.Sprintf(" %s REGEXP '%s'", field, value)
+			} else {
+				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.%s') REGEXP '%s'", elem, field, value)
+			}
+		}
+		conditions = append(conditions, singleCond)
+	}
+	return
+}
+
 func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	defer sqlDB.Close()
 	if rdr.Config().StartDelay > 0 {
@@ -134,8 +270,47 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 		}
 	}
 	tm := time.NewTimer(0)
+	var filters []*engine.Filter
+	var whereQueries []string
+	var renewedFltrs []string
+	for _, fltr := range rdr.Config().Filters {
+		if result, err := rdr.dm.GetFilter(config.CgrConfig().GeneralCfg().DefaultTenant, fltr, true, false, utils.NonTransactional); err != nil {
+			rdr.rdrErr <- err
+			return
+		} else {
+			filters = append(filters, result)
+			if !strings.Contains(fltr, utils.DynamicDataPrefix+utils.MetaReq) {
+				renewedFltrs = append(renewedFltrs, fltr)
+			}
+		}
+	}
+	rdr.Config().Filters = renewedFltrs // remove filters containing *req
+	for _, filter := range filters {
+		for _, rule := range filter.Rules {
+			var elem, field string
+			switch {
+			case strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep):
+				field = strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep)
+				parts := strings.SplitN(field, ".", 2)
+				if len(parts) == 2 { // Split in 2 pieces if it contains any more dots in the field
+					// First part (before the first dot)
+					elem = parts[0]
+					// Second part (everything after the first dot)
+					field = parts[1]
+				}
+			default:
+				continue
+			}
+			conditions := valueQry(rule.Type, elem, field, rule.Values, strings.HasPrefix(rule.Type, utils.MetaNot))
+			whereQueries = append(whereQueries, strings.Join(conditions, " OR "))
+		}
+	}
 	for {
-		rows, err := db.Table(rdr.tableName).Select(utils.Meta).Rows()
+		tx := db.Table(rdr.tableName).Select(utils.Meta)
+		for _, whereQ := range whereQueries {
+			tx = tx.Where(whereQ)
+		}
+		rows, err := tx.Rows()
 		if err != nil {
 			rdr.rdrErr <- err
 			return
@@ -194,13 +369,15 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 					fltr[colName] = utils.IfaceAsString(columns[i])
 				}
 			}
-			if err = db.Table(rdr.tableName).Delete(nil, fltr).Error; err != nil { // to ensure we don't read it again
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> deleting message %s error: %s",
-						utils.ERs, utils.ToJSON(msg), err.Error()))
-				rdr.rdrErr <- err
-				rows.Close()
-				return
+			if rdr.Config().ProcessedPath == utils.MetaDelete {
+				if err = db.Table(rdr.tableName).Delete(nil, fltr).Error; err != nil { // to ensure we don't read it again
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> deleting message %s error: %s",
+							utils.ERs, utils.ToJSON(msg), err.Error()))
+					rdr.rdrErr <- err
+					rows.Close()
+					return
+				}
 			}
 
 			go func(msg map[string]any) {
@@ -215,11 +392,8 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 			}(msg)
 		}
 		rows.Close()
-		if rdr.Config().RunDelay < 0 {
-			return
-		}
-		tm.Reset(rdr.Config().RunDelay)
-		select {
+		tm.Reset(rdr.Config().RunDelay) // reset the timer to RunDelay
+		select {                        // wait for timer or rdrExit
 		case <-rdr.rdrExit:
 			tm.Stop()
 			utils.Logger.Info(

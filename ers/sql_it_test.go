@@ -89,26 +89,24 @@ func testSQLInitConfig(t *testing.T) {
 		"stor_db": {
 			"db_password": "CGRateS.org",
 		},
-		"ers": {									// EventReaderService
-			"enabled": true,						// starts the EventReader service: <true|false>
+		"ers": {									
+			"enabled": true,						
 			"sessions_conns":["*localhost"],
 			"readers": [
 				{
-					"id": "mysql",										// identifier of the EventReader profile
-					"type": "*sql",							// reader type <*file_csv>
-					"run_delay": "1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-					"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					// read data from this path
+					"id": "mysql",										
+					"type": "*sql",							
+					"run_delay": "1",									
+					"concurrent_requests": 1024,						
+					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
 					"opts": {
 						"sqlDBName":"cgrates2",
-						"sqlDBNameProcessed":"cgrates2",
-						"sqlTableNameProcessed":"cdrs2",
 					},
-					"processed_path": "",	// move processed data here
-					"tenant": "cgrates.org",							// tenant used by import
-					"filters": [],										// limit parsing based on the filters
-					"flags": [],										// flags to influence the event processing
-					"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+					"processed_path": "*delete",
+					"tenant": "cgrates.org",							
+					"filters": [],										
+					"flags": [],										
+					"fields":[									
 						{"tag": "CGRID", "type": "*composed", "value": "~*req.cgrid", "path": "*cgreq.CGRID"},
 						{"tag": "readerId", "type": "*variable", "value": "~*vars.*readerID", "path": "*cgreq.ReaderID"},
 					],
@@ -236,7 +234,7 @@ func testSQLReader(t *testing.T) {
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
-	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, make(chan *erEvent, 1), rdrErr, new(engine.FilterS), rdrExit)
+	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, make(chan *erEvent, 1), rdrErr, new(engine.FilterS), rdrExit, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -373,25 +371,23 @@ func testSQLInitConfig2(t *testing.T) {
 		"stor_db": {
 			"db_password": "CGRateS.org",
 		},
-		"ers": {									// EventReaderService
-			"enabled": true,						// starts the EventReader service: <true|false>
+		"ers": {									
+			"enabled": true,						
 			"readers": [
 				{
-					"id": "mysql",										// identifier of the EventReader profile
-					"type": "*sql",							// reader type <*file_csv>
-					"run_delay": "1",									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-					"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					// read data from this path
+					"id": "mysql",										
+					"type": "*sql",							
+					"run_delay": "1",									
+					"concurrent_requests": 1024,						
+					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
 					"opts": {
 						"sqlDBName":"cgrates2",
-						"sqlDBNameProcessed":"cgrates2",
-						"sqlTableNameProcessed":"cdrs2",
 					},
-					"processed_path": "",	// move processed data here
-					"tenant": "cgrates.org",							// tenant used by import
-					"filters": [],										// limit parsing based on the filters
-					"flags": [],										// flags to influence the event processing
-					"fields":[									// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+					"processed_path": "*delete",
+					"tenant": "cgrates.org",							
+					"filters": [],										
+					"flags": [],										
+					"fields":[									
 						{"tag": "CGRID", "type": "*composed", "value": "~*req.cgrid", "path": "*cgreq.CGRID"},
 					],
 				},
@@ -484,7 +480,7 @@ func testSQLReader3(t *testing.T) {
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
-	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, make(chan *erEvent, 1), rdrErr, new(engine.FilterS), rdrExit)
+	sqlER, err := NewEventReader(sqlCfg, 1, rdrEvents, make(chan *erEvent, 1), rdrErr, new(engine.FilterS), rdrExit, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

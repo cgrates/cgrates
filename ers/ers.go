@@ -46,9 +46,10 @@ type erEvent struct {
 }
 
 // NewERService instantiates the ERService
-func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engine.ConnManager) (ers *ERService) {
+func NewERService(cfg *config.CGRConfig, datadb *engine.DataManager, filterS *engine.FilterS, connMgr *engine.ConnManager) (ers *ERService) {
 	ers = &ERService{
 		cfg:              cfg,
+		dataManager:      datadb,
 		rdrs:             make(map[string]EventReader),
 		rdrPaths:         make(map[string]string),
 		stopLsn:          make(map[string]chan struct{}),
@@ -67,6 +68,7 @@ func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engin
 type ERService struct {
 	sync.RWMutex
 	cfg              *config.CGRConfig
+	dataManager      *engine.DataManager
 	rdrs             map[string]EventReader   // map[rdrID]EventReader
 	rdrPaths         map[string]string        // used for reloads in case of path changes
 	stopLsn          map[string]chan struct{} // map[rdrID] chan struct{}
@@ -220,7 +222,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 	var rdr EventReader
 	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
 		erS.rdrEvents, erS.partialEvents, erS.rdrErr,
-		erS.filterS, erS.stopLsn[rdrID]); err != nil {
+		erS.filterS, erS.stopLsn[rdrID], erS.dataManager); err != nil {
 		return
 	}
 	erS.rdrs[rdrID] = rdr

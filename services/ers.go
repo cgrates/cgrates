@@ -35,6 +35,7 @@ import (
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(
 	cfg *config.CGRConfig,
+	dm *DataDBService,
 	filterSChan chan *engine.FilterS,
 	shdChan *utils.SyncedChan,
 	connMgr *engine.ConnManager,
@@ -48,6 +49,7 @@ func NewEventReaderService(
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
+		dm:          dm,
 		connMgr:     connMgr,
 		server:      server,
 		intConn:     intConn,
@@ -66,6 +68,7 @@ type EventReaderService struct {
 	ers      *ers.ERService
 	rldChan  chan struct{}
 	stopChan chan struct{}
+	dm       *DataDBService
 	connMgr  *engine.ConnManager
 	server   *cores.Server
 	intConn  chan birpc.ClientConnector
@@ -84,6 +87,9 @@ func (erS *EventReaderService) Start() (err error) {
 
 	filterS := <-erS.filterSChan
 	erS.filterSChan <- filterS
+	dbchan := erS.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	// remake the stop chan
 	erS.stopChan = make(chan struct{})
@@ -91,7 +97,7 @@ func (erS *EventReaderService) Start() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
 
 	// build the service
-	erS.ers = ers.NewERService(erS.cfg, filterS, erS.connMgr)
+	erS.ers = ers.NewERService(erS.cfg, datadb, filterS, erS.connMgr)
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan)
 
 	// Register ERsV1 methods.
