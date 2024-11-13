@@ -318,6 +318,7 @@ const (
 	CreateCDRsTablesSQL       = "create_cdrs_tables.sql"
 	CreateTariffPlanTablesSQL = "create_tariffplan_tables.sql"
 	TestSQL                   = "TEST_SQL"
+	MetaDelete                = "*delete"
 	MetaConstant              = "*constant"
 	MetaPositive              = "*positive"
 	MetaNegative              = "*negative"

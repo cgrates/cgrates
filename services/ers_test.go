@@ -39,7 +39,7 @@ func TestEventReaderSCoverage(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	server := cores.NewServer(nil)
-	srv := NewEventReaderService(cfg, filterSChan, shdChan, nil, server, nil, nil, srvDep)
+	srv := NewEventReaderService(cfg, nil, filterSChan, shdChan, nil, server, nil, nil, srvDep)
 
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")

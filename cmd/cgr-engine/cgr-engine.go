@@ -627,7 +627,7 @@ func main() {
 		ldrs, anz, dspS, dspH, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, internalEEsChan, anz, srvDep),
-		services.NewEventReaderService(cfg, filterSChan,
+		services.NewEventReaderService(cfg, dmService, filterSChan,
 			shdChan, connManager, server, internalERsChan, anz, srvDep),
 		services.NewSIPAgent(cfg, filterSChan, shdChan, connManager, srvDep),
 		services.NewJanusAgent(cfg, filterSChan, server, connManager, srvDep),
