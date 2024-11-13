@@ -60,7 +60,7 @@ func TestRadiusAgentReloadStartShut(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	shdWg := new(sync.WaitGroup)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	engine.NewConnManager(cfg, nil)
@@ -124,7 +124,7 @@ func TestRadiusAgentReload1(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep)
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
@@ -195,7 +195,7 @@ func TestRadiusAgentReload2(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep)
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
@@ -265,7 +265,7 @@ func TestRadiusAgentReload3(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	err := srv.Start()
 	if err == nil || err.Error() != "stat test: no such file or directory" {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", "stat test: no such file or directory", err)
@@ -283,8 +283,8 @@ func TestRadiusAgentReload4(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, srvDep)
-	r, err := agents.NewRadiusAgent(cfg, nil, nil)
+	srv := NewRadiusAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
+	r, err := agents.NewRadiusAgent(cfg, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
