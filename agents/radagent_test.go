@@ -40,7 +40,7 @@ func TestNewRadiusAgentFailDict(t *testing.T) {
 		"badpath": {"bad/path"},
 	}
 	exp := "stat bad/path: no such file or directory"
-	if _, err := NewRadiusAgent(cfg, nil, nil); err == nil || err.Error() != exp {
+	if _, err := NewRadiusAgent(cfg, nil, nil, nil); err == nil || err.Error() != exp {
 		t.Errorf("Expected error <%v>, received <%v>", exp, err)
 	}
 }
@@ -51,7 +51,7 @@ func TestNewRadiusAgentOK(t *testing.T) {
 	exp := &RadiusAgent{
 		cgrCfg: cfg,
 	}
-	if rcv, err := NewRadiusAgent(cfg, nil, nil); err != nil {
+	if rcv, err := NewRadiusAgent(cfg, nil, nil, nil); err != nil {
 		if err.Error() == "stat /usr/share/cgrates/radius/dict/: no such file or directory" {
 			t.SkipNow() // skipping if running in gitactions
 		}

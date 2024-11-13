@@ -621,7 +621,7 @@ func main() {
 		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
 		services.NewKamailioAgent(cfg, shdChan, connManager, srvDep),
 		services.NewAsteriskAgent(cfg, shdChan, connManager, srvDep),                    // partial reload
-		services.NewRadiusAgent(cfg, filterSChan, shdChan, connManager, srvDep),         // partial reload
+		services.NewRadiusAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),   // partial reload
 		services.NewDiameterAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep), // partial reload
 		services.NewHTTPAgent(cfg, filterSChan, server, connManager, srvDep),            // no reload
 		ldrs, anz, dspS, dspH, dmService, storDBService,

@@ -31,13 +31,14 @@ import (
 
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RadiusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     connMgr,
+		caps:        caps,
 		srvDep:      srvDep,
 	}
 }
@@ -52,6 +53,7 @@ type RadiusAgent struct {
 
 	rad     *agents.RadiusAgent
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 	srvDep  map[string]*sync.WaitGroup
 }
 
@@ -67,7 +69,7 @@ func (rad *RadiusAgent) Start() (err error) {
 	rad.Lock()
 	defer rad.Unlock()
 
-	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, filterS, rad.connMgr); err != nil {
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, filterS, rad.connMgr, rad.caps); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		return
 	}
