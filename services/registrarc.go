@@ -30,12 +30,11 @@ import (
 )
 
 // NewRegistrarCService returns the Dispatcher Service
-func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager, anz *AnalyzerService,
+func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RegistrarCService{
 		cfg:     cfg,
 		connMgr: connMgr,
-		anz:     anz,
 		srvDep:  srvDep,
 	}
 }
@@ -43,8 +42,6 @@ func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager, an
 // RegistrarCService implements Service interface
 type RegistrarCService struct {
 	sync.RWMutex
-
-	anz *AnalyzerService
 
 	dspS *registrarc.RegistrarCService
 

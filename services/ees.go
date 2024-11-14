@@ -35,14 +35,14 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS, intConnChan chan birpc.ClientConnector,
-	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		clSChan:     clSChan,
 		intConnChan: intConnChan,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -52,7 +52,7 @@ type EventExporterService struct {
 	mu sync.RWMutex
 
 	clSChan     chan *commonlisteners.CommonListenerS
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	eeS *ees.EeS
@@ -113,9 +113,8 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	if err != nil {
 		return err
 	}
-	if err := es.anz.WaitForAnalyzerS(ctx); err != nil {
-		return err
-	}
+	anz := <-es.anzChan
+	es.anzChan <- anz
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EEs))
 
@@ -132,6 +131,6 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	if !es.cfg.DispatcherSCfg().Enabled {
 		es.cl.RpcRegister(srv)
 	}
-	es.intConnChan <- es.anz.GetInternalCodec(srv, utils.EEs)
+	es.intConnChan <- anz.GetInternalCodec(srv, utils.EEs)
 	return nil
 }

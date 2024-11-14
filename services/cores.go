@@ -34,7 +34,7 @@ import (
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS,
-	internalCoreSChan chan birpc.ClientConnector, anz *AnalyzerService,
+	internalCoreSChan chan birpc.ClientConnector, anzChan chan *AnalyzerService,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
 	srvDep map[string]*sync.WaitGroup) *CoreService {
 	return &CoreService{
@@ -44,7 +44,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *comm
 		caps:     caps,
 		fileCPU:  fileCPU,
 		clSChan:  clSChan,
-		anz:      anz,
+		anzChan:  anzChan,
 		srvDep:   srvDep,
 		csCh:     make(chan *cores.CoreS, 1),
 	}
@@ -54,7 +54,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *comm
 type CoreService struct {
 	mu sync.RWMutex
 
-	anz     *AnalyzerService
+	anzChan chan *AnalyzerService
 	clSChan chan *commonlisteners.CommonListenerS
 
 	cS *cores.CoreS
@@ -78,9 +78,8 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 
 	cS.cl = <-cS.clSChan
 	cS.clSChan <- cS.cl
-	if err := cS.anz.WaitForAnalyzerS(ctx); err != nil {
-		return err
-	}
+	anz := <-cS.anzChan
+	cS.anzChan <- anz
 
 	cS.mu.Lock()
 	defer cS.mu.Unlock()
@@ -97,7 +96,7 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 			cS.cl.RpcRegister(s)
 		}
 	}
-	cS.connChan <- cS.anz.GetInternalCodec(srv, utils.CoreS)
+	cS.connChan <- anz.GetInternalCodec(srv, utils.CoreS)
 	return nil
 }
 

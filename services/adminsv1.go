@@ -36,7 +36,7 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 	dm *DataDBService, storDB *StorDBService,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	internalAPIerSv1Chan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AdminSv1Service{
 		connChan:    internalAPIerSv1Chan,
@@ -46,7 +46,7 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -58,7 +58,7 @@ type AdminSv1Service struct {
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	storDB      *StorDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	api *apis.AdminSv1
@@ -88,9 +88,8 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	if datadb, err = apiService.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = apiService.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-apiService.anzChan
+	apiService.anzChan <- anz
 
 	storDBChan := make(chan engine.StorDB, 1)
 	apiService.stopChan = make(chan struct{})
@@ -117,7 +116,7 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	}
 
 	//backwards compatible
-	apiService.connChan <- apiService.anz.GetInternalCodec(srv, utils.AdminSv1)
+	apiService.connChan <- anz.GetInternalCodec(srv, utils.AdminSv1)
 
 	return
 }

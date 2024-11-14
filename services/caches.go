@@ -33,13 +33,13 @@ import (
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
-	anz *AnalyzerService, // dspS *DispatcherService,
+	anzChan chan *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
 	srvDep map[string]*sync.WaitGroup) *CacheService {
 	return &CacheService{
 		cfg:     cfg,
 		srvDep:  srvDep,
-		anz:     anz,
+		anzChan: anzChan,
 		cores:   cores,
 		clSChan: clSChan,
 		dm:      dm,
@@ -51,7 +51,7 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 
 // CacheService implements Agent interface
 type CacheService struct {
-	anz     *AnalyzerService
+	anzChan chan *AnalyzerService
 	cores   *CoreService
 	clSChan chan *commonlisteners.CommonListenerS
 	dm      *DataDBService
@@ -73,9 +73,9 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 	if dm, err = cS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = cS.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+
+	anz := <-cS.anzChan
+	cS.anzChan <- anz
 	var cs *cores.CoreS
 	if cs, err = cS.cores.WaitForCoreS(ctx); err != nil {
 		return
@@ -92,7 +92,7 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 			cS.cl.RpcRegister(s)
 		}
 	}
-	cS.rpc <- cS.anz.GetInternalCodec(srv, utils.CacheS)
+	cS.rpc <- anz.GetInternalCodec(srv, utils.CacheS)
 	return
 }
 

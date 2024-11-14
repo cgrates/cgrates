@@ -35,7 +35,7 @@ import (
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalResourceSChan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ResourceService{
 		connChan:    internalResourceSChan,
@@ -45,7 +45,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -56,7 +56,7 @@ type ResourceService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -92,9 +92,8 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if datadb, err = reS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = reS.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-reS.anzChan
+	reS.anzChan <- anz
 
 	reS.Lock()
 	defer reS.Unlock()
@@ -108,7 +107,7 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 			reS.cl.RpcRegister(s)
 		}
 	}
-	reS.connChan <- reS.anz.GetInternalCodec(srv, utils.ResourceS)
+	reS.connChan <- anz.GetInternalCodec(srv, utils.ResourceS)
 	return
 }
 

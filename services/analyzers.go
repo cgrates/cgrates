@@ -35,12 +35,14 @@ import (
 func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.CommonListenerS,
 	filterSChan chan *engine.FilterS,
 	internalAnalyzerSChan chan birpc.ClientConnector,
+	anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
 		clSChan:     clSChan,
 		filterSChan: filterSChan,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -51,11 +53,11 @@ type AnalyzerService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
+	anzChan     chan *AnalyzerService
 
 	anz *analyzers.AnalyzerS
 	cl  *commonlisteners.CommonListenerS
 
-	started    chan struct{}
 	cancelFunc context.CancelFunc
 	connChan   chan birpc.ClientConnector
 	cfg        *config.CGRConfig
@@ -73,12 +75,11 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 
 	anz.Lock()
 	defer anz.Unlock()
-	anz.started = make(chan struct{})
 	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}
-	close(anz.started)
+	anz.anzChan <- anz
 	anzCtx, cancel := context.WithCancel(ctx)
 	anz.cancelFunc = cancel
 	go func(a *analyzers.AnalyzerS) {
@@ -126,14 +127,14 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.Lock()
 	anz.cancelFunc()
 	anz.cl.SetAnalyzer(nil)
-	anz.anz.Shutdown()
-	anz.anz = nil
 
 	// Close the channel before making it nil to prevent stale goroutines
 	// in case there are other services waiting on AnalyzerS.
-	close(anz.started)
+	close(anz.anzChan)
 
-	anz.started = nil
+	anz.anzChan = nil
+	anz.anz.Shutdown()
+	anz.anz = nil
 	<-anz.connChan
 	anz.Unlock()
 	anz.cl.RpcUnregisterName(utils.AnalyzerSv1)
@@ -163,17 +164,4 @@ func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string)
 		return c
 	}
 	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
-}
-
-// WaitForAnalyzerS waits for the AnalyzerS structure to be initialized.
-func (a *AnalyzerService) WaitForAnalyzerS(ctx *context.Context) error {
-	if a.started == nil { // AnalyzerS is disabled
-		return nil
-	}
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-a.started:
-	}
-	return nil
 }

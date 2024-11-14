@@ -36,7 +36,7 @@ import (
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalRouteSChan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RouteService{
 		connChan:    internalRouteSChan,
@@ -46,7 +46,7 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -57,7 +57,7 @@ type RouteService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -91,9 +91,8 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if datadb, err = routeS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = routeS.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-routeS.anzChan
+	routeS.anzChan <- anz
 
 	routeS.Lock()
 	defer routeS.Unlock()
@@ -107,7 +106,7 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 			routeS.cl.RpcRegister(s)
 		}
 	}
-	routeS.connChan <- routeS.anz.GetInternalCodec(srv, utils.RouteS)
+	routeS.connChan <- anz.GetInternalCodec(srv, utils.RouteS)
 	return
 }
 
