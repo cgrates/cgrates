@@ -39,7 +39,7 @@ func NewEventReaderService(
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
 	intConn chan birpc.ClientConnector,
-	anz *AnalyzerService,
+	anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
@@ -48,7 +48,7 @@ func NewEventReaderService(
 		connMgr:     connMgr,
 		clSChan:     clSChan,
 		intConn:     intConn,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -58,7 +58,7 @@ type EventReaderService struct {
 	sync.RWMutex
 
 	clSChan     chan *commonlisteners.CommonListenerS
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	ers *ers.ERService
@@ -84,9 +84,8 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	if filterS, err = waitForFilterS(ctx, erS.filterSChan); err != nil {
 		return
 	}
-	if err = erS.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-erS.anzChan
+	erS.anzChan <- anz
 
 	erS.Lock()
 	defer erS.Unlock()
@@ -107,7 +106,7 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	if !erS.cfg.DispatcherSCfg().Enabled {
 		erS.cl.RpcRegister(srv)
 	}
-	erS.intConn <- erS.anz.GetInternalCodec(srv, utils.ERs)
+	erS.intConn <- anz.GetInternalCodec(srv, utils.ERs)
 	return
 }
 

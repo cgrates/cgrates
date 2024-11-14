@@ -36,7 +36,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS, internalThresholdSChan chan birpc.ClientConnector,
-	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
 		cfg:         cfg,
@@ -44,7 +44,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 		connMgr:     connMgr,
 	}
@@ -56,7 +56,7 @@ type ThresholdService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -92,9 +92,8 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	if datadb, err = thrs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = thrs.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-thrs.anzChan
+	thrs.anzChan <- anz
 
 	thrs.Lock()
 	defer thrs.Unlock()
@@ -109,7 +108,7 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 			thrs.cl.RpcRegister(s)
 		}
 	}
-	thrs.connChan <- thrs.anz.GetInternalCodec(srv, utils.ThresholdS)
+	thrs.connChan <- anz.GetInternalCodec(srv, utils.ThresholdS)
 	return
 }
 

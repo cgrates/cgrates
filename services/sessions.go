@@ -37,7 +37,7 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &SessionService{
 		connChan:    internalChan,
@@ -46,7 +46,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -57,7 +57,7 @@ type SessionService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	sm *sessions.SessionS
@@ -87,9 +87,8 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	if datadb, err = smg.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = smg.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-smg.anzChan
+	smg.anzChan <- anz
 
 	smg.Lock()
 	defer smg.Unlock()
@@ -108,7 +107,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 			smg.cl.RpcRegister(s)
 		}
 	}
-	smg.connChan <- smg.anz.GetInternalCodec(srv, utils.SessionS)
+	smg.connChan <- anz.GetInternalCodec(srv, utils.SessionS)
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
 		smg.bircpEnabled = true

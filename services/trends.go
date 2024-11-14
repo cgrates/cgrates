@@ -35,7 +35,7 @@ import (
 func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalTrendSChan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &TrendService{
 		connChan: internalTrendSChan,
@@ -44,7 +44,7 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:   cacheS,
 		clSChan:  clSChan,
 		connMgr:  connMgr,
-		anz:      anz,
+		anzChan:  anzChan,
 		srvDep:   srvDep,
 	}
 }
@@ -54,7 +54,7 @@ type TrendService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -90,9 +90,8 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	if filterS, err = waitForFilterS(ctx, trs.filterSChan); err != nil {
 		return
 	}
-	if err = trs.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-trs.anzChan
+	trs.anzChan <- anz
 
 	trs.Lock()
 	defer trs.Unlock()
@@ -110,7 +109,7 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 			trs.cl.RpcRegister(s)
 		}
 	}
-	trs.connChan <- trs.anz.GetInternalCodec(srv, utils.Trends)
+	trs.connChan <- anz.GetInternalCodec(srv, utils.Trends)
 	return nil
 }
 

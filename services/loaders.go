@@ -35,7 +35,7 @@ import (
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	internalLoaderSChan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *LoaderService {
 	return &LoaderService{
 		connChan:    internalLoaderSChan,
@@ -45,7 +45,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
 		stopChan:    make(chan struct{}),
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -56,7 +56,7 @@ type LoaderService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	ldrs *loaders.LoaderS
@@ -85,9 +85,8 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if datadb, err = ldrs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = ldrs.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-ldrs.anzChan
+	ldrs.anzChan <- anz
 
 	ldrs.Lock()
 	defer ldrs.Unlock()
@@ -107,7 +106,7 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 			ldrs.cl.RpcRegister(s)
 		}
 	}
-	ldrs.connChan <- ldrs.anz.GetInternalCodec(srv, utils.LoaderS)
+	ldrs.connChan <- anz.GetInternalCodec(srv, utils.LoaderS)
 	return
 }
 

@@ -37,7 +37,7 @@ import (
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalCDRServerChan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &CDRService{
 		connChan:    internalCDRServerChan,
@@ -47,7 +47,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -59,7 +59,7 @@ type CDRService struct {
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	storDB      *StorDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	cdrS *cdrs.CDRServer
@@ -90,9 +90,8 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	if datadb, err = cs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = cs.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-cs.anzChan
+	cs.anzChan <- anz
 
 	storDBChan := make(chan engine.StorDB, 1)
 	cs.stopChan = make(chan struct{})
@@ -112,7 +111,7 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	if !cs.cfg.DispatcherSCfg().Enabled {
 		cs.cl.RpcRegister(srv)
 	}
-	cs.connChan <- cs.anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
+	cs.connChan <- anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
 	return
 }
 

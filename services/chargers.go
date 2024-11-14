@@ -36,7 +36,7 @@ import (
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	internalChargerSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
-	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ChargerService{
 		connChan:    internalChargerSChan,
 		cfg:         cfg,
@@ -45,7 +45,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -57,7 +57,7 @@ type ChargerService struct {
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	cacheS      *CacheService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	chrS *engine.ChargerS
@@ -90,9 +90,8 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if datadb, err = chrS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = chrS.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-chrS.anzChan
+	chrS.anzChan <- anz
 
 	chrS.Lock()
 	defer chrS.Unlock()
@@ -105,7 +104,7 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 			chrS.cl.RpcRegister(s)
 		}
 	}
-	chrS.connChan <- chrS.anz.GetInternalCodec(srv, utils.ChargerS)
+	chrS.connChan <- anz.GetInternalCodec(srv, utils.ChargerS)
 	return
 }
 

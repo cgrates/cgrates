@@ -36,7 +36,7 @@ import (
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
-	anz *AnalyzerService, dspS *DispatcherService,
+	anzChan chan *AnalyzerService, dspS *DispatcherService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &AttributeService{
 		connChan:    internalChan,
@@ -45,7 +45,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 		dspS:        dspS,
 	}
@@ -57,7 +57,7 @@ type AttributeService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	dspS        *DispatcherService
 	filterSChan chan *engine.FilterS
@@ -92,9 +92,8 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	if datadb, err = attrS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = attrS.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-attrS.anzChan
+	attrS.anzChan <- anz
 
 	attrS.Lock()
 	defer attrS.Unlock()
@@ -120,7 +119,7 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 
 		}
 	}()
-	attrS.connChan <- attrS.anz.GetInternalCodec(srv, utils.AttributeS)
+	attrS.connChan <- anz.GetInternalCodec(srv, utils.AttributeS)
 	return
 }
 

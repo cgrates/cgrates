@@ -35,7 +35,7 @@ import (
 func NewRateService(cfg *config.CGRConfig,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	dmS *DataDBService, clSChan chan *commonlisteners.CommonListenerS,
-	intConnChan chan birpc.ClientConnector, anz *AnalyzerService,
+	intConnChan chan birpc.ClientConnector, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
@@ -45,7 +45,7 @@ func NewRateService(cfg *config.CGRConfig,
 		clSChan:     clSChan,
 		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -55,7 +55,7 @@ type RateService struct {
 	sync.RWMutex
 
 	clSChan     chan *commonlisteners.CommonListenerS
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	dmS         *DataDBService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
@@ -127,9 +127,8 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	if datadb, err = rs.dmS.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = rs.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-rs.anzChan
+	rs.anzChan <- anz
 
 	rs.Lock()
 	rs.rateS = rates.NewRateS(rs.cfg, filterS, datadb)
@@ -146,6 +145,6 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	if !rs.cfg.DispatcherSCfg().Enabled {
 		rs.cl.RpcRegister(srv)
 	}
-	rs.intConnChan <- rs.anz.GetInternalCodec(srv, utils.RateS)
+	rs.intConnChan <- anz.GetInternalCodec(srv, utils.RateS)
 	return
 }

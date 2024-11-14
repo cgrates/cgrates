@@ -39,7 +39,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
-	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ActionService{
 		connChan:    internalChan,
 		connMgr:     connMgr,
@@ -48,7 +48,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
 	}
@@ -60,7 +60,7 @@ type ActionService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -97,9 +97,8 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if datadb, err = acts.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = acts.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-acts.anzChan
+	acts.anzChan <- anz
 
 	acts.Lock()
 	defer acts.Unlock()
@@ -116,7 +115,7 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if !acts.cfg.DispatcherSCfg().Enabled {
 		acts.cl.RpcRegister(srv)
 	}
-	acts.connChan <- acts.anz.GetInternalCodec(srv, utils.ActionS)
+	acts.connChan <- anz.GetInternalCodec(srv, utils.ActionS)
 	return
 }
 

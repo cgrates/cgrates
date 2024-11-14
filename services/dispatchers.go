@@ -34,7 +34,7 @@ import (
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) *DispatcherService {
 	return &DispatcherService{
 		connChan:    internalChan,
@@ -44,7 +44,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvsReload:  make(map[string]chan struct{}),
 	}
@@ -56,7 +56,7 @@ type DispatcherService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -92,9 +92,8 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	if datadb, err = dspS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	if err = dspS.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-dspS.anzChan
+	dspS.anzChan <- anz
 
 	dspS.Lock()
 	defer dspS.Unlock()
@@ -112,7 +111,7 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	// for the moment we dispable Apier through dispatcher
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
-	dspS.connChan <- dspS.anz.GetInternalCodec(srv, utils.DispatcherS)
+	dspS.connChan <- anz.GetInternalCodec(srv, utils.DispatcherS)
 
 	return
 }

@@ -36,7 +36,7 @@ import (
 func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalRankingSChan chan birpc.ClientConnector,
-	connMgr *engine.ConnManager, anz *AnalyzerService,
+	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &RankingService{
 		connChan:    internalRankingSChan,
@@ -46,7 +46,7 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anz:         anz,
+		anzChan:     anzChan,
 		srvDep:      srvDep,
 	}
 }
@@ -56,7 +56,7 @@ type RankingService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anz         *AnalyzerService
+	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -92,9 +92,8 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if filterS, err = waitForFilterS(ctx, ran.filterSChan); err != nil {
 		return
 	}
-	if err = ran.anz.WaitForAnalyzerS(ctx); err != nil {
-		return
-	}
+	anz := <-ran.anzChan
+	ran.anzChan <- anz
 
 	ran.Lock()
 	defer ran.Unlock()
@@ -114,7 +113,7 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 			ran.cl.RpcRegister(s)
 		}
 	}
-	ran.connChan <- ran.anz.GetInternalCodec(srv, utils.RankingS)
+	ran.connChan <- anz.GetInternalCodec(srv, utils.RankingS)
 	return nil
 }
 
