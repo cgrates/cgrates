@@ -412,6 +412,8 @@ type EventReaderCfg struct {
 	// 	- Any positive duration sets a fixed time interval for automatic reading cycles.
 	RunDelay time.Duration
 
+	// StartDelay adds a delay before starting reading loop
+	StartDelay           time.Duration
 	ConcurrentReqs       int
 	SourcePath           string
 	ProcessedPath        string
@@ -479,6 +481,11 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Run_delay != nil {
 		if er.RunDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Run_delay); err != nil {
+			return
+		}
+	}
+	if jsnCfg.Start_delay != nil {
+		if er.StartDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.Start_delay); err != nil {
 			return
 		}
 	}
@@ -783,6 +790,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		ID:                   er.ID,
 		Type:                 er.Type,
 		RunDelay:             er.RunDelay,
+		StartDelay:           er.StartDelay,
 		ConcurrentReqs:       er.ConcurrentReqs,
 		SourcePath:           er.SourcePath,
 		ProcessedPath:        er.ProcessedPath,
@@ -975,6 +983,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.FiltersCfg:              er.Filters,
 		utils.FlagsCfg:                []string{},
 		utils.RunDelayCfg:             "0",
+		utils.StartDelayCfg:           "0",
 		utils.ReconnectsCfg:           er.Reconnects,
 		utils.MaxReconnectIntervalCfg: "0",
 		utils.OptsCfg:                 opts,
@@ -1022,6 +1031,9 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		initialMP[utils.RunDelayCfg] = er.RunDelay.String()
 	} else if er.RunDelay < 0 {
 		initialMP[utils.RunDelayCfg] = "-1"
+	}
+	if er.StartDelay > 0 {
+		initialMP[utils.StartDelayCfg] = er.StartDelay.String()
 	}
 	return
 }

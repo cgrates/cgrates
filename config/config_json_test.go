@@ -2100,6 +2100,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 			{
 				Id:                     utils.StringPointer(utils.MetaDefault),
 				Type:                   utils.StringPointer(utils.MetaNone),
+				Start_delay:            utils.StringPointer("0"),
 				Run_delay:              utils.StringPointer("0"),
 				Concurrent_requests:    utils.IntPointer(1024),
 				Source_path:            utils.StringPointer("/var/spool/cgrates/ers/in"),

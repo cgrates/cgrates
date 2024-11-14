@@ -400,6 +400,7 @@ const CGRATES_CFG_JSON = `
 			"id": "*default",					// identifier of the EventReader profile
 			"type": "*none",					// reader type <*file_csv>
 			"run_delay": "0",					// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+			"start_delay": "0",                 // time to wait before an reader starts to run 	
 			"concurrent_requests": 1024,				// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "/var/spool/cgrates/ers/in",		// read data from this path
 			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
