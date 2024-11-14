@@ -197,7 +197,14 @@ func (rdr *AMQPER) Serve() error {
 // monitorAndProcess manages the message processing loop for AMQP events.
 // It handles reconnection logic in case the AMQP channel closes unexpectedly.
 func (rdr *AMQPER) monitorAndProcess(deliveries <-chan amqp.Delivery, chClosedCh chan *amqp.Error) {
-
+	if rdr.Config().StartDelay > 0 {
+		select {
+		case <-time.After(rdr.Config().StartDelay):
+		case <-rdr.client.done:
+			rdr.close()
+			return
+		}
+	}
 	// Initialize a Fibonacci backoff strategy to progressively wait longer
 	// between reconnection attempts, avoiding unnecessary load.
 	fib := utils.FibDuration(time.Second, rdr.Config().MaxReconnectInterval)

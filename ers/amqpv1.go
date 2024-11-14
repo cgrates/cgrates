@@ -115,6 +115,13 @@ func (rdr *AMQPv1ER) Serve() (err error) {
 }
 
 func (rdr *AMQPv1ER) readLoop(recv *amqpv1.Receiver) (err error) {
+	if rdr.Config().StartDelay > 0 {
+		select {
+		case <-time.After(rdr.Config().StartDelay):
+		case <-rdr.rdrExit:
+			return
+		}
+	}
 	for {
 		if rdr.Config().ConcurrentReqs != -1 {
 			rdr.cap <- struct{}{} // do not try to read if the limit is reached

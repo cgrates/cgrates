@@ -92,10 +92,8 @@ func (rdr *NatsER) Serve() error {
 	if err != nil {
 		return err
 	}
-
 	// Define the message handler. Its content will get executed for every received message.
 	handleMessage := func(msgData []byte) {
-
 		// If the rdr.cap channel buffer is empty, block until a resource is available. Otherwise
 		// allocate one resource and start processing the message.
 		if rdr.Config().ConcurrentReqs != -1 {
@@ -116,6 +114,8 @@ func (rdr *NatsER) Serve() error {
 
 		}()
 	}
+
+	time.Sleep(rdr.Config().StartDelay)
 
 	// Subscribe to the appropriate NATS subject.
 	if !rdr.jetStream {

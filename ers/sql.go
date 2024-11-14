@@ -123,6 +123,16 @@ func (rdr *SQLEventReader) Serve() (err error) {
 
 func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	defer sqlDB.Close()
+	if rdr.Config().StartDelay > 0 {
+		select {
+		case <-time.After(rdr.Config().StartDelay):
+		case <-rdr.rdrExit:
+			utils.Logger.Info(
+				fmt.Sprintf("<%s> stop monitoring sql DB <%s>",
+					utils.ERs, rdr.Config().SourcePath))
+			return
+		}
+	}
 	tm := time.NewTimer(0)
 	for {
 		rows, err := db.Table(rdr.tableName).Select(utils.Meta).Rows()

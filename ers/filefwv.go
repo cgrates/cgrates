@@ -82,6 +82,16 @@ func (rdr *FWVFileER) Config() *config.EventReaderCfg {
 }
 
 func (rdr *FWVFileER) serveDefault() {
+	if rdr.Config().StartDelay > 0 {
+		select {
+		case <-time.After(rdr.Config().StartDelay):
+		case <-rdr.rdrExit:
+			utils.Logger.Info(
+				fmt.Sprintf("<%s> stop monitoring path <%s>",
+					utils.ERs, rdr.sourceDir))
+			return
+		}
+	}
 	tm := time.NewTimer(0)
 	for {
 		// Not automated, process and sleep approach
@@ -104,6 +114,7 @@ func (rdr *FWVFileER) Serve() (err error) {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
 	case time.Duration(-1):
+		time.Sleep(rdr.Config().StartDelay)
 
 		// Ensure that files already existing in the source path are processed
 		// before the reader starts listening for filesystem change events.

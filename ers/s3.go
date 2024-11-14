@@ -167,6 +167,13 @@ func (rdr *S3ER) parseOpts(opts *config.EventReaderOpts) {
 }
 
 func (rdr *S3ER) readLoop(scv s3Client) (err error) {
+	if rdr.Config().StartDelay > 0 {
+		select {
+		case <-time.After(rdr.Config().StartDelay):
+		case <-rdr.rdrExit:
+			return
+		}
+	}
 	var keys []string
 	if err = scv.ListObjectsV2Pages(&s3.ListObjectsV2Input{Bucket: aws.String(rdr.bucket)},
 		func(lovo *s3.ListObjectsV2Output, _ bool) bool {
