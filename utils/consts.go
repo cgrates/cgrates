@@ -2806,8 +2806,9 @@ const (
 	SQLDefaultDBName  = "cgrates"
 	SQLDefaultSSLMode = "disable"
 
-	SQLDBNameOpt    = "sqlDBName"
-	SQLTableNameOpt = "sqlTableName"
+	SQLDBNameOpt              = "sqlDBName"
+	SQLTableNameOpt           = "sqlTableName"
+	SQLDeleteIndexedFieldsOpt = "sqlDeleteIndexedFields"
 
 	SQLMaxOpenConns    = "sqlMaxOpenConns"
 	SQLConnMaxLifetime = "sqlConnMaxLifetime"

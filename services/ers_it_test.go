@@ -68,7 +68,7 @@ func TestEventReaderSReload(t *testing.T) {
 	db := NewDataDBService(cfg, nil, false, srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1), shdChan, nil, anz, srvDep)
 	intERsConn := make(chan birpc.ClientConnector, 1)
-	erS := NewEventReaderService(cfg, nil, filterSChan, shdChan, nil, server, intERsConn, anz, srvDep)
+	erS := NewEventReaderService(cfg, db, filterSChan, shdChan, nil, server, intERsConn, anz, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(erS, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
@@ -94,7 +94,6 @@ func TestEventReaderSReload(t *testing.T) {
 	if !erS.IsRunning() {
 		t.Fatalf("Expected service to be running")
 	}
-
 	runtime.Gosched()
 	err := erS.Start()
 	if err == nil || err != utils.ErrServiceAlreadyRunning {
@@ -112,7 +111,6 @@ func TestEventReaderSReload(t *testing.T) {
 	if erS.IsRunning() {
 		t.Fatal("Expected service to be down")
 	}
-
 }
 
 func TestEventReaderSReload2(t *testing.T) {
