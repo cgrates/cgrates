@@ -1,0 +1,44 @@
+{
+
+"general": {
+	"node_id": "ALL2",
+	"log_level": 7
+},
+
+
+"listen": {
+	"rpc_json": ":7012",
+	"rpc_gob": ":7013",
+	"http": ":7080"
+},
+
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "12" 						
+},
+
+"stor_db": {
+	"db_type":"*internal"
+},
+
+"trends": {
+	"enabled": true,
+	"stats_conns":["*internal"],
+	"store_interval": "-1"
+},
+
+"rankings": {
+	"enabled": true,
+	"stats_conns":["*internal"],
+	"store_interval": "-1" 
+},
+
+"stats": {
+	"enabled": true
+},
+
+"apiers": {
+	"enabled": true
+}
+}

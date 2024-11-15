@@ -32,7 +32,7 @@ func (dS *DispatcherService) TrendSv1Ping(ctx *context.Context, args *utils.CGRE
 	}
 	args.Tenant = utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
-		if err = dS.authorize(utils.ThresholdSv1Ping, args.Tenant,
+		if err = dS.authorize(utils.TrendSv1Ping, args.Tenant,
 			utils.IfaceAsString(args.APIOpts[utils.OptsAPIKey]), args.Time); err != nil {
 			return
 		}
