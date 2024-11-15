@@ -161,12 +161,12 @@ func (eEe *ElasticEE) Cfg() *config.EventExporterCfg { return eEe.cfg }
 
 func (eEe *ElasticEE) Connect() (err error) {
 	eEe.Lock()
+	defer eEe.Unlock()
 	// create the client
 	if eEe.eClnt != nil {
 		return
 	}
 	eEe.eClnt, err = elasticsearch.NewClient(eEe.clntOpts)
-	eEe.Unlock()
 	return
 }
 
