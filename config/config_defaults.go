@@ -399,7 +399,7 @@ const CGRATES_CFG_JSON = `
 		{
 			"id": "*default",					// identifier of the EventReader profile
 			"type": "*none",					// reader type <*file_csv>
-			"run_delay": "0",					// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+			"run_delay": "0",					// sleep interval between consecutive runs; "-1" to use automation via inotify; "0" to disable running all together; <""|$dur>
 			"start_delay": "0",                 // time to wait before an reader starts to run 	
 			"concurrent_requests": 1024,				// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "/var/spool/cgrates/ers/in",		// read data from this path
@@ -450,6 +450,7 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlDBName": "cgrates", 			// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",			// the name of the table from were the events are read
+				// "sqlDeleteIndexedFields": [],   	// list of fields to DELETE from the table
 				// "pgSSLMode": "disable",			// the ssl mode for postgres db
 
 				// SQS and S3
