@@ -274,8 +274,8 @@ func (dT *DispatcherThresholdSv1) GetThreshold(ctx *context.Context, args *utils
 	return dT.dS.ThresholdSv1GetThreshold(ctx, args, th)
 }
 
-func NewDispatcherTrendSv1(dps *dispatchers.DispatcherService) *DispatcherThresholdSv1 {
-	return &DispatcherThresholdSv1{dS: dps}
+func NewDispatcherTrendSv1(dps *dispatchers.DispatcherService) *DispatcherTrendSv1 {
+	return &DispatcherTrendSv1{dS: dps}
 }
 
 type DispatcherTrendSv1 struct {
