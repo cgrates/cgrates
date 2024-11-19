@@ -30,6 +30,8 @@ type FilterSCfg struct {
 	StatSConns     []string
 	ResourceSConns []string
 	AccountSConns  []string
+	TrendSConns    []string
+	RankingSConns  []string
 }
 
 // loadFilterSCfg loads the FilterS section of the configuration
@@ -54,6 +56,12 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 	if jsnCfg.Accounts_conns != nil {
 		fSCfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
+	if jsnCfg.Trends_conns != nil {
+		fSCfg.TrendSConns = updateInternalConns(*jsnCfg.Trends_conns, utils.MetaTrends)
+	}
+	if jsnCfg.Rankings_conns != nil {
+		fSCfg.RankingSConns = updateInternalConns(*jsnCfg.Rankings_conns, utils.MetaRankings)
+	}
 	return
 }
 
@@ -68,6 +76,12 @@ func (fSCfg FilterSCfg) AsMapInterface(string) any {
 	}
 	if fSCfg.AccountSConns != nil {
 		mp[utils.AccountSConnsCfg] = getInternalJSONConns(fSCfg.AccountSConns)
+	}
+	if fSCfg.TrendSConns != nil {
+		mp[utils.TrendSConnsCfg] = getInternalJSONConns(fSCfg.TrendSConns)
+	}
+	if fSCfg.RankingSConns != nil {
+		mp[utils.RankingSConnsCfg] = getInternalJSONConns(fSCfg.RankingSConns)
 	}
 	return mp
 }
@@ -87,6 +101,12 @@ func (fSCfg FilterSCfg) Clone() (cln *FilterSCfg) {
 	if fSCfg.AccountSConns != nil {
 		cln.AccountSConns = slices.Clone(fSCfg.AccountSConns)
 	}
+	if fSCfg.TrendSConns != nil {
+		cln.TrendSConns = slices.Clone(fSCfg.TrendSConns)
+	}
+	if fSCfg.RankingSConns != nil {
+		cln.RankingSConns = slices.Clone(fSCfg.RankingSConns)
+	}
 	return
 }
 
@@ -95,6 +115,8 @@ type FilterSJsonCfg struct {
 	Stats_conns     *[]string
 	Resources_conns *[]string
 	Accounts_conns  *[]string
+	Trends_conns    *[]string
+	Rankings_conns  *[]string
 }
 
 func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
@@ -109,6 +131,12 @@ func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
 		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+	}
+	if !slices.Equal(v1.TrendSConns, v2.TrendSConns) {
+		d.Trends_conns = utils.SliceStringPointer(getInternalJSONConns(v2.TrendSConns))
+	}
+	if !slices.Equal(v1.RankingSConns, v2.RankingSConns) {
+		d.Rankings_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RankingSConns))
 	}
 	return d
 }

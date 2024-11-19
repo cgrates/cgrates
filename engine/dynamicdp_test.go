@@ -46,7 +46,7 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 	}
 
 	if rcv := newDynamicDP(context.Background(), []string{"conn1"}, []string{"conn2"},
-		[]string{"conn3"}, "cgrates.org",
+		[]string{"conn3"}, nil, nil, "cgrates.org",
 		utils.StringSet{"test": struct{}{}}); !reflect.DeepEqual(rcv, expDDP) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ToJSON(expDDP), utils.ToJSON(rcv))
@@ -456,7 +456,7 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 	Cache.Clear(nil)
 
 	ms := utils.MapStorage{}
-	dDp := newDynamicDP(context.Background(), []string{}, []string{}, []string{}, "cgrates.org", ms)
+	dDp := newDynamicDP(context.Background(), []string{}, []string{}, []string{}, nil, nil, "cgrates.org", ms)
 
 	if _, err := dDp.fieldAsInterface([]string{"inexistentfld1", "inexistentfld2"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)

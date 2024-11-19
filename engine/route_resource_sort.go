@@ -73,7 +73,9 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			cfg.FilterSCfg().ResourceSConns,
 			cfg.FilterSCfg().StatSConns,
-			cfg.FilterSCfg().AccountSConns); err != nil {
+			cfg.FilterSCfg().AccountSConns,
+			cfg.FilterSCfg().TrendSConns,
+			cfg.FilterSCfg().RankingSConns); err != nil {
 			return
 		} else if pass {
 			sortedRoutes = append(sortedRoutes, srtRoute)

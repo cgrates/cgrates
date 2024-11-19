@@ -29,11 +29,15 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 		Stats_conns:     &[]string{utils.MetaInternal, "*conn1"},
 		Resources_conns: &[]string{utils.MetaInternal, "*conn1"},
 		Accounts_conns:  &[]string{utils.MetaInternal, "*conn1"},
+		Trends_conns:    &[]string{utils.MetaInternal, "*conn1"},
+		Rankings_conns:  &[]string{utils.MetaInternal, "*conn1"},
 	}
 	expected := &FilterSCfg{
 		StatSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
 		ResourceSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), "*conn1"},
 		AccountSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
+		TrendSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends), "*conn1"},
+		RankingSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings), "*conn1"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err := jsnCfg.filterSCfg.loadFromJSONCfg(cfgJSONS); err != nil {
@@ -53,12 +57,16 @@ func TestFilterSCfgAsMapInterface(t *testing.T) {
 			"stats_conns": ["*internal:*stats", "*conn1"],						
 			"resources_conns": ["*internal:*resources", "*conn1"],
             "accounts_conns": ["*internal:*apier", "*conn1"],
+			"trends_conns": ["*internal:*trends", "*conn1"],
+			"rankings_conns": ["*internal:*rankings", "*conn1"],
 	},
 }`
 	eMap := map[string]any{
 		utils.StatSConnsCfg:     []string{utils.MetaInternal, "*conn1"},
 		utils.ResourceSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
+		utils.TrendSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.RankingSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -75,6 +83,8 @@ func TestFilterSCfgAsMapInterface2(t *testing.T) {
 		utils.StatSConnsCfg:     []string{},
 		utils.ResourceSConnsCfg: []string{},
 		utils.AccountSConnsCfg:  []string{},
+		utils.TrendSConnsCfg:    []string{},
+		utils.RankingSConnsCfg:  []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

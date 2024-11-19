@@ -95,7 +95,9 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			qos.cfg.FilterSCfg().ResourceSConns,
 			qos.cfg.FilterSCfg().StatSConns,
-			qos.cfg.FilterSCfg().AccountSConns); err != nil {
+			qos.cfg.FilterSCfg().AccountSConns,
+			qos.cfg.FilterSCfg().TrendSConns,
+			qos.cfg.FilterSCfg().RankingSConns); err != nil {
 			return
 		} else if pass {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)
