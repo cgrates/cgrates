@@ -345,7 +345,7 @@ func testSectConfigSReloadFilters(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"filters":{"accounts_conns":["*internal"],"resources_conns":["*internal"],"stats_conns":["*localhost"]}}`
+	cfgStr := `{"filters":{"accounts_conns":["*internal"],"rankings_conns":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"trends_conns":[]}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

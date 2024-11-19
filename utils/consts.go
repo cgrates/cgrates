@@ -2028,6 +2028,8 @@ const (
 const (
 	StatSConnsCfg     = "stats_conns"
 	ResourceSConnsCfg = "resources_conns"
+	TrendSConnsCfg    = "trends_conns"
+	RankingSConnsCfg  = "rankings_conns"
 )
 
 const (

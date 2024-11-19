@@ -310,7 +310,7 @@ func (sq *StatQueue) addStatEvent(ctx *context.Context, tnt, evID string, filter
 	var pass bool
 	// recreate the request without *opts
 	dDP := newDynamicDP(ctx, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
-		config.CgrConfig().FilterSCfg().AccountSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]})
+		config.CgrConfig().FilterSCfg().AccountSConns, config.CgrConfig().FilterSCfg().TrendSConns, config.CgrConfig().FilterSCfg().RankingSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]})
 	for idx, metricCfg := range sq.sqPrfl.Metrics {
 		if pass, err = filterS.Pass(ctx, tnt, metricCfg.FilterIDs,
 			evNm); err != nil {
@@ -344,7 +344,7 @@ func (sq *StatQueue) addStatOneEvent(ctx *context.Context, tnt string, filterS *
 	var pass bool
 
 	dDP := newDynamicDP(ctx, config.CgrConfig().FilterSCfg().ResourceSConns, config.CgrConfig().FilterSCfg().StatSConns,
-		config.CgrConfig().FilterSCfg().AccountSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]})
+		config.CgrConfig().FilterSCfg().AccountSConns, config.CgrConfig().FilterSCfg().TrendSConns, config.CgrConfig().FilterSCfg().RankingSConns, tnt, utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]})
 
 	for idx, metricCfg := range sq.sqPrfl.Metrics {
 		if pass, err = filterS.Pass(ctx, tnt, metricCfg.FilterIDs,

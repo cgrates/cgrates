@@ -321,7 +321,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	var lastID string
 	matchedIDs := []*FieldsAltered{}
 	dynDP := newDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
-		alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, args.Tenant, eNV)
+		alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, nil, nil, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
 		eNV[utils.MetaVars].(utils.MapStorage)[utils.MetaProcessRunsCfg] = i + 1
 		var evRply *AttrSProcessEventReply

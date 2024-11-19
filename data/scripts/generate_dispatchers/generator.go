@@ -73,6 +73,8 @@ func main() {
 		{"resources.go", "MetaResources", new(engine.ResourceS), utils.EmptyString},
 		{"routes.go", "MetaRoutes", new(engine.RouteS), utils.EmptyString},
 		{"sessions.go", "MetaSessionS", new(sessions.SessionS), utils.SessionS},
+		{"rankings.go", "MetaRankings", new(engine.RankingS), utils.RankingS},
+		{"trends.go", "MetaTrends", new(engine.TrendS), utils.TrendS},
 		{"stats.go", "MetaStats", new(engine.StatS), utils.EmptyString},
 		{"thresholds.go", "MetaThresholds", new(engine.ThresholdS), utils.EmptyString},
 		{"loaders.go", "MetaLoaders", new(loaders.LoaderS), utils.EmptyString},

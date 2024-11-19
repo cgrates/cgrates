@@ -185,7 +185,7 @@ func testConfigSReload(t *testing.T) {
 
 	}
 
-	cfgStr = `{"filters":{"accounts_conns":["*internal"],"resources_conns":["*internal"],"stats_conns":["*internal"]}}`
+	cfgStr = `{"filters":{"accounts_conns":["*internal"],"rankings_conns":[],"resources_conns":["*internal"],"stats_conns":["*internal"],"trends_conns":[]}}`
 	var rpl8 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

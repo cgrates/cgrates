@@ -287,13 +287,13 @@ func (lps RouteProfilesWithWeight) Sort() {
 
 // routeLazyPass filters the route based on
 func routeLazyPass(ctx *context.Context, filters []*FilterRule, ev *utils.CGREvent, data utils.MapStorage,
-	resConns, statConns, acntConns []string) (pass bool, err error) {
+	resConns, statConns, acntConns, trdConns, rnkConns []string) (pass bool, err error) {
 	if len(filters) == 0 {
 		return true, nil
 	}
 
 	dynDP := newDynamicDP(ctx, resConns, statConns, acntConns, //construct the DP and pass it to filterS
-		ev.Tenant, utils.MapStorage{
+		trdConns, rnkConns, ev.Tenant, utils.MapStorage{
 			utils.MetaReq:  ev.Event,
 			utils.MetaOpts: ev.APIOpts,
 			utils.MetaVars: data,

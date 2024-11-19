@@ -58,7 +58,9 @@ func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			ws.cfg.FilterSCfg().ResourceSConns,
 			ws.cfg.FilterSCfg().StatSConns,
-			ws.cfg.FilterSCfg().AccountSConns); err != nil {
+			ws.cfg.FilterSCfg().AccountSConns,
+			ws.cfg.FilterSCfg().TrendSConns,
+			ws.cfg.FilterSCfg().RankingSConns); err != nil {
 			return
 		} else if pass {
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)
