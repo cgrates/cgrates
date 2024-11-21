@@ -75,7 +75,6 @@
     # - role: ../../roles/cgrates
     #   vars:
     #     # To avoid tasks/dependencies we don't need.
-    #     cgrates_migrator_cfg_path:
     #     cgrates_dbs:
     #     cgrates_dependencies:
     #       - git
