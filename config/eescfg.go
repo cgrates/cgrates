@@ -32,11 +32,13 @@ type EEsCfg struct {
 	Exporters       []*EventExporterCfg
 }
 
-// GetDefaultExporter returns the exporter with the *default id
-func (eeS *EEsCfg) GetDefaultExporter() *EventExporterCfg {
-	for _, es := range eeS.Exporters {
-		if es.ID == utils.MetaDefault {
-			return es
+// ExporterCfg iterates over the Exporters slice and returns the exporter
+// configuration associated with the specified "id". If none were found, the
+// method will return nil.
+func (eeS *EEsCfg) ExporterCfg(id string) *EventExporterCfg {
+	for _, eeCfg := range eeS.Exporters {
+		if eeCfg.ID == id {
+			return eeCfg
 		}
 	}
 	return nil
