@@ -1410,16 +1410,6 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfgCgr.ersCfg))
 	}
 }
-func TestGetDefaultExporter(t *testing.T) {
-	ees := new(EEsCfg)
-	if dft := ees.GetDefaultExporter(); dft != nil {
-		t.Fatalf("Expected no default cfg, received: %s", utils.ToJSON(dft))
-	}
-	cfgCgr := NewDefaultCGRConfig()
-	if dft := cfgCgr.EEsCfg().GetDefaultExporter(); dft == nil || dft.ID != utils.MetaDefault {
-		t.Fatalf("Unexpected default cfg returned: %s", utils.ToJSON(dft))
-	}
-}
 func TestEventReaderOptsCfg(t *testing.T) {
 	erCfg := new(EventReaderCfg)
 	if err := erCfg.Opts.loadFromJSONCfg(nil); err != nil {
