@@ -47,7 +47,7 @@ func (erS *ERsCfg) ReaderCfg(ID string) *EventReaderCfg {
 	return nil
 }
 
-func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg, separator string) (err error) {
+func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
