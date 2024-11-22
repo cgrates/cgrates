@@ -204,7 +204,7 @@ func TestNewEventExporterCase7(t *testing.T) {
 	newEE := ee.(*ElasticEE)
 	newEE.dc.MapStorage[utils.TimeNow] = nil
 	eeExpect.dc.MapStorage[utils.TimeNow] = nil
-	eeExpect.eClnt = newEE.eClnt
+	eeExpect.client = newEE.client
 	if !reflect.DeepEqual(eeExpect, newEE) {
 		t.Errorf("Expected %+v \n but got %+v", eeExpect, newEE)
 	}
