@@ -1,0 +1,116 @@
+{
+
+"ees": {
+	"enabled": true,
+	"cache": {
+		"*els": {
+			"limit": -1,
+			"ttl": "10s",
+			"precache": false
+		}
+	},
+	"exporters": [{
+			"id": "els_basic",
+			"type": "*els",
+			"export_path": "http://localhost:9200",
+			"synchronous": true,
+			"failed_posts_dir": "*none",
+			"opts": {
+				"elsIndex": "cdrs_basic"
+			}
+		},
+		{
+			"id": "els_fields",
+			"type": "*els",
+			"export_path": "http://localhost:9200",
+			"synchronous": true,
+			"failed_posts_dir": "*none",
+			"opts": {
+				"elsIndex": "cdrs_fields"
+			},
+			"fields": [
+				{ "tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID" },
+				{ "tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account" },
+				{ "tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage" },
+				{ "tag": "Source", "path": "*exp.Source", "type": "*constant", "value": "test" },
+				{ "tag": "timestamp", "path": "*exp.@timestamp", "type": "*datetime", "value": "*now" }
+			]
+		},
+		{
+			"id": "els_cloud",
+			"type": "*els",
+			"export_path": "ELASTIC_DEPLOYMENT",
+			"synchronous": true,
+			"failed_posts_dir": "*none",
+			"opts": {
+				"elsIndex": "cdrs",
+				"elsCloud": true,
+				"elsApiKey": "ELASTIC_APIKEY"
+			}
+		},
+		{
+			"id": "els_cluster",
+			"type": "*els",
+			"export_path": "http://192.168.56.22:9200;http://192.168.56.64:9200",
+			"synchronous": true,
+			"opts": {
+				"elsIndex": "cdrs",
+				"elsDiscoverNodesOnStart": true,
+				"elsDiscoverNodesInterval": "10s"
+			}
+		},
+		{
+			"id": "els_https",
+			"type": "*els",
+			"export_path": "https://192.168.56.29:9200",
+			"synchronous": true,
+			"opts": {
+				"elsIndex": "cdrs",
+				"elsUsername": "elastic",
+				// "elsPassword":"",
+				"caPath": "/path/to/http_ca.crt"
+				// "elsCloud":true,
+				// "elsApiKey": "",
+				// "elsServiceToken": "",
+				// "elsCertificateFingerPrint": "",
+				// "elsDiscoverNodesOnStart": false,
+				// "elsDiscoverNodesInterval": "10s",
+				// "elsEnableDebugLogger": "false",
+				// "elsLogger": "",
+				// "elsCompressRequestBody": false,
+				// "elsCompressRequestBodyLevel": 0,
+				// "elsRetryOnStatus": [],
+				// "elsMaxRetries": 0,
+				// "elsDisableRetry": false,
+				// "elsIfPrimaryTerm": 0,
+ 				// "elsIfSeqNo": 0,
+				// "elsOpType": "",
+				// "elsPipeline": "",
+				// "elsRouting": "",
+				// "elsTimeout": "",
+				// "elsVersion": 0,
+				// "elsVersionType": "",
+				// "elsWaitForActiveShards": ""
+			},
+			"fields": [
+				{ "tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID" },
+				{ "tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID" },
+				{ "tag": "ToR", "path": "*exp.ToR", "type": "*variable", "value": "~*req.ToR" },
+				{ "tag": "OriginID", "path": "*exp.OriginID", "type": "*variable", "value": "~*req.OriginID" },
+				{ "tag": "RequestType", "path": "*exp.RequestType", "type": "*variable", "value": "~*req.RequestType" },
+				{ "tag": "Tenant", "path": "*exp.Tenant", "type": "*variable", "value": "~*vars.*tenant" },
+				{ "tag": "Category", "path": "*exp.Category", "type": "*variable", "value": "~*req.Category" },
+				{ "tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account" },
+				{ "tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject" },
+				{ "tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination" },
+				{ "tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime" },
+				{ "tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime" },
+				{ "tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage" },
+				{ "tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}" },
+				{ "tag": "@timestamp", "path": "*exp.@timestamp", "type": "*datetime", "value": "*now" }
+			]
+		}
+	]
+}
+
+}
