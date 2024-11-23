@@ -981,3 +981,13 @@ func SplitPath(rule string, sep byte, n int) []string {
 	splt = append(splt, rule[pos:]) // add last element
 	return splt
 }
+
+// StructChanTimeout will return true if timeout occurs before struct is received
+func StructChanTimeout(chn chan struct{}, timeout time.Duration) bool {
+	select {
+	case <-chn:
+		return false
+	case <-time.After(timeout):
+		return true
+	}
+}
