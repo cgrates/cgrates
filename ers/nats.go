@@ -115,53 +115,65 @@ func (rdr *NatsER) Serve() error {
 		}()
 	}
 
-	time.Sleep(rdr.Config().StartDelay)
+	go func() {
+		time.Sleep(rdr.Config().StartDelay)
 
-	// Subscribe to the appropriate NATS subject.
-	if !rdr.jetStream {
-		_, err = nc.QueueSubscribe(rdr.subject, rdr.queueID, func(msg *nats.Msg) {
-			handleMessage(msg.Data)
-		})
-		if err != nil {
-			nc.Drain()
-			return err
-		}
-	} else {
-		var js jetstream.JetStream
-		js, err = jetstream.New(nc)
-		if err != nil {
-			nc.Drain()
-			return err
-		}
-		ctx := context.TODO()
-		if jsMaxWait := rdr.Config().Opts.NATS.JetStreamMaxWait; jsMaxWait != nil {
-			var cancel context.CancelFunc
-			ctx, cancel = context.WithTimeout(ctx, *jsMaxWait)
-			defer cancel()
-		}
+		defer func() {
+			if err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> reader <%s> got error: <%v>",
+						utils.ERs, rdr.Config().ID, err))
+			}
+		}()
 
-		var cons jetstream.Consumer
-		cons, err = js.CreateOrUpdateConsumer(ctx, rdr.streamName, jetstream.ConsumerConfig{
-			FilterSubject: rdr.subject,
-			Durable:       rdr.consumerName,
-			AckPolicy:     jetstream.AckAllPolicy,
-		})
-		if err != nil {
-			nc.Drain()
-			return err
-		}
+		// Subscribe to the appropriate NATS subject.
+		if !rdr.jetStream {
+			_, err = nc.QueueSubscribe(rdr.subject, rdr.queueID, func(msg *nats.Msg) {
+				handleMessage(msg.Data)
+			})
+			if err != nil {
+				nc.Drain()
+				rdr.rdrErr <- err
+				return
+			}
+		} else {
+			var js jetstream.JetStream
+			js, err = jetstream.New(nc)
+			if err != nil {
+				nc.Drain()
+				rdr.rdrErr <- err
+				return
+			}
+			ctx := context.TODO()
+			if jsMaxWait := rdr.Config().Opts.NATS.JetStreamMaxWait; jsMaxWait != nil {
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithTimeout(ctx, *jsMaxWait)
+				defer cancel()
+			}
 
-		_, err = cons.Consume(func(msg jetstream.Msg) {
-			handleMessage(msg.Data())
-		})
-		if err != nil {
-			nc.Drain()
-			return err
+			var cons jetstream.Consumer
+			cons, err = js.CreateOrUpdateConsumer(ctx, rdr.streamName, jetstream.ConsumerConfig{
+				FilterSubject: rdr.subject,
+				Durable:       rdr.consumerName,
+				AckPolicy:     jetstream.AckAllPolicy,
+			})
+			if err != nil {
+				nc.Drain()
+				rdr.rdrErr <- err
+				return
+			}
+
+			_, err = cons.Consume(func(msg jetstream.Msg) {
+				handleMessage(msg.Data())
+			})
+			if err != nil {
+				nc.Drain()
+				rdr.rdrErr <- err
+			}
 		}
-	}
+	}()
 
 	go func() {
-
 		// Wait for exit signal.
 		<-rdr.rdrExit
 		utils.Logger.Info(
