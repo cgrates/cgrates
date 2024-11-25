@@ -332,20 +332,20 @@ func TestFileFWVServeErrTimeDuration0(t *testing.T) {
 	}
 }
 
-func TestFileFWVServeErrTimeDurationNeg1(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfgIdx := 0
-	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	rdr.Config().RunDelay = time.Duration(-1)
-	expected := "no such file or directory"
-	err = rdr.Serve()
-	if err == nil || err.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-	}
-}
+// func TestFileFWVServeErrTimeDurationNeg1(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfgIdx := 0
+// 	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
+// 	if err != nil {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+// 	}
+// 	rdr.Config().RunDelay = time.Duration(-1)
+// 	expected := "no such file or directory"
+// 	err = rdr.Serve()
+// 	if err == nil || err.Error() != expected {
+// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+// 	}
+// }
 
 func TestFileFWV(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

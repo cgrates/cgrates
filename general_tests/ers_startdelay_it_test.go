@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -37,8 +38,8 @@ func TestErsStartDelay(t *testing.T) {
 	default:
 		t.Fatal("unsupported db type value")
 	}
-	csvcontent := `1d65221e540dmp55gw,1001,1303535,1727779754,1727779754,60`
-	csvFd, procFd := t.TempDir(), t.TempDir()
+	csvcontent := ``
+	csvFd, csvFd2, procFd := t.TempDir(), t.TempDir(), t.TempDir()
 	filePath := filepath.Join(csvFd, fmt.Sprintf("file1%s", utils.CSVSuffix))
 	if err := os.WriteFile(filePath, []byte(csvcontent), 0644); err != nil {
 		t.Fatalf("could not write to file %s: %v", filePath, err)
@@ -90,17 +91,49 @@ func TestErsStartDelay(t *testing.T) {
                         {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4"},
                         {"tag": "Usage", "path": "*cgreq.Usage", "filters": ["*notempty:~*req.5:"],"type": "*variable", "value": "~*req.5;s", "mandatory": true},
 					]
-				}
+				},
+				{
+					"id": "file_csv_reader2",
+					"run_delay":  "-1",
+					"type": "*file_csv",
+					"source_path": "%s",
+					"flags": ["*cdrs"],
+					"processed_path": "%s",
+					"fields":[
+						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
+                        {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
+                        {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
+						{"tag":"Category","path":"*cgreq.Category","type":"*constant","value":"call"},
+						{"tag":"Subject","path":"*cgreq.Subject","type":"*variable","value":"~*req.1"},
+						{"tag":"Destination","path":"*cgreq.Destination","type":"*variable","value":"~*req.2"},
+						{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.3"},
+                        {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4"},
+                        {"tag": "Usage", "path": "*cgreq.Usage", "filters": ["*notempty:~*req.5:"],"type": "*variable", "value": "~*req.5;s", "mandatory": true},
+						]
+				},
 			]
             }
-		}`, csvFd, procFd)
-
+		}`, csvFd, procFd, csvFd2, procFd)
+	var buf bytes.Buffer
 	ng := engine.TestEngine{
 		ConfigJSON: content,
+		LogBuffer:  &buf,
+	}
+
+	fileIdx := 0
+	createFile := func(t *testing.T, dir, ext, content string) {
+		fileIdx++
+		filePath := filepath.Join(dir, fmt.Sprintf("file%d%s", fileIdx, ext))
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+			t.Fatalf("could not write to file %s: %v", filePath, err)
+		}
 	}
 	client, _ := ng.Run(t)
+	//defer fmt.Println(buf.String())
+	createFile(t, csvFd, utils.CSVSuffix, "csvfile1,1001,1303535,1727779754,1727779754,60")
+	createFile(t, csvFd2, utils.CSVSuffix, "csvfile2,1001,1303535,1727779754,1727779754,120")
 
-	t.Run("CheckForCdrs", func(t *testing.T) {
+	t.Run("ReaderWithoutStartDelay", func(t *testing.T) {
 		newtpFiles := map[string]string{
 			utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
 RT_ANY,0,1.7,60s,1s,0s`,
@@ -115,14 +148,19 @@ cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_ANY,`,
 		time.Sleep(100 * time.Millisecond)
 
 		var cdrs []*engine.CDR
-		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{Subjects: []string{"1001"}}}, &cdrs); err == nil {
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{OriginIDs: []string{"csvfile2"}}}, &cdrs); err != nil {
 			t.Error(err)
+		} else if len(cdrs) != 1 {
+			fmt.Println(cdrs)
+			t.Errorf("expected a CDR generated from ers")
+		} else if cdrs[0].Cost != 3.4 {
+			t.Errorf("expected %f,received %f", 3.4, cdrs[0].Cost)
 		}
 	})
 	time.Sleep(1 * time.Second)
-	t.Run("ErsAfterStartDelay", func(t *testing.T) {
+	t.Run("ReaderAfterStartDelay", func(t *testing.T) {
 		var cdrs []*engine.CDR
-		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{Subjects: []string{"1001"}}}, &cdrs); err != nil {
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{RPCCDRsFilter: &utils.RPCCDRsFilter{OriginIDs: []string{"csvfile1"}}}, &cdrs); err != nil {
 			t.Error(err)
 		} else if len(cdrs) != 1 {
 			t.Errorf("expected a CDR generated from ers")

@@ -105,14 +105,19 @@ func (rdr *CSVFileER) Serve() (err error) {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
 	case time.Duration(-1):
-		time.Sleep(rdr.Config().StartDelay)
+		go func() {
+			time.Sleep(rdr.Config().StartDelay)
 
-		// Ensure that files already existing in the source path are processed
-		// before the reader starts listening for filesystem change events.
-		processReaderDir(rdr.sourceDir, utils.CSVSuffix, rdr.processFile)
+			// Ensure that files already existing in the source path are processed
+			// before the reader starts listening for filesystem change events.
+			processReaderDir(rdr.sourceDir, utils.CSVSuffix, rdr.processFile)
 
-		return utils.WatchDir(rdr.sourceDir, rdr.processFile,
-			utils.ERs, rdr.rdrExit)
+			if err := utils.WatchDir(rdr.sourceDir, rdr.processFile,
+				utils.ERs, rdr.rdrExit); err != nil {
+				rdr.rdrError <- err
+			}
+		}()
+
 	default:
 		go rdr.serveDefault()
 	}
