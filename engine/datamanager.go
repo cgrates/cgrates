@@ -1302,7 +1302,6 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id string, withIndex bool)
 func (dm *DataManager) GetTrend(tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (tr *Trend, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheTrends, tntID); ok {
 			if x == nil {
@@ -1367,7 +1366,7 @@ func (dm *DataManager) SetTrend(tr *Trend) (err error) {
 		return utils.ErrNoDatabaseConn
 	}
 	if dm.dataDB.GetStorageType() != utils.MetaInternal {
-		if err = tr.compress(dm.ms); err != nil {
+		if tr, err = tr.compress(dm.ms); err != nil {
 			return
 		}
 	}

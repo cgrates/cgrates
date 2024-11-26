@@ -442,20 +442,20 @@ func TestTrendCompressSuccess(t *testing.T) {
 		RunTimes: []time.Time{time.Now()},
 	}
 
-	err := trend.compress(marshaler)
+	tr, err := trend.compress(marshaler)
 	if err != nil {
 		t.Errorf("Expected no error, got <%+v>", err)
 	}
 
-	if trend.CompressedMetrics == nil {
-		t.Errorf("Expected CompressedMetrics to be populated, got: %+v", trend.CompressedMetrics)
+	if tr.CompressedMetrics == nil {
+		t.Errorf("Expected CompressedMetrics to be populated, got: %+v", tr.CompressedMetrics)
 	}
 
-	if trend.Metrics != nil {
-		t.Errorf("Expected Metrics to be nil after compression, got: %+v", trend.Metrics)
+	if tr.Metrics != nil {
+		t.Errorf("Expected Metrics to be nil after compression, got: %+v", tr.Metrics)
 	}
-	if trend.RunTimes != nil {
-		t.Errorf("Expected RunTimes to be nil after compression, got: %+v", trend.RunTimes)
+	if tr.RunTimes != nil {
+		t.Errorf("Expected RunTimes to be nil after compression, got: %+v", tr.RunTimes)
 	}
 }
 

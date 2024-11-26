@@ -635,26 +635,28 @@ func TestFileCSVProcessEventError3(t *testing.T) {
 	}
 }
 
-//	func TestFileCSVDirErr(t *testing.T) {
-//		cfg := config.NewDefaultCGRConfig()
-//		fltrs := &engine.FilterS{}
-//		eR := &CSVFileER{
-//			cgrCfg:    cfg,
-//			cfgIdx:    0,
-//			fltrS:     fltrs,
-//			sourceDir: "/tmp/ers/out/",
-//			rdrEvents: make(chan *erEvent, 1),
-//			rdrError:  make(chan error, 1),
-//			rdrExit:   make(chan struct{}),
-//			conReqs:   make(chan struct{}, 1),
-//		}
-//		eR.conReqs <- struct{}{}
-//		eR.Config().RunDelay = -1
-//		errExpect := "no such file or directory"
-//		if err := eR.Serve(); err == nil || err.Error() != errExpect {
-//			t.Errorf("Expected %v but received %v", errExpect, err)
-//		}
-//	}
+func TestFileCSVDirErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrS := &engine.FilterS{}
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			Type:          utils.MetaFileCSV,
+			RunDelay:      -1,
+			ID:            "csv_reader",
+			SourcePath:    "/var/spool/cgrates/ers/in",
+			ProcessedPath: "/var/spool/cgrates/out",
+		},
+	}
+	srv := NewERService(cfg, nil, fltrS, nil)
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+
+	expected := "no such file or directory"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
 func TestFileCSV(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltrs := &engine.FilterS{}
