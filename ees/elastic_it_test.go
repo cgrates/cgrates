@@ -192,7 +192,7 @@ func initElsClient(t *testing.T, cfg *config.CGRConfig, exporterType string) *el
 	tmp := &ElasticEE{
 		cfg: eeCfg,
 	}
-	if err := tmp.prepareOpts(); err != nil {
+	if err := tmp.parseClientOpts(); err != nil {
 		t.Fatal(err)
 	}
 	client, err := elasticsearch.NewTypedClient(tmp.clientCfg)
