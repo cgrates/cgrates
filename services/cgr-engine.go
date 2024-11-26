@@ -39,7 +39,8 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewCGREngine(cfg *config.CGRConfig) *CGREngine {
+func NewCGREngine(cfg *config.CGRConfig,
+	services []servmanager.Service) *CGREngine {
 	cM := engine.NewConnManager(cfg)
 	caps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
 	shdWg := new(sync.WaitGroup)
@@ -48,7 +49,7 @@ func NewCGREngine(cfg *config.CGRConfig) *CGREngine {
 		cM:         cM,
 		caps:       caps,  // caps is used to limit RPC CPS
 		shdWg:      shdWg, // wait for shutdown
-		srvManager: servmanager.NewServiceManager(shdWg, cM, cfg),
+		srvManager: servmanager.NewServiceManager(shdWg, cM, cfg, services),
 		srvDep: map[string]*sync.WaitGroup{
 			utils.AccountS:        new(sync.WaitGroup),
 			utils.ActionS:         new(sync.WaitGroup),

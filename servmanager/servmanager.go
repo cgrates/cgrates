@@ -29,14 +29,17 @@ import (
 )
 
 // NewServiceManager returns a service manager
-func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager, cfg *config.CGRConfig) *ServiceManager {
-	return &ServiceManager{
+func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager,
+	cfg *config.CGRConfig, services []Service) (sM *ServiceManager) {
+	sM = &ServiceManager{
 		cfg:        cfg,
 		subsystems: make(map[string]Service),
 		shdWg:      shdWg,
 		connMgr:    connMgr,
 		rldChan:    cfg.GetReloadChan(),
 	}
+	sM.AddServices(services...)
+	return
 }
 
 // ServiceManager handles service management ran by the engine

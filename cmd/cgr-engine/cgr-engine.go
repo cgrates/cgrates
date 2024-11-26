@@ -28,9 +28,11 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/services"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
+// runCGREngine configures the CGREngine object and runs it
 func runCGREngine(fs []string) (err error) {
 	flags := services.NewCGREngineFlags()
 	flags.Parse(fs)
@@ -57,7 +59,7 @@ func runCGREngine(fs []string) (err error) {
 	if cfg, err = services.InitConfigFromPath(ctx, *flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
 		return
 	}
-	cgr := services.NewCGREngine(cfg)
+	cgr := services.NewCGREngine(cfg, []servmanager.Service{})
 	defer cgr.Stop(*flags.PidFile)
 
 	if err = cgr.Run(ctx, cancel, flags, vers,
