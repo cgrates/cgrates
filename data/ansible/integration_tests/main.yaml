@@ -3,16 +3,7 @@
   roles:
     - ../roles/rabbitmq
     - ../roles/nats
-    - role: ../roles/elasticsearch
-      vars:
-        auto_create_index: ".monitoring*,.watches,.triggered_watches,.watcher-history*,.ml*,cdrs"
-
-    # # Trying for now to overwrite the auto_create_index defaults.
-    # # In case of failure, we will be using the commented task below:
-    # - name: Create 'cdrs' index in Elasticsearch for CGRateS integration tests
-    #   command: 'curl -X PUT "localhost:9200/cdrs?pretty"'
-    #   ignore_errors: yes
-
+    - ../roles/elasticsearch
     - ../roles/kafka
     - ../roles/mongodb
     - ../roles/postgresql

@@ -1,13 +1,11 @@
 ---
-elasticsearch_version: "8.8.0"
+elasticsearch_version: "8.16.1"
 elasticsearch_deb_url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ elasticsearch_version }}-amd64.deb"
 elasticsearch_deb_sha_url: "{{ elasticsearch_deb_url }}.sha512"
 elasticsearch_gpg_key_url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
 elasticsearch_gpg_keyring: "/usr/share/keyrings/elasticsearch-keyring.gpg"
 elasticsearch_repository: "deb [signed-by={{ elasticsearch_gpg_keyring }}] https://artifacts.elastic.co/packages/8.x/apt stable main"
-auto_create_index: ".monitoring*,.watches,.triggered_watches,.watcher-history*,.ml*"
-elasticsearch_service_enabled: true
+elasticsearch_service_enabled: false
 elasticsearch_service_state: started
-elasticsearch_service_masked: false
 elasticsearch_dependencies:
   - apt-transport-https
