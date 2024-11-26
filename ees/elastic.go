@@ -19,33 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ees
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/elastic/elastic-transport-go/v8/elastictransport"
-	"github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/optype"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/refresh"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/versiontype"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	elasticsearch "github.com/elastic/go-elasticsearch/v8"
 )
-
-func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (*ElasticEE, error) {
-	el := &ElasticEE{
-		cfg:  cfg,
-		dc:   dc,
-		reqs: newConcReq(cfg.ConcurrentRequests),
-	}
-	if err := el.prepareOpts(); err != nil {
-		return nil, err
-	}
-	return el, nil
-}
 
 // ElasticEE implements EventExporter interface for ElasticSearch export.
 type ElasticEE struct {
@@ -53,48 +42,26 @@ type ElasticEE struct {
 	cfg  *config.EventExporterCfg
 	dc   *utils.SafeMapStorage
 	reqs *concReq
-	bytePreparing
 
-	client    *elasticsearch.Client
+	client    *elasticsearch.TypedClient
 	clientCfg elasticsearch.Config
+}
 
-	// indexReqOpts is used to store IndexRequest options for convenience
-	// and does not represent the IndexRequest itself.
-	indexReqOpts esapi.IndexRequest
+func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (*ElasticEE, error) {
+	el := &ElasticEE{
+		cfg:  cfg,
+		dc:   dc,
+		reqs: newConcReq(cfg.ConcurrentRequests),
+	}
+	if err := el.parseClientOpts(); err != nil {
+		return nil, err
+	}
+	return el, nil
 }
 
 // init will create all the necessary dependencies, including opening the file
-func (e *ElasticEE) prepareOpts() error {
+func (e *ElasticEE) parseClientOpts() error {
 	opts := e.cfg.Opts.Els
-
-	// Parse index request options.
-	e.indexReqOpts.Index = utils.CDRsTBL
-	if opts.Index != nil {
-		e.indexReqOpts.Index = *opts.Index
-	}
-	e.indexReqOpts.IfPrimaryTerm = opts.IfPrimaryTerm
-	e.indexReqOpts.IfSeqNo = opts.IfSeqNo
-	if opts.OpType != nil {
-		e.indexReqOpts.OpType = *opts.OpType
-	}
-	if opts.Pipeline != nil {
-		e.indexReqOpts.Pipeline = *opts.Pipeline
-	}
-	if opts.Routing != nil {
-		e.indexReqOpts.Routing = *opts.Routing
-	}
-	if opts.Timeout != nil {
-		e.indexReqOpts.Timeout = *opts.Timeout
-	}
-	e.indexReqOpts.Version = opts.Version
-	if opts.VersionType != nil {
-		e.indexReqOpts.VersionType = *opts.VersionType
-	}
-	if opts.WaitForActiveShards != nil {
-		e.indexReqOpts.WaitForActiveShards = *opts.WaitForActiveShards
-	}
-
-	// Parse client config options.
 	if opts.Cloud != nil && *opts.Cloud {
 		e.clientCfg.CloudID = e.Cfg().ExportPath
 	} else {
@@ -183,12 +150,12 @@ func (e *ElasticEE) Connect() (err error) {
 	if e.client != nil { // check if connection is cached
 		return
 	}
-	e.client, err = elasticsearch.NewClient(e.clientCfg)
+	e.client, err = elasticsearch.NewTypedClient(e.clientCfg)
 	return
 }
 
 // ExportEvent implements EventExporter
-func (e *ElasticEE) ExportEvent(ev any, key string) error {
+func (e *ElasticEE) ExportEvent(event any, key string) error {
 	e.reqs.get()
 	e.mu.RLock()
 	defer func() {
@@ -198,43 +165,74 @@ func (e *ElasticEE) ExportEvent(ev any, key string) error {
 	if e.client == nil {
 		return utils.ErrDisconnected
 	}
-	req := esapi.IndexRequest{
-		DocumentID:          key,
-		Body:                bytes.NewReader(ev.([]byte)),
-		Refresh:             "true",
-		Index:               e.indexReqOpts.Index,
-		IfPrimaryTerm:       e.indexReqOpts.IfPrimaryTerm,
-		IfSeqNo:             e.indexReqOpts.IfSeqNo,
-		OpType:              e.indexReqOpts.OpType,
-		Pipeline:            e.indexReqOpts.Pipeline,
-		Routing:             e.indexReqOpts.Routing,
-		Timeout:             e.indexReqOpts.Timeout,
-		Version:             e.indexReqOpts.Version,
-		VersionType:         e.indexReqOpts.VersionType,
-		WaitForActiveShards: e.indexReqOpts.WaitForActiveShards,
-	}
 
-	resp, err := req.Do(context.Background(), e.client)
-	if err != nil {
-		return err
+	// Build and send index request.
+	opts := e.cfg.Opts.Els
+	indexName := utils.CDRsTBL
+	if opts.Index != nil {
+		indexName = *opts.Index
 	}
-	defer resp.Body.Close()
-	if resp.IsError() {
-		var errResp map[string]any
-		if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
-			return err
+	req := e.client.Index(indexName).
+		Id(key).
+		Request(event).
+		Refresh(refresh.True)
+
+	if opts.IfPrimaryTerm != nil {
+		req.IfPrimaryTerm(strconv.Itoa(*opts.IfPrimaryTerm))
+	}
+	if opts.IfSeqNo != nil {
+		req.IfSeqNo(strconv.Itoa(*opts.IfSeqNo))
+	}
+	if opts.OpType != nil {
+		req.OpType(optype.OpType{Name: *opts.OpType})
+	}
+	if opts.Pipeline != nil {
+		req.Pipeline(*opts.Pipeline)
+	}
+	if opts.Routing != nil {
+		req.Routing(*opts.Routing)
+	}
+	if opts.Timeout != nil {
+		req.Timeout((*opts.Timeout).String())
+	}
+	if opts.Version != nil {
+		req.Version(strconv.Itoa(*opts.Version))
+	}
+	if opts.VersionType != nil {
+		req.VersionType(versiontype.VersionType{Name: *opts.VersionType})
+	}
+	if opts.WaitForActiveShards != nil {
+		req.WaitForActiveShards(*opts.WaitForActiveShards)
+	}
+	_, err := req.Do(context.TODO())
+	return err
+}
+
+func (e *ElasticEE) PrepareMap(cgrEv *utils.CGREvent) (any, error) {
+	return cgrEv.Event, nil
+}
+
+func (e *ElasticEE) PrepareOrderMap(onm *utils.OrderedNavigableMap) (any, error) {
+	preparedMap := make(map[string]any)
+	for el := onm.GetFirstElement(); el != nil; el = el.Next() {
+		path := el.Value
+		item, err := onm.Field(path)
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> exporter %q: failed to retrieve field at path %q",
+				utils.EEs, e.cfg.ID, path))
+			continue
 		}
-		utils.Logger.Warning(fmt.Sprintf(
-			"<%s> exporter %q: failed to index document: %+v",
-			utils.EEs, e.Cfg().ID, errResp))
+		path = path[:len(path)-1] // remove the last index
+		preparedMap[strings.Join(path, utils.NestingSep)] = item.String()
 	}
-	return nil
+	return preparedMap, nil
 }
 
 func (e *ElasticEE) Close() error {
 	e.mu.Lock()
+	defer e.mu.Unlock()
 	e.client = nil
-	e.mu.Unlock()
 	return nil
 }
 
