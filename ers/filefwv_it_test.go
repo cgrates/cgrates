@@ -332,20 +332,28 @@ func TestFileFWVServeErrTimeDuration0(t *testing.T) {
 	}
 }
 
-// func TestFileFWVServeErrTimeDurationNeg1(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cfgIdx := 0
-// 	rdr, err := NewFWVFileER(cfg, cfgIdx, nil, nil, nil, nil, nil)
-// 	if err != nil {
-// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-// 	}
-// 	rdr.Config().RunDelay = time.Duration(-1)
-// 	expected := "no such file or directory"
-// 	err = rdr.Serve()
-// 	if err == nil || err.Error() != expected {
-// 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
-// 	}
-// }
+func TestFileFWVServeErrTimeDurationNeg1(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	fltrS := &engine.FilterS{}
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			Type:          utils.MetaFileFWV,
+			RunDelay:      -1,
+			ID:            "fwv_reader",
+			SourcePath:    "/var/spool/cgrates/ers/in",
+			ProcessedPath: "/var/spool/cgrates/out",
+		},
+	}
+	srv := NewERService(cfg, nil, fltrS, nil)
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+	err := srv.ListenAndServe(stopChan, cfgRldChan)
+
+	expected := "no such file or directory"
+	if err == nil || err.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
+	}
+}
 
 func TestFileFWV(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

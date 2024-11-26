@@ -287,14 +287,14 @@ func (tS *TrendS) storeTrends() {
 			continue
 		}
 		trnd := trndIf.(*Trend)
-		trnd.tMux.RLock()
+		trnd.tMux.Lock()
 		if err := tS.dm.SetTrend(trnd); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed storing Trend with ID: %q, err: %q",
 					utils.TrendS, trndID, err))
 			failedTrndIDs = append(failedTrndIDs, trndID) // record failure so we can schedule it for next backup
 		}
-		trnd.tMux.RUnlock()
+		trnd.tMux.Unlock()
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -467,8 +467,11 @@ func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTr
 	if trnd, err = tS.dm.GetTrend(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return
 	}
+	trnd.tMux.RLock()
+	defer trnd.tMux.RUnlock()
 	retTrend.Tenant = trnd.Tenant // avoid vet complaining for mutex copying
 	retTrend.ID = trnd.ID
+
 	startIdx := arg.RunIndexStart
 	if startIdx > len(trnd.RunTimes) {
 		startIdx = len(trnd.RunTimes)

@@ -119,6 +119,25 @@ type Trend struct {
 }
 
 func (t *Trend) Clone() (tC *Trend) {
+	tC = &Trend{
+		Tenant: t.Tenant,
+		ID:     t.ID,
+	}
+	if t.RunTimes != nil {
+		tC.RunTimes = make([]time.Time, len(t.RunTimes))
+		copy(tC.RunTimes, t.RunTimes)
+	}
+	if t.CompressedMetrics != nil {
+		tC.CompressedMetrics = make([]byte, len(t.CompressedMetrics))
+		copy(tC.CompressedMetrics, t.CompressedMetrics)
+	}
+	if t.Metrics != nil {
+		tC.Metrics = make(map[time.Time]map[string]*MetricWithTrend)
+		for key, val := range t.Metrics {
+			tC.Metrics[key] = val
+		}
+	}
+
 	return
 }
 
@@ -143,17 +162,19 @@ func (t *Trend) asTrendSummary() (ts *TrendSummary) {
 	return
 }
 
-func (t *Trend) compress(ms Marshaler) (err error) {
+func (t *Trend) compress(ms Marshaler) (tr *Trend, err error) {
 	if config.CgrConfig().TrendSCfg().StoreUncompressedLimit > len(t.RunTimes) {
 		return
 	}
-	t.CompressedMetrics, err = ms.Marshal(t.Metrics)
-	if err != nil {
-		return
+	tr = &Trend{
+		Tenant: t.Tenant,
+		ID:     t.ID,
 	}
-	t.Metrics = nil
-	t.RunTimes = nil
-	return nil
+	tr.CompressedMetrics, err = ms.Marshal(t.Metrics)
+	if err != nil {
+		return nil, err
+	}
+	return tr, nil
 }
 
 func (t *Trend) uncompress(ms Marshaler) (err error) {
@@ -164,7 +185,7 @@ func (t *Trend) uncompress(ms Marshaler) (err error) {
 	if err != nil {
 		return
 	}
-	t.CompressedMetrics = []byte{}
+	t.CompressedMetrics = nil
 	t.RunTimes = make([]time.Time, len(t.Metrics))
 	i := 0
 	for key := range t.Metrics {
