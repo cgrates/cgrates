@@ -264,7 +264,54 @@ func (cgr *CGREngine) InitServices(setVersions bool) {
 
 }
 
-func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFunc, preload string, memProfParams cores.MemoryProfilingParams) (err error) {
+// init will initialize the signal handlers and other functions needed by CGRateS service to run
+func (cgr *CGREngine) init(ctx *context.Context, shtDw context.CancelFunc, flags *CGREngineFlags, vers string) (err error) {
+	cgr.shdWg.Add(1)
+	go cgrSingnalHandler(ctx, shtDw, cgr.cfg, cgr.shdWg)
+
+	var cpuPrfF *os.File
+	if *flags.CpuPrfDir != utils.EmptyString {
+		cpuPath := filepath.Join(*flags.CpuPrfDir, utils.CpuPathCgr)
+		if cpuPrfF, err = cores.StartCPUProfiling(cpuPath); err != nil {
+			return
+		}
+		cgr.cpuPrfF = cpuPrfF
+	}
+
+	if *flags.ScheduledShutdown != utils.EmptyString {
+		var shtDwDur time.Duration
+		if shtDwDur, err = utils.ParseDurationWithNanosecs(*flags.ScheduledShutdown); err != nil {
+			return
+		}
+		cgr.shdWg.Add(1)
+		go func() { // Schedule shutdown
+			tm := time.NewTimer(shtDwDur)
+			select {
+			case <-tm.C:
+				shtDw()
+			case <-ctx.Done():
+				tm.Stop()
+			}
+			cgr.shdWg.Done()
+		}()
+	}
+
+	// init syslog
+	if utils.Logger, err = engine.NewLogger(ctx,
+		utils.FirstNonEmpty(*flags.Logger, cgr.cfg.LoggerCfg().Type),
+		cgr.cfg.GeneralCfg().DefaultTenant,
+		cgr.cfg.GeneralCfg().NodeID,
+		cgr.cM, cgr.cfg); err != nil {
+		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
+	}
+	efs.SetFailedPostCacheTTL(cgr.cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
+	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
+	cgr.InitServices(*flags.SetVersions)
+	return nil
+}
+
+// startServices will start the services infrastructure
+func (cgr *CGREngine) startServices(ctx *context.Context, shtDw context.CancelFunc, preload string, memProfParams cores.MemoryProfilingParams) (err error) {
 	defer func() {
 		if err != nil {
 			cgr.srvManager.ShutdownServices()
@@ -350,49 +397,13 @@ func (cgr *CGREngine) StartServices(ctx *context.Context, shtDw context.CancelFu
 	return
 }
 
-func (cgr *CGREngine) Init(ctx *context.Context, shtDw context.CancelFunc, flags *CGREngineFlags, vers string) (err error) {
-	cgr.shdWg.Add(1)
-	go cgrSingnalHandler(ctx, shtDw, cgr.cfg, cgr.shdWg)
-
-	var cpuPrfF *os.File
-	if *flags.CpuPrfDir != utils.EmptyString {
-		cpuPath := filepath.Join(*flags.CpuPrfDir, utils.CpuPathCgr)
-		if cpuPrfF, err = cores.StartCPUProfiling(cpuPath); err != nil {
-			return
-		}
-		cgr.cpuPrfF = cpuPrfF
+// Run will run the CGREngine, calling it's init and startServices
+func (cgr *CGREngine) Run(ctx *context.Context, shtDw context.CancelFunc,
+	flags *CGREngineFlags, vers string, memProfParams cores.MemoryProfilingParams) (err error) {
+	if err = cgr.init(ctx, shtDw, flags, vers); err != nil {
+		return
 	}
-
-	if *flags.ScheduledShutdown != utils.EmptyString {
-		var shtDwDur time.Duration
-		if shtDwDur, err = utils.ParseDurationWithNanosecs(*flags.ScheduledShutdown); err != nil {
-			return
-		}
-		cgr.shdWg.Add(1)
-		go func() { // Schedule shutdown
-			tm := time.NewTimer(shtDwDur)
-			select {
-			case <-tm.C:
-				shtDw()
-			case <-ctx.Done():
-				tm.Stop()
-			}
-			cgr.shdWg.Done()
-		}()
-	}
-
-	// init syslog
-	if utils.Logger, err = engine.NewLogger(ctx,
-		utils.FirstNonEmpty(*flags.Logger, cgr.cfg.LoggerCfg().Type),
-		cgr.cfg.GeneralCfg().DefaultTenant,
-		cgr.cfg.GeneralCfg().NodeID,
-		cgr.cM, cgr.cfg); err != nil {
-		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
-	}
-	efs.SetFailedPostCacheTTL(cgr.cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
-	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
-	cgr.InitServices(*flags.SetVersions)
-	return nil
+	return cgr.startServices(ctx, shtDw, *flags.Preload, memProfParams)
 }
 
 func (cgr *CGREngine) Stop(pidFile string) {

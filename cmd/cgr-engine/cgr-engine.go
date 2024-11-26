@@ -31,7 +31,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func RunCGREngine(fs []string) (err error) {
+func runCGREngine(fs []string) (err error) {
 	flags := services.NewCGREngineFlags()
 	flags.Parse(fs)
 	var vers string
@@ -60,10 +60,7 @@ func RunCGREngine(fs []string) (err error) {
 	cgr := services.NewCGREngine(cfg)
 	defer cgr.Stop(*flags.PidFile)
 
-	if err = cgr.Init(ctx, cancel, flags, vers); err != nil {
-		return
-	}
-	if err = cgr.StartServices(ctx, cancel, *flags.Preload,
+	if err = cgr.Run(ctx, cancel, flags, vers,
 		cores.MemoryProfilingParams{
 			DirPath:      *flags.MemPrfDir,
 			MaxFiles:     *flags.MemPrfMaxF,
@@ -72,12 +69,13 @@ func RunCGREngine(fs []string) (err error) {
 		}); err != nil {
 		return
 	}
+
 	<-ctx.Done()
 	return
 }
 
 func main() {
-	if err := RunCGREngine(os.Args[1:]); err != nil {
+	if err := runCGREngine(os.Args[1:]); err != nil {
 		log.Fatal(err)
 	}
 }
