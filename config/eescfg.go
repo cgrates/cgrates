@@ -164,7 +164,6 @@ func (eeS *EEsCfg) exporterIDs() []string {
 
 type ElsOpts struct {
 	Index                    *string
-	IfPrimaryTerm            *int
 	DiscoverNodesOnStart     *bool
 	DiscoverNodeInterval     *time.Duration
 	Cloud                    *bool
@@ -180,13 +179,10 @@ type ElsOpts struct {
 	RetryOnStatus            *[]int
 	MaxRetries               *int
 	DisableRetry             *bool
-	IfSeqNo                  *int
 	OpType                   *string
 	Pipeline                 *string
 	Routing                  *string
 	Timeout                  *time.Duration
-	Version                  *int
-	VersionType              *string
 	WaitForActiveShards      *string
 }
 
@@ -351,12 +347,6 @@ func (elsOpts *ElsOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 	if jsnCfg.ElsIndex != nil {
 		elsOpts.Index = jsnCfg.ElsIndex
 	}
-	if jsnCfg.ElsIfPrimaryTerm != nil {
-		elsOpts.IfPrimaryTerm = jsnCfg.ElsIfPrimaryTerm
-	}
-	if jsnCfg.ElsIfSeqNo != nil {
-		elsOpts.IfSeqNo = jsnCfg.ElsIfSeqNo
-	}
 	if jsnCfg.ElsOpType != nil {
 		elsOpts.OpType = jsnCfg.ElsOpType
 	}
@@ -372,12 +362,6 @@ func (elsOpts *ElsOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 			return
 		}
 		elsOpts.Timeout = utils.DurationPointer(elsTimeout)
-	}
-	if jsnCfg.ElsVersion != nil {
-		elsOpts.Version = jsnCfg.ElsVersion
-	}
-	if jsnCfg.ElsVersionType != nil {
-		elsOpts.VersionType = jsnCfg.ElsVersionType
 	}
 	if jsnCfg.ElsWaitForActiveShards != nil {
 		elsOpts.WaitForActiveShards = jsnCfg.ElsWaitForActiveShards
@@ -688,14 +672,6 @@ func (elsOpts *ElsOpts) Clone() *ElsOpts {
 		cln.Index = new(string)
 		*cln.Index = *elsOpts.Index
 	}
-	if elsOpts.IfPrimaryTerm != nil {
-		cln.IfPrimaryTerm = new(int)
-		*cln.IfPrimaryTerm = *elsOpts.IfPrimaryTerm
-	}
-	if elsOpts.IfSeqNo != nil {
-		cln.IfSeqNo = new(int)
-		*cln.IfSeqNo = *elsOpts.IfSeqNo
-	}
 	if elsOpts.OpType != nil {
 		cln.OpType = new(string)
 		*cln.OpType = *elsOpts.OpType
@@ -711,14 +687,6 @@ func (elsOpts *ElsOpts) Clone() *ElsOpts {
 	if elsOpts.Timeout != nil {
 		cln.Timeout = new(time.Duration)
 		*cln.Timeout = *elsOpts.Timeout
-	}
-	if elsOpts.Version != nil {
-		cln.Version = new(int)
-		*cln.Version = *elsOpts.Version
-	}
-	if elsOpts.VersionType != nil {
-		cln.VersionType = new(string)
-		*cln.VersionType = *elsOpts.VersionType
 	}
 	if elsOpts.WaitForActiveShards != nil {
 		cln.WaitForActiveShards = new(string)
@@ -1013,12 +981,6 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		if elsOpts.Index != nil {
 			opts[utils.ElsIndex] = *elsOpts.Index
 		}
-		if elsOpts.IfPrimaryTerm != nil {
-			opts[utils.ElsIfPrimaryTerm] = *elsOpts.IfPrimaryTerm
-		}
-		if elsOpts.IfSeqNo != nil {
-			opts[utils.ElsIfSeqNo] = *elsOpts.IfSeqNo
-		}
 		if elsOpts.OpType != nil {
 			opts[utils.ElsOpType] = *elsOpts.OpType
 		}
@@ -1030,12 +992,6 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		}
 		if elsOpts.Timeout != nil {
 			opts[utils.ElsTimeout] = elsOpts.Timeout.String()
-		}
-		if elsOpts.Version != nil {
-			opts[utils.ElsVersionLow] = *elsOpts.Version
-		}
-		if elsOpts.VersionType != nil {
-			opts[utils.ElsVersionType] = *elsOpts.VersionType
 		}
 		if elsOpts.WaitForActiveShards != nil {
 			opts[utils.ElsWaitForActiveShards] = *elsOpts.WaitForActiveShards
