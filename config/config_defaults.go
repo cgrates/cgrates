@@ -540,13 +540,13 @@ const CGRATES_CFG_JSON = `
 				// "elsDisableRetry": false,		// Default: false.
 
 
-				// "elsIndex": "",			// ElsIndex
-				// "elsRefresh": "false",		// controls when changes become visible <true|false|wait_for>
-				// "elsOpType": "",			// ElsOpType
-				// "elsPipeline": "",			// ElsPipeline
-				// "elsRouting": "",			// ElsRouting
-				// "elsTimeout": "",			// ElsTimeout
-				// "elsWaitForActiveShards": "",	// ElsWaitForActiveShards
+				// "elsIndex": "",			// target elasticsearch index
+				// "elsRefresh": "false",		// controls when changes become searchable <true|false|wait_for>
+				// "elsOpType": "index",		// operation type <index|create>
+				// "elsPipeline": "",			// name of the ingest pipeline to use
+				// "elsRouting": "",			// custom routing value for document storage
+				// "elsTimeout": "1m",			// maximum time to wait for operation
+				// "elsWaitForActiveShards": "1",	// number of shard copies required before indexing (default: 1)
 
 
 				// SQL
