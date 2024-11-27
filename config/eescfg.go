@@ -707,6 +707,70 @@ func (elsOpts *ElsOpts) Clone() *ElsOpts {
 		cln.WaitForActiveShards = new(string)
 		*cln.WaitForActiveShards = *elsOpts.WaitForActiveShards
 	}
+	if elsOpts.CAPath != nil {
+		cln.CAPath = new(string)
+		*cln.CAPath = *elsOpts.CAPath
+	}
+	if elsOpts.DiscoverNodesOnStart != nil {
+		cln.DiscoverNodesOnStart = new(bool)
+		*cln.DiscoverNodesOnStart = *elsOpts.DiscoverNodesOnStart
+	}
+	if elsOpts.DiscoverNodeInterval != nil {
+		cln.DiscoverNodeInterval = new(time.Duration)
+		*cln.DiscoverNodeInterval = *elsOpts.DiscoverNodeInterval
+	}
+	if elsOpts.Cloud != nil {
+		cln.Cloud = new(bool)
+		*cln.Cloud = *elsOpts.Cloud
+	}
+	if elsOpts.APIKey != nil {
+		cln.APIKey = new(string)
+		*cln.APIKey = *elsOpts.APIKey
+	}
+	if elsOpts.CertificateFingerprint != nil {
+		cln.CertificateFingerprint = new(string)
+		*cln.CertificateFingerprint = *elsOpts.CertificateFingerprint
+	}
+	if elsOpts.ServiceToken != nil {
+		cln.ServiceToken = new(string)
+		*cln.ServiceToken = *elsOpts.ServiceToken
+	}
+	if elsOpts.Username != nil {
+		cln.Username = new(string)
+		*cln.Username = *elsOpts.Username
+	}
+	if elsOpts.Password != nil {
+		cln.Password = new(string)
+		*cln.Password = *elsOpts.Password
+	}
+	if elsOpts.EnableDebugLogger != nil {
+		cln.EnableDebugLogger = new(bool)
+		*cln.EnableDebugLogger = *elsOpts.EnableDebugLogger
+	}
+	if elsOpts.Logger != nil {
+		cln.Logger = new(string)
+		*cln.Logger = *elsOpts.Logger
+	}
+	if elsOpts.CompressRequestBody != nil {
+		cln.CompressRequestBody = new(bool)
+		*cln.CompressRequestBody = *elsOpts.CompressRequestBody
+	}
+	if elsOpts.CompressRequestBodyLevel != nil {
+		cln.CompressRequestBodyLevel = new(int)
+		*cln.CompressRequestBodyLevel = *elsOpts.CompressRequestBodyLevel
+	}
+	if elsOpts.RetryOnStatus != nil {
+		cln.RetryOnStatus = new([]int)
+		*cln.RetryOnStatus = *elsOpts.RetryOnStatus
+	}
+	if elsOpts.MaxRetries != nil {
+		cln.MaxRetries = new(int)
+		*cln.MaxRetries = *elsOpts.MaxRetries
+	}
+	if elsOpts.DisableRetry != nil {
+		cln.DisableRetry = new(bool)
+		*cln.DisableRetry = *elsOpts.DisableRetry
+	}
 	return cln
 }
 
@@ -1013,6 +1077,54 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		}
 		if elsOpts.WaitForActiveShards != nil {
 			opts[utils.ElsWaitForActiveShards] = *elsOpts.WaitForActiveShards
+		}
+		if elsOpts.CAPath != nil {
+			opts[utils.ElsCAPath] = *elsOpts.CAPath
+		}
+		if elsOpts.DiscoverNodesOnStart != nil {
+			opts[utils.ElsDiscoverNodesOnStart] = *elsOpts.DiscoverNodesOnStart
+		}
+		if elsOpts.DiscoverNodeInterval != nil {
+			opts[utils.ElsDiscoverNodeInterval] = *elsOpts.DiscoverNodeInterval
+		}
+		if elsOpts.Cloud != nil {
+			opts[utils.ElsCloud] = *elsOpts.Cloud
+		}
+		if elsOpts.APIKey != nil {
+			opts[utils.ElsAPIKey] = *elsOpts.APIKey
+		}
+		if elsOpts.CertificateFingerprint != nil {
+			opts[utils.ElsCertificateFingerprint] = *elsOpts.CertificateFingerprint
+		}
+		if elsOpts.ServiceToken != nil {
+			opts[utils.ElsServiceToken] = *elsOpts.ServiceToken
+		}
+		if elsOpts.Username != nil {
+			opts[utils.ElsUsername] = *elsOpts.Username
+		}
+		if elsOpts.Password != nil {
+			opts[utils.ElsPassword] = *elsOpts.Password
+		}
+		if elsOpts.EnableDebugLogger != nil {
+			opts[utils.ElsEnableDebugLogger] = *elsOpts.EnableDebugLogger
+		}
+		if elsOpts.Logger != nil {
+			opts[utils.ElsLogger] = *elsOpts.Logger
+		}
+		if elsOpts.CompressRequestBody != nil {
+			opts[utils.ElsCompressRequestBody] = *elsOpts.CompressRequestBody
+		}
+		if elsOpts.CompressRequestBodyLevel != nil {
+			opts[utils.ElsCompressRequestBodyLevel] = *elsOpts.CompressRequestBodyLevel
+		}
+		if elsOpts.RetryOnStatus != nil {
+			opts[utils.ElsRetryOnStatus] = *elsOpts.RetryOnStatus
+		}
+		if elsOpts.MaxRetries != nil {
+			opts[utils.ElsMaxRetries] = *elsOpts.MaxRetries
+		}
+		if elsOpts.DisableRetry != nil {
+			opts[utils.ElsDisableRetry] = *elsOpts.DisableRetry
 		}
 	}
 	if sqlOpts := eeC.Opts.SQL; sqlOpts != nil {
