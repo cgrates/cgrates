@@ -67,10 +67,10 @@
 			"export_path": "https://192.168.56.29:9200",
 			"synchronous": true,
 			"opts": {
+				// "elsCAPath": "/path/to/http_ca.crt"
 				"elsIndex": "cdrs",
 				"elsUsername": "elastic",
 				// "elsPassword":"",
-				"elsCAPath": "/path/to/http_ca.crt"
 				// "elsCloud":true,
 				// "elsApiKey": "",
 				// "elsServiceToken": "",

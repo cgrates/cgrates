@@ -927,6 +927,28 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if len(exp.ContentFields()) == 0 {
 					return fmt.Errorf("<%s> empty content fields for exporter with ID: %s", utils.EEs, exp.ID)
 				}
+			case utils.MetaElastic:
+				elsOpts := exp.Opts.Els
+				if elsOpts.Logger != nil {
+					if !slices.Contains([]string{utils.ElsJson, utils.ElsText, utils.ElsColor}, *elsOpts.Logger) {
+						return fmt.Errorf("<%s> invalid elsLogger value for exporter with ID: %s", utils.EEs, exp.ID)
+					}
+				}
+				if elsOpts.Refresh != nil {
+					if !slices.Contains([]string{"true", "false", "wait_for"}, *elsOpts.Refresh) {
+						return fmt.Errorf("<%s> invalid elsRefresh value for exporter with ID: %s", utils.EEs, exp.ID)
+					}
+				}
+				if elsOpts.OpType != nil {
+					if !slices.Contains([]string{"index", "create"}, *elsOpts.OpType) {
+						return fmt.Errorf("<%s> invalid elsOpType value for exporter with ID: %s", utils.EEs, exp.ID)
+					}
+				}
+				if elsOpts.CAPath != nil {
+					if _, err := os.Stat(*elsOpts.CAPath); os.IsNotExist(err) {
+						return fmt.Errorf("<%s> CA certificate file not found at path: %s for exporter with ID: %s", utils.EEs, *elsOpts.CAPath, exp.ID)
+					}
+				}
 			}
 			for _, field := range exp.Fields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
