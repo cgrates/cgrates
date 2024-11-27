@@ -541,6 +541,7 @@ const CGRATES_CFG_JSON = `
 
 
 				// "elsIndex": "",			// ElsIndex
+				// "elsRefresh": "false",		// controls when changes become visible <true|false|wait_for>
 				// "elsOpType": "",			// ElsOpType
 				// "elsPipeline": "",			// ElsPipeline
 				// "elsRouting": "",			// ElsRouting
@@ -549,9 +550,9 @@ const CGRATES_CFG_JSON = `
 
 
 				// SQL
-				// "sqlMaxIdleConns": 0,	// SQLMaxIdleConns    
+				// "sqlMaxIdleConns": 0,	// SQLMaxIdleConns
 				// "sqlMaxOpenConns": 0,	// SQLMaxOpenConns
-				// "sqlConnMaxLifetime": "0",	// SQLConnMaxLifetime 
+				// "sqlConnMaxLifetime": "0",	// SQLConnMaxLifetime
 				// "mysqlDSNParams": {},        // DSN params
 
 

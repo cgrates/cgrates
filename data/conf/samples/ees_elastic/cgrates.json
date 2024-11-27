@@ -16,7 +16,8 @@
 			"synchronous": true,
 			"failed_posts_dir": "*none",
 			"opts": {
-				"elsIndex": "cdrs_basic"
+				"elsIndex": "cdrs_basic",
+				"elsRefresh": "true"
 			}
 		},
 		{
@@ -26,7 +27,8 @@
 			"synchronous": true,
 			"failed_posts_dir": "*none",
 			"opts": {
-				"elsIndex": "cdrs_fields"
+				"elsIndex": "cdrs_fields",
+				"elsRefresh": "true"
 			},
 			"fields": [
 				{ "tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID" },
