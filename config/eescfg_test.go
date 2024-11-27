@@ -1116,6 +1116,7 @@ func TestEEsCfgloadFromJSONCfg(t *testing.T) {
 		ElsCertificateFingerprint:   &str,
 		ElsUsername:                 &str,
 		ElsPassword:                 &str,
+		ElsCAPath:                   &str,
 		ElsDiscoverNodesOnStart:     &bl,
 		ElsDiscoverNodesInterval:    &tms,
 		ElsEnableDebugLogger:        &bl,
@@ -1175,6 +1176,7 @@ func TestEEsCfgloadFromJSONCfg(t *testing.T) {
 	exp := &ElsOpts{
 		Index:                    &str,
 		Refresh:                  &str,
+		CAPath:                   &str,
 		DiscoverNodesOnStart:     &bl,
 		DiscoverNodeInterval:     &tm,
 		Cloud:                    &bl,

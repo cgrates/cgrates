@@ -173,6 +173,7 @@ type ElsOpts struct {
 	WaitForActiveShards *string
 
 	// elasticsearch client opts
+	CAPath                   *string
 	DiscoverNodesOnStart     *bool
 	DiscoverNodeInterval     *time.Duration
 	Cloud                    *bool
@@ -328,6 +329,9 @@ func (elsOpts *ElsOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 	}
 	if jsnCfg.ElsPassword != nil {
 		elsOpts.Password = jsnCfg.ElsPassword
+	}
+	if jsnCfg.ElsCAPath != nil {
+		elsOpts.CAPath = jsnCfg.ElsCAPath
 	}
 	if jsnCfg.ElsDiscoverNodesOnStart != nil {
 		elsOpts.DiscoverNodesOnStart = jsnCfg.ElsDiscoverNodesOnStart
