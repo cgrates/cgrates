@@ -307,6 +307,7 @@ type EventExporterOptsJson struct {
 	ElsCertificateFingerprint   *string           `json:"elsCertificateFingerPrint"`
 	ElsUsername                 *string           `json:"elsUsername"`
 	ElsPassword                 *string           `json:"elsPassword"`
+	ElsCAPath                   *string           `json:"elsCAPath"`
 	ElsDiscoverNodesOnStart     *bool             `json:"elsDiscoverNodesOnStart"`
 	ElsDiscoverNodesInterval    *string           `json:"elsDiscoverNodesInterval"`
 	ElsEnableDebugLogger        *bool             `json:"elsEnableDebugLogger"`

@@ -70,7 +70,7 @@
 				"elsIndex": "cdrs",
 				"elsUsername": "elastic",
 				// "elsPassword":"",
-				"caPath": "/path/to/http_ca.crt"
+				"elsCAPath": "/path/to/http_ca.crt"
 				// "elsCloud":true,
 				// "elsApiKey": "",
 				// "elsServiceToken": "",
