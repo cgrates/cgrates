@@ -92,9 +92,11 @@
 // 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+// 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 // 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -272,8 +274,11 @@
 // 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control resource profiles caching
 // 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control resources caching
 // 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching resources to events
+// 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control trend profiles caching
+// 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control trends caching
+// 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// ranking profiles
+// 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	 // controle rankings caching
 // 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
-// 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// stataggregator profiles
 // 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// statqueues with metrics
 // 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
 // 		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control thresholds caching
@@ -318,6 +323,8 @@
 // 	"stats_conns": [],	// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"resources_conns": [],	// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 // 	"apiers_conns": [],	// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"trends_conns": [],	// connections to TrendS for <*trends> filters, empty to disable trends functionality: <""|*internal|$rpc_conns_id>
+// 	"rankings_conns": [], // connections to RankingS for <*rankings> filters, empty to disable rankings functionality: <""|*internal|$rpc_conns_id>
 // },
 
 
@@ -372,6 +379,7 @@
 // 			"id": "*default",					// identifier of the EventReader profile
 // 			"type": "*none",					// reader type <*file_csv>
 // 			"run_delay": "0",					// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+// 			"start_delay": "0",                 // time to wait before an reader starts to run 	
 // 			"concurrent_requests": 1024,				// maximum simultaneous requests/files to process, 0 for unlimited
 // 			"source_path": "/var/spool/cgrates/ers/in",		// read data from this path
 // 			"processed_path": "/var/spool/cgrates/ers/out",		// move processed data here
@@ -511,19 +519,19 @@
 // 				// "elsDisableRetry": false,		// Default: false.
 
 
-// 				// "elsIndex": "",			// ElsIndex
-// 				// "elsRefresh": "",			// ElsRefresh
-// 				// "elsOpType": "",			// ElsOpType
-// 				// "elsPipeline": "",			// ElsPipeline
-// 				// "elsRouting": "",			// ElsRouting
-// 				// "elsTimeout": "",			// ElsTimeout
-// 				// "elsWaitForActiveShards": "",	// ElsWaitForActiveShards
+// 				// "elsIndex": "",			// target elasticsearch index
+// 				// "elsRefresh": "false",		// controls when changes become searchable <true|false|wait_for>
+// 				// "elsOpType": "index",		// operation type <index|create>
+// 				// "elsPipeline": "",			// name of the ingest pipeline to use
+// 				// "elsRouting": "",			// custom routing value for document storage
+// 				// "elsTimeout": "1m",			// maximum time to wait for operation
+// 				// "elsWaitForActiveShards": "1",	// number of shard copies required before indexing (default: 1)
 
 
 // 				// SQL
-// 				// "sqlMaxIdleConns": 0,	// SQLMaxIdleConns    
+// 				// "sqlMaxIdleConns": 0,	// SQLMaxIdleConns
 // 				// "sqlMaxOpenConns": 0,	// SQLMaxOpenConns
-// 				// "sqlConnMaxLifetime": "0",	// SQLConnMaxLifetime 
+// 				// "sqlConnMaxLifetime": "0",	// SQLConnMaxLifetime
 // 				// "mysqlDSNParams": {},        // DSN params
 
 
@@ -701,7 +709,6 @@
 // 	"origin_realm": "cgrates.org",					// diameter Origin-Realm AVP used in replies
 // 	"vendor_id": 0,							// diameter Vendor-Id AVP used in replies
 // 	"product_name": "CGRateS",					// diameter Product-Name AVP used in replies
-// 	"concurrent_requests": -1,					// limit the number of active requests processed by the server <-1|0-n>
 // 	"synced_conn_requests": false,					// process one request at the time per connection
 // 	"asr_template": "",						// enable AbortSession message being sent to client on DisconnectSession
 // 	"rar_template": "",						// template used to build the Re-Auth-Request
@@ -814,6 +821,8 @@
 // 	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
 // 	"store_uncompressed_limit": 0,	// used to compress data
 // 	"thresholds_conns": [],		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+// 	"ees_conns": [],			// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+// 	"ees_exporter_ids": [],		// list of EventExporter profiles to use for real-time StatUpdate exports
 // 	"indexed_selects": true,	// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -825,10 +834,29 @@
 // 	}
 // },
 
-// "trends":{			// TrendS config
-// 	"enabled": false,	// starts TrendS service: <true|false>.
-// 	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+
+// "trends":{							// TrendS config
+// 	"enabled": false,				// starts TrendS service: <true|false>.
+// 	"store_interval": "", 			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+// 	"store_uncompressed_limit": 0,	// used to compress metrics
+// 	"stats_conns": [],				// connections to StatS, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"scheduled_ids": {},			// autoload these trend ids on start
+// 	"thresholds_conns": [],			// connections to ThresholdS for trendSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+//  	"ees_conns": [],			 	// connections to EEs for trendSummary, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+// 	"ees_exporter_ids": []			// list of EventExporter profiles to use for real-time trendSummary exports 
 // },
+
+
+//  "rankings":{					// RankingS config
+// 	"enabled": false,			// starts  RankingS service: <true|false>.
+// 	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+//  	"stats_conns": [],			// connections to StatS, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
+// 	"scheduled_ids": {},		// autoload these ranking ids on start
+// 	"thresholds_conns": [],		// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
+//  	"ees_conns": [],			// connections to EEs for rankingSummary events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+// 	"ees_exporter_ids": []		// list of EventExporter profiles to use for real-time rankingSummary exports 
+// },
+
 
 // "thresholds": {					// ThresholdS
 // 	"enabled": false,			// starts ThresholdS service: <true|false>.
