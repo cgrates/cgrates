@@ -317,14 +317,10 @@ type EventExporterOptsJson struct {
 	ElsMaxRetries               *int              `json:"elsMaxRetries"`
 	ElsDisableRetry             *bool             `json:"elsDisableRetry"`
 	ElsIndex                    *string           `json:"elsIndex"`
-	ElsIfPrimaryTerm            *int              `json:"elsIfPrimaryTerm"`
-	ElsIfSeqNo                  *int              `json:"elsIfSeqNo"`
 	ElsOpType                   *string           `json:"elsOpType"`
 	ElsPipeline                 *string           `json:"elsPipeline"`
 	ElsRouting                  *string           `json:"elsRouting"`
 	ElsTimeout                  *string           `json:"elsTimeout"`
-	ElsVersion                  *int              `json:"elsVersion"`
-	ElsVersionType              *string           `json:"elsVersionType"`
 	ElsWaitForActiveShards      *string           `json:"elsWaitForActiveShards"`
 	SQLMaxIdleConns             *int              `json:"sqlMaxIdleConns"`
 	SQLMaxOpenConns             *int              `json:"sqlMaxOpenConns"`

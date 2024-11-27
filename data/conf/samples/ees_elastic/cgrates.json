@@ -82,14 +82,10 @@
 				// "elsRetryOnStatus": [],
 				// "elsMaxRetries": 0,
 				// "elsDisableRetry": false,
-				// "elsIfPrimaryTerm": 0,
- 				// "elsIfSeqNo": 0,
 				// "elsOpType": "",
 				// "elsPipeline": "",
 				// "elsRouting": "",
 				// "elsTimeout": "",
-				// "elsVersion": 0,
-				// "elsVersionType": "",
 				// "elsWaitForActiveShards": ""
 			},
 			"fields": [
