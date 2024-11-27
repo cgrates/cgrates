@@ -397,16 +397,16 @@ func TestERSSQLFilters(t *testing.T) {
 					"sqlDeleteIndexedFields": ["id"],
 				},
 				"start_delay": "500ms", // wait for db to be populated before starting reader 
-				"processed_path": "",
+				"processed_path": "*delete",
 				"tenant": "cgrates.org",							
 				"filters": [
 				"*gt:~*req.answer_time:NOW() - INTERVAL 7 DAY", // dont process cdrs with answer_time older than 7 days ago (continue if answer_time > now-7days)
 				"FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
 				"*string:~*vars.*readerID:mysql",
 				"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
-				],										
-				"flags": ["*dryrun"],										
-				"fields":[									
+				],
+				"flags": ["*dryrun"],
+				"fields":[
 					{"tag": "CGRID", "path": "*cgreq.CGRID", "type": "*variable", "value": "~*req.cgrid", "mandatory": true},
 					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.tor", "mandatory": true},
 					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.origin_id", "mandatory": true},
