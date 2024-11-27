@@ -790,3 +790,8 @@ func (fltr *FilterRule) passHttp(dDP utils.DataProvider) (bool, error) {
 	return filterHTTP(fltr.Type, dDP, fltr.Element, strVal)
 
 }
+
+// Will return all items the element, e.g.  "~*req", "cost_details", "Charges[0]". "RatingID"
+func (fltr *FilterRule) ElementItems() []string {
+	return strings.Split(fltr.Element, utils.NestingSep)
+}

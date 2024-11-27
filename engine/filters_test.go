@@ -2993,3 +2993,15 @@ func TestFilterRanking(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterRuleElementItems(t *testing.T) {
+	rf, err := NewFilterRule(utils.MetaEqual, "~*req.cost_details.Charges[0].RatingID", []string{"RatingID2"})
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	exp := []string{"~*req", "cost_details", "Charges[0]", "RatingID"}
+	rcv := rf.ElementItems()
+	if !reflect.DeepEqual(exp, rcv) {
+		t.Errorf("Expected: %v , received: %v", exp, rcv)
+	}
+}
