@@ -163,7 +163,16 @@ func (eeS *EEsCfg) exporterIDs() []string {
 }
 
 type ElsOpts struct {
-	Index                    *string
+	// index request opts
+	Index               *string
+	Refresh             *string
+	OpType              *string
+	Pipeline            *string
+	Routing             *string
+	Timeout             *time.Duration
+	WaitForActiveShards *string
+
+	// elasticsearch client opts
 	DiscoverNodesOnStart     *bool
 	DiscoverNodeInterval     *time.Duration
 	Cloud                    *bool
@@ -179,11 +188,6 @@ type ElsOpts struct {
 	RetryOnStatus            *[]int
 	MaxRetries               *int
 	DisableRetry             *bool
-	OpType                   *string
-	Pipeline                 *string
-	Routing                  *string
-	Timeout                  *time.Duration
-	WaitForActiveShards      *string
 }
 
 type SQLOpts struct {
@@ -346,6 +350,9 @@ func (elsOpts *ElsOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 	}
 	if jsnCfg.ElsIndex != nil {
 		elsOpts.Index = jsnCfg.ElsIndex
+	}
+	if jsnCfg.ElsRefresh != nil {
+		elsOpts.Refresh = jsnCfg.ElsRefresh
 	}
 	if jsnCfg.ElsOpType != nil {
 		elsOpts.OpType = jsnCfg.ElsOpType
@@ -672,6 +679,10 @@ func (elsOpts *ElsOpts) Clone() *ElsOpts {
 		cln.Index = new(string)
 		*cln.Index = *elsOpts.Index
 	}
+	if elsOpts.Refresh != nil {
+		cln.Refresh = new(string)
+		*cln.Refresh = *elsOpts.Refresh
+	}
 	if elsOpts.OpType != nil {
 		cln.OpType = new(string)
 		*cln.OpType = *elsOpts.OpType
@@ -980,6 +991,9 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	if elsOpts := eeC.Opts.Els; elsOpts != nil {
 		if elsOpts.Index != nil {
 			opts[utils.ElsIndex] = *elsOpts.Index
+		}
+		if elsOpts.Refresh != nil {
+			opts[utils.ElsRefresh] = *elsOpts.Refresh
 		}
 		if elsOpts.OpType != nil {
 			opts[utils.ElsOpType] = *elsOpts.OpType

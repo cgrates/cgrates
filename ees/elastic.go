@@ -172,9 +172,11 @@ func (e *ElasticEE) ExportEvent(event any, key string) error {
 	}
 	req := e.client.Index(indexName).
 		Id(key).
-		Request(event).
-		Refresh(refresh.True)
+		Request(event)
 
+	if opts.Refresh != nil {
+		req.Refresh(refresh.Refresh{Name: *opts.Refresh})
+	}
 	if opts.OpType != nil {
 		req.OpType(optype.OpType{Name: *opts.OpType})
 	}

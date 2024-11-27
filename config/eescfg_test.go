@@ -46,6 +46,7 @@ func TestEESClone(t *testing.T) {
 					"allowNativePasswords": "true",
 				},
 			"elsIndex":"test",
+			"elsRefresh":"true",
 			"elsOpType":"test2",
 			"elsPipeline":"test3",
 			"elsRouting":"test4",
@@ -240,6 +241,7 @@ func TestEESClone(t *testing.T) {
 					},
 					Els: &ElsOpts{
 						Index:               utils.StringPointer("test"),
+						Refresh:             utils.StringPointer("true"),
 						OpType:              utils.StringPointer("test2"),
 						Pipeline:            utils.StringPointer("test3"),
 						Routing:             utils.StringPointer("test4"),
@@ -368,6 +370,7 @@ func TestEventExporterOptsloadFromJsonCfg(t *testing.T) {
 	eventExporterOptsJSON := &EventExporterOptsJson{
 
 		ElsIndex:                 utils.StringPointer("test"),
+		ElsRefresh:               utils.StringPointer("true"),
 		ElsOpType:                utils.StringPointer("test2"),
 		ElsPipeline:              utils.StringPointer("test3"),
 		ElsRouting:               utils.StringPointer("test4"),
@@ -394,6 +397,7 @@ func TestEventExporterOptsloadFromJsonCfg(t *testing.T) {
 	expected := &EventExporterOpts{
 		Els: &ElsOpts{
 			Index:               utils.StringPointer("test"),
+			Refresh:             utils.StringPointer("true"),
 			OpType:              utils.StringPointer("test2"),
 			Pipeline:            utils.StringPointer("test3"),
 			Routing:             utils.StringPointer("test4"),
@@ -882,6 +886,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
                   "export_path": "/tmp/testCSV",			
 			      "opts": {
 					"elsIndex":"test",
+					"elsRefresh": "true",
 					"kafkaTopic": "test",	
 					"elsOpType":"test2",
 					"elsPipeline":"test3",
@@ -965,6 +970,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.OptsCfg: map[string]any{
 					utils.KafkaTopic:               "test",
 					utils.ElsIndex:                 "test",
+					utils.ElsRefresh:               "true",
 					utils.ElsOpType:                "test2",
 					utils.ElsPipeline:              "test3",
 					utils.ElsRouting:               "test4",
@@ -1120,6 +1126,7 @@ func TestEEsCfgloadFromJSONCfg(t *testing.T) {
 		ElsMaxRetries:               &nm,
 		ElsDisableRetry:             &bl,
 		ElsIndex:                    &str,
+		ElsRefresh:                  &str,
 		ElsOpType:                   &str,
 		ElsPipeline:                 &str,
 		ElsRouting:                  &str,
@@ -1167,6 +1174,7 @@ func TestEEsCfgloadFromJSONCfg(t *testing.T) {
 	}
 	exp := &ElsOpts{
 		Index:                    &str,
+		Refresh:                  &str,
 		DiscoverNodesOnStart:     &bl,
 		DiscoverNodeInterval:     &tm,
 		Cloud:                    &bl,

@@ -512,6 +512,7 @@
 
 
 // 				// "elsIndex": "",			// ElsIndex
+// 				// "elsRefresh": "",			// ElsRefresh
 // 				// "elsOpType": "",			// ElsOpType
 // 				// "elsPipeline": "",			// ElsPipeline
 // 				// "elsRouting": "",			// ElsRouting
