@@ -208,6 +208,7 @@
           become: true
           ansible.builtin.file:
             path: /var/packages/debian/incoming
+            state: absent
 
         - name: Check for leftover package files
           ansible.builtin.find:
