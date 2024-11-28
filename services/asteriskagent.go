@@ -34,11 +34,13 @@ import (
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AsteriskAgent{
-		cfg:     cfg,
-		connMgr: connMgr,
-		srvDep:  srvDep,
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -51,6 +53,9 @@ type AsteriskAgent struct {
 	smas    []*agents.AsteriskAgent
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -112,4 +117,9 @@ func (ast *AsteriskAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ast *AsteriskAgent) ShouldRun() bool {
 	return ast.cfg.AsteriskAgentCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (ast *AsteriskAgent) StateChan(stateID string) chan struct{} {
+	return ast.stateDeps.StateChan(stateID)
 }

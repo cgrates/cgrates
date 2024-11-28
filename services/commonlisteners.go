@@ -26,16 +26,20 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewCommonListenerService instantiates a new CommonListenerService.
-func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) *CommonListenerService {
+func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps,
+	clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *CommonListenerService {
 	return &CommonListenerService{
-		cfg:     cfg,
-		caps:    caps,
-		clSChan: clSChan,
-		srvDep:  srvDep,
+		cfg:        cfg,
+		caps:       caps,
+		clSChan:    clSChan,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -49,6 +53,9 @@ type CommonListenerService struct {
 	caps    *engine.Caps
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start handles the service start.
@@ -98,4 +105,9 @@ func (cl *CommonListenerService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (cl *CommonListenerService) ShouldRun() bool {
 	return true
+}
+
+// StateChan returns signaling channel of specific state
+func (cl *CommonListenerService) StateChan(stateID string) chan struct{} {
+	return cl.stateDeps.StateChan(stateID)
 }

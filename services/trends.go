@@ -36,7 +36,8 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalTrendSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TrendService{
 		connChan:    internalTrendSChan,
 		cfg:         cfg,
@@ -47,6 +48,7 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		filterSChan: filterSChan,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -66,6 +68,9 @@ type TrendService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -147,4 +152,9 @@ func (trs *TrendService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (trs *TrendService) ShouldRun() bool {
 	return trs.cfg.TrendSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (trs *TrendService) StateChan(stateID string) chan struct{} {
+	return trs.stateDeps.StateChan(stateID)
 }

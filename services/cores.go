@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,17 +37,19 @@ import (
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS,
 	internalCoreSChan chan birpc.ClientConnector, anzChan chan *AnalyzerService,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
-	srvDep map[string]*sync.WaitGroup) *CoreService {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *CoreService {
 	return &CoreService{
-		shdWg:    shdWg,
-		connChan: internalCoreSChan,
-		cfg:      cfg,
-		caps:     caps,
-		fileCPU:  fileCPU,
-		clSChan:  clSChan,
-		anzChan:  anzChan,
-		srvDep:   srvDep,
-		csCh:     make(chan *cores.CoreS, 1),
+		shdWg:      shdWg,
+		connChan:   internalCoreSChan,
+		cfg:        cfg,
+		caps:       caps,
+		fileCPU:    fileCPU,
+		clSChan:    clSChan,
+		anzChan:    anzChan,
+		srvDep:     srvDep,
+		csCh:       make(chan *cores.CoreS, 1),
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -68,6 +71,9 @@ type CoreService struct {
 	connChan chan birpc.ClientConnector
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -149,4 +155,9 @@ func (cS *CoreService) WaitForCoreS(ctx *context.Context) (cs *cores.CoreS, err 
 		cSCh <- cs
 	}
 	return
+}
+
+// StateChan returns signaling channel of specific state
+func (cS *CoreService) StateChan(stateID string) chan struct{} {
+	return cS.stateDeps.StateChan(stateID)
 }

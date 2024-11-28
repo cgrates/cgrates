@@ -36,7 +36,8 @@ func NewRateService(cfg *config.CGRConfig,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	dmS *DataDBService, clSChan chan *commonlisteners.CommonListenerS,
 	intConnChan chan birpc.ClientConnector, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
 		cacheS:      cacheS,
@@ -47,6 +48,7 @@ func NewRateService(cfg *config.CGRConfig,
 		rldChan:     make(chan struct{}),
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -68,6 +70,9 @@ type RateService struct {
 	intConnChan chan birpc.ClientConnector
 	cfg         *config.CGRConfig
 	srvDep      map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name
@@ -147,4 +152,9 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	}
 	rs.intConnChan <- anz.GetInternalCodec(srv, utils.RateS)
 	return
+}
+
+// StateChan returns signaling channel of specific state
+func (rs *RateService) StateChan(stateID string) chan struct{} {
+	return rs.stateDeps.StateChan(stateID)
 }

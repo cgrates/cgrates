@@ -2828,6 +2828,10 @@ const (
 	ToNearestTowardZero = "*toNearestTowardZero"
 )
 
+const (
+	StateServiceUP = "SERVICE_UP"
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {

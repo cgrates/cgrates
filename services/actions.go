@@ -39,7 +39,8 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ActionService{
 		connChan:    internalChan,
 		connMgr:     connMgr,
@@ -51,6 +52,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -74,6 +76,9 @@ type ActionService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -152,4 +157,9 @@ func (acts *ActionService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (acts *ActionService) ShouldRun() bool {
 	return acts.cfg.ActionSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (acts *ActionService) StateChan(stateID string) chan struct{} {
+	return acts.stateDeps.StateChan(stateID)
 }

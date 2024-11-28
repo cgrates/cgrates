@@ -16,52 +16,50 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package services
+package servmanager
 
 import (
 	"sync"
-
-	"github.com/cgrates/cgrates/servmanager"
 )
 
-// NewStateIndexer constructs a StateIndexer
-func NewStateIndexer() *StateIndexer {
-	return &StateIndexer{srvS: make(map[string]servmanager.Service)}
+// NewServiceIndexer constructs a ServiceIndexer
+func NewServiceIndexer() *ServiceIndexer {
+	return &ServiceIndexer{srvS: make(map[string]Service)}
 }
 
-// StateIndexer implements service indexing in a thread safe way
-type StateIndexer struct {
+// ServiceIndexer implements service indexing in a thread safe way
+type ServiceIndexer struct {
 	mux sync.RWMutex
 
-	srvS map[string]servmanager.Service // services indexed by ID
+	srvS map[string]Service // services indexed by ID
 }
 
 // GetService returns one service or nil
-func (sI *StateIndexer) GetService(srvID string) servmanager.Service {
+func (sI *ServiceIndexer) GetService(srvID string) Service {
 	sI.mux.RLock()
 	defer sI.mux.RUnlock()
 	return sI.srvS[srvID]
 }
 
 // AddService adds a service based on it's id to the index
-func (sI *StateIndexer) AddService(srvID string, srv servmanager.Service) {
+func (sI *ServiceIndexer) AddService(srvID string, srv Service) {
 	sI.mux.Lock()
 	sI.srvS[srvID] = srv
 	sI.mux.Unlock()
 }
 
-// RemService will remove a service based on it's ID
-func (sI *StateIndexer) RemService(srvID string) {
+// RemoveService will remove a service based on it's ID
+func (sI *ServiceIndexer) RemoveService(srvID string) {
 	sI.mux.Lock()
 	defer sI.mux.Unlock()
 	delete(sI.srvS, srvID)
 }
 
 // GetServices returns the list of services indexed
-func (sI *StateIndexer) GetServices() []servmanager.Service {
+func (sI *ServiceIndexer) GetServices() []Service {
 	sI.mux.RLock()
 	defer sI.mux.RUnlock()
-	srvs := make([]servmanager.Service, 0, len(sI.srvS))
+	srvs := make([]Service, 0, len(sI.srvS))
 	for _, s := range sI.srvS {
 		srvs = append(srvs, s)
 	}

@@ -39,7 +39,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewCGREngine(cfg *config.CGRConfig,
+func NewCGREngine(cfg *config.CGRConfig, sIdxr *servmanager.ServiceIndexer,
 	services []servmanager.Service) *CGREngine {
 	cM := engine.NewConnManager(cfg)
 	caps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
@@ -49,7 +49,7 @@ func NewCGREngine(cfg *config.CGRConfig,
 		cM:         cM,
 		caps:       caps,  // caps is used to limit RPC CPS
 		shdWg:      shdWg, // wait for shutdown
-		srvManager: servmanager.NewServiceManager(shdWg, cM, cfg, services),
+		srvManager: servmanager.NewServiceManager(shdWg, cM, cfg, sIdxr, services),
 		srvDep: map[string]*sync.WaitGroup{
 			utils.AccountS:        new(sync.WaitGroup),
 			utils.ActionS:         new(sync.WaitGroup),
@@ -194,73 +194,78 @@ func (cgr *CGREngine) InitServices(setVersions bool) {
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs), utils.EfSv1, iEFsCh)
 	cgr.cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaERs), utils.ErSv1, iERsCh)
 
-	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep)
-	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, setVersions, cgr.srvDep)
-	cgr.sdbS = NewStorDBService(cgr.cfg, setVersions, cgr.srvDep)
-	cgr.cls = NewCommonListenerService(cgr.cfg, cgr.caps, cgr.clsCh, cgr.srvDep)
+	// ServiceIndexer will share service references to all services
+	srvIdxr := servmanager.NewServiceIndexer()
+	cgr.gvS = NewGlobalVarS(cgr.cfg, cgr.srvDep, srvIdxr)
+	cgr.dmS = NewDataDBService(cgr.cfg, cgr.cM, setVersions, cgr.srvDep, srvIdxr)
+	cgr.sdbS = NewStorDBService(cgr.cfg, setVersions, cgr.srvDep, srvIdxr)
+	cgr.cls = NewCommonListenerService(cgr.cfg, cgr.caps, cgr.clsCh, cgr.srvDep, srvIdxr)
 	cgr.anzS = NewAnalyzerService(cgr.cfg, cgr.clsCh,
-		cgr.iFilterSCh, iAnalyzerSCh, cgr.anzCh, cgr.srvDep)
+		cgr.iFilterSCh, iAnalyzerSCh, cgr.anzCh, cgr.srvDep, srvIdxr)
 
-	cgr.coreS = NewCoreService(cgr.cfg, cgr.caps, cgr.clsCh, iCoreSv1Ch, cgr.anzCh, cgr.cpuPrfF, cgr.shdWg, cgr.srvDep)
+	cgr.coreS = NewCoreService(cgr.cfg, cgr.caps, cgr.clsCh, iCoreSv1Ch, cgr.anzCh,
+		cgr.cpuPrfF, cgr.shdWg, cgr.srvDep, srvIdxr)
 
 	cgr.cacheS = NewCacheService(cgr.cfg, cgr.dmS, cgr.cM,
 		cgr.clsCh, iCacheSCh, cgr.anzCh, cgr.coreS,
-		cgr.srvDep)
+		cgr.srvDep, srvIdxr)
 
 	dspS := NewDispatcherService(cgr.cfg, cgr.dmS, cgr.cacheS,
 		cgr.iFilterSCh, cgr.clsCh, cgr.iDispatcherSCh, cgr.cM,
-		cgr.anzCh, cgr.srvDep)
+		cgr.anzCh, cgr.srvDep, srvIdxr)
 
 	cgr.ldrs = NewLoaderService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.clsCh,
-		iLoaderSCh, cgr.cM, cgr.anzCh, cgr.srvDep)
+		iLoaderSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr)
 
-	cgr.efs = NewExportFailoverService(cgr.cfg, cgr.cM, iEFsCh, cgr.clsCh, cgr.srvDep)
+	cgr.efs = NewExportFailoverService(cgr.cfg, cgr.cM, iEFsCh, cgr.clsCh, cgr.srvDep, srvIdxr)
 
 	cgr.srvManager.AddServices(cgr.gvS, cgr.cls, cgr.coreS, cgr.cacheS,
 		cgr.ldrs, cgr.anzS, dspS, cgr.dmS, cgr.sdbS, cgr.efs,
 		NewAdminSv1Service(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.clsCh,
-			iAdminSCh, cgr.cM, cgr.anzCh, cgr.srvDep),
-		NewSessionService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.clsCh, iSessionSCh, cgr.cM, cgr.anzCh, cgr.srvDep),
+			iAdminSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
+		NewSessionService(cgr.cfg, cgr.dmS, cgr.iFilterSCh, cgr.clsCh, iSessionSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
 		NewAttributeService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.clsCh, iAttributeSCh,
-			cgr.anzCh, dspS, cgr.srvDep),
+			cgr.anzCh, dspS, cgr.srvDep, srvIdxr),
 		NewChargerService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.clsCh,
-			iChargerSCh, cgr.cM, cgr.anzCh, cgr.srvDep),
+			iChargerSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
 		NewRouteService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.clsCh,
-			iRouteSCh, cgr.cM, cgr.anzCh, cgr.srvDep),
+			iRouteSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
 		NewResourceService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.clsCh,
-			iResourceSCh, cgr.cM, cgr.anzCh, cgr.srvDep),
+			iResourceSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
 		NewTrendService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.clsCh,
-			iTrendSCh, cgr.cM, cgr.anzCh, cgr.srvDep),
+			iTrendSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
 		NewRankingService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.clsCh,
-			iRankingSCh, cgr.cM, cgr.anzCh, cgr.srvDep),
+			iRankingSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
 		NewThresholdService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh,
-			cgr.cM, cgr.clsCh, iThresholdSCh, cgr.anzCh, cgr.srvDep),
+			cgr.cM, cgr.clsCh, iThresholdSCh, cgr.anzCh, cgr.srvDep, srvIdxr),
 		NewStatService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.clsCh,
-			iStatSCh, cgr.cM, cgr.anzCh, cgr.srvDep),
+			iStatSCh, cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
 
-		NewEventReaderService(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.clsCh, iERsCh, cgr.anzCh, cgr.srvDep),
-		NewDNSAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
-		NewFreeswitchAgent(cgr.cfg, cgr.cM, cgr.srvDep),
-		NewKamailioAgent(cgr.cfg, cgr.cM, cgr.srvDep),
-		NewJanusAgent(cgr.cfg, cgr.iFilterSCh, cgr.clsCh, cgr.cM, cgr.srvDep),
-		NewAsteriskAgent(cgr.cfg, cgr.cM, cgr.srvDep),                           // partial reload
-		NewRadiusAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),             // partial reload
-		NewDiameterAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.caps, cgr.srvDep), // partial reload
-		NewHTTPAgent(cgr.cfg, cgr.iFilterSCh, cgr.clsCh, cgr.cM, cgr.srvDep),    // no reload
-		NewSIPAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep),
+		NewEventReaderService(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.clsCh, iERsCh, cgr.anzCh, cgr.srvDep, srvIdxr),
+		NewDNSAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, srvIdxr),
+		NewFreeswitchAgent(cgr.cfg, cgr.cM, cgr.srvDep, srvIdxr),
+		NewKamailioAgent(cgr.cfg, cgr.cM, cgr.srvDep, srvIdxr),
+		NewJanusAgent(cgr.cfg, cgr.iFilterSCh, cgr.clsCh, cgr.cM, cgr.srvDep, srvIdxr),
+		NewAsteriskAgent(cgr.cfg, cgr.cM, cgr.srvDep, srvIdxr),                           // partial reload
+		NewRadiusAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, srvIdxr),             // partial reload
+		NewDiameterAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.caps, cgr.srvDep, srvIdxr), // partial reload
+		NewHTTPAgent(cgr.cfg, cgr.iFilterSCh, cgr.clsCh, cgr.cM, cgr.srvDep, srvIdxr),    // no reload
+		NewSIPAgent(cgr.cfg, cgr.iFilterSCh, cgr.cM, cgr.srvDep, srvIdxr),
 
 		NewEventExporterService(cgr.cfg, cgr.iFilterSCh,
-			cgr.cM, cgr.clsCh, iEEsCh, cgr.anzCh, cgr.srvDep),
+			cgr.cM, cgr.clsCh, iEEsCh, cgr.anzCh, cgr.srvDep, srvIdxr),
 		NewCDRServer(cgr.cfg, cgr.dmS, cgr.sdbS, cgr.iFilterSCh, cgr.clsCh, iCDRServerCh,
-			cgr.cM, cgr.anzCh, cgr.srvDep),
+			cgr.cM, cgr.anzCh, cgr.srvDep, srvIdxr),
 
-		NewRegistrarCService(cgr.cfg, cgr.cM, cgr.srvDep),
+		NewRegistrarCService(cgr.cfg, cgr.cM, cgr.srvDep, srvIdxr),
 
 		NewRateService(cgr.cfg, cgr.cacheS, cgr.iFilterSCh, cgr.dmS,
-			cgr.clsCh, iRateSCh, cgr.anzCh, cgr.srvDep),
-		NewActionService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.clsCh, iActionSCh, cgr.anzCh, cgr.srvDep),
-		NewAccountService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM, cgr.clsCh, iAccountSCh, cgr.anzCh, cgr.srvDep),
-		NewTPeService(cgr.cfg, cgr.cM, cgr.dmS, cgr.clsCh, cgr.srvDep),
+			cgr.clsCh, iRateSCh, cgr.anzCh, cgr.srvDep, srvIdxr),
+		NewActionService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh, cgr.cM,
+			cgr.clsCh, iActionSCh, cgr.anzCh, cgr.srvDep, srvIdxr),
+		NewAccountService(cgr.cfg, cgr.dmS, cgr.cacheS, cgr.iFilterSCh,
+			cgr.cM, cgr.clsCh, iAccountSCh, cgr.anzCh, cgr.srvDep, srvIdxr),
+		NewTPeService(cgr.cfg, cgr.cM, cgr.dmS, cgr.clsCh, cgr.srvDep, srvIdxr),
 	)
 
 }

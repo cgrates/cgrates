@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,7 +36,8 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) *DispatcherService {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *DispatcherService {
 	return &DispatcherService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -47,6 +49,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvsReload:  make(map[string]chan struct{}),
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -68,6 +71,9 @@ type DispatcherService struct {
 	cfg        *config.CGRConfig
 	srvsReload map[string]chan struct{}
 	srvDep     map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -179,4 +185,9 @@ func (dspS *DispatcherService) sync() {
 	for _, c := range dspS.srvsReload {
 		c <- struct{}{}
 	}
+}
+
+// StateChan returns signaling channel of specific state
+func (dspS *DispatcherService) StateChan(stateID string) chan struct{} {
+	return dspS.stateDeps.StateChan(stateID)
 }

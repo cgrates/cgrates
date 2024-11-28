@@ -37,7 +37,8 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalRankingSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RankingService{
 		connChan:    internalRankingSChan,
 		cfg:         cfg,
@@ -48,6 +49,7 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:     connMgr,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -67,6 +69,9 @@ type RankingService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -150,4 +155,9 @@ func (ran *RankingService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ran *RankingService) ShouldRun() bool {
 	return ran.cfg.RankingSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (ran *RankingService) StateChan(stateID string) chan struct{} {
+	return ran.stateDeps.StateChan(stateID)
 }

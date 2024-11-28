@@ -33,13 +33,15 @@ import (
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, caps *engine.Caps,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &DiameterAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		caps:        caps,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -58,6 +60,9 @@ type DiameterAgent struct {
 	laddr string
 
 	srvDep map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -136,4 +141,9 @@ func (da *DiameterAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (da *DiameterAgent) ShouldRun() bool {
 	return da.cfg.DiameterAgentCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (da *DiameterAgent) StateChan(stateID string) chan struct{} {
+	return da.stateDeps.StateChan(stateID)
 }

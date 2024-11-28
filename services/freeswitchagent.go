@@ -34,11 +34,13 @@ import (
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &FreeswitchAgent{
-		cfg:     cfg,
-		connMgr: connMgr,
-		srvDep:  srvDep,
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -50,6 +52,9 @@ type FreeswitchAgent struct {
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -111,4 +116,9 @@ func (fS *FreeswitchAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (fS *FreeswitchAgent) ShouldRun() bool {
 	return fS.cfg.FsAgentCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (fS *FreeswitchAgent) StateChan(stateID string) chan struct{} {
+	return fS.stateDeps.StateChan(stateID)
 }

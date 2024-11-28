@@ -31,11 +31,13 @@ import (
 
 // NewRegistrarCService returns the Dispatcher Service
 func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RegistrarCService{
-		cfg:     cfg,
-		connMgr: connMgr,
-		srvDep:  srvDep,
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -50,6 +52,9 @@ type RegistrarCService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -101,4 +106,9 @@ func (dspS *RegistrarCService) ServiceName() string {
 func (dspS *RegistrarCService) ShouldRun() bool {
 	return len(dspS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 ||
 		len(dspS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0
+}
+
+// StateChan returns signaling channel of specific state
+func (dspS *RegistrarCService) StateChan(stateID string) chan struct{} {
+	return dspS.stateDeps.StateChan(stateID)
 }

@@ -37,7 +37,8 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	internalAPIerSv1Chan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AdminSv1Service{
 		connChan:    internalAPIerSv1Chan,
 		cfg:         cfg,
@@ -48,6 +49,7 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 		connMgr:     connMgr,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -69,6 +71,9 @@ type AdminSv1Service struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -152,4 +157,9 @@ func (apiService *AdminSv1Service) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (apiService *AdminSv1Service) ShouldRun() bool {
 	return apiService.cfg.AdminSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (apiService *AdminSv1Service) StateChan(stateID string) chan struct{} {
+	return apiService.stateDeps.StateChan(stateID)
 }

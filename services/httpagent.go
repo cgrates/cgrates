@@ -34,13 +34,15 @@ import (
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -60,6 +62,9 @@ type HTTPAgent struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -116,4 +121,9 @@ func (ha *HTTPAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ha *HTTPAgent) ShouldRun() bool {
 	return len(ha.cfg.HTTPAgentCfg()) != 0
+}
+
+// StateChan returns signaling channel of specific state
+func (ha *HTTPAgent) StateChan(stateID string) chan struct{} {
+	return ha.stateDeps.StateChan(stateID)
 }

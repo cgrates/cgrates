@@ -33,12 +33,14 @@ import (
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RadiusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -56,6 +58,9 @@ type RadiusAgent struct {
 	lnet  string
 	lauth string
 	lacct string
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -135,4 +140,9 @@ func (rad *RadiusAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (rad *RadiusAgent) ShouldRun() bool {
 	return rad.cfg.RadiusAgentCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (rad *RadiusAgent) StateChan(stateID string) chan struct{} {
+	return rad.stateDeps.StateChan(stateID)
 }

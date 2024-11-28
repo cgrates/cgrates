@@ -36,7 +36,8 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalStatSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &StatService{
 		connChan:    internalStatSChan,
 		cfg:         cfg,
@@ -47,6 +48,7 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:     connMgr,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -67,6 +69,9 @@ type StatService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -148,4 +153,9 @@ func (sts *StatService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (sts *StatService) ShouldRun() bool {
 	return sts.cfg.StatSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (sts *StatService) StateChan(stateID string) chan struct{} {
+	return sts.stateDeps.StateChan(stateID)
 }

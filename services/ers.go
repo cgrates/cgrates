@@ -40,7 +40,8 @@ func NewEventReaderService(
 	clSChan chan *commonlisteners.CommonListenerS,
 	intConn chan birpc.ClientConnector,
 	anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
 		cfg:         cfg,
@@ -50,6 +51,7 @@ func NewEventReaderService(
 		intConn:     intConn,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -70,6 +72,9 @@ type EventReaderService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -151,4 +156,9 @@ func (erS *EventReaderService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (erS *EventReaderService) ShouldRun() bool {
 	return erS.cfg.ERsCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (erS *EventReaderService) StateChan(stateID string) chan struct{} {
+	return erS.stateDeps.StateChan(stateID)
 }

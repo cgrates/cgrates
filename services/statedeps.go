@@ -22,28 +22,25 @@ import (
 	"sync"
 )
 
-// newStateDependencies constructs a stateDependencies struct
-func newStateDependencies() *stateDependencies {
-	return &stateDependencies{stateDeps: make(map[string]chan struct{})}
+// NewStateDependencies constructs a StateDependencies struct
+func NewStateDependencies(servStates []string) (stDeps *StateDependencies) {
+	stDeps = &StateDependencies{stateDeps: make(map[string]chan struct{})}
+	for _, stateID := range servStates {
+		stDeps.stateDeps[stateID] = make(chan struct{})
+	}
+	return
 }
 
-// stateDependencies enhances a service with state dependencies management
-type stateDependencies struct {
+// StateDependencies enhances a service with state dependencies management
+type StateDependencies struct {
 	stateDeps    map[string]chan struct{} // listeners for various states of the service
 	stateDepsMux sync.RWMutex             // protects stateDeps
 }
 
 // RegisterStateDependency will be called by a service interested by specific stateID of the service
-func (sDs *stateDependencies) RegisterStateDependency(stateID string) (retChan chan struct{}) {
+func (sDs *StateDependencies) StateChan(stateID string) (retChan chan struct{}) {
 	sDs.stateDepsMux.RLock()
 	retChan = sDs.stateDeps[stateID]
 	sDs.stateDepsMux.RUnlock()
-	if retChan != nil {
-		return
-	}
-	sDs.stateDepsMux.Lock()
-	defer sDs.stateDepsMux.Unlock()
-	retChan = make(chan struct{})
-	sDs.stateDeps[stateID] = retChan
 	return
 }

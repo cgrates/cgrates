@@ -25,16 +25,19 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewStorDBService returns the StorDB Service
 func NewStorDBService(cfg *config.CGRConfig, setVersions bool,
-	srvDep map[string]*sync.WaitGroup) *StorDBService {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *StorDBService {
 	return &StorDBService{
 		cfg:         cfg,
 		setVersions: setVersions,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -49,6 +52,9 @@ type StorDBService struct {
 	setVersions bool
 
 	srvDep map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -202,4 +208,9 @@ func (db *StorDBService) needsConnectionReload() bool {
 			db.oldDBCfg.Opts.PgSSLPassword != db.cfg.StorDbCfg().Opts.PgSSLPassword ||
 			db.oldDBCfg.Opts.PgSSLCertMode != db.cfg.StorDbCfg().Opts.PgSSLCertMode ||
 			db.oldDBCfg.Opts.PgSSLRootCert != db.cfg.StorDbCfg().Opts.PgSSLRootCert)
+}
+
+// StateChan returns signaling channel of specific state
+func (db *StorDBService) StateChan(stateID string) chan struct{} {
+	return db.stateDeps.StateChan(stateID)
 }

@@ -59,7 +59,7 @@ func runCGREngine(fs []string) (err error) {
 	if cfg, err = services.InitConfigFromPath(ctx, *flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
 		return
 	}
-	cgr := services.NewCGREngine(cfg, []servmanager.Service{})
+	cgr := services.NewCGREngine(cfg, servmanager.NewServiceIndexer(), []servmanager.Service{})
 	defer cgr.Stop(*flags.PidFile)
 
 	if err = cgr.Run(ctx, cancel, flags, vers,

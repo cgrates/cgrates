@@ -39,7 +39,8 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
 	internalChan chan birpc.ClientConnector,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AccountService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -51,6 +52,7 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -73,6 +75,9 @@ type AccountService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -80,7 +85,7 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if acts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
+	acts.stateDeps = NewStateDependencies([]string{utils.StateServiceUP})
 	acts.cl = <-acts.clSChan
 	acts.clSChan <- acts.cl
 	if err = acts.cacheS.WaitToPrecache(ctx,
@@ -153,4 +158,9 @@ func (acts *AccountService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (acts *AccountService) ShouldRun() bool {
 	return acts.cfg.AccountSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (acts *AccountService) StateChan(stateID string) chan struct{} {
+	return acts.stateDeps.StateChan(stateID)
 }

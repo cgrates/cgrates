@@ -36,7 +36,8 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalResourceSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ResourceService{
 		connChan:    internalResourceSChan,
 		cfg:         cfg,
@@ -47,6 +48,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:     connMgr,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -67,6 +69,9 @@ type ResourceService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -146,4 +151,9 @@ func (reS *ResourceService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (reS *ResourceService) ShouldRun() bool {
 	return reS.cfg.ResourceSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (reS *ResourceService) StateChan(stateID string) chan struct{} {
+	return reS.stateDeps.StateChan(stateID)
 }

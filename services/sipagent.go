@@ -33,12 +33,14 @@ import (
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &SIPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -53,6 +55,9 @@ type SIPAgent struct {
 	srvDep  map[string]*sync.WaitGroup
 
 	oldListen string
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -124,4 +129,9 @@ func (sip *SIPAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (sip *SIPAgent) ShouldRun() bool {
 	return sip.cfg.SIPAgentCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (sip *SIPAgent) StateChan(stateID string) chan struct{} {
+	return sip.stateDeps.StateChan(stateID)
 }

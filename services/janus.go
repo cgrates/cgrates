@@ -35,13 +35,15 @@ import (
 // NewJanusAgent returns the Janus Agent
 func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &JanusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -61,6 +63,9 @@ type JanusAgent struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should jandle the sercive start
@@ -128,4 +133,9 @@ func (ja *JanusAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ja *JanusAgent) ShouldRun() bool {
 	return ja.cfg.JanusAgentCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (ja *JanusAgent) StateChan(stateID string) chan struct{} {
+	return ja.stateDeps.StateChan(stateID)
 }

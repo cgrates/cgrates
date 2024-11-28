@@ -37,17 +37,19 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	anzChan chan *AnalyzerService, dspS *DispatcherService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup, sIndxr *servmanager.ServiceIndexer) servmanager.Service {
 	return &AttributeService{
-		connChan:    internalChan,
-		cfg:         cfg,
-		dm:          dm,
-		cacheS:      cacheS,
-		filterSChan: filterSChan,
-		clSChan:     clSChan,
-		anzChan:     anzChan,
-		srvDep:      srvDep,
-		dspS:        dspS,
+		connChan:       internalChan,
+		cfg:            cfg,
+		dm:             dm,
+		cacheS:         cacheS,
+		filterSChan:    filterSChan,
+		clSChan:        clSChan,
+		anzChan:        anzChan,
+		srvDep:         srvDep,
+		dspS:           dspS,
+		stateDeps:      NewStateDependencies([]string{utils.StateServiceUP}),
+		serviceIndexer: sIndxr,
 	}
 }
 
@@ -69,6 +71,9 @@ type AttributeService struct {
 	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	serviceIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps      *StateDependencies
 }
 
 // Start should handle the service start
@@ -76,7 +81,11 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	if attrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
+	if utils.StructChanTimeout(
+		attrS.serviceIndexer.GetService(utils.CommonListenerS).StateChan(utils.StateServiceUP),
+		attrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CommonListenerS, utils.StateServiceUP)
+	}
 	attrS.cl = <-attrS.clSChan
 	attrS.clSChan <- attrS.cl
 	if err = attrS.cacheS.WaitToPrecache(ctx,
@@ -120,6 +129,7 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 		}
 	}()
 	attrS.connChan <- anz.GetInternalCodec(srv, utils.AttributeS)
+	close(attrS.stateDeps.StateChan(utils.StateServiceUP)) // inform listeners about the service reaching UP state
 	return
 }
 
@@ -156,4 +166,9 @@ func (attrS *AttributeService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (attrS *AttributeService) ShouldRun() bool {
 	return attrS.cfg.AttributeSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (attrS *AttributeService) StateChan(stateID string) chan struct{} {
+	return attrS.stateDeps.StateChan(stateID)
 }

@@ -35,7 +35,8 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS, intConnChan chan birpc.ClientConnector,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
@@ -44,6 +45,7 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 		intConnChan: intConnChan,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -62,6 +64,9 @@ type EventExporterService struct {
 	connMgr     *engine.ConnManager
 	cfg         *config.CGRConfig
 	srvDep      map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name
@@ -133,4 +138,9 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	}
 	es.intConnChan <- anz.GetInternalCodec(srv, utils.EEs)
 	return nil
+}
+
+// StateChan returns signaling channel of specific state
+func (es *EventExporterService) StateChan(stateID string) chan struct{} {
+	return es.stateDeps.StateChan(stateID)
 }

@@ -30,7 +30,7 @@ import (
 
 // NewServiceManager returns a service manager
 func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager,
-	cfg *config.CGRConfig, services []Service) (sM *ServiceManager) {
+	cfg *config.CGRConfig, srvIndxr *ServiceIndexer, services []Service) (sM *ServiceManager) {
 	sM = &ServiceManager{
 		cfg:        cfg,
 		subsystems: make(map[string]Service),
@@ -48,6 +48,8 @@ type ServiceManager struct {
 	cfg          *config.CGRConfig
 	subsystems   map[string]Service // active subsystems managed by SM
 
+	serviceIndexer *ServiceIndexer // index here the services for accessing them by their IDs
+
 	shdWg   *sync.WaitGroup // list of shutdown items
 	connMgr *engine.ConnManager
 	rldChan <-chan string // reload signals come over this channelc
@@ -57,6 +59,18 @@ type ServiceManager struct {
 func (srvMngr *ServiceManager) StartServices(ctx *context.Context, shtDwn context.CancelFunc) {
 	go srvMngr.handleReload(ctx, shtDwn)
 	for _, service := range srvMngr.subsystems {
+		if service.ShouldRun() && !service.IsRunning() {
+			srvMngr.shdWg.Add(1)
+			go func(srv Service) {
+				if err := srv.Start(ctx, shtDwn); err != nil &&
+					err != utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
+					utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, srv.ServiceName(), err))
+					shtDwn()
+				}
+			}(service)
+		}
+	}
+	for _, service := range srvMngr.serviceIndexer.GetServices() {
 		if service.ShouldRun() && !service.IsRunning() {
 			srvMngr.shdWg.Add(1)
 			go func(srv Service) {
@@ -165,6 +179,8 @@ type Service interface {
 	ShouldRun() bool
 	// ServiceName returns the service name
 	ServiceName() string
+	// StateChan returns the channel for specific state subscription
+	StateChan(stateID string) chan struct{}
 }
 
 // ArgsServiceID are passed to Start/Stop/Status RPC methods

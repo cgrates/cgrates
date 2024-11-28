@@ -25,18 +25,21 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewDataDBService returns the DataDB Service
 func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVersions bool,
-	srvDep map[string]*sync.WaitGroup) *DataDBService {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *DataDBService {
 	return &DataDBService{
 		cfg:         cfg,
 		dbchan:      make(chan *engine.DataManager, 1),
 		connMgr:     connMgr,
 		setVersions: setVersions,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -52,6 +55,9 @@ type DataDBService struct {
 	setVersions bool
 
 	srvDep map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start handles the service start.
@@ -188,4 +194,9 @@ func (db *DataDBService) WaitForDM(ctx *context.Context) (datadb *engine.DataMan
 		dbCh <- datadb
 	}
 	return
+}
+
+// StateChan returns signaling channel of specific state
+func (db *DataDBService) StateChan(stateID string) chan struct{} {
+	return db.stateDeps.StateChan(stateID)
 }

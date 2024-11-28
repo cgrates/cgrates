@@ -38,7 +38,8 @@ import (
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &SessionService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -48,6 +49,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 		connMgr:     connMgr,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -69,6 +71,9 @@ type SessionService struct {
 	connMgr      *engine.ConnManager
 	cfg          *config.CGRConfig
 	srvDep       map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -171,4 +176,9 @@ func (smg *SessionService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (smg *SessionService) ShouldRun() bool {
 	return smg.cfg.SessionSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (smg *SessionService) StateChan(stateID string) chan struct{} {
+	return smg.stateDeps.StateChan(stateID)
 }

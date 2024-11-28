@@ -33,12 +33,14 @@ import (
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -53,6 +55,9 @@ type DNSAgent struct {
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -141,4 +146,9 @@ func (dns *DNSAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (dns *DNSAgent) ShouldRun() bool {
 	return dns.cfg.DNSAgentCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (dns *DNSAgent) StateChan(stateID string) chan struct{} {
+	return dns.stateDeps.StateChan(stateID)
 }

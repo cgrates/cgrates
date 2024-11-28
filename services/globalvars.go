@@ -25,15 +25,18 @@ import (
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewGlobalVarS .
 func NewGlobalVarS(cfg *config.CGRConfig,
-	srvDep map[string]*sync.WaitGroup) *GlobalVarS {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *GlobalVarS {
 	return &GlobalVarS{
-		cfg:    cfg,
-		srvDep: srvDep,
+		cfg:        cfg,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -41,6 +44,9 @@ func NewGlobalVarS(cfg *config.CGRConfig,
 type GlobalVarS struct {
 	cfg    *config.CGRConfig
 	srvDep map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -81,4 +87,9 @@ func (gv *GlobalVarS) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (gv *GlobalVarS) ShouldRun() bool {
 	return true
+}
+
+// StateChan returns signaling channel of specific state
+func (gv *GlobalVarS) StateChan(stateID string) chan struct{} {
+	return gv.stateDeps.StateChan(stateID)
 }

@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,17 +36,19 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
 	anzChan chan *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
-	srvDep map[string]*sync.WaitGroup) *CacheService {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *CacheService {
 	return &CacheService{
-		cfg:     cfg,
-		srvDep:  srvDep,
-		anzChan: anzChan,
-		cores:   cores,
-		clSChan: clSChan,
-		dm:      dm,
-		connMgr: connMgr,
-		rpc:     internalChan,
-		cacheCh: make(chan *engine.CacheS, 1),
+		cfg:        cfg,
+		srvDep:     srvDep,
+		anzChan:    anzChan,
+		cores:      cores,
+		clSChan:    clSChan,
+		dm:         dm,
+		connMgr:    connMgr,
+		rpc:        internalChan,
+		cacheCh:    make(chan *engine.CacheS, 1),
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -63,6 +66,9 @@ type CacheService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -143,4 +149,9 @@ func (cS *CacheService) WaitToPrecache(ctx *context.Context, cacheIDs ...string)
 		}
 	}
 	return
+}
+
+// StateChan returns signaling channel of specific state
+func (cS *CacheService) StateChan(stateID string) chan struct{} {
+	return cS.stateDeps.StateChan(stateID)
 }

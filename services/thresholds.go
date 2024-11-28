@@ -36,7 +36,8 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS, internalThresholdSChan chan birpc.ClientConnector,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
 		cfg:         cfg,
@@ -47,6 +48,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		connMgr:     connMgr,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -67,6 +69,9 @@ type ThresholdService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -147,4 +152,9 @@ func (thrs *ThresholdService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (thrs *ThresholdService) ShouldRun() bool {
 	return thrs.cfg.ThresholdSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (thrs *ThresholdService) StateChan(stateID string) chan struct{} {
+	return thrs.stateDeps.StateChan(stateID)
 }

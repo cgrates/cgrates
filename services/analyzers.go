@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +37,8 @@ func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.Com
 	filterSChan chan *engine.FilterS,
 	internalAnalyzerSChan chan birpc.ClientConnector,
 	anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) *AnalyzerService {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
 	return &AnalyzerService{
 		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
@@ -44,6 +46,7 @@ func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.Com
 		filterSChan: filterSChan,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -62,6 +65,10 @@ type AnalyzerService struct {
 	connChan   chan birpc.ClientConnector
 	cfg        *config.CGRConfig
 	srvDep     map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
+
 }
 
 // Start should handle the sercive start
@@ -164,4 +171,9 @@ func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string)
 		return c
 	}
 	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
+}
+
+// StateChan returns signaling channel of specific state
+func (anz *AnalyzerService) StateChan(stateID string) chan struct{} {
+	return anz.stateDeps.StateChan(stateID)
 }

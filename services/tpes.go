@@ -34,13 +34,15 @@ import (
 
 // NewTPeService is the constructor for the TpeService
 func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataDBService,
-	clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TPeService{
-		cfg:     cfg,
-		srvDep:  srvDep,
-		dm:      dm,
-		connMgr: connMgr,
-		clSChan: clSChan,
+		cfg:        cfg,
+		srvDep:     srvDep,
+		dm:         dm,
+		connMgr:    connMgr,
+		clSChan:    clSChan,
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -59,6 +61,9 @@ type TPeService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -106,4 +111,9 @@ func (ts *TPeService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (ts *TPeService) ShouldRun() bool {
 	return ts.cfg.TpeSCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (ts *TPeService) StateChan(stateID string) chan struct{} {
+	return ts.stateDeps.StateChan(stateID)
 }

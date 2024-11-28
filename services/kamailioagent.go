@@ -35,11 +35,13 @@ import (
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &KamailioAgent{
-		cfg:     cfg,
-		connMgr: connMgr,
-		srvDep:  srvDep,
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
 	}
 }
 
@@ -51,6 +53,9 @@ type KamailioAgent struct {
 	kam     *agents.KamailioAgent
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -117,4 +122,9 @@ func (kam *KamailioAgent) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (kam *KamailioAgent) ShouldRun() bool {
 	return kam.cfg.KamAgentCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (kam *KamailioAgent) StateChan(stateID string) chan struct{} {
+	return kam.stateDeps.StateChan(stateID)
 }

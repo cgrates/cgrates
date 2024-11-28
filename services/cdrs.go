@@ -38,7 +38,8 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, internalCDRServerChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &CDRService{
 		connChan:    internalCDRServerChan,
 		cfg:         cfg,
@@ -49,6 +50,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:     connMgr,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -70,6 +72,9 @@ type CDRService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -146,4 +151,9 @@ func (cs *CDRService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (cs *CDRService) ShouldRun() bool {
 	return cs.cfg.CdrsCfg().Enabled
+}
+
+// StateChan returns signaling channel of specific state
+func (cs *CDRService) StateChan(stateID string) chan struct{} {
+	return cs.stateDeps.StateChan(stateID)
 }

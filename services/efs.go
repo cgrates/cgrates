@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -47,18 +48,24 @@ type ExportFailoverService struct {
 	connMgr     *engine.ConnManager
 	cfg         *config.CGRConfig
 	srvDep      map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // NewExportFailoverService is the constructor for the TpeService
 func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	intConnChan chan birpc.ClientConnector,
-	clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup) *ExportFailoverService {
+	clSChan chan *commonlisteners.CommonListenerS,
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *ExportFailoverService {
 	return &ExportFailoverService{
 		cfg:         cfg,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
 		intConnChan: intConnChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -109,4 +116,9 @@ func (efServ *ExportFailoverService) ShouldRun() bool {
 // ServiceName returns the service name
 func (efServ *ExportFailoverService) ServiceName() string {
 	return utils.EFs
+}
+
+// StateChan returns signaling channel of specific state
+func (efServ *ExportFailoverService) StateChan(stateID string) chan struct{} {
+	return efServ.stateDeps.StateChan(stateID)
 }

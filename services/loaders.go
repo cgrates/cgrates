@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +37,8 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	internalLoaderSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup) *LoaderService {
+	srvDep map[string]*sync.WaitGroup,
+	srvIndexer *servmanager.ServiceIndexer) *LoaderService {
 	return &LoaderService{
 		connChan:    internalLoaderSChan,
 		cfg:         cfg,
@@ -47,6 +49,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		stopChan:    make(chan struct{}),
 		anzChan:     anzChan,
 		srvDep:      srvDep,
+		srvIndexer:  srvIndexer,
 	}
 }
 
@@ -67,6 +70,9 @@ type LoaderService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
+
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -166,4 +172,9 @@ func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderS {
 // GetRPCChan returns the conn chan
 func (ldrs *LoaderService) GetRPCChan() chan birpc.ClientConnector {
 	return ldrs.connChan
+}
+
+// StateChan returns signaling channel of specific state
+func (ldrs *LoaderService) StateChan(stateID string) chan struct{} {
+	return ldrs.stateDeps.StateChan(stateID)
 }

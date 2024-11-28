@@ -249,3 +249,8 @@ func ErrPathNotReachable(path string) error {
 func NewSTIRError(reason string) error {
 	return fmt.Errorf("%s: %s", MetaSTIRAuthenticate, reason)
 }
+
+// NewServiceTimeoutError is called when waiting
+func NewServiceStateTimeoutError(sourceID, srvID, stateID string) error {
+	return fmt.Errorf("%s: service <%s> state <%s> timeout", sourceID, srvID, stateID)
+}
