@@ -40,40 +40,22 @@ func TestATExportAndTopup(t *testing.T) {
 	}
 
 	content := `{
-
-"general": {
-	"log_level": 7,
-	"reply_timeout": "30s"
-},
-
-"data_db": {								
-	"db_type": "*internal"
-},
-
-"stor_db": {
-	"db_type": "*internal"
-},
-
 "cdrs": {
 	"enabled": true,
 	"rals_conns": ["*internal"]
 },
-
 "rals": {
 	"enabled": true
 },
-
 "schedulers": {
 	"enabled": true,
 	"cdrs_conns": ["*internal"]
 },
-
 "apiers": {
 	"enabled": true,
 	"scheduler_conns": ["*internal"],
 	"ees_conns": ["*internal"]
 },
-
 "ees": {
 	"enabled": true,
 	"exporters": [
@@ -89,7 +71,6 @@ func TestATExportAndTopup(t *testing.T) {
 		}
 	]
 }
-
 }`
 
 	tpFiles := map[string]string{
@@ -112,6 +93,7 @@ TRIGGER_1001,,*balance_expired,,true,0,,,main,*data,,,,,,,,,,ACT_TOPUP_INITIAL,`
 	}
 
 	ng := engine.TestEngine{
+		DBCfg:      engine.InternalDBCfg,
 		ConfigJSON: content,
 		TpFiles:    tpFiles,
 	}
@@ -223,3 +205,170 @@ TRIGGER_1001,,*balance_expired,,true,0,,,main,*data,,,,,,,,,,ACT_TOPUP_INITIAL,`
 		checkAccountAndCDRs(t, 20480, 7)               // 20GB balance
 	})
 }
+
+/*
+
+Alternative setup by API:
+
+	var reply string
+	if err := client.Call(context.Background(), utils.APIerSv2SetActions,
+		&utils.AttrSetActions{
+			ActionsId: "ACT_TOPUP_INITIAL",
+			Actions: []*utils.TPAction{
+				{
+					Identifier:    utils.MetaTopUpReset,
+					BalanceId:     "main",
+					BalanceType:   utils.MetaData,
+					ExpiryTime:    "+150ms",
+					Units:         "10240",
+					BalanceWeight: "0",
+					Weight:        10,
+				},
+				{
+					Identifier:    utils.MetaTopUp,
+					BalanceId:     "main",
+					BalanceType:   utils.MetaData,
+					Units:         "10240",
+					BalanceWeight: "0",
+					Weight:        0,
+				},
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv2SetActions,
+		&utils.AttrSetActions{
+			ActionsId: "ACT_TOPUP_10GB",
+			Actions: []*utils.TPAction{
+				{
+					Identifier:    utils.MetaTopUp,
+					BalanceId:     "main",
+					BalanceType:   utils.MetaData,
+					Units:         "10240",
+					BalanceWeight: "0",
+				},
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv2SetActions,
+		&utils.AttrSetActions{
+			ActionsId: "ACT_USAGE_1GB",
+			Actions: []*utils.TPAction{
+				{
+					Identifier:      utils.MetaExport,
+					ExtraParameters: "test_exporter",
+					Weight:          30,
+				},
+				{
+					Identifier:  utils.MetaTopUp,
+					BalanceId:   "main",
+					BalanceType: utils.MetaData,
+					Units:       "1024",
+					Weight:      20,
+				},
+				{
+					Identifier:      utils.CDRLog,
+					ExtraParameters: `{"ToR":"*data"}`,
+					Weight:          10,
+				},
+				{
+					Identifier: utils.MetaResetTriggers,
+					Weight:     0,
+				},
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv2SetActions,
+		&utils.AttrSetActions{
+			ActionsId: "ACT_RESET_TRIGGERS",
+			Actions: []*utils.TPAction{
+				{
+					Identifier: utils.MetaResetTriggers,
+				},
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv1SetActionPlan,
+		&v1.AttrSetActionPlan{
+			Id: "PACKAGE_1001",
+			ActionPlan: []*v1.AttrActionPlan{{
+				ActionsId: "ACT_TOPUP_INITIAL",
+				TimingID:  "*asap",
+				Time:      "*asap",
+			}},
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv1SetActionTrigger,
+		v1.AttrSetActionTrigger{
+			GroupID: "TRIGGER_1001",
+			ActionTrigger: map[string]any{
+				"BalanceType":    "*data",
+				"BalanceID":      "main",
+				"Recurrent":      "false",
+				"ThresholdType":  "*min_balance",
+				"ThresholdValue": 0,
+				"ActionsID":      "ACT_USAGE_1GB",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv1SetActionTrigger,
+		v1.AttrSetActionTrigger{
+			GroupID: "TRIGGER_1001",
+			ActionTrigger: map[string]any{
+				"BalanceType":   "*data",
+				"BalanceID":     "main",
+				"Recurrent":     "true",
+				"ThresholdType": "*balance_expired",
+				"ActionsID":     "ACT_TOPUP_INITIAL",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv1SetActionTrigger,
+		v1.AttrSetActionTrigger{
+			GroupID: "TRIGGER_1002",
+			ActionTrigger: map[string]any{
+				"BalanceType":   "*data",
+				"BalanceID":     "main",
+				"Recurrent":     "true",
+				"ThresholdType": "*balance_expired",
+				"ActionsID":     "ACT_TOPUP_INITIAL",
+			},
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv2SetAccount,
+		&v2.AttrSetAccount{
+			Tenant:           "cgrates.org",
+			Account:          "1001",
+			ActionPlanIDs:    []string{"PACKAGE_1001"},
+			ActionTriggerIDs: []string{"TRIGGER_1001"},
+			ReloadScheduler:  true,
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv1AddAccountActionTriggers,
+		&v1.AttrAddAccountActionTriggers{
+			ActionTriggerIDs: []string{"TRIGGER_1001"},
+			Tenant:           "cgrates.org",
+			Account:          "1001",
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+
+
+*/
