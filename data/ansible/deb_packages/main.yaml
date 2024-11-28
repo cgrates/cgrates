@@ -188,20 +188,46 @@
           with_items: "{{ package_files.files }}"
           when: package_files.matched > 0
 
+        - name: Check for uniqueness of changes files per distribution
+          ansible.builtin.find:
+            paths: /var/packages/debian/incoming
+            patterns: "*~deb{{ item.version }}u1_amd64.changes"
+            file_type: file
+          register: changes_files
+          with_items: "{{ distributions }}"
+
+        - name: Fail if wrong number of changes files found
+          ansible.builtin.fail:
+            msg: "Expected exactly 1 changes file for {{ item.item.codename }}, found {{ item.matched }} files"
+          when: item.matched != 1
+          with_items: "{{ changes_files.results }}"
+
         - name: Include the packages with reprepro
           become: true
           ansible.builtin.shell:
-            cmd: >-
-              reprepro -Vb . --ignore=wrongdistribution include
-              {{ cgrates_branch }}-{{ item.codename }}
-              /var/packages/debian/incoming/*~deb{{ item.version }}u1_amd64.changes
+            cmd: reprepro -Vb . --ignore=wrongdistribution include {{ cgrates_branch }}-{{ item.item.codename }} {{ item.files[0].path }}
             chdir: /var/packages/debian
-          with_items: "{{ distributions }}"
+          with_items: "{{ changes_files.results }}"
           when: cgrates_branch == 'master' or git_tag_result.stdout_lines | length > 0
 
         - name: Copy the file to PKG server
           ansible.builtin.command: "scp /var/packages/debian/incoming/{{ item.path | basename }} {{ pkgAddr }}:/tmp/"
           with_items: "{{ package_files.files }}"
+
+      rescue:
+        - name: Find files in incoming directory
+          ansible.builtin.find:
+            paths: /var/packages/debian/incoming
+            file_type: file
+          register: debug_files
+
+        - name: Display files
+          ansible.builtin.debug:
+            msg: "{{ debug_files.files | map(attribute='path') | list }}"
+
+        - name: Fail with error
+          ansible.builtin.fail:
+            msg: "Task failed - see original error above"
 
       always:
         - name: Clean the incoming folder
