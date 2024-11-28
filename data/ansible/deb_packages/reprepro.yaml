@@ -1,23 +1,23 @@
 ---
-- name: Check if /var/packages/debian directory exists
+- name: Create debian repository base directory
   become: true
   ansible.builtin.file:
     path: /var/packages/debian
     state: directory
 
-- name: Check if /var/packages/debian/conf directory exists
+- name: Create reprepro configuration directory
   become: true
   ansible.builtin.file:
     path: /var/packages/debian/conf
     state: directory
 
-- name: Check if /var/packages/debian/incoming directory exists
+- name: Create reprepro incoming packages directory
   become: true
   ansible.builtin.file:
     path: /var/packages/debian/incoming
     state: directory
 
-- name: Add distributions file in reprepro
+- name: Configure reprepro distribution settings
   become: true
   ansible.builtin.template:
     src: distributions.conf.j2
@@ -25,7 +25,7 @@
     mode: "0600"
     owner: "{{ rootUser }}"
 
-- name: Add distributions file in reprepro
+- name: Configure reprepro general options
   become: true
   ansible.builtin.template:
     src: options.conf.j2
@@ -33,7 +33,7 @@
     mode: "0600"
     owner: "{{ rootUser }}"
 
-- name: Create override.testing file
+- name: Initialize empty override file for testing distribution
   become: true
   ansible.builtin.copy:
     content: ""
