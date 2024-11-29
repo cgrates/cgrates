@@ -44,11 +44,11 @@ func TestDNSAgentCoverage(t *testing.T) {
 	cacheSChan := make(chan birpc.ClientConnector, 1)
 	cacheSChan <- cacheSrv
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	dns, _ := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil)
+	dns, _ := agents.NewDNSAgent(cfg, &engine.FilterS{}, nil, nil)
 	srv2 := DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
