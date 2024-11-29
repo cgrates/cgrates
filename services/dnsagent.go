@@ -31,13 +31,14 @@ import (
 
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	shdChan *utils.SyncedChan, connMgr *engine.ConnManager,
+	shdChan *utils.SyncedChan, connMgr *engine.ConnManager, caps *engine.Caps,
 	srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &DNSAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		shdChan:     shdChan,
 		connMgr:     connMgr,
+		caps:        caps,
 		srvDep:      srvDep,
 	}
 }
@@ -53,6 +54,7 @@ type DNSAgent struct {
 
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
+	caps    *engine.Caps
 	srvDep  map[string]*sync.WaitGroup
 }
 
@@ -67,7 +69,7 @@ func (dns *DNSAgent) Start() (err error) {
 
 	dns.Lock()
 	defer dns.Unlock()
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr, dns.caps)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent, error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil
@@ -90,7 +92,7 @@ func (dns *DNSAgent) Reload() (err error) {
 		close(dns.stopChan)
 	}
 
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr, dns.caps)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil

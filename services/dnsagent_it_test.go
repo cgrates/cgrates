@@ -58,7 +58,7 @@ func TestDNSAgentStartReloadShut(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	shdWg := new(sync.WaitGroup)
 	srvMngr := servmanager.NewServiceManager(cfg, shdChan, shdWg, nil)
 	engine.NewConnManager(cfg, nil)
@@ -122,7 +122,7 @@ func TestDNSAgentReloadFirst(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	sS := NewSessionService(cfg, db, server, make(chan birpc.ClientConnector, 1),
 		shdChan, nil, anz, srvDep)
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(srv, sS,
 		NewLoaderService(cfg, db, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep), db)
@@ -193,8 +193,8 @@ func TestDNSAgentReload2(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
-	agentSrv, err := agents.NewDNSAgent(cfg, nil, nil)
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
+	agentSrv, err := agents.NewDNSAgent(cfg, nil, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -221,7 +221,7 @@ func TestDNSAgentReload4(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 
 	runtime.Gosched()
 	dnsSrv := srv.(*DNSAgent)
@@ -246,7 +246,7 @@ func TestDNSAgentReload5(t *testing.T) {
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	err := srv.Start()
 	if err != nil {
 		t.Fatalf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
@@ -274,7 +274,7 @@ func TestDNSAgentReload6(t *testing.T) {
 	shdChan := utils.NewSyncedChan()
 	srvDep := map[string]*sync.WaitGroup{utils.DataDB: new(sync.WaitGroup)}
 	cfg.DNSAgentCfg().Listeners[0].Address = "127.0.0.1:0"
-	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, srvDep)
+	srv := NewDNSAgent(cfg, filterSChan, shdChan, nil, nil, srvDep)
 	time.Sleep(10 * time.Millisecond)
 
 	err := srv.Start()

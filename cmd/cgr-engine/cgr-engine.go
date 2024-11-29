@@ -617,7 +617,7 @@ func main() {
 
 	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, rnS, reS, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
-		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, srvDep),
+		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),
 		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
 		services.NewKamailioAgent(cfg, shdChan, connManager, srvDep),
 		services.NewAsteriskAgent(cfg, shdChan, connManager, srvDep),                    // partial reload

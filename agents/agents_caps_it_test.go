@@ -36,20 +36,12 @@ import (
 	"github.com/fiorix/go-diameter/v4/diam/avp"
 	"github.com/fiorix/go-diameter/v4/diam/datatype"
 	"github.com/fiorix/go-diameter/v4/diam/dict"
+	"github.com/miekg/dns"
 )
 
 func TestAgentCapsIT(t *testing.T) {
-	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		dbCfg = engine.DBCfg{
-			DataDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-			StorDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-		}
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -71,14 +63,23 @@ func TestAgentCapsIT(t *testing.T) {
 },
 "radius_agent": {
 	"enabled": true
+},
+"dns_agent": {
+	"enabled": true,
+	"listeners":[
+		{
+			"address": "127.0.0.1:2053",
+			"network": "udp"
+		}
+	]
 }
 }`
 
 	ng := engine.TestEngine{
 		ConfigJSON: jsonCfg,
-		DBCfg:      dbCfg,
+		DBCfg:      engine.InternalDBCfg,
 	}
-	client, cfg := ng.Run(t)
+	conn, cfg := ng.Run(t)
 	time.Sleep(10 * time.Millisecond) // wait for services to start
 
 	var i int
@@ -97,13 +98,13 @@ func TestAgentCapsIT(t *testing.T) {
 		sendCCR(t, diamClient, &i, "5012")
 
 		// Caps limit is 2, therefore expecting the same result as in the scenario above.
-		doneCh := simulateCapsTraffic(t, client, 1, *cfg.CoreSCfg())
+		doneCh := simulateCapsTraffic(t, conn, 1, *cfg.CoreSCfg())
 		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
 		sendCCR(t, diamClient, &i, "5012")
 		<-doneCh
 
 		// With caps limit reached, Result-Code 3004 (DIAMETER_TOO_BUSY) is expected.
-		doneCh = simulateCapsTraffic(t, client, 2, *cfg.CoreSCfg())
+		doneCh = simulateCapsTraffic(t, conn, 2, *cfg.CoreSCfg())
 		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
 		sendCCR(t, diamClient, &i, "3004")
 		<-doneCh
@@ -122,14 +123,14 @@ func TestAgentCapsIT(t *testing.T) {
 		sendRadReq(t, radClient, radigo.AccessRequest, &i, radigo.AccessAccept)
 		// Caps limit is 2, therefore expecting the same result as in
 		// the scenario above.
-		doneCh := simulateCapsTraffic(t, client, 1, *cfg.CoreSCfg())
+		doneCh := simulateCapsTraffic(t, conn, 1, *cfg.CoreSCfg())
 		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
 		sendRadReq(t, radClient, radigo.AccessRequest, &i, radigo.AccessAccept)
 		<-doneCh
 
 		// With caps limit reached, Reply with Code 3 (AccessReject)
 		// and ReplyMessage with the caps error is expected.
-		doneCh = simulateCapsTraffic(t, client, 2, *cfg.CoreSCfg())
+		doneCh = simulateCapsTraffic(t, conn, 2, *cfg.CoreSCfg())
 		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
 		sendRadReq(t, radClient, radigo.AccessRequest, &i, radigo.AccessReject)
 		<-doneCh
@@ -147,17 +148,43 @@ func TestAgentCapsIT(t *testing.T) {
 
 		// Caps limit is 2, therefore expecting the same result as in
 		// the scenario above.
-		doneCh := simulateCapsTraffic(t, client, 1, *cfg.CoreSCfg())
+		doneCh := simulateCapsTraffic(t, conn, 1, *cfg.CoreSCfg())
 		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
 		sendRadReq(t, radClient, radigo.AccountingRequest, &i, 0)
 		<-doneCh
 
 		// With caps limit reached, Reply with Code 5 (AccountingResponse)
 		// and ReplyMessage with the caps error is expected.
-		doneCh = simulateCapsTraffic(t, client, 2, *cfg.CoreSCfg())
+		doneCh = simulateCapsTraffic(t, conn, 2, *cfg.CoreSCfg())
 		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
 		sendRadReq(t, radClient, radigo.AccountingRequest, &i, radigo.AccountingResponse)
 		<-doneCh
+	})
+
+	t.Run("DNSAgent", func(t *testing.T) {
+		client := new(dns.Client)
+		dc, err := client.Dial(cfg.DNSAgentCfg().Listeners[0].Address)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// There is currently no traffic. Expecting ServerFailure Rcode
+		// because there are no request processors enabled.
+		writeDNSMsg(t, dc, dns.RcodeServerFailure)
+
+		// Caps limit is 2, therefore expecting the same result as in
+		// the scenario above.
+		doneCh := simulateCapsTraffic(t, conn, 1, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
+		writeDNSMsg(t, dc, dns.RcodeServerFailure)
+		<-doneCh
+
+		// With caps limit reached, Refused Rcode is expected.
+		doneCh = simulateCapsTraffic(t, conn, 2, *cfg.CoreSCfg())
+		time.Sleep(time.Millisecond) // ensure traffic requests have been sent
+		writeDNSMsg(t, dc, dns.RcodeRefused)
+		<-doneCh
+
 	})
 }
 
@@ -241,6 +268,19 @@ func sendRadReq(t *testing.T, client *radigo.Client, reqType radigo.PacketCode, 
 		if got != want {
 			t.Errorf("ReplyMessage=%v, want %v", got, want)
 		}
+	}
+}
+
+func writeDNSMsg(t *testing.T, conn *dns.Conn, wantRcode int) {
+	m := new(dns.Msg)
+	m.SetQuestion("cgrates.org.", dns.TypeA)
+	if err := conn.WriteMsg(m); err != nil {
+		t.Error(err)
+	}
+	if rply, err := conn.ReadMsg(); err != nil {
+		t.Error(err)
+	} else if rply.Rcode != wantRcode {
+		t.Errorf("reply Msg Rcode=%d, want %d", rply.Rcode, wantRcode)
 	}
 }
 
