@@ -71,6 +71,7 @@ type RateService struct {
 	cfg         *config.CGRConfig
 	srvDep      map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -150,11 +151,18 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	if !rs.cfg.DispatcherSCfg().Enabled {
 		rs.cl.RpcRegister(srv)
 	}
-	rs.intConnChan <- anz.GetInternalCodec(srv, utils.RateS)
+
+	rs.intRPCconn = anz.GetInternalCodec(srv, utils.RateS)
+	rs.intConnChan <- rs.intRPCconn
 	return
 }
 
 // StateChan returns signaling channel of specific state
 func (rs *RateService) StateChan(stateID string) chan struct{} {
 	return rs.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (rs *RateService) IntRPCConn() birpc.ClientConnector {
+	return rs.intRPCconn
 }

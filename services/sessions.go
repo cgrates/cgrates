@@ -72,6 +72,7 @@ type SessionService struct {
 	cfg          *config.CGRConfig
 	srvDep       map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -181,4 +182,9 @@ func (smg *SessionService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (smg *SessionService) StateChan(stateID string) chan struct{} {
 	return smg.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (smg *SessionService) IntRPCConn() birpc.ClientConnector {
+	return smg.intRPCconn
 }

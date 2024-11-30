@@ -71,6 +71,7 @@ type RouteService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -111,7 +112,8 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 			routeS.cl.RpcRegister(s)
 		}
 	}
-	routeS.connChan <- anz.GetInternalCodec(srv, utils.RouteS)
+	routeS.intRPCconn = anz.GetInternalCodec(srv, utils.RouteS)
+	routeS.connChan <- routeS.intRPCconn
 	return
 }
 
@@ -151,4 +153,9 @@ func (routeS *RouteService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (routeS *RouteService) StateChan(stateID string) chan struct{} {
 	return routeS.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (routeS *RouteService) IntRPCConn() birpc.ClientConnector {
+	return routeS.intRPCconn
 }

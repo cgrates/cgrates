@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
@@ -53,6 +54,7 @@ type FreeswitchAgent struct {
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -121,4 +123,9 @@ func (fS *FreeswitchAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (fS *FreeswitchAgent) StateChan(stateID string) chan struct{} {
 	return fS.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (fS *FreeswitchAgent) IntRPCConn() birpc.ClientConnector {
+	return fS.intRPCconn
 }

@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/commonlisteners"
@@ -64,6 +65,7 @@ type JanusAgent struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -138,4 +140,9 @@ func (ja *JanusAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ja *JanusAgent) StateChan(stateID string) chan struct{} {
 	return ja.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (ja *JanusAgent) IntRPCConn() birpc.ClientConnector {
+	return ja.intRPCconn
 }

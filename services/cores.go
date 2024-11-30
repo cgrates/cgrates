@@ -72,6 +72,7 @@ type CoreService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -102,7 +103,9 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 			cS.cl.RpcRegister(s)
 		}
 	}
-	cS.connChan <- anz.GetInternalCodec(srv, utils.CoreS)
+
+	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CoreS)
+	cS.connChan <- cS.intRPCconn
 	return nil
 }
 
@@ -160,4 +163,9 @@ func (cS *CoreService) WaitForCoreS(ctx *context.Context) (cs *cores.CoreS, err 
 // StateChan returns signaling channel of specific state
 func (cS *CoreService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (cS *CoreService) IntRPCConn() birpc.ClientConnector {
+	return cS.intRPCconn
 }

@@ -23,6 +23,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
@@ -54,6 +55,7 @@ type KamailioAgent struct {
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -127,4 +129,9 @@ func (kam *KamailioAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (kam *KamailioAgent) StateChan(stateID string) chan struct{} {
 	return kam.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (kam *KamailioAgent) IntRPCConn() birpc.ClientConnector {
+	return kam.intRPCconn
 }

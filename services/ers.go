@@ -73,6 +73,7 @@ type EventReaderService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -111,7 +112,8 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	if !erS.cfg.DispatcherSCfg().Enabled {
 		erS.cl.RpcRegister(srv)
 	}
-	erS.intConn <- anz.GetInternalCodec(srv, utils.ERs)
+	erS.intRPCconn = anz.GetInternalCodec(srv, utils.ERs)
+	erS.intConn <- erS.intRPCconn
 	return
 }
 
@@ -161,4 +163,9 @@ func (erS *EventReaderService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (erS *EventReaderService) StateChan(stateID string) chan struct{} {
 	return erS.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (erS *EventReaderService) IntRPCConn() birpc.ClientConnector {
+	return erS.intRPCconn
 }

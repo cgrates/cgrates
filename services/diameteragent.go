@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
@@ -61,6 +62,7 @@ type DiameterAgent struct {
 
 	srvDep map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -146,4 +148,9 @@ func (da *DiameterAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (da *DiameterAgent) StateChan(stateID string) chan struct{} {
 	return da.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (da *DiameterAgent) IntRPCConn() birpc.ClientConnector {
+	return da.intRPCconn
 }

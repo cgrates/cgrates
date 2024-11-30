@@ -66,6 +66,7 @@ type AnalyzerService struct {
 	cfg        *config.CGRConfig
 	srvDep     map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 
@@ -176,4 +177,9 @@ func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string)
 // StateChan returns signaling channel of specific state
 func (anz *AnalyzerService) StateChan(stateID string) chan struct{} {
 	return anz.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (anz *AnalyzerService) IntRPCConn() birpc.ClientConnector {
+	return anz.intRPCconn
 }

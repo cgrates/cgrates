@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
@@ -56,6 +57,7 @@ type SIPAgent struct {
 
 	oldListen string
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -134,4 +136,9 @@ func (sip *SIPAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (sip *SIPAgent) StateChan(stateID string) chan struct{} {
 	return sip.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (sip *SIPAgent) IntRPCConn() birpc.ClientConnector {
+	return sip.intRPCconn
 }

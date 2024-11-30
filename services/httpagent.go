@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/commonlisteners"
@@ -63,6 +64,7 @@ type HTTPAgent struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -126,4 +128,9 @@ func (ha *HTTPAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ha *HTTPAgent) StateChan(stateID string) chan struct{} {
 	return ha.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (ha *HTTPAgent) IntRPCConn() birpc.ClientConnector {
+	return ha.intRPCconn
 }

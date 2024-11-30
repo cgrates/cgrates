@@ -72,6 +72,7 @@ type DispatcherService struct {
 	srvsReload map[string]chan struct{}
 	srvDep     map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -117,7 +118,8 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	// for the moment we dispable Apier through dispatcher
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
-	dspS.connChan <- anz.GetInternalCodec(srv, utils.DispatcherS)
+	dspS.intRPCconn = anz.GetInternalCodec(srv, utils.DispatcherS)
+	dspS.connChan <- dspS.intRPCconn
 
 	return
 }
@@ -190,4 +192,9 @@ func (dspS *DispatcherService) sync() {
 // StateChan returns signaling channel of specific state
 func (dspS *DispatcherService) StateChan(stateID string) chan struct{} {
 	return dspS.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (dspS *DispatcherService) IntRPCConn() birpc.ClientConnector {
+	return dspS.intRPCconn
 }

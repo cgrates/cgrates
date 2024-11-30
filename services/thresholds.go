@@ -70,6 +70,7 @@ type ThresholdService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -113,7 +114,8 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 			thrs.cl.RpcRegister(s)
 		}
 	}
-	thrs.connChan <- anz.GetInternalCodec(srv, utils.ThresholdS)
+	thrs.intRPCconn = anz.GetInternalCodec(srv, utils.ThresholdS)
+	thrs.connChan <- thrs.intRPCconn
 	return
 }
 
@@ -157,4 +159,9 @@ func (thrs *ThresholdService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (thrs *ThresholdService) StateChan(stateID string) chan struct{} {
 	return thrs.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (thrs *ThresholdService) IntRPCConn() birpc.ClientConnector {
+	return thrs.intRPCconn
 }

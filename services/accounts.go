@@ -76,6 +76,7 @@ type AccountService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -121,7 +122,8 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		acts.cl.RpcRegister(srv)
 	}
 
-	acts.connChan <- anz.GetInternalCodec(srv, utils.AccountS)
+	acts.intRPCconn = anz.GetInternalCodec(srv, utils.AccountS)
+	acts.connChan <- acts.intRPCconn
 	return
 }
 
@@ -163,4 +165,9 @@ func (acts *AccountService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (acts *AccountService) StateChan(stateID string) chan struct{} {
 	return acts.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (acts *AccountService) IntRPCConn() birpc.ClientConnector {
+	return acts.intRPCconn
 }

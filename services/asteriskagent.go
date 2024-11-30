@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
@@ -54,6 +55,7 @@ type AsteriskAgent struct {
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -122,4 +124,9 @@ func (ast *AsteriskAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ast *AsteriskAgent) StateChan(stateID string) chan struct{} {
 	return ast.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (ast *AsteriskAgent) IntRPCConn() birpc.ClientConnector {
+	return ast.intRPCconn
 }

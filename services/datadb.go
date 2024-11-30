@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -56,6 +57,7 @@ type DataDBService struct {
 
 	srvDep map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -199,4 +201,9 @@ func (db *DataDBService) WaitForDM(ctx *context.Context) (datadb *engine.DataMan
 // StateChan returns signaling channel of specific state
 func (db *DataDBService) StateChan(stateID string) chan struct{} {
 	return db.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (db *DataDBService) IntRPCConn() birpc.ClientConnector {
+	return db.intRPCconn
 }

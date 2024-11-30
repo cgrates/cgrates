@@ -22,10 +22,12 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // NewServiceManager returns a service manager
@@ -50,9 +52,11 @@ type ServiceManager struct {
 
 	serviceIndexer *ServiceIndexer // index here the services for accessing them by their IDs
 
-	shdWg   *sync.WaitGroup // list of shutdown items
-	connMgr *engine.ConnManager
+	shdWg *sync.WaitGroup // list of shutdown items
+
 	rldChan <-chan string // reload signals come over this channelc
+
+	connMgr *engine.ConnManager
 }
 
 // StartServices starts all enabled services
@@ -91,6 +95,24 @@ func (srvMngr *ServiceManager) AddServices(services ...Service) {
 	for _, srv := range services {
 		if _, has := srvMngr.subsystems[srv.ServiceName()]; !has { // do not rewrite the service
 			srvMngr.subsystems[srv.ServiceName()] = srv
+		}
+		if sAPIData, hasAPIData := serviceAPIData[srv.ServiceName()]; hasAPIData { // Add the internal connections
+			rpcIntChan := make(chan birpc.ClientConnector, 1)
+			srvMngr.connMgr.AddInternalConn(sAPIData[1], sAPIData[0], rpcIntChan)
+			if len(sAPIData) > 2 { // Add the bidirectional API
+				srvMngr.connMgr.AddInternalConn(sAPIData[2], sAPIData[0], rpcIntChan)
+			}
+			go func() { // ToDo: centralize management into one single goroutine
+				if utils.StructChanTimeout(
+					srvMngr.serviceIndexer.GetService(srv.ServiceName()).StateChan(utils.StateServiceUP),
+					srvMngr.cfg.GeneralCfg().ConnectTimeout) {
+					utils.Logger.Err(
+						fmt.Sprintf("<%s> failed to register internal connection to service %s because of timeout waiting for ServiceUP state",
+							utils.ServiceManager, srv.ServiceName()))
+					// toDo: shutdown service
+				}
+				rpcIntChan <- srv.IntRPCConn()
+			}()
 		}
 	}
 	srvMngr.Unlock()
@@ -181,6 +203,8 @@ type Service interface {
 	ServiceName() string
 	// StateChan returns the channel for specific state subscription
 	StateChan(stateID string) chan struct{}
+	// IntRPCConn returns the connector needed for internal RPC connections
+	IntRPCConn() birpc.ClientConnector
 }
 
 // ArgsServiceID are passed to Start/Stop/Status RPC methods
@@ -327,4 +351,86 @@ func toggleService(serviceID string, status bool, srvMngr *ServiceManager) (err 
 		err = utils.ErrUnsupportedServiceID
 	}
 	return
+}
+
+var serviceAPIData = map[string][]string{
+	utils.AnalyzerS: {
+		utils.AnalyzerSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzerS)},
+	utils.AdminS: {
+		utils.AdminSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)},
+	utils.AttributeS: {
+		utils.AttributeSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
+	utils.CacheS: {
+		utils.CacheSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+	utils.CDRs: {
+		utils.CDRsV1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+	utils.ChargerS: {
+		utils.ChargerSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+	utils.GuardianS: {
+		utils.GuardianSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian)},
+	utils.LoaderS: {
+		utils.LoaderSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders)},
+	utils.ResourceS: {
+		utils.ResourceSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
+	utils.SessionS: {
+		utils.SessionSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS),
+		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)},
+	utils.StatS: {
+		utils.StatSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+	utils.RankingS: {
+		utils.RankingSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)},
+	utils.TrendS: {
+		utils.TrendSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)},
+	utils.RouteS: {
+		utils.RouteSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)},
+	utils.ThresholdS: {
+		utils.ThresholdSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+	utils.ServiceManagerS: {
+		utils.ServiceManagerV1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager)},
+	utils.ConfigS: {
+		utils.ConfigSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig)},
+	utils.CoreS: {
+		utils.CoreSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore)},
+	utils.EEs: {
+		utils.EeSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
+	utils.RateS: {
+		utils.RateSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
+	utils.DispatcherS: {
+		utils.DispatcherSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers)},
+	utils.AccountS: {
+		utils.AccountSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+	utils.ActionS: {
+		utils.ActionSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
+	utils.TPeS: {
+		utils.TPeSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTpes)},
+	utils.EFs: {
+		utils.EfSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
+	utils.ERs: {
+		utils.ErSv1,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaERs)},
 }

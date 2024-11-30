@@ -21,6 +21,7 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -54,6 +55,7 @@ type CommonListenerService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -110,4 +112,9 @@ func (cl *CommonListenerService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (cl *CommonListenerService) StateChan(stateID string) chan struct{} {
 	return cl.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (cl *CommonListenerService) IntRPCConn() birpc.ClientConnector {
+	return cl.intRPCconn
 }

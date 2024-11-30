@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
@@ -59,6 +60,7 @@ type RadiusAgent struct {
 	lauth string
 	lacct string
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -145,4 +147,9 @@ func (rad *RadiusAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (rad *RadiusAgent) StateChan(stateID string) chan struct{} {
 	return rad.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (rad *RadiusAgent) IntRPCConn() birpc.ClientConnector {
+	return rad.intRPCconn
 }

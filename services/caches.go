@@ -67,6 +67,7 @@ type CacheService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -98,7 +99,8 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 			cS.cl.RpcRegister(s)
 		}
 	}
-	cS.rpc <- anz.GetInternalCodec(srv, utils.CacheS)
+	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CacheS)
+	cS.rpc <- cS.intRPCconn
 	return
 }
 
@@ -154,4 +156,9 @@ func (cS *CacheService) WaitToPrecache(ctx *context.Context, cacheIDs ...string)
 // StateChan returns signaling channel of specific state
 func (cS *CacheService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (cS *CacheService) IntRPCConn() birpc.ClientConnector {
+	return cS.intRPCconn
 }

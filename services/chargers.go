@@ -70,6 +70,7 @@ type ChargerService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -109,7 +110,9 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 			chrS.cl.RpcRegister(s)
 		}
 	}
-	chrS.connChan <- anz.GetInternalCodec(srv, utils.ChargerS)
+
+	chrS.intRPCconn = anz.GetInternalCodec(srv, utils.ChargerS)
+	chrS.connChan <- chrS.intRPCconn
 	return
 }
 
@@ -149,4 +152,9 @@ func (chrS *ChargerService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (chrS *ChargerService) StateChan(stateID string) chan struct{} {
 	return chrS.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (chrS *ChargerService) IntRPCConn() birpc.ClientConnector {
+	return chrS.intRPCconn
 }

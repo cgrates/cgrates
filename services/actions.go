@@ -77,6 +77,7 @@ type ActionService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -120,7 +121,9 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if !acts.cfg.DispatcherSCfg().Enabled {
 		acts.cl.RpcRegister(srv)
 	}
-	acts.connChan <- anz.GetInternalCodec(srv, utils.ActionS)
+
+	acts.intRPCconn = anz.GetInternalCodec(srv, utils.ActionS)
+	acts.connChan <- acts.intRPCconn
 	return
 }
 
@@ -162,4 +165,9 @@ func (acts *ActionService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (acts *ActionService) StateChan(stateID string) chan struct{} {
 	return acts.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (acts *ActionService) IntRPCConn() birpc.ClientConnector {
+	return acts.intRPCconn
 }

@@ -72,6 +72,7 @@ type AttributeService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn     birpc.ClientConnector       // expose API methods over internal connection
 	serviceIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps      *StateDependencies
 }
@@ -128,7 +129,9 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 
 		}
 	}()
-	attrS.connChan <- anz.GetInternalCodec(srv, utils.AttributeS)
+
+	attrS.intRPCconn = anz.GetInternalCodec(srv, utils.AttributeS)
+	attrS.connChan <- attrS.intRPCconn
 	close(attrS.stateDeps.StateChan(utils.StateServiceUP)) // inform listeners about the service reaching UP state
 	return
 }
@@ -171,4 +174,9 @@ func (attrS *AttributeService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (attrS *AttributeService) StateChan(stateID string) chan struct{} {
 	return attrS.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (attrS *AttributeService) IntRPCConn() birpc.ClientConnector {
+	return attrS.intRPCconn
 }

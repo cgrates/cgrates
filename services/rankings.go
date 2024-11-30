@@ -70,6 +70,7 @@ type RankingService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -118,7 +119,8 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 			ran.cl.RpcRegister(s)
 		}
 	}
-	ran.connChan <- anz.GetInternalCodec(srv, utils.RankingS)
+	ran.intRPCconn = anz.GetInternalCodec(srv, utils.RankingS)
+	ran.connChan <- ran.intRPCconn
 	return nil
 }
 
@@ -160,4 +162,9 @@ func (ran *RankingService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ran *RankingService) StateChan(stateID string) chan struct{} {
 	return ran.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (ran *RankingService) IntRPCConn() birpc.ClientConnector {
+	return ran.intRPCconn
 }

@@ -65,6 +65,7 @@ type EventExporterService struct {
 	cfg         *config.CGRConfig
 	srvDep      map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -136,11 +137,18 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	if !es.cfg.DispatcherSCfg().Enabled {
 		es.cl.RpcRegister(srv)
 	}
-	es.intConnChan <- anz.GetInternalCodec(srv, utils.EEs)
+
+	es.intRPCconn = anz.GetInternalCodec(srv, utils.EEs)
+	es.intConnChan <- es.intRPCconn
 	return nil
 }
 
 // StateChan returns signaling channel of specific state
 func (es *EventExporterService) StateChan(stateID string) chan struct{} {
 	return es.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (es *EventExporterService) IntRPCConn() birpc.ClientConnector {
+	return es.intRPCconn
 }

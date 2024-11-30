@@ -72,6 +72,7 @@ type AdminSv1Service struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // RPC connector with internal APIs
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -121,7 +122,8 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	}
 
 	//backwards compatible
-	apiService.connChan <- anz.GetInternalCodec(srv, utils.AdminSv1)
+	apiService.intRPCconn = anz.GetInternalCodec(srv, utils.AdminSv1)
+	apiService.connChan <- apiService.intRPCconn
 
 	return
 }
@@ -162,4 +164,9 @@ func (apiService *AdminSv1Service) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (apiService *AdminSv1Service) StateChan(stateID string) chan struct{} {
 	return apiService.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (apiService *AdminSv1Service) IntRPCConn() birpc.ClientConnector {
+	return apiService.intRPCconn
 }

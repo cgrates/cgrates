@@ -62,6 +62,7 @@ type TPeService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -116,4 +117,9 @@ func (ts *TPeService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ts *TPeService) StateChan(stateID string) chan struct{} {
 	return ts.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (ts *TPeService) IntRPCConn() birpc.ClientConnector {
+	return ts.intRPCconn
 }

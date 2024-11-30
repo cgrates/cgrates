@@ -712,7 +712,7 @@ const (
 	Preference              = "Preference"
 	Flags                   = "Flags"
 	Service                 = "Service"
-	MetaAnalyzer            = "*analyzer"
+	MetaAnalyzerS           = "*analyzers"
 	CGREventString          = "CGREvent"
 	MetaTextPlain           = "*text_plain"
 	MetaRelease             = "*release"

@@ -69,6 +69,7 @@ type TrendService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -115,7 +116,8 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 			trs.cl.RpcRegister(s)
 		}
 	}
-	trs.connChan <- anz.GetInternalCodec(srv, utils.Trends)
+	trs.intRPCconn = anz.GetInternalCodec(srv, utils.Trends)
+	trs.connChan <- trs.intRPCconn
 	return nil
 }
 
@@ -157,4 +159,9 @@ func (trs *TrendService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (trs *TrendService) StateChan(stateID string) chan struct{} {
 	return trs.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (trs *TrendService) IntRPCConn() birpc.ClientConnector {
+	return trs.intRPCconn
 }

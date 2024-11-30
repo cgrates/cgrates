@@ -73,6 +73,7 @@ type CDRService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -116,7 +117,9 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	if !cs.cfg.DispatcherSCfg().Enabled {
 		cs.cl.RpcRegister(srv)
 	}
-	cs.connChan <- anz.GetInternalCodec(srv, utils.CDRServer) // Signal that cdrS is operational
+
+	cs.intRPCconn = anz.GetInternalCodec(srv, utils.CDRServer)
+	cs.connChan <- cs.intRPCconn // Signal that cdrS is operational
 	return
 }
 
@@ -156,4 +159,9 @@ func (cs *CDRService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (cs *CDRService) StateChan(stateID string) chan struct{} {
 	return cs.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (cs *CDRService) IntRPCConn() birpc.ClientConnector {
+	return cs.intRPCconn
 }

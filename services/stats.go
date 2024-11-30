@@ -70,6 +70,7 @@ type StatService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -114,7 +115,8 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 			sts.cl.RpcRegister(s)
 		}
 	}
-	sts.connChan <- anz.GetInternalCodec(srv, utils.StatS)
+	sts.intRPCconn = anz.GetInternalCodec(srv, utils.StatS)
+	sts.connChan <- sts.intRPCconn
 	return
 }
 
@@ -158,4 +160,9 @@ func (sts *StatService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (sts *StatService) StateChan(stateID string) chan struct{} {
 	return sts.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (sts *StatService) IntRPCConn() birpc.ClientConnector {
+	return sts.intRPCconn
 }

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
@@ -56,6 +57,7 @@ type DNSAgent struct {
 	connMgr *engine.ConnManager
 	srvDep  map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -151,4 +153,9 @@ func (dns *DNSAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (dns *DNSAgent) StateChan(stateID string) chan struct{} {
 	return dns.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (dns *DNSAgent) IntRPCConn() birpc.ClientConnector {
+	return dns.intRPCconn
 }

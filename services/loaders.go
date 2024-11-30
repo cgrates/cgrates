@@ -71,6 +71,7 @@ type LoaderService struct {
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
 }
@@ -112,7 +113,8 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 			ldrs.cl.RpcRegister(s)
 		}
 	}
-	ldrs.connChan <- anz.GetInternalCodec(srv, utils.LoaderS)
+	ldrs.intRPCconn = anz.GetInternalCodec(srv, utils.LoaderS)
+	ldrs.connChan <- ldrs.intRPCconn
 	return
 }
 
@@ -177,4 +179,9 @@ func (ldrs *LoaderService) GetRPCChan() chan birpc.ClientConnector {
 // StateChan returns signaling channel of specific state
 func (ldrs *LoaderService) StateChan(stateID string) chan struct{} {
 	return ldrs.stateDeps.StateChan(stateID)
+}
+
+// IntRPCConn returns the internal connection used by RPCClient
+func (ldrs *LoaderService) IntRPCConn() birpc.ClientConnector {
+	return ldrs.intRPCconn
 }
