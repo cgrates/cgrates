@@ -39,12 +39,13 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewCGREngine(cfg *config.CGRConfig, sIdxr *servmanager.ServiceIndexer,
+func NewCGREngine(stopChan chan struct{}, cfg *config.CGRConfig, sIdxr *servmanager.ServiceIndexer,
 	services []servmanager.Service) *CGREngine {
 	cM := engine.NewConnManager(cfg)
 	caps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
 	shdWg := new(sync.WaitGroup)
 	return &CGREngine{
+		stopChan:   stopChan,
 		cfg:        cfg, // Engine configuration
 		cM:         cM,
 		caps:       caps,  // caps is used to limit RPC CPS
@@ -93,6 +94,8 @@ func NewCGREngine(cfg *config.CGRConfig, sIdxr *servmanager.ServiceIndexer,
 }
 
 type CGREngine struct {
+	stopChan chan struct{}
+
 	cfg *config.CGRConfig
 
 	srvManager *servmanager.ServiceManager
@@ -404,7 +407,7 @@ func (cgr *CGREngine) startServices(ctx *context.Context, shtDw context.CancelFu
 }
 
 // Run will run the CGREngine, calling it's init and startServices
-func (cgr *CGREngine) Run(ctx *context.Context, shtDw context.CancelFunc,
+func (cgr *CGREngine) Run(ctx *context.Context, shtDw context.CancelFunc, stopChan chan struct{},
 	flags *CGREngineFlags, vers string, memProfParams cores.MemoryProfilingParams) (err error) {
 	if err = cgr.init(ctx, shtDw, flags, vers); err != nil {
 		return
