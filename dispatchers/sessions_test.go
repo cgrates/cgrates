@@ -758,3 +758,34 @@ func TestDspSessionSv1AlterSessionsErrorNil(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
 }
+
+func TestTrendSv1PingNilArgs(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	args := &utils.CGREvent{
+		Tenant: "",
+	}
+	var reply *string
+	result := dspSrv.TrendSv1Ping(context.Background(), args, reply)
+	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	if result == nil || result.Error() != expected {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
+	}
+}
+
+func TestTrendSv1PingErrorAuthorization(t *testing.T) {
+	cgrCfg := config.NewDefaultCGRConfig()
+	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
+	args := &utils.CGREvent{
+		Tenant: "tenant",
+		APIOpts: map[string]interface{}{
+			utils.OptsAPIKey: "invalid_api_key",
+		},
+	}
+	var reply *string
+	expectedError := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
+	result := dspSrv.TrendSv1Ping(context.Background(), args, reply)
+	if result == nil || result.Error() != expectedError {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedError, result)
+	}
+}
