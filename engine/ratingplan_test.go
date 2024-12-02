@@ -19,12 +19,11 @@ package engine
 
 import (
 	"encoding/json"
-
-	"github.com/cgrates/cgrates/utils"
-
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestApRestoreFromStorage(t *testing.T) {
@@ -462,5 +461,164 @@ func TestEqual(t *testing.T) {
 	rp2 = &RatingPlan{Id: "2"}
 	if rp1.Equal(rp2) {
 		t.Errorf("expected RatingPlan instances with different Ids to be not equal")
+	}
+}
+
+func TestRatingPlanIsContinous(t *testing.T) {
+	tests := []struct {
+		name     string
+		rp       *RatingPlan
+		expected bool
+	}{
+		{
+			name: "Test with all weekdays covered and midnight start",
+			rp: &RatingPlan{
+				Timings: map[string]*RITiming{
+					"timing1": {
+						WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "Test with not all weekdays covered",
+			rp: &RatingPlan{
+				Timings: map[string]*RITiming{
+					"timing1": {
+						WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday},
+						StartTime: "00:00:00",
+					},
+				},
+			},
+			expected: false,
+		},
+		{
+			name: "Test with non-midnight start time",
+			rp: &RatingPlan{
+				Timings: map[string]*RITiming{
+					"timing1": {
+						WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday},
+						StartTime: "01:00:00",
+					},
+				},
+			},
+			expected: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.rp.isContinous()
+			if result != tt.expected {
+				t.Errorf("Expected isContinous to be %v, but got %v", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestRatingPlanEqual(t *testing.T) {
+	tests := []struct {
+		name     string
+		rp1      *RatingPlan
+		rp2      *RatingPlan
+		expected bool
+	}{
+		{
+			name: "Equal Id",
+			rp1: &RatingPlan{
+				Id: "plan1",
+			},
+			rp2: &RatingPlan{
+				Id: "plan1",
+			},
+			expected: true,
+		},
+		{
+			name: "Different Id",
+			rp1: &RatingPlan{
+				Id: "plan1",
+			},
+			rp2: &RatingPlan{
+				Id: "plan2",
+			},
+			expected: false,
+		},
+		{
+			name: "Empty Ids",
+			rp1: &RatingPlan{
+				Id: "",
+			},
+			rp2: &RatingPlan{
+				Id: "",
+			},
+			expected: true,
+		},
+		{
+			name: "One empty Id",
+			rp1: &RatingPlan{
+				Id: "plan1",
+			},
+			rp2: &RatingPlan{
+				Id: "",
+			},
+			expected: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.rp1.Equal(tt.rp2)
+			if result != tt.expected {
+				t.Errorf("Expected %v, but got %v", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestRateGroupsSwap(t *testing.T) {
+	tests := []struct {
+		name   string
+		i, j   int
+		before RateGroups
+		after  RateGroups
+	}{
+		{
+			name: "Swap first and second element",
+			i:    0,
+			j:    1,
+			before: RateGroups{
+				&RGRate{GroupIntervalStart: 10, Value: 100},
+				&RGRate{GroupIntervalStart: 20, Value: 200},
+			},
+			after: RateGroups{
+				&RGRate{GroupIntervalStart: 20, Value: 200},
+				&RGRate{GroupIntervalStart: 10, Value: 100},
+			},
+		},
+		{
+			name: "Swap same elements (no change)",
+			i:    0,
+			j:    0,
+			before: RateGroups{
+				&RGRate{GroupIntervalStart: 10, Value: 100},
+				&RGRate{GroupIntervalStart: 20, Value: 200},
+			},
+			after: RateGroups{
+				&RGRate{GroupIntervalStart: 10, Value: 100},
+				&RGRate{GroupIntervalStart: 20, Value: 200},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pg := append(RateGroups(nil), tt.before...)
+			pg.Swap(tt.i, tt.j)
+			for idx, expected := range tt.after {
+				if pg[idx].GroupIntervalStart != expected.GroupIntervalStart || pg[idx].Value != expected.Value {
+					t.Errorf("After Swap at index %d: expected %v, got %v", idx, expected, pg[idx])
+				}
+			}
+		})
 	}
 }
