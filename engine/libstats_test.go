@@ -1176,3 +1176,31 @@ func TestStatQueueUnmarshalJSON(t *testing.T) {
 	}
 
 }
+
+func TestLibRoutesRouteIDs(t *testing.T) {
+	sortedRoutesList := SortedRoutesList{
+		{
+			Routes: []*SortedRoute{
+				{RouteID: "1"},
+				{RouteID: "2"},
+			},
+		},
+		{
+			Routes: []*SortedRoute{
+				{RouteID: "3"},
+				{RouteID: "4"},
+			},
+		},
+	}
+	expectedIDs := []string{"1", "2", "3", "4"}
+	actualIDs := sortedRoutesList.RouteIDs()
+	if len(actualIDs) != len(expectedIDs) {
+		t.Errorf("expected length %d, got %d", len(expectedIDs), len(actualIDs))
+		return
+	}
+	for i := range expectedIDs {
+		if actualIDs[i] != expectedIDs[i] {
+			t.Errorf("at index %d, expected %s, got %s", i, expectedIDs[i], actualIDs[i])
+		}
+	}
+}
