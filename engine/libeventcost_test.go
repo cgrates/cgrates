@@ -1606,3 +1606,35 @@ func TestRatingFieldAsInterface(t *testing.T) {
 		t.Error("Expected error for invalid field within rating")
 	}
 }
+
+func TestBalanceChargesClone(t *testing.T) {
+	t.Run("Normal", func(t *testing.T) {
+		original := &BalanceCharge{
+			AccountID:     "account1",
+			BalanceUUID:   "uuid1",
+			RatingID:      "rating1",
+			Units:         100.5,
+			BalanceFactor: 1.25,
+			ExtraChargeID: "extraCharge01",
+		}
+		cloned := original.Clone()
+		if cloned == nil {
+			t.Errorf("Expected cloned BalanceCharge to be non-nil, but got nil")
+		}
+		if cloned.AccountID != original.AccountID || cloned.BalanceUUID != original.BalanceUUID ||
+			cloned.RatingID != original.RatingID || cloned.Units != original.Units ||
+			cloned.BalanceFactor != original.BalanceFactor || cloned.ExtraChargeID != original.ExtraChargeID {
+			t.Errorf("Cloned BalanceCharge does not match original. Expected %+v, but got %+v", original, cloned)
+		}
+		if cloned == original {
+			t.Errorf("Expected original and cloned BalanceCharge to be different instances, but they are the same")
+		}
+	})
+	t.Run("NilReceiver", func(t *testing.T) {
+		var original *BalanceCharge
+		cloned := original.Clone()
+		if cloned != nil {
+			t.Errorf("Expected cloned BalanceCharge to be nil, but got %+v", cloned)
+		}
+	})
+}
