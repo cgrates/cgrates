@@ -169,3 +169,9 @@ func (cS *CoreService) StateChan(stateID string) chan struct{} {
 func (cS *CoreService) IntRPCConn() birpc.ClientConnector {
 	return cS.intRPCconn
 }
+
+func (cS *CoreService) GetCoreS() *cores.CoreS {
+	cS.mu.RLock()
+	defer cS.mu.RUnlock()
+	return cS.cS
+}
