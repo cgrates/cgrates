@@ -22,22 +22,12 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/signal"
 	"strconv"
-	"strings"
-	"sync"
-	"syscall"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
-	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -85,36 +75,6 @@ type CGREngineFlags struct {
 	SetVersions       *bool
 }
 
-func cgrSingnalHandler(ctx *context.Context, shutdown context.CancelFunc,
-	cfg *config.CGRConfig, shdWg *sync.WaitGroup) {
-	shutdownSignal := make(chan os.Signal, 1)
-	reloadSignal := make(chan os.Signal, 1)
-	signal.Notify(shutdownSignal, os.Interrupt,
-		syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-	signal.Notify(reloadSignal, syscall.SIGHUP)
-	for {
-		select {
-		case <-ctx.Done():
-			shdWg.Done()
-			return
-		case <-shutdownSignal:
-			shutdown()
-			shdWg.Done()
-			return
-		case <-reloadSignal:
-			//  do it in it's own goroutine in order to not block the signal handler with the reload functionality
-			go func() {
-				var reply string
-				if err := cfg.V1ReloadConfig(ctx,
-					new(config.ReloadArgs), &reply); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("Error reloading configuration: <%s>", err))
-				}
-			}()
-		}
-	}
-}
-
 func CgrWritePid(pidFile string) (err error) {
 	var f *os.File
 	if f, err = os.Create(pidFile); err != nil {
@@ -130,112 +90,6 @@ func CgrWritePid(pidFile string) (err error) {
 		err = fmt.Errorf("could not close pid file: %s", err)
 	}
 	return
-}
-
-func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string,
-	loader *LoaderService) (err error) {
-	if !cfg.LoaderCfg().Enabled() {
-		err = fmt.Errorf("<%s> not enabled but required by preload mechanism", utils.LoaderS)
-		return
-	}
-	ch := loader.GetRPCChan()
-	select {
-	case ldrs := <-ch:
-		ch <- ldrs
-	case <-ctx.Done():
-		return
-	}
-
-	var reply string
-	for _, loaderID := range strings.Split(loaderIDs, utils.FieldsSep) {
-		if err = loader.GetLoaderS().V1Run(ctx, &loaders.ArgsProcessFolder{
-			APIOpts: map[string]any{
-				utils.MetaForceLock:   true, // force lock will unlock the file in case is locked and return error
-				utils.MetaStopOnError: true,
-			},
-			LoaderID: loaderID,
-		}, &reply); err != nil {
-			err = fmt.Errorf("<%s> preload failed on loadID <%s> , err: <%s>", utils.LoaderS, loaderID, err)
-			return
-		}
-	}
-	return
-}
-
-// cgrStartFilterService fires up the FilterS
-func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS,
-	cacheSCh chan *engine.CacheS, connMgr *engine.ConnManager,
-	cfg *config.CGRConfig, db *DataDBService) {
-	var cacheS *engine.CacheS
-	select {
-	case cacheS = <-cacheSCh:
-		cacheSCh <- cacheS
-	case <-ctx.Done():
-		return
-	}
-	dm, err := db.WaitForDM(ctx)
-	if err != nil {
-		return
-	}
-	select {
-	case <-cacheS.GetPrecacheChannel(utils.CacheFilters):
-		iFilterSCh <- engine.NewFilterS(cfg, connMgr, dm)
-	case <-ctx.Done():
-	}
-}
-
-func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGRConfig,
-	clSChan chan *commonlisteners.CommonListenerS, anz *AnalyzerService) {
-	cl := <-clSChan
-	clSChan <- cl
-	srv, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
-	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cl.RpcRegister(s)
-		}
-	}
-	iGuardianSCh <- anz.GetInternalCodec(srv, utils.GuardianS)
-}
-
-func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
-	srvMngr *servmanager.ServiceManager, cfg *config.CGRConfig,
-	clSChan chan *commonlisteners.CommonListenerS, anz *AnalyzerService) {
-	cl := <-clSChan
-	clSChan <- cl
-	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
-	if !cfg.DispatcherSCfg().Enabled {
-		cl.RpcRegister(srv)
-	}
-	iServMngrCh <- anz.GetInternalCodec(srv, utils.ServiceManager)
-}
-
-func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
-	cfg *config.CGRConfig, clSChan chan *commonlisteners.CommonListenerS, anz *AnalyzerService) {
-	cl := <-clSChan
-	clSChan <- cl
-	srv, _ := engine.NewServiceWithName(cfg, utils.ConfigS, true)
-	// srv, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
-	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cl.RpcRegister(s)
-		}
-	}
-	iConfigCh <- anz.GetInternalCodec(srv, utils.ConfigSv1)
-}
-
-func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
-	cfg *config.CGRConfig, clSChan chan *commonlisteners.CommonListenerS, internalDispatcherSChan chan birpc.ClientConnector) {
-	cl := <-clSChan
-	clSChan <- cl
-	if cfg.DispatcherSCfg().Enabled { // wait only for dispatcher as cache is allways registered before this
-		select {
-		case dispatcherS := <-internalDispatcherSChan:
-			internalDispatcherSChan <- dispatcherS
-		case <-ctx.Done():
-			return
-		}
-	}
-	cl.StartServer(ctx, shtdwnEngine, cfg)
 }
 
 func waitForFilterS(ctx *context.Context, fsCh chan *engine.FilterS) (filterS *engine.FilterS, err error) {

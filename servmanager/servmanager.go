@@ -20,6 +20,7 @@ package servmanager
 
 import (
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -34,11 +35,12 @@ import (
 func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager,
 	cfg *config.CGRConfig, srvIndxr *ServiceIndexer, services []Service) (sM *ServiceManager) {
 	sM = &ServiceManager{
-		cfg:        cfg,
-		subsystems: make(map[string]Service),
-		shdWg:      shdWg,
-		connMgr:    connMgr,
-		rldChan:    cfg.GetReloadChan(),
+		cfg:            cfg,
+		subsystems:     make(map[string]Service),
+		serviceIndexer: srvIndxr,
+		shdWg:          shdWg,
+		connMgr:        connMgr,
+		rldChan:        cfg.GetReloadChan(),
 	}
 	sM.AddServices(services...)
 	return
@@ -103,6 +105,7 @@ func (srvMngr *ServiceManager) AddServices(services ...Service) {
 				srvMngr.connMgr.AddInternalConn(sAPIData[2], sAPIData[0], rpcIntChan)
 			}
 			go func() { // ToDo: centralize management into one single goroutine
+				log.Printf("service name: %s", srv.ServiceName())
 				if utils.StructChanTimeout(
 					srvMngr.serviceIndexer.GetService(srv.ServiceName()).StateChan(utils.StateServiceUP),
 					srvMngr.cfg.GeneralCfg().ConnectTimeout) {
