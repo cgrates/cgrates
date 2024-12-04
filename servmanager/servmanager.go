@@ -76,7 +76,7 @@ func (srvMngr *ServiceManager) StartServices(ctx *context.Context, shtDwn contex
 func (srvMngr *ServiceManager) AddServices(services ...Service) {
 	srvMngr.Lock()
 	for _, srv := range services {
-		srvMngr.serviceIndexer.AddService(srv.ServiceName(), srv)
+		srvMngr.serviceIndexer.AddService(srv)
 		if sAPIData, hasAPIData := serviceAPIData[srv.ServiceName()]; hasAPIData { // Add the internal connections
 			rpcIntChan := make(chan birpc.ClientConnector, 1)
 			srvMngr.connMgr.AddInternalConn(sAPIData[1], sAPIData[0], rpcIntChan)
