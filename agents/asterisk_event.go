@@ -186,7 +186,8 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
+// UpdateCGREvent updates a previously cached CGREvent (from StasisStart) with data from a new ARI event.
+func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent, alterableFields utils.StringSet) error {
 	resCGREv := *cgrEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
@@ -212,6 +213,17 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 			}
 		}
 	}
+
+	// Update any additional fields if specified in alterableFields.
+	if alterableFields.Size() != 0 {
+		for k, v := range smaEv.cachedFields {
+			if !alterableFields.Has(k) {
+				continue
+			}
+			resCGREv.Event[k] = v
+		}
+	}
+
 	*cgrEv = resCGREv
 	return nil
 }
