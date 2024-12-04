@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -598,10 +599,11 @@ func (aConnCfg *AsteriskConnCfg) AsMapInterface() map[string]any {
 }
 
 type AsteriskAgentCfg struct {
-	Enabled       bool
-	SessionSConns []string
-	CreateCDR     bool
-	AsteriskConns []*AsteriskConnCfg
+	Enabled         bool
+	SessionSConns   []string
+	CreateCDR       bool
+	AlterableFields []string
+	AsteriskConns   []*AsteriskConnCfg
 }
 
 func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err error) {
@@ -624,6 +626,9 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	}
 	if jsnCfg.Create_cdr != nil {
 		aCfg.CreateCDR = *jsnCfg.Create_cdr
+	}
+	if jsnCfg.Alterable_fields != nil {
+		aCfg.AlterableFields = *jsnCfg.Alterable_fields
 	}
 	if jsnCfg.Asterisk_conns != nil {
 		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))
@@ -652,9 +657,10 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() map[string]any {
 	}
 
 	return map[string]any{
-		utils.EnabledCfg:       aCfg.Enabled,
-		utils.SessionSConnsCfg: sessionSConns,
-		utils.CreateCDRCfg:     aCfg.CreateCDR,
-		utils.AsteriskConnsCfg: conns,
+		utils.EnabledCfg:         aCfg.Enabled,
+		utils.SessionSConnsCfg:   sessionSConns,
+		utils.CreateCDRCfg:       aCfg.CreateCDR,
+		utils.AlterableFieldsCfg: slices.Clone(aCfg.AlterableFields),
+		utils.AsteriskConnsCfg:   conns,
 	}
 }

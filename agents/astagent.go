@@ -249,8 +249,10 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	if !hasIt { // Not handled by us
 		return
 	}
+
+	// Update the cached event with new channel state.
 	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent) // Updates the event directly in the cache
+	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent, sma.cgrCfg.AsteriskAgentCfg().AlterableFields)
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		sma.hangupChannel(ev.ChannelID(),
@@ -258,6 +260,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
+
 	// populate init session args
 	initSessionArgs := ev.V1InitSessionArgs(*cgrEvDisp)
 	if initSessionArgs == nil {
@@ -289,8 +292,10 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	if !hasIt { // Not handled by us
 		return
 	}
+
+	// Update the cached event with new channel state.
 	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent) // Updates the event directly in the cache
+	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent, sma.cgrCfg.AsteriskAgentCfg().AlterableFields)
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		utils.Logger.Warning(
@@ -298,6 +303,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
 	}
+
 	// populate terminate session args
 	tsArgs := ev.V1TerminateSessionArgs(*cgrEvDisp)
 	if tsArgs == nil {

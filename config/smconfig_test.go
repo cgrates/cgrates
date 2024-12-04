@@ -497,15 +497,17 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		"enabled": true,
 		"sessions_conns": ["*internal"],
 		"create_cdr": false,
+		"alterable_fields": ["field1", "field2"],
 		"asterisk_conns":[
 			{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
 		],
 	},
 }`
 	eMap := map[string]any{
-		"enabled":        true,
-		"sessions_conns": []string{"*internal"},
-		"create_cdr":     false,
+		"enabled":                true,
+		"sessions_conns":         []string{"*internal"},
+		"create_cdr":             false,
+		utils.AlterableFieldsCfg: []string{"field1", "field2"},
 		"asterisk_conns": []map[string]any{
 			{"alias": "", "address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3, "reconnects": 5},
 		},
@@ -517,7 +519,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	} else if err = asagcfg.loadFromJsonCfg(jsnAsAgCfg); err != nil {
 		t.Error(err)
 	} else if rcv := asagcfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
-		t.Errorf("\nExpected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
+		t.Errorf("expected: %s, received: %s", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 
@@ -912,9 +914,10 @@ func TestSMConfigAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 func TestSMConfigAsteriskAgentCfgAsMapInterface(t *testing.T) {
 	str := "test"
 	aCfg := &AsteriskAgentCfg{
-		Enabled:       false,
-		SessionSConns: []string{str},
-		CreateCDR:     false,
+		Enabled:         false,
+		SessionSConns:   []string{str},
+		CreateCDR:       false,
+		AlterableFields: []string{"field1", "field2"},
 		AsteriskConns: []*AsteriskConnCfg{
 			{
 				Alias:           str,
@@ -927,15 +930,14 @@ func TestSMConfigAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		},
 	}
 	exp := map[string]any{
-		utils.EnabledCfg:       aCfg.Enabled,
-		utils.SessionSConnsCfg: []string{str},
-		utils.CreateCDRCfg:     aCfg.CreateCDR,
-		utils.AsteriskConnsCfg: []map[string]any{aCfg.AsteriskConns[0].AsMapInterface()},
+		utils.EnabledCfg:         aCfg.Enabled,
+		utils.SessionSConnsCfg:   []string{str},
+		utils.CreateCDRCfg:       aCfg.CreateCDR,
+		utils.AlterableFieldsCfg: []string{"field1", "field2"},
+		utils.AsteriskConnsCfg:   []map[string]any{aCfg.AsteriskConns[0].AsMapInterface()},
 	}
 
-	rcv := aCfg.AsMapInterface()
-
-	if !reflect.DeepEqual(exp, rcv) {
+	if rcv := aCfg.AsMapInterface(); !reflect.DeepEqual(exp, rcv) {
 		t.Errorf("expected %s, received %s", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }

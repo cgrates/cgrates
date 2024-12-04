@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -186,7 +187,8 @@ func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) 
 	return
 }
 
-func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
+// UpdateCGREvent updates a previously cached CGREvent (from StasisStart) with data from a new ARI event.
+func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent, alterableFields []string) error {
 	resCGREv := *cgrEv
 	switch smaEv.EventType() {
 	case ARIChannelStateChange:
@@ -212,6 +214,30 @@ func (smaEv *SMAsteriskEvent) UpdateCGREvent(cgrEv *utils.CGREvent) error {
 			}
 		}
 	}
+
+	// Update fields specified in alterableFields. Each field can be in the format:
+	// - "path.to.field": copies the field value using the last path element as key
+	// - "path.to.field:alias": copies the field value using the alias as key
+	if len(alterableFields) != 0 {
+		ms := utils.MapStorage(smaEv.ariEv)
+		for _, field := range alterableFields {
+			path, alias, hasAlias := strings.Cut(field, utils.InInFieldSep)
+			pathElems := strings.Split(path, utils.NestingSep)
+			fieldVal, err := ms.FieldAsString(pathElems)
+			if errors.Is(err, utils.ErrNotFound) {
+				continue
+			}
+			if err != nil {
+				return err
+			}
+			fieldKey := pathElems[len(pathElems)-1]
+			if hasAlias {
+				fieldKey = alias
+			}
+			resCGREv.Event[fieldKey] = fieldVal
+		}
+	}
+
 	*cgrEv = resCGREv
 	return nil
 }
