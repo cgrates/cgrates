@@ -369,14 +369,18 @@ const CGRATES_CFG_JSON = `
 
 
 "asterisk_agent": {
-	"enabled": false,						// starts the Asterisk agent: <true|false>
+	"enabled": false,			// starts the Asterisk agent: <true|false>
 	"sessions_conns": ["*internal"],
-	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
-	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
-		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
-	],
+	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
+	//"alterable_fields": [],		// additional fields to update from ARI events, optionally with :alias
+	"asterisk_conns": [{			// instantiate connections to multiple Asterisk servers
+		"address": "127.0.0.1:8088",
+		"user": "cgrates",
+		"password": "CGRateS.org",
+		"connect_attempts": 3,
+		"reconnects": 5
+	}]
 },
-
 
 "freeswitch_agent": {
 	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
