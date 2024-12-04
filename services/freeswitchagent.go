@@ -42,6 +42,7 @@ func NewFreeswitchAgent(cfg *config.CGRConfig,
 		connMgr:    connMgr,
 		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -71,6 +72,7 @@ func (fS *FreeswitchAgent) Start(_ *context.Context, shtDwn context.CancelFunc) 
 	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
 
 	go fS.connect(shtDwn)
+	close(fS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

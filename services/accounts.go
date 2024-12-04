@@ -53,6 +53,7 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -86,7 +87,6 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if acts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	acts.stateDeps = NewStateDependencies([]string{utils.StateServiceUP})
 	acts.cl = <-acts.clSChan
 	acts.clSChan <- acts.cl
 	if err = acts.cacheS.WaitToPrecache(ctx,
@@ -124,6 +124,7 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	acts.intRPCconn = anz.GetInternalCodec(srv, utils.AccountS)
 	acts.connChan <- acts.intRPCconn
+	close(acts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

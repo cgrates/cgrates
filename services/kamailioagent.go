@@ -43,6 +43,7 @@ func NewKamailioAgent(cfg *config.CGRConfig,
 		connMgr:    connMgr,
 		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -73,6 +74,7 @@ func (kam *KamailioAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 
 	go kam.connect(kam.kam, shtDwn)
+	close(kam.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

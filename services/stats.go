@@ -49,6 +49,7 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -117,6 +118,7 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	}
 	sts.intRPCconn = anz.GetInternalCodec(srv, utils.StatS)
 	sts.connChan <- sts.intRPCconn
+	close(sts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

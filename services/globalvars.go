@@ -38,6 +38,7 @@ func NewGlobalVarS(cfg *config.CGRConfig,
 		cfg:        cfg,
 		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -58,6 +59,7 @@ func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
 	utils.DecimalContext.Precision = gv.cfg.GeneralCfg().DecimalPrecision
 	utils.DecimalContext.RoundingMode = gv.cfg.GeneralCfg().DecimalRoundingMode
+	close(gv.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 

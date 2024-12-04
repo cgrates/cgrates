@@ -50,6 +50,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -115,6 +116,7 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	}
 	ldrs.intRPCconn = anz.GetInternalCodec(srv, utils.LoaderS)
 	ldrs.connChan <- ldrs.intRPCconn
+	close(ldrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

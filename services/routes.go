@@ -50,6 +50,7 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -114,6 +115,7 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 	routeS.intRPCconn = anz.GetInternalCodec(srv, utils.RouteS)
 	routeS.connChan <- routeS.intRPCconn
+	close(routeS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

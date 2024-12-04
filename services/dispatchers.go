@@ -50,6 +50,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		srvDep:      srvDep,
 		srvsReload:  make(map[string]chan struct{}),
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -120,7 +121,7 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	// dspS.server.SetDispatched()
 	dspS.intRPCconn = anz.GetInternalCodec(srv, utils.DispatcherS)
 	dspS.connChan <- dspS.intRPCconn
-
+	close(dspS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

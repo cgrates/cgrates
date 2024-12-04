@@ -49,6 +49,7 @@ func NewRateService(cfg *config.CGRConfig,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -154,6 +155,7 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 
 	rs.intRPCconn = anz.GetInternalCodec(srv, utils.RateS)
 	rs.intConnChan <- rs.intRPCconn
+	close(rs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

@@ -43,6 +43,7 @@ func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataD
 		connMgr:    connMgr,
 		clSChan:    clSChan,
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -81,6 +82,7 @@ func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	ts.stopChan = make(chan struct{})
 	ts.srv, _ = birpc.NewService(apis.NewTPeSv1(ts.tpes), utils.EmptyString, false)
 	ts.cl.RpcRegister(ts.srv)
+	close(ts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

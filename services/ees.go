@@ -46,6 +46,7 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -140,6 +141,7 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 
 	es.intRPCconn = anz.GetInternalCodec(srv, utils.EEs)
 	es.intConnChan <- es.intRPCconn
+	close(es.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 

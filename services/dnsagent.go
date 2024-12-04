@@ -42,6 +42,7 @@ func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -82,6 +83,7 @@ func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err
 	}
 	dns.stopChan = make(chan struct{})
 	go dns.listenAndServe(dns.stopChan, shtDwn)
+	close(dns.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

@@ -43,6 +43,7 @@ func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 		caps:        caps,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -100,6 +101,7 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, shtDwn context.CancelFun
 			shtDwn()
 		}
 	}(da.da)
+	close(da.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 

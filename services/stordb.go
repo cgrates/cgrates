@@ -39,6 +39,7 @@ func NewStorDBService(cfg *config.CGRConfig, setVersions bool,
 		setVersions: setVersions,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -88,6 +89,7 @@ func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error)
 	}
 
 	db.sync()
+	close(db.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

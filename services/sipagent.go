@@ -42,6 +42,7 @@ func NewSIPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -83,6 +84,7 @@ func (sip *SIPAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err
 		return
 	}
 	go sip.listenAndServe(shtDwn)
+	close(sip.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

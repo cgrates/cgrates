@@ -47,6 +47,7 @@ func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.Com
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -98,6 +99,7 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 	}(anz.anz)
 	anz.cl.SetAnalyzer(anz.anz)
 	go anz.start(ctx)
+	close(anz.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

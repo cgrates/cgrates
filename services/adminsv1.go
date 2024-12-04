@@ -50,6 +50,7 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -124,7 +125,7 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	//backwards compatible
 	apiService.intRPCconn = anz.GetInternalCodec(srv, utils.AdminSv1)
 	apiService.connChan <- apiService.intRPCconn
-
+	close(apiService.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

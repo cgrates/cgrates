@@ -39,6 +39,7 @@ func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 		connMgr:    connMgr,
 		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -72,7 +73,7 @@ func (dspS *RegistrarCService) Start(*context.Context, context.CancelFunc) (err 
 	dspS.rldChan = make(chan struct{})
 	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, dspS.connMgr)
 	go dspS.dspS.ListenAndServe(dspS.stopChan, dspS.rldChan)
-
+	close(dspS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

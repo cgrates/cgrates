@@ -67,6 +67,7 @@ func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager
 		intConnChan: intConnChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -84,6 +85,7 @@ func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.Cance
 	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
 	efServ.cl.RpcRegister(efServ.srv)
 	efServ.Unlock()
+	close(efServ.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

@@ -50,6 +50,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -123,6 +124,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 		// run this in it's own goroutine
 		go smg.start(shtDw)
 	}
+	close(smg.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
