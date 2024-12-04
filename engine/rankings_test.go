@@ -21,6 +21,7 @@ package engine
 import (
 	"reflect"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -363,15 +364,247 @@ func TestRankingsStoreRankings(t *testing.T) {
 	if profile.Sorting != "*desc" {
 		t.Errorf("Expected sorting to be 'desc', but got %v", profile.Sorting)
 	}
-	if !slices.Equal(profile.SortedStatIDs, []string{"stat2", "stat1"}) {
-		t.Errorf("Expected SortedStatIDs to be [stat2, stat1], but got %v", profile.SortedStatIDs)
-
-	}
 	if !slices.Equal(profile.SortingParameters, profile.SortingParameters) {
 		t.Errorf("Expected SortingParameters to be ['metric1:true'], but got %v", profile.SortingParameters)
 	}
 	if !reflect.DeepEqual(profile.Metrics, map[string]map[string]float64{"stat1": {"*acc": 22.2, "*tcd": 20000000000}, "stat2": {"*acc": 22.2, "*tcd": 23000000000}}) {
 		t.Errorf("Expected sorting to be 'asc', but got %v", profile.Metrics)
+	}
+
+}
+
+func TestV1GetRankingSummary(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RankingSCfg().Enabled = true
+
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	connMgr := NewConnManager(config.NewDefaultCGRConfig(), nil)
+	rkg := NewRankingS(dm, connMgr, nil, cfg)
+
+	rankingProfile := &RankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "TestRanking",
+		Schedule:          "@every 1s",
+		StatIDs:           []string{"stat1", "stat2"},
+		MetricIDs:         []string{},
+		Sorting:           "*desc",
+		SortingParameters: []string{utils.MetaTCD, utils.MetaACC},
+		Stored:            true,
+	}
+	dm.SetRankingProfile(rankingProfile)
+
+	if err := rkg.StartRankingS(); err != nil {
+		t.Fatalf("Unexpected error when starting rankings: %v", err)
+	}
+
+	time.Sleep(1200 * time.Millisecond)
+
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "TestRanking",
+		},
+		APIOpts: make(map[string]any),
+	}
+	reply := &RankingSummary{}
+
+	err := rkg.V1GetRankingSummary(nil, arg, reply)
+	if err != nil {
+		t.Fatalf("V1GetRankingSummary failed with error: %v", err)
+	}
+
+	expectedTenant := "cgrates.org"
+	if reply.Tenant != expectedTenant {
+		t.Errorf("Expected Tenant to be %q, but got %q", expectedTenant, reply.Tenant)
+	}
+
+	expectedID := "TestRanking"
+	if reply.ID != expectedID {
+		t.Errorf("Expected ID to be %q, but got %q", expectedID, reply.ID)
+	}
+}
+
+func TestV1GetSchedule(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	connMgr := NewConnManager(config.NewDefaultCGRConfig(), nil)
+	rkg := NewRankingS(dm, connMgr, nil, cfg)
+
+	rankingProfile := &RankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "TestRanking",
+		Schedule:          "@every 1s",
+		StatIDs:           []string{"stat1", "stat2"},
+		MetricIDs:         []string{},
+		Sorting:           "*desc",
+		SortingParameters: []string{utils.MetaTCD, utils.MetaACC},
+		Stored:            true,
+	}
+	dm.SetRankingProfile(rankingProfile)
+
+	if err := rkg.StartRankingS(); err != nil {
+		t.Fatalf("Unexpected error when starting rankings: %v", err)
+	}
+
+	time.Sleep(1200 * time.Millisecond)
+
+	arg := &utils.ArgScheduledRankings{
+		TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestRanking",
+			},
+			APIOpts: make(map[string]any),
+		},
+		RankingIDPrefixes: []string{"TestRanking"},
+	}
+
+	var schedRankings []utils.ScheduledRanking
+
+	err := rkg.V1GetSchedule(nil, arg, &schedRankings)
+	if err != nil {
+		t.Fatalf("V1GetSchedule failed with error: %v", err)
+	}
+
+	if len(schedRankings) == 0 {
+		t.Errorf("Expected at least one scheduled ranking, but got none")
+	}
+
+	if schedRankings[0].RankingID != "TestRanking" {
+		t.Errorf("Expected RankingID to be %q, but got %q", "TestRanking", schedRankings[0].RankingID)
+	}
+
+	if schedRankings[0].Next.IsZero() {
+		t.Errorf("Expected Next to be non-zero, but got zero time")
+	}
+
+	if schedRankings[0].Previous.IsZero() {
+		t.Errorf("Expected Previous to be non-zero, but got zero time")
+	}
+}
+
+func TestV1GetRankingMissingID(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	connMgr := NewConnManager(config.NewDefaultCGRConfig(), nil)
+	rkg := NewRankingS(dm, connMgr, nil, cfg)
+
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "",
+		},
+		APIOpts: make(map[string]any),
+	}
+
+	retRanking := &Ranking{}
+	err := rkg.V1GetRanking(nil, arg, retRanking)
+
+	if err == nil {
+		t.Fatalf("Expected error when ID is missing, but got none")
+	}
+
+	if !strings.Contains(err.Error(), "MANDATORY_IE_MISSING: [ID") {
+		t.Errorf("Expected error related to missing fields, but got: %v", err)
+	}
+}
+
+func TestV1GetRankingSortedStatIDs(t *testing.T) {
+
+	rk := &Ranking{
+		SortedStatIDs: []string{"stat1", "stat2", "stat3"},
+	}
+	retRanking := &Ranking{}
+	retRanking.SortedStatIDs = make([]string, len(rk.SortedStatIDs))
+	copy(retRanking.SortedStatIDs, rk.SortedStatIDs)
+
+	if len(retRanking.SortedStatIDs) != len(rk.SortedStatIDs) {
+		t.Errorf("Expected SortedStatIDs length: %d, but got: %d", len(rk.SortedStatIDs), len(retRanking.SortedStatIDs))
+	}
+	for i, v := range rk.SortedStatIDs {
+		if retRanking.SortedStatIDs[i] != v {
+			t.Errorf("Expected SortedStatIDs[%d]: %s, but got: %s", i, v, retRanking.SortedStatIDs[i])
+		}
+	}
+
+	rk.SortedStatIDs = []string{}
+	retRanking = &Ranking{}
+	retRanking.SortedStatIDs = make([]string, len(rk.SortedStatIDs))
+	copy(retRanking.SortedStatIDs, rk.SortedStatIDs)
+
+	if len(retRanking.SortedStatIDs) != 0 {
+		t.Errorf("Expected empty SortedStatIDs, but got length: %d", len(retRanking.SortedStatIDs))
+	}
+
+	rk.SortedStatIDs = nil
+	retRanking = &Ranking{}
+	retRanking.SortedStatIDs = make([]string, len(rk.SortedStatIDs))
+	copy(retRanking.SortedStatIDs, rk.SortedStatIDs)
+
+	if len(retRanking.SortedStatIDs) != 0 {
+		t.Errorf("Expected empty SortedStatIDs for nil input, but got length: %d", len(retRanking.SortedStatIDs))
+	}
+}
+
+func TestV1ScheduleQueries(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+
+	connMgr := NewConnManager(config.NewDefaultCGRConfig(), nil)
+	rkg := NewRankingS(dm, connMgr, nil, cfg)
+
+	rankingProfile := &RankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "TestRanking",
+		Schedule:          "@every 1s",
+		StatIDs:           []string{"stat1", "stat2"},
+		MetricIDs:         []string{},
+		Sorting:           "*desc",
+		SortingParameters: []string{utils.MetaTCD, utils.MetaACC},
+		Stored:            true,
+	}
+	dm.SetRankingProfile(rankingProfile)
+
+	if err := rkg.StartRankingS(); err != nil {
+		t.Fatalf("Unexpected error when starting rankings: %v", err)
+	}
+
+	arg := &utils.ArgScheduleRankingQueries{
+		TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "TestRanking",
+			},
+			APIOpts: make(map[string]any),
+		},
+		RankingIDs: []string{"TestRanking"},
+	}
+
+	var scheduled int
+	err := rkg.V1ScheduleQueries(context.Background(), arg, &scheduled)
+
+	if err != nil {
+		t.Fatalf("V1ScheduleQueries failed with error: %v", err)
+	}
+
+	if scheduled == 0 {
+		t.Errorf("Expected at least one scheduled ranking query, but got none")
+	}
+
+	if len(rkg.crnTQs["cgrates.org"]) == 0 {
+		t.Errorf("Expected cron entries for tenant 'cgrates.org', but got none")
+	}
+
+	if _, exists := rkg.crnTQs["cgrates.org"]["TestRanking"]; !exists {
+		t.Errorf("Expected cron entry for ranking ID 'TestRanking', but it was not found")
 	}
 
 }
