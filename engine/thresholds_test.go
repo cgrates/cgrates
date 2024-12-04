@@ -871,7 +871,7 @@ func TestThSProcessEventMaxHits(t *testing.T) {
 func TestThresholdsProcessEvent3(t *testing.T) {
 	to := Threshold{
 		Snooze: time.Date(
-			2024, 11, 17, 20, 34, 58, 651387237, time.UTC),
+			2030, 11, 17, 20, 34, 58, 651387237, time.UTC),
 	}
 
 	err := to.ProcessEvent(nil, nil)
