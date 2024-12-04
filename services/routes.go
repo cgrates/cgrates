@@ -35,12 +35,11 @@ import (
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalRouteSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RouteService{
-		connChan:    internalRouteSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -67,10 +66,9 @@ type RouteService struct {
 	routeS *engine.RouteS
 	cl     *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -114,7 +112,6 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		}
 	}
 	routeS.intRPCconn = anz.GetInternalCodec(srv, utils.RouteS)
-	routeS.connChan <- routeS.intRPCconn
 	close(routeS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -130,7 +127,6 @@ func (routeS *RouteService) Shutdown() (err error) {
 	defer routeS.Unlock()
 	routeS.routeS.Shutdown() //we don't verify the error because shutdown never returns an error
 	routeS.routeS = nil
-	<-routeS.connChan
 	routeS.cl.RpcUnregisterName(utils.RouteSv1)
 	return
 }

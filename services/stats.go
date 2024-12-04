@@ -34,12 +34,11 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalStatSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &StatService{
-		connChan:    internalStatSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -66,10 +65,9 @@ type StatService struct {
 	sts *engine.StatS
 	cl  *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -117,7 +115,6 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 		}
 	}
 	sts.intRPCconn = anz.GetInternalCodec(srv, utils.StatS)
-	sts.connChan <- sts.intRPCconn
 	close(sts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -137,7 +134,6 @@ func (sts *StatService) Shutdown() (err error) {
 	defer sts.Unlock()
 	sts.sts.Shutdown(context.TODO())
 	sts.sts = nil
-	<-sts.connChan
 	sts.cl.RpcUnregisterName(utils.StatSv1)
 	return
 }

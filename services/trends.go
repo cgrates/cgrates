@@ -34,12 +34,11 @@ import (
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalTrendSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TrendService{
-		connChan:    internalTrendSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -65,10 +64,9 @@ type TrendService struct {
 	trs *engine.TrendS
 	cl  *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -118,7 +116,6 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 		}
 	}
 	trs.intRPCconn = anz.GetInternalCodec(srv, utils.Trends)
-	trs.connChan <- trs.intRPCconn
 	close(trs.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -138,7 +135,6 @@ func (trs *TrendService) Shutdown() (err error) {
 	defer trs.Unlock()
 	trs.trs.StopTrendS()
 	trs.trs = nil
-	<-trs.connChan
 	trs.cl.RpcUnregisterName(utils.TrendSv1)
 	return
 }

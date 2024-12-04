@@ -33,7 +33,7 @@ import (
 
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
-	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
 	srvDep map[string]*sync.WaitGroup,
@@ -46,7 +46,6 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 		clSChan:    clSChan,
 		dm:         dm,
 		connMgr:    connMgr,
-		rpc:        internalChan,
 		cacheCh:    make(chan *engine.CacheS, 1),
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
@@ -63,7 +62,6 @@ type CacheService struct {
 	cl *commonlisteners.CommonListenerS
 
 	cacheCh chan *engine.CacheS
-	rpc     chan birpc.ClientConnector
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
@@ -101,7 +99,6 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 		}
 	}
 	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CacheS)
-	cS.rpc <- cS.intRPCconn
 	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }

@@ -38,11 +38,9 @@ import (
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
-	internalChan chan birpc.ClientConnector,
 	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AccountService{
-		connChan:    internalChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -72,7 +70,6 @@ type AccountService struct {
 
 	rldChan  chan struct{}
 	stopChan chan struct{}
-	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
@@ -123,7 +120,6 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 
 	acts.intRPCconn = anz.GetInternalCodec(srv, utils.AccountS)
-	acts.connChan <- acts.intRPCconn
 	close(acts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -140,7 +136,6 @@ func (acts *AccountService) Shutdown() (err error) {
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
-	<-acts.connChan
 	acts.Unlock()
 	acts.cl.RpcUnregisterName(utils.AccountSv1)
 	return

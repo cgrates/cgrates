@@ -34,12 +34,11 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *DispatcherService {
 	return &DispatcherService{
-		connChan:    internalChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -67,7 +66,6 @@ type DispatcherService struct {
 	dspS *dispatchers.DispatcherService
 	cl   *commonlisteners.CommonListenerS
 
-	connChan   chan birpc.ClientConnector
 	connMgr    *engine.ConnManager
 	cfg        *config.CGRConfig
 	srvsReload map[string]chan struct{}
@@ -120,7 +118,6 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
 	dspS.intRPCconn = anz.GetInternalCodec(srv, utils.DispatcherS)
-	dspS.connChan <- dspS.intRPCconn
 	close(dspS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -136,7 +133,6 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 	defer dspS.Unlock()
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
-	<-dspS.connChan
 	dspS.cl.RpcUnregisterName(utils.DispatcherSv1)
 	dspS.cl.RpcUnregisterName(utils.AttributeSv1)
 
