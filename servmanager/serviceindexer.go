@@ -41,10 +41,10 @@ func (sI *ServiceIndexer) GetService(srvID string) Service {
 	return sI.srvS[srvID]
 }
 
-// AddService adds a service based on it's id to the index
-func (sI *ServiceIndexer) AddService(srvID string, srv Service) {
+// AddService registers a service in the indexer using its name as key
+func (sI *ServiceIndexer) AddService(s Service) {
 	sI.mux.Lock()
-	sI.srvS[srvID] = srv
+	sI.srvS[s.ServiceName()] = s
 	sI.mux.Unlock()
 }
 
