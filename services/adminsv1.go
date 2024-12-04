@@ -35,12 +35,10 @@ import (
 func NewAdminSv1Service(cfg *config.CGRConfig,
 	dm *DataDBService, storDB *StorDBService,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
-	internalAPIerSv1Chan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AdminSv1Service{
-		connChan:    internalAPIerSv1Chan,
 		cfg:         cfg,
 		dm:          dm,
 		storDB:      storDB,
@@ -68,7 +66,6 @@ type AdminSv1Service struct {
 	cl  *commonlisteners.CommonListenerS
 
 	stopChan chan struct{}
-	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
@@ -124,7 +121,6 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 
 	//backwards compatible
 	apiService.intRPCconn = anz.GetInternalCodec(srv, utils.AdminSv1)
-	apiService.connChan <- apiService.intRPCconn
 	close(apiService.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -139,7 +135,6 @@ func (apiService *AdminSv1Service) Shutdown() (err error) {
 	apiService.Lock()
 	// close(apiService.stopChan)
 	apiService.api = nil
-	<-apiService.connChan
 	apiService.cl.RpcUnregisterName(utils.AdminSv1)
 	apiService.Unlock()
 	return

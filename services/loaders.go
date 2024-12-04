@@ -35,12 +35,10 @@ import (
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
-	internalLoaderSChan chan birpc.ClientConnector,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *LoaderService {
 	return &LoaderService{
-		connChan:    internalLoaderSChan,
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
@@ -67,7 +65,6 @@ type LoaderService struct {
 	cl   *commonlisteners.CommonListenerS
 
 	stopChan chan struct{}
-	connChan chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
@@ -115,7 +112,6 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		}
 	}
 	ldrs.intRPCconn = anz.GetInternalCodec(srv, utils.LoaderS)
-	ldrs.connChan <- ldrs.intRPCconn
 	close(ldrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -145,7 +141,6 @@ func (ldrs *LoaderService) Shutdown() (_ error) {
 	ldrs.Lock()
 	ldrs.ldrs = nil
 	close(ldrs.stopChan)
-	<-ldrs.connChan
 	ldrs.cl.RpcUnregisterName(utils.LoaderSv1)
 	ldrs.Unlock()
 	return
@@ -171,11 +166,6 @@ func (ldrs *LoaderService) ShouldRun() bool {
 // GetLoaderS returns the initialized LoaderService
 func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderS {
 	return ldrs.ldrs
-}
-
-// GetRPCChan returns the conn chan
-func (ldrs *LoaderService) GetRPCChan() chan birpc.ClientConnector {
-	return ldrs.connChan
 }
 
 // StateChan returns signaling channel of specific state

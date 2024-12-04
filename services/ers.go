@@ -38,7 +38,6 @@ func NewEventReaderService(
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
-	intConn chan birpc.ClientConnector,
 	anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
@@ -48,7 +47,6 @@ func NewEventReaderService(
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		clSChan:     clSChan,
-		intConn:     intConn,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
@@ -69,7 +67,6 @@ type EventReaderService struct {
 
 	rldChan  chan struct{}
 	stopChan chan struct{}
-	intConn  chan birpc.ClientConnector
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
@@ -114,7 +111,6 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 		erS.cl.RpcRegister(srv)
 	}
 	erS.intRPCconn = anz.GetInternalCodec(srv, utils.ERs)
-	erS.intConn <- erS.intRPCconn
 	close(erS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }

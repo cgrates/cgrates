@@ -38,11 +38,10 @@ import (
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ActionService{
-		connChan:    internalChan,
 		connMgr:     connMgr,
 		cfg:         cfg,
 		dm:          dm,
@@ -73,10 +72,9 @@ type ActionService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
-	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -124,7 +122,6 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	}
 
 	acts.intRPCconn = anz.GetInternalCodec(srv, utils.ActionS)
-	acts.connChan <- acts.intRPCconn
 	close(acts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -142,7 +139,6 @@ func (acts *ActionService) Shutdown() (err error) {
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
-	<-acts.connChan
 	acts.cl.RpcUnregisterName(utils.ActionSv1)
 	return
 }

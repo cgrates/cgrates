@@ -36,12 +36,11 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalCDRServerChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &CDRService{
-		connChan:    internalCDRServerChan,
 		cfg:         cfg,
 		dm:          dm,
 		storDB:      storDB,
@@ -68,7 +67,6 @@ type CDRService struct {
 	cdrS *cdrs.CDRServer
 	cl   *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
@@ -120,7 +118,6 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	}
 
 	cs.intRPCconn = anz.GetInternalCodec(srv, utils.CDRServer)
-	cs.connChan <- cs.intRPCconn // Signal that cdrS is operational
 	close(cs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -135,7 +132,6 @@ func (cs *CDRService) Shutdown() (err error) {
 	cs.Lock()
 	close(cs.stopChan)
 	cs.cdrS = nil
-	<-cs.connChan
 	cs.Unlock()
 	cs.cl.RpcUnregisterName(utils.CDRsV1)
 	return

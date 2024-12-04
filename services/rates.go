@@ -35,7 +35,7 @@ import (
 func NewRateService(cfg *config.CGRConfig,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	dmS *DataDBService, clSChan chan *commonlisteners.CommonListenerS,
-	intConnChan chan birpc.ClientConnector, anzChan chan *AnalyzerService,
+	anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RateService{
@@ -44,7 +44,6 @@ func NewRateService(cfg *config.CGRConfig,
 		filterSChan: filterSChan,
 		dmS:         dmS,
 		clSChan:     clSChan,
-		intConnChan: intConnChan,
 		rldChan:     make(chan struct{}),
 		anzChan:     anzChan,
 		srvDep:      srvDep,
@@ -66,11 +65,10 @@ type RateService struct {
 	rateS *rates.RateS
 	cl    *commonlisteners.CommonListenerS
 
-	rldChan     chan struct{}
-	stopChan    chan struct{}
-	intConnChan chan birpc.ClientConnector
-	cfg         *config.CGRConfig
-	srvDep      map[string]*sync.WaitGroup
+	rldChan  chan struct{}
+	stopChan chan struct{}
+	cfg      *config.CGRConfig
+	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -107,7 +105,6 @@ func (rs *RateService) Shutdown() (err error) {
 	close(rs.stopChan)
 	rs.rateS.Shutdown() //we don't verify the error because shutdown never returns an err
 	rs.rateS = nil
-	<-rs.intConnChan
 	rs.cl.RpcUnregisterName(utils.RateSv1)
 	return
 }
@@ -154,7 +151,6 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	}
 
 	rs.intRPCconn = anz.GetInternalCodec(srv, utils.RateS)
-	rs.intConnChan <- rs.intRPCconn
 	close(rs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }

@@ -35,12 +35,10 @@ import (
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.CommonListenerS,
 	filterSChan chan *engine.FilterS,
-	internalAnalyzerSChan chan birpc.ClientConnector,
 	anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
 	return &AnalyzerService{
-		connChan:    internalAnalyzerSChan,
 		cfg:         cfg,
 		clSChan:     clSChan,
 		filterSChan: filterSChan,
@@ -63,7 +61,6 @@ type AnalyzerService struct {
 	cl  *commonlisteners.CommonListenerS
 
 	cancelFunc context.CancelFunc
-	connChan   chan birpc.ClientConnector
 	cfg        *config.CGRConfig
 	srvDep     map[string]*sync.WaitGroup
 
@@ -106,7 +103,6 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 func (anz *AnalyzerService) start(ctx *context.Context) {
 	fS, err := waitForFilterS(ctx, anz.filterSChan)
 	if err != nil {
-		anz.connChan <- nil
 		return
 	}
 
@@ -124,7 +120,6 @@ func (anz *AnalyzerService) start(ctx *context.Context) {
 		}
 	}
 	anz.Unlock()
-	anz.connChan <- anz.GetInternalCodec(srv, utils.AnalyzerS)
 }
 
 // Reload handles the change of config
@@ -145,7 +140,6 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.anzChan = nil
 	anz.anz.Shutdown()
 	anz.anz = nil
-	<-anz.connChan
 	anz.Unlock()
 	anz.cl.RpcUnregisterName(utils.AnalyzerSv1)
 	return

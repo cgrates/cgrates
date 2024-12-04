@@ -35,11 +35,10 @@ import (
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	clSChan chan *commonlisteners.CommonListenerS, internalThresholdSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ThresholdService{
-		connChan:    internalThresholdSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -66,10 +65,9 @@ type ThresholdService struct {
 	thrs *engine.ThresholdS
 	cl   *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -116,7 +114,6 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 		}
 	}
 	thrs.intRPCconn = anz.GetInternalCodec(srv, utils.ThresholdS)
-	thrs.connChan <- thrs.intRPCconn
 	close(thrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -136,7 +133,6 @@ func (thrs *ThresholdService) Shutdown() (_ error) {
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
-	<-thrs.connChan
 	thrs.cl.RpcUnregisterName(utils.ThresholdSv1)
 	return
 }

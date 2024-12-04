@@ -36,12 +36,11 @@ import (
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &SessionService{
-		connChan:    internalChan,
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
@@ -68,7 +67,6 @@ type SessionService struct {
 
 	bircpEnabled bool // to stop birpc server if needed
 	stopChan     chan struct{}
-	connChan     chan birpc.ClientConnector
 	connMgr      *engine.ConnManager
 	cfg          *config.CGRConfig
 	srvDep       map[string]*sync.WaitGroup
@@ -114,7 +112,6 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 			smg.cl.RpcRegister(s)
 		}
 	}
-	smg.connChan <- anz.GetInternalCodec(srv, utils.SessionS)
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
 		smg.bircpEnabled = true
@@ -158,7 +155,6 @@ func (smg *SessionService) Shutdown() (err error) {
 		smg.bircpEnabled = false
 	}
 	smg.sm = nil
-	<-smg.connChan
 	smg.cl.RpcUnregisterName(utils.SessionSv1)
 	// smg.server.BiRPCUnregisterName(utils.SessionSv1)
 	return

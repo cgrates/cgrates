@@ -35,12 +35,11 @@ import (
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalRankingSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RankingService{
-		connChan:    internalRankingSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -66,10 +65,9 @@ type RankingService struct {
 	ran *engine.RankingS
 	cl  *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -121,7 +119,6 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		}
 	}
 	ran.intRPCconn = anz.GetInternalCodec(srv, utils.RankingS)
-	ran.connChan <- ran.intRPCconn
 	close(ran.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -141,7 +138,6 @@ func (ran *RankingService) Shutdown() (err error) {
 	defer ran.Unlock()
 	ran.ran.StopRankingS()
 	ran.ran = nil
-	<-ran.connChan
 	ran.cl.RpcUnregisterName(utils.RankingSv1)
 	return
 }

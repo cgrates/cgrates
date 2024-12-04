@@ -34,12 +34,11 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalResourceSChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ResourceService{
-		connChan:    internalResourceSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -66,10 +65,9 @@ type ResourceService struct {
 	reS *engine.ResourceS
 	cl  *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -116,7 +114,6 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 
 	reS.intRPCconn = anz.GetInternalCodec(srv, utils.ResourceS)
-	reS.connChan <- reS.intRPCconn
 	close(reS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -136,7 +133,6 @@ func (reS *ResourceService) Shutdown() (err error) {
 	defer reS.Unlock()
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
-	<-reS.connChan
 	reS.cl.RpcUnregisterName(utils.ResourceSv1)
 	return
 }

@@ -35,11 +35,10 @@ import (
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
-	internalChargerSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
+	connMgr *engine.ConnManager,
 	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ChargerService{
-		connChan:    internalChargerSChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -66,10 +65,9 @@ type ChargerService struct {
 	chrS *engine.ChargerS
 	cl   *commonlisteners.CommonListenerS
 
-	connChan chan birpc.ClientConnector
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -113,7 +111,6 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 
 	chrS.intRPCconn = anz.GetInternalCodec(srv, utils.ChargerS)
-	chrS.connChan <- chrS.intRPCconn
 	close(chrS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -129,7 +126,6 @@ func (chrS *ChargerService) Shutdown() (err error) {
 	defer chrS.Unlock()
 	chrS.chrS.Shutdown()
 	chrS.chrS = nil
-	<-chrS.connChan
 	chrS.cl.RpcUnregisterName(utils.ChargerSv1)
 	return
 }

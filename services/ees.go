@@ -34,7 +34,7 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS, intConnChan chan birpc.ClientConnector,
+	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventExporterService{
@@ -42,7 +42,6 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		clSChan:     clSChan,
-		intConnChan: intConnChan,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
@@ -61,10 +60,9 @@ type EventExporterService struct {
 	eeS *ees.EeS
 	cl  *commonlisteners.CommonListenerS
 
-	intConnChan chan birpc.ClientConnector
-	connMgr     *engine.ConnManager
-	cfg         *config.CGRConfig
-	srvDep      map[string]*sync.WaitGroup
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
+	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -103,7 +101,6 @@ func (es *EventExporterService) Shutdown() error {
 	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EEs))
 	es.eeS.ClearExporterCache()
 	es.eeS = nil
-	<-es.intConnChan
 	es.cl.RpcUnregisterName(utils.EeSv1)
 	return nil
 }
@@ -140,7 +137,6 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	}
 
 	es.intRPCconn = anz.GetInternalCodec(srv, utils.EEs)
-	es.intConnChan <- es.intRPCconn
 	close(es.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }

@@ -35,11 +35,10 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, internalChan chan birpc.ClientConnector,
+	clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService, dspS *DispatcherService,
 	srvDep map[string]*sync.WaitGroup, sIndxr *servmanager.ServiceIndexer) servmanager.Service {
 	return &AttributeService{
-		connChan:       internalChan,
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
@@ -68,9 +67,8 @@ type AttributeService struct {
 	cl    *commonlisteners.CommonListenerS
 	rpc   *apis.AttributeSv1 // useful on restart
 
-	connChan chan birpc.ClientConnector // publish the internal Subsystem when available
-	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
+	cfg    *config.CGRConfig
+	srvDep map[string]*sync.WaitGroup
 
 	intRPCconn     birpc.ClientConnector       // expose API methods over internal connection
 	serviceIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -131,7 +129,6 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	}()
 
 	attrS.intRPCconn = anz.GetInternalCodec(srv, utils.AttributeS)
-	attrS.connChan <- attrS.intRPCconn
 	close(attrS.stateDeps.StateChan(utils.StateServiceUP)) // inform listeners about the service reaching UP state
 	return
 }
@@ -147,7 +144,6 @@ func (attrS *AttributeService) Shutdown() (err error) {
 	attrS.attrS.Shutdown()
 	attrS.attrS = nil
 	attrS.rpc = nil
-	<-attrS.connChan
 	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
 	attrS.dspS.UnregisterShutdownChan(attrS.ServiceName())
 	attrS.Unlock()

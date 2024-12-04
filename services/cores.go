@@ -35,13 +35,12 @@ import (
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS,
-	internalCoreSChan chan birpc.ClientConnector, anzChan chan *AnalyzerService,
+	anzChan chan *AnalyzerService,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *CoreService {
 	return &CoreService{
 		shdWg:      shdWg,
-		connChan:   internalCoreSChan,
 		cfg:        cfg,
 		caps:       caps,
 		fileCPU:    fileCPU,
@@ -69,7 +68,6 @@ type CoreService struct {
 	csCh     chan *cores.CoreS
 	stopChan chan struct{}
 	shdWg    *sync.WaitGroup
-	connChan chan birpc.ClientConnector
 	cfg      *config.CGRConfig
 	srvDep   map[string]*sync.WaitGroup
 
@@ -106,7 +104,6 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 	}
 
 	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CoreS)
-	cS.connChan <- cS.intRPCconn
 	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -125,7 +122,6 @@ func (cS *CoreService) Shutdown() error {
 	cS.cS.StopCPUProfiling()
 	cS.cS.StopMemoryProfiling()
 	cS.cS = nil
-	<-cS.connChan
 	<-cS.csCh
 	cS.cl.RpcUnregisterName(utils.CoreSv1)
 	return nil
