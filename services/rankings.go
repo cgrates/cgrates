@@ -50,6 +50,7 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -121,6 +122,7 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	}
 	ran.intRPCconn = anz.GetInternalCodec(srv, utils.RankingS)
 	ran.connChan <- ran.intRPCconn
+	close(ran.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 

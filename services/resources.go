@@ -49,6 +49,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -116,6 +117,7 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	reS.intRPCconn = anz.GetInternalCodec(srv, utils.ResourceS)
 	reS.connChan <- reS.intRPCconn
+	close(reS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

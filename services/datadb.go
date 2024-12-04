@@ -41,6 +41,7 @@ func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVer
 		setVersions: setVersions,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -91,6 +92,7 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 	}
 
 	db.dbchan <- db.dm
+	close(db.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

@@ -49,6 +49,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		srvDep:      srvDep,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -116,6 +117,7 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	}
 	thrs.intRPCconn = anz.GetInternalCodec(srv, utils.ThresholdS)
 	thrs.connChan <- thrs.intRPCconn
+	close(thrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

@@ -41,6 +41,7 @@ func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps,
 		clSChan:    clSChan,
 		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -75,6 +76,7 @@ func (cl *CommonListenerService) Start(*context.Context, context.CancelFunc) err
 	if cl.cfg.ConfigSCfg().Enabled {
 		cl.cls.RegisterHTTPFunc(cl.cfg.ConfigSCfg().URL, config.HandlerConfigS)
 	}
+	close(cl.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 

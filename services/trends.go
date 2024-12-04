@@ -49,6 +49,7 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 		srvDep:      srvDep,
 		filterSChan: filterSChan,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -118,6 +119,7 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	}
 	trs.intRPCconn = anz.GetInternalCodec(srv, utils.Trends)
 	trs.connChan <- trs.intRPCconn
+	close(trs.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 

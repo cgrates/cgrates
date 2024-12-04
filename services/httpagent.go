@@ -44,6 +44,7 @@ func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -92,6 +93,7 @@ func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err erro
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 	ha.Unlock()
+	close(ha.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

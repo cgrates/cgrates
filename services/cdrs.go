@@ -51,6 +51,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -120,6 +121,7 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 
 	cs.intRPCconn = anz.GetInternalCodec(srv, utils.CDRServer)
 	cs.connChan <- cs.intRPCconn // Signal that cdrS is operational
+	close(cs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

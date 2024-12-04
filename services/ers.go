@@ -52,6 +52,7 @@ func NewEventReaderService(
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -114,6 +115,7 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	}
 	erS.intRPCconn = anz.GetInternalCodec(srv, utils.ERs)
 	erS.intConn <- erS.intRPCconn
+	close(erS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

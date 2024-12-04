@@ -49,6 +49,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -113,6 +114,7 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	chrS.intRPCconn = anz.GetInternalCodec(srv, utils.ChargerS)
 	chrS.connChan <- chrS.intRPCconn
+	close(chrS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

@@ -45,6 +45,7 @@ func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -102,6 +103,7 @@ func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err err
 
 	ja.started = true
 	ja.Unlock()
+	close(ja.stateDeps.StateChan(utils.StateServiceUP))
 	utils.Logger.Info(fmt.Sprintf("<%s> successfully started.", utils.JanusAgent))
 	return
 }

@@ -42,6 +42,7 @@ func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -90,7 +91,7 @@ func (rad *RadiusAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (
 	rad.stopChan = make(chan struct{})
 
 	go rad.listenAndServe(rad.rad, shtDwn)
-
+	close(rad.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

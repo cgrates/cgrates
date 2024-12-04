@@ -49,6 +49,7 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 		rpc:        internalChan,
 		cacheCh:    make(chan *engine.CacheS, 1),
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -101,6 +102,7 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 	}
 	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CacheS)
 	cS.rpc <- cS.intRPCconn
+	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

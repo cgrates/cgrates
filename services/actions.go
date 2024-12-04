@@ -53,6 +53,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
 		srvIndexer:  srvIndexer,
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -124,6 +125,7 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 
 	acts.intRPCconn = anz.GetInternalCodec(srv, utils.ActionS)
 	acts.connChan <- acts.intRPCconn
+	close(acts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

@@ -50,6 +50,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *comm
 		srvDep:     srvDep,
 		csCh:       make(chan *cores.CoreS, 1),
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -106,6 +107,7 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 
 	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CoreS)
 	cS.connChan <- cS.intRPCconn
+	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 

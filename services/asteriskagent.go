@@ -42,6 +42,7 @@ func NewAsteriskAgent(cfg *config.CGRConfig,
 		connMgr:    connMgr,
 		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
@@ -81,6 +82,7 @@ func (ast *AsteriskAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (
 		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
 		go listenAndServe(ast.smas[connIdx], ast.stopChan)
 	}
+	close(ast.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
