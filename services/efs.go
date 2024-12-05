@@ -46,7 +46,6 @@ type ExportFailoverService struct {
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -56,13 +55,11 @@ type ExportFailoverService struct {
 // NewExportFailoverService is the constructor for the TpeService
 func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *ExportFailoverService {
 	return &ExportFailoverService{
 		cfg:        cfg,
 		clSChan:    clSChan,
 		connMgr:    connMgr,
-		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}

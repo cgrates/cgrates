@@ -35,12 +35,10 @@ import (
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &FreeswitchAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
-		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -53,7 +51,6 @@ type FreeswitchAgent struct {
 
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
-	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

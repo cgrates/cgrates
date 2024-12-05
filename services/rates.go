@@ -36,7 +36,6 @@ func NewRateService(cfg *config.CGRConfig,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	dmS *DataDBService, clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
@@ -46,7 +45,6 @@ func NewRateService(cfg *config.CGRConfig,
 		clSChan:     clSChan,
 		rldChan:     make(chan struct{}),
 		anzChan:     anzChan,
-		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -68,7 +66,6 @@ type RateService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

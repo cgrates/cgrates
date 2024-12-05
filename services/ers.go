@@ -39,7 +39,6 @@ func NewEventReaderService(
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
@@ -48,7 +47,6 @@ func NewEventReaderService(
 		connMgr:     connMgr,
 		clSChan:     clSChan,
 		anzChan:     anzChan,
-		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -69,7 +67,6 @@ type EventReaderService struct {
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

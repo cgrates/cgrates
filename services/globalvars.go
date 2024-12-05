@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
@@ -32,11 +30,9 @@ import (
 
 // NewGlobalVarS .
 func NewGlobalVarS(cfg *config.CGRConfig,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *GlobalVarS {
 	return &GlobalVarS{
 		cfg:        cfg,
-		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -44,8 +40,7 @@ func NewGlobalVarS(cfg *config.CGRConfig,
 
 // GlobalVarS implements Agent interface
 type GlobalVarS struct {
-	cfg    *config.CGRConfig
-	srvDep map[string]*sync.WaitGroup
+	cfg *config.CGRConfig
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

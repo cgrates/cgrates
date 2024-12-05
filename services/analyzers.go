@@ -36,14 +36,12 @@ import (
 func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.CommonListenerS,
 	filterSChan chan *engine.FilterS,
 	anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
 	return &AnalyzerService{
 		cfg:         cfg,
 		clSChan:     clSChan,
 		filterSChan: filterSChan,
 		anzChan:     anzChan,
-		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -62,7 +60,6 @@ type AnalyzerService struct {
 
 	cancelFunc context.CancelFunc
 	cfg        *config.CGRConfig
-	srvDep     map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
