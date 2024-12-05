@@ -23,8 +23,6 @@ package general_tests
 
 import (
 	"fmt"
-	"os"
-	"path"
 	"reflect"
 	"sort"
 	"testing"
@@ -33,109 +31,127 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	anzDocCfgPath string
-	anzDocCfg     *config.CGRConfig
-	anzDocRPC     *birpc.Client
-	timeVar       string // will be used to query results based on date
-
-	sTestsAnzDoc = []func(t *testing.T){
-		testAnzDocInitCfg,
-		testAnzDocFlushDBs,
-		testAnzDocStartEngine,
-		testAnzDocRPCConn,
-
-		/*
-			Generate traffic. The following API methods will be stored in the blevesearch db:
-			- 2 * CoreSv1.Status
-			- 5 * AttributeSv1.SetAttributeProfile
-			- 1 * AttributeSv1.GetAttributeProfiles
-			- 3 * AttributeSv1.ProcessEvent
-			- ? * CacheSv1.ReloadCache
-		*/
-		testAnzDocCoreSStatus,
-		testPopulateTimeVariable,
-		testAnzDocSetAttributeProfiles,
-		testAnzDocCheckAttributeProfiles,
-		testAnzDocAttributeSProcessEvent,
-		testAnzDocCoreSStatus,
-		// make queries to the AnalyzerS db using only HeaderFilters
-		testAnzDocQueryWithHeaderFilters,
-		// make queries to the AnalyzerS db using only ContentFilters
-		testAnzDocQueryWithContentFiltersFilters,
-		// make queries to the AnalyzerS db using a combination of both types of filters
-		testAnzDocQuery,
-		testAnzDocKillEngine,
-	}
-)
-
 func TestAnzDocIT(t *testing.T) {
-	for _, stest := range sTestsAnzDoc {
-		t.Run("TestAnzDocIT", stest)
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
 	}
+	jsonCfg := fmt.Sprintf(`{
+"admins": {
+	"enabled": true
+},
+"attributes": {
+	"enabled": true,
+	"prefix_indexed_fields": ["*req.Destination", "*req.Account"],
+	"opts": {
+		"*processRuns": [{
+			"Tenant": "cgrates.org",
+			"FilterIDs": [],
+			"Value": 2
+		}]
+	}
+},
+"analyzers": {
+	"enabled": true,
+	"db_path": "%s"
 }
+}`, t.TempDir())
+	ng := engine.TestEngine{
+		ConfigJSON: jsonCfg,
+		DBCfg:      engine.InternalDBCfg,
+		Encoding:   *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
 
-func testAnzDocFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(anzDocCfg); err != nil {
-		t.Fatal(err)
+	status := func(t *testing.T) {
+		t.Helper()
+		var status map[string]any
+		if err := client.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
+			t.Error(err)
+		}
 	}
-	if err := engine.InitStorDB(anzDocCfg); err != nil {
-		t.Fatal(err)
-	}
-}
 
-func testAnzDocStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(anzDocCfgPath, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-}
+	//Generate traffic.
+	status(t) //1*CoreSv1.Status
 
-func testAnzDocInitCfg(t *testing.T) {
-	var err error
-	if err := os.RemoveAll("/tmp/analyzers/"); err != nil {
-		t.Fatal(err)
-	}
-	if err = os.MkdirAll("/tmp/analyzers/", 0700); err != nil {
-		t.Fatal(err)
-	}
-	anzDocCfgPath = path.Join(*utils.DataDir, "conf", "samples", "analyzers_doc")
-	anzDocCfg, err = config.NewCGRConfigFromPath(context.Background(), anzDocCfgPath)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-func testAnzDocRPCConn(t *testing.T) {
-	anzDocRPC = engine.NewRPCClient(t, anzDocCfg.ListenCfg(), *utils.Encoding)
-}
-
-func testAnzDocKillEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
-	}
-	if err := os.RemoveAll(anzDocCfg.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testAnzDocCoreSStatus(t *testing.T) {
-	var status map[string]any
-	if err := anzDocRPC.Call(context.Background(), utils.CoreSv1Status, utils.TenantWithAPIOpts{}, &status); err != nil {
-		return
-	}
-}
-
-func testPopulateTimeVariable(t *testing.T) {
 	time.Sleep(time.Second)
-	timeVar = time.Now().UTC().Format("2006-01-02T15:04:05Z07:00")
+	timeVar := time.Now().UTC().Format("2006-01-02T15:04:05Z07:00")
+
+	setAttrProfiles(t, client)   // 5*AdminSv1.SetAttributeProfiles
+	getAttrProfiles(t, client)   // 1*AdminSv1.GetAttributeProfiles
+	attrProcessEvents(t, client) // 3*AttributeSv1.ProcessEvent
+	status(t)                    //1*CoreSv1.Status (2 total)
+
+	time.Sleep(100 * time.Millisecond)
+
+	// HeaderFilters only queries.
+	anzStringQuery(t, client, 5, `+RequestMethod:"AdminSv1.SetAttributeProfile"`)
+	anzStringQuery(t, client, 1, `+RequestMethod:"AdminSv1.GetAttributeProfiles"`)
+	anzStringQuery(t, client, 3, `+RequestMethod:"AttributeSv1.ProcessEvent"`)
+	anzStringQuery(t, client, 2, `+RequestMethod:"CoreSv1.Status"`)
+	anzStringQuery(t, client, 5, `+RequestMethod:"CacheSv1.ReloadCache"`)
+	anzStringQuery(t, client, 11, `-RequestMethod:"CacheSv1.ReloadCache"`)
+	anzStringQuery(t, client, 6, `+RequestMethod:"/AdminSv1.*/"`) // regex
+
+	// Query results that happen before a given time.
+	headerFltr := `+RequestStartTime:<"%s"`
+	headerFltr = fmt.Sprintf(headerFltr, timeVar)
+	anzStringQuery(t, client, 1, headerFltr)
+
+	// ContentFilters only queries.
+	anzStringQuery(t, client, 2, `+RequestID:<=2 -RequestMethod:"CacheSv1.ReloadCache"`)
+	anzStringQuery(t, client, 5, "", "*string:~*hdr.RequestMethod:AdminSv1.SetAttributeProfile")
+	anzStringQuery(t, client, 1, "", "*string:~*hdr.RequestMethod:AdminSv1.GetAttributeProfiles")
+	anzStringQuery(t, client, 3, "", "*string:~*hdr.RequestMethod:AttributeSv1.ProcessEvent")
+	anzStringQuery(t, client, 2, "", "*string:~*hdr.RequestMethod:CoreSv1.Status")
+	anzStringQuery(t, client, 5, "", "*string:~*hdr.RequestMethod:CacheSv1.ReloadCache")
+	anzStringQuery(t, client, 6, "", "*prefix:~*hdr.RequestMethod:AdminSv1.")
+
+	// Query results that happen before a given time
+	contentFltr := "*lt:~*hdr.RequestStartTime:%s"
+	contentFltr = fmt.Sprintf(contentFltr, timeVar)
+	anzStringQuery(t, client, 1, "", contentFltr)
+
+	anzStringQuery(t, client, 7, "", "*lte:~*hdr.RequestID:2")
+	anzStringQuery(t, client, -1, "", "*gt:~*hdr.RequestDuration:1ms")
+	anzStringQuery(t, client, 1, `+RequestMethod:"AttributeSv1.ProcessEvent"`, "*notstring:~*rep.Event.Cost:0")
+	anzStringQuery(t, client, 1, `+RequestMethod:"CoreSv1.Status"`, "*gt:~*rep.goroutines:55")
 }
 
-func testAnzDocSetAttributeProfiles(t *testing.T) {
+// anzStringQuery sends an AnalyzerSv1.StringQuery request. First filter represents
+// the HeaderFilters parameter, while the rest are the ContentFilters. Checks if the
+// result contains the expected amount of matches (wantRC).
+func anzStringQuery(t *testing.T, client *birpc.Client, wantRC int, filters ...string) {
+	t.Helper()
+	var headerFilters string
+	var contentFilters []string
+	if len(filters) > 0 {
+		headerFilters = filters[0]
+		contentFilters = filters[1:]
+	}
+	var result []map[string]any
+	if err := client.Call(context.Background(), utils.AnalyzerSv1StringQuery,
+		&analyzers.QueryArgs{
+			HeaderFilters:  headerFilters,
+			ContentFilters: contentFilters,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if len(result) != wantRC && wantRC != -1 {
+		t.Errorf("AnalyzerSv1.StringQuery: len(result)=%d, want %d\n%s", len(result), wantRC, utils.ToJSON(result))
+	} else if wantRC == -1 && len(result) < 1 {
+		t.Errorf("AnalyzerSv1.StringQuery: len(result)=%d, want >0\n%s", len(result), utils.ToJSON(result))
+	}
+
+}
+
+func setAttrProfiles(t *testing.T, client *birpc.Client) {
 	attributeProfiles := []*engine.APIAttributeProfileWithAPIOpts{
 		{
 			APIAttributeProfile: &engine.APIAttributeProfile{
@@ -238,19 +254,16 @@ func testAnzDocSetAttributeProfiles(t *testing.T) {
 			},
 		},
 	}
-
 	var reply string
 	for _, attributeProfile := range attributeProfiles {
-		if err := anzDocRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		if err := client.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
 			attributeProfile, &reply); err != nil {
-			t.Error(err)
-		} else if reply != utils.OK {
 			t.Error(err)
 		}
 	}
 }
 
-func testAnzDocCheckAttributeProfiles(t *testing.T) {
+func getAttrProfiles(t *testing.T, client *birpc.Client) {
 	expectedAttributeProfiles := []*engine.APIAttributeProfile{
 		{
 			ID:        "ATTR_1001",
@@ -344,7 +357,7 @@ func testAnzDocCheckAttributeProfiles(t *testing.T) {
 		},
 	}
 	var replyAttributeProfiles []*engine.APIAttributeProfile
-	if err := anzDocRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
+	if err := client.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
 		}, &replyAttributeProfiles); err != nil {
@@ -360,7 +373,7 @@ func testAnzDocCheckAttributeProfiles(t *testing.T) {
 	}
 }
 
-func testAnzDocAttributeSProcessEvent(t *testing.T) {
+func attrProcessEvents(t *testing.T, client *birpc.Client) {
 	eventCall1001to1002 := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "call1001to1002",
@@ -421,7 +434,7 @@ func testAnzDocAttributeSProcessEvent(t *testing.T) {
 	}
 	expectedReply := `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_1001","Fields":["*req.RequestType"]}],"Tenant":"cgrates.org","ID":"call1001to1002","Event":{"Account":"1001","AnswerTime":"2013-11-07T08:42:28Z","Category":"call","Cost":1.01,"Destination":"1002","OriginHost":"192.168.1.1","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":10000000000},"APIOpts":{}}`
 	var rplyEv engine.AttrSProcessEventReply
-	if err := anzDocRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+	if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		eventCall1001to1002, &rplyEv); err != nil {
 		t.Error(err)
 	} else if jsonReply := utils.ToJSON(rplyEv); jsonReply != expectedReply {
@@ -429,7 +442,7 @@ func testAnzDocAttributeSProcessEvent(t *testing.T) {
 			expectedReply, jsonReply)
 	}
 	expectedReply = `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_PRF_11","Fields":["*req.Cost"]},{"MatchedProfileID":"cgrates.org:ATTR_1101","Fields":["*req.RequestType"]}],"Tenant":"cgrates.org","ID":"call1011to1002","Event":{"Account":"1101","AnswerTime":"2013-11-07T08:42:35Z","Category":"call","Cost":"0","Destination":"1002","OriginHost":"192.168.1.1","OriginID":"ghijkl","RequestType":"*prepaid","RunID":"*default","SetupTime":"2013-11-07T08:42:28Z","Subject":"1101","Tenant":"cgrates.org","ToR":"*voice","Usage":15000000000},"APIOpts":{}}`
-	if err := anzDocRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+	if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		eventCall1101to1002, &rplyEv); err != nil {
 		t.Error(err)
 	} else if jsonReply := utils.ToJSON(rplyEv); jsonReply != expectedReply {
@@ -437,229 +450,11 @@ func testAnzDocAttributeSProcessEvent(t *testing.T) {
 			expectedReply, jsonReply)
 	}
 	expectedReply = `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_PRF_11","Fields":["*req.Cost"]},{"MatchedProfileID":"cgrates.org:ATTR_1102","Fields":["*req.RequestType"]}],"Tenant":"cgrates.org","ID":"call1102to1001","Event":{"Account":"1102","AnswerTime":"2013-11-07T08:42:42Z","Category":"call","Cost":"0","Destination":"1001","OriginHost":"192.168.1.1","OriginID":"uvwxyz","RequestType":"*pseudoprepaid","RunID":"*default","SetupTime":"2013-11-07T08:42:35Z","Subject":"1102","Tenant":"cgrates.org","ToR":"*voice","Usage":20000000000},"APIOpts":{}}`
-	if err := anzDocRPC.Call(context.Background(), utils.AttributeSv1ProcessEvent,
+	if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		eventCall1102to1001, &rplyEv); err != nil {
 		t.Error(err)
 	} else if jsonReply := utils.ToJSON(rplyEv); jsonReply != expectedReply {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			expectedReply, jsonReply)
-	}
-
-}
-
-func testAnzDocQueryWithHeaderFilters(t *testing.T) {
-	time.Sleep(500 * time.Millisecond)
-	var result []map[string]any
-
-	// Query results for the AdminSv1.SetAttributeProfile request method using HeaderFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestMethod:"AdminSv1.SetAttributeProfile"`,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 5 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for the AdminSv1.GetAttributeProfiles request method using HeaderFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestMethod:"AdminSv1.GetAttributeProfiles"`,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 1 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for the AttributeSv1.ProcessEvent request method using HeaderFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestMethod:"AttributeSv1.ProcessEvent"`,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 3 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for the CoreSv1.Status request method using HeaderFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestMethod:"CoreSv1.Status"`,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 2 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for the CacheSv1.ReloadCache request method using HeaderFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestMethod:"CacheSv1.ReloadCache"`,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 5 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for all the request methods except CacheSv1.ReloadCache using HeaderFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `-RequestMethod:"CacheSv1.ReloadCache"`,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 11 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query all results for the requests made to the AdminS service using regular expressions
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestMethod:"/AdminSv1.*/"`,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 6 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results that happen before a given time
-	headerFltr := `+RequestStartTime:<"%s"`
-	headerFltr = fmt.Sprintf(headerFltr, timeVar)
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  headerFltr,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 1 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for API calls with RequestID smaller or equal to 2
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestID:<=2 -RequestMethod:"CacheSv1.ReloadCache"`,
-		ContentFilters: []string{},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 2 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-}
-
-func testAnzDocQueryWithContentFiltersFilters(t *testing.T) {
-	var result []map[string]any
-	// Query results for the AdminSv1.SetAttributeProfile request method using ContentFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{"*string:~*hdr.RequestMethod:AdminSv1.SetAttributeProfile"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 5 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for the AdminSv1.GetAttributeProfile request method using ContentFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{"*string:~*hdr.RequestMethod:AdminSv1.GetAttributeProfiles"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 1 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for the AttributeSv1.ProcessEvent request method using ContentFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{"*string:~*hdr.RequestMethod:AttributeSv1.ProcessEvent"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 3 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for the CoreSv1.Status request method using ContentFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{"*string:~*hdr.RequestMethod:CoreSv1.Status"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 2 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for the CacheSv1.ReloadCache request method using ContentFilters
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{"*string:~*hdr.RequestMethod:CacheSv1.ReloadCache"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 5 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query all results for the requests made to the AdminS service using prefix filter
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{"*prefix:~*hdr.RequestMethod:AdminSv1."},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 6 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results that happen before a given time
-	contentFltr := "*lt:~*hdr.RequestStartTime:%s"
-	contentFltr = fmt.Sprintf(contentFltr, timeVar)
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{contentFltr},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 1 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for API calls with RequestID smaller or equal to 2
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{"*lte:~*hdr.RequestID:2"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 7 {
-		fmt.Println(len(result))
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Query results for API calls with with an execution duration longer than 30ms
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  "",
-		ContentFilters: []string{"*gt:~*hdr.RequestDuration:10ms"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) == 0 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-}
-
-func testAnzDocQuery(t *testing.T) {
-	var result []map[string]any
-
-	// Get results for AttributeSv1.ProcessEvent request replies whose events have a non-null cost
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestMethod:"AttributeSv1.ProcessEvent"`,
-		ContentFilters: []string{"*notstring:~*rep.Event.Cost:0"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 1 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
-	}
-
-	// Get results for CoreSv1.Status request replies that state a higher number of goroutines than 46
-	if err := anzDocRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, &analyzers.QueryArgs{
-		HeaderFilters:  `+RequestMethod:"CoreSv1.Status"`,
-		ContentFilters: []string{"*gt:~*rep.goroutines:46"},
-	}, &result); err != nil {
-		t.Error(err)
-	} else if len(result) != 1 {
-		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 }
