@@ -32,12 +32,10 @@ import (
 
 // NewRegistrarCService returns the Dispatcher Service
 func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RegistrarCService{
 		cfg:        cfg,
 		connMgr:    connMgr,
-		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -53,7 +51,6 @@ type RegistrarCService struct {
 	rldChan  chan struct{}
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

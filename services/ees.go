@@ -35,7 +35,7 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
@@ -43,7 +43,6 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 		connMgr:     connMgr,
 		clSChan:     clSChan,
 		anzChan:     anzChan,
-		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -62,7 +61,6 @@ type EventExporterService struct {
 
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

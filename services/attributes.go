@@ -37,7 +37,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService, dspS *DispatcherService,
-	srvDep map[string]*sync.WaitGroup, sIndxr *servmanager.ServiceIndexer) servmanager.Service {
+	sIndxr *servmanager.ServiceIndexer) servmanager.Service {
 	return &AttributeService{
 		cfg:            cfg,
 		dm:             dm,
@@ -45,7 +45,6 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan:    filterSChan,
 		clSChan:        clSChan,
 		anzChan:        anzChan,
-		srvDep:         srvDep,
 		dspS:           dspS,
 		stateDeps:      NewStateDependencies([]string{utils.StateServiceUP}),
 		serviceIndexer: sIndxr,
@@ -67,8 +66,7 @@ type AttributeService struct {
 	cl    *commonlisteners.CommonListenerS
 	rpc   *apis.AttributeSv1 // useful on restart
 
-	cfg    *config.CGRConfig
-	srvDep map[string]*sync.WaitGroup
+	cfg *config.CGRConfig
 
 	intRPCconn     birpc.ClientConnector       // expose API methods over internal connection
 	serviceIndexer *servmanager.ServiceIndexer // access directly services from here

@@ -37,7 +37,6 @@ import (
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *CoreService {
 	return &CoreService{
 		shdWg:      shdWg,
@@ -46,7 +45,6 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *comm
 		fileCPU:    fileCPU,
 		clSChan:    clSChan,
 		anzChan:    anzChan,
-		srvDep:     srvDep,
 		csCh:       make(chan *cores.CoreS, 1),
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
@@ -69,7 +67,6 @@ type CoreService struct {
 	stopChan chan struct{}
 	shdWg    *sync.WaitGroup
 	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

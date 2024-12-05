@@ -36,7 +36,6 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 	dm *DataDBService, storDB *StorDBService,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AdminSv1Service{
 		cfg:         cfg,
@@ -46,7 +45,6 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anzChan:     anzChan,
-		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -68,7 +66,6 @@ type AdminSv1Service struct {
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // RPC connector with internal APIs
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

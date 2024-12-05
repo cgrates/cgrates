@@ -36,7 +36,7 @@ import (
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ChargerService{
 		cfg:         cfg,
@@ -46,7 +46,6 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
 		anzChan:     anzChan,
-		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -67,7 +66,6 @@ type ChargerService struct {
 
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

@@ -34,11 +34,10 @@ import (
 
 // NewTPeService is the constructor for the TpeService
 func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataDBService,
-	clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup,
+	clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TPeService{
 		cfg:        cfg,
-		srvDep:     srvDep,
 		dm:         dm,
 		connMgr:    connMgr,
 		clSChan:    clSChan,
@@ -61,7 +60,6 @@ type TPeService struct {
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

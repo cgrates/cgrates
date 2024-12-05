@@ -33,13 +33,12 @@ import (
 
 // NewCommonListenerService instantiates a new CommonListenerService.
 func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps,
-	clSChan chan *commonlisteners.CommonListenerS, srvDep map[string]*sync.WaitGroup,
+	clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) *CommonListenerService {
 	return &CommonListenerService{
 		cfg:        cfg,
 		caps:       caps,
 		clSChan:    clSChan,
-		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -54,7 +53,6 @@ type CommonListenerService struct {
 	clSChan chan *commonlisteners.CommonListenerS
 	caps    *engine.Caps
 	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

@@ -39,7 +39,7 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ActionService{
 		connMgr:     connMgr,
@@ -49,7 +49,6 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		anzChan:     anzChan,
-		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -74,7 +73,6 @@ type ActionService struct {
 
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

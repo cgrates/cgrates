@@ -35,14 +35,12 @@ import (
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -63,7 +61,6 @@ type HTTPAgent struct {
 
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

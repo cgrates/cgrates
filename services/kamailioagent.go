@@ -36,12 +36,10 @@ import (
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &KamailioAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
-		srvDep:     srvDep,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -54,7 +52,6 @@ type KamailioAgent struct {
 
 	kam     *agents.KamailioAgent
 	connMgr *engine.ConnManager
-	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

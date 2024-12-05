@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
@@ -36,11 +34,9 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 	clSChan chan *commonlisteners.CommonListenerS,
 	anzChan chan *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *CacheService {
 	return &CacheService{
 		cfg:        cfg,
-		srvDep:     srvDep,
 		anzChan:    anzChan,
 		cores:      cores,
 		clSChan:    clSChan,
@@ -64,7 +60,6 @@ type CacheService struct {
 	cacheCh chan *engine.CacheS
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

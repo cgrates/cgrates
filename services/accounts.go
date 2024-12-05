@@ -38,7 +38,7 @@ import (
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AccountService{
 		cfg:         cfg,
@@ -48,7 +48,6 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:     connMgr,
 		clSChan:     clSChan,
 		anzChan:     anzChan,
-		srvDep:      srvDep,
 		rldChan:     make(chan struct{}, 1),
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -72,7 +71,6 @@ type AccountService struct {
 	stopChan chan struct{}
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
-	srvDep   map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here

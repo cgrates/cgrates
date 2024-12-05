@@ -32,12 +32,10 @@ import (
 
 // NewStorDBService returns the StorDB Service
 func NewStorDBService(cfg *config.CGRConfig, setVersions bool,
-	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *StorDBService {
 	return &StorDBService{
 		cfg:         cfg,
 		setVersions: setVersions,
-		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -52,8 +50,6 @@ type StorDBService struct {
 	db          engine.StorDB
 	syncChans   []chan engine.StorDB
 	setVersions bool
-
-	srvDep map[string]*sync.WaitGroup
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
