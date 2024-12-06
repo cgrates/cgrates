@@ -35,7 +35,7 @@ import (
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) *LoaderService {
 	return &LoaderService{
 		cfg:         cfg,
@@ -44,7 +44,6 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
 		stopChan:    make(chan struct{}),
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -56,7 +55,6 @@ type LoaderService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	ldrs *loaders.LoaderS
@@ -87,8 +85,10 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if datadb, err = ldrs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-ldrs.anzChan
-	ldrs.anzChan <- anz
+	anz := ldrs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	ldrs.Lock()
 	defer ldrs.Unlock()

@@ -135,7 +135,6 @@ func runCGREngine(fs []string) (err error) {
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian), utils.GuardianSv1, iGuardianSCh)
 
 	clsCh := make(chan *commonlisteners.CommonListenerS, 1)
-	anzCh := make(chan *services.AnalyzerService, 1)
 	iFilterSCh := make(chan *engine.FilterS, 1)
 
 	// ServiceIndexer will share service references to all services
@@ -144,23 +143,23 @@ func runCGREngine(fs []string) (err error) {
 	dmS := services.NewDataDBService(cfg, connMgr, *flags.SetVersions, srvDep, srvIdxr)
 	sdbS := services.NewStorDBService(cfg, *flags.SetVersions, srvIdxr)
 	cls := services.NewCommonListenerService(cfg, caps, clsCh, srvIdxr)
-	anzS := services.NewAnalyzerService(cfg, clsCh, iFilterSCh, anzCh, srvIdxr)
-	coreS := services.NewCoreService(cfg, caps, clsCh, anzCh, cpuPrfF, shdWg, srvIdxr)
-	cacheS := services.NewCacheService(cfg, dmS, connMgr, clsCh, anzCh, coreS, srvIdxr)
-	dspS := services.NewDispatcherService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, anzCh, srvIdxr)
-	ldrs := services.NewLoaderService(cfg, dmS, iFilterSCh, clsCh, connMgr, anzCh, srvIdxr)
+	anzS := services.NewAnalyzerService(cfg, clsCh, iFilterSCh, srvIdxr)
+	coreS := services.NewCoreService(cfg, caps, clsCh, cpuPrfF, shdWg, srvIdxr)
+	cacheS := services.NewCacheService(cfg, dmS, connMgr, clsCh, coreS, srvIdxr)
+	dspS := services.NewDispatcherService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, srvIdxr)
+	ldrs := services.NewLoaderService(cfg, dmS, iFilterSCh, clsCh, connMgr, srvIdxr)
 	efs := services.NewExportFailoverService(cfg, connMgr, clsCh, srvIdxr)
-	adminS := services.NewAdminSv1Service(cfg, dmS, sdbS, iFilterSCh, clsCh, connMgr, anzCh, srvIdxr)
-	sessionS := services.NewSessionService(cfg, dmS, iFilterSCh, clsCh, connMgr, anzCh, srvIdxr)
-	attrS := services.NewAttributeService(cfg, dmS, cacheS, iFilterSCh, clsCh, anzCh, dspS, srvIdxr)
-	chrgS := services.NewChargerService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, anzCh, srvIdxr)
-	routeS := services.NewRouteService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, anzCh, srvIdxr)
-	resourceS := services.NewResourceService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, anzCh, srvDep, srvIdxr)
-	trendS := services.NewTrendService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, anzCh, srvDep, srvIdxr)
-	rankingS := services.NewRankingService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, anzCh, srvDep, srvIdxr)
-	thS := services.NewThresholdService(cfg, dmS, cacheS, iFilterSCh, connMgr, clsCh, anzCh, srvDep, srvIdxr)
-	stS := services.NewStatService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, anzCh, srvDep, srvIdxr)
-	erS := services.NewEventReaderService(cfg, iFilterSCh, connMgr, clsCh, anzCh, srvIdxr)
+	adminS := services.NewAdminSv1Service(cfg, dmS, sdbS, iFilterSCh, clsCh, connMgr, srvIdxr)
+	sessionS := services.NewSessionService(cfg, dmS, iFilterSCh, clsCh, connMgr, srvIdxr)
+	attrS := services.NewAttributeService(cfg, dmS, cacheS, iFilterSCh, clsCh, dspS, srvIdxr)
+	chrgS := services.NewChargerService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, srvIdxr)
+	routeS := services.NewRouteService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, srvIdxr)
+	resourceS := services.NewResourceService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, srvDep, srvIdxr)
+	trendS := services.NewTrendService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, srvDep, srvIdxr)
+	rankingS := services.NewRankingService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, srvDep, srvIdxr)
+	thS := services.NewThresholdService(cfg, dmS, cacheS, iFilterSCh, connMgr, clsCh, srvDep, srvIdxr)
+	stS := services.NewStatService(cfg, dmS, cacheS, iFilterSCh, clsCh, connMgr, srvDep, srvIdxr)
+	erS := services.NewEventReaderService(cfg, iFilterSCh, connMgr, clsCh, srvIdxr)
 	dnsAgent := services.NewDNSAgent(cfg, iFilterSCh, connMgr, srvIdxr)
 	fsAgent := services.NewFreeswitchAgent(cfg, connMgr, srvIdxr)
 	kamAgent := services.NewKamailioAgent(cfg, connMgr, srvIdxr)
@@ -170,12 +169,12 @@ func runCGREngine(fs []string) (err error) {
 	diamAgent := services.NewDiameterAgent(cfg, iFilterSCh, connMgr, caps, srvIdxr)
 	httpAgent := services.NewHTTPAgent(cfg, iFilterSCh, clsCh, connMgr, srvIdxr)
 	sipAgent := services.NewSIPAgent(cfg, iFilterSCh, connMgr, srvIdxr)
-	eeS := services.NewEventExporterService(cfg, iFilterSCh, connMgr, clsCh, anzCh, srvIdxr)
-	cdrS := services.NewCDRServer(cfg, dmS, sdbS, iFilterSCh, clsCh, connMgr, anzCh, srvIdxr)
+	eeS := services.NewEventExporterService(cfg, iFilterSCh, connMgr, clsCh, srvIdxr)
+	cdrS := services.NewCDRServer(cfg, dmS, sdbS, iFilterSCh, clsCh, connMgr, srvIdxr)
 	registrarcS := services.NewRegistrarCService(cfg, connMgr, srvIdxr)
-	rateS := services.NewRateService(cfg, cacheS, iFilterSCh, dmS, clsCh, anzCh, srvIdxr)
-	actionS := services.NewActionService(cfg, dmS, cacheS, iFilterSCh, connMgr, clsCh, anzCh, srvIdxr)
-	accS := services.NewAccountService(cfg, dmS, cacheS, iFilterSCh, connMgr, clsCh, anzCh, srvIdxr)
+	rateS := services.NewRateService(cfg, cacheS, iFilterSCh, dmS, clsCh, srvIdxr)
+	actionS := services.NewActionService(cfg, dmS, cacheS, iFilterSCh, connMgr, clsCh, srvIdxr)
+	accS := services.NewAccountService(cfg, dmS, cacheS, iFilterSCh, connMgr, clsCh, srvIdxr)
 	tpeS := services.NewTPeService(cfg, connMgr, dmS, clsCh, srvIdxr)
 
 	srvManager := servmanager.NewServiceManager(shdWg, connMgr, cfg, srvIdxr, []servmanager.Service{
@@ -294,7 +293,7 @@ func runCGREngine(fs []string) (err error) {
 			return
 		}
 	} else {
-		anzCh <- anzS
+		close(anzS.StateChan(utils.StateServiceUP))
 	}
 
 	shdWg.Add(1)
@@ -339,7 +338,6 @@ func runCGREngine(fs []string) (err error) {
 	}
 
 	<-ctx.Done()
-	//<-stopChan
 	return
 }
 
@@ -464,7 +462,7 @@ func handleSignals(ctx *context.Context, shutdown context.CancelFunc,
 			shdWg.Done()
 			return
 		case <-reloadSignal:
-			//  do it in it's own goroutine in order to not block the signal handler with the reload functionality
+			//  do it in its own goroutine in order to not block the signal handler with the reload functionality
 			go func() {
 				var reply string
 				if err := cfg.V1ReloadConfig(ctx,
