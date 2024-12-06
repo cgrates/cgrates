@@ -178,6 +178,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 	expStats[utils.CacheRankingProfiles].Items = 1
+	expStats[utils.CacheRankings].Items = 1
 	expStats[utils.CacheTrendProfiles].Items = 1
 	expStats[utils.CacheTrends].Items = 1
 
@@ -249,6 +250,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheReverseFilterIndexes].Items = 10
 	expStats[utils.CacheReverseFilterIndexes].Groups = 7
 	expStats[utils.CacheRankingProfiles].Items = 1
+	expStats[utils.CacheRankings].Items = 1
 	expStats[utils.CacheTrends].Items = 1
 	expStats[utils.CacheTrendProfiles].Items = 1
 

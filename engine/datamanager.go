@@ -1302,7 +1302,6 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id string, withIndex bool)
 func (dm *DataManager) GetTrend(tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (tr *Trend, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
-
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheTrends, tntID); ok {
 			if x == nil {
@@ -1726,10 +1725,10 @@ func (dm *DataManager) GetRanking(tenant, id string, cacheRead, cacheWrite bool,
 			}
 			return nil, err
 		}
-		if cacheWrite {
-			if errCh := Cache.Set(utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
-				return nil, errCh
-			}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
 		}
 	}
 	return
