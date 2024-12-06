@@ -35,7 +35,7 @@ import (
 func NewAdminSv1Service(cfg *config.CGRConfig,
 	dm *DataDBService, storDB *StorDBService,
 	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AdminSv1Service{
 		cfg:         cfg,
@@ -44,7 +44,6 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -57,7 +56,6 @@ type AdminSv1Service struct {
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	storDB      *StorDBService
-	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	api *apis.AdminSv1
@@ -89,8 +87,10 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	if datadb, err = apiService.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-apiService.anzChan
-	apiService.anzChan <- anz
+	anz := apiService.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	storDBChan := make(chan engine.StorDB, 1)
 	apiService.stopChan = make(chan struct{})

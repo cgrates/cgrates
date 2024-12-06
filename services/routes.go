@@ -36,7 +36,7 @@ import (
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RouteService{
 		cfg:         cfg,
@@ -45,7 +45,6 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -57,7 +56,6 @@ type RouteService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -93,8 +91,10 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if datadb, err = routeS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-routeS.anzChan
-	routeS.anzChan <- anz
+	anz := routeS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), routeS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RouteS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	routeS.Lock()
 	defer routeS.Unlock()

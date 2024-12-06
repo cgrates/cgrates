@@ -35,14 +35,12 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		clSChan:     clSChan,
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -53,7 +51,6 @@ type EventExporterService struct {
 	mu sync.RWMutex
 
 	clSChan     chan *commonlisteners.CommonListenerS
-	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	eeS *ees.EeS
@@ -115,8 +112,10 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	if err != nil {
 		return err
 	}
-	anz := <-es.anzChan
-	es.anzChan <- anz
+	anz := es.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), es.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.EEs, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EEs))
 

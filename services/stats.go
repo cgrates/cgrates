@@ -35,7 +35,7 @@ import (
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &StatService{
@@ -45,7 +45,6 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -58,7 +57,6 @@ type StatService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -97,8 +95,10 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	if datadb, err = sts.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-sts.anzChan
-	sts.anzChan <- anz
+	anz := sts.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.StatS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	sts.Lock()
 	defer sts.Unlock()

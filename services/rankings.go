@@ -36,7 +36,7 @@ import (
 func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RankingService{
@@ -46,7 +46,6 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -58,7 +57,6 @@ type RankingService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -97,8 +95,10 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if filterS, err = waitForFilterS(ctx, ran.filterSChan); err != nil {
 		return
 	}
-	anz := <-ran.anzChan
-	ran.anzChan <- anz
+	anz := ran.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	ran.Lock()
 	defer ran.Unlock()

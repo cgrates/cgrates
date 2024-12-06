@@ -38,7 +38,6 @@ func NewEventReaderService(
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventReaderService{
 		rldChan:     make(chan struct{}, 1),
@@ -46,7 +45,6 @@ func NewEventReaderService(
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		clSChan:     clSChan,
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -57,7 +55,6 @@ type EventReaderService struct {
 	sync.RWMutex
 
 	clSChan     chan *commonlisteners.CommonListenerS
-	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	ers *ers.ERService
@@ -85,8 +82,10 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	if filterS, err = waitForFilterS(ctx, erS.filterSChan); err != nil {
 		return
 	}
-	anz := <-erS.anzChan
-	erS.anzChan <- anz
+	anz := erS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), erS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ERs, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	erS.Lock()
 	defer erS.Unlock()

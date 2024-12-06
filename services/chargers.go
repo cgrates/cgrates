@@ -36,7 +36,6 @@ import (
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
-	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ChargerService{
 		cfg:         cfg,
@@ -45,7 +44,6 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -58,7 +56,6 @@ type ChargerService struct {
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	cacheS      *CacheService
-	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	chrS *engine.ChargerS
@@ -93,8 +90,10 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if datadb, err = chrS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-chrS.anzChan
-	chrS.anzChan <- anz
+	anz := chrS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	chrS.Lock()
 	defer chrS.Unlock()

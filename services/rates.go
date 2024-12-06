@@ -35,7 +35,6 @@ import (
 func NewRateService(cfg *config.CGRConfig,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	dmS *DataDBService, clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
@@ -44,7 +43,6 @@ func NewRateService(cfg *config.CGRConfig,
 		dmS:         dmS,
 		clSChan:     clSChan,
 		rldChan:     make(chan struct{}),
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -55,7 +53,6 @@ type RateService struct {
 	sync.RWMutex
 
 	clSChan     chan *commonlisteners.CommonListenerS
-	anzChan     chan *AnalyzerService
 	dmS         *DataDBService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
@@ -128,8 +125,10 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	if datadb, err = rs.dmS.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-rs.anzChan
-	rs.anzChan <- anz
+	anz := rs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RateS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	rs.Lock()
 	rs.rateS = rates.NewRateS(rs.cfg, filterS, datadb)

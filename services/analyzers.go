@@ -35,13 +35,11 @@ import (
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.CommonListenerS,
 	filterSChan chan *engine.FilterS,
-	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
 	return &AnalyzerService{
 		cfg:         cfg,
 		clSChan:     clSChan,
 		filterSChan: filterSChan,
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -53,7 +51,6 @@ type AnalyzerService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
-	anzChan     chan *AnalyzerService
 
 	anz *analyzers.AnalyzerS
 	cl  *commonlisteners.CommonListenerS
@@ -82,7 +79,6 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}
-	anz.anzChan <- anz
 	anzCtx, cancel := context.WithCancel(ctx)
 	anz.cancelFunc = cancel
 	go func(a *analyzers.AnalyzerS) {
@@ -129,12 +125,6 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.Lock()
 	anz.cancelFunc()
 	anz.cl.SetAnalyzer(nil)
-
-	// Close the channel before making it nil to prevent stale goroutines
-	// in case there are other services waiting on AnalyzerS.
-	close(anz.anzChan)
-
-	anz.anzChan = nil
 	anz.anz.Shutdown()
 	anz.anz = nil
 	anz.Unlock()

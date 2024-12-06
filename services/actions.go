@@ -39,7 +39,6 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ActionService{
 		connMgr:     connMgr,
@@ -48,7 +47,6 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
-		anzChan:     anzChan,
 		rldChan:     make(chan struct{}, 1),
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -61,7 +59,6 @@ type ActionService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -100,8 +97,10 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if datadb, err = acts.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-acts.anzChan
-	acts.anzChan <- anz
+	anz := acts.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	acts.Lock()
 	defer acts.Unlock()

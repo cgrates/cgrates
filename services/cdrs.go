@@ -37,7 +37,7 @@ import (
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &CDRService{
 		cfg:         cfg,
@@ -46,7 +46,6 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -59,7 +58,6 @@ type CDRService struct {
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	storDB      *StorDBService
-	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	cdrS *cdrs.CDRServer
@@ -92,8 +90,10 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	if datadb, err = cs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-cs.anzChan
-	cs.anzChan <- anz
+	anz := cs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	storDBChan := make(chan engine.StorDB, 1)
 	cs.stopChan = make(chan struct{})

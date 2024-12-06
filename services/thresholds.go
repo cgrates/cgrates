@@ -36,7 +36,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService, srvDep map[string]*sync.WaitGroup,
+	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ThresholdService{
 		cfg:         cfg,
@@ -44,7 +44,6 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
-		anzChan:     anzChan,
 		srvDep:      srvDep,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
@@ -58,7 +57,6 @@ type ThresholdService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -97,8 +95,10 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	if datadb, err = thrs.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-thrs.anzChan
-	thrs.anzChan <- anz
+	anz := thrs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	thrs.Lock()
 	defer thrs.Unlock()

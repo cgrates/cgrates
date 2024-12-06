@@ -32,12 +32,10 @@ import (
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService, // dspS *DispatcherService,
 	cores *CoreService,
 	srvIndexer *servmanager.ServiceIndexer) *CacheService {
 	return &CacheService{
 		cfg:        cfg,
-		anzChan:    anzChan,
 		cores:      cores,
 		clSChan:    clSChan,
 		dm:         dm,
@@ -50,7 +48,6 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 
 // CacheService implements Agent interface
 type CacheService struct {
-	anzChan chan *AnalyzerService
 	cores   *CoreService
 	clSChan chan *commonlisteners.CommonListenerS
 	dm      *DataDBService
@@ -75,8 +72,10 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 		return
 	}
 
-	anz := <-cS.anzChan
-	cS.anzChan <- anz
+	anz := cS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 	var cs *cores.CoreS
 	if cs, err = cS.cores.WaitForCoreS(ctx); err != nil {
 		return

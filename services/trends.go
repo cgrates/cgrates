@@ -35,7 +35,7 @@ import (
 func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TrendService{
@@ -44,7 +44,6 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvDep:      srvDep,
 		filterSChan: filterSChan,
 		srvIndexer:  srvIndexer,
@@ -57,7 +56,6 @@ type TrendService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -96,8 +94,10 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	if filterS, err = waitForFilterS(ctx, trs.filterSChan); err != nil {
 		return
 	}
-	anz := <-trs.anzChan
-	trs.anzChan <- anz
+	anz := trs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	trs.Lock()
 	defer trs.Unlock()

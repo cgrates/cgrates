@@ -36,7 +36,7 @@ import (
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService, dspS *DispatcherService,
+	dspS *DispatcherService,
 	sIndxr *servmanager.ServiceIndexer) servmanager.Service {
 	return &AttributeService{
 		cfg:            cfg,
@@ -44,7 +44,6 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:         cacheS,
 		filterSChan:    filterSChan,
 		clSChan:        clSChan,
-		anzChan:        anzChan,
 		dspS:           dspS,
 		stateDeps:      NewStateDependencies([]string{utils.StateServiceUP}),
 		serviceIndexer: sIndxr,
@@ -57,7 +56,6 @@ type AttributeService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	dspS        *DispatcherService
 	filterSChan chan *engine.FilterS
@@ -98,8 +96,10 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	if datadb, err = attrS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-attrS.anzChan
-	attrS.anzChan <- anz
+	anz := attrS.serviceIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	attrS.Lock()
 	defer attrS.Unlock()
