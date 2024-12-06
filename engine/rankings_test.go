@@ -343,6 +343,7 @@ func TestRankingsStoreRankings(t *testing.T) {
 	if err := rkg.StartRankingS(); err != nil {
 		t.Fatalf("Unexpected error when starting rankings: %v", err)
 	}
+	t.Cleanup(func() { rkg.StopRankingS() })
 
 	time.Sleep(1200 * time.Millisecond)
 

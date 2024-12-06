@@ -1725,10 +1725,10 @@ func (dm *DataManager) GetRanking(tenant, id string, cacheRead, cacheWrite bool,
 			}
 			return nil, err
 		}
-		if cacheWrite {
-			if errCh := Cache.Set(utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
-				return nil, errCh
-			}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
 		}
 	}
 	return
