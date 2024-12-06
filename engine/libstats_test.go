@@ -1204,3 +1204,231 @@ func TestLibRoutesRouteIDs(t *testing.T) {
 		}
 	}
 }
+
+func TestSortLeastCost(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		ProfileID: "test-profile",
+		Sorting:   "LeastCost",
+		Routes: []*SortedRoute{
+			{
+				RouteID:        "route1",
+				SortingData:    map[string]any{"Cost": 10.0, "Weight": 3.0},
+				sortingDataF64: map[string]float64{"Cost": 10.0, "Weight": 3.0},
+			},
+			{
+				RouteID:        "route2",
+				SortingData:    map[string]any{"Cost": 5.0, "Weight": 2.0},
+				sortingDataF64: map[string]float64{"Cost": 5.0, "Weight": 2.0},
+			},
+		},
+	}
+	sRoutes.SortLeastCost()
+
+	expectedOrder := []string{"route2", "route1"}
+
+	for i, route := range sRoutes.Routes {
+		if route.RouteID != expectedOrder[i] {
+			t.Errorf("Expected route ID %s at position %d, but got %s", expectedOrder[i], i, route.RouteID)
+		}
+	}
+}
+
+func TestSortedRoutessAsNavigableMap(t *testing.T) {
+	route := &SortedRoute{
+		RouteID:         "route1",
+		RouteParameters: "param1",
+		SortingData: map[string]any{
+			"Cost": 10.5,
+			"PDD":  20.0,
+		},
+	}
+
+	navigableMap := route.AsNavigableMap()
+
+	if navigableMap.Type != utils.NMMapType {
+		t.Errorf("Expected Type %v, got %v", utils.NMMapType, navigableMap.Type)
+	}
+
+	routeIDNode, exists := navigableMap.Map[utils.RouteID]
+	if !exists {
+		t.Fatalf("RouteID node does not exist in navigable map")
+	}
+	if routeIDNode.Value == nil || routeIDNode.Value.Data != "route1" {
+		t.Errorf("Expected RouteID value 'route1', got %v", routeIDNode.Value)
+	}
+
+	routeParamsNode, exists := navigableMap.Map[utils.RouteParameters]
+	if !exists {
+		t.Fatalf("RouteParameters node does not exist in navigable map")
+	}
+	if routeParamsNode.Value == nil || routeParamsNode.Value.Data != "param1" {
+		t.Errorf("Expected RouteParameters value 'param1', got %v", routeParamsNode.Value)
+	}
+
+	sortingDataNode, exists := navigableMap.Map[utils.SortingData]
+	if !exists {
+		t.Fatalf("SortingData node does not exist in navigable map")
+	}
+	if sortingDataNode.Type != utils.NMMapType {
+		t.Errorf("Expected SortingData node Type %v, got %v", utils.NMMapType, sortingDataNode.Type)
+	}
+
+	expectedSortingData := map[string]any{
+		"Cost": 10.5,
+		"PDD":  20.0,
+	}
+
+	for key, expectedValue := range expectedSortingData {
+		actualNode, exists := sortingDataNode.Map[key]
+		if !exists {
+			t.Errorf("Expected SortingData key %s to exist", key)
+			continue
+		}
+		if actualNode.Value == nil || !reflect.DeepEqual(actualNode.Value.Data, expectedValue) {
+			t.Errorf("For key %s, expected value %v, got %v", key, expectedValue, actualNode.Value)
+		}
+	}
+}
+
+func TestRoutesSortedRoutesAsNavigableMap(t *testing.T) {
+	route1 := &SortedRoute{
+		RouteID:         "route1",
+		RouteParameters: "param1",
+		SortingData: map[string]any{
+			"Cost": 10.5,
+			"PDD":  20.0,
+		},
+	}
+
+	route2 := &SortedRoute{
+		RouteID:         "route2",
+		RouteParameters: "param2",
+		SortingData: map[string]any{
+			"Cost": 5.5,
+			"PDD":  15.0,
+		},
+	}
+
+	sRoutes := &SortedRoutes{
+		ProfileID: "profile1",
+		Sorting:   "leastCost",
+		Routes:    []*SortedRoute{route1, route2},
+	}
+
+	navigableMap := sRoutes.AsNavigableMap()
+
+	if navigableMap.Type != utils.NMMapType {
+		t.Errorf("Expected Type %v, got %v", utils.NMMapType, navigableMap.Type)
+	}
+
+	profileIDNode, exists := navigableMap.Map[utils.ProfileID]
+	if !exists {
+		t.Fatalf("ProfileID node does not exist in navigable map")
+	}
+	if profileIDNode.Value == nil || profileIDNode.Value.Data != "profile1" {
+		t.Errorf("Expected ProfileID value 'profile1', got %v", profileIDNode.Value)
+	}
+
+	sortingNode, exists := navigableMap.Map[utils.Sorting]
+	if !exists {
+		t.Fatalf("Sorting node does not exist in navigable map")
+	}
+	if sortingNode.Value == nil || sortingNode.Value.Data != "leastCost" {
+		t.Errorf("Expected Sorting value 'leastCost', got %v", sortingNode.Value)
+	}
+
+	capRoutesNode, exists := navigableMap.Map[utils.CapRoutes]
+	if !exists {
+		t.Fatalf("CapRoutes node does not exist in navigable map")
+	}
+	if capRoutesNode.Type != utils.NMSliceType {
+		t.Errorf("Expected CapRoutes node Type %v, got %v", utils.NMSliceType, capRoutesNode.Type)
+	}
+
+	if len(capRoutesNode.Slice) != 2 {
+		t.Errorf("Expected 2 routes in CapRoutes, got %d", len(capRoutesNode.Slice))
+	}
+
+	for i, routeNode := range capRoutesNode.Slice {
+		if routeNode.Type != utils.NMMapType {
+			t.Errorf("Expected route node Type %v, got %v", utils.NMMapType, routeNode.Type)
+		}
+		expectedRouteID := "route1"
+		expectedRouteParameters := "param1"
+		if i == 1 {
+			expectedRouteID = "route2"
+			expectedRouteParameters = "param2"
+		}
+		routeIDNode, exists := routeNode.Map[utils.RouteID]
+		if !exists || routeIDNode.Value == nil || routeIDNode.Value.Data != expectedRouteID {
+			t.Errorf("For route %d, expected RouteID value '%s', got %v", i+1, expectedRouteID, routeIDNode.Value)
+		}
+		routeParamsNode, exists := routeNode.Map[utils.RouteParameters]
+		if !exists || routeParamsNode.Value == nil || routeParamsNode.Value.Data != expectedRouteParameters {
+			t.Errorf("For route %d, expected RouteParameters value '%s', got %v", i+1, expectedRouteParameters, routeParamsNode.Value)
+		}
+	}
+}
+
+func TestRoutesSortedRoutesListAsNavigableMap(t *testing.T) {
+	route1 := &SortedRoute{
+		RouteID:         "route1",
+		RouteParameters: "param1",
+		SortingData: map[string]any{
+			"Cost": 10.5,
+			"PDD":  20.0,
+		},
+	}
+
+	route2 := &SortedRoute{
+		RouteID:         "route2",
+		RouteParameters: "param2",
+		SortingData: map[string]any{
+			"Cost": 5.5,
+			"PDD":  15.0,
+		},
+	}
+
+	sRoutesList := SortedRoutesList{
+		{ProfileID: "profile1", Sorting: "leastCost", Routes: []*SortedRoute{route1}},
+		{ProfileID: "profile2", Sorting: "maxCost", Routes: []*SortedRoute{route2}},
+	}
+
+	navigableMap := sRoutesList.AsNavigableMap()
+
+	if navigableMap.Type != utils.NMSliceType {
+		t.Errorf("Expected Type %v, got %v", utils.NMSliceType, navigableMap.Type)
+	}
+
+	if len(navigableMap.Slice) != 2 {
+		t.Errorf("Expected slice length 2, got %d", len(navigableMap.Slice))
+	}
+
+	firstRouteNode := navigableMap.Slice[0]
+	if firstRouteNode.Type != utils.NMMapType {
+		t.Errorf("Expected first route node Type %v, got %v", utils.NMMapType, firstRouteNode.Type)
+	}
+	profileIDNode, exists := firstRouteNode.Map[utils.ProfileID]
+	if !exists || profileIDNode.Value == nil || profileIDNode.Value.Data != "profile1" {
+		t.Errorf("Expected ProfileID value 'profile1', got %v", profileIDNode.Value)
+	}
+
+	secondRouteNode := navigableMap.Slice[1]
+	if secondRouteNode.Type != utils.NMMapType {
+		t.Errorf("Expected second route node Type %v, got %v", utils.NMMapType, secondRouteNode.Type)
+	}
+	profileIDNode2, exists := secondRouteNode.Map[utils.ProfileID]
+	if !exists || profileIDNode2.Value == nil || profileIDNode2.Value.Data != "profile2" {
+		t.Errorf("Expected ProfileID value 'profile2', got %v", profileIDNode2.Value)
+	}
+
+	for idx, routeNode := range navigableMap.Slice {
+		if routeNode.Type != utils.NMMapType {
+			t.Errorf("Expected route node %d Type %v, got %v", idx, utils.NMMapType, routeNode.Type)
+		}
+		profileIDNode, exists := routeNode.Map[utils.ProfileID]
+		if !exists || profileIDNode.Value == nil {
+			t.Errorf("Expected ProfileID value, got nil at route %d", idx)
+		}
+	}
+}
