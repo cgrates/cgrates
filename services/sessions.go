@@ -37,7 +37,7 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &SessionService{
 		cfg:         cfg,
@@ -45,7 +45,6 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -57,7 +56,6 @@ type SessionService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	sm *sessions.SessionS
@@ -89,8 +87,10 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	if datadb, err = smg.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-smg.anzChan
-	smg.anzChan <- anz
+	anz := smg.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	smg.Lock()
 	defer smg.Unlock()

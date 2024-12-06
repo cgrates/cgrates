@@ -38,7 +38,6 @@ import (
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AccountService{
 		cfg:         cfg,
@@ -47,7 +46,6 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		clSChan:     clSChan,
-		anzChan:     anzChan,
 		rldChan:     make(chan struct{}, 1),
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -61,7 +59,6 @@ type AccountService struct {
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	cacheS      *CacheService
-	anzChan     chan *AnalyzerService
 	filterSChan chan *engine.FilterS
 
 	acts *accounts.AccountS
@@ -97,8 +94,10 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if datadb, err = acts.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-acts.anzChan
-	acts.anzChan <- anz
+	anz := acts.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AccountS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	acts.Lock()
 	defer acts.Unlock()

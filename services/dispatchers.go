@@ -35,7 +35,7 @@ import (
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *CacheService, filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
-	connMgr *engine.ConnManager, anzChan chan *AnalyzerService,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) *DispatcherService {
 	return &DispatcherService{
 		cfg:         cfg,
@@ -44,7 +44,6 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
-		anzChan:     anzChan,
 		srvsReload:  make(map[string]chan struct{}),
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -57,7 +56,6 @@ type DispatcherService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	anzChan     chan *AnalyzerService
 	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
@@ -95,8 +93,10 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	if datadb, err = dspS.dm.WaitForDM(ctx); err != nil {
 		return
 	}
-	anz := <-dspS.anzChan
-	dspS.anzChan <- anz
+	anz := dspS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DispatcherS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	dspS.Lock()
 	defer dspS.Unlock()

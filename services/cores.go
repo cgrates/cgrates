@@ -35,7 +35,6 @@ import (
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS,
-	anzChan chan *AnalyzerService,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *CoreService {
 	return &CoreService{
@@ -44,7 +43,6 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *comm
 		caps:       caps,
 		fileCPU:    fileCPU,
 		clSChan:    clSChan,
-		anzChan:    anzChan,
 		csCh:       make(chan *cores.CoreS, 1),
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
@@ -55,7 +53,6 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *comm
 type CoreService struct {
 	mu sync.RWMutex
 
-	anzChan chan *AnalyzerService
 	clSChan chan *commonlisteners.CommonListenerS
 
 	cS *cores.CoreS
@@ -81,8 +78,10 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 
 	cS.cl = <-cS.clSChan
 	cS.clSChan <- cS.cl
-	anz := <-cS.anzChan
-	cS.anzChan <- anz
+	anz := cS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CoreS, utils.AnalyzerS, utils.StateServiceUP)
+	}
 
 	cS.mu.Lock()
 	defer cS.mu.Unlock()
