@@ -451,6 +451,13 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err != nil || date.Sub(expected).Seconds() > 20 || date.Sub(expected).Seconds() < 19 {
 		t.Error("error parsing date: ", date.Sub(expected).Seconds())
 	}
+
+	date, err = ParseTimeDetectLayout("-20s", "")
+	expected = time.Now()
+	if err != nil || expected.Sub(date).Seconds() > 21 || expected.Sub(date).Seconds() < 20 {
+		t.Error("error parsing date: ", expected.Sub(date).Seconds())
+	}
+
 	expected = time.Now().AddDate(0, 0, 1)
 	if date, err := ParseTimeDetectLayout("*daily", ""); err != nil {
 		t.Error(err)

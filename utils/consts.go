@@ -2809,6 +2809,7 @@ const (
 	SQLDBNameOpt              = "sqlDBName"
 	SQLTableNameOpt           = "sqlTableName"
 	SQLDeleteIndexedFieldsOpt = "sqlDeleteIndexedFields"
+	SQLUpdateIndexedFieldsOpt = "sqlUpdateIndexedFields"
 
 	SQLMaxOpenConns    = "sqlMaxOpenConns"
 	SQLConnMaxLifetime = "sqlConnMaxLifetime"

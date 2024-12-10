@@ -811,7 +811,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		Flags:                er.Flags.Clone(),
 		Reconnects:           er.Reconnects,
 		MaxReconnectInterval: er.MaxReconnectInterval,
-		EEsSuccessIDs:        slices.Clone(er.EEsFailedIDs),
+		EEsSuccessIDs:        slices.Clone(er.EEsSuccessIDs),
 		EEsFailedIDs:         slices.Clone(er.EEsFailedIDs),
 		Opts:                 er.Opts.Clone(),
 	}

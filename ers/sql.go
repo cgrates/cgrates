@@ -148,33 +148,24 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	for _, filterObj := range filtersObjList { // seperate filters used for WHERE clause from other filters, and build query conditions out of them
 		var lazyFltrPopulated bool // Track if a lazyFilter is already populated by the previous filterObj.Rules, so we dont store the same lazy filter more than once
 		for _, rule := range filterObj.Rules {
-			var firstItem string   // Excluding ~*req, hold the first item of an element, left empty if no more than 1 item in element. e.g. "cost_details" out of ~*req.cost_details.Charges[0].RatingID or "" out of ~*req.answer_time
-			var restOfItems string // Excluding ~*req, hold the rest of the items past the first one. If only 1 item in all element, holds that item. e.g. "Charges[0].RatingID" out of ~*req.cost_details.Charges[0].RatingID or "answer_time" out of ~*req.answer_time
-			switch {
-			case strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep): // convert filter to WHERE condition only on filters with ~*req.
-				elementItems := rule.ElementItems()[1:] // exclude first item: ~*req
-				if len(elementItems) > 1 {
-					firstItem = elementItems[0]
-					restOfItems = strings.Join(elementItems[1:], utils.NestingSep)
-				} else {
-					restOfItems = elementItems[0]
-				}
-			default: // If not used in the WHERE condition, put the filter in rdr.lazyFilters
-				if !lazyFltrPopulated {
-					rdr.lazyFilters = append(rdr.lazyFilters, filterObj.ID)
-					lazyFltrPopulated = true
-				}
+			if strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep) { // convert filter to WHERE condition only on filters with ~*req.
+				rdr.dbFilters = append(rdr.dbFilters, strings.Join(rule.FilterToSQLQuery(), " OR "))
 				continue
 			}
-			conditions := utils.FilterToSQLQuery(rule.Type, firstItem, restOfItems, rule.Values, strings.HasPrefix(rule.Type, utils.MetaNot))
-			rdr.dbFilters = append(rdr.dbFilters, strings.Join(conditions, " OR "))
+			// If not used in the WHERE condition, put the filter in rdr.lazyFilters
+			if !lazyFltrPopulated {
+				rdr.lazyFilters = append(rdr.lazyFilters, filterObj.ID)
+				lazyFltrPopulated = true
+			}
 		}
 	}
-	tm := time.NewTimer(0) // Timer matching rdr.Config().RunDelay, will delay the for loop until timer expires. It doesnt wait for the loop to finish an iteration to start.
+	selectWhereQuery := strings.Join(rdr.dbFilters, " AND ") // the whole WHERE query gotten from filters
+	tm := time.NewTimer(0)                                   // Timer matching rdr.Config().RunDelay, will delay the for loop until timer expires. It doesnt wait for the loop to finish an iteration to start.
 	for {
-		tx := db.Table(rdr.tableName).Select(utils.Meta) // Select everything from the table
-		for _, whereQ := range rdr.dbFilters {
-			tx = tx.Where(whereQ) // apply WHERE conditions to the select if any
+		tx := db.Table(rdr.tableName).Select(utils.Meta)         // Select everything from the table
+		if err := tx.Where(selectWhereQuery).Error; err != nil { // apply WHERE conditions to the select if any
+			rdr.rdrErr <- err
+			return
 		}
 		rows, err := tx.Rows() // get all rows selected
 		if err != nil {
@@ -220,23 +211,24 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 			for i, colName := range colNames { // populate ev from columns
 				ev[colName] = columns[i]
 			}
+			sqlClauseVars := make(map[string]any) // map used for conditioning queries used for marking processed events
 			if rdr.Config().ProcessedPath == utils.MetaDelete {
-				sqlWhereVars := make(map[string]any) // map used for conditioning the DELETE query
 				if rdr.Config().Opts.SQL.DeleteIndexedFields != nil {
 					for _, fieldName := range *rdr.Config().Opts.SQL.DeleteIndexedFields {
-						if _, has := ev[fieldName]; has && fieldName != createdAt && fieldName != updatedAt && fieldName != deletedAt { // ignore the sql colums for filter only
-							addValidFieldToSQLWHEREVars(sqlWhereVars, fieldName, ev[fieldName])
+						if _, has := ev[fieldName]; has && fieldName != createdAt &&
+							fieldName != updatedAt && fieldName != deletedAt { // ignore the sql colums for sqlWhereVars only
+							addValidFieldToSQLWhereVars(sqlClauseVars, fieldName, ev[fieldName])
 						}
 					}
 				}
-				if len(sqlWhereVars) == 0 {
+				if len(sqlClauseVars) == 0 {
 					for i, colName := range colNames {
-						if colName != createdAt && colName != updatedAt && colName != deletedAt { // ignore the sql colums for filter only
-							addValidFieldToSQLWHEREVars(sqlWhereVars, colName, columns[i])
+						if colName != createdAt && colName != updatedAt && colName != deletedAt { // ignore the sql colums for sqlWhereVars only
+							addValidFieldToSQLWhereVars(sqlClauseVars, colName, columns[i])
 						}
 					}
 				}
-				if err = tx.Delete(nil, sqlWhereVars).Error; err != nil { // to ensure we don't read it again
+				if err = tx.Delete(nil, sqlClauseVars).Error; err != nil { // to ensure we don't read it again
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> deleting message %s error: %s",
 							utils.ERs, utils.ToJSON(ev), err.Error()))
@@ -245,7 +237,6 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 					return
 				}
 			}
-
 			go func(ev map[string]any) {
 				if err := rdr.processMessage(ev); err != nil {
 					utils.Logger.Warning(
@@ -272,7 +263,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 }
 
 // Helper function to add valid time and non-time values to the sqlWhereVars map
-func addValidFieldToSQLWHEREVars(sqlWhereVars map[string]any, fieldName string, value any) {
+func addValidFieldToSQLWhereVars(sqlWhereVars map[string]any, fieldName string, value any) {
 	switch dateTimeCol := value.(type) {
 	case time.Time:
 		if dateTimeCol.IsZero() {
@@ -291,10 +282,10 @@ func addValidFieldToSQLWHEREVars(sqlWhereVars map[string]any, fieldName string, 
 	}
 }
 
-func (rdr *SQLEventReader) processMessage(msg map[string]any) (err error) {
+func (rdr *SQLEventReader) processMessage(ev map[string]any) (err error) {
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaReaderID: utils.NewLeafNode(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].ID)}}
 	agReq := agents.NewAgentRequest(
-		utils.MapStorage(msg), reqVars,
+		utils.MapStorage(ev), reqVars,
 		nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -313,8 +304,19 @@ func (rdr *SQLEventReader) processMessage(msg map[string]any) (err error) {
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
 	}
+	rawEvent := make(map[string]any, len(ev))
+	if len(rdr.Config().EEsSuccessIDs) != 0 {
+		for key, value := range ev {
+			if val, ok := value.([]uint8); ok { // convert byte values to string to comply with the INSERT INTO query on SQL exporter. Converted before sent to rpc call to avoid unnecesary decoding and converting on SQL exporter side
+				rawEvent[key] = string(val)
+				continue
+			}
+			rawEvent[key] = value
+		}
+	}
 	rdrEv <- &erEvent{
 		cgrEvent: cgrEv,
+		rawEvent: rawEvent,
 		rdrCfg:   rdr.Config(),
 	}
 	return
