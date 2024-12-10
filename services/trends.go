@@ -32,14 +32,13 @@ import (
 )
 
 // NewTrendsService returns the TrendS Service
-func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
+func NewTrendService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TrendService{
 		cfg:         cfg,
-		dm:          dm,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		filterSChan: filterSChan,
@@ -51,7 +50,6 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 type TrendService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	trs *engine.TrendS
@@ -88,9 +86,9 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	); err != nil {
 		return err
 	}
-	var datadb *engine.DataManager
-	if datadb, err = trs.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := trs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.DataDB, utils.StateServiceUP)
 	}
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, trs.filterSChan); err != nil {
@@ -103,7 +101,7 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 
 	trs.Lock()
 	defer trs.Unlock()
-	trs.trs = engine.NewTrendService(datadb, trs.cfg, filterS, trs.connMgr)
+	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, filterS, trs.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TrendS))
 	if err := trs.trs.StartTrendS(ctx); err != nil {
 		return err

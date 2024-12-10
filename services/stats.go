@@ -32,14 +32,13 @@ import (
 )
 
 // NewStatService returns the Stat Service
-func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
+func NewStatService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &StatService{
 		cfg:         cfg,
-		dm:          dm,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
@@ -52,7 +51,6 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 type StatService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	sts *engine.StatS
@@ -93,9 +91,9 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	if filterS, err = waitForFilterS(ctx, sts.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = sts.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := sts.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.StatS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := sts.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
@@ -104,7 +102,7 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 
 	sts.Lock()
 	defer sts.Unlock()
-	sts.sts = engine.NewStatService(datadb, sts.cfg, filterS, sts.connMgr)
+	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, filterS, sts.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.StatS))

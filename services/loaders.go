@@ -33,13 +33,12 @@ import (
 )
 
 // NewLoaderService returns the Loader Service
-func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
+func NewLoaderService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) *LoaderService {
 	return &LoaderService{
 		cfg:         cfg,
-		dm:          dm,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		stopChan:    make(chan struct{}),
@@ -52,7 +51,6 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 type LoaderService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	ldrs *loaders.LoaderS
@@ -82,9 +80,9 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if filterS, err = waitForFilterS(ctx, ldrs.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = ldrs.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := ldrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := ldrs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
@@ -94,7 +92,7 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	ldrs.Lock()
 	defer ldrs.Unlock()
 
-	ldrs.ldrs = loaders.NewLoaderS(ldrs.cfg, datadb, filterS, ldrs.connMgr)
+	ldrs.ldrs = loaders.NewLoaderS(ldrs.cfg, dbs.DataManager(), filterS, ldrs.connMgr)
 
 	if !ldrs.ldrs.Enabled() {
 		return
@@ -120,9 +118,9 @@ func (ldrs *LoaderService) Reload(ctx *context.Context, _ context.CancelFunc) er
 	if err != nil {
 		return err
 	}
-	datadb, err := ldrs.dm.WaitForDM(ctx)
-	if err != nil {
-		return err
+	dbs := ldrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.DataDB, utils.StateServiceUP)
 	}
 	close(ldrs.stopChan)
 	ldrs.stopChan = make(chan struct{})
@@ -130,7 +128,7 @@ func (ldrs *LoaderService) Reload(ctx *context.Context, _ context.CancelFunc) er
 	ldrs.RLock()
 	defer ldrs.RUnlock()
 
-	ldrs.ldrs.Reload(datadb, filterS, ldrs.connMgr)
+	ldrs.ldrs.Reload(dbs.DataManager(), filterS, ldrs.connMgr)
 	return ldrs.ldrs.ListenAndServe(ldrs.stopChan)
 }
 

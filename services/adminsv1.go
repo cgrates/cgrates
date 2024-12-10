@@ -33,13 +33,12 @@ import (
 
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig,
-	dm *DataDBService, storDB *StorDBService,
+	storDB *StorDBService,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AdminSv1Service{
 		cfg:         cfg,
-		dm:          dm,
 		storDB:      storDB,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
@@ -52,7 +51,6 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 type AdminSv1Service struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	storDB      *StorDBService
 	filterSChan chan *engine.FilterS
 
@@ -84,9 +82,9 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	if filterS, err = waitForFilterS(ctx, apiService.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = apiService.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := apiService.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := apiService.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
@@ -100,7 +98,7 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	apiService.Lock()
 	defer apiService.Unlock()
 
-	apiService.api = apis.NewAdminSv1(apiService.cfg, datadb, apiService.connMgr, filterS, storDBChan)
+	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), apiService.connMgr, filterS, storDBChan)
 
 	// go apiService.api.ListenAndServe(apiService.stopChan)
 	// runtime.Gosched()
@@ -111,7 +109,7 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		for _, s := range srv {
 			apiService.cl.RpcRegister(s)
 		}
-		rpl, _ := engine.NewService(apis.NewReplicatorSv1(datadb, apiService.api))
+		rpl, _ := engine.NewService(apis.NewReplicatorSv1(dbs.DataManager(), apiService.api))
 		for _, s := range rpl {
 			apiService.cl.RpcRegister(s)
 		}

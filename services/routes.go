@@ -33,13 +33,12 @@ import (
 )
 
 // NewRouteService returns the Route Service
-func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
+func NewRouteService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RouteService{
 		cfg:         cfg,
-		dm:          dm,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
@@ -51,7 +50,6 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 type RouteService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	routeS *engine.RouteS
@@ -89,9 +87,9 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if filterS, err = waitForFilterS(ctx, routeS.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = routeS.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := routeS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), routeS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RouteS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := routeS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), routeS.cfg.GeneralCfg().ConnectTimeout) {
@@ -100,7 +98,7 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	routeS.Lock()
 	defer routeS.Unlock()
-	routeS.routeS = engine.NewRouteService(datadb, filterS, routeS.cfg, routeS.connMgr)
+	routeS.routeS = engine.NewRouteService(dbs.DataManager(), filterS, routeS.cfg, routeS.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
 	srv, _ := engine.NewService(routeS.routeS)

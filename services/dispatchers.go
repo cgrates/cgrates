@@ -32,13 +32,12 @@ import (
 )
 
 // NewDispatcherService returns the Dispatcher Service
-func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
+func NewDispatcherService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) *DispatcherService {
 	return &DispatcherService{
 		cfg:         cfg,
-		dm:          dm,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvsReload:  make(map[string]chan struct{}),
@@ -51,7 +50,6 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 type DispatcherService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	dspS *dispatchers.DispatcherService
@@ -91,9 +89,9 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	if filterS, err = waitForFilterS(ctx, dspS.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = dspS.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := dspS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DispatcherS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := dspS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
@@ -103,7 +101,7 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	dspS.Lock()
 	defer dspS.Unlock()
 
-	dspS.dspS = dispatchers.NewDispatcherService(datadb, dspS.cfg, filterS, dspS.connMgr)
+	dspS.dspS = dispatchers.NewDispatcherService(dbs.DataManager(), dspS.cfg, filterS, dspS.connMgr)
 
 	dspS.unregisterAllDispatchedSubsystems() // unregister all rpc services that can be dispatched
 

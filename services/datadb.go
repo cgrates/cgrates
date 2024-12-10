@@ -36,7 +36,6 @@ func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVer
 	srvIndexer *servmanager.ServiceIndexer) *DataDBService {
 	return &DataDBService{
 		cfg:         cfg,
-		dbchan:      make(chan *engine.DataManager, 1),
 		connMgr:     connMgr,
 		setVersions: setVersions,
 		srvDep:      srvDep,
@@ -53,7 +52,6 @@ type DataDBService struct {
 	connMgr  *engine.ConnManager
 
 	dm          *engine.DataManager
-	dbchan      chan *engine.DataManager
 	setVersions bool
 
 	srvDep map[string]*sync.WaitGroup
@@ -91,7 +89,6 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 		return err
 	}
 
-	db.dbchan <- db.dm
 	close(db.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -131,7 +128,6 @@ func (db *DataDBService) Shutdown() (_ error) {
 	db.Lock()
 	db.dm.DataDB().Close()
 	db.dm = nil
-	<-db.dbchan
 	db.Unlock()
 	return
 }
@@ -186,18 +182,9 @@ func (db *DataDBService) needsConnectionReload() bool {
 			db.oldDBCfg.Opts.RedisPoolPipelineLimit != db.cfg.DataDbCfg().Opts.RedisPoolPipelineLimit)
 }
 
-// GetDM returns the DataManager
-func (db *DataDBService) WaitForDM(ctx *context.Context) (datadb *engine.DataManager, err error) {
-	db.RLock()
-	dbCh := db.dbchan
-	db.RUnlock()
-	select {
-	case <-ctx.Done():
-		err = ctx.Err()
-	case datadb = <-dbCh:
-		dbCh <- datadb
-	}
-	return
+// DataManager returns the DataManager object.
+func (db *DataDBService) DataManager() *engine.DataManager {
+	return db.dm
 }
 
 // StateChan returns signaling channel of specific state
