@@ -36,7 +36,7 @@ import (
 
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
@@ -44,7 +44,6 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 		connMgr:     connMgr,
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		rldChan:     make(chan struct{}, 1),
@@ -59,7 +58,6 @@ type ActionService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	acts *actions.ActionS
@@ -84,7 +82,11 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 
 	acts.cl = <-acts.clSChan
 	acts.clSChan <- acts.cl
-	if err = acts.cacheS.WaitToPrecache(ctx,
+	cacheS := acts.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheActionProfiles,
 		utils.CacheActionProfilesFilterIndexes); err != nil {
 		return

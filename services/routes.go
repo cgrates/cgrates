@@ -34,14 +34,13 @@ import (
 
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RouteService{
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
@@ -56,7 +55,6 @@ type RouteService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	routeS *engine.RouteS
@@ -78,7 +76,11 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	routeS.cl = <-routeS.clSChan
 	routeS.clSChan <- routeS.cl
-	if err = routeS.cacheS.WaitToPrecache(ctx,
+	cacheS := routeS.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), routeS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RouteS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheRouteProfiles,
 		utils.CacheRouteFilterIndexes); err != nil {
 		return

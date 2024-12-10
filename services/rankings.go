@@ -34,7 +34,7 @@ import (
 
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
@@ -42,7 +42,6 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	return &RankingService{
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
@@ -57,7 +56,6 @@ type RankingService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	ran *engine.RankingS
@@ -81,7 +79,11 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	ran.srvDep[utils.DataDB].Add(1)
 	ran.cl = <-ran.clSChan
 	ran.clSChan <- ran.cl
-	if err = ran.cacheS.WaitToPrecache(ctx,
+	cacheS := ran.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheRankingProfiles,
 		utils.CacheRankings,
 	); err != nil {

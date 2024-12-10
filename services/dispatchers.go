@@ -33,14 +33,13 @@ import (
 
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) *DispatcherService {
 	return &DispatcherService{
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
@@ -56,7 +55,6 @@ type DispatcherService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	dspS *dispatchers.DispatcherService
@@ -79,7 +77,11 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	utils.Logger.Info("Starting CGRateS DispatcherS service.")
 	dspS.cl = <-dspS.clSChan
 	dspS.clSChan <- dspS.cl
-	if err = dspS.cacheS.WaitToPrecache(ctx,
+	cacheS := dspS.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DispatcherS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheDispatcherProfiles,
 		utils.CacheDispatcherHosts,
 		utils.CacheDispatcherFilterIndexes); err != nil {
