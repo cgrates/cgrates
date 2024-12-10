@@ -33,7 +33,7 @@ import (
 
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
@@ -41,7 +41,6 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	return &StatService{
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
@@ -57,7 +56,6 @@ type StatService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	sts *engine.StatS
@@ -81,7 +79,11 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	sts.srvDep[utils.DataDB].Add(1)
 	sts.cl = <-sts.clSChan
 	sts.clSChan <- sts.cl
-	if err = sts.cacheS.WaitToPrecache(ctx,
+	cacheS := sts.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.StatS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheStatQueueProfiles,
 		utils.CacheStatQueues,
 		utils.CacheStatFilterIndexes); err != nil {

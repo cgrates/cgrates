@@ -34,13 +34,12 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
+	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ChargerService{
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
@@ -55,7 +54,6 @@ type ChargerService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	chrS *engine.ChargerS
@@ -77,7 +75,11 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	chrS.cl = <-chrS.clSChan
 	chrS.clSChan <- chrS.cl
-	if err = chrS.cacheS.WaitToPrecache(ctx,
+	cacheS := chrS.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheChargerProfiles,
 		utils.CacheChargerFilterIndexes); err != nil {
 		return

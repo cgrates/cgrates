@@ -33,12 +33,11 @@ import (
 
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	dmS *DataDBService, clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		dmS:         dmS,
 		clSChan:     clSChan,
@@ -54,7 +53,6 @@ type RateService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dmS         *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	rateS *rates.RateS
@@ -111,7 +109,11 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 
 	rs.cl = <-rs.clSChan
 	rs.clSChan <- rs.cl
-	if err = rs.cacheS.WaitToPrecache(ctx,
+	cacheS := rs.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RateS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheRateProfiles,
 		utils.CacheRateProfilesFilterIndexes,
 		utils.CacheRateFilterIndexes); err != nil {

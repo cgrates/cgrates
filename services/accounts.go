@@ -36,13 +36,12 @@ import (
 
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AccountService{
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		clSChan:     clSChan,
@@ -58,7 +57,6 @@ type AccountService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	acts *accounts.AccountS
@@ -81,7 +79,11 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 	acts.cl = <-acts.clSChan
 	acts.clSChan <- acts.cl
-	if err = acts.cacheS.WaitToPrecache(ctx,
+	cacheS := acts.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AccountS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheAccounts,
 		utils.CacheAccountsFilterIndexes); err != nil {
 		return

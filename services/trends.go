@@ -33,7 +33,7 @@ import (
 
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
@@ -41,7 +41,6 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	return &TrendService{
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
@@ -56,7 +55,6 @@ type TrendService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	trs *engine.TrendS
@@ -80,7 +78,11 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	trs.srvDep[utils.DataDB].Add(1)
 	trs.cl = <-trs.clSChan
 	trs.clSChan <- trs.cl
-	if err = trs.cacheS.WaitToPrecache(ctx,
+	cacheS := trs.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheTrendProfiles,
 		utils.CacheTrends,
 	); err != nil {

@@ -33,7 +33,7 @@ import (
 
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
@@ -41,7 +41,6 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	return &ResourceService{
 		cfg:         cfg,
 		dm:          dm,
-		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		clSChan:     clSChan,
 		connMgr:     connMgr,
@@ -57,7 +56,6 @@ type ResourceService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	filterSChan chan *engine.FilterS
 
 	reS *engine.ResourceS
@@ -81,7 +79,11 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	reS.srvDep[utils.DataDB].Add(1)
 	reS.cl = <-reS.clSChan
 	reS.clSChan <- reS.cl
-	if err = reS.cacheS.WaitToPrecache(ctx,
+	cacheS := reS.srvIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheResourceProfiles,
 		utils.CacheResources,
 		utils.CacheResourceFilterIndexes); err != nil {

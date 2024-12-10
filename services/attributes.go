@@ -34,14 +34,13 @@ import (
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *CacheService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	clSChan chan *commonlisteners.CommonListenerS,
 	dspS *DispatcherService,
 	sIndxr *servmanager.ServiceIndexer) servmanager.Service {
 	return &AttributeService{
 		cfg:            cfg,
 		dm:             dm,
-		cacheS:         cacheS,
 		filterSChan:    filterSChan,
 		clSChan:        clSChan,
 		dspS:           dspS,
@@ -56,7 +55,6 @@ type AttributeService struct {
 
 	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
-	cacheS      *CacheService
 	dspS        *DispatcherService
 	filterSChan chan *engine.FilterS
 
@@ -83,7 +81,11 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	}
 	attrS.cl = <-attrS.clSChan
 	attrS.clSChan <- attrS.cl
-	if err = attrS.cacheS.WaitToPrecache(ctx,
+	cacheS := attrS.serviceIndexer.GetService(utils.CacheS).(*CacheService)
+	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CacheS, utils.StateServiceUP)
+	}
+	if err = cacheS.WaitToPrecache(ctx,
 		utils.CacheAttributeProfiles,
 		utils.CacheAttributeFilterIndexes); err != nil {
 		return
