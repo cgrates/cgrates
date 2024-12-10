@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -409,4 +410,88 @@ func TestNewURLCSVStorage(t *testing.T) {
 		t.Fatal("Expected csvStorage.generator to be initialized, but got nil")
 	}
 
+}
+
+func TestNewGoogleCSVStorageInvalidSpreadsheetID(t *testing.T) {
+	sep := ','
+	spreadsheetID := "invalid-id"
+	storage, err := NewGoogleCSVStorage(sep, spreadsheetID)
+	if err == nil {
+		t.Error("Expected error, but got nil")
+	}
+	if storage != nil {
+		t.Error("Expected nil storage, but got a non-nil value")
+	}
+}
+
+func TestGetAllFoldersInvalidPath(t *testing.T) {
+	nonExistentPath := "/non/existent/path"
+	paths, err := getAllFolders(nonExistentPath)
+	if err == nil {
+		t.Error("Expected error, but got nil")
+	}
+	if len(paths) != 0 {
+		t.Errorf("Expected no paths, but got: %v", paths)
+	}
+}
+
+func TestJoinURLValidBaseURL(t *testing.T) {
+	baseURL := "https://cgrates.com/path"
+	fn := "subpath"
+	expected := "https://cgrates.com/path/subpath"
+	result := joinURL(baseURL, fn)
+	if result != expected {
+		t.Errorf("Expected %s, but got %s", expected, result)
+	}
+}
+
+func TestGetCfgJSONData(t *testing.T) {
+	t.Run("Empty raw JSON", func(t *testing.T) {
+		raw := json.RawMessage{}
+		data, err := getCfgJSONData(raw)
+		if err != nil {
+			t.Errorf("Expected no error, but got: %v", err)
+		}
+		if len(data) != 0 {
+			t.Errorf("Expected no data, but got: %v", data)
+		}
+	})
+	t.Run("Valid raw JSON", func(t *testing.T) {
+		raw := json.RawMessage(`{"key": "value"}`)
+		data, err := getCfgJSONData(raw)
+		if err != nil {
+			t.Errorf("Expected no error, but got: %v", err)
+		}
+		if string(data) != string(raw) {
+			t.Errorf("Expected data %s, but got %s", string(raw), string(data))
+		}
+	})
+	t.Run("Valid file path", func(t *testing.T) {
+		path := "/tmp/mockConfigPath.json"
+		expectedContent := []byte(`{"key": "value"}`)
+		err := os.WriteFile(path, expectedContent, 0600)
+		if err != nil {
+			t.Fatalf("Failed to create mock file: %v", err)
+		}
+		defer os.Remove(path)
+		raw := json.RawMessage(`"` + path + `"`)
+		data, err := getCfgJSONData(raw)
+		if err != nil {
+			t.Errorf("Expected no error, but got: %v", err)
+		}
+		if string(data) != string(expectedContent) {
+			t.Errorf("Expected data %s, but got %s", string(expectedContent), string(data))
+		}
+	})
+
+	t.Run("Invalid file path", func(t *testing.T) {
+		raw := json.RawMessage(`"/nonexistent/path/to/file.json"`)
+		data, err := getCfgJSONData(raw)
+		if err == nil {
+			t.Errorf("Expected error, but got none")
+		}
+		if data != nil {
+			t.Errorf("Expected no data, but got: %v", data)
+		}
+	})
 }
