@@ -94,12 +94,12 @@ func TestRankingAscSorterSortStatIDs(t *testing.T) {
 func TestRankingMixedOrder(t *testing.T) {
 	statmetrics := map[string]map[string]float64{
 		"Stat1": {"*acc": 13},
-		"Stat2": {"*acc": 14},
-		"Stat3": {"*acc": 12.1, "*pdd": 900},
-		"Stat4": {"*acc": 12.1, "*pdd": 1000},
-		"Stat5": {"*acc": 10, "*pdd": 700, "*tcc": 120},
 		"Stat6": {"*acc": 10, "*pdd": 700, "*tcc": 121},
+		"Stat2": {"*acc": 14},
+		"Stat5": {"*acc": 10, "*pdd": 700, "*tcc": 120},
+		"Stat3": {"*acc": 12.1, "*pdd": 900},
 		"Stat7": {"*acc": 10, "*pdd": 600, "*tcc": 123},
+		"Stat4": {"*acc": 12.1, "*pdd": 1000},
 	}
 
 	testCases := []struct {
@@ -115,12 +115,24 @@ func TestRankingMixedOrder(t *testing.T) {
 			sorter:     "*asc",
 			statIDs:    []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
 		},
-		// {
-		// 	name:       "TestSortStatsDesc",
-		// 	sortMetric: []string{"*tcc", "*pdd:false", "*acc"},
-		// 	sorter:     "*desc",
-		// 	statIDs:    []string{"Stat7", "Stat6", "Stat5", "Stat3", "Stat4", "Stat2", "Stat1"},
-		// },
+		{
+			name:       "TestSortStatsDesc",
+			sortMetric: []string{"*tcc", "*pdd:false", "*acc"},
+			sorter:     "*desc",
+			statIDs:    []string{"Stat7", "Stat6", "Stat5", "Stat3", "Stat4", "Stat2", "Stat1"},
+		},
+		{
+			name:       "TestSortStatsDesc2",
+			sortMetric: []string{"*acc", "*tcc", "*pdd:false"},
+			sorter:     "*desc",
+			statIDs:    []string{"Stat2", "Stat1", "Stat3", "Stat4", "Stat7", "Stat6", "Stat5"},
+		},
+		{
+			name:       "TestSortStatsAsc2",
+			sortMetric: []string{"*tcc", "*pdd:false", "*acc"},
+			sorter:     "*asc",
+			statIDs:    []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
+		},
 	}
 
 	for _, tc := range testCases {
