@@ -248,7 +248,7 @@ type EventReaderOptsJson struct {
 	KafkaSkipTLSVerify       *bool     `json:"kafkaSkipTLSVerify"`
 	SQLDBName                *string   `json:"sqlDBName"`
 	SQLTableName             *string   `json:"sqlTableName"`
-	SQLDeleteIndexedFields   *[]string `json:"sqlDeleteIndexedFields"`
+	SQLWhereIndexedFields    *[]string `json:"sqlWhereIndexedFields"`
 	PgSSLMode                *string   `json:"pgSSLMode"`
 	AWSRegion                *string   `json:"awsRegion"`
 	AWSKey                   *string   `json:"awsKey"`
@@ -331,6 +331,7 @@ type EventExporterOptsJson struct {
 	MYSQLDSNParams              map[string]string `json:"mysqlDSNParams"`
 	SQLTableName                *string           `json:"sqlTableName"`
 	SQLDBName                   *string           `json:"sqlDBName"`
+	SQLUpdateIndexedFields      *[]string         `json:"sqlUpdateIndexedFields"`
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
 	KafkaBatchSize              *int              `json:"kafkaBatchSize"`

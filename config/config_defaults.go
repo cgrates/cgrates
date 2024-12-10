@@ -450,7 +450,7 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlDBName": "cgrates", 			// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",			// the name of the table from were the events are read
-				// "sqlDeleteIndexedFields": [],   	// list of fields to DELETE from the table
+				// "sqlWhereIndexedFields": [],   	// list of field names used for indexing queries from the table
 				// "pgSSLMode": "disable",			// the ssl mode for postgres db
 
 				// SQS and S3
@@ -554,6 +554,7 @@ const CGRATES_CFG_JSON = `
 				// "sqlMaxIdleConns": 0,	// SQLMaxIdleConns
 				// "sqlMaxOpenConns": 0,	// SQLMaxOpenConns
 				// "sqlConnMaxLifetime": "0",	// SQLConnMaxLifetime
+				// "sqlUpdateIndexedFields": [], // list of field names used for indexing UPDATE queries from the table
 				// "mysqlDSNParams": {},        // DSN params
 
 

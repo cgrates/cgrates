@@ -256,10 +256,10 @@ func (kafkaROpts *KafkaROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err 
 }
 
 type SQLROpts struct {
-	DBName              *string
-	TableName           *string
-	DeleteIndexedFields *[]string
-	PgSSLMode           *string
+	DBName             *string
+	TableName          *string
+	WhereIndexedFields *[]string
+	PgSSLMode          *string
 }
 
 func (sqlOpts *SQLROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error) {
@@ -269,10 +269,10 @@ func (sqlOpts *SQLROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error
 	if jsnCfg.SQLTableName != nil {
 		sqlOpts.TableName = jsnCfg.SQLTableName
 	}
-	if jsnCfg.SQLDeleteIndexedFields != nil {
-		dif := make([]string, len(*jsnCfg.SQLDeleteIndexedFields))
-		copy(dif, *jsnCfg.SQLDeleteIndexedFields)
-		sqlOpts.DeleteIndexedFields = &dif
+	if jsnCfg.SQLWhereIndexedFields != nil {
+		dif := make([]string, len(*jsnCfg.SQLWhereIndexedFields))
+		copy(dif, *jsnCfg.SQLWhereIndexedFields)
+		sqlOpts.WhereIndexedFields = &dif
 	}
 	if jsnCfg.PgSSLMode != nil {
 		sqlOpts.PgSSLMode = jsnCfg.PgSSLMode
@@ -666,10 +666,10 @@ func (sqlOpts *SQLROpts) Clone() *SQLROpts {
 		cln.TableName = new(string)
 		*cln.TableName = *sqlOpts.TableName
 	}
-	if sqlOpts.DeleteIndexedFields != nil {
-		idx := make([]string, len(*sqlOpts.DeleteIndexedFields))
-		copy(idx, *sqlOpts.DeleteIndexedFields)
-		cln.DeleteIndexedFields = &idx
+	if sqlOpts.WhereIndexedFields != nil {
+		idx := make([]string, len(*sqlOpts.WhereIndexedFields))
+		copy(idx, *sqlOpts.WhereIndexedFields)
+		cln.WhereIndexedFields = &idx
 	}
 	if sqlOpts.PgSSLMode != nil {
 		cln.PgSSLMode = new(string)
@@ -922,10 +922,10 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		if sqlOpts.TableName != nil {
 			opts[utils.SQLTableNameOpt] = *sqlOpts.TableName
 		}
-		if sqlOpts.DeleteIndexedFields != nil {
-			deleteIndexedFields := make([]string, len(*sqlOpts.DeleteIndexedFields))
-			copy(deleteIndexedFields, *sqlOpts.DeleteIndexedFields)
-			opts[utils.SQLDeleteIndexedFieldsOpt] = deleteIndexedFields
+		if sqlOpts.WhereIndexedFields != nil {
+			whereIndexedFields := make([]string, len(*sqlOpts.WhereIndexedFields))
+			copy(whereIndexedFields, *sqlOpts.WhereIndexedFields)
+			opts[utils.SQLWhereIndexedFieldsOpt] = whereIndexedFields
 		}
 		if sqlOpts.PgSSLMode != nil {
 			opts[utils.PgSSLModeCfg] = *sqlOpts.PgSSLMode

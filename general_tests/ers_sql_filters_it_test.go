@@ -88,7 +88,7 @@ var (
 			},
 			AccountSummary: &engine.AccountSummary{
 				Tenant: "cgrates.org",
-				ID:     "testV1CDRsRefundOutOfSessionCost",
+				ID:     "1001",
 				BalanceSummaries: []*engine.BalanceSummary{
 					{
 						UUID:  "uuid1",
@@ -110,12 +110,12 @@ var (
 			},
 			Accounting: engine.Accounting{
 				"a012888": &engine.BalanceCharge{
-					AccountID:   "cgrates.org:testV1CDRsRefundOutOfSessionCost",
+					AccountID:   "cgrates.org:1001",
 					BalanceUUID: "uuid1",
 					Units:       120.7,
 				},
 				"44d6c02": &engine.BalanceCharge{
-					AccountID:   "cgrates.org:testV1CDRsRefundOutOfSessionCost",
+					AccountID:   "cgrates.org:1001",
 					BalanceUUID: "uuid1",
 					Units:       120.7,
 				},
@@ -182,7 +182,7 @@ var (
 			},
 			AccountSummary: &engine.AccountSummary{
 				Tenant: "cgrates.org",
-				ID:     "testV1CDRsRefundOutOfSessionCost",
+				ID:     "1001",
 				BalanceSummaries: []*engine.BalanceSummary{
 					{
 						UUID:  "uuid1",
@@ -204,12 +204,12 @@ var (
 			},
 			Accounting: engine.Accounting{
 				"a012888": &engine.BalanceCharge{
-					AccountID:   "cgrates.org:testV1CDRsRefundOutOfSessionCost",
+					AccountID:   "cgrates.org:1001",
 					BalanceUUID: "uuid1",
 					Units:       120.7,
 				},
 				"44d6c02": &engine.BalanceCharge{
-					AccountID:   "cgrates.org:testV1CDRsRefundOutOfSessionCost",
+					AccountID:   "cgrates.org:1001",
 					BalanceUUID: "uuid1",
 					Units:       120.7,
 				},
@@ -283,32 +283,6 @@ func TestERSSQLFilters(t *testing.T) {
 		}
 	})
 
-	type testModelSql struct {
-		ID          int64
-		Cgrid       string
-		RunID       string
-		OriginHost  string
-		Source      string
-		OriginID    string
-		ToR         string
-		RequestType string
-		Tenant      string
-		Category    string
-		Account     string
-		Subject     string
-		Destination string
-		SetupTime   time.Time
-		AnswerTime  time.Time
-		Usage       int64
-		ExtraFields string
-		CostSource  string
-		Cost        float64
-		CostDetails string
-		ExtraInfo   string
-		CreatedAt   time.Time
-		UpdatedAt   time.Time
-		DeletedAt   *time.Time
-	}
 	t.Run("PutCDRsInDataBase", func(t *testing.T) {
 		var err error
 		if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
@@ -394,7 +368,8 @@ func TestERSSQLFilters(t *testing.T) {
 				"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
 				"opts": {
 					"sqlDBName":"cgrates2",
-					"sqlDeleteIndexedFields": ["id"],
+					"sqlTableName":"cdrs", 
+					"sqlWhereIndexedFields": ["id"],
 				},
 				"start_delay": "500ms", // wait for db to be populated before starting reader 
 				"processed_path": "*delete",
@@ -448,7 +423,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
 		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
+		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -457,7 +432,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 			}
 			records++
 			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%s>, \nreceived\n<%s>", expectedLog, line)
+				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
 			}
 			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
 				ersLogsCount++
@@ -489,7 +464,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		for _, row := range rslt {
 			for col, value := range row {
 				if strings.Contains(fmt.Sprintln(value), "RatingID2") {
-					t.Fatalf("Expected CDR with RatingID: \"RatingID2\" to be deleted. Received column <%s>, value <%s>", col, value)
+					t.Fatalf("Expected CDR with RatingID: \"RatingID2\" to be deleted. Received column <%q>, value <%q>", col, value)
 				}
 			}
 		}
@@ -526,32 +501,6 @@ func TestERSSQLFiltersWithoutDelete(t *testing.T) {
 		}
 	})
 
-	type testModelSql struct {
-		ID          int64
-		Cgrid       string
-		RunID       string
-		OriginHost  string
-		Source      string
-		OriginID    string
-		ToR         string
-		RequestType string
-		Tenant      string
-		Category    string
-		Account     string
-		Subject     string
-		Destination string
-		SetupTime   time.Time
-		AnswerTime  time.Time
-		Usage       int64
-		ExtraFields string
-		CostSource  string
-		Cost        float64
-		CostDetails string
-		ExtraInfo   string
-		CreatedAt   time.Time
-		UpdatedAt   time.Time
-		DeletedAt   *time.Time
-	}
 	t.Run("PutCDRsInDataBase", func(t *testing.T) {
 		var err error
 		if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
@@ -637,6 +586,7 @@ func TestERSSQLFiltersWithoutDelete(t *testing.T) {
 				"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
 				"opts": {
 					"sqlDBName":"cgrates2",
+					"sqlTableName":"cdrs", 
 				},
 				"start_delay": "500ms", // wait for db to be populated before starting reader 
 				"processed_path": "",
@@ -690,7 +640,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
 		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
+		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -699,7 +649,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 			}
 			records++
 			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%s>, \nreceived\n<%s>", expectedLog, line)
+				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
 			}
 			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
 				ersLogsCount++
@@ -759,32 +709,6 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 		}
 	})
 
-	type testModelSql struct {
-		ID          int64
-		Cgrid       string
-		RunID       string
-		OriginHost  string
-		Source      string
-		OriginID    string
-		ToR         string
-		RequestType string
-		Tenant      string
-		Category    string
-		Account     string
-		Subject     string
-		Destination string
-		SetupTime   time.Time
-		AnswerTime  time.Time
-		Usage       int64
-		ExtraFields string
-		CostSource  string
-		Cost        float64
-		CostDetails string
-		ExtraInfo   string
-		CreatedAt   time.Time
-		UpdatedAt   time.Time
-		DeletedAt   *time.Time
-	}
 	t.Run("PutCDRsInDataBase", func(t *testing.T) {
 		var err error
 		if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
@@ -870,6 +794,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 				"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
 				"opts": {
 					"sqlDBName":"cgrates2",
+					"sqlTableName":"cdrs", 
 				},
 				"start_delay": "500ms", // wait for db to be populated before starting reader 
 				"processed_path": "*delete",
@@ -923,7 +848,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		records := 0
 		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
 		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
-		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:testV1CDRsRefundOutOfSessionCost\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
+		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
 		var ersLogsCount int
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -932,7 +857,7 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 			}
 			records++
 			if !strings.Contains(line, expectedLog) {
-				t.Errorf("expected \n<%s>, \nreceived\n<%s>", expectedLog, line)
+				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
 			}
 			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
 				ersLogsCount++
@@ -964,9 +889,796 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
 		for _, row := range rslt {
 			for col, value := range row {
 				if strings.Contains(fmt.Sprintln(value), "RatingID2") {
-					t.Fatalf("Expected CDR with RatingID: \"RatingID2\" to be deleted. Received column <%s>, value <%s>", col, value)
+					t.Fatalf("Expected CDR with RatingID: \"RatingID2\" to be deleted. Received column <%q>, value <%q>", col, value)
 				}
 			}
+		}
+	})
+}
+
+type mockTableName struct {
+	ID          int64
+	Cgrid       string
+	RunID       string
+	OriginHost  string
+	Source      string
+	OriginID    string
+	TOR         string
+	RequestType string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	SetupTime   time.Time
+	AnswerTime  *time.Time
+	Usage       int64
+	ExtraFields string
+	CostSource  string
+	Cost        float64
+	CostDetails string
+	ExtraInfo   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+}
+
+func (mtn mockTableName) TableName() string {
+	return "cdrsProcessed"
+}
+
+func TestERSSQLFiltersMove(t *testing.T) {
+	var dbcfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaMySQL:
+	case utils.MetaMongo:
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		dbcfg = engine.PostgresDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	t.Run("InitSQLDB", func(t *testing.T) {
+		var err error
+		var db2 *gorm.DB
+		if db2, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")),
+			&gorm.Config{
+				AllowGlobalUpdate: true,
+				Logger:            logger.Default.LogMode(logger.Silent),
+			}); err != nil {
+			t.Fatal(err)
+		}
+
+		if err = db2.Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`).Error; err != nil {
+			t.Fatal(err)
+		}
+	})
+	t.Run("PutCDRsInDataBase", func(t *testing.T) {
+		var err error
+		if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
+			&gorm.Config{
+				AllowGlobalUpdate: true,
+				Logger:            logger.Default.LogMode(logger.Silent),
+			}); err != nil {
+			t.Fatal(err)
+		}
+		tx := db.Begin()
+		if !tx.Migrator().HasTable("cdrs") {
+			if err = tx.Migrator().CreateTable(new(engine.CDRsql)); err != nil {
+				tx.Rollback()
+				t.Fatal(err)
+			}
+		}
+		if !tx.Migrator().HasTable("cdrsProcessed") {
+			if err = tx.Migrator().CreateTable(new(mockTableName)); err != nil {
+				tx.Rollback()
+				t.Fatal(err)
+			}
+		}
+		tx.Commit()
+		tx = db.Begin()
+		tx = tx.Table(utils.CDRsTBL)
+		cdrSql := cdr1.AsCDRsql()
+		cdrSql2 := cdr2.AsCDRsql()
+		cdrsql3 := cdr3.AsCDRsql()
+		cdrSql.CreatedAt = time.Now()
+		cdrSql2.CreatedAt = time.Now()
+		cdrsql3.CreatedAt = time.Now()
+		saved := tx.Save(cdrSql)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		saved = tx.Save(cdrSql2)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		saved = tx.Save(cdrsql3)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		tx.Commit()
+		time.Sleep(10 * time.Millisecond)
+		var result int64
+		db.Table(utils.CDRsTBL).Count(&result)
+		if result != 3 {
+			t.Error("Expected table to have 3 results but got ", result)
+		}
+	})
+	defer t.Run("StopSQL", func(t *testing.T) {
+		if err := db.Migrator().DropTable("cdrs"); err != nil {
+			t.Fatal(err)
+		}
+		if err := db.Migrator().DropTable("cdrsProcessed"); err != nil {
+			t.Fatal(err)
+		}
+		if err := db.Exec(`DROP DATABASE cgrates2;`).Error; err != nil {
+			t.Fatal(err)
+		}
+		if db2, err := db.DB(); err != nil {
+			t.Fatal(err)
+		} else if err = db2.Close(); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	content := `{
+
+	"general": {
+		"log_level": 7
+	},
+	
+	"apiers": {
+		"enabled": true
+	},
+	"filters": {			
+		"apiers_conns": ["*localhost"]
+	},
+	"ees": {
+		"enabled": true,
+		"exporters": [{
+			"id": "SQLExporter",
+			"type": "*sql",
+			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"attempts": 1,
+			"opts": {
+				"sqlDBName": "cgrates2",
+				"sqlTableName":"cdrsProcessed", 
+			},
+			"flags": ["*log"],
+		}]
+	},
+	"ers": {									
+		"enabled": true,						
+		"sessions_conns":["*localhost"],
+		"ees_conns": ["*internal"],
+		"readers": [
+			{
+				"id": "mysql",										
+				"type": "*sql",				
+				"ees_success_ids": ["SQLExporter"],			
+				"run_delay": "1m",									
+				"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
+				"opts": {
+					"sqlDBName":"cgrates2",
+					"sqlTableName":"cdrs", 
+					"sqlWhereIndexedFields": ["id"],
+				},
+				"start_delay": "500ms", // wait for db to be populated before starting reader 
+				"processed_path": "*delete",
+				"tenant": "cgrates.org",							
+				"filters": [
+				"*gt:~*req.answer_time:NOW() - INTERVAL 7 DAY", // dont process cdrs with answer_time older than 7 days ago (continue if answer_time > now-7days)
+				"FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
+				"*string:~*vars.*readerID:mysql",
+				"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
+				],										
+				"flags": ["*dryrun"],										
+				"fields":[									
+					{"tag": "CGRID", "path": "*cgreq.CGRID", "type": "*variable", "value": "~*req.cgrid", "mandatory": true},
+					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.tor", "mandatory": true},
+					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.origin_id", "mandatory": true},
+					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.request_type", "mandatory": true},
+					{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.tenant", "mandatory": true},
+					{"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.category", "mandatory": true},
+					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true},
+					{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.subject", "mandatory": true},
+					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination", "mandatory": true},
+					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.setup_time", "mandatory": true},
+					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.answer_time", "mandatory": true},
+					{"tag": "CostDetails", "path": "*cgreq.CostDetails", "type": "*variable", "value": "~*req.cost_details", "mandatory": true},
+					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage", "mandatory": true},
+				],
+			},
+		],
+	},
+	
+	}`
+
+	tpFiles := map[string]string{
+		utils.FiltersCsv: `#Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
+cgrates.org,FLTR_SQL_RatingID,*eq,~*req.cost_details.Charges[0].RatingID,RatingID2,
+cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
+	}
+
+	buf := &bytes.Buffer{}
+	ng := engine.TestEngine{
+		ConfigJSON: content,
+		DBCfg:      dbcfg,
+		TpFiles:    tpFiles,
+		LogBuffer:  buf,
+	}
+	ng.Run(t)
+	time.Sleep(1 * time.Second)
+
+	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
+		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
+		records := 0
+		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
+		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
+		var ersLogsCount int
+		for scanner.Scan() {
+			line := scanner.Text()
+			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+				continue
+			}
+			records++
+			if !strings.Contains(line, expectedLog) {
+				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
+			}
+			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+				ersLogsCount++
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			t.Errorf("error reading input: %v", err)
+		}
+		if records != 1 {
+			t.Errorf("expected ERs to process 1 records, but it processed %d records", records)
+		}
+		if ersLogsCount != 1 {
+			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+	})
+
+	t.Run("VerifyRowsCount", func(t *testing.T) {
+		var result int64
+		db.Table(utils.CDRsTBL).Count(&result)
+		if result != 2 {
+			t.Fatal("Expected 2 rows in table, got: ", result)
+		}
+		var rslt []map[string]interface{}
+		if err := db.Raw("SELECT * FROM " + utils.CDRsTBL).Scan(&rslt).Error; err != nil {
+			t.Errorf("failed to query table: %v", err)
+		}
+		// Print the entire table as a string
+		for _, row := range rslt {
+			for col, value := range row {
+				if strings.Contains(fmt.Sprintln(value), "RatingID2") {
+					t.Fatalf("Expected CDR with RatingID: \"RatingID2\" to be deleted. Received column <%q>, value <%q>", col, value)
+				}
+			}
+		}
+
+		var result2 int64
+		db.Table("cdrsProcessed").Count(&result2)
+		if result2 != 1 {
+			t.Fatal("Expected 1 rows in table, got: ", result2)
+		}
+		var rslt2 []map[string]interface{}
+		if err := db.Raw("SELECT * FROM " + "cdrsProcessed").Scan(&rslt2).Error; err != nil {
+			t.Errorf("failed to query table: %v", err)
+		}
+		timeStartFormated := rslt2[0]["answer_time"]
+		createdAt := rslt2[0]["created_at"]
+		updatedAt := rslt2[0]["updated_at"]
+		exp := fmt.Sprintf("map[account:1001 answer_time:%s category:call cgrid:%s cost:1.01 cost_details:{\"CGRID\":\"test1\",\"RunID\":\"*default\",\"StartTime\":\"2017-01-09T16:18:21Z\",\"Usage\":180000000000,\"Cost\":2.3,\"Charges\":[{\"RatingID\":\"RatingID2\",\"Increments\":[{\"Usage\":120000000000,\"Cost\":2,\"AccountingID\":\"a012888\",\"CompressFactor\":1},{\"Usage\":1000000000,\"Cost\":0.005,\"AccountingID\":\"44d6c02\",\"CompressFactor\":60}],\"CompressFactor\":1}],\"AccountSummary\":{\"Tenant\":\"cgrates.org\",\"ID\":\"1001\",\"BalanceSummaries\":[{\"UUID\":\"uuid1\",\"ID\":\"\",\"Type\":\"*monetary\",\"Initial\":0,\"Value\":50,\"Disabled\":false}],\"AllowNegative\":false,\"Disabled\":false},\"Rating\":{\"c1a5ab9\":{\"ConnectFee\":0.1,\"RoundingMethod\":\"*up\",\"RoundingDecimals\":5,\"MaxCost\":0,\"MaxCostStrategy\":\"\",\"TimingID\":\"\",\"RatesID\":\"ec1a177\",\"RatingFiltersID\":\"43e77dc\"}},\"Accounting\":{\"44d6c02\":{\"AccountID\":\"cgrates.org:1001\",\"BalanceUUID\":\"uuid1\",\"RatingID\":\"\",\"Units\":120.7,\"ExtraChargeID\":\"\"},\"a012888\":{\"AccountID\":\"cgrates.org:1001\",\"BalanceUUID\":\"uuid1\",\"RatingID\":\"\",\"Units\":120.7,\"ExtraChargeID\":\"\"}},\"RatingFilters\":null,\"Rates\":{\"ec1a177\":[{\"GroupIntervalStart\":0,\"Value\":0.01,\"RateIncrement\":60000000000,\"RateUnit\":1000000000}]},\"Timings\":null} cost_source:cost source created_at:%s deleted_at:<nil> destination:1002 extra_fields:{\"field_extr1\":\"val_extr1\",\"fieldextr2\":\"valextr2\"} extra_info:extraInfo id:2 origin_host:192.168.1.1 origin_id:oid2 request_type:*rated run_id:*default setup_time:%s source:test subject:1001 tenant:cgrates.org tor:*voice updated_at:%s usage:10000000000]", timeStartFormated, cgrID, createdAt, timeStartFormated, updatedAt)
+		// Print the entire table as a string
+		for _, row := range rslt2 {
+			if !strings.Contains(fmt.Sprintf("%+v", row), exp) {
+				t.Errorf("Expected <%v>, \nReceived <%v>", exp, fmt.Sprintf("%+v", row))
+			}
+		}
+	})
+}
+
+func TestERSSQLFiltersUpdate(t *testing.T) {
+	var dbcfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaMySQL:
+	case utils.MetaMongo:
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		dbcfg = engine.PostgresDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	t.Run("InitSQLDB", func(t *testing.T) {
+		var err error
+		var db2 *gorm.DB
+		if db2, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")),
+			&gorm.Config{
+				AllowGlobalUpdate: true,
+				Logger:            logger.Default.LogMode(logger.Silent),
+			}); err != nil {
+			t.Fatal(err)
+		}
+
+		if err = db2.Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`).Error; err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("PutCDRsInDataBase", func(t *testing.T) {
+		var err error
+		if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
+			&gorm.Config{
+				AllowGlobalUpdate: true,
+				Logger:            logger.Default.LogMode(logger.Silent),
+			}); err != nil {
+			t.Fatal(err)
+		}
+		tx := db.Begin()
+		if !tx.Migrator().HasTable("cdrs") {
+			if err = tx.Migrator().CreateTable(new(engine.CDRsql)); err != nil {
+				tx.Rollback()
+				t.Fatal(err)
+			}
+		}
+		tx.Commit()
+		tx = db.Begin()
+		tx = tx.Table(utils.CDRsTBL)
+		cdrSql := cdr1.AsCDRsql()
+		cdrSql2 := cdr2.AsCDRsql()
+		cdrsql3 := cdr3.AsCDRsql()
+		cdrSql.CreatedAt = time.Now()
+		cdrSql2.CreatedAt = time.Now()
+		cdrsql3.CreatedAt = time.Now()
+		saved := tx.Save(cdrSql)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		saved = tx.Save(cdrSql2)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		saved = tx.Save(cdrsql3)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		tx.Commit()
+		time.Sleep(10 * time.Millisecond)
+		var result int64
+		db.Table(utils.CDRsTBL).Count(&result)
+		if result != 3 {
+			t.Error("Expected table to have 3 results but got ", result)
+		}
+	})
+	defer t.Run("StopSQL", func(t *testing.T) {
+		if err := db.Migrator().DropTable("cdrs"); err != nil {
+			t.Fatal(err)
+		}
+		if err := db.Exec(`DROP DATABASE cgrates2;`).Error; err != nil {
+			t.Fatal(err)
+		}
+		if db2, err := db.DB(); err != nil {
+			t.Fatal(err)
+		} else if err = db2.Close(); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	content := `{
+
+	"general": {
+		"log_level": 7,
+		"default_timezone": "UTC",
+	},
+	
+	"apiers": {
+		"enabled": true
+	},
+	"filters": {			
+		"apiers_conns": ["*localhost"]
+	},
+	"ees": {
+		"enabled": true,
+		"exporters": [{
+			"id": "SQLExporter",
+			"type": "*sql",
+			"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"attempts": 1,
+			"opts": {
+				"sqlDBName": "cgrates2",
+				"sqlTableName":"cdrs", 
+				"sqlUpdateIndexedFields": ["id", "cgrid"],
+			},
+			"flags": ["*log"],
+			"fields": [
+				{"tag": "SetupTime", "path": "*exp.setup_time", "type": "*constant", "value": "2018-11-27 14:21:26"},
+				{"tag": "Account", "path": "*exp.account", "type": "*variable", "value": "~*req.ExtraInfo"},
+				{"tag": "ID", "path": "*exp.id", "type": "*variable", "value": "~*req.Id"},
+				{"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.CGRID"},
+			]
+		}]
+	},
+	"ers": {									
+		"enabled": true,						
+		"sessions_conns":["*localhost"],
+		"ees_conns": ["*localhost"],
+		"readers": [{
+				"id": "mysql",										
+				"type": "*sql",				
+				"run_delay": "1m",									
+				"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
+				"opts": {
+					"sqlDBName":"cgrates2",
+					"sqlTableName":"cdrs", 
+				},
+				"start_delay": "500ms", // wait for db to be populated before starting reader 
+				"tenant": "cgrates.org",							
+				"filters": [
+				"*gt:~*req.answer_time:NOW() - INTERVAL 7 DAY", // dont process cdrs with answer_time older than 7 days ago (continue if answer_time > now-7days)
+				"FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
+				"*string:~*vars.*readerID:mysql",
+				"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
+				],										
+				"flags": ["*dryrun", "*export:SQLExporter"],										
+				"fields":[									
+					{"tag": "CGRID", "path": "*cgreq.CGRID", "type": "*variable", "value": "~*req.cgrid", "mandatory": true},
+					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.tor", "mandatory": true},
+					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.origin_id", "mandatory": true},
+					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.request_type", "mandatory": true},
+					{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.tenant", "mandatory": true},
+					{"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.category", "mandatory": true},
+					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true},
+					{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.subject", "mandatory": true},
+					{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination", "mandatory": true},
+					{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.setup_time", "mandatory": true},
+					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.answer_time", "mandatory": true},
+					{"tag": "CostDetails", "path": "*cgreq.CostDetails", "type": "*variable", "value": "~*req.cost_details", "mandatory": true},
+					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage", "mandatory": true},
+					{"tag": "ExtraInfo", "path": "*cgreq.ExtraInfo", "type": "*variable", "value": "~*req.extra_info", "mandatory": true},
+					{"tag": "ID", "path": "*cgreq.Id", "type": "*variable", "value": "~*req.id", "mandatory": true},
+				],
+			},
+		],
+	},
+	
+	}`
+
+	tpFiles := map[string]string{
+		utils.FiltersCsv: `#Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
+cgrates.org,FLTR_SQL_RatingID,*eq,~*req.cost_details.Charges[0].RatingID,RatingID2,
+cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
+	}
+
+	buf := &bytes.Buffer{}
+	ng := engine.TestEngine{
+		ConfigJSON: content,
+		DBCfg:      dbcfg,
+		TpFiles:    tpFiles,
+		LogBuffer:  buf,
+	}
+	ng.Run(t)
+	time.Sleep(1 * time.Second)
+
+	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
+		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
+		records := 0
+		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
+		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"ExtraInfo\":\"extraInfo\",\"Id\":\"2\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
+		var ersLogsCount int
+		for scanner.Scan() {
+			line := scanner.Text()
+			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+				continue
+			}
+			records++
+			if !strings.Contains(line, expectedLog) {
+				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
+			}
+			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+				ersLogsCount++
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			t.Errorf("error reading input: %v", err)
+		}
+		if records != 1 {
+			t.Errorf("expected ERs to process 1 records, but it processed %d records", records)
+		}
+		if ersLogsCount != 1 {
+			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+	})
+
+	t.Run("VerifyRowsCount", func(t *testing.T) {
+		var result int64
+		db.Table(utils.CDRsTBL).Count(&result)
+		if result != 3 {
+			t.Error("Expected 3 rows in table, got: ", result)
+		}
+		var rslt []map[string]interface{}
+		if err := db.Raw("SELECT * FROM " + utils.CDRsTBL).Scan(&rslt).Error; err != nil {
+			t.Errorf("failed to query table: %v", err)
+		}
+		var countST int
+		// Print the entire table as a string
+		for _, row := range rslt {
+			for col, value := range row {
+				if col == "setup_time" {
+					if value.(time.Time).Equal(time.Date(2018, 11, 27, 12, 21, 26, 0, time.UTC)) {
+						countST++
+						if utils.IfaceAsString(row["account"]) != "extraInfo" {
+							t.Errorf("Expected CDR to be updated with empty cost_details. Received value <%q>", utils.IfaceAsString(row["cost_details"]))
+						}
+					}
+				}
+			}
+		}
+		if countST != 1 {
+			t.Errorf("Expected CDR with origin_id:oid2 to have updated setup_time: <%+v>. Received <%v> \nCounted <%v> with expected setup_time", time.Date(2018, 11, 27, 12, 21, 26, 0, time.UTC), utils.ToJSON(rslt), countST)
+		}
+	})
+}
+
+// Using the raw event to update the rows means you dont need to define in the reader's template fields, the fields which you want to send to EES since all of the fields read in that row will be sent to EES. It also means that the request field names used for exporter template fields will be as read on the row; meaning instead of ~*req.SetupTime, it will be written as ~*req.setup_time
+func TestERSSQLFiltersRawUpdate(t *testing.T) {
+	var dbcfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaMySQL:
+	case utils.MetaMongo:
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		dbcfg = engine.PostgresDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	t.Run("InitSQLDB", func(t *testing.T) {
+		var err error
+		var db2 *gorm.DB
+		if db2, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")),
+			&gorm.Config{
+				AllowGlobalUpdate: true,
+				Logger:            logger.Default.LogMode(logger.Silent),
+			}); err != nil {
+			t.Fatal(err)
+		}
+
+		if err = db2.Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`).Error; err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("PutCDRsInDataBase", func(t *testing.T) {
+		var err error
+		if db, err = gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates2")),
+			&gorm.Config{
+				AllowGlobalUpdate: true,
+				Logger:            logger.Default.LogMode(logger.Silent),
+			}); err != nil {
+			t.Fatal(err)
+		}
+		tx := db.Begin()
+		if !tx.Migrator().HasTable("cdrs") {
+			if err = tx.Migrator().CreateTable(new(engine.CDRsql)); err != nil {
+				tx.Rollback()
+				t.Fatal(err)
+			}
+		}
+		tx.Commit()
+		tx = db.Begin()
+		tx = tx.Table(utils.CDRsTBL)
+		cdrSql := cdr1.AsCDRsql()
+		cdrSql2 := cdr2.AsCDRsql()
+		cdrsql3 := cdr3.AsCDRsql()
+		cdrSql.CreatedAt = time.Now()
+		cdrSql2.CreatedAt = time.Now()
+		cdrsql3.CreatedAt = time.Now()
+		saved := tx.Save(cdrSql)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		saved = tx.Save(cdrSql2)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		saved = tx.Save(cdrsql3)
+		if saved.Error != nil {
+			tx.Rollback()
+			t.Fatal(err)
+		}
+		tx.Commit()
+		time.Sleep(10 * time.Millisecond)
+		var result int64
+		db.Table(utils.CDRsTBL).Count(&result)
+		if result != 3 {
+			t.Error("Expected table to have 3 results but got ", result)
+		}
+	})
+	defer t.Run("StopSQL", func(t *testing.T) {
+		if err := db.Migrator().DropTable("cdrs"); err != nil {
+			t.Fatal(err)
+		}
+		if err := db.Exec(`DROP DATABASE cgrates2;`).Error; err != nil {
+			t.Fatal(err)
+		}
+		if db2, err := db.DB(); err != nil {
+			t.Fatal(err)
+		} else if err = db2.Close(); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	content := `{
+"general": {
+	"log_level": 7,
+	"default_timezone": "UTC",
+},
+
+"apiers": {
+	"enabled": true
+},
+"filters": {			
+	"apiers_conns": ["*localhost"]
+},
+"ees": {
+	"enabled": true,
+	"exporters": [{
+		"id": "SQLExporter",
+		"type": "*sql",
+		"export_path": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+		"attempts": 1,
+		"opts": {
+			"sqlDBName": "cgrates2",
+			"sqlTableName":"cdrs", 
+			"sqlUpdateIndexedFields": ["id", "cgrid"],
+		},
+		"flags": ["*log"],
+		"fields": [
+			{"tag": "SetupTime", "path": "*exp.setup_time", "type": "*constant", "value": "2018-11-27 14:21:26"},
+			{"tag": "Account", "path": "*exp.account", "type": "*variable", "value": "~*req.extra_info"},
+			{"tag": "ID", "path": "*exp.id", "type": "*variable", "value": "~*req.id"},
+			{"tag": "CGRID", "path": "*exp.cgrid", "type": "*variable", "value": "~*req.cgrid"},
+		]
+	}]
+},
+"ers": {									
+	"enabled": true,						
+	"sessions_conns":["*localhost"],
+	"ees_conns": ["*localhost"],
+	"readers": [{
+			"id": "mysql",										
+			"type": "*sql",		
+			"ees_success_ids": ["SQLExporter"],				
+			"run_delay": "1m",									
+			"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
+			"opts": {
+				"sqlDBName":"cgrates2",
+				"sqlTableName":"cdrs", 
+			},
+			"start_delay": "500ms", // wait for db to be populated before starting reader 
+			"tenant": "cgrates.org",							
+			"filters": [
+			"*gt:~*req.answer_time:NOW() - INTERVAL 7 DAY", // dont process cdrs with answer_time older than 7 days ago (continue if answer_time > now-7days)
+			"FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
+			"*string:~*vars.*readerID:mysql",
+			"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
+			],										
+			"flags": ["*dryrun"],										
+			"fields":[									
+				{"tag": "CGRID", "path": "*cgreq.CGRID", "type": "*variable", "value": "~*req.cgrid", "mandatory": true},
+				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.tor", "mandatory": true},
+				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.origin_id", "mandatory": true},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.request_type", "mandatory": true},
+				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.tenant", "mandatory": true},
+				{"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.category", "mandatory": true},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true},
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.subject", "mandatory": true},
+				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.destination", "mandatory": true},
+				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.setup_time", "mandatory": true},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.answer_time", "mandatory": true},
+				{"tag": "CostDetails", "path": "*cgreq.CostDetails", "type": "*variable", "value": "~*req.cost_details", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage", "mandatory": true},
+			],
+		},
+	],
+},
+
+}`
+
+	tpFiles := map[string]string{
+		utils.FiltersCsv: `#Tenant[0],ID[1],Type[2],Path[3],Values[4],ActivationInterval[5]
+cgrates.org,FLTR_SQL_RatingID,*eq,~*req.cost_details.Charges[0].RatingID,RatingID2,
+cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql,`,
+	}
+
+	buf := &bytes.Buffer{}
+	ng := engine.TestEngine{
+		ConfigJSON: content,
+		DBCfg:      dbcfg,
+		TpFiles:    tpFiles,
+		LogBuffer:  buf,
+	}
+	ng.Run(t)
+	time.Sleep(1 * time.Second)
+
+	t.Run("VerifyProcessedFieldsFromLogs", func(t *testing.T) {
+		time.Sleep(100 * time.Millisecond) // give enough time to process from sql table
+		records := 0
+		scanner := bufio.NewScanner(strings.NewReader(buf.String()))
+		timeStartFormated := timeStart.Format("2006-01-02T15:04:05Z07:00")
+		expectedLog := fmt.Sprintf("\"Event\":{\"Account\":\"1001\",\"AnswerTime\":\"%s\",\"CGRID\":\"%s\",\"Category\":\"call\",\"CostDetails\":\"{\\\"CGRID\\\":\\\"test1\\\",\\\"RunID\\\":\\\"*default\\\",\\\"StartTime\\\":\\\"2017-01-09T16:18:21Z\\\",\\\"Usage\\\":180000000000,\\\"Cost\\\":2.3,\\\"Charges\\\":[{\\\"RatingID\\\":\\\"RatingID2\\\",\\\"Increments\\\":[{\\\"Usage\\\":120000000000,\\\"Cost\\\":2,\\\"AccountingID\\\":\\\"a012888\\\",\\\"CompressFactor\\\":1},{\\\"Usage\\\":1000000000,\\\"Cost\\\":0.005,\\\"AccountingID\\\":\\\"44d6c02\\\",\\\"CompressFactor\\\":60}],\\\"CompressFactor\\\":1}],\\\"AccountSummary\\\":{\\\"Tenant\\\":\\\"cgrates.org\\\",\\\"ID\\\":\\\"1001\\\",\\\"BalanceSummaries\\\":[{\\\"UUID\\\":\\\"uuid1\\\",\\\"ID\\\":\\\"\\\",\\\"Type\\\":\\\"*monetary\\\",\\\"Initial\\\":0,\\\"Value\\\":50,\\\"Disabled\\\":false}],\\\"AllowNegative\\\":false,\\\"Disabled\\\":false},\\\"Rating\\\":{\\\"c1a5ab9\\\":{\\\"ConnectFee\\\":0.1,\\\"RoundingMethod\\\":\\\"*up\\\",\\\"RoundingDecimals\\\":5,\\\"MaxCost\\\":0,\\\"MaxCostStrategy\\\":\\\"\\\",\\\"TimingID\\\":\\\"\\\",\\\"RatesID\\\":\\\"ec1a177\\\",\\\"RatingFiltersID\\\":\\\"43e77dc\\\"}},\\\"Accounting\\\":{\\\"44d6c02\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"},\\\"a012888\\\":{\\\"AccountID\\\":\\\"cgrates.org:1001\\\",\\\"BalanceUUID\\\":\\\"uuid1\\\",\\\"RatingID\\\":\\\"\\\",\\\"Units\\\":120.7,\\\"ExtraChargeID\\\":\\\"\\\"}},\\\"RatingFilters\\\":null,\\\"Rates\\\":{\\\"ec1a177\\\":[{\\\"GroupIntervalStart\\\":0,\\\"Value\\\":0.01,\\\"RateIncrement\\\":60000000000,\\\"RateUnit\\\":1000000000}]},\\\"Timings\\\":null}\",\"Destination\":\"1002\",\"OriginID\":\"oid2\",\"RequestType\":\"*rated\",\"SetupTime\":\"%s\",\"Subject\":\"1001\",\"Tenant\":\"cgrates.org\",\"ToR\":\"*voice\",\"Usage\":\"10000000000\"},\"APIOpts\":{}}>", timeStartFormated, cgrID, timeStartFormated)
+		var ersLogsCount int
+		for scanner.Scan() {
+			line := scanner.Text()
+			if !strings.Contains(line, "<ERs> DRYRUN, reader: <mysql>") {
+				continue
+			}
+			records++
+			if !strings.Contains(line, expectedLog) {
+				t.Errorf("expected \n<%q>, \nreceived\n<%q>", expectedLog, line)
+			}
+			if strings.Contains(line, "[INFO] <ERs> DRYRUN") {
+				ersLogsCount++
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			t.Errorf("error reading input: %v", err)
+		}
+		if records != 1 {
+			t.Errorf("expected ERs to process 1 records, but it processed %d records", records)
+		}
+		if ersLogsCount != 1 {
+			t.Error("Expected only 1 ERS Dryrun log, received: ", ersLogsCount)
+		}
+	})
+
+	t.Run("VerifyRowsCount", func(t *testing.T) {
+		var result int64
+		db.Table(utils.CDRsTBL).Count(&result)
+		if result != 3 {
+			t.Error("Expected 3 rows in table, got: ", result)
+		}
+		var rslt []map[string]interface{}
+		if err := db.Raw("SELECT * FROM " + utils.CDRsTBL).Scan(&rslt).Error; err != nil {
+			t.Errorf("failed to query table: %v", err)
+		}
+		var countST int
+		// Print the entire table as a string
+		for _, row := range rslt {
+			for col, value := range row {
+				if col == "setup_time" {
+					if value.(time.Time).Equal(time.Date(2018, 11, 27, 12, 21, 26, 0, time.UTC)) {
+						countST++
+						if utils.IfaceAsString(row["account"]) != "extraInfo" {
+							t.Errorf("Expected CDR to be updated with empty cost_details. Received value <%q>", utils.IfaceAsString(row["cost_details"]))
+						}
+					}
+				}
+			}
+		}
+		if countST != 1 {
+			t.Errorf("Expected CDR with origin_id:oid2 to have updated setup_time: <%v>. Received <%v> \nCounted <%v> with expected setup_time", "2018-11-27T14:21:26+02:00", utils.ToJSON(rslt), countST)
 		}
 	})
 }

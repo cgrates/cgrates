@@ -2808,7 +2808,8 @@ const (
 
 	SQLDBNameOpt              = "sqlDBName"
 	SQLTableNameOpt           = "sqlTableName"
-	SQLDeleteIndexedFieldsOpt = "sqlDeleteIndexedFields"
+	SQLWhereIndexedFieldsOpt  = "sqlWhereIndexedFields"
+	SQLUpdateIndexedFieldsOpt = "sqlUpdateIndexedFields"
 
 	SQLMaxOpenConns    = "sqlMaxOpenConns"
 	SQLConnMaxLifetime = "sqlConnMaxLifetime"
