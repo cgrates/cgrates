@@ -41,6 +41,7 @@ import (
 
 // erEvent is passed from reader to ERs
 type erEvent struct {
+	rawEvent map[string]any
 	cgrEvent *utils.CGREvent
 	rdrCfg   *config.EventReaderCfg
 }
@@ -152,7 +153,7 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) error {
 						fmt.Sprintf("<%s> reading event: <%s> from reader: <%s> got error: <%v>",
 							utils.ERs, utils.ToJSON(erEv.cgrEvent), erEv.rdrCfg.ID, err))
 				}
-				if err = erS.exportEvent(erEv, err != nil); err != nil {
+				if err = erS.exportRawEvent(erEv, err != nil); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> exporting event: <%s> from reader: <%s> got error: <%v>",
 							utils.ERs, utils.ToJSON(erEv.cgrEvent), erEv.rdrCfg.ID, err))
@@ -166,7 +167,7 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) error {
 					fmt.Sprintf("<%s> reading partial event: <%s> from reader: <%s> got error: <%v>",
 						utils.ERs, utils.ToJSON(pEv.cgrEvent), pEv.rdrCfg.ID, err))
 			}
-			if err = erS.exportEvent(pEv, err != nil); err != nil {
+			if err = erS.exportRawEvent(pEv, err != nil); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> exporting partial event: <%s> from reader: <%s> got error: <%v>",
 						utils.ERs, utils.ToJSON(pEv.cgrEvent), pEv.rdrCfg.ID, err))
@@ -244,7 +245,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		utils.MetaDryRun, utils.MetaAuthorize,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone} {
+		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone, utils.MetaExport} {
 		if rdrCfg.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -359,6 +360,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 	case utils.MetaCDRs: // allow CDR processing
+	case utils.MetaExport: // allow event exporting
 	}
 	if err != nil {
 		return
@@ -369,6 +371,13 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		rplyCDRs := utils.StringPointer("")
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessCDR,
 			cgrEv, rplyCDRs)
+	}
+	if rdrCfg.Flags.Has(utils.MetaExport) {
+		var reply map[string]map[string]any
+		return erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().EEsConns, utils.EeSv1ProcessEvent,
+			&engine.CGREventWithEeIDs{
+				CGREvent: cgrEv,
+			}, &reply)
 	}
 
 	return
@@ -593,9 +602,9 @@ func (erS *ERService) onEvicted(id string, value any) {
 
 }
 
-// exportEvent exports the given event. If the processing of the event failed,
+// exportRawEvent exports the given event. If the processing of the event failed,
 // it uses ees_failed_ids; otherwise, it uses ees_success_ids.
-func (erS *ERService) exportEvent(event *erEvent, processingFailed bool) error {
+func (erS *ERService) exportRawEvent(event *erEvent, processingFailed bool) error {
 	var exporterIDs []string
 	if processingFailed {
 		if len(event.rdrCfg.EEsFailedIDs) == 0 {
@@ -608,11 +617,13 @@ func (erS *ERService) exportEvent(event *erEvent, processingFailed bool) error {
 		}
 		exporterIDs = event.rdrCfg.EEsSuccessIDs
 	}
-
 	var reply map[string]map[string]any
 	return erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().EEsConns, utils.EeSv1ProcessEvent,
 		&engine.CGREventWithEeIDs{
-			EeIDs:    exporterIDs,
-			CGREvent: event.cgrEvent,
+			EeIDs: exporterIDs,
+			CGREvent: &utils.CGREvent{
+				Tenant: erS.cfg.GeneralCfg().DefaultTenant,
+				Event:  event.rawEvent,
+			},
 		}, &reply)
 }

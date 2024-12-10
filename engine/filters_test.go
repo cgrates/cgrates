@@ -3115,3 +3115,294 @@ func TestNewFilterRule(t *testing.T) {
 		}
 	})
 }
+
+func TestFilterToSQLQuery(t *testing.T) {
+	tests := []struct {
+		name     string
+		fltrRule FilterRule
+		expected []string
+	}{
+		{"MetaEqual with values", FilterRule{Type: utils.MetaEqual, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"RatingID2"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') = 'RatingID2'"}},
+
+		{"MetaExists with no values", FilterRule{Type: utils.MetaExists, Element: "~*req.answer_time", Values: nil}, []string{"answer_time IS NULL"}},
+
+		{"MetaExists with JSON field", FilterRule{Type: utils.MetaExists, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') IS NULL"}},
+
+		{"MetaNotExists with no values", FilterRule{Type: utils.MetaNotExists, Element: "~*req.answer_time", Values: nil}, []string{"answer_time IS NOT NULL"}},
+
+		{"MetaNotExists with JSON field", FilterRule{Type: utils.MetaNotExists, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') IS NOT NULL"}},
+
+		{"MetaString with values", FilterRule{Type: utils.MetaString, Element: "~*req.answer_time", Values: []string{"value1", "value2"}}, []string{"answer_time = 'value1'", "answer_time = 'value2'"}},
+
+		{"MetaNotString with values", FilterRule{Type: utils.MetaNotString, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"value1"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') != 'value1'"}},
+
+		{"MetaEmpty with no values", FilterRule{Type: utils.MetaEmpty, Element: "~*req.answer_time", Values: nil}, []string{"answer_time == ''"}},
+
+		{"MetaEmpty with JSON field", FilterRule{Type: utils.MetaEmpty, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') == ''"}},
+
+		{"MetaNotEmpty with no values", FilterRule{Type: utils.MetaNotEmpty, Element: "~*req.answer_time", Values: nil}, []string{"answer_time != ''"}},
+
+		{"MetaNotEmpty with JSON field", FilterRule{Type: utils.MetaNotEmpty, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') != ''"}},
+
+		{"MetaGreaterOrEqual with values", FilterRule{Type: utils.MetaGreaterOrEqual, Element: "~*req.answer_time", Values: []string{"10"}}, []string{"answer_time >= '10'"}},
+
+		{"MetaGreaterThan with values", FilterRule{Type: utils.MetaGreaterThan, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"20"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') > '20'"}},
+
+		{"MetaLessThan with values", FilterRule{Type: utils.MetaLessThan, Element: "~*req.answer_time", Values: []string{"5"}}, []string{"answer_time < '5'"}},
+
+		{"MetaLessOrEqual with values", FilterRule{Type: utils.MetaLessOrEqual, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"15"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') <= '15'"}},
+
+		{"MetaPrefix with values", FilterRule{Type: utils.MetaPrefix, Element: "~*req.answer_time", Values: []string{"pre"}}, []string{"answer_time LIKE 'pre%'"}},
+
+		{"MetaNotPrefix with values", FilterRule{Type: utils.MetaNotPrefix, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"pre"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') NOT LIKE 'pre%'"}},
+
+		{"MetaSuffix with values", FilterRule{Type: utils.MetaSuffix, Element: "~*req.answer_time", Values: []string{"suf"}}, []string{"answer_time LIKE '%suf'"}},
+
+		{"MetaNotSuffix with values", FilterRule{Type: utils.MetaNotSuffix, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"suf"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') NOT LIKE '%suf'"}},
+
+		{"MetaGreaterOrEqual with JSON field", FilterRule{Type: utils.MetaGreaterOrEqual, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"100"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') >= '100'"}},
+
+		{"MetaRegex with values", FilterRule{Type: utils.MetaRegex, Element: "~*req.answer_time", Values: []string{"pattern1", "pattern2"}}, []string{"answer_time REGEXP 'pattern1'", "answer_time REGEXP 'pattern2'"}},
+
+		{"MetaNotRegex with values", FilterRule{Type: utils.MetaNotRegex, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"pattern"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') NOT REGEXP 'pattern'"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.fltrRule.FilterToSQLQuery()
+			if len(got) != len(tt.expected) {
+				t.Errorf("expected %v, got %v", tt.expected, got)
+				return
+			}
+			for i, cond := range got {
+				if cond != tt.expected[i] {
+					t.Errorf("expected %v, got %v", tt.expected[i], cond)
+				}
+			}
+		})
+	}
+}
+
+func TestFilterToSQLQueryValidations(t *testing.T) {
+	tests := []struct {
+		name     string
+		fltrRule FilterRule
+		expected []string
+	}{
+		{
+			name: "Boolean true value",
+			fltrRule: FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.active",
+				Values:  []string{"true"},
+			},
+			expected: []string{"active = '1'"},
+		},
+		{
+			name: "Boolean false value",
+			fltrRule: FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.active",
+				Values:  []string{"false"},
+			},
+			expected: []string{"active = '0'"},
+		},
+		{
+			name: "Greater than or equal with empty beforeSep",
+			fltrRule: FilterRule{
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.score",
+				Values:  []string{"10"},
+			},
+			expected: []string{"score >= '10'"},
+		},
+		{
+			name: "Greater than with empty beforeSep",
+			fltrRule: FilterRule{
+				Type:    utils.MetaGreaterThan,
+				Element: "~*req.score",
+				Values:  []string{"20"},
+			},
+			expected: []string{"score > '20'"},
+		},
+		{
+			name: "Less than or equal with empty beforeSep",
+			fltrRule: FilterRule{
+				Type:    utils.MetaLessOrEqual,
+				Element: "~*req.score",
+				Values:  []string{"30"},
+			},
+			expected: []string{"score <= '30'"},
+		},
+		{
+			name: "Less than with empty beforeSep",
+			fltrRule: FilterRule{
+				Type:    utils.MetaLessThan,
+				Element: "~*req.score",
+				Values:  []string{"40"},
+			},
+			expected: []string{"score < '40'"},
+		},
+		{
+			name: "Prefix NOT LIKE with empty beforeSep",
+			fltrRule: FilterRule{
+				Type:    utils.MetaNotPrefix,
+				Element: "~*req.name",
+				Values:  []string{"prefix"},
+			},
+			expected: []string{"name NOT LIKE 'prefix%'"},
+		},
+		{
+			name: "Prefix LIKE with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaPrefix,
+				Element: "~*req.data.name",
+				Values:  []string{"prefix"},
+			},
+			expected: []string{"JSON_VALUE(data, '$.name') LIKE 'prefix%'"},
+		},
+		{
+			name: "Suffix NOT LIKE with empty beforeSep",
+			fltrRule: FilterRule{
+				Type:    utils.MetaNotSuffix,
+				Element: "~*req.name",
+				Values:  []string{"suffix"},
+			},
+			expected: []string{"name NOT LIKE '%suffix'"},
+		},
+		{
+			name: "Suffix LIKE with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaSuffix,
+				Element: "~*req.data.name",
+				Values:  []string{"suffix"},
+			},
+			expected: []string{"JSON_VALUE(data, '$.name') LIKE '%suffix'"},
+		},
+		{
+			name: "Regex NOT REGEXP with empty beforeSep",
+			fltrRule: FilterRule{
+				Type:    utils.MetaNotRegex,
+				Element: "~*req.pattern",
+				Values:  []string{"[a-z]+"},
+			},
+			expected: []string{"pattern NOT REGEXP '[a-z]+'"},
+		},
+		{
+			name: "Regex REGEXP with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaRegex,
+				Element: "~*req.data.pattern",
+				Values:  []string{"[0-9]+"},
+			},
+			expected: []string{"JSON_VALUE(data, '$.pattern') REGEXP '[0-9]+'"},
+		},
+
+		{
+			name: "Not equal with empty beforeSep",
+			fltrRule: FilterRule{
+				Type:    utils.MetaNotString,
+				Element: "~*req.status",
+				Values:  []string{"inactive"},
+			},
+			expected: []string{"status != 'inactive'"},
+		},
+		{
+			name: "Equal condition with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.data.status",
+				Values:  []string{"active"},
+			},
+			expected: []string{"JSON_VALUE(data, '$.status') = 'active'"},
+		},
+		{
+			name: "Greater than condition with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaGreaterThan,
+				Element: "~*req.data.score",
+				Values:  []string{"50"},
+			},
+			expected: []string{"JSON_VALUE(data, '$.score') > '50'"},
+		},
+		{
+			name: "Less than or equal condition with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaLessOrEqual,
+				Element: "~*req.data.score",
+				Values:  []string{"30"},
+			},
+			expected: []string{"JSON_VALUE(data, '$.score') <= '30'"},
+		},
+		{
+			name: "Less than condition with JSON_VALUE",
+			fltrRule: FilterRule{
+				Type:    utils.MetaLessThan,
+				Element: "~*req.data.score",
+				Values:  []string{"20"},
+			},
+			expected: []string{"JSON_VALUE(data, '$.score') < '20'"},
+		},
+
+		{
+			name: "MetaExists with no values",
+			fltrRule: FilterRule{
+				Type:    utils.MetaExists,
+				Element: "~*req.column1",
+				Values:  nil,
+			},
+			expected: []string{"column1 IS NULL"},
+		},
+		{
+			name: "MetaNotExists with no values",
+			fltrRule: FilterRule{
+				Type:    utils.MetaNotExists,
+				Element: "~*req.json_field.key",
+				Values:  nil,
+			},
+			expected: []string{"JSON_VALUE(json_field, '$.key') IS NOT NULL"},
+		},
+		{
+			name: "MetaString with values",
+			fltrRule: FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.column2",
+				Values:  []string{"value1", "value2"},
+			},
+			expected: []string{"column2 = 'value1'", "column2 = 'value2'"},
+		},
+		{
+			name: "MetaPrefix with NOT condition",
+			fltrRule: FilterRule{
+				Type:    utils.MetaNotPrefix,
+				Element: "~*req.json_field.key",
+				Values:  []string{"prefix1"},
+			},
+			expected: []string{"JSON_VALUE(json_field, '$.key') NOT LIKE 'prefix1%'"},
+		},
+		{
+			name: "MetaRegex with multiple values",
+			fltrRule: FilterRule{
+				Type:    utils.MetaRegex,
+				Element: "~*req.column3",
+				Values:  []string{"pattern1", "pattern2"},
+			},
+			expected: []string{"column3 REGEXP 'pattern1'", "column3 REGEXP 'pattern2'"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.fltrRule.FilterToSQLQuery()
+			if len(got) != len(tt.expected) {
+				t.Errorf("expected %v, got %v", tt.expected, got)
+				return
+			}
+			for i, cond := range got {
+				if cond != tt.expected[i] {
+					t.Errorf("expected %v, got %v", tt.expected[i], cond)
+				}
+			}
+		})
+	}
+}
