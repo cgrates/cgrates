@@ -34,13 +34,11 @@ import (
 
 // NewTPeService is the constructor for the TpeService
 func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataDBService,
-	clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TPeService{
 		cfg:        cfg,
 		dm:         dm,
 		connMgr:    connMgr,
-		clSChan:    clSChan,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -50,8 +48,7 @@ func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataD
 type TPeService struct {
 	sync.RWMutex
 
-	clSChan chan *commonlisteners.CommonListenerS
-	dm      *DataDBService
+	dm *DataDBService
 
 	tpes *tpes.TPeS
 	cl   *commonlisteners.CommonListenerS
@@ -68,8 +65,11 @@ type TPeService struct {
 
 // Start should handle the service start
 func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	ts.cl = <-ts.clSChan
-	ts.clSChan <- ts.cl
+	cls := ts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.TPeS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	ts.cl = cls.CLS()
 	var datadb *engine.DataManager
 	if datadb, err = ts.dm.WaitForDM(ctx); err != nil {
 		return

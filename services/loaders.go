@@ -34,14 +34,13 @@ import (
 
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
-	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
+	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) *LoaderService {
 	return &LoaderService{
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		stopChan:    make(chan struct{}),
 		srvIndexer:  srvIndexer,
@@ -53,7 +52,6 @@ func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 type LoaderService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -75,8 +73,11 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	ldrs.cl = <-ldrs.clSChan
-	ldrs.clSChan <- ldrs.cl
+	cls := ldrs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	ldrs.cl = cls.CLS()
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ldrs.filterSChan); err != nil {
 		return

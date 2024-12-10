@@ -34,14 +34,12 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) *DispatcherService {
 	return &DispatcherService{
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvsReload:  make(map[string]chan struct{}),
 		srvIndexer:  srvIndexer,
@@ -53,7 +51,6 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 type DispatcherService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -75,8 +72,11 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 	utils.Logger.Info("Starting CGRateS DispatcherS service.")
-	dspS.cl = <-dspS.clSChan
-	dspS.clSChan <- dspS.cl
+	cls := dspS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DispatcherS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	dspS.cl = cls.CLS()
 	cacheS := dspS.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.DispatcherS, utils.CacheS, utils.StateServiceUP)

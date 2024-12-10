@@ -34,13 +34,12 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventExporterService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
-		clSChan:     clSChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -50,7 +49,6 @@ func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.Fil
 type EventExporterService struct {
 	mu sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
 
 	eeS *ees.EeS
@@ -106,8 +104,11 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	es.cl = <-es.clSChan
-	es.clSChan <- es.cl
+	cls := es.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), es.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.EEs, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	es.cl = cls.CLS()
 	fltrS, err := waitForFilterS(ctx, es.filterSChan)
 	if err != nil {
 		return err

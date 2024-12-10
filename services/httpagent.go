@@ -34,12 +34,11 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &HTTPAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -50,7 +49,6 @@ func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 type HTTPAgent struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
 
 	cl *commonlisteners.CommonListenerS
@@ -73,8 +71,11 @@ func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err erro
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cl := <-ha.clSChan
-	ha.clSChan <- cl
+	cls := ha.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ha.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.HTTPAgent, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	cl := cls.CLS()
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ha.filterSChan); err != nil {
 		return

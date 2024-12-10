@@ -35,14 +35,12 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	dspS *DispatcherService,
 	sIndxr *servmanager.ServiceIndexer) servmanager.Service {
 	return &AttributeService{
 		cfg:            cfg,
 		dm:             dm,
 		filterSChan:    filterSChan,
-		clSChan:        clSChan,
 		dspS:           dspS,
 		stateDeps:      NewStateDependencies([]string{utils.StateServiceUP}),
 		serviceIndexer: sIndxr,
@@ -53,7 +51,6 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 type AttributeService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	dspS        *DispatcherService
 	filterSChan chan *engine.FilterS
@@ -79,8 +76,11 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 		attrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CommonListenerS, utils.StateServiceUP)
 	}
-	attrS.cl = <-attrS.clSChan
-	attrS.clSChan <- attrS.cl
+	cls := attrS.serviceIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	attrS.cl = cls.CLS()
 	cacheS := attrS.serviceIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CacheS, utils.StateServiceUP)

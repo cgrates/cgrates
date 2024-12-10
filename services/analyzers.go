@@ -33,12 +33,11 @@ import (
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.CommonListenerS,
+func NewAnalyzerService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
 	return &AnalyzerService{
 		cfg:         cfg,
-		clSChan:     clSChan,
 		filterSChan: filterSChan,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -49,7 +48,6 @@ func NewAnalyzerService(cfg *config.CGRConfig, clSChan chan *commonlisteners.Com
 type AnalyzerService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
 
 	anz *analyzers.AnalyzerS
@@ -70,8 +68,11 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	anz.cl = <-anz.clSChan
-	anz.clSChan <- anz.cl
+	cls := anz.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), anz.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AnalyzerS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	anz.cl = cls.CLS()
 
 	anz.Lock()
 	defer anz.Unlock()

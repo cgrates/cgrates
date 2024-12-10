@@ -34,7 +34,7 @@ import (
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig,
 	dm *DataDBService, storDB *StorDBService,
-	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
+	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AdminSv1Service{
@@ -42,7 +42,6 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 		dm:          dm,
 		storDB:      storDB,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -53,7 +52,6 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 type AdminSv1Service struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	storDB      *StorDBService
 	filterSChan chan *engine.FilterS
@@ -77,8 +75,11 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	apiService.cl = <-apiService.clSChan
-	apiService.clSChan <- apiService.cl
+	cls := apiService.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	apiService.cl = cls.CLS()
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, apiService.filterSChan); err != nil {
 		return

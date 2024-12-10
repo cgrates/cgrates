@@ -34,14 +34,12 @@ import (
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TrendService{
 		cfg:         cfg,
 		dm:          dm,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		filterSChan: filterSChan,
@@ -53,7 +51,6 @@ func NewTrendService(cfg *config.CGRConfig, dm *DataDBService,
 type TrendService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -76,8 +73,11 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	}
 
 	trs.srvDep[utils.DataDB].Add(1)
-	trs.cl = <-trs.clSChan
-	trs.clSChan <- trs.cl
+	cls := trs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	trs.cl = cls.CLS()
 	cacheS := trs.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.CacheS, utils.StateServiceUP)

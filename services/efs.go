@@ -37,8 +37,6 @@ import (
 type ExportFailoverService struct {
 	sync.Mutex
 
-	clSChan chan *commonlisteners.CommonListenerS
-
 	efS *efs.EfS
 	cl  *commonlisteners.CommonListenerS
 	srv *birpc.Service
@@ -54,11 +52,9 @@ type ExportFailoverService struct {
 
 // NewExportFailoverService is the constructor for the TpeService
 func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) *ExportFailoverService {
 	return &ExportFailoverService{
 		cfg:        cfg,
-		clSChan:    clSChan,
 		connMgr:    connMgr,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
@@ -70,8 +66,11 @@ func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.Cance
 	if efServ.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	efServ.cl = <-efServ.clSChan
-	efServ.clSChan <- efServ.cl
+	cls := efServ.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), efServ.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.EFs, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	efServ.cl = cls.CLS()
 	efServ.Lock()
 	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))

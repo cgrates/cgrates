@@ -34,7 +34,6 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
@@ -42,7 +41,6 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
@@ -54,7 +52,6 @@ func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 type ResourceService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -77,8 +74,11 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	}
 
 	reS.srvDep[utils.DataDB].Add(1)
-	reS.cl = <-reS.clSChan
-	reS.clSChan <- reS.cl
+	cls := reS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	reS.cl = cls.CLS()
 	cacheS := reS.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.CacheS, utils.StateServiceUP)

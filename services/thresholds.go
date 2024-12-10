@@ -35,14 +35,12 @@ import (
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	clSChan chan *commonlisteners.CommonListenerS,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ThresholdService{
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		srvDep:      srvDep,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
@@ -54,7 +52,6 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 type ThresholdService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -77,8 +74,11 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	}
 
 	thrs.srvDep[utils.DataDB].Add(1)
-	thrs.cl = <-thrs.clSChan
-	thrs.clSChan <- thrs.cl
+	cls := thrs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	thrs.cl = cls.CLS()
 	cacheS := thrs.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.CacheS, utils.StateServiceUP)

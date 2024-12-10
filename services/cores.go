@@ -34,7 +34,7 @@ import (
 )
 
 // NewCoreService returns the Core Service
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *commonlisteners.CommonListenerS,
+func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) *CoreService {
 	return &CoreService{
@@ -42,7 +42,6 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *comm
 		cfg:        cfg,
 		caps:       caps,
 		fileCPU:    fileCPU,
-		clSChan:    clSChan,
 		csCh:       make(chan *cores.CoreS, 1),
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
@@ -52,8 +51,6 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, clSChan chan *comm
 // CoreService implements Service interface
 type CoreService struct {
 	mu sync.RWMutex
-
-	clSChan chan *commonlisteners.CommonListenerS
 
 	cS *cores.CoreS
 	cl *commonlisteners.CommonListenerS
@@ -76,8 +73,11 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cS.cl = <-cS.clSChan
-	cS.clSChan <- cS.cl
+	cls := cS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CoreS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	cS.cl = cls.CLS()
 	anz := cS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.CoreS, utils.AnalyzerS, utils.StateServiceUP)

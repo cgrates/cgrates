@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -35,12 +34,11 @@ import (
 
 // NewJanusAgent returns the Janus Agent
 func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS, connMgr *engine.ConnManager,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &JanusAgent{
 		cfg:         cfg,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -51,7 +49,6 @@ func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 type JanusAgent struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	filterSChan chan *engine.FilterS
 
 	jA *agents.JanusAgent
@@ -70,8 +67,11 @@ type JanusAgent struct {
 
 // Start should jandle the sercive start
 func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	cl := <-ja.clSChan
-	ja.clSChan <- cl
+	cls := ja.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ja.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.JanusAgent, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	cl := cls.CLS()
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ja.filterSChan); err != nil {
 		return
