@@ -36,7 +36,6 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &CDRService{
@@ -44,7 +43,6 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 		dm:          dm,
 		storDB:      storDB,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -55,7 +53,6 @@ func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 type CDRService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	storDB      *StorDBService
 	filterSChan chan *engine.FilterS
@@ -80,8 +77,11 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))
 
-	cs.cl = <-cs.clSChan
-	cs.clSChan <- cs.cl
+	cls := cs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	cs.cl = cls.CLS()
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, cs.filterSChan); err != nil {
 		return

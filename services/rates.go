@@ -34,13 +34,12 @@ import (
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
-	dmS *DataDBService, clSChan chan *commonlisteners.CommonListenerS,
+	dmS *DataDBService,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RateService{
 		cfg:         cfg,
 		filterSChan: filterSChan,
 		dmS:         dmS,
-		clSChan:     clSChan,
 		rldChan:     make(chan struct{}),
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -51,7 +50,6 @@ func NewRateService(cfg *config.CGRConfig,
 type RateService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dmS         *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -107,8 +105,11 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	rs.cl = <-rs.clSChan
-	rs.clSChan <- rs.cl
+	cls := rs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RateS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	rs.cl = cls.CLS()
 	cacheS := rs.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.RateS, utils.CacheS, utils.StateServiceUP)

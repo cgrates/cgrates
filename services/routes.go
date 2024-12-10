@@ -35,14 +35,12 @@ import (
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RouteService{
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -53,7 +51,6 @@ func NewRouteService(cfg *config.CGRConfig, dm *DataDBService,
 type RouteService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -74,8 +71,11 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	routeS.cl = <-routeS.clSChan
-	routeS.clSChan <- routeS.cl
+	cls := routeS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), routeS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RouteS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	routeS.cl = cls.CLS()
 	cacheS := routeS.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), routeS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.RouteS, utils.CacheS, utils.StateServiceUP)

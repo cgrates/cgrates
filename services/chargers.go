@@ -34,14 +34,13 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
-	filterSChan chan *engine.FilterS, clSChan chan *commonlisteners.CommonListenerS,
+	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ChargerService{
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -52,7 +51,6 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 type ChargerService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -73,8 +71,11 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	chrS.cl = <-chrS.clSChan
-	chrS.clSChan <- chrS.cl
+	cls := chrS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	chrS.cl = cls.CLS()
 	cacheS := chrS.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.CacheS, utils.StateServiceUP)

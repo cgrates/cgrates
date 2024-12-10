@@ -36,14 +36,12 @@ import (
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &SessionService{
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -54,7 +52,6 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 type SessionService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -77,8 +74,11 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	smg.cl = <-smg.clSChan
-	smg.clSChan <- smg.cl
+	cls := smg.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	smg.cl = cls.CLS()
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, smg.filterSChan); err != nil {
 		return

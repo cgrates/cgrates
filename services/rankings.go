@@ -35,7 +35,6 @@ import (
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
@@ -43,7 +42,6 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
@@ -54,7 +52,6 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 type RankingService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -77,8 +74,11 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	}
 
 	ran.srvDep[utils.DataDB].Add(1)
-	ran.cl = <-ran.clSChan
-	ran.clSChan <- ran.cl
+	cls := ran.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	ran.cl = cls.CLS()
 	cacheS := ran.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.CacheS, utils.StateServiceUP)

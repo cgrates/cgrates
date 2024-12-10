@@ -33,12 +33,10 @@ import (
 
 // NewCommonListenerService instantiates a new CommonListenerService.
 func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps,
-	clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) *CommonListenerService {
 	return &CommonListenerService{
 		cfg:        cfg,
 		caps:       caps,
-		clSChan:    clSChan,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
@@ -50,9 +48,8 @@ type CommonListenerService struct {
 
 	cls *commonlisteners.CommonListenerS
 
-	clSChan chan *commonlisteners.CommonListenerS
-	caps    *engine.Caps
-	cfg     *config.CGRConfig
+	caps *engine.Caps
+	cfg  *config.CGRConfig
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -67,7 +64,6 @@ func (cl *CommonListenerService) Start(*context.Context, context.CancelFunc) err
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	cl.cls = commonlisteners.NewCommonListenerS(cl.caps)
-	cl.clSChan <- cl.cls
 	if len(cl.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cl.cls.RegisterHTTPFunc(cl.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
 	}
@@ -88,7 +84,6 @@ func (cl *CommonListenerService) Shutdown() error {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	cl.cls = nil
-	<-cl.clSChan
 	return nil
 }
 
@@ -117,4 +112,9 @@ func (cl *CommonListenerService) StateChan(stateID string) chan struct{} {
 // IntRPCConn returns the internal connection used by RPCClient
 func (cl *CommonListenerService) IntRPCConn() birpc.ClientConnector {
 	return cl.intRPCconn
+}
+
+// CLS returns the CommonListenerS object.
+func (cl *CommonListenerService) CLS() *commonlisteners.CommonListenerS {
+	return cl.cls
 }

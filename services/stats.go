@@ -34,7 +34,6 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
-	clSChan chan *commonlisteners.CommonListenerS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
@@ -42,7 +41,6 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
 		srvIndexer:  srvIndexer,
@@ -54,7 +52,6 @@ func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 type StatService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -77,8 +74,11 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	}
 
 	sts.srvDep[utils.DataDB].Add(1)
-	sts.cl = <-sts.clSChan
-	sts.clSChan <- sts.cl
+	cls := sts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.StatS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	sts.cl = cls.CLS()
 	cacheS := sts.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.StatS, utils.CacheS, utils.StateServiceUP)

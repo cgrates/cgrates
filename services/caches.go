@@ -31,13 +31,11 @@ import (
 
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
-	clSChan chan *commonlisteners.CommonListenerS,
 	cores *CoreService,
 	srvIndexer *servmanager.ServiceIndexer) *CacheService {
 	return &CacheService{
 		cfg:        cfg,
 		cores:      cores,
-		clSChan:    clSChan,
 		dm:         dm,
 		connMgr:    connMgr,
 		cacheCh:    make(chan *engine.CacheS, 1),
@@ -48,9 +46,8 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 
 // CacheService implements Agent interface
 type CacheService struct {
-	cores   *CoreService
-	clSChan chan *commonlisteners.CommonListenerS
-	dm      *DataDBService
+	cores *CoreService
+	dm    *DataDBService
 
 	cl *commonlisteners.CommonListenerS
 
@@ -65,8 +62,11 @@ type CacheService struct {
 
 // Start should handle the sercive start
 func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
-	cS.cl = <-cS.clSChan
-	cS.clSChan <- cS.cl
+	cls := cS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	cS.cl = cls.CLS()
 	var dm *engine.DataManager
 	if dm, err = cS.dm.WaitForDM(ctx); err != nil {
 		return

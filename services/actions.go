@@ -38,14 +38,12 @@ import (
 func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
-	clSChan chan *commonlisteners.CommonListenerS,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ActionService{
 		connMgr:     connMgr,
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
-		clSChan:     clSChan,
 		rldChan:     make(chan struct{}, 1),
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -56,7 +54,6 @@ func NewActionService(cfg *config.CGRConfig, dm *DataDBService,
 type ActionService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -80,8 +77,11 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	acts.cl = <-acts.clSChan
-	acts.clSChan <- acts.cl
+	cls := acts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	acts.cl = cls.CLS()
 	cacheS := acts.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.CacheS, utils.StateServiceUP)

@@ -37,14 +37,13 @@ import (
 // NewAccountService returns the Account Service
 func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS,
-	connMgr *engine.ConnManager, clSChan chan *commonlisteners.CommonListenerS,
+	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AccountService{
 		cfg:         cfg,
 		dm:          dm,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
-		clSChan:     clSChan,
 		rldChan:     make(chan struct{}, 1),
 		srvIndexer:  srvIndexer,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
@@ -55,7 +54,6 @@ func NewAccountService(cfg *config.CGRConfig, dm *DataDBService,
 type AccountService struct {
 	sync.RWMutex
 
-	clSChan     chan *commonlisteners.CommonListenerS
 	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
@@ -77,8 +75,11 @@ func (acts *AccountService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if acts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	acts.cl = <-acts.clSChan
-	acts.clSChan <- acts.cl
+	cls := acts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.CommonListenerS, utils.StateServiceUP)
+	}
+	acts.cl = cls.CLS()
 	cacheS := acts.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AccountS, utils.CacheS, utils.StateServiceUP)
