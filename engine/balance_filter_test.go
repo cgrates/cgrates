@@ -618,3 +618,33 @@ func TestBalanceFilterGetFactors(t *testing.T) {
 		}
 	})
 }
+
+func TestBalanceFilterString(t *testing.T) {
+	uuid := "1234-uuid"
+	id := "5678-id"
+	bfType := "type"
+	weight := 10.5
+	disabled := true
+	blocker := false
+
+	factors := ValueFactors{
+		"factor1": 1.5,
+		"factor2": 2.5,
+	}
+	balanceFilter := &BalanceFilter{
+		Uuid:     &uuid,
+		ID:       &id,
+		Type:     &bfType,
+		Weight:   &weight,
+		Disabled: &disabled,
+		Blocker:  &blocker,
+		Factors:  &factors,
+	}
+	expectedJSON := `{"Uuid":"1234-uuid","ID":"5678-id","Type":"type","Value":null,"ExpirationDate":null,"Weight":10.5,"DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":true,"Factors":{"factor1":1.5,"factor2":2.5},"Blocker":false}`
+
+	result := balanceFilter.String()
+
+	if result != expectedJSON {
+		t.Errorf("Expected JSON: %s, but got: %s", expectedJSON, result)
+	}
+}

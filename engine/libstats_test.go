@@ -1432,3 +1432,33 @@ func TestRoutesSortedRoutesListAsNavigableMap(t *testing.T) {
 		}
 	}
 }
+
+func TestSortWeight(t *testing.T) {
+	routes := []*SortedRoute{
+		{
+			RouteID:        "route1",
+			SortingData:    map[string]any{"Weight": 10.5},
+			sortingDataF64: map[string]float64{"Weight": 10.5},
+		},
+		{
+			RouteID:        "route2",
+			SortingData:    map[string]any{"Weight": 20.3},
+			sortingDataF64: map[string]float64{"Weight": 20.3},
+		},
+		{
+			RouteID:        "route3",
+			SortingData:    map[string]any{"Weight": 15.7},
+			sortingDataF64: map[string]float64{"Weight": 15.7},
+		},
+	}
+
+	sortedRoutes := &SortedRoutes{
+		Routes: routes,
+	}
+
+	sortedRoutes.SortWeight()
+
+	if sortedRoutes.Routes[0].RouteID != "route2" || sortedRoutes.Routes[1].RouteID != "route3" || sortedRoutes.Routes[2].RouteID != "route1" {
+		t.Errorf("Expected sorted routes to be route2, route3, route1, but got %v", sortedRoutes.Routes)
+	}
+}
