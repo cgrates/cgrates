@@ -30,13 +30,12 @@ import (
 )
 
 // NewCacheService .
-func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.ConnManager,
+func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	cores *CoreService,
 	srvIndexer *servmanager.ServiceIndexer) *CacheService {
 	return &CacheService{
 		cfg:        cfg,
 		cores:      cores,
-		dm:         dm,
 		connMgr:    connMgr,
 		cacheCh:    make(chan *engine.CacheS, 1),
 		srvIndexer: srvIndexer,
@@ -47,7 +46,6 @@ func NewCacheService(cfg *config.CGRConfig, dm *DataDBService, connMgr *engine.C
 // CacheService implements Agent interface
 type CacheService struct {
 	cores *CoreService
-	dm    *DataDBService
 
 	cl *commonlisteners.CommonListenerS
 
@@ -67,11 +65,10 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	cS.cl = cls.CLS()
-	var dm *engine.DataManager
-	if dm, err = cS.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := cS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.DataDB, utils.StateServiceUP)
 	}
-
 	anz := cS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.AnalyzerS, utils.StateServiceUP)
@@ -80,7 +77,7 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 	if cs, err = cS.cores.WaitForCoreS(ctx); err != nil {
 		return
 	}
-	engine.Cache = engine.NewCacheS(cS.cfg, dm, cS.connMgr, cs.CapsStats)
+	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cS.connMgr, cs.CapsStats)
 	go engine.Cache.Precache(ctx, shtDw)
 
 	cS.cacheCh <- engine.Cache

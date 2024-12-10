@@ -33,13 +33,12 @@ import (
 )
 
 // NewAttributeService returns the Attribute Service
-func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
+func NewAttributeService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	dspS *DispatcherService,
 	sIndxr *servmanager.ServiceIndexer) servmanager.Service {
 	return &AttributeService{
 		cfg:            cfg,
-		dm:             dm,
 		filterSChan:    filterSChan,
 		dspS:           dspS,
 		stateDeps:      NewStateDependencies([]string{utils.StateServiceUP}),
@@ -51,7 +50,6 @@ func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 type AttributeService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	dspS        *DispatcherService
 	filterSChan chan *engine.FilterS
 
@@ -94,9 +92,9 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	if filterS, err = waitForFilterS(ctx, attrS.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = attrS.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := attrS.serviceIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := attrS.serviceIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
@@ -105,7 +103,7 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 
 	attrS.Lock()
 	defer attrS.Unlock()
-	attrS.attrS = engine.NewAttributeService(datadb, filterS, attrS.cfg)
+	attrS.attrS = engine.NewAttributeService(dbs.DataManager(), filterS, attrS.cfg)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
 	srv, _ := engine.NewService(attrS.rpc)

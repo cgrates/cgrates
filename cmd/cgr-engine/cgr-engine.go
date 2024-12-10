@@ -144,20 +144,20 @@ func runCGREngine(fs []string) (err error) {
 	cls := services.NewCommonListenerService(cfg, caps, srvIdxr)
 	anzS := services.NewAnalyzerService(cfg, iFilterSCh, srvIdxr)
 	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg, srvIdxr)
-	cacheS := services.NewCacheService(cfg, dmS, connMgr, coreS, srvIdxr)
-	dspS := services.NewDispatcherService(cfg, dmS, iFilterSCh, connMgr, srvIdxr)
-	ldrs := services.NewLoaderService(cfg, dmS, iFilterSCh, connMgr, srvIdxr)
+	cacheS := services.NewCacheService(cfg, connMgr, coreS, srvIdxr)
+	dspS := services.NewDispatcherService(cfg, iFilterSCh, connMgr, srvIdxr)
+	ldrs := services.NewLoaderService(cfg, iFilterSCh, connMgr, srvIdxr)
 	efs := services.NewExportFailoverService(cfg, connMgr, srvIdxr)
-	adminS := services.NewAdminSv1Service(cfg, dmS, sdbS, iFilterSCh, connMgr, srvIdxr)
-	sessionS := services.NewSessionService(cfg, dmS, iFilterSCh, connMgr, srvIdxr)
-	attrS := services.NewAttributeService(cfg, dmS, iFilterSCh, dspS, srvIdxr)
-	chrgS := services.NewChargerService(cfg, dmS, iFilterSCh, connMgr, srvIdxr)
-	routeS := services.NewRouteService(cfg, dmS, iFilterSCh, connMgr, srvIdxr)
-	resourceS := services.NewResourceService(cfg, dmS, iFilterSCh, connMgr, srvDep, srvIdxr)
-	trendS := services.NewTrendService(cfg, dmS, iFilterSCh, connMgr, srvDep, srvIdxr)
-	rankingS := services.NewRankingService(cfg, dmS, iFilterSCh, connMgr, srvDep, srvIdxr)
-	thS := services.NewThresholdService(cfg, dmS, iFilterSCh, connMgr, srvDep, srvIdxr)
-	stS := services.NewStatService(cfg, dmS, iFilterSCh, connMgr, srvDep, srvIdxr)
+	adminS := services.NewAdminSv1Service(cfg, sdbS, iFilterSCh, connMgr, srvIdxr)
+	sessionS := services.NewSessionService(cfg, iFilterSCh, connMgr, srvIdxr)
+	attrS := services.NewAttributeService(cfg, iFilterSCh, dspS, srvIdxr)
+	chrgS := services.NewChargerService(cfg, iFilterSCh, connMgr, srvIdxr)
+	routeS := services.NewRouteService(cfg, iFilterSCh, connMgr, srvIdxr)
+	resourceS := services.NewResourceService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
+	trendS := services.NewTrendService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
+	rankingS := services.NewRankingService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
+	thS := services.NewThresholdService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
+	stS := services.NewStatService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
 	erS := services.NewEventReaderService(cfg, iFilterSCh, connMgr, srvIdxr)
 	dnsAgent := services.NewDNSAgent(cfg, iFilterSCh, connMgr, srvIdxr)
 	fsAgent := services.NewFreeswitchAgent(cfg, connMgr, srvIdxr)
@@ -169,12 +169,12 @@ func runCGREngine(fs []string) (err error) {
 	httpAgent := services.NewHTTPAgent(cfg, iFilterSCh, connMgr, srvIdxr)
 	sipAgent := services.NewSIPAgent(cfg, iFilterSCh, connMgr, srvIdxr)
 	eeS := services.NewEventExporterService(cfg, iFilterSCh, connMgr, srvIdxr)
-	cdrS := services.NewCDRServer(cfg, dmS, sdbS, iFilterSCh, connMgr, srvIdxr)
+	cdrS := services.NewCDRServer(cfg, sdbS, iFilterSCh, connMgr, srvIdxr)
 	registrarcS := services.NewRegistrarCService(cfg, connMgr, srvIdxr)
-	rateS := services.NewRateService(cfg, iFilterSCh, dmS, srvIdxr)
-	actionS := services.NewActionService(cfg, dmS, iFilterSCh, connMgr, srvIdxr)
-	accS := services.NewAccountService(cfg, dmS, iFilterSCh, connMgr, srvIdxr)
-	tpeS := services.NewTPeService(cfg, connMgr, dmS, srvIdxr)
+	rateS := services.NewRateService(cfg, iFilterSCh, srvIdxr)
+	actionS := services.NewActionService(cfg, iFilterSCh, connMgr, srvIdxr)
+	accS := services.NewAccountService(cfg, iFilterSCh, connMgr, srvIdxr)
+	tpeS := services.NewTPeService(cfg, connMgr, srvIdxr)
 
 	srvManager := servmanager.NewServiceManager(shdWg, connMgr, cfg, srvIdxr, []servmanager.Service{
 		gvS,
@@ -380,13 +380,9 @@ func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS
 	case <-ctx.Done():
 		return
 	}
-	dm, err := db.WaitForDM(ctx)
-	if err != nil {
-		return
-	}
 	select {
 	case <-cacheS.GetPrecacheChannel(utils.CacheFilters):
-		iFilterSCh <- engine.NewFilterS(cfg, connMgr, dm)
+		iFilterSCh <- engine.NewFilterS(cfg, connMgr, db.DataManager())
 	case <-ctx.Done():
 	}
 }

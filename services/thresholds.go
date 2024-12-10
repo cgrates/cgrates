@@ -32,14 +32,13 @@ import (
 )
 
 // NewThresholdService returns the Threshold Service
-func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
+func NewThresholdService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ThresholdService{
 		cfg:         cfg,
-		dm:          dm,
 		filterSChan: filterSChan,
 		srvDep:      srvDep,
 		connMgr:     connMgr,
@@ -52,7 +51,6 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 type ThresholdService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	thrs *engine.ThresholdS
@@ -93,9 +91,9 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	if filterS, err = waitForFilterS(ctx, thrs.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = thrs.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := thrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := thrs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
@@ -104,7 +102,7 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 
 	thrs.Lock()
 	defer thrs.Unlock()
-	thrs.thrs = engine.NewThresholdService(datadb, thrs.cfg, filterS, thrs.connMgr)
+	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, filterS, thrs.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	thrs.thrs.StartLoop(ctx)

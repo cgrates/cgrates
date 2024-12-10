@@ -33,14 +33,13 @@ import (
 )
 
 // NewRankingService returns the RankingS Service
-func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
+func NewRankingService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RankingService{
 		cfg:         cfg,
-		dm:          dm,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvDep:      srvDep,
@@ -52,7 +51,6 @@ func NewRankingService(cfg *config.CGRConfig, dm *DataDBService,
 type RankingService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	ran *engine.RankingS
@@ -89,9 +87,9 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	); err != nil {
 		return err
 	}
-	var datadb *engine.DataManager
-	if datadb, err = ran.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := ran.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.DataDB, utils.StateServiceUP)
 	}
 	var filterS *engine.FilterS
 	if filterS, err = waitForFilterS(ctx, ran.filterSChan); err != nil {
@@ -104,7 +102,7 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 
 	ran.Lock()
 	defer ran.Unlock()
-	ran.ran = engine.NewRankingS(datadb, ran.connMgr, filterS, ran.cfg)
+	ran.ran = engine.NewRankingS(dbs.DataManager(), ran.connMgr, filterS, ran.cfg)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.RankingS))

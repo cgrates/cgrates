@@ -33,11 +33,10 @@ import (
 )
 
 // NewTPeService is the constructor for the TpeService
-func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataDBService,
+func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TPeService{
 		cfg:        cfg,
-		dm:         dm,
 		connMgr:    connMgr,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
@@ -47,8 +46,6 @@ func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager, dm *DataD
 // TypeService implements Service interface
 type TPeService struct {
 	sync.RWMutex
-
-	dm *DataDBService
 
 	tpes *tpes.TPeS
 	cl   *commonlisteners.CommonListenerS
@@ -70,12 +67,12 @@ func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 		return utils.NewServiceStateTimeoutError(utils.TPeS, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	ts.cl = cls.CLS()
-	var datadb *engine.DataManager
-	if datadb, err = ts.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := ts.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.TPeS, utils.DataDB, utils.StateServiceUP)
 	}
 
-	ts.tpes = tpes.NewTPeS(ts.cfg, datadb, ts.connMgr)
+	ts.tpes = tpes.NewTPeS(ts.cfg, dbs.DataManager(), ts.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TPeS))
 	ts.stopChan = make(chan struct{})
 	ts.srv, _ = birpc.NewService(apis.NewTPeSv1(ts.tpes), utils.EmptyString, false)

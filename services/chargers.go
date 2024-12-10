@@ -33,13 +33,12 @@ import (
 )
 
 // NewChargerService returns the Charger Service
-func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
+func NewChargerService(cfg *config.CGRConfig,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ChargerService{
 		cfg:         cfg,
-		dm:          dm,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
@@ -51,7 +50,6 @@ func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 type ChargerService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	chrS *engine.ChargerS
@@ -89,9 +87,9 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if filterS, err = waitForFilterS(ctx, chrS.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = chrS.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := chrS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := chrS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
@@ -100,7 +98,7 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	chrS.Lock()
 	defer chrS.Unlock()
-	chrS.chrS = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr)
+	chrS.chrS = engine.NewChargerService(dbs.DataManager(), filterS, chrS.cfg, chrS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
 	srv, _ := engine.NewService(chrS.chrS)
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)

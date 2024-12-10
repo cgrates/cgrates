@@ -35,12 +35,11 @@ import (
 )
 
 // NewSessionService returns the Session Service
-func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan chan *engine.FilterS,
+func NewSessionService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &SessionService{
 		cfg:         cfg,
-		dm:          dm,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
@@ -52,7 +51,6 @@ func NewSessionService(cfg *config.CGRConfig, dm *DataDBService, filterSChan cha
 type SessionService struct {
 	sync.RWMutex
 
-	dm          *DataDBService
 	filterSChan chan *engine.FilterS
 
 	sm *sessions.SessionS
@@ -83,9 +81,9 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	if filterS, err = waitForFilterS(ctx, smg.filterSChan); err != nil {
 		return
 	}
-	var datadb *engine.DataManager
-	if datadb, err = smg.dm.WaitForDM(ctx); err != nil {
-		return
+	dbs := smg.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.DataDB, utils.StateServiceUP)
 	}
 	anz := smg.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
@@ -95,7 +93,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	smg.Lock()
 	defer smg.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, datadb, filterS, smg.connMgr)
+	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), filterS, smg.connMgr)
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)
