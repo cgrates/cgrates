@@ -155,8 +155,12 @@ func TestPrepareMap(t *testing.T) {
 	if err != nil {
 		t.Errorf("PrepareMap() returned an error: %v", err)
 	}
-	if result != nil {
-		t.Errorf("PrepareMap() returned a non-nil result: %v", result)
+	exp := &sqlPosterRequest{
+		Querry: "INSERT INTO  (``) VALUES ();",
+		Values: make([]any, 0),
+	}
+	if !reflect.DeepEqual(exp, result) {
+		t.Errorf("Expected <%+v>, Received <%+v>", utils.ToJSON(exp), utils.ToJSON(result))
 	}
 }
 

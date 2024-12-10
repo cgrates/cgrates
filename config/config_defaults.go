@@ -554,6 +554,7 @@ const CGRATES_CFG_JSON = `
 				// "sqlMaxIdleConns": 0,	// SQLMaxIdleConns
 				// "sqlMaxOpenConns": 0,	// SQLMaxOpenConns
 				// "sqlConnMaxLifetime": "0",	// SQLConnMaxLifetime
+				// "sqlUpdateIndexedFields": [], // list of field names used for indexing UPDATE queries from the table
 				// "mysqlDSNParams": {},        // DSN params
 
 

@@ -331,6 +331,7 @@ type EventExporterOptsJson struct {
 	MYSQLDSNParams              map[string]string `json:"mysqlDSNParams"`
 	SQLTableName                *string           `json:"sqlTableName"`
 	SQLDBName                   *string           `json:"sqlDBName"`
+	SQLUpdateIndexedFields      *[]string         `json:"sqlUpdateIndexedFields"`
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
 	KafkaBatchSize              *int              `json:"kafkaBatchSize"`

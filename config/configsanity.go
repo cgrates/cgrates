@@ -923,10 +923,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 						return fmt.Errorf("<%s> nonexistent folder: %s for exporter with ID: %s", utils.EEs, dir, exp.ID)
 					}
 				}
-			case utils.MetaSQL:
-				if len(exp.ContentFields()) == 0 {
-					return fmt.Errorf("<%s> empty content fields for exporter with ID: %s", utils.EEs, exp.ID)
-				}
 			case utils.MetaElastic:
 				elsOpts := exp.Opts.Els
 				if elsOpts.Logger != nil {

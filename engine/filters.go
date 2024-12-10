@@ -795,3 +795,149 @@ func (fltr *FilterRule) passHttp(dDP utils.DataProvider) (bool, error) {
 func (fltr *FilterRule) ElementItems() []string {
 	return strings.Split(fltr.Element, utils.NestingSep)
 }
+
+// Creates mysql conditions used in WHERE statement out of filters
+func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
+	var firstItem string   // Excluding ~*req, hold the first item of an element, left empty if no more than 1 item in element. e.g. "cost_details" out of ~*req.cost_details.Charges[0].RatingID or "" out of ~*req.answer_time
+	var restOfItems string // Excluding ~*req, hold the rest of the items past the first one. If only 1 item in all element, holds that item. e.g. "Charges[0].RatingID" out of ~*req.cost_details.Charges[0].RatingID or "answer_time" out of ~*req.answer_time
+	not := strings.HasPrefix(fltr.Type, utils.MetaNot)
+	elementItems := fltr.ElementItems()[1:] // exclude first item: ~*req
+	if len(elementItems) > 1 {
+		firstItem = elementItems[0]
+		restOfItems = strings.Join(elementItems[1:], utils.NestingSep)
+	} else {
+		restOfItems = elementItems[0]
+	}
+
+	// here are for the filters that their values are empty: *exists, *notexists, *empty, *notempty..
+	if len(fltr.Values) == 0 {
+		switch fltr.Type {
+		case utils.MetaExists, utils.MetaNotExists:
+			if not {
+				if firstItem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf("%s IS NOT NULL", restOfItems))
+					return
+				}
+				conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NOT NULL", firstItem, restOfItems))
+				return
+			}
+			if firstItem == utils.EmptyString {
+				conditions = append(conditions, fmt.Sprintf("%s IS NULL", restOfItems))
+				return
+			}
+			conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NULL", firstItem, restOfItems))
+		case utils.MetaEmpty, utils.MetaNotEmpty:
+			if not {
+				if firstItem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf("%s != ''", restOfItems))
+					return
+				}
+				conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') != ''", firstItem, restOfItems))
+				return
+			}
+			if firstItem == utils.EmptyString {
+				conditions = append(conditions, fmt.Sprintf("%s == ''", restOfItems))
+				return
+			}
+			conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') == ''", firstItem, restOfItems))
+		}
+		return
+	}
+	// here are for the filters that can have more than one value: *string, *prefix, *suffix ..
+	for _, value := range fltr.Values {
+		switch value { // in case we have boolean values, it should be queried over 1 or 0
+		case "true":
+			value = "1"
+		case "false":
+			value = "0"
+		}
+		var singleCond string
+		switch fltr.Type {
+		case utils.MetaString, utils.MetaNotString, utils.MetaEqual, utils.MetaNotEqual:
+			if not {
+				if firstItem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf("%s != '%s'", restOfItems, value))
+					continue
+				}
+				conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') != '%s'",
+					firstItem, restOfItems, value))
+				continue
+			}
+			if firstItem == utils.EmptyString {
+				singleCond = fmt.Sprintf("%s = '%s'", restOfItems, value)
+			} else {
+				singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') = '%s'", firstItem, restOfItems, value)
+			}
+		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
+			if fltr.Type == utils.MetaGreaterOrEqual {
+				if firstItem == utils.EmptyString {
+					singleCond = fmt.Sprintf("%s >= %s", restOfItems, value)
+				} else {
+					singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') >= %s", firstItem, restOfItems, value)
+				}
+			} else if fltr.Type == utils.MetaGreaterThan {
+				if firstItem == utils.EmptyString {
+					singleCond = fmt.Sprintf("%s > %s", restOfItems, value)
+				} else {
+					singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') > %s", firstItem, restOfItems, value)
+				}
+			} else if fltr.Type == utils.MetaLessOrEqual {
+				if firstItem == utils.EmptyString {
+					singleCond = fmt.Sprintf("%s <= %s", restOfItems, value)
+				} else {
+					singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') <= %s", firstItem, restOfItems, value)
+				}
+			} else if fltr.Type == utils.MetaLessThan {
+				if firstItem == utils.EmptyString {
+					singleCond = fmt.Sprintf("%s < %s", restOfItems, value)
+				} else {
+					singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') < %s", firstItem, restOfItems, value)
+				}
+			}
+		case utils.MetaPrefix, utils.MetaNotPrefix:
+			if not {
+				if firstItem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf("%s NOT LIKE '%s%%'", restOfItems, value))
+					continue
+				}
+				conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') NOT LIKE '%s%%'", firstItem, restOfItems, value))
+				continue
+			}
+			if firstItem == utils.EmptyString {
+				singleCond = fmt.Sprintf("%s LIKE '%s%%'", restOfItems, value)
+			} else {
+				singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') LIKE '%s%%'", firstItem, restOfItems, value)
+			}
+		case utils.MetaSuffix, utils.MetaNotSuffix:
+			if not {
+				if firstItem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf("%s NOT LIKE '%%%s'", restOfItems, value))
+					continue
+				}
+				conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') NOT LIKE '%%%s'", firstItem, restOfItems, value))
+				continue
+			}
+			if firstItem == utils.EmptyString {
+				singleCond = fmt.Sprintf("%s LIKE '%%%s'", restOfItems, value)
+			} else {
+				singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') LIKE '%%%s'", firstItem, restOfItems, value)
+			}
+		case utils.MetaRegex, utils.MetaNotRegex:
+			if not {
+				if firstItem == utils.EmptyString {
+					conditions = append(conditions, fmt.Sprintf("%s NOT REGEXP '%s'", restOfItems, value))
+					continue
+				}
+				conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') NOT REGEXP '%s'", firstItem, restOfItems, value))
+				continue
+			}
+			if firstItem == utils.EmptyString {
+				singleCond = fmt.Sprintf("%s REGEXP '%s'", restOfItems, value)
+			} else {
+				singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') REGEXP '%s'", firstItem, restOfItems, value)
+			}
+		}
+		conditions = append(conditions, singleCond)
+	}
+	return
+}
