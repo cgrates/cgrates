@@ -451,3 +451,112 @@ func TestV1GetTrendStoreIntervalZero(t *testing.T) {
 		t.Fatalf("Expected error type 'ErrNotFound', got: %v", err)
 	}
 }
+
+func TestTrendV1GetTrend(t *testing.T) {
+	r1 := time.Now()
+	r2 := time.Now().Add(1 * time.Second)
+	r3 := time.Now().Add(6 * time.Second)
+	r4 := time.Now().Add(8 * time.Second)
+	tests := []struct {
+		name          string
+		RunIndexStart int
+		RunIndexEnd   int
+		RunTimeStart  string
+		RunTimeEnd    string
+		MetricsLen    int
+		expErr        error
+	}{
+		{
+			name:       "GetTrendNoIdxNoTimeArgs",
+			MetricsLen: 4,
+		},
+		{
+			name:          "GetTrendWithStartIdx",
+			RunIndexStart: 2,
+			MetricsLen:    2,
+		},
+		{
+			name:        "GetTrendWithEndIdx",
+			RunIndexEnd: 1,
+			MetricsLen:  1,
+		},
+		{
+			name:          "GetTrendWithStartEndIdx",
+			RunIndexStart: 1,
+			RunIndexEnd:   3,
+			MetricsLen:    2,
+		},
+		{
+			name:          "GetTrendWithStartEndIdxErr",
+			RunIndexStart: 2,
+			RunIndexEnd:   2,
+			expErr:        utils.ErrNotFound,
+		},
+		{
+			name:          "GetTrendWithStartIdxGtEndIndex",
+			RunIndexStart: 3,
+			RunIndexEnd:   2,
+			MetricsLen:    1,
+		},
+		{
+			name:          "GetTrendWithStartIdxGtEndIndex",
+			RunIndexStart: 3,
+			RunIndexEnd:   2,
+			MetricsLen:    1,
+		},
+		{
+			name:          "GetTrendWithStartLgLen",
+			RunIndexStart: 5,
+			expErr:        utils.ErrNotFound,
+		},
+		{
+			name:         "GetTrendRunTimeStart",
+			RunTimeStart: r1.Add(2 * time.Second).Format(time.RFC3339),
+			MetricsLen:   2,
+		},
+	}
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	trnds := NewTrendS(dm, nil, nil, cfg)
+	dm.SetTrend(&Trend{
+		Tenant:   "cgrates.org",
+		ID:       "TR1",
+		RunTimes: []time.Time{r1, r2, r3, r4},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{
+			r1: {utils.MetaTCD: {utils.MetaTCD, float64(42 * time.Second), -1.0, utils.NotAvailable}, utils.MetaTCC: {utils.MetaTCC, 41.0, -1.0, utils.NotAvailable}},
+			r2: {utils.MetaTCD: {utils.MetaTCD, float64(9 * time.Second), -78.048, utils.MetaNegative}, utils.MetaTCC: {utils.MetaTCC, 9.0, -78.048, utils.MetaNegative}},
+			r3: {utils.MetaTCD: {utils.MetaTCD, float64(9 * time.Second), -78.048, utils.MetaNegative}, utils.MetaTCC: {utils.MetaTCC, 9.0, -78.048, utils.MetaNegative}},
+			r4: {utils.MetaTCD: {utils.MetaTCD, float64(9 * time.Second), 40, utils.MetaPositive}, utils.MetaTCC: {utils.MetaTCC, 9.0, -78.048, utils.MetaPositive}},
+		},
+	})
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var tr Trend
+			err := trnds.V1GetTrend(context.Background(), &utils.ArgGetTrend{TenantWithAPIOpts: utils.TenantWithAPIOpts{
+				Tenant: "cgrates.org",
+			},
+				ID:            "TR1",
+				RunIndexStart: tc.RunIndexStart,
+				RunIndexEnd:   tc.RunIndexEnd,
+				RunTimeStart:  tc.RunTimeStart,
+				RunTimeEnd:    tc.RunTimeEnd,
+			}, &tr)
+
+			if tc.expErr != nil {
+				if err == nil {
+					t.Error("expected to receive an error")
+				}
+				if tc.expErr != err {
+					t.Errorf("expected err: %v, received: %v", tc.expErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Error("unexpected error")
+			}
+			if tc.MetricsLen != len(tr.Metrics) {
+				t.Errorf("expected trend to have %d metrics,got %d", tc.MetricsLen, len(tr.Metrics))
+			}
+		})
+	}
+}
