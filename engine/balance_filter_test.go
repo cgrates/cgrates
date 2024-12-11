@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"log"
+	"strings"
 	"testing"
 	"time"
 
@@ -646,5 +649,65 @@ func TestBalanceFilterString(t *testing.T) {
 
 	if result != expectedJSON {
 		t.Errorf("Expected JSON: %s, but got: %s", expectedJSON, result)
+	}
+}
+
+func TestShowStatistics(t *testing.T) {
+	tpr := &TpReader{
+		destinations: map[string]*Destination{
+			"dest1": {Id: "dest1", Prefixes: []string{"123", "456"}},
+			"dest2": {Id: "dest2", Prefixes: []string{"789"}},
+		},
+		ratingPlans: map[string]*RatingPlan{
+			"rp1": {Id: "rp1", DestinationRates: map[string]RPRateList{"rate1": {}, "rate2": {}}},
+		},
+		ratingProfiles: map[string]*RatingProfile{
+			"profile1": {Id: "profile1", RatingPlanActivations: RatingPlanActivations{
+				&RatingPlanActivation{ActivationTime: time.Now(), RatingPlanId: "rp1"},
+			}},
+		},
+		actions: map[string][]*Action{
+			"action1": {{Id: "action1", ActionType: "type1"}},
+		},
+		actionPlans: map[string]*ActionPlan{
+			"plan1": {},
+		},
+	}
+
+	var logBuffer bytes.Buffer
+	log.SetOutput(&logBuffer)
+	defer log.SetOutput(nil)
+
+	tpr.ShowStatistics()
+
+	logOutput := logBuffer.String()
+
+	if !strings.Contains(logOutput, "Destinations: 2") {
+		t.Errorf("Expected log to contain 'Destinations: 2', got: %s", logOutput)
+	}
+	if !strings.Contains(logOutput, "Avg Prefixes: 1") {
+		t.Errorf("Expected log to contain 'Avg Prefixes: 1', got: %s", logOutput)
+	}
+
+	if !strings.Contains(logOutput, "Rating plans: 1") {
+		t.Errorf("Expected log to contain 'Rating plans: 1', got: %s", logOutput)
+	}
+	if !strings.Contains(logOutput, "Avg Destination Rates: 2") {
+		t.Errorf("Expected log to contain 'Avg Destination Rates: 2', got: %s", logOutput)
+	}
+
+	if !strings.Contains(logOutput, "Rating profiles: 1") {
+		t.Errorf("Expected log to contain 'Rating profiles: 1', got: %s", logOutput)
+	}
+	if !strings.Contains(logOutput, "Avg Activations: 1") {
+		t.Errorf("Expected log to contain 'Avg Activations: 1', got: %s", logOutput)
+	}
+
+	if !strings.Contains(logOutput, "Actions: 1") {
+		t.Errorf("Expected log to contain 'Actions: 1', got: %s", logOutput)
+	}
+
+	if !strings.Contains(logOutput, "Action plans: 1") {
+		t.Errorf("Expected log to contain 'Action plans: 1', got: %s", logOutput)
 	}
 }
