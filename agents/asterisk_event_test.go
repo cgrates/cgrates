@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 var (
@@ -446,5 +447,138 @@ func TestSMAEventV1TerminateSessionArgs(t *testing.T) {
 	cgrEv.Event[utils.CGRFlags] = "*resources,*accounts,*stats"
 	if rcv := smaEv.V1TerminateSessionArgs(utils.CGREventWithArgDispatcher{CGREvent: cgrEv}); !reflect.DeepEqual(exp2, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp2), utils.ToJSON(rcv))
+	}
+}
+
+func TestAsteriskEventUpdateCGREventChannelStateChange(t *testing.T) {
+	var ariEv map[string]any
+	if err := json.Unmarshal([]byte(channelStateChange), &ariEv); err != nil {
+		t.Fatal(err)
+	}
+	smaEv := NewSMAsteriskEvent(ariEv, "127.0.0.1", "")
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "99b61ee",
+		Event: map[string]any{
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+			utils.EVENT_NAME:  "SMA_AUTHORIZATION",
+			utils.OriginHost:  "127.0.0.1",
+			utils.OriginID:    "1733904242.0",
+			utils.RequestType: "*prepaid",
+			utils.SetupTime:   "2024-12-11T10:04:02.180+0200",
+			utils.Source:      "AsteriskAgent",
+			utils.CGRFlags:    "*accounts,*attributes,*resources,*stats,*suppliers,*thresholds",
+		},
+	}
+	alterableFields := []string{
+		"channel.name:channel_name",
+		"channel.non_existing_field",
+		"channel.caller.number:channel_caller_number",
+		"channel.connected.number:channel_connected_number",
+		"channel.dialplan.exten:extension",
+		"channel.dialplan.priority",
+	}
+
+	want := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "99b61ee",
+		Event: map[string]any{
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+			utils.EVENT_NAME:  "SMA_SESSION_START", // updated
+			utils.OriginHost:  "127.0.0.1",
+			utils.OriginID:    "1733904242.0",
+			utils.RequestType: "*prepaid",
+			utils.SetupTime:   "2024-12-11T10:04:02.180+0200",
+			utils.Source:      "AsteriskAgent",
+			utils.CGRFlags:    "*accounts,*attributes,*resources,*stats,*suppliers,*thresholds",
+
+			// new fields
+			utils.AnswerTime:           "2016-09-12T13:53:52.110+0200",
+			"channel_name":             "PJSIP/1001-00000004",
+			"channel_caller_number":    "1001",
+			"channel_connected_number": "1002",
+			"extension":                "1002",
+			"priority":                 "3",
+		},
+	}
+	if err := smaEv.UpdateCGREvent(cgrEv, alterableFields); err != nil {
+		t.Fatalf("UpdateCGREvent unexpected err: %v", err)
+	}
+	if diff := cmp.Diff(cgrEv, want); diff != "" {
+		t.Errorf("UpdateCGREvent: event was not updated as expected (-want +got): \n%s", diff)
+	}
+}
+
+func TestAsteriskEventUpdateCGREventChannelDestroyed(t *testing.T) {
+	var ariEv map[string]any
+	if err := json.Unmarshal([]byte(channelAnsweredDestroyed), &ariEv); err != nil {
+		t.Fatal(err)
+	}
+
+	smaEv := NewSMAsteriskEvent(ariEv, "127.0.0.1", "")
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "99b61ee",
+		Event: map[string]any{
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+			utils.EVENT_NAME:  "SMA_SESSION_START",
+			utils.OriginHost:  "127.0.0.1",
+			utils.OriginID:    "1733904242.0",
+			utils.RequestType: "*prepaid",
+			utils.SetupTime:   "2024-12-11T10:04:02.180+0200",
+			utils.Source:      "AsteriskAgent",
+			utils.CGRFlags:    "*accounts,*attributes,*resources,*stats,*suppliers,*thresholds",
+
+			// added by ChannelStateChange handler
+			utils.AnswerTime:           "2016-09-12T13:53:52.110+0200",
+			"channel_name":             "PJSIP/1001-00000004",
+			"channel_caller_number":    "1001",
+			"channel_connected_number": "1002",
+			"extension":                "1002",
+			"priority":                 "3",
+		},
+	}
+	alterableFields := []string{
+		"channel.name:channel_name",
+		"channel.non_existing_field",
+		"channel.caller.number:channel_caller_number",
+		"channel.connected.number:channel_connected_number",
+		"channel.dialplan.exten:extension",
+		"channel.dialplan.priority",
+	}
+
+	want := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "99b61ee",
+		Event: map[string]any{
+			utils.Account:              "1001",
+			utils.Destination:          "1002",
+			utils.EVENT_NAME:           "SMA_SESSION_TERMINATE", // updated
+			utils.OriginHost:           "127.0.0.1",
+			utils.OriginID:             "1733904242.0",
+			utils.RequestType:          "*prepaid",
+			utils.SetupTime:            "2024-12-11T10:04:02.180+0200",
+			utils.Source:               "AsteriskAgent",
+			utils.CGRFlags:             "*accounts,*attributes,*resources,*stats,*suppliers,*thresholds",
+			utils.AnswerTime:           "2016-09-12T13:53:52.110+0200",
+			"channel_name":             "PJSIP/1001-00000004",
+			"channel_caller_number":    "1001",
+			"channel_connected_number": "1002",
+			"extension":                "1002",
+			"priority":                 "3",
+
+			// new fields
+			utils.Usage:            "35.225s",
+			utils.DISCONNECT_CAUSE: "Normal Clearing",
+		},
+	}
+	if err := smaEv.UpdateCGREvent(cgrEv, alterableFields); err != nil {
+		t.Fatalf("UpdateCGREvent unexpected err: %v", err)
+	}
+	if diff := cmp.Diff(cgrEv, want); diff != "" {
+		t.Errorf("UpdateCGREvent: event was not updated as expected (-want +got): \n%s", diff)
 	}
 }
