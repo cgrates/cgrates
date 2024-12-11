@@ -48,7 +48,6 @@ type StorDBService struct {
 	oldDBCfg *config.StorDbCfg
 
 	db          engine.StorDB
-	syncChans   []chan engine.StorDB
 	setVersions bool
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
@@ -83,8 +82,6 @@ func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error)
 	if err != nil {
 		return err
 	}
-
-	db.sync()
 	close(db.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -105,7 +102,6 @@ func (db *StorDBService) Reload(*context.Context, context.CancelFunc) (err error
 		db.db.Close()
 		db.db = d
 		db.oldDBCfg = db.cfg.StorDbCfg().Clone()
-		db.sync() // sync only if needed
 		return
 	}
 	if db.cfg.StorDbCfg().Type == utils.MetaMongo {
@@ -142,10 +138,6 @@ func (db *StorDBService) Shutdown() (_ error) {
 	db.Lock()
 	db.db.Close()
 	db.db = nil
-	for _, c := range db.syncChans {
-		close(c)
-	}
-	db.syncChans = nil
 	db.Unlock()
 	return
 }
@@ -172,25 +164,6 @@ func (db *StorDBService) ShouldRun() bool {
 	return db.cfg.CdrsCfg().Enabled || db.cfg.AdminSCfg().Enabled
 }
 
-// RegisterSyncChan used by dependent subsystems to register a chanel to reload only the storDB(thread safe)
-func (db *StorDBService) RegisterSyncChan(c chan engine.StorDB) {
-	db.Lock()
-	db.syncChans = append(db.syncChans, c)
-	if db.isRunning() {
-		c <- db.db
-	}
-	db.Unlock()
-}
-
-// sync sends the storDB over syncChansv (not thrad safe)
-func (db *StorDBService) sync() {
-	if db.isRunning() {
-		for _, c := range db.syncChans {
-			c <- db.db
-		}
-	}
-}
-
 // needsConnectionReload returns if the DB connection needs to reloaded
 func (db *StorDBService) needsConnectionReload() bool {
 	if db.oldDBCfg.Type != db.cfg.StorDbCfg().Type ||
@@ -208,6 +181,11 @@ func (db *StorDBService) needsConnectionReload() bool {
 			db.oldDBCfg.Opts.PgSSLPassword != db.cfg.StorDbCfg().Opts.PgSSLPassword ||
 			db.oldDBCfg.Opts.PgSSLCertMode != db.cfg.StorDbCfg().Opts.PgSSLCertMode ||
 			db.oldDBCfg.Opts.PgSSLRootCert != db.cfg.StorDbCfg().Opts.PgSSLRootCert)
+}
+
+// DB returns the db connection object.
+func (db *StorDBService) DB() engine.StorDB {
+	return db.db
 }
 
 // StateChan returns signaling channel of specific state

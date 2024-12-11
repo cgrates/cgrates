@@ -24,20 +24,13 @@ import (
 )
 
 func NewAdminSv1(cfg *config.CGRConfig, dm *engine.DataManager, connMgr *engine.ConnManager, fltrS *engine.FilterS,
-	storDBChan chan engine.StorDB) *AdminSv1 {
-	storDB := <-storDBChan
+	storDB engine.StorDB) *AdminSv1 {
 	return &AdminSv1{
 		cfg:     cfg,
 		dm:      dm,
 		storDB:  storDB,
 		connMgr: connMgr,
 		fltrS:   fltrS,
-
-		// TODO: Might be a good idea to pass the storDB channel to AdminSv1
-		// to be able to close the service the moment storDB is down (inside
-		//  a ListenAndServe goroutine maybe)
-
-		// storDBChan: storDBChan,
 	}
 }
 

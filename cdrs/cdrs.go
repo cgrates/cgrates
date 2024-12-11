@@ -45,16 +45,14 @@ func newMapEventFromReqForm(r *http.Request) (mp engine.MapEvent, err error) {
 
 // NewCDRServer is a constructor for CDRServer
 func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, filterS *engine.FilterS, connMgr *engine.ConnManager,
-	storDBChan chan engine.StorDB) *CDRServer {
-	cdrDB := <-storDBChan
+	storDB engine.StorDB) *CDRServer {
 	return &CDRServer{
 		cfg:     cfg,
 		dm:      dm,
-		db:      cdrDB,
+		db:      storDB,
 		guard:   guardian.Guardian,
 		fltrS:   filterS,
 		connMgr: connMgr,
-		dbChan:  storDBChan,
 	}
 }
 
@@ -66,21 +64,6 @@ type CDRServer struct {
 	guard   *guardian.GuardianLocker
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
-	dbChan  chan engine.StorDB
-}
-
-// ListenAndServe listen for storbd reload
-func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) {
-	for {
-		select {
-		case <-stopChan:
-			return
-		case _, ok := <-cdrS.dbChan:
-			if !ok { // the channel was closed by the shutdown of the StorDB Service
-				return
-			}
-		}
-	}
 }
 
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles

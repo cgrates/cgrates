@@ -48,9 +48,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDB)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -126,9 +124,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDB)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -207,9 +203,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDB)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -291,9 +285,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDB)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -374,9 +366,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDBChan)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDB)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
@@ -438,9 +428,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDB)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -486,9 +474,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDB)
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "testID",
@@ -539,9 +525,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDB)
 
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",

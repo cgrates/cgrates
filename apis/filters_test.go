@@ -38,10 +38,7 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -207,10 +204,7 @@ func TestFiltersSetFiltersMissingField(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -234,10 +228,7 @@ func TestFiltersSetFiltersTenantEmpty(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
@@ -287,10 +278,7 @@ func TestFiltersSetFiltersGetFilterError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -344,10 +332,7 @@ func TestFiltersSetFiltersError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -391,10 +376,7 @@ func TestFiltersSetFiltersSetFilterError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -457,10 +439,7 @@ func TestFiltersSetFiltersComposeCacheArgsForFilterError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -525,10 +504,7 @@ func TestFiltersSetFiltersSetLoadIDsError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -593,10 +569,7 @@ func TestFiltersSetFiltersCacheForFilterError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -633,10 +606,7 @@ func TestFiltersGetFilterNoTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
@@ -682,10 +652,7 @@ func TestFiltersGetFilterMissingField(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
@@ -731,10 +698,7 @@ func TestFiltersGetFilterGetFilterError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var replyGet engine.Filter
 	argsGet := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -760,10 +724,7 @@ func TestFiltersGetFiltersCountError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var reply int
 	args := &utils.ArgsItemIDs{}
 
@@ -781,10 +742,7 @@ func TestFiltersRemoveFilterMissingStructFieldError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{},
@@ -809,10 +767,7 @@ func TestFiltersRemoveFilterRemoveFilterError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -1206,10 +1161,7 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -1256,10 +1208,7 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -1284,10 +1233,7 @@ func TestFiltersGetFilterIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 
 	args6 := &utils.ArgsItemIDs{}
 	var reply6 []string
@@ -1355,10 +1301,7 @@ func TestFiltersFiltersMatchTrue(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), connMgr)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, nil)
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -1389,10 +1332,7 @@ func TestFiltersFiltersMatchFalse(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), connMgr)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, nil)
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			ID: "EventTest",
@@ -1422,10 +1362,7 @@ func TestFiltersFiltersMatchErr(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), connMgr)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, nil)
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -1454,10 +1391,7 @@ func TestFiltersGetFiltersOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args1 := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
@@ -1575,10 +1509,7 @@ func TestFiltersGetFiltersGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
@@ -1752,10 +1683,7 @@ func TestFiltersSetFilterNoRulesErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID:    "fltr_for_attr",
@@ -1777,10 +1705,7 @@ func TestFiltersSetFilterInvalidRulesErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
