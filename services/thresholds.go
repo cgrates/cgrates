@@ -33,25 +33,21 @@ import (
 
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ThresholdService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		srvDep:      srvDep,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		srvDep:     srvDep,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // ThresholdService implements Service interface
 type ThresholdService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	thrs *engine.ThresholdS
 	cl   *commonlisteners.CommonListenerS
@@ -87,9 +83,9 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 		utils.CacheThresholdFilterIndexes); err != nil {
 		return
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, thrs.filterSChan); err != nil {
-		return
+	fs := thrs.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.FilterS, utils.StateServiceUP)
 	}
 	dbs := thrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
@@ -102,7 +98,7 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 
 	thrs.Lock()
 	defer thrs.Unlock()
-	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, filterS, thrs.connMgr)
+	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), thrs.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	thrs.thrs.StartLoop(ctx)

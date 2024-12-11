@@ -32,23 +32,21 @@ import (
 )
 
 // NewSIPAgent returns the sip Agent
-func NewSIPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewSIPAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &SIPAgent{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // SIPAgent implements Agent interface
 type SIPAgent struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
-	filterSChan chan *engine.FilterS
+	cfg *config.CGRConfig
 
 	sip     *agents.SIPAgent
 	connMgr *engine.ConnManager
@@ -66,15 +64,15 @@ func (sip *SIPAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, sip.filterSChan); err != nil {
-		return
+	fs := sip.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), sip.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.SIPAgent, utils.FilterS, utils.StateServiceUP)
 	}
 
 	sip.Lock()
 	defer sip.Unlock()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, filterS)
+	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, fs.FilterS())
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 			utils.SIPAgent, err))

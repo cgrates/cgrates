@@ -35,24 +35,20 @@ import (
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(
 	cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventReaderService{
-		rldChan:     make(chan struct{}, 1),
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		rldChan:    make(chan struct{}, 1),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // EventReaderService implements Service interface
 type EventReaderService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	ers *ers.ERService
 	cl  *commonlisteners.CommonListenerS
@@ -78,9 +74,9 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 		return utils.NewServiceStateTimeoutError(utils.ERs, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	erS.cl = cls.CLS()
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, erS.filterSChan); err != nil {
-		return
+	fs := erS.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), erS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ERs, utils.FilterS, utils.StateServiceUP)
 	}
 	anz := erS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), erS.cfg.GeneralCfg().ConnectTimeout) {
@@ -96,7 +92,7 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
 
 	// build the service
-	erS.ers = ers.NewERService(erS.cfg, filterS, erS.connMgr)
+	erS.ers = ers.NewERService(erS.cfg, fs.FilterS(), erS.connMgr)
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shtDwn)
 
 	srv, err := engine.NewServiceWithPing(erS.ers, utils.ErSv1, utils.V1Prfx)

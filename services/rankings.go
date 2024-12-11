@@ -34,24 +34,20 @@ import (
 
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RankingService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvDep:      srvDep,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 type RankingService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	ran *engine.RankingS
 	cl  *commonlisteners.CommonListenerS
@@ -91,9 +87,9 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.DataDB, utils.StateServiceUP)
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, ran.filterSChan); err != nil {
-		return
+	fs := ran.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.FilterS, utils.StateServiceUP)
 	}
 	anz := ran.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
@@ -102,7 +98,7 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 
 	ran.Lock()
 	defer ran.Unlock()
-	ran.ran = engine.NewRankingS(dbs.DataManager(), ran.connMgr, filterS, ran.cfg)
+	ran.ran = engine.NewRankingS(dbs.DataManager(), ran.connMgr, fs.FilterS(), ran.cfg)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.RankingS))

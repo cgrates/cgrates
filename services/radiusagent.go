@@ -32,24 +32,22 @@ import (
 )
 
 // NewRadiusAgent returns the Radius Agent
-func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewRadiusAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RadiusAgent{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // RadiusAgent implements Agent interface
 type RadiusAgent struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
-	filterSChan chan *engine.FilterS
-	stopChan    chan struct{}
+	cfg      *config.CGRConfig
+	stopChan chan struct{}
 
 	rad     *agents.RadiusAgent
 	connMgr *engine.ConnManager
@@ -69,9 +67,9 @@ func (rad *RadiusAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, rad.filterSChan); err != nil {
-		return
+	fs := rad.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), rad.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RadiusAgent, utils.FilterS, utils.StateServiceUP)
 	}
 
 	rad.Lock()
@@ -81,7 +79,7 @@ func (rad *RadiusAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (
 	rad.lauth = rad.cfg.RadiusAgentCfg().ListenAuth
 	rad.lacct = rad.cfg.RadiusAgentCfg().ListenAcct
 
-	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, filterS, rad.connMgr); err != nil {
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.FilterS(), rad.connMgr); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		return
 	}

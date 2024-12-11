@@ -33,23 +33,20 @@ import (
 )
 
 // NewJanusAgent returns the Janus Agent
-func NewJanusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewJanusAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &JanusAgent{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // JanusAgent implements Service interface
 type JanusAgent struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	jA *agents.JanusAgent
 
@@ -72,9 +69,9 @@ func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err err
 		return utils.NewServiceStateTimeoutError(utils.JanusAgent, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	cl := cls.CLS()
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, ja.filterSChan); err != nil {
-		return
+	fs := ja.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ja.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.JanusAgent, utils.FilterS, utils.StateServiceUP)
 	}
 
 	ja.Lock()
@@ -82,7 +79,7 @@ func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err err
 		ja.Unlock()
 		return utils.ErrServiceAlreadyRunning
 	}
-	ja.jA, err = agents.NewJanusAgent(ja.cfg, ja.connMgr, filterS)
+	ja.jA, err = agents.NewJanusAgent(ja.cfg, ja.connMgr, fs.FilterS())
 	if err != nil {
 		return
 	}

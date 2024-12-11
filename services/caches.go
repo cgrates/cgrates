@@ -23,7 +23,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -31,11 +30,9 @@ import (
 
 // NewCacheService .
 func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	cores *CoreService,
 	srvIndexer *servmanager.ServiceIndexer) *CacheService {
 	return &CacheService{
 		cfg:        cfg,
-		cores:      cores,
 		connMgr:    connMgr,
 		cacheCh:    make(chan *engine.CacheS, 1),
 		srvIndexer: srvIndexer,
@@ -45,8 +42,6 @@ func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 
 // CacheService implements Agent interface
 type CacheService struct {
-	cores *CoreService
-
 	cl *commonlisteners.CommonListenerS
 
 	cacheCh chan *engine.CacheS
@@ -73,11 +68,11 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.AnalyzerS, utils.StateServiceUP)
 	}
-	var cs *cores.CoreS
-	if cs, err = cS.cores.WaitForCoreS(ctx); err != nil {
-		return
+	cs := cS.srvIndexer.GetService(utils.CoreS).(*CoreService)
+	if utils.StructChanTimeout(cs.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CoreS, utils.StateServiceUP)
 	}
-	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cS.connMgr, cs.CapsStats)
+	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cS.connMgr, cs.CoreS().CapsStats)
 	go engine.Cache.Precache(ctx, shtDw)
 
 	cS.cacheCh <- engine.Cache

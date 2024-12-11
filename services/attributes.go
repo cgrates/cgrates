@@ -34,15 +34,13 @@ import (
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	dspS *DispatcherService,
 	sIndxr *servmanager.ServiceIndexer) servmanager.Service {
 	return &AttributeService{
-		cfg:            cfg,
-		filterSChan:    filterSChan,
-		dspS:           dspS,
-		stateDeps:      NewStateDependencies([]string{utils.StateServiceUP}),
-		serviceIndexer: sIndxr,
+		cfg:        cfg,
+		dspS:       dspS,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		srvIndexer: sIndxr,
 	}
 }
 
@@ -50,8 +48,7 @@ func NewAttributeService(cfg *config.CGRConfig,
 type AttributeService struct {
 	sync.RWMutex
 
-	dspS        *DispatcherService
-	filterSChan chan *engine.FilterS
+	dspS *DispatcherService
 
 	attrS *engine.AttributeS
 	cl    *commonlisteners.CommonListenerS
@@ -59,9 +56,9 @@ type AttributeService struct {
 
 	cfg *config.CGRConfig
 
-	intRPCconn     birpc.ClientConnector       // expose API methods over internal connection
-	serviceIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps      *StateDependencies
+	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	stateDeps  *StateDependencies
 }
 
 // Start should handle the service start
@@ -70,16 +67,16 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 		return utils.ErrServiceAlreadyRunning
 	}
 	if utils.StructChanTimeout(
-		attrS.serviceIndexer.GetService(utils.CommonListenerS).StateChan(utils.StateServiceUP),
+		attrS.srvIndexer.GetService(utils.CommonListenerS).StateChan(utils.StateServiceUP),
 		attrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CommonListenerS, utils.StateServiceUP)
 	}
-	cls := attrS.serviceIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
+	cls := attrS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
 	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	attrS.cl = cls.CLS()
-	cacheS := attrS.serviceIndexer.GetService(utils.CacheS).(*CacheService)
+	cacheS := attrS.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CacheS, utils.StateServiceUP)
 	}
@@ -88,22 +85,22 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 		utils.CacheAttributeFilterIndexes); err != nil {
 		return
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, attrS.filterSChan); err != nil {
-		return
+	fs := attrS.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.FilterS, utils.StateServiceUP)
 	}
-	dbs := attrS.serviceIndexer.GetService(utils.DataDB).(*DataDBService)
+	dbs := attrS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.DataDB, utils.StateServiceUP)
 	}
-	anz := attrS.serviceIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
+	anz := attrS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.AnalyzerS, utils.StateServiceUP)
 	}
 
 	attrS.Lock()
 	defer attrS.Unlock()
-	attrS.attrS = engine.NewAttributeService(dbs.DataManager(), filterS, attrS.cfg)
+	attrS.attrS = engine.NewAttributeService(dbs.DataManager(), fs.FilterS(), attrS.cfg)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
 	srv, _ := engine.NewService(attrS.rpc)

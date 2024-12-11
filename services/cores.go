@@ -140,20 +140,6 @@ func (cS *CoreService) ShouldRun() bool {
 	return true
 }
 
-// GetCoreS returns the coreS
-func (cS *CoreService) WaitForCoreS(ctx *context.Context) (cs *cores.CoreS, err error) {
-	cS.mu.RLock()
-	cSCh := cS.csCh
-	cS.mu.RUnlock()
-	select {
-	case <-ctx.Done():
-		err = ctx.Err()
-	case cs = <-cSCh:
-		cSCh <- cs
-	}
-	return
-}
-
 // StateChan returns signaling channel of specific state
 func (cS *CoreService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
@@ -164,7 +150,8 @@ func (cS *CoreService) IntRPCConn() birpc.ClientConnector {
 	return cS.intRPCconn
 }
 
-func (cS *CoreService) GetCoreS() *cores.CoreS {
+// CoreS returns the CoreS object.
+func (cS *CoreService) CoreS() *cores.CoreS {
 	cS.mu.RLock()
 	defer cS.mu.RUnlock()
 	return cS.cS

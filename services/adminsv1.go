@@ -33,23 +33,19 @@ import (
 
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AdminSv1Service{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // AdminSv1Service implements Service interface
 type AdminSv1Service struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	api *apis.AdminSv1
 	cl  *commonlisteners.CommonListenerS
@@ -75,9 +71,9 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	apiService.cl = cls.CLS()
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, apiService.filterSChan); err != nil {
-		return
+	fs := apiService.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.FilterS, utils.StateServiceUP)
 	}
 	dbs := apiService.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
@@ -95,7 +91,7 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	apiService.Lock()
 	defer apiService.Unlock()
 
-	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), apiService.connMgr, filterS, sdbs.DB())
+	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), apiService.connMgr, fs.FilterS(), sdbs.DB())
 
 	srv, _ := engine.NewService(apiService.api)
 	// srv, _ := birpc.NewService(apiService.api, "", false)
