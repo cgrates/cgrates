@@ -2028,3 +2028,70 @@ func TestMapIfaceTimeAsString(t *testing.T) {
 		t.Errorf("Expected <%q>, received <%v>", "simpleValue", mapAny["simpleKey"])
 	}
 }
+
+func TestDifferences(t *testing.T) {
+	tests := []struct {
+		name       string
+		tm         string
+		items      []any
+		wantDiff   any
+		wantErr    bool
+		wantErrMsg string
+	}{
+		{
+			name:     "Valid duration difference",
+			tm:       "",
+			items:    []any{time.Duration(5 * time.Hour), time.Duration(2 * time.Hour)},
+			wantDiff: time.Duration(3 * time.Hour),
+			wantErr:  false,
+		},
+		{
+			name:     "Valid float64 difference",
+			tm:       "",
+			items:    []any{10.5, 3.2},
+			wantDiff: 7.3,
+			wantErr:  false,
+		},
+		{
+			name:     "Valid int64 difference",
+			tm:       "",
+			items:    []any{int64(100), int64(30)},
+			wantDiff: int64(70),
+			wantErr:  false,
+		},
+		{
+			name:     "Valid int difference",
+			tm:       "",
+			items:    []any{100, 30},
+			wantDiff: int64(70),
+			wantErr:  false,
+		},
+		{
+			name:       "Unsupported type",
+			tm:         "",
+			items:      []any{"unsupported", "another"},
+			wantDiff:   nil,
+			wantErr:    true,
+			wantErrMsg: "unsupported type",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotDiff, err := Difference(tt.tm, tt.items...)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Difference() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if err != nil && tt.wantErrMsg != "" {
+				if len(err.Error()) < len(tt.wantErrMsg) || err.Error()[:len(tt.wantErrMsg)] != tt.wantErrMsg {
+					t.Errorf("Difference() error = %v, wantErrMsg %v", err.Error(), tt.wantErrMsg)
+					return
+				}
+			}
+			if gotDiff != tt.wantDiff {
+				t.Errorf("Difference() = %v, want %v", gotDiff, tt.wantDiff)
+			}
+		})
+	}
+}
