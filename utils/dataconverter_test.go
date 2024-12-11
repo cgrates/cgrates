@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
 	"math"
 	"net"
 	"reflect"
@@ -1722,6 +1723,93 @@ func TestURLEncodeConverter(t *testing.T) {
 			}
 			if tt.expected != rcv {
 				t.Errorf("expected %q,received %q", tt.expected, rcv)
+			}
+		})
+	}
+}
+
+func TestStripConverterConvert(t *testing.T) {
+	tests := []struct {
+		name       string
+		converter  StripConverter
+		input      any
+		wantOutput any
+		wantErr    error
+	}{
+		{
+			name: "Valid prefix strip",
+			converter: StripConverter{
+				amount: 3,
+				side:   MetaPrefix,
+				substr: EmptyString,
+			},
+			input:      "DatSms",
+			wantOutput: "Sms",
+			wantErr:    nil,
+		},
+		{
+			name: "Valid suffix strip",
+			converter: StripConverter{
+				amount: 3,
+				side:   MetaSuffix,
+				substr: EmptyString,
+			},
+			input:      "abcdef",
+			wantOutput: "abc",
+			wantErr:    nil,
+		},
+		{
+			name: "Invalid input type",
+			converter: StripConverter{
+				amount: 3,
+				side:   MetaPrefix,
+			},
+			input:      123,
+			wantOutput: nil,
+			wantErr:    ErrCastFailed,
+		},
+		{
+			name: "No strip with non-positive amount",
+			converter: StripConverter{
+				amount: 0,
+				side:   MetaPrefix,
+			},
+			input:      "cgrates",
+			wantOutput: "cgrates",
+			wantErr:    nil,
+		},
+		{
+			name: "Trim prefix using substring",
+			converter: StripConverter{
+				amount: -1,
+				side:   MetaPrefix,
+				substr: "data",
+			},
+			input:      "dataTariff",
+			wantOutput: "Tariff",
+			wantErr:    nil,
+		},
+		{
+			name: "Trim both sides using substring",
+			converter: StripConverter{
+				amount: -1,
+				side:   MetaBoth,
+				substr: "a",
+			},
+			input:      "aaaabcdefaaa",
+			wantOutput: "bcdef",
+			wantErr:    nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.converter.Convert(tt.input)
+			if got != tt.wantOutput {
+				t.Errorf("Convert() = %v, want %v", got, tt.wantOutput)
+			}
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("Convert() error = %v, want %v", err, tt.wantErr)
 			}
 		})
 	}
