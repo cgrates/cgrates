@@ -33,25 +33,21 @@ import (
 
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &ResourceService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvDep:      srvDep,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // ResourceService implements Service interface
 type ResourceService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	reS *engine.ResourceS
 	cl  *commonlisteners.CommonListenerS
@@ -87,9 +83,9 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 		utils.CacheResourceFilterIndexes); err != nil {
 		return
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, reS.filterSChan); err != nil {
-		return
+	fs := reS.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.FilterS, utils.StateServiceUP)
 	}
 	dbs := reS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
@@ -102,7 +98,7 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 
 	reS.Lock()
 	defer reS.Unlock()
-	reS.reS = engine.NewResourceService(dbs.DataManager(), reS.cfg, filterS, reS.connMgr)
+	reS.reS = engine.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	reS.reS.StartLoop(ctx)
 	srv, _ := engine.NewService(reS.reS)

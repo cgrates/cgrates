@@ -33,25 +33,21 @@ import (
 
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &StatService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvDep:      srvDep,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // StatService implements Service interface
 type StatService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	sts *engine.StatS
 	cl  *commonlisteners.CommonListenerS
@@ -87,9 +83,9 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 		utils.CacheStatFilterIndexes); err != nil {
 		return
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, sts.filterSChan); err != nil {
-		return
+	fs := sts.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.StatS, utils.FilterS, utils.StateServiceUP)
 	}
 	dbs := sts.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
@@ -102,7 +98,7 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 
 	sts.Lock()
 	defer sts.Unlock()
-	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, filterS, sts.connMgr)
+	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), sts.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.StatS))

@@ -33,24 +33,20 @@ import (
 
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) *DispatcherService {
 	return &DispatcherService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvsReload:  make(map[string]chan struct{}),
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvsReload: make(map[string]chan struct{}),
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // DispatcherService implements Service interface
 type DispatcherService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	dspS *dispatchers.DispatcherService
 	cl   *commonlisteners.CommonListenerS
@@ -85,9 +81,10 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 		utils.CacheDispatcherFilterIndexes); err != nil {
 		return
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, dspS.filterSChan); err != nil {
-		return
+
+	fs := dspS.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DispatcherS, utils.FilterS, utils.StateServiceUP)
 	}
 	dbs := dspS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
@@ -101,7 +98,7 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	dspS.Lock()
 	defer dspS.Unlock()
 
-	dspS.dspS = dispatchers.NewDispatcherService(dbs.DataManager(), dspS.cfg, filterS, dspS.connMgr)
+	dspS.dspS = dispatchers.NewDispatcherService(dbs.DataManager(), dspS.cfg, fs.FilterS(), dspS.connMgr)
 
 	dspS.unregisterAllDispatchedSubsystems() // unregister all rpc services that can be dispatched
 

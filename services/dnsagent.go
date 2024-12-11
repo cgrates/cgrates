@@ -32,23 +32,21 @@ import (
 )
 
 // NewDNSAgent returns the DNS Agent
-func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewDNSAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &DNSAgent{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // DNSAgent implements Agent interface
 type DNSAgent struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
-	filterSChan chan *engine.FilterS
+	cfg *config.CGRConfig
 
 	stopChan chan struct{}
 
@@ -65,14 +63,14 @@ func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, dns.filterSChan); err != nil {
-		return
+	fs := dns.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dns.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DNSAgent, utils.FilterS, utils.StateServiceUP)
 	}
 
 	dns.Lock()
 	defer dns.Unlock()
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil
@@ -86,8 +84,10 @@ func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	filterS := <-dns.filterSChan
-	dns.filterSChan <- filterS
+	fs := dns.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dns.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DNSAgent, utils.FilterS, utils.StateServiceUP)
+	}
 
 	dns.Lock()
 	defer dns.Unlock()
@@ -96,7 +96,7 @@ func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (er
 		close(dns.stopChan)
 	}
 
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil

@@ -33,23 +33,20 @@ import (
 )
 
 // NewEventExporterService constructs EventExporterService
-func NewEventExporterService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewEventExporterService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &EventExporterService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // EventExporterService is the service structure for EventExporterS
 type EventExporterService struct {
 	mu sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	eeS *ees.EeS
 	cl  *commonlisteners.CommonListenerS
@@ -109,9 +106,9 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 		return utils.NewServiceStateTimeoutError(utils.EEs, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	es.cl = cls.CLS()
-	fltrS, err := waitForFilterS(ctx, es.filterSChan)
-	if err != nil {
-		return err
+	fs := es.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), es.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.EEs, utils.FilterS, utils.StateServiceUP)
 	}
 	anz := es.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), es.cfg.GeneralCfg().ConnectTimeout) {
@@ -123,7 +120,8 @@ func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc
 	es.mu.Lock()
 	defer es.mu.Unlock()
 
-	es.eeS, err = ees.NewEventExporterS(es.cfg, fltrS, es.connMgr)
+	var err error
+	es.eeS, err = ees.NewEventExporterS(es.cfg, fs.FilterS(), es.connMgr)
 	if err != nil {
 		return err
 	}

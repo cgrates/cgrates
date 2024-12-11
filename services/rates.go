@@ -33,23 +33,18 @@ import (
 
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &RateService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		rldChan:     make(chan struct{}),
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		rldChan:    make(chan struct{}),
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // RateService is the service structure for RateS
 type RateService struct {
 	sync.RWMutex
-
-	dmS         *DataDBService
-	filterSChan chan *engine.FilterS
 
 	rateS *rates.RateS
 	cl    *commonlisteners.CommonListenerS
@@ -118,9 +113,9 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 		utils.CacheRateFilterIndexes); err != nil {
 		return
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, rs.filterSChan); err != nil {
-		return
+	fs := rs.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.RateS, utils.FilterS, utils.StateServiceUP)
 	}
 	dbs := rs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
@@ -132,7 +127,7 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	}
 
 	rs.Lock()
-	rs.rateS = rates.NewRateS(rs.cfg, filterS, dbs.DataManager())
+	rs.rateS = rates.NewRateS(rs.cfg, fs.FilterS(), dbs.DataManager())
 	rs.Unlock()
 
 	rs.stopChan = make(chan struct{})

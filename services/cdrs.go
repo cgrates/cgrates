@@ -35,23 +35,19 @@ import (
 
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &CDRService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // CDRService implements Service interface
 type CDRService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	cdrS *cdrs.CDRServer
 	cl   *commonlisteners.CommonListenerS
@@ -77,9 +73,9 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	cs.cl = cls.CLS()
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, cs.filterSChan); err != nil {
-		return
+	fs := cs.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.FilterS, utils.StateServiceUP)
 	}
 	dbs := cs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
@@ -97,7 +93,7 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	cs.Lock()
 	defer cs.Unlock()
 
-	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), filterS, cs.connMgr, sdbs.DB())
+	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs.FilterS(), cs.connMgr, sdbs.DB())
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)

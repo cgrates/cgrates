@@ -34,21 +34,17 @@ import (
 
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
 	return &AnalyzerService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // AnalyzerService implements Service interface
 type AnalyzerService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	anz *analyzers.AnalyzerS
 	cl  *commonlisteners.CommonListenerS
@@ -89,22 +85,23 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 		}
 	}(anz.anz)
 	anz.cl.SetAnalyzer(anz.anz)
-	go anz.start(ctx)
+	go anz.start()
 	close(anz.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (anz *AnalyzerService) start(ctx *context.Context) {
-	fS, err := waitForFilterS(ctx, anz.filterSChan)
-	if err != nil {
+func (anz *AnalyzerService) start() {
+	fs := anz.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), anz.cfg.GeneralCfg().ConnectTimeout) {
 		return
+		// return utils.NewServiceStateTimeoutError(utils.AnalyzerS, utils.FilterS, utils.StateServiceUP)
 	}
 
 	if !anz.IsRunning() {
 		return
 	}
 	anz.Lock()
-	anz.anz.SetFilterS(fS)
+	anz.anz.SetFilterS(fs.FilterS())
 
 	srv, _ := engine.NewService(anz.anz)
 	// srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)

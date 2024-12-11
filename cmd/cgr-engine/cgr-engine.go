@@ -134,46 +134,45 @@ func runCGREngine(fs []string) (err error) {
 	iGuardianSCh := make(chan birpc.ClientConnector, 1)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian), utils.GuardianSv1, iGuardianSCh)
 
-	iFilterSCh := make(chan *engine.FilterS, 1)
-
 	// ServiceIndexer will share service references to all services
 	srvIdxr := servmanager.NewServiceIndexer()
 	gvS := services.NewGlobalVarS(cfg, srvIdxr)
 	dmS := services.NewDataDBService(cfg, connMgr, *flags.SetVersions, srvDep, srvIdxr)
 	sdbS := services.NewStorDBService(cfg, *flags.SetVersions, srvIdxr)
 	cls := services.NewCommonListenerService(cfg, caps, srvIdxr)
-	anzS := services.NewAnalyzerService(cfg, iFilterSCh, srvIdxr)
+	anzS := services.NewAnalyzerService(cfg, srvIdxr)
 	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg, srvIdxr)
-	cacheS := services.NewCacheService(cfg, connMgr, coreS, srvIdxr)
-	dspS := services.NewDispatcherService(cfg, iFilterSCh, connMgr, srvIdxr)
-	ldrs := services.NewLoaderService(cfg, iFilterSCh, connMgr, srvIdxr)
+	cacheS := services.NewCacheService(cfg, connMgr, srvIdxr)
+	fltrS := services.NewFilterService(cfg, connMgr, srvIdxr)
+	dspS := services.NewDispatcherService(cfg, connMgr, srvIdxr)
+	ldrs := services.NewLoaderService(cfg, connMgr, srvIdxr)
 	efs := services.NewExportFailoverService(cfg, connMgr, srvIdxr)
-	adminS := services.NewAdminSv1Service(cfg, iFilterSCh, connMgr, srvIdxr)
-	sessionS := services.NewSessionService(cfg, iFilterSCh, connMgr, srvIdxr)
-	attrS := services.NewAttributeService(cfg, iFilterSCh, dspS, srvIdxr)
-	chrgS := services.NewChargerService(cfg, iFilterSCh, connMgr, srvIdxr)
-	routeS := services.NewRouteService(cfg, iFilterSCh, connMgr, srvIdxr)
-	resourceS := services.NewResourceService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
-	trendS := services.NewTrendService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
-	rankingS := services.NewRankingService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
-	thS := services.NewThresholdService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
-	stS := services.NewStatService(cfg, iFilterSCh, connMgr, srvDep, srvIdxr)
-	erS := services.NewEventReaderService(cfg, iFilterSCh, connMgr, srvIdxr)
-	dnsAgent := services.NewDNSAgent(cfg, iFilterSCh, connMgr, srvIdxr)
+	adminS := services.NewAdminSv1Service(cfg, connMgr, srvIdxr)
+	sessionS := services.NewSessionService(cfg, connMgr, srvIdxr)
+	attrS := services.NewAttributeService(cfg, dspS, srvIdxr)
+	chrgS := services.NewChargerService(cfg, connMgr, srvIdxr)
+	routeS := services.NewRouteService(cfg, connMgr, srvIdxr)
+	resourceS := services.NewResourceService(cfg, connMgr, srvDep, srvIdxr)
+	trendS := services.NewTrendService(cfg, connMgr, srvDep, srvIdxr)
+	rankingS := services.NewRankingService(cfg, connMgr, srvDep, srvIdxr)
+	thS := services.NewThresholdService(cfg, connMgr, srvDep, srvIdxr)
+	stS := services.NewStatService(cfg, connMgr, srvDep, srvIdxr)
+	erS := services.NewEventReaderService(cfg, connMgr, srvIdxr)
+	dnsAgent := services.NewDNSAgent(cfg, connMgr, srvIdxr)
 	fsAgent := services.NewFreeswitchAgent(cfg, connMgr, srvIdxr)
 	kamAgent := services.NewKamailioAgent(cfg, connMgr, srvIdxr)
-	janusAgent := services.NewJanusAgent(cfg, iFilterSCh, connMgr, srvIdxr)
+	janusAgent := services.NewJanusAgent(cfg, connMgr, srvIdxr)
 	astAgent := services.NewAsteriskAgent(cfg, connMgr, srvIdxr)
-	radAgent := services.NewRadiusAgent(cfg, iFilterSCh, connMgr, srvIdxr)
-	diamAgent := services.NewDiameterAgent(cfg, iFilterSCh, connMgr, caps, srvIdxr)
-	httpAgent := services.NewHTTPAgent(cfg, iFilterSCh, connMgr, srvIdxr)
-	sipAgent := services.NewSIPAgent(cfg, iFilterSCh, connMgr, srvIdxr)
-	eeS := services.NewEventExporterService(cfg, iFilterSCh, connMgr, srvIdxr)
-	cdrS := services.NewCDRServer(cfg, iFilterSCh, connMgr, srvIdxr)
+	radAgent := services.NewRadiusAgent(cfg, connMgr, srvIdxr)
+	diamAgent := services.NewDiameterAgent(cfg, connMgr, caps, srvIdxr)
+	httpAgent := services.NewHTTPAgent(cfg, connMgr, srvIdxr)
+	sipAgent := services.NewSIPAgent(cfg, connMgr, srvIdxr)
+	eeS := services.NewEventExporterService(cfg, connMgr, srvIdxr)
+	cdrS := services.NewCDRServer(cfg, connMgr, srvIdxr)
 	registrarcS := services.NewRegistrarCService(cfg, connMgr, srvIdxr)
-	rateS := services.NewRateService(cfg, iFilterSCh, srvIdxr)
-	actionS := services.NewActionService(cfg, iFilterSCh, connMgr, srvIdxr)
-	accS := services.NewAccountService(cfg, iFilterSCh, connMgr, srvIdxr)
+	rateS := services.NewRateService(cfg, srvIdxr)
+	actionS := services.NewActionService(cfg, connMgr, srvIdxr)
+	accS := services.NewAccountService(cfg, connMgr, srvIdxr)
 	tpeS := services.NewTPeService(cfg, connMgr, srvIdxr)
 
 	srvManager := servmanager.NewServiceManager(shdWg, connMgr, cfg, srvIdxr, []servmanager.Service{
@@ -184,6 +183,7 @@ func runCGREngine(fs []string) (err error) {
 		anzS,
 		coreS,
 		cacheS,
+		fltrS,
 		dspS,
 		ldrs,
 		efs,
@@ -308,8 +308,6 @@ func runCGREngine(fs []string) (err error) {
 		return
 	}
 	srvManager.StartServices(ctx, cancel)
-	// Start FilterS
-	go cgrStartFilterService(ctx, iFilterSCh, cacheS.GetCacheSChan(), connMgr, cfg, dmS)
 
 	cgrInitServiceManagerV1(iServeManagerCh, srvManager, cfg, cls.CLS(), anzS)
 	cgrInitGuardianSv1(iGuardianSCh, cfg, cls.CLS(), anzS)
@@ -326,7 +324,7 @@ func runCGREngine(fs []string) (err error) {
 
 	// TODO: find a better location for this if block
 	if *flags.MemPrfDir != "" {
-		if err := coreS.GetCoreS().StartMemoryProfiling(cores.MemoryProfilingParams{
+		if err := coreS.CoreS().StartMemoryProfiling(cores.MemoryProfilingParams{
 			DirPath:      *flags.MemPrfDir,
 			MaxFiles:     *flags.MemPrfMaxF,
 			Interval:     *flags.MemPrfInterval,
@@ -367,24 +365,6 @@ func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string
 		}
 	}
 	return
-}
-
-// cgrStartFilterService fires up the FilterS
-func cgrStartFilterService(ctx *context.Context, iFilterSCh chan *engine.FilterS,
-	cacheSCh chan *engine.CacheS, connMgr *engine.ConnManager,
-	cfg *config.CGRConfig, db *services.DataDBService) {
-	var cacheS *engine.CacheS
-	select {
-	case cacheS = <-cacheSCh:
-		cacheSCh <- cacheS
-	case <-ctx.Done():
-		return
-	}
-	select {
-	case <-cacheS.GetPrecacheChannel(utils.CacheFilters):
-		iFilterSCh <- engine.NewFilterS(cfg, connMgr, db.DataManager())
-	case <-ctx.Done():
-	}
 }
 
 func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGRConfig,

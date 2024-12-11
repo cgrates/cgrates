@@ -35,23 +35,20 @@ import (
 )
 
 // NewSessionService returns the Session Service
-func NewSessionService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewSessionService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &SessionService{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // SessionService implements Service interface
 type SessionService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	sm *sessions.SessionS
 	cl *commonlisteners.CommonListenerS
@@ -77,9 +74,9 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.CommonListenerS, utils.StateServiceUP)
 	}
 	smg.cl = cls.CLS()
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, smg.filterSChan); err != nil {
-		return
+	fs := smg.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.FilterS, utils.StateServiceUP)
 	}
 	dbs := smg.srvIndexer.GetService(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
@@ -93,7 +90,7 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 	smg.Lock()
 	defer smg.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), filterS, smg.connMgr)
+	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), fs.FilterS(), smg.connMgr)
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)

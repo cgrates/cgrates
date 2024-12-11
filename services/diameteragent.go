@@ -32,25 +32,23 @@ import (
 )
 
 // NewDiameterAgent returns the Diameter Agent
-func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+func NewDiameterAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, caps *engine.Caps,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &DiameterAgent{
-		cfg:         cfg,
-		filterSChan: filterSChan,
-		connMgr:     connMgr,
-		caps:        caps,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		caps:       caps,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 // DiameterAgent implements Agent interface
 type DiameterAgent struct {
 	sync.RWMutex
-	cfg         *config.CGRConfig
-	filterSChan chan *engine.FilterS
-	stopChan    chan struct{}
+	cfg      *config.CGRConfig
+	stopChan chan struct{}
 
 	da      *agents.DiameterAgent
 	connMgr *engine.ConnManager
@@ -70,13 +68,13 @@ func (da *DiameterAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) 
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	filterS, err := waitForFilterS(ctx, da.filterSChan)
-	if err != nil {
-		return err
+	fs := da.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), da.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DiameterAgent, utils.FilterS, utils.StateServiceUP)
 	}
 	da.Lock()
 	defer da.Unlock()
-	return da.start(filterS, shtDwn, da.caps)
+	return da.start(fs.FilterS(), shtDwn, da.caps)
 }
 
 func (da *DiameterAgent) start(filterS *engine.FilterS, shtDwn context.CancelFunc, caps *engine.Caps) error {
@@ -110,11 +108,11 @@ func (da *DiameterAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc)
 		return
 	}
 	close(da.stopChan)
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, da.filterSChan); err != nil {
-		return
+	fs := da.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), da.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.DiameterAgent, utils.FilterS, utils.StateServiceUP)
 	}
-	return da.start(filterS, shtDwn, da.caps)
+	return da.start(fs.FilterS(), shtDwn, da.caps)
 }
 
 // Shutdown stops the service

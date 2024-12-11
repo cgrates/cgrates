@@ -33,24 +33,20 @@ import (
 
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig,
-	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &TrendService{
-		cfg:         cfg,
-		connMgr:     connMgr,
-		srvDep:      srvDep,
-		filterSChan: filterSChan,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:        cfg,
+		connMgr:    connMgr,
+		srvDep:     srvDep,
+		srvIndexer: srvIndexer,
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
 }
 
 type TrendService struct {
 	sync.RWMutex
-
-	filterSChan chan *engine.FilterS
 
 	trs *engine.TrendS
 	cl  *commonlisteners.CommonListenerS
@@ -90,9 +86,9 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.DataDB, utils.StateServiceUP)
 	}
-	var filterS *engine.FilterS
-	if filterS, err = waitForFilterS(ctx, trs.filterSChan); err != nil {
-		return
+	fs := trs.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.FilterS, utils.StateServiceUP)
 	}
 	anz := trs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
@@ -101,7 +97,7 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 
 	trs.Lock()
 	defer trs.Unlock()
-	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, filterS, trs.connMgr)
+	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), trs.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TrendS))
 	if err := trs.trs.StartTrendS(ctx); err != nil {
 		return err
