@@ -35,10 +35,7 @@ func TestAccountsSetGetAccount(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
@@ -128,10 +125,7 @@ func TestAccountsGetAccountErrorMissingID(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
@@ -192,10 +186,7 @@ func TestAccountsGetAccountErrorNotFound(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRply utils.Account
 	err := admS.GetAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -220,10 +211,7 @@ func TestAccountsGetAccountErrorGetAccount(t *testing.T) {
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRply utils.Account
 	err := admS.GetAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -245,10 +233,7 @@ func TestAccountsSetGetAccountNoTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			ID:   "test_ID1",
@@ -337,10 +322,7 @@ func TestAccountsSetGetAccountErrorMissingID(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Opts: map[string]any{},
@@ -385,10 +367,7 @@ func TestAccountsSetGetAccountErrorBadFilter(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant:    "",
@@ -451,10 +430,7 @@ func TestAccountsSetGetAccountErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -522,10 +498,7 @@ func TestAccountsSetGetAccountErrorCallCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -575,10 +548,7 @@ func TestAccountsSetGetAccountIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "testTenant",
@@ -799,10 +769,7 @@ func TestAccountsGetAccountsCountError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRplyCount3 int
 	err := admS.GetAccountsCount(context.Background(),
 		&utils.ArgsItemIDs{}, &getRplyCount3)
@@ -817,10 +784,7 @@ func TestAccountsGetAccountIDSError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRplyCount3 []string
 	err := admS.GetAccountIDs(context.Background(),
 		&utils.ArgsItemIDs{}, &getRplyCount3)
@@ -835,10 +799,7 @@ func TestAccountsRemoveAccountErrorMissingID(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRplyRmv string
 	err := admS.RemoveAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -859,10 +820,7 @@ func TestAccountsRemoveAccountErrorRmvAccount(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRplyRmv string
 	err := admS.RemoveAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -899,10 +857,7 @@ func TestAccountsRemoveAccountErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRplyRmv string
 	err := admS.RemoveAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -943,10 +898,7 @@ func TestAccountsRemoveAccountErrorCallCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRplyRmv string
 	err := admS.RemoveAccount(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -967,10 +919,7 @@ func TestAccountsGetAccountsOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args1 := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
@@ -1105,10 +1054,7 @@ func TestAccountsGetAccountsGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",

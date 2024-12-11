@@ -108,10 +108,7 @@ func TestAccountsGetAccount(t *testing.T) {
 	acc := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := apis.NewAdminSv1(cfg, dm, nil, fltrs, storDBChan)
+	admS := apis.NewAdminSv1(cfg, dm, nil, fltrs, nil)
 	acc_args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant: "cgrates.org",
@@ -175,10 +172,7 @@ func TestAccountsDebitConcretes(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := apis.NewAdminSv1(cfg, dm, nil, nil, storDBChan)
+	admS := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 
@@ -269,10 +263,7 @@ func TestAccountsMaxConcretes(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := apis.NewAdminSv1(cfg, dm, nil, nil, storDBChan)
+	admS := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 	args := &utils.AccountWithAPIOpts{
 		Account: &utils.Account{
 			Tenant:    "cgrates.org",
@@ -523,10 +514,7 @@ func TestAccountsActionSetBalance(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -712,10 +700,7 @@ func TestAccountsDebitAbstracts(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -901,10 +886,7 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{
@@ -1090,10 +1072,7 @@ func TestAccountsAccountsForEvent(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
 	args := &utils.AccountWithAPIOpts{

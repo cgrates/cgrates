@@ -38,10 +38,7 @@ func TestRatesGetRateProfileErrMandatoryIeMissing(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{},
 	}
@@ -60,10 +57,7 @@ func TestRatesGetRateProfile1(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "DefaultRate",
@@ -127,10 +121,7 @@ func TestRatesGetRateProfileErrorNotFound(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			ID: "2",
@@ -151,10 +142,7 @@ func TestRatesGetRateProfileIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "RP1",
@@ -193,10 +181,7 @@ func TestRatesGetRateProfile2(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "RP2",
@@ -237,10 +222,7 @@ func TestRatesGetRateProfileErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDBMock := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.ArgsItemIDs{
 		Tenant: "tenant",
 	}
@@ -262,10 +244,7 @@ func TestRatesGetRateProfileErr2(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.ArgsItemIDs{
 		Tenant: "tenant",
 	}
@@ -283,10 +262,7 @@ func TestRatesGetRateProfilesCount(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "RP3",
@@ -326,10 +302,7 @@ func TestRatesGetRateProfilesCountEmptyTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "RP4",
@@ -368,10 +341,7 @@ func TestRatesGetRateProfilesCountGetKeysError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDBMock := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.ArgsItemIDs{}
 	result := utils.IntPointer(0)
 	err := admS.GetRateProfilesCount(context.Background(), args, result)
@@ -391,10 +361,7 @@ func TestRatesGetRateProfilesCountKeysLenError(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDBMock, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.ArgsItemIDs{}
 	result := utils.IntPointer(0)
 	err := admS.GetRateProfilesCount(context.Background(), args, result)
@@ -410,10 +377,7 @@ func TestRatesSetRateProfileMissingStructFieldError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			Tenant:    "cgrates.org",
@@ -441,10 +405,7 @@ func TestRatesSetRateProfileEmptyTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -507,10 +468,7 @@ func TestRatesSetRateProfileError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "RP6",
@@ -575,10 +533,7 @@ func TestRatesSetRateProfile(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -643,10 +598,7 @@ func TestRatesRemoveRateProfile(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -701,10 +653,7 @@ func TestRatesRemoveRateProfileMissing(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -747,10 +696,7 @@ func TestRatesRemoveRateProfileEmptyTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -802,10 +748,7 @@ func TestRatesSetGetRateProfileError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -847,10 +790,7 @@ func TestRatesSetRemoveRateProfileError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -905,10 +845,7 @@ func TestRatesSetRateProfileRates(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext1 := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -983,10 +920,7 @@ func TestRatesSetRateProfileRatesNoTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext1 := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -1058,10 +992,7 @@ func TestRatesSetRateProfileRatesMissingField(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext2 := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			FilterIDs: []string{"*string:~*req.Subject:1001"},
@@ -1092,10 +1023,7 @@ func TestRatesSetRateProfileRatesErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext2 := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -1128,10 +1056,7 @@ func TestRatesRemoveRateProfileRate(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext1 := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -1212,10 +1137,7 @@ func TestRatesRemoveRateProfileRateEmptyTenant(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext1 := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -1279,10 +1201,7 @@ func TestRatesRemoveRateProfileRateError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var rtRply string
 	args1 := &utils.RemoveRPrfRates{
 		ID:      "2",
@@ -1303,10 +1222,7 @@ func TestRatesRemoveRateProfileRateErrorMissingField(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var rtRply string
 	args1 := &utils.RemoveRPrfRates{
 
@@ -1341,10 +1257,7 @@ func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -1392,10 +1305,7 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -1443,10 +1353,7 @@ func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.RemoveRPrfRates{
 		ID:      "2",
 		Tenant:  "tenant",
@@ -1486,10 +1393,7 @@ func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "tenant",
@@ -1532,10 +1436,7 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -1591,10 +1492,7 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "2",
@@ -1646,10 +1544,7 @@ func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.RemoveRPrfRates{
 		ID:      "2",
 		Tenant:  "tenant",
@@ -1693,10 +1588,7 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 		},
 	}
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ext := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
 			Tenant: "tenant",
@@ -1718,10 +1610,7 @@ func TestRatesGetRateProfilesOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args1 := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			Tenant: "cgrates.org",
@@ -1851,10 +1740,7 @@ func TestRatesGetRateProfilesGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			Tenant: "cgrates.org",
@@ -2430,10 +2316,7 @@ func TestRatesSetRateProfileErrConvertOverwriteOpt(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			Tenant:    "cgrates.org",
@@ -2465,10 +2348,7 @@ func TestRatesGetRateProfilePagination(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	ratePrf := &utils.APIRateProfile{
 		RateProfile: &utils.RateProfile{
 			ID:        "RATE_PROFILE",

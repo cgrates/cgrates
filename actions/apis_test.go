@@ -49,9 +49,7 @@ func TestActionsAPIs(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	stordbchan := make(chan engine.StorDB, 1)
-	stordbchan <- nil
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, stordbchan)
+	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 	aS := NewActionS(cfg, fltrs, dm, nil)
 	actPrf := &engine.ActionProfileWithAPIOpts{
 		ActionProfile: &engine.ActionProfile{
@@ -131,9 +129,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
-	stordbchan := make(chan engine.StorDB, 1)
-	stordbchan <- nil
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, stordbchan)
+	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
@@ -225,9 +221,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
-	stordbchan := make(chan engine.StorDB, 1)
-	stordbchan <- nil
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, stordbchan)
+	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
@@ -317,9 +311,7 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
-	stordbchan := make(chan engine.StorDB, 1)
-	stordbchan <- nil
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, stordbchan)
+	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
@@ -408,9 +400,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
-	stordbchan := make(chan engine.StorDB, 1)
-	stordbchan <- nil
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, stordbchan)
+	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
@@ -482,9 +472,7 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	storDbChan := make(chan engine.StorDB, 1)
-	storDbChan <- nil
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, storDbChan)
+	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, nil)
 
@@ -569,9 +557,7 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs), utils.CDRsV1, rpcInternal)
-	stordbchan := make(chan engine.StorDB, 1)
-	stordbchan <- nil
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, stordbchan)
+	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
@@ -659,9 +645,7 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
-	stordbchan := make(chan engine.StorDB, 1)
-	stordbchan <- nil
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, stordbchan)
+	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 

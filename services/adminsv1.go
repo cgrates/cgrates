@@ -33,13 +33,11 @@ import (
 
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig,
-	storDB *StorDBService,
 	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &AdminSv1Service{
 		cfg:         cfg,
-		storDB:      storDB,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
@@ -51,7 +49,6 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 type AdminSv1Service struct {
 	sync.RWMutex
 
-	storDB      *StorDBService
 	filterSChan chan *engine.FilterS
 
 	api *apis.AdminSv1
@@ -90,18 +87,16 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.AnalyzerS, utils.StateServiceUP)
 	}
-
-	storDBChan := make(chan engine.StorDB, 1)
-	apiService.stopChan = make(chan struct{})
-	apiService.storDB.RegisterSyncChan(storDBChan)
+	sdbs := apiService.srvIndexer.GetService(utils.StorDB).(*StorDBService)
+	if utils.StructChanTimeout(sdbs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.StorDB, utils.StateServiceUP)
+	}
 
 	apiService.Lock()
 	defer apiService.Unlock()
 
-	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), apiService.connMgr, filterS, storDBChan)
+	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), apiService.connMgr, filterS, sdbs.DB())
 
-	// go apiService.api.ListenAndServe(apiService.stopChan)
-	// runtime.Gosched()
 	srv, _ := engine.NewService(apiService.api)
 	// srv, _ := birpc.NewService(apiService.api, "", false)
 

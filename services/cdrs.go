@@ -35,12 +35,11 @@ import (
 
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig,
-	storDB *StorDBService, filterSChan chan *engine.FilterS,
+	filterSChan chan *engine.FilterS,
 	connMgr *engine.ConnManager,
 	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
 	return &CDRService{
 		cfg:         cfg,
-		storDB:      storDB,
 		filterSChan: filterSChan,
 		connMgr:     connMgr,
 		srvIndexer:  srvIndexer,
@@ -52,15 +51,13 @@ func NewCDRServer(cfg *config.CGRConfig,
 type CDRService struct {
 	sync.RWMutex
 
-	storDB      *StorDBService
 	filterSChan chan *engine.FilterS
 
 	cdrS *cdrs.CDRServer
 	cl   *commonlisteners.CommonListenerS
 
-	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
+	connMgr *engine.ConnManager
+	cfg     *config.CGRConfig
 
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
@@ -92,16 +89,15 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.AnalyzerS, utils.StateServiceUP)
 	}
-
-	storDBChan := make(chan engine.StorDB, 1)
-	cs.stopChan = make(chan struct{})
-	cs.storDB.RegisterSyncChan(storDBChan)
+	sdbs := cs.srvIndexer.GetService(utils.StorDB).(*StorDBService)
+	if utils.StructChanTimeout(sdbs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.StorDB, utils.StateServiceUP)
+	}
 
 	cs.Lock()
 	defer cs.Unlock()
 
-	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), filterS, cs.connMgr, storDBChan)
-	go cs.cdrS.ListenAndServe(cs.stopChan)
+	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), filterS, cs.connMgr, sdbs.DB())
 	runtime.Gosched()
 	utils.Logger.Info("Registering CDRS RPC service.")
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
@@ -125,7 +121,6 @@ func (cs *CDRService) Reload(*context.Context, context.CancelFunc) (err error) {
 // Shutdown stops the service
 func (cs *CDRService) Shutdown() (err error) {
 	cs.Lock()
-	close(cs.stopChan)
 	cs.cdrS = nil
 	cs.Unlock()
 	cs.cl.RpcUnregisterName(utils.CDRsV1)

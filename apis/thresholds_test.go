@@ -773,10 +773,7 @@ func TestThresholdsGetThresholdProfilesOK(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args1 := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:           "cgrates.org",
@@ -896,10 +893,7 @@ func TestThresholdsGetThresholdProfilesGetIDsErr(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &engine.ThresholdProfileWithAPIOpts{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:           "cgrates.org",

@@ -110,10 +110,7 @@ func TestCallCache(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, nil)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	opts := map[string]any{
 		utils.MetaCache: utils.MetaNone,
@@ -153,10 +150,7 @@ func TestCallCacheForRemoveIndexes(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, nil)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	opts := map[string]any{
 		utils.MetaCache: utils.MetaNone,
@@ -190,10 +184,7 @@ func TestCallCacheForComputeIndexes(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, nil)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	opts := map[string]any{
 		utils.MetaCache: utils.MetaNone,
@@ -227,10 +218,7 @@ func TestCallCacheMultiple(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, nil, connMgr)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	var storDB engine.StorDB
-	storDBChan := make(chan engine.StorDB, 1)
-	storDBChan <- storDB
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, storDBChan)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, nil)
 	admS.cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	opts := map[string]any{
 		utils.MetaCache: utils.MetaNone,
