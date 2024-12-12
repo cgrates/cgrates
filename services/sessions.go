@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/engine"
@@ -37,7 +35,7 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *SessionService {
 	return &SessionService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -64,7 +62,7 @@ type SessionService struct {
 }
 
 // Start should handle the service start
-func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
+func (smg *SessionService) Start(shutdown chan struct{}) (err error) {
 	if smg.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -111,26 +109,26 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 			smg.cl.BiRPCRegisterName(n, s)
 		}
 		// run this in it's own goroutine
-		go smg.start(shtDw)
+		go smg.start(shutdown)
 	}
 	close(smg.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (smg *SessionService) start(shtDw context.CancelFunc) (err error) {
+func (smg *SessionService) start(shutdown chan struct{}) (err error) {
 	if err := smg.cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
 		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
 		smg.Lock()
 		smg.bircpEnabled = false
 		smg.Unlock()
-		shtDw()
+		close(shutdown)
 	}
 	return
 }
 
 // Reload handles the change of config
-func (smg *SessionService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (smg *SessionService) Reload(_ chan struct{}) (err error) {
 	return
 }
 

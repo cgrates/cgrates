@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
@@ -61,7 +60,7 @@ type DispatcherService struct {
 }
 
 // Start should handle the sercive start
-func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (dspS *DispatcherService) Start(shutdown chan struct{}) (err error) {
 	if dspS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -75,7 +74,7 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), dspS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.DispatcherS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheDispatcherProfiles,
 		utils.CacheDispatcherHosts,
 		utils.CacheDispatcherFilterIndexes); err != nil {
@@ -117,7 +116,7 @@ func (dspS *DispatcherService) Start(ctx *context.Context, _ context.CancelFunc)
 }
 
 // Reload handles the change of config
-func (dspS *DispatcherService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (dspS *DispatcherService) Reload(_ chan struct{}) (err error) {
 	return // for the momment nothing to reload
 }
 

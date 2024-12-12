@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -34,7 +33,7 @@ import (
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *DNSAgent {
 	return &DNSAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -59,7 +58,7 @@ type DNSAgent struct {
 }
 
 // Start should handle the service start
-func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (dns *DNSAgent) Start(shutdown chan struct{}) (err error) {
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -77,13 +76,13 @@ func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err
 		return
 	}
 	dns.stopChan = make(chan struct{})
-	go dns.listenAndServe(dns.stopChan, shtDwn)
+	go dns.listenAndServe(dns.stopChan, shutdown)
 	close(dns.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (dns *DNSAgent) Reload(shutdown chan struct{}) (err error) {
 	fs := dns.srvIndexer.GetService(utils.FilterS).(*FilterService)
 	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dns.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.DNSAgent, utils.FilterS, utils.StateServiceUP)
@@ -106,16 +105,16 @@ func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (er
 	dns.dns.Lock()
 	defer dns.dns.Unlock()
 	dns.stopChan = make(chan struct{})
-	go dns.listenAndServe(dns.stopChan, shtDwn)
+	go dns.listenAndServe(dns.stopChan, shutdown)
 	return
 }
 
-func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shtDwn context.CancelFunc) (err error) {
+func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shutdown chan struct{}) (err error) {
 	dns.dns.RLock()
 	defer dns.dns.RUnlock()
 	if err = dns.dns.ListenAndServe(stopChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-		shtDwn() // stop the engine here
+		close(shutdown) // stop the engine here
 	}
 	return
 }

@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -35,7 +33,7 @@ import (
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *ChargerService {
 	return &ChargerService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -60,7 +58,7 @@ type ChargerService struct {
 }
 
 // Start should handle the service start
-func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (chrS *ChargerService) Start(shutdown chan struct{}) (err error) {
 	if chrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -74,7 +72,7 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheChargerProfiles,
 		utils.CacheChargerFilterIndexes); err != nil {
 		return
@@ -110,7 +108,7 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 }
 
 // Reload handles the change of config
-func (chrS *ChargerService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (chrS *ChargerService) Reload(_ chan struct{}) (err error) {
 	return
 }
 

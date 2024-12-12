@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -35,7 +34,7 @@ import (
 // NewJanusAgent returns the Janus Agent
 func NewJanusAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *JanusAgent {
 	return &JanusAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -63,7 +62,7 @@ type JanusAgent struct {
 }
 
 // Start should jandle the sercive start
-func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (ja *JanusAgent) Start(_ chan struct{}) (err error) {
 	cls := ja.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
 	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ja.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.JanusAgent, utils.CommonListenerS, utils.StateServiceUP)
@@ -103,7 +102,7 @@ func (ja *JanusAgent) Start(ctx *context.Context, _ context.CancelFunc) (err err
 }
 
 // Reload jandles the change of config
-func (ja *JanusAgent) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (ja *JanusAgent) Reload(_ chan struct{}) (err error) {
 	return // no reload
 }
 

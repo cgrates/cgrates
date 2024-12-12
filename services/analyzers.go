@@ -59,7 +59,7 @@ type AnalyzerService struct {
 }
 
 // Start should handle the sercive start
-func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (anz *AnalyzerService) Start(shutdown chan struct{}) (err error) {
 	if anz.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -76,12 +76,12 @@ func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFun
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}
-	anzCtx, cancel := context.WithCancel(ctx)
+	anzCtx, cancel := context.WithCancel(context.TODO())
 	anz.cancelFunc = cancel
 	go func(a *analyzers.AnalyzerS) {
 		if err := a.ListenAndServe(anzCtx); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
-			shtDwn()
+			close(shutdown)
 		}
 	}(anz.anz)
 	anz.cl.SetAnalyzer(anz.anz)
@@ -114,7 +114,7 @@ func (anz *AnalyzerService) start() {
 }
 
 // Reload handles the change of config
-func (anz *AnalyzerService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (anz *AnalyzerService) Reload(_ chan struct{}) (err error) {
 	return // for the momment nothing to reload
 }
 

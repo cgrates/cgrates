@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -34,7 +33,7 @@ import (
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *RadiusAgent {
 	return &RadiusAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -62,7 +61,7 @@ type RadiusAgent struct {
 }
 
 // Start should handle the sercive start
-func (rad *RadiusAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (rad *RadiusAgent) Start(shutdown chan struct{}) (err error) {
 	if rad.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -85,21 +84,21 @@ func (rad *RadiusAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (
 	}
 	rad.stopChan = make(chan struct{})
 
-	go rad.listenAndServe(rad.rad, shtDwn)
+	go rad.listenAndServe(rad.rad, shutdown)
 	close(rad.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shtDwn context.CancelFunc) (err error) {
+func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shutdown chan struct{}) (err error) {
 	if err = r.ListenAndServe(rad.stopChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
-		shtDwn()
+		close(shutdown)
 	}
 	return
 }
 
 // Reload handles the change of config
-func (rad *RadiusAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (rad *RadiusAgent) Reload(shutdown chan struct{}) (err error) {
 	if rad.lnet == rad.cfg.RadiusAgentCfg().ListenNet &&
 		rad.lauth == rad.cfg.RadiusAgentCfg().ListenAuth &&
 		rad.lacct == rad.cfg.RadiusAgentCfg().ListenAcct {
@@ -107,7 +106,7 @@ func (rad *RadiusAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) 
 	}
 
 	rad.shutdown()
-	return rad.Start(ctx, shtDwn)
+	return rad.Start(shutdown)
 }
 
 // Shutdown stops the service

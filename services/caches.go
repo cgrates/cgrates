@@ -20,7 +20,6 @@ package services
 
 import (
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -54,7 +53,7 @@ type CacheService struct {
 }
 
 // Start should handle the sercive start
-func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
+func (cS *CacheService) Start(shutdown chan struct{}) (err error) {
 	cls := cS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
 	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CommonListenerS, utils.StateServiceUP)
@@ -73,7 +72,7 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CoreS, utils.StateServiceUP)
 	}
 	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cS.connMgr, cs.CoreS().CapsStats)
-	go engine.Cache.Precache(ctx, shtDw)
+	go engine.Cache.Precache(shutdown)
 
 	cS.cacheCh <- engine.Cache
 
@@ -90,7 +89,7 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 }
 
 // Reload handles the change of config
-func (cS *CacheService) Reload(*context.Context, context.CancelFunc) (_ error) {
+func (cS *CacheService) Reload(_ chan struct{}) (_ error) {
 	return
 }
 
@@ -120,18 +119,18 @@ func (cS *CacheService) GetCacheSChan() chan *engine.CacheS {
 	return cS.cacheCh
 }
 
-func (cS *CacheService) WaitToPrecache(ctx *context.Context, cacheIDs ...string) (err error) {
+func (cS *CacheService) WaitToPrecache(shutdown chan struct{}, cacheIDs ...string) (err error) {
 	var cacheS *engine.CacheS
 	select {
-	case <-ctx.Done():
-		return ctx.Err()
+	case <-shutdown:
+		return
 	case cacheS = <-cS.cacheCh:
 		cS.cacheCh <- cacheS
 	}
 	for _, cacheID := range cacheIDs {
 		select {
-		case <-ctx.Done():
-			return ctx.Err()
+		case <-shutdown:
+			return
 		case <-cacheS.GetPrecacheChannel(cacheID):
 		}
 	}

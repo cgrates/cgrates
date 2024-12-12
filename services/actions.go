@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/actions"
 	"github.com/cgrates/cgrates/commonlisteners"
@@ -37,7 +35,7 @@ import (
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *ActionService {
 	return &ActionService{
 		connMgr:    connMgr,
 		cfg:        cfg,
@@ -66,7 +64,7 @@ type ActionService struct {
 }
 
 // Start should handle the service start
-func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (acts *ActionService) Start(shutdown chan struct{}) (err error) {
 	if acts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -80,7 +78,7 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheActionProfiles,
 		utils.CacheActionProfilesFilterIndexes); err != nil {
 		return
@@ -120,7 +118,7 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 }
 
 // Reload handles the change of config
-func (acts *ActionService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (acts *ActionService) Reload(_ chan struct{}) (err error) {
 	acts.rldChan <- struct{}{}
 	return // for the moment nothing to reload
 }

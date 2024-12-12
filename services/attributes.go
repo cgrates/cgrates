@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -35,7 +34,7 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig,
 	dspS *DispatcherService,
-	sIndxr *servmanager.ServiceIndexer) servmanager.Service {
+	sIndxr *servmanager.ServiceIndexer) *AttributeService {
 	return &AttributeService{
 		cfg:        cfg,
 		dspS:       dspS,
@@ -62,7 +61,7 @@ type AttributeService struct {
 }
 
 // Start should handle the service start
-func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (attrS *AttributeService) Start(shutdown chan struct{}) (err error) {
 	if attrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -80,7 +79,7 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheAttributeProfiles,
 		utils.CacheAttributeFilterIndexes); err != nil {
 		return
@@ -129,7 +128,7 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 }
 
 // Reload handles the change of config
-func (attrS *AttributeService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (attrS *AttributeService) Reload(_ chan struct{}) (err error) {
 	return // for the moment nothing to reload
 }
 

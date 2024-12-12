@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
@@ -35,7 +34,7 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *EventExporterService {
 	return &EventExporterService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -77,7 +76,7 @@ func (es *EventExporterService) IsRunning() bool {
 }
 
 // Reload handles the change of config
-func (es *EventExporterService) Reload(*context.Context, context.CancelFunc) error {
+func (es *EventExporterService) Reload(_ chan struct{}) error {
 	es.mu.Lock()
 	defer es.mu.Unlock()
 	es.eeS.ClearExporterCache()
@@ -96,7 +95,7 @@ func (es *EventExporterService) Shutdown() error {
 }
 
 // Start should handle the service start
-func (es *EventExporterService) Start(ctx *context.Context, _ context.CancelFunc) error {
+func (es *EventExporterService) Start(_ chan struct{}) error {
 	if es.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}

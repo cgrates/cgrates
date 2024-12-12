@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,7 +32,7 @@ import (
 
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *RateService {
 	return &RateService{
 		cfg:        cfg,
 		rldChan:    make(chan struct{}),
@@ -76,7 +75,7 @@ func (rs *RateService) IsRunning() bool {
 }
 
 // Reload handles the change of config
-func (rs *RateService) Reload(*context.Context, context.CancelFunc) (_ error) {
+func (rs *RateService) Reload(_ chan struct{}) (_ error) {
 	rs.rldChan <- struct{}{}
 	return
 }
@@ -93,7 +92,7 @@ func (rs *RateService) Shutdown() (err error) {
 }
 
 // Start should handle the service start
-func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (rs *RateService) Start(shutdown chan struct{}) (err error) {
 	if rs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -107,7 +106,7 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.RateS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheRateProfiles,
 		utils.CacheRateProfilesFilterIndexes,
 		utils.CacheRateFilterIndexes); err != nil {

@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -35,7 +33,7 @@ import (
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *RouteService {
 	return &RouteService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -60,7 +58,7 @@ type RouteService struct {
 }
 
 // Start should handle the sercive start
-func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (routeS *RouteService) Start(shutdown chan struct{}) (err error) {
 	if routeS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -74,7 +72,7 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), routeS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.RouteS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheRouteProfiles,
 		utils.CacheRouteFilterIndexes); err != nil {
 		return
@@ -110,7 +108,7 @@ func (routeS *RouteService) Start(ctx *context.Context, _ context.CancelFunc) (e
 }
 
 // Reload handles the change of config
-func (routeS *RouteService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (routeS *RouteService) Reload(_ chan struct{}) (err error) {
 	return
 }
 
