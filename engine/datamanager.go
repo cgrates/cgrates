@@ -1032,7 +1032,7 @@ func (dm *DataManager) SetTrend(ctx *context.Context, tr *Trend) (err error) {
 		return utils.ErrNoDatabaseConn
 	}
 	if dm.dataDB.GetStorageType() != utils.MetaInternal {
-		if err = tr.compress(dm.ms); err != nil {
+		if tr, err = tr.compress(dm.ms); err != nil {
 			return
 		}
 	}
@@ -1391,10 +1391,10 @@ func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cache
 			}
 			return nil, err
 		}
-		if cacheWrite {
-			if errCh := Cache.Set(ctx, utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
-				return nil, errCh
-			}
+	}
+	if cacheWrite {
+		if errCh := Cache.Set(ctx, utils.CacheRankings, tntID, rn, nil, cacheCommit(transactionID), transactionID); errCh != nil {
+			return nil, errCh
 		}
 	}
 	return
