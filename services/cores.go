@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -68,7 +67,7 @@ type CoreService struct {
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) error {
+func (cS *CoreService) Start(shutdown chan struct{}) error {
 	if cS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -87,7 +86,7 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 	defer cS.mu.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, shtDw)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, shutdown)
 	cS.csCh <- cS.cS
 	srv, err := engine.NewService(cS.cS)
 	if err != nil {
@@ -105,7 +104,7 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 }
 
 // Reload handles the change of config
-func (cS *CoreService) Reload(*context.Context, context.CancelFunc) error {
+func (cS *CoreService) Reload(_ chan struct{}) error {
 	return nil
 }
 

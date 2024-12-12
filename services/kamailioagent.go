@@ -24,11 +24,9 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -36,7 +34,7 @@ import (
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *KamailioAgent {
 	return &KamailioAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -59,7 +57,7 @@ type KamailioAgent struct {
 }
 
 // Start should handle the sercive start
-func (kam *KamailioAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
+func (kam *KamailioAgent) Start(shutdown chan struct{}) (err error) {
 	if kam.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -70,30 +68,30 @@ func (kam *KamailioAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (
 	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), kam.connMgr,
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 
-	go kam.connect(kam.kam, shtDwn)
+	go kam.connect(kam.kam, shutdown)
 	close(kam.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (kam *KamailioAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) (err error) {
+func (kam *KamailioAgent) Reload(shutdown chan struct{}) (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 	if err = kam.kam.Shutdown(); err != nil {
 		return
 	}
 	kam.kam.Reload()
-	go kam.connect(kam.kam, shtDwn)
+	go kam.connect(kam.kam, shutdown)
 	return
 }
 
-func (kam *KamailioAgent) connect(k *agents.KamailioAgent, shtDwn context.CancelFunc) (err error) {
+func (kam *KamailioAgent) connect(k *agents.KamailioAgent, shutdown chan struct{}) (err error) {
 	if err = k.Connect(); err != nil {
 		if !strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
 			if !strings.Contains(err.Error(), "KamEvapi") {
 				utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
 			}
-			shtDwn()
+			close(shutdown)
 		}
 	}
 	return

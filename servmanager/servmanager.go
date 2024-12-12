@@ -55,16 +55,16 @@ type ServiceManager struct {
 }
 
 // StartServices starts all enabled services
-func (srvMngr *ServiceManager) StartServices(ctx *context.Context, shtDwn context.CancelFunc) {
-	go srvMngr.handleReload(ctx, shtDwn)
+func (srvMngr *ServiceManager) StartServices(shutdown chan struct{}) {
+	go srvMngr.handleReload(shutdown)
 	for _, service := range srvMngr.serviceIndexer.GetServices() {
 		if service.ShouldRun() && !service.IsRunning() {
 			srvMngr.shdWg.Add(1)
 			go func() {
-				if err := service.Start(ctx, shtDwn); err != nil &&
+				if err := service.Start(shutdown); err != nil &&
 					err != utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, service.ServiceName(), err))
-					shtDwn()
+					close(shutdown)
 				}
 			}()
 		}
@@ -99,11 +99,11 @@ func (srvMngr *ServiceManager) AddServices(services ...Service) {
 	srvMngr.Unlock()
 }
 
-func (srvMngr *ServiceManager) handleReload(ctx *context.Context, shtDwn context.CancelFunc) {
+func (srvMngr *ServiceManager) handleReload(shutdown chan struct{}) {
 	var srvName string
 	for {
 		select {
-		case <-ctx.Done():
+		case <-shutdown:
 			srvMngr.ShutdownServices()
 			return
 		case srvName = <-srvMngr.rldChan:
@@ -111,34 +111,34 @@ func (srvMngr *ServiceManager) handleReload(ctx *context.Context, shtDwn context
 		if srvName == config.RPCConnsJSON {
 			go srvMngr.connMgr.Reload()
 		} else {
-			go srvMngr.reloadService(srvName, ctx, shtDwn)
+			go srvMngr.reloadService(srvName, shutdown)
 
 		}
 		// handle RPC server
 	}
 }
 
-func (srvMngr *ServiceManager) reloadService(srvName string, ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (srvMngr *ServiceManager) reloadService(srvName string, shutdown chan struct{}) (err error) {
 	srv := srvMngr.serviceIndexer.GetService(srvName)
 	if srv.ShouldRun() {
 		if srv.IsRunning() {
-			if err = srv.Reload(ctx, shtDwn); err != nil {
+			if err = srv.Reload(shutdown); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-				shtDwn()
+				close(shutdown)
 				return // stop if we encounter an error
 			}
 		} else {
 			srvMngr.shdWg.Add(1)
-			if err = srv.Start(ctx, shtDwn); err != nil {
+			if err = srv.Start(shutdown); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-				shtDwn()
+				close(shutdown)
 				return // stop if we encounter an error
 			}
 		}
 	} else if srv.IsRunning() {
 		if err = srv.Shutdown(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to stop service <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
-			shtDwn()
+			close(shutdown)
 		}
 		srvMngr.shdWg.Done()
 	}
@@ -163,9 +163,9 @@ func (srvMngr *ServiceManager) ShutdownServices() {
 // Service interface that describes what functions should a service implement
 type Service interface {
 	// Start should handle the service start
-	Start(*context.Context, context.CancelFunc) error
+	Start(chan struct{}) error
 	// Reload handles the change of config
-	Reload(*context.Context, context.CancelFunc) error
+	Reload(chan struct{}) error
 	// Shutdown stops the service
 	Shutdown() error
 	// IsRunning returns if the service is running

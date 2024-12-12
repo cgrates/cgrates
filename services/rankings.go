@@ -36,7 +36,7 @@ import (
 func NewRankingService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *RankingService {
 	return &RankingService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -62,7 +62,7 @@ type RankingService struct {
 }
 
 // Start should handle the sercive start
-func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (ran *RankingService) Start(shutdown chan struct{}) (err error) {
 	if ran.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -77,7 +77,7 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheRankingProfiles,
 		utils.CacheRankings,
 	); err != nil {
@@ -102,7 +102,7 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.RankingS))
-	if err := ran.ran.StartRankingS(ctx); err != nil {
+	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
 	}
 	srv, err := engine.NewService(ran.ran)
@@ -120,9 +120,9 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 }
 
 // Reload handles the change of config
-func (ran *RankingService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (ran *RankingService) Reload(_ chan struct{}) (err error) {
 	ran.Lock()
-	ran.ran.Reload(ctx)
+	ran.ran.Reload(context.TODO())
 	ran.Unlock()
 	return
 }

@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/agents"
@@ -35,7 +34,7 @@ import (
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *FreeswitchAgent {
 	return &FreeswitchAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -58,7 +57,7 @@ type FreeswitchAgent struct {
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
+func (fS *FreeswitchAgent) Start(shutdown chan struct{}) (err error) {
 	if fS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -68,27 +67,27 @@ func (fS *FreeswitchAgent) Start(_ *context.Context, shtDwn context.CancelFunc) 
 
 	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
 
-	go fS.connect(shtDwn)
+	go fS.connect(shutdown)
 	close(fS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (fS *FreeswitchAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) (err error) {
+func (fS *FreeswitchAgent) Reload(shutdown chan struct{}) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 	if err = fS.fS.Shutdown(); err != nil {
 		return
 	}
 	fS.fS.Reload()
-	go fS.connect(shtDwn)
+	go fS.connect(shutdown)
 	return
 }
 
-func (fS *FreeswitchAgent) connect(shtDwn context.CancelFunc) {
+func (fS *FreeswitchAgent) connect(shutdown chan struct{}) {
 	if err := fS.fS.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-		shtDwn() // stop the engine here
+		close(shutdown) // stop the engine here
 	}
 	return
 }

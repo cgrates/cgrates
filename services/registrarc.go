@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
@@ -32,7 +31,7 @@ import (
 
 // NewRegistrarCService returns the Dispatcher Service
 func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *RegistrarCService {
 	return &RegistrarCService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -58,7 +57,7 @@ type RegistrarCService struct {
 }
 
 // Start should handle the sercive start
-func (dspS *RegistrarCService) Start(*context.Context, context.CancelFunc) (err error) {
+func (dspS *RegistrarCService) Start(_ chan struct{}) (err error) {
 	if dspS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -75,7 +74,7 @@ func (dspS *RegistrarCService) Start(*context.Context, context.CancelFunc) (err 
 }
 
 // Reload handles the change of config
-func (dspS *RegistrarCService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (dspS *RegistrarCService) Reload(_ chan struct{}) (err error) {
 	dspS.rldChan <- struct{}{}
 	return // for the momment nothing to reload
 }

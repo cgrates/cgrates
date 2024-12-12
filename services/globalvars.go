@@ -20,7 +20,6 @@ package services
 
 import (
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -48,7 +47,7 @@ type GlobalVarS struct {
 }
 
 // Start should handle the sercive start
-func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
+func (gv *GlobalVarS) Start(_ chan struct{}) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -59,7 +58,7 @@ func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
 }
 
 // Reload handles the change of config
-func (gv *GlobalVarS) Reload(*context.Context, context.CancelFunc) error {
+func (gv *GlobalVarS) Reload(_ chan struct{}) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
