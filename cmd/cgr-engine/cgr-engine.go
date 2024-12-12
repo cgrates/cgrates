@@ -39,7 +39,6 @@ import (
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
@@ -129,10 +128,6 @@ func runCGREngine(fs []string) (err error) {
 
 	iServeManagerCh := make(chan birpc.ClientConnector, 1)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager), utils.ServiceManagerV1, iServeManagerCh)
-	iConfigCh := make(chan birpc.ClientConnector, 1)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig), utils.ConfigSv1, iConfigCh)
-	iGuardianSCh := make(chan birpc.ClientConnector, 1)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian), utils.GuardianSv1, iGuardianSCh)
 
 	// ServiceIndexer will share service references to all services
 	srvIdxr := servmanager.NewServiceIndexer()
@@ -141,6 +136,8 @@ func runCGREngine(fs []string) (err error) {
 	sdbS := services.NewStorDBService(cfg, *flags.SetVersions, srvIdxr)
 	cls := services.NewCommonListenerService(cfg, caps, srvIdxr)
 	anzS := services.NewAnalyzerService(cfg, srvIdxr)
+	configS := services.NewConfigService(cfg, srvIdxr)
+	guardianS := services.NewGuardianService(cfg, srvIdxr)
 	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg, srvIdxr)
 	cacheS := services.NewCacheService(cfg, connMgr, srvIdxr)
 	fltrS := services.NewFilterService(cfg, connMgr, srvIdxr)
@@ -175,47 +172,48 @@ func runCGREngine(fs []string) (err error) {
 	accS := services.NewAccountService(cfg, connMgr, srvIdxr)
 	tpeS := services.NewTPeService(cfg, connMgr, srvIdxr)
 
-	srvManager := servmanager.NewServiceManager(shdWg, connMgr, cfg, srvIdxr,
-		[]servmanager.Service{
-			gvS,
-			dmS,
-			sdbS,
-			cls,
-			anzS,
-			coreS,
-			cacheS,
-			fltrS,
-			dspS,
-			ldrs,
-			efs,
-			adminS,
-			sessionS,
-			attrS,
-			chrgS,
-			routeS,
-			resourceS,
-			trendS,
-			rankingS,
-			thS,
-			stS,
-			erS,
-			dnsAgent,
-			fsAgent,
-			kamAgent,
-			janusAgent,
-			astAgent,
-			radAgent,
-			diamAgent,
-			httpAgent,
-			sipAgent,
-			eeS,
-			cdrS,
-			registrarcS,
-			rateS,
-			actionS,
-			accS,
-			tpeS,
-		})
+	srvManager := servmanager.NewServiceManager(shdWg, connMgr, cfg, srvIdxr, []servmanager.Service{
+		gvS,
+		dmS,
+		sdbS,
+		cls,
+		anzS,
+		configS,
+		guardianS,
+		coreS,
+		cacheS,
+		fltrS,
+		dspS,
+		ldrs,
+		efs,
+		adminS,
+		sessionS,
+		attrS,
+		chrgS,
+		routeS,
+		resourceS,
+		trendS,
+		rankingS,
+		thS,
+		stS,
+		erS,
+		dnsAgent,
+		fsAgent,
+		kamAgent,
+		janusAgent,
+		astAgent,
+		radAgent,
+		diamAgent,
+		httpAgent,
+		sipAgent,
+		eeS,
+		cdrS,
+		registrarcS,
+		rateS,
+		actionS,
+		accS,
+		tpeS,
+	})
 
 	defer func() {
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.CoreSCfg().ShutdownTimeout*10)
@@ -309,10 +307,7 @@ func runCGREngine(fs []string) (err error) {
 		return
 	}
 	srvManager.StartServices(ctx, cancel)
-
 	cgrInitServiceManagerV1(iServeManagerCh, srvManager, cfg, cls.CLS(), anzS)
-	cgrInitGuardianSv1(iGuardianSCh, cfg, cls.CLS(), anzS)
-	cgrInitConfigSv1(iConfigCh, cfg, cls.CLS(), anzS)
 
 	if *flags.Preload != utils.EmptyString {
 		if err = cgrRunPreload(ctx, cfg, *flags.Preload, srvIdxr); err != nil {
@@ -368,17 +363,6 @@ func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string
 	return
 }
 
-func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGRConfig,
-	cl *commonlisteners.CommonListenerS, anz *services.AnalyzerService) {
-	srv, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
-	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cl.RpcRegister(s)
-		}
-	}
-	iGuardianSCh <- anz.GetInternalCodec(srv, utils.GuardianS)
-}
-
 func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
 	srvMngr *servmanager.ServiceManager, cfg *config.CGRConfig,
 	cl *commonlisteners.CommonListenerS, anz *services.AnalyzerService) {
@@ -387,18 +371,6 @@ func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
 		cl.RpcRegister(srv)
 	}
 	iServMngrCh <- anz.GetInternalCodec(srv, utils.ServiceManager)
-}
-
-func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
-	cfg *config.CGRConfig, cl *commonlisteners.CommonListenerS, anz *services.AnalyzerService) {
-	srv, _ := engine.NewServiceWithName(cfg, utils.ConfigS, true)
-	// srv, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
-	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cl.RpcRegister(s)
-		}
-	}
-	iConfigCh <- anz.GetInternalCodec(srv, utils.ConfigSv1)
 }
 
 func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
