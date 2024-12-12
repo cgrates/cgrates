@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/agents"
@@ -35,7 +34,7 @@ import (
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *AsteriskAgent {
 	return &AsteriskAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -59,7 +58,7 @@ type AsteriskAgent struct {
 }
 
 // Start should handle the sercive start
-func (ast *AsteriskAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
+func (ast *AsteriskAgent) Start(shutdown chan struct{}) (err error) {
 	if ast.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -70,7 +69,7 @@ func (ast *AsteriskAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (
 	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}) {
 		if err := sma.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, err))
-			shtDwn()
+			close(shutdown)
 		}
 	}
 	ast.stopChan = make(chan struct{})
@@ -84,9 +83,9 @@ func (ast *AsteriskAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (
 }
 
 // Reload handles the change of config
-func (ast *AsteriskAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (ast *AsteriskAgent) Reload(shutdown chan struct{}) (err error) {
 	ast.shutdown()
-	return ast.Start(ctx, shtDwn)
+	return ast.Start(shutdown)
 }
 
 // Shutdown stops the service

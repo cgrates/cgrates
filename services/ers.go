@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -36,7 +35,7 @@ import (
 func NewEventReaderService(
 	cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *EventReaderService {
 	return &EventReaderService{
 		rldChan:    make(chan struct{}, 1),
 		cfg:        cfg,
@@ -64,7 +63,7 @@ type EventReaderService struct {
 }
 
 // Start should handle the sercive start
-func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (erS *EventReaderService) Start(shutdown chan struct{}) (err error) {
 	if erS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -93,7 +92,7 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 
 	// build the service
 	erS.ers = ers.NewERService(erS.cfg, fs.FilterS(), erS.connMgr)
-	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shtDwn)
+	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shutdown)
 
 	srv, err := engine.NewServiceWithPing(erS.ers, utils.ErSv1, utils.V1Prfx)
 	if err != nil {
@@ -107,16 +106,16 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	return
 }
 
-func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan chan struct{}, rldChan chan struct{}, shtDwn context.CancelFunc) (err error) {
+func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan, rldChan, shutdown chan struct{}) (err error) {
 	if err = ers.ListenAndServe(stopChan, rldChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%v>", utils.ERs, err))
-		shtDwn()
+		close(shutdown)
 	}
 	return
 }
 
 // Reload handles the change of config
-func (erS *EventReaderService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (erS *EventReaderService) Reload(_ chan struct{}) (err error) {
 	erS.RLock()
 	erS.rldChan <- struct{}{}
 	erS.RUnlock()

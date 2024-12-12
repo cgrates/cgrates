@@ -21,8 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -62,7 +60,7 @@ type LoaderService struct {
 }
 
 // Start should handle the service start
-func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (ldrs *LoaderService) Start(_ chan struct{}) (err error) {
 	if ldrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -110,7 +108,7 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 }
 
 // Reload handles the change of config
-func (ldrs *LoaderService) Reload(ctx *context.Context, _ context.CancelFunc) error {
+func (ldrs *LoaderService) Reload(_ chan struct{}) error {
 	fs := ldrs.srvIndexer.GetService(utils.FilterS).(*FilterService)
 	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.FilterS, utils.StateServiceUP)

@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -57,7 +56,7 @@ type CommonListenerService struct {
 }
 
 // Start handles the service start.
-func (cl *CommonListenerService) Start(*context.Context, context.CancelFunc) error {
+func (cl *CommonListenerService) Start(_ chan struct{}) error {
 	if cl.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -75,7 +74,7 @@ func (cl *CommonListenerService) Start(*context.Context, context.CancelFunc) err
 }
 
 // Reload handles the config changes.
-func (cl *CommonListenerService) Reload(*context.Context, context.CancelFunc) error {
+func (cl *CommonListenerService) Reload(_ chan struct{}) error {
 	return nil
 }
 

@@ -35,7 +35,7 @@ import (
 func NewThresholdService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *ThresholdService {
 	return &ThresholdService{
 		cfg:        cfg,
 		srvDep:     srvDep,
@@ -62,7 +62,7 @@ type ThresholdService struct {
 }
 
 // Start should handle the sercive start
-func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (thrs *ThresholdService) Start(shutdown chan struct{}) (err error) {
 	if thrs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -77,7 +77,7 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheThresholdProfiles,
 		utils.CacheThresholds,
 		utils.CacheThresholdFilterIndexes); err != nil {
@@ -101,7 +101,7 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), thrs.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
-	thrs.thrs.StartLoop(ctx)
+	thrs.thrs.StartLoop(context.TODO())
 	srv, _ := engine.NewService(thrs.thrs)
 	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
 	if !thrs.cfg.DispatcherSCfg().Enabled {
@@ -115,9 +115,9 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 }
 
 // Reload handles the change of config
-func (thrs *ThresholdService) Reload(ctx *context.Context, _ context.CancelFunc) (_ error) {
+func (thrs *ThresholdService) Reload(_ chan struct{}) (_ error) {
 	thrs.Lock()
-	thrs.thrs.Reload(ctx)
+	thrs.thrs.Reload(context.TODO())
 	thrs.Unlock()
 	return
 }

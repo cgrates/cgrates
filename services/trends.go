@@ -35,7 +35,7 @@ import (
 func NewTrendService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *TrendService {
 	return &TrendService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -61,7 +61,7 @@ type TrendService struct {
 }
 
 // Start should handle the sercive start
-func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (trs *TrendService) Start(shutdown chan struct{}) (err error) {
 	if trs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -76,7 +76,7 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheTrendProfiles,
 		utils.CacheTrends,
 	); err != nil {
@@ -99,7 +99,7 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 	defer trs.Unlock()
 	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), trs.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TrendS))
-	if err := trs.trs.StartTrendS(ctx); err != nil {
+	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
 	}
 	srv, err := engine.NewService(trs.trs)
@@ -117,9 +117,9 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 }
 
 // Reload handles the change of config
-func (trs *TrendService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (trs *TrendService) Reload(_ chan struct{}) (err error) {
 	trs.Lock()
-	trs.trs.Reload(ctx)
+	trs.trs.Reload(context.TODO())
 	trs.Unlock()
 	return
 }

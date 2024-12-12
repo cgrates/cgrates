@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -62,7 +60,7 @@ func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager
 }
 
 // Start should handle the service start
-func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (efServ *ExportFailoverService) Start(_ chan struct{}) (err error) {
 	if efServ.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -83,7 +81,7 @@ func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.Cance
 }
 
 // Reload handles the change of config
-func (efServ *ExportFailoverService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (efServ *ExportFailoverService) Reload(_ chan struct{}) (err error) {
 	return
 }
 

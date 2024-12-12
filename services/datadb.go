@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -62,7 +61,7 @@ type DataDBService struct {
 }
 
 // Start handles the service start.
-func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error) {
+func (db *DataDBService) Start(_ chan struct{}) (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -94,7 +93,7 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 }
 
 // Reload handles the change of config
-func (db *DataDBService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (db *DataDBService) Reload(_ chan struct{}) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {

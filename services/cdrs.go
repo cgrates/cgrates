@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -36,7 +35,7 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *CDRService {
 	return &CDRService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -61,7 +60,7 @@ type CDRService struct {
 }
 
 // Start should handle the sercive start
-func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (cs *CDRService) Start(_ chan struct{}) (err error) {
 	if cs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -110,7 +109,7 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 }
 
 // Reload handles the change of config
-func (cs *CDRService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (cs *CDRService) Reload(_ chan struct{}) (err error) {
 	return
 }
 

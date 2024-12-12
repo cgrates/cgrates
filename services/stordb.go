@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -56,7 +55,7 @@ type StorDBService struct {
 }
 
 // Start should handle the service start
-func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error) {
+func (db *StorDBService) Start(_ chan struct{}) (err error) {
 	if db.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -87,7 +86,7 @@ func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error)
 }
 
 // Reload handles the change of config
-func (db *StorDBService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (db *StorDBService) Reload(_ chan struct{}) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
