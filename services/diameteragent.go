@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -34,7 +33,7 @@ import (
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, caps *engine.Caps,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *DiameterAgent {
 	return &DiameterAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -63,7 +62,7 @@ type DiameterAgent struct {
 }
 
 // Start should handle the sercive start
-func (da *DiameterAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) error {
+func (da *DiameterAgent) Start(shutdown chan struct{}) error {
 	if da.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -74,10 +73,10 @@ func (da *DiameterAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) 
 	}
 	da.Lock()
 	defer da.Unlock()
-	return da.start(fs.FilterS(), shtDwn, da.caps)
+	return da.start(fs.FilterS(), da.caps, shutdown)
 }
 
-func (da *DiameterAgent) start(filterS *engine.FilterS, shtDwn context.CancelFunc, caps *engine.Caps) error {
+func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps, shutdown chan struct{}) error {
 	var err error
 	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr, caps)
 	if err != nil {
@@ -92,7 +91,7 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, shtDwn context.CancelFun
 		if err := d.ListenAndServe(da.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
-			shtDwn()
+			close(shutdown)
 		}
 	}(da.da)
 	close(da.stateDeps.StateChan(utils.StateServiceUP))
@@ -100,7 +99,7 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, shtDwn context.CancelFun
 }
 
 // Reload handles the change of config
-func (da *DiameterAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (da *DiameterAgent) Reload(shutdown chan struct{}) (err error) {
 	da.Lock()
 	defer da.Unlock()
 	if da.lnet == da.cfg.DiameterAgentCfg().ListenNet &&
@@ -112,7 +111,7 @@ func (da *DiameterAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc)
 	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), da.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.DiameterAgent, utils.FilterS, utils.StateServiceUP)
 	}
-	return da.start(fs.FilterS(), shtDwn, da.caps)
+	return da.start(fs.FilterS(), da.caps, shutdown)
 }
 
 // Shutdown stops the service

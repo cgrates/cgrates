@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -34,7 +33,7 @@ import (
 
 // NewTPeService is the constructor for the TpeService
 func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *TPeService {
 	return &TPeService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -61,7 +60,7 @@ type TPeService struct {
 }
 
 // Start should handle the service start
-func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (ts *TPeService) Start(_ chan struct{}) (err error) {
 	cls := ts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
 	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ts.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.TPeS, utils.CommonListenerS, utils.StateServiceUP)
@@ -82,7 +81,7 @@ func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 }
 
 // Reload handles the change of config
-func (ts *TPeService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (ts *TPeService) Reload(_ chan struct{}) (err error) {
 	return
 }
 

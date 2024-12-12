@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -34,7 +33,7 @@ import (
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *AdminSv1Service {
 	return &AdminSv1Service{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -61,7 +60,7 @@ type AdminSv1Service struct {
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (apiService *AdminSv1Service) Start(_ chan struct{}) (err error) {
 	if apiService.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -113,7 +112,7 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 }
 
 // Reload handles the change of config
-func (apiService *AdminSv1Service) Reload(*context.Context, context.CancelFunc) (err error) {
+func (apiService *AdminSv1Service) Reload(_ chan struct{}) (err error) {
 	return
 }
 

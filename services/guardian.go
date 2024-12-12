@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -49,7 +48,7 @@ type GuardianService struct {
 }
 
 // Start handles the service start.
-func (s *GuardianService) Start(_ *context.Context, _ context.CancelFunc) error {
+func (s *GuardianService) Start(_ chan struct{}) error {
 	cls := s.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
 	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), s.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.GuardianS, utils.CommonListenerS, utils.StateServiceUP)
@@ -70,7 +69,7 @@ func (s *GuardianService) Start(_ *context.Context, _ context.CancelFunc) error 
 }
 
 // Reload handles the config changes.
-func (s *GuardianService) Reload(*context.Context, context.CancelFunc) error {
+func (s *GuardianService) Reload(_ chan struct{}) error {
 	return nil
 }
 

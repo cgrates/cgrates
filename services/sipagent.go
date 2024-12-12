@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -34,7 +33,7 @@ import (
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *SIPAgent {
 	return &SIPAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -59,7 +58,7 @@ type SIPAgent struct {
 }
 
 // Start should handle the sercive start
-func (sip *SIPAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (sip *SIPAgent) Start(shutdown chan struct{}) (err error) {
 	if sip.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -78,20 +77,20 @@ func (sip *SIPAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err
 			utils.SIPAgent, err))
 		return
 	}
-	go sip.listenAndServe(shtDwn)
+	go sip.listenAndServe(shutdown)
 	close(sip.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (sip *SIPAgent) listenAndServe(shtDwn context.CancelFunc) {
+func (sip *SIPAgent) listenAndServe(shutdown chan struct{}) {
 	if err := sip.sip.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
-		shtDwn() // stop the engine here
+		close(shutdown) // stop the engine here
 	}
 }
 
 // Reload handles the change of config
-func (sip *SIPAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) (err error) {
+func (sip *SIPAgent) Reload(shutdown chan struct{}) (err error) {
 	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
 		return
 	}
@@ -100,7 +99,7 @@ func (sip *SIPAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) (err 
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
 	sip.sip.InitStopChan()
 	sip.Unlock()
-	go sip.listenAndServe(shtDwn)
+	go sip.listenAndServe(shutdown)
 	return
 }
 

@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -35,7 +34,7 @@ import (
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *HTTPAgent {
 	return &HTTPAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -63,7 +62,7 @@ type HTTPAgent struct {
 }
 
 // Start should handle the sercive start
-func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (ha *HTTPAgent) Start(_ chan struct{}) (err error) {
 	if ha.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -93,7 +92,7 @@ func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err erro
 }
 
 // Reload handles the change of config
-func (ha *HTTPAgent) Reload(*context.Context, context.CancelFunc) (err error) {
+func (ha *HTTPAgent) Reload(_ chan struct{}) (err error) {
 	return // no reload
 }
 

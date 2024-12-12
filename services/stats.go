@@ -35,7 +35,7 @@ import (
 func NewStatService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *StatService {
 	return &StatService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -62,7 +62,7 @@ type StatService struct {
 }
 
 // Start should handle the sercive start
-func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (sts *StatService) Start(shutdown chan struct{}) (err error) {
 	if sts.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -77,7 +77,7 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.StatS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheStatQueueProfiles,
 		utils.CacheStatQueues,
 		utils.CacheStatFilterIndexes); err != nil {
@@ -102,7 +102,7 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
 		utils.CoreS, utils.StatS))
-	sts.sts.StartLoop(ctx)
+	sts.sts.StartLoop(context.TODO())
 	srv, _ := engine.NewService(sts.sts)
 	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
 	if !sts.cfg.DispatcherSCfg().Enabled {
@@ -116,9 +116,9 @@ func (sts *StatService) Start(ctx *context.Context, _ context.CancelFunc) (err e
 }
 
 // Reload handles the change of config
-func (sts *StatService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (sts *StatService) Reload(_ chan struct{}) (err error) {
 	sts.Lock()
-	sts.sts.Reload(ctx)
+	sts.sts.Reload(context.TODO())
 	sts.Unlock()
 	return
 }

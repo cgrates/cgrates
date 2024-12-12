@@ -35,7 +35,7 @@ import (
 func NewResourceService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvIndexer *servmanager.ServiceIndexer) *ResourceService {
 	return &ResourceService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -62,7 +62,7 @@ type ResourceService struct {
 }
 
 // Start should handle the service start
-func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (reS *ResourceService) Start(shutdown chan struct{}) (err error) {
 	if reS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
@@ -77,7 +77,7 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err = cacheS.WaitToPrecache(ctx,
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheResourceProfiles,
 		utils.CacheResources,
 		utils.CacheResourceFilterIndexes); err != nil {
@@ -100,7 +100,7 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 	defer reS.Unlock()
 	reS.reS = engine.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), reS.connMgr)
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
-	reS.reS.StartLoop(ctx)
+	reS.reS.StartLoop(context.TODO())
 	srv, _ := engine.NewService(reS.reS)
 	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
 	if !reS.cfg.DispatcherSCfg().Enabled {
@@ -115,9 +115,9 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 }
 
 // Reload handles the change of config
-func (reS *ResourceService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (reS *ResourceService) Reload(_ chan struct{}) (err error) {
 	reS.Lock()
-	reS.reS.Reload(ctx)
+	reS.reS.Reload(context.TODO())
 	reS.Unlock()
 	return
 }

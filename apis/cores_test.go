@@ -60,8 +60,8 @@ func TestCoreSSleep(t *testing.T) {
 func TestCoreSShutdown(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	var closed bool
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, func() { closed = true })
+	shutdown := make(chan struct{})
+	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, shutdown)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.CGREvent{}
 	var reply string
@@ -70,8 +70,10 @@ func TestCoreSShutdown(t *testing.T) {
 	} else if reply != "OK" {
 		t.Errorf("Expected OK, received %+v", reply)
 	}
-	if !closed {
-		t.Error("Did not stop the engine")
+	select {
+	case <-shutdown:
+	default:
+		t.Error("engine did not shut down")
 	}
 }
 

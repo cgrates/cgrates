@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -55,12 +54,12 @@ type FilterService struct {
 }
 
 // Start handles the service start.
-func (s *FilterService) Start(ctx *context.Context, _ context.CancelFunc) error {
+func (s *FilterService) Start(shutdown chan struct{}) error {
 	cacheS := s.srvIndexer.GetService(utils.CacheS).(*CacheService)
 	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), s.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.FilterS, utils.CacheS, utils.StateServiceUP)
 	}
-	if err := cacheS.WaitToPrecache(ctx, utils.CacheFilters); err != nil {
+	if err := cacheS.WaitToPrecache(shutdown, utils.CacheFilters); err != nil {
 		return err
 	}
 	dbs := s.srvIndexer.GetService(utils.DataDB).(*DataDBService)
@@ -73,7 +72,7 @@ func (s *FilterService) Start(ctx *context.Context, _ context.CancelFunc) error 
 }
 
 // Reload handles the config changes.
-func (s *FilterService) Reload(*context.Context, context.CancelFunc) error {
+func (s *FilterService) Reload(_ chan struct{}) error {
 	return nil
 }
 
