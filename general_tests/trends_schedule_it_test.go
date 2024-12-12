@@ -66,9 +66,6 @@ func TestTrendSchedule(t *testing.T) {
 	"store_interval": "-1",
 },
 
-"apiers": {
-	"enabled": true,
-},
 "admins": {
 	"enabled": true,
 },

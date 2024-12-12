@@ -143,17 +143,19 @@ func (t *Trend) asTrendSummary() (ts *TrendSummary) {
 	return
 }
 
-func (t *Trend) compress(ms utils.Marshaler) (err error) {
+func (t *Trend) compress(ms utils.Marshaler) (tr *Trend, err error) {
 	if config.CgrConfig().TrendSCfg().StoreUncompressedLimit > len(t.RunTimes) {
 		return
 	}
-	t.CompressedMetrics, err = ms.Marshal(t.Metrics)
+	tr = &Trend{
+		Tenant: t.Tenant,
+		ID:     t.ID,
+	}
+	tr.CompressedMetrics, err = ms.Marshal(tr.Metrics)
 	if err != nil {
 		return
 	}
-	t.Metrics = nil
-	t.RunTimes = nil
-	return nil
+	return tr, nil
 }
 
 func (t *Trend) uncompress(ms utils.Marshaler) (err error) {
@@ -165,7 +167,7 @@ func (t *Trend) uncompress(ms utils.Marshaler) (err error) {
 	if err != nil {
 		return
 	}
-	t.CompressedMetrics = []byte{}
+	t.CompressedMetrics = nil
 	t.RunTimes = make([]time.Time, len(t.Metrics))
 	i := 0
 	for key := range t.Metrics {
