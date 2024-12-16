@@ -3005,3 +3005,113 @@ func TestFilterRuleElementItems(t *testing.T) {
 		t.Errorf("Expected: %v , received: %v", exp, rcv)
 	}
 }
+
+func TestNewFilterRule(t *testing.T) {
+	t.Run("Valid filter rule", func(t *testing.T) {
+		rfType := "*regex"
+		fieldName := "field"
+		vals := []string{"val1", "val2"}
+
+		rule, err := NewFilterRule(rfType, fieldName, vals)
+
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+		if rule == nil {
+			t.Fatalf("Expected a valid FilterRule, got nil")
+		}
+		if rule.Type != rfType {
+			t.Errorf("Expected Type to be %v, got %v", rfType, rule.Type)
+		}
+		if rule.Element != fieldName {
+			t.Errorf("Expected Element to be %v, got %v", fieldName, rule.Element)
+		}
+		if len(rule.Values) != len(vals) || rule.Values[0] != vals[0] || rule.Values[1] != vals[1] {
+			t.Errorf("Expected Values to be %v, got %v", vals, rule.Values)
+		}
+		if rule.negative == nil || *rule.negative {
+			t.Errorf("Expected negative to be false, got %v", rule.negative)
+		}
+	})
+
+	t.Run("Unsupported filter type", func(t *testing.T) {
+		rfType := "*unsupported"
+		fieldName := "field"
+		vals := []string{"val1"}
+
+		rule, err := NewFilterRule(rfType, fieldName, vals)
+
+		if err == nil || err.Error() != "Unsupported filter Type: *unsupported" {
+			t.Errorf("Expected error 'Unsupported filter Type: *unsupported', got %v", err)
+		}
+		if rule != nil {
+			t.Errorf("Expected nil FilterRule, got %v", rule)
+		}
+	})
+
+	t.Run("Missing field name for type requiring it", func(t *testing.T) {
+		rfType := "*regex"
+		fieldName := ""
+		vals := []string{"val1"}
+
+		rule, err := NewFilterRule(rfType, fieldName, vals)
+
+		if err == nil || err.Error() != "Element is mandatory for Type: *regex" {
+			t.Errorf("Expected error 'Element is mandatory for Type: *regex', got %v", err)
+		}
+		if rule != nil {
+			t.Errorf("Expected nil FilterRule, got %v", rule)
+		}
+	})
+
+	t.Run("Missing values for type requiring them", func(t *testing.T) {
+		rfType := "*regex"
+		fieldName := "field"
+		vals := []string{}
+
+		rule, err := NewFilterRule(rfType, fieldName, vals)
+
+		if err == nil || err.Error() != "Values is mandatory for Type: *regex" {
+			t.Errorf("Expected error 'Values is mandatory for Type: *regex', got %v", err)
+		}
+		if rule != nil {
+			t.Errorf("Expected nil FilterRule, got %v", rule)
+		}
+	})
+
+	t.Run("MetaHTTP prefix handling", func(t *testing.T) {
+		rfType := "*http/specific"
+		fieldName := "url"
+		vals := []string{"http://cgrates.com"}
+
+		rule, err := NewFilterRule(rfType, fieldName, vals)
+
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+		if rule == nil {
+			t.Fatalf("Expected a valid FilterRule, got nil")
+		}
+		if rule.Element != fieldName {
+			t.Errorf("Expected Element to be %v, got %v", fieldName, rule.Element)
+		}
+		if len(rule.Values) != len(vals) || rule.Values[0] != vals[0] {
+			t.Errorf("Expected Values to be %v, got %v", vals, rule.Values)
+		}
+	})
+
+	t.Run("CompileValues error handling", func(t *testing.T) {
+		rfType := "*regex"
+		fieldName := "pattern"
+		vals := []string{"[invalid-regex"}
+
+		rule, err := NewFilterRule(rfType, fieldName, vals)
+
+		if err == nil || !strings.Contains(err.Error(), "error parsing regexp") {
+			t.Errorf("Expected error parsing regexp, got %v", err)
+		}
+		if rule != nil {
+			t.Errorf("Expected nil FilterRule, got %v", rule)
+		}
+	})
+}

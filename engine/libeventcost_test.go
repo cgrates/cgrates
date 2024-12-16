@@ -1638,3 +1638,74 @@ func TestBalanceChargesClone(t *testing.T) {
 		}
 	})
 }
+
+func TestFieldsAsInterfaces(t *testing.T) {
+	ct := &ChargedTiming{
+		Years:     utils.Years{1, 2},
+		Months:    utils.Months{2, 3},
+		MonthDays: utils.MonthDays{4, 5},
+		WeekDays:  utils.WeekDays{2, 3},
+		StartTime: "Time",
+	}
+	tests := []struct {
+		name      string
+		fldPath   []string
+		expected  any
+		expectErr bool
+	}{
+		{
+			name:      "Years Field",
+			fldPath:   []string{utils.YearsFieldName},
+			expected:  ct.Years,
+			expectErr: false,
+		},
+		{
+			name:      "Months Field",
+			fldPath:   []string{utils.MonthsFieldName},
+			expected:  ct.Months,
+			expectErr: false,
+		},
+		{
+			name:      "MonthDays Field",
+			fldPath:   []string{utils.MonthDaysFieldName},
+			expected:  ct.MonthDays,
+			expectErr: false,
+		},
+		{
+			name:      "WeekDays Field",
+			fldPath:   []string{utils.WeekDaysFieldName},
+			expected:  ct.WeekDays,
+			expectErr: false,
+		},
+		{
+			name:      "StartTime Field",
+			fldPath:   []string{utils.StartTime},
+			expected:  ct.StartTime,
+			expectErr: false,
+		},
+		{
+			name:      "Invalid Field",
+			fldPath:   []string{"invalidField"},
+			expected:  nil,
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			val, err := ct.FieldAsInterface(tt.fldPath)
+			if tt.expectErr {
+				if err == nil {
+					t.Errorf("Expected error, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error, got %v", err)
+				}
+				if !reflect.DeepEqual(val, tt.expected) {
+					t.Errorf("Expected value %v, got %v", tt.expected, val)
+				}
+			}
+		})
+	}
+}
