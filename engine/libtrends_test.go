@@ -410,3 +410,63 @@ func TestNewTrendFromProfile(t *testing.T) {
 		t.Errorf("Expected tPrfl to point to the original profile, got a different value")
 	}
 }
+
+func TestTrendProfileFieldAsString(t *testing.T) {
+	tests := []struct {
+		name    string
+		fldPath []string
+		err     error
+		val     any
+	}{
+		{utils.ID, []string{utils.ID}, nil, "Trend1"},
+		{utils.Tenant, []string{utils.Tenant}, nil, "cgrates.org"},
+		{utils.Schedule, []string{utils.Schedule}, nil, "@every 1m"},
+		{utils.StatID, []string{utils.StatID}, nil, "Stat1"},
+		{utils.Metrics, []string{utils.Metrics + "[0]"}, nil, "*acc"},
+		{utils.Metrics, []string{utils.Metrics + "[1]"}, nil, "*tcd"},
+		{utils.TTL, []string{utils.TTL}, nil, 10 * time.Minute},
+		{utils.QueueLength, []string{utils.QueueLength}, nil, 100},
+		{utils.MinItems, []string{utils.MinItems}, nil, 10},
+		{utils.CorrelationType, []string{utils.CorrelationType}, nil, "*average"},
+		{utils.Tolerance, []string{utils.Tolerance}, nil, 0.05},
+		{utils.Stored, []string{utils.Stored}, nil, true},
+		{utils.ThresholdIDs, []string{utils.ThresholdIDs + "[0]"}, nil, "Thresh1"},
+		{utils.ThresholdIDs, []string{utils.ThresholdIDs + "[1]"}, nil, "Thresh2"},
+		{"NonExistingField", []string{"Field1"}, utils.ErrNotFound, nil},
+	}
+	rp := &TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "Trend1",
+		Schedule:        "@every 1m",
+		StatID:          "Stat1",
+		Metrics:         []string{"*acc", "*tcd"},
+		TTL:             10 * time.Minute,
+		QueueLength:     100,
+		MinItems:        10,
+		CorrelationType: "*average",
+		Tolerance:       0.05,
+		Stored:          true,
+		ThresholdIDs:    []string{"Thresh1", "Thresh2"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			val, err := rp.FieldAsInterface(tc.fldPath)
+			if tc.err != nil {
+				if err == nil {
+					t.Error("expect to receive an error")
+				}
+				if tc.err != err {
+					t.Errorf("expected %v,received %v", tc.err, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("unexpected error %v", err)
+			}
+			if val != tc.val {
+				t.Errorf("expected %v,received %v", tc.val, val)
+			}
+		})
+	}
+}

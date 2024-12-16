@@ -239,3 +239,137 @@ func TestRankingSortStats(t *testing.T) {
 		})
 	}
 }
+
+func TestRankingMixedOrder(t *testing.T) {
+	statmetrics := map[string]map[string]float64{
+		"Stat1": {"*acc": 13},
+		"Stat6": {"*acc": 10, "*pdd": 700, "*tcc": 121},
+		"Stat2": {"*acc": 14},
+		"Stat5": {"*acc": 10, "*pdd": 700, "*tcc": 120},
+		"Stat3": {"*acc": 12.1, "*pdd": 900},
+		"Stat7": {"*acc": 10, "*pdd": 600, "*tcc": 123},
+		"Stat4": {"*acc": 12.1, "*pdd": 1000},
+	}
+
+	testCases := []struct {
+		name       string
+		sortMetric []string
+		sorter     string
+		statIDs    []string
+		expErr     error
+	}{
+		{
+			name:       "TestSortStatsAsc",
+			sortMetric: []string{"*acc", "*pdd:false", "*tcc"},
+			sorter:     "*asc",
+			statIDs:    []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
+		},
+		{
+			name:       "TestSortStatsDesc",
+			sortMetric: []string{"*tcc", "*pdd:false", "*acc"},
+			sorter:     "*desc",
+			statIDs:    []string{"Stat7", "Stat6", "Stat5", "Stat3", "Stat4", "Stat2", "Stat1"},
+		},
+		{
+			name:       "TestSortStatsDesc",
+			sortMetric: []string{"*acc", "*tcc", "*pdd:false"},
+			sorter:     "*desc",
+			statIDs:    []string{"Stat2", "Stat1", "Stat3", "Stat4", "Stat7", "Stat6", "Stat5"},
+		},
+		{
+			name:       "TestSortStatsAsc",
+			sortMetric: []string{"*tcc", "*pdd:false", "*acc"},
+			sorter:     "*asc",
+			statIDs:    []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
+		},
+		{
+			name:       "TestSortStatsDesc",
+			sortMetric: []string{"*pdd:false", "*acc", "*tcc"},
+			sorter:     "*desc",
+			statIDs:    []string{"Stat7", "Stat6", "Stat5", "Stat3", "Stat4", "Stat2", "Stat1"},
+		},
+		{
+			name:       "TestSortStatsAsc",
+			sortMetric: []string{"*tcc", "*acc", "*pdd:false"},
+			sorter:     "*asc",
+			statIDs:    []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			rs, err := newRankingSorter(tc.sorter, tc.sortMetric, statmetrics)
+			if tc.expErr != nil {
+				if err == nil {
+					t.Error("Expected error, got nil")
+				}
+				if tc.expErr.Error() != err.Error() {
+					t.Errorf("Expected error: %v, got: %v", tc.expErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+			if resStatIDs := rs.sortStatIDs(); !reflect.DeepEqual(resStatIDs, tc.statIDs) {
+				t.Errorf("Expecting: %v, received %v", tc.statIDs, resStatIDs)
+			}
+		})
+	}
+
+}
+
+func TestRankingProfileFieldAsString(t *testing.T) {
+	tests := []struct {
+		name    string
+		fldPath []string
+		err     error
+		val     any
+	}{
+		{utils.ID, []string{utils.ID}, nil, "RP1"},
+		{utils.Tenant, []string{utils.Tenant}, nil, "cgrates.org"},
+		{utils.Schedule, []string{utils.Schedule}, nil, "@every 2s"},
+		{utils.StatIDs, []string{utils.StatIDs + "[0]"}, nil, "Stat1"},
+		{utils.StatIDs, []string{utils.StatIDs + "[1]"}, nil, "Stat2"},
+		{utils.MetricIDs, []string{utils.MetricIDs + "[0]"}, nil, "*tcc"},
+		{utils.MetricIDs, []string{utils.MetricIDs + "[1]"}, nil, "*acc"},
+		{utils.Sorting, []string{utils.Sorting}, nil, "*asc"},
+		{utils.Stored, []string{utils.Stored}, nil, false},
+		{utils.SortingParameters, []string{utils.SortingParameters + "[0]"}, nil, "*acc"},
+		{utils.SortingParameters, []string{utils.SortingParameters + "[1]"}, nil, "*pdd:false"},
+		{utils.ThresholdIDs, []string{utils.ThresholdIDs + "[0]"}, nil, "Threshold1"},
+		{utils.ThresholdIDs, []string{utils.ThresholdIDs + "[1]"}, nil, "Threshold2"},
+		{"NonExistingField", []string{"Field1"}, utils.ErrNotFound, nil},
+	}
+	rp := &RankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "RP1",
+		Schedule:          "@every 2s",
+		StatIDs:           []string{"Stat1", "Stat2"},
+		MetricIDs:         []string{"*tcc", "*acc", "*pdd"},
+		Sorting:           "*asc",
+		SortingParameters: []string{"*acc", "*pdd:false"},
+		ThresholdIDs:      []string{"Threshold1", "Threshold2"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			val, err := rp.FieldAsInterface(tc.fldPath)
+			if tc.err != nil {
+				if err == nil {
+					t.Error("expect to receive an error")
+				}
+				if tc.err != err {
+					t.Errorf("expected %v,received %v", tc.err, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("unexpected error %v", err)
+			}
+			if val != tc.val {
+				t.Errorf("expected %v,received %v", tc.val, val)
+			}
+		})
+	}
+}
