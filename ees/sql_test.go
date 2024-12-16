@@ -159,3 +159,15 @@ func TestPrepareMap(t *testing.T) {
 		t.Errorf("PrepareMap() returned a non-nil result: %v", result)
 	}
 }
+
+func TestExportEvent(t *testing.T) {
+	sqlEe := &SQLEe{
+		db:   nil,
+		reqs: &concReq{},
+	}
+	err := sqlEe.ExportEvent(&sqlPosterRequest{}, "")
+	if err != utils.ErrDisconnected {
+		t.Errorf("Expected error %v, got %v", utils.ErrDisconnected, err)
+	}
+
+}
