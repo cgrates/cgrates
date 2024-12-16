@@ -205,10 +205,13 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 	sort.Slice(rkDsrtr.statIDs, func(i, j int) bool {
 		for _, metricID := range rkDsrtr.sMetricIDs {
 			val1, hasMetric1 := rkDsrtr.Metrics[rkDsrtr.statIDs[i]][metricID]
+			val2, hasMetric2 := rkDsrtr.Metrics[rkDsrtr.statIDs[j]][metricID]
+			if !hasMetric1 && !hasMetric2 {
+				continue
+			}
 			if !hasMetric1 {
 				return false
 			}
-			val2, hasMetric2 := rkDsrtr.Metrics[rkDsrtr.statIDs[j]][metricID]
 			if !hasMetric2 {
 				return true
 			}
@@ -268,10 +271,13 @@ func (rkASrtr *rankingAscSorter) sortStatIDs() []string {
 	sort.Slice(rkASrtr.statIDs, func(i, j int) bool {
 		for _, metricID := range rkASrtr.sMetricIDs {
 			val1, hasMetric1 := rkASrtr.Metrics[rkASrtr.statIDs[i]][metricID]
+			val2, hasMetric2 := rkASrtr.Metrics[rkASrtr.statIDs[j]][metricID]
+			if !hasMetric1 && !hasMetric2 {
+				continue
+			}
 			if !hasMetric1 {
 				return false
 			}
-			val2, hasMetric2 := rkASrtr.Metrics[rkASrtr.statIDs[j]][metricID]
 			if !hasMetric2 {
 				return true
 			}
