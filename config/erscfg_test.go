@@ -1882,3 +1882,41 @@ func TestERsCfg_ReaderCfg(t *testing.T) {
 		t.Errorf("Expected not to find reader with ID '%s', but got a reader", notFoundID)
 	}
 }
+
+func TestKafkaROptsClone(t *testing.T) {
+
+	originalOpts := &KafkaROpts{
+		Topic:         utils.StringPointer("topic"),
+		GroupID:       utils.StringPointer("group"),
+		MaxWait:       utils.DurationPointer(10 * time.Second),
+		TLS:           utils.BoolPointer(true),
+		CAPath:        utils.StringPointer("/ca/path"),
+		SkipTLSVerify: utils.BoolPointer(false),
+	}
+
+	clonedOpts := originalOpts.Clone()
+
+	if *clonedOpts.Topic != *originalOpts.Topic {
+		t.Errorf("Expected Topic to be copied, got %s vs %s", *clonedOpts.Topic, *originalOpts.Topic)
+	}
+	if *clonedOpts.GroupID != *originalOpts.GroupID {
+		t.Errorf("Expected GroupID to be copied, got %s vs %s", *clonedOpts.GroupID, *originalOpts.GroupID)
+	}
+	if *clonedOpts.MaxWait != *originalOpts.MaxWait {
+		t.Errorf("Expected MaxWait to be copied, got %v vs %v", *clonedOpts.MaxWait, *originalOpts.MaxWait)
+	}
+	if *clonedOpts.TLS != *originalOpts.TLS {
+		t.Errorf("Expected TLS to be copied, got %v vs %v", *clonedOpts.TLS, *originalOpts.TLS)
+	}
+	if *clonedOpts.CAPath != *originalOpts.CAPath {
+		t.Errorf("Expected CAPath to be copied, got %s vs %s", *clonedOpts.CAPath, *originalOpts.CAPath)
+	}
+	if *clonedOpts.SkipTLSVerify != *originalOpts.SkipTLSVerify {
+		t.Errorf("Expected SkipTLSVerify to be copied, got %v vs %v", *clonedOpts.SkipTLSVerify, *originalOpts.SkipTLSVerify)
+	}
+
+	*originalOpts.CAPath = "modified/ca/path"
+	if *clonedOpts.CAPath == *originalOpts.CAPath {
+		t.Errorf("Expected cloned CAPath to be separate, got %s", *clonedOpts.CAPath)
+	}
+}

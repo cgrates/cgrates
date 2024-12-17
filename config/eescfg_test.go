@@ -1310,3 +1310,99 @@ func TestEventExporterCfgAsMapInterface(t *testing.T) {
 		t.Errorf("\nexpected %s\nreceived  %s\n", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 }
+
+func TestExporterCfg(t *testing.T) {
+	testCfg := &EEsCfg{
+		Exporters: []*EventExporterCfg{
+			{ID: "exporter1", Type: "type1"},
+			{ID: "exporter2", Type: "type2"},
+			{ID: "exporter3", Type: "type1"},
+		},
+	}
+
+	testCases := []struct {
+		id     string
+		want   *EventExporterCfg
+		errMsg string
+	}{
+		{"exporter1", testCfg.Exporters[0], ""},
+		{"exporter2", testCfg.Exporters[1], ""},
+		{"nonexistent", nil, "Exporter with ID 'nonexistent' not found"},
+		{"", nil, "Exporter ID cannot be empty"},
+	}
+
+	for _, tc := range testCases {
+		got := testCfg.ExporterCfg(tc.id)
+		if got != tc.want {
+			t.Errorf("ExporterCfg(%q): expected %v, got %v; %s", tc.id, tc.want, got, tc.errMsg)
+		}
+	}
+}
+
+func TestLoadFromJSONCfg(t *testing.T) {
+
+	jsonCfg := &EventExporterOptsJson{
+		KafkaTopic:         utils.StringPointer("topic"),
+		KafkaBatchSize:     utils.IntPointer(10),
+		KafkaTLS:           utils.BoolPointer(true),
+		KafkaCAPath:        utils.StringPointer("/path/to/ca"),
+		KafkaSkipTLSVerify: utils.BoolPointer(false),
+	}
+
+	kafkaOpts := &KafkaOpts{}
+
+	err := kafkaOpts.loadFromJSONCfg(jsonCfg)
+	if err != nil {
+		t.Errorf("Error loading KafkaOpts from JSON: %v", err)
+	}
+
+	if *kafkaOpts.Topic != "topic" {
+		t.Errorf("Expected KafkaTopic to be 'topic', got %s", *kafkaOpts.Topic)
+	}
+	if *kafkaOpts.BatchSize != 10 {
+		t.Errorf("Expected KafkaBatchSize to be 10, got %d", *kafkaOpts.BatchSize)
+	}
+	if *kafkaOpts.TLS != true {
+		t.Errorf("Expected KafkaTLS to be true, got %v", *kafkaOpts.TLS)
+	}
+	if *kafkaOpts.CAPath != "/path/to/ca" {
+		t.Errorf("Expected KafkaCAPath to be '/path/to/ca', got %s", *kafkaOpts.CAPath)
+	}
+	if *kafkaOpts.SkipTLSVerify != false {
+		t.Errorf("Expected KafkaSkipTLSVerify to be false, got %v", *kafkaOpts.SkipTLSVerify)
+	}
+}
+
+func TestKafkaOptsClone(t *testing.T) {
+
+	originalOpts := &KafkaOpts{
+		Topic:         utils.StringPointer("topic"),
+		BatchSize:     utils.IntPointer(10),
+		TLS:           utils.BoolPointer(true),
+		CAPath:        utils.StringPointer("/ca/path"),
+		SkipTLSVerify: utils.BoolPointer(false),
+	}
+
+	clonedOpts := originalOpts.Clone()
+
+	if *clonedOpts.Topic != *originalOpts.Topic {
+		t.Errorf("Expected Topic to be copied, got %s vs %s", *clonedOpts.Topic, *originalOpts.Topic)
+	}
+	if *clonedOpts.BatchSize != *originalOpts.BatchSize {
+		t.Errorf("Expected BatchSize to be copied, got %d vs %d", *clonedOpts.BatchSize, *originalOpts.BatchSize)
+	}
+	if *clonedOpts.TLS != *originalOpts.TLS {
+		t.Errorf("Expected TLS to be copied, got %v vs %v", *clonedOpts.TLS, *originalOpts.TLS)
+	}
+	if *clonedOpts.CAPath != *originalOpts.CAPath {
+		t.Errorf("Expected CAPath to be copied, got %s vs %s", *clonedOpts.CAPath, *originalOpts.CAPath)
+	}
+	if *clonedOpts.SkipTLSVerify != *originalOpts.SkipTLSVerify {
+		t.Errorf("Expected SkipTLSVerify to be copied, got %v vs %v", *clonedOpts.SkipTLSVerify, *originalOpts.SkipTLSVerify)
+	}
+
+	*originalOpts.CAPath = "modified/ca/path"
+	if *clonedOpts.CAPath == *originalOpts.CAPath {
+		t.Errorf("Expected cloned CAPath to be separate, got %s", *clonedOpts.CAPath)
+	}
+}
