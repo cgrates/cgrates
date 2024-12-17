@@ -470,3 +470,75 @@ func TestTrendProfileFieldAsString(t *testing.T) {
 		})
 	}
 }
+
+func TestTrendCleanUp(t *testing.T) {
+	tm := time.Now().Add(-19 * time.Second)
+	tm2 := tm.Add(15 * time.Second)
+	tm3 := time.Now().Add(1)
+	tm4 := time.Now().Add(-5 * time.Second)
+	tm5 := time.Now().Add(-3 * time.Second)
+	tr := &Trend{
+		Tenant: "cgrates.org",
+		ID:     "TREND1",
+		RunTimes: []time.Time{
+			tm,
+			tm2,
+			tm3,
+			tm4,
+			tm5,
+		},
+		Metrics: map[time.Time]map[string]*MetricWithTrend{
+			tm: {
+				utils.MetaTCC: {ID: utils.MetaTCC, Value: 13, TrendGrowth: -1, TrendLabel: utils.NotAvailable},
+				utils.MetaACC: {ID: utils.MetaACC, Value: 13, TrendGrowth: -1, TrendLabel: utils.NotAvailable},
+			},
+			tm2: {
+				utils.MetaTCC: {ID: utils.MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: utils.MetaPositive},
+				utils.MetaACC: {ID: utils.MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: utils.MetaPositive},
+			},
+			tm3: {
+				utils.MetaTCC: {ID: utils.MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: utils.MetaPositive},
+				utils.MetaACC: {ID: utils.MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: utils.MetaPositive},
+			},
+			tm4: {
+				utils.MetaTCC: {ID: utils.MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: utils.MetaPositive},
+				utils.MetaACC: {ID: utils.MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: utils.MetaPositive},
+			},
+			tm5: {
+				utils.MetaTCC: {ID: utils.MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: utils.MetaPositive},
+				utils.MetaACC: {ID: utils.MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: utils.MetaPositive},
+			},
+		},
+	}
+
+	tests := []struct {
+		name               string
+		ttl                time.Duration
+		tr                 *Trend
+		qLength            int
+		altered            bool
+		runtimesmetriclens int
+	}{
+		{"TTLlgThan0", 10 * time.Second, tr, 3, true, 3},
+		{"QueueLenLg0", -1, tr, 2, true, 2},
+		{"TLLExpiredAll", 2 * time.Second, tr, 0, true, 0},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			altered := tc.tr.cleanup(tc.ttl, tc.qLength)
+			if tc.altered {
+				if !altered {
+					t.Errorf("expected trend to be altered")
+				}
+				if len(tc.tr.RunTimes) != tc.runtimesmetriclens || len(tc.tr.Metrics) != tc.runtimesmetriclens {
+					t.Errorf("expected len to be %d,got %d metrics,%d runtimes", tc.runtimesmetriclens, len(tc.tr.Metrics), len(tc.tr.RunTimes))
+				}
+
+				return
+			}
+			if altered {
+				t.Error("expected trend to not be altered")
+			}
+		})
+	}
+}

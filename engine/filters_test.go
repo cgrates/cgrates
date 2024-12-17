@@ -2516,3 +2516,170 @@ func TestHttpInlineFilter(t *testing.T) {
 		t.Error("should had passed")
 	}
 }
+
+func TestFilterTrends(t *testing.T) {
+	tmpConn := connMgr
+	defer func() {
+		connMgr = tmpConn
+	}()
+	clientConn := make(chan context.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.TrendSv1GetTrendSummary: func(ctx *context.Context, args, reply any) error {
+				argGetTrend, ok := args.(*utils.TenantIDWithAPIOpts)
+				if !ok {
+					return fmt.Errorf("wrong args")
+				}
+				if argGetTrend.ID == "Trend1" && argGetTrend.Tenant == "cgrates.org" {
+					now := time.Now()
+					now2 := now.Add(time.Second)
+					tr := Trend{
+						Tenant:   "cgrates.org",
+						ID:       "Trend1",
+						RunTimes: []time.Time{now, now2},
+						Metrics: map[time.Time]map[string]*MetricWithTrend{
+							now: {
+								"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+								"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
+							},
+							now2: {
+								"*acc": {ID: "*acc", Value: 42, TrendGrowth: -3.0, TrendLabel: utils.MetaNegative},
+								"*acd": {ID: "*acd", Value: 52, TrendGrowth: 2.0, TrendLabel: utils.MetaPositive},
+							},
+						},
+					}
+					trS := tr.asTrendSummary()
+					*reply.(*TrendSummary) = *trS
+					return nil
+				}
+				return utils.ErrNotFound
+			},
+		},
+	}
+	now3 := time.Now().Add(-time.Second * 3).Format(time.RFC3339)
+	connMgr = NewConnManager(config.NewDefaultCGRConfig())
+
+	connMgr.rpcInternal = map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends): clientConn,
+	}
+	testCases := []struct {
+		name       string
+		filter     string
+		shouldPass bool
+	}{
+		{
+			name:       "TrendPassACCLabel",
+			filter:     "*string:~*trends.Trend1.Metrics.*acc.TrendLabel:*negative",
+			shouldPass: true,
+		},
+		{
+
+			name:       "TrendPassID",
+			filter:     "*string:~*trends.Trend1.ID:Trend1",
+			shouldPass: true,
+		},
+		{
+			name:       "TrendPassACDLabel",
+			filter:     "*string:~*trends.Trend1.Metrics.*acd.TrendLabel:*positive",
+			shouldPass: true,
+		},
+		{
+			name:       "TrendFailACCGrowth",
+			filter:     "*gt:~*trends.Trend1.Metrics.*acc.TrendGrowth:1.0",
+			shouldPass: false,
+		},
+		{
+			name:       "TrendPassACDGrowth",
+			filter:     "*gte:~*trends.Trend1.Metrics.*acd.TrendGrowth:2",
+			shouldPass: true,
+		},
+		{
+			name:       "TrendPassTime",
+			filter:     fmt.Sprintf("*ai:~*trends.Trend1.Time:%s", now3),
+			shouldPass: true,
+		},
+	}
+	initDP := utils.MapStorage{}
+	dp := newDynamicDP(context.Background(), nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)}, nil, "cgrates.org", initDP)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fl, err := NewFilterFromInline("cgrates.org", tc.filter)
+			if err != nil {
+				t.Fatal(err)
+			}
+			rule := fl.Rules[0]
+			pass, err := rule.Pass(context.Background(), dp)
+			if err != nil {
+				t.Fatalf("rule.Pass() unexpected error: %v", err)
+			}
+			if pass != tc.shouldPass {
+				t.Errorf("rule.Pass() expected: %t ,got: %t", tc.shouldPass, pass)
+			}
+		})
+	}
+}
+
+func TestFilterRanking(t *testing.T) {
+	tmpConn := connMgr
+	defer func() {
+		connMgr = tmpConn
+	}()
+	clientConn := make(chan context.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.RankingSv1GetRankingSummary: func(ctx *context.Context, args any, reply any) error {
+				argTntID, ok := args.(*utils.TenantIDWithAPIOpts)
+				if !ok {
+					return fmt.Errorf("wrong args")
+				}
+				if argTntID.ID == "Ranking1" && argTntID.Tenant == "cgrates.org" {
+					rn := Ranking{
+						Tenant:        "cgrates.org",
+						ID:            "Ranking1",
+						LastUpdate:    time.Now(),
+						SortedStatIDs: []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
+					}
+					rnS := rn.asRankingSummary()
+					*reply.(*RankingSummary) = *rnS
+					return nil
+				}
+				return utils.ErrNotFound
+			},
+		}}
+
+	connMgr = NewConnManager(config.NewDefaultCGRConfig())
+	connMgr.rpcInternal = map[string]chan context.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings): clientConn,
+	}
+	now := time.Now().Add(-2 * time.Second).Format(time.RFC3339)
+	testCases := []struct {
+		name   string
+		filter string
+		pass   bool
+	}{
+		{name: "RankingPassID", filter: "*string:~*rankings.Ranking1.ID:Ranking1", pass: true},
+		{name: "RankingPassLastUpdate", filter: fmt.Sprintf("*ai:~*rankings.Ranking1.LastUpdate:%s", now), pass: true},
+		{name: "RankingPassFirstSortedStatIDs", filter: "*string:~*rankings.Ranking1.SortedStatIDs[0]:Stat5", pass: true},
+		{name: "RankingPassLastSortedStatIDs", filter: "*string:~*rankings.Ranking1.SortedStatIDs[6]:Stat2", pass: true},
+		{name: "RankingFailSortedStatIDsIdx", filter: "*string:~*rankings.Ranking1.SortedStatIDs[1]:Stat4", pass: false},
+	}
+
+	initDP := utils.MapStorage{}
+	dp := newDynamicDP(context.Background(), nil, nil, nil, nil, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)}, "cgrates.org", initDP)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fl, err := NewFilterFromInline(dp.tenant, tc.filter)
+			if err != nil {
+				t.Fatal(err)
+			}
+			rule := fl.Rules[0]
+			pass, err := rule.Pass(context.Background(), dp)
+			if err != nil {
+				t.Fatalf("rule.Pass() unexpected error: %v", err)
+			}
+			if pass != tc.pass {
+				t.Errorf("rule.Pass() expected: %t ,got: %t", tc.pass, pass)
+			}
+		})
+	}
+}
