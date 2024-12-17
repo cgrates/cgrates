@@ -67,7 +67,8 @@ func (rS *RateS) Shutdown() (err error) {
 }
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
-func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, rPfIDs []string, args *utils.CGREvent, ignoreFilters bool) (rtPfl *utils.RateProfile, err error) {
+func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, rPfIDs []string, args *utils.CGREvent,
+	ignoreFilters bool, ignoredRPfIDs utils.StringSet) (rtPfl *utils.RateProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
@@ -94,6 +95,9 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 	}
 	var rpWw *rpWithWeight
 	for _, rPfID := range rPfIDs {
+		if ignoredRPfIDs.Has(rPfID) { // already processed and gave errors or not appropriate for our request
+			continue
+		}
 		var rPf *utils.RateProfile
 		if rPf, err = rS.dm.GetRateProfile(ctx, tnt, rPfID,
 			true, true, utils.NonTransactional); err != nil {

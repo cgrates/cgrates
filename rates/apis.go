@@ -140,20 +140,31 @@ func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCo
 		config.RatesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var rtPrl *utils.RateProfile
-	if rtPrl, err = rS.matchingRateProfileForEvent(ctx, args.Tenant, rPfIDs, args, ignFilters); err != nil {
-		if err != utils.ErrNotFound {
-			err = utils.NewErrServerError(err)
+	ignoredRPfIDs := utils.NewStringSet([]string{})
+	var firstError error
+	for i := 0; i < rS.cfg.RateSCfg().Verbosity; i++ {
+		var rtPrl *utils.RateProfile
+		if rtPrl, err = rS.matchingRateProfileForEvent(ctx, args.Tenant, rPfIDs, args, ignFilters, ignoredRPfIDs); err != nil {
+			if err != utils.ErrNotFound {
+				err = utils.NewErrServerError(err)
+			} else if i != 0 { // no more fallback rating profiles, return the original error
+				err = utils.NewErrServerError(firstError)
+			}
+			return
 		}
-		return
-	}
-	var rcvCost *utils.RateProfileCost
-	if rcvCost, err = rS.rateProfileCostForEvent(ctx, rtPrl, args, rS.cfg.RateSCfg().Verbosity); err != nil {
-		if err != utils.ErrNotFound {
-			err = utils.NewErrServerError(err)
+		var rcvCost *utils.RateProfileCost
+		if rcvCost, err = rS.rateProfileCostForEvent(ctx, rtPrl, args, rS.cfg.RateSCfg().Verbosity); err != nil {
+			if err != utils.ErrNotFound {
+				//err = utils.NewErrServerError(err)
+				if i == 0 {
+					firstError = err
+				}
+				ignoredRPfIDs.Add(rtPrl.ID)
+				continue // no cost, go to the next matching RatingProfile
+			}
+			return
 		}
-		return
+		*rpCost = *rcvCost
 	}
-	*rpCost = *rcvCost
 	return
 }
