@@ -32,13 +32,11 @@ import (
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig,
-	dspS *DispatcherService,
-	sIndxr *servmanager.ServiceRegistry) *AttributeService {
+	dspS *DispatcherService) *AttributeService {
 	return &AttributeService{
-		cfg:        cfg,
-		dspS:       dspS,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
-		srvIndexer: sIndxr,
+		cfg:       cfg,
+		dspS:      dspS,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -54,17 +52,12 @@ type AttributeService struct {
 
 	cfg *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
 	stateDeps  *StateDependencies
 }
 
 // Start should handle the service start
-func (attrS *AttributeService) Start(shutdown chan struct{}) (err error) {
-	if attrS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (attrS *AttributeService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -73,7 +66,7 @@ func (attrS *AttributeService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		attrS.srvIndexer, attrS.cfg.GeneralCfg().ConnectTimeout)
+		registry, attrS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
@@ -105,7 +98,7 @@ func (attrS *AttributeService) Start(shutdown chan struct{}) (err error) {
 			if _, closed := <-dspShtdChan; closed {
 				return
 			}
-			if attrS.IsRunning() {
+			if servmanager.IsServiceInState(attrS, utils.StateServiceUP) {
 				attrS.cl.RpcRegister(srv)
 			}
 
@@ -118,26 +111,20 @@ func (attrS *AttributeService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (attrS *AttributeService) Reload(_ chan struct{}) (err error) {
+func (attrS *AttributeService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return // for the moment nothing to reload
 }
 
 // Shutdown stops the service
-func (attrS *AttributeService) Shutdown() (err error) {
+func (attrS *AttributeService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	attrS.Lock()
 	attrS.attrS = nil
 	attrS.rpc = nil
 	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
 	attrS.dspS.UnregisterShutdownChan(attrS.ServiceName())
 	attrS.Unlock()
+	close(attrS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (attrS *AttributeService) IsRunning() bool {
-	attrS.RLock()
-	defer attrS.RUnlock()
-	return attrS.attrS != nil
 }
 
 // ServiceName returns the service name

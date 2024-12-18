@@ -33,12 +33,10 @@ import (
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceRegistry) *AnalyzerService {
+func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 	anz := &AnalyzerService{
-		cfg:        cfg,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 
 	// Wait for AnalyzerService only when it should run.
@@ -59,19 +57,14 @@ type AnalyzerService struct {
 	cancelFunc context.CancelFunc
 	cfg        *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // share the API object implementing API calls for internal
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 
 }
 
 // Start should handle the sercive start
-func (anz *AnalyzerService) Start(shutdown chan struct{}) (err error) {
-	if anz.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
-	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, anz.srvIndexer,
+func (anz *AnalyzerService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -81,7 +74,6 @@ func (anz *AnalyzerService) Start(shutdown chan struct{}) (err error) {
 	anz.Lock()
 	defer anz.Unlock()
 	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
 		return
 	}
 	anzCtx, cancel := context.WithCancel(context.TODO())
@@ -93,23 +85,19 @@ func (anz *AnalyzerService) Start(shutdown chan struct{}) (err error) {
 		}
 	}(anz.anz)
 	anz.cl.SetAnalyzer(anz.anz)
-	go anz.start()
+	go anz.start(registry)
 	close(anz.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (anz *AnalyzerService) start() {
-	fs := anz.srvIndexer.Lookup(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), anz.cfg.GeneralCfg().ConnectTimeout) {
-		return
-		// return utils.NewServiceStateTimeoutError(utils.AnalyzerS, utils.FilterS, utils.StateServiceUP)
-	}
-
-	if !anz.IsRunning() {
+func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry) {
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+		anz.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
 		return
 	}
 	anz.Lock()
-	anz.anz.SetFilterS(fs.FilterS())
+	anz.anz.SetFilterS(fs.(*FilterService).FilterS())
 
 	srv, _ := engine.NewService(anz.anz)
 	// srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
@@ -122,12 +110,12 @@ func (anz *AnalyzerService) start() {
 }
 
 // Reload handles the change of config
-func (anz *AnalyzerService) Reload(_ chan struct{}) (err error) {
+func (anz *AnalyzerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return // for the momment nothing to reload
 }
 
 // Shutdown stops the service
-func (anz *AnalyzerService) Shutdown() (err error) {
+func (anz *AnalyzerService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	anz.Lock()
 	anz.cancelFunc()
 	anz.cl.SetAnalyzer(nil)
@@ -135,14 +123,8 @@ func (anz *AnalyzerService) Shutdown() (err error) {
 	anz.anz = nil
 	anz.Unlock()
 	anz.cl.RpcUnregisterName(utils.AnalyzerSv1)
+	close(anz.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (anz *AnalyzerService) IsRunning() bool {
-	anz.RLock()
-	defer anz.RUnlock()
-	return anz.anz != nil
 }
 
 // ServiceName returns the service name
@@ -157,7 +139,7 @@ func (anz *AnalyzerService) ShouldRun() bool {
 
 // GetInternalCodec returns the connection wrapped in analyzer connector
 func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string) birpc.ClientConnector {
-	if !anz.IsRunning() {
+	if !servmanager.IsServiceInState(anz, utils.StateServiceUP) {
 		return c
 	}
 	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)

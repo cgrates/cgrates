@@ -32,14 +32,12 @@ import (
 
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *DispatcherService {
+	connMgr *engine.ConnManager) *DispatcherService {
 	return &DispatcherService{
 		cfg:        cfg,
 		connMgr:    connMgr,
 		srvsReload: make(map[string]chan struct{}),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -54,17 +52,12 @@ type DispatcherService struct {
 	cfg        *config.CGRConfig
 	srvsReload map[string]chan struct{}
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (dspS *DispatcherService) Start(shutdown chan struct{}) (err error) {
-	if dspS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (dspS *DispatcherService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -73,7 +66,7 @@ func (dspS *DispatcherService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		dspS.srvIndexer, dspS.cfg.GeneralCfg().ConnectTimeout)
+		registry, dspS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -111,12 +104,12 @@ func (dspS *DispatcherService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (dspS *DispatcherService) Reload(_ chan struct{}) (err error) {
+func (dspS *DispatcherService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return // for the momment nothing to reload
 }
 
 // Shutdown stops the service
-func (dspS *DispatcherService) Shutdown() (err error) {
+func (dspS *DispatcherService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 	dspS.dspS = nil
@@ -126,14 +119,8 @@ func (dspS *DispatcherService) Shutdown() (err error) {
 	dspS.unregisterAllDispatchedSubsystems()
 	dspS.connMgr.DisableDispatcher()
 	dspS.sync()
+	close(dspS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (dspS *DispatcherService) IsRunning() bool {
-	dspS.RLock()
-	defer dspS.RUnlock()
-	return dspS.dspS != nil
 }
 
 // ServiceName returns the service name

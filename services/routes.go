@@ -31,13 +31,11 @@ import (
 
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *RouteService {
+	connMgr *engine.ConnManager) *RouteService {
 	return &RouteService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -51,17 +49,12 @@ type RouteService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (routeS *RouteService) Start(shutdown chan struct{}) (err error) {
-	if routeS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (routeS *RouteService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -70,7 +63,7 @@ func (routeS *RouteService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		routeS.srvIndexer, routeS.cfg.GeneralCfg().ConnectTimeout)
+		registry, routeS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -101,24 +94,18 @@ func (routeS *RouteService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (routeS *RouteService) Reload(_ chan struct{}) (err error) {
+func (routeS *RouteService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (routeS *RouteService) Shutdown() (err error) {
+func (routeS *RouteService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	routeS.Lock()
 	defer routeS.Unlock()
 	routeS.routeS = nil
 	routeS.cl.RpcUnregisterName(utils.RouteSv1)
+	close(routeS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (routeS *RouteService) IsRunning() bool {
-	routeS.RLock()
-	defer routeS.RUnlock()
-	return routeS.routeS != nil
 }
 
 // ServiceName returns the service name

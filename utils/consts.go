@@ -2829,7 +2829,9 @@ const (
 )
 
 const (
-	StateServiceUP = "SERVICE_UP"
+	StateServiceUP   = "SERVICE_UP"
+	StateServiceDOWN = "SERVICE_DOWN"
+	StateServiceInit = "SERVICE_INIT"
 )
 
 func buildCacheInstRevPrefixes() {

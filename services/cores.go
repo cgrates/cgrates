@@ -33,16 +33,14 @@ import (
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps,
-	fileCPU *os.File, shdWg *sync.WaitGroup,
-	srvIndexer *servmanager.ServiceRegistry) *CoreService {
+	fileCPU *os.File, shdWg *sync.WaitGroup) *CoreService {
 	return &CoreService{
-		shdWg:      shdWg,
-		cfg:        cfg,
-		caps:       caps,
-		fileCPU:    fileCPU,
-		csCh:       make(chan *cores.CoreS, 1),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		shdWg:     shdWg,
+		cfg:       cfg,
+		caps:      caps,
+		fileCPU:   fileCPU,
+		csCh:      make(chan *cores.CoreS, 1),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -60,23 +58,18 @@ type CoreService struct {
 	shdWg    *sync.WaitGroup
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start(shutdown chan struct{}) error {
-	if cS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (cS *CoreService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.AnalyzerS,
 		},
-		cS.srvIndexer, cS.cfg.GeneralCfg().ConnectTimeout)
+		registry, cS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -104,12 +97,12 @@ func (cS *CoreService) Start(shutdown chan struct{}) error {
 }
 
 // Reload handles the change of config
-func (cS *CoreService) Reload(_ chan struct{}) error {
+func (cS *CoreService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service
-func (cS *CoreService) Shutdown() error {
+func (cS *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	cS.mu.Lock()
 	defer cS.mu.Unlock()
 	cS.cS.Shutdown()
@@ -119,14 +112,8 @@ func (cS *CoreService) Shutdown() error {
 	cS.cS = nil
 	<-cS.csCh
 	cS.cl.RpcUnregisterName(utils.CoreSv1)
+	close(cS.StateChan(utils.StateServiceDOWN))
 	return nil
-}
-
-// IsRunning returns if the service is running
-func (cS *CoreService) IsRunning() bool {
-	cS.mu.RLock()
-	defer cS.mu.RUnlock()
-	return cS.cS != nil
 }
 
 // ServiceName returns the service name

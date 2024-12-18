@@ -32,13 +32,11 @@ import (
 
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *SIPAgent {
+	connMgr *engine.ConnManager) *SIPAgent {
 	return &SIPAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -52,18 +50,13 @@ type SIPAgent struct {
 
 	oldListen string
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (sip *SIPAgent) Start(shutdown chan struct{}) (err error) {
-	if sip.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, sip.srvIndexer,
+func (sip *SIPAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		sip.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -91,7 +84,7 @@ func (sip *SIPAgent) listenAndServe(shutdown chan struct{}) {
 }
 
 // Reload handles the change of config
-func (sip *SIPAgent) Reload(shutdown chan struct{}) (err error) {
+func (sip *SIPAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
 		return
 	}
@@ -105,19 +98,13 @@ func (sip *SIPAgent) Reload(shutdown chan struct{}) (err error) {
 }
 
 // Shutdown stops the service
-func (sip *SIPAgent) Shutdown() (err error) {
+func (sip *SIPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	sip.Lock()
 	defer sip.Unlock()
 	sip.sip.Shutdown()
 	sip.sip = nil
+	close(sip.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (sip *SIPAgent) IsRunning() bool {
-	sip.RLock()
-	defer sip.RUnlock()
-	return sip.sip != nil
 }
 
 // ServiceName returns the service name

@@ -32,13 +32,11 @@ import (
 
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *DNSAgent {
+	connMgr *engine.ConnManager) *DNSAgent {
 	return &DNSAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -52,18 +50,13 @@ type DNSAgent struct {
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (dns *DNSAgent) Start(shutdown chan struct{}) (err error) {
-	if dns.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, dns.srvIndexer,
+func (dns *DNSAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -84,10 +77,11 @@ func (dns *DNSAgent) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (dns *DNSAgent) Reload(shutdown chan struct{}) (err error) {
-	fs := dns.srvIndexer.Lookup(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dns.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.DNSAgent, utils.FilterS, utils.StateServiceUP)
+func (dns *DNSAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+		dns.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
 
 	dns.Lock()
@@ -97,7 +91,7 @@ func (dns *DNSAgent) Reload(shutdown chan struct{}) (err error) {
 		close(dns.stopChan)
 	}
 
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), dns.connMgr)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.(*FilterService).FilterS(), dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil
@@ -122,7 +116,7 @@ func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shutdown chan struct
 }
 
 // Shutdown stops the service
-func (dns *DNSAgent) Shutdown() (err error) {
+func (dns *DNSAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	if dns.dns == nil {
 		return
 	}
@@ -130,14 +124,8 @@ func (dns *DNSAgent) Shutdown() (err error) {
 	dns.Lock()
 	defer dns.Unlock()
 	dns.dns = nil
+	close(dns.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (dns *DNSAgent) IsRunning() bool {
-	dns.RLock()
-	defer dns.RUnlock()
-	return dns.dns != nil
 }
 
 // ServiceName returns the service name

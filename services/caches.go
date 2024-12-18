@@ -30,14 +30,12 @@ import (
 )
 
 // NewCacheService .
-func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *CacheService {
+func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *CacheService {
 	return &CacheService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		cacheCh:    make(chan *engine.CacheS, 1),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		cacheCh:   make(chan *engine.CacheS, 1),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -50,17 +48,12 @@ type CacheService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (cS *CacheService) Start(shutdown chan struct{}) (err error) {
-	if cS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -68,7 +61,7 @@ func (cS *CacheService) Start(shutdown chan struct{}) (err error) {
 			utils.AnalyzerS,
 			utils.CoreS,
 		},
-		cS.srvIndexer, cS.cfg.GeneralCfg().ConnectTimeout)
+		registry, cS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -98,19 +91,15 @@ func (cS *CacheService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (cS *CacheService) Reload(_ chan struct{}) (_ error) {
+func (cS *CacheService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
 	return
 }
 
 // Shutdown stops the service
-func (cS *CacheService) Shutdown() (_ error) {
+func (cS *CacheService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	cS.cl.RpcUnregisterName(utils.CacheSv1)
+	close(cS.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (cS *CacheService) IsRunning() bool {
-	return IsServiceInState(cS.ServiceName(), utils.StateServiceUP, cS.srvIndexer)
 }
 
 // ServiceName returns the service name

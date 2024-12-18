@@ -31,15 +31,13 @@ import (
 
 // NewDataDBService returns the DataDB Service
 func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVersions bool,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceRegistry) *DataDBService {
+	srvDep map[string]*sync.WaitGroup) *DataDBService {
 	return &DataDBService{
 		cfg:         cfg,
 		connMgr:     connMgr,
 		setVersions: setVersions,
 		srvDep:      srvDep,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -55,16 +53,12 @@ type DataDBService struct {
 
 	srvDep map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (db *DataDBService) Start(_ chan struct{}) (err error) {
-	if db.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
+func (db *DataDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
@@ -93,7 +87,7 @@ func (db *DataDBService) Start(_ chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (db *DataDBService) Reload(_ chan struct{}) (err error) {
+func (db *DataDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
@@ -122,20 +116,14 @@ func (db *DataDBService) Reload(_ chan struct{}) (err error) {
 }
 
 // Shutdown stops the service
-func (db *DataDBService) Shutdown() (_ error) {
+func (db *DataDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	db.srvDep[utils.DataDB].Wait()
 	db.Lock()
 	db.dm.DataDB().Close()
 	db.dm = nil
 	db.Unlock()
+	close(db.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (db *DataDBService) IsRunning() bool {
-	db.RLock()
-	defer db.RUnlock()
-	return db.dm != nil && db.dm.DataDB() != nil
 }
 
 // ServiceName returns the service name

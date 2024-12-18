@@ -31,13 +31,11 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *ChargerService {
+	connMgr *engine.ConnManager) *ChargerService {
 	return &ChargerService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -51,17 +49,12 @@ type ChargerService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (chrS *ChargerService) Start(shutdown chan struct{}) error {
-	if chrS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (chrS *ChargerService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -70,7 +63,7 @@ func (chrS *ChargerService) Start(shutdown chan struct{}) error {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		chrS.srvIndexer, chrS.cfg.GeneralCfg().ConnectTimeout)
+		registry, chrS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -102,24 +95,18 @@ func (chrS *ChargerService) Start(shutdown chan struct{}) error {
 }
 
 // Reload handles the change of config
-func (chrS *ChargerService) Reload(_ chan struct{}) (err error) {
+func (chrS *ChargerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (chrS *ChargerService) Shutdown() (err error) {
+func (chrS *ChargerService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	chrS.Lock()
 	defer chrS.Unlock()
 	chrS.chrS = nil
 	chrS.cl.RpcUnregisterName(utils.ChargerSv1)
+	close(chrS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (chrS *ChargerService) IsRunning() bool {
-	chrS.RLock()
-	defer chrS.RUnlock()
-	return chrS.chrS != nil
 }
 
 // ServiceName returns the service name

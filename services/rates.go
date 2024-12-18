@@ -31,13 +31,11 @@ import (
 )
 
 // NewRateService constructs RateService
-func NewRateService(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceRegistry) *RateService {
+func NewRateService(cfg *config.CGRConfig) *RateService {
 	return &RateService{
-		cfg:        cfg,
-		rldChan:    make(chan struct{}),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		rldChan:   make(chan struct{}),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -52,9 +50,8 @@ type RateService struct {
 	stopChan chan struct{}
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name
@@ -67,35 +64,25 @@ func (rs *RateService) ShouldRun() (should bool) {
 	return rs.cfg.RateSCfg().Enabled
 }
 
-// IsRunning returns if the service is running
-func (rs *RateService) IsRunning() bool {
-	rs.RLock()
-	defer rs.RUnlock()
-	return rs.rateS != nil
-}
-
 // Reload handles the change of config
-func (rs *RateService) Reload(_ chan struct{}) (_ error) {
+func (rs *RateService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
 	rs.rldChan <- struct{}{}
 	return
 }
 
 // Shutdown stops the service
-func (rs *RateService) Shutdown() (err error) {
+func (rs *RateService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	rs.Lock()
 	defer rs.Unlock()
 	close(rs.stopChan)
 	rs.rateS = nil
 	rs.cl.RpcUnregisterName(utils.RateSv1)
+	close(rs.StateChan(utils.StateServiceDOWN))
 	return
 }
 
 // Start should handle the service start
-func (rs *RateService) Start(shutdown chan struct{}) (err error) {
-	if rs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -104,7 +91,7 @@ func (rs *RateService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		rs.srvIndexer, rs.cfg.GeneralCfg().ConnectTimeout)
+		registry, rs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}

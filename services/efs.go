@@ -42,29 +42,22 @@ type ExportFailoverService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // NewExportFailoverService is the constructor for the TpeService
-func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *ExportFailoverService {
+func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *ExportFailoverService {
 	return &ExportFailoverService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // Start should handle the service start
-func (efServ *ExportFailoverService) Start(_ chan struct{}) (err error) {
-	if efServ.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
-	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, efServ.srvIndexer,
+func (efServ *ExportFailoverService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
 		efServ.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -83,23 +76,17 @@ func (efServ *ExportFailoverService) Start(_ chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (efServ *ExportFailoverService) Reload(_ chan struct{}) (err error) {
+func (efServ *ExportFailoverService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (efServ *ExportFailoverService) Shutdown() (err error) {
+func (efServ *ExportFailoverService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	efServ.srv = nil
 	close(efServ.stopChan)
 	// NEXT SHOULD EXPORT ALL THE SHUTDOWN LOGGERS TO WRITE
+	close(efServ.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (efServ *ExportFailoverService) IsRunning() bool {
-	efServ.Lock()
-	defer efServ.Unlock()
-	return efServ.efS != nil
 }
 
 // ShouldRun returns if the service should be running

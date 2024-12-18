@@ -32,13 +32,11 @@ import (
 
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *RadiusAgent {
+	connMgr *engine.ConnManager) *RadiusAgent {
 	return &RadiusAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -55,18 +53,13 @@ type RadiusAgent struct {
 	lauth string
 	lacct string
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (rad *RadiusAgent) Start(shutdown chan struct{}) (err error) {
-	if rad.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, rad.srvIndexer,
+func (rad *RadiusAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		rad.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -98,7 +91,7 @@ func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shutdown chan stru
 }
 
 // Reload handles the change of config
-func (rad *RadiusAgent) Reload(shutdown chan struct{}) (err error) {
+func (rad *RadiusAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	if rad.lnet == rad.cfg.RadiusAgentCfg().ListenNet &&
 		rad.lauth == rad.cfg.RadiusAgentCfg().ListenAuth &&
 		rad.lacct == rad.cfg.RadiusAgentCfg().ListenAcct {
@@ -106,12 +99,13 @@ func (rad *RadiusAgent) Reload(shutdown chan struct{}) (err error) {
 	}
 
 	rad.shutdown()
-	return rad.Start(shutdown)
+	return rad.Start(shutdown, registry)
 }
 
 // Shutdown stops the service
-func (rad *RadiusAgent) Shutdown() (err error) {
+func (rad *RadiusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	rad.shutdown()
+	close(rad.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
 
@@ -120,13 +114,6 @@ func (rad *RadiusAgent) shutdown() {
 	close(rad.stopChan)
 	rad.rad = nil
 	rad.Unlock()
-}
-
-// IsRunning returns if the service is running
-func (rad *RadiusAgent) IsRunning() bool {
-	rad.RLock()
-	defer rad.RUnlock()
-	return rad.rad != nil
 }
 
 // ServiceName returns the service name

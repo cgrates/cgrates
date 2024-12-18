@@ -57,16 +57,16 @@ type ServiceManager struct {
 // StartServices starts all enabled services
 func (m *ServiceManager) StartServices(shutdown chan struct{}) {
 	go m.handleReload(shutdown)
-	for _, service := range m.registry.List() {
-		if service.ShouldRun() && !service.IsRunning() {
+	for _, svc := range m.registry.List() {
+		if svc.ShouldRun() && !IsServiceInState(svc, utils.StateServiceUP) {
 			m.shdWg.Add(1)
 			go func() {
-				if err := service.Start(shutdown); err != nil &&
+				if err := svc.Start(shutdown, m.registry); err != nil &&
 					err != utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
-					utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> service: %v", utils.ServiceManager, service.ServiceName(), err))
+					utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 					close(shutdown)
 				}
-				utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, service.ServiceName()))
+				utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, svc.ServiceName()))
 			}()
 		}
 	}
@@ -76,9 +76,9 @@ func (m *ServiceManager) StartServices(shutdown chan struct{}) {
 // AddServices adds given services
 func (m *ServiceManager) AddServices(services ...Service) {
 	m.Lock()
-	for _, srv := range services {
-		m.registry.Register(srv)
-		if sAPIData, hasAPIData := serviceAPIData[srv.ServiceName()]; hasAPIData { // Add the internal connections
+	for _, svc := range services {
+		m.registry.Register(svc)
+		if sAPIData, hasAPIData := serviceAPIData[svc.ServiceName()]; hasAPIData { // Add the internal connections
 			rpcIntChan := make(chan birpc.ClientConnector, 1)
 			m.connMgr.AddInternalConn(sAPIData[1], sAPIData[0], rpcIntChan)
 			if len(sAPIData) > 2 { // Add the bidirectional API
@@ -86,14 +86,14 @@ func (m *ServiceManager) AddServices(services ...Service) {
 			}
 			go func() { // ToDo: centralize management into one single goroutine
 				if utils.StructChanTimeout(
-					m.registry.Lookup(srv.ServiceName()).StateChan(utils.StateServiceUP),
+					m.registry.Lookup(svc.ServiceName()).StateChan(utils.StateServiceUP),
 					m.cfg.GeneralCfg().ConnectTimeout) {
 					utils.Logger.Err(
 						fmt.Sprintf("<%s> failed to register internal connection to service %s because of timeout waiting for ServiceUP state",
-							utils.ServiceManager, srv.ServiceName()))
+							utils.ServiceManager, svc.ServiceName()))
 					// toDo: shutdown service
 				}
-				rpcIntChan <- srv.IntRPCConn()
+				rpcIntChan <- svc.IntRPCConn()
 			}()
 		}
 	}
@@ -101,49 +101,50 @@ func (m *ServiceManager) AddServices(services ...Service) {
 }
 
 func (m *ServiceManager) handleReload(shutdown chan struct{}) {
-	var srvName string
+	var serviceID string
 	for {
 		select {
 		case <-shutdown:
 			m.ShutdownServices()
 			return
-		case srvName = <-m.rldChan:
+		case serviceID = <-m.rldChan:
 		}
-		if srvName == config.RPCConnsJSON {
+		if serviceID == config.RPCConnsJSON {
 			go m.connMgr.Reload()
 		} else {
-			go m.reloadService(srvName, shutdown)
+			go m.reloadService(serviceID, shutdown)
 
 		}
 		// handle RPC server
 	}
 }
 
-func (m *ServiceManager) reloadService(srvName string, shutdown chan struct{}) (err error) {
-	srv := m.registry.Lookup(srvName)
-	if srv.ShouldRun() {
-		if srv.IsRunning() {
-			if err = srv.Reload(shutdown); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> service: %v", utils.ServiceManager, srv.ServiceName(), err))
+func (m *ServiceManager) reloadService(id string, shutdown chan struct{}) (err error) {
+	svc := m.registry.Lookup(id)
+	isUp := IsServiceInState(svc, utils.StateServiceUP)
+	if svc.ShouldRun() {
+		if isUp {
+			if err = svc.Reload(shutdown, m.registry); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 				close(shutdown)
 				return // stop if we encounter an error
 			}
-			utils.Logger.Info(fmt.Sprintf("<%s> reloaded <%s> service", utils.ServiceManager, srv.ServiceName()))
+			utils.Logger.Info(fmt.Sprintf("<%s> reloaded <%s> service", utils.ServiceManager, svc.ServiceName()))
 		} else {
 			m.shdWg.Add(1)
-			if err = srv.Start(shutdown); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> serivce: %v", utils.ServiceManager, srv.ServiceName(), err))
+			if err = svc.Start(shutdown, m.registry); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> serivce: %v", utils.ServiceManager, svc.ServiceName(), err))
 				close(shutdown)
 				return // stop if we encounter an error
 			}
-			utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, srv.ServiceName()))
+			utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, svc.ServiceName()))
 		}
-	} else if srv.IsRunning() {
-		if err = srv.Shutdown(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down <%s> service: %v", utils.ServiceManager, srv.ServiceName(), err))
+	} else if isUp {
+		if err = svc.Shutdown(m.registry); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 			close(shutdown)
 		}
-		utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, srv.ServiceName()))
+		utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, svc.ServiceName()))
 		m.shdWg.Done()
 	}
 	return
@@ -151,16 +152,16 @@ func (m *ServiceManager) reloadService(srvName string, shutdown chan struct{}) (
 
 // ShutdownServices will stop all services
 func (m *ServiceManager) ShutdownServices() {
-	for _, srv := range m.registry.List() {
-		if srv.IsRunning() {
+	for _, svc := range m.registry.List() {
+		if IsServiceInState(svc, utils.StateServiceUP) {
 			go func() {
 				defer m.shdWg.Done()
-				if err := srv.Shutdown(); err != nil {
+				if err := svc.Shutdown(m.registry); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down <%s> service: %v",
-						utils.ServiceManager, srv.ServiceName(), err))
+						utils.ServiceManager, svc.ServiceName(), err))
 					return
 				}
-				utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, srv.ServiceName()))
+				utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, svc.ServiceName()))
 			}()
 		}
 	}
@@ -169,13 +170,11 @@ func (m *ServiceManager) ShutdownServices() {
 // Service interface that describes what functions should a service implement
 type Service interface {
 	// Start should handle the service start
-	Start(chan struct{}) error
+	Start(chan struct{}, *ServiceRegistry) error
 	// Reload handles the change of config
-	Reload(chan struct{}) error
+	Reload(chan struct{}, *ServiceRegistry) error
 	// Shutdown stops the service
-	Shutdown() error
-	// IsRunning returns if the service is running
-	IsRunning() bool
+	Shutdown(*ServiceRegistry) error
 	// ShouldRun returns if the service should be running
 	ShouldRun() bool
 	// ServiceName returns the service name
@@ -217,13 +216,12 @@ func (m *ServiceManager) V1ServiceStatus(ctx *context.Context, args *ArgsService
 	m.RLock()
 	defer m.RUnlock()
 
-	srv := m.registry.Lookup(args.ServiceID)
-	if srv == nil {
+	svc := m.registry.Lookup(args.ServiceID)
+	if svc == nil {
 		return utils.ErrUnsupportedServiceID
 	}
-	running := srv.IsRunning()
 
-	if running {
+	if IsServiceInState(svc, utils.StateServiceUP) {
 		*reply = utils.RunningCaps
 	} else {
 		*reply = utils.StoppedCaps
@@ -412,4 +410,14 @@ var serviceAPIData = map[string][]string{
 	utils.ERs: {
 		utils.ErSv1,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaERs)},
+}
+
+// IsServiceInState performs a non-blocking check to determine if a service is in the specified state.
+func IsServiceInState(svc Service, state string) bool {
+	select {
+	case <-svc.StateChan(state):
+		return true
+	default:
+		return false
+	}
 }

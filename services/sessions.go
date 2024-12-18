@@ -34,13 +34,11 @@ import (
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *SessionService {
+	connMgr *engine.ConnManager) *SessionService {
 	return &SessionService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -56,17 +54,12 @@ type SessionService struct {
 	connMgr      *engine.ConnManager
 	cfg          *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (smg *SessionService) Start(shutdown chan struct{}) (err error) {
-	if smg.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (smg *SessionService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -74,7 +67,7 @@ func (smg *SessionService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		smg.srvIndexer, smg.cfg.GeneralCfg().ConnectTimeout)
+		registry, smg.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -127,12 +120,12 @@ func (smg *SessionService) start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (smg *SessionService) Reload(_ chan struct{}) (err error) {
+func (smg *SessionService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (smg *SessionService) Shutdown() (err error) {
+func (smg *SessionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	smg.Lock()
 	defer smg.Unlock()
 	close(smg.stopChan)
@@ -146,14 +139,8 @@ func (smg *SessionService) Shutdown() (err error) {
 	smg.sm = nil
 	smg.cl.RpcUnregisterName(utils.SessionSv1)
 	// smg.server.BiRPCUnregisterName(utils.SessionSv1)
+	close(smg.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (smg *SessionService) IsRunning() bool {
-	smg.RLock()
-	defer smg.RUnlock()
-	return smg.sm != nil
 }
 
 // ServiceName returns the service name
