@@ -35,11 +35,18 @@ import (
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig,
 	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
-	return &AnalyzerService{
+	anz := &AnalyzerService{
 		cfg:        cfg,
 		srvIndexer: srvIndexer,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
 	}
+
+	// Wait for AnalyzerService only when it should run.
+	if !anz.ShouldRun() {
+		close(anz.StateChan(utils.StateServiceUP))
+	}
+
+	return anz
 }
 
 // AnalyzerService implements Service interface
