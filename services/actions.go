@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -101,8 +100,6 @@ func (acts *ActionService) Start(shutdown chan struct{}) (err error) {
 	acts.acts = actions.NewActionS(acts.cfg, fs.FilterS(), dbs.DataManager(), acts.connMgr)
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ActionS))
 	srv, err := engine.NewServiceWithPing(acts.acts, utils.ActionSv1, utils.V1Prfx)
 	if err != nil {
 		return

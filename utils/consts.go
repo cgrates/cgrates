@@ -351,7 +351,7 @@ const (
 	MandatoryIEMissingCaps   = "MANDATORY_IE_MISSING"
 	UnsupportedCachePrefix   = "unsupported cache prefix"
 	UnsupportedServiceIDCaps = "UNSUPPORTED_SERVICE_ID"
-	ServiceManager           = "service_manager"
+	ServiceManager           = "ServiceManager"
 	ServiceAlreadyRunning    = "service already running"
 	RunningCaps              = "RUNNING"
 	StoppedCaps              = "STOPPED"

@@ -756,7 +756,6 @@ func TestDispatcherServiceDispatchDspErr(t *testing.T) {
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err)
 	}
-	dss.Shutdown()
 }
 
 func TestDispatcherServiceDispatchDspErrHostNotFound(t *testing.T) {

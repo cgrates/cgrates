@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -93,7 +92,6 @@ func (chrS *ChargerService) Start(shutdown chan struct{}) (err error) {
 	chrS.Lock()
 	defer chrS.Unlock()
 	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, chrS.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
 	srv, _ := engine.NewService(chrS.chrS)
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
 	if !chrS.cfg.DispatcherSCfg().Enabled {
@@ -116,7 +114,6 @@ func (chrS *ChargerService) Reload(_ chan struct{}) (err error) {
 func (chrS *ChargerService) Shutdown() (err error) {
 	chrS.Lock()
 	defer chrS.Unlock()
-	chrS.chrS.Shutdown()
 	chrS.chrS = nil
 	chrS.cl.RpcUnregisterName(utils.ChargerSv1)
 	return

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -99,9 +98,6 @@ func (sts *StatService) Start(shutdown chan struct{}) (err error) {
 	sts.Lock()
 	defer sts.Unlock()
 	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), sts.connMgr)
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
-		utils.CoreS, utils.StatS))
 	sts.sts.StartLoop(context.TODO())
 	srv, _ := engine.NewService(sts.sts)
 	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)

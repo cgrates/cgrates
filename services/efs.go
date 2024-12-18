@@ -19,7 +19,6 @@ along with this program.  If not, see <http://.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -71,7 +70,6 @@ func (efServ *ExportFailoverService) Start(_ chan struct{}) (err error) {
 	efServ.cl = cls.CLS()
 	efServ.Lock()
 	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))
 	efServ.stopChan = make(chan struct{})
 	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
 	efServ.cl.RpcRegister(efServ.srv)
@@ -89,9 +87,7 @@ func (efServ *ExportFailoverService) Reload(_ chan struct{}) (err error) {
 func (efServ *ExportFailoverService) Shutdown() (err error) {
 	efServ.srv = nil
 	close(efServ.stopChan)
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.EFs))
 	// NEXT SHOULD EXPORT ALL THE SHUTDOWN LOGGERS TO WRITE
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.EFs))
 	return
 }
 

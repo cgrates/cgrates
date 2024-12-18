@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -99,9 +98,6 @@ func (acts *AccountService) Start(shutdown chan struct{}) (err error) {
 	acts.acts = accounts.NewAccountS(acts.cfg, fs.FilterS(), acts.connMgr, dbs.DataManager())
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AccountS))
-
 	srv, err := engine.NewServiceWithPing(acts.acts, utils.AccountSv1, utils.V1Prfx)
 	if err != nil {
 		return err
@@ -126,7 +122,6 @@ func (acts *AccountService) Reload(_ chan struct{}) (err error) {
 func (acts *AccountService) Shutdown() (err error) {
 	acts.Lock()
 	close(acts.stopChan)
-	acts.acts.Shutdown()
 	acts.acts = nil
 	acts.Unlock()
 	acts.cl.RpcUnregisterName(utils.AccountSv1)

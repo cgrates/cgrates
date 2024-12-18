@@ -245,10 +245,8 @@ func (tS *ThresholdS) StartLoop(ctx *context.Context) {
 
 // Shutdown is called to shutdown the service
 func (tS *ThresholdS) Shutdown(ctx *context.Context) {
-	utils.Logger.Info("<ThresholdS> shutdown initialized")
 	close(tS.stopBackup)
 	tS.storeThresholds(ctx)
-	utils.Logger.Info("<ThresholdS> shutdown complete")
 }
 
 // backup will regularly store thresholds changed to dataDB

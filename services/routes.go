@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -93,8 +92,6 @@ func (routeS *RouteService) Start(shutdown chan struct{}) (err error) {
 	routeS.Lock()
 	defer routeS.Unlock()
 	routeS.routeS = engine.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, routeS.connMgr)
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.RouteS))
 	srv, _ := engine.NewService(routeS.routeS)
 	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
 	if !routeS.cfg.DispatcherSCfg().Enabled {
@@ -116,7 +113,6 @@ func (routeS *RouteService) Reload(_ chan struct{}) (err error) {
 func (routeS *RouteService) Shutdown() (err error) {
 	routeS.Lock()
 	defer routeS.Unlock()
-	routeS.routeS.Shutdown() //we don't verify the error because shutdown never returns an error
 	routeS.routeS = nil
 	routeS.cl.RpcUnregisterName(utils.RouteSv1)
 	return

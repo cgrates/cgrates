@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -87,7 +86,6 @@ func (es *EventExporterService) Reload(_ chan struct{}) error {
 func (es *EventExporterService) Shutdown() error {
 	es.mu.Lock()
 	defer es.mu.Unlock()
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.EEs))
 	es.eeS.ClearExporterCache()
 	es.eeS = nil
 	es.cl.RpcUnregisterName(utils.EeSv1)
@@ -113,8 +111,6 @@ func (es *EventExporterService) Start(_ chan struct{}) error {
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), es.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.EEs, utils.AnalyzerS, utils.StateServiceUP)
 	}
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EEs))
 
 	es.mu.Lock()
 	defer es.mu.Unlock()

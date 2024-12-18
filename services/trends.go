@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -98,7 +97,6 @@ func (trs *TrendService) Start(shutdown chan struct{}) (err error) {
 	trs.Lock()
 	defer trs.Unlock()
 	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), trs.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TrendS))
 	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
 	}
