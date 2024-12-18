@@ -80,7 +80,7 @@ func (s *ConfigService) Shutdown() error {
 
 // IsRunning returns whether the service is running or not.
 func (s *ConfigService) IsRunning() bool {
-	return CheckServiceState(s.ServiceName(), utils.StateServiceUP, s.srvIndexer)
+	return IsServiceInState(s.ServiceName(), utils.StateServiceUP, s.srvIndexer)
 }
 
 // ServiceName returns the service name

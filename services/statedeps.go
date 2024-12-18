@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/servmanager"
 )
@@ -47,9 +49,40 @@ func (sDs *StateDependencies) StateChan(stateID string) (retChan chan struct{}) 
 	return
 }
 
-func CheckServiceState(id, state string, indexer *servmanager.ServiceIndexer) bool {
+// waitForServicesToReachState ensures each service reaches the desired state, with the timeout applied individually per service.
+// Returns a map of service names to their instances or an error if any service fails to reach its state within its timeout window.
+func waitForServicesToReachState(state string, serviceIDs []string, indexer *servmanager.ServiceIndexer, timeout time.Duration,
+) (map[string]servmanager.Service, error) {
+	services := make(map[string]servmanager.Service, len(serviceIDs))
+	for _, serviceID := range serviceIDs {
+		srv, err := waitForServiceState(state, serviceID, indexer, timeout)
+		if err != nil {
+			return nil, err
+		}
+		services[srv.ServiceName()] = srv
+
+	}
+	return services, nil
+}
+
+// waitForServiceState waits up to timeout duration for a service to reach the specified state.
+// Returns the service instance or an error if the timeout is exceeded.
+func waitForServiceState(state, serviceID string, indexer *servmanager.ServiceIndexer, timeout time.Duration,
+) (servmanager.Service, error) {
+	srv := indexer.GetService(serviceID)
 	select {
-	case <-indexer.GetService(id).StateChan(state):
+	case <-srv.StateChan(state):
+		return srv, nil
+	case <-time.After(timeout):
+		return nil, fmt.Errorf("timed out waiting for service %q state %q", serviceID, state)
+	}
+}
+
+// IsServiceInState performs a non-blocking check to determine if a service is in the specified state.
+func IsServiceInState(serviceID, state string, indexer *servmanager.ServiceIndexer) bool {
+	svc := indexer.GetService(serviceID)
+	select {
+	case <-svc.StateChan(state):
 		return true
 	default:
 		return false
