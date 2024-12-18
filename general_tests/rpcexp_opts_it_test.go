@@ -90,6 +90,9 @@ func TestRPCExpIT(t *testing.T) {
 			}
 		]
 	}
+},
+"efs": {
+	"enabled": true
 }
 }`,
 		DBCfg:    engine.InternalDBCfg,

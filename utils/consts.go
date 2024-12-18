@@ -993,6 +993,7 @@ const (
 	GuardianS       = "GuardianS"
 	ServiceManagerS = "ServiceManager"
 	CommonListenerS = "CommonListenerS"
+	ConnManager     = "ConnManager"
 )
 
 // Lower service names

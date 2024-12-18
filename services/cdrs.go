@@ -22,7 +22,6 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -32,11 +31,9 @@ import (
 )
 
 // NewCDRServer returns the CDR Server
-func NewCDRServer(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *CDRService {
+func NewCDRServer(cfg *config.CGRConfig) *CDRService {
 	return &CDRService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -44,15 +41,12 @@ func NewCDRServer(cfg *config.CGRConfig,
 // CDRService implements Service interface
 type CDRService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	cdrS *cdrs.CDRServer
 	cl   *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -60,9 +54,9 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 			utils.StorDB,
 		},
 		registry, cs.cfg.GeneralCfg().ConnectTimeout)
@@ -70,15 +64,15 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 		return err
 	}
 	cs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	fs := srvDeps[utils.FilterS].(*FilterService)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
-	sdbs := srvDeps[utils.StorDB].(*StorDBService)
+	sdbs := srvDeps[utils.StorDB].(*StorDBService).DB()
 
 	cs.Lock()
 	defer cs.Unlock()
 
-	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs.FilterS(), cs.connMgr, sdbs.DB())
+	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs, cms.ConnManager(), sdbs)
 	runtime.Gosched()
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
 	if err != nil {
@@ -87,8 +81,7 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	if !cs.cfg.DispatcherSCfg().Enabled {
 		cs.cl.RpcRegister(srv)
 	}
-
-	cs.intRPCconn = anz.GetInternalCodec(srv, utils.CDRServer)
+	cms.AddInternalConn(utils.CDRServer, srv)
 	return
 }
 
@@ -119,9 +112,4 @@ func (cs *CDRService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (cs *CDRService) StateChan(stateID string) chan struct{} {
 	return cs.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (cs *CDRService) IntRPCConn() birpc.ClientConnector {
-	return cs.intRPCconn
 }

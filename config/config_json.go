@@ -115,7 +115,7 @@ var (
 		ActionSJSON:         utils.ActionS,
 		CoreSJSON:           utils.CoreS,
 		TPeSJSON:            utils.TPeS,
-		RPCConnsJSON:        RPCConnsJSON,
+		RPCConnsJSON:        utils.ConnManager,
 	}
 )
 

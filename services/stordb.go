@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -41,14 +40,11 @@ func NewStorDBService(cfg *config.CGRConfig, setVersions bool) *StorDBService {
 // StorDBService implements Service interface
 type StorDBService struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	oldDBCfg *config.StorDbCfg
-
+	cfg         *config.CGRConfig
+	oldDBCfg    *config.StorDbCfg
 	db          engine.StorDB
 	setVersions bool
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps   *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -176,9 +172,4 @@ func (db *StorDBService) DB() engine.StorDB {
 // StateChan returns signaling channel of specific state
 func (db *StorDBService) StateChan(stateID string) chan struct{} {
 	return db.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (db *StorDBService) IntRPCConn() birpc.ClientConnector {
-	return db.intRPCconn
 }

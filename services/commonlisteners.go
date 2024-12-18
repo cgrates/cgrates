@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -41,15 +40,11 @@ func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps) *CommonL
 
 // CommonListenerService implements Service interface.
 type CommonListenerService struct {
-	mu sync.RWMutex
-
-	cls *commonlisteners.CommonListenerS
-
-	caps *engine.Caps
-	cfg  *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	cls       *commonlisteners.CommonListenerS
+	caps      *engine.Caps
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
@@ -92,11 +87,6 @@ func (cl *CommonListenerService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (cl *CommonListenerService) StateChan(stateID string) chan struct{} {
 	return cl.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (cl *CommonListenerService) IntRPCConn() birpc.ClientConnector {
-	return cl.intRPCconn
 }
 
 // CLS returns the CommonListenerS object.

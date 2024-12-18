@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
@@ -31,11 +30,9 @@ import (
 )
 
 // NewDispatcherService returns the Dispatcher Service
-func NewDispatcherService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *DispatcherService {
+func NewDispatcherService(cfg *config.CGRConfig) *DispatcherService {
 	return &DispatcherService{
 		cfg:        cfg,
-		connMgr:    connMgr,
 		srvsReload: make(map[string]chan struct{}),
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
@@ -44,16 +41,12 @@ func NewDispatcherService(cfg *config.CGRConfig,
 // DispatcherService implements Service interface
 type DispatcherService struct {
 	sync.RWMutex
-
-	dspS *dispatchers.DispatcherService
-	cl   *commonlisteners.CommonListenerS
-
-	connMgr    *engine.ConnManager
 	cfg        *config.CGRConfig
+	dspS       *dispatchers.DispatcherService
+	cl         *commonlisteners.CommonListenerS
+	connMgr    *engine.ConnManager
 	srvsReload map[string]chan struct{}
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps  *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -61,16 +54,19 @@ func (dspS *DispatcherService) Start(shutdown *utils.SyncedChan, registry *servm
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
+			utils.AttributeS,
 		},
 		registry, dspS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	dspS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	dspS.connMgr = cms.ConnManager()
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheDispatcherProfiles,
@@ -80,7 +76,6 @@ func (dspS *DispatcherService) Start(shutdown *utils.SyncedChan, registry *servm
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	dspS.Lock()
 	defer dspS.Unlock()
@@ -98,7 +93,7 @@ func (dspS *DispatcherService) Start(shutdown *utils.SyncedChan, registry *servm
 	// for the moment we dispable Apier through dispatcher
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
-	dspS.intRPCconn = anz.GetInternalCodec(srv, utils.DispatcherS)
+	cms.AddInternalConn(utils.DispatcherS, srv)
 	return
 }
 
@@ -161,9 +156,4 @@ func (dspS *DispatcherService) sync() {
 // StateChan returns signaling channel of specific state
 func (dspS *DispatcherService) StateChan(stateID string) chan struct{} {
 	return dspS.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (dspS *DispatcherService) IntRPCConn() birpc.ClientConnector {
-	return dspS.intRPCconn
 }

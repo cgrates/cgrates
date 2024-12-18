@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
@@ -31,27 +30,22 @@ import (
 )
 
 // NewEventExporterService constructs EventExporterService
-func NewEventExporterService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *EventExporterService {
+func NewEventExporterService(cfg *config.CGRConfig) *EventExporterService {
 	return &EventExporterService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // EventExporterService is the service structure for EventExporterS
 type EventExporterService struct {
-	mu sync.RWMutex
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
 
 	eeS *ees.EeS
 	cl  *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name
@@ -87,21 +81,21 @@ func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.FilterS,
-			utils.AnalyzerS,
 		},
 		registry, es.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	es.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	fs := srvDeps[utils.FilterS].(*FilterService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
 	es.mu.Lock()
 	defer es.mu.Unlock()
 
-	es.eeS, err = ees.NewEventExporterS(es.cfg, fs.FilterS(), es.connMgr)
+	es.eeS, err = ees.NewEventExporterS(es.cfg, fs, cms.ConnManager())
 	if err != nil {
 		return err
 	}
@@ -111,17 +105,11 @@ func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager
 	if !es.cfg.DispatcherSCfg().Enabled {
 		es.cl.RpcRegister(srv)
 	}
-
-	es.intRPCconn = anz.GetInternalCodec(srv, utils.EEs)
+	cms.AddInternalConn(utils.EEs, srv)
 	return nil
 }
 
 // StateChan returns signaling channel of specific state
 func (es *EventExporterService) StateChan(stateID string) chan struct{} {
 	return es.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (es *EventExporterService) IntRPCConn() birpc.ClientConnector {
-	return es.intRPCconn
 }

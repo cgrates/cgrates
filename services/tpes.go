@@ -24,17 +24,15 @@ import (
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/tpes"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewTPeService is the constructor for the TpeService
-func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *TPeService {
+func NewTPeService(cfg *config.CGRConfig) *TPeService {
 	return &TPeService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -42,17 +40,12 @@ func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *TPeServi
 // TypeService implements Service interface
 type TPeService struct {
 	sync.RWMutex
-
-	tpes *tpes.TPeS
-	cl   *commonlisteners.CommonListenerS
-	srv  *birpc.Service
-
-	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	cfg       *config.CGRConfig
+	tpes      *tpes.TPeS
+	cl        *commonlisteners.CommonListenerS
+	srv       *birpc.Service
+	stopChan  chan struct{}
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -61,6 +54,7 @@ func (ts *TPeService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.DataDB,
 		},
 		registry, ts.cfg.GeneralCfg().ConnectTimeout)
@@ -68,9 +62,10 @@ func (ts *TPeService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 		return err
 	}
 	ts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	ts.tpes = tpes.NewTPeS(ts.cfg, dbs.DataManager(), ts.connMgr)
+	ts.tpes = tpes.NewTPeS(ts.cfg, dbs, cm)
 	ts.stopChan = make(chan struct{})
 	ts.srv, _ = birpc.NewService(apis.NewTPeSv1(ts.tpes), utils.EmptyString, false)
 	ts.cl.RpcRegister(ts.srv)
@@ -102,9 +97,4 @@ func (ts *TPeService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ts *TPeService) StateChan(stateID string) chan struct{} {
 	return ts.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (ts *TPeService) IntRPCConn() birpc.ClientConnector {
-	return ts.intRPCconn
 }

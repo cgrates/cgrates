@@ -52,11 +52,11 @@ func (sDs *StateDependencies) StateChan(stateID string) (retChan chan struct{}) 
 
 // WaitForServicesToReachState ensures each service reaches the desired state, with the timeout applied individually per service.
 // Returns a map of service names to their instances or an error if any service fails to reach its state within its timeout window.
-func WaitForServicesToReachState(state string, serviceIDs []string, indexer *servmanager.ServiceRegistry, timeout time.Duration,
+func WaitForServicesToReachState(state string, serviceIDs []string, registry *servmanager.ServiceRegistry, timeout time.Duration,
 ) (map[string]servmanager.Service, error) {
 	services := make(map[string]servmanager.Service, len(serviceIDs))
 	for _, serviceID := range serviceIDs {
-		srv, err := WaitForServiceState(state, serviceID, indexer, timeout)
+		srv, err := WaitForServiceState(state, serviceID, registry, timeout)
 		if err != nil {
 			return nil, err
 		}
@@ -68,13 +68,19 @@ func WaitForServicesToReachState(state string, serviceIDs []string, indexer *ser
 
 // WaitForServiceState waits up to timeout duration for a service to reach the specified state.
 // Returns the service instance or an error if the timeout is exceeded.
-func WaitForServiceState(state, serviceID string, indexer *servmanager.ServiceRegistry, timeout time.Duration,
+func WaitForServiceState(state, serviceID string, registry *servmanager.ServiceRegistry, timeout time.Duration,
 ) (servmanager.Service, error) {
-	srv := indexer.Lookup(serviceID)
-	if serviceID == utils.AnalyzerS && !srv.ShouldRun() {
-		// Return disabled analyzer service immediately since dependent
-		// services still need the instance.
-		return srv, nil
+	srv := registry.Lookup(serviceID)
+	if !srv.ShouldRun() {
+		switch serviceID {
+		case utils.AnalyzerS:
+			// Return disabled analyzer service immediately since dependent
+			// services still need the instance.
+			return srv, nil
+		case utils.AttributeS:
+			// Don't make DispatcherS wait when AttributeS is disabled.
+			return srv, nil
+		}
 	}
 	select {
 	case <-srv.StateChan(state):

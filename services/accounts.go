@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/accounts"
 	"github.com/cgrates/cgrates/commonlisteners"
 
@@ -32,11 +31,9 @@ import (
 )
 
 // NewAccountService returns the Account Service
-func NewAccountService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *AccountService {
+func NewAccountService(cfg *config.CGRConfig) *AccountService {
 	return &AccountService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		rldChan:   make(chan struct{}, 1),
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
@@ -45,17 +42,15 @@ func NewAccountService(cfg *config.CGRConfig,
 // AccountService implements Service interface
 type AccountService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	acts *accounts.AccountS
 	cl   *commonlisteners.CommonListenerS
 
 	rldChan  chan struct{}
 	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -63,29 +58,29 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, acts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	acts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheAccounts,
 		utils.CacheAccountsFilterIndexes); err != nil {
 		return err
 	}
-	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
 	acts.Lock()
 	defer acts.Unlock()
-	acts.acts = accounts.NewAccountS(acts.cfg, fs.FilterS(), acts.connMgr, dbs.DataManager())
+	acts.acts = accounts.NewAccountS(acts.cfg, fs, cms.ConnManager(), dbs)
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
 	srv, err := engine.NewServiceWithPing(acts.acts, utils.AccountSv1, utils.V1Prfx)
@@ -97,7 +92,7 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 		acts.cl.RpcRegister(srv)
 	}
 
-	acts.intRPCconn = anz.GetInternalCodec(srv, utils.AccountS)
+	cms.AddInternalConn(utils.AccountS, srv)
 	return
 }
 
@@ -130,9 +125,4 @@ func (acts *AccountService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (acts *AccountService) StateChan(stateID string) chan struct{} {
 	return acts.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (acts *AccountService) IntRPCConn() birpc.ClientConnector {
-	return acts.intRPCconn
 }

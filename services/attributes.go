@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -43,6 +42,7 @@ func NewAttributeService(cfg *config.CGRConfig,
 // AttributeService implements Service interface
 type AttributeService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	dspS *DispatcherService
 
@@ -50,10 +50,7 @@ type AttributeService struct {
 	cl    *commonlisteners.CommonListenerS
 	rpc   *apis.AttributeSv1 // useful on restart
 
-	cfg *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies
+	stateDeps *StateDependencies
 }
 
 // Start should handle the service start
@@ -61,16 +58,17 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, attrS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
 	attrS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheAttributeProfiles,
@@ -79,7 +77,6 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	attrS.Lock()
 	defer attrS.Unlock()
@@ -104,8 +101,7 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 
 		}
 	}()
-
-	attrS.intRPCconn = anz.GetInternalCodec(srv, utils.AttributeS)
+	cms.AddInternalConn(utils.AttributeS, srv)
 	return
 }
 
@@ -138,9 +134,4 @@ func (attrS *AttributeService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (attrS *AttributeService) StateChan(stateID string) chan struct{} {
 	return attrS.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (attrS *AttributeService) IntRPCConn() birpc.ClientConnector {
-	return attrS.intRPCconn
 }

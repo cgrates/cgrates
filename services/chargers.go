@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -30,11 +29,9 @@ import (
 )
 
 // NewChargerService returns the Charger Service
-func NewChargerService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *ChargerService {
+func NewChargerService(cfg *config.CGRConfig) *ChargerService {
 	return &ChargerService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -42,15 +39,12 @@ func NewChargerService(cfg *config.CGRConfig,
 // ChargerService implements Service interface
 type ChargerService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	chrS *engine.ChargerS
 	cl   *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -58,16 +52,17 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, chrS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	chrS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheChargerProfiles,
@@ -76,11 +71,10 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	chrS.Lock()
 	defer chrS.Unlock()
-	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, chrS.connMgr)
+	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(chrS.chrS)
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
 	if !chrS.cfg.DispatcherSCfg().Enabled {
@@ -88,8 +82,7 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 			chrS.cl.RpcRegister(s)
 		}
 	}
-
-	chrS.intRPCconn = anz.GetInternalCodec(srv, utils.ChargerS)
+	cms.AddInternalConn(utils.ChargerS, srv)
 	return nil
 }
 
@@ -120,9 +113,4 @@ func (chrS *ChargerService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (chrS *ChargerService) StateChan(stateID string) chan struct{} {
 	return chrS.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (chrS *ChargerService) IntRPCConn() birpc.ClientConnector {
-	return chrS.intRPCconn
 }

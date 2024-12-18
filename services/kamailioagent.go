@@ -23,20 +23,16 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewKamailioAgent returns the Kamailio Agent
-func NewKamailioAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *KamailioAgent {
+func NewKamailioAgent(cfg *config.CGRConfig) *KamailioAgent {
 	return &KamailioAgent{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -44,21 +40,22 @@ func NewKamailioAgent(cfg *config.CGRConfig,
 // KamailioAgent implements Agent interface
 type KamailioAgent struct {
 	sync.RWMutex
-	cfg *config.CGRConfig
-
-	kam     *agents.KamailioAgent
-	connMgr *engine.ConnManager
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	cfg       *config.CGRConfig
+	kam       *agents.KamailioAgent
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (kam *KamailioAgent) Start(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (kam *KamailioAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, kam.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
+	}
+
 	kam.Lock()
 	defer kam.Unlock()
 
-	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), kam.connMgr,
+	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), cms.(*ConnManagerService).ConnManager(),
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 
 	go kam.connect(kam.kam, shutdown)
@@ -111,9 +108,4 @@ func (kam *KamailioAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (kam *KamailioAgent) StateChan(stateID string) chan struct{} {
 	return kam.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (kam *KamailioAgent) IntRPCConn() birpc.ClientConnector {
-	return kam.intRPCconn
 }

@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -30,11 +29,10 @@ import (
 )
 
 // NewDataDBService returns the DataDB Service
-func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVersions bool,
+func NewDataDBService(cfg *config.CGRConfig, setVersions bool,
 	srvDep map[string]*sync.WaitGroup) *DataDBService {
 	return &DataDBService{
 		cfg:         cfg,
-		connMgr:     connMgr,
 		setVersions: setVersions,
 		srvDep:      srvDep,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
@@ -44,21 +42,20 @@ func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVer
 // DataDBService implements Service interface
 type DataDBService struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	oldDBCfg *config.DataDbCfg
-	connMgr  *engine.ConnManager
-
+	cfg         *config.CGRConfig
+	oldDBCfg    *config.DataDbCfg
 	dm          *engine.DataManager
 	setVersions bool
-
-	srvDep map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	srvDep      map[string]*sync.WaitGroup
+	stateDeps   *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (db *DataDBService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, db.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
+	}
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
@@ -71,7 +68,7 @@ func (db *DataDBService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegist
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
-	db.dm = engine.NewDataManager(dbConn, db.cfg.CacheCfg(), db.connMgr)
+	db.dm = engine.NewDataManager(dbConn, db.cfg.CacheCfg(), cms.(*ConnManagerService).ConnManager())
 
 	if db.setVersions {
 		err = engine.OverwriteDBVersions(dbConn)
@@ -175,9 +172,4 @@ func (db *DataDBService) DataManager() *engine.DataManager {
 // StateChan returns signaling channel of specific state
 func (db *DataDBService) StateChan(stateID string) chan struct{} {
 	return db.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (db *DataDBService) IntRPCConn() birpc.ClientConnector {
-	return db.intRPCconn
 }

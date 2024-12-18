@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -32,13 +31,10 @@ import (
 )
 
 // NewEventReaderService returns the EventReader Service
-func NewEventReaderService(
-	cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *EventReaderService {
+func NewEventReaderService(cfg *config.CGRConfig) *EventReaderService {
 	return &EventReaderService{
 		rldChan:   make(chan struct{}, 1),
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -46,17 +42,15 @@ func NewEventReaderService(
 // EventReaderService implements Service interface
 type EventReaderService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	ers *ers.ERService
 	cl  *commonlisteners.CommonListenerS
 
 	rldChan  chan struct{}
 	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -64,16 +58,16 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.FilterS,
-			utils.AnalyzerS,
 		},
 		registry, erS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	erS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	erS.Lock()
 	defer erS.Unlock()
@@ -82,7 +76,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	erS.stopChan = make(chan struct{})
 
 	// build the service
-	erS.ers = ers.NewERService(erS.cfg, fs.FilterS(), erS.connMgr)
+	erS.ers = ers.NewERService(erS.cfg, fs.FilterS(), cms.ConnManager())
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shutdown)
 
 	srv, err := engine.NewServiceWithPing(erS.ers, utils.ErSv1, utils.V1Prfx)
@@ -92,7 +86,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	if !erS.cfg.DispatcherSCfg().Enabled {
 		erS.cl.RpcRegister(srv)
 	}
-	erS.intRPCconn = anz.GetInternalCodec(srv, utils.ERs)
+	cms.AddInternalConn(utils.ERs, srv)
 	return
 }
 
@@ -135,9 +129,4 @@ func (erS *EventReaderService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (erS *EventReaderService) StateChan(stateID string) chan struct{} {
 	return erS.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (erS *EventReaderService) IntRPCConn() birpc.ClientConnector {
-	return erS.intRPCconn
 }

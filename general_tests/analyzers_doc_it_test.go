@@ -122,7 +122,7 @@ func TestAnzDocIT(t *testing.T) {
 	anzStringQuery(t, client, 7, "", "*lte:~*hdr.RequestID:2")
 	anzStringQuery(t, client, -1, "", "*gt:~*hdr.RequestDuration:1ms")
 	anzStringQuery(t, client, 1, `+RequestMethod:"AttributeSv1.ProcessEvent"`, "*notstring:~*rep.Event.Cost:0")
-	anzStringQuery(t, client, 1, `+RequestMethod:"CoreSv1.Status"`, "*gt:~*rep.goroutines:55")
+	anzStringQuery(t, client, 1, `+RequestMethod:"CoreSv1.Status"`, "*gt:~*rep.goroutines:47")
 }
 
 // anzStringQuery sends an AnalyzerSv1.StringQuery request. First filter represents

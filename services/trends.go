@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -32,11 +31,9 @@ import (
 
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) *TrendService {
 	return &TrendService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		srvDep:    srvDep,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
@@ -44,16 +41,13 @@ func NewTrendService(cfg *config.CGRConfig,
 
 type TrendService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	trs *engine.TrendS
 	cl  *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	srvDep    map[string]*sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -63,16 +57,17 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, trs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	trs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheTrendProfiles,
@@ -81,11 +76,10 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	trs.Lock()
 	defer trs.Unlock()
-	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), trs.connMgr)
+	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), cms.ConnManager())
 	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
 	}
@@ -98,7 +92,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 			trs.cl.RpcRegister(s)
 		}
 	}
-	trs.intRPCconn = anz.GetInternalCodec(srv, utils.Trends)
+	cms.AddInternalConn(utils.TrendS, srv)
 	return nil
 }
 
@@ -134,9 +128,4 @@ func (trs *TrendService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (trs *TrendService) StateChan(stateID string) chan struct{} {
 	return trs.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (trs *TrendService) IntRPCConn() birpc.ClientConnector {
-	return trs.intRPCconn
 }
