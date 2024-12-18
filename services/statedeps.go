@@ -51,7 +51,7 @@ func (sDs *StateDependencies) StateChan(stateID string) (retChan chan struct{}) 
 
 // waitForServicesToReachState ensures each service reaches the desired state, with the timeout applied individually per service.
 // Returns a map of service names to their instances or an error if any service fails to reach its state within its timeout window.
-func waitForServicesToReachState(state string, serviceIDs []string, indexer *servmanager.ServiceIndexer, timeout time.Duration,
+func waitForServicesToReachState(state string, serviceIDs []string, indexer *servmanager.ServiceRegistry, timeout time.Duration,
 ) (map[string]servmanager.Service, error) {
 	services := make(map[string]servmanager.Service, len(serviceIDs))
 	for _, serviceID := range serviceIDs {
@@ -67,9 +67,9 @@ func waitForServicesToReachState(state string, serviceIDs []string, indexer *ser
 
 // waitForServiceState waits up to timeout duration for a service to reach the specified state.
 // Returns the service instance or an error if the timeout is exceeded.
-func waitForServiceState(state, serviceID string, indexer *servmanager.ServiceIndexer, timeout time.Duration,
+func waitForServiceState(state, serviceID string, indexer *servmanager.ServiceRegistry, timeout time.Duration,
 ) (servmanager.Service, error) {
-	srv := indexer.GetService(serviceID)
+	srv := indexer.Lookup(serviceID)
 	select {
 	case <-srv.StateChan(state):
 		return srv, nil
@@ -79,8 +79,8 @@ func waitForServiceState(state, serviceID string, indexer *servmanager.ServiceIn
 }
 
 // IsServiceInState performs a non-blocking check to determine if a service is in the specified state.
-func IsServiceInState(serviceID, state string, indexer *servmanager.ServiceIndexer) bool {
-	svc := indexer.GetService(serviceID)
+func IsServiceInState(serviceID, state string, indexer *servmanager.ServiceRegistry) bool {
+	svc := indexer.Lookup(serviceID)
 	select {
 	case <-svc.StateChan(state):
 		return true

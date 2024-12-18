@@ -30,7 +30,7 @@ import (
 
 // NewFilterService instantiates a new FilterService.
 func NewFilterService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *FilterService {
+	srvIndexer *servmanager.ServiceRegistry) *FilterService {
 	return &FilterService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -48,9 +48,9 @@ type FilterService struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start handles the service start.

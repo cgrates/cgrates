@@ -32,7 +32,7 @@ import (
 // NewDataDBService returns the DataDB Service
 func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVersions bool,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) *DataDBService {
+	srvIndexer *servmanager.ServiceRegistry) *DataDBService {
 	return &DataDBService{
 		cfg:         cfg,
 		connMgr:     connMgr,
@@ -55,9 +55,9 @@ type DataDBService struct {
 
 	srvDep map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start handles the service start.

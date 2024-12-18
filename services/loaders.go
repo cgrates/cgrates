@@ -33,7 +33,7 @@ import (
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *LoaderService {
+	srvIndexer *servmanager.ServiceRegistry) *LoaderService {
 	return &LoaderService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -54,9 +54,9 @@ type LoaderService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -106,11 +106,11 @@ func (ldrs *LoaderService) Start(_ chan struct{}) (err error) {
 
 // Reload handles the change of config
 func (ldrs *LoaderService) Reload(_ chan struct{}) error {
-	fs := ldrs.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	fs := ldrs.srvIndexer.Lookup(utils.FilterS).(*FilterService)
 	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.FilterS, utils.StateServiceUP)
 	}
-	dbs := ldrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
+	dbs := ldrs.srvIndexer.Lookup(utils.DataDB).(*DataDBService)
 	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.DataDB, utils.StateServiceUP)
 	}

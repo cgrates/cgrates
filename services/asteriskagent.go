@@ -34,7 +34,7 @@ import (
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *AsteriskAgent {
+	srvIndexer *servmanager.ServiceRegistry) *AsteriskAgent {
 	return &AsteriskAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -52,9 +52,9 @@ type AsteriskAgent struct {
 	smas    []*agents.AsteriskAgent
 	connMgr *engine.ConnManager
 
-	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // share the API object implementing API calls for internal
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start

@@ -128,49 +128,49 @@ func runCGREngine(fs []string) (err error) {
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager), utils.ServiceManagerV1, iServeManagerCh)
 
 	// ServiceIndexer will share service references to all services
-	srvIdxr := servmanager.NewServiceIndexer()
-	gvS := services.NewGlobalVarS(cfg, srvIdxr)
-	dmS := services.NewDataDBService(cfg, connMgr, *flags.SetVersions, srvDep, srvIdxr)
-	sdbS := services.NewStorDBService(cfg, *flags.SetVersions, srvIdxr)
-	cls := services.NewCommonListenerService(cfg, caps, srvIdxr)
-	anzS := services.NewAnalyzerService(cfg, srvIdxr)
-	configS := services.NewConfigService(cfg, srvIdxr)
-	guardianS := services.NewGuardianService(cfg, srvIdxr)
-	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg, srvIdxr)
-	cacheS := services.NewCacheService(cfg, connMgr, srvIdxr)
-	fltrS := services.NewFilterService(cfg, connMgr, srvIdxr)
-	dspS := services.NewDispatcherService(cfg, connMgr, srvIdxr)
-	ldrs := services.NewLoaderService(cfg, connMgr, srvIdxr)
-	efs := services.NewExportFailoverService(cfg, connMgr, srvIdxr)
-	adminS := services.NewAdminSv1Service(cfg, connMgr, srvIdxr)
-	sessionS := services.NewSessionService(cfg, connMgr, srvIdxr)
-	attrS := services.NewAttributeService(cfg, dspS, srvIdxr)
-	chrgS := services.NewChargerService(cfg, connMgr, srvIdxr)
-	routeS := services.NewRouteService(cfg, connMgr, srvIdxr)
-	resourceS := services.NewResourceService(cfg, connMgr, srvDep, srvIdxr)
-	trendS := services.NewTrendService(cfg, connMgr, srvDep, srvIdxr)
-	rankingS := services.NewRankingService(cfg, connMgr, srvDep, srvIdxr)
-	thS := services.NewThresholdService(cfg, connMgr, srvDep, srvIdxr)
-	stS := services.NewStatService(cfg, connMgr, srvDep, srvIdxr)
-	erS := services.NewEventReaderService(cfg, connMgr, srvIdxr)
-	dnsAgent := services.NewDNSAgent(cfg, connMgr, srvIdxr)
-	fsAgent := services.NewFreeswitchAgent(cfg, connMgr, srvIdxr)
-	kamAgent := services.NewKamailioAgent(cfg, connMgr, srvIdxr)
-	janusAgent := services.NewJanusAgent(cfg, connMgr, srvIdxr)
-	astAgent := services.NewAsteriskAgent(cfg, connMgr, srvIdxr)
-	radAgent := services.NewRadiusAgent(cfg, connMgr, srvIdxr)
-	diamAgent := services.NewDiameterAgent(cfg, connMgr, caps, srvIdxr)
-	httpAgent := services.NewHTTPAgent(cfg, connMgr, srvIdxr)
-	sipAgent := services.NewSIPAgent(cfg, connMgr, srvIdxr)
-	eeS := services.NewEventExporterService(cfg, connMgr, srvIdxr)
-	cdrS := services.NewCDRServer(cfg, connMgr, srvIdxr)
-	registrarcS := services.NewRegistrarCService(cfg, connMgr, srvIdxr)
-	rateS := services.NewRateService(cfg, srvIdxr)
-	actionS := services.NewActionService(cfg, connMgr, srvIdxr)
-	accS := services.NewAccountService(cfg, connMgr, srvIdxr)
-	tpeS := services.NewTPeService(cfg, connMgr, srvIdxr)
+	registry := servmanager.NewServiceRegistry()
+	gvS := services.NewGlobalVarS(cfg, registry)
+	dmS := services.NewDataDBService(cfg, connMgr, *flags.SetVersions, srvDep, registry)
+	sdbS := services.NewStorDBService(cfg, *flags.SetVersions, registry)
+	cls := services.NewCommonListenerService(cfg, caps, registry)
+	anzS := services.NewAnalyzerService(cfg, registry)
+	configS := services.NewConfigService(cfg, registry)
+	guardianS := services.NewGuardianService(cfg, registry)
+	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg, registry)
+	cacheS := services.NewCacheService(cfg, connMgr, registry)
+	fltrS := services.NewFilterService(cfg, connMgr, registry)
+	dspS := services.NewDispatcherService(cfg, connMgr, registry)
+	ldrs := services.NewLoaderService(cfg, connMgr, registry)
+	efs := services.NewExportFailoverService(cfg, connMgr, registry)
+	adminS := services.NewAdminSv1Service(cfg, connMgr, registry)
+	sessionS := services.NewSessionService(cfg, connMgr, registry)
+	attrS := services.NewAttributeService(cfg, dspS, registry)
+	chrgS := services.NewChargerService(cfg, connMgr, registry)
+	routeS := services.NewRouteService(cfg, connMgr, registry)
+	resourceS := services.NewResourceService(cfg, connMgr, srvDep, registry)
+	trendS := services.NewTrendService(cfg, connMgr, srvDep, registry)
+	rankingS := services.NewRankingService(cfg, connMgr, srvDep, registry)
+	thS := services.NewThresholdService(cfg, connMgr, srvDep, registry)
+	stS := services.NewStatService(cfg, connMgr, srvDep, registry)
+	erS := services.NewEventReaderService(cfg, connMgr, registry)
+	dnsAgent := services.NewDNSAgent(cfg, connMgr, registry)
+	fsAgent := services.NewFreeswitchAgent(cfg, connMgr, registry)
+	kamAgent := services.NewKamailioAgent(cfg, connMgr, registry)
+	janusAgent := services.NewJanusAgent(cfg, connMgr, registry)
+	astAgent := services.NewAsteriskAgent(cfg, connMgr, registry)
+	radAgent := services.NewRadiusAgent(cfg, connMgr, registry)
+	diamAgent := services.NewDiameterAgent(cfg, connMgr, caps, registry)
+	httpAgent := services.NewHTTPAgent(cfg, connMgr, registry)
+	sipAgent := services.NewSIPAgent(cfg, connMgr, registry)
+	eeS := services.NewEventExporterService(cfg, connMgr, registry)
+	cdrS := services.NewCDRServer(cfg, connMgr, registry)
+	registrarcS := services.NewRegistrarCService(cfg, connMgr, registry)
+	rateS := services.NewRateService(cfg, registry)
+	actionS := services.NewActionService(cfg, connMgr, registry)
+	accS := services.NewAccountService(cfg, connMgr, registry)
+	tpeS := services.NewTPeService(cfg, connMgr, registry)
 
-	srvManager := servmanager.NewServiceManager(shdWg, connMgr, cfg, srvIdxr, []servmanager.Service{
+	srvManager := servmanager.NewServiceManager(shdWg, connMgr, cfg, registry, []servmanager.Service{
 		gvS,
 		dmS,
 		sdbS,
@@ -243,16 +243,16 @@ func runCGREngine(fs []string) (err error) {
 	}()
 
 	srvManager.StartServices(shutdown)
-	cgrInitServiceManagerV1(iServeManagerCh, cfg, srvManager, srvIdxr)
+	cgrInitServiceManagerV1(iServeManagerCh, cfg, srvManager, registry)
 
 	if *flags.Preload != utils.EmptyString {
-		if err = cgrRunPreload(cfg, *flags.Preload, srvIdxr); err != nil {
+		if err = cgrRunPreload(cfg, *flags.Preload, registry); err != nil {
 			return
 		}
 	}
 
 	// Serve rpc connections
-	cgrStartRPC(cfg, srvIdxr, shutdown)
+	cgrStartRPC(cfg, registry, shutdown)
 
 	// TODO: find a better location for this if block
 	if *flags.MemPrfDir != "" {
@@ -272,12 +272,12 @@ func runCGREngine(fs []string) (err error) {
 
 // TODO: merge with LoaderService
 func cgrRunPreload(cfg *config.CGRConfig, loaderIDs string,
-	sIdxr *servmanager.ServiceIndexer) (err error) {
+	registry *servmanager.ServiceRegistry) (err error) {
 	if !cfg.LoaderCfg().Enabled() {
 		err = fmt.Errorf("<%s> not enabled but required by preload mechanism", utils.LoaderS)
 		return
 	}
-	loader := sIdxr.GetService(utils.LoaderS).(*services.LoaderService)
+	loader := registry.Lookup(utils.LoaderS).(*services.LoaderService)
 	if utils.StructChanTimeout(loader.StateChan(utils.StateServiceUP), cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.PreloadCgr, utils.LoaderS, utils.StateServiceUP)
 	}
@@ -298,13 +298,13 @@ func cgrRunPreload(cfg *config.CGRConfig, loaderIDs string,
 }
 
 func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector, cfg *config.CGRConfig,
-	srvMngr *servmanager.ServiceManager, srvIndexer *servmanager.ServiceIndexer) {
-	cls := srvIndexer.GetService(utils.CommonListenerS).(*services.CommonListenerService)
+	srvMngr *servmanager.ServiceManager, registry *servmanager.ServiceRegistry) {
+	cls := registry.Lookup(utils.CommonListenerS).(*services.CommonListenerService)
 	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cfg.GeneralCfg().ConnectTimeout) {
 		return
 	}
 	cl := cls.CLS()
-	anz := srvIndexer.GetService(utils.AnalyzerS).(*services.AnalyzerService)
+	anz := registry.Lookup(utils.AnalyzerS).(*services.AnalyzerService)
 	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cfg.GeneralCfg().ConnectTimeout) {
 		return
 	}
@@ -315,15 +315,15 @@ func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector, cfg *config
 	iServMngrCh <- anz.GetInternalCodec(srv, utils.ServiceManager)
 }
 
-func cgrStartRPC(cfg *config.CGRConfig, sIdxr *servmanager.ServiceIndexer, shutdown chan struct{}) {
+func cgrStartRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown chan struct{}) {
 	if cfg.DispatcherSCfg().Enabled { // wait only for dispatcher as cache is allways registered before this
 		if utils.StructChanTimeout(
-			sIdxr.GetService(utils.DispatcherS).StateChan(utils.StateServiceUP),
+			registry.Lookup(utils.DispatcherS).StateChan(utils.StateServiceUP),
 			cfg.GeneralCfg().ConnectTimeout) {
 			return
 		}
 	}
-	cl := sIdxr.GetService(utils.CommonListenerS).(*services.CommonListenerService).CLS()
+	cl := registry.Lookup(utils.CommonListenerS).(*services.CommonListenerService).CLS()
 	cl.StartServer(cfg, shutdown)
 }
 
