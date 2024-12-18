@@ -74,7 +74,7 @@ func (gv *GlobalVarS) Shutdown() error {
 
 // IsRunning returns if the service is running
 func (gv *GlobalVarS) IsRunning() bool {
-	return true
+	return CheckServiceState(gv.ServiceName(), utils.StateServiceUP, gv.srvIndexer)
 }
 
 // ServiceName returns the service name
