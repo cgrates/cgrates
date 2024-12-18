@@ -101,7 +101,7 @@ func (cS *CacheService) Shutdown() (_ error) {
 
 // IsRunning returns if the service is running
 func (cS *CacheService) IsRunning() bool {
-	return CheckServiceState(cS.ServiceName(), utils.StateServiceUP, cS.srvIndexer)
+	return IsServiceInState(cS.ServiceName(), utils.StateServiceUP, cS.srvIndexer)
 }
 
 // ServiceName returns the service name
