@@ -303,6 +303,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 
+	var ignoredRPIDs utils.StringSet
 	if rtPRf, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -312,7 +313,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != nil {
+		}, false, ignoredRPIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtPRf, rpp) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rpp), utils.ToJSON(rtPRf))
@@ -327,7 +328,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  2002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != utils.ErrNotFound {
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
@@ -339,7 +340,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  2002,
 				utils.AnswerTime:   t1.Add(10 * time.Second),
 			},
-		}, false); err != utils.ErrNotFound {
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
@@ -351,7 +352,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != utils.ErrNotFound {
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -364,7 +365,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != utils.ErrNotFound {
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003", "*gt:~*req.Cost{*:10"}
@@ -377,7 +378,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Cost:         1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
+		}, false, ignoredRPIDs); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
 		t.Error(err)
 	}
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003"}
@@ -392,7 +393,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != utils.ErrNoDatabaseConn {
+		}, false, ignoredRPIDs); err != utils.ErrNoDatabaseConn {
 		t.Error(err)
 	}
 
@@ -907,6 +908,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	var ignoredRPIDs utils.StringSet
 	_, err = rateS.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -916,7 +918,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   time.Date(9999, 7, 21, 10, 0, 0, 0, time.UTC).Add(-10 * time.Second),
 			},
-		}, false)
+		}, false, ignoredRPIDs)
 	expectedErr := "NOT_FOUND"
 	if err == nil || err.Error() != expectedErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedErr, err)
