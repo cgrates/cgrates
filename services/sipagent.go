@@ -22,20 +22,16 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewSIPAgent returns the sip Agent
-func NewSIPAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *SIPAgent {
+func NewSIPAgent(cfg *config.CGRConfig) *SIPAgent {
 	return &SIPAgent{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -45,30 +41,31 @@ type SIPAgent struct {
 	sync.RWMutex
 	cfg *config.CGRConfig
 
-	sip     *agents.SIPAgent
-	connMgr *engine.ConnManager
-
+	sip       *agents.SIPAgent
 	oldListen string
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (sip *SIPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
-		sip.cfg.GeneralCfg().ConnectTimeout)
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, sip.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
+	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
 	sip.Lock()
 	defer sip.Unlock()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, fs.(*FilterService).FilterS())
+	sip.sip, err = agents.NewSIPAgent(cm, sip.cfg, fs)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
-			utils.SIPAgent, err))
 		return
 	}
 	go sip.listenAndServe(shutdown)
@@ -118,9 +115,4 @@ func (sip *SIPAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (sip *SIPAgent) StateChan(stateID string) chan struct{} {
 	return sip.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (sip *SIPAgent) IntRPCConn() birpc.ClientConnector {
-	return sip.intRPCconn
 }

@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -31,10 +30,9 @@ import (
 )
 
 // NewStatService returns the Stat Service
-func NewStatService(cfg *config.CGRConfig, connMgr *engine.ConnManager, srvDep map[string]*sync.WaitGroup) *StatService {
+func NewStatService(cfg *config.CGRConfig, srvDep map[string]*sync.WaitGroup) *StatService {
 	return &StatService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		srvDep:    srvDep,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
@@ -43,16 +41,13 @@ func NewStatService(cfg *config.CGRConfig, connMgr *engine.ConnManager, srvDep m
 // StatService implements Service interface
 type StatService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	sts *engine.StatS
 	cl  *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	srvDep    map[string]*sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -62,16 +57,17 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, sts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	sts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheStatQueueProfiles,
@@ -81,11 +77,10 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	sts.Lock()
 	defer sts.Unlock()
-	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), sts.connMgr)
+	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), cms.ConnManager())
 	sts.sts.StartLoop(context.TODO())
 	srv, _ := engine.NewService(sts.sts)
 	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
@@ -94,7 +89,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 			sts.cl.RpcRegister(s)
 		}
 	}
-	sts.intRPCconn = anz.GetInternalCodec(srv, utils.StatS)
+	cms.AddInternalConn(utils.StatS, srv)
 	return
 }
 
@@ -130,9 +125,4 @@ func (sts *StatService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (sts *StatService) StateChan(stateID string) chan struct{} {
 	return sts.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (sts *StatService) IntRPCConn() birpc.ClientConnector {
-	return sts.intRPCconn
 }

@@ -44,19 +44,23 @@ func (r *ServiceRegistry) Lookup(id string) Service {
 	return r.services[id]
 }
 
-// Register adds or updates a Service using its name as the unique identifier.
-// Will overwrite existing service if name conflicts.
-func (r *ServiceRegistry) Register(s Service) {
+// Register adds or updates Services using their name as the unique identifier.
+// Will overwrite existing services if name conflicts.
+func (r *ServiceRegistry) Register(svcs ...Service) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.services[s.ServiceName()] = s
+	for _, svc := range svcs {
+		r.services[svc.ServiceName()] = svc
+	}
 }
 
-// Unregister removes a Service by ID.
-func (r *ServiceRegistry) Unregister(id string) {
+// Unregister removes Services by ID.
+func (r *ServiceRegistry) Unregister(ids ...string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	delete(r.services, id)
+	for _, id := range ids {
+		delete(r.services, id)
+	}
 }
 
 // List returns a new slice containing all registered Services.

@@ -35,8 +35,12 @@ import (
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 	anz := &AnalyzerService{
-		cfg:       cfg,
-		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
+		cfg: cfg,
+		stateDeps: NewStateDependencies([]string{
+			utils.StateServiceInit,
+			utils.StateServiceUP,
+			utils.StateServiceDOWN,
+		}),
 	}
 	return anz
 }
@@ -44,15 +48,11 @@ func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 // AnalyzerService implements Service interface
 type AnalyzerService struct {
 	sync.RWMutex
-
-	anz *analyzers.AnalyzerS
-	cl  *commonlisteners.CommonListenerS
-
-	cancelFunc context.CancelFunc
 	cfg        *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // share the API object implementing API calls for internal
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	anz        *analyzers.AnalyzerS
+	cl         *commonlisteners.CommonListenerS
+	cancelFunc context.CancelFunc
+	stateDeps  *StateDependencies // channel subscriptions for state changes
 
 }
 
@@ -70,6 +70,7 @@ func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
 		return
 	}
+	close(anz.stateDeps.StateChan(utils.StateServiceInit))
 	anzCtx, cancel := context.WithCancel(context.TODO())
 	anz.cancelFunc = cancel
 	go func(a *analyzers.AnalyzerS) {
@@ -145,9 +146,4 @@ func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string)
 // StateChan returns signaling channel of specific state
 func (anz *AnalyzerService) StateChan(stateID string) chan struct{} {
 	return anz.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (anz *AnalyzerService) IntRPCConn() birpc.ClientConnector {
-	return anz.intRPCconn
 }

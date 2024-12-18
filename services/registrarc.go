@@ -21,19 +21,16 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewRegistrarCService returns the Dispatcher Service
-func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *RegistrarCService {
+func NewRegistrarCService(cfg *config.CGRConfig) *RegistrarCService {
 	return &RegistrarCService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -41,26 +38,29 @@ func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *R
 // RegistrarCService implements Service interface
 type RegistrarCService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	dspS *registrarc.RegistrarCService
 
 	stopChan chan struct{}
 	rldChan  chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (dspS *RegistrarCService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (dspS *RegistrarCService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 
+	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, dspS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
+	}
+
 	dspS.stopChan = make(chan struct{})
 	dspS.rldChan = make(chan struct{})
-	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, dspS.connMgr)
+	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, cms.(*ConnManagerService).ConnManager())
 	go dspS.dspS.ListenAndServe(dspS.stopChan, dspS.rldChan)
 	return
 }
@@ -95,9 +95,4 @@ func (dspS *RegistrarCService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (dspS *RegistrarCService) StateChan(stateID string) chan struct{} {
 	return dspS.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (dspS *RegistrarCService) IntRPCConn() birpc.ClientConnector {
-	return dspS.intRPCconn
 }

@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -32,12 +31,10 @@ import (
 
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) *ThresholdService {
 	return &ThresholdService{
 		cfg:       cfg,
 		srvDep:    srvDep,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -45,16 +42,13 @@ func NewThresholdService(cfg *config.CGRConfig,
 // ThresholdService implements Service interface
 type ThresholdService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	thrs *engine.ThresholdS
 	cl   *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	srvDep    map[string]*sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -64,16 +58,17 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, thrs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	thrs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheThresholdProfiles,
@@ -83,11 +78,10 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	thrs.Lock()
 	defer thrs.Unlock()
-	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), thrs.connMgr)
+	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), cms.ConnManager())
 	thrs.thrs.StartLoop(context.TODO())
 	srv, _ := engine.NewService(thrs.thrs)
 	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
@@ -96,7 +90,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 			thrs.cl.RpcRegister(s)
 		}
 	}
-	thrs.intRPCconn = anz.GetInternalCodec(srv, utils.ThresholdS)
+	cms.AddInternalConn(utils.ThresholdS, srv)
 	return
 }
 
@@ -132,9 +126,4 @@ func (thrs *ThresholdService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (thrs *ThresholdService) StateChan(stateID string) chan struct{} {
 	return thrs.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (thrs *ThresholdService) IntRPCConn() birpc.ClientConnector {
-	return thrs.intRPCconn
 }

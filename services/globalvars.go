@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -37,10 +36,8 @@ func NewGlobalVarS(cfg *config.CGRConfig) *GlobalVarS {
 
 // GlobalVarS implements Agent interface
 type GlobalVarS struct {
-	cfg *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	cfg       *config.CGRConfig
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -81,9 +78,4 @@ func (gv *GlobalVarS) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (gv *GlobalVarS) StateChan(stateID string) chan struct{} {
 	return gv.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (gv *GlobalVarS) IntRPCConn() birpc.ClientConnector {
-	return gv.intRPCconn
 }

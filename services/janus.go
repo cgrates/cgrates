@@ -23,20 +23,16 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewJanusAgent returns the Janus Agent
-func NewJanusAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *JanusAgent {
+func NewJanusAgent(cfg *config.CGRConfig) *JanusAgent {
 	return &JanusAgent{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -44,6 +40,7 @@ func NewJanusAgent(cfg *config.CGRConfig,
 // JanusAgent implements Service interface
 type JanusAgent struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	jA *agents.JanusAgent
 
@@ -51,11 +48,7 @@ type JanusAgent struct {
 	// if we registerd the jandlers
 	started bool
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should jandle the sercive start
@@ -63,6 +56,7 @@ func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.FilterS,
 		},
 		registry, ja.cfg.GeneralCfg().ConnectTimeout)
@@ -70,6 +64,7 @@ func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 		return err
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	ja.Lock()
@@ -77,7 +72,7 @@ func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 		ja.Unlock()
 		return utils.ErrServiceAlreadyRunning
 	}
-	ja.jA, err = agents.NewJanusAgent(ja.cfg, ja.connMgr, fs.FilterS())
+	ja.jA, err = agents.NewJanusAgent(ja.cfg, cms.ConnManager(), fs.FilterS())
 	if err != nil {
 		return
 	}
@@ -125,9 +120,4 @@ func (ja *JanusAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ja *JanusAgent) StateChan(stateID string) chan struct{} {
 	return ja.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (ja *JanusAgent) IntRPCConn() birpc.ClientConnector {
-	return ja.intRPCconn
 }
