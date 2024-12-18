@@ -39,7 +39,7 @@ func NewTPeService(cfg *config.CGRConfig) *TPeService {
 
 // TypeService implements Service interface
 type TPeService struct {
-	sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	tpes      *tpes.TPeS
 	cl        *commonlisteners.CommonListenerS
@@ -99,4 +99,14 @@ func (ts *TPeService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ts *TPeService) StateChan(stateID string) chan struct{} {
 	return ts.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *TPeService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *TPeService) Unlock() {
+	s.mu.Unlock()
 }

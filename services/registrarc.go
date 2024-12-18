@@ -37,7 +37,7 @@ func NewRegistrarCService(cfg *config.CGRConfig) *RegistrarCService {
 
 // RegistrarCService implements Service interface
 type RegistrarCService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	dspS *registrarc.RegistrarCService
@@ -50,9 +50,6 @@ type RegistrarCService struct {
 
 // Start should handle the sercive start
 func (dspS *RegistrarCService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	dspS.Lock()
-	defer dspS.Unlock()
-
 	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, dspS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -74,11 +71,9 @@ func (dspS *RegistrarCService) Reload(_ chan struct{}, _ *servmanager.ServiceReg
 
 // Shutdown stops the service
 func (dspS *RegistrarCService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	dspS.Lock()
 	close(dspS.stopChan)
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
-	dspS.Unlock()
 	close(dspS.StateChan(utils.StateServiceDOWN))
 	return
 }
@@ -97,4 +92,14 @@ func (dspS *RegistrarCService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (dspS *RegistrarCService) StateChan(stateID string) chan struct{} {
 	return dspS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *RegistrarCService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RegistrarCService) Unlock() {
+	s.mu.Unlock()
 }

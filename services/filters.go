@@ -37,7 +37,7 @@ func NewFilterService(cfg *config.CGRConfig) *FilterService {
 
 // FilterService implements Service interface.
 type FilterService struct {
-	mu        sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	fltrS     *engine.FilterS
 	stateDeps *StateDependencies // channel subscriptions for state changes
@@ -62,9 +62,6 @@ func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.Serv
 	}
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	s.fltrS = engine.NewFilterS(s.cfg, cms.ConnManager(), dbs.DataManager())
 	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
@@ -77,8 +74,6 @@ func (s *FilterService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) 
 
 // Shutdown stops the service.
 func (s *FilterService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	s.fltrS = nil
 	close(s.stateDeps.StateChan(utils.StateServiceDOWN))
 	return nil
@@ -102,4 +97,14 @@ func (s *FilterService) StateChan(stateID string) chan struct{} {
 // FilterS returns the FilterS object.
 func (s *FilterService) FilterS() *engine.FilterS {
 	return s.fltrS
+}
+
+// Lock implements the sync.Locker interface
+func (s *FilterService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *FilterService) Unlock() {
+	s.mu.Unlock()
 }

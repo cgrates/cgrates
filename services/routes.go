@@ -38,7 +38,7 @@ func NewRouteService(cfg *config.CGRConfig) *RouteService {
 
 // RouteService implements Service interface
 type RouteService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	routeS *engine.RouteS
@@ -72,8 +72,6 @@ func (routeS *RouteService) Start(shutdown chan struct{}, registry *servmanager.
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	routeS.Lock()
-	defer routeS.Unlock()
 	routeS.routeS = engine.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(routeS.routeS)
 	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
@@ -94,8 +92,6 @@ func (routeS *RouteService) Reload(_ chan struct{}, _ *servmanager.ServiceRegist
 
 // Shutdown stops the service
 func (routeS *RouteService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	routeS.Lock()
-	defer routeS.Unlock()
 	routeS.routeS = nil
 	routeS.cl.RpcUnregisterName(utils.RouteSv1)
 	close(routeS.StateChan(utils.StateServiceDOWN))
@@ -115,4 +111,14 @@ func (routeS *RouteService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (routeS *RouteService) StateChan(stateID string) chan struct{} {
 	return routeS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *RouteService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RouteService) Unlock() {
+	s.mu.Unlock()
 }

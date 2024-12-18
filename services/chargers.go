@@ -38,7 +38,7 @@ func NewChargerService(cfg *config.CGRConfig) *ChargerService {
 
 // ChargerService implements Service interface
 type ChargerService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	chrS *engine.ChargerS
@@ -72,8 +72,6 @@ func (chrS *ChargerService) Start(shutdown chan struct{}, registry *servmanager.
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	chrS.Lock()
-	defer chrS.Unlock()
 	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(chrS.chrS)
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
@@ -94,8 +92,6 @@ func (chrS *ChargerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegist
 
 // Shutdown stops the service
 func (chrS *ChargerService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	chrS.Lock()
-	defer chrS.Unlock()
 	chrS.chrS = nil
 	chrS.cl.RpcUnregisterName(utils.ChargerSv1)
 	close(chrS.StateChan(utils.StateServiceDOWN))
@@ -115,4 +111,14 @@ func (chrS *ChargerService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (chrS *ChargerService) StateChan(stateID string) chan struct{} {
 	return chrS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *ChargerService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ChargerService) Unlock() {
+	s.mu.Unlock()
 }

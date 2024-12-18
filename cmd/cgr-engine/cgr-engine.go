@@ -112,7 +112,13 @@ func runCGREngine(fs []string) (err error) {
 		utils.FirstNonEmpty(*flags.Logger, cfg.LoggerCfg().Type),
 		cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().NodeID,
-		nil, cfg); err != nil {
+
+		// TODO: Implement LoggerService with a dependency on
+		// ConnManager. See how to make it run as early as possible.
+		// Until then leave ConnManager nil.
+		nil,
+
+		cfg); err != nil {
 		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
 	}
 	efs.SetFailedPostCacheTTL(cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
@@ -123,92 +129,52 @@ func runCGREngine(fs []string) (err error) {
 		utils.DataDB: new(sync.WaitGroup),
 	}
 
-	// ServiceIndexer will share service references to all services
-	registry := servmanager.NewServiceRegistry()
-	gvS := services.NewGlobalVarS(cfg)
-	cls := services.NewCommonListenerService(cfg, caps)
-	anzS := services.NewAnalyzerService(cfg)
-	cms := services.NewConnManagerService(cfg)
-	dmS := services.NewDataDBService(cfg, *flags.SetVersions, srvDep)
-	sdbS := services.NewStorDBService(cfg, *flags.SetVersions)
-	configS := services.NewConfigService(cfg)
-	guardianS := services.NewGuardianService(cfg)
 	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg)
-	cacheS := services.NewCacheService(cfg)
-	fltrS := services.NewFilterService(cfg)
 	dspS := services.NewDispatcherService(cfg)
-	ldrs := services.NewLoaderService(cfg)
-	efs := services.NewExportFailoverService(cfg)
-	adminS := services.NewAdminSv1Service(cfg)
-	sessionS := services.NewSessionService(cfg)
-	attrS := services.NewAttributeService(cfg, dspS)
-	chrgS := services.NewChargerService(cfg)
-	routeS := services.NewRouteService(cfg)
-	resourceS := services.NewResourceService(cfg, srvDep)
-	trendS := services.NewTrendService(cfg, srvDep)
-	rankingS := services.NewRankingService(cfg, srvDep)
-	thS := services.NewThresholdService(cfg, srvDep)
-	stS := services.NewStatService(cfg, srvDep)
-	erS := services.NewEventReaderService(cfg)
-	dnsAgent := services.NewDNSAgent(cfg)
-	fsAgent := services.NewFreeswitchAgent(cfg)
-	kamAgent := services.NewKamailioAgent(cfg)
-	janusAgent := services.NewJanusAgent(cfg)
-	astAgent := services.NewAsteriskAgent(cfg)
-	radAgent := services.NewRadiusAgent(cfg)
-	diamAgent := services.NewDiameterAgent(cfg, caps)
-	httpAgent := services.NewHTTPAgent(cfg)
-	sipAgent := services.NewSIPAgent(cfg)
-	eeS := services.NewEventExporterService(cfg)
-	cdrS := services.NewCDRServer(cfg)
-	registrarcS := services.NewRegistrarCService(cfg)
-	rateS := services.NewRateService(cfg)
-	actionS := services.NewActionService(cfg)
-	accS := services.NewAccountService(cfg)
-	tpeS := services.NewTPeService(cfg)
 
+	registry := servmanager.NewServiceRegistry()
 	srvManager := servmanager.NewServiceManager(shdWg, cfg, registry, []servmanager.Service{
-		gvS,
-		cls,
-		anzS,
-		cms,
-		dmS,
-		sdbS,
-		configS,
-		guardianS,
+		services.NewGlobalVarS(cfg),
+		services.NewCommonListenerService(cfg, caps),
+		services.NewAnalyzerService(cfg),
+		services.NewConnManagerService(cfg),
+		services.NewDataDBService(cfg, *flags.SetVersions, srvDep),
+		services.NewStorDBService(cfg, *flags.SetVersions),
+		services.NewConfigService(cfg),
+		services.NewGuardianService(cfg),
 		coreS,
-		cacheS,
-		fltrS,
+		services.NewCacheService(cfg),
+		services.NewFilterService(cfg),
 		dspS,
-		ldrs,
-		efs,
-		adminS,
-		sessionS,
-		attrS,
-		chrgS,
-		routeS,
-		resourceS,
-		trendS,
-		rankingS,
-		thS,
-		stS,
-		erS,
-		dnsAgent,
-		fsAgent,
-		kamAgent,
-		janusAgent,
-		astAgent,
-		radAgent,
-		diamAgent,
-		httpAgent,
-		sipAgent,
-		eeS,
-		cdrS,
-		registrarcS,
-		rateS,
-		actionS,
-		accS,
-		tpeS,
+		services.NewLoaderService(cfg),
+		services.NewExportFailoverService(cfg),
+		services.NewAdminSv1Service(cfg),
+		services.NewSessionService(cfg),
+		services.NewAttributeService(cfg, dspS),
+		services.NewChargerService(cfg),
+		services.NewRouteService(cfg),
+		services.NewResourceService(cfg, srvDep),
+		services.NewTrendService(cfg, srvDep),
+		services.NewRankingService(cfg, srvDep),
+		services.NewThresholdService(cfg, srvDep),
+		services.NewStatService(cfg, srvDep),
+		services.NewEventReaderService(cfg),
+		services.NewDNSAgent(cfg),
+		services.NewFreeswitchAgent(cfg),
+		services.NewKamailioAgent(cfg),
+		services.NewJanusAgent(cfg),
+		services.NewAsteriskAgent(cfg),
+		services.NewRadiusAgent(cfg),
+		services.NewDiameterAgent(cfg, caps),
+		services.NewHTTPAgent(cfg),
+		services.NewSIPAgent(cfg),
+		services.NewEventExporterService(cfg),
+		services.NewCDRServer(cfg),
+		services.NewRegistrarCService(cfg),
+		services.NewRateService(cfg),
+		services.NewActionService(cfg),
+		services.NewAccountService(cfg),
+		services.NewTPeService(cfg),
 	})
 
 	defer func() {

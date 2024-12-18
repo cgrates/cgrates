@@ -41,7 +41,7 @@ func NewThresholdService(cfg *config.CGRConfig,
 
 // ThresholdService implements Service interface
 type ThresholdService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	thrs *engine.ThresholdS
@@ -79,8 +79,6 @@ func (thrs *ThresholdService) Start(shutdown chan struct{}, registry *servmanage
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	thrs.Lock()
-	defer thrs.Unlock()
 	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), cms.ConnManager())
 	thrs.thrs.StartLoop(context.TODO())
 	srv, _ := engine.NewService(thrs.thrs)
@@ -97,17 +95,13 @@ func (thrs *ThresholdService) Start(shutdown chan struct{}, registry *servmanage
 
 // Reload handles the change of config
 func (thrs *ThresholdService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
-	thrs.Lock()
 	thrs.thrs.Reload(context.TODO())
-	thrs.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (thrs *ThresholdService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	defer thrs.srvDep[utils.DataDB].Done()
-	thrs.Lock()
-	defer thrs.Unlock()
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
 	thrs.cl.RpcUnregisterName(utils.ThresholdSv1)
@@ -128,4 +122,14 @@ func (thrs *ThresholdService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (thrs *ThresholdService) StateChan(stateID string) chan struct{} {
 	return thrs.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *ThresholdService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ThresholdService) Unlock() {
+	s.mu.Unlock()
 }

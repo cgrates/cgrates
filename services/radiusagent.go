@@ -38,7 +38,7 @@ func NewRadiusAgent(cfg *config.CGRConfig) *RadiusAgent {
 
 // RadiusAgent implements Agent interface
 type RadiusAgent struct {
-	sync.RWMutex
+	mu       sync.Mutex
 	cfg      *config.CGRConfig
 	stopChan chan struct{}
 
@@ -64,9 +64,6 @@ func (rad *RadiusAgent) Start(shutdown chan struct{}, registry *servmanager.Serv
 	}
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
-
-	rad.Lock()
-	defer rad.Unlock()
 
 	rad.lnet = rad.cfg.RadiusAgentCfg().ListenNet
 	rad.lauth = rad.cfg.RadiusAgentCfg().ListenAuth
@@ -110,10 +107,8 @@ func (rad *RadiusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 }
 
 func (rad *RadiusAgent) shutdown() {
-	rad.Lock()
 	close(rad.stopChan)
 	rad.rad = nil
-	rad.Unlock()
 }
 
 // ServiceName returns the service name
@@ -129,4 +124,14 @@ func (rad *RadiusAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (rad *RadiusAgent) StateChan(stateID string) chan struct{} {
 	return rad.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *RadiusAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RadiusAgent) Unlock() {
+	s.mu.Unlock()
 }

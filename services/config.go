@@ -38,7 +38,7 @@ func NewConfigService(cfg *config.CGRConfig) *ConfigService {
 
 // ConfigService implements Service interface.
 type ConfigService struct {
-	mu        sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	cl        *commonlisteners.CommonListenerS
 	stateDeps *StateDependencies // channel subscriptions for state changes
@@ -93,4 +93,14 @@ func (s *ConfigService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (s *ConfigService) StateChan(stateID string) chan struct{} {
 	return s.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *ConfigService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ConfigService) Unlock() {
+	s.mu.Unlock()
 }

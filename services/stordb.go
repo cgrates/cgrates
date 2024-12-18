@@ -39,7 +39,7 @@ func NewStorDBService(cfg *config.CGRConfig, setVersions bool) *StorDBService {
 
 // StorDBService implements Service interface
 type StorDBService struct {
-	sync.RWMutex
+	mu          sync.Mutex
 	cfg         *config.CGRConfig
 	oldDBCfg    *config.StorDbCfg
 	db          engine.StorDB
@@ -49,8 +49,6 @@ type StorDBService struct {
 
 // Start should handle the service start
 func (db *StorDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	db.Lock()
-	defer db.Unlock()
 	db.oldDBCfg = db.cfg.StorDbCfg().Clone()
 	dbConn, err := engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
@@ -77,8 +75,6 @@ func (db *StorDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) 
 
 // Reload handles the change of config
 func (db *StorDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	db.Lock()
-	defer db.Unlock()
 	if db.needsConnectionReload() {
 		var d engine.StorDB
 		if d, err = engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
@@ -124,17 +120,10 @@ func (db *StorDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry)
 
 // Shutdown stops the service
 func (db *StorDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
-	db.Lock()
 	db.db.Close()
 	db.db = nil
-	db.Unlock()
 	close(db.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// isRunning returns if the service is running (not thread safe)
-func (db *StorDBService) isRunning() bool {
-	return db.db != nil
 }
 
 // ServiceName returns the service name
@@ -174,4 +163,14 @@ func (db *StorDBService) DB() engine.StorDB {
 // StateChan returns signaling channel of specific state
 func (db *StorDBService) StateChan(stateID string) chan struct{} {
 	return db.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *StorDBService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *StorDBService) Unlock() {
+	s.mu.Unlock()
 }

@@ -40,7 +40,7 @@ func NewDispatcherService(cfg *config.CGRConfig) *DispatcherService {
 
 // DispatcherService implements Service interface
 type DispatcherService struct {
-	sync.RWMutex
+	mu         sync.Mutex
 	cfg        *config.CGRConfig
 	dspS       *dispatchers.DispatcherService
 	cl         *commonlisteners.CommonListenerS
@@ -76,9 +76,6 @@ func (dspS *DispatcherService) Start(shutdown chan struct{}, registry *servmanag
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	dspS.Lock()
-	defer dspS.Unlock()
-
 	dspS.dspS = dispatchers.NewDispatcherService(dbs.DataManager(), dspS.cfg, fs.FilterS(), dspS.connMgr)
 
 	dspS.unregisterAllDispatchedSubsystems() // unregister all rpc services that can be dispatched
@@ -104,8 +101,6 @@ func (dspS *DispatcherService) Reload(_ chan struct{}, _ *servmanager.ServiceReg
 
 // Shutdown stops the service
 func (dspS *DispatcherService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	dspS.Lock()
-	defer dspS.Unlock()
 	dspS.dspS = nil
 	dspS.cl.RpcUnregisterName(utils.DispatcherSv1)
 	dspS.cl.RpcUnregisterName(utils.AttributeSv1)
@@ -133,19 +128,15 @@ func (dspS *DispatcherService) unregisterAllDispatchedSubsystems() {
 
 func (dspS *DispatcherService) RegisterShutdownChan(subsys string) (c chan struct{}) {
 	c = make(chan struct{})
-	dspS.Lock()
 	dspS.srvsReload[subsys] = c
-	dspS.Unlock()
 	return
 }
 
 func (dspS *DispatcherService) UnregisterShutdownChan(subsys string) {
-	dspS.Lock()
 	if dspS.srvsReload[subsys] != nil {
 		close(dspS.srvsReload[subsys])
 	}
 	delete(dspS.srvsReload, subsys)
-	dspS.Unlock()
 }
 
 func (dspS *DispatcherService) sync() {
@@ -157,4 +148,14 @@ func (dspS *DispatcherService) sync() {
 // StateChan returns signaling channel of specific state
 func (dspS *DispatcherService) StateChan(stateID string) chan struct{} {
 	return dspS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *DispatcherService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *DispatcherService) Unlock() {
+	s.mu.Unlock()
 }

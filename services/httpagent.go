@@ -38,7 +38,7 @@ func NewHTTPAgent(cfg *config.CGRConfig) *HTTPAgent {
 
 // HTTPAgent implements Agent interface
 type HTTPAgent struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	cl *commonlisteners.CommonListenerS
@@ -66,9 +66,6 @@ func (ha *HTTPAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistr
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	ha.Lock()
-	defer ha.Unlock()
-
 	ha.started = true
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		cl.RegisterHttpHandler(agntCfg.URL,
@@ -87,9 +84,7 @@ func (ha *HTTPAgent) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (er
 
 // Shutdown stops the service
 func (ha *HTTPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	ha.Lock()
 	ha.started = false
-	ha.Unlock()
 	close(ha.stateDeps.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
@@ -107,4 +102,14 @@ func (ha *HTTPAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ha *HTTPAgent) StateChan(stateID string) chan struct{} {
 	return ha.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *HTTPAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *HTTPAgent) Unlock() {
+	s.mu.Unlock()
 }

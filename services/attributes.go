@@ -41,7 +41,7 @@ func NewAttributeService(cfg *config.CGRConfig,
 
 // AttributeService implements Service interface
 type AttributeService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	dspS *DispatcherService
@@ -78,8 +78,6 @@ func (attrS *AttributeService) Start(shutdown chan struct{}, registry *servmanag
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	attrS.Lock()
-	defer attrS.Unlock()
 	attrS.attrS = engine.NewAttributeService(dbs.DataManager(), fs.FilterS(), attrS.cfg)
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
 	srv, _ := engine.NewService(attrS.rpc)
@@ -113,12 +111,10 @@ func (attrS *AttributeService) Reload(_ chan struct{}, _ *servmanager.ServiceReg
 
 // Shutdown stops the service
 func (attrS *AttributeService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	attrS.Lock()
 	attrS.attrS = nil
 	attrS.rpc = nil
 	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
 	attrS.dspS.UnregisterShutdownChan(attrS.ServiceName())
-	attrS.Unlock()
 	close(attrS.StateChan(utils.StateServiceDOWN))
 	return
 }
@@ -136,4 +132,14 @@ func (attrS *AttributeService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (attrS *AttributeService) StateChan(stateID string) chan struct{} {
 	return attrS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *AttributeService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AttributeService) Unlock() {
+	s.mu.Unlock()
 }

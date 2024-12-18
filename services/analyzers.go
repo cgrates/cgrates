@@ -47,7 +47,7 @@ func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 
 // AnalyzerService implements Service interface
 type AnalyzerService struct {
-	sync.RWMutex
+	mu         sync.Mutex
 	cfg        *config.CGRConfig
 	anz        *analyzers.AnalyzerS
 	cl         *commonlisteners.CommonListenerS
@@ -65,8 +65,6 @@ func (anz *AnalyzerService) Start(shutdown chan struct{}, registry *servmanager.
 	}
 	anz.cl = cls.(*CommonListenerService).CLS()
 
-	anz.Lock()
-	defer anz.Unlock()
 	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
 		return
 	}
@@ -90,7 +88,6 @@ func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry) {
 	if err != nil {
 		return
 	}
-	anz.Lock()
 	anz.anz.SetFilterS(fs.(*FilterService).FilterS())
 
 	srv, _ := engine.NewService(anz.anz)
@@ -100,7 +97,6 @@ func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry) {
 			anz.cl.RpcRegister(s)
 		}
 	}
-	anz.Unlock()
 	close(anz.stateDeps.StateChan(utils.StateServiceUP))
 }
 
@@ -111,12 +107,10 @@ func (anz *AnalyzerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegist
 
 // Shutdown stops the service
 func (anz *AnalyzerService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	anz.Lock()
 	anz.cancelFunc()
 	anz.cl.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
-	anz.Unlock()
 	anz.cl.RpcUnregisterName(utils.AnalyzerSv1)
 	close(anz.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
@@ -143,4 +137,14 @@ func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string)
 // StateChan returns signaling channel of specific state
 func (anz *AnalyzerService) StateChan(stateID string) chan struct{} {
 	return anz.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *AnalyzerService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AnalyzerService) Unlock() {
+	s.mu.Unlock()
 }

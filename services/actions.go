@@ -41,7 +41,7 @@ func NewActionService(cfg *config.CGRConfig) *ActionService {
 
 // ActionService implements Service interface
 type ActionService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	acts *actions.ActionS
@@ -78,8 +78,6 @@ func (acts *ActionService) Start(shutdown chan struct{}, registry *servmanager.S
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	acts.Lock()
-	defer acts.Unlock()
 	acts.acts = actions.NewActionS(acts.cfg, fs, dbs, cms.ConnManager())
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
@@ -104,8 +102,6 @@ func (acts *ActionService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistr
 
 // Shutdown stops the service
 func (acts *ActionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	acts.Lock()
-	defer acts.Unlock()
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
@@ -127,4 +123,14 @@ func (acts *ActionService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (acts *ActionService) StateChan(stateID string) chan struct{} {
 	return acts.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *ActionService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ActionService) Unlock() {
+	s.mu.Unlock()
 }

@@ -41,7 +41,7 @@ func NewDataDBService(cfg *config.CGRConfig, setVersions bool,
 
 // DataDBService implements Service interface
 type DataDBService struct {
-	sync.RWMutex
+	mu          sync.Mutex
 	cfg         *config.CGRConfig
 	oldDBCfg    *config.DataDbCfg
 	dm          *engine.DataManager
@@ -56,8 +56,6 @@ func (db *DataDBService) Start(_ chan struct{}, registry *servmanager.ServiceReg
 	if err != nil {
 		return
 	}
-	db.Lock()
-	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
 	dbConn, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
 		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
@@ -85,8 +83,6 @@ func (db *DataDBService) Start(_ chan struct{}, registry *servmanager.ServiceReg
 
 // Reload handles the change of config
 func (db *DataDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	db.Lock()
-	defer db.Unlock()
 	if db.needsConnectionReload() {
 		var d engine.DataDBDriver
 		d, err = engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
@@ -115,10 +111,8 @@ func (db *DataDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry)
 // Shutdown stops the service
 func (db *DataDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	db.srvDep[utils.DataDB].Wait()
-	db.Lock()
 	db.dm.DataDB().Close()
 	db.dm = nil
-	db.Unlock()
 	close(db.StateChan(utils.StateServiceDOWN))
 	return
 }
@@ -174,4 +168,14 @@ func (db *DataDBService) DataManager() *engine.DataManager {
 // StateChan returns signaling channel of specific state
 func (db *DataDBService) StateChan(stateID string) chan struct{} {
 	return db.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (db *DataDBService) Lock() {
+	db.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (db *DataDBService) Unlock() {
+	db.mu.Unlock()
 }

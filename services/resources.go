@@ -41,7 +41,7 @@ func NewResourceService(cfg *config.CGRConfig,
 
 // ResourceService implements Service interface
 type ResourceService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	reS *engine.ResourceS
@@ -79,8 +79,6 @@ func (reS *ResourceService) Start(shutdown chan struct{}, registry *servmanager.
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	reS.Lock()
-	defer reS.Unlock()
 	reS.reS = engine.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), cms.ConnManager())
 	reS.reS.StartLoop(context.TODO())
 	srv, _ := engine.NewService(reS.reS)
@@ -97,17 +95,13 @@ func (reS *ResourceService) Start(shutdown chan struct{}, registry *servmanager.
 
 // Reload handles the change of config
 func (reS *ResourceService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	reS.Lock()
 	reS.reS.Reload(context.TODO())
-	reS.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (reS *ResourceService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer reS.srvDep[utils.DataDB].Done()
-	reS.Lock()
-	defer reS.Unlock()
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
 	reS.cl.RpcUnregisterName(utils.ResourceSv1)
@@ -128,4 +122,14 @@ func (reS *ResourceService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (reS *ResourceService) StateChan(stateID string) chan struct{} {
 	return reS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *ResourceService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ResourceService) Unlock() {
+	s.mu.Unlock()
 }

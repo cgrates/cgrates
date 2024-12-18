@@ -41,7 +41,7 @@ func NewRankingService(cfg *config.CGRConfig,
 }
 
 type RankingService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	ran *engine.RankingS
@@ -78,8 +78,6 @@ func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.S
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	ran.Lock()
-	defer ran.Unlock()
 	ran.ran = engine.NewRankingS(dbs.DataManager(), cms.ConnManager(), fs.FilterS(), ran.cfg)
 	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
@@ -100,17 +98,13 @@ func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.S
 
 // Reload handles the change of config
 func (ran *RankingService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	ran.Lock()
 	ran.ran.Reload(context.TODO())
-	ran.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (ran *RankingService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer ran.srvDep[utils.DataDB].Done()
-	ran.Lock()
-	defer ran.Unlock()
 	ran.ran.StopRankingS()
 	ran.ran = nil
 	ran.cl.RpcUnregisterName(utils.RankingSv1)
@@ -131,4 +125,14 @@ func (ran *RankingService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ran *RankingService) StateChan(stateID string) chan struct{} {
 	return ran.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *RankingService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RankingService) Unlock() {
+	s.mu.Unlock()
 }

@@ -64,9 +64,6 @@ func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.Serv
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cs := srvDeps[utils.CoreS].(*CoreService)
 
-	cS.mu.Lock()
-	defer cS.mu.Unlock()
-
 	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cms.ConnManager(), cs.CoreS().CapsStats)
 	go engine.Cache.Precache(shutdown)
 
@@ -132,4 +129,14 @@ func (cS *CacheService) WaitToPrecache(shutdown chan struct{}, cacheIDs ...strin
 // StateChan returns signaling channel of specific state
 func (cS *CacheService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *CacheService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *CacheService) Unlock() {
+	s.mu.Unlock()
 }

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"sync"
+
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -36,6 +38,7 @@ func NewGlobalVarS(cfg *config.CGRConfig) *GlobalVarS {
 
 // GlobalVarS implements Agent interface
 type GlobalVarS struct {
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
@@ -80,4 +83,14 @@ func (gv *GlobalVarS) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (gv *GlobalVarS) StateChan(stateID string) chan struct{} {
 	return gv.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *GlobalVarS) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *GlobalVarS) Unlock() {
+	s.mu.Unlock()
 }

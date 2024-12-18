@@ -41,7 +41,7 @@ func NewAccountService(cfg *config.CGRConfig) *AccountService {
 
 // AccountService implements Service interface
 type AccountService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	acts *accounts.AccountS
@@ -78,8 +78,6 @@ func (acts *AccountService) Start(shutdown chan struct{}, registry *servmanager.
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	acts.Lock()
-	defer acts.Unlock()
 	acts.acts = accounts.NewAccountS(acts.cfg, fs, cms.ConnManager(), dbs)
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
@@ -105,10 +103,8 @@ func (acts *AccountService) Reload(_ chan struct{}, _ *servmanager.ServiceRegist
 
 // Shutdown stops the service
 func (acts *AccountService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	acts.Lock()
 	close(acts.stopChan)
 	acts.acts = nil
-	acts.Unlock()
 	acts.cl.RpcUnregisterName(utils.AccountSv1)
 	close(acts.StateChan(utils.StateServiceDOWN))
 	return
@@ -127,4 +123,14 @@ func (acts *AccountService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (acts *AccountService) StateChan(stateID string) chan struct{} {
 	return acts.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *AccountService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AccountService) Unlock() {
+	s.mu.Unlock()
 }

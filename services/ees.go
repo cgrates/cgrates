@@ -39,7 +39,7 @@ func NewEventExporterService(cfg *config.CGRConfig) *EventExporterService {
 
 // EventExporterService is the service structure for EventExporterS
 type EventExporterService struct {
-	mu  sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	eeS *ees.EeS
@@ -60,16 +60,12 @@ func (es *EventExporterService) ShouldRun() (should bool) {
 
 // Reload handles the change of config
 func (es *EventExporterService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
-	es.mu.Lock()
-	defer es.mu.Unlock()
 	es.eeS.ClearExporterCache()
 	return es.eeS.SetupExporterCache()
 }
 
 // Shutdown stops the service
 func (es *EventExporterService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	es.mu.Lock()
-	defer es.mu.Unlock()
 	es.eeS.ClearExporterCache()
 	es.eeS = nil
 	es.cl.RpcUnregisterName(utils.EeSv1)
@@ -93,9 +89,6 @@ func (es *EventExporterService) Start(_ chan struct{}, registry *servmanager.Ser
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
-	es.mu.Lock()
-	defer es.mu.Unlock()
-
 	es.eeS, err = ees.NewEventExporterS(es.cfg, fs, cms.ConnManager())
 	if err != nil {
 		return err
@@ -114,4 +107,14 @@ func (es *EventExporterService) Start(_ chan struct{}, registry *servmanager.Ser
 // StateChan returns signaling channel of specific state
 func (es *EventExporterService) StateChan(stateID string) chan struct{} {
 	return es.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *EventExporterService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *EventExporterService) Unlock() {
+	s.mu.Unlock()
 }

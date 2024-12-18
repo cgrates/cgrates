@@ -39,7 +39,7 @@ func NewGuardianService(cfg *config.CGRConfig) *GuardianService {
 
 // GuardianService implements Service interface.
 type GuardianService struct {
-	mu        sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	cl        *commonlisteners.CommonListenerS
 	stateDeps *StateDependencies // channel subscriptions for state changes
@@ -59,9 +59,6 @@ func (s *GuardianService) Start(_ chan struct{}, registry *servmanager.ServiceRe
 	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	svcs, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
 	if !s.cfg.DispatcherSCfg().Enabled {
 		for _, svc := range svcs {
@@ -80,8 +77,6 @@ func (s *GuardianService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry
 
 // Shutdown stops the service.
 func (s *GuardianService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	s.cl.RpcUnregisterName(utils.GuardianSv1)
 	close(s.StateChan(utils.StateServiceDOWN))
 	return nil
@@ -100,4 +95,14 @@ func (s *GuardianService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (s *GuardianService) StateChan(stateID string) chan struct{} {
 	return s.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *GuardianService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *GuardianService) Unlock() {
+	s.mu.Unlock()
 }

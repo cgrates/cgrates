@@ -39,7 +39,7 @@ func NewKamailioAgent(cfg *config.CGRConfig) *KamailioAgent {
 
 // KamailioAgent implements Agent interface
 type KamailioAgent struct {
-	sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	kam       *agents.KamailioAgent
 	stateDeps *StateDependencies // channel subscriptions for state changes
@@ -52,9 +52,6 @@ func (kam *KamailioAgent) Start(shutdown chan struct{}, registry *servmanager.Se
 		return
 	}
 
-	kam.Lock()
-	defer kam.Unlock()
-
 	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), cms.(*ConnManagerService).ConnManager(),
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 
@@ -65,8 +62,6 @@ func (kam *KamailioAgent) Start(shutdown chan struct{}, registry *servmanager.Se
 
 // Reload handles the change of config
 func (kam *KamailioAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	kam.Lock()
-	defer kam.Unlock()
 	if err = kam.kam.Shutdown(); err != nil {
 		return
 	}
@@ -89,8 +84,6 @@ func (kam *KamailioAgent) connect(k *agents.KamailioAgent, shutdown chan struct{
 
 // Shutdown stops the service
 func (kam *KamailioAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	kam.Lock()
-	defer kam.Unlock()
 	err = kam.kam.Shutdown()
 	kam.kam = nil
 	close(kam.StateChan(utils.StateServiceDOWN))
@@ -110,4 +103,14 @@ func (kam *KamailioAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (kam *KamailioAgent) StateChan(stateID string) chan struct{} {
 	return kam.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *KamailioAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *KamailioAgent) Unlock() {
+	s.mu.Unlock()
 }

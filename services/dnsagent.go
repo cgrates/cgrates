@@ -37,13 +37,10 @@ func NewDNSAgent(cfg *config.CGRConfig) *DNSAgent {
 
 // DNSAgent implements Agent interface
 type DNSAgent struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	stopChan chan struct{}
-
-	dns *agents.DNSAgent
-
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	stopChan  chan struct{}
+	dns       *agents.DNSAgent
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -61,8 +58,6 @@ func (dns *DNSAgent) Start(shutdown chan struct{}, registry *servmanager.Service
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	dns.Lock()
-	defer dns.Unlock()
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager())
 	if err != nil {
 		dns.dns = nil
@@ -87,9 +82,6 @@ func (dns *DNSAgent) Reload(shutdown chan struct{}, registry *servmanager.Servic
 	}
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
-
-	dns.Lock()
-	defer dns.Unlock()
 
 	if dns.dns != nil {
 		close(dns.stopChan)
@@ -123,8 +115,6 @@ func (dns *DNSAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 		return
 	}
 	close(dns.stopChan)
-	dns.Lock()
-	defer dns.Unlock()
 	dns.dns = nil
 	close(dns.StateChan(utils.StateServiceDOWN))
 	return
@@ -143,4 +133,14 @@ func (dns *DNSAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (dns *DNSAgent) StateChan(stateID string) chan struct{} {
 	return dns.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *DNSAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *DNSAgent) Unlock() {
+	s.mu.Unlock()
 }

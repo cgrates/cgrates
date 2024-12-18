@@ -41,7 +41,7 @@ func NewEventReaderService(cfg *config.CGRConfig) *EventReaderService {
 
 // EventReaderService implements Service interface
 type EventReaderService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	ers *ers.ERService
@@ -68,9 +68,6 @@ func (erS *EventReaderService) Start(shutdown chan struct{}, registry *servmanag
 	erS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
-
-	erS.Lock()
-	defer erS.Unlock()
 
 	// remake the stop chan
 	erS.stopChan = make(chan struct{})
@@ -101,16 +98,12 @@ func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan, rldC
 
 // Reload handles the change of config
 func (erS *EventReaderService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	erS.RLock()
 	erS.rldChan <- struct{}{}
-	erS.RUnlock()
 	return
 }
 
 // Shutdown stops the service
 func (erS *EventReaderService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	erS.Lock()
-	defer erS.Unlock()
 	close(erS.stopChan)
 	erS.ers = nil
 	erS.cl.RpcUnregisterName(utils.ErSv1)
@@ -131,4 +124,14 @@ func (erS *EventReaderService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (erS *EventReaderService) StateChan(stateID string) chan struct{} {
 	return erS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *EventReaderService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *EventReaderService) Unlock() {
+	s.mu.Unlock()
 }

@@ -39,7 +39,7 @@ func NewAdminSv1Service(cfg *config.CGRConfig) *AdminSv1Service {
 
 // AdminSv1Service implements Service interface
 type AdminSv1Service struct {
-	sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	api       *apis.AdminSv1
 	cl        *commonlisteners.CommonListenerS
@@ -68,9 +68,6 @@ func (apiService *AdminSv1Service) Start(_ chan struct{}, registry *servmanager.
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 	sdbs := srvDeps[utils.StorDB].(*StorDBService)
 
-	apiService.Lock()
-	defer apiService.Unlock()
-
 	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), cms.ConnManager(), fs.FilterS(), sdbs.DB())
 
 	srv, _ := engine.NewService(apiService.api)
@@ -97,11 +94,9 @@ func (apiService *AdminSv1Service) Reload(_ chan struct{}, _ *servmanager.Servic
 
 // Shutdown stops the service
 func (apiService *AdminSv1Service) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	apiService.Lock()
 	// close(apiService.stopChan)
 	apiService.api = nil
 	apiService.cl.RpcUnregisterName(utils.AdminSv1)
-	apiService.Unlock()
 	close(apiService.StateChan(utils.StateServiceDOWN))
 	return
 }
@@ -119,4 +114,14 @@ func (apiService *AdminSv1Service) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (apiService *AdminSv1Service) StateChan(stateID string) chan struct{} {
 	return apiService.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *AdminSv1Service) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AdminSv1Service) Unlock() {
+	s.mu.Unlock()
 }

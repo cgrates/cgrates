@@ -40,7 +40,7 @@ func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps) *CommonL
 
 // CommonListenerService implements Service interface.
 type CommonListenerService struct {
-	mu        sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	cls       *commonlisteners.CommonListenerS
 	caps      *engine.Caps
@@ -49,8 +49,6 @@ type CommonListenerService struct {
 
 // Start handles the service start.
 func (cl *CommonListenerService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
-	cl.mu.Lock()
-	defer cl.mu.Unlock()
 	cl.cls = commonlisteners.NewCommonListenerS(cl.caps)
 	if len(cl.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cl.cls.RegisterHTTPFunc(cl.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
@@ -69,8 +67,6 @@ func (cl *CommonListenerService) Reload(_ chan struct{}, _ *servmanager.ServiceR
 
 // Shutdown stops the service.
 func (cl *CommonListenerService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	cl.mu.Lock()
-	defer cl.mu.Unlock()
 	cl.cls = nil
 	close(cl.StateChan(utils.StateServiceDOWN))
 	return nil
@@ -94,4 +90,14 @@ func (cl *CommonListenerService) StateChan(stateID string) chan struct{} {
 // CLS returns the CommonListenerS object.
 func (cl *CommonListenerService) CLS() *commonlisteners.CommonListenerS {
 	return cl.cls
+}
+
+// Lock implements the sync.Locker interface
+func (s *CommonListenerService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *CommonListenerService) Unlock() {
+	s.mu.Unlock()
 }

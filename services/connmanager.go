@@ -39,7 +39,7 @@ func NewConnManagerService(cfg *config.CGRConfig) *ConnManagerService {
 
 // ConnManagerService implements Service interface.
 type ConnManagerService struct {
-	mu        sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	connMgr   *engine.ConnManager
 	anz       *AnalyzerService
@@ -87,6 +87,16 @@ func (s *ConnManagerService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (s *ConnManagerService) StateChan(stateID string) chan struct{} {
 	return s.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *ConnManagerService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ConnManagerService) Unlock() {
+	s.mu.Unlock()
 }
 
 // ConnManager returns the ConnManager object.

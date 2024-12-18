@@ -38,7 +38,7 @@ func NewFreeswitchAgent(cfg *config.CGRConfig) *FreeswitchAgent {
 
 // FreeswitchAgent implements Agent interface
 type FreeswitchAgent struct {
-	sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	fS        *agents.FSsessions
 	stateDeps *StateDependencies // channel subscriptions for state changes
@@ -51,9 +51,6 @@ func (fS *FreeswitchAgent) Start(shutdown chan struct{}, registry *servmanager.S
 		return
 	}
 
-	fS.Lock()
-	defer fS.Unlock()
-
 	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, cms.(*ConnManagerService).ConnManager())
 
 	go fS.connect(shutdown)
@@ -63,8 +60,6 @@ func (fS *FreeswitchAgent) Start(shutdown chan struct{}, registry *servmanager.S
 
 // Reload handles the change of config
 func (fS *FreeswitchAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	fS.Lock()
-	defer fS.Unlock()
 	if err = fS.fS.Shutdown(); err != nil {
 		return
 	}
@@ -83,8 +78,6 @@ func (fS *FreeswitchAgent) connect(shutdown chan struct{}) {
 
 // Shutdown stops the service
 func (fS *FreeswitchAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	fS.Lock()
-	defer fS.Unlock()
 	err = fS.fS.Shutdown()
 	fS.fS = nil
 	close(fS.stateDeps.StateChan(utils.StateServiceDOWN))
@@ -104,4 +97,14 @@ func (fS *FreeswitchAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (fS *FreeswitchAgent) StateChan(stateID string) chan struct{} {
 	return fS.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *FreeswitchAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *FreeswitchAgent) Unlock() {
+	s.mu.Unlock()
 }

@@ -40,7 +40,7 @@ func NewDiameterAgent(cfg *config.CGRConfig, caps *engine.Caps) *DiameterAgent {
 
 // DiameterAgent implements Agent interface
 type DiameterAgent struct {
-	sync.RWMutex
+	mu       sync.Mutex
 	cfg      *config.CGRConfig
 	stopChan chan struct{}
 
@@ -67,8 +67,6 @@ func (da *DiameterAgent) Start(shutdown chan struct{}, registry *servmanager.Ser
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	da.Lock()
-	defer da.Unlock()
 	return da.start(fs.FilterS(), cms.ConnManager(), da.caps, shutdown)
 }
 
@@ -95,8 +93,6 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, 
 
 // Reload handles the change of config
 func (da *DiameterAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	da.Lock()
-	defer da.Unlock()
 	if da.lnet == da.cfg.DiameterAgentCfg().ListenNet &&
 		da.laddr == da.cfg.DiameterAgentCfg().Listen {
 		return
@@ -119,10 +115,8 @@ func (da *DiameterAgent) Reload(shutdown chan struct{}, registry *servmanager.Se
 
 // Shutdown stops the service
 func (da *DiameterAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	da.Lock()
 	close(da.stopChan)
 	da.da = nil
-	da.Unlock()
 	close(da.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
@@ -140,4 +134,14 @@ func (da *DiameterAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (da *DiameterAgent) StateChan(stateID string) chan struct{} {
 	return da.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *DiameterAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *DiameterAgent) Unlock() {
+	s.mu.Unlock()
 }

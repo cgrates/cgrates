@@ -56,6 +56,8 @@ func (m *ServiceManager) StartServices(shutdown chan struct{}) {
 		if svc.ShouldRun() && !IsServiceInState(svc, utils.StateServiceUP) {
 			m.shdWg.Add(1)
 			go func() {
+				svc.Lock()
+				defer svc.Unlock()
 				if err := svc.Start(shutdown, m.registry); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 					close(shutdown)
@@ -83,6 +85,8 @@ func (m *ServiceManager) handleReload(shutdown chan struct{}) {
 
 func (m *ServiceManager) reloadService(id string, shutdown chan struct{}) (err error) {
 	svc := m.registry.Lookup(id)
+	svc.Lock()
+	defer svc.Unlock()
 	isUp := IsServiceInState(svc, utils.StateServiceUP)
 	if svc.ShouldRun() {
 		if isUp {
@@ -118,6 +122,8 @@ func (m *ServiceManager) ShutdownServices() {
 		if IsServiceInState(svc, utils.StateServiceUP) {
 			go func() {
 				defer m.shdWg.Done()
+				svc.Lock()
+				defer svc.Unlock()
 				if err := svc.Shutdown(m.registry); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down <%s> service: %v",
 						utils.ServiceManager, svc.ServiceName(), err))
@@ -131,6 +137,8 @@ func (m *ServiceManager) ShutdownServices() {
 
 // Service interface that describes what functions should a service implement
 type Service interface {
+	sync.Locker // Lock/Unlock methods
+
 	// Start should handle the service start
 	Start(chan struct{}, *ServiceRegistry) error
 	// Reload handles the change of config

@@ -40,7 +40,7 @@ func NewStatService(cfg *config.CGRConfig, srvDep map[string]*sync.WaitGroup) *S
 
 // StatService implements Service interface
 type StatService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	sts *engine.StatS
@@ -78,8 +78,6 @@ func (sts *StatService) Start(shutdown chan struct{}, registry *servmanager.Serv
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	sts.Lock()
-	defer sts.Unlock()
 	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), cms.ConnManager())
 	sts.sts.StartLoop(context.TODO())
 	srv, _ := engine.NewService(sts.sts)
@@ -96,17 +94,13 @@ func (sts *StatService) Start(shutdown chan struct{}, registry *servmanager.Serv
 
 // Reload handles the change of config
 func (sts *StatService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	sts.Lock()
 	sts.sts.Reload(context.TODO())
-	sts.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (sts *StatService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer sts.srvDep[utils.DataDB].Done()
-	sts.Lock()
-	defer sts.Unlock()
 	sts.sts.Shutdown(context.TODO())
 	sts.sts = nil
 	sts.cl.RpcUnregisterName(utils.StatSv1)
@@ -127,4 +121,14 @@ func (sts *StatService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (sts *StatService) StateChan(stateID string) chan struct{} {
 	return sts.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *StatService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *StatService) Unlock() {
+	s.mu.Unlock()
 }

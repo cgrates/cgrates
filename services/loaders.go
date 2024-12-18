@@ -40,7 +40,7 @@ func NewLoaderService(cfg *config.CGRConfig) *LoaderService {
 
 // LoaderService implements Service interface
 type LoaderService struct {
-	sync.RWMutex
+	mu sync.Mutex
 
 	ldrs *loaders.LoaderS
 	cl   *commonlisteners.CommonListenerS
@@ -68,9 +68,6 @@ func (ldrs *LoaderService) Start(_ chan struct{}, registry *servmanager.ServiceR
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-
-	ldrs.Lock()
-	defer ldrs.Unlock()
 
 	ldrs.ldrs = loaders.NewLoaderS(ldrs.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 
@@ -110,20 +107,15 @@ func (ldrs *LoaderService) Reload(_ chan struct{}, registry *servmanager.Service
 	close(ldrs.stopChan)
 	ldrs.stopChan = make(chan struct{})
 
-	ldrs.RLock()
-	defer ldrs.RUnlock()
-
 	ldrs.ldrs.Reload(dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	return ldrs.ldrs.ListenAndServe(ldrs.stopChan)
 }
 
 // Shutdown stops the service
 func (ldrs *LoaderService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
-	ldrs.Lock()
 	ldrs.ldrs = nil
 	close(ldrs.stopChan)
 	ldrs.cl.RpcUnregisterName(utils.LoaderSv1)
-	ldrs.Unlock()
 	close(ldrs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
@@ -146,4 +138,14 @@ func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderS {
 // StateChan returns signaling channel of specific state
 func (ldrs *LoaderService) StateChan(stateID string) chan struct{} {
 	return ldrs.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *LoaderService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *LoaderService) Unlock() {
+	s.mu.Unlock()
 }

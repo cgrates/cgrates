@@ -40,7 +40,7 @@ func NewTrendService(cfg *config.CGRConfig,
 }
 
 type TrendService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	trs *engine.TrendS
@@ -77,8 +77,6 @@ func (trs *TrendService) Start(shutdown chan struct{}, registry *servmanager.Ser
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	trs.Lock()
-	defer trs.Unlock()
 	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), cms.ConnManager())
 	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
@@ -99,17 +97,13 @@ func (trs *TrendService) Start(shutdown chan struct{}, registry *servmanager.Ser
 
 // Reload handles the change of config
 func (trs *TrendService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
-	trs.Lock()
 	trs.trs.Reload(context.TODO())
-	trs.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (trs *TrendService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer trs.srvDep[utils.DataDB].Done()
-	trs.Lock()
-	defer trs.Unlock()
 	trs.trs.StopTrendS()
 	trs.trs = nil
 	trs.cl.RpcUnregisterName(utils.TrendSv1)
@@ -130,4 +124,14 @@ func (trs *TrendService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (trs *TrendService) StateChan(stateID string) chan struct{} {
 	return trs.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *TrendService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *TrendService) Unlock() {
+	s.mu.Unlock()
 }

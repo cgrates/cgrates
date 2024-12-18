@@ -40,7 +40,7 @@ func NewRateService(cfg *config.CGRConfig) *RateService {
 
 // RateService is the service structure for RateS
 type RateService struct {
-	sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	rateS     *rates.RateS
 	cl        *commonlisteners.CommonListenerS
@@ -67,8 +67,6 @@ func (rs *RateService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (
 
 // Shutdown stops the service
 func (rs *RateService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	rs.Lock()
-	defer rs.Unlock()
 	close(rs.stopChan)
 	rs.rateS = nil
 	rs.cl.RpcUnregisterName(utils.RateSv1)
@@ -102,9 +100,7 @@ func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.Servi
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	rs.Lock()
 	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)
-	rs.Unlock()
 
 	rs.stopChan = make(chan struct{})
 	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
@@ -125,4 +121,14 @@ func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.Servi
 // StateChan returns signaling channel of specific state
 func (rs *RateService) StateChan(stateID string) chan struct{} {
 	return rs.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *RateService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RateService) Unlock() {
+	s.mu.Unlock()
 }

@@ -40,7 +40,7 @@ func NewCDRServer(cfg *config.CGRConfig) *CDRService {
 
 // CDRService implements Service interface
 type CDRService struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	cdrS *cdrs.CDRServer
@@ -69,9 +69,6 @@ func (cs *CDRService) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 	sdbs := srvDeps[utils.StorDB].(*StorDBService).DB()
 
-	cs.Lock()
-	defer cs.Unlock()
-
 	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs, cms.ConnManager(), sdbs)
 	runtime.Gosched()
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
@@ -93,9 +90,7 @@ func (cs *CDRService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (e
 
 // Shutdown stops the service
 func (cs *CDRService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	cs.Lock()
 	cs.cdrS = nil
-	cs.Unlock()
 	cs.cl.RpcUnregisterName(utils.CDRsV1)
 	close(cs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
@@ -114,4 +109,14 @@ func (cs *CDRService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (cs *CDRService) StateChan(stateID string) chan struct{} {
 	return cs.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *CDRService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *CDRService) Unlock() {
+	s.mu.Unlock()
 }

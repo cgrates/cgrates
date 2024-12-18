@@ -41,7 +41,7 @@ func NewSessionService(cfg *config.CGRConfig) *SessionService {
 
 // SessionService implements Service interface
 type SessionService struct {
-	sync.RWMutex
+	mu sync.Mutex
 
 	sm *sessions.SessionS
 	cl *commonlisteners.CommonListenerS
@@ -70,9 +70,6 @@ func (smg *SessionService) Start(shutdown chan struct{}, registry *servmanager.S
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-
-	smg.Lock()
-	defer smg.Unlock()
 
 	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	//start sync session in a separate goroutine
@@ -106,9 +103,7 @@ func (smg *SessionService) start(shutdown chan struct{}) (err error) {
 	if err := smg.cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
 		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
-		smg.Lock()
 		smg.bircpEnabled = false
-		smg.Unlock()
 		close(shutdown)
 	}
 	return
@@ -121,8 +116,6 @@ func (smg *SessionService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistr
 
 // Shutdown stops the service
 func (smg *SessionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	smg.Lock()
-	defer smg.Unlock()
 	close(smg.stopChan)
 	if err = smg.sm.Shutdown(); err != nil {
 		return
@@ -151,4 +144,14 @@ func (smg *SessionService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (smg *SessionService) StateChan(stateID string) chan struct{} {
 	return smg.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *SessionService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *SessionService) Unlock() {
+	s.mu.Unlock()
 }

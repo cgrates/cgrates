@@ -38,7 +38,7 @@ func NewAsteriskAgent(cfg *config.CGRConfig) *AsteriskAgent {
 
 // AsteriskAgent implements Agent interface
 type AsteriskAgent struct {
-	sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	stopChan  chan struct{}
 	smas      []*agents.AsteriskAgent
@@ -51,9 +51,6 @@ func (ast *AsteriskAgent) Start(shutdown chan struct{}, registry *servmanager.Se
 	if err != nil {
 		return
 	}
-
-	ast.Lock()
-	defer ast.Unlock()
 
 	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}) {
 		if err := sma.ListenAndServe(stopChan); err != nil {
@@ -85,10 +82,8 @@ func (ast *AsteriskAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 }
 
 func (ast *AsteriskAgent) shutdown() {
-	ast.Lock()
 	close(ast.stopChan)
 	ast.smas = nil
-	ast.Unlock()
 	return // no shutdown for the momment
 }
 
@@ -105,4 +100,14 @@ func (ast *AsteriskAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ast *AsteriskAgent) StateChan(stateID string) chan struct{} {
 	return ast.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *AsteriskAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AsteriskAgent) Unlock() {
+	s.mu.Unlock()
 }

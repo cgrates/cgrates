@@ -45,7 +45,7 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps,
 
 // CoreService implements Service interface
 type CoreService struct {
-	mu        sync.RWMutex
+	mu        sync.Mutex
 	cfg       *config.CGRConfig
 	cS        *cores.CoreS
 	cl        *commonlisteners.CommonListenerS
@@ -71,8 +71,6 @@ func (cS *CoreService) Start(shutdown chan struct{}, registry *servmanager.Servi
 	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
-	cS.mu.Lock()
-	defer cS.mu.Unlock()
 	cS.stopChan = make(chan struct{})
 	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, shutdown)
 	cS.csCh <- cS.cS
@@ -98,8 +96,6 @@ func (cS *CoreService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) e
 
 // Shutdown stops the service
 func (cS *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	cS.mu.Lock()
-	defer cS.mu.Unlock()
 	cS.cS.Shutdown()
 	close(cS.stopChan)
 	cS.cS.StopCPUProfiling()
@@ -126,9 +122,17 @@ func (cS *CoreService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
 }
 
+// Lock implements the sync.Locker interface
+func (s *CoreService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *CoreService) Unlock() {
+	s.mu.Unlock()
+}
+
 // CoreS returns the CoreS object.
 func (cS *CoreService) CoreS() *cores.CoreS {
-	cS.mu.RLock()
-	defer cS.mu.RUnlock()
 	return cS.cS
 }

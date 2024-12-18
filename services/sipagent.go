@@ -38,7 +38,7 @@ func NewSIPAgent(cfg *config.CGRConfig) *SIPAgent {
 
 // SIPAgent implements Agent interface
 type SIPAgent struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
 	sip       *agents.SIPAgent
@@ -61,8 +61,6 @@ func (sip *SIPAgent) Start(shutdown chan struct{}, registry *servmanager.Service
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
-	sip.Lock()
-	defer sip.Unlock()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
 	sip.sip, err = agents.NewSIPAgent(cm, sip.cfg, fs)
 	if err != nil {
@@ -85,19 +83,15 @@ func (sip *SIPAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegist
 	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
 		return
 	}
-	sip.Lock()
 	sip.sip.Shutdown()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
 	sip.sip.InitStopChan()
-	sip.Unlock()
 	go sip.listenAndServe(shutdown)
 	return
 }
 
 // Shutdown stops the service
 func (sip *SIPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	sip.Lock()
-	defer sip.Unlock()
 	sip.sip.Shutdown()
 	sip.sip = nil
 	close(sip.stateDeps.StateChan(utils.StateServiceDOWN))
@@ -117,4 +111,14 @@ func (sip *SIPAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (sip *SIPAgent) StateChan(stateID string) chan struct{} {
 	return sip.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *SIPAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *SIPAgent) Unlock() {
+	s.mu.Unlock()
 }

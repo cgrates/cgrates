@@ -39,10 +39,9 @@ func NewJanusAgent(cfg *config.CGRConfig) *JanusAgent {
 
 // JanusAgent implements Service interface
 type JanusAgent struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
-
-	jA *agents.JanusAgent
+	jA  *agents.JanusAgent
 
 	// we can realy stop the JanusAgent so keep a flag
 	// if we registerd the jandlers
@@ -67,9 +66,7 @@ func (ja *JanusAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	ja.Lock()
 	if ja.started {
-		ja.Unlock()
 		return utils.ErrServiceAlreadyRunning
 	}
 	ja.jA, err = agents.NewJanusAgent(ja.cfg, cms.ConnManager(), fs.FilterS())
@@ -89,7 +86,6 @@ func (ja *JanusAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 	cl.RegisterHttpHandler(fmt.Sprintf("POST %s/{sessionID}/{handleID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.HandlePlugin))
 
 	ja.started = true
-	ja.Unlock()
 	close(ja.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -101,10 +97,8 @@ func (ja *JanusAgent) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (e
 
 // Shutdown stops the service
 func (ja *JanusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	ja.Lock()
 	err = ja.jA.Shutdown()
 	ja.started = false
-	ja.Unlock()
 	close(ja.stateDeps.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
@@ -122,4 +116,14 @@ func (ja *JanusAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ja *JanusAgent) StateChan(stateID string) chan struct{} {
 	return ja.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *JanusAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *JanusAgent) Unlock() {
+	s.mu.Unlock()
 }

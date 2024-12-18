@@ -32,15 +32,12 @@ import (
 
 // ExportFailoverService is the service structure for ExportFailover
 type ExportFailoverService struct {
-	sync.Mutex
-
-	efS *efs.EfS
-	cl  *commonlisteners.CommonListenerS
-	srv *birpc.Service
-
-	stopChan chan struct{}
-	cfg      *config.CGRConfig
-
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	efS       *efs.EfS
+	cl        *commonlisteners.CommonListenerS
+	srv       *birpc.Service
+	stopChan  chan struct{}
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -65,9 +62,6 @@ func (efServ *ExportFailoverService) Start(_ chan struct{}, registry *servmanage
 	}
 	efServ.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-
-	efServ.Lock()
-	defer efServ.Unlock()
 
 	efServ.efS = efs.NewEfs(efServ.cfg, cms.ConnManager())
 	efServ.stopChan = make(chan struct{})
@@ -104,4 +98,14 @@ func (efServ *ExportFailoverService) ServiceName() string {
 // StateChan returns signaling channel of specific state
 func (efServ *ExportFailoverService) StateChan(stateID string) chan struct{} {
 	return efServ.stateDeps.StateChan(stateID)
+}
+
+// Lock implements the sync.Locker interface
+func (s *ExportFailoverService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ExportFailoverService) Unlock() {
+	s.mu.Unlock()
 }
