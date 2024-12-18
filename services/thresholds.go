@@ -34,7 +34,7 @@ import (
 func NewThresholdService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) *ThresholdService {
+	srvIndexer *servmanager.ServiceRegistry) *ThresholdService {
 	return &ThresholdService{
 		cfg:        cfg,
 		srvDep:     srvDep,
@@ -55,9 +55,9 @@ type ThresholdService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start

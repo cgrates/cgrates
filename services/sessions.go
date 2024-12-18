@@ -35,7 +35,7 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *SessionService {
+	srvIndexer *servmanager.ServiceRegistry) *SessionService {
 	return &SessionService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -56,9 +56,9 @@ type SessionService struct {
 	connMgr      *engine.ConnManager
 	cfg          *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the service start

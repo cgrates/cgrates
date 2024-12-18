@@ -33,7 +33,7 @@ import (
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, caps *engine.Caps,
-	srvIndexer *servmanager.ServiceIndexer) *DiameterAgent {
+	srvIndexer *servmanager.ServiceRegistry) *DiameterAgent {
 	return &DiameterAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -56,9 +56,9 @@ type DiameterAgent struct {
 	lnet  string
 	laddr string
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
@@ -109,7 +109,7 @@ func (da *DiameterAgent) Reload(shutdown chan struct{}) (err error) {
 		return
 	}
 	close(da.stopChan)
-	fs := da.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	fs := da.srvIndexer.Lookup(utils.FilterS).(*FilterService)
 	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), da.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.DiameterAgent, utils.FilterS, utils.StateServiceUP)
 	}

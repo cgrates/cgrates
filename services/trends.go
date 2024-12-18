@@ -34,7 +34,7 @@ import (
 func NewTrendService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) *TrendService {
+	srvIndexer *servmanager.ServiceRegistry) *TrendService {
 	return &TrendService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -54,9 +54,9 @@ type TrendService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start

@@ -34,7 +34,7 @@ import (
 func NewStatService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) *StatService {
+	srvIndexer *servmanager.ServiceRegistry) *StatService {
 	return &StatService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -55,9 +55,9 @@ type StatService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start

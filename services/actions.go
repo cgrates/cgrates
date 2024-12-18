@@ -34,7 +34,7 @@ import (
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *ActionService {
+	srvIndexer *servmanager.ServiceRegistry) *ActionService {
 	return &ActionService{
 		connMgr:    connMgr,
 		cfg:        cfg,
@@ -57,9 +57,9 @@ type ActionService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // share the API object implementing API calls for internal
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the service start

@@ -34,7 +34,7 @@ import (
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps,
 	fileCPU *os.File, shdWg *sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) *CoreService {
+	srvIndexer *servmanager.ServiceRegistry) *CoreService {
 	return &CoreService{
 		shdWg:      shdWg,
 		cfg:        cfg,
@@ -60,9 +60,9 @@ type CoreService struct {
 	shdWg    *sync.WaitGroup
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the service start

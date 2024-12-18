@@ -33,7 +33,7 @@ import (
 // NewAPIerSv1Service returns the APIerSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *AdminSv1Service {
+	srvIndexer *servmanager.ServiceRegistry) *AdminSv1Service {
 	return &AdminSv1Service{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -53,9 +53,9 @@ type AdminSv1Service struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // RPC connector with internal APIs
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // RPC connector with internal APIs
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start

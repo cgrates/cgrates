@@ -35,7 +35,7 @@ import (
 func NewRankingService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) *RankingService {
+	srvIndexer *servmanager.ServiceRegistry) *RankingService {
 	return &RankingService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -55,9 +55,9 @@ type RankingService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start

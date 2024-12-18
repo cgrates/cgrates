@@ -32,7 +32,7 @@ import (
 // NewRouteService returns the Route Service
 func NewRouteService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *RouteService {
+	srvIndexer *servmanager.ServiceRegistry) *RouteService {
 	return &RouteService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -51,9 +51,9 @@ type RouteService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start

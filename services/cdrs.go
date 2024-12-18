@@ -34,7 +34,7 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *CDRService {
+	srvIndexer *servmanager.ServiceRegistry) *CDRService {
 	return &CDRService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -53,9 +53,9 @@ type CDRService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start

@@ -33,7 +33,7 @@ import (
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *EventExporterService {
+	srvIndexer *servmanager.ServiceRegistry) *EventExporterService {
 	return &EventExporterService{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -52,9 +52,9 @@ type EventExporterService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name

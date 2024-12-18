@@ -33,7 +33,7 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig,
 	dspS *DispatcherService,
-	sIndxr *servmanager.ServiceIndexer) *AttributeService {
+	sIndxr *servmanager.ServiceRegistry) *AttributeService {
 	return &AttributeService{
 		cfg:        cfg,
 		dspS:       dspS,
@@ -54,8 +54,8 @@ type AttributeService struct {
 
 	cfg *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
 	stateDeps  *StateDependencies
 }
 

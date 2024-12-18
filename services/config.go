@@ -30,7 +30,7 @@ import (
 )
 
 // NewConfigService instantiates a new ConfigService.
-func NewConfigService(cfg *config.CGRConfig, srvIndexer *servmanager.ServiceIndexer) *ConfigService {
+func NewConfigService(cfg *config.CGRConfig, srvIndexer *servmanager.ServiceRegistry) *ConfigService {
 	return &ConfigService{
 		cfg:        cfg,
 		srvIndexer: srvIndexer,
@@ -43,9 +43,9 @@ type ConfigService struct {
 	mu         sync.RWMutex
 	cfg        *config.CGRConfig
 	cl         *commonlisteners.CommonListenerS
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start handles the service start.

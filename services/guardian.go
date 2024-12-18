@@ -31,7 +31,7 @@ import (
 )
 
 // NewGuardianService instantiates a new GuardianService.
-func NewGuardianService(cfg *config.CGRConfig, srvIndexer *servmanager.ServiceIndexer) *GuardianService {
+func NewGuardianService(cfg *config.CGRConfig, srvIndexer *servmanager.ServiceRegistry) *GuardianService {
 	return &GuardianService{
 		cfg:        cfg,
 		srvIndexer: srvIndexer,
@@ -44,9 +44,9 @@ type GuardianService struct {
 	mu         sync.RWMutex
 	cfg        *config.CGRConfig
 	cl         *commonlisteners.CommonListenerS
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start handles the service start.

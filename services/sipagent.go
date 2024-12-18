@@ -33,7 +33,7 @@ import (
 // NewSIPAgent returns the sip Agent
 func NewSIPAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *SIPAgent {
+	srvIndexer *servmanager.ServiceRegistry) *SIPAgent {
 	return &SIPAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -52,9 +52,9 @@ type SIPAgent struct {
 
 	oldListen string
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
