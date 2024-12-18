@@ -31,13 +31,11 @@ import (
 )
 
 // NewCommonListenerService instantiates a new CommonListenerService.
-func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps,
-	srvIndexer *servmanager.ServiceRegistry) *CommonListenerService {
+func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps) *CommonListenerService {
 	return &CommonListenerService{
-		cfg:        cfg,
-		caps:       caps,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		caps:      caps,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -50,16 +48,12 @@ type CommonListenerService struct {
 	caps *engine.Caps
 	cfg  *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (cl *CommonListenerService) Start(_ chan struct{}) error {
-	if cl.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
+func (cl *CommonListenerService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	cl.cls = commonlisteners.NewCommonListenerS(cl.caps)
@@ -74,23 +68,17 @@ func (cl *CommonListenerService) Start(_ chan struct{}) error {
 }
 
 // Reload handles the config changes.
-func (cl *CommonListenerService) Reload(_ chan struct{}) error {
+func (cl *CommonListenerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (cl *CommonListenerService) Shutdown() error {
+func (cl *CommonListenerService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	cl.cls = nil
+	close(cl.StateChan(utils.StateServiceDOWN))
 	return nil
-}
-
-// IsRunning returns whether the service is running or not.
-func (cl *CommonListenerService) IsRunning() bool {
-	cl.mu.RLock()
-	defer cl.mu.RUnlock()
-	return cl.cls != nil
 }
 
 // ServiceName returns the service name

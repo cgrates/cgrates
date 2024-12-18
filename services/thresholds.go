@@ -33,14 +33,12 @@ import (
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceRegistry) *ThresholdService {
+	srvDep map[string]*sync.WaitGroup) *ThresholdService {
 	return &ThresholdService{
-		cfg:        cfg,
-		srvDep:     srvDep,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		srvDep:    srvDep,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -55,17 +53,12 @@ type ThresholdService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (thrs *ThresholdService) Start(shutdown chan struct{}) (err error) {
-	if thrs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (thrs *ThresholdService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	thrs.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -76,7 +69,7 @@ func (thrs *ThresholdService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		thrs.srvIndexer, thrs.cfg.GeneralCfg().ConnectTimeout)
+		registry, thrs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -109,7 +102,7 @@ func (thrs *ThresholdService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (thrs *ThresholdService) Reload(_ chan struct{}) (_ error) {
+func (thrs *ThresholdService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
 	thrs.Lock()
 	thrs.thrs.Reload(context.TODO())
 	thrs.Unlock()
@@ -117,21 +110,15 @@ func (thrs *ThresholdService) Reload(_ chan struct{}) (_ error) {
 }
 
 // Shutdown stops the service
-func (thrs *ThresholdService) Shutdown() (_ error) {
+func (thrs *ThresholdService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	defer thrs.srvDep[utils.DataDB].Done()
 	thrs.Lock()
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
 	thrs.cl.RpcUnregisterName(utils.ThresholdSv1)
+	close(thrs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (thrs *ThresholdService) IsRunning() bool {
-	thrs.RLock()
-	defer thrs.RUnlock()
-	return thrs.thrs != nil
 }
 
 // ServiceName returns the service name

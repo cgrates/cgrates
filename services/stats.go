@@ -31,16 +31,12 @@ import (
 )
 
 // NewStatService returns the Stat Service
-func NewStatService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceRegistry) *StatService {
+func NewStatService(cfg *config.CGRConfig, connMgr *engine.ConnManager, srvDep map[string]*sync.WaitGroup) *StatService {
 	return &StatService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvDep:     srvDep,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		srvDep:    srvDep,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -55,17 +51,12 @@ type StatService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (sts *StatService) Start(shutdown chan struct{}) (err error) {
-	if sts.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (sts *StatService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	sts.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -76,7 +67,7 @@ func (sts *StatService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		sts.srvIndexer, sts.cfg.GeneralCfg().ConnectTimeout)
+		registry, sts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -109,7 +100,7 @@ func (sts *StatService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (sts *StatService) Reload(_ chan struct{}) (err error) {
+func (sts *StatService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	sts.Lock()
 	sts.sts.Reload(context.TODO())
 	sts.Unlock()
@@ -117,21 +108,15 @@ func (sts *StatService) Reload(_ chan struct{}) (err error) {
 }
 
 // Shutdown stops the service
-func (sts *StatService) Shutdown() (err error) {
+func (sts *StatService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer sts.srvDep[utils.DataDB].Done()
 	sts.Lock()
 	defer sts.Unlock()
 	sts.sts.Shutdown(context.TODO())
 	sts.sts = nil
 	sts.cl.RpcUnregisterName(utils.StatSv1)
+	close(sts.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (sts *StatService) IsRunning() bool {
-	sts.RLock()
-	defer sts.RUnlock()
-	return sts.sts != nil
 }
 
 // ServiceName returns the service name

@@ -29,13 +29,11 @@ import (
 )
 
 // NewFilterService instantiates a new FilterService.
-func NewFilterService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *FilterService {
+func NewFilterService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *FilterService {
 	return &FilterService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -48,23 +46,18 @@ type FilterService struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (s *FilterService) Start(shutdown chan struct{}) error {
-	if s.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CacheS,
 			utils.DataDB,
 		},
-		s.srvIndexer, s.cfg.GeneralCfg().ConnectTimeout)
+		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -83,23 +76,17 @@ func (s *FilterService) Start(shutdown chan struct{}) error {
 }
 
 // Reload handles the config changes.
-func (s *FilterService) Reload(_ chan struct{}) error {
+func (s *FilterService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *FilterService) Shutdown() error {
+func (s *FilterService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.fltrS = nil
+	close(s.stateDeps.StateChan(utils.StateServiceDOWN))
 	return nil
-}
-
-// IsRunning returns whether the service is running or not.
-func (s *FilterService) IsRunning() bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.fltrS != nil
 }
 
 // ServiceName returns the service name

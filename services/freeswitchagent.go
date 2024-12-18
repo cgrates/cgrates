@@ -33,13 +33,11 @@ import (
 
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *FreeswitchAgent {
+	connMgr *engine.ConnManager) *FreeswitchAgent {
 	return &FreeswitchAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -51,17 +49,12 @@ type FreeswitchAgent struct {
 	fS      *agents.FSsessions
 	connMgr *engine.ConnManager
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start(shutdown chan struct{}) (err error) {
-	if fS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (fS *FreeswitchAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 
@@ -73,7 +66,7 @@ func (fS *FreeswitchAgent) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (fS *FreeswitchAgent) Reload(shutdown chan struct{}) (err error) {
+func (fS *FreeswitchAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 	if err = fS.fS.Shutdown(); err != nil {
@@ -93,19 +86,13 @@ func (fS *FreeswitchAgent) connect(shutdown chan struct{}) {
 }
 
 // Shutdown stops the service
-func (fS *FreeswitchAgent) Shutdown() (err error) {
+func (fS *FreeswitchAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 	err = fS.fS.Shutdown()
 	fS.fS = nil
+	close(fS.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (fS *FreeswitchAgent) IsRunning() bool {
-	fS.RLock()
-	defer fS.RUnlock()
-	return fS.fS != nil
 }
 
 // ServiceName returns the service name

@@ -33,13 +33,11 @@ import (
 
 // NewJanusAgent returns the Janus Agent
 func NewJanusAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *JanusAgent {
+	connMgr *engine.ConnManager) *JanusAgent {
 	return &JanusAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -56,19 +54,18 @@ type JanusAgent struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should jandle the sercive start
-func (ja *JanusAgent) Start(_ chan struct{}) (err error) {
+func (ja *JanusAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.FilterS,
 		},
-		ja.srvIndexer, ja.cfg.GeneralCfg().ConnectTimeout)
+		registry, ja.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -103,24 +100,18 @@ func (ja *JanusAgent) Start(_ chan struct{}) (err error) {
 }
 
 // Reload jandles the change of config
-func (ja *JanusAgent) Reload(_ chan struct{}) (err error) {
+func (ja *JanusAgent) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return // no reload
 }
 
 // Shutdown stops the service
-func (ja *JanusAgent) Shutdown() (err error) {
+func (ja *JanusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ja.Lock()
 	err = ja.jA.Shutdown()
 	ja.started = false
 	ja.Unlock()
+	close(ja.stateDeps.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
-}
-
-// IsRunning returns if the service is running
-func (ja *JanusAgent) IsRunning() bool {
-	ja.RLock()
-	defer ja.RUnlock()
-	return ja.started
 }
 
 // ServiceName returns the service name

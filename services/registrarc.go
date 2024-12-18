@@ -30,13 +30,11 @@ import (
 )
 
 // NewRegistrarCService returns the Dispatcher Service
-func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *RegistrarCService {
+func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *RegistrarCService {
 	return &RegistrarCService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -51,16 +49,12 @@ type RegistrarCService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (dspS *RegistrarCService) Start(_ chan struct{}) (err error) {
-	if dspS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
+func (dspS *RegistrarCService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 
@@ -73,26 +67,20 @@ func (dspS *RegistrarCService) Start(_ chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (dspS *RegistrarCService) Reload(_ chan struct{}) (err error) {
+func (dspS *RegistrarCService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	dspS.rldChan <- struct{}{}
 	return // for the momment nothing to reload
 }
 
 // Shutdown stops the service
-func (dspS *RegistrarCService) Shutdown() (err error) {
+func (dspS *RegistrarCService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	dspS.Lock()
 	close(dspS.stopChan)
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
 	dspS.Unlock()
+	close(dspS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (dspS *RegistrarCService) IsRunning() bool {
-	dspS.RLock()
-	defer dspS.RUnlock()
-	return dspS.dspS != nil
 }
 
 // ServiceName returns the service name

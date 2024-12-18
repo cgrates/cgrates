@@ -33,13 +33,11 @@ import (
 
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *CDRService {
+	connMgr *engine.ConnManager) *CDRService {
 	return &CDRService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -53,17 +51,12 @@ type CDRService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (cs *CDRService) Start(_ chan struct{}) (err error) {
-	if cs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (cs *CDRService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -72,7 +65,7 @@ func (cs *CDRService) Start(_ chan struct{}) (err error) {
 			utils.AnalyzerS,
 			utils.StorDB,
 		},
-		cs.srvIndexer, cs.cfg.GeneralCfg().ConnectTimeout)
+		registry, cs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -101,24 +94,18 @@ func (cs *CDRService) Start(_ chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (cs *CDRService) Reload(_ chan struct{}) (err error) {
+func (cs *CDRService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (cs *CDRService) Shutdown() (err error) {
+func (cs *CDRService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	cs.Lock()
 	cs.cdrS = nil
 	cs.Unlock()
 	cs.cl.RpcUnregisterName(utils.CDRsV1)
+	close(cs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (cs *CDRService) IsRunning() bool {
-	cs.RLock()
-	defer cs.RUnlock()
-	return cs.cdrS != nil
 }
 
 // ServiceName returns the service name

@@ -31,11 +31,10 @@ import (
 )
 
 // NewGuardianService instantiates a new GuardianService.
-func NewGuardianService(cfg *config.CGRConfig, srvIndexer *servmanager.ServiceRegistry) *GuardianService {
+func NewGuardianService(cfg *config.CGRConfig) *GuardianService {
 	return &GuardianService{
-		cfg:        cfg,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -44,23 +43,18 @@ type GuardianService struct {
 	mu         sync.RWMutex
 	cfg        *config.CGRConfig
 	cl         *commonlisteners.CommonListenerS
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (s *GuardianService) Start(_ chan struct{}) error {
-	if s.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (s *GuardianService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.AnalyzerS,
 		},
-		s.srvIndexer, s.cfg.GeneralCfg().ConnectTimeout)
+		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -82,21 +76,17 @@ func (s *GuardianService) Start(_ chan struct{}) error {
 }
 
 // Reload handles the config changes.
-func (s *GuardianService) Reload(_ chan struct{}) error {
+func (s *GuardianService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *GuardianService) Shutdown() error {
+func (s *GuardianService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.cl.RpcUnregisterName(utils.GuardianSv1)
+	close(s.StateChan(utils.StateServiceDOWN))
 	return nil
-}
-
-// IsRunning returns whether the service is running or not.
-func (s *GuardianService) IsRunning() bool {
-	return IsServiceInState(s.ServiceName(), utils.StateServiceUP, s.srvIndexer)
 }
 
 // ServiceName returns the service name

@@ -77,14 +77,3 @@ func waitForServiceState(state, serviceID string, indexer *servmanager.ServiceRe
 		return nil, fmt.Errorf("timed out waiting for service %q state %q", serviceID, state)
 	}
 }
-
-// IsServiceInState performs a non-blocking check to determine if a service is in the specified state.
-func IsServiceInState(serviceID, state string, indexer *servmanager.ServiceRegistry) bool {
-	svc := indexer.Lookup(serviceID)
-	select {
-	case <-svc.StateChan(state):
-		return true
-	default:
-		return false
-	}
-}

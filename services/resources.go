@@ -33,14 +33,12 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceRegistry) *ResourceService {
+	srvDep map[string]*sync.WaitGroup) *ResourceService {
 	return &ResourceService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvDep:     srvDep,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		srvDep:    srvDep,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -55,17 +53,12 @@ type ResourceService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (reS *ResourceService) Start(shutdown chan struct{}) (err error) {
-	if reS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (reS *ResourceService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	reS.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -76,7 +69,7 @@ func (reS *ResourceService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		reS.srvIndexer, reS.cfg.GeneralCfg().ConnectTimeout)
+		registry, reS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -110,7 +103,7 @@ func (reS *ResourceService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (reS *ResourceService) Reload(_ chan struct{}) (err error) {
+func (reS *ResourceService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	reS.Lock()
 	reS.reS.Reload(context.TODO())
 	reS.Unlock()
@@ -118,21 +111,15 @@ func (reS *ResourceService) Reload(_ chan struct{}) (err error) {
 }
 
 // Shutdown stops the service
-func (reS *ResourceService) Shutdown() (err error) {
+func (reS *ResourceService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer reS.srvDep[utils.DataDB].Done()
 	reS.Lock()
 	defer reS.Unlock()
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
 	reS.cl.RpcUnregisterName(utils.ResourceSv1)
+	close(reS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (reS *ResourceService) IsRunning() bool {
-	reS.RLock()
-	defer reS.RUnlock()
-	return reS.reS != nil
 }
 
 // ServiceName returns the service name

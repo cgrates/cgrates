@@ -33,14 +33,12 @@ import (
 
 // NewActionService returns the Action Service
 func NewActionService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *ActionService {
+	connMgr *engine.ConnManager) *ActionService {
 	return &ActionService{
-		connMgr:    connMgr,
-		cfg:        cfg,
-		rldChan:    make(chan struct{}, 1),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		connMgr:   connMgr,
+		cfg:       cfg,
+		rldChan:   make(chan struct{}, 1),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -57,17 +55,12 @@ type ActionService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // share the API object implementing API calls for internal
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (acts *ActionService) Start(shutdown chan struct{}) (err error) {
-	if acts.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (acts *ActionService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -76,7 +69,7 @@ func (acts *ActionService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		acts.srvIndexer, acts.cfg.GeneralCfg().ConnectTimeout)
+		registry, acts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -111,27 +104,21 @@ func (acts *ActionService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (acts *ActionService) Reload(_ chan struct{}) (err error) {
+func (acts *ActionService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	acts.rldChan <- struct{}{}
 	return // for the moment nothing to reload
 }
 
 // Shutdown stops the service
-func (acts *ActionService) Shutdown() (err error) {
+func (acts *ActionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	acts.Lock()
 	defer acts.Unlock()
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
 	acts.cl.RpcUnregisterName(utils.ActionSv1)
+	close(acts.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (acts *ActionService) IsRunning() bool {
-	acts.RLock()
-	defer acts.RUnlock()
-	return acts.acts != nil
 }
 
 // ServiceName returns the service name
