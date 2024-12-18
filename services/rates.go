@@ -85,7 +85,6 @@ func (rs *RateService) Shutdown() (err error) {
 	rs.Lock()
 	defer rs.Unlock()
 	close(rs.stopChan)
-	rs.rateS.Shutdown() //we don't verify the error because shutdown never returns an err
 	rs.rateS = nil
 	rs.cl.RpcUnregisterName(utils.RateSv1)
 	return

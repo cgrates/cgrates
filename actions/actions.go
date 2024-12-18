@@ -55,8 +55,6 @@ type ActionS struct {
 
 // ListenAndServe keeps the service alive
 func (aS *ActionS) ListenAndServe(stopChan, cfgRld chan struct{}) {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
-		utils.CoreS, utils.ActionS))
 	for {
 		select {
 		case <-stopChan:
@@ -69,7 +67,6 @@ func (aS *ActionS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 
 // Shutdown is called to shutdown the service
 func (aS *ActionS) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.ActionS))
 	aS.crnLk.RLock()
 	aS.crn.Stop()
 	aS.crnLk.RUnlock()

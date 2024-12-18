@@ -124,7 +124,6 @@ func (dspS *DispatcherService) Reload(_ chan struct{}) (err error) {
 func (dspS *DispatcherService) Shutdown() (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
-	dspS.dspS.Shutdown()
 	dspS.dspS = nil
 	dspS.cl.RpcUnregisterName(utils.DispatcherSv1)
 	dspS.cl.RpcUnregisterName(utils.AttributeSv1)

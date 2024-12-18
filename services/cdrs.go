@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"runtime"
 	"sync"
 
@@ -64,8 +63,6 @@ func (cs *CDRService) Start(_ chan struct{}) (err error) {
 	if cs.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))
 
 	cls := cs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
 	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {

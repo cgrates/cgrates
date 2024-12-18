@@ -222,7 +222,7 @@ func runCGREngine(fs []string) (err error) {
 		}()
 		<-ctx.Done()
 		if ctx.Err() != context.Canceled {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown all subsystems in the given time",
+			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down all services in the given time",
 				utils.ServiceManager))
 		}
 		if *flags.PidFile != utils.EmptyString {

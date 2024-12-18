@@ -61,7 +61,6 @@ func (dspS *RegistrarCService) Start(_ chan struct{}) (err error) {
 	if dspS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	utils.Logger.Info("Starting CGRateS DispatcherH service.")
 	dspS.Lock()
 	defer dspS.Unlock()
 

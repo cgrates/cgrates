@@ -88,8 +88,6 @@ func (erS *EventReaderService) Start(shutdown chan struct{}) (err error) {
 	// remake the stop chan
 	erS.stopChan = make(chan struct{})
 
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
-
 	// build the service
 	erS.ers = ers.NewERService(erS.cfg, fs.FilterS(), erS.connMgr)
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shutdown)

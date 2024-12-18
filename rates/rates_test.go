@@ -680,13 +680,6 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 	b.StopTimer()
 }
 
-func TestRatesShutDown(t *testing.T) {
-	rateS := new(RateS)
-	if err := rateS.Shutdown(); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()

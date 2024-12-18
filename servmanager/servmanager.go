@@ -63,9 +63,10 @@ func (srvMngr *ServiceManager) StartServices(shutdown chan struct{}) {
 			go func() {
 				if err := service.Start(shutdown); err != nil &&
 					err != utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
-					utils.Logger.Err(fmt.Sprintf("<%s> failed to start %s because: %s", utils.ServiceManager, service.ServiceName(), err))
+					utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> service: %v", utils.ServiceManager, service.ServiceName(), err))
 					close(shutdown)
 				}
+				utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, service.ServiceName()))
 			}()
 		}
 	}
@@ -123,23 +124,26 @@ func (srvMngr *ServiceManager) reloadService(srvName string, shutdown chan struc
 	if srv.ShouldRun() {
 		if srv.IsRunning() {
 			if err = srv.Reload(shutdown); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
+				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> service: %v", utils.ServiceManager, srv.ServiceName(), err))
 				close(shutdown)
 				return // stop if we encounter an error
 			}
+			utils.Logger.Info(fmt.Sprintf("<%s> reloaded <%s> service", utils.ServiceManager, srv.ServiceName()))
 		} else {
 			srvMngr.shdWg.Add(1)
 			if err = srv.Start(shutdown); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
+				utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> serivce: %v", utils.ServiceManager, srv.ServiceName(), err))
 				close(shutdown)
 				return // stop if we encounter an error
 			}
+			utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, srv.ServiceName()))
 		}
 	} else if srv.IsRunning() {
 		if err = srv.Shutdown(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed to stop service <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
+			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down <%s> service: %v", utils.ServiceManager, srv.ServiceName(), err))
 			close(shutdown)
 		}
+		utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, srv.ServiceName()))
 		srvMngr.shdWg.Done()
 	}
 	return
@@ -149,13 +153,15 @@ func (srvMngr *ServiceManager) reloadService(srvName string, shutdown chan struc
 func (srvMngr *ServiceManager) ShutdownServices() {
 	for _, srv := range srvMngr.serviceIndexer.GetServices() {
 		if srv.IsRunning() {
-			go func(srv Service) {
+			go func() {
+				defer srvMngr.shdWg.Done()
 				if err := srv.Shutdown(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown subsystem <%s> because: %s",
+					utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down <%s> service: %v",
 						utils.ServiceManager, srv.ServiceName(), err))
+					return
 				}
-				srvMngr.shdWg.Done()
-			}(srv)
+				utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, srv.ServiceName()))
+			}()
 		}
 	}
 }
@@ -187,8 +193,8 @@ type ArgsServiceID struct {
 }
 
 // V1StartService starts a service with ID
-func (srvMngr *ServiceManager) V1StartService(ctx *context.Context, args *ArgsServiceID, reply *string) (err error) {
-	err = toggleService(args.ServiceID, true, srvMngr)
+func (m *ServiceManager) V1StartService(ctx *context.Context, args *ArgsServiceID, reply *string) (err error) {
+	err = toggleService(args.ServiceID, true, m)
 	if err != nil {
 		return
 	}
@@ -197,8 +203,8 @@ func (srvMngr *ServiceManager) V1StartService(ctx *context.Context, args *ArgsSe
 }
 
 // V1StopService shuts-down a service with ID
-func (srvMngr *ServiceManager) V1StopService(ctx *context.Context, args *ArgsServiceID, reply *string) (err error) {
-	err = toggleService(args.ServiceID, false, srvMngr)
+func (m *ServiceManager) V1StopService(ctx *context.Context, args *ArgsServiceID, reply *string) (err error) {
+	err = toggleService(args.ServiceID, false, m)
 	if err != nil {
 		return
 	}
@@ -207,11 +213,11 @@ func (srvMngr *ServiceManager) V1StopService(ctx *context.Context, args *ArgsSer
 }
 
 // V1ServiceStatus  returns the service status
-func (srvMngr *ServiceManager) V1ServiceStatus(ctx *context.Context, args *ArgsServiceID, reply *string) error {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
+func (m *ServiceManager) V1ServiceStatus(ctx *context.Context, args *ArgsServiceID, reply *string) error {
+	m.RLock()
+	defer m.RUnlock()
 
-	srv := srvMngr.serviceIndexer.GetService(args.ServiceID)
+	srv := m.serviceIndexer.GetService(args.ServiceID)
 	if srv == nil {
 		return utils.ErrUnsupportedServiceID
 	}
@@ -226,100 +232,100 @@ func (srvMngr *ServiceManager) V1ServiceStatus(ctx *context.Context, args *ArgsS
 }
 
 // GetConfig returns the Configuration
-func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	return srvMngr.cfg
+func (m *ServiceManager) GetConfig() *config.CGRConfig {
+	m.RLock()
+	defer m.RUnlock()
+	return m.cfg
 }
 
-func toggleService(serviceID string, status bool, srvMngr *ServiceManager) (err error) {
+func toggleService(id string, status bool, srvMngr *ServiceManager) (err error) {
 	srvMngr.Lock()
 	defer srvMngr.Unlock()
-	switch serviceID {
+	switch id {
 	case utils.AccountS:
 		srvMngr.cfg.AccountSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.ActionS:
 		srvMngr.cfg.ActionSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.AdminS:
 		srvMngr.cfg.AdminSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.AnalyzerS:
 		srvMngr.cfg.AnalyzerSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.AttributeS:
 		srvMngr.cfg.AttributeSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.CDRServer:
 		srvMngr.cfg.CdrsCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.ChargerS:
 		srvMngr.cfg.ChargerSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.DispatcherS:
 		srvMngr.cfg.DispatcherSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.EEs:
 		srvMngr.cfg.EEsCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.EFs:
 		srvMngr.cfg.EFsCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.ERs:
 		srvMngr.cfg.ERsCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 		// case utils.LoaderS:
 		// 	srvMngr.cfg.LoaderCfg()[0].Enabled = status
 		// 	srvMngr.cfg.GetReloadChan() <- serviceID
 	case utils.RateS:
 		srvMngr.cfg.RateSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.TrendS:
 		srvMngr.cfg.TrendSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.RankingS:
 		srvMngr.cfg.RankingSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.ResourceS:
 		srvMngr.cfg.ResourceSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.RouteS:
 		srvMngr.cfg.RouteSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.SessionS:
 		srvMngr.cfg.SessionSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.StatS:
 		srvMngr.cfg.StatSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.ThresholdS:
 		srvMngr.cfg.ThresholdSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.TPeS:
 		srvMngr.cfg.TpeSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.AsteriskAgent:
 		srvMngr.cfg.AsteriskAgentCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.DiameterAgent:
 		srvMngr.cfg.DiameterAgentCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.DNSAgent:
 		srvMngr.cfg.DNSAgentCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.FreeSWITCHAgent:
 		srvMngr.cfg.FsAgentCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.KamailioAgent:
 		srvMngr.cfg.KamAgentCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.RadiusAgent:
 		srvMngr.cfg.RadiusAgentCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.SIPAgent:
 		srvMngr.cfg.SIPAgentCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- serviceID
+		srvMngr.cfg.GetReloadChan() <- id
 	default:
 		err = utils.ErrUnsupportedServiceID
 	}

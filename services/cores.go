@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"os"
 	"sync"
 
@@ -84,7 +83,6 @@ func (cS *CoreService) Start(shutdown chan struct{}) error {
 
 	cS.mu.Lock()
 	defer cS.mu.Unlock()
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
 	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, shutdown)
 	cS.csCh <- cS.cS

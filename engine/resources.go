@@ -399,10 +399,8 @@ func (rS *ResourceS) StartLoop(ctx *context.Context) {
 
 // Shutdown is called to shutdown the service
 func (rS *ResourceS) Shutdown(ctx *context.Context) {
-	utils.Logger.Info("<ResourceS> service shutdown initialized")
 	close(rS.stopBackup)
 	rS.storeResources(ctx)
-	utils.Logger.Info("<ResourceS> service shutdown complete")
 }
 
 // backup will regularly store resources changed to dataDB

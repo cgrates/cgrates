@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -100,7 +99,6 @@ func (attrS *AttributeService) Start(shutdown chan struct{}) (err error) {
 	attrS.Lock()
 	defer attrS.Unlock()
 	attrS.attrS = engine.NewAttributeService(dbs.DataManager(), fs.FilterS(), attrS.cfg)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
 	srv, _ := engine.NewService(attrS.rpc)
 	// srv, _ := birpc.NewService(attrS.rpc, "", false)
@@ -135,7 +133,6 @@ func (attrS *AttributeService) Reload(_ chan struct{}) (err error) {
 // Shutdown stops the service
 func (attrS *AttributeService) Shutdown() (err error) {
 	attrS.Lock()
-	attrS.attrS.Shutdown()
 	attrS.attrS = nil
 	attrS.rpc = nil
 	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
