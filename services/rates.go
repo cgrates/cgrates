@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -42,16 +41,12 @@ func NewRateService(cfg *config.CGRConfig) *RateService {
 // RateService is the service structure for RateS
 type RateService struct {
 	sync.RWMutex
-
-	rateS *rates.RateS
-	cl    *commonlisteners.CommonListenerS
-
-	rldChan  chan struct{}
-	stopChan chan struct{}
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	cfg       *config.CGRConfig
+	rateS     *rates.RateS
+	cl        *commonlisteners.CommonListenerS
+	rldChan   chan struct{}
+	stopChan  chan struct{}
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name
@@ -83,19 +78,20 @@ func (rs *RateService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 
 // Start should handle the service start
 func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, rs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	rs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheRateProfiles,
@@ -103,12 +99,11 @@ func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.Servi
 		utils.CacheRateFilterIndexes); err != nil {
 		return err
 	}
-	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
 	rs.Lock()
-	rs.rateS = rates.NewRateS(rs.cfg, fs.FilterS(), dbs.DataManager())
+	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)
 	rs.Unlock()
 
 	rs.stopChan = make(chan struct{})
@@ -122,8 +117,7 @@ func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.Servi
 	if !rs.cfg.DispatcherSCfg().Enabled {
 		rs.cl.RpcRegister(srv)
 	}
-
-	rs.intRPCconn = anz.GetInternalCodec(srv, utils.RateS)
+	cms.AddInternalConn(utils.RateS, srv)
 	close(rs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -131,9 +125,4 @@ func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.Servi
 // StateChan returns signaling channel of specific state
 func (rs *RateService) StateChan(stateID string) chan struct{} {
 	return rs.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (rs *RateService) IntRPCConn() birpc.ClientConnector {
-	return rs.intRPCconn
 }

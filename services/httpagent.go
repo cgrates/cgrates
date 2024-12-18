@@ -21,21 +21,17 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewHTTPAgent returns the HTTP Agent
-func NewHTTPAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *HTTPAgent {
+func NewHTTPAgent(cfg *config.CGRConfig) *HTTPAgent {
 	return &HTTPAgent{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -43,6 +39,7 @@ func NewHTTPAgent(cfg *config.CGRConfig,
 // HTTPAgent implements Agent interface
 type HTTPAgent struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	cl *commonlisteners.CommonListenerS
 
@@ -50,18 +47,15 @@ type HTTPAgent struct {
 	// if we registerd the handlers
 	started bool
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (ha *HTTPAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.FilterS,
 		},
 		registry, ha.cfg.GeneralCfg().ConnectTimeout)
@@ -69,6 +63,7 @@ func (ha *HTTPAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistr
 		return err
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	ha.Lock()
@@ -77,7 +72,7 @@ func (ha *HTTPAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistr
 	ha.started = true
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		cl.RegisterHttpHandler(agntCfg.URL,
-			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, fs.FilterS(),
+			agents.NewHTTPAgent(cms, agntCfg.SessionSConns, fs.FilterS(),
 				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
@@ -112,9 +107,4 @@ func (ha *HTTPAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ha *HTTPAgent) StateChan(stateID string) chan struct{} {
 	return ha.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (ha *HTTPAgent) IntRPCConn() birpc.ClientConnector {
-	return ha.intRPCconn
 }

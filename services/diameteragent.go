@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -31,11 +30,9 @@ import (
 )
 
 // NewDiameterAgent returns the Diameter Agent
-func NewDiameterAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager, caps *engine.Caps) *DiameterAgent {
+func NewDiameterAgent(cfg *config.CGRConfig, caps *engine.Caps) *DiameterAgent {
 	return &DiameterAgent{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		caps:      caps,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
@@ -47,36 +44,39 @@ type DiameterAgent struct {
 	cfg      *config.CGRConfig
 	stopChan chan struct{}
 
-	da      *agents.DiameterAgent
-	connMgr *engine.ConnManager
-	caps    *engine.Caps
+	da   *agents.DiameterAgent
+	caps *engine.Caps
 
 	lnet  string
 	laddr string
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (da *DiameterAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
-		da.cfg.GeneralCfg().ConnectTimeout)
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, da.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	da.Lock()
 	defer da.Unlock()
-	return da.start(fs.(*FilterService).FilterS(), da.caps, shutdown)
+	return da.start(fs.FilterS(), cms.ConnManager(), da.caps, shutdown)
 }
 
-func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps, shutdown chan struct{}) error {
+func (da *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, caps *engine.Caps,
+	shutdown chan struct{}) error {
 	var err error
-	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr, caps)
+	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, cm, caps)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed to initialize agent: %v",
-			utils.DiameterAgent, err))
 		return err
 	}
 	da.lnet = da.cfg.DiameterAgentCfg().ListenNet
@@ -103,12 +103,18 @@ func (da *DiameterAgent) Reload(shutdown chan struct{}, registry *servmanager.Se
 	}
 	close(da.stopChan)
 
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
-		da.cfg.GeneralCfg().ConnectTimeout)
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, da.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
-	return da.start(fs.(*FilterService).FilterS(), da.caps, shutdown)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	return da.start(fs.FilterS(), cms.ConnManager(), da.caps, shutdown)
 }
 
 // Shutdown stops the service
@@ -134,9 +140,4 @@ func (da *DiameterAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (da *DiameterAgent) StateChan(stateID string) chan struct{} {
 	return da.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (da *DiameterAgent) IntRPCConn() birpc.ClientConnector {
-	return da.intRPCconn
 }

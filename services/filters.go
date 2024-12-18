@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -29,31 +28,26 @@ import (
 )
 
 // NewFilterService instantiates a new FilterService.
-func NewFilterService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *FilterService {
+func NewFilterService(cfg *config.CGRConfig) *FilterService {
 	return &FilterService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // FilterService implements Service interface.
 type FilterService struct {
-	mu sync.RWMutex
-
-	fltrS *engine.FilterS
-
-	cfg     *config.CGRConfig
-	connMgr *engine.ConnManager
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	fltrS     *engine.FilterS
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
 func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
+			utils.ConnManager,
 			utils.CacheS,
 			utils.DataDB,
 		},
@@ -61,6 +55,7 @@ func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.Serv
 	if err != nil {
 		return err
 	}
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown, utils.CacheFilters); err != nil {
 		return err
@@ -70,7 +65,7 @@ func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.Serv
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.fltrS = engine.NewFilterS(s.cfg, s.connMgr, dbs.DataManager())
+	s.fltrS = engine.NewFilterS(s.cfg, cms.ConnManager(), dbs.DataManager())
 	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -102,11 +97,6 @@ func (s *FilterService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (s *FilterService) StateChan(stateID string) chan struct{} {
 	return s.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (s *FilterService) IntRPCConn() birpc.ClientConnector {
-	return s.intRPCconn
 }
 
 // FilterS returns the FilterS object.

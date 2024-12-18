@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -30,11 +29,9 @@ import (
 )
 
 // NewRouteService returns the Route Service
-func NewRouteService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *RouteService {
+func NewRouteService(cfg *config.CGRConfig) *RouteService {
 	return &RouteService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -42,32 +39,30 @@ func NewRouteService(cfg *config.CGRConfig,
 // RouteService implements Service interface
 type RouteService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	routeS *engine.RouteS
 	cl     *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (routeS *RouteService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, routeS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	routeS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheRouteProfiles,
@@ -76,11 +71,10 @@ func (routeS *RouteService) Start(shutdown chan struct{}, registry *servmanager.
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	routeS.Lock()
 	defer routeS.Unlock()
-	routeS.routeS = engine.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, routeS.connMgr)
+	routeS.routeS = engine.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(routeS.routeS)
 	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
 	if !routeS.cfg.DispatcherSCfg().Enabled {
@@ -88,7 +82,7 @@ func (routeS *RouteService) Start(shutdown chan struct{}, registry *servmanager.
 			routeS.cl.RpcRegister(s)
 		}
 	}
-	routeS.intRPCconn = anz.GetInternalCodec(srv, utils.RouteS)
+	cms.AddInternalConn(utils.RouteS, srv)
 	close(routeS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -121,9 +115,4 @@ func (routeS *RouteService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (routeS *RouteService) StateChan(stateID string) chan struct{} {
 	return routeS.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (routeS *RouteService) IntRPCConn() birpc.ClientConnector {
-	return routeS.intRPCconn
 }

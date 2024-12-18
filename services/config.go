@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,26 +38,25 @@ func NewConfigService(cfg *config.CGRConfig) *ConfigService {
 
 // ConfigService implements Service interface.
 type ConfigService struct {
-	mu         sync.RWMutex
-	cfg        *config.CGRConfig
-	cl         *commonlisteners.CommonListenerS
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	cl        *commonlisteners.CommonListenerS
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
 func (s *ConfigService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
-			utils.AnalyzerS,
+			utils.ConnManager,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
 	svcs, _ := engine.NewServiceWithName(s.cfg, utils.ConfigS, true)
 	if !s.cfg.DispatcherSCfg().Enabled {
@@ -66,7 +64,7 @@ func (s *ConfigService) Start(_ chan struct{}, registry *servmanager.ServiceRegi
 			s.cl.RpcRegister(svc)
 		}
 	}
-	s.intRPCconn = anz.GetInternalCodec(svcs, utils.ConfigSv1)
+	cms.AddInternalConn(utils.ConfigS, svcs)
 	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -95,9 +93,4 @@ func (s *ConfigService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (s *ConfigService) StateChan(stateID string) chan struct{} {
 	return s.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (s *ConfigService) IntRPCConn() birpc.ClientConnector {
-	return s.intRPCconn
 }

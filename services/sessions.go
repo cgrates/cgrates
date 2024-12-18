@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/engine"
 
@@ -33,11 +32,9 @@ import (
 )
 
 // NewSessionService returns the Session Service
-func NewSessionService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *SessionService {
+func NewSessionService(cfg *config.CGRConfig) *SessionService {
 	return &SessionService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -51,35 +48,33 @@ type SessionService struct {
 
 	bircpEnabled bool // to stop birpc server if needed
 	stopChan     chan struct{}
-	connMgr      *engine.ConnManager
 	cfg          *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
 func (smg *SessionService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, smg.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	smg.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	smg.Lock()
 	defer smg.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), fs.FilterS(), smg.connMgr)
+	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)
@@ -102,7 +97,7 @@ func (smg *SessionService) Start(shutdown chan struct{}, registry *servmanager.S
 		// run this in it's own goroutine
 		go smg.start(shutdown)
 	}
-	smg.intRPCconn = anz.GetInternalCodec(srv, utils.SessionS)
+	cms.AddInternalConn(utils.SessionS, srv)
 	close(smg.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -156,9 +151,4 @@ func (smg *SessionService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (smg *SessionService) StateChan(stateID string) chan struct{} {
 	return smg.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (smg *SessionService) IntRPCConn() birpc.ClientConnector {
-	return smg.intRPCconn
 }

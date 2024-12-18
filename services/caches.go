@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -30,10 +29,9 @@ import (
 )
 
 // NewCacheService .
-func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *CacheService {
+func NewCacheService(cfg *config.CGRConfig) *CacheService {
 	return &CacheService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		cacheCh:   make(chan *engine.CacheS, 1),
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
@@ -41,24 +39,20 @@ func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *CacheS
 
 // CacheService implements Agent interface
 type CacheService struct {
-	mu sync.Mutex
-	cl *commonlisteners.CommonListenerS
-
-	cacheCh chan *engine.CacheS
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	cl        *commonlisteners.CommonListenerS
+	cacheCh   chan *engine.CacheS
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.DataDB,
-			utils.AnalyzerS,
+			utils.ConnManager,
 			utils.CoreS,
 		},
 		registry, cS.cfg.GeneralCfg().ConnectTimeout)
@@ -67,13 +61,13 @@ func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.Serv
 	}
 	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cs := srvDeps[utils.CoreS].(*CoreService)
 
 	cS.mu.Lock()
 	defer cS.mu.Unlock()
 
-	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cS.connMgr, cs.CoreS().CapsStats)
+	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cms.ConnManager(), cs.CoreS().CapsStats)
 	go engine.Cache.Precache(shutdown)
 
 	cS.cacheCh <- engine.Cache
@@ -85,7 +79,7 @@ func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.Serv
 			cS.cl.RpcRegister(s)
 		}
 	}
-	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CacheS)
+	cms.AddInternalConn(utils.CacheS, srv)
 	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -138,9 +132,4 @@ func (cS *CacheService) WaitToPrecache(shutdown chan struct{}, cacheIDs ...strin
 // StateChan returns signaling channel of specific state
 func (cS *CacheService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (cS *CacheService) IntRPCConn() birpc.ClientConnector {
-	return cS.intRPCconn
 }

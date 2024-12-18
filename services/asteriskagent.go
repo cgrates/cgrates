@@ -22,9 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
@@ -32,11 +29,9 @@ import (
 )
 
 // NewAsteriskAgent returns the Asterisk Agent
-func NewAsteriskAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *AsteriskAgent {
+func NewAsteriskAgent(cfg *config.CGRConfig) *AsteriskAgent {
 	return &AsteriskAgent{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -44,18 +39,19 @@ func NewAsteriskAgent(cfg *config.CGRConfig,
 // AsteriskAgent implements Agent interface
 type AsteriskAgent struct {
 	sync.RWMutex
-	cfg      *config.CGRConfig
-	stopChan chan struct{}
-
-	smas    []*agents.AsteriskAgent
-	connMgr *engine.ConnManager
-
-	intRPCconn birpc.ClientConnector // share the API object implementing API calls for internal
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	cfg       *config.CGRConfig
+	stopChan  chan struct{}
+	smas      []*agents.AsteriskAgent
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (ast *AsteriskAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (ast *AsteriskAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, ast.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
+	}
+
 	ast.Lock()
 	defer ast.Unlock()
 
@@ -68,7 +64,7 @@ func (ast *AsteriskAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRe
 	ast.stopChan = make(chan struct{})
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
+		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, cms.(*ConnManagerService).ConnManager())
 		go listenAndServe(ast.smas[connIdx], ast.stopChan)
 	}
 	close(ast.stateDeps.StateChan(utils.StateServiceUP))
@@ -109,9 +105,4 @@ func (ast *AsteriskAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ast *AsteriskAgent) StateChan(stateID string) chan struct{} {
 	return ast.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (ast *AsteriskAgent) IntRPCConn() birpc.ClientConnector {
-	return ast.intRPCconn
 }

@@ -22,7 +22,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -46,35 +45,31 @@ func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps,
 
 // CoreService implements Service interface
 type CoreService struct {
-	mu sync.RWMutex
-
-	cS *cores.CoreS
-	cl *commonlisteners.CommonListenerS
-
-	fileCPU  *os.File
-	caps     *engine.Caps
-	csCh     chan *cores.CoreS
-	stopChan chan struct{}
-	shdWg    *sync.WaitGroup
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	cS        *cores.CoreS
+	cl        *commonlisteners.CommonListenerS
+	fileCPU   *os.File
+	caps      *engine.Caps
+	csCh      chan *cores.CoreS
+	stopChan  chan struct{}
+	shdWg     *sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
 func (cS *CoreService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
-			utils.AnalyzerS,
+			utils.ConnManager,
 		},
 		registry, cS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
 	cS.mu.Lock()
 	defer cS.mu.Unlock()
@@ -91,7 +86,7 @@ func (cS *CoreService) Start(shutdown chan struct{}, registry *servmanager.Servi
 		}
 	}
 
-	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CoreS)
+	cms.AddInternalConn(utils.CoreS, srv)
 	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -129,11 +124,6 @@ func (cS *CoreService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (cS *CoreService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (cS *CoreService) IntRPCConn() birpc.ClientConnector {
-	return cS.intRPCconn
 }
 
 // CoreS returns the CoreS object.

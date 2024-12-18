@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -31,11 +30,9 @@ import (
 )
 
 // NewLoaderService returns the Loader Service
-func NewLoaderService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *LoaderService {
+func NewLoaderService(cfg *config.CGRConfig) *LoaderService {
 	return &LoaderService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stopChan:  make(chan struct{}),
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
@@ -49,35 +46,33 @@ type LoaderService struct {
 	cl   *commonlisteners.CommonListenerS
 
 	stopChan chan struct{}
-	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
 func (ldrs *LoaderService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, ldrs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	ldrs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	ldrs.Lock()
 	defer ldrs.Unlock()
 
-	ldrs.ldrs = loaders.NewLoaderS(ldrs.cfg, dbs.DataManager(), fs.FilterS(), ldrs.connMgr)
+	ldrs.ldrs = loaders.NewLoaderS(ldrs.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 
 	if !ldrs.ldrs.Enabled() {
 		return
@@ -92,15 +87,16 @@ func (ldrs *LoaderService) Start(_ chan struct{}, registry *servmanager.ServiceR
 			ldrs.cl.RpcRegister(s)
 		}
 	}
-	ldrs.intRPCconn = anz.GetInternalCodec(srv, utils.LoaderS)
+	cms.AddInternalConn(utils.LoaderS, srv)
 	close(ldrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
 func (ldrs *LoaderService) Reload(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
+			utils.ConnManager,
 			utils.FilterS,
 			utils.DataDB,
 		},
@@ -108,6 +104,7 @@ func (ldrs *LoaderService) Reload(_ chan struct{}, registry *servmanager.Service
 	if err != nil {
 		return err
 	}
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 	close(ldrs.stopChan)
@@ -116,7 +113,7 @@ func (ldrs *LoaderService) Reload(_ chan struct{}, registry *servmanager.Service
 	ldrs.RLock()
 	defer ldrs.RUnlock()
 
-	ldrs.ldrs.Reload(dbs.DataManager(), fs.FilterS(), ldrs.connMgr)
+	ldrs.ldrs.Reload(dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	return ldrs.ldrs.ListenAndServe(ldrs.stopChan)
 }
 
@@ -149,9 +146,4 @@ func (ldrs *LoaderService) GetLoaderS() *loaders.LoaderS {
 // StateChan returns signaling channel of specific state
 func (ldrs *LoaderService) StateChan(stateID string) chan struct{} {
 	return ldrs.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (ldrs *LoaderService) IntRPCConn() birpc.ClientConnector {
-	return ldrs.intRPCconn
 }

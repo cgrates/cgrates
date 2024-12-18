@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -31,11 +30,9 @@ import (
 )
 
 // NewAPIerSv1Service returns the APIerSv1 Service
-func NewAdminSv1Service(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *AdminSv1Service {
+func NewAdminSv1Service(cfg *config.CGRConfig) *AdminSv1Service {
 	return &AdminSv1Service{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -43,27 +40,22 @@ func NewAdminSv1Service(cfg *config.CGRConfig,
 // AdminSv1Service implements Service interface
 type AdminSv1Service struct {
 	sync.RWMutex
-
-	api *apis.AdminSv1
-	cl  *commonlisteners.CommonListenerS
-
-	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector // RPC connector with internal APIs
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	cfg       *config.CGRConfig
+	api       *apis.AdminSv1
+	cl        *commonlisteners.CommonListenerS
+	stopChan  chan struct{}
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
 func (apiService *AdminSv1Service) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 			utils.StorDB,
 		},
 		registry, apiService.cfg.GeneralCfg().ConnectTimeout)
@@ -71,15 +63,15 @@ func (apiService *AdminSv1Service) Start(_ chan struct{}, registry *servmanager.
 		return err
 	}
 	apiService.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 	sdbs := srvDeps[utils.StorDB].(*StorDBService)
 
 	apiService.Lock()
 	defer apiService.Unlock()
 
-	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), apiService.connMgr, fs.FilterS(), sdbs.DB())
+	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), cms.ConnManager(), fs.FilterS(), sdbs.DB())
 
 	srv, _ := engine.NewService(apiService.api)
 	// srv, _ := birpc.NewService(apiService.api, "", false)
@@ -93,9 +85,7 @@ func (apiService *AdminSv1Service) Start(_ chan struct{}, registry *servmanager.
 			apiService.cl.RpcRegister(s)
 		}
 	}
-
-	//backwards compatible
-	apiService.intRPCconn = anz.GetInternalCodec(srv, utils.AdminSv1)
+	cms.AddInternalConn(utils.AdminS, srv)
 	close(apiService.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -129,9 +119,4 @@ func (apiService *AdminSv1Service) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (apiService *AdminSv1Service) StateChan(stateID string) chan struct{} {
 	return apiService.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (apiService *AdminSv1Service) IntRPCConn() birpc.ClientConnector {
-	return apiService.intRPCconn
 }

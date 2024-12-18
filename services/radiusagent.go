@@ -22,20 +22,16 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewRadiusAgent returns the Radius Agent
-func NewRadiusAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager) *RadiusAgent {
+func NewRadiusAgent(cfg *config.CGRConfig) *RadiusAgent {
 	return &RadiusAgent{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -46,24 +42,28 @@ type RadiusAgent struct {
 	cfg      *config.CGRConfig
 	stopChan chan struct{}
 
-	rad     *agents.RadiusAgent
-	connMgr *engine.ConnManager
+	rad *agents.RadiusAgent
 
 	lnet  string
 	lauth string
 	lacct string
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (rad *RadiusAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
-		rad.cfg.GeneralCfg().ConnectTimeout)
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, rad.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	rad.Lock()
 	defer rad.Unlock()
@@ -72,7 +72,7 @@ func (rad *RadiusAgent) Start(shutdown chan struct{}, registry *servmanager.Serv
 	rad.lauth = rad.cfg.RadiusAgentCfg().ListenAuth
 	rad.lacct = rad.cfg.RadiusAgentCfg().ListenAcct
 
-	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.(*FilterService).FilterS(), rad.connMgr); err != nil {
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.FilterS(), cms.ConnManager()); err != nil {
 		return
 	}
 	rad.stopChan = make(chan struct{})
@@ -129,9 +129,4 @@ func (rad *RadiusAgent) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (rad *RadiusAgent) StateChan(stateID string) chan struct{} {
 	return rad.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (rad *RadiusAgent) IntRPCConn() birpc.ClientConnector {
-	return rad.intRPCconn
 }

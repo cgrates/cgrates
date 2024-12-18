@@ -22,25 +22,21 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewServiceManager returns a service manager
-func NewServiceManager(shdWg *sync.WaitGroup, connMgr *engine.ConnManager,
-	cfg *config.CGRConfig, registry *ServiceRegistry, services []Service) (sM *ServiceManager) {
+func NewServiceManager(shdWg *sync.WaitGroup, cfg *config.CGRConfig, registry *ServiceRegistry,
+	services []Service) (sM *ServiceManager) {
 	sM = &ServiceManager{
 		cfg:      cfg,
 		registry: registry,
 		shdWg:    shdWg,
-		connMgr:  connMgr,
 		rldChan:  cfg.GetReloadChan(),
 	}
-	sM.AddServices(services...)
+	sM.registry.Register(services...)
 	return
 }
 
@@ -51,7 +47,6 @@ type ServiceManager struct {
 	registry     *ServiceRegistry // index here the services for accessing them by their IDs
 	shdWg        *sync.WaitGroup  // list of shutdown items
 	rldChan      <-chan string    // reload signals come over this channelc
-	connMgr      *engine.ConnManager
 }
 
 // StartServices starts all enabled services
@@ -61,8 +56,7 @@ func (m *ServiceManager) StartServices(shutdown chan struct{}) {
 		if svc.ShouldRun() && !IsServiceInState(svc, utils.StateServiceUP) {
 			m.shdWg.Add(1)
 			go func() {
-				if err := svc.Start(shutdown, m.registry); err != nil &&
-					err != utils.ErrServiceAlreadyRunning { // in case the service was started in another gorutine
+				if err := svc.Start(shutdown, m.registry); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 					close(shutdown)
 				}
@@ -71,33 +65,6 @@ func (m *ServiceManager) StartServices(shutdown chan struct{}) {
 		}
 	}
 	// startServer()
-}
-
-// AddServices adds given services
-func (m *ServiceManager) AddServices(services ...Service) {
-	m.Lock()
-	for _, svc := range services {
-		m.registry.Register(svc)
-		if sAPIData, hasAPIData := serviceAPIData[svc.ServiceName()]; hasAPIData { // Add the internal connections
-			rpcIntChan := make(chan birpc.ClientConnector, 1)
-			m.connMgr.AddInternalConn(sAPIData[1], sAPIData[0], rpcIntChan)
-			if len(sAPIData) > 2 { // Add the bidirectional API
-				m.connMgr.AddInternalConn(sAPIData[2], sAPIData[0], rpcIntChan)
-			}
-			go func() { // ToDo: centralize management into one single goroutine
-				if utils.StructChanTimeout(
-					m.registry.Lookup(svc.ServiceName()).StateChan(utils.StateServiceUP),
-					m.cfg.GeneralCfg().ConnectTimeout) {
-					utils.Logger.Err(
-						fmt.Sprintf("<%s> failed to register internal connection to service %s because of timeout waiting for ServiceUP state",
-							utils.ServiceManager, svc.ServiceName()))
-					// toDo: shutdown service
-				}
-				rpcIntChan <- svc.IntRPCConn()
-			}()
-		}
-	}
-	m.Unlock()
 }
 
 func (m *ServiceManager) handleReload(shutdown chan struct{}) {
@@ -109,12 +76,7 @@ func (m *ServiceManager) handleReload(shutdown chan struct{}) {
 			return
 		case serviceID = <-m.rldChan:
 		}
-		if serviceID == config.RPCConnsJSON {
-			go m.connMgr.Reload()
-		} else {
-			go m.reloadService(serviceID, shutdown)
-
-		}
+		go m.reloadService(serviceID, shutdown)
 		// handle RPC server
 	}
 }
@@ -181,8 +143,6 @@ type Service interface {
 	ServiceName() string
 	// StateChan returns the channel for specific state subscription
 	StateChan(stateID string) chan struct{}
-	// IntRPCConn returns the connector needed for internal RPC connections
-	IntRPCConn() birpc.ClientConnector
 }
 
 // ArgsServiceID are passed to Start/Stop/Status RPC methods
@@ -328,88 +288,6 @@ func toggleService(id string, status bool, srvMngr *ServiceManager) (err error) 
 		err = utils.ErrUnsupportedServiceID
 	}
 	return
-}
-
-var serviceAPIData = map[string][]string{
-	utils.AnalyzerS: {
-		utils.AnalyzerSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzerS)},
-	utils.AdminS: {
-		utils.AdminSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)},
-	utils.AttributeS: {
-		utils.AttributeSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)},
-	utils.CacheS: {
-		utils.CacheSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
-	utils.CDRs: {
-		utils.CDRsV1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
-	utils.ChargerS: {
-		utils.ChargerSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
-	utils.GuardianS: {
-		utils.GuardianSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian)},
-	utils.LoaderS: {
-		utils.LoaderSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders)},
-	utils.ResourceS: {
-		utils.ResourceSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
-	utils.SessionS: {
-		utils.SessionSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS),
-		utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)},
-	utils.StatS: {
-		utils.StatSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
-	utils.RankingS: {
-		utils.RankingSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings)},
-	utils.TrendS: {
-		utils.TrendSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends)},
-	utils.RouteS: {
-		utils.RouteSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)},
-	utils.ThresholdS: {
-		utils.ThresholdSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
-	utils.ServiceManagerS: {
-		utils.ServiceManagerV1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager)},
-	utils.ConfigS: {
-		utils.ConfigSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig)},
-	utils.CoreS: {
-		utils.CoreSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore)},
-	utils.EEs: {
-		utils.EeSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)},
-	utils.RateS: {
-		utils.RateSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)},
-	utils.DispatcherS: {
-		utils.DispatcherSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers)},
-	utils.AccountS: {
-		utils.AccountSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
-	utils.ActionS: {
-		utils.ActionSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
-	utils.TPeS: {
-		utils.TPeSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTpes)},
-	utils.EFs: {
-		utils.EfSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEFs)},
-	utils.ERs: {
-		utils.ErSv1,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaERs)},
 }
 
 // IsServiceInState performs a non-blocking check to determine if a service is in the specified state.

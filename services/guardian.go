@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -40,26 +39,25 @@ func NewGuardianService(cfg *config.CGRConfig) *GuardianService {
 
 // GuardianService implements Service interface.
 type GuardianService struct {
-	mu         sync.RWMutex
-	cfg        *config.CGRConfig
-	cl         *commonlisteners.CommonListenerS
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	cl        *commonlisteners.CommonListenerS
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
 func (s *GuardianService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
-			utils.AnalyzerS,
+			utils.ConnManager,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -70,7 +68,7 @@ func (s *GuardianService) Start(_ chan struct{}, registry *servmanager.ServiceRe
 			s.cl.RpcRegister(svc)
 		}
 	}
-	s.intRPCconn = anz.GetInternalCodec(svcs, utils.GuardianS)
+	cms.AddInternalConn(utils.GuardianS, svcs)
 	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -102,9 +100,4 @@ func (s *GuardianService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (s *GuardianService) StateChan(stateID string) chan struct{} {
 	return s.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (s *GuardianService) IntRPCConn() birpc.ClientConnector {
-	return s.intRPCconn
 }

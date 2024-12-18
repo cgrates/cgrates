@@ -39,35 +39,37 @@ type ExportFailoverService struct {
 	srv *birpc.Service
 
 	stopChan chan struct{}
-	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // NewExportFailoverService is the constructor for the TpeService
-func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *ExportFailoverService {
+func NewExportFailoverService(cfg *config.CGRConfig) *ExportFailoverService {
 	return &ExportFailoverService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // Start should handle the service start
 func (efServ *ExportFailoverService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
-	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
-		efServ.cfg.GeneralCfg().ConnectTimeout)
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+		},
+		registry, efServ.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
-	efServ.cl = cls.(*CommonListenerService).CLS()
+	efServ.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
 	efServ.Lock()
 	defer efServ.Unlock()
 
-	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
+	efServ.efS = efs.NewEfs(efServ.cfg, cms.ConnManager())
 	efServ.stopChan = make(chan struct{})
 	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
 	efServ.cl.RpcRegister(efServ.srv)
@@ -102,9 +104,4 @@ func (efServ *ExportFailoverService) ServiceName() string {
 // StateChan returns signaling channel of specific state
 func (efServ *ExportFailoverService) StateChan(stateID string) chan struct{} {
 	return efServ.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (efServ *ExportFailoverService) IntRPCConn() birpc.ClientConnector {
-	return efServ.intRPCconn
 }

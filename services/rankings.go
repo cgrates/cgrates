@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/commonlisteners"
@@ -33,11 +32,9 @@ import (
 
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
 	srvDep map[string]*sync.WaitGroup) *RankingService {
 	return &RankingService{
 		cfg:       cfg,
-		connMgr:   connMgr,
 		srvDep:    srvDep,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
@@ -45,35 +42,33 @@ func NewRankingService(cfg *config.CGRConfig,
 
 type RankingService struct {
 	sync.RWMutex
+	cfg *config.CGRConfig
 
 	ran *engine.RankingS
 	cl  *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector // expose API methods over internal connection
-	stateDeps  *StateDependencies    // channel subscriptions for state changes
+	srvDep    map[string]*sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	ran.srvDep[utils.DataDB].Add(1)
 
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
+			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
 			utils.DataDB,
-			utils.AnalyzerS,
 		},
 		registry, ran.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
 	ran.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheRankingProfiles,
@@ -82,11 +77,10 @@ func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.S
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	ran.Lock()
 	defer ran.Unlock()
-	ran.ran = engine.NewRankingS(dbs.DataManager(), ran.connMgr, fs.FilterS(), ran.cfg)
+	ran.ran = engine.NewRankingS(dbs.DataManager(), cms.ConnManager(), fs.FilterS(), ran.cfg)
 	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
 	}
@@ -99,7 +93,7 @@ func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.S
 			ran.cl.RpcRegister(s)
 		}
 	}
-	ran.intRPCconn = anz.GetInternalCodec(srv, utils.RankingS)
+	cms.AddInternalConn(utils.RankingS, srv)
 	close(ran.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -137,9 +131,4 @@ func (ran *RankingService) ShouldRun() bool {
 // StateChan returns signaling channel of specific state
 func (ran *RankingService) StateChan(stateID string) chan struct{} {
 	return ran.stateDeps.StateChan(stateID)
-}
-
-// IntRPCConn returns the internal connection used by RPCClient
-func (ran *RankingService) IntRPCConn() birpc.ClientConnector {
-	return ran.intRPCconn
 }
