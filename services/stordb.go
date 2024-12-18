@@ -30,13 +30,11 @@ import (
 )
 
 // NewStorDBService returns the StorDB Service
-func NewStorDBService(cfg *config.CGRConfig, setVersions bool,
-	srvIndexer *servmanager.ServiceRegistry) *StorDBService {
+func NewStorDBService(cfg *config.CGRConfig, setVersions bool) *StorDBService {
 	return &StorDBService{
 		cfg:         cfg,
 		setVersions: setVersions,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -49,16 +47,12 @@ type StorDBService struct {
 	db          engine.StorDB
 	setVersions bool
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (db *StorDBService) Start(_ chan struct{}) (err error) {
-	if db.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
+func (db *StorDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.StorDbCfg().Clone()
@@ -86,7 +80,7 @@ func (db *StorDBService) Start(_ chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (db *StorDBService) Reload(_ chan struct{}) (err error) {
+func (db *StorDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
@@ -133,19 +127,13 @@ func (db *StorDBService) Reload(_ chan struct{}) (err error) {
 }
 
 // Shutdown stops the service
-func (db *StorDBService) Shutdown() (_ error) {
+func (db *StorDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	db.Lock()
 	db.db.Close()
 	db.db = nil
 	db.Unlock()
+	close(db.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (db *StorDBService) IsRunning() bool {
-	db.RLock()
-	defer db.RUnlock()
-	return db.isRunning()
 }
 
 // isRunning returns if the service is running (not thread safe)

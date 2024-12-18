@@ -30,11 +30,10 @@ import (
 )
 
 // NewConfigService instantiates a new ConfigService.
-func NewConfigService(cfg *config.CGRConfig, srvIndexer *servmanager.ServiceRegistry) *ConfigService {
+func NewConfigService(cfg *config.CGRConfig) *ConfigService {
 	return &ConfigService{
-		cfg:        cfg,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -43,23 +42,18 @@ type ConfigService struct {
 	mu         sync.RWMutex
 	cfg        *config.CGRConfig
 	cl         *commonlisteners.CommonListenerS
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (s *ConfigService) Start(_ chan struct{}) error {
-	if s.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (s *ConfigService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.AnalyzerS,
 		},
-		s.srvIndexer, s.cfg.GeneralCfg().ConnectTimeout)
+		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -78,22 +72,17 @@ func (s *ConfigService) Start(_ chan struct{}) error {
 }
 
 // Reload handles the config changes.
-func (s *ConfigService) Reload(_ chan struct{}) error {
+func (s *ConfigService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *ConfigService) Shutdown() error {
+func (s *ConfigService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.cl.RpcUnregisterName(utils.ConfigSv1)
+	close(s.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 
-// IsRunning returns whether the service is running or not.
-func (s *ConfigService) IsRunning() bool {
-	return IsServiceInState(s.ServiceName(), utils.StateServiceUP, s.srvIndexer)
-}
-
-// ServiceName returns the service name
 func (s *ConfigService) ServiceName() string {
 	return utils.ConfigS
 }

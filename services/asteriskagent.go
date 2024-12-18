@@ -33,13 +33,11 @@ import (
 
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *AsteriskAgent {
+	connMgr *engine.ConnManager) *AsteriskAgent {
 	return &AsteriskAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -52,17 +50,12 @@ type AsteriskAgent struct {
 	smas    []*agents.AsteriskAgent
 	connMgr *engine.ConnManager
 
-	intRPCconn birpc.ClientConnector        // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // share the API object implementing API calls for internal
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (ast *AsteriskAgent) Start(shutdown chan struct{}) (err error) {
-	if ast.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (ast *AsteriskAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	ast.Lock()
 	defer ast.Unlock()
 
@@ -83,14 +76,15 @@ func (ast *AsteriskAgent) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (ast *AsteriskAgent) Reload(shutdown chan struct{}) (err error) {
+func (ast *AsteriskAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	ast.shutdown()
-	return ast.Start(shutdown)
+	return ast.Start(shutdown, registry)
 }
 
 // Shutdown stops the service
-func (ast *AsteriskAgent) Shutdown() (err error) {
+func (ast *AsteriskAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ast.shutdown()
+	close(ast.StateChan(utils.StateServiceDOWN))
 	return
 }
 
@@ -100,13 +94,6 @@ func (ast *AsteriskAgent) shutdown() {
 	ast.smas = nil
 	ast.Unlock()
 	return // no shutdown for the momment
-}
-
-// IsRunning returns if the service is running
-func (ast *AsteriskAgent) IsRunning() bool {
-	ast.RLock()
-	defer ast.RUnlock()
-	return ast.smas != nil
 }
 
 // ServiceName returns the service name

@@ -32,13 +32,11 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *HTTPAgent {
+	connMgr *engine.ConnManager) *HTTPAgent {
 	return &HTTPAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -55,23 +53,18 @@ type HTTPAgent struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (ha *HTTPAgent) Start(_ chan struct{}) (err error) {
-	if ha.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (ha *HTTPAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.FilterS,
 		},
-		ha.srvIndexer, ha.cfg.GeneralCfg().ConnectTimeout)
+		registry, ha.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -93,23 +86,17 @@ func (ha *HTTPAgent) Start(_ chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (ha *HTTPAgent) Reload(_ chan struct{}) (err error) {
+func (ha *HTTPAgent) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return // no reload
 }
 
 // Shutdown stops the service
-func (ha *HTTPAgent) Shutdown() (err error) {
+func (ha *HTTPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ha.Lock()
 	ha.started = false
 	ha.Unlock()
+	close(ha.stateDeps.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
-}
-
-// IsRunning returns if the service is running
-func (ha *HTTPAgent) IsRunning() bool {
-	ha.RLock()
-	defer ha.RUnlock()
-	return ha.started
 }
 
 // ServiceName returns the service name

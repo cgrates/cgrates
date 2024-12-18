@@ -33,14 +33,12 @@ import (
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceRegistry) *TrendService {
+	srvDep map[string]*sync.WaitGroup) *TrendService {
 	return &TrendService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvDep:     srvDep,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		srvDep:    srvDep,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -54,17 +52,12 @@ type TrendService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (trs *TrendService) Start(shutdown chan struct{}) (err error) {
-	if trs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (trs *TrendService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	trs.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -75,7 +68,7 @@ func (trs *TrendService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		trs.srvIndexer, trs.cfg.GeneralCfg().ConnectTimeout)
+		registry, trs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -111,7 +104,7 @@ func (trs *TrendService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (trs *TrendService) Reload(_ chan struct{}) (err error) {
+func (trs *TrendService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	trs.Lock()
 	trs.trs.Reload(context.TODO())
 	trs.Unlock()
@@ -119,19 +112,15 @@ func (trs *TrendService) Reload(_ chan struct{}) (err error) {
 }
 
 // Shutdown stops the service
-func (trs *TrendService) Shutdown() (err error) {
+func (trs *TrendService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer trs.srvDep[utils.DataDB].Done()
 	trs.Lock()
 	defer trs.Unlock()
 	trs.trs.StopTrendS()
 	trs.trs = nil
 	trs.cl.RpcUnregisterName(utils.TrendSv1)
+	close(trs.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (trs *TrendService) IsRunning() bool {
-	return trs.trs != nil
 }
 
 // ServiceName returns the service name

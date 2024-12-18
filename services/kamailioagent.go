@@ -33,13 +33,11 @@ import (
 
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *KamailioAgent {
+	connMgr *engine.ConnManager) *KamailioAgent {
 	return &KamailioAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -51,17 +49,12 @@ type KamailioAgent struct {
 	kam     *agents.KamailioAgent
 	connMgr *engine.ConnManager
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (kam *KamailioAgent) Start(shutdown chan struct{}) (err error) {
-	if kam.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (kam *KamailioAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 
@@ -74,7 +67,7 @@ func (kam *KamailioAgent) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (kam *KamailioAgent) Reload(shutdown chan struct{}) (err error) {
+func (kam *KamailioAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 	if err = kam.kam.Shutdown(); err != nil {
@@ -98,19 +91,13 @@ func (kam *KamailioAgent) connect(k *agents.KamailioAgent, shutdown chan struct{
 }
 
 // Shutdown stops the service
-func (kam *KamailioAgent) Shutdown() (err error) {
+func (kam *KamailioAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 	err = kam.kam.Shutdown()
 	kam.kam = nil
+	close(kam.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (kam *KamailioAgent) IsRunning() bool {
-	kam.RLock()
-	defer kam.RUnlock()
-	return kam.kam != nil
 }
 
 // ServiceName returns the service name

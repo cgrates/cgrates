@@ -31,13 +31,11 @@ import (
 )
 
 // NewTPeService is the constructor for the TpeService
-func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *TPeService {
+func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *TPeService {
 	return &TPeService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -53,20 +51,19 @@ type TPeService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (ts *TPeService) Start(_ chan struct{}) (err error) {
+func (ts *TPeService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.DataDB,
 		},
-		ts.srvIndexer, ts.cfg.GeneralCfg().ConnectTimeout)
+		registry, ts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -82,22 +79,16 @@ func (ts *TPeService) Start(_ chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (ts *TPeService) Reload(_ chan struct{}) (err error) {
+func (ts *TPeService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (ts *TPeService) Shutdown() (err error) {
+func (ts *TPeService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ts.srv = nil
 	close(ts.stopChan)
+	close(ts.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (ts *TPeService) IsRunning() bool {
-	ts.Lock()
-	defer ts.Unlock()
-	return ts.tpes != nil
 }
 
 // ServiceName returns the service name

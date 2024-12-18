@@ -28,12 +28,10 @@ import (
 )
 
 // NewGlobalVarS .
-func NewGlobalVarS(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceRegistry) *GlobalVarS {
+func NewGlobalVarS(cfg *config.CGRConfig) *GlobalVarS {
 	return &GlobalVarS{
-		cfg:        cfg,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -41,13 +39,12 @@ func NewGlobalVarS(cfg *config.CGRConfig,
 type GlobalVarS struct {
 	cfg *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (gv *GlobalVarS) Start(_ chan struct{}) error {
+func (gv *GlobalVarS) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -58,7 +55,7 @@ func (gv *GlobalVarS) Start(_ chan struct{}) error {
 }
 
 // Reload handles the change of config
-func (gv *GlobalVarS) Reload(_ chan struct{}) error {
+func (gv *GlobalVarS) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -68,13 +65,9 @@ func (gv *GlobalVarS) Reload(_ chan struct{}) error {
 }
 
 // Shutdown stops the service
-func (gv *GlobalVarS) Shutdown() error {
+func (gv *GlobalVarS) Shutdown(_ *servmanager.ServiceRegistry) error {
+	close(gv.StateChan(utils.StateServiceDOWN))
 	return nil
-}
-
-// IsRunning returns if the service is running
-func (gv *GlobalVarS) IsRunning() bool {
-	return IsServiceInState(gv.ServiceName(), utils.StateServiceUP, gv.srvIndexer)
 }
 
 // ServiceName returns the service name

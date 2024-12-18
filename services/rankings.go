@@ -34,14 +34,12 @@ import (
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceRegistry) *RankingService {
+	srvDep map[string]*sync.WaitGroup) *RankingService {
 	return &RankingService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvDep:     srvDep,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		srvDep:    srvDep,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -55,17 +53,12 @@ type RankingService struct {
 	cfg     *config.CGRConfig
 	srvDep  map[string]*sync.WaitGroup
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (ran *RankingService) Start(shutdown chan struct{}) (err error) {
-	if ran.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	ran.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -76,7 +69,7 @@ func (ran *RankingService) Start(shutdown chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		ran.srvIndexer, ran.cfg.GeneralCfg().ConnectTimeout)
+		registry, ran.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -112,7 +105,7 @@ func (ran *RankingService) Start(shutdown chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (ran *RankingService) Reload(_ chan struct{}) (err error) {
+func (ran *RankingService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	ran.Lock()
 	ran.ran.Reload(context.TODO())
 	ran.Unlock()
@@ -120,19 +113,15 @@ func (ran *RankingService) Reload(_ chan struct{}) (err error) {
 }
 
 // Shutdown stops the service
-func (ran *RankingService) Shutdown() (err error) {
+func (ran *RankingService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer ran.srvDep[utils.DataDB].Done()
 	ran.Lock()
 	defer ran.Unlock()
 	ran.ran.StopRankingS()
 	ran.ran = nil
 	ran.cl.RpcUnregisterName(utils.RankingSv1)
+	close(ran.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (ran *RankingService) IsRunning() bool {
-	return ran.ran != nil
 }
 
 // ServiceName returns the service name

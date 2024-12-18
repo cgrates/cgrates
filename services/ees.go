@@ -32,13 +32,11 @@ import (
 
 // NewEventExporterService constructs EventExporterService
 func NewEventExporterService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *EventExporterService {
+	connMgr *engine.ConnManager) *EventExporterService {
 	return &EventExporterService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -52,9 +50,8 @@ type EventExporterService struct {
 	connMgr *engine.ConnManager
 	cfg     *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name
@@ -67,15 +64,8 @@ func (es *EventExporterService) ShouldRun() (should bool) {
 	return es.cfg.EEsCfg().Enabled
 }
 
-// IsRunning returns if the service is running
-func (es *EventExporterService) IsRunning() bool {
-	es.mu.RLock()
-	defer es.mu.RUnlock()
-	return es.eeS != nil
-}
-
 // Reload handles the change of config
-func (es *EventExporterService) Reload(_ chan struct{}) error {
+func (es *EventExporterService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	es.mu.Lock()
 	defer es.mu.Unlock()
 	es.eeS.ClearExporterCache()
@@ -83,28 +73,25 @@ func (es *EventExporterService) Reload(_ chan struct{}) error {
 }
 
 // Shutdown stops the service
-func (es *EventExporterService) Shutdown() error {
+func (es *EventExporterService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	es.mu.Lock()
 	defer es.mu.Unlock()
 	es.eeS.ClearExporterCache()
 	es.eeS = nil
 	es.cl.RpcUnregisterName(utils.EeSv1)
+	close(es.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 
 // Start should handle the service start
-func (es *EventExporterService) Start(_ chan struct{}) error {
-	if es.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (es *EventExporterService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.FilterS,
 			utils.AnalyzerS,
 		},
-		es.srvIndexer, es.cfg.GeneralCfg().ConnectTimeout)
+		registry, es.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}

@@ -32,14 +32,12 @@ import (
 
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *LoaderService {
+	connMgr *engine.ConnManager) *LoaderService {
 	return &LoaderService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		stopChan:   make(chan struct{}),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stopChan:  make(chan struct{}),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -54,17 +52,12 @@ type LoaderService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (ldrs *LoaderService) Start(_ chan struct{}) (err error) {
-	if ldrs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (ldrs *LoaderService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -72,7 +65,7 @@ func (ldrs *LoaderService) Start(_ chan struct{}) (err error) {
 			utils.DataDB,
 			utils.AnalyzerS,
 		},
-		ldrs.srvIndexer, ldrs.cfg.GeneralCfg().ConnectTimeout)
+		registry, ldrs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -105,15 +98,18 @@ func (ldrs *LoaderService) Start(_ chan struct{}) (err error) {
 }
 
 // Reload handles the change of config
-func (ldrs *LoaderService) Reload(_ chan struct{}) error {
-	fs := ldrs.srvIndexer.Lookup(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.FilterS, utils.StateServiceUP)
+func (ldrs *LoaderService) Reload(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, ldrs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	dbs := ldrs.srvIndexer.Lookup(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.DataDB, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 	close(ldrs.stopChan)
 	ldrs.stopChan = make(chan struct{})
 
@@ -125,20 +121,14 @@ func (ldrs *LoaderService) Reload(_ chan struct{}) error {
 }
 
 // Shutdown stops the service
-func (ldrs *LoaderService) Shutdown() (_ error) {
+func (ldrs *LoaderService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	ldrs.Lock()
 	ldrs.ldrs = nil
 	close(ldrs.stopChan)
 	ldrs.cl.RpcUnregisterName(utils.LoaderSv1)
 	ldrs.Unlock()
+	close(ldrs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (ldrs *LoaderService) IsRunning() bool {
-	ldrs.RLock()
-	defer ldrs.RUnlock()
-	return ldrs.ldrs != nil && ldrs.ldrs.Enabled()
 }
 
 // ServiceName returns the service name

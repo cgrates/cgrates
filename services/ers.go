@@ -34,14 +34,12 @@ import (
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(
 	cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceRegistry) *EventReaderService {
+	connMgr *engine.ConnManager) *EventReaderService {
 	return &EventReaderService{
-		rldChan:    make(chan struct{}, 1),
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		rldChan:   make(chan struct{}, 1),
+		cfg:       cfg,
+		connMgr:   connMgr,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
@@ -57,24 +55,19 @@ type EventReaderService struct {
 	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceRegistry // access directly services from here
-	stateDeps  *StateDependencies           // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector // expose API methods over internal connection
+	stateDeps  *StateDependencies    // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (erS *EventReaderService) Start(shutdown chan struct{}) (err error) {
-	if erS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (erS *EventReaderService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.FilterS,
 			utils.AnalyzerS,
 		},
-		erS.srvIndexer, erS.cfg.GeneralCfg().ConnectTimeout)
+		registry, erS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
@@ -113,7 +106,7 @@ func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan, rldC
 }
 
 // Reload handles the change of config
-func (erS *EventReaderService) Reload(_ chan struct{}) (err error) {
+func (erS *EventReaderService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	erS.RLock()
 	erS.rldChan <- struct{}{}
 	erS.RUnlock()
@@ -121,20 +114,14 @@ func (erS *EventReaderService) Reload(_ chan struct{}) (err error) {
 }
 
 // Shutdown stops the service
-func (erS *EventReaderService) Shutdown() (err error) {
+func (erS *EventReaderService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	erS.Lock()
 	defer erS.Unlock()
 	close(erS.stopChan)
 	erS.ers = nil
 	erS.cl.RpcUnregisterName(utils.ErSv1)
+	close(erS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (erS *EventReaderService) IsRunning() bool {
-	erS.RLock()
-	defer erS.RUnlock()
-	return erS.ers != nil
 }
 
 // ServiceName returns the service name
