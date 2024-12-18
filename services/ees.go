@@ -98,24 +98,23 @@ func (es *EventExporterService) Start(_ chan struct{}) error {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cls := es.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), es.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.EEs, utils.CommonListenerS, utils.StateServiceUP)
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.FilterS,
+			utils.AnalyzerS,
+		},
+		es.srvIndexer, es.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	es.cl = cls.CLS()
-	fs := es.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), es.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.EEs, utils.FilterS, utils.StateServiceUP)
-	}
-	anz := es.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), es.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.EEs, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	es.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	es.mu.Lock()
 	defer es.mu.Unlock()
 
-	var err error
 	es.eeS, err = ees.NewEventExporterS(es.cfg, fs.FilterS(), es.connMgr)
 	if err != nil {
 		return err

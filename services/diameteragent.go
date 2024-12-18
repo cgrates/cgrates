@@ -67,13 +67,15 @@ func (da *DiameterAgent) Start(shutdown chan struct{}) error {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	fs := da.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), da.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.DiameterAgent, utils.FilterS, utils.StateServiceUP)
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, da.srvIndexer,
+		da.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
+
 	da.Lock()
 	defer da.Unlock()
-	return da.start(fs.FilterS(), da.caps, shutdown)
+	return da.start(fs.(*FilterService).FilterS(), da.caps, shutdown)
 }
 
 func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps, shutdown chan struct{}) error {

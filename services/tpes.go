@@ -60,15 +60,18 @@ type TPeService struct {
 
 // Start should handle the service start
 func (ts *TPeService) Start(_ chan struct{}) (err error) {
-	cls := ts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TPeS, utils.CommonListenerS, utils.StateServiceUP)
+
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.DataDB,
+		},
+		ts.srvIndexer, ts.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	ts.cl = cls.CLS()
-	dbs := ts.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TPeS, utils.DataDB, utils.StateServiceUP)
-	}
+	ts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
 	ts.tpes = tpes.NewTPeS(ts.cfg, dbs.DataManager(), ts.connMgr)
 	ts.stopChan = make(chan struct{})

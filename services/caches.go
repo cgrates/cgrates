@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"sync"
+
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -41,6 +43,7 @@ func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
 
 // CacheService implements Agent interface
 type CacheService struct {
+	mu sync.Mutex
 	cl *commonlisteners.CommonListenerS
 
 	cacheCh chan *engine.CacheS
@@ -54,23 +57,29 @@ type CacheService struct {
 
 // Start should handle the sercive start
 func (cS *CacheService) Start(shutdown chan struct{}) (err error) {
-	cls := cS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CommonListenerS, utils.StateServiceUP)
+	if cS.IsRunning() {
+		return utils.ErrServiceAlreadyRunning
 	}
-	cS.cl = cls.CLS()
-	dbs := cS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.DataDB, utils.StateServiceUP)
+
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.DataDB,
+			utils.AnalyzerS,
+			utils.CoreS,
+		},
+		cS.srvIndexer, cS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	anz := cS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.AnalyzerS, utils.StateServiceUP)
-	}
-	cs := cS.srvIndexer.GetService(utils.CoreS).(*CoreService)
-	if utils.StructChanTimeout(cs.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CoreS, utils.StateServiceUP)
-	}
+	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	cs := srvDeps[utils.CoreS].(*CoreService)
+
+	cS.mu.Lock()
+	defer cS.mu.Unlock()
+
 	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cS.connMgr, cs.CoreS().CapsStats)
 	go engine.Cache.Precache(shutdown)
 

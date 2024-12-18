@@ -55,17 +55,28 @@ type FilterService struct {
 
 // Start handles the service start.
 func (s *FilterService) Start(shutdown chan struct{}) error {
-	cacheS := s.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), s.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.FilterS, utils.CacheS, utils.StateServiceUP)
+	if s.IsRunning() {
+		return utils.ErrServiceAlreadyRunning
 	}
-	if err := cacheS.WaitToPrecache(shutdown, utils.CacheFilters); err != nil {
+
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CacheS,
+			utils.DataDB,
+		},
+		s.srvIndexer, s.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
 		return err
 	}
-	dbs := s.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), s.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.FilterS, utils.DataDB, utils.StateServiceUP)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown, utils.CacheFilters); err != nil {
+		return err
 	}
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.fltrS = engine.NewFilterS(s.cfg, s.connMgr, dbs.DataManager())
 	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil

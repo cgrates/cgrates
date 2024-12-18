@@ -63,15 +63,16 @@ func (sip *SIPAgent) Start(shutdown chan struct{}) (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	fs := sip.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), sip.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.SIPAgent, utils.FilterS, utils.StateServiceUP)
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, sip.srvIndexer,
+		sip.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
 
 	sip.Lock()
 	defer sip.Unlock()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, fs.FilterS())
+	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, fs.(*FilterService).FilterS())
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 			utils.SIPAgent, err))

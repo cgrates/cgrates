@@ -62,14 +62,16 @@ func (dns *DNSAgent) Start(shutdown chan struct{}) (err error) {
 	if dns.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	fs := dns.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dns.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.DNSAgent, utils.FilterS, utils.StateServiceUP)
+
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, dns.srvIndexer,
+		dns.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
 
 	dns.Lock()
 	defer dns.Unlock()
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), dns.connMgr)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.(*FilterService).FilterS(), dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil
