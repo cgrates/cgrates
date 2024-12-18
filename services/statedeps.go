@@ -20,6 +20,8 @@ package services
 
 import (
 	"sync"
+
+	"github.com/cgrates/cgrates/servmanager"
 )
 
 // NewStateDependencies constructs a StateDependencies struct
@@ -43,4 +45,13 @@ func (sDs *StateDependencies) StateChan(stateID string) (retChan chan struct{}) 
 	retChan = sDs.stateDeps[stateID]
 	sDs.stateDepsMux.RUnlock()
 	return
+}
+
+func CheckServiceState(id, state string, indexer *servmanager.ServiceIndexer) bool {
+	select {
+	case <-indexer.GetService(id).StateChan(state):
+		return true
+	default:
+		return false
+	}
 }
