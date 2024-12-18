@@ -66,33 +66,29 @@ func (trs *TrendService) Start(shutdown chan struct{}) (err error) {
 	}
 
 	trs.srvDep[utils.DataDB].Add(1)
-	cls := trs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	trs.cl = cls.CLS()
-	cacheS := trs.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(shutdown,
-		utils.CacheTrendProfiles,
-		utils.CacheTrends,
-	); err != nil {
+
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+			utils.AnalyzerS,
+		},
+		trs.srvIndexer, trs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
 		return err
 	}
-	dbs := trs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.DataDB, utils.StateServiceUP)
+	trs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
+		utils.CacheTrendProfiles,
+		utils.CacheTrends); err != nil {
+		return err
 	}
-	fs := trs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.FilterS, utils.StateServiceUP)
-	}
-	anz := trs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	trs.Lock()
 	defer trs.Unlock()

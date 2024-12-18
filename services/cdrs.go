@@ -64,34 +64,29 @@ func (cs *CDRService) Start(_ chan struct{}) (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cls := cs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.CommonListenerS, utils.StateServiceUP)
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.FilterS,
+			utils.DataDB,
+			utils.AnalyzerS,
+			utils.StorDB,
+		},
+		cs.srvIndexer, cs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	cs.cl = cls.CLS()
-	fs := cs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := cs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := cs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.AnalyzerS, utils.StateServiceUP)
-	}
-	sdbs := cs.srvIndexer.GetService(utils.StorDB).(*StorDBService)
-	if utils.StructChanTimeout(sdbs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.StorDB, utils.StateServiceUP)
-	}
+	cs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	sdbs := srvDeps[utils.StorDB].(*StorDBService)
 
 	cs.Lock()
 	defer cs.Unlock()
 
 	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs.FilterS(), cs.connMgr, sdbs.DB())
 	runtime.Gosched()
-	utils.Logger.Info("Registering CDRS RPC service.")
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
 	if err != nil {
 		return err

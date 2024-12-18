@@ -96,33 +96,29 @@ func (rs *RateService) Start(shutdown chan struct{}) (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cls := rs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.CommonListenerS, utils.StateServiceUP)
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+			utils.AnalyzerS,
+		},
+		rs.srvIndexer, rs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	rs.cl = cls.CLS()
-	cacheS := rs.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.CacheS, utils.StateServiceUP)
-	}
+	rs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheRateProfiles,
 		utils.CacheRateProfilesFilterIndexes,
 		utils.CacheRateFilterIndexes); err != nil {
-		return
+		return err
 	}
-	fs := rs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := rs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := rs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	rs.Lock()
 	rs.rateS = rates.NewRateS(rs.cfg, fs.FilterS(), dbs.DataManager())

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -67,26 +66,28 @@ func (ha *HTTPAgent) Start(_ chan struct{}) (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cls := ha.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ha.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.HTTPAgent, utils.CommonListenerS, utils.StateServiceUP)
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.FilterS,
+		},
+		ha.srvIndexer, ha.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	cl := cls.CLS()
-	fs := ha.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ha.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.HTTPAgent, utils.FilterS, utils.StateServiceUP)
-	}
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	ha.Lock()
+	defer ha.Unlock()
+
 	ha.started = true
-	utils.Logger.Info(fmt.Sprintf("<%s> successfully started HTTPAgent", utils.HTTPAgent))
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		cl.RegisterHttpHandler(agntCfg.URL,
 			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, fs.FilterS(),
 				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
-	ha.Unlock()
 	close(ha.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }

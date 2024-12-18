@@ -65,27 +65,23 @@ func (apiService *AdminSv1Service) Start(_ chan struct{}) (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cls := apiService.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.CommonListenerS, utils.StateServiceUP)
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.FilterS,
+			utils.DataDB,
+			utils.AnalyzerS,
+			utils.StorDB,
+		},
+		apiService.srvIndexer, apiService.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	apiService.cl = cls.CLS()
-	fs := apiService.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := apiService.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := apiService.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.AnalyzerS, utils.StateServiceUP)
-	}
-	sdbs := apiService.srvIndexer.GetService(utils.StorDB).(*StorDBService)
-	if utils.StructChanTimeout(sdbs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.StorDB, utils.StateServiceUP)
-	}
+	apiService.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+	sdbs := srvDeps[utils.StorDB].(*StorDBService)
 
 	apiService.Lock()
 	defer apiService.Unlock()

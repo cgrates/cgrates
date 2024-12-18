@@ -66,9 +66,10 @@ func (rad *RadiusAgent) Start(shutdown chan struct{}) (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	fs := rad.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), rad.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RadiusAgent, utils.FilterS, utils.StateServiceUP)
+	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, rad.srvIndexer,
+		rad.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
 
 	rad.Lock()
@@ -78,8 +79,7 @@ func (rad *RadiusAgent) Start(shutdown chan struct{}) (err error) {
 	rad.lauth = rad.cfg.RadiusAgentCfg().ListenAuth
 	rad.lacct = rad.cfg.RadiusAgentCfg().ListenAcct
 
-	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.FilterS(), rad.connMgr); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.(*FilterService).FilterS(), rad.connMgr); err != nil {
 		return
 	}
 	rad.stopChan = make(chan struct{})

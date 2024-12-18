@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -42,6 +43,7 @@ func NewGuardianService(cfg *config.CGRConfig, srvIndexer *servmanager.ServiceIn
 type GuardianService struct {
 	mu         sync.RWMutex
 	cfg        *config.CGRConfig
+	cl         *commonlisteners.CommonListenerS
 	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
 	srvIndexer *servmanager.ServiceIndexer // access directly services from here
 	stateDeps  *StateDependencies          // channel subscriptions for state changes
@@ -49,21 +51,32 @@ type GuardianService struct {
 
 // Start handles the service start.
 func (s *GuardianService) Start(_ chan struct{}) error {
-	cls := s.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), s.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.GuardianS, utils.CommonListenerS, utils.StateServiceUP)
+	if s.IsRunning() {
+		return utils.ErrServiceAlreadyRunning
 	}
-	anz := s.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), s.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.GuardianS, utils.AnalyzerS, utils.StateServiceUP)
+
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.AnalyzerS,
+		},
+		s.srvIndexer, s.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	srv, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
+	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	svcs, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
 	if !s.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cls.CLS().RpcRegister(s)
+		for _, svc := range svcs {
+			s.cl.RpcRegister(svc)
 		}
 	}
-	s.intRPCconn = anz.GetInternalCodec(srv, utils.GuardianS)
+	s.intRPCconn = anz.GetInternalCodec(svcs, utils.GuardianS)
 	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
@@ -75,6 +88,9 @@ func (s *GuardianService) Reload(_ chan struct{}) error {
 
 // Shutdown stops the service.
 func (s *GuardianService) Shutdown() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.cl.RpcUnregisterName(utils.GuardianSv1)
 	return nil
 }
 
@@ -85,7 +101,7 @@ func (s *GuardianService) IsRunning() bool {
 
 // ServiceName returns the service name
 func (s *GuardianService) ServiceName() string {
-	return utils.FilterS
+	return utils.GuardianS
 }
 
 // ShouldRun returns if the service should be running.

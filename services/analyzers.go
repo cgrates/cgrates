@@ -71,11 +71,12 @@ func (anz *AnalyzerService) Start(shutdown chan struct{}) (err error) {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cls := anz.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), anz.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AnalyzerS, utils.CommonListenerS, utils.StateServiceUP)
+	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, anz.srvIndexer,
+		anz.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-	anz.cl = cls.CLS()
+	anz.cl = cls.(*CommonListenerService).CLS()
 
 	anz.Lock()
 	defer anz.Unlock()

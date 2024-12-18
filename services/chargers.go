@@ -57,37 +57,33 @@ type ChargerService struct {
 }
 
 // Start should handle the service start
-func (chrS *ChargerService) Start(shutdown chan struct{}) (err error) {
+func (chrS *ChargerService) Start(shutdown chan struct{}) error {
 	if chrS.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cls := chrS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.CommonListenerS, utils.StateServiceUP)
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+			utils.AnalyzerS,
+		},
+		chrS.srvIndexer, chrS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	chrS.cl = cls.CLS()
-	cacheS := chrS.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.CacheS, utils.StateServiceUP)
-	}
+	chrS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheChargerProfiles,
 		utils.CacheChargerFilterIndexes); err != nil {
-		return
+		return err
 	}
-	fs := chrS.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := chrS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := chrS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	chrS.Lock()
 	defer chrS.Unlock()
@@ -102,7 +98,7 @@ func (chrS *ChargerService) Start(shutdown chan struct{}) (err error) {
 
 	chrS.intRPCconn = anz.GetInternalCodec(srv, utils.ChargerS)
 	close(chrS.stateDeps.StateChan(utils.StateServiceUP))
-	return
+	return nil
 }
 
 // Reload handles the change of config
