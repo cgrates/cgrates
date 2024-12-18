@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -99,9 +98,6 @@ func (ran *RankingService) Start(shutdown chan struct{}) (err error) {
 	ran.Lock()
 	defer ran.Unlock()
 	ran.ran = engine.NewRankingS(dbs.DataManager(), ran.connMgr, fs.FilterS(), ran.cfg)
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
-		utils.CoreS, utils.RankingS))
 	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
 	}

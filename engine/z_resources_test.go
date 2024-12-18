@@ -2957,48 +2957,6 @@ func TestResourcesAllocateResourceDryRun(t *testing.T) {
 	}
 }
 
-func TestResourcesShutdown(t *testing.T) {
-	tmpLogger := utils.Logger
-	defer func() {
-		utils.Logger = tmpLogger
-	}()
-	var buf bytes.Buffer
-	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
-
-	rS := &ResourceS{
-		storedResources: utils.StringSet{
-			"Res1": struct{}{},
-		},
-		stopBackup: make(chan struct{}),
-	}
-
-	expLogs := []string{
-		fmt.Sprintf("CGRateS <> [INFO] <%s> service shutdown initialized",
-			utils.ResourceS),
-		fmt.Sprintf("CGRateS <> [WARNING] <%s> failed retrieving from cache resource with ID: %s",
-			utils.ResourceS, "Res1"),
-		fmt.Sprintf("CGRateS <> [INFO] <%s> service shutdown complete",
-			utils.ResourceS),
-	}
-	exp := utils.StringSet{}
-	rS.Shutdown(context.TODO())
-
-	if !reflect.DeepEqual(rS.storedResources, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
-			exp, rS.storedResources)
-	}
-
-	rcvLogs := strings.Split(buf.String(), "\n")
-	rcvLogs = rcvLogs[:len(rcvLogs)-1]
-
-	for idx, rcvLog := range rcvLogs {
-		if rcvLog != expLogs[idx] {
-			t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>",
-				expLogs[idx], rcvLog)
-		}
-	}
-}
-
 func TestResourcesStoreResources(t *testing.T) {
 	tmp := Cache
 	tmpLogger := utils.Logger

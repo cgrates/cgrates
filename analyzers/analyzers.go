@@ -20,7 +20,6 @@ package analyzers
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"math/rand"
 	"os"
@@ -105,7 +104,6 @@ func (aS *AnalyzerS) deleteHits(hits search.DocumentMatchCollection) (err error)
 
 // ListenAndServe will initialize the service
 func (aS *AnalyzerS) ListenAndServe(ctx *context.Context) (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AnalyzerS))
 	if err = aS.clenaUp(); err != nil { // clean up the data at the system start
 		return
 	}
@@ -123,10 +121,7 @@ func (aS *AnalyzerS) ListenAndServe(ctx *context.Context) (err error) {
 
 // Shutdown is called to shutdown the service
 func (aS *AnalyzerS) Shutdown() error {
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.AnalyzerS))
-	aS.db.Close()
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.AnalyzerS))
-	return nil
+	return aS.db.Close()
 }
 
 func (aS *AnalyzerS) logTrafic(id uint64, method string,

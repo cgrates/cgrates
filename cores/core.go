@@ -71,13 +71,9 @@ func (cS *CoreS) ShutdownEngine() {
 
 // Shutdown is called to shutdown the service
 func (cS *CoreS) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.CoreS))
-
 	// safe to ignore errors (irrelevant)
 	_ = cS.StopMemoryProfiling()
 	_ = cS.StopCPUProfiling()
-
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.CoreS))
 }
 
 // StartCPUProfiling starts CPU profiling and saves the profile to the specified path.

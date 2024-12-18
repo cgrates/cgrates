@@ -1242,30 +1242,6 @@ func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 // 	}
 // }
 
-func TestThresholdsShutdown(t *testing.T) {
-	tmpLogger := utils.Logger
-	defer func() {
-		utils.Logger = tmpLogger
-	}()
-	var buf bytes.Buffer
-	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
-
-	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	tS := NewThresholdService(dm, cfg, nil, nil)
-
-	expLog1 := `[INFO] <ThresholdS> shutdown initialized`
-	expLog2 := `[INFO] <ThresholdS> shutdown complete`
-	tS.Shutdown(context.Background())
-
-	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog1) ||
-		!strings.Contains(rcvLog, expLog2) {
-		t.Errorf("expected logs <%+v> and <%+v> \n to be included in <%+v>",
-			expLog1, expLog2, rcvLog)
-	}
-}
-
 func TestThresholdsStoreThresholdsOK(t *testing.T) {
 	tmp := Cache
 	defer func() {

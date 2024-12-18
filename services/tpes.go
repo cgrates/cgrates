@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
@@ -72,7 +71,6 @@ func (ts *TPeService) Start(_ chan struct{}) (err error) {
 	}
 
 	ts.tpes = tpes.NewTPeS(ts.cfg, dbs.DataManager(), ts.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TPeS))
 	ts.stopChan = make(chan struct{})
 	ts.srv, _ = birpc.NewService(apis.NewTPeSv1(ts.tpes), utils.EmptyString, false)
 	ts.cl.RpcRegister(ts.srv)
@@ -89,7 +87,6 @@ func (ts *TPeService) Reload(_ chan struct{}) (err error) {
 func (ts *TPeService) Shutdown() (err error) {
 	ts.srv = nil
 	close(ts.stopChan)
-	utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> subsystem", utils.CoreS, utils.TPeS))
 	return
 }
 
