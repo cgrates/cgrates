@@ -63,15 +63,17 @@ type JanusAgent struct {
 
 // Start should jandle the sercive start
 func (ja *JanusAgent) Start(_ chan struct{}) (err error) {
-	cls := ja.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ja.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.JanusAgent, utils.CommonListenerS, utils.StateServiceUP)
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.FilterS,
+		},
+		ja.srvIndexer, ja.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	cl := cls.CLS()
-	fs := ja.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ja.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.JanusAgent, utils.FilterS, utils.StateServiceUP)
-	}
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	ja.Lock()
 	if ja.started {
@@ -97,7 +99,6 @@ func (ja *JanusAgent) Start(_ chan struct{}) (err error) {
 	ja.started = true
 	ja.Unlock()
 	close(ja.stateDeps.StateChan(utils.StateServiceUP))
-	utils.Logger.Info(fmt.Sprintf("<%s> successfully started.", utils.JanusAgent))
 	return
 }
 

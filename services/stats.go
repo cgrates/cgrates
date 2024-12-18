@@ -67,33 +67,30 @@ func (sts *StatService) Start(shutdown chan struct{}) (err error) {
 	}
 
 	sts.srvDep[utils.DataDB].Add(1)
-	cls := sts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.StatS, utils.CommonListenerS, utils.StateServiceUP)
+
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+			utils.AnalyzerS,
+		},
+		sts.srvIndexer, sts.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	sts.cl = cls.CLS()
-	cacheS := sts.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.StatS, utils.CacheS, utils.StateServiceUP)
-	}
+	sts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheStatQueueProfiles,
 		utils.CacheStatQueues,
 		utils.CacheStatFilterIndexes); err != nil {
 		return
 	}
-	fs := sts.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.StatS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := sts.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.StatS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := sts.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), sts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.StatS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	sts.Lock()
 	defer sts.Unlock()

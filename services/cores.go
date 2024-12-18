@@ -71,15 +71,17 @@ func (cS *CoreService) Start(shutdown chan struct{}) error {
 		return utils.ErrServiceAlreadyRunning
 	}
 
-	cls := cS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CoreS, utils.CommonListenerS, utils.StateServiceUP)
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.AnalyzerS,
+		},
+		cS.srvIndexer, cS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	cS.cl = cls.CLS()
-	anz := cS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CoreS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	cS.mu.Lock()
 	defer cS.mu.Unlock()

@@ -67,33 +67,30 @@ func (thrs *ThresholdService) Start(shutdown chan struct{}) (err error) {
 	}
 
 	thrs.srvDep[utils.DataDB].Add(1)
-	cls := thrs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.CommonListenerS, utils.StateServiceUP)
+
+	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+			utils.AnalyzerS,
+		},
+		thrs.srvIndexer, thrs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	thrs.cl = cls.CLS()
-	cacheS := thrs.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.CacheS, utils.StateServiceUP)
-	}
+	thrs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheThresholdProfiles,
 		utils.CacheThresholds,
 		utils.CacheThresholdFilterIndexes); err != nil {
 		return
 	}
-	fs := thrs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := thrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := thrs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	anz := srvDeps[utils.AnalyzerS].(*AnalyzerService)
 
 	thrs.Lock()
 	defer thrs.Unlock()

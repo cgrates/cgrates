@@ -63,17 +63,21 @@ func (efServ *ExportFailoverService) Start(_ chan struct{}) (err error) {
 	if efServ.IsRunning() {
 		return utils.ErrServiceAlreadyRunning
 	}
-	cls := efServ.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), efServ.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.EFs, utils.CommonListenerS, utils.StateServiceUP)
+
+	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, efServ.srvIndexer,
+		efServ.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-	efServ.cl = cls.CLS()
+	efServ.cl = cls.(*CommonListenerService).CLS()
+
 	efServ.Lock()
+	defer efServ.Unlock()
+
 	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
 	efServ.stopChan = make(chan struct{})
 	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
 	efServ.cl.RpcRegister(efServ.srv)
-	efServ.Unlock()
 	close(efServ.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
