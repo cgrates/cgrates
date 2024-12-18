@@ -34,7 +34,7 @@ import (
 
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
+	srvIndexer *servmanager.ServiceRegistry) *AnalyzerService {
 	anz := &AnalyzerService{
 		cfg:        cfg,
 		srvIndexer: srvIndexer,
@@ -59,9 +59,9 @@ type AnalyzerService struct {
 	cancelFunc context.CancelFunc
 	cfg        *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // share the API object implementing API calls for internal
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 
 }
 
@@ -99,7 +99,7 @@ func (anz *AnalyzerService) Start(shutdown chan struct{}) (err error) {
 }
 
 func (anz *AnalyzerService) start() {
-	fs := anz.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	fs := anz.srvIndexer.Lookup(utils.FilterS).(*FilterService)
 	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), anz.cfg.GeneralCfg().ConnectTimeout) {
 		return
 		// return utils.NewServiceStateTimeoutError(utils.AnalyzerS, utils.FilterS, utils.StateServiceUP)

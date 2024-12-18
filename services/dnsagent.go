@@ -33,7 +33,7 @@ import (
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig,
 	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *DNSAgent {
+	srvIndexer *servmanager.ServiceRegistry) *DNSAgent {
 	return &DNSAgent{
 		cfg:        cfg,
 		connMgr:    connMgr,
@@ -52,9 +52,9 @@ type DNSAgent struct {
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -85,7 +85,7 @@ func (dns *DNSAgent) Start(shutdown chan struct{}) (err error) {
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload(shutdown chan struct{}) (err error) {
-	fs := dns.srvIndexer.GetService(utils.FilterS).(*FilterService)
+	fs := dns.srvIndexer.Lookup(utils.FilterS).(*FilterService)
 	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dns.cfg.GeneralCfg().ConnectTimeout) {
 		return utils.NewServiceStateTimeoutError(utils.DNSAgent, utils.FilterS, utils.StateServiceUP)
 	}

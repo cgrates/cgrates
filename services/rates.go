@@ -32,7 +32,7 @@ import (
 
 // NewRateService constructs RateService
 func NewRateService(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceIndexer) *RateService {
+	srvIndexer *servmanager.ServiceRegistry) *RateService {
 	return &RateService{
 		cfg:        cfg,
 		rldChan:    make(chan struct{}),
@@ -52,9 +52,9 @@ type RateService struct {
 	stopChan chan struct{}
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	intRPCconn birpc.ClientConnector        // expose API methods over internal connection
+	srvIndexer *servmanager.ServiceRegistry // access directly services from here
+	stateDeps  *StateDependencies           // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name
