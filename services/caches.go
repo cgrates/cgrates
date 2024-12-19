@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
+	"sync"
+
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -29,51 +29,43 @@ import (
 )
 
 // NewCacheService .
-func NewCacheService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *CacheService {
+func NewCacheService(cfg *config.CGRConfig) *CacheService {
 	return &CacheService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		cacheCh:    make(chan *engine.CacheS, 1),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		cacheCh:   make(chan *engine.CacheS, 1),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // CacheService implements Agent interface
 type CacheService struct {
-	cl *commonlisteners.CommonListenerS
-
-	cacheCh chan *engine.CacheS
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	cl        *commonlisteners.CommonListenerS
+	cacheCh   chan *engine.CacheS
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
-	cls := cS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CommonListenerS, utils.StateServiceUP)
+func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.DataDB,
+			utils.ConnManager,
+			utils.CoreS,
+		},
+		registry, cS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	cS.cl = cls.CLS()
-	dbs := cS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := cS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.AnalyzerS, utils.StateServiceUP)
-	}
-	cs := cS.srvIndexer.GetService(utils.CoreS).(*CoreService)
-	if utils.StructChanTimeout(cs.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CacheS, utils.CoreS, utils.StateServiceUP)
-	}
-	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cS.connMgr, cs.CoreS().CapsStats)
-	go engine.Cache.Precache(ctx, shtDw)
+	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cs := srvDeps[utils.CoreS].(*CoreService)
+
+	engine.Cache = engine.NewCacheS(cS.cfg, dbs.DataManager(), cms.ConnManager(), cs.CoreS().CapsStats)
+	go engine.Cache.Precache(shutdown)
 
 	cS.cacheCh <- engine.Cache
 
@@ -84,25 +76,21 @@ func (cS *CacheService) Start(ctx *context.Context, shtDw context.CancelFunc) (e
 			cS.cl.RpcRegister(s)
 		}
 	}
-	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CacheS)
+	cms.AddInternalConn(utils.CacheS, srv)
 	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (cS *CacheService) Reload(*context.Context, context.CancelFunc) (_ error) {
+func (cS *CacheService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
 	return
 }
 
 // Shutdown stops the service
-func (cS *CacheService) Shutdown() (_ error) {
+func (cS *CacheService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	cS.cl.RpcUnregisterName(utils.CacheSv1)
+	close(cS.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (cS *CacheService) IsRunning() bool {
-	return true
 }
 
 // ServiceName returns the service name
@@ -120,18 +108,18 @@ func (cS *CacheService) GetCacheSChan() chan *engine.CacheS {
 	return cS.cacheCh
 }
 
-func (cS *CacheService) WaitToPrecache(ctx *context.Context, cacheIDs ...string) (err error) {
+func (cS *CacheService) WaitToPrecache(shutdown chan struct{}, cacheIDs ...string) (err error) {
 	var cacheS *engine.CacheS
 	select {
-	case <-ctx.Done():
-		return ctx.Err()
+	case <-shutdown:
+		return
 	case cacheS = <-cS.cacheCh:
 		cS.cacheCh <- cacheS
 	}
 	for _, cacheID := range cacheIDs {
 		select {
-		case <-ctx.Done():
-			return ctx.Err()
+		case <-shutdown:
+			return
 		case <-cacheS.GetPrecacheChannel(cacheID):
 		}
 	}
@@ -143,7 +131,12 @@ func (cS *CacheService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (cS *CacheService) IntRPCConn() birpc.ClientConnector {
-	return cS.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *CacheService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *CacheService) Unlock() {
+	s.mu.Unlock()
 }

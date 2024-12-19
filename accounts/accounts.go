@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
-	"fmt"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -53,11 +51,6 @@ func (aS *AccountS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 			cfgRld <- rld
 		}
 	}
-}
-
-// Shutdown is called to shutdown the service
-func (aS *AccountS) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.AccountS))
 }
 
 // matchingAccountsForEvent returns the matched Accounts for the given event

@@ -28,7 +28,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cron"
 
 	"github.com/cgrates/rpcclient"
 
@@ -315,34 +314,6 @@ func TestAsapExecuteActions(t *testing.T) {
 	}
 }
 
-func TestActionSListenAndServe(t *testing.T) {
-	newData := &dataDBMockError{}
-	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(newData, cfg.CacheCfg(), nil)
-	cfg.ActionSCfg().Tenants = &[]string{"cgrates1.org", "cgrates.org2"}
-	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
-
-	stopChan := make(chan struct{}, 1)
-	cfgRld := make(chan struct{}, 1)
-	cfgRld <- struct{}{}
-	go func() {
-		time.Sleep(10)
-		stopChan <- struct{}{}
-	}()
-	tmpLogger := utils.Logger
-	defer func() {
-		utils.Logger = tmpLogger
-	}()
-	var buf bytes.Buffer
-	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
-	acts.ListenAndServe(stopChan, cfgRld)
-	expString := "CGRateS <> [INFO] <CoreS> starting <ActionS>"
-	if rcv := buf.String(); !strings.Contains(rcv, expString) {
-		t.Errorf("Expected %+v, received %+v", expString, rcv)
-	}
-}
-
 func TestV1ScheduleActions(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -459,29 +430,6 @@ func TestV1ExecuteActions(t *testing.T) {
 
 	if err := acts.dm.RemoveActionProfile(context.Background(), actPrf.Tenant, actPrf.ID, true); err != nil {
 		t.Error(err)
-	}
-}
-
-func TestActionShutDown(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	filters := engine.NewFilterS(cfg, nil, dm)
-	acts := NewActionS(cfg, filters, dm, nil)
-	acts.crn = &cron.Cron{}
-
-	tmpLogger := utils.Logger
-	defer func() {
-		utils.Logger = tmpLogger
-	}()
-	var buf bytes.Buffer
-	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
-
-	acts.Shutdown()
-	expBuff := "CGRateS <> [INFO] <CoreS> shutdown <ActionS>"
-	if rcv := buf.String(); !strings.Contains(rcv, expBuff) {
-		t.Errorf("Expected %+v, received %+v", expBuff, rcv)
 	}
 }
 

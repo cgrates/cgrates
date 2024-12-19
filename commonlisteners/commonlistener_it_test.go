@@ -123,10 +123,10 @@ func testServeJSON(t *testing.T) {
 
 	buff := new(bytes.Buffer)
 	log.SetOutput(buff)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	shutdown := make(chan struct{})
+	defer close(shutdown)
 	defer server.Stop()
-	go server.ServeJSON(ctx, cancel, ":88845")
+	go server.ServeJSON(":88845", shutdown)
 	runtime.Gosched()
 
 	expected := "listen tcp: address 88845: invalid port"
@@ -143,17 +143,14 @@ func testServeHHTPFail(t *testing.T) {
 	server.RpcRegister(new(mockRegister))
 	var closed bool
 	ch := make(chan struct{})
-	go server.ServeHTTP(func() {
-		closed = true
-		close(ch)
-	},
-		"invalid_port_format",
+	go server.ServeHTTP("invalid_port_format",
 		cfgDflt.HTTPCfg().JsonRPCURL,
 		cfgDflt.HTTPCfg().WSURL,
 		cfgDflt.HTTPCfg().PrometheusURL,
 		cfgDflt.HTTPCfg().PprofPath,
 		cfgDflt.HTTPCfg().UseBasicAuth,
 		cfgDflt.HTTPCfg().AuthUsers,
+		nil,
 	)
 
 	runtime.Gosched()

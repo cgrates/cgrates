@@ -21,8 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -32,37 +30,25 @@ import (
 )
 
 // NewCommonListenerService instantiates a new CommonListenerService.
-func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps,
-	srvIndexer *servmanager.ServiceIndexer) *CommonListenerService {
+func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps) *CommonListenerService {
 	return &CommonListenerService{
-		cfg:        cfg,
-		caps:       caps,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		caps:      caps,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // CommonListenerService implements Service interface.
 type CommonListenerService struct {
-	mu sync.RWMutex
-
-	cls *commonlisteners.CommonListenerS
-
-	caps *engine.Caps
-	cfg  *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	cls       *commonlisteners.CommonListenerS
+	caps      *engine.Caps
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (cl *CommonListenerService) Start(*context.Context, context.CancelFunc) error {
-	if cl.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-	cl.mu.Lock()
-	defer cl.mu.Unlock()
+func (cl *CommonListenerService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	cl.cls = commonlisteners.NewCommonListenerS(cl.caps)
 	if len(cl.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cl.cls.RegisterHTTPFunc(cl.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
@@ -75,23 +61,15 @@ func (cl *CommonListenerService) Start(*context.Context, context.CancelFunc) err
 }
 
 // Reload handles the config changes.
-func (cl *CommonListenerService) Reload(*context.Context, context.CancelFunc) error {
+func (cl *CommonListenerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (cl *CommonListenerService) Shutdown() error {
-	cl.mu.Lock()
-	defer cl.mu.Unlock()
+func (cl *CommonListenerService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	cl.cls = nil
+	close(cl.StateChan(utils.StateServiceDOWN))
 	return nil
-}
-
-// IsRunning returns whether the service is running or not.
-func (cl *CommonListenerService) IsRunning() bool {
-	cl.mu.RLock()
-	defer cl.mu.RUnlock()
-	return cl.cls != nil
 }
 
 // ServiceName returns the service name
@@ -109,12 +87,17 @@ func (cl *CommonListenerService) StateChan(stateID string) chan struct{} {
 	return cl.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (cl *CommonListenerService) IntRPCConn() birpc.ClientConnector {
-	return cl.intRPCconn
-}
-
 // CLS returns the CommonListenerS object.
 func (cl *CommonListenerService) CLS() *commonlisteners.CommonListenerS {
 	return cl.cls
+}
+
+// Lock implements the sync.Locker interface
+func (s *CommonListenerService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *CommonListenerService) Unlock() {
+	s.mu.Unlock()
 }

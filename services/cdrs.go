@@ -19,12 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"runtime"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -34,68 +31,46 @@ import (
 )
 
 // NewCDRServer returns the CDR Server
-func NewCDRServer(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewCDRServer(cfg *config.CGRConfig) *CDRService {
 	return &CDRService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // CDRService implements Service interface
 type CDRService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	cdrS *cdrs.CDRServer
 	cl   *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if cs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (cs *CDRService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.FilterS,
+			utils.DataDB,
+			utils.StorDB,
+		},
+		registry, cs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
+	cs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	sdbs := srvDeps[utils.StorDB].(*StorDBService).DB()
 
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))
-
-	cls := cs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	cs.cl = cls.CLS()
-	fs := cs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := cs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := cs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.AnalyzerS, utils.StateServiceUP)
-	}
-	sdbs := cs.srvIndexer.GetService(utils.StorDB).(*StorDBService)
-	if utils.StructChanTimeout(sdbs.StateChan(utils.StateServiceUP), cs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CDRs, utils.StorDB, utils.StateServiceUP)
-	}
-
-	cs.Lock()
-	defer cs.Unlock()
-
-	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs.FilterS(), cs.connMgr, sdbs.DB())
+	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs, cms.ConnManager(), sdbs)
 	runtime.Gosched()
-	utils.Logger.Info("Registering CDRS RPC service.")
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
 	if err != nil {
 		return err
@@ -103,31 +78,22 @@ func (cs *CDRService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 	if !cs.cfg.DispatcherSCfg().Enabled {
 		cs.cl.RpcRegister(srv)
 	}
-
-	cs.intRPCconn = anz.GetInternalCodec(srv, utils.CDRServer)
+	cms.AddInternalConn(utils.CDRServer, srv)
 	close(cs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (cs *CDRService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (cs *CDRService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (cs *CDRService) Shutdown() (err error) {
-	cs.Lock()
+func (cs *CDRService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	cs.cdrS = nil
-	cs.Unlock()
 	cs.cl.RpcUnregisterName(utils.CDRsV1)
+	close(cs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (cs *CDRService) IsRunning() bool {
-	cs.RLock()
-	defer cs.RUnlock()
-	return cs.cdrS != nil
 }
 
 // ServiceName returns the service name
@@ -145,7 +111,12 @@ func (cs *CDRService) StateChan(stateID string) chan struct{} {
 	return cs.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (cs *CDRService) IntRPCConn() birpc.ClientConnector {
-	return cs.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *CDRService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *CDRService) Unlock() {
+	s.mu.Unlock()
 }

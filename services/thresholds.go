@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -33,75 +31,56 @@ import (
 
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) *ThresholdService {
 	return &ThresholdService{
-		cfg:        cfg,
-		srvDep:     srvDep,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		srvDep:    srvDep,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // ThresholdService implements Service interface
 type ThresholdService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	thrs *engine.ThresholdS
 	cl   *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	srvDep    map[string]*sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if thrs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (thrs *ThresholdService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	thrs.srvDep[utils.DataDB].Add(1)
-	cls := thrs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.CommonListenerS, utils.StateServiceUP)
+
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, thrs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	thrs.cl = cls.CLS()
-	cacheS := thrs.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(ctx,
+	thrs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheThresholdProfiles,
 		utils.CacheThresholds,
 		utils.CacheThresholdFilterIndexes); err != nil {
 		return
 	}
-	fs := thrs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := thrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := thrs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), thrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ThresholdS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	thrs.Lock()
-	defer thrs.Unlock()
-	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), thrs.connMgr)
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
-	thrs.thrs.StartLoop(ctx)
+	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), cms.ConnManager())
+	thrs.thrs.StartLoop(context.TODO())
 	srv, _ := engine.NewService(thrs.thrs)
 	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
 	if !thrs.cfg.DispatcherSCfg().Enabled {
@@ -109,35 +88,25 @@ func (thrs *ThresholdService) Start(ctx *context.Context, _ context.CancelFunc) 
 			thrs.cl.RpcRegister(s)
 		}
 	}
-	thrs.intRPCconn = anz.GetInternalCodec(srv, utils.ThresholdS)
+	cms.AddInternalConn(utils.ThresholdS, srv)
 	close(thrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (thrs *ThresholdService) Reload(ctx *context.Context, _ context.CancelFunc) (_ error) {
-	thrs.Lock()
-	thrs.thrs.Reload(ctx)
-	thrs.Unlock()
+func (thrs *ThresholdService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
+	thrs.thrs.Reload(context.TODO())
 	return
 }
 
 // Shutdown stops the service
-func (thrs *ThresholdService) Shutdown() (_ error) {
+func (thrs *ThresholdService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	defer thrs.srvDep[utils.DataDB].Done()
-	thrs.Lock()
-	defer thrs.Unlock()
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
 	thrs.cl.RpcUnregisterName(utils.ThresholdSv1)
+	close(thrs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (thrs *ThresholdService) IsRunning() bool {
-	thrs.RLock()
-	defer thrs.RUnlock()
-	return thrs.thrs != nil
 }
 
 // ServiceName returns the service name
@@ -155,7 +124,12 @@ func (thrs *ThresholdService) StateChan(stateID string) chan struct{} {
 	return thrs.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (thrs *ThresholdService) IntRPCConn() birpc.ClientConnector {
-	return thrs.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *ThresholdService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ThresholdService) Unlock() {
+	s.mu.Unlock()
 }

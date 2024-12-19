@@ -19,86 +19,76 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewDNSAgent returns the DNS Agent
-func NewDNSAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewDNSAgent(cfg *config.CGRConfig) *DNSAgent {
 	return &DNSAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // DNSAgent implements Agent interface
 type DNSAgent struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	stopChan chan struct{}
-
-	dns     *agents.DNSAgent
-	connMgr *engine.ConnManager
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	stopChan  chan struct{}
+	dns       *agents.DNSAgent
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (dns *DNSAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	if dns.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-	fs := dns.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dns.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.DNSAgent, utils.FilterS, utils.StateServiceUP)
-	}
-
-	dns.Lock()
-	defer dns.Unlock()
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), dns.connMgr)
+func (dns *DNSAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
+		return err
+	}
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
+
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager())
+	if err != nil {
 		dns.dns = nil
 		return
 	}
 	dns.stopChan = make(chan struct{})
-	go dns.listenAndServe(dns.stopChan, shtDwn)
+	go dns.listenAndServe(dns.stopChan, shutdown)
 	close(dns.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	fs := dns.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), dns.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.DNSAgent, utils.FilterS, utils.StateServiceUP)
+func (dns *DNSAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, dns.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-
-	dns.Lock()
-	defer dns.Unlock()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	if dns.dns != nil {
 		close(dns.stopChan)
 	}
 
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), dns.connMgr)
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager())
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		dns.dns = nil
 		return
 	}
@@ -106,37 +96,28 @@ func (dns *DNSAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (er
 	dns.dns.Lock()
 	defer dns.dns.Unlock()
 	dns.stopChan = make(chan struct{})
-	go dns.listenAndServe(dns.stopChan, shtDwn)
+	go dns.listenAndServe(dns.stopChan, shutdown)
 	return
 }
 
-func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shtDwn context.CancelFunc) (err error) {
+func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shutdown chan struct{}) (err error) {
 	dns.dns.RLock()
 	defer dns.dns.RUnlock()
 	if err = dns.dns.ListenAndServe(stopChan); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-		shtDwn() // stop the engine here
+		close(shutdown) // stop the engine here
 	}
 	return
 }
 
 // Shutdown stops the service
-func (dns *DNSAgent) Shutdown() (err error) {
+func (dns *DNSAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	if dns.dns == nil {
 		return
 	}
 	close(dns.stopChan)
-	dns.Lock()
-	defer dns.Unlock()
 	dns.dns = nil
+	close(dns.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (dns *DNSAgent) IsRunning() bool {
-	dns.RLock()
-	defer dns.RUnlock()
-	return dns.dns != nil
 }
 
 // ServiceName returns the service name
@@ -154,7 +135,12 @@ func (dns *DNSAgent) StateChan(stateID string) chan struct{} {
 	return dns.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (dns *DNSAgent) IntRPCConn() birpc.ClientConnector {
-	return dns.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *DNSAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *DNSAgent) Unlock() {
+	s.mu.Unlock()
 }

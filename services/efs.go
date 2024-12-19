@@ -19,10 +19,7 @@ along with this program.  If not, see <http://.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
@@ -35,73 +32,57 @@ import (
 
 // ExportFailoverService is the service structure for ExportFailover
 type ExportFailoverService struct {
-	sync.Mutex
-
-	efS *efs.EfS
-	cl  *commonlisteners.CommonListenerS
-	srv *birpc.Service
-
-	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	efS       *efs.EfS
+	cl        *commonlisteners.CommonListenerS
+	srv       *birpc.Service
+	stopChan  chan struct{}
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // NewExportFailoverService is the constructor for the TpeService
-func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *ExportFailoverService {
+func NewExportFailoverService(cfg *config.CGRConfig) *ExportFailoverService {
 	return &ExportFailoverService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // Start should handle the service start
-func (efServ *ExportFailoverService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if efServ.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (efServ *ExportFailoverService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+		},
+		registry, efServ.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-	cls := efServ.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), efServ.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.EFs, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	efServ.cl = cls.CLS()
-	efServ.Lock()
-	efServ.efS = efs.NewEfs(efServ.cfg, efServ.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.EFs))
+	efServ.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+
+	efServ.efS = efs.NewEfs(efServ.cfg, cms.ConnManager())
 	efServ.stopChan = make(chan struct{})
 	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
 	efServ.cl.RpcRegister(efServ.srv)
-	efServ.Unlock()
 	close(efServ.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (efServ *ExportFailoverService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (efServ *ExportFailoverService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (efServ *ExportFailoverService) Shutdown() (err error) {
+func (efServ *ExportFailoverService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	efServ.srv = nil
 	close(efServ.stopChan)
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.EFs))
 	// NEXT SHOULD EXPORT ALL THE SHUTDOWN LOGGERS TO WRITE
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.EFs))
+	close(efServ.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (efServ *ExportFailoverService) IsRunning() bool {
-	efServ.Lock()
-	defer efServ.Unlock()
-	return efServ.efS != nil
 }
 
 // ShouldRun returns if the service should be running
@@ -119,7 +100,12 @@ func (efServ *ExportFailoverService) StateChan(stateID string) chan struct{} {
 	return efServ.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (efServ *ExportFailoverService) IntRPCConn() birpc.ClientConnector {
-	return efServ.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *ExportFailoverService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ExportFailoverService) Unlock() {
+	s.mu.Unlock()
 }

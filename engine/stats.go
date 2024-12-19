@@ -71,10 +71,8 @@ func (sS *StatS) StartLoop(ctx *context.Context) {
 
 // Shutdown is called to shutdown the service
 func (sS *StatS) Shutdown(ctx *context.Context) {
-	utils.Logger.Info("<StatS> service shutdown initialized")
 	close(sS.stopBackup)
 	sS.storeStats(ctx)
-	utils.Logger.Info("<StatS> service shutdown complete")
 }
 
 // runBackup will regularly store statQueues changed to dataDB

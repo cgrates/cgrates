@@ -19,12 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"os"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
@@ -35,59 +32,47 @@ import (
 
 // NewCoreService returns the Core Service
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps,
-	fileCPU *os.File, shdWg *sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) *CoreService {
+	fileCPU *os.File, shdWg *sync.WaitGroup) *CoreService {
 	return &CoreService{
-		shdWg:      shdWg,
-		cfg:        cfg,
-		caps:       caps,
-		fileCPU:    fileCPU,
-		csCh:       make(chan *cores.CoreS, 1),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		shdWg:     shdWg,
+		cfg:       cfg,
+		caps:      caps,
+		fileCPU:   fileCPU,
+		csCh:      make(chan *cores.CoreS, 1),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // CoreService implements Service interface
 type CoreService struct {
-	mu sync.RWMutex
-
-	cS *cores.CoreS
-	cl *commonlisteners.CommonListenerS
-
-	fileCPU  *os.File
-	caps     *engine.Caps
-	csCh     chan *cores.CoreS
-	stopChan chan struct{}
-	shdWg    *sync.WaitGroup
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	cS        *cores.CoreS
+	cl        *commonlisteners.CommonListenerS
+	fileCPU   *os.File
+	caps      *engine.Caps
+	csCh      chan *cores.CoreS
+	stopChan  chan struct{}
+	shdWg     *sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) error {
-	if cS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (cS *CoreService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+		},
+		registry, cS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
+	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
-	cls := cS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CoreS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	cS.cl = cls.CLS()
-	anz := cS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), cS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.CoreS, utils.AnalyzerS, utils.StateServiceUP)
-	}
-
-	cS.mu.Lock()
-	defer cS.mu.Unlock()
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CoreS))
 	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, shtDw)
+	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, shutdown)
 	cS.csCh <- cS.cS
 	srv, err := engine.NewService(cS.cS)
 	if err != nil {
@@ -99,20 +84,18 @@ func (cS *CoreService) Start(ctx *context.Context, shtDw context.CancelFunc) err
 		}
 	}
 
-	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CoreS)
+	cms.AddInternalConn(utils.CoreS, srv)
 	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
 // Reload handles the change of config
-func (cS *CoreService) Reload(*context.Context, context.CancelFunc) error {
+func (cS *CoreService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service
-func (cS *CoreService) Shutdown() error {
-	cS.mu.Lock()
-	defer cS.mu.Unlock()
+func (cS *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	cS.cS.Shutdown()
 	close(cS.stopChan)
 	cS.cS.StopCPUProfiling()
@@ -120,14 +103,8 @@ func (cS *CoreService) Shutdown() error {
 	cS.cS = nil
 	<-cS.csCh
 	cS.cl.RpcUnregisterName(utils.CoreSv1)
+	close(cS.StateChan(utils.StateServiceDOWN))
 	return nil
-}
-
-// IsRunning returns if the service is running
-func (cS *CoreService) IsRunning() bool {
-	cS.mu.RLock()
-	defer cS.mu.RUnlock()
-	return cS.cS != nil
 }
 
 // ServiceName returns the service name
@@ -145,14 +122,17 @@ func (cS *CoreService) StateChan(stateID string) chan struct{} {
 	return cS.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (cS *CoreService) IntRPCConn() birpc.ClientConnector {
-	return cS.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *CoreService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *CoreService) Unlock() {
+	s.mu.Unlock()
 }
 
 // CoreS returns the CoreS object.
 func (cS *CoreService) CoreS() *cores.CoreS {
-	cS.mu.RLock()
-	defer cS.mu.RUnlock()
 	return cS.cS
 }

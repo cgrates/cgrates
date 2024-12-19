@@ -19,12 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,69 +29,50 @@ import (
 )
 
 // NewChargerService returns the Charger Service
-func NewChargerService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewChargerService(cfg *config.CGRConfig) *ChargerService {
 	return &ChargerService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // ChargerService implements Service interface
 type ChargerService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	chrS *engine.ChargerS
 	cl   *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if chrS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (chrS *ChargerService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, chrS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-
-	cls := chrS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	chrS.cl = cls.CLS()
-	cacheS := chrS.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(ctx,
+	chrS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheChargerProfiles,
 		utils.CacheChargerFilterIndexes); err != nil {
-		return
+		return err
 	}
-	fs := chrS.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := chrS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := chrS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), chrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ChargerS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	chrS.Lock()
-	defer chrS.Unlock()
-	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, chrS.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
+	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(chrS.chrS)
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
 	if !chrS.cfg.DispatcherSCfg().Enabled {
@@ -103,32 +80,22 @@ func (chrS *ChargerService) Start(ctx *context.Context, _ context.CancelFunc) (e
 			chrS.cl.RpcRegister(s)
 		}
 	}
-
-	chrS.intRPCconn = anz.GetInternalCodec(srv, utils.ChargerS)
+	cms.AddInternalConn(utils.ChargerS, srv)
 	close(chrS.stateDeps.StateChan(utils.StateServiceUP))
-	return
+	return nil
 }
 
 // Reload handles the change of config
-func (chrS *ChargerService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
+func (chrS *ChargerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (chrS *ChargerService) Shutdown() (err error) {
-	chrS.Lock()
-	defer chrS.Unlock()
-	chrS.chrS.Shutdown()
+func (chrS *ChargerService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	chrS.chrS = nil
 	chrS.cl.RpcUnregisterName(utils.ChargerSv1)
+	close(chrS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (chrS *ChargerService) IsRunning() bool {
-	chrS.RLock()
-	defer chrS.RUnlock()
-	return chrS.chrS != nil
 }
 
 // ServiceName returns the service name
@@ -146,7 +113,12 @@ func (chrS *ChargerService) StateChan(stateID string) chan struct{} {
 	return chrS.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (chrS *ChargerService) IntRPCConn() birpc.ClientConnector {
-	return chrS.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *ChargerService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ChargerService) Unlock() {
+	s.mu.Unlock()
 }

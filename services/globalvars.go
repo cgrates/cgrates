@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
+	"sync"
+
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -29,26 +29,22 @@ import (
 )
 
 // NewGlobalVarS .
-func NewGlobalVarS(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceIndexer) *GlobalVarS {
+func NewGlobalVarS(cfg *config.CGRConfig) *GlobalVarS {
 	return &GlobalVarS{
-		cfg:        cfg,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // GlobalVarS implements Agent interface
 type GlobalVarS struct {
-	cfg *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
+func (gv *GlobalVarS) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -59,7 +55,7 @@ func (gv *GlobalVarS) Start(*context.Context, context.CancelFunc) error {
 }
 
 // Reload handles the change of config
-func (gv *GlobalVarS) Reload(*context.Context, context.CancelFunc) error {
+func (gv *GlobalVarS) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -69,13 +65,9 @@ func (gv *GlobalVarS) Reload(*context.Context, context.CancelFunc) error {
 }
 
 // Shutdown stops the service
-func (gv *GlobalVarS) Shutdown() error {
+func (gv *GlobalVarS) Shutdown(_ *servmanager.ServiceRegistry) error {
+	close(gv.StateChan(utils.StateServiceDOWN))
 	return nil
-}
-
-// IsRunning returns if the service is running
-func (gv *GlobalVarS) IsRunning() bool {
-	return true
 }
 
 // ServiceName returns the service name
@@ -93,7 +85,12 @@ func (gv *GlobalVarS) StateChan(stateID string) chan struct{} {
 	return gv.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (gv *GlobalVarS) IntRPCConn() birpc.ClientConnector {
-	return gv.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *GlobalVarS) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *GlobalVarS) Unlock() {
+	s.mu.Unlock()
 }

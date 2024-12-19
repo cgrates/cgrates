@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rates
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/ericlagergren/decimal"
@@ -48,8 +47,6 @@ type RateS struct {
 
 // ListenAndServe keeps the service alive
 func (rS *RateS) ListenAndServe(stopChan, cfgRld chan struct{}) {
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s>",
-		utils.CoreS, utils.RateS))
 	for {
 		select {
 		case <-stopChan:
@@ -58,12 +55,6 @@ func (rS *RateS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 			cfgRld <- rld
 		}
 	}
-}
-
-// Shutdown is called to shutdown the service
-func (rS *RateS) Shutdown() (err error) {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown <%s>", utils.CoreS, utils.RateS))
-	return
 }
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event

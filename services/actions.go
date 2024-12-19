@@ -19,12 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/actions"
 	"github.com/cgrates/cgrates/commonlisteners"
 
@@ -35,21 +31,18 @@ import (
 )
 
 // NewActionService returns the Action Service
-func NewActionService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewActionService(cfg *config.CGRConfig) *ActionService {
 	return &ActionService{
-		connMgr:    connMgr,
-		cfg:        cfg,
-		rldChan:    make(chan struct{}, 1),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		rldChan:   make(chan struct{}, 1),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // ActionService implements Service interface
 type ActionService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	acts *actions.ActionS
 	cl   *commonlisteners.CommonListenerS
@@ -57,54 +50,37 @@ type ActionService struct {
 	rldChan  chan struct{}
 	stopChan chan struct{}
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if acts.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (acts *ActionService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, acts.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-
-	cls := acts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	acts.cl = cls.CLS()
-	cacheS := acts.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(ctx,
+	acts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheActionProfiles,
 		utils.CacheActionProfilesFilterIndexes); err != nil {
-		return
+		return err
 	}
-	fs := acts.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := acts.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := acts.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), acts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ActionS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	acts.Lock()
-	defer acts.Unlock()
-	acts.acts = actions.NewActionS(acts.cfg, fs.FilterS(), dbs.DataManager(), acts.connMgr)
+	acts.acts = actions.NewActionS(acts.cfg, fs, dbs, cms.ConnManager())
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ActionS))
 	srv, err := engine.NewServiceWithPing(acts.acts, utils.ActionSv1, utils.V1Prfx)
 	if err != nil {
 		return
@@ -113,34 +89,25 @@ func (acts *ActionService) Start(ctx *context.Context, _ context.CancelFunc) (er
 	if !acts.cfg.DispatcherSCfg().Enabled {
 		acts.cl.RpcRegister(srv)
 	}
-
-	acts.intRPCconn = anz.GetInternalCodec(srv, utils.ActionS)
+	cms.AddInternalConn(utils.ActionS, srv)
 	close(acts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (acts *ActionService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (acts *ActionService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	acts.rldChan <- struct{}{}
 	return // for the moment nothing to reload
 }
 
 // Shutdown stops the service
-func (acts *ActionService) Shutdown() (err error) {
-	acts.Lock()
-	defer acts.Unlock()
+func (acts *ActionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	close(acts.stopChan)
 	acts.acts.Shutdown()
 	acts.acts = nil
 	acts.cl.RpcUnregisterName(utils.ActionSv1)
+	close(acts.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (acts *ActionService) IsRunning() bool {
-	acts.RLock()
-	defer acts.RUnlock()
-	return acts.acts != nil
 }
 
 // ServiceName returns the service name
@@ -158,7 +125,12 @@ func (acts *ActionService) StateChan(stateID string) chan struct{} {
 	return acts.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (acts *ActionService) IntRPCConn() birpc.ClientConnector {
-	return acts.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *ActionService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ActionService) Unlock() {
+	s.mu.Unlock()
 }

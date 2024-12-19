@@ -22,102 +22,80 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewSIPAgent returns the sip Agent
-func NewSIPAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewSIPAgent(cfg *config.CGRConfig) *SIPAgent {
 	return &SIPAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // SIPAgent implements Agent interface
 type SIPAgent struct {
-	sync.RWMutex
+	mu  sync.Mutex
 	cfg *config.CGRConfig
 
-	sip     *agents.SIPAgent
-	connMgr *engine.ConnManager
-
+	sip       *agents.SIPAgent
 	oldListen string
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (sip *SIPAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	if sip.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
-	fs := sip.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), sip.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.SIPAgent, utils.FilterS, utils.StateServiceUP)
-	}
-
-	sip.Lock()
-	defer sip.Unlock()
-	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
-	sip.sip, err = agents.NewSIPAgent(sip.connMgr, sip.cfg, fs.FilterS())
+func (sip *SIPAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, sip.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
-			utils.SIPAgent, err))
 		return
 	}
-	go sip.listenAndServe(shtDwn)
+	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+
+	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
+	sip.sip, err = agents.NewSIPAgent(cm, sip.cfg, fs)
+	if err != nil {
+		return
+	}
+	go sip.listenAndServe(shutdown)
 	close(sip.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (sip *SIPAgent) listenAndServe(shtDwn context.CancelFunc) {
+func (sip *SIPAgent) listenAndServe(shutdown chan struct{}) {
 	if err := sip.sip.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
-		shtDwn() // stop the engine here
+		close(shutdown) // stop the engine here
 	}
 }
 
 // Reload handles the change of config
-func (sip *SIPAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) (err error) {
+func (sip *SIPAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
 		return
 	}
-	sip.Lock()
 	sip.sip.Shutdown()
 	sip.oldListen = sip.cfg.SIPAgentCfg().Listen
 	sip.sip.InitStopChan()
-	sip.Unlock()
-	go sip.listenAndServe(shtDwn)
+	go sip.listenAndServe(shutdown)
 	return
 }
 
 // Shutdown stops the service
-func (sip *SIPAgent) Shutdown() (err error) {
-	sip.Lock()
-	defer sip.Unlock()
+func (sip *SIPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	sip.sip.Shutdown()
 	sip.sip = nil
+	close(sip.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (sip *SIPAgent) IsRunning() bool {
-	sip.RLock()
-	defer sip.RUnlock()
-	return sip.sip != nil
 }
 
 // ServiceName returns the service name
@@ -135,7 +113,12 @@ func (sip *SIPAgent) StateChan(stateID string) chan struct{} {
 	return sip.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (sip *SIPAgent) IntRPCConn() birpc.ClientConnector {
-	return sip.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *SIPAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *SIPAgent) Unlock() {
+	s.mu.Unlock()
 }

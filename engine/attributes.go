@@ -49,12 +49,6 @@ type AttributeS struct {
 	cfg   *config.CGRConfig
 }
 
-// Shutdown is called to shutdown the service
-func (alS *AttributeS) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.AttributeS))
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.AttributeS))
-}
-
 // attributeProfileForEvent returns the matching attribute
 func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string, attrIDs []string,
 	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchAttrPrfl *AttributeProfile, err error) {

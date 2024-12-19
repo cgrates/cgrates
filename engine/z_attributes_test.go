@@ -317,7 +317,6 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 	alS := NewAttributeService(dm, filterS, cfg)
 	var ev utils.CGREvent
 	rply := &APIAttributeProfile{}
-	alS.Shutdown()
 	err = alS.V1GetAttributeForEvent(context.Background(), &ev, rply)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)

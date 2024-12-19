@@ -33,75 +33,62 @@ import (
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceIndexer) *AnalyzerService {
-	return &AnalyzerService{
-		cfg:        cfg,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
+	anz := &AnalyzerService{
+		cfg: cfg,
+		stateDeps: NewStateDependencies([]string{
+			utils.StateServiceInit,
+			utils.StateServiceUP,
+			utils.StateServiceDOWN,
+		}),
 	}
+	return anz
 }
 
 // AnalyzerService implements Service interface
 type AnalyzerService struct {
-	sync.RWMutex
-
-	anz *analyzers.AnalyzerS
-	cl  *commonlisteners.CommonListenerS
-
-	cancelFunc context.CancelFunc
+	mu         sync.Mutex
 	cfg        *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	anz        *analyzers.AnalyzerS
+	cl         *commonlisteners.CommonListenerS
+	cancelFunc context.CancelFunc
+	stateDeps  *StateDependencies // channel subscriptions for state changes
 
 }
 
 // Start should handle the sercive start
-func (anz *AnalyzerService) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	if anz.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
-	cls := anz.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), anz.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AnalyzerS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	anz.cl = cls.CLS()
-
-	anz.Lock()
-	defer anz.Unlock()
-	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
+func (anz *AnalyzerService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	cls, err := WaitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
+		anz.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
 		return
 	}
-	anzCtx, cancel := context.WithCancel(ctx)
+	anz.cl = cls.(*CommonListenerService).CLS()
+
+	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
+		return
+	}
+	close(anz.stateDeps.StateChan(utils.StateServiceInit))
+	anzCtx, cancel := context.WithCancel(context.TODO())
 	anz.cancelFunc = cancel
 	go func(a *analyzers.AnalyzerS) {
 		if err := a.ListenAndServe(anzCtx); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
-			shtDwn()
+			close(shutdown)
 		}
 	}(anz.anz)
 	anz.cl.SetAnalyzer(anz.anz)
-	go anz.start()
-	close(anz.stateDeps.StateChan(utils.StateServiceUP))
+	go anz.start(registry)
 	return
 }
 
-func (anz *AnalyzerService) start() {
-	fs := anz.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), anz.cfg.GeneralCfg().ConnectTimeout) {
-		return
-		// return utils.NewServiceStateTimeoutError(utils.AnalyzerS, utils.FilterS, utils.StateServiceUP)
-	}
-
-	if !anz.IsRunning() {
+func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry) {
+	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+		anz.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
 		return
 	}
-	anz.Lock()
-	anz.anz.SetFilterS(fs.FilterS())
+	anz.anz.SetFilterS(fs.(*FilterService).FilterS())
 
 	srv, _ := engine.NewService(anz.anz)
 	// srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
@@ -110,31 +97,23 @@ func (anz *AnalyzerService) start() {
 			anz.cl.RpcRegister(s)
 		}
 	}
-	anz.Unlock()
+	close(anz.stateDeps.StateChan(utils.StateServiceUP))
 }
 
 // Reload handles the change of config
-func (anz *AnalyzerService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (anz *AnalyzerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return // for the momment nothing to reload
 }
 
 // Shutdown stops the service
-func (anz *AnalyzerService) Shutdown() (err error) {
-	anz.Lock()
+func (anz *AnalyzerService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	anz.cancelFunc()
 	anz.cl.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
-	anz.Unlock()
 	anz.cl.RpcUnregisterName(utils.AnalyzerSv1)
+	close(anz.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (anz *AnalyzerService) IsRunning() bool {
-	anz.RLock()
-	defer anz.RUnlock()
-	return anz.anz != nil
 }
 
 // ServiceName returns the service name
@@ -149,7 +128,7 @@ func (anz *AnalyzerService) ShouldRun() bool {
 
 // GetInternalCodec returns the connection wrapped in analyzer connector
 func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string) birpc.ClientConnector {
-	if !anz.IsRunning() {
+	if !servmanager.IsServiceInState(anz, utils.StateServiceInit) {
 		return c
 	}
 	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
@@ -160,7 +139,12 @@ func (anz *AnalyzerService) StateChan(stateID string) chan struct{} {
 	return anz.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (anz *AnalyzerService) IntRPCConn() birpc.ClientConnector {
-	return anz.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *AnalyzerService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AnalyzerService) Unlock() {
+	s.mu.Unlock()
 }

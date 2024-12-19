@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -31,43 +29,33 @@ import (
 )
 
 // NewDataDBService returns the DataDB Service
-func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager, setVersions bool,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) *DataDBService {
+func NewDataDBService(cfg *config.CGRConfig, setVersions bool,
+	srvDep map[string]*sync.WaitGroup) *DataDBService {
 	return &DataDBService{
 		cfg:         cfg,
-		connMgr:     connMgr,
 		setVersions: setVersions,
 		srvDep:      srvDep,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // DataDBService implements Service interface
 type DataDBService struct {
-	sync.RWMutex
-	cfg      *config.CGRConfig
-	oldDBCfg *config.DataDbCfg
-	connMgr  *engine.ConnManager
-
+	mu          sync.Mutex
+	cfg         *config.CGRConfig
+	oldDBCfg    *config.DataDbCfg
 	dm          *engine.DataManager
 	setVersions bool
-
-	srvDep map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	srvDep      map[string]*sync.WaitGroup
+	stateDeps   *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error) {
-	if db.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (db *DataDBService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, db.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-	db.Lock()
-	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
 	dbConn, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
 		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
@@ -78,7 +66,7 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
-	db.dm = engine.NewDataManager(dbConn, db.cfg.CacheCfg(), db.connMgr)
+	db.dm = engine.NewDataManager(dbConn, db.cfg.CacheCfg(), cms.(*ConnManagerService).ConnManager())
 
 	if db.setVersions {
 		err = engine.OverwriteDBVersions(dbConn)
@@ -94,9 +82,7 @@ func (db *DataDBService) Start(*context.Context, context.CancelFunc) (err error)
 }
 
 // Reload handles the change of config
-func (db *DataDBService) Reload(*context.Context, context.CancelFunc) (err error) {
-	db.Lock()
-	defer db.Unlock()
+func (db *DataDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	if db.needsConnectionReload() {
 		var d engine.DataDBDriver
 		d, err = engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
@@ -123,20 +109,12 @@ func (db *DataDBService) Reload(*context.Context, context.CancelFunc) (err error
 }
 
 // Shutdown stops the service
-func (db *DataDBService) Shutdown() (_ error) {
+func (db *DataDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	db.srvDep[utils.DataDB].Wait()
-	db.Lock()
 	db.dm.DataDB().Close()
 	db.dm = nil
-	db.Unlock()
+	close(db.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (db *DataDBService) IsRunning() bool {
-	db.RLock()
-	defer db.RUnlock()
-	return db.dm != nil && db.dm.DataDB() != nil
 }
 
 // ServiceName returns the service name
@@ -192,7 +170,12 @@ func (db *DataDBService) StateChan(stateID string) chan struct{} {
 	return db.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (db *DataDBService) IntRPCConn() birpc.ClientConnector {
-	return db.intRPCconn
+// Lock implements the sync.Locker interface
+func (db *DataDBService) Lock() {
+	db.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (db *DataDBService) Unlock() {
+	db.mu.Unlock()
 }

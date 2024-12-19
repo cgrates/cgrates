@@ -22,84 +22,73 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewRadiusAgent returns the Radius Agent
-func NewRadiusAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewRadiusAgent(cfg *config.CGRConfig) *RadiusAgent {
 	return &RadiusAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // RadiusAgent implements Agent interface
 type RadiusAgent struct {
-	sync.RWMutex
+	mu       sync.Mutex
 	cfg      *config.CGRConfig
 	stopChan chan struct{}
 
-	rad     *agents.RadiusAgent
-	connMgr *engine.ConnManager
+	rad *agents.RadiusAgent
 
 	lnet  string
 	lauth string
 	lacct string
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (rad *RadiusAgent) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	if rad.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (rad *RadiusAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, rad.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-
-	fs := rad.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), rad.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RadiusAgent, utils.FilterS, utils.StateServiceUP)
-	}
-
-	rad.Lock()
-	defer rad.Unlock()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	rad.lnet = rad.cfg.RadiusAgentCfg().ListenNet
 	rad.lauth = rad.cfg.RadiusAgentCfg().ListenAuth
 	rad.lacct = rad.cfg.RadiusAgentCfg().ListenAcct
 
-	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.FilterS(), rad.connMgr); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.FilterS(), cms.ConnManager()); err != nil {
 		return
 	}
 	rad.stopChan = make(chan struct{})
 
-	go rad.listenAndServe(rad.rad, shtDwn)
+	go rad.listenAndServe(rad.rad, shutdown)
 	close(rad.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shtDwn context.CancelFunc) (err error) {
+func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shutdown chan struct{}) (err error) {
 	if err = r.ListenAndServe(rad.stopChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
-		shtDwn()
+		close(shutdown)
 	}
 	return
 }
 
 // Reload handles the change of config
-func (rad *RadiusAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (rad *RadiusAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	if rad.lnet == rad.cfg.RadiusAgentCfg().ListenNet &&
 		rad.lauth == rad.cfg.RadiusAgentCfg().ListenAuth &&
 		rad.lacct == rad.cfg.RadiusAgentCfg().ListenAcct {
@@ -107,27 +96,19 @@ func (rad *RadiusAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) 
 	}
 
 	rad.shutdown()
-	return rad.Start(ctx, shtDwn)
+	return rad.Start(shutdown, registry)
 }
 
 // Shutdown stops the service
-func (rad *RadiusAgent) Shutdown() (err error) {
+func (rad *RadiusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	rad.shutdown()
+	close(rad.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
 
 func (rad *RadiusAgent) shutdown() {
-	rad.Lock()
 	close(rad.stopChan)
 	rad.rad = nil
-	rad.Unlock()
-}
-
-// IsRunning returns if the service is running
-func (rad *RadiusAgent) IsRunning() bool {
-	rad.RLock()
-	defer rad.RUnlock()
-	return rad.rad != nil
 }
 
 // ServiceName returns the service name
@@ -145,7 +126,12 @@ func (rad *RadiusAgent) StateChan(stateID string) chan struct{} {
 	return rad.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (rad *RadiusAgent) IntRPCConn() birpc.ClientConnector {
-	return rad.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *RadiusAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RadiusAgent) Unlock() {
+	s.mu.Unlock()
 }

@@ -21,8 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -32,30 +30,23 @@ import (
 )
 
 // NewRateService constructs RateService
-func NewRateService(cfg *config.CGRConfig,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewRateService(cfg *config.CGRConfig) *RateService {
 	return &RateService{
-		cfg:        cfg,
-		rldChan:    make(chan struct{}),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		rldChan:   make(chan struct{}),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // RateService is the service structure for RateS
 type RateService struct {
-	sync.RWMutex
-
-	rateS *rates.RateS
-	cl    *commonlisteners.CommonListenerS
-
-	rldChan  chan struct{}
-	stopChan chan struct{}
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	rateS     *rates.RateS
+	cl        *commonlisteners.CommonListenerS
+	rldChan   chan struct{}
+	stopChan  chan struct{}
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // ServiceName returns the service name
@@ -68,67 +59,48 @@ func (rs *RateService) ShouldRun() (should bool) {
 	return rs.cfg.RateSCfg().Enabled
 }
 
-// IsRunning returns if the service is running
-func (rs *RateService) IsRunning() bool {
-	rs.RLock()
-	defer rs.RUnlock()
-	return rs.rateS != nil
-}
-
 // Reload handles the change of config
-func (rs *RateService) Reload(*context.Context, context.CancelFunc) (_ error) {
+func (rs *RateService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
 	rs.rldChan <- struct{}{}
 	return
 }
 
 // Shutdown stops the service
-func (rs *RateService) Shutdown() (err error) {
-	rs.Lock()
-	defer rs.Unlock()
+func (rs *RateService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	close(rs.stopChan)
-	rs.rateS.Shutdown() //we don't verify the error because shutdown never returns an err
 	rs.rateS = nil
 	rs.cl.RpcUnregisterName(utils.RateSv1)
+	close(rs.StateChan(utils.StateServiceDOWN))
 	return
 }
 
 // Start should handle the service start
-func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if rs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, rs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-
-	cls := rs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	rs.cl = cls.CLS()
-	cacheS := rs.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(ctx,
+	rs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheRateProfiles,
 		utils.CacheRateProfilesFilterIndexes,
 		utils.CacheRateFilterIndexes); err != nil {
-		return
+		return err
 	}
-	fs := rs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := rs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := rs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), rs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RateS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	rs.Lock()
-	rs.rateS = rates.NewRateS(rs.cfg, fs.FilterS(), dbs.DataManager())
-	rs.Unlock()
+	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)
 
 	rs.stopChan = make(chan struct{})
 	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
@@ -141,8 +113,7 @@ func (rs *RateService) Start(ctx *context.Context, _ context.CancelFunc) (err er
 	if !rs.cfg.DispatcherSCfg().Enabled {
 		rs.cl.RpcRegister(srv)
 	}
-
-	rs.intRPCconn = anz.GetInternalCodec(srv, utils.RateS)
+	cms.AddInternalConn(utils.RateS, srv)
 	close(rs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
@@ -152,7 +123,12 @@ func (rs *RateService) StateChan(stateID string) chan struct{} {
 	return rs.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (rs *RateService) IntRPCConn() birpc.ClientConnector {
-	return rs.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *RateService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RateService) Unlock() {
+	s.mu.Unlock()
 }

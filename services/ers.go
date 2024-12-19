@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,67 +31,50 @@ import (
 )
 
 // NewEventReaderService returns the EventReader Service
-func NewEventReaderService(
-	cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewEventReaderService(cfg *config.CGRConfig) *EventReaderService {
 	return &EventReaderService{
-		rldChan:    make(chan struct{}, 1),
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		rldChan:   make(chan struct{}, 1),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // EventReaderService implements Service interface
 type EventReaderService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	ers *ers.ERService
 	cl  *commonlisteners.CommonListenerS
 
 	rldChan  chan struct{}
 	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
-	if erS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (erS *EventReaderService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, erS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-
-	cls := erS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), erS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ERs, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	erS.cl = cls.CLS()
-	fs := erS.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), erS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ERs, utils.FilterS, utils.StateServiceUP)
-	}
-	anz := erS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), erS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ERs, utils.AnalyzerS, utils.StateServiceUP)
-	}
-
-	erS.Lock()
-	defer erS.Unlock()
+	erS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
 
 	// remake the stop chan
 	erS.stopChan = make(chan struct{})
 
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
-
 	// build the service
-	erS.ers = ers.NewERService(erS.cfg, fs.FilterS(), erS.connMgr)
-	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shtDwn)
+	erS.ers = ers.NewERService(erS.cfg, fs.FilterS(), cms.ConnManager())
+	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shutdown)
 
 	srv, err := engine.NewServiceWithPing(erS.ers, utils.ErSv1, utils.V1Prfx)
 	if err != nil {
@@ -102,42 +83,32 @@ func (erS *EventReaderService) Start(ctx *context.Context, shtDwn context.Cancel
 	if !erS.cfg.DispatcherSCfg().Enabled {
 		erS.cl.RpcRegister(srv)
 	}
-	erS.intRPCconn = anz.GetInternalCodec(srv, utils.ERs)
+	cms.AddInternalConn(utils.ERs, srv)
 	close(erS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan chan struct{}, rldChan chan struct{}, shtDwn context.CancelFunc) (err error) {
+func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan, rldChan, shutdown chan struct{}) (err error) {
 	if err = ers.ListenAndServe(stopChan, rldChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%v>", utils.ERs, err))
-		shtDwn()
+		close(shutdown)
 	}
 	return
 }
 
 // Reload handles the change of config
-func (erS *EventReaderService) Reload(*context.Context, context.CancelFunc) (err error) {
-	erS.RLock()
+func (erS *EventReaderService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	erS.rldChan <- struct{}{}
-	erS.RUnlock()
 	return
 }
 
 // Shutdown stops the service
-func (erS *EventReaderService) Shutdown() (err error) {
-	erS.Lock()
-	defer erS.Unlock()
+func (erS *EventReaderService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	close(erS.stopChan)
 	erS.ers = nil
 	erS.cl.RpcUnregisterName(utils.ErSv1)
+	close(erS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (erS *EventReaderService) IsRunning() bool {
-	erS.RLock()
-	defer erS.RUnlock()
-	return erS.ers != nil
 }
 
 // ServiceName returns the service name
@@ -155,7 +126,12 @@ func (erS *EventReaderService) StateChan(stateID string) chan struct{} {
 	return erS.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (erS *EventReaderService) IntRPCConn() birpc.ClientConnector {
-	return erS.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *EventReaderService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *EventReaderService) Unlock() {
+	s.mu.Unlock()
 }

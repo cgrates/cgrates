@@ -21,90 +21,86 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewFilterService instantiates a new FilterService.
-func NewFilterService(cfg *config.CGRConfig) *FilterService {
-	return &FilterService{
+// NewConfigService instantiates a new ConfigService.
+func NewConfigService(cfg *config.CGRConfig) *ConfigService {
+	return &ConfigService{
 		cfg:       cfg,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
-// FilterService implements Service interface.
-type FilterService struct {
+// ConfigService implements Service interface.
+type ConfigService struct {
 	mu        sync.Mutex
 	cfg       *config.CGRConfig
-	fltrS     *engine.FilterS
+	cl        *commonlisteners.CommonListenerS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
+func (s *ConfigService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
+			utils.CommonListenerS,
 			utils.ConnManager,
-			utils.CacheS,
-			utils.DataDB,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
+	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-	cacheS := srvDeps[utils.CacheS].(*CacheService)
-	if err = cacheS.WaitToPrecache(shutdown, utils.CacheFilters); err != nil {
-		return err
-	}
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	s.fltrS = engine.NewFilterS(s.cfg, cms.ConnManager(), dbs.DataManager())
+	svcs, _ := engine.NewServiceWithName(s.cfg, utils.ConfigS, true)
+	if !s.cfg.DispatcherSCfg().Enabled {
+		for _, svc := range svcs {
+			s.cl.RpcRegister(svc)
+		}
+	}
+	cms.AddInternalConn(utils.ConfigS, svcs)
 	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
 // Reload handles the config changes.
-func (s *FilterService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (s *ConfigService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (s *FilterService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	s.fltrS = nil
-	close(s.stateDeps.StateChan(utils.StateServiceDOWN))
+func (s *ConfigService) Shutdown(_ *servmanager.ServiceRegistry) error {
+	s.cl.RpcUnregisterName(utils.ConfigSv1)
+	close(s.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 
-// ServiceName returns the service name
-func (s *FilterService) ServiceName() string {
-	return utils.FilterS
+func (s *ConfigService) ServiceName() string {
+	return utils.ConfigS
 }
 
 // ShouldRun returns if the service should be running.
-func (s *FilterService) ShouldRun() bool {
+func (s *ConfigService) ShouldRun() bool {
 	return true
 }
 
 // StateChan returns signaling channel of specific state
-func (s *FilterService) StateChan(stateID string) chan struct{} {
+func (s *ConfigService) StateChan(stateID string) chan struct{} {
 	return s.stateDeps.StateChan(stateID)
 }
 
-// FilterS returns the FilterS object.
-func (s *FilterService) FilterS() *engine.FilterS {
-	return s.fltrS
-}
-
 // Lock implements the sync.Locker interface
-func (s *FilterService) Lock() {
+func (s *ConfigService) Lock() {
 	s.mu.Lock()
 }
 
 // Unlock implements the sync.Locker interface
-func (s *FilterService) Unlock() {
+func (s *ConfigService) Unlock() {
 	s.mu.Unlock()
 }

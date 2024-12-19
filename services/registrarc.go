@@ -21,80 +21,61 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewRegistrarCService returns the Dispatcher Service
-func NewRegistrarCService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewRegistrarCService(cfg *config.CGRConfig) *RegistrarCService {
 	return &RegistrarCService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // RegistrarCService implements Service interface
 type RegistrarCService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	dspS *registrarc.RegistrarCService
 
 	stopChan chan struct{}
 	rldChan  chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (dspS *RegistrarCService) Start(*context.Context, context.CancelFunc) (err error) {
-	if dspS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (dspS *RegistrarCService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, dspS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-	utils.Logger.Info("Starting CGRateS DispatcherH service.")
-	dspS.Lock()
-	defer dspS.Unlock()
 
 	dspS.stopChan = make(chan struct{})
 	dspS.rldChan = make(chan struct{})
-	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, dspS.connMgr)
+	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, cms.(*ConnManagerService).ConnManager())
 	go dspS.dspS.ListenAndServe(dspS.stopChan, dspS.rldChan)
 	close(dspS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (dspS *RegistrarCService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (dspS *RegistrarCService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	dspS.rldChan <- struct{}{}
 	return // for the momment nothing to reload
 }
 
 // Shutdown stops the service
-func (dspS *RegistrarCService) Shutdown() (err error) {
-	dspS.Lock()
+func (dspS *RegistrarCService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	close(dspS.stopChan)
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
-	dspS.Unlock()
+	close(dspS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (dspS *RegistrarCService) IsRunning() bool {
-	dspS.RLock()
-	defer dspS.RUnlock()
-	return dspS.dspS != nil
 }
 
 // ServiceName returns the service name
@@ -113,7 +94,12 @@ func (dspS *RegistrarCService) StateChan(stateID string) chan struct{} {
 	return dspS.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (dspS *RegistrarCService) IntRPCConn() birpc.ClientConnector {
-	return dspS.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *RegistrarCService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RegistrarCService) Unlock() {
+	s.mu.Unlock()
 }

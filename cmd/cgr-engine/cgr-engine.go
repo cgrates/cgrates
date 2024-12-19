@@ -34,12 +34,10 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
@@ -73,10 +71,8 @@ func runCGREngine(fs []string) (err error) {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
 	}
 
-	// Init config
-	ctx, cancel := context.WithCancel(context.Background())
 	var cfg *config.CGRConfig
-	if cfg, err = services.InitConfigFromPath(ctx, *flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
+	if cfg, err = services.InitConfigFromPath(context.TODO(), *flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
 		return
 	}
 
@@ -90,7 +86,8 @@ func runCGREngine(fs []string) (err error) {
 
 	shdWg := new(sync.WaitGroup)
 	shdWg.Add(1)
-	go handleSignals(ctx, cancel, cfg, shdWg)
+	shutdown := make(chan struct{})
+	go handleSignals(shutdown, cfg, shdWg)
 
 	if *flags.ScheduledShutdown != utils.EmptyString {
 		var shtDwDur time.Duration
@@ -99,24 +96,29 @@ func runCGREngine(fs []string) (err error) {
 		}
 		shdWg.Add(1)
 		go func() { // Schedule shutdown
+			defer shdWg.Done()
 			tm := time.NewTimer(shtDwDur)
 			select {
 			case <-tm.C:
-				cancel()
-			case <-ctx.Done():
+				close(shutdown)
+			case <-shutdown:
 				tm.Stop()
 			}
-			shdWg.Done()
 		}()
 	}
 
-	connMgr := engine.NewConnManager(cfg)
 	// init syslog
-	if utils.Logger, err = engine.NewLogger(ctx,
+	if utils.Logger, err = engine.NewLogger(context.TODO(),
 		utils.FirstNonEmpty(*flags.Logger, cfg.LoggerCfg().Type),
 		cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().NodeID,
-		connMgr, cfg); err != nil {
+
+		// TODO: Implement LoggerService with a dependency on
+		// ConnManager. See how to make it run as early as possible.
+		// Until then leave ConnManager nil.
+		nil,
+
+		cfg); err != nil {
 		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
 	}
 	efs.SetFailedPostCacheTTL(cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
@@ -127,93 +129,52 @@ func runCGREngine(fs []string) (err error) {
 		utils.DataDB: new(sync.WaitGroup),
 	}
 
-	iServeManagerCh := make(chan birpc.ClientConnector, 1)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager), utils.ServiceManagerV1, iServeManagerCh)
-	iConfigCh := make(chan birpc.ClientConnector, 1)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig), utils.ConfigSv1, iConfigCh)
-	iGuardianSCh := make(chan birpc.ClientConnector, 1)
-	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian), utils.GuardianSv1, iGuardianSCh)
+	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg)
+	dspS := services.NewDispatcherService(cfg)
 
-	// ServiceIndexer will share service references to all services
-	srvIdxr := servmanager.NewServiceIndexer()
-	gvS := services.NewGlobalVarS(cfg, srvIdxr)
-	dmS := services.NewDataDBService(cfg, connMgr, *flags.SetVersions, srvDep, srvIdxr)
-	sdbS := services.NewStorDBService(cfg, *flags.SetVersions, srvIdxr)
-	cls := services.NewCommonListenerService(cfg, caps, srvIdxr)
-	anzS := services.NewAnalyzerService(cfg, srvIdxr)
-	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg, srvIdxr)
-	cacheS := services.NewCacheService(cfg, connMgr, srvIdxr)
-	fltrS := services.NewFilterService(cfg, connMgr, srvIdxr)
-	dspS := services.NewDispatcherService(cfg, connMgr, srvIdxr)
-	ldrs := services.NewLoaderService(cfg, connMgr, srvIdxr)
-	efs := services.NewExportFailoverService(cfg, connMgr, srvIdxr)
-	adminS := services.NewAdminSv1Service(cfg, connMgr, srvIdxr)
-	sessionS := services.NewSessionService(cfg, connMgr, srvIdxr)
-	attrS := services.NewAttributeService(cfg, dspS, srvIdxr)
-	chrgS := services.NewChargerService(cfg, connMgr, srvIdxr)
-	routeS := services.NewRouteService(cfg, connMgr, srvIdxr)
-	resourceS := services.NewResourceService(cfg, connMgr, srvDep, srvIdxr)
-	trendS := services.NewTrendService(cfg, connMgr, srvDep, srvIdxr)
-	rankingS := services.NewRankingService(cfg, connMgr, srvDep, srvIdxr)
-	thS := services.NewThresholdService(cfg, connMgr, srvDep, srvIdxr)
-	stS := services.NewStatService(cfg, connMgr, srvDep, srvIdxr)
-	erS := services.NewEventReaderService(cfg, connMgr, srvIdxr)
-	dnsAgent := services.NewDNSAgent(cfg, connMgr, srvIdxr)
-	fsAgent := services.NewFreeswitchAgent(cfg, connMgr, srvIdxr)
-	kamAgent := services.NewKamailioAgent(cfg, connMgr, srvIdxr)
-	janusAgent := services.NewJanusAgent(cfg, connMgr, srvIdxr)
-	astAgent := services.NewAsteriskAgent(cfg, connMgr, srvIdxr)
-	radAgent := services.NewRadiusAgent(cfg, connMgr, srvIdxr)
-	diamAgent := services.NewDiameterAgent(cfg, connMgr, caps, srvIdxr)
-	httpAgent := services.NewHTTPAgent(cfg, connMgr, srvIdxr)
-	sipAgent := services.NewSIPAgent(cfg, connMgr, srvIdxr)
-	eeS := services.NewEventExporterService(cfg, connMgr, srvIdxr)
-	cdrS := services.NewCDRServer(cfg, connMgr, srvIdxr)
-	registrarcS := services.NewRegistrarCService(cfg, connMgr, srvIdxr)
-	rateS := services.NewRateService(cfg, srvIdxr)
-	actionS := services.NewActionService(cfg, connMgr, srvIdxr)
-	accS := services.NewAccountService(cfg, connMgr, srvIdxr)
-	tpeS := services.NewTPeService(cfg, connMgr, srvIdxr)
-
-	srvManager := servmanager.NewServiceManager(shdWg, connMgr, cfg, srvIdxr, []servmanager.Service{
-		gvS,
-		dmS,
-		sdbS,
-		cls,
-		anzS,
+	registry := servmanager.NewServiceRegistry()
+	srvManager := servmanager.NewServiceManager(shdWg, cfg, registry, []servmanager.Service{
+		services.NewGlobalVarS(cfg),
+		services.NewCommonListenerService(cfg, caps),
+		services.NewAnalyzerService(cfg),
+		services.NewConnManagerService(cfg),
+		services.NewDataDBService(cfg, *flags.SetVersions, srvDep),
+		services.NewStorDBService(cfg, *flags.SetVersions),
+		services.NewConfigService(cfg),
+		services.NewGuardianService(cfg),
 		coreS,
-		cacheS,
-		fltrS,
+		services.NewCacheService(cfg),
+		services.NewFilterService(cfg),
 		dspS,
-		ldrs,
-		efs,
-		adminS,
-		sessionS,
-		attrS,
-		chrgS,
-		routeS,
-		resourceS,
-		trendS,
-		rankingS,
-		thS,
-		stS,
-		erS,
-		dnsAgent,
-		fsAgent,
-		kamAgent,
-		janusAgent,
-		astAgent,
-		radAgent,
-		diamAgent,
-		httpAgent,
-		sipAgent,
-		eeS,
-		cdrS,
-		registrarcS,
-		rateS,
-		actionS,
-		accS,
-		tpeS,
+		services.NewLoaderService(cfg),
+		services.NewExportFailoverService(cfg),
+		services.NewAdminSv1Service(cfg),
+		services.NewSessionService(cfg),
+		services.NewAttributeService(cfg, dspS),
+		services.NewChargerService(cfg),
+		services.NewRouteService(cfg),
+		services.NewResourceService(cfg, srvDep),
+		services.NewTrendService(cfg, srvDep),
+		services.NewRankingService(cfg, srvDep),
+		services.NewThresholdService(cfg, srvDep),
+		services.NewStatService(cfg, srvDep),
+		services.NewEventReaderService(cfg),
+		services.NewDNSAgent(cfg),
+		services.NewFreeswitchAgent(cfg),
+		services.NewKamailioAgent(cfg),
+		services.NewJanusAgent(cfg),
+		services.NewAsteriskAgent(cfg),
+		services.NewRadiusAgent(cfg),
+		services.NewDiameterAgent(cfg, caps),
+		services.NewHTTPAgent(cfg),
+		services.NewSIPAgent(cfg),
+		services.NewEventExporterService(cfg),
+		services.NewCDRServer(cfg),
+		services.NewRegistrarCService(cfg),
+		services.NewRateService(cfg),
+		services.NewActionService(cfg),
+		services.NewAccountService(cfg),
+		services.NewTPeService(cfg),
 	})
 
 	defer func() {
@@ -224,7 +185,7 @@ func runCGREngine(fs []string) (err error) {
 		}()
 		<-ctx.Done()
 		if ctx.Err() != context.Canceled {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown all subsystems in the given time",
+			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down all services in the given time",
 				utils.ServiceManager))
 		}
 		if *flags.PidFile != utils.EmptyString {
@@ -242,85 +203,20 @@ func runCGREngine(fs []string) (err error) {
 		// TODO: check if there's any need to manually stop memory profiling.
 		// It should be stopped automatically during CoreS service shutdown.
 
-		utils.Logger.Info("<CoreS> stopped all components. CGRateS shutdown!")
+		utils.Logger.Info(fmt.Sprintf("<%s> stopped all services. CGRateS shutdown!", utils.ServiceManager))
 	}()
 
-	shdWg.Add(1)
-	if err = gvS.Start(ctx, cancel); err != nil {
-		shdWg.Done()
-		srvManager.ShutdownServices()
-		return
-	}
-	if cls.ShouldRun() {
-		shdWg.Add(1)
-		if err = cls.Start(ctx, cancel); err != nil {
-			shdWg.Done()
-			srvManager.ShutdownServices()
-			return
-		}
-	}
-	if efs.ShouldRun() { // efs checking first because of loggers
-		shdWg.Add(1)
-		if err = efs.Start(ctx, cancel); err != nil {
-			shdWg.Done()
-			srvManager.ShutdownServices()
-			return
-		}
-	}
-	if dmS.ShouldRun() { // Some services can run without db, ie:  ERs
-		shdWg.Add(1)
-		if err = dmS.Start(ctx, cancel); err != nil {
-			shdWg.Done()
-			srvManager.ShutdownServices()
-			return
-		}
-	}
-	if sdbS.ShouldRun() {
-		shdWg.Add(1)
-		if err = sdbS.Start(ctx, cancel); err != nil {
-			shdWg.Done()
-			srvManager.ShutdownServices()
-			return
-		}
-	}
-
-	if anzS.ShouldRun() {
-		shdWg.Add(1)
-		if err = anzS.Start(ctx, cancel); err != nil {
-			shdWg.Done()
-			srvManager.ShutdownServices()
-			return
-		}
-	} else {
-		close(anzS.StateChan(utils.StateServiceUP))
-	}
-
-	shdWg.Add(1)
-	if err = coreS.Start(ctx, cancel); err != nil {
-		shdWg.Done()
-		srvManager.ShutdownServices()
-		return
-	}
-	shdWg.Add(1)
-	if err = cacheS.Start(ctx, cancel); err != nil {
-		shdWg.Done()
-		srvManager.ShutdownServices()
-		return
-	}
-	srvManager.StartServices(ctx, cancel)
-
-	cgrInitServiceManagerV1(iServeManagerCh, srvManager, cfg, cls.CLS(), anzS)
-	cgrInitGuardianSv1(iGuardianSCh, cfg, cls.CLS(), anzS)
-	cgrInitConfigSv1(iConfigCh, cfg, cls.CLS(), anzS)
+	srvManager.StartServices(shutdown)
+	cgrInitServiceManagerV1(cfg, srvManager, registry)
 
 	if *flags.Preload != utils.EmptyString {
-		if err = cgrRunPreload(ctx, cfg, *flags.Preload, srvIdxr); err != nil {
+		if err = cgrRunPreload(cfg, *flags.Preload, registry); err != nil {
 			return
 		}
 	}
 
 	// Serve rpc connections
-	cgrStartRPC(ctx, cancel, cfg, srvIdxr)
+	cgrStartRPC(cfg, registry, shutdown)
 
 	// TODO: find a better location for this if block
 	if *flags.MemPrfDir != "" {
@@ -334,26 +230,24 @@ func runCGREngine(fs []string) (err error) {
 		}
 	}
 
-	<-ctx.Done()
+	<-shutdown
 	return
 }
 
-func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string,
-	sIdxr *servmanager.ServiceIndexer) (err error) {
+// TODO: merge with LoaderService
+func cgrRunPreload(cfg *config.CGRConfig, loaderIDs string,
+	registry *servmanager.ServiceRegistry) (err error) {
 	if !cfg.LoaderCfg().Enabled() {
 		err = fmt.Errorf("<%s> not enabled but required by preload mechanism", utils.LoaderS)
 		return
 	}
-	loader := sIdxr.GetService(utils.LoaderS).(*services.LoaderService)
-	select {
-	case <-loader.StateChan(utils.StateServiceUP):
-	case <-ctx.Done():
-		return
+	loader := registry.Lookup(utils.LoaderS).(*services.LoaderService)
+	if utils.StructChanTimeout(loader.StateChan(utils.StateServiceUP), cfg.GeneralCfg().ConnectTimeout) {
+		return utils.NewServiceStateTimeoutError(utils.PreloadCgr, utils.LoaderS, utils.StateServiceUP)
 	}
-
 	var reply string
 	for _, loaderID := range strings.Split(loaderIDs, utils.FieldsSep) {
-		if err = loader.GetLoaderS().V1Run(ctx, &loaders.ArgsProcessFolder{
+		if err = loader.GetLoaderS().V1Run(context.TODO(), &loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
 				utils.MetaForceLock:   true, // force lock will unlock the file in case is locked and return error
 				utils.MetaStopOnError: true,
@@ -367,54 +261,40 @@ func cgrRunPreload(ctx *context.Context, cfg *config.CGRConfig, loaderIDs string
 	return
 }
 
-func cgrInitGuardianSv1(iGuardianSCh chan birpc.ClientConnector, cfg *config.CGRConfig,
-	cl *commonlisteners.CommonListenerS, anz *services.AnalyzerService) {
-	srv, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
-	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cl.RpcRegister(s)
-		}
+func cgrInitServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceManager,
+	registry *servmanager.ServiceRegistry) {
+	srvDeps, err := services.WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+		},
+		registry, cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-	iGuardianSCh <- anz.GetInternalCodec(srv, utils.GuardianS)
-}
-
-func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector,
-	srvMngr *servmanager.ServiceManager, cfg *config.CGRConfig,
-	cl *commonlisteners.CommonListenerS, anz *services.AnalyzerService) {
+	cl := srvDeps[utils.CommonListenerS].(*services.CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*services.ConnManagerService)
 	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
 	if !cfg.DispatcherSCfg().Enabled {
 		cl.RpcRegister(srv)
 	}
-	iServMngrCh <- anz.GetInternalCodec(srv, utils.ServiceManager)
+	cms.AddInternalConn(utils.ServiceManager, srv)
 }
 
-func cgrInitConfigSv1(iConfigCh chan birpc.ClientConnector,
-	cfg *config.CGRConfig, cl *commonlisteners.CommonListenerS, anz *services.AnalyzerService) {
-	srv, _ := engine.NewServiceWithName(cfg, utils.ConfigS, true)
-	// srv, _ := birpc.NewService(apis.NewConfigSv1(cfg), "", false)
-	if !cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cl.RpcRegister(s)
-		}
-	}
-	iConfigCh <- anz.GetInternalCodec(srv, utils.ConfigSv1)
-}
-
-func cgrStartRPC(ctx *context.Context, shtdwnEngine context.CancelFunc,
-	cfg *config.CGRConfig, sIdxr *servmanager.ServiceIndexer) {
+func cgrStartRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown chan struct{}) {
 	if cfg.DispatcherSCfg().Enabled { // wait only for dispatcher as cache is allways registered before this
-		select {
-		case <-sIdxr.GetService(utils.DispatcherS).StateChan(utils.StateServiceUP):
-		case <-ctx.Done():
+		if utils.StructChanTimeout(
+			registry.Lookup(utils.DispatcherS).StateChan(utils.StateServiceUP),
+			cfg.GeneralCfg().ConnectTimeout) {
 			return
 		}
 	}
-	cl := sIdxr.GetService(utils.CommonListenerS).(*services.CommonListenerService).CLS()
-	cl.StartServer(ctx, shtdwnEngine, cfg)
+	cl := registry.Lookup(utils.CommonListenerS).(*services.CommonListenerService).CLS()
+	cl.StartServer(cfg, shutdown)
 }
 
-func handleSignals(ctx *context.Context, shutdown context.CancelFunc,
-	cfg *config.CGRConfig, shdWg *sync.WaitGroup) {
+func handleSignals(stopChan chan struct{}, cfg *config.CGRConfig, shdWg *sync.WaitGroup) {
+	defer shdWg.Done()
 	shutdownSignal := make(chan os.Signal, 1)
 	reloadSignal := make(chan os.Signal, 1)
 	signal.Notify(shutdownSignal, os.Interrupt,
@@ -422,18 +302,15 @@ func handleSignals(ctx *context.Context, shutdown context.CancelFunc,
 	signal.Notify(reloadSignal, syscall.SIGHUP)
 	for {
 		select {
-		case <-ctx.Done():
-			shdWg.Done()
+		case <-stopChan:
 			return
 		case <-shutdownSignal:
-			shutdown()
-			shdWg.Done()
-			return
+			close(stopChan)
 		case <-reloadSignal:
 			//  do it in its own goroutine in order to not block the signal handler with the reload functionality
 			go func() {
 				var reply string
-				if err := cfg.V1ReloadConfig(ctx,
+				if err := cfg.V1ReloadConfig(context.TODO(),
 					new(config.ReloadArgs), &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("Error reloading configuration: <%s>", err))

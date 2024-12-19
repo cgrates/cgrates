@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -33,73 +31,54 @@ import (
 
 // NewTrendsService returns the TrendS Service
 func NewTrendService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) *TrendService {
 	return &TrendService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvDep:     srvDep,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		srvDep:    srvDep,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 type TrendService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	trs *engine.TrendS
 	cl  *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	srvDep    map[string]*sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if trs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (trs *TrendService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	trs.srvDep[utils.DataDB].Add(1)
-	cls := trs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	trs.cl = cls.CLS()
-	cacheS := trs.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(ctx,
-		utils.CacheTrendProfiles,
-		utils.CacheTrends,
-	); err != nil {
+
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, trs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
 		return err
 	}
-	dbs := trs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.DataDB, utils.StateServiceUP)
+	trs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
+		utils.CacheTrendProfiles,
+		utils.CacheTrends); err != nil {
+		return err
 	}
-	fs := trs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.FilterS, utils.StateServiceUP)
-	}
-	anz := trs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), trs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TrendS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	trs.Lock()
-	defer trs.Unlock()
-	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), trs.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TrendS))
-	if err := trs.trs.StartTrendS(ctx); err != nil {
+	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), cms.ConnManager())
+	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
 	}
 	srv, err := engine.NewService(trs.trs)
@@ -111,33 +90,25 @@ func (trs *TrendService) Start(ctx *context.Context, _ context.CancelFunc) (err 
 			trs.cl.RpcRegister(s)
 		}
 	}
-	trs.intRPCconn = anz.GetInternalCodec(srv, utils.Trends)
+	cms.AddInternalConn(utils.TrendS, srv)
 	close(trs.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
 // Reload handles the change of config
-func (trs *TrendService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
-	trs.Lock()
-	trs.trs.Reload(ctx)
-	trs.Unlock()
+func (trs *TrendService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+	trs.trs.Reload(context.TODO())
 	return
 }
 
 // Shutdown stops the service
-func (trs *TrendService) Shutdown() (err error) {
+func (trs *TrendService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer trs.srvDep[utils.DataDB].Done()
-	trs.Lock()
-	defer trs.Unlock()
 	trs.trs.StopTrendS()
 	trs.trs = nil
 	trs.cl.RpcUnregisterName(utils.TrendSv1)
+	close(trs.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (trs *TrendService) IsRunning() bool {
-	return trs.trs != nil
 }
 
 // ServiceName returns the service name
@@ -155,7 +126,12 @@ func (trs *TrendService) StateChan(stateID string) chan struct{} {
 	return trs.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (trs *TrendService) IntRPCConn() birpc.ClientConnector {
-	return trs.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *TrendService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *TrendService) Unlock() {
+	s.mu.Unlock()
 }

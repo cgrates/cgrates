@@ -19,34 +19,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewHTTPAgent returns the HTTP Agent
-func NewHTTPAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewHTTPAgent(cfg *config.CGRConfig) *HTTPAgent {
 	return &HTTPAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // HTTPAgent implements Agent interface
 type HTTPAgent struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	cl *commonlisteners.CommonListenerS
 
@@ -54,62 +47,46 @@ type HTTPAgent struct {
 	// if we registerd the handlers
 	started bool
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (ha *HTTPAgent) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if ha.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (ha *HTTPAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.FilterS,
+		},
+		registry, ha.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	cls := ha.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ha.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.HTTPAgent, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	cl := cls.CLS()
-	fs := ha.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ha.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.HTTPAgent, utils.FilterS, utils.StateServiceUP)
-	}
-
-	ha.Lock()
 	ha.started = true
-	utils.Logger.Info(fmt.Sprintf("<%s> successfully started HTTPAgent", utils.HTTPAgent))
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		cl.RegisterHttpHandler(agntCfg.URL,
-			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, fs.FilterS(),
+			agents.NewHTTPAgent(cms, agntCfg.SessionSConns, fs.FilterS(),
 				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
-	ha.Unlock()
 	close(ha.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (ha *HTTPAgent) Reload(*context.Context, context.CancelFunc) (err error) {
+func (ha *HTTPAgent) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return // no reload
 }
 
 // Shutdown stops the service
-func (ha *HTTPAgent) Shutdown() (err error) {
-	ha.Lock()
+func (ha *HTTPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ha.started = false
-	ha.Unlock()
+	close(ha.stateDeps.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
-}
-
-// IsRunning returns if the service is running
-func (ha *HTTPAgent) IsRunning() bool {
-	ha.RLock()
-	defer ha.RUnlock()
-	return ha.started
 }
 
 // ServiceName returns the service name
@@ -127,7 +104,12 @@ func (ha *HTTPAgent) StateChan(stateID string) chan struct{} {
 	return ha.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (ha *HTTPAgent) IntRPCConn() birpc.ClientConnector {
-	return ha.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *HTTPAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *HTTPAgent) Unlock() {
+	s.mu.Unlock()
 }

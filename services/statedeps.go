@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
+	"fmt"
 	"sync"
+	"time"
+
+	"github.com/cgrates/cgrates/servmanager"
 )
 
 // NewStateDependencies constructs a StateDependencies struct
@@ -43,4 +47,33 @@ func (sDs *StateDependencies) StateChan(stateID string) (retChan chan struct{}) 
 	retChan = sDs.stateDeps[stateID]
 	sDs.stateDepsMux.RUnlock()
 	return
+}
+
+// WaitForServicesToReachState ensures each service reaches the desired state, with the timeout applied individually per service.
+// Returns a map of service names to their instances or an error if any service fails to reach its state within its timeout window.
+func WaitForServicesToReachState(state string, serviceIDs []string, registry *servmanager.ServiceRegistry, timeout time.Duration,
+) (map[string]servmanager.Service, error) {
+	services := make(map[string]servmanager.Service, len(serviceIDs))
+	for _, serviceID := range serviceIDs {
+		srv, err := WaitForServiceState(state, serviceID, registry, timeout)
+		if err != nil {
+			return nil, err
+		}
+		services[srv.ServiceName()] = srv
+
+	}
+	return services, nil
+}
+
+// WaitForServiceState waits up to timeout duration for a service to reach the specified state.
+// Returns the service instance or an error if the timeout is exceeded.
+func WaitForServiceState(state, serviceID string, registry *servmanager.ServiceRegistry, timeout time.Duration,
+) (servmanager.Service, error) {
+	srv := registry.Lookup(serviceID)
+	select {
+	case <-srv.StateChan(state):
+		return srv, nil
+	case <-time.After(timeout):
+		return nil, fmt.Errorf("timed out waiting for service %q state %q", serviceID, state)
+	}
 }

@@ -22,8 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -31,37 +29,26 @@ import (
 )
 
 // NewStorDBService returns the StorDB Service
-func NewStorDBService(cfg *config.CGRConfig, setVersions bool,
-	srvIndexer *servmanager.ServiceIndexer) *StorDBService {
+func NewStorDBService(cfg *config.CGRConfig, setVersions bool) *StorDBService {
 	return &StorDBService{
 		cfg:         cfg,
 		setVersions: setVersions,
-		srvIndexer:  srvIndexer,
-		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP}),
+		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // StorDBService implements Service interface
 type StorDBService struct {
-	sync.RWMutex
-	cfg      *config.CGRConfig
-	oldDBCfg *config.StorDbCfg
-
+	mu          sync.Mutex
+	cfg         *config.CGRConfig
+	oldDBCfg    *config.StorDbCfg
 	db          engine.StorDB
 	setVersions bool
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps   *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error) {
-	if db.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-	db.Lock()
-	defer db.Unlock()
+func (db *StorDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	db.oldDBCfg = db.cfg.StorDbCfg().Clone()
 	dbConn, err := engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
@@ -87,9 +74,7 @@ func (db *StorDBService) Start(*context.Context, context.CancelFunc) (err error)
 }
 
 // Reload handles the change of config
-func (db *StorDBService) Reload(*context.Context, context.CancelFunc) (err error) {
-	db.Lock()
-	defer db.Unlock()
+func (db *StorDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	if db.needsConnectionReload() {
 		var d engine.StorDB
 		if d, err = engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
@@ -134,24 +119,11 @@ func (db *StorDBService) Reload(*context.Context, context.CancelFunc) (err error
 }
 
 // Shutdown stops the service
-func (db *StorDBService) Shutdown() (_ error) {
-	db.Lock()
+func (db *StorDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	db.db.Close()
 	db.db = nil
-	db.Unlock()
+	close(db.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (db *StorDBService) IsRunning() bool {
-	db.RLock()
-	defer db.RUnlock()
-	return db.isRunning()
-}
-
-// isRunning returns if the service is running (not thread safe)
-func (db *StorDBService) isRunning() bool {
-	return db.db != nil
 }
 
 // ServiceName returns the service name
@@ -193,7 +165,12 @@ func (db *StorDBService) StateChan(stateID string) chan struct{} {
 	return db.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (db *StorDBService) IntRPCConn() birpc.ClientConnector {
-	return db.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *StorDBService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *StorDBService) Unlock() {
+	s.mu.Unlock()
 }

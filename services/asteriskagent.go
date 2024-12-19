@@ -22,10 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
@@ -33,50 +29,39 @@ import (
 )
 
 // NewAsteriskAgent returns the Asterisk Agent
-func NewAsteriskAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewAsteriskAgent(cfg *config.CGRConfig) *AsteriskAgent {
 	return &AsteriskAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // AsteriskAgent implements Agent interface
 type AsteriskAgent struct {
-	sync.RWMutex
-	cfg      *config.CGRConfig
-	stopChan chan struct{}
-
-	smas    []*agents.AsteriskAgent
-	connMgr *engine.ConnManager
-
-	intRPCconn birpc.ClientConnector       // share the API object implementing API calls for internal
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	stopChan  chan struct{}
+	smas      []*agents.AsteriskAgent
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (ast *AsteriskAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
-	if ast.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (ast *AsteriskAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, ast.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-
-	ast.Lock()
-	defer ast.Unlock()
 
 	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}) {
 		if err := sma.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, err))
-			shtDwn()
+			close(shutdown)
 		}
 	}
 	ast.stopChan = make(chan struct{})
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
+		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, cms.(*ConnManagerService).ConnManager())
 		go listenAndServe(ast.smas[connIdx], ast.stopChan)
 	}
 	close(ast.stateDeps.StateChan(utils.StateServiceUP))
@@ -84,30 +69,22 @@ func (ast *AsteriskAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (
 }
 
 // Reload handles the change of config
-func (ast *AsteriskAgent) Reload(ctx *context.Context, shtDwn context.CancelFunc) (err error) {
+func (ast *AsteriskAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	ast.shutdown()
-	return ast.Start(ctx, shtDwn)
+	return ast.Start(shutdown, registry)
 }
 
 // Shutdown stops the service
-func (ast *AsteriskAgent) Shutdown() (err error) {
+func (ast *AsteriskAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ast.shutdown()
+	close(ast.StateChan(utils.StateServiceDOWN))
 	return
 }
 
 func (ast *AsteriskAgent) shutdown() {
-	ast.Lock()
 	close(ast.stopChan)
 	ast.smas = nil
-	ast.Unlock()
 	return // no shutdown for the momment
-}
-
-// IsRunning returns if the service is running
-func (ast *AsteriskAgent) IsRunning() bool {
-	ast.RLock()
-	defer ast.RUnlock()
-	return ast.smas != nil
 }
 
 // ServiceName returns the service name
@@ -125,7 +102,12 @@ func (ast *AsteriskAgent) StateChan(stateID string) chan struct{} {
 	return ast.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (ast *AsteriskAgent) IntRPCConn() birpc.ClientConnector {
-	return ast.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *AsteriskAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AsteriskAgent) Unlock() {
+	s.mu.Unlock()
 }

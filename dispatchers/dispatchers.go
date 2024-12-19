@@ -51,12 +51,6 @@ type DispatcherService struct {
 	connMgr *engine.ConnManager
 }
 
-// Shutdown is called to shutdown the service
-func (dS *DispatcherService) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.DispatcherS))
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.DispatcherS))
-}
-
 func (dS *DispatcherService) authorizeEvent(ctx *context.Context, ev *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
 	if err = dS.connMgr.Call(ctx, dS.cfg.DispatcherSCfg().AttributeSConns,

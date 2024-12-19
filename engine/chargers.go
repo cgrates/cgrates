@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -38,12 +36,6 @@ type ChargerS struct {
 	fltrS   *FilterS
 	cfg     *config.CGRConfig
 	connMgr *ConnManager
-}
-
-// Shutdown is called to shutdown the service
-func (cS *ChargerS) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown initialized", utils.ChargerS))
-	utils.Logger.Info(fmt.Sprintf("<%s> shutdown complete", utils.ChargerS))
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call

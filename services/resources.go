@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -33,74 +31,56 @@ import (
 
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) *ResourceService {
 	return &ResourceService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvDep:     srvDep,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		srvDep:    srvDep,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // ResourceService implements Service interface
 type ResourceService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	reS *engine.ResourceS
 	cl  *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	srvDep    map[string]*sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if reS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (reS *ResourceService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	reS.srvDep[utils.DataDB].Add(1)
-	cls := reS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.CommonListenerS, utils.StateServiceUP)
+
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, reS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	reS.cl = cls.CLS()
-	cacheS := reS.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(ctx,
+	reS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheResourceProfiles,
 		utils.CacheResources,
 		utils.CacheResourceFilterIndexes); err != nil {
 		return
 	}
-	fs := reS.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := reS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := reS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), reS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.ResourceS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	reS.Lock()
-	defer reS.Unlock()
-	reS.reS = engine.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), reS.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
-	reS.reS.StartLoop(ctx)
+	reS.reS = engine.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), cms.ConnManager())
+	reS.reS.StartLoop(context.TODO())
 	srv, _ := engine.NewService(reS.reS)
 	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
 	if !reS.cfg.DispatcherSCfg().Enabled {
@@ -108,36 +88,25 @@ func (reS *ResourceService) Start(ctx *context.Context, _ context.CancelFunc) (e
 			reS.cl.RpcRegister(s)
 		}
 	}
-
-	reS.intRPCconn = anz.GetInternalCodec(srv, utils.ResourceS)
+	cms.AddInternalConn(utils.ResourceS, srv)
 	close(reS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (reS *ResourceService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
-	reS.Lock()
-	reS.reS.Reload(ctx)
-	reS.Unlock()
+func (reS *ResourceService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+	reS.reS.Reload(context.TODO())
 	return
 }
 
 // Shutdown stops the service
-func (reS *ResourceService) Shutdown() (err error) {
+func (reS *ResourceService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer reS.srvDep[utils.DataDB].Done()
-	reS.Lock()
-	defer reS.Unlock()
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
 	reS.cl.RpcUnregisterName(utils.ResourceSv1)
+	close(reS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (reS *ResourceService) IsRunning() bool {
-	reS.RLock()
-	defer reS.RUnlock()
-	return reS.reS != nil
 }
 
 // ServiceName returns the service name
@@ -155,7 +124,12 @@ func (reS *ResourceService) StateChan(stateID string) chan struct{} {
 	return reS.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (reS *ResourceService) IntRPCConn() birpc.ClientConnector {
-	return reS.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *ResourceService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *ResourceService) Unlock() {
+	s.mu.Unlock()
 }

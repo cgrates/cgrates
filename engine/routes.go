@@ -131,12 +131,6 @@ type RouteS struct {
 	connMgr *ConnManager
 }
 
-// Shutdown is called to shutdown the service
-func (rpS *RouteS) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.RouteS))
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.RouteS))
-}
-
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent) (matchingRPrf RouteProfilesWithWeight, err error) {
 	evNm := utils.MapStorage{

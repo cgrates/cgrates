@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/commonlisteners"
@@ -34,75 +32,54 @@ import (
 
 // NewRankingService returns the RankingS Service
 func NewRankingService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvDep map[string]*sync.WaitGroup,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+	srvDep map[string]*sync.WaitGroup) *RankingService {
 	return &RankingService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvDep:     srvDep,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		srvDep:    srvDep,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 type RankingService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	ran *engine.RankingS
 	cl  *commonlisteners.CommonListenerS
 
-	connMgr *engine.ConnManager
-	cfg     *config.CGRConfig
-	srvDep  map[string]*sync.WaitGroup
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	srvDep    map[string]*sync.WaitGroup
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if ran.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
-	}
-
+func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 	ran.srvDep[utils.DataDB].Add(1)
-	cls := ran.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	ran.cl = cls.CLS()
-	cacheS := ran.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(ctx,
-		utils.CacheRankingProfiles,
-		utils.CacheRankings,
-	); err != nil {
+
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, ran.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
 		return err
 	}
-	dbs := ran.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.DataDB, utils.StateServiceUP)
+	ran.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
+		utils.CacheRankingProfiles,
+		utils.CacheRankings); err != nil {
+		return err
 	}
-	fs := ran.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.FilterS, utils.StateServiceUP)
-	}
-	anz := ran.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), ran.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.RankingS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	ran.Lock()
-	defer ran.Unlock()
-	ran.ran = engine.NewRankingS(dbs.DataManager(), ran.connMgr, fs.FilterS(), ran.cfg)
-
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem",
-		utils.CoreS, utils.RankingS))
-	if err := ran.ran.StartRankingS(ctx); err != nil {
+	ran.ran = engine.NewRankingS(dbs.DataManager(), cms.ConnManager(), fs.FilterS(), ran.cfg)
+	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
 	}
 	srv, err := engine.NewService(ran.ran)
@@ -114,33 +91,25 @@ func (ran *RankingService) Start(ctx *context.Context, _ context.CancelFunc) (er
 			ran.cl.RpcRegister(s)
 		}
 	}
-	ran.intRPCconn = anz.GetInternalCodec(srv, utils.RankingS)
+	cms.AddInternalConn(utils.RankingS, srv)
 	close(ran.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
 // Reload handles the change of config
-func (ran *RankingService) Reload(ctx *context.Context, _ context.CancelFunc) (err error) {
-	ran.Lock()
-	ran.ran.Reload(ctx)
-	ran.Unlock()
+func (ran *RankingService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+	ran.ran.Reload(context.TODO())
 	return
 }
 
 // Shutdown stops the service
-func (ran *RankingService) Shutdown() (err error) {
+func (ran *RankingService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer ran.srvDep[utils.DataDB].Done()
-	ran.Lock()
-	defer ran.Unlock()
 	ran.ran.StopRankingS()
 	ran.ran = nil
 	ran.cl.RpcUnregisterName(utils.RankingSv1)
+	close(ran.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (ran *RankingService) IsRunning() bool {
-	return ran.ran != nil
 }
 
 // ServiceName returns the service name
@@ -158,7 +127,12 @@ func (ran *RankingService) StateChan(stateID string) chan struct{} {
 	return ran.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (ran *RankingService) IntRPCConn() birpc.ClientConnector {
-	return ran.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *RankingService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *RankingService) Unlock() {
+	s.mu.Unlock()
 }

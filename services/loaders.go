@@ -21,9 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -33,63 +30,46 @@ import (
 )
 
 // NewLoaderService returns the Loader Service
-func NewLoaderService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) *LoaderService {
+func NewLoaderService(cfg *config.CGRConfig) *LoaderService {
 	return &LoaderService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		stopChan:   make(chan struct{}),
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stopChan:  make(chan struct{}),
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // LoaderService implements Service interface
 type LoaderService struct {
-	sync.RWMutex
+	mu sync.Mutex
 
 	ldrs *loaders.LoaderS
 	cl   *commonlisteners.CommonListenerS
 
 	stopChan chan struct{}
-	connMgr  *engine.ConnManager
 	cfg      *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if ldrs.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (ldrs *LoaderService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, ldrs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
+	ldrs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	cls := ldrs.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	ldrs.cl = cls.CLS()
-
-	fs := ldrs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := ldrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := ldrs.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.AnalyzerS, utils.StateServiceUP)
-	}
-
-	ldrs.Lock()
-	defer ldrs.Unlock()
-
-	ldrs.ldrs = loaders.NewLoaderS(ldrs.cfg, dbs.DataManager(), fs.FilterS(), ldrs.connMgr)
+	ldrs.ldrs = loaders.NewLoaderS(ldrs.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 
 	if !ldrs.ldrs.Enabled() {
 		return
@@ -104,46 +84,40 @@ func (ldrs *LoaderService) Start(ctx *context.Context, _ context.CancelFunc) (er
 			ldrs.cl.RpcRegister(s)
 		}
 	}
-	ldrs.intRPCconn = anz.GetInternalCodec(srv, utils.LoaderS)
+	cms.AddInternalConn(utils.LoaderS, srv)
 	close(ldrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (ldrs *LoaderService) Reload(ctx *context.Context, _ context.CancelFunc) error {
-	fs := ldrs.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.FilterS, utils.StateServiceUP)
+func (ldrs *LoaderService) Reload(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.ConnManager,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, ldrs.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	dbs := ldrs.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ldrs.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.LoaderS, utils.DataDB, utils.StateServiceUP)
-	}
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 	close(ldrs.stopChan)
 	ldrs.stopChan = make(chan struct{})
 
-	ldrs.RLock()
-	defer ldrs.RUnlock()
-
-	ldrs.ldrs.Reload(dbs.DataManager(), fs.FilterS(), ldrs.connMgr)
+	ldrs.ldrs.Reload(dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	return ldrs.ldrs.ListenAndServe(ldrs.stopChan)
 }
 
 // Shutdown stops the service
-func (ldrs *LoaderService) Shutdown() (_ error) {
-	ldrs.Lock()
+func (ldrs *LoaderService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	ldrs.ldrs = nil
 	close(ldrs.stopChan)
 	ldrs.cl.RpcUnregisterName(utils.LoaderSv1)
-	ldrs.Unlock()
+	close(ldrs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (ldrs *LoaderService) IsRunning() bool {
-	ldrs.RLock()
-	defer ldrs.RUnlock()
-	return ldrs.ldrs != nil && ldrs.ldrs.Enabled()
 }
 
 // ServiceName returns the service name
@@ -166,7 +140,12 @@ func (ldrs *LoaderService) StateChan(stateID string) chan struct{} {
 	return ldrs.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (ldrs *LoaderService) IntRPCConn() birpc.ClientConnector {
-	return ldrs.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *LoaderService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *LoaderService) Unlock() {
+	s.mu.Unlock()
 }

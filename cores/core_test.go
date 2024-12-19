@@ -34,17 +34,23 @@ func TestNewCoreService(t *testing.T) {
 	stopchan := make(chan struct{}, 1)
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopchan)
+	shutdown := make(chan struct{})
 	expected := &CoreS{
 		cfg:       cfgDflt,
 		CapsStats: sts,
 		caps:      caps,
+		shutdown:  shutdown,
 	}
-	rcv := NewCoreService(cfgDflt, caps, nil, stopchan, nil, nil)
+	rcv := NewCoreService(cfgDflt, caps, nil, stopchan, nil, shutdown)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
 	//shut down the service
-	rcv.shtDw = func() {}
 	rcv.Shutdown()
 	rcv.ShutdownEngine()
+	select {
+	case <-shutdown:
+	default:
+		t.Error("engine did not shut down")
+	}
 }

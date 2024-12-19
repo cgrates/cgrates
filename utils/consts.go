@@ -351,7 +351,7 @@ const (
 	MandatoryIEMissingCaps   = "MANDATORY_IE_MISSING"
 	UnsupportedCachePrefix   = "unsupported cache prefix"
 	UnsupportedServiceIDCaps = "UNSUPPORTED_SERVICE_ID"
-	ServiceManager           = "service_manager"
+	ServiceManager           = "ServiceManager"
 	ServiceAlreadyRunning    = "service already running"
 	RunningCaps              = "RUNNING"
 	StoppedCaps              = "STOPPED"
@@ -992,6 +992,7 @@ const (
 	GuardianS       = "GuardianS"
 	ServiceManagerS = "ServiceManager"
 	CommonListenerS = "CommonListenerS"
+	ConnManager     = "ConnManager"
 )
 
 // Lower service names
@@ -2829,7 +2830,9 @@ const (
 )
 
 const (
-	StateServiceUP = "SERVICE_UP"
+	StateServiceUP   = "SERVICE_UP"
+	StateServiceDOWN = "SERVICE_DOWN"
+	StateServiceInit = "SERVICE_INIT"
 )
 
 func buildCacheInstRevPrefixes() {

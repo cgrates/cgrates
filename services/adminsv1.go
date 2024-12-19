@@ -21,8 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -32,66 +30,45 @@ import (
 )
 
 // NewAPIerSv1Service returns the APIerSv1 Service
-func NewAdminSv1Service(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewAdminSv1Service(cfg *config.CGRConfig) *AdminSv1Service {
 	return &AdminSv1Service{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // AdminSv1Service implements Service interface
 type AdminSv1Service struct {
-	sync.RWMutex
-
-	api *apis.AdminSv1
-	cl  *commonlisteners.CommonListenerS
-
-	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // RPC connector with internal APIs
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	api       *apis.AdminSv1
+	cl        *commonlisteners.CommonListenerS
+	stopChan  chan struct{}
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if apiService.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (apiService *AdminSv1Service) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.FilterS,
+			utils.DataDB,
+			utils.StorDB,
+		},
+		registry, apiService.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
+	apiService.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	sdbs := srvDeps[utils.StorDB].(*StorDBService)
 
-	cls := apiService.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	apiService.cl = cls.CLS()
-	fs := apiService.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := apiService.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := apiService.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.AnalyzerS, utils.StateServiceUP)
-	}
-	sdbs := apiService.srvIndexer.GetService(utils.StorDB).(*StorDBService)
-	if utils.StructChanTimeout(sdbs.StateChan(utils.StateServiceUP), apiService.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AdminS, utils.StorDB, utils.StateServiceUP)
-	}
-
-	apiService.Lock()
-	defer apiService.Unlock()
-
-	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), apiService.connMgr, fs.FilterS(), sdbs.DB())
+	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), cms.ConnManager(), fs.FilterS(), sdbs.DB())
 
 	srv, _ := engine.NewService(apiService.api)
 	// srv, _ := birpc.NewService(apiService.api, "", false)
@@ -105,33 +82,23 @@ func (apiService *AdminSv1Service) Start(ctx *context.Context, _ context.CancelF
 			apiService.cl.RpcRegister(s)
 		}
 	}
-
-	//backwards compatible
-	apiService.intRPCconn = anz.GetInternalCodec(srv, utils.AdminSv1)
+	cms.AddInternalConn(utils.AdminS, srv)
 	close(apiService.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (apiService *AdminSv1Service) Reload(*context.Context, context.CancelFunc) (err error) {
+func (apiService *AdminSv1Service) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (apiService *AdminSv1Service) Shutdown() (err error) {
-	apiService.Lock()
+func (apiService *AdminSv1Service) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	// close(apiService.stopChan)
 	apiService.api = nil
 	apiService.cl.RpcUnregisterName(utils.AdminSv1)
-	apiService.Unlock()
+	close(apiService.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (apiService *AdminSv1Service) IsRunning() bool {
-	apiService.RLock()
-	defer apiService.RUnlock()
-	return apiService.api != nil
 }
 
 // ServiceName returns the service name
@@ -149,7 +116,12 @@ func (apiService *AdminSv1Service) StateChan(stateID string) chan struct{} {
 	return apiService.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (apiService *AdminSv1Service) IntRPCConn() birpc.ClientConnector {
-	return apiService.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *AdminSv1Service) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AdminSv1Service) Unlock() {
+	s.mu.Unlock()
 }

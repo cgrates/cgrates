@@ -19,11 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
@@ -34,19 +31,18 @@ import (
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig,
-	dspS *DispatcherService,
-	sIndxr *servmanager.ServiceIndexer) servmanager.Service {
+	dspS *DispatcherService) *AttributeService {
 	return &AttributeService{
-		cfg:        cfg,
-		dspS:       dspS,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
-		srvIndexer: sIndxr,
+		cfg:       cfg,
+		dspS:      dspS,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // AttributeService implements Service interface
 type AttributeService struct {
-	sync.RWMutex
+	mu  sync.Mutex
+	cfg *config.CGRConfig
 
 	dspS *DispatcherService
 
@@ -54,54 +50,35 @@ type AttributeService struct {
 	cl    *commonlisteners.CommonListenerS
 	rpc   *apis.AttributeSv1 // useful on restart
 
-	cfg *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies
+	stateDeps *StateDependencies
 }
 
 // Start should handle the service start
-func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	if attrS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (attrS *AttributeService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.CacheS,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, attrS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
-	if utils.StructChanTimeout(
-		attrS.srvIndexer.GetService(utils.CommonListenerS).StateChan(utils.StateServiceUP),
-		attrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	cls := attrS.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	attrS.cl = cls.CLS()
-	cacheS := attrS.srvIndexer.GetService(utils.CacheS).(*CacheService)
-	if utils.StructChanTimeout(cacheS.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.CacheS, utils.StateServiceUP)
-	}
-	if err = cacheS.WaitToPrecache(ctx,
+	attrS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cacheS := srvDeps[utils.CacheS].(*CacheService)
+	if err = cacheS.WaitToPrecache(shutdown,
 		utils.CacheAttributeProfiles,
 		utils.CacheAttributeFilterIndexes); err != nil {
 		return
 	}
-	fs := attrS.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := attrS.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := attrS.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), attrS.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.AttributeS, utils.AnalyzerS, utils.StateServiceUP)
-	}
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	attrS.Lock()
-	defer attrS.Unlock()
 	attrS.attrS = engine.NewAttributeService(dbs.DataManager(), fs.FilterS(), attrS.cfg)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
 	srv, _ := engine.NewService(attrS.rpc)
 	// srv, _ := birpc.NewService(attrS.rpc, "", false)
@@ -116,40 +93,30 @@ func (attrS *AttributeService) Start(ctx *context.Context, _ context.CancelFunc)
 			if _, closed := <-dspShtdChan; closed {
 				return
 			}
-			if attrS.IsRunning() {
+			if servmanager.IsServiceInState(attrS, utils.StateServiceUP) {
 				attrS.cl.RpcRegister(srv)
 			}
 
 		}
 	}()
-
-	attrS.intRPCconn = anz.GetInternalCodec(srv, utils.AttributeS)
+	cms.AddInternalConn(utils.AttributeS, srv)
 	close(attrS.stateDeps.StateChan(utils.StateServiceUP)) // inform listeners about the service reaching UP state
 	return
 }
 
 // Reload handles the change of config
-func (attrS *AttributeService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (attrS *AttributeService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return // for the moment nothing to reload
 }
 
 // Shutdown stops the service
-func (attrS *AttributeService) Shutdown() (err error) {
-	attrS.Lock()
-	attrS.attrS.Shutdown()
+func (attrS *AttributeService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	attrS.attrS = nil
 	attrS.rpc = nil
 	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
 	attrS.dspS.UnregisterShutdownChan(attrS.ServiceName())
-	attrS.Unlock()
+	close(attrS.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (attrS *AttributeService) IsRunning() bool {
-	attrS.RLock()
-	defer attrS.RUnlock()
-	return attrS.attrS != nil
 }
 
 // ServiceName returns the service name
@@ -167,7 +134,12 @@ func (attrS *AttributeService) StateChan(stateID string) chan struct{} {
 	return attrS.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (attrS *AttributeService) IntRPCConn() birpc.ClientConnector {
-	return attrS.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *AttributeService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *AttributeService) Unlock() {
+	s.mu.Unlock()
 }

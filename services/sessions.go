@@ -22,9 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
-
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/engine"
 
@@ -35,62 +32,46 @@ import (
 )
 
 // NewSessionService returns the Session Service
-func NewSessionService(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewSessionService(cfg *config.CGRConfig) *SessionService {
 	return &SessionService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // SessionService implements Service interface
 type SessionService struct {
-	sync.RWMutex
+	mu sync.Mutex
 
 	sm *sessions.SessionS
 	cl *commonlisteners.CommonListenerS
 
 	bircpEnabled bool // to stop birpc server if needed
 	stopChan     chan struct{}
-	connMgr      *engine.ConnManager
 	cfg          *config.CGRConfig
 
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc) (err error) {
-	if smg.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (smg *SessionService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.FilterS,
+			utils.DataDB,
+		},
+		registry, smg.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
+	smg.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	cls := smg.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	smg.cl = cls.CLS()
-	fs := smg.srvIndexer.GetService(utils.FilterS).(*FilterService)
-	if utils.StructChanTimeout(fs.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.FilterS, utils.StateServiceUP)
-	}
-	dbs := smg.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.DataDB, utils.StateServiceUP)
-	}
-	anz := smg.srvIndexer.GetService(utils.AnalyzerS).(*AnalyzerService)
-	if utils.StructChanTimeout(anz.StateChan(utils.StateServiceUP), smg.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.SessionS, utils.AnalyzerS, utils.StateServiceUP)
-	}
-
-	smg.Lock()
-	defer smg.Unlock()
-
-	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), fs.FilterS(), smg.connMgr)
+	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)
@@ -111,33 +92,30 @@ func (smg *SessionService) Start(ctx *context.Context, shtDw context.CancelFunc)
 			smg.cl.BiRPCRegisterName(n, s)
 		}
 		// run this in it's own goroutine
-		go smg.start(shtDw)
+		go smg.start(shutdown)
 	}
+	cms.AddInternalConn(utils.SessionS, srv)
 	close(smg.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
-func (smg *SessionService) start(shtDw context.CancelFunc) (err error) {
+func (smg *SessionService) start(shutdown chan struct{}) (err error) {
 	if err := smg.cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
 		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
-		smg.Lock()
 		smg.bircpEnabled = false
-		smg.Unlock()
-		shtDw()
+		close(shutdown)
 	}
 	return
 }
 
 // Reload handles the change of config
-func (smg *SessionService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (smg *SessionService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (smg *SessionService) Shutdown() (err error) {
-	smg.Lock()
-	defer smg.Unlock()
+func (smg *SessionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	close(smg.stopChan)
 	if err = smg.sm.Shutdown(); err != nil {
 		return
@@ -149,14 +127,8 @@ func (smg *SessionService) Shutdown() (err error) {
 	smg.sm = nil
 	smg.cl.RpcUnregisterName(utils.SessionSv1)
 	// smg.server.BiRPCUnregisterName(utils.SessionSv1)
+	close(smg.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (smg *SessionService) IsRunning() bool {
-	smg.RLock()
-	defer smg.RUnlock()
-	return smg.sm != nil
 }
 
 // ServiceName returns the service name
@@ -174,7 +146,12 @@ func (smg *SessionService) StateChan(stateID string) chan struct{} {
 	return smg.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (smg *SessionService) IntRPCConn() birpc.ClientConnector {
-	return smg.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *SessionService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *SessionService) Unlock() {
+	s.mu.Unlock()
 }

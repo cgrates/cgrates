@@ -34,36 +34,6 @@ import (
 	"github.com/ericlagergren/decimal"
 )
 
-func TestShutDownCoverage(t *testing.T) {
-	//this is called in order to cover the ListenAndServe method
-	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(nil, cfg.CacheCfg(), nil)
-	fltr := engine.NewFilterS(cfg, nil, dm)
-	accnts := NewAccountS(cfg, fltr, nil, dm)
-	stopChan := make(chan struct{}, 1)
-	cfgRld := make(chan struct{}, 1)
-	cfgRld <- struct{}{}
-	go func() {
-		time.Sleep(10 * time.Millisecond)
-		stopChan <- struct{}{}
-	}()
-
-	tmpLogger := utils.Logger
-	defer func() {
-		utils.Logger = tmpLogger
-	}()
-	var buf bytes.Buffer
-	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
-	accnts.ListenAndServe(stopChan, cfgRld)
-
-	//this is called in order to cover the ShutDown method
-	accnts.Shutdown()
-	expected := "CGRateS <> [INFO] <CoreS> shutdown <AccountS>"
-	if rcv := buf.String(); !strings.Contains(rcv, expected) {
-		t.Errorf("Expected %+v, received %+v", expected, rcv)
-	}
-}
-
 func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()

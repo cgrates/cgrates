@@ -18,62 +18,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/tpes"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewTPeService is the constructor for the TpeService
-func NewTPeService(cfg *config.CGRConfig, connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewTPeService(cfg *config.CGRConfig) *TPeService {
 	return &TPeService{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // TypeService implements Service interface
 type TPeService struct {
-	sync.RWMutex
-
-	tpes *tpes.TPeS
-	cl   *commonlisteners.CommonListenerS
-	srv  *birpc.Service
-
-	stopChan chan struct{}
-	connMgr  *engine.ConnManager
-	cfg      *config.CGRConfig
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	tpes      *tpes.TPeS
+	cl        *commonlisteners.CommonListenerS
+	srv       *birpc.Service
+	stopChan  chan struct{}
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
-func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err error) {
-	cls := ts.srvIndexer.GetService(utils.CommonListenerS).(*CommonListenerService)
-	if utils.StructChanTimeout(cls.StateChan(utils.StateServiceUP), ts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TPeS, utils.CommonListenerS, utils.StateServiceUP)
-	}
-	ts.cl = cls.CLS()
-	dbs := ts.srvIndexer.GetService(utils.DataDB).(*DataDBService)
-	if utils.StructChanTimeout(dbs.StateChan(utils.StateServiceUP), ts.cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.TPeS, utils.DataDB, utils.StateServiceUP)
-	}
+func (ts *TPeService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
 
-	ts.tpes = tpes.NewTPeS(ts.cfg, dbs.DataManager(), ts.connMgr)
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.TPeS))
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+			utils.DataDB,
+		},
+		registry, ts.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
+	}
+	ts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+
+	ts.tpes = tpes.NewTPeS(ts.cfg, dbs, cm)
 	ts.stopChan = make(chan struct{})
 	ts.srv, _ = birpc.NewService(apis.NewTPeSv1(ts.tpes), utils.EmptyString, false)
 	ts.cl.RpcRegister(ts.srv)
@@ -82,23 +74,16 @@ func (ts *TPeService) Start(ctx *context.Context, _ context.CancelFunc) (err err
 }
 
 // Reload handles the change of config
-func (ts *TPeService) Reload(*context.Context, context.CancelFunc) (err error) {
+func (ts *TPeService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (ts *TPeService) Shutdown() (err error) {
+func (ts *TPeService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ts.srv = nil
 	close(ts.stopChan)
-	utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> subsystem", utils.CoreS, utils.TPeS))
+	close(ts.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (ts *TPeService) IsRunning() bool {
-	ts.Lock()
-	defer ts.Unlock()
-	return ts.tpes != nil
 }
 
 // ServiceName returns the service name
@@ -116,7 +101,12 @@ func (ts *TPeService) StateChan(stateID string) chan struct{} {
 	return ts.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (ts *TPeService) IntRPCConn() birpc.ClientConnector {
-	return ts.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *TPeService) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *TPeService) Unlock() {
+	s.mu.Unlock()
 }

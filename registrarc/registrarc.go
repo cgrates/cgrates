@@ -93,7 +93,6 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 
 // Shutdown is called to shutdown the service
 func (dhS *RegistrarCService) Shutdown() {
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown initialized", utils.RegistrarC))
 	if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
 		unregisterHosts(dhS.connMgr, dhS.cfg.RegistrarCCfg().Dispatchers,
 			dhS.cfg.GeneralCfg().DefaultTenant, utils.RegistrarSv1UnregisterDispatcherHosts)
@@ -102,7 +101,6 @@ func (dhS *RegistrarCService) Shutdown() {
 		unregisterHosts(dhS.connMgr, dhS.cfg.RegistrarCCfg().RPC,
 			dhS.cfg.GeneralCfg().DefaultTenant, utils.RegistrarSv1UnregisterRPCHosts)
 	}
-	utils.Logger.Info(fmt.Sprintf("<%s> service shutdown complete", utils.RegistrarC))
 }
 
 func (dhS *RegistrarCService) registerDispHosts() {

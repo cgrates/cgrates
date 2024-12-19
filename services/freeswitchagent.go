@@ -22,10 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
@@ -33,80 +29,59 @@ import (
 )
 
 // NewFreeswitchAgent returns the Freeswitch Agent
-func NewFreeswitchAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager,
-	srvIndexer *servmanager.ServiceIndexer) servmanager.Service {
+func NewFreeswitchAgent(cfg *config.CGRConfig) *FreeswitchAgent {
 	return &FreeswitchAgent{
-		cfg:        cfg,
-		connMgr:    connMgr,
-		srvIndexer: srvIndexer,
-		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP}),
+		cfg:       cfg,
+		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
 
 // FreeswitchAgent implements Agent interface
 type FreeswitchAgent struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	fS      *agents.FSsessions
-	connMgr *engine.ConnManager
-
-	intRPCconn birpc.ClientConnector       // expose API methods over internal connection
-	srvIndexer *servmanager.ServiceIndexer // access directly services from here
-	stateDeps  *StateDependencies          // channel subscriptions for state changes
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	fS        *agents.FSsessions
+	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start(_ *context.Context, shtDwn context.CancelFunc) (err error) {
-	if fS.IsRunning() {
-		return utils.ErrServiceAlreadyRunning
+func (fS *FreeswitchAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, fS.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
 	}
 
-	fS.Lock()
-	defer fS.Unlock()
+	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, cms.(*ConnManagerService).ConnManager())
 
-	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
-
-	go fS.connect(shtDwn)
+	go fS.connect(shutdown)
 	close(fS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
 // Reload handles the change of config
-func (fS *FreeswitchAgent) Reload(_ *context.Context, shtDwn context.CancelFunc) (err error) {
-	fS.Lock()
-	defer fS.Unlock()
+func (fS *FreeswitchAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
 	if err = fS.fS.Shutdown(); err != nil {
 		return
 	}
 	fS.fS.Reload()
-	go fS.connect(shtDwn)
+	go fS.connect(shutdown)
 	return
 }
 
-func (fS *FreeswitchAgent) connect(shtDwn context.CancelFunc) {
+func (fS *FreeswitchAgent) connect(shutdown chan struct{}) {
 	if err := fS.fS.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-		shtDwn() // stop the engine here
+		close(shutdown) // stop the engine here
 	}
 	return
 }
 
 // Shutdown stops the service
-func (fS *FreeswitchAgent) Shutdown() (err error) {
-	fS.Lock()
-	defer fS.Unlock()
+func (fS *FreeswitchAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	err = fS.fS.Shutdown()
 	fS.fS = nil
+	close(fS.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
-}
-
-// IsRunning returns if the service is running
-func (fS *FreeswitchAgent) IsRunning() bool {
-	fS.RLock()
-	defer fS.RUnlock()
-	return fS.fS != nil
 }
 
 // ServiceName returns the service name
@@ -124,7 +99,12 @@ func (fS *FreeswitchAgent) StateChan(stateID string) chan struct{} {
 	return fS.stateDeps.StateChan(stateID)
 }
 
-// IntRPCConn returns the internal connection used by RPCClient
-func (fS *FreeswitchAgent) IntRPCConn() birpc.ClientConnector {
-	return fS.intRPCconn
+// Lock implements the sync.Locker interface
+func (s *FreeswitchAgent) Lock() {
+	s.mu.Lock()
+}
+
+// Unlock implements the sync.Locker interface
+func (s *FreeswitchAgent) Unlock() {
+	s.mu.Unlock()
 }
