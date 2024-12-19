@@ -192,13 +192,14 @@ type ElsOpts struct {
 }
 
 type SQLOpts struct {
-	MaxIdleConns    *int
-	MaxOpenConns    *int
-	ConnMaxLifetime *time.Duration
-	MYSQLDSNParams  map[string]string
-	TableName       *string
-	DBName          *string
-	PgSSLMode       *string
+	MaxIdleConns        *int
+	MaxOpenConns        *int
+	ConnMaxLifetime     *time.Duration
+	MYSQLDSNParams      map[string]string
+	TableName           *string
+	DBName              *string
+	UpdateIndexedFields *[]string
+	PgSSLMode           *string
 }
 
 type AMQPOpts struct {
@@ -422,6 +423,11 @@ func (sqlOpts *SQLOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) (err erro
 	}
 	if jsnCfg.SQLDBName != nil {
 		sqlOpts.DBName = jsnCfg.SQLDBName
+	}
+	if jsnCfg.SQLUpdateIndexedFields != nil {
+		uif := make([]string, len(*jsnCfg.SQLUpdateIndexedFields))
+		copy(uif, *jsnCfg.SQLUpdateIndexedFields)
+		sqlOpts.UpdateIndexedFields = &uif
 	}
 	if jsnCfg.PgSSLMode != nil {
 		sqlOpts.PgSSLMode = jsnCfg.PgSSLMode
@@ -825,6 +831,11 @@ func (sqlOpts *SQLOpts) Clone() *SQLOpts {
 		cln.DBName = new(string)
 		*cln.DBName = *sqlOpts.DBName
 	}
+	if sqlOpts.UpdateIndexedFields != nil {
+		idx := make([]string, len(*sqlOpts.UpdateIndexedFields))
+		copy(idx, *sqlOpts.UpdateIndexedFields)
+		cln.UpdateIndexedFields = &idx
+	}
 	if sqlOpts.PgSSLMode != nil {
 		cln.PgSSLMode = new(string)
 		*cln.PgSSLMode = *sqlOpts.PgSSLMode
@@ -1145,6 +1156,11 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		}
 		if sqlOpts.DBName != nil {
 			opts[utils.SQLDBNameOpt] = *sqlOpts.DBName
+		}
+		if sqlOpts.UpdateIndexedFields != nil {
+			updateIndexedFields := make([]string, len(*sqlOpts.UpdateIndexedFields))
+			copy(updateIndexedFields, *sqlOpts.UpdateIndexedFields)
+			opts[utils.SQLUpdateIndexedFieldsOpt] = updateIndexedFields
 		}
 		if sqlOpts.PgSSLMode != nil {
 			opts[utils.PgSSLModeCfg] = *sqlOpts.PgSSLMode

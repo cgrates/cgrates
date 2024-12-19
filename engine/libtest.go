@@ -31,6 +31,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -332,14 +333,15 @@ func NewRPCClient(t testing.TB, cfg *config.ListenCfg) *birpc.Client {
 // TestEngine holds the setup parameters and configurations
 // required for running integration tests.
 type TestEngine struct {
-	ConfigPath     string            // path to the main configuration file
-	ConfigJSON     string            // JSON cfg content (standalone/overwrites static configs)
-	DBCfg          DBCfg             // custom db settings for dynamic setup (overrides static config)
-	LogBuffer      io.Writer         // captures log output of the test environment
-	PreserveDataDB bool              // prevents automatic data_db flush when set
-	PreserveStorDB bool              // prevents automatic stor_db flush when set
-	TpPath         string            // path to the tariff plans
-	TpFiles        map[string]string // CSV data for tariff plans: filename -> content
+	ConfigPath       string            // path to the main configuration file
+	ConfigJSON       string            // JSON cfg content (standalone/overwrites static configs)
+	DBCfg            DBCfg             // custom db settings for dynamic setup (overrides static config)
+	LogBuffer        io.Writer         // captures log output of the test environment
+	PreserveDataDB   bool              // prevents automatic data_db flush when set
+	PreserveStorDB   bool              // prevents automatic stor_db flush when set
+	TpPath           string            // path to the tariff plans
+	TpFiles          map[string]string // CSV data for tariff plans: filename -> content
+	GracefulShutdown bool              // shutdown the engine gracefuly, otherwise use process.Kill
 
 	// PreStartHook executes custom logic relying on CGRConfig
 	// before starting cgr-engine.
@@ -356,7 +358,7 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	if ng.PreStartHook != nil {
 		ng.PreStartHook(t, cfg)
 	}
-	startEngine(t, cfg, ng.LogBuffer)
+	startEngine(t, cfg, ng.LogBuffer, ng.GracefulShutdown)
 	client := NewRPCClient(t, cfg.ListenCfg())
 	LoadCSVs(t, client, ng.TpPath, ng.TpFiles)
 	return client, cfg
@@ -542,7 +544,7 @@ func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool
 
 // startEngine starts the CGR engine process with the provided configuration. It writes engine logs to the
 // provided logBuffer (if any).
-func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, extraFlags ...string) {
+func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, gracefulShutdown bool, extraFlags ...string) {
 	t.Helper()
 	binPath, err := exec.LookPath("cgr-engine")
 	if err != nil {
@@ -564,8 +566,17 @@ func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, extra
 		t.Fatalf("cgr-engine command failed: %v", err)
 	}
 	t.Cleanup(func() {
-		if err := engine.Process.Kill(); err != nil {
-			t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+		if gracefulShutdown {
+			if err := engine.Process.Signal(syscall.SIGTERM); err != nil {
+				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+			}
+			if err := engine.Wait(); err != nil {
+				t.Errorf("cgr-engine process failed to exit cleanly: %v", err)
+			}
+		} else {
+			if err := engine.Process.Kill(); err != nil {
+				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+			}
 		}
 	})
 	backoff := utils.FibDuration(time.Millisecond, 0)

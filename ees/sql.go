@@ -158,11 +158,34 @@ func (sqlEe *SQLEe) Close() (err error) {
 
 func (sqlEe *SQLEe) GetMetrics() *utils.SafeMapStorage { return sqlEe.dc }
 
-func (sqlEe *SQLEe) PrepareMap(*utils.CGREvent) (any, error) { return nil, nil }
+// Create the sqlPosterRequest used to instert the map into the table
+func (sqlEe *SQLEe) PrepareMap(cgrEv *utils.CGREvent) (any, error) {
+	colNames := make([]string, 0, len(cgrEv.Event)) // slice with all column names to be insterted
+	vals := make([]any, 0, len(cgrEv.Event))        // slice with all values to be insterted
+	for colName, value := range cgrEv.Event {
+		colNames = append(colNames, colName)
+		vals = append(vals, value)
+	}
+	sqlValues := make([]string, len(vals)) // values to be inserted as "?" for the query
+	for i := range vals {
+		sqlValues[i] = "?"
+	}
+	sqlQuery := fmt.Sprintf("INSERT INTO %s (`%s`) VALUES (%s);",
+		sqlEe.tableName,
+		strings.Join(colNames, "`, `"), // back ticks added to include special characters
+		strings.Join(sqlValues, ","),
+	)
+	return &sqlPosterRequest{
+		Querry: sqlQuery,
+		Values: vals,
+	}, nil
+}
 
 func (sqlEe *SQLEe) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) {
 	var vals []any
 	var colNames []string
+	var whereVars []string // key-value parts of WHERE clause used on UPDATE
+	var whereVals []any    // will hold the values replacing "?" used on WHERE part of UPDATE query
 	for el := mp.GetFirstElement(); el != nil; el = el.Next() {
 		nmIt, _ := mp.Field(el.Value)
 		pathWithoutIndex := strings.Join(el.Value[:len(el.Value)-1], utils.NestingSep) // remove the index path.index
@@ -170,21 +193,46 @@ func (sqlEe *SQLEe) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any, error) 
 			colNames = append(colNames, pathWithoutIndex)
 		}
 		vals = append(vals, nmIt.Data)
+		if sqlEe.cfg.Opts.SQL.UpdateIndexedFields != nil {
+			for _, updateFields := range *sqlEe.cfg.Opts.SQL.UpdateIndexedFields {
+				if pathWithoutIndex == updateFields {
+					whereVars = append(whereVars, fmt.Sprintf("%s = ?", updateFields))
+					whereVals = append(whereVals, nmIt.Data)
+				}
+			}
+		}
 	}
-	sqlValues := make([]string, len(vals))
+	sqlValues := make([]string, len(vals)+len(whereVals))
 	for i := range vals {
 		sqlValues[i] = "?"
 	}
 	var sqlQuery string
-	if len(colNames) != len(vals) {
-		sqlQuery = fmt.Sprintf("INSERT INTO %s VALUES (%s); ",
+	if sqlEe.cfg.Opts.SQL.UpdateIndexedFields != nil {
+		if len(whereVars) == 0 {
+			return nil, fmt.Errorf("%w: no usable sqlUpdateIndexedFields found <%v>", utils.ErrNotFound, *sqlEe.cfg.Opts.SQL.UpdateIndexedFields)
+		}
+		setClauses := []string{} // used in SET part of UPDATE query
+		for _, col := range colNames {
+			setClauses = append(setClauses, fmt.Sprintf("%s = ?", col))
+		}
+		sqlQuery = fmt.Sprintf("UPDATE %s SET %s WHERE %s;",
 			sqlEe.tableName,
-			strings.Join(sqlValues, ","))
+			strings.Join(setClauses, ", "),
+			strings.Join(whereVars, " AND "))
+		for _, val := range whereVals {
+			vals = append(vals, val)
+		}
 	} else {
-		sqlQuery = fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s); ",
-			sqlEe.tableName,
-			strings.Join(colNames, ", "),
-			strings.Join(sqlValues, ","))
+		if len(colNames) != len(vals) {
+			sqlQuery = fmt.Sprintf("INSERT INTO %s VALUES (%s); ",
+				sqlEe.tableName,
+				strings.Join(sqlValues, ","))
+		} else {
+			sqlQuery = fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s); ",
+				sqlEe.tableName,
+				strings.Join(colNames, ", "),
+				strings.Join(sqlValues, ","))
+		}
 	}
 	return &sqlPosterRequest{
 		Querry: sqlQuery,
