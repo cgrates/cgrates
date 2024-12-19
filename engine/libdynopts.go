@@ -138,7 +138,7 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
 		} else if pass {
-			return opt.Value, nil
+			return opt.Values, nil
 		}
 	}
 	return dftOpt, nil // return the default value if there are no options and none of the filters pass

@@ -27,7 +27,7 @@ import (
 type DynamicStringSliceOpt struct {
 	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	Value     []string
+	Values    []string
 }
 
 type DynamicStringOpt struct {
@@ -90,7 +90,7 @@ func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) (cl []*DynamicStrin
 		cl[i] = &DynamicStringSliceOpt{
 			Tenant:    val.Tenant,
 			FilterIDs: slices.Clone(val.FilterIDs),
-			Value:     val.Value,
+			Values:    slices.Clone(val.Values),
 		}
 	}
 	return
@@ -215,7 +215,7 @@ func DynamicStringSliceOptEqual(v1, v2 []*DynamicStringSliceOpt) bool {
 		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) {
 			return false
 		}
-		if !slices.Equal(v1[i].Value, v2[i].Value) {
+		if !slices.Equal(v1[i].Values, v2[i].Values) {
 			return false
 		}
 	}
