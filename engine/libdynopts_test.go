@@ -1041,18 +1041,18 @@ func TestLibFiltersGetStringSliceOptsReturnConfigOpt(t *testing.T) {
 		{
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Tenant:    "cgrates.net",
-			Value:     []string{"value1"},
+			Values:    []string{"value1"},
 		},
 		// filter will not pass, will ignore this opt
 		{
 			FilterIDs: []string{"*string:~*req.Account:1002"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"value2"},
+			Values:    []string{"value2"},
 		},
 		{
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"value3"},
+			Values:    []string{"value3"},
 		},
 	}
 
@@ -1083,7 +1083,7 @@ func TestLibFiltersGetStringSliceOptsFilterCheckErr(t *testing.T) {
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"value2"},
+			Values:    []string{"value2"},
 		},
 	}
 
@@ -1113,7 +1113,7 @@ func TestLibFiltersGetStringSliceOptsReturnDefaultOpt(t *testing.T) {
 		{
 			FilterIDs: []string{"*string:~*req.Account:1002"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"value2"},
+			Values:    []string{"value2"},
 		},
 	}
 
@@ -1146,7 +1146,7 @@ func TestLibFiltersGetStringSliceOptsReturnOptFromAPIOpts(t *testing.T) {
 		{
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"value3"},
+			Values:    []string{"value3"},
 		},
 	}
 

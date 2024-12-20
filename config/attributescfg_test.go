@@ -75,7 +75,7 @@ func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
 	attrOpt := &AttributesOpts{
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{},
+				Values: []string{},
 			},
 		},
 		ProcessRuns: []*utils.DynamicIntOpt{
@@ -98,7 +98,7 @@ func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
 	exp := &AttributesOpts{
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{},
+				Values: []string{},
 			},
 		},
 		ProcessRuns: []*utils.DynamicIntOpt{
@@ -304,7 +304,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"prf1"},
+					Values: []string{"prf1"},
 				},
 			},
 			ProcessRuns: []*utils.DynamicIntOpt{
@@ -342,7 +342,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"prf2"},
+					Values: []string{"prf2"},
 				},
 			},
 			ProcessRuns: []*utils.DynamicIntOpt{
@@ -380,7 +380,7 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"prf2"},
+					Values: []string{"prf2"},
 				},
 			},
 			ProcessRuns: []*utils.DynamicIntOpt{

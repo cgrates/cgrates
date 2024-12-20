@@ -3524,7 +3524,7 @@ func TestStatSV1GetStatQueuesForEventsqIDsErr(t *testing.T) {
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"value2"},
+			Values:    []string{"value2"},
 		},
 	}
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -3792,7 +3792,7 @@ func TestStatQueueProcessEventProfileIDsErr(t *testing.T) {
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"value2"},
+			Values:    []string{"value2"},
 		},
 	}
 
@@ -3877,7 +3877,7 @@ func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"value2"},
+			Values:    []string{"value2"},
 		},
 	}
 

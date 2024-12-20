@@ -303,6 +303,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 
+	var ignoredRPIDs utils.StringSet
 	if rtPRf, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -312,7 +313,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != nil {
+		}, false, ignoredRPIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rtPRf, rpp) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rpp), utils.ToJSON(rtPRf))
@@ -327,7 +328,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  2002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != utils.ErrNotFound {
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
@@ -339,7 +340,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  2002,
 				utils.AnswerTime:   t1.Add(10 * time.Second),
 			},
-		}, false); err != utils.ErrNotFound {
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
@@ -351,7 +352,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != utils.ErrNotFound {
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 
@@ -364,7 +365,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != utils.ErrNotFound {
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003", "*gt:~*req.Cost{*:10"}
@@ -377,7 +378,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Cost:         1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
+		}, false, ignoredRPIDs); err.Error() != "invalid converter terminator in rule: <~*req.Cost{*>" {
 		t.Error(err)
 	}
 	rpp.FilterIDs = []string{"*string:~*req.Account:1001|1002|1003"}
@@ -392,7 +393,7 @@ func TestMatchingRateProfileEvent(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   t1.Add(-10 * time.Second),
 			},
-		}, false); err != utils.ErrNoDatabaseConn {
+		}, false, ignoredRPIDs); err != utils.ErrNoDatabaseConn {
 		t.Error(err)
 	}
 
@@ -680,13 +681,6 @@ func BenchmarkRateS_V1CostForEventSingleRate(b *testing.B) {
 	b.StopTimer()
 }
 
-func TestRatesShutDown(t *testing.T) {
-	rateS := new(RateS)
-	if err := rateS.Shutdown(); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestRateProfileCostForEventInvalidUsage(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -914,6 +908,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	var ignoredRPfIDs utils.StringSet
 	_, err = rateS.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -923,7 +918,7 @@ func TestRateSMatchingRateProfileForEventErrFltr(t *testing.T) {
 				utils.Destination:  1002,
 				utils.AnswerTime:   time.Date(9999, 7, 21, 10, 0, 0, 0, time.UTC).Add(-10 * time.Second),
 			},
-		}, false)
+		}, false, ignoredRPfIDs)
 	expectedErr := "NOT_FOUND"
 	if err == nil || err.Error() != expectedErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expectedErr, err)
@@ -1317,6 +1312,112 @@ func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
 	//fmt.Printf("received costV1: \n%s\n", utils.ToIJSON(expectedRPCost))
 
 	if err := dm.RemoveRateProfile(context.Background(), rPrf.Tenant, rPrf.ID, true); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestMatchingRateProfileFallbacks(t *testing.T) {
+
+	cfg := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rate := RateS{
+		cfg:   cfg,
+		fltrS: filters,
+		dm:    dm,
+	}
+	t1 := time.Date(2020, 7, 21, 10, 0, 0, 0, time.UTC)
+
+	rpp1 := &utils.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RP1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
+	}
+
+	rpp2 := &utils.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RP2",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 5,
+			},
+		},
+		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
+	}
+
+	// Set both rate profiles
+	err := dm.SetRateProfile(context.Background(), rpp1, false, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dm.SetRateProfile(context.Background(), rpp2, false, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Initialize ignoredRPIDs as a new empty map
+	ignoredRPIDs := make(utils.StringSet)
+
+	// 1. Test without any ignored profiles (should match RP1 with higher weight)
+	if rtPRf, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  1002,
+				utils.AnswerTime:   t1.Add(-10 * time.Second),
+			},
+		}, false, ignoredRPIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rtPRf, rpp1) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rpp1), utils.ToJSON(rtPRf))
+	}
+
+	// 2. Test with ignoredRPIDs containing RP1 (should match RP2  )
+	ignoredRPIDs.Add(rpp1.ID)
+	if rtPRf, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  1002,
+				utils.AnswerTime:   t1.Add(-10 * time.Second),
+			},
+		}, false, ignoredRPIDs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rtPRf, rpp2) {
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(rpp2), utils.ToJSON(rtPRf))
+	}
+
+	// 3. Test with both RP1 and RP2 in ignoredRPIDs (should return ErrNotFound)
+	ignoredRPIDs.Add(rpp2.ID)
+	if _, err := rate.matchingRateProfileForEvent(context.TODO(), "cgrates.org", []string{},
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ID",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  1002,
+				utils.AnswerTime:   t1.Add(-10 * time.Second),
+			},
+		}, false, ignoredRPIDs); err != utils.ErrNotFound {
+		t.Errorf("Expected error %v, got %v", utils.ErrNotFound, err)
+	}
+
+	err = dm.RemoveRateProfile(context.Background(), rpp1.Tenant, rpp1.ID, true)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dm.RemoveRateProfile(context.Background(), rpp2.Tenant, rpp2.ID, true)
+	if err != nil {
 		t.Error(err)
 	}
 }

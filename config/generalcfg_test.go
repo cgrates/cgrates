@@ -235,7 +235,7 @@ func TestGeneralCfgClone(t *testing.T) {
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"*ees"},
+					Values: []string{"*ees"},
 				},
 			},
 		},
@@ -273,7 +273,7 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"*ees"},
+					Values: []string{"*ees"},
 				},
 			},
 		},
@@ -306,7 +306,7 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		Opts: &GeneralOpts{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"*syslog"},
+					Values: []string{"*syslog"},
 				},
 			},
 		},
@@ -339,7 +339,7 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		Opts: &GeneralOptsJson{
 			ExporterIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"*syslog"},
+					Values: []string{"*syslog"},
 				},
 			},
 		},

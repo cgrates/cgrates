@@ -3349,7 +3349,7 @@ func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
 		{
 			FilterIDs: []string{"*string"},
 			Tenant:    "cgrates.org",
-			Value:     []string{"ProfIdVal"},
+			Values:    []string{"ProfIdVal"},
 		},
 	}
 
@@ -3391,7 +3391,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 	cfg.ThresholdSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
 		{
 			Tenant: "cgrates.org",
-			Value:  []string{"ACC1"},
+			Values: []string{"ACC1"},
 		},
 	}
 	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{

@@ -82,7 +82,7 @@ func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 	actOpts := &ActionsOpts{
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{},
+				Values: []string{},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -94,7 +94,7 @@ func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 	exp := &ActionsOpts{
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{},
+				Values: []string{},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -233,7 +233,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"prf1"},
+					Values: []string{"prf1"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -263,7 +263,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"prf2"},
+					Values: []string{"prf2"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -293,7 +293,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"prf2"},
+					Values: []string{"prf2"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -339,7 +339,7 @@ func TestActionSCloneSection(t *testing.T) {
 		Opts: &ActionsOpts{
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					Values: []string{},
 				},
 			},
 		},
@@ -361,7 +361,7 @@ func TestActionSCloneSection(t *testing.T) {
 		Opts: &ActionsOpts{
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{},
+					Values: []string{},
 				},
 			},
 		},

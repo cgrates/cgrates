@@ -73,7 +73,7 @@ func TestThresholdSLoadFromJsonOpts(t *testing.T) {
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Tenant: "cgrates.org",
-				Value:  []string{"thsd_p1"},
+				Values: []string{"thsd_p1"},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -87,7 +87,7 @@ func TestThresholdSLoadFromJsonOpts(t *testing.T) {
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Tenant: "cgrates.org",
-				Value:  []string{"thsd_p1"},
+				Values: []string{"thsd_p1"},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -219,7 +219,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"thsr_p1"},
+					Values: []string{"thsr_p1"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -244,7 +244,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"thsr_p2"},
+					Values: []string{"thsr_p2"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -269,7 +269,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"thsr_p2"},
+					Values: []string{"thsr_p2"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
