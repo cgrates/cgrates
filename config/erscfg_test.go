@@ -104,6 +104,7 @@ func TestERSClone(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsIDs:              []string{},
 				EEsSuccessIDs:       []string{},
 				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
@@ -147,6 +148,7 @@ func TestERSClone(t *testing.T) {
 						Value: NewRSRParsersMustCompile("~*req.2", utils.InfieldSep), Mandatory: true, Layout: time.RFC3339},
 				},
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsIDs:              []string{},
 				EEsSuccessIDs:       []string{},
 				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
@@ -280,6 +282,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsIDs:              []string{},
 				EEsSuccessIDs:       []string{},
 				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
@@ -338,6 +341,7 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsIDs:              []string{},
 				EEsSuccessIDs:       []string{},
 				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
@@ -536,6 +540,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsIDs:              []string{},
 				EEsSuccessIDs:       []string{},
 				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
@@ -578,6 +583,7 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 				PartialCommitFields:  make([]*FCTemplate, 0),
 				Reconnects:           5,
 				MaxReconnectInterval: 3 * time.Minute,
+				EEsIDs:               []string{},
 				EEsSuccessIDs:        []string{},
 				EEsFailedIDs:         []string{},
 				Opts: &EventReaderOpts{
@@ -697,6 +703,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				},
 				CacheDumpFields:     make([]*FCTemplate, 0),
 				PartialCommitFields: make([]*FCTemplate, 0),
+				EEsIDs:              []string{},
 				EEsSuccessIDs:       []string{},
 				EEsFailedIDs:        []string{},
 				Opts: &EventReaderOpts{
@@ -728,6 +735,7 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
 				Fields:         []*FCTemplate{},
+				EEsIDs:         []string{},
 				EEsSuccessIDs:  []string{},
 				EEsFailedIDs:   []string{},
 				CacheDumpFields: []*FCTemplate{
@@ -825,6 +833,7 @@ func TestEventReaderSameID(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsIDs:               []string{},
 				EEsSuccessIDs:        []string{},
 				EEsFailedIDs:         []string{},
 				Fields: []*FCTemplate{
@@ -881,6 +890,7 @@ func TestEventReaderSameID(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
+				EEsIDs:         []string{},
 				EEsSuccessIDs:  []string{},
 				EEsFailedIDs:   []string{},
 				Fields: []*FCTemplate{
@@ -1303,6 +1313,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsIDs:               []string{},
 				EEsSuccessIDs:        []string{},
 				EEsFailedIDs:         []string{},
 				Fields: []*FCTemplate{
@@ -1361,6 +1372,7 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 				Flags:                utils.FlagsWithParams{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsIDs:               []string{},
 				EEsSuccessIDs:        []string{},
 				EEsFailedIDs:         []string{},
 				Fields: []*FCTemplate{

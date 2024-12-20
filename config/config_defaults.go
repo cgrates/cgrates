@@ -409,8 +409,9 @@ const CGRATES_CFG_JSON = `
 			"filters": [],						// limit parsing based on the filters
 			"flags": [],						// flags to influence the event processing
 			"reconnects": -1,					// number of retries in case of connection lost
-			"ees_success_ids": [],					// ids of exporters used for moving the successfully processed event
-			"ees_failed_ids": [],					// ids of exporters used for moving the unprocessed event
+			"ees_ids": [], 						// ids of exporters used for moving the processed event to EEs
+			"ees_success_ids": [],					// ids of exporters used for moving the raw event to EEs
+			"ees_failed_ids": [],					// ids of exporters used for moving the failed raw event to EEs
 			"max_reconnect_interval": "5m", 			// time to wait in between reconnect attempts
 			"opts": {
 				// Partial
@@ -450,7 +451,7 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlDBName": "cgrates", 			// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",			// the name of the table from were the events are read
-				// "sqlDeleteIndexedFields": [],   	// list of fields to DELETE from the table
+				// "sqlDeleteIndexedFields": [],   		// list of fields to DELETE from the table
 				// "pgSSLMode": "disable",			// the ssl mode for postgres db
 
 				// SQS and S3

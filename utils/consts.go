@@ -2605,6 +2605,7 @@ const (
 	TenantCfg              = "tenant"
 	FlagsCfg               = "flags"
 	FieldsCfg              = "fields"
+	EEsIDsCfg              = "ees_ids"
 	EEsSuccessIDsCfg       = "ees_success_ids"
 	EEsFailedIDsCfg        = "ees_failed_ids"
 	CacheDumpFieldsCfg     = "cache_dump_fields"
