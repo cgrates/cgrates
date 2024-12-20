@@ -613,6 +613,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 				PartialCommitFields:  []*FCTemplate{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsIDs:               []string{},
 				EEsSuccessIDs:        []string{},
 				EEsFailedIDs:         []string{},
 				Opts: &EventReaderOpts{
@@ -646,6 +647,7 @@ func testCGRConfigReloadERs(t *testing.T) {
 				PartialCommitFields:  []*FCTemplate{},
 				Reconnects:           -1,
 				MaxReconnectInterval: 5 * time.Minute,
+				EEsIDs:               []string{},
 				EEsSuccessIDs:        []string{},
 				EEsFailedIDs:         []string{},
 				Opts: &EventReaderOpts{
