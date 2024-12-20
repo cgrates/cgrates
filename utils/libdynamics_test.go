@@ -29,11 +29,11 @@ import (
 func TestCloneDynamicStringsSliceOpt(t *testing.T) {
 	in := []*DynamicStringSliceOpt{
 		{
-			Value:     []string{"VAL_1", "VAL_2"},
+			Values:    []string{"VAL_1", "VAL_2"},
 			FilterIDs: []string{"fltr1"},
 		},
 		{
-			Value:     []string{"VAL_3", "VAL_4"},
+			Values:    []string{"VAL_3", "VAL_4"},
 			FilterIDs: []string{"fltr2"},
 		},
 	}
@@ -168,12 +168,12 @@ func TestDynamicStringSliceOptEqual(t *testing.T) {
 	v1 := []*DynamicStringSliceOpt{
 		{
 			Tenant:    "cgrates.org",
-			Value:     []string{"VAL_1", "VAL_2"},
+			Values:    []string{"VAL_1", "VAL_2"},
 			FilterIDs: []string{"fltr1"},
 		},
 		{
 			Tenant:    "cgrates.org",
-			Value:     []string{"VAL_3", "VAL_4"},
+			Values:    []string{"VAL_3", "VAL_4"},
 			FilterIDs: []string{"fltr2"},
 		},
 	}
@@ -181,12 +181,12 @@ func TestDynamicStringSliceOptEqual(t *testing.T) {
 	v2 := []*DynamicStringSliceOpt{
 		{
 			Tenant:    "cgrates.org",
-			Value:     []string{"VAL_1", "VAL_2"},
+			Values:    []string{"VAL_1", "VAL_2"},
 			FilterIDs: []string{"fltr1"},
 		},
 		{
 			Tenant:    "cgrates.org",
-			Value:     []string{"VAL_3", "VAL_4"},
+			Values:    []string{"VAL_3", "VAL_4"},
 			FilterIDs: []string{"fltr2"},
 		},
 	}
@@ -197,7 +197,7 @@ func TestDynamicStringSliceOptEqual(t *testing.T) {
 	}
 
 	//Test if different
-	v1[0].Value = append(v1[0].Value, "VAL_3")
+	v1[0].Values = append(v1[0].Values, "VAL_3")
 	if DynamicStringSliceOptEqual(v1, v2) {
 		t.Error("Expected slices to differ")
 	}
@@ -217,7 +217,7 @@ func TestDynamicStringSliceOptEqual(t *testing.T) {
 
 	//Test if different lengths
 	v1 = append(v1, &DynamicStringSliceOpt{
-		Value:     []string{"VAL_1", "VAL_2"},
+		Values:    []string{"VAL_1", "VAL_2"},
 		FilterIDs: []string{"fltr1"},
 	})
 	if DynamicStringSliceOptEqual(v1, v2) {

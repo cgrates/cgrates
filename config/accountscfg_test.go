@@ -84,7 +84,7 @@ func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
 	accOpts := &AccountsOpts{
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{"1001", "1002"},
+				Values: []string{"1001", "1002"},
 			},
 		},
 		Usage: []*utils.DynamicDecimalBigOpt{
@@ -245,7 +245,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"ACC1"},
+					Values: []string{"ACC1"},
 				},
 			},
 			Usage: []*utils.DynamicDecimalBigOpt{
@@ -279,7 +279,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"ACC2"},
+					Values: []string{"ACC2"},
 				},
 			},
 			Usage: []*utils.DynamicDecimalBigOpt{
@@ -313,7 +313,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"ACC2"},
+					Values: []string{"ACC2"},
 				},
 			},
 			Usage: []*utils.DynamicStringOpt{
@@ -376,7 +376,7 @@ func TestAccountSCloneSection(t *testing.T) {
 		Opts: &AccountsOpts{
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"ACC1"},
+					Values: []string{"ACC1"},
 				},
 			},
 		},

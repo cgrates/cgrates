@@ -75,7 +75,7 @@ func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 	statsOpt := &StatsOpts{
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{},
+				Values: []string{},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -88,7 +88,7 @@ func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 	exp := &StatsOpts{
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{},
+				Values: []string{},
 			},
 		},
 		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -237,7 +237,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"statsid1"},
+					Values: []string{"statsid1"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -255,7 +255,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"statsid1"},
+					Values: []string{"statsid1"},
 				},
 			},
 		},
@@ -275,7 +275,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"statsid2"},
+					Values: []string{"statsid2"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -293,7 +293,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"statsid2"},
+					Values: []string{"statsid2"},
 				},
 			},
 		},
@@ -313,7 +313,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"statsid2"},
+					Values: []string{"statsid2"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -331,7 +331,7 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"statsid2"},
+					Values: []string{"statsid2"},
 				},
 			},
 		},

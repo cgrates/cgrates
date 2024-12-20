@@ -235,7 +235,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"RP1"},
+					Values: []string{"RP1"},
 				},
 			},
 			StartTime: []*utils.DynamicStringOpt{
@@ -282,7 +282,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"RP2"},
+					Values: []string{"RP2"},
 				},
 			},
 			StartTime: []*utils.DynamicStringOpt{
@@ -329,7 +329,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  []string{"RP2"},
+					Values: []string{"RP2"},
 				},
 			},
 			StartTime: []*utils.DynamicStringOpt{
@@ -391,7 +391,7 @@ func TestRateSCloneSection(t *testing.T) {
 		Opts: &RatesOpts{
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"RP1"},
+					Values: []string{"RP1"},
 				},
 			},
 		},
@@ -413,7 +413,7 @@ func TestRateSCloneSection(t *testing.T) {
 		Opts: &RatesOpts{
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
-					Value: []string{"RP1"},
+					Values: []string{"RP1"},
 				},
 			},
 		},
@@ -429,7 +429,7 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	rateOpts := &RatesOpts{
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
-				Value: []string{},
+				Values: []string{},
 			},
 		},
 		StartTime: []*utils.DynamicStringOpt{
@@ -463,7 +463,7 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 		ProfileIDs: []*utils.DynamicStringSliceOpt{
 			{
 				Tenant: "cgrates.org",
-				Value:  []string{"RP2"},
+				Values: []string{"RP2"},
 			},
 		},
 		Usage: []*utils.DynamicStringOpt{
