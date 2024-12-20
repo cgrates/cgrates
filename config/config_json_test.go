@@ -2114,6 +2114,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Partial_commit_fields:  &[]*FcTemplateJsonCfg{},
 				Reconnects:             utils.IntPointer(-1),
 				Max_reconnect_interval: utils.StringPointer("5m"),
+				Ees_ids:                &[]string{},
 				Ees_success_ids:        &[]string{},
 				Ees_failed_ids:         &[]string{},
 				Opts: &EventReaderOptsJson{

@@ -284,6 +284,7 @@ type EventReaderJsonCfg struct {
 	Flags                  *[]string
 	Reconnects             *int
 	Max_reconnect_interval *string
+	Ees_ids                *[]string
 	Ees_success_ids        *[]string
 	Ees_failed_ids         *[]string
 	Opts                   *EventReaderOptsJson

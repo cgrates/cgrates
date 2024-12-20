@@ -27,7 +27,6 @@
 				"sqlTableName":"cdrs", 
 				"sqlUpdateIndexedFields": ["id", "cgrid"],
 			},
-			"filters":["*string:~*req.ReaderID:mysqlReaderID"],
 			"flags": ["*log"],
 			"fields": [
 				{"tag": "SetupTime", "path": "*exp.setup_time", "type": "*constant", "value": "2018-11-27 14:21:26"},
@@ -42,7 +41,7 @@
 		"sessions_conns":["*localhost"],
 		"ees_conns": ["*localhost"],
 		"readers": [{
-				"id": "mysqlReaderID",										
+				"id": "mysql",										
 				"type": "*sql",				
 				"run_delay": "1m",									
 				"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",					
@@ -53,11 +52,12 @@
 				"start_delay": "500ms", // wait for db to be populated before starting reader 
 				"tenant": "cgrates.org",							
 				"filters": [
-				"*gt:~*req.answer_time:-168h", // dont process cdrs with answer_time older than 7 days ago 
-				"FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
-				"*string:~*vars.*readerID:mysqlReaderID",
-				"FLTR_VARS", // "*string:~*vars.*readerID:mysqlReaderID",
+                    "*gt:~*req.answer_time:-168h", // dont process cdrs with answer_time older than 7 days ago 
+                    "FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
+                    "*string:~*vars.*readerID:mysql",
+                    "FLTR_VARS", // "*string:~*vars.*readerID:mysql",
 				],										
+                "ees_ids": ["SQLExporter"],
 				"flags": ["*dryrun", "*export"],										
 				"fields":[									
 					{"tag": "CGRID", "path": "*cgreq.CGRID", "type": "*variable", "value": "~*req.cgrid", "mandatory": true},
@@ -75,7 +75,6 @@
 					{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.usage", "mandatory": true},
 					{"tag": "ExtraInfo", "path": "*cgreq.ExtraInfo", "type": "*variable", "value": "~*req.extra_info", "mandatory": true},
 					{"tag": "ID", "path": "*cgreq.Id", "type": "*variable", "value": "~*req.id", "mandatory": true},
-					{"tag": "ReaderID", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID", "mandatory": true},
 				],
 			},
 		],

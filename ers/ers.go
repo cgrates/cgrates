@@ -376,6 +376,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		var reply map[string]map[string]any
 		return erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().EEsConns, utils.EeSv1ProcessEvent,
 			&engine.CGREventWithEeIDs{
+				EeIDs:    rdrCfg.EEsIDs,
 				CGREvent: cgrEv,
 			}, &reply)
 	}

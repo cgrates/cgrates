@@ -52,10 +52,10 @@
                 "start_delay": "500ms", // wait for db to be populated before starting reader 
                 "tenant": "cgrates.org",							
                 "filters": [
-                "*gt:~*req.answer_time:-168h", // dont process cdrs with answer_time older than 7 days ago 
-                "FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
-                "*string:~*vars.*readerID:mysql",
-                "FLTR_VARS", // "*string:~*vars.*readerID:mysql",
+                    "*gt:~*req.answer_time:-168h", // dont process cdrs with answer_time older than 7 days ago 
+                    "FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
+                    "*string:~*vars.*readerID:mysql",
+                    "FLTR_VARS", // "*string:~*vars.*readerID:mysql",
                 ],										
                 "flags": ["*dryrun"],										
                 "fields":[									

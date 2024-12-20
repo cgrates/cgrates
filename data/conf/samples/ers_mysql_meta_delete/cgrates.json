@@ -32,10 +32,10 @@
 				"processed_path": "*delete",
 				"tenant": "cgrates.org",							
 				"filters": [
-				"*gt:~*req.answer_time:-168h", // dont process cdrs with answer_time older than 7 days ago 
-				"FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
-				"*string:~*vars.*readerID:mysql",
-				"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
+                    "*gt:~*req.answer_time:-168h", // dont process cdrs with answer_time older than 7 days ago 
+                    "FLTR_SQL_RatingID", // "*eq:~*req.cost_details.Charges[0].RatingID:RatingID2",
+                    "*string:~*vars.*readerID:mysql",
+                    "FLTR_VARS", // "*string:~*vars.*readerID:mysql",
 				],										
 				"flags": ["*dryrun"],										
 				"fields":[									
