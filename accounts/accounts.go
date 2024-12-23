@@ -151,6 +151,11 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 	}
 	dbted := decimal.New(0, 0) // amount debited so far
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))
+	defer func() { // make sure we revert debits if errors occured
+		if err != nil && store {
+			restoreAccounts(ctx, aS.dm, acnts, acntBkps)
+		}
+	}()
 	for i, acnt := range acnts {
 		if usage.Cmp(decimal.New(0, 0)) == 0 {
 			return // no more debits
@@ -159,12 +164,9 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		var ecDbt *utils.EventCharges
 		if ecDbt, err = aS.accountDebit(ctx, acnt.Account,
 			utils.CloneDecimalBig(usage), cgrEv, concretes, dbted); err != nil {
-			if store {
-				restoreAccounts(ctx, aS.dm, acnts, acntBkps)
-			}
 			return
 		}
-		if ecDbt == nil {
+		if ecDbt == nil { // no balance matched
 			continue
 		}
 		if ec == nil { // no debit performed yet
@@ -172,7 +174,6 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		}
 		if store && acnt.Account.BalancesAltered(acntBkps[i]) {
 			if err = aS.dm.SetAccount(ctx, acnt.Account, false); err != nil {
-				restoreAccounts(ctx, aS.dm, acnts, acntBkps)
 				return
 			}
 		}
@@ -187,7 +188,8 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		ec.Merge(ecDbt)
 		// check for blockers for every profile
 		var blocker bool
-		if blocker, err = engine.BlockerFromDynamics(ctx, acnt.Blockers, aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
+		if blocker, err = engine.BlockerFromDynamics(ctx, acnt.Blockers, aS.fltrS,
+			cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
 			return
 		}
 		// if blockers active, do not debit from the other accounts
@@ -204,6 +206,9 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 	// Find balances matching event
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
+		if !utils.HasPrefixSlice([]string{utils.MetaConcrete, utils.MetaAbstract}, blnCfg.Type) {
+			continue // only concrete and abstracts will participate in debits
+		}
 		var weight float64
 		if weight, err = engine.WeightFromDynamics(ctx, blnCfg.Weights,
 			aS.fltrS, cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
@@ -266,6 +271,8 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 // refundCharges implements the mechanism of refunding the charges into accounts
 func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.EventCharges) (err error) {
 	acnts := make(utils.AccountsWithWeight, 0, len(ecs.Accounts))
+	defer unlockAccounts(acnts) // no unlocking in upper layers
+
 	acntsIdxed := make(map[string]*utils.Account) // so we can access Account easier
 	alteredAcnts := make(utils.StringSet)         // hold here the list of modified accounts
 	for acntID := range ecs.Accounts {
@@ -279,7 +286,6 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 				err = nil
 				continue
 			}
-			unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
 			return
 		}
 		acnts = append(acnts, &utils.AccountWithWeight{Account: qAcnt, Weight: 0, LockID: refID})
@@ -295,7 +301,7 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 		if acntChrg.UnitFactorID != utils.EmptyString {
 			uf = ecs.UnitFactors[acntChrg.UnitFactorID]
 		}
-		if acntChrg.BalanceID != utils.MetaTransAbstract { // *transabstracts is not a real balance, hence the exception
+		if acntChrg.BalanceID != utils.MetaMockAbstract { // *transabstracts is not a real balance, hence the exception
 			refundUnitsOnAccount(
 				acntsIdxed[acntChrg.AccountID],
 				uncompressUnits(acntChrg.Units, chrg.CompressFactor, acntChrg, uf),
@@ -321,7 +327,5 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 			return
 		}
 	}
-
-	unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
 	return
 }

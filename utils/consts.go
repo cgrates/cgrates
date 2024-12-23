@@ -819,7 +819,7 @@ const (
 	BalanceOpts             = "BalanceOpts"
 	MetaConcrete            = "*concrete"
 	MetaAbstract            = "*abstract"
-	MetaTransAbstract       = "*transabstract"
+	MetaMockAbstract        = "*mockabstract"
 	MetaBalanceLimit        = "*balanceLimit"
 	MetaBalanceUnlimited    = "*balanceUnlimited"
 	MetaTemplateID          = "*templateID"

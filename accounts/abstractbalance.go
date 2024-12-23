@@ -51,6 +51,7 @@ func (aB *abstractBalance) id() string {
 }
 
 // debitAbstracts implements the balanceOperator interface
+// it will debit the abstracts out of a single abstractBalance or pay it with one or multiple concrete balances
 func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.Big,
 	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
 	evNm := utils.MapStorage{
@@ -72,7 +73,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		return
 	}
 	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, blncLmt.Big)
+		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, blncLmt.Big) // reserve the limit
 		hasLmt = true
 	}
 
@@ -91,7 +92,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
 		hasUF = true
 	}
-	if blncLmt != nil {
+	if blncLmt != nil { // unlimited balances do not need usage limiting
 		maxBlcDbt := utils.CloneDecimalBig(aB.blnCfg.Units.Big)
 		if hasUF {
 			maxBlcDbt = utils.DivideBig(maxBlcDbt, uF.Factor.Big) // common units with debit and increments
@@ -102,7 +103,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		}
 	}
 	var ecCost *utils.EventCharges
-	if costIcrm.FixedFee == nil && costIcrm.RecurrentFee == nil ||
+	if costIcrm.FixedFee == nil && costIcrm.RecurrentFee == nil || // no cost defined, will be queried via RateS
 		costIcrm.FixedFee != nil && costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0 ||
 		costIcrm.RecurrentFee != nil && costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0 {
 		// attempt to debit usage with cost
@@ -119,13 +120,13 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		}
 	}
 	var dbtUnits *decimal.Big
-	if ecCost != nil {
+	if ecCost != nil { // abstracts with concretes cost
 		usage = ecCost.Abstracts.Big
 		dbtUnits = ecCost.Abstracts.Big
-	} else {
+	} else { // abstracts without cost
 		dbtUnits = utils.CloneDecimalBig(usage)
 	}
-	if hasUF {
+	if hasUF { // convert back what we have divided above
 		dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
 	}
 

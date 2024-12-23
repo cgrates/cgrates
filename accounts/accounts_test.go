@@ -280,13 +280,6 @@ func TestAccountDebit(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Balances["ConcreteBalance1"].Weights[0].FilterIDs = []string{}
-
-	accPrf.Balances["ConcreteBalance1"].Type = "not_a_type"
-	expected = "unsupported balance type: <not_a_type>"
-	if _, err := accnts.accountDebit(context.Background(), accPrf, usage.Big,
-		cgrEvent, true, decimal.New(0, 0)); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
 	accPrf.Balances["ConcreteBalance1"].Type = utils.MetaConcrete
 
 	usage = &utils.Decimal{Big: decimal.New(0, 0)}
@@ -367,7 +360,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 		Accounting: map[string]*utils.AccountCharge{
 			"CHARGING1": {
 				AccountID:       "TestAccountsDebitGetUsage",
-				BalanceID:       "*transabstract",
+				BalanceID:       "*mockabstract",
 				Units:           utils.NewDecimal(89, 0),
 				RatingID:        "RATING1",
 				JoinedChargeIDs: []string{"CHARGING1_JOINEDCHARGE"},
@@ -1826,7 +1819,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			},
 			"ACCOUNT4": {
 				AccountID:       "TestV1DebitAbstractsEventCharges1",
-				BalanceID:       "*transabstract",
+				BalanceID:       utils.MetaMockAbstract,
 				Units:           utils.NewDecimal(int64(125*time.Second), 0), // 125s
 				RatingID:        "account4_rating",
 				JoinedChargeIDs: []string{"account4_joinedcharges"},
@@ -1851,14 +1844,14 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 			},
 			"ACCOUNT6": {
 				AccountID:       "TestV1DebitAbstractsEventCharges1",
-				BalanceID:       "*transabstract",
+				BalanceID:       utils.MetaMockAbstract,
 				Units:           utils.NewDecimal(int64(20*time.Second), 0), // 2.000000000e+10,
 				RatingID:        "account6_rating",
 				JoinedChargeIDs: []string{"account6_joinedcharges"},
 			},
 			"ACCOUNT1": {
 				AccountID:       "TestV1DebitAbstractsEventCharges2",
-				BalanceID:       "*transabstract",
+				BalanceID:       utils.MetaMockAbstract,
 				Units:           utils.NewDecimal(int64(time.Second), 0),
 				RatingID:        "account1_rating",
 				JoinedChargeIDs: []string{"account1_joinedcharges"},
@@ -2384,7 +2377,7 @@ func TestV1DebitAbstractsWithRecurrentFeeNegative(t *testing.T) {
 			},
 			"CHARGE2": {
 				AccountID:       "TestV1DebitAbstractsWithRecurrentFeeNegative",
-				BalanceID:       utils.MetaTransAbstract,
+				BalanceID:       utils.MetaMockAbstract,
 				Units:           utils.NewDecimal(int64(29*time.Second), 0),
 				RatingID:        "RATING2",
 				JoinedChargeIDs: []string{"JOINED2"},

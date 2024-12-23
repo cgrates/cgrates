@@ -68,6 +68,8 @@ func (cB *concreteBalance) id() string {
 }
 
 // debitAbstracts implements the balanceOperator interface
+// it will mainly debit the aUnits out of a single concrete balance
+// the abstract
 func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.Big,
 	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
@@ -127,7 +129,7 @@ func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.
 	acntID := utils.UUIDSha1Prefix()
 	ec.Accounting[acntID] = &utils.AccountCharge{
 		AccountID: cB.acntID,
-		BalanceID: utils.MetaTransAbstract,
+		BalanceID: utils.MetaMockAbstract,
 		Units:     ec.Abstracts,
 		RatingID:  ratingID,
 	}
@@ -149,6 +151,7 @@ func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.
 }
 
 // debitConcretes implements the balanceOperator interface
+// it will attempt to debit the amount of concrete units out of this single concrete balance
 func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.Big,
 	cgrEv *utils.CGREvent, debited *decimal.Big) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()

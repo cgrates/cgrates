@@ -33,6 +33,7 @@ import (
 )
 
 // newAccountBalances constructs accountBalances
+// expects the balances to be ordered and it will keep them that way
 func newBalanceOperators(ctx *context.Context, acntID string, blnCfgs []*utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (blncOpers []balanceOperator, err error) {
@@ -49,13 +50,11 @@ func newBalanceOperators(ctx *context.Context, acntID string, blnCfgs []*utils.B
 	}
 
 	for i, blnCfg := range blnCfgs { // build the abstract balances
-		if blnCfg.Type == utils.MetaConcrete {
+		if blnCfg.Type != utils.MetaAbstract {
 			continue
 		}
-		if blncOpers[i], err = newBalanceOperator(ctx, acntID, blnCfg, cncrtBlncs,
-			fltrS, connMgr, attrSConns, rateSConns); err != nil {
-			return
-		}
+		blncOpers[i] = newAbstractBalanceOperator(ctx, acntID, blnCfg, cncrtBlncs,
+			fltrS, connMgr, attrSConns, rateSConns)
 	}
 	return
 }
@@ -224,7 +223,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			return
 		}
 		if len(rplyAttrS.AlteredFields) != 0 { // event was altered
-			cgrEv = rplyAttrS.CGREvent
+			cgrEv = rplyAttrS.CGREvent // local change, not reflected out
 		}
 	}
 	origConcrtUnts := cloneUnitsFromConcretes(cncrtBlncs) // so we can revert on errors

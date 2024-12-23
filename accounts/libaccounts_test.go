@@ -87,13 +87,6 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 			}
 		}
 	}
-
-	acntPrf.Balances["BL1"].Type = "INVALID_TYPE"
-	expectedErr := "unsupported balance type: <INVALID_TYPE>"
-	if _, err := newBalanceOperators(context.Background(), acntPrf.ID, blnCfgs, filters, nil,
-		nil, nil); err == nil || err.Error() != expectedErr {
-		t.Errorf("Expected %+v, received %+v", expectedErr, err)
-	}
 }
 
 type testMockCall struct {
