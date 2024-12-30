@@ -854,6 +854,7 @@ const (
 	MetaCostIncrement       = "*costIncrement"
 	Length                  = "Length"
 	V1Prfx                  = "V1"
+	Ping                    = "Ping"
 
 	// dns
 	DNSQueryType          = "QueryType"

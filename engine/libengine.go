@@ -155,23 +155,25 @@ func NewServiceWithPing(val any, name, prefix string) (*birpc.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	srv.Methods["Ping"] = pingM
+	srv.Methods[utils.Ping] = pingM
 	return srv, nil
 }
 
+// NewServiceWithName is used by a service to return a number of *birpc.Service objects with different versions
+//
+//	which are groupped by the vX prefix in the RPC capable methods of val interface. (ie: CoreS and CoreSv1)
 func NewServiceWithName(val any, name string, useName bool) (_ IntService, err error) {
 	var srv *birpc.Service
 	if srv, err = birpc.NewService(val, name, useName); err != nil {
 		return
 	}
-	srv.Methods["Ping"] = pingM
+	srv.Methods[utils.Ping] = pingM
 	s := IntService{srv.Name: srv}
 	for m, v := range srv.Methods {
 		m = strings.TrimPrefix(m, "BiRPC")
 		if len(m) < 2 || unicode.ToLower(rune(m[0])) != 'v' {
 			continue
 		}
-
 		key := srv.Name
 		if unicode.IsLower(rune(key[len(key)-1])) {
 			key += "V"
@@ -184,7 +186,7 @@ func NewServiceWithName(val any, name string, useName bool) (_ IntService, err e
 			srv2 = new(birpc.Service)
 			*srv2 = *srv
 			srv2.Name = key
-			srv2.Methods = map[string]*birpc.MethodType{"Ping": pingM}
+			srv2.Methods = map[string]*birpc.MethodType{utils.Ping: pingM}
 			s[key] = srv2
 		}
 		srv2.Methods[m[2:]] = v
@@ -197,7 +199,7 @@ func NewDispatcherService(val any) (_ IntService, err error) {
 	if srv, err = birpc.NewService(val, utils.EmptyString, false); err != nil {
 		return
 	}
-	srv.Methods["Ping"] = pingM
+	srv.Methods[utils.Ping] = pingM
 	s := IntService{srv.Name: srv}
 	for m, v := range srv.Methods {
 		key := srv.Name
@@ -283,7 +285,7 @@ func NewDispatcherService(val any) (_ IntService, err error) {
 			srv2 = new(birpc.Service)
 			*srv2 = *srv
 			srv2.Name = key
-			srv2.Methods = map[string]*birpc.MethodType{"Ping": pingM}
+			srv2.Methods = map[string]*birpc.MethodType{utils.Ping: pingM}
 			s[key] = srv2
 		}
 		srv2.Methods[m[2:]] = v
@@ -308,7 +310,7 @@ func ping(_ any, _ *context.Context, _ *utils.CGREvent, reply *string) error {
 
 var pingM = &birpc.MethodType{
 	Method: reflect.Method{
-		Name: "Ping",
+		Name: utils.Ping,
 		Type: reflect.TypeOf(ping),
 		Func: reflect.ValueOf(ping),
 	},

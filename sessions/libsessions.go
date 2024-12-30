@@ -502,7 +502,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() map[string]*utils.DataNode
 type V1AuthorizeReplyWithDigest struct {
 	AttributesDigest   *string
 	ResourceAllocation *string
-	MaxUsage           float64 // special treat returning time.Duration.Seconds()
+	MaxUsage           int64 // special treat returning time.Duration.Nanoseconds()
 	RoutesDigest       *string
 	Thresholds         *string
 	StatQueues         *string

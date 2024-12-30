@@ -171,6 +171,12 @@ func NewDecimalFromUsage(u string) (d *Decimal, err error) {
 	return
 }
 
+// NewDecimalFromUsage is a constructor for Decimal out of unit represents as string
+func NewDecimalFromUsageIgnoreErr(u string) (d *Decimal) {
+	d, _ = NewDecimalFromUsage(u)
+	return
+}
+
 // NewDecimal is a constructor for Decimal, following the one of decimal.Big
 func NewDecimal(value int64, scale int) *Decimal {
 	return &Decimal{decimal.WithContext(DecimalContext).SetMantScale(value, scale)}
