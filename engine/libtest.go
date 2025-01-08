@@ -329,7 +329,7 @@ func NewRPCClient(t testing.TB, cfg *config.ListenCfg, encoding string) *birpc.C
 	case utils.MetaGOB:
 		client, err = birpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
-		t.Fatalf("unsupported RPC encoding: %s", encoding)
+		t.Fatalf("unsupported RPC encoding: %q", encoding)
 	}
 	if err != nil {
 		t.Fatalf("unable to connect to cgr-engine: %v", err)
