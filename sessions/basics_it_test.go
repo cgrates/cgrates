@@ -113,24 +113,24 @@ func testSBscsItAuthorizeEvent(t *testing.T) {
 			ID:        "1001",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Balances: map[string]*utils.Balance{
-				"ABSTRACT1": &utils.Balance{
+				"ABSTRACT1": {
 					ID:      "ABSTRACT1",
 					Type:    utils.MetaAbstract,
 					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 20.0}},
 					CostIncrements: []*utils.CostIncrement{
-						&utils.CostIncrement{
+						{
 							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
 							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
 						},
 					},
 					Units: utils.NewDecimalFromUsageIgnoreErr("1m"),
 				},
-				"CONCRETE1": &utils.Balance{
+				"CONCRETE1": {
 					ID:      "CONCRETE1",
 					Type:    utils.MetaConcrete,
 					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
 					CostIncrements: []*utils.CostIncrement{
-						&utils.CostIncrement{
+						{
 							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
 							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
 						},
@@ -191,12 +191,12 @@ func testSBscsItAuthorizeEvent(t *testing.T) {
 			ID:        "1001",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Balances: map[string]*utils.Balance{
-				"CONCRETE1": &utils.Balance{
+				"CONCRETE1": {
 					ID:      "CONCRETE1",
 					Type:    utils.MetaConcrete,
 					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
 					CostIncrements: []*utils.CostIncrement{
-						&utils.CostIncrement{
+						{
 							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
 							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
 						},
@@ -249,12 +249,12 @@ func testSBscsItAuthorizeEventWithDigest(t *testing.T) {
 			ID:        "1001",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Balances: map[string]*utils.Balance{
-				"CONCRETE1": &utils.Balance{
+				"CONCRETE1": {
 					ID:      "CONCRETE1",
 					Type:    utils.MetaConcrete,
 					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
 					CostIncrements: []*utils.CostIncrement{
-						&utils.CostIncrement{
+						{
 							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
 							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
 						},
@@ -309,12 +309,12 @@ func testSBscsItProcessCDR(t *testing.T) {
 			ID:        "1001",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Balances: map[string]*utils.Balance{
-				"CONCRETE1": &utils.Balance{
+				"CONCRETE1": {
 					ID:      "CONCRETE1",
 					Type:    utils.MetaConcrete,
 					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
 					CostIncrements: []*utils.CostIncrement{
-						&utils.CostIncrement{
+						{
 							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
 							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
 						},
