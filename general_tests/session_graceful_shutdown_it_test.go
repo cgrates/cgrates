@@ -179,7 +179,7 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 }
 
 func testSessionSRplcApierGetInitateSessions(t *testing.T) {
-	smgRplCfg1.SessionSCfg().Opts.Initiate = []*utils.DynamicBoolOpt{
+	smgRplCfg1.SessionSCfg().Opts.Initiate = []*config.DynamicBoolOpt{
 		{
 			Value:  true,
 			Tenant: "cgrates.org",

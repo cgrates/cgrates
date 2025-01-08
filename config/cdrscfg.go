@@ -39,16 +39,16 @@ const (
 )
 
 type CdrsOpts struct {
-	Accounts   []*utils.DynamicBoolOpt
-	Attributes []*utils.DynamicBoolOpt
-	Chargers   []*utils.DynamicBoolOpt
-	Export     []*utils.DynamicBoolOpt
-	Rates      []*utils.DynamicBoolOpt
-	Stats      []*utils.DynamicBoolOpt
-	Thresholds []*utils.DynamicBoolOpt
-	Refund     []*utils.DynamicBoolOpt
-	Rerate     []*utils.DynamicBoolOpt
-	Store      []*utils.DynamicBoolOpt
+	Accounts   []*DynamicBoolOpt
+	Attributes []*DynamicBoolOpt
+	Chargers   []*DynamicBoolOpt
+	Export     []*DynamicBoolOpt
+	Rates      []*DynamicBoolOpt
+	Stats      []*DynamicBoolOpt
+	Thresholds []*DynamicBoolOpt
+	Refund     []*DynamicBoolOpt
+	Rerate     []*DynamicBoolOpt
+	Store      []*DynamicBoolOpt
 }
 
 // CdrsCfg is the CDR server
@@ -215,45 +215,45 @@ func (CdrsCfg) SName() string                 { return CDRsJSON }
 func (cdrscfg CdrsCfg) CloneSection() Section { return cdrscfg.Clone() }
 
 func (cdrsOpts *CdrsOpts) Clone() *CdrsOpts {
-	var accS []*utils.DynamicBoolOpt
+	var accS []*DynamicBoolOpt
 	if cdrsOpts.Accounts != nil {
-		accS = utils.CloneDynamicBoolOpt(cdrsOpts.Accounts)
+		accS = CloneDynamicBoolOpt(cdrsOpts.Accounts)
 	}
-	var attrS []*utils.DynamicBoolOpt
+	var attrS []*DynamicBoolOpt
 	if cdrsOpts.Attributes != nil {
-		attrS = utils.CloneDynamicBoolOpt(cdrsOpts.Attributes)
+		attrS = CloneDynamicBoolOpt(cdrsOpts.Attributes)
 	}
-	var chrgS []*utils.DynamicBoolOpt
+	var chrgS []*DynamicBoolOpt
 	if cdrsOpts.Chargers != nil {
-		chrgS = utils.CloneDynamicBoolOpt(cdrsOpts.Chargers)
+		chrgS = CloneDynamicBoolOpt(cdrsOpts.Chargers)
 	}
-	var export []*utils.DynamicBoolOpt
+	var export []*DynamicBoolOpt
 	if cdrsOpts.Export != nil {
-		export = utils.CloneDynamicBoolOpt(cdrsOpts.Export)
+		export = CloneDynamicBoolOpt(cdrsOpts.Export)
 	}
-	var rtS []*utils.DynamicBoolOpt
+	var rtS []*DynamicBoolOpt
 	if cdrsOpts.Rates != nil {
-		rtS = utils.CloneDynamicBoolOpt(cdrsOpts.Rates)
+		rtS = CloneDynamicBoolOpt(cdrsOpts.Rates)
 	}
-	var stS []*utils.DynamicBoolOpt
+	var stS []*DynamicBoolOpt
 	if cdrsOpts.Stats != nil {
-		stS = utils.CloneDynamicBoolOpt(cdrsOpts.Stats)
+		stS = CloneDynamicBoolOpt(cdrsOpts.Stats)
 	}
-	var thdS []*utils.DynamicBoolOpt
+	var thdS []*DynamicBoolOpt
 	if cdrsOpts.Thresholds != nil {
-		thdS = utils.CloneDynamicBoolOpt(cdrsOpts.Thresholds)
+		thdS = CloneDynamicBoolOpt(cdrsOpts.Thresholds)
 	}
-	var refund []*utils.DynamicBoolOpt
+	var refund []*DynamicBoolOpt
 	if cdrsOpts.Refund != nil {
-		refund = utils.CloneDynamicBoolOpt(cdrsOpts.Refund)
+		refund = CloneDynamicBoolOpt(cdrsOpts.Refund)
 	}
-	var rerate []*utils.DynamicBoolOpt
+	var rerate []*DynamicBoolOpt
 	if cdrsOpts.Rerate != nil {
-		rerate = utils.CloneDynamicBoolOpt(cdrsOpts.Rerate)
+		rerate = CloneDynamicBoolOpt(cdrsOpts.Rerate)
 	}
-	var store []*utils.DynamicBoolOpt
+	var store []*DynamicBoolOpt
 	if cdrsOpts.Store != nil {
-		store = utils.CloneDynamicBoolOpt(cdrsOpts.Store)
+		store = CloneDynamicBoolOpt(cdrsOpts.Store)
 	}
 	return &CdrsOpts{
 		Accounts:   accS,
@@ -309,16 +309,16 @@ func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 }
 
 type CdrsOptsJson struct {
-	Accounts   []*utils.DynamicBoolOpt `json:"*accounts"`
-	Attributes []*utils.DynamicBoolOpt `json:"*attributes"`
-	Chargers   []*utils.DynamicBoolOpt `json:"*chargers"`
-	Export     []*utils.DynamicBoolOpt `json:"*ees"`
-	Rates      []*utils.DynamicBoolOpt `json:"*rates"`
-	Stats      []*utils.DynamicBoolOpt `json:"*stats"`
-	Thresholds []*utils.DynamicBoolOpt `json:"*thresholds"`
-	Refund     []*utils.DynamicBoolOpt `json:"*refund"`
-	Rerate     []*utils.DynamicBoolOpt `json:"*rerate"`
-	Store      []*utils.DynamicBoolOpt `json:"*store"`
+	Accounts   []*DynamicBoolOpt `json:"*accounts"`
+	Attributes []*DynamicBoolOpt `json:"*attributes"`
+	Chargers   []*DynamicBoolOpt `json:"*chargers"`
+	Export     []*DynamicBoolOpt `json:"*ees"`
+	Rates      []*DynamicBoolOpt `json:"*rates"`
+	Stats      []*DynamicBoolOpt `json:"*stats"`
+	Thresholds []*DynamicBoolOpt `json:"*thresholds"`
+	Refund     []*DynamicBoolOpt `json:"*refund"`
+	Rerate     []*DynamicBoolOpt `json:"*rerate"`
+	Store      []*DynamicBoolOpt `json:"*store"`
 }
 
 // Cdrs config section
@@ -342,34 +342,34 @@ func diffCdrsOptsJsonCfg(d *CdrsOptsJson, v1, v2 *CdrsOpts) *CdrsOptsJson {
 	if d == nil {
 		d = new(CdrsOptsJson)
 	}
-	if !utils.DynamicBoolOptEqual(v1.Accounts, v2.Accounts) {
+	if !DynamicBoolOptEqual(v1.Accounts, v2.Accounts) {
 		d.Accounts = v2.Accounts
 	}
-	if !utils.DynamicBoolOptEqual(v1.Attributes, v2.Attributes) {
+	if !DynamicBoolOptEqual(v1.Attributes, v2.Attributes) {
 		d.Attributes = v2.Attributes
 	}
-	if !utils.DynamicBoolOptEqual(v1.Chargers, v2.Chargers) {
+	if !DynamicBoolOptEqual(v1.Chargers, v2.Chargers) {
 		d.Chargers = v2.Chargers
 	}
-	if !utils.DynamicBoolOptEqual(v1.Export, v2.Export) {
+	if !DynamicBoolOptEqual(v1.Export, v2.Export) {
 		d.Export = v2.Export
 	}
-	if !utils.DynamicBoolOptEqual(v1.Rates, v2.Rates) {
+	if !DynamicBoolOptEqual(v1.Rates, v2.Rates) {
 		d.Rates = v2.Rates
 	}
-	if !utils.DynamicBoolOptEqual(v1.Stats, v2.Stats) {
+	if !DynamicBoolOptEqual(v1.Stats, v2.Stats) {
 		d.Stats = v2.Stats
 	}
-	if !utils.DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
+	if !DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
 		d.Thresholds = v2.Thresholds
 	}
-	if !utils.DynamicBoolOptEqual(v1.Refund, v2.Refund) {
+	if !DynamicBoolOptEqual(v1.Refund, v2.Refund) {
 		d.Refund = v2.Refund
 	}
-	if !utils.DynamicBoolOptEqual(v1.Rerate, v2.Rerate) {
+	if !DynamicBoolOptEqual(v1.Rerate, v2.Rerate) {
 		d.Rerate = v2.Rerate
 	}
-	if !utils.DynamicBoolOptEqual(v1.Store, v2.Store) {
+	if !DynamicBoolOptEqual(v1.Store, v2.Store) {
 		d.Store = v2.Store
 	}
 	return d

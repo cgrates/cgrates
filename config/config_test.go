@@ -319,16 +319,16 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 		AccountSConns:   []string{},
 		ExtraFields:     RSRParsers{},
 		Opts: &CdrsOpts{
-			Accounts:   []*utils.DynamicBoolOpt{},
-			Attributes: []*utils.DynamicBoolOpt{},
-			Chargers:   []*utils.DynamicBoolOpt{},
-			Export:     []*utils.DynamicBoolOpt{},
-			Rates:      []*utils.DynamicBoolOpt{},
-			Stats:      []*utils.DynamicBoolOpt{},
-			Thresholds: []*utils.DynamicBoolOpt{},
-			Refund:     []*utils.DynamicBoolOpt{},
-			Rerate:     []*utils.DynamicBoolOpt{},
-			Store:      []*utils.DynamicBoolOpt{},
+			Accounts:   []*DynamicBoolOpt{},
+			Attributes: []*DynamicBoolOpt{},
+			Chargers:   []*DynamicBoolOpt{},
+			Export:     []*DynamicBoolOpt{},
+			Rates:      []*DynamicBoolOpt{},
+			Stats:      []*DynamicBoolOpt{},
+			Thresholds: []*DynamicBoolOpt{},
+			Refund:     []*DynamicBoolOpt{},
+			Rerate:     []*DynamicBoolOpt{},
+			Store:      []*DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eCdrsCfg, cgrCfg.cdrsCfg) {
@@ -391,37 +391,37 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			utils.MetaSMS:   1,
 		},
 		Opts: &SessionsOpts{
-			Accounts:               []*utils.DynamicBoolOpt{},
-			Attributes:             []*utils.DynamicBoolOpt{},
-			CDRs:                   []*utils.DynamicBoolOpt{},
-			Chargers:               []*utils.DynamicBoolOpt{},
-			Resources:              []*utils.DynamicBoolOpt{},
-			Routes:                 []*utils.DynamicBoolOpt{},
-			Stats:                  []*utils.DynamicBoolOpt{},
-			Thresholds:             []*utils.DynamicBoolOpt{},
-			Initiate:               []*utils.DynamicBoolOpt{},
-			Update:                 []*utils.DynamicBoolOpt{},
-			Terminate:              []*utils.DynamicBoolOpt{},
-			Message:                []*utils.DynamicBoolOpt{},
-			AttributesDerivedReply: []*utils.DynamicBoolOpt{},
-			BlockerError:           []*utils.DynamicBoolOpt{},
-			CDRsDerivedReply:       []*utils.DynamicBoolOpt{},
-			ResourcesAuthorize:     []*utils.DynamicBoolOpt{},
-			ResourcesAllocate:      []*utils.DynamicBoolOpt{},
-			ResourcesRelease:       []*utils.DynamicBoolOpt{},
-			ResourcesDerivedReply:  []*utils.DynamicBoolOpt{},
-			RoutesDerivedReply:     []*utils.DynamicBoolOpt{},
-			StatsDerivedReply:      []*utils.DynamicBoolOpt{},
-			ThresholdsDerivedReply: []*utils.DynamicBoolOpt{},
-			MaxUsage:               []*utils.DynamicBoolOpt{},
-			ForceDuration:          []*utils.DynamicBoolOpt{},
-			TTL:                    []*utils.DynamicDurationOpt{},
-			Chargeable:             []*utils.DynamicBoolOpt{},
-			TTLLastUsage:           []*utils.DynamicDurationPointerOpt{},
-			TTLLastUsed:            []*utils.DynamicDurationPointerOpt{},
-			DebitInterval:          []*utils.DynamicDurationOpt{},
-			TTLMaxDelay:            []*utils.DynamicDurationOpt{},
-			TTLUsage:               []*utils.DynamicDurationPointerOpt{},
+			Accounts:               []*DynamicBoolOpt{},
+			Attributes:             []*DynamicBoolOpt{},
+			CDRs:                   []*DynamicBoolOpt{},
+			Chargers:               []*DynamicBoolOpt{},
+			Resources:              []*DynamicBoolOpt{},
+			Routes:                 []*DynamicBoolOpt{},
+			Stats:                  []*DynamicBoolOpt{},
+			Thresholds:             []*DynamicBoolOpt{},
+			Initiate:               []*DynamicBoolOpt{},
+			Update:                 []*DynamicBoolOpt{},
+			Terminate:              []*DynamicBoolOpt{},
+			Message:                []*DynamicBoolOpt{},
+			AttributesDerivedReply: []*DynamicBoolOpt{},
+			BlockerError:           []*DynamicBoolOpt{},
+			CDRsDerivedReply:       []*DynamicBoolOpt{},
+			ResourcesAuthorize:     []*DynamicBoolOpt{},
+			ResourcesAllocate:      []*DynamicBoolOpt{},
+			ResourcesRelease:       []*DynamicBoolOpt{},
+			ResourcesDerivedReply:  []*DynamicBoolOpt{},
+			RoutesDerivedReply:     []*DynamicBoolOpt{},
+			StatsDerivedReply:      []*DynamicBoolOpt{},
+			ThresholdsDerivedReply: []*DynamicBoolOpt{},
+			MaxUsage:               []*DynamicBoolOpt{},
+			ForceDuration:          []*DynamicBoolOpt{},
+			TTL:                    []*DynamicDurationOpt{},
+			Chargeable:             []*DynamicBoolOpt{},
+			TTLLastUsage:           []*DynamicDurationPointerOpt{},
+			TTLLastUsed:            []*DynamicDurationPointerOpt{},
+			DebitInterval:          []*DynamicDurationOpt{},
+			TTLMaxDelay:            []*DynamicDurationOpt{},
+			TTLUsage:               []*DynamicDurationPointerOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eSessionSCfg, cgrCfg.sessionSCfg) {
@@ -602,9 +602,9 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
 		Opts: &ResourcesOpts{
-			UsageID:  []*utils.DynamicStringOpt{},
-			UsageTTL: []*utils.DynamicDurationOpt{},
-			Units:    []*utils.DynamicFloat64Opt{},
+			UsageID:  []*DynamicStringOpt{},
+			UsageTTL: []*DynamicDurationOpt{},
+			Units:    []*DynamicFloat64Opt{},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
@@ -625,10 +625,10 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
 		Opts: &StatsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			RoundingDecimals:     []*utils.DynamicIntOpt{},
-			PrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			RoundingDecimals:     []*DynamicIntOpt{},
+			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
 		EEsConns: []string{},
 	}
@@ -649,8 +649,8 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		NotExistsIndexedFields: &[]string{},
 		ActionSConns:           []string{},
 		Opts: &ThresholdsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
@@ -674,14 +674,14 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		AccountSConns:          []string{},
 		DefaultRatio:           1,
 		Opts: &RoutesOpts{
-			Context:      []*utils.DynamicStringOpt{},
-			ProfileCount: []*utils.DynamicIntPointerOpt{},
-			IgnoreErrors: []*utils.DynamicBoolOpt{},
-			MaxCost:      []*utils.DynamicInterfaceOpt{},
-			Limit:        []*utils.DynamicIntPointerOpt{},
-			Offset:       []*utils.DynamicIntPointerOpt{},
-			MaxItems:     []*utils.DynamicIntPointerOpt{},
-			Usage:        []*utils.DynamicDecimalBigOpt{},
+			Context:      []*DynamicStringOpt{},
+			ProfileCount: []*DynamicIntPointerOpt{},
+			IgnoreErrors: []*DynamicBoolOpt{},
+			MaxCost:      []*DynamicInterfaceOpt{},
+			Limit:        []*DynamicIntPointerOpt{},
+			Offset:       []*DynamicIntPointerOpt{},
+			MaxItems:     []*DynamicIntPointerOpt{},
+			Usage:        []*DynamicDecimalOpt{},
 		},
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.routeSCfg) {
@@ -1608,10 +1608,10 @@ func TestAttributeSConfig(t *testing.T) {
 		NotExistsIndexedFields: &[]string{},
 		NestedFields:           false,
 		Opts: &AttributesOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProcessRuns:          []*utils.DynamicIntOpt{},
-			ProfileRuns:          []*utils.DynamicIntOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProcessRuns:          []*DynamicIntOpt{},
+			ProfileRuns:          []*DynamicIntOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1651,9 +1651,9 @@ func TestResourceSConfig(t *testing.T) {
 		NotExistsIndexedFields: &[]string{},
 		NestedFields:           false,
 		Opts: &ResourcesOpts{
-			UsageID:  []*utils.DynamicStringOpt{},
-			UsageTTL: []*utils.DynamicDurationOpt{},
-			Units:    []*utils.DynamicFloat64Opt{},
+			UsageID:  []*DynamicStringOpt{},
+			UsageTTL: []*DynamicDurationOpt{},
+			Units:    []*DynamicFloat64Opt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1676,10 +1676,10 @@ func TestStatSConfig(t *testing.T) {
 		NotExistsIndexedFields: &[]string{},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			RoundingDecimals:     []*utils.DynamicIntOpt{},
-			PrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			RoundingDecimals:     []*DynamicIntOpt{},
+			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
 		EEsConns: []string{},
 	}
@@ -1702,8 +1702,8 @@ func TestThresholdSConfig(t *testing.T) {
 		NestedFields:           false,
 		ActionSConns:           []string{},
 		Opts: &ThresholdsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1729,14 +1729,14 @@ func TestRouteSConfig(t *testing.T) {
 		DefaultRatio:           1,
 		NestedFields:           false,
 		Opts: &RoutesOpts{
-			Context:      []*utils.DynamicStringOpt{},
-			ProfileCount: []*utils.DynamicIntPointerOpt{},
-			IgnoreErrors: []*utils.DynamicBoolOpt{},
-			MaxCost:      []*utils.DynamicInterfaceOpt{},
-			Limit:        []*utils.DynamicIntPointerOpt{},
-			Offset:       []*utils.DynamicIntPointerOpt{},
-			MaxItems:     []*utils.DynamicIntPointerOpt{},
-			Usage:        []*utils.DynamicDecimalBigOpt{},
+			Context:      []*DynamicStringOpt{},
+			ProfileCount: []*DynamicIntPointerOpt{},
+			IgnoreErrors: []*DynamicBoolOpt{},
+			MaxCost:      []*DynamicInterfaceOpt{},
+			Limit:        []*DynamicIntPointerOpt{},
+			Offset:       []*DynamicIntPointerOpt{},
+			MaxItems:     []*DynamicIntPointerOpt{},
+			Usage:        []*DynamicDecimalOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1781,37 +1781,37 @@ func TestSessionSConfig(t *testing.T) {
 			utils.MetaSMS:   1,
 		},
 		Opts: &SessionsOpts{
-			Accounts:               []*utils.DynamicBoolOpt{},
-			Attributes:             []*utils.DynamicBoolOpt{},
-			CDRs:                   []*utils.DynamicBoolOpt{},
-			Chargers:               []*utils.DynamicBoolOpt{},
-			Resources:              []*utils.DynamicBoolOpt{},
-			Routes:                 []*utils.DynamicBoolOpt{},
-			Stats:                  []*utils.DynamicBoolOpt{},
-			Thresholds:             []*utils.DynamicBoolOpt{},
-			Initiate:               []*utils.DynamicBoolOpt{},
-			Update:                 []*utils.DynamicBoolOpt{},
-			Terminate:              []*utils.DynamicBoolOpt{},
-			Message:                []*utils.DynamicBoolOpt{},
-			AttributesDerivedReply: []*utils.DynamicBoolOpt{},
-			BlockerError:           []*utils.DynamicBoolOpt{},
-			CDRsDerivedReply:       []*utils.DynamicBoolOpt{},
-			ResourcesAuthorize:     []*utils.DynamicBoolOpt{},
-			ResourcesAllocate:      []*utils.DynamicBoolOpt{},
-			ResourcesRelease:       []*utils.DynamicBoolOpt{},
-			ResourcesDerivedReply:  []*utils.DynamicBoolOpt{},
-			RoutesDerivedReply:     []*utils.DynamicBoolOpt{},
-			StatsDerivedReply:      []*utils.DynamicBoolOpt{},
-			ThresholdsDerivedReply: []*utils.DynamicBoolOpt{},
-			MaxUsage:               []*utils.DynamicBoolOpt{},
-			ForceDuration:          []*utils.DynamicBoolOpt{},
-			TTL:                    []*utils.DynamicDurationOpt{},
-			Chargeable:             []*utils.DynamicBoolOpt{},
-			TTLLastUsage:           []*utils.DynamicDurationPointerOpt{},
-			TTLLastUsed:            []*utils.DynamicDurationPointerOpt{},
-			DebitInterval:          []*utils.DynamicDurationOpt{},
-			TTLMaxDelay:            []*utils.DynamicDurationOpt{},
-			TTLUsage:               []*utils.DynamicDurationPointerOpt{},
+			Accounts:               []*DynamicBoolOpt{},
+			Attributes:             []*DynamicBoolOpt{},
+			CDRs:                   []*DynamicBoolOpt{},
+			Chargers:               []*DynamicBoolOpt{},
+			Resources:              []*DynamicBoolOpt{},
+			Routes:                 []*DynamicBoolOpt{},
+			Stats:                  []*DynamicBoolOpt{},
+			Thresholds:             []*DynamicBoolOpt{},
+			Initiate:               []*DynamicBoolOpt{},
+			Update:                 []*DynamicBoolOpt{},
+			Terminate:              []*DynamicBoolOpt{},
+			Message:                []*DynamicBoolOpt{},
+			AttributesDerivedReply: []*DynamicBoolOpt{},
+			BlockerError:           []*DynamicBoolOpt{},
+			CDRsDerivedReply:       []*DynamicBoolOpt{},
+			ResourcesAuthorize:     []*DynamicBoolOpt{},
+			ResourcesAllocate:      []*DynamicBoolOpt{},
+			ResourcesRelease:       []*DynamicBoolOpt{},
+			ResourcesDerivedReply:  []*DynamicBoolOpt{},
+			RoutesDerivedReply:     []*DynamicBoolOpt{},
+			StatsDerivedReply:      []*DynamicBoolOpt{},
+			ThresholdsDerivedReply: []*DynamicBoolOpt{},
+			MaxUsage:               []*DynamicBoolOpt{},
+			ForceDuration:          []*DynamicBoolOpt{},
+			TTL:                    []*DynamicDurationOpt{},
+			Chargeable:             []*DynamicBoolOpt{},
+			TTLLastUsage:           []*DynamicDurationPointerOpt{},
+			TTLLastUsed:            []*DynamicDurationPointerOpt{},
+			DebitInterval:          []*DynamicDurationOpt{},
+			TTLMaxDelay:            []*DynamicDurationOpt{},
+			TTLUsage:               []*DynamicDurationPointerOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1955,7 +1955,7 @@ func TestDispatcherSConfig(t *testing.T) {
 		AttributeSConns:        []string{},
 		NestedFields:           false,
 		Opts: &DispatchersOpts{
-			[]*utils.DynamicBoolOpt{},
+			[]*DynamicBoolOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1974,7 +1974,7 @@ func TestAnalyzerConfig(t *testing.T) {
 		EEsConns:        []string{},
 		TTL:             24 * time.Hour,
 		Opts: &AnalyzerSOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			ExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -2094,11 +2094,11 @@ func TestRateSConfig(t *testing.T) {
 		RateNestedFields:           false,
 		Verbosity:                  1000,
 		Opts: &RatesOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			StartTime:            []*utils.DynamicStringOpt{},
-			Usage:                []*utils.DynamicDecimalBigOpt{},
-			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			StartTime:            []*DynamicStringOpt{},
+			Usage:                []*DynamicDecimalOpt{},
+			IntervalStart:        []*DynamicDecimalOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -3348,7 +3348,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		NotExistsIndexedFields: &[]string{},
 		AttributeSConns:        []string{},
 		Opts: &DispatchersOpts{
-			[]*utils.DynamicBoolOpt{},
+			[]*DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
@@ -3474,7 +3474,7 @@ func TestCgrCfgJSONDefaultAnalyzerSCfg(t *testing.T) {
 		EEsConns:        []string{},
 		TTL:             24 * time.Hour,
 		Opts: &AnalyzerSOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			ExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.analyzerSCfg, aSCfg) {
@@ -3536,11 +3536,11 @@ func TestCgrCfgJSONDefaultRateCfg(t *testing.T) {
 		RateNestedFields:           false,
 		Verbosity:                  1000,
 		Opts: &RatesOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			StartTime:            []*utils.DynamicStringOpt{},
-			Usage:                []*utils.DynamicDecimalBigOpt{},
-			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			StartTime:            []*DynamicStringOpt{},
+			Usage:                []*DynamicDecimalOpt{},
+			IntervalStart:        []*DynamicDecimalOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.rateSCfg, eCfg) {
@@ -3719,7 +3719,7 @@ func TestV1GetConfigGeneral(t *testing.T) {
 		utils.DecimalPrecisionCfg:     0,
 		utils.DecimalRoundingModeCfg:  "*toNearestEven",
 		utils.OptsCfg: map[string]any{
-			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+			utils.MetaExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	expected = map[string]any{
@@ -3888,16 +3888,16 @@ func TestV1GetConfigCdrs(t *testing.T) {
 			utils.RateSConnsCfg:       []string{},
 			utils.AccountSConnsCfg:    []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaAccounts:   []*utils.DynamicBoolOpt{},
-				utils.MetaAttributes: []*utils.DynamicBoolOpt{},
-				utils.MetaChargers:   []*utils.DynamicBoolOpt{},
-				utils.MetaEEs:        []*utils.DynamicBoolOpt{},
-				utils.MetaRates:      []*utils.DynamicBoolOpt{},
-				utils.MetaStats:      []*utils.DynamicBoolOpt{},
-				utils.MetaThresholds: []*utils.DynamicBoolOpt{},
-				utils.MetaRefund:     []*utils.DynamicBoolOpt{},
-				utils.MetaRerate:     []*utils.DynamicBoolOpt{},
-				utils.MetaStore:      []*utils.DynamicBoolOpt{},
+				utils.MetaAccounts:   []*DynamicBoolOpt{},
+				utils.MetaAttributes: []*DynamicBoolOpt{},
+				utils.MetaChargers:   []*DynamicBoolOpt{},
+				utils.MetaEEs:        []*DynamicBoolOpt{},
+				utils.MetaRates:      []*DynamicBoolOpt{},
+				utils.MetaStats:      []*DynamicBoolOpt{},
+				utils.MetaThresholds: []*DynamicBoolOpt{},
+				utils.MetaRefund:     []*DynamicBoolOpt{},
+				utils.MetaRerate:     []*DynamicBoolOpt{},
+				utils.MetaStore:      []*DynamicBoolOpt{},
 			},
 		},
 	}
@@ -3948,37 +3948,37 @@ func TestV1GetConfigSessionS(t *testing.T) {
 				utils.MetaSMS:   "1",
 			},
 			utils.OptsCfg: map[string]any{
-				utils.MetaAccounts:                  []*utils.DynamicBoolOpt{},
-				utils.MetaAttributes:                []*utils.DynamicBoolOpt{},
-				utils.MetaCDRs:                      []*utils.DynamicBoolOpt{},
-				utils.MetaChargers:                  []*utils.DynamicBoolOpt{},
-				utils.MetaResources:                 []*utils.DynamicBoolOpt{},
-				utils.MetaRoutes:                    []*utils.DynamicBoolOpt{},
-				utils.MetaStats:                     []*utils.DynamicBoolOpt{},
-				utils.MetaThresholds:                []*utils.DynamicBoolOpt{},
-				utils.MetaInitiate:                  []*utils.DynamicBoolOpt{},
-				utils.MetaUpdate:                    []*utils.DynamicBoolOpt{},
-				utils.MetaTerminate:                 []*utils.DynamicBoolOpt{},
-				utils.MetaMessage:                   []*utils.DynamicBoolOpt{},
-				utils.MetaAttributesDerivedReplyCfg: []*utils.DynamicBoolOpt{},
-				utils.MetaBlockerErrorCfg:           []*utils.DynamicBoolOpt{},
-				utils.MetaCDRsDerivedReplyCfg:       []*utils.DynamicBoolOpt{},
-				utils.MetaResourcesAuthorizeCfg:     []*utils.DynamicBoolOpt{},
-				utils.MetaResourcesAllocateCfg:      []*utils.DynamicBoolOpt{},
-				utils.MetaResourcesReleaseCfg:       []*utils.DynamicBoolOpt{},
-				utils.MetaResourcesDerivedReplyCfg:  []*utils.DynamicBoolOpt{},
-				utils.MetaRoutesDerivedReplyCfg:     []*utils.DynamicBoolOpt{},
-				utils.MetaStatsDerivedReplyCfg:      []*utils.DynamicBoolOpt{},
-				utils.MetaThresholdsDerivedReplyCfg: []*utils.DynamicBoolOpt{},
-				utils.MetaMaxUsageCfg:               []*utils.DynamicBoolOpt{},
-				utils.MetaForceDurationCfg:          []*utils.DynamicBoolOpt{},
-				utils.MetaTTLCfg:                    []*utils.DynamicDurationOpt{},
-				utils.MetaChargeableCfg:             []*utils.DynamicBoolOpt{},
-				utils.MetaDebitIntervalCfg:          []*utils.DynamicDurationOpt{},
-				utils.MetaTTLLastUsageCfg:           []*utils.DynamicDurationPointerOpt{},
-				utils.MetaTTLLastUsedCfg:            []*utils.DynamicDurationPointerOpt{},
-				utils.MetaTTLMaxDelayCfg:            []*utils.DynamicDurationOpt{},
-				utils.MetaTTLUsageCfg:               []*utils.DynamicDurationPointerOpt{},
+				utils.MetaAccounts:                  []*DynamicBoolOpt{},
+				utils.MetaAttributes:                []*DynamicBoolOpt{},
+				utils.MetaCDRs:                      []*DynamicBoolOpt{},
+				utils.MetaChargers:                  []*DynamicBoolOpt{},
+				utils.MetaResources:                 []*DynamicBoolOpt{},
+				utils.MetaRoutes:                    []*DynamicBoolOpt{},
+				utils.MetaStats:                     []*DynamicBoolOpt{},
+				utils.MetaThresholds:                []*DynamicBoolOpt{},
+				utils.MetaInitiate:                  []*DynamicBoolOpt{},
+				utils.MetaUpdate:                    []*DynamicBoolOpt{},
+				utils.MetaTerminate:                 []*DynamicBoolOpt{},
+				utils.MetaMessage:                   []*DynamicBoolOpt{},
+				utils.MetaAttributesDerivedReplyCfg: []*DynamicBoolOpt{},
+				utils.MetaBlockerErrorCfg:           []*DynamicBoolOpt{},
+				utils.MetaCDRsDerivedReplyCfg:       []*DynamicBoolOpt{},
+				utils.MetaResourcesAuthorizeCfg:     []*DynamicBoolOpt{},
+				utils.MetaResourcesAllocateCfg:      []*DynamicBoolOpt{},
+				utils.MetaResourcesReleaseCfg:       []*DynamicBoolOpt{},
+				utils.MetaResourcesDerivedReplyCfg:  []*DynamicBoolOpt{},
+				utils.MetaRoutesDerivedReplyCfg:     []*DynamicBoolOpt{},
+				utils.MetaStatsDerivedReplyCfg:      []*DynamicBoolOpt{},
+				utils.MetaThresholdsDerivedReplyCfg: []*DynamicBoolOpt{},
+				utils.MetaMaxUsageCfg:               []*DynamicBoolOpt{},
+				utils.MetaForceDurationCfg:          []*DynamicBoolOpt{},
+				utils.MetaTTLCfg:                    []*DynamicDurationOpt{},
+				utils.MetaChargeableCfg:             []*DynamicBoolOpt{},
+				utils.MetaDebitIntervalCfg:          []*DynamicDurationOpt{},
+				utils.MetaTTLLastUsageCfg:           []*DynamicDurationPointerOpt{},
+				utils.MetaTTLLastUsedCfg:            []*DynamicDurationPointerOpt{},
+				utils.MetaTTLMaxDelayCfg:            []*DynamicDurationOpt{},
+				utils.MetaTTLUsageCfg:               []*DynamicDurationPointerOpt{},
 			},
 		},
 	}
@@ -4171,10 +4171,10 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.NotExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:           false,
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4222,9 +4222,9 @@ func TestV1GetConfigResourceS(t *testing.T) {
 			utils.NotExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:           false,
 			utils.OptsCfg: map[string]any{
-				utils.MetaUsageIDCfg:  []*utils.DynamicStringOpt{},
-				utils.MetaUsageTTLCfg: []*utils.DynamicDurationOpt{},
-				utils.MetaUnitsCfg:    []*utils.DynamicFloat64Opt{},
+				utils.MetaUsageIDCfg:  []*DynamicStringOpt{},
+				utils.MetaUsageTTLCfg: []*DynamicDurationOpt{},
+				utils.MetaUnitsCfg:    []*DynamicFloat64Opt{},
 			},
 		},
 	}
@@ -4251,10 +4251,10 @@ func TestV1GetConfigStats(t *testing.T) {
 			utils.NotExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:           false,
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-				utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
-				utils.OptsPrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
+				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+				utils.OptsRoundingDecimals:     []*DynamicIntOpt{},
+				utils.OptsPrometheusStatIDs:    []*DynamicStringSliceOpt{},
 			},
 			utils.EEsConnsCfg:       []string{},
 			utils.EEsExporterIDsCfg: []string(nil),
@@ -4282,8 +4282,8 @@ func TestV1GetConfigThresholds(t *testing.T) {
 			utils.NestedFieldsCfg:           false,
 			utils.ActionSConnsCfg:           []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4312,9 +4312,9 @@ func TestV1GetConfigAcounts(t *testing.T) {
 			utils.MaxIterations:             1000,
 			utils.MaxUsage:                  "259200000000000", // 72h in ns
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+				utils.MetaUsage:                []*DynamicDecimalOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4344,14 +4344,14 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.AccountSConnsCfg:          []string{},
 			utils.DefaultRatioCfg:           1,
 			utils.OptsCfg: map[string]any{
-				utils.OptsContext:         []*utils.DynamicStringOpt{},
-				utils.MetaProfileCountCfg: []*utils.DynamicIntPointerOpt{},
-				utils.MetaIgnoreErrorsCfg: []*utils.DynamicBoolOpt{},
-				utils.MetaMaxCostCfg:      []*utils.DynamicInterfaceOpt{},
-				utils.MetaLimitCfg:        []*utils.DynamicIntPointerOpt{},
-				utils.MetaOffsetCfg:       []*utils.DynamicIntPointerOpt{},
-				utils.MetaMaxItemsCfg:     []*utils.DynamicIntPointerOpt{},
-				utils.MetaUsage:           []*utils.DynamicDecimalBigOpt{},
+				utils.OptsContext:         []*DynamicStringOpt{},
+				utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{},
+				utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{},
+				utils.MetaMaxCostCfg:      []*DynamicInterfaceOpt{},
+				utils.MetaLimitCfg:        []*DynamicIntPointerOpt{},
+				utils.MetaOffsetCfg:       []*DynamicIntPointerOpt{},
+				utils.MetaMaxItemsCfg:     []*DynamicIntPointerOpt{},
+				utils.MetaUsage:           []*DynamicDecimalOpt{},
 			},
 		},
 	}
@@ -4417,7 +4417,7 @@ func TestV1GetConfigDispatcherS(t *testing.T) {
 			utils.NestedFieldsCfg:           false,
 			utils.AttributeSConnsCfg:        []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaDispatcherSCfg: []*utils.DynamicBoolOpt{},
+				utils.MetaDispatcherSCfg: []*DynamicBoolOpt{},
 			},
 		},
 	}
@@ -4817,7 +4817,7 @@ func TestV1GetConfigSectionAnalyzer(t *testing.T) {
 			utils.EEsConnsCfg:        []string{},
 			utils.TTLCfg:             "24h0m0s",
 			utils.OptsCfg: map[string]any{
-				utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+				utils.MetaExporterIDs: []*DynamicStringSliceOpt{},
 			},
 		},
 	}
@@ -4848,11 +4848,11 @@ func TestV1GetConfigSectionRateS(t *testing.T) {
 			utils.RateNestedFieldsCfg:           false,
 			utils.Verbosity:                     1000,
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaStartTime:            []*utils.DynamicStringOpt{},
-				utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
-				utils.MetaIntervalStartCfg:     []*utils.DynamicDecimalBigOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+				utils.MetaStartTime:            []*DynamicStringOpt{},
+				utils.MetaUsage:                []*DynamicDecimalOpt{},
+				utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 			},
 		},
 	}
@@ -5793,9 +5793,9 @@ func TestActionSConfig(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{},
 		Opts: &ActionsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			PosterAttempts:       []*utils.DynamicIntOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			PosterAttempts:       []*DynamicIntOpt{},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -5824,9 +5824,9 @@ func TestV1GetConfigSectionActionSJSON(t *testing.T) {
 			utils.NestedFieldsCfg:           false,
 			utils.DynaprepaidActionplansCfg: []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-				utils.MetaPosterAttempts:       []*utils.DynamicIntOpt{},
+				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+				utils.MetaPosterAttempts:       []*DynamicIntOpt{},
 			},
 		},
 	}
@@ -5921,7 +5921,7 @@ func TestSetCfgInDb(t *testing.T) {
 		ExistsIndexedFields:    &[]string{"field1"},
 		NotExistsIndexedFields: &[]string{"field1"},
 		Opts: &AttributesOpts{
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*DynamicIntOpt{
 				{
 					Value: 2,
 				},
@@ -5945,7 +5945,7 @@ func TestSetCfgInDb(t *testing.T) {
 				Exists_indexed_fields:    &[]string{"field2"},
 				Notexists_indexed_fields: &[]string{"field2"},
 				Opts: &AttributesOptsJson{
-					ProcessRuns: []*utils.DynamicIntOpt{
+					ProcessRuns: []*DynamicIntOpt{
 						{
 							Value: 3,
 						},
@@ -5967,7 +5967,7 @@ func TestSetCfgInDb(t *testing.T) {
 		Exists_indexed_fields:    &[]string{"field2"},
 		Notexists_indexed_fields: &[]string{"field2"},
 		Opts: &AttributesOptsJson{
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*DynamicIntOpt{
 				{
 					Value: 2,
 				},
@@ -6008,7 +6008,7 @@ func TestSetNilCfgInDb(t *testing.T) {
 		ExistsIndexedFields:    &[]string{"field1"},
 		NotExistsIndexedFields: &[]string{"field1"},
 		Opts: &AttributesOpts{
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     2,

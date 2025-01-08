@@ -1120,7 +1120,7 @@ func TestChargersAPIs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	cfg.AttributeSCfg().Opts.ProcessRuns = []*utils.DynamicIntOpt{
+	cfg.AttributeSCfg().Opts.ProcessRuns = []*config.DynamicIntOpt{
 		{
 			Value: 2,
 		},

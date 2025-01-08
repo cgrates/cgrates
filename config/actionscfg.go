@@ -30,9 +30,9 @@ var ActionsProfileIDsDftOpt = []string{}
 const ActionsProfileIgnoreFiltersDftOpt = false
 
 type ActionsOpts struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt
-	PosterAttempts       []*utils.DynamicIntOpt
+	ProfileIDs           []*DynamicStringSliceOpt
+	ProfileIgnoreFilters []*DynamicBoolOpt
+	PosterAttempts       []*DynamicIntOpt
 }
 
 // ActionSCfg is the configuration of ActionS
@@ -189,17 +189,17 @@ func (ActionSCfg) SName() string             { return ActionSJSON }
 func (acS ActionSCfg) CloneSection() Section { return acS.Clone() }
 
 func (actOpts *ActionsOpts) Clone() *ActionsOpts {
-	var actPrfIDs []*utils.DynamicStringSliceOpt
+	var actPrfIDs []*DynamicStringSliceOpt
 	if actOpts.ProfileIDs != nil {
-		actPrfIDs = utils.CloneDynamicStringSliceOpt(actOpts.ProfileIDs)
+		actPrfIDs = CloneDynamicStringSliceOpt(actOpts.ProfileIDs)
 	}
-	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	var profileIgnoreFilters []*DynamicBoolOpt
 	if actOpts.ProfileIgnoreFilters != nil {
-		profileIgnoreFilters = utils.CloneDynamicBoolOpt(actOpts.ProfileIgnoreFilters)
+		profileIgnoreFilters = CloneDynamicBoolOpt(actOpts.ProfileIgnoreFilters)
 	}
-	var posterAttempts []*utils.DynamicIntOpt
+	var posterAttempts []*DynamicIntOpt
 	if actOpts.PosterAttempts != nil {
-		posterAttempts = utils.CloneDynamicIntOpt(actOpts.PosterAttempts)
+		posterAttempts = CloneDynamicIntOpt(actOpts.PosterAttempts)
 	}
 	return &ActionsOpts{
 		ProfileIDs:           actPrfIDs,
@@ -257,9 +257,9 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 }
 
 type ActionsOptsJson struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
-	PosterAttempts       []*utils.DynamicIntOpt         `json:"*posterAttempts"`
+	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
+	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	PosterAttempts       []*DynamicIntOpt         `json:"*posterAttempts"`
 }
 
 // Action service config section
@@ -286,13 +286,13 @@ func diffActionsOptsJsonCfg(d *ActionsOptsJson, v1, v2 *ActionsOpts) *ActionsOpt
 	if d == nil {
 		d = new(ActionsOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
+	if !DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
 		d.ProfileIDs = v2.ProfileIDs
 	}
-	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
-	if !utils.DynamicIntOptEqual(v1.PosterAttempts, v2.PosterAttempts) {
+	if !DynamicIntOptEqual(v1.PosterAttempts, v2.PosterAttempts) {
 		d.PosterAttempts = v2.PosterAttempts
 	}
 	return d

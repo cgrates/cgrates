@@ -24,13 +24,14 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
 // GetFloat64Opts checks the specified option names in order among the keys in APIOpts returning the first value it finds as float64, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetFloat64Opts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicFloat64Opt,
+func GetFloat64Opts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicFloat64Opt,
 	dftOpt float64, optNames ...string) (cfgOpt float64, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -53,7 +54,7 @@ func GetFloat64Opts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fi
 
 // GetDurationOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Duration, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetDurationOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicDurationOpt,
+func GetDurationOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicDurationOpt,
 	dftOpt time.Duration, optNames ...string) (cfgOpt time.Duration, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -76,7 +77,7 @@ func GetDurationOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *F
 
 // GetStringOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as string, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicStringOpt,
+func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicStringOpt,
 	dftOpt string, optNames ...string) (cfgOpt string, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -99,7 +100,7 @@ func GetStringOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Fil
 
 // GetTimeOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Time, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetTimeOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicStringOpt,
+func GetTimeOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicStringOpt,
 	tmz string, dftOpt string, optNames ...string) (_ time.Time, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -123,7 +124,7 @@ func GetTimeOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filte
 
 // GetStringSliceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as []string, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicStringSliceOpt,
+func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicStringSliceOpt,
 	dftOpt []string, optNames ...string) (cfgOpt []string, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -146,7 +147,7 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS
 
 // GetIntOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as int, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicIntOpt,
+func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicIntOpt,
 	dftOpt int, optNames ...string) (cfgOpt int, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -173,7 +174,7 @@ func GetIntOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *Filter
 
 // GetBoolOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as bool, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*utils.DynamicBoolOpt,
+func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicBoolOpt,
 	dftOpt bool, optNames ...string) (cfgOpt bool, err error) {
 	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
 	if err != nil {
@@ -203,7 +204,7 @@ func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fi
 
 // GetDecimalBigOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *decimal.Big, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicDecimalBigOpt,
+func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicDecimalOpt,
 	dftOpt *decimal.Big, optNames ...string) (cfgOpt *decimal.Big, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -218,7 +219,7 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, evDP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
 		} else if pass {
-			return opt.Value, nil
+			return opt.Value(evDP)
 		}
 	}
 	return dftOpt, nil // return the default value if there are no options and none of the filters pass
@@ -226,7 +227,7 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 
 // GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as any, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicInterfaceOpt,
+func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicInterfaceOpt,
 	dftOpt any, optNames ...string) (cfgOpt any, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -249,7 +250,7 @@ func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *
 
 // GetIntPointerOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *int, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetIntPointerOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*utils.DynamicIntPointerOpt,
+func GetIntPointerOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicIntPointerOpt,
 	optNames ...string) (cfgOpt *int, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
@@ -277,7 +278,7 @@ func GetIntPointerOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 // GetDurationPointerOptsFromMultipleMaps checks the specified option names in order among the keys in APIOpts, then in startOpts, returning the first value it finds as *time.Duration,
 // otherwise it returns the config option if at least one filter passes or NOT_FOUND if none of them do
 func GetDurationPointerOptsFromMultipleMaps(ctx *context.Context, tnt string, eventStart, apiOpts, startOpts map[string]any, fS *FilterS,
-	dynOpts []*utils.DynamicDurationPointerOpt, optName string) (cfgOpt *time.Duration, err error) {
+	dynOpts []*config.DynamicDurationPointerOpt, optName string) (cfgOpt *time.Duration, err error) {
 	var value time.Duration
 	if opt, has := apiOpts[optName]; has {
 		if value, err = utils.IfaceAsDuration(opt); err != nil {
@@ -309,7 +310,7 @@ func GetDurationPointerOptsFromMultipleMaps(ctx *context.Context, tnt string, ev
 
 // GetDurationOptsFromMultipleMaps checks the specified option names in order among the keys in APIOpts, then in startOpts, returning the first value it finds as time.Duration,
 // otherwise it returns the config option if at least one filter passes or the default one if none of them do
-func GetDurationOptsFromMultipleMaps(ctx *context.Context, tnt string, eventStart, apiOpts, startOpts map[string]any, fS *FilterS, dynOpts []*utils.DynamicDurationOpt,
+func GetDurationOptsFromMultipleMaps(ctx *context.Context, tnt string, eventStart, apiOpts, startOpts map[string]any, fS *FilterS, dynOpts []*config.DynamicDurationOpt,
 	dftOpt time.Duration, optName string) (cfgOpt time.Duration, err error) {
 	var value time.Duration
 	if opt, has := apiOpts[optName]; has {

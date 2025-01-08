@@ -35,9 +35,9 @@ var (
 const AccountsProfileIgnoreFiltersDftOpt = false
 
 type AccountsOpts struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt
-	Usage                []*utils.DynamicDecimalBigOpt
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt
+	ProfileIDs           []*DynamicStringSliceOpt
+	Usage                []*DynamicDecimalOpt
+	ProfileIgnoreFilters []*DynamicBoolOpt
 }
 
 // AccountSCfg is the configuration of ActionS
@@ -75,8 +75,8 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 		accOpts.ProfileIDs = append(accOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.Usage != nil {
-		var usage []*utils.DynamicDecimalBigOpt
-		if usage, err = utils.StringToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
+		var usage []*DynamicDecimalOpt
+		if usage, err = StringToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
 			return
 		}
 		accOpts.Usage = append(accOpts.Usage, usage...)
@@ -183,17 +183,17 @@ func (acS AccountSCfg) AsMapInterface(string) any {
 }
 
 func (accOpts *AccountsOpts) Clone() *AccountsOpts {
-	var accIDs []*utils.DynamicStringSliceOpt
+	var accIDs []*DynamicStringSliceOpt
 	if accOpts.ProfileIDs != nil {
-		accIDs = utils.CloneDynamicStringSliceOpt(accOpts.ProfileIDs)
+		accIDs = CloneDynamicStringSliceOpt(accOpts.ProfileIDs)
 	}
-	var usage []*utils.DynamicDecimalBigOpt
+	var usage []*DynamicDecimalOpt
 	if accOpts.Usage != nil {
-		usage = utils.CloneDynamicDecimalBigOpt(accOpts.Usage)
+		usage = CloneDynamicDecimalOpt(accOpts.Usage)
 	}
-	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	var profileIgnoreFilters []*DynamicBoolOpt
 	if accOpts.ProfileIgnoreFilters != nil {
-		profileIgnoreFilters = utils.CloneDynamicBoolOpt(accOpts.ProfileIgnoreFilters)
+		profileIgnoreFilters = CloneDynamicBoolOpt(accOpts.ProfileIgnoreFilters)
 	}
 	return &AccountsOpts{
 		ProfileIDs:           accIDs,
@@ -242,9 +242,9 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 }
 
 type AccountsOptsJson struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
-	Usage                []*utils.DynamicStringOpt      `json:"*usage"`
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
+	Usage                []*DynamicStringOpt      `json:"*usage"`
+	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
 // Account service config section
@@ -269,13 +269,13 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 	if d == nil {
 		d = new(AccountsOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
+	if !DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
 		d.ProfileIDs = v2.ProfileIDs
 	}
-	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
-		d.Usage = utils.DecimalBigToStringDynamicOpts(v2.Usage)
+	if !DynamicDecimalOptEqual(v1.Usage, v2.Usage) {
+		d.Usage = DecimalToStringDynamicOpts(v2.Usage)
 	}
-	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
 	return d

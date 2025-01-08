@@ -63,11 +63,11 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		RateNestedFields:           true,
 		Verbosity:                  20,
 		Opts: &RatesOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			StartTime:            []*utils.DynamicStringOpt{},
-			Usage:                []*utils.DynamicDecimalBigOpt{},
-			IntervalStart:        []*utils.DynamicDecimalBigOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			StartTime:            []*DynamicStringOpt{},
+			Usage:                []*DynamicDecimalOpt{},
+			IntervalStart:        []*DynamicDecimalOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -102,11 +102,11 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.RateNestedFieldsCfg:           false,
 		utils.Verbosity:                     1000,
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaStartTime:            []*utils.DynamicStringOpt{},
-			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
-			utils.MetaIntervalStartCfg:     []*utils.DynamicDecimalBigOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaStartTime:            []*DynamicStringOpt{},
+			utils.MetaUsage:                []*DynamicDecimalOpt{},
+			utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -154,11 +154,11 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.RateNestedFieldsCfg:           true,
 		utils.Verbosity:                     1000,
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaStartTime:            []*utils.DynamicStringOpt{},
-			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
-			utils.MetaIntervalStartCfg:     []*utils.DynamicDecimalBigOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaStartTime:            []*DynamicStringOpt{},
+			utils.MetaUsage:                []*DynamicDecimalOpt{},
+			utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -232,31 +232,25 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               2,
 		Opts: &RatesOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"RP1"},
 				},
 			},
-			StartTime: []*utils.DynamicStringOpt{
+			StartTime: []*DynamicStringOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  "",
 				},
 			},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					Tenant: "cgrates.org",
-					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(2),
-				},
+			Usage: []*DynamicDecimalOpt{
+				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
 			},
-			IntervalStart: []*utils.DynamicDecimalBigOpt{
-				{
-					Tenant: "cgrates.org",
-					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(2),
-				},
+			IntervalStart: []*DynamicDecimalOpt{
+				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
@@ -279,33 +273,27 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		RateNestedFields:        true,
 		Verbosity:               3,
 		Opts: &RatesOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
-					Tenant: "cgrates.net",
+					Tenant: "cgrates.org",
 					Values: []string{"RP2"},
 				},
 			},
-			StartTime: []*utils.DynamicStringOpt{
+			StartTime: []*DynamicStringOpt{
 				{
-					Tenant: "cgrates.net",
+					Tenant: "cgrates.org",
 					Value:  utils.MetaNow,
 				},
 			},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					Tenant: "cgrates.net",
-					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(3),
-				},
+			Usage: []*DynamicDecimalOpt{
+				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(3), nil),
 			},
-			IntervalStart: []*utils.DynamicDecimalBigOpt{
-				{
-					Tenant: "cgrates.net",
-					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(3),
-				},
+			IntervalStart: []*DynamicDecimalOpt{
+				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(3), nil),
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
-					Tenant: "cgrates.net",
+					Tenant: "cgrates.org",
 					Value:  true,
 				},
 			},
@@ -326,33 +314,33 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 		Rate_nested_fields:         utils.BoolPointer(true),
 		Verbosity:                  utils.IntPointer(3),
 		Opts: &RatesOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
-					Tenant: "cgrates.net",
+					Tenant: "cgrates.org",
 					Values: []string{"RP2"},
 				},
 			},
-			StartTime: []*utils.DynamicStringOpt{
+			StartTime: []*DynamicStringOpt{
 				{
-					Tenant: "cgrates.net",
+					Tenant: "cgrates.org",
 					Value:  utils.MetaNow,
 				},
 			},
-			Usage: []*utils.DynamicStringOpt{
+			Usage: []*DynamicStringOpt{
 				{
-					Tenant: "cgrates.net",
+					Tenant: "cgrates.org",
 					Value:  "3",
 				},
 			},
-			IntervalStart: []*utils.DynamicStringOpt{
+			IntervalStart: []*DynamicStringOpt{
 				{
-					Tenant: "cgrates.net",
+					Tenant: "cgrates.org",
 					Value:  "3",
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
-					Tenant: "cgrates.net",
+					Tenant: "cgrates.org",
 					Value:  true,
 				},
 			},
@@ -389,7 +377,7 @@ func TestRateSCloneSection(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               2,
 		Opts: &RatesOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{"RP1"},
 				},
@@ -411,7 +399,7 @@ func TestRateSCloneSection(t *testing.T) {
 		RateNestedFields:        false,
 		Verbosity:               2,
 		Opts: &RatesOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{"RP1"},
 				},
@@ -427,27 +415,23 @@ func TestRateSCloneSection(t *testing.T) {
 
 func TestRatesOptsLoadFromJSON(t *testing.T) {
 	rateOpts := &RatesOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Values: []string{},
 			},
 		},
-		StartTime: []*utils.DynamicStringOpt{
+		StartTime: []*DynamicStringOpt{
 			{
 				Value: utils.MetaNow,
 			},
 		},
-		Usage: []*utils.DynamicDecimalBigOpt{
-			{
-				Value: nil,
-			},
+		Usage: []*DynamicDecimalOpt{
+			{},
 		},
-		IntervalStart: []*utils.DynamicDecimalBigOpt{
-			{
-				Value: nil,
-			},
+		IntervalStart: []*DynamicDecimalOpt{
+			{},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -460,13 +444,13 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	}
 
 	jsnCfg := &RatesOptsJson{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Tenant: "cgrates.org",
 				Values: []string{"RP2"},
 			},
 		},
-		Usage: []*utils.DynamicStringOpt{
+		Usage: []*DynamicStringOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  "error",
@@ -479,7 +463,7 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	}
 
 	jsnCfg = &RatesOptsJson{
-		IntervalStart: []*utils.DynamicStringOpt{
+		IntervalStart: []*DynamicStringOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  "error",

@@ -31,8 +31,8 @@ var ThresholdsProfileIDsDftOpt = []string{}
 const ThresholdsProfileIgnoreFiltersDftOpt = false
 
 type ThresholdsOpts struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt
+	ProfileIDs           []*DynamicStringSliceOpt
+	ProfileIgnoreFilters []*DynamicBoolOpt
 }
 
 // ThresholdSCfg the threshold config section
@@ -155,13 +155,13 @@ func (ThresholdSCfg) SName() string           { return ThresholdSJSON }
 func (t ThresholdSCfg) CloneSection() Section { return t.Clone() }
 
 func (thdOpts *ThresholdsOpts) Clone() *ThresholdsOpts {
-	var thIDs []*utils.DynamicStringSliceOpt
+	var thIDs []*DynamicStringSliceOpt
 	if thdOpts.ProfileIDs != nil {
-		thIDs = utils.CloneDynamicStringSliceOpt(thdOpts.ProfileIDs)
+		thIDs = CloneDynamicStringSliceOpt(thdOpts.ProfileIDs)
 	}
-	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	var profileIgnoreFilters []*DynamicBoolOpt
 	if thdOpts.ProfileIgnoreFilters != nil {
-		profileIgnoreFilters = utils.CloneDynamicBoolOpt(thdOpts.ProfileIgnoreFilters)
+		profileIgnoreFilters = CloneDynamicBoolOpt(thdOpts.ProfileIgnoreFilters)
 	}
 	return &ThresholdsOpts{
 		ProfileIDs:           thIDs,
@@ -201,8 +201,8 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 }
 
 type ThresholdsOptsJson struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
+	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
 // Threshold service config section
@@ -224,10 +224,10 @@ func diffThresholdsOptsJsonCfg(d *ThresholdsOptsJson, v1, v2 *ThresholdsOpts) *T
 	if d == nil {
 		d = new(ThresholdsOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
+	if !DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
 		d.ProfileIDs = v2.ProfileIDs
 	}
-	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
 	return d

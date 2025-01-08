@@ -52,10 +52,10 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		NotExistsIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			RoundingDecimals:     []*utils.DynamicIntOpt{},
-			PrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			RoundingDecimals:     []*DynamicIntOpt{},
+			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
 		EEsConns: []string{},
 	}
@@ -73,12 +73,12 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 	statsOpt := &StatsOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Values: []string{},
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -86,12 +86,12 @@ func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 	}
 
 	exp := &StatsOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Values: []string{},
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -131,10 +131,10 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
-			utils.OptsPrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.OptsRoundingDecimals:     []*DynamicIntOpt{},
+			utils.OptsPrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
 		utils.EEsConnsCfg:       []string{},
 		utils.EEsExporterIDsCfg: []string(nil),
@@ -175,10 +175,10 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{"*req.notexists_indexed_fields"},
 		utils.NestedFieldsCfg:           true,
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			utils.OptsRoundingDecimals:     []*utils.DynamicIntOpt{},
-			utils.OptsPrometheusStatIDs:    []*utils.DynamicStringSliceOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.OptsRoundingDecimals:     []*DynamicIntOpt{},
+			utils.OptsPrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
 		utils.EEsConnsCfg:       []string{},
 		utils.EEsExporterIDsCfg: []string(nil),
@@ -234,25 +234,25 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"statsid1"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
 				},
 			},
-			RoundingDecimals: []*utils.DynamicIntOpt{
+			RoundingDecimals: []*DynamicIntOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  1,
 				},
 			},
-			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
+			PrometheusStatIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"statsid1"},
@@ -272,25 +272,25 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index33"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"statsid2"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			RoundingDecimals: []*utils.DynamicIntOpt{
+			RoundingDecimals: []*DynamicIntOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  2,
 				},
 			},
-			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
+			PrometheusStatIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"statsid2"},
@@ -310,25 +310,25 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 		Suffix_indexed_fields:    &[]string{"*req.index33"},
 		Nested_fields:            utils.BoolPointer(true),
 		Opts: &StatsOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"statsid2"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			RoundingDecimals: []*utils.DynamicIntOpt{
+			RoundingDecimals: []*DynamicIntOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  2,
 				},
 			},
-			PrometheusStatIDs: []*utils.DynamicStringSliceOpt{
+			PrometheusStatIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"statsid2"},
@@ -364,7 +364,7 @@ func TestStatSCloneSection(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{},
+			ProfileIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 
@@ -379,7 +379,7 @@ func TestStatSCloneSection(t *testing.T) {
 		SuffixIndexedFields:    &[]string{"*req.index3"},
 		NestedFields:           false,
 		Opts: &StatsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{},
+			ProfileIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 

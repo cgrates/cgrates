@@ -3059,7 +3059,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
-	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3133,7 +3133,7 @@ func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
-	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3189,7 +3189,7 @@ func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3486,7 +3486,7 @@ func TestStatSV1GetQueueStringMetricsIntOptsErr(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	cfg.StatSCfg().StringIndexedFields = nil
 	cfg.StatSCfg().PrefixIndexedFields = nil
-	cfg.StatSCfg().Opts.RoundingDecimals = []*utils.DynamicIntOpt{
+	cfg.StatSCfg().Opts.RoundingDecimals = []*config.DynamicIntOpt{
 		// function will return error after trying to parse the filter
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
@@ -3519,7 +3519,7 @@ func TestStatSV1GetStatQueuesForEventsqIDsErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
+	cfg.StatSCfg().Opts.ProfileIDs = []*config.DynamicStringSliceOpt{
 		// function will return error after trying to parse the filter
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
@@ -3603,7 +3603,7 @@ func TestStatSV1GetStatQueuesForEventignFiltersErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		// function will return error after trying to parse the filter
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
@@ -3787,7 +3787,7 @@ func TestStatQueueProcessEventProfileIDsErr(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	sS.cfg.StatSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
+	sS.cfg.StatSCfg().Opts.ProfileIDs = []*config.DynamicStringSliceOpt{
 
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
@@ -3872,7 +3872,7 @@ func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
 		},
 	}
 
-	sS.cfg.StatSCfg().Opts.PrometheusStatIDs = []*utils.DynamicStringSliceOpt{
+	sS.cfg.StatSCfg().Opts.PrometheusStatIDs = []*config.DynamicStringSliceOpt{
 
 		{
 			FilterIDs: []string{"*string.invalid:filter"},

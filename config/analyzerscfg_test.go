@@ -37,7 +37,7 @@ func TestAnalyzerSCfgloadFromJsonCfg(t *testing.T) {
 		EEsConns:        []string{},
 		TTL:             24 * time.Hour,
 		Opts: &AnalyzerSOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			ExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -65,7 +65,7 @@ func TestAnalyzerSCfgAsMapInterface(t *testing.T) {
 		utils.EEsConnsCfg:        []string{},
 		utils.TTLCfg:             "24h0m0s",
 		utils.OptsCfg: map[string]any{
-			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+			utils.MetaExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -91,7 +91,7 @@ func TestAnalyzerSCfgAsMapInterface1(t *testing.T) {
 		utils.EEsConnsCfg:        []string{"*localhost"},
 		utils.TTLCfg:             "24h0m0s",
 		utils.OptsCfg: map[string]any{
-			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+			utils.MetaExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -207,7 +207,7 @@ func TestAnalyzerSCloneSection(t *testing.T) {
 
 func TestToLoadFromJSONCfg(t *testing.T) {
 	anzOpts := &AnalyzerSOpts{
-		ExporterIDs: []*utils.DynamicStringSliceOpt{
+		ExporterIDs: []*DynamicStringSliceOpt{
 			{
 				FilterIDs: []string{"filtr1"},
 			},
@@ -226,17 +226,17 @@ func TestToLoadFromJSONCfg(t *testing.T) {
 func TestDiffAnalyzerSOptsJsonCfg(t *testing.T) {
 	d := &AnalyzerSOptsJson{}
 	v1 := &AnalyzerSOpts{
-		ExporterIDs: []*utils.DynamicStringSliceOpt{},
+		ExporterIDs: []*DynamicStringSliceOpt{},
 	}
 	v2 := &AnalyzerSOpts{
-		ExporterIDs: []*utils.DynamicStringSliceOpt{{
+		ExporterIDs: []*DynamicStringSliceOpt{{
 			FilterIDs: []string{"test"},
 		},
 		},
 	}
 	exp := &AnalyzerSOptsJson{
 
-		ExporterIDs: []*utils.DynamicStringSliceOpt{{
+		ExporterIDs: []*DynamicStringSliceOpt{{
 			FilterIDs: []string{"test"},
 		},
 		},

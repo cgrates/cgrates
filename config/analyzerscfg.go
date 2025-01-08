@@ -38,7 +38,7 @@ type AnalyzerSCfg struct {
 }
 
 type AnalyzerSOpts struct {
-	ExporterIDs []*utils.DynamicStringSliceOpt
+	ExporterIDs []*DynamicStringSliceOpt
 }
 
 // loadAnalyzerCgrCfg loads the Analyzer section of the configuration
@@ -134,12 +134,12 @@ func (anzOpts *AnalyzerSOpts) Clone() *AnalyzerSOpts {
 		return nil
 	}
 	return &AnalyzerSOpts{
-		ExporterIDs: utils.CloneDynamicStringSliceOpt(anzOpts.ExporterIDs),
+		ExporterIDs: []*DynamicStringSliceOpt(anzOpts.ExporterIDs),
 	}
 }
 
 type AnalyzerSOptsJson struct {
-	ExporterIDs []*utils.DynamicStringSliceOpt `json:"*exporterIDs"`
+	ExporterIDs []*DynamicStringSliceOpt `json:"*exporterIDs"`
 }
 
 // Analyzer service json config section
@@ -157,7 +157,7 @@ func diffAnalyzerSOptsJsonCfg(d *AnalyzerSOptsJson, v1, v2 *AnalyzerSOpts) *Anal
 	if d == nil {
 		d = new(AnalyzerSOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.ExporterIDs, v2.ExporterIDs) {
+	if !DynamicStringSliceOptEqual(v1.ExporterIDs, v2.ExporterIDs) {
 		d.ExporterIDs = v2.ExporterIDs
 	}
 	return d

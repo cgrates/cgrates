@@ -64,7 +64,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
 		Opts: &GeneralOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			ExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -156,7 +156,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.DecimalPrecisionCfg:     0,
 		utils.DecimalRoundingModeCfg:  "*toNearestEven",
 		utils.OptsCfg: map[string]any{
-			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+			utils.MetaExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -203,7 +203,7 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.DecimalPrecisionCfg:     0,
 		utils.DecimalRoundingModeCfg:  "*toNearestEven",
 		utils.OptsCfg: map[string]any{
-			utils.MetaExporterIDs: []*utils.DynamicStringSliceOpt{},
+			utils.MetaExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -233,7 +233,7 @@ func TestGeneralCfgClone(t *testing.T) {
 		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
 		Opts: &GeneralOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{
+			ExporterIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{"*ees"},
 				},
@@ -271,7 +271,7 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		Opts: &GeneralOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{
+			ExporterIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{"*ees"},
 				},
@@ -304,7 +304,7 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		DefaultCaching:   utils.MetaReload,
 		LockingTimeout:   2 * time.Second,
 		Opts: &GeneralOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{
+			ExporterIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{"*syslog"},
 				},
@@ -337,7 +337,7 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		Digest_equal:         utils.StringPointer(":"),
 		Max_parallel_conns:   utils.IntPointer(100),
 		Opts: &GeneralOptsJson{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{
+			ExporterIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{"*syslog"},
 				},
@@ -407,7 +407,7 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		Opts: &GeneralOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			ExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 

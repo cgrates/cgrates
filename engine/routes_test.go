@@ -499,7 +499,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 }
 
 func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
-	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{{Value: true}}
+	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{{Value: true}}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{},
 	}
@@ -1763,7 +1763,7 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{
+	cfg.RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -1796,7 +1796,7 @@ func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.Limit = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.Limit = []*config.DynamicIntPointerOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -1829,7 +1829,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.Offset = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.Offset = []*config.DynamicIntPointerOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -1862,7 +1862,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.MaxItems = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.MaxItems = []*config.DynamicIntPointerOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -1895,7 +1895,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.MaxCost = []*utils.DynamicInterfaceOpt{
+	cfg.RouteSCfg().Opts.MaxCost = []*config.DynamicInterfaceOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -1928,7 +1928,7 @@ func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
 func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.ProfileCount = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -2017,7 +2017,7 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.ProfileCount = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -2104,7 +2104,7 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.IgnoreErrors = []*utils.DynamicBoolOpt{
+	cfg.RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -2191,13 +2191,13 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.MaxItems = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.MaxItems = []*config.DynamicIntPointerOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  utils.IntPointer(1),
 		},
 	}
-	cfg.RouteSCfg().Opts.Limit = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.Limit = []*config.DynamicIntPointerOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  utils.IntPointer(2),
@@ -2282,7 +2282,7 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 
 func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.Context = []*utils.DynamicStringOpt{
+	cfg.RouteSCfg().Opts.Context = []*config.DynamicStringOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -2439,7 +2439,7 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.ProfileCount = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
@@ -2940,7 +2940,7 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RouteSCfg().Opts.Offset = []*utils.DynamicIntPointerOpt{
+	cfg.RouteSCfg().Opts.Offset = []*config.DynamicIntPointerOpt{
 		{
 			Value: utils.IntPointer(10),
 		},

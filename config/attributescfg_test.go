@@ -52,10 +52,10 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		NotExistsIndexedFields: &[]string{"*req.index1"},
 		NestedFields:           true,
 		Opts: &AttributesOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProcessRuns:          []*utils.DynamicIntOpt{},
-			ProfileRuns:          []*utils.DynamicIntOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProcessRuns:          []*DynamicIntOpt{},
+			ProfileRuns:          []*DynamicIntOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -73,22 +73,22 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 
 func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
 	attrOpt := &AttributesOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Values: []string{},
 			},
 		},
-		ProcessRuns: []*utils.DynamicIntOpt{
+		ProcessRuns: []*DynamicIntOpt{
 			{
 				Value: 1,
 			},
 		},
-		ProfileRuns: []*utils.DynamicIntOpt{
+		ProfileRuns: []*DynamicIntOpt{
 			{
 				Value: 0,
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -96,22 +96,22 @@ func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
 	}
 
 	exp := &AttributesOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Values: []string{},
 			},
 		},
-		ProcessRuns: []*utils.DynamicIntOpt{
+		ProcessRuns: []*DynamicIntOpt{
 			{
 				Value: 1,
 			},
 		},
-		ProfileRuns: []*utils.DynamicIntOpt{
+		ProfileRuns: []*DynamicIntOpt{
 			{
 				Value: 0,
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -157,14 +157,14 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.SuffixIndexedFieldsCfg:    []string{},
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
-			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
+			utils.MetaProcessRunsCfg: []*DynamicIntOpt{
 				{
 					Value: 3,
 				},
 			},
-			utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -202,14 +202,14 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:           true,
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
-			utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
+			utils.MetaProcessRunsCfg: []*DynamicIntOpt{
 				{
 					Value: 7,
 				},
 			},
-			utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -237,10 +237,10 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.NotExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
-			utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaProcessRunsCfg:       []*DynamicIntOpt{},
+			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
@@ -301,25 +301,25 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"prf1"},
 				},
 			},
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     1,
 				},
 			},
-			ProfileRuns: []*utils.DynamicIntOpt{
+			ProfileRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     1,
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
@@ -339,25 +339,25 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		SuffixIndexedFields: nil,
 		NestedFields:        false,
 		Opts: &AttributesOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"prf2"},
 				},
 			},
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     2,
 				},
 			},
-			ProfileRuns: []*utils.DynamicIntOpt{
+			ProfileRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     2,
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
@@ -377,25 +377,25 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &AttributesOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"prf2"},
 				},
 			},
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     2,
 				},
 			},
-			ProfileRuns: []*utils.DynamicIntOpt{
+			ProfileRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     2,
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
@@ -431,7 +431,7 @@ func TestAttributeSCloneSection(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     1,
@@ -451,7 +451,7 @@ func TestAttributeSCloneSection(t *testing.T) {
 		SuffixIndexedFields: &[]string{},
 		NestedFields:        true,
 		Opts: &AttributesOpts{
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
 					Value:     1,

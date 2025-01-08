@@ -1181,7 +1181,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 
 func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.RateSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.RateSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},

@@ -3033,7 +3033,7 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
-	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3099,7 +3099,7 @@ func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
-	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3345,7 +3345,7 @@ func TestThresholdProfileMerge(t *testing.T) {
 func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
+	cfg.ThresholdSCfg().Opts.ProfileIDs = []*config.DynamicStringSliceOpt{
 		{
 			FilterIDs: []string{"*string"},
 			Tenant:    "cgrates.org",
@@ -3388,13 +3388,13 @@ func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
 
 func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().Opts.ProfileIDs = []*utils.DynamicStringSliceOpt{
+	cfg.ThresholdSCfg().Opts.ProfileIDs = []*config.DynamicStringSliceOpt{
 		{
 			Tenant: "cgrates.org",
 			Values: []string{"ACC1"},
 		},
 	}
-	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  true,

@@ -65,13 +65,13 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &config.ThresholdsOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*config.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"value1"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*config.DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  true,
@@ -93,17 +93,17 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index33"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &config.ResourcesOptsJson{
-			UsageID: []*utils.DynamicStringOpt{
+			UsageID: []*config.DynamicStringOpt{
 				{
 					Value: "usg2",
 				},
 			},
-			UsageTTL: []*utils.DynamicStringOpt{
+			UsageTTL: []*config.DynamicStringOpt{
 				{
 					Value: "1m0s",
 				},
 			},
-			Units: []*utils.DynamicFloat64Opt{
+			Units: []*config.DynamicFloat64Opt{
 				{
 					Value: 2,
 				},
@@ -184,13 +184,13 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &config.ThresholdsOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*config.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"value1"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*config.DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  true,
@@ -212,17 +212,17 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index33"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &config.ResourcesOptsJson{
-			UsageID: []*utils.DynamicStringOpt{
+			UsageID: []*config.DynamicStringOpt{
 				{
 					Value: "usg2",
 				},
 			},
-			UsageTTL: []*utils.DynamicStringOpt{
+			UsageTTL: []*config.DynamicStringOpt{
 				{
 					Value: "1m0s",
 				},
 			},
-			Units: []*utils.DynamicFloat64Opt{
+			Units: []*config.DynamicFloat64Opt{
 				{
 					Value: 2,
 				},
@@ -300,13 +300,13 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &config.ThresholdsOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*config.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"value1"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*config.DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  true,
@@ -328,17 +328,17 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 		Suffix_indexed_fields: &[]string{"*req.index33"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &config.ResourcesOptsJson{
-			UsageID: []*utils.DynamicStringOpt{
+			UsageID: []*config.DynamicStringOpt{
 				{
 					Value: "usg2",
 				},
 			},
-			UsageTTL: []*utils.DynamicStringOpt{
+			UsageTTL: []*config.DynamicStringOpt{
 				{
 					Value: "1m0s",
 				},
 			},
-			Units: []*utils.DynamicFloat64Opt{
+			Units: []*config.DynamicFloat64Opt{
 				{
 					Value: 2,
 				},

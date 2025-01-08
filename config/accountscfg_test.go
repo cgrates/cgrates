@@ -61,9 +61,9 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 		MaxIterations:          1000,
 		MaxUsage:               usage,
 		Opts: &AccountsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			Usage:                []*utils.DynamicDecimalBigOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			Usage:                []*DynamicDecimalOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -82,17 +82,15 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 
 func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
 	accOpts := &AccountsOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Values: []string{"1001", "1002"},
 			},
 		},
-		Usage: []*utils.DynamicDecimalBigOpt{
-			{
-				Value: decimal.WithContext(utils.DecimalContext).SetUint64(2),
-			},
+		Usage: []*DynamicDecimalOpt{
+			NewDynamicDecimalOpt(nil, "", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -100,15 +98,15 @@ func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
 	}
 
 	jsnCfg := &AccountsOptsJson{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{},
 		},
-		Usage: []*utils.DynamicStringOpt{
+		Usage: []*DynamicStringOpt{
 			{
 				Value: "error",
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -171,9 +169,9 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.MaxIterations:             100,
 		utils.MaxUsage:                  "259200000000000", // 72h in ns
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaUsage:                []*DynamicDecimalOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -242,19 +240,16 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       1,
 		MaxUsage:            nil,
 		Opts: &AccountsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"ACC1"},
 				},
 			},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					Tenant: "cgrates.org",
-					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(1),
-				},
+			Usage: []*DynamicDecimalOpt{
+				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(1), nil),
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  true,
@@ -276,19 +271,16 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		MaxIterations:       3,
 		MaxUsage:            utils.NewDecimal(60, 0),
 		Opts: &AccountsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"ACC2"},
 				},
 			},
-			Usage: []*utils.DynamicDecimalBigOpt{
-				{
-					Tenant: "cgrates.net",
-					Value:  decimal.WithContext(utils.DecimalContext).SetUint64(2),
-				},
+			Usage: []*DynamicDecimalOpt{
+				NewDynamicDecimalOpt([]string{"fld1", "fld2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  false,
@@ -310,19 +302,20 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 		Max_iterations:        utils.IntPointer(3),
 		Max_usage:             utils.StringPointer("60"),
 		Opts: &AccountsOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"ACC2"},
 				},
 			},
-			Usage: []*utils.DynamicStringOpt{
+			Usage: []*DynamicStringOpt{
 				{
-					Tenant: "cgrates.net",
-					Value:  "2",
+					FilterIDs: []string{"fld1", "fld2"},
+					Tenant:    "cgrates.org",
+					Value:     "2",
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  false,
@@ -374,7 +367,7 @@ func TestAccountSCloneSection(t *testing.T) {
 		MaxIterations:       1,
 		MaxUsage:            nil,
 		Opts: &AccountsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{"ACC1"},
 				},

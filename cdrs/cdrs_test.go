@@ -1253,7 +1253,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1313,7 +1313,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1374,7 +1374,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1435,7 +1435,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1497,7 +1497,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1558,7 +1558,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1620,7 +1620,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1681,7 +1681,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1743,7 +1743,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 
 			Value: false,
@@ -1805,7 +1805,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1867,7 +1867,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1927,7 +1927,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -1989,7 +1989,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -2050,7 +2050,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},
@@ -2337,7 +2337,7 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaAccounts)}
-	cfg.CdrsCfg().Opts.Attributes = []*utils.DynamicBoolOpt{
+	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
 		{
 			Value: false,
 		},

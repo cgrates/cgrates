@@ -152,10 +152,10 @@ func testCfgGetConfig(t *testing.T) {
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -191,7 +191,7 @@ func testCfgSetGetConfig(t *testing.T) {
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]any{
-						utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+						utils.MetaProcessRunsCfg: []*config.DynamicIntOpt{
 							{
 								Value: 2,
 							},
@@ -298,11 +298,11 @@ func testCfgSetEmptyReload(t *testing.T) {
 			"rate_notexists_indexed_fields": []string{},
 			"verbosity":                     1000,
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaStartTime:            []*utils.DynamicStringOpt{},
-				utils.MetaUsage:                []*utils.DynamicDecimalBigOpt{},
-				utils.MetaIntervalStartCfg:     []*utils.DynamicDecimalBigOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
+				utils.MetaStartTime:            []*config.DynamicStringOpt{},
+				utils.MetaUsage:                []*config.DynamicDecimalOpt{},
+				utils.MetaIntervalStartCfg:     []*config.DynamicDecimalOpt{},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -496,7 +496,7 @@ func testCfgSetGetConfigStore(t *testing.T) {
 					"profile_runs":          0.,
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]any{
-						utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{},
+						utils.MetaProcessRunsCfg: []*config.DynamicIntOpt{},
 					},
 				},
 			},
@@ -521,10 +521,10 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -577,7 +577,7 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
 		Opts: &config.AttributesOptsJson{
-			ProcessRuns: []*utils.DynamicIntOpt{
+			ProcessRuns: []*config.DynamicIntOpt{
 				{
 					Value: 2,
 				},
