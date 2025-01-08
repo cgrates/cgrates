@@ -39,11 +39,11 @@ const (
 )
 
 type RatesOpts struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt
-	StartTime            []*utils.DynamicStringOpt
-	Usage                []*utils.DynamicDecimalBigOpt
-	IntervalStart        []*utils.DynamicDecimalBigOpt
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt
+	ProfileIDs           []*DynamicStringSliceOpt
+	StartTime            []*DynamicStringOpt
+	Usage                []*DynamicDecimalOpt
+	IntervalStart        []*DynamicDecimalOpt
+	ProfileIgnoreFilters []*DynamicBoolOpt
 }
 
 // RateSCfg the rates config section
@@ -87,15 +87,15 @@ func (rateOpts *RatesOpts) loadFromJSONCfg(jsnCfg *RatesOptsJson) (err error) {
 		rateOpts.StartTime = append(rateOpts.StartTime, jsnCfg.StartTime...)
 	}
 	if jsnCfg.Usage != nil {
-		var usage []*utils.DynamicDecimalBigOpt
-		if usage, err = utils.StringToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
+		var usage []*DynamicDecimalOpt
+		if usage, err = StringToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
 			return
 		}
 		rateOpts.Usage = append(rateOpts.Usage, usage...)
 	}
 	if jsnCfg.IntervalStart != nil {
-		var intervalStart []*utils.DynamicDecimalBigOpt
-		if intervalStart, err = utils.StringToDecimalBigDynamicOpts(jsnCfg.IntervalStart); err != nil {
+		var intervalStart []*DynamicDecimalOpt
+		if intervalStart, err = StringToDecimalBigDynamicOpts(jsnCfg.IntervalStart); err != nil {
 			return
 		}
 		rateOpts.IntervalStart = append(rateOpts.IntervalStart, intervalStart...)
@@ -220,25 +220,25 @@ func (RateSCfg) SName() string              { return RateSJSON }
 func (rCfg RateSCfg) CloneSection() Section { return rCfg.Clone() }
 
 func (rateOpts *RatesOpts) Clone() *RatesOpts {
-	var ratePrfIDs []*utils.DynamicStringSliceOpt
+	var ratePrfIDs []*DynamicStringSliceOpt
 	if rateOpts.ProfileIDs != nil {
-		ratePrfIDs = utils.CloneDynamicStringSliceOpt(rateOpts.ProfileIDs)
+		ratePrfIDs = CloneDynamicStringSliceOpt(rateOpts.ProfileIDs)
 	}
-	var startTime []*utils.DynamicStringOpt
+	var startTime []*DynamicStringOpt
 	if rateOpts.StartTime != nil {
-		startTime = utils.CloneDynamicStringOpt(rateOpts.StartTime)
+		startTime = CloneDynamicStringOpt(rateOpts.StartTime)
 	}
-	var usage []*utils.DynamicDecimalBigOpt
+	var usage []*DynamicDecimalOpt
 	if rateOpts.Usage != nil {
-		usage = utils.CloneDynamicDecimalBigOpt(rateOpts.Usage)
+		usage = CloneDynamicDecimalOpt(rateOpts.Usage)
 	}
-	var intervalStart []*utils.DynamicDecimalBigOpt
+	var intervalStart []*DynamicDecimalOpt
 	if rateOpts.IntervalStart != nil {
-		intervalStart = utils.CloneDynamicDecimalBigOpt(rateOpts.IntervalStart)
+		intervalStart = CloneDynamicDecimalOpt(rateOpts.IntervalStart)
 	}
-	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	var profileIgnoreFilters []*DynamicBoolOpt
 	if rateOpts.ProfileIgnoreFilters != nil {
-		profileIgnoreFilters = utils.CloneDynamicBoolOpt(rateOpts.ProfileIgnoreFilters)
+		profileIgnoreFilters = CloneDynamicBoolOpt(rateOpts.ProfileIgnoreFilters)
 	}
 	return &RatesOpts{
 		ProfileIDs:           ratePrfIDs,
@@ -294,11 +294,11 @@ func (rCfg RateSCfg) Clone() (cln *RateSCfg) {
 }
 
 type RatesOptsJson struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
-	StartTime            []*utils.DynamicStringOpt      `json:"*startTime"`
-	Usage                []*utils.DynamicStringOpt      `json:"*usage"`
-	IntervalStart        []*utils.DynamicStringOpt      `json:"*intervalStart"`
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
+	StartTime            []*DynamicStringOpt      `json:"*startTime"`
+	Usage                []*DynamicStringOpt      `json:"*usage"`
+	IntervalStart        []*DynamicStringOpt      `json:"*intervalStart"`
+	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
 }
 
 type RateSJsonCfg struct {
@@ -325,19 +325,19 @@ func diffRatesOptsJsonCfg(d *RatesOptsJson, v1, v2 *RatesOpts) *RatesOptsJson {
 	if d == nil {
 		d = new(RatesOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
+	if !DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
 		d.ProfileIDs = v2.ProfileIDs
 	}
-	if !utils.DynamicStringOptEqual(v1.StartTime, v2.StartTime) {
+	if !DynamicStringOptEqual(v1.StartTime, v2.StartTime) {
 		d.StartTime = v2.StartTime
 	}
-	if !utils.DynamicDecimalBigOptEqual(v1.Usage, v2.Usage) {
-		d.Usage = utils.DecimalBigToStringDynamicOpts(v2.Usage)
+	if !DynamicDecimalOptEqual(v1.Usage, v2.Usage) {
+		d.Usage = DecimalToStringDynamicOpts(v2.Usage)
 	}
-	if !utils.DynamicDecimalBigOptEqual(v1.IntervalStart, v2.IntervalStart) {
-		d.IntervalStart = utils.DecimalBigToStringDynamicOpts(v2.IntervalStart)
+	if !DynamicDecimalOptEqual(v1.IntervalStart, v2.IntervalStart) {
+		d.IntervalStart = DecimalToStringDynamicOpts(v2.IntervalStart)
 	}
-	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
 	return d

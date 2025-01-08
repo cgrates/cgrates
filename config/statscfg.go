@@ -31,10 +31,10 @@ var StatsProfileIDsDftOpt = []string{}
 const StatsProfileIgnoreFilters = false
 
 type StatsOpts struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt
-	RoundingDecimals     []*utils.DynamicIntOpt
-	PrometheusStatIDs    []*utils.DynamicStringSliceOpt
+	ProfileIDs           []*DynamicStringSliceOpt
+	ProfileIgnoreFilters []*DynamicBoolOpt
+	RoundingDecimals     []*DynamicIntOpt
+	PrometheusStatIDs    []*DynamicStringSliceOpt
 }
 
 // StatSCfg the stats config section
@@ -181,21 +181,21 @@ func (StatSCfg) SName() string            { return StatSJSON }
 func (st StatSCfg) CloneSection() Section { return st.Clone() }
 
 func (sqOpts *StatsOpts) Clone() *StatsOpts {
-	var sqIDs []*utils.DynamicStringSliceOpt
+	var sqIDs []*DynamicStringSliceOpt
 	if sqOpts.ProfileIDs != nil {
-		sqIDs = utils.CloneDynamicStringSliceOpt(sqOpts.ProfileIDs)
+		sqIDs = CloneDynamicStringSliceOpt(sqOpts.ProfileIDs)
 	}
-	var profileIgnoreFilters []*utils.DynamicBoolOpt
+	var profileIgnoreFilters []*DynamicBoolOpt
 	if sqOpts.ProfileIgnoreFilters != nil {
-		profileIgnoreFilters = utils.CloneDynamicBoolOpt(sqOpts.ProfileIgnoreFilters)
+		profileIgnoreFilters = CloneDynamicBoolOpt(sqOpts.ProfileIgnoreFilters)
 	}
-	var rounding []*utils.DynamicIntOpt
+	var rounding []*DynamicIntOpt
 	if sqOpts.RoundingDecimals != nil {
-		rounding = utils.CloneDynamicIntOpt(sqOpts.RoundingDecimals)
+		rounding = CloneDynamicIntOpt(sqOpts.RoundingDecimals)
 	}
-	var promMtrcs []*utils.DynamicStringSliceOpt
+	var promMtrcs []*DynamicStringSliceOpt
 	if sqOpts.PrometheusStatIDs != nil {
-		promMtrcs = utils.CloneDynamicStringSliceOpt(sqOpts.PrometheusStatIDs)
+		promMtrcs = CloneDynamicStringSliceOpt(sqOpts.PrometheusStatIDs)
 	}
 	return &StatsOpts{
 		ProfileIDs:           sqIDs,
@@ -243,10 +243,10 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 }
 
 type StatsOptsJson struct {
-	ProfileIDs           []*utils.DynamicStringSliceOpt `json:"*profileIDs"`
-	ProfileIgnoreFilters []*utils.DynamicBoolOpt        `json:"*profileIgnoreFilters"`
-	RoundingDecimals     []*utils.DynamicIntOpt         `json:"*roundingDecimals"`
-	PrometheusStatIDs    []*utils.DynamicStringSliceOpt `json:"*prometheusStatIDs"`
+	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
+	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	RoundingDecimals     []*DynamicIntOpt         `json:"*roundingDecimals"`
+	PrometheusStatIDs    []*DynamicStringSliceOpt `json:"*prometheusStatIDs"`
 }
 
 // Stat service config section
@@ -271,16 +271,16 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 	if d == nil {
 		d = new(StatsOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
+	if !DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
 		d.ProfileIDs = v2.ProfileIDs
 	}
-	if !utils.DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
+	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
 	}
-	if !utils.DynamicIntOptEqual(v1.RoundingDecimals, v2.RoundingDecimals) {
+	if !DynamicIntOptEqual(v1.RoundingDecimals, v2.RoundingDecimals) {
 		d.RoundingDecimals = v2.RoundingDecimals
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.PrometheusStatIDs, v2.PrometheusStatIDs) {
+	if !DynamicStringSliceOptEqual(v1.PrometheusStatIDs, v2.PrometheusStatIDs) {
 		d.PrometheusStatIDs = v2.PrometheusStatIDs
 	}
 	return d

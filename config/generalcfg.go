@@ -28,7 +28,7 @@ import (
 )
 
 type GeneralOpts struct {
-	ExporterIDs []*utils.DynamicStringSliceOpt
+	ExporterIDs []*DynamicStringSliceOpt
 }
 
 // GeneralCfg is the general config section
@@ -237,7 +237,7 @@ func (generalOpts *GeneralOpts) Clone() *GeneralOpts {
 		return nil
 	}
 	return &GeneralOpts{
-		ExporterIDs: utils.CloneDynamicStringSliceOpt(generalOpts.ExporterIDs),
+		ExporterIDs: CloneDynamicStringSliceOpt(generalOpts.ExporterIDs),
 	}
 }
 
@@ -272,7 +272,7 @@ func (gencfg GeneralCfg) Clone() *GeneralCfg {
 }
 
 type GeneralOptsJson struct {
-	ExporterIDs []*utils.DynamicStringSliceOpt `json:"*exporterIDs"`
+	ExporterIDs []*DynamicStringSliceOpt `json:"*exporterIDs"`
 }
 
 // General config section
@@ -309,7 +309,7 @@ func diffGeneralOptsJsonCfg(d *GeneralOptsJson, v1, v2 *GeneralOpts) *GeneralOpt
 	if d == nil {
 		d = new(GeneralOptsJson)
 	}
-	if !utils.DynamicStringSliceOptEqual(v1.ExporterIDs, v2.ExporterIDs) {
+	if !DynamicStringSliceOptEqual(v1.ExporterIDs, v2.ExporterIDs) {
 		d.ExporterIDs = v2.ExporterIDs
 	}
 	return d

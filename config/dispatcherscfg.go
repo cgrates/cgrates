@@ -30,7 +30,7 @@ const (
 )
 
 type DispatchersOpts struct {
-	Dispatchers []*utils.DynamicBoolOpt
+	Dispatchers []*DynamicBoolOpt
 }
 
 // DispatcherSCfg is the configuration of dispatcher service
@@ -138,9 +138,9 @@ func (DispatcherSCfg) SName() string             { return DispatcherSJSON }
 func (dps DispatcherSCfg) CloneSection() Section { return dps.Clone() }
 
 func (dspOpts *DispatchersOpts) Clone() *DispatchersOpts {
-	var dpS []*utils.DynamicBoolOpt
+	var dpS []*DynamicBoolOpt
 	if dspOpts.Dispatchers != nil {
-		dpS = utils.CloneDynamicBoolOpt(dspOpts.Dispatchers)
+		dpS = CloneDynamicBoolOpt(dspOpts.Dispatchers)
 	}
 	return &DispatchersOpts{
 		Dispatchers: dpS,
@@ -178,7 +178,7 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 }
 
 type DispatchersOptsJson struct {
-	Dispatchers []*utils.DynamicBoolOpt `json:"*dispatchers"`
+	Dispatchers []*DynamicBoolOpt `json:"*dispatchers"`
 }
 
 type DispatcherSJsonCfg struct {
@@ -198,7 +198,7 @@ func diffDispatchersOptsJsonCfg(d *DispatchersOptsJson, v1, v2 *DispatchersOpts)
 	if d == nil {
 		d = new(DispatchersOptsJson)
 	}
-	if !utils.DynamicBoolOptEqual(v1.Dispatchers, v2.Dispatchers) {
+	if !DynamicBoolOptEqual(v1.Dispatchers, v2.Dispatchers) {
 		d.Dispatchers = v2.Dispatchers
 	}
 	return d

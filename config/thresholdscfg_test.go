@@ -51,8 +51,8 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		NestedFields:           true,
 		ActionSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
 		Opts: &ThresholdsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -70,13 +70,13 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestThresholdSLoadFromJsonOpts(t *testing.T) {
 	thrsOpt := &ThresholdsOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Tenant: "cgrates.org",
 				Values: []string{"thsd_p1"},
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  true,
@@ -84,13 +84,13 @@ func TestThresholdSLoadFromJsonOpts(t *testing.T) {
 		},
 	}
 	exp := &ThresholdsOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Tenant: "cgrates.org",
 				Values: []string{"thsd_p1"},
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  true,
@@ -129,8 +129,8 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.ActionSConnsCfg:           []string{},
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -167,8 +167,8 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.ActionSConnsCfg:           []string{utils.MetaInternal},
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -216,13 +216,13 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		ActionSConns:        []string{},
 		NestedFields:        false,
 		Opts: &ThresholdsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"thsr_p1"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
@@ -241,13 +241,13 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		ActionSConns:        []string{"*internal"},
 		NestedFields:        true,
 		Opts: &ThresholdsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"thsr_p2"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
@@ -266,13 +266,13 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 		Actions_conns:         &[]string{"*internal"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &ThresholdsOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"thsr_p2"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
@@ -307,7 +307,7 @@ func TestThresholdSCloneSection(t *testing.T) {
 		ActionSConns:        []string{},
 		NestedFields:        false,
 		Opts: &ThresholdsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{},
+			ProfileIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 
@@ -321,7 +321,7 @@ func TestThresholdSCloneSection(t *testing.T) {
 		ActionSConns:        []string{},
 		NestedFields:        false,
 		Opts: &ThresholdsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{},
+			ProfileIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 

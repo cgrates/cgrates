@@ -6617,7 +6617,7 @@ func TestResourcesV1ResourcesForEventErrRetrieveUsageID(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.UsageID = []*utils.DynamicStringOpt{
+	cfg.ResourceSCfg().Opts.UsageID = []*config.DynamicStringOpt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6654,7 +6654,7 @@ func TestResourcesV1ResourcesForEventErrRetrieveUsageTTL(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
+	cfg.ResourceSCfg().Opts.UsageTTL = []*config.DynamicDurationOpt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6691,7 +6691,7 @@ func TestResourcesV1AuthorizeResourcesErrRetrieveUsageID(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.UsageID = []*utils.DynamicStringOpt{
+	cfg.ResourceSCfg().Opts.UsageID = []*config.DynamicStringOpt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6728,7 +6728,7 @@ func TestResourcesV1AuthorizeResourcesErrRetrieveUnits(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.Units = []*utils.DynamicFloat64Opt{
+	cfg.ResourceSCfg().Opts.Units = []*config.DynamicFloat64Opt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6765,7 +6765,7 @@ func TestResourcesV1AuthorizeResourcesErrRetrieveUsageTTL(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
+	cfg.ResourceSCfg().Opts.UsageTTL = []*config.DynamicDurationOpt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6802,7 +6802,7 @@ func TestResourcesV1AllocateResourcesErrRetrieveUsageID(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.UsageID = []*utils.DynamicStringOpt{
+	cfg.ResourceSCfg().Opts.UsageID = []*config.DynamicStringOpt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6839,7 +6839,7 @@ func TestResourcesV1AllocateResourcesErrRetrieveUsageTTL(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
+	cfg.ResourceSCfg().Opts.UsageTTL = []*config.DynamicDurationOpt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6876,7 +6876,7 @@ func TestResourcesV1AllocateResourcesErrRetrieveUnits(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.Units = []*utils.DynamicFloat64Opt{
+	cfg.ResourceSCfg().Opts.Units = []*config.DynamicFloat64Opt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6913,7 +6913,7 @@ func TestResourcesV1ReleaseResourcesErrRetrieveUsageID(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.UsageID = []*utils.DynamicStringOpt{
+	cfg.ResourceSCfg().Opts.UsageID = []*config.DynamicStringOpt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",
@@ -6950,7 +6950,7 @@ func TestResourcesV1ReleaseResourcesErrRetrieveUsageTTL(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ResourceSCfg().Opts.UsageTTL = []*utils.DynamicDurationOpt{
+	cfg.ResourceSCfg().Opts.UsageTTL = []*config.DynamicDurationOpt{
 		{
 			FilterIDs: []string{"FLTR_Invalid"},
 			Tenant:    "*any",

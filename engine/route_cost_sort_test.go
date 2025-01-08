@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 // func TestPopulateCostForRoutesConnRefused(t *testing.T) {
@@ -273,13 +272,15 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-	cfg.RouteSCfg().Opts.Usage = []*utils.DynamicDecimalBigOpt{
+	strOpts := []*config.DynamicStringOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
-			Value:     decimal.New(-1, 0),
+			Value:     "-1",
 		},
 	}
+	dynOpts, _ := config.StringToDecimalBigDynamicOpts(strOpts)
+	cfg.RouteSCfg().Opts.Usage = dynOpts
 	cM := NewConnManager(cfg)
 	fltrS := NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{

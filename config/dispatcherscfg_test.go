@@ -48,7 +48,7 @@ func TestDispatcherSCfgloadFromJsonCfg(t *testing.T) {
 		AttributeSConns:        []string{utils.ConcatenatedKey(utils.MetaDispatchers, utils.MetaAttributes), "*conn1"},
 		NestedFields:           true,
 		Opts: &DispatchersOpts{
-			[]*utils.DynamicBoolOpt{},
+			[]*DynamicBoolOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -87,7 +87,7 @@ func TestDispatcherSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.AttributeSConnsCfg:        []string{},
 		utils.OptsCfg: map[string]any{
-			utils.MetaDispatcherSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaDispatcherSCfg: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -123,7 +123,7 @@ func TestDispatcherSCfgAsMapInterface1(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.AttributeSConnsCfg:        []string{"*internal", "*conn1"},
 		utils.OptsCfg: map[string]any{
-			utils.MetaDispatcherSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaDispatcherSCfg: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -147,7 +147,7 @@ func TestDispatcherSCfgAsMapInterface2(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.AttributeSConnsCfg:        []string{},
 		utils.OptsCfg: map[string]any{
-			utils.MetaDispatcherSCfg: []*utils.DynamicBoolOpt{},
+			utils.MetaDispatcherSCfg: []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -273,7 +273,7 @@ func TestDispatcherSCfgCloneTest(t *testing.T) {
 func TestDispatchersOptsLoadFromJSONCfgNil(t *testing.T) {
 	var jsnCfg *DispatchersOptsJson
 	dspOpts := &DispatchersOpts{
-		Dispatchers: []*utils.DynamicBoolOpt{
+		Dispatchers: []*DynamicBoolOpt{
 			{
 				Tenant: "Filler val",
 			},
@@ -290,7 +290,7 @@ func TestDiffDispatchersOptsJsonCfg(t *testing.T) {
 	var d *DispatchersOptsJson
 
 	v1 := &DispatchersOpts{
-		Dispatchers: []*utils.DynamicBoolOpt{
+		Dispatchers: []*DynamicBoolOpt{
 			{
 				Tenant: "1",
 			},
@@ -298,7 +298,7 @@ func TestDiffDispatchersOptsJsonCfg(t *testing.T) {
 	}
 
 	v2 := &DispatchersOpts{
-		Dispatchers: []*utils.DynamicBoolOpt{
+		Dispatchers: []*DynamicBoolOpt{
 			{
 				Tenant: "2",
 			},
@@ -306,7 +306,7 @@ func TestDiffDispatchersOptsJsonCfg(t *testing.T) {
 	}
 
 	expected := &DispatchersOptsJson{
-		Dispatchers: []*utils.DynamicBoolOpt{
+		Dispatchers: []*DynamicBoolOpt{
 			{
 				Tenant: "2",
 			},

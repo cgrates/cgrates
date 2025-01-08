@@ -1123,7 +1123,7 @@ func TestACScheduledActions(t *testing.T) {
 
 func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -1179,7 +1179,7 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 
 func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},

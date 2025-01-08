@@ -74,7 +74,7 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		RSRSep:           ";",
 		MaxParallelConns: 100,
 		Opts: &GeneralOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			ExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expected, *mfCgrCfg.generalCfg) {

@@ -89,14 +89,14 @@ func TestConfigSetGetConfig(t *testing.T) {
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs: []*utils.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+				utils.MetaProfileIDs: []*config.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg: []*config.DynamicIntOpt{
 					{
 						Value: 3,
 					},
 				},
-				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -126,7 +126,7 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				"exists_indexed_fields":    []string{},
 				"notexists_indexed_fields": []string{},
 				utils.OptsCfg: map[string]any{
-					utils.MetaProcessRunsCfg: []*utils.DynamicIntOpt{
+					utils.MetaProcessRunsCfg: []*config.DynamicIntOpt{
 						{
 							Value: 2,
 						},
@@ -158,10 +158,10 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
 			},
 		},
 	}
@@ -198,10 +198,10 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"exists_indexed_fields":    []string{},
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*utils.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
+				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
+				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
 			},
 		},
 	}

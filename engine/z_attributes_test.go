@@ -154,7 +154,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	dm := NewDataManager(db, nil, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
-	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -5019,7 +5019,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
-	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},

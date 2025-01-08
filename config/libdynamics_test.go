@@ -16,13 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package config
 
 import (
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
@@ -147,17 +148,11 @@ func TestCloneDynamicDurationOpt(t *testing.T) {
 }
 
 func TestCloneDynamicDecimalBigOpt(t *testing.T) {
-	in := []*DynamicDecimalBigOpt{
-		{
-			Value:     decimal.WithContext(DecimalContext).SetUint64(10),
-			FilterIDs: []string{"fltr1"},
-		},
-		{
-			Value:     decimal.WithContext(DecimalContext).SetUint64(2),
-			FilterIDs: []string{"fltr2"},
-		},
+	in := []*DynamicDecimalOpt{
+		NewDynamicDecimalOpt([]string{"fltr1"}, "", decimal.WithContext(utils.DecimalContext).SetUint64(10), nil),
+		NewDynamicDecimalOpt([]string{"fltr2"}, "", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
 	}
-	clone := CloneDynamicDecimalBigOpt(in)
+	clone := CloneDynamicDecimalOpt(in)
 	if !reflect.DeepEqual(in, clone) {
 		t.Error("Expected objects to match")
 	}
@@ -521,60 +516,36 @@ func TestDynamicDurationOptEquals(t *testing.T) {
 }
 
 func TestDynamicDecimalBigOptEquals(t *testing.T) {
-	v1 := []*DynamicDecimalBigOpt{
-		{
-			Tenant:    "cgrates.org",
-			Value:     decimal.WithContext(DecimalContext).SetUint64(10),
-			FilterIDs: []string{"fltr1"},
-		},
-		{
-			Tenant:    "cgrates.org",
-			Value:     decimal.WithContext(DecimalContext).SetUint64(2),
-			FilterIDs: []string{"fltr2"},
-		},
+	v1 := []*DynamicDecimalOpt{
+		NewDynamicDecimalOpt([]string{"fltr1"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(10), nil),
+		NewDynamicDecimalOpt([]string{"fltr2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
 	}
 
-	v2 := []*DynamicDecimalBigOpt{
-		{
-			Tenant:    "cgrates.org",
-			Value:     decimal.WithContext(DecimalContext).SetUint64(10),
-			FilterIDs: []string{"fltr1"},
-		},
-		{
-			Tenant:    "cgrates.org",
-			Value:     decimal.WithContext(DecimalContext).SetUint64(2),
-			FilterIDs: []string{"fltr2"},
-		},
+	v2 := []*DynamicDecimalOpt{
+		NewDynamicDecimalOpt([]string{"fltr1"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(10), nil),
+		NewDynamicDecimalOpt([]string{"fltr2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
 	}
 
-	if !DynamicDecimalBigOptEqual(v1, v2) {
+	if !DynamicDecimalOptEqual(v1, v2) {
 		t.Error("Expected both slices to be the same")
-	}
-
-	v1[0].Value = decimal.WithContext(DecimalContext).SetUint64(16)
-	if DynamicDecimalBigOptEqual(v1, v2) {
-		t.Error("Expected slices to differ")
 	}
 
 	//Test if different tenants
 	v1[0].Tenant = "cgrates.net"
-	if DynamicDecimalBigOptEqual(v1, v2) {
+	if DynamicDecimalOptEqual(v1, v2) {
 		t.Error("Expected slices to differ")
 	}
 	v1[0].Tenant = "cgrates.org"
 
 	//Test if different filters
 	v1[0].FilterIDs = append(v1[0].FilterIDs, "new_fltr")
-	if DynamicDecimalBigOptEqual(v1, v2) {
+	if DynamicDecimalOptEqual(v1, v2) {
 		t.Error("Expected slices to differ")
 	}
 
 	//Test if different lengths
-	v1 = append(v1, &DynamicDecimalBigOpt{
-		Value:     decimal.WithContext(DecimalContext).SetUint64(10),
-		FilterIDs: []string{"fltr1"},
-	})
-	if DynamicDecimalBigOptEqual(v1, v2) {
+	v1 = append(v1, NewDynamicDecimalOpt([]string{"fltr1"}, "", decimal.WithContext(utils.DecimalContext).SetUint64(10), nil))
+	if DynamicDecimalOptEqual(v1, v2) {
 		t.Error("Expected slices to differ")
 	}
 }
@@ -647,12 +618,8 @@ func TestStringToDecimalBigDynamicOpts(t *testing.T) {
 		},
 	}
 
-	exp := []*DynamicDecimalBigOpt{
-		{
-			FilterIDs: []string{"fld1", "fld2"},
-			Tenant:    "cgrates.org",
-			Value:     decimal.WithContext(DecimalContext).SetUint64(200),
-		},
+	exp := []*DynamicDecimalOpt{
+		NewDynamicDecimalOpt([]string{"fld1", "fld2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(200), nil),
 	}
 
 	rcv, err := StringToDecimalBigDynamicOpts(dsOpt)
@@ -676,7 +643,7 @@ func TestDynamicIntPointerOptEqual(t *testing.T) {
 		{
 			FilterIDs: []string{"fld1", "fld2"},
 			Tenant:    "cgrates.org",
-			Value:     IntPointer(200),
+			Value:     utils.IntPointer(200),
 		},
 	}
 
@@ -684,7 +651,7 @@ func TestDynamicIntPointerOptEqual(t *testing.T) {
 		{
 			FilterIDs: []string{"fld1", "fld2"},
 			Tenant:    "cgrates.org",
-			Value:     IntPointer(200),
+			Value:     utils.IntPointer(200),
 		},
 	}
 
@@ -700,11 +667,11 @@ func TestDynamicIntPointerOptEqual(t *testing.T) {
 	v1[0].Tenant = "cgrates.org"
 
 	//Test if different values
-	v1[0].Value = IntPointer(500)
+	v1[0].Value = utils.IntPointer(500)
 	if DynamicIntPointerOptEqual(v1, v2) {
 		t.Error("Expected slices to differ")
 	}
-	v1[0].Value = IntPointer(200)
+	v1[0].Value = utils.IntPointer(200)
 
 	//Test if different filters
 	v1[0].FilterIDs = append(v1[0].FilterIDs, "new_fltr")
@@ -714,7 +681,7 @@ func TestDynamicIntPointerOptEqual(t *testing.T) {
 
 	//Test if different lengths
 	v1 = append(v1, &DynamicIntPointerOpt{
-		Value:     IntPointer(2),
+		Value:     utils.IntPointer(2),
 		FilterIDs: []string{"fltr1"},
 	})
 	if DynamicIntPointerOptEqual(v1, v2) {
@@ -727,7 +694,7 @@ func TestDynamicDurationPointerOptEqual(t *testing.T) {
 		{
 			FilterIDs: []string{"fld3"},
 			Tenant:    "cgrates.org",
-			Value:     DurationPointer(3 * time.Second),
+			Value:     utils.DurationPointer(3 * time.Second),
 		},
 	}
 
@@ -735,7 +702,7 @@ func TestDynamicDurationPointerOptEqual(t *testing.T) {
 		{
 			FilterIDs: []string{"fld3"},
 			Tenant:    "cgrates.org",
-			Value:     DurationPointer(3 * time.Second),
+			Value:     utils.DurationPointer(3 * time.Second),
 		},
 	}
 
@@ -750,11 +717,11 @@ func TestDynamicDurationPointerOptEqual(t *testing.T) {
 	v1[0].Tenant = "cgrates.org"
 
 	//Test if different values
-	v1[0].Value = DurationPointer(4 * time.Second)
+	v1[0].Value = utils.DurationPointer(4 * time.Second)
 	if DynamicDurationPointerOptEqual(v1, v2) {
 		t.Error("Expected slices to differ")
 	}
-	v1[0].Value = DurationPointer(3 * time.Second)
+	v1[0].Value = utils.DurationPointer(3 * time.Second)
 
 	//Test if different filters
 	v1[0].FilterIDs = append(v1[0].FilterIDs, "new_fltr")
@@ -764,7 +731,7 @@ func TestDynamicDurationPointerOptEqual(t *testing.T) {
 
 	//Test if different lengths
 	v1 = append(v1, &DynamicDurationPointerOpt{
-		Value:     DurationPointer(2),
+		Value:     utils.DurationPointer(2),
 		FilterIDs: []string{"fltr1"},
 	})
 	if DynamicDurationPointerOptEqual(v1, v2) {
@@ -773,12 +740,8 @@ func TestDynamicDurationPointerOptEqual(t *testing.T) {
 }
 
 func TestDecimalBigToStringDynamicOpts(t *testing.T) {
-	dbOpt := []*DynamicDecimalBigOpt{
-		{
-			FilterIDs: []string{"test_filter", "test_filter2"},
-			Tenant:    "cgrates.org",
-			Value:     decimal.WithContext(DecimalContext).SetUint64(300),
-		},
+	dbOpt := []*DynamicDecimalOpt{
+		NewDynamicDecimalOpt([]string{"test_filter", "test_filter2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(300), nil),
 	}
 
 	exp := []*DynamicStringOpt{
@@ -789,7 +752,7 @@ func TestDecimalBigToStringDynamicOpts(t *testing.T) {
 		},
 	}
 
-	rcv := DecimalBigToStringDynamicOpts(dbOpt)
+	rcv := DecimalToStringDynamicOpts(dbOpt)
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v \n but received \n %v", exp, rcv)
 	}
@@ -864,7 +827,7 @@ func TestIntToIntPointerDynamicOpts(t *testing.T) {
 		{
 			FilterIDs: []string{"test_filter", "test_filter2"},
 			Tenant:    "cgrates.org",
-			Value:     IntPointer(50),
+			Value:     utils.IntPointer(50),
 		},
 	}
 
@@ -887,7 +850,7 @@ func TestIntPointerToIntDynamicOpts(t *testing.T) {
 		{
 			FilterIDs: []string{"test_filter", "test_filter2"},
 			Tenant:    "cgrates.org",
-			Value:     IntPointer(50),
+			Value:     utils.IntPointer(50),
 		},
 	}
 
@@ -910,7 +873,7 @@ func TestStringToDurationPointerDynamicOpts(t *testing.T) {
 		{
 			FilterIDs: []string{"test_filter", "test_filter2"},
 			Tenant:    "cgrates.org",
-			Value:     DurationPointer(50 * time.Second),
+			Value:     utils.DurationPointer(50 * time.Second),
 		},
 	}
 
@@ -942,7 +905,7 @@ func TestDurationPointerToStringDynamicOpts(t *testing.T) {
 		{
 			FilterIDs: []string{"test_filter", "test_filter2"},
 			Tenant:    "cgrates.org",
-			Value:     DurationPointer(50 * time.Second),
+			Value:     utils.DurationPointer(50 * time.Second),
 		},
 	}
 
@@ -957,7 +920,7 @@ func TestCloneDynamicIntPointerOpt(t *testing.T) {
 		{
 			FilterIDs: []string{"fld1", "fld2"},
 			Tenant:    "cgrates.org",
-			Value:     IntPointer(200),
+			Value:     utils.IntPointer(200),
 		},
 	}
 
@@ -965,7 +928,7 @@ func TestCloneDynamicIntPointerOpt(t *testing.T) {
 		{
 			FilterIDs: []string{"fld1", "fld2"},
 			Tenant:    "cgrates.org",
-			Value:     IntPointer(200),
+			Value:     utils.IntPointer(200),
 		},
 	}
 
@@ -980,7 +943,7 @@ func TestCloneDynamicDurationPointerOpt(t *testing.T) {
 		{
 			FilterIDs: []string{"test_filter", "test_filter2"},
 			Tenant:    "cgrates.org",
-			Value:     DurationPointer(50 * time.Second),
+			Value:     utils.DurationPointer(50 * time.Second),
 		},
 	}
 
@@ -988,7 +951,7 @@ func TestCloneDynamicDurationPointerOpt(t *testing.T) {
 		{
 			FilterIDs: []string{"test_filter", "test_filter2"},
 			Tenant:    "cgrates.org",
-			Value:     DurationPointer(50 * time.Second),
+			Value:     utils.DurationPointer(50 * time.Second),
 		},
 	}
 

@@ -2832,7 +2832,7 @@ func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -2905,7 +2905,7 @@ func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
 func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3039,7 +3039,7 @@ func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 func TestV1MaxAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3080,7 +3080,7 @@ func TestV1MaxAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3230,7 +3230,7 @@ func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 func TestV1DebitAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3308,7 +3308,7 @@ func TestV1DebitAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3461,7 +3461,7 @@ func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
 func TestV1MaxConcretesProfileIgnoreFiltersError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3503,7 +3503,7 @@ func TestV1MaxConcretesProfileIgnoreFiltersError(t *testing.T) {
 func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},
@@ -3668,7 +3668,7 @@ func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
 func TestV1DebitConcretesProfileIgnoreFiltersError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*utils.DynamicBoolOpt{
+	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		{
 			Value: true,
 		},

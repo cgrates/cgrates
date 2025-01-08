@@ -15,12 +15,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package utils
+package config
 
 import (
 	"slices"
+	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
 
@@ -60,10 +62,11 @@ type DynamicDurationOpt struct {
 	Value     time.Duration
 }
 
-type DynamicDecimalBigOpt struct {
+type DynamicDecimalOpt struct {
 	FilterIDs []string `json:",omitempty"`
 	Tenant    string
-	Value     *decimal.Big
+	value     *decimal.Big
+	dynVal    RSRParsers
 }
 
 type DynamicInterfaceOpt struct {
@@ -168,13 +171,13 @@ func CloneDynamicDurationOpt(in []*DynamicDurationOpt) (cl []*DynamicDurationOpt
 	return
 }
 
-func CloneDynamicDecimalBigOpt(in []*DynamicDecimalBigOpt) (cl []*DynamicDecimalBigOpt) {
-	cl = make([]*DynamicDecimalBigOpt, len(in))
+func CloneDynamicDecimalOpt(in []*DynamicDecimalOpt) (cl []*DynamicDecimalOpt) {
+	cl = make([]*DynamicDecimalOpt, len(in))
 	for i, val := range in {
-		cl[i] = &DynamicDecimalBigOpt{
+		cl[i] = &DynamicDecimalOpt{
 			Tenant:    val.Tenant,
 			FilterIDs: slices.Clone(val.FilterIDs),
-			Value:     CloneDecimalBig(val.Value),
+			value:     utils.CloneDecimalBig(val.value),
 		}
 	}
 	return
@@ -186,7 +189,7 @@ func CloneDynamicIntPointerOpt(in []*DynamicIntPointerOpt) (cl []*DynamicIntPoin
 		cl[i] = &DynamicIntPointerOpt{
 			Tenant:    val.Tenant,
 			FilterIDs: slices.Clone(val.FilterIDs),
-			Value:     IntPointer(*val.Value),
+			Value:     utils.IntPointer(*val.Value),
 		}
 	}
 	return
@@ -198,7 +201,7 @@ func CloneDynamicDurationPointerOpt(in []*DynamicDurationPointerOpt) (cl []*Dyna
 		cl[i] = &DynamicDurationPointerOpt{
 			Tenant:    val.Tenant,
 			FilterIDs: slices.Clone(val.FilterIDs),
-			Value:     DurationPointer(*val.Value),
+			Value:     utils.DurationPointer(*val.Value),
 		}
 	}
 	return
@@ -312,7 +315,7 @@ func DynamicDurationOptEqual(v1, v2 []*DynamicDurationOpt) bool {
 	return true
 }
 
-func DynamicDecimalBigOptEqual(v1, v2 []*DynamicDecimalBigOpt) bool {
+func DynamicDecimalOptEqual(v1, v2 []*DynamicDecimalOpt) bool {
 	if len(v1) != len(v2) {
 		return false
 	}
@@ -321,7 +324,7 @@ func DynamicDecimalBigOptEqual(v1, v2 []*DynamicDecimalBigOpt) bool {
 			return false
 		}
 		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) ||
-			v1[i].Value.Cmp(v2[i].Value) != 0 {
+			v1[i].value.Cmp(v2[i].value) != 0 {
 			return false
 		}
 	}
@@ -382,27 +385,35 @@ func DynamicDurationPointerOptEqual(v1, v2 []*DynamicDurationPointerOpt) bool {
 	return true
 }
 
-func StringToDecimalBigDynamicOpts(strOpts []*DynamicStringOpt) (decOpts []*DynamicDecimalBigOpt, err error) {
-	decOpts = make([]*DynamicDecimalBigOpt, len(strOpts))
+func StringToDecimalBigDynamicOpts(strOpts []*DynamicStringOpt) (decOpts []*DynamicDecimalOpt, err error) {
+	decOpts = make([]*DynamicDecimalOpt, len(strOpts))
 	for index, opt := range strOpts {
-		decOpts[index] = &DynamicDecimalBigOpt{
+		decOpts[index] = &DynamicDecimalOpt{
 			Tenant:    opt.Tenant,
 			FilterIDs: opt.FilterIDs,
 		}
-		if decOpts[index].Value, err = StringAsBig(opt.Value); err != nil {
+		if strings.HasPrefix(opt.Value, utils.DynamicDataPrefix) {
+			decOpts[index].dynVal, err = NewRSRParsers(opt.Value, CgrConfig().GeneralCfg().RSRSep)
+			if err != nil {
+				return nil, err
+			}
+			continue
+		}
+
+		if decOpts[index].value, err = utils.StringAsBig(opt.Value); err != nil {
 			return
 		}
 	}
 	return
 }
 
-func DecimalBigToStringDynamicOpts(decOpts []*DynamicDecimalBigOpt) (strOpts []*DynamicStringOpt) {
+func DecimalToStringDynamicOpts(decOpts []*DynamicDecimalOpt) (strOpts []*DynamicStringOpt) {
 	strOpts = make([]*DynamicStringOpt, len(decOpts))
 	for index, opt := range decOpts {
 		strOpts[index] = &DynamicStringOpt{
 			Tenant:    opt.Tenant,
 			FilterIDs: opt.FilterIDs,
-			Value:     opt.Value.String(),
+			Value:     opt.value.String(),
 		}
 	}
 	return
@@ -415,7 +426,7 @@ func StringToDurationDynamicOpts(strOpts []*DynamicStringOpt) (durOpts []*Dynami
 			Tenant:    opt.Tenant,
 			FilterIDs: opt.FilterIDs,
 		}
-		if durOpts[index].Value, err = ParseDurationWithNanosecs(opt.Value); err != nil {
+		if durOpts[index].Value, err = utils.ParseDurationWithNanosecs(opt.Value); err != nil {
 			return
 		}
 	}
@@ -440,7 +451,7 @@ func IntToIntPointerDynamicOpts(intOpts []*DynamicIntOpt) (intPtOpts []*DynamicI
 		intPtOpts[index] = &DynamicIntPointerOpt{
 			Tenant:    opt.Tenant,
 			FilterIDs: opt.FilterIDs,
-			Value:     IntPointer(opt.Value),
+			Value:     utils.IntPointer(opt.Value),
 		}
 	}
 	return
@@ -462,13 +473,13 @@ func StringToDurationPointerDynamicOpts(strOpts []*DynamicStringOpt) (durPtOpts 
 	durPtOpts = make([]*DynamicDurationPointerOpt, len(strOpts))
 	for index, opt := range strOpts {
 		var durOpt time.Duration
-		if durOpt, err = ParseDurationWithNanosecs(opt.Value); err != nil {
+		if durOpt, err = utils.ParseDurationWithNanosecs(opt.Value); err != nil {
 			return
 		}
 		durPtOpts[index] = &DynamicDurationPointerOpt{
 			Tenant:    opt.Tenant,
 			FilterIDs: opt.FilterIDs,
-			Value:     DurationPointer(durOpt),
+			Value:     utils.DurationPointer(durOpt),
 		}
 	}
 	return
@@ -484,4 +495,24 @@ func DurationPointerToStringDynamicOpts(durPtOpts []*DynamicDurationPointerOpt) 
 		}
 	}
 	return
+}
+
+func (dynDec *DynamicDecimalOpt) Value(dP utils.DataProvider) (*decimal.Big, error) {
+	if dynDec.value == nil {
+		out, err := dynDec.dynVal.ParseDataProvider(dP)
+		if err != nil {
+			return nil, err
+		}
+		return utils.StringAsBig(out)
+	}
+	return dynDec.value, nil
+}
+
+func NewDynamicDecimalOpt(filterIDs []string, tenant string, value *decimal.Big, dynValue RSRParsers) *DynamicDecimalOpt {
+	return &DynamicDecimalOpt{
+		FilterIDs: filterIDs,
+		Tenant:    tenant,
+		value:     value,
+		dynVal:    dynValue,
+	}
 }

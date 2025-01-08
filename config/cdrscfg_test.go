@@ -53,16 +53,16 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		AccountSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
 		ExtraFields:      RSRParsers{},
 		Opts: &CdrsOpts{
-			Accounts:   []*utils.DynamicBoolOpt{},
-			Attributes: []*utils.DynamicBoolOpt{},
-			Chargers:   []*utils.DynamicBoolOpt{},
-			Export:     []*utils.DynamicBoolOpt{},
-			Rates:      []*utils.DynamicBoolOpt{},
-			Stats:      []*utils.DynamicBoolOpt{},
-			Thresholds: []*utils.DynamicBoolOpt{},
-			Refund:     []*utils.DynamicBoolOpt{},
-			Rerate:     []*utils.DynamicBoolOpt{},
-			Store:      []*utils.DynamicBoolOpt{},
+			Accounts:   []*DynamicBoolOpt{},
+			Attributes: []*DynamicBoolOpt{},
+			Chargers:   []*DynamicBoolOpt{},
+			Export:     []*DynamicBoolOpt{},
+			Rates:      []*DynamicBoolOpt{},
+			Stats:      []*DynamicBoolOpt{},
+			Thresholds: []*DynamicBoolOpt{},
+			Refund:     []*DynamicBoolOpt{},
+			Rerate:     []*DynamicBoolOpt{},
+			Store:      []*DynamicBoolOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -80,37 +80,37 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 
 func TestCdrsCfgloadFromJsonCfgOpt(t *testing.T) {
 	cdrsOpt := &CdrsOpts{
-		Accounts: []*utils.DynamicBoolOpt{
+		Accounts: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Attributes: []*utils.DynamicBoolOpt{
+		Attributes: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Chargers: []*utils.DynamicBoolOpt{
+		Chargers: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Export: []*utils.DynamicBoolOpt{
+		Export: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Rates: []*utils.DynamicBoolOpt{
+		Rates: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Stats: []*utils.DynamicBoolOpt{
+		Stats: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Thresholds: []*utils.DynamicBoolOpt{
+		Thresholds: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -118,37 +118,37 @@ func TestCdrsCfgloadFromJsonCfgOpt(t *testing.T) {
 	}
 
 	exp := &CdrsOpts{
-		Accounts: []*utils.DynamicBoolOpt{
+		Accounts: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Attributes: []*utils.DynamicBoolOpt{
+		Attributes: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Chargers: []*utils.DynamicBoolOpt{
+		Chargers: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Export: []*utils.DynamicBoolOpt{
+		Export: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Rates: []*utils.DynamicBoolOpt{
+		Rates: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Stats: []*utils.DynamicBoolOpt{
+		Stats: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
-		Thresholds: []*utils.DynamicBoolOpt{
+		Thresholds: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -203,16 +203,16 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 		utils.RateSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
 		utils.AccountSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
 		utils.OptsCfg: map[string]any{
-			utils.MetaAccounts:   []*utils.DynamicBoolOpt{},
-			utils.MetaAttributes: []*utils.DynamicBoolOpt{},
-			utils.MetaChargers:   []*utils.DynamicBoolOpt{},
-			utils.MetaEEs:        []*utils.DynamicBoolOpt{},
-			utils.MetaRates:      []*utils.DynamicBoolOpt{},
-			utils.MetaStats:      []*utils.DynamicBoolOpt{},
-			utils.MetaThresholds: []*utils.DynamicBoolOpt{},
-			utils.MetaRefund:     []*utils.DynamicBoolOpt{},
-			utils.MetaRerate:     []*utils.DynamicBoolOpt{},
-			utils.MetaStore:      []*utils.DynamicBoolOpt{},
+			utils.MetaAccounts:   []*DynamicBoolOpt{},
+			utils.MetaAttributes: []*DynamicBoolOpt{},
+			utils.MetaChargers:   []*DynamicBoolOpt{},
+			utils.MetaEEs:        []*DynamicBoolOpt{},
+			utils.MetaRates:      []*DynamicBoolOpt{},
+			utils.MetaStats:      []*DynamicBoolOpt{},
+			utils.MetaThresholds: []*DynamicBoolOpt{},
+			utils.MetaRefund:     []*DynamicBoolOpt{},
+			utils.MetaRerate:     []*DynamicBoolOpt{},
+			utils.MetaStore:      []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -245,16 +245,16 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
 		utils.RateSConnsCfg:       []string{},
 		utils.AccountSConnsCfg:    []string{},
 		utils.OptsCfg: map[string]any{
-			utils.MetaAccounts:   []*utils.DynamicBoolOpt{},
-			utils.MetaAttributes: []*utils.DynamicBoolOpt{},
-			utils.MetaChargers:   []*utils.DynamicBoolOpt{},
-			utils.MetaEEs:        []*utils.DynamicBoolOpt{},
-			utils.MetaRates:      []*utils.DynamicBoolOpt{},
-			utils.MetaStats:      []*utils.DynamicBoolOpt{},
-			utils.MetaThresholds: []*utils.DynamicBoolOpt{},
-			utils.MetaRefund:     []*utils.DynamicBoolOpt{},
-			utils.MetaRerate:     []*utils.DynamicBoolOpt{},
-			utils.MetaStore:      []*utils.DynamicBoolOpt{},
+			utils.MetaAccounts:   []*DynamicBoolOpt{},
+			utils.MetaAttributes: []*DynamicBoolOpt{},
+			utils.MetaChargers:   []*DynamicBoolOpt{},
+			utils.MetaEEs:        []*DynamicBoolOpt{},
+			utils.MetaRates:      []*DynamicBoolOpt{},
+			utils.MetaStats:      []*DynamicBoolOpt{},
+			utils.MetaThresholds: []*DynamicBoolOpt{},
+			utils.MetaRefund:     []*DynamicBoolOpt{},
+			utils.MetaRerate:     []*DynamicBoolOpt{},
+			utils.MetaStore:      []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -329,43 +329,43 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		RateSConns:       []string{"*localhost"},
 		AccountSConns:    []string{"*localhost"},
 		Opts: &CdrsOpts{
-			Accounts: []*utils.DynamicBoolOpt{
+			Accounts: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
 				},
 			},
-			Attributes: []*utils.DynamicBoolOpt{
+			Attributes: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
 				},
 			},
-			Chargers: []*utils.DynamicBoolOpt{
+			Chargers: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
 				},
 			},
-			Export: []*utils.DynamicBoolOpt{
+			Export: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
 				},
 			},
-			Rates: []*utils.DynamicBoolOpt{
+			Rates: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
 				},
 			},
-			Stats: []*utils.DynamicBoolOpt{
+			Stats: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
 				},
 			},
-			Thresholds: []*utils.DynamicBoolOpt{
+			Thresholds: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
@@ -393,43 +393,43 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		RateSConns:       []string{"*birpc"},
 		AccountSConns:    []string{"*birpc"},
 		Opts: &CdrsOpts{
-			Accounts: []*utils.DynamicBoolOpt{
+			Accounts: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Attributes: []*utils.DynamicBoolOpt{
+			Attributes: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Chargers: []*utils.DynamicBoolOpt{
+			Chargers: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Export: []*utils.DynamicBoolOpt{
+			Export: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Rates: []*utils.DynamicBoolOpt{
+			Rates: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Stats: []*utils.DynamicBoolOpt{
+			Stats: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Thresholds: []*utils.DynamicBoolOpt{
+			Thresholds: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
@@ -452,43 +452,43 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 		Rates_conns:          &[]string{"*birpc"},
 		Accounts_conns:       &[]string{"*birpc"},
 		Opts: &CdrsOptsJson{
-			Accounts: []*utils.DynamicBoolOpt{
+			Accounts: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Attributes: []*utils.DynamicBoolOpt{
+			Attributes: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Chargers: []*utils.DynamicBoolOpt{
+			Chargers: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Export: []*utils.DynamicBoolOpt{
+			Export: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Rates: []*utils.DynamicBoolOpt{
+			Rates: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Stats: []*utils.DynamicBoolOpt{
+			Stats: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			Thresholds: []*utils.DynamicBoolOpt{
+			Thresholds: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,

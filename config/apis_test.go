@@ -233,7 +233,7 @@ func TestConfigLoadFromDB(t *testing.T) {
 		MaxParallelConns: 100,
 		RSRSep:           ";",
 		Opts: &GeneralOpts{
-			ExporterIDs: []*utils.DynamicStringSliceOpt{},
+			ExporterIDs: []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expGeneral, cfg.GeneralCfg()) {

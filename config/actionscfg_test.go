@@ -60,9 +60,9 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1", "val2"},
 		Opts: &ActionsOpts{
-			ProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			PosterAttempts:       []*utils.DynamicIntOpt{},
+			ProfileIDs:           []*DynamicStringSliceOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			PosterAttempts:       []*DynamicIntOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -80,24 +80,24 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 
 func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 	actOpts := &ActionsOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Values: []string{},
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
 		},
 	}
 	exp := &ActionsOpts{
-		ProfileIDs: []*utils.DynamicStringSliceOpt{
+		ProfileIDs: []*DynamicStringSliceOpt{
 			{
 				Values: []string{},
 			},
 		},
-		ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Value: false,
 			},
@@ -147,9 +147,9 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.DynaprepaidActionplansCfg: []string{},
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*utils.DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*utils.DynamicBoolOpt{},
-			utils.MetaPosterAttempts:       []*utils.DynamicIntOpt{},
+			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaPosterAttempts:       []*DynamicIntOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -230,13 +230,13 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{},
 		Opts: &ActionsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
 					Values: []string{"prf1"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  false,
@@ -260,13 +260,13 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
 		Opts: &ActionsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"prf2"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.nett",
 					Value:  true,
@@ -290,13 +290,13 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Nested_fields:             utils.BoolPointer(false),
 		Dynaprepaid_actionprofile: &[]string{"dynaprepaid"},
 		Opts: &ActionsOptsJson{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.net",
 					Values: []string{"prf2"},
 				},
 			},
-			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.nett",
 					Value:  true,
@@ -337,7 +337,7 @@ func TestActionSCloneSection(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
 		Opts: &ActionsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{},
 				},
@@ -359,7 +359,7 @@ func TestActionSCloneSection(t *testing.T) {
 		NestedFields:             false,
 		DynaprepaidActionProfile: []string{"dynaprepaid"},
 		Opts: &ActionsOpts{
-			ProfileIDs: []*utils.DynamicStringSliceOpt{
+			ProfileIDs: []*DynamicStringSliceOpt{
 				{
 					Values: []string{},
 				},
@@ -374,17 +374,17 @@ func TestActionSCloneSection(t *testing.T) {
 func TestDiffActionsOptsJsonCfg(t *testing.T) {
 	d := &ActionsOptsJson{}
 	v1 := &ActionsOpts{
-		PosterAttempts: []*utils.DynamicIntOpt{},
+		PosterAttempts: []*DynamicIntOpt{},
 	}
 	v2 := &ActionsOpts{
-		PosterAttempts: []*utils.DynamicIntOpt{{
+		PosterAttempts: []*DynamicIntOpt{{
 			FilterIDs: []string{"fltr1"},
 		},
 		},
 	}
 	exp := &ActionsOptsJson{
 
-		PosterAttempts: []*utils.DynamicIntOpt{{
+		PosterAttempts: []*DynamicIntOpt{{
 			FilterIDs: []string{"fltr1"},
 		},
 		},
