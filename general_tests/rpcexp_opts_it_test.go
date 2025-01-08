@@ -21,386 +21,205 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"path"
-	"reflect"
-	"sort"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-)
-
-var (
-	ng1CfgPath, ng2CfgPath string
-	ng1Cfg, ng2Cfg         *config.CGRConfig
-	ng1RPC, ng2RPC         *birpc.Client
-	ng1ConfDIR, ng2ConfDIR string //run tests for specific configuration
-	rrDelay                int
-
-	rrTests = []func(t *testing.T){
-		testRPCExpLoadConfig,
-		testRPCExpFlushDBs,
-
-		testRPCExpStartEngine,
-		testRPCExpRPCConn,
-		testRPCExpSetThresholdProfilesBeforeProcessEv,
-		testRPCExpProcessEventWithConfigOpts,
-		testRPCExpGetThresholdsAfterFirstEvent,
-		testRPCExpProcessEventWithAPIOpts,
-		testRPCExpGetThresholdsAfterSecondEvent,
-		testRPCExpProcessEventWithRPCAPIOpts,
-		testRPCExpGetThresholdsAfterThirdEvent,
-		testRPCExpStopEngine,
-	}
 )
 
 func TestRPCExpIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		ng1ConfDIR = "rpcexp_opts_engine1_internal"
-		ng2ConfDIR = "rpcexp_opts_engine2_internal"
-	case utils.MetaMySQL:
-		ng1ConfDIR = "rpcexp_opts_engine1_mysql"
-		ng2ConfDIR = "rpcexp_opts_engine2_mysql"
-	case utils.MetaMongo:
-		ng1ConfDIR = "rpcexp_opts_engine1_mongo"
-		ng2ConfDIR = "rpcexp_opts_engine2_mongo"
-	case utils.MetaPostgres:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
-		t.Fatal("Unknown Database type")
+		t.Fatal("unsupported dbtype value")
 	}
 
-	for _, stest := range rrTests {
-		t.Run(ng1ConfDIR, stest)
-	}
-}
-
-func testRPCExpLoadConfig(t *testing.T) {
-	var err error
-	ng1CfgPath = path.Join(*utils.DataDir, "conf", "samples", "rpcexp_multiple_engines", ng1ConfDIR)
-	if ng1Cfg, err = config.NewCGRConfigFromPath(context.Background(), ng1CfgPath); err != nil {
-		t.Error(err)
-	}
-	ng2CfgPath = path.Join(*utils.DataDir, "conf", "samples", "rpcexp_multiple_engines", ng2ConfDIR)
-	if ng2Cfg, err = config.NewCGRConfigFromPath(context.Background(), ng2CfgPath); err != nil {
-		t.Error(err)
-	}
-	rrDelay = 1000
-}
-
-func testRPCExpFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(ng1Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitDataDB(ng2Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(ng1Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(ng2Cfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRPCExpStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(ng1CfgPath, rrDelay); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := engine.StartEngine(ng2CfgPath, rrDelay); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testRPCExpRPCConn(t *testing.T) {
-	ng1RPC = engine.NewRPCClient(t, ng1Cfg.ListenCfg(), *utils.Encoding)
-	ng2RPC = engine.NewRPCClient(t, ng2Cfg.ListenCfg(), *utils.Encoding)
-}
-func testRPCExpSetThresholdProfilesBeforeProcessEv(t *testing.T) {
-	thPrf1 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "THD_1",
-			FilterIDs:        []string{"*string:~*req.Account:1001"},
-			ActionProfileIDs: []string{"*none)"},
-			MaxHits:          5,
-			MinHits:          3,
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-			Async: true,
+	ng1 := engine.TestEngine{
+		ConfigJSON: `{
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "thProcessEv1",
+			"type": "*rpc",
+			"opts": {
+				"rpcCodec": "*json",
+				"connIDs": ["thEngine"],
+				"serviceMethod": "ThresholdSv1.ProcessEvent",
+				"keyPath": "",
+				"certPath": "",
+				"caPath": "",
+				"tls": false,
+				"rpcConnTimeout": "1s",
+				"rpcReplyTimeout": "5s"
+			}
 		},
-	}
-
-	var reply string
-	if err := ng2RPC.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
-		thPrf1, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
-	}
-
-	thPrf2 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "THD_2",
-			FilterIDs:        []string{"*string:~*req.Account:1001"},
-			ActionProfileIDs: []string{"*none"},
-			MaxHits:          3,
-			MinHits:          2,
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 20,
-				},
-			},
-			Async: true,
-		},
-	}
-
-	if err := ng2RPC.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
-		thPrf2, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
-	}
-
-	thPrf3 := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant:           "cgrates.org",
-			ID:               "THD_3",
-			FilterIDs:        []string{"*string:~*req.Account:1001"},
-			ActionProfileIDs: []string{"*none"},
-			MaxHits:          4,
-			MinHits:          1,
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 15,
-				},
-			},
-			Async: true,
-		},
-	}
-
-	if err := ng2RPC.Call(context.Background(), utils.AdminSv1SetThresholdProfile,
-		thPrf3, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
+		{
+			"id": "thProcessEv2",
+			"type": "*rpc",
+			"opts": {
+				"rpcCodec": "*json",
+				"connIDs": ["thEngine"],
+				"serviceMethod": "ThresholdSv1.ProcessEvent",
+				"keyPath": "",
+				"certPath": "",
+				"caPath": "",
+				"tls": false,
+				"rpcConnTimeout": "1s",
+				"rpcReplyTimeout": "5s",
+				"rpcAPIOpts": {
+					"*thdProfileIDs": ["THD_3"]
+				}
+			}
+		}
+	]
+},
+"rpc_conns": {
+	"thEngine": {
+		"strategy": "*first",
+		"conns": [
+			{
+				"address": "127.0.0.1:22012",
+				"transport": "*json"
+			}
+		]
 	}
 }
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	clientNg1, _ := ng1.Run(t)
 
-func testRPCExpProcessEventWithConfigOpts(t *testing.T) {
+	ng2 := engine.TestEngine{
+		ConfigJSON: `{
+"listen": {
+	"rpc_json": ":22012",
+	"rpc_gob": ":22013",
+	"http": ":22080"
+},
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+	"opts": {
+		"*profileIDs": [
+			{
+				"Values": ["THD_1"]
+			}
+		]
+	}
+}
+}`,
+		TpFiles: map[string]string{
+			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
+cgrates.org,THD_1,*string:~*req.Account:1001,;10,5,3,,,*none,true
+cgrates.org,THD_2,*string:~*req.Account:1001,;20,3,2,,,*none,true
+cgrates.org,THD_3,*string:~*req.Account:1001,;15,4,1,,,*none,true`,
+		},
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	clientNg2, _ := ng2.Run(t)
+
+	time.Sleep(10 * time.Millisecond) // wait for ThresholdProfiles to load
+
+	// Send the request to thProcessEv1 exporter without specifying any
+	// *thdProfileIDs. On the receiving engine, thresholds is configured to
+	// hit only "THD_1" (through *profileIDs config opt).
+	exportRPCEvent(t, clientNg1, "thProcessEv1")
+	checkThresholdsHits(t, clientNg2, map[string]int{
+		"cgrates.org:THD_1": 1,
+		"cgrates.org:THD_2": 0,
+		"cgrates.org:THD_3": 0,
+	})
+
+	// Same as above, but this time specify "THD_2" under *thdProfileIDs,
+	// which ignores the configured *profileOpts, and will only hit "THD_2".
+	exportRPCEvent(t, clientNg1, "thProcessEv1", "THD_2")
+	checkThresholdsHits(t, clientNg2, map[string]int{
+		"cgrates.org:THD_1": 1,
+		"cgrates.org:THD_2": 1,
+		"cgrates.org:THD_3": 0,
+	})
+
+	// Same as above, but this time overwrite *thdProfileIDs through the
+	// *rpc exporter configuration ("THD_2" -> "THD_3"). This will only hit
+	// "THD_3".
+	exportRPCEvent(t, clientNg1, "thProcessEv2", "THD_2")
+	checkThresholdsHits(t, clientNg2, map[string]int{
+		"cgrates.org:THD_1": 1,
+		"cgrates.org:THD_2": 1,
+		"cgrates.org:THD_3": 1,
+	})
+}
+
+func exportRPCEvent(t *testing.T, client *birpc.Client, exporterID string, thIDs ...string) {
+	t.Helper()
 	args := utils.CGREventWithEeIDs{
-		EeIDs: []string{"thProcessEv1"},
+		EeIDs: []string{exporterID},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "ThresholdProcessEv1",
+			ID:     utils.GenUUID(),
 			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
-			APIOpts: map[string]any{},
+			APIOpts: make(map[string]any),
 		},
 	}
+	if len(thIDs) != 0 {
+		args.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+	}
+	method := utils.EeSv1ProcessEvent
 	var reply map[string]map[string]any
-	if err := ng1RPC.Call(context.Background(), utils.EeSv1ProcessEvent, args, &reply); err != nil {
-		t.Error(err)
+	if err := client.Call(context.Background(), method, args, &reply); err != nil {
+		t.Errorf("%s unexpected err received: %v", method, err)
 	}
-	time.Sleep(50 * time.Millisecond)
-
+	time.Sleep(10 * time.Millisecond) // wait for ThresholdSv1.ProcessEvent to finish
 }
 
-func testRPCExpGetThresholdsAfterFirstEvent(t *testing.T) {
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ThresholdEventTest1",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2", "THD_3"},
-		},
-	}
-	expThs := engine.Thresholds{
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_1",
-			Hits:   1,
-		},
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_2",
-			Hits:   0,
-		},
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_3",
-			Hits:   0,
-		},
+func checkThresholdsHits(t *testing.T, client *birpc.Client, expectedThHits map[string]int) {
+	t.Helper()
+	thIDs := make([]string, 0, len(expectedThHits))
+	for tntID := range expectedThHits {
+		thID := utils.NewTenantID(tntID).ID
+		thIDs = append(thIDs, thID)
 	}
 
-	var rplyThs engine.Thresholds
-	if err := ng2RPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
-		args, &rplyThs); err != nil {
-		t.Error(err)
-	} else {
-		sort.Slice(rplyThs, func(i, j int) bool {
-			return rplyThs[i].ID < rplyThs[j].ID
-		})
-		for idx, thd := range rplyThs {
-			thd.Snooze = expThs[idx].Snooze
-		}
-		if !reflect.DeepEqual(rplyThs, expThs) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expThs), utils.ToJSON(rplyThs))
-		}
-	}
-}
-
-func testRPCExpProcessEventWithAPIOpts(t *testing.T) {
-	args := utils.CGREventWithEeIDs{
-		EeIDs: []string{"thProcessEv1"},
-		CGREvent: &utils.CGREvent{
+	method := utils.ThresholdSv1GetThresholdsForEvent
+	var reply engine.Thresholds
+	if err := client.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
+		&utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "ThresholdProcessEv2",
+			ID:     utils.GenUUID(),
 			Event: map[string]any{
 				utils.AccountField: "1001",
 			},
 			APIOpts: map[string]any{
-				utils.OptsThresholdsProfileIDs: []string{"THD_2"},
+				utils.OptsThresholdsProfileIDs: thIDs,
 			},
-		},
-	}
-	var reply map[string]map[string]any
-	if err := ng1RPC.Call(context.Background(), utils.EeSv1ProcessEvent, args, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(50 * time.Millisecond)
-}
-
-func testRPCExpGetThresholdsAfterSecondEvent(t *testing.T) {
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ThresholdEventTest2",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2", "THD_3"},
-		},
-	}
-	expThs := engine.Thresholds{
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_1",
-			Hits:   1,
-		},
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_2",
-			Hits:   1,
-		},
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_3",
-			Hits:   0,
-		},
+		}, &reply); err != nil {
+		t.Errorf("%s unexpected err received: %v", method, err)
 	}
 
-	var rplyThs engine.Thresholds
-	if err := ng2RPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
-		args, &rplyThs); err != nil {
-		t.Error(err)
-	} else {
-		sort.Slice(rplyThs, func(i, j int) bool {
-			return rplyThs[i].ID < rplyThs[j].ID
-		})
-		for idx, thd := range rplyThs {
-			thd.Snooze = expThs[idx].Snooze
+	for tntID, want := range expectedThHits {
+		var got int
+		if !slices.ContainsFunc(reply, func(th *engine.Threshold) bool {
+			has := th.TenantID() == tntID
+			if has {
+				got = th.Hits
+			}
+			return has
+		}) {
+			t.Errorf("%s reply=%s, expected %q to be part of the reply", method, utils.ToJSON(reply), tntID)
 		}
-		if !reflect.DeepEqual(rplyThs, expThs) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expThs), utils.ToJSON(rplyThs))
+		if got != want {
+			t.Errorf("%s hits=%d, want %d (threshold %q)", method, got, want, tntID)
 		}
-	}
-}
-
-func testRPCExpProcessEventWithRPCAPIOpts(t *testing.T) {
-	args := utils.CGREventWithEeIDs{
-		EeIDs: []string{"thProcessEv2"},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "ThresholdProcessEv3",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]any{
-				utils.OptsThresholdsProfileIDs: []string{"THD_2"},
-			},
-		},
-	}
-	var reply map[string]map[string]any
-	if err := ng1RPC.Call(context.Background(), utils.EeSv1ProcessEvent, args, &reply); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(50 * time.Millisecond)
-}
-
-func testRPCExpGetThresholdsAfterThirdEvent(t *testing.T) {
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ThresholdEventTest3",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2", "THD_3"},
-		},
-	}
-	expThs := engine.Thresholds{
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_1",
-			Hits:   1,
-		},
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_2",
-			Hits:   1,
-		},
-		&engine.Threshold{
-			Tenant: "cgrates.org",
-			ID:     "THD_3",
-			Hits:   1,
-		},
-	}
-
-	var rplyThs engine.Thresholds
-	if err := ng2RPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
-		args, &rplyThs); err != nil {
-		t.Error(err)
-	} else {
-		sort.Slice(rplyThs, func(i, j int) bool {
-			return rplyThs[i].ID < rplyThs[j].ID
-		})
-		for idx, thd := range rplyThs {
-			thd.Snooze = expThs[idx].Snooze
-		}
-		if !reflect.DeepEqual(rplyThs, expThs) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expThs), utils.ToJSON(rplyThs))
-		}
-	}
-}
-
-func testRPCExpStopEngine(t *testing.T) {
-	if err := engine.KillEngine(rrDelay); err != nil {
-		t.Error(err)
 	}
 }
