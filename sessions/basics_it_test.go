@@ -1,5 +1,4 @@
-//go:build integration
-// +build integration
+//go:build localonly
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
