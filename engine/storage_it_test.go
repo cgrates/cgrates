@@ -68,7 +68,7 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"value1"},
+					Values: []string{"value1"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -187,7 +187,7 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"value1"},
+					Values: []string{"value1"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
@@ -303,7 +303,7 @@ func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
 			ProfileIDs: []*utils.DynamicStringSliceOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  []string{"value1"},
+					Values: []string{"value1"},
 				},
 			},
 			ProfileIgnoreFilters: []*utils.DynamicBoolOpt{
