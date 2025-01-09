@@ -106,7 +106,6 @@ func (attrS *AttributeService) Start(shutdown chan struct{}, registry *servmanag
 	}()
 
 	attrS.intRPCconn = anz.GetInternalCodec(srv, utils.AttributeS)
-	close(attrS.stateDeps.StateChan(utils.StateServiceUP)) // inform listeners about the service reaching UP state
 	return
 }
 
@@ -123,7 +122,6 @@ func (attrS *AttributeService) Shutdown(_ *servmanager.ServiceRegistry) (err err
 	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
 	attrS.dspS.UnregisterShutdownChan(attrS.ServiceName())
 	attrS.Unlock()
-	close(attrS.StateChan(utils.StateServiceDOWN))
 	return
 }
 

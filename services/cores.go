@@ -92,7 +92,6 @@ func (cS *CoreService) Start(shutdown chan struct{}, registry *servmanager.Servi
 	}
 
 	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CoreS)
-	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -112,7 +111,6 @@ func (cS *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	cS.cS = nil
 	<-cS.csCh
 	cS.cl.RpcUnregisterName(utils.CoreSv1)
-	close(cS.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 

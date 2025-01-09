@@ -78,7 +78,6 @@ func (rad *RadiusAgent) Start(shutdown chan struct{}, registry *servmanager.Serv
 	rad.stopChan = make(chan struct{})
 
 	go rad.listenAndServe(rad.rad, shutdown)
-	close(rad.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -105,7 +104,6 @@ func (rad *RadiusAgent) Reload(shutdown chan struct{}, registry *servmanager.Ser
 // Shutdown stops the service
 func (rad *RadiusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	rad.shutdown()
-	close(rad.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
 

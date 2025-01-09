@@ -103,7 +103,6 @@ func (smg *SessionService) Start(shutdown chan struct{}, registry *servmanager.S
 		go smg.start(shutdown)
 	}
 	smg.intRPCconn = anz.GetInternalCodec(srv, utils.SessionS)
-	close(smg.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -139,7 +138,6 @@ func (smg *SessionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) 
 	smg.sm = nil
 	smg.cl.RpcUnregisterName(utils.SessionSv1)
 	// smg.server.BiRPCUnregisterName(utils.SessionSv1)
-	close(smg.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

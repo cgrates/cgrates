@@ -72,7 +72,6 @@ func (sip *SIPAgent) Start(shutdown chan struct{}, registry *servmanager.Service
 		return
 	}
 	go sip.listenAndServe(shutdown)
-	close(sip.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -103,7 +102,6 @@ func (sip *SIPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer sip.Unlock()
 	sip.sip.Shutdown()
 	sip.sip = nil
-	close(sip.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

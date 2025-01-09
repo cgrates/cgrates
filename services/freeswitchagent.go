@@ -61,7 +61,6 @@ func (fS *FreeswitchAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceR
 	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
 
 	go fS.connect(shutdown)
-	close(fS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -91,7 +90,6 @@ func (fS *FreeswitchAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) 
 	defer fS.Unlock()
 	err = fS.fS.Shutdown()
 	fS.fS = nil
-	close(fS.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

@@ -100,7 +100,6 @@ func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.S
 		}
 	}
 	ran.intRPCconn = anz.GetInternalCodec(srv, utils.RankingS)
-	close(ran.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -120,7 +119,6 @@ func (ran *RankingService) Shutdown(_ *servmanager.ServiceRegistry) (err error) 
 	ran.ran.StopRankingS()
 	ran.ran = nil
 	ran.cl.RpcUnregisterName(utils.RankingSv1)
-	close(ran.StateChan(utils.StateServiceDOWN))
 	return
 }
 

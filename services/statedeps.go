@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // NewStateDependencies constructs a StateDependencies struct
@@ -70,6 +71,11 @@ func waitForServicesToReachState(state string, serviceIDs []string, indexer *ser
 func waitForServiceState(state, serviceID string, indexer *servmanager.ServiceRegistry, timeout time.Duration,
 ) (servmanager.Service, error) {
 	srv := indexer.Lookup(serviceID)
+	if serviceID == utils.AnalyzerS && !srv.ShouldRun() {
+		// Return disabled analyzer service immediately since dependent
+		// services still need the instance.
+		return srv, nil
+	}
 	select {
 	case <-srv.StateChan(state):
 		return srv, nil

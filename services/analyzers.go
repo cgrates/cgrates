@@ -38,12 +38,6 @@ func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 		cfg:       cfg,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
-
-	// Wait for AnalyzerService only when it should run.
-	if !anz.ShouldRun() {
-		close(anz.StateChan(utils.StateServiceUP))
-	}
-
 	return anz
 }
 
@@ -86,7 +80,6 @@ func (anz *AnalyzerService) Start(shutdown chan struct{}, registry *servmanager.
 	}(anz.anz)
 	anz.cl.SetAnalyzer(anz.anz)
 	go anz.start(registry)
-	close(anz.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -123,7 +116,6 @@ func (anz *AnalyzerService) Shutdown(_ *servmanager.ServiceRegistry) (err error)
 	anz.anz = nil
 	anz.Unlock()
 	anz.cl.RpcUnregisterName(utils.AnalyzerSv1)
-	close(anz.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

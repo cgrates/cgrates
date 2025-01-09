@@ -98,7 +98,6 @@ func (reS *ResourceService) Start(shutdown chan struct{}, registry *servmanager.
 	}
 
 	reS.intRPCconn = anz.GetInternalCodec(srv, utils.ResourceS)
-	close(reS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -118,7 +117,6 @@ func (reS *ResourceService) Shutdown(_ *servmanager.ServiceRegistry) (err error)
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
 	reS.cl.RpcUnregisterName(utils.ResourceSv1)
-	close(reS.StateChan(utils.StateServiceDOWN))
 	return
 }
 

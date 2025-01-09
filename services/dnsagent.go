@@ -72,7 +72,6 @@ func (dns *DNSAgent) Start(shutdown chan struct{}, registry *servmanager.Service
 	}
 	dns.stopChan = make(chan struct{})
 	go dns.listenAndServe(dns.stopChan, shutdown)
-	close(dns.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -124,7 +123,6 @@ func (dns *DNSAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	dns.Lock()
 	defer dns.Unlock()
 	dns.dns = nil
-	close(dns.StateChan(utils.StateServiceDOWN))
 	return
 }
 

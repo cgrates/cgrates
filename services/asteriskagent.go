@@ -71,7 +71,6 @@ func (ast *AsteriskAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRe
 		ast.smas[connIdx] = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr)
 		go listenAndServe(ast.smas[connIdx], ast.stopChan)
 	}
-	close(ast.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -84,7 +83,6 @@ func (ast *AsteriskAgent) Reload(shutdown chan struct{}, registry *servmanager.S
 // Shutdown stops the service
 func (ast *AsteriskAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ast.shutdown()
-	close(ast.StateChan(utils.StateServiceDOWN))
 	return
 }
 

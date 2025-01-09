@@ -77,7 +77,6 @@ func (rs *RateService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	close(rs.stopChan)
 	rs.rateS = nil
 	rs.cl.RpcUnregisterName(utils.RateSv1)
-	close(rs.StateChan(utils.StateServiceDOWN))
 	return
 }
 
@@ -124,7 +123,6 @@ func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.Servi
 	}
 
 	rs.intRPCconn = anz.GetInternalCodec(srv, utils.RateS)
-	close(rs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 

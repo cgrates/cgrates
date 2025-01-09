@@ -90,7 +90,6 @@ func (chrS *ChargerService) Start(shutdown chan struct{}, registry *servmanager.
 	}
 
 	chrS.intRPCconn = anz.GetInternalCodec(srv, utils.ChargerS)
-	close(chrS.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -105,7 +104,6 @@ func (chrS *ChargerService) Shutdown(_ *servmanager.ServiceRegistry) (err error)
 	defer chrS.Unlock()
 	chrS.chrS = nil
 	chrS.cl.RpcUnregisterName(utils.ChargerSv1)
-	close(chrS.StateChan(utils.StateServiceDOWN))
 	return
 }
 

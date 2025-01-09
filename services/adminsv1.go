@@ -96,7 +96,6 @@ func (apiService *AdminSv1Service) Start(_ chan struct{}, registry *servmanager.
 
 	//backwards compatible
 	apiService.intRPCconn = anz.GetInternalCodec(srv, utils.AdminSv1)
-	close(apiService.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -112,7 +111,6 @@ func (apiService *AdminSv1Service) Shutdown(_ *servmanager.ServiceRegistry) (err
 	apiService.api = nil
 	apiService.cl.RpcUnregisterName(utils.AdminSv1)
 	apiService.Unlock()
-	close(apiService.StateChan(utils.StateServiceDOWN))
 	return
 }
 

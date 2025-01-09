@@ -62,7 +62,6 @@ func (kam *KamailioAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRe
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 
 	go kam.connect(kam.kam, shutdown)
-	close(kam.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -96,7 +95,6 @@ func (kam *KamailioAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	defer kam.Unlock()
 	err = kam.kam.Shutdown()
 	kam.kam = nil
-	close(kam.StateChan(utils.StateServiceDOWN))
 	return
 }
 

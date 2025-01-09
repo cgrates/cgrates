@@ -89,7 +89,6 @@ func (routeS *RouteService) Start(shutdown chan struct{}, registry *servmanager.
 		}
 	}
 	routeS.intRPCconn = anz.GetInternalCodec(srv, utils.RouteS)
-	close(routeS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -104,7 +103,6 @@ func (routeS *RouteService) Shutdown(_ *servmanager.ServiceRegistry) (err error)
 	defer routeS.Unlock()
 	routeS.routeS = nil
 	routeS.cl.RpcUnregisterName(utils.RouteSv1)
-	close(routeS.StateChan(utils.StateServiceDOWN))
 	return
 }
 
