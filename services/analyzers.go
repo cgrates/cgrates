@@ -57,7 +57,7 @@ type AnalyzerService struct {
 }
 
 // Start should handle the sercive start
-func (anz *AnalyzerService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -75,7 +75,7 @@ func (anz *AnalyzerService) Start(shutdown chan struct{}, registry *servmanager.
 	go func(a *analyzers.AnalyzerS) {
 		if err := a.ListenAndServe(anzCtx); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
-			close(shutdown)
+			shutdown.CloseOnce()
 		}
 	}(anz.anz)
 	anz.cl.SetAnalyzer(anz.anz)
@@ -103,7 +103,7 @@ func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry) {
 }
 
 // Reload handles the change of config
-func (anz *AnalyzerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (anz *AnalyzerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return // for the momment nothing to reload
 }
 

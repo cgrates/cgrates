@@ -57,7 +57,7 @@ type DispatcherService struct {
 }
 
 // Start should handle the sercive start
-func (dspS *DispatcherService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (dspS *DispatcherService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -103,7 +103,7 @@ func (dspS *DispatcherService) Start(shutdown chan struct{}, registry *servmanag
 }
 
 // Reload handles the change of config
-func (dspS *DispatcherService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (dspS *DispatcherService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return // for the momment nothing to reload
 }
 

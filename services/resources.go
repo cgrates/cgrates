@@ -58,7 +58,7 @@ type ResourceService struct {
 }
 
 // Start should handle the service start
-func (reS *ResourceService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	reS.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -102,7 +102,7 @@ func (reS *ResourceService) Start(shutdown chan struct{}, registry *servmanager.
 }
 
 // Reload handles the change of config
-func (reS *ResourceService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (reS *ResourceService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	reS.Lock()
 	reS.reS.Reload(context.TODO())
 	reS.Unlock()

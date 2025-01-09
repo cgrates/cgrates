@@ -56,7 +56,7 @@ type TPeService struct {
 }
 
 // Start should handle the service start
-func (ts *TPeService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (ts *TPeService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
@@ -78,7 +78,7 @@ func (ts *TPeService) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 }
 
 // Reload handles the change of config
-func (ts *TPeService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (ts *TPeService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 

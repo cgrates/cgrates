@@ -54,7 +54,7 @@ type RegistrarCService struct {
 }
 
 // Start should handle the sercive start
-func (dspS *RegistrarCService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (dspS *RegistrarCService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 
@@ -66,7 +66,7 @@ func (dspS *RegistrarCService) Start(_ chan struct{}, _ *servmanager.ServiceRegi
 }
 
 // Reload handles the change of config
-func (dspS *RegistrarCService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (dspS *RegistrarCService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	dspS.rldChan <- struct{}{}
 	return // for the momment nothing to reload
 }

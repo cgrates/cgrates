@@ -55,7 +55,7 @@ type SIPAgent struct {
 }
 
 // Start should handle the sercive start
-func (sip *SIPAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (sip *SIPAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		sip.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -75,15 +75,15 @@ func (sip *SIPAgent) Start(shutdown chan struct{}, registry *servmanager.Service
 	return
 }
 
-func (sip *SIPAgent) listenAndServe(shutdown chan struct{}) {
+func (sip *SIPAgent) listenAndServe(shutdown *utils.SyncedChan) {
 	if err := sip.sip.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.SIPAgent, err.Error()))
-		close(shutdown) // stop the engine here
+		shutdown.CloseOnce() // stop the engine here
 	}
 }
 
 // Reload handles the change of config
-func (sip *SIPAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (sip *SIPAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	if sip.oldListen == sip.cfg.SIPAgentCfg().Listen {
 		return
 	}

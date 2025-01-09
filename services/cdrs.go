@@ -56,7 +56,7 @@ type CDRService struct {
 }
 
 // Start should handle the sercive start
-func (cs *CDRService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -93,7 +93,7 @@ func (cs *CDRService) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 }
 
 // Reload handles the change of config
-func (cs *CDRService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (cs *CDRService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 

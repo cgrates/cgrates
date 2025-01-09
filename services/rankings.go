@@ -58,7 +58,7 @@ type RankingService struct {
 }
 
 // Start should handle the sercive start
-func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	ran.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -104,7 +104,7 @@ func (ran *RankingService) Start(shutdown chan struct{}, registry *servmanager.S
 }
 
 // Reload handles the change of config
-func (ran *RankingService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (ran *RankingService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	ran.Lock()
 	ran.ran.Reload(context.TODO())
 	ran.Unlock()

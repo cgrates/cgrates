@@ -54,7 +54,7 @@ type RouteService struct {
 }
 
 // Start should handle the sercive start
-func (routeS *RouteService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -93,7 +93,7 @@ func (routeS *RouteService) Start(shutdown chan struct{}, registry *servmanager.
 }
 
 // Reload handles the change of config
-func (routeS *RouteService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (routeS *RouteService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 

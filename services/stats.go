@@ -56,7 +56,7 @@ type StatService struct {
 }
 
 // Start should handle the sercive start
-func (sts *StatService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	sts.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -99,7 +99,7 @@ func (sts *StatService) Start(shutdown chan struct{}, registry *servmanager.Serv
 }
 
 // Reload handles the change of config
-func (sts *StatService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (sts *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	sts.Lock()
 	sts.sts.Reload(context.TODO())
 	sts.Unlock()

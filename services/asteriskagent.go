@@ -55,14 +55,14 @@ type AsteriskAgent struct {
 }
 
 // Start should handle the sercive start
-func (ast *AsteriskAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (ast *AsteriskAgent) Start(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	ast.Lock()
 	defer ast.Unlock()
 
 	listenAndServe := func(sma *agents.AsteriskAgent, stopChan chan struct{}) {
 		if err := sma.ListenAndServe(stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> runtime error: %s!", utils.AsteriskAgent, err))
-			close(shutdown)
+			shutdown.CloseOnce()
 		}
 	}
 	ast.stopChan = make(chan struct{})
@@ -75,7 +75,7 @@ func (ast *AsteriskAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRe
 }
 
 // Reload handles the change of config
-func (ast *AsteriskAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (ast *AsteriskAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	ast.shutdown()
 	return ast.Start(shutdown, registry)
 }

@@ -1373,7 +1373,7 @@ func TestCacheSPrecachePartitions(t *testing.T) {
 	if _, err := dm.GetAttributeProfile(context.Background(), utils.CGRateSorg, "TEST_ATTRIBUTES_TEST", true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	cacheS.Precache(make(chan struct{}))
+	cacheS.Precache(utils.NewSyncedChan())
 	time.Sleep(10 * time.Millisecond)
 
 	if rcv, ok := Cache.Get(utils.CacheAttributeProfiles, "cgrates.org:TEST_ATTRIBUTES_TEST"); !ok {
@@ -1410,7 +1410,7 @@ func TestCacheSPrecacheErr(t *testing.T) {
 
 	cacheS := NewCacheS(cfg, nil, connMgr, nil)
 
-	cacheS.Precache(make(chan struct{}))
+	cacheS.Precache(utils.NewSyncedChan())
 	time.Sleep(10 * time.Millisecond)
 	expErr := "<CacheS> precaching cacheID <*accounts>, got error: NO_DATABASE_CONNECTION"
 

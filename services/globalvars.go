@@ -44,7 +44,7 @@ type GlobalVarS struct {
 }
 
 // Start should handle the sercive start
-func (gv *GlobalVarS) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (gv *GlobalVarS) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
@@ -54,7 +54,7 @@ func (gv *GlobalVarS) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) err
 }
 
 // Reload handles the change of config
-func (gv *GlobalVarS) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (gv *GlobalVarS) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	engine.SetHTTPPstrTransport(gv.cfg.HTTPCfg().ClientOpts)
 	utils.DecimalContext.MaxScale = gv.cfg.GeneralCfg().DecimalMaxScale
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale

@@ -53,7 +53,7 @@ type CommonListenerService struct {
 }
 
 // Start handles the service start.
-func (cl *CommonListenerService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (cl *CommonListenerService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	cl.cls = commonlisteners.NewCommonListenerS(cl.caps)
@@ -67,7 +67,7 @@ func (cl *CommonListenerService) Start(_ chan struct{}, _ *servmanager.ServiceRe
 }
 
 // Reload handles the config changes.
-func (cl *CommonListenerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (cl *CommonListenerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 

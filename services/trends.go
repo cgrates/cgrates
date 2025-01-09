@@ -57,7 +57,7 @@ type TrendService struct {
 }
 
 // Start should handle the sercive start
-func (trs *TrendService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	trs.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -103,7 +103,7 @@ func (trs *TrendService) Start(shutdown chan struct{}, registry *servmanager.Ser
 }
 
 // Reload handles the change of config
-func (trs *TrendService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (trs *TrendService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	trs.Lock()
 	trs.trs.Reload(context.TODO())
 	trs.Unlock()

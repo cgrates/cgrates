@@ -34,7 +34,7 @@ import (
 )
 
 func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps, fileCPU *os.File, stopChan chan struct{},
-	shdWg *sync.WaitGroup, shutdown chan struct{}) *CoreS {
+	shdWg *sync.WaitGroup, shutdown *utils.SyncedChan) *CoreS {
 	var st *engine.CapsStats
 	if caps.IsLimited() && cfg.CoreSCfg().CapsStatsInterval != 0 {
 		st = engine.NewCapsStats(cfg.CoreSCfg().CapsStatsInterval, caps, stopChan)
@@ -53,7 +53,7 @@ type CoreS struct {
 	cfg       *config.CGRConfig
 	CapsStats *engine.CapsStats
 	shdWg     *sync.WaitGroup
-	shutdown  chan struct{}
+	shutdown  *utils.SyncedChan
 
 	memProfMux   sync.Mutex
 	finalMemProf string        // full path of the final memory profile created on stop/shutdown
@@ -66,7 +66,7 @@ type CoreS struct {
 }
 
 func (cS *CoreS) ShutdownEngine() {
-	close(cS.shutdown)
+	cS.shutdown.CloseOnce()
 }
 
 // Shutdown is called to shutdown the service

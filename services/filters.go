@@ -51,7 +51,7 @@ type FilterService struct {
 }
 
 // Start handles the service start.
-func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
+func (s *FilterService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CacheS,
@@ -75,7 +75,7 @@ func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.Serv
 }
 
 // Reload handles the config changes.
-func (s *FilterService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (s *FilterService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 

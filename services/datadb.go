@@ -58,7 +58,7 @@ type DataDBService struct {
 }
 
 // Start handles the service start.
-func (db *DataDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (db *DataDBService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
@@ -86,7 +86,7 @@ func (db *DataDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) 
 }
 
 // Reload handles the change of config
-func (db *DataDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
