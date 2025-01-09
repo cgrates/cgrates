@@ -89,7 +89,6 @@ func (cs *CDRService) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 	}
 
 	cs.intRPCconn = anz.GetInternalCodec(srv, utils.CDRServer)
-	close(cs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -104,7 +103,6 @@ func (cs *CDRService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	cs.cdrS = nil
 	cs.Unlock()
 	cs.cl.RpcUnregisterName(utils.CDRsV1)
-	close(cs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

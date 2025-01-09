@@ -95,7 +95,6 @@ func (ja *JanusAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 
 	ja.started = true
 	ja.Unlock()
-	close(ja.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -110,7 +109,6 @@ func (ja *JanusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	err = ja.jA.Shutdown()
 	ja.started = false
 	ja.Unlock()
-	close(ja.stateDeps.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
 

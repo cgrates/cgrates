@@ -79,7 +79,6 @@ func (es *EventExporterService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	es.eeS.ClearExporterCache()
 	es.eeS = nil
 	es.cl.RpcUnregisterName(utils.EeSv1)
-	close(es.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 
@@ -114,7 +113,6 @@ func (es *EventExporterService) Start(_ chan struct{}, registry *servmanager.Ser
 	}
 
 	es.intRPCconn = anz.GetInternalCodec(srv, utils.EEs)
-	close(es.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 

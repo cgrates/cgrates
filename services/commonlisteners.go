@@ -63,7 +63,6 @@ func (cl *CommonListenerService) Start(_ chan struct{}, _ *servmanager.ServiceRe
 	if cl.cfg.ConfigSCfg().Enabled {
 		cl.cls.RegisterHTTPFunc(cl.cfg.ConfigSCfg().URL, config.HandlerConfigS)
 	}
-	close(cl.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -77,7 +76,6 @@ func (cl *CommonListenerService) Shutdown(_ *servmanager.ServiceRegistry) error 
 	cl.mu.Lock()
 	defer cl.mu.Unlock()
 	cl.cls = nil
-	close(cl.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 

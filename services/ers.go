@@ -93,7 +93,6 @@ func (erS *EventReaderService) Start(shutdown chan struct{}, registry *servmanag
 		erS.cl.RpcRegister(srv)
 	}
 	erS.intRPCconn = anz.GetInternalCodec(srv, utils.ERs)
-	close(erS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -120,7 +119,6 @@ func (erS *EventReaderService) Shutdown(_ *servmanager.ServiceRegistry) (err err
 	close(erS.stopChan)
 	erS.ers = nil
 	erS.cl.RpcUnregisterName(utils.ErSv1)
-	close(erS.StateChan(utils.StateServiceDOWN))
 	return
 }
 

@@ -58,6 +58,9 @@ type ServiceManager struct {
 func (m *ServiceManager) StartServices(shutdown chan struct{}) {
 	go m.handleReload(shutdown)
 	for _, svc := range m.registry.List() {
+		// TODO: verify if IsServiceInState check is needed. It should
+		// be redundant since ServManager manages all services and this
+		// runs only at startup
 		if svc.ShouldRun() && !IsServiceInState(svc, utils.StateServiceUP) {
 			m.shdWg.Add(1)
 			go func() {
@@ -66,6 +69,7 @@ func (m *ServiceManager) StartServices(shutdown chan struct{}) {
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 					close(shutdown)
 				}
+				close(svc.StateChan(utils.StateServiceUP))
 				utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, svc.ServiceName()))
 			}()
 		}
@@ -124,6 +128,7 @@ func (m *ServiceManager) reloadService(id string, shutdown chan struct{}) (err e
 	isUp := IsServiceInState(svc, utils.StateServiceUP)
 	if svc.ShouldRun() {
 		if isUp {
+			// TODO: state channels must be reinitiated for both SERVICE_UP and SERVICE_DOWN.
 			if err = svc.Reload(shutdown, m.registry); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 				close(shutdown)
@@ -137,6 +142,7 @@ func (m *ServiceManager) reloadService(id string, shutdown chan struct{}) (err e
 				close(shutdown)
 				return // stop if we encounter an error
 			}
+			close(svc.StateChan(utils.StateServiceUP))
 			utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, svc.ServiceName()))
 		}
 	} else if isUp {
@@ -144,6 +150,7 @@ func (m *ServiceManager) reloadService(id string, shutdown chan struct{}) (err e
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 			close(shutdown)
 		}
+		close(svc.StateChan(utils.StateServiceDOWN))
 		utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, svc.ServiceName()))
 		m.shdWg.Done()
 	}
@@ -161,6 +168,7 @@ func (m *ServiceManager) ShutdownServices() {
 						utils.ServiceManager, svc.ServiceName(), err))
 					return
 				}
+				close(svc.StateChan(utils.StateServiceDOWN))
 				utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, svc.ServiceName()))
 			}()
 		}

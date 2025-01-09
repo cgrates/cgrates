@@ -75,7 +75,6 @@ func (db *StorDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) 
 	if err != nil {
 		return err
 	}
-	close(db.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -132,7 +131,6 @@ func (db *StorDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	db.db.Close()
 	db.db = nil
 	db.Unlock()
-	close(db.StateChan(utils.StateServiceDOWN))
 	return
 }
 

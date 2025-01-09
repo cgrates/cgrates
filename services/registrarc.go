@@ -62,7 +62,6 @@ func (dspS *RegistrarCService) Start(_ chan struct{}, _ *servmanager.ServiceRegi
 	dspS.rldChan = make(chan struct{})
 	dspS.dspS = registrarc.NewRegistrarCService(dspS.cfg, dspS.connMgr)
 	go dspS.dspS.ListenAndServe(dspS.stopChan, dspS.rldChan)
-	close(dspS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -79,7 +78,6 @@ func (dspS *RegistrarCService) Shutdown(_ *servmanager.ServiceRegistry) (err err
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
 	dspS.Unlock()
-	close(dspS.StateChan(utils.StateServiceDOWN))
 	return
 }
 

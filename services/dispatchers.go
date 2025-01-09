@@ -99,7 +99,6 @@ func (dspS *DispatcherService) Start(shutdown chan struct{}, registry *servmanag
 	// until we figured out a better sollution in case of gob server
 	// dspS.server.SetDispatched()
 	dspS.intRPCconn = anz.GetInternalCodec(srv, utils.DispatcherS)
-	close(dspS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -119,7 +118,6 @@ func (dspS *DispatcherService) Shutdown(_ *servmanager.ServiceRegistry) (err err
 	dspS.unregisterAllDispatchedSubsystems()
 	dspS.connMgr.DisableDispatcher()
 	dspS.sync()
-	close(dspS.StateChan(utils.StateServiceDOWN))
 	return
 }
 

@@ -50,7 +50,6 @@ func (gv *GlobalVarS) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) err
 	utils.DecimalContext.MinScale = gv.cfg.GeneralCfg().DecimalMinScale
 	utils.DecimalContext.Precision = gv.cfg.GeneralCfg().DecimalPrecision
 	utils.DecimalContext.RoundingMode = gv.cfg.GeneralCfg().DecimalRoundingMode
-	close(gv.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -66,7 +65,6 @@ func (gv *GlobalVarS) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) er
 
 // Shutdown stops the service
 func (gv *GlobalVarS) Shutdown(_ *servmanager.ServiceRegistry) error {
-	close(gv.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 

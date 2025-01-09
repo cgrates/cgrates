@@ -99,7 +99,6 @@ func (trs *TrendService) Start(shutdown chan struct{}, registry *servmanager.Ser
 		}
 	}
 	trs.intRPCconn = anz.GetInternalCodec(srv, utils.Trends)
-	close(trs.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -119,7 +118,6 @@ func (trs *TrendService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	trs.trs.StopTrendS()
 	trs.trs = nil
 	trs.cl.RpcUnregisterName(utils.TrendSv1)
-	close(trs.StateChan(utils.StateServiceDOWN))
 	return
 }
 

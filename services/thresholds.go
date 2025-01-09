@@ -97,7 +97,6 @@ func (thrs *ThresholdService) Start(shutdown chan struct{}, registry *servmanage
 		}
 	}
 	thrs.intRPCconn = anz.GetInternalCodec(srv, utils.ThresholdS)
-	close(thrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -117,7 +116,6 @@ func (thrs *ThresholdService) Shutdown(_ *servmanager.ServiceRegistry) (_ error)
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
 	thrs.cl.RpcUnregisterName(utils.ThresholdSv1)
-	close(thrs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

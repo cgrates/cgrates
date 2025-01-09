@@ -99,7 +99,6 @@ func (acts *ActionService) Start(shutdown chan struct{}, registry *servmanager.S
 	}
 
 	acts.intRPCconn = anz.GetInternalCodec(srv, utils.ActionS)
-	close(acts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -117,7 +116,6 @@ func (acts *ActionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) 
 	acts.acts.Shutdown()
 	acts.acts = nil
 	acts.cl.RpcUnregisterName(utils.ActionSv1)
-	close(acts.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

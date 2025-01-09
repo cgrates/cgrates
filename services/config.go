@@ -67,7 +67,6 @@ func (s *ConfigService) Start(_ chan struct{}, registry *servmanager.ServiceRegi
 		}
 	}
 	s.intRPCconn = anz.GetInternalCodec(svcs, utils.ConfigSv1)
-	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -79,7 +78,6 @@ func (s *ConfigService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) 
 // Shutdown stops the service.
 func (s *ConfigService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.cl.RpcUnregisterName(utils.ConfigSv1)
-	close(s.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 

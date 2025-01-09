@@ -89,7 +89,6 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps, shutd
 			close(shutdown)
 		}
 	}(da.da)
-	close(da.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -117,7 +116,6 @@ func (da *DiameterAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	close(da.stopChan)
 	da.da = nil
 	da.Unlock()
-	close(da.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
 

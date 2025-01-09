@@ -71,7 +71,6 @@ func (efServ *ExportFailoverService) Start(_ chan struct{}, registry *servmanage
 	efServ.stopChan = make(chan struct{})
 	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
 	efServ.cl.RpcRegister(efServ.srv)
-	close(efServ.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -85,7 +84,6 @@ func (efServ *ExportFailoverService) Shutdown(_ *servmanager.ServiceRegistry) (e
 	efServ.srv = nil
 	close(efServ.stopChan)
 	// NEXT SHOULD EXPORT ALL THE SHUTDOWN LOGGERS TO WRITE
-	close(efServ.StateChan(utils.StateServiceDOWN))
 	return
 }
 

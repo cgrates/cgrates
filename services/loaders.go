@@ -93,7 +93,6 @@ func (ldrs *LoaderService) Start(_ chan struct{}, registry *servmanager.ServiceR
 		}
 	}
 	ldrs.intRPCconn = anz.GetInternalCodec(srv, utils.LoaderS)
-	close(ldrs.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -127,7 +126,6 @@ func (ldrs *LoaderService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	close(ldrs.stopChan)
 	ldrs.cl.RpcUnregisterName(utils.LoaderSv1)
 	ldrs.Unlock()
-	close(ldrs.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

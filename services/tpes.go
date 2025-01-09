@@ -74,7 +74,6 @@ func (ts *TPeService) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 	ts.stopChan = make(chan struct{})
 	ts.srv, _ = birpc.NewService(apis.NewTPeSv1(ts.tpes), utils.EmptyString, false)
 	ts.cl.RpcRegister(ts.srv)
-	close(ts.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -87,7 +86,6 @@ func (ts *TPeService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (e
 func (ts *TPeService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ts.srv = nil
 	close(ts.stopChan)
-	close(ts.StateChan(utils.StateServiceDOWN))
 	return
 }
 

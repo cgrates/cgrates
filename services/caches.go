@@ -86,7 +86,6 @@ func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.Serv
 		}
 	}
 	cS.intRPCconn = anz.GetInternalCodec(srv, utils.CacheS)
-	close(cS.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -98,7 +97,6 @@ func (cS *CacheService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) 
 // Shutdown stops the service
 func (cS *CacheService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	cS.cl.RpcUnregisterName(utils.CacheSv1)
-	close(cS.stateDeps.StateChan(utils.StateServiceDOWN))
 	return
 }
 

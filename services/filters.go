@@ -71,7 +71,6 @@ func (s *FilterService) Start(shutdown chan struct{}, registry *servmanager.Serv
 	defer s.mu.Unlock()
 
 	s.fltrS = engine.NewFilterS(s.cfg, s.connMgr, dbs.DataManager())
-	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -85,7 +84,6 @@ func (s *FilterService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.fltrS = nil
-	close(s.stateDeps.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 

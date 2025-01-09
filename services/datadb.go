@@ -82,7 +82,6 @@ func (db *DataDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) 
 		return err
 	}
 
-	close(db.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -122,7 +121,6 @@ func (db *DataDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
 	db.dm.DataDB().Close()
 	db.dm = nil
 	db.Unlock()
-	close(db.StateChan(utils.StateServiceDOWN))
 	return
 }
 

@@ -81,7 +81,6 @@ func (ha *HTTPAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistr
 				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
-	close(ha.stateDeps.StateChan(utils.StateServiceUP))
 	return
 }
 
@@ -95,7 +94,6 @@ func (ha *HTTPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 	ha.Lock()
 	ha.started = false
 	ha.Unlock()
-	close(ha.stateDeps.StateChan(utils.StateServiceDOWN))
 	return // no shutdown for the momment
 }
 

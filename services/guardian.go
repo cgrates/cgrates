@@ -71,7 +71,6 @@ func (s *GuardianService) Start(_ chan struct{}, registry *servmanager.ServiceRe
 		}
 	}
 	s.intRPCconn = anz.GetInternalCodec(svcs, utils.GuardianS)
-	close(s.stateDeps.StateChan(utils.StateServiceUP))
 	return nil
 }
 
@@ -85,7 +84,6 @@ func (s *GuardianService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.cl.RpcUnregisterName(utils.GuardianSv1)
-	close(s.StateChan(utils.StateServiceDOWN))
 	return nil
 }
 
