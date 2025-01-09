@@ -60,7 +60,7 @@ type EventReaderService struct {
 }
 
 // Start should handle the sercive start
-func (erS *EventReaderService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -96,16 +96,16 @@ func (erS *EventReaderService) Start(shutdown chan struct{}, registry *servmanag
 	return
 }
 
-func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan, rldChan, shutdown chan struct{}) (err error) {
+func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan, rldChan chan struct{}, shutdown *utils.SyncedChan) (err error) {
 	if err = ers.ListenAndServe(stopChan, rldChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%v>", utils.ERs, err))
-		close(shutdown)
+		shutdown.CloseOnce()
 	}
 	return
 }
 
 // Reload handles the change of config
-func (erS *EventReaderService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (erS *EventReaderService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	erS.RLock()
 	erS.rldChan <- struct{}{}
 	erS.RUnlock()

@@ -60,7 +60,7 @@ type ActionService struct {
 }
 
 // Start should handle the service start
-func (acts *ActionService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -103,7 +103,7 @@ func (acts *ActionService) Start(shutdown chan struct{}, registry *servmanager.S
 }
 
 // Reload handles the change of config
-func (acts *ActionService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (acts *ActionService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	acts.rldChan <- struct{}{}
 	return // for the moment nothing to reload
 }

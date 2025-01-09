@@ -54,7 +54,7 @@ type ChargerService struct {
 }
 
 // Start should handle the service start
-func (chrS *ChargerService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
+func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -94,7 +94,7 @@ func (chrS *ChargerService) Start(shutdown chan struct{}, registry *servmanager.
 }
 
 // Reload handles the change of config
-func (chrS *ChargerService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (chrS *ChargerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 

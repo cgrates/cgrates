@@ -65,7 +65,7 @@ func (es *EventExporterService) ShouldRun() (should bool) {
 }
 
 // Reload handles the change of config
-func (es *EventExporterService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (es *EventExporterService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	es.mu.Lock()
 	defer es.mu.Unlock()
 	es.eeS.ClearExporterCache()
@@ -83,7 +83,7 @@ func (es *EventExporterService) Shutdown(_ *servmanager.ServiceRegistry) error {
 }
 
 // Start should handle the service start
-func (es *EventExporterService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
+func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,

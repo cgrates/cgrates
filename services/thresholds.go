@@ -58,7 +58,7 @@ type ThresholdService struct {
 }
 
 // Start should handle the sercive start
-func (thrs *ThresholdService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	thrs.srvDep[utils.DataDB].Add(1)
 
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
@@ -101,7 +101,7 @@ func (thrs *ThresholdService) Start(shutdown chan struct{}, registry *servmanage
 }
 
 // Reload handles the change of config
-func (thrs *ThresholdService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
+func (thrs *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (_ error) {
 	thrs.Lock()
 	thrs.thrs.Reload(context.TODO())
 	thrs.Unlock()

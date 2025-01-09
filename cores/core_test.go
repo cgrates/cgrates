@@ -34,7 +34,7 @@ func TestNewCoreService(t *testing.T) {
 	stopchan := make(chan struct{}, 1)
 	caps := engine.NewCaps(1, utils.MetaBusy)
 	sts := engine.NewCapsStats(cfgDflt.CoreSCfg().CapsStatsInterval, caps, stopchan)
-	shutdown := make(chan struct{})
+	shutdown := utils.NewSyncedChan()
 	expected := &CoreS{
 		cfg:       cfgDflt,
 		CapsStats: sts,
@@ -49,7 +49,7 @@ func TestNewCoreService(t *testing.T) {
 	rcv.Shutdown()
 	rcv.ShutdownEngine()
 	select {
-	case <-shutdown:
+	case <-shutdown.Done():
 	default:
 		t.Error("engine did not shut down")
 	}

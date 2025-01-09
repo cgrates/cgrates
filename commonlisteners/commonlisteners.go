@@ -133,10 +133,10 @@ func (c *CommonListenerS) handleWebSocket(ws *websocket.Conn) {
 	c.rpcServer.ServeCodec(newCapsJSONCodec(ws, c.caps, c.anz))
 }
 
-func (c *CommonListenerS) ServeJSON(addr string, shutdown chan struct{}) (err error) {
+func (c *CommonListenerS) ServeJSON(addr string, shutdown *utils.SyncedChan) (err error) {
 	if c.rpcJSONl, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("Serve%s listen error: %s", utils.JSONCaps, err)
-		close(shutdown)
+		shutdown.CloseOnce()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s server at <%s>.", utils.JSONCaps, addr))
@@ -145,10 +145,10 @@ func (c *CommonListenerS) ServeJSON(addr string, shutdown chan struct{}) (err er
 	})
 }
 
-func (c *CommonListenerS) ServeGOB(addr string, shutdown chan struct{}) (err error) {
+func (c *CommonListenerS) ServeGOB(addr string, shutdown *utils.SyncedChan) (err error) {
 	if c.rpcGOBl, err = net.Listen(utils.TCP, addr); err != nil {
 		log.Printf("Serve%s listen error: %s", utils.GOBCaps, err)
-		close(shutdown)
+		shutdown.CloseOnce()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s server at <%s>.", utils.GOBCaps, addr))
@@ -158,7 +158,7 @@ func (c *CommonListenerS) ServeGOB(addr string, shutdown chan struct{}) (err err
 }
 
 func (c *CommonListenerS) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string,
-	useBasicAuth bool, userList map[string]string, shutdown chan struct{}) {
+	useBasicAuth bool, userList map[string]string, shutdown *utils.SyncedChan) {
 	c.mu.Lock()
 	c.httpEnabled = c.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
 	enabled := c.httpEnabled
@@ -218,7 +218,7 @@ func (c *CommonListenerS) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPa
 	c.httpServer.Addr = addr
 	if err := c.httpServer.ListenAndServe(); err != nil {
 		log.Println(fmt.Sprintf("<HTTP>Error: %s when listening ", err))
-		close(shutdown)
+		shutdown.CloseOnce()
 	}
 }
 
@@ -249,16 +249,16 @@ func (c *CommonListenerS) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis fun
 }
 
 func (c *CommonListenerS) ServeGOBTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
-	serverName string, shutdown chan struct{}) (err error) {
+	serverName string, shutdown *utils.SyncedChan) (err error) {
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
-		close(shutdown)
+		shutdown.CloseOnce()
 		return
 	}
 	c.rpcGOBlTLS, err = tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
-		close(shutdown)
+		shutdown.CloseOnce()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s TLS server at <%s>.", utils.GOBCaps, addr))
@@ -269,16 +269,16 @@ func (c *CommonListenerS) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 }
 
 func (c *CommonListenerS) ServeJSONTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
-	serverName string, shutdown chan struct{}) (err error) {
+	serverName string, shutdown *utils.SyncedChan) (err error) {
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
-		close(shutdown)
+		shutdown.CloseOnce()
 		return
 	}
 	c.rpcJSONlTLS, err = tls.Listen(utils.TCP, addr, config)
 	if err != nil {
 		log.Println(fmt.Sprintf("Error: %s when listening", err))
-		close(shutdown)
+		shutdown.CloseOnce()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s TLS server at <%s>.", utils.JSONCaps, addr))
@@ -290,7 +290,7 @@ func (c *CommonListenerS) ServeJSONTLS(addr, serverCrt, serverKey, caCert string
 
 func (c *CommonListenerS) ServeHTTPS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
 	serverName, jsonRPCURL, wsRPCURL, pprofPath string, useBasicAuth bool, userList map[string]string,
-	shutdown chan struct{}) {
+	shutdown *utils.SyncedChan) {
 	c.mu.Lock()
 	c.httpEnabled = c.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
 	enabled := c.httpEnabled
@@ -339,7 +339,7 @@ func (c *CommonListenerS) ServeHTTPS(addr, serverCrt, serverKey, caCert string, 
 	}
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
-		close(shutdown)
+		shutdown.CloseOnce()
 		return
 	}
 	c.httpsServer.Addr = addr
@@ -348,7 +348,7 @@ func (c *CommonListenerS) ServeHTTPS(addr, serverCrt, serverKey, caCert string, 
 
 	if err := c.httpsServer.ListenAndServeTLS(serverCrt, serverKey); err != nil {
 		log.Println(fmt.Sprintf("<HTTPS>Error: %s when listening ", err))
-		close(shutdown)
+		shutdown.CloseOnce()
 	}
 }
 
@@ -380,7 +380,7 @@ func (c *CommonListenerS) StopBiRPC() {
 	c.birpcSrv = birpc.NewBirpcServer()
 }
 
-func (c *CommonListenerS) StartServer(cfg *config.CGRConfig, shutdown chan struct{}) {
+func (c *CommonListenerS) StartServer(cfg *config.CGRConfig, shutdown *utils.SyncedChan) {
 	c.startSrv.Do(func() {
 		go c.ServeJSON(cfg.ListenCfg().RPCJSONListen, shutdown)
 		go c.ServeGOB(cfg.ListenCfg().RPCGOBListen, shutdown)

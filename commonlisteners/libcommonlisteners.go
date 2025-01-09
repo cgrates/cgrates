@@ -124,14 +124,14 @@ func loadTLSConfig(serverCrt, serverKey, caCert string, serverPolicy int,
 	return
 }
 
-func acceptRPC(shutdown chan struct{}, srv *birpc.Server, l net.Listener, codecName string, newCodec func(conn conn) birpc.ServerCodec) (err error) {
+func acceptRPC(shutdown *utils.SyncedChan, srv *birpc.Server, l net.Listener, codecName string, newCodec func(conn conn) birpc.ServerCodec) (err error) {
 	var errCnt int
 	var lastErrorTime time.Time
 	for {
 		var conn net.Conn
 		if conn, err = l.Accept(); err != nil {
 			select {
-			case <-shutdown:
+			case <-shutdown.Done():
 				return
 			default:
 			}
@@ -143,7 +143,7 @@ func acceptRPC(shutdown chan struct{}, srv *birpc.Server, l net.Listener, codecN
 			lastErrorTime = time.Now()
 			errCnt++
 			if errCnt > 50 { // Too many errors in short interval, network buffer failure most probably
-				close(shutdown)
+				shutdown.CloseOnce()
 				return
 			}
 			continue

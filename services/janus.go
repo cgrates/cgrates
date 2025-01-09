@@ -59,7 +59,7 @@ type JanusAgent struct {
 }
 
 // Start should jandle the sercive start
-func (ja *JanusAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -99,7 +99,7 @@ func (ja *JanusAgent) Start(_ chan struct{}, registry *servmanager.ServiceRegist
 }
 
 // Reload jandles the change of config
-func (ja *JanusAgent) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (ja *JanusAgent) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return // no reload
 }
 

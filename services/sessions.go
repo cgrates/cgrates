@@ -59,7 +59,7 @@ type SessionService struct {
 }
 
 // Start should handle the service start
-func (smg *SessionService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -106,20 +106,20 @@ func (smg *SessionService) Start(shutdown chan struct{}, registry *servmanager.S
 	return
 }
 
-func (smg *SessionService) start(shutdown chan struct{}) (err error) {
+func (smg *SessionService) start(shutdown *utils.SyncedChan) (err error) {
 	if err := smg.cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
 		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
 		smg.Lock()
 		smg.bircpEnabled = false
 		smg.Unlock()
-		close(shutdown)
+		shutdown.CloseOnce()
 	}
 	return
 }
 
 // Reload handles the change of config
-func (smg *SessionService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (smg *SessionService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 

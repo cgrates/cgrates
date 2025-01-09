@@ -58,7 +58,7 @@ type RadiusAgent struct {
 }
 
 // Start should handle the sercive start
-func (rad *RadiusAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (rad *RadiusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		rad.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -81,16 +81,16 @@ func (rad *RadiusAgent) Start(shutdown chan struct{}, registry *servmanager.Serv
 	return
 }
 
-func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shutdown chan struct{}) (err error) {
+func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shutdown *utils.SyncedChan) (err error) {
 	if err = r.ListenAndServe(rad.stopChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
-		close(shutdown)
+		shutdown.CloseOnce()
 	}
 	return
 }
 
 // Reload handles the change of config
-func (rad *RadiusAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (rad *RadiusAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	if rad.lnet == rad.cfg.RadiusAgentCfg().ListenNet &&
 		rad.lauth == rad.cfg.RadiusAgentCfg().ListenAuth &&
 		rad.lacct == rad.cfg.RadiusAgentCfg().ListenAcct {

@@ -52,7 +52,7 @@ type StorDBService struct {
 }
 
 // Start should handle the service start
-func (db *StorDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (db *StorDBService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.StorDbCfg().Clone()
@@ -79,7 +79,7 @@ func (db *StorDBService) Start(_ chan struct{}, _ *servmanager.ServiceRegistry) 
 }
 
 // Reload handles the change of config
-func (db *StorDBService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (db *StorDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {

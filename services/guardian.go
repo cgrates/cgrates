@@ -48,7 +48,7 @@ type GuardianService struct {
 }
 
 // Start handles the service start.
-func (s *GuardianService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
+func (s *GuardianService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -75,7 +75,7 @@ func (s *GuardianService) Start(_ chan struct{}, registry *servmanager.ServiceRe
 }
 
 // Reload handles the config changes.
-func (s *GuardianService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (s *GuardianService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 

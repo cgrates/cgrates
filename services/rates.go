@@ -65,7 +65,7 @@ func (rs *RateService) ShouldRun() (should bool) {
 }
 
 // Reload handles the change of config
-func (rs *RateService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
+func (rs *RateService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (_ error) {
 	rs.rldChan <- struct{}{}
 	return
 }
@@ -81,7 +81,7 @@ func (rs *RateService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 }
 
 // Start should handle the service start
-func (rs *RateService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,

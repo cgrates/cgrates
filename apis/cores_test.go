@@ -60,7 +60,7 @@ func TestCoreSSleep(t *testing.T) {
 func TestCoreSShutdown(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	shutdown := make(chan struct{})
+	shutdown := utils.NewSyncedChan()
 	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, shutdown)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.CGREvent{}
@@ -71,7 +71,7 @@ func TestCoreSShutdown(t *testing.T) {
 		t.Errorf("Expected OK, received %+v", reply)
 	}
 	select {
-	case <-shutdown:
+	case <-shutdown.Done():
 	default:
 		t.Error("engine did not shut down")
 	}

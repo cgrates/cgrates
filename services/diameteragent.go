@@ -59,7 +59,7 @@ type DiameterAgent struct {
 }
 
 // Start should handle the sercive start
-func (da *DiameterAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
+func (da *DiameterAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		da.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -71,7 +71,7 @@ func (da *DiameterAgent) Start(shutdown chan struct{}, registry *servmanager.Ser
 	return da.start(fs.(*FilterService).FilterS(), da.caps, shutdown)
 }
 
-func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps, shutdown chan struct{}) error {
+func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps, shutdown *utils.SyncedChan) error {
 	var err error
 	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr, caps)
 	if err != nil {
@@ -86,14 +86,14 @@ func (da *DiameterAgent) start(filterS *engine.FilterS, caps *engine.Caps, shutd
 		if err := d.ListenAndServe(da.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
-			close(shutdown)
+			shutdown.CloseOnce()
 		}
 	}(da.da)
 	return nil
 }
 
 // Reload handles the change of config
-func (da *DiameterAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (da *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	da.Lock()
 	defer da.Unlock()
 	if da.lnet == da.cfg.DiameterAgentCfg().ListenNet &&

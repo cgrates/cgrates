@@ -56,7 +56,7 @@ func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager
 }
 
 // Start should handle the service start
-func (efServ *ExportFailoverService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (efServ *ExportFailoverService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
 		efServ.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -75,7 +75,7 @@ func (efServ *ExportFailoverService) Start(_ chan struct{}, registry *servmanage
 }
 
 // Reload handles the change of config
-func (efServ *ExportFailoverService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (efServ *ExportFailoverService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 

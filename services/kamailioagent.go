@@ -54,7 +54,7 @@ type KamailioAgent struct {
 }
 
 // Start should handle the sercive start
-func (kam *KamailioAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (kam *KamailioAgent) Start(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 
@@ -66,7 +66,7 @@ func (kam *KamailioAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRe
 }
 
 // Reload handles the change of config
-func (kam *KamailioAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (kam *KamailioAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	kam.Lock()
 	defer kam.Unlock()
 	if err = kam.kam.Shutdown(); err != nil {
@@ -77,13 +77,13 @@ func (kam *KamailioAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceR
 	return
 }
 
-func (kam *KamailioAgent) connect(k *agents.KamailioAgent, shutdown chan struct{}) (err error) {
+func (kam *KamailioAgent) connect(k *agents.KamailioAgent, shutdown *utils.SyncedChan) (err error) {
 	if err = k.Connect(); err != nil {
 		if !strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
 			if !strings.Contains(err.Error(), "KamEvapi") {
 				utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
 			}
-			close(shutdown)
+			shutdown.CloseOnce()
 		}
 	}
 	return

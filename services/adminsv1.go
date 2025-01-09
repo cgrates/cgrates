@@ -57,7 +57,7 @@ type AdminSv1Service struct {
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (apiService *AdminSv1Service) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (apiService *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -100,7 +100,7 @@ func (apiService *AdminSv1Service) Start(_ chan struct{}, registry *servmanager.
 }
 
 // Reload handles the change of config
-func (apiService *AdminSv1Service) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (apiService *AdminSv1Service) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 

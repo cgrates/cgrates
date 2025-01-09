@@ -86,7 +86,7 @@ func runCGREngine(fs []string) (err error) {
 
 	shdWg := new(sync.WaitGroup)
 	shdWg.Add(1)
-	shutdown := make(chan struct{})
+	shutdown := utils.NewSyncedChan()
 	go handleSignals(shutdown, cfg, shdWg)
 
 	if *flags.ScheduledShutdown != utils.EmptyString {
@@ -100,8 +100,8 @@ func runCGREngine(fs []string) (err error) {
 			tm := time.NewTimer(shtDwDur)
 			select {
 			case <-tm.C:
-				close(shutdown)
-			case <-shutdown:
+				shutdown.CloseOnce()
+			case <-shutdown.Done():
 				tm.Stop()
 			}
 		}()
@@ -266,7 +266,7 @@ func runCGREngine(fs []string) (err error) {
 		}
 	}
 
-	<-shutdown
+	<-shutdown.Done()
 	return
 }
 
@@ -315,7 +315,7 @@ func cgrInitServiceManagerV1(iServMngrCh chan birpc.ClientConnector, cfg *config
 	iServMngrCh <- anz.GetInternalCodec(srv, utils.ServiceManager)
 }
 
-func cgrStartRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown chan struct{}) {
+func cgrStartRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown *utils.SyncedChan) {
 	if cfg.DispatcherSCfg().Enabled { // wait only for dispatcher as cache is allways registered before this
 		if utils.StructChanTimeout(
 			registry.Lookup(utils.DispatcherS).StateChan(utils.StateServiceUP),
@@ -327,7 +327,7 @@ func cgrStartRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, s
 	cl.StartServer(cfg, shutdown)
 }
 
-func handleSignals(stopChan chan struct{}, cfg *config.CGRConfig, shdWg *sync.WaitGroup) {
+func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *sync.WaitGroup) {
 	defer shdWg.Done()
 	shutdownSignal := make(chan os.Signal, 1)
 	reloadSignal := make(chan os.Signal, 1)
@@ -336,10 +336,10 @@ func handleSignals(stopChan chan struct{}, cfg *config.CGRConfig, shdWg *sync.Wa
 	signal.Notify(reloadSignal, syscall.SIGHUP)
 	for {
 		select {
-		case <-stopChan:
+		case <-shutdown.Done():
 			return
 		case <-shutdownSignal:
-			close(stopChan)
+			shutdown.CloseOnce()
 		case <-reloadSignal:
 			//  do it in its own goroutine in order to not block the signal handler with the reload functionality
 			go func() {

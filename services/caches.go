@@ -53,7 +53,7 @@ type CacheService struct {
 }
 
 // Start should handle the sercive start
-func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -90,7 +90,7 @@ func (cS *CacheService) Start(shutdown chan struct{}, registry *servmanager.Serv
 }
 
 // Reload handles the change of config
-func (cS *CacheService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (_ error) {
+func (cS *CacheService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (_ error) {
 	return
 }
 
@@ -115,17 +115,17 @@ func (cS *CacheService) GetCacheSChan() chan *engine.CacheS {
 	return cS.cacheCh
 }
 
-func (cS *CacheService) WaitToPrecache(shutdown chan struct{}, cacheIDs ...string) (err error) {
+func (cS *CacheService) WaitToPrecache(shutdown *utils.SyncedChan, cacheIDs ...string) (err error) {
 	var cacheS *engine.CacheS
 	select {
-	case <-shutdown:
+	case <-shutdown.Done():
 		return
 	case cacheS = <-cS.cacheCh:
 		cS.cacheCh <- cacheS
 	}
 	for _, cacheID := range cacheIDs {
 		select {
-		case <-shutdown:
+		case <-shutdown.Done():
 			return
 		case <-cacheS.GetPrecacheChannel(cacheID):
 		}

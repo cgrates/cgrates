@@ -55,7 +55,7 @@ type DNSAgent struct {
 }
 
 // Start should handle the service start
-func (dns *DNSAgent) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -76,7 +76,7 @@ func (dns *DNSAgent) Start(shutdown chan struct{}, registry *servmanager.Service
 }
 
 // Reload handles the change of config
-func (dns *DNSAgent) Reload(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -104,12 +104,12 @@ func (dns *DNSAgent) Reload(shutdown chan struct{}, registry *servmanager.Servic
 	return
 }
 
-func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shutdown chan struct{}) (err error) {
+func (dns *DNSAgent) listenAndServe(stopChan chan struct{}, shutdown *utils.SyncedChan) (err error) {
 	dns.dns.RLock()
 	defer dns.dns.RUnlock()
 	if err = dns.dns.ListenAndServe(stopChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
-		close(shutdown) // stop the engine here
+		shutdown.CloseOnce() // stop the engine here
 	}
 	return
 }

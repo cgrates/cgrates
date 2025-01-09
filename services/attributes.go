@@ -57,7 +57,7 @@ type AttributeService struct {
 }
 
 // Start should handle the service start
-func (attrS *AttributeService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -110,7 +110,7 @@ func (attrS *AttributeService) Start(shutdown chan struct{}, registry *servmanag
 }
 
 // Reload handles the change of config
-func (attrS *AttributeService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (attrS *AttributeService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return // for the moment nothing to reload
 }
 

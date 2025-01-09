@@ -54,7 +54,7 @@ type FreeswitchAgent struct {
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (fS *FreeswitchAgent) Start(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 
@@ -65,7 +65,7 @@ func (fS *FreeswitchAgent) Start(shutdown chan struct{}, _ *servmanager.ServiceR
 }
 
 // Reload handles the change of config
-func (fS *FreeswitchAgent) Reload(shutdown chan struct{}, _ *servmanager.ServiceRegistry) (err error) {
+func (fS *FreeswitchAgent) Reload(shutdown *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	fS.Lock()
 	defer fS.Unlock()
 	if err = fS.fS.Shutdown(); err != nil {
@@ -76,10 +76,10 @@ func (fS *FreeswitchAgent) Reload(shutdown chan struct{}, _ *servmanager.Service
 	return
 }
 
-func (fS *FreeswitchAgent) connect(shutdown chan struct{}) {
+func (fS *FreeswitchAgent) connect(shutdown *utils.SyncedChan) {
 	if err := fS.fS.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-		close(shutdown) // stop the engine here
+		shutdown.CloseOnce() // stop the engine here
 	}
 	return
 }

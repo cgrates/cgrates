@@ -57,7 +57,7 @@ type LoaderService struct {
 }
 
 // Start should handle the service start
-func (ldrs *LoaderService) Start(_ chan struct{}, registry *servmanager.ServiceRegistry) (err error) {
+func (ldrs *LoaderService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -97,7 +97,7 @@ func (ldrs *LoaderService) Start(_ chan struct{}, registry *servmanager.ServiceR
 }
 
 // Reload handles the change of config
-func (ldrs *LoaderService) Reload(_ chan struct{}, registry *servmanager.ServiceRegistry) error {
+func (ldrs *LoaderService) Reload(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.FilterS,

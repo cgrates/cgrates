@@ -123,8 +123,8 @@ func testServeJSON(t *testing.T) {
 
 	buff := new(bytes.Buffer)
 	log.SetOutput(buff)
-	shutdown := make(chan struct{})
-	defer close(shutdown)
+	shutdown := utils.NewSyncedChan()
+	defer shutdown.CloseOnce()
 	defer server.Stop()
 	go server.ServeJSON(":88845", shutdown)
 	runtime.Gosched()

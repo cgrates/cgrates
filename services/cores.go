@@ -63,7 +63,7 @@ type CoreService struct {
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start(shutdown chan struct{}, registry *servmanager.ServiceRegistry) error {
+func (cS *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -96,7 +96,7 @@ func (cS *CoreService) Start(shutdown chan struct{}, registry *servmanager.Servi
 }
 
 // Reload handles the change of config
-func (cS *CoreService) Reload(_ chan struct{}, _ *servmanager.ServiceRegistry) error {
+func (cS *CoreService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
