@@ -2236,7 +2236,7 @@ const (
 	MetaStatsDerivedReplyCfg      = "*statsDerivedReply"
 	MetaThresholdsDerivedReplyCfg = "*thresholdsDerivedReply"
 	MetaMaxUsageCfg               = "*maxUsage"
-	MetaForceDurationCfg          = "*forceDuration"
+	MetaForceUsageCfg             = "*forceUsage"
 	MetaTTLCfg                    = "*ttl"
 	MetaChargeableCfg             = "*chargeable"
 	MetaDebitIntervalCfg          = "*debitInterval"
@@ -2425,7 +2425,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, MetaRoutes,
 	OptsSesRouteSDerivedReply, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
 	OptsSesSTIRInitiate, OptsSesThresholdSDerivedReply,
-	OptsSesMaxUsage, OptsSesForceDuration, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
+	OptsSesMaxUsage, OptsSesForceUsage, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
 	OptsSesMessage, MetaAttributes, MetaChargers, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, MetaStats, OptsCDRsStore, MetaThresholds, MetaRates, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
@@ -2443,6 +2443,7 @@ const (
 	OptsSesTTLLastUsed   = "*sesTTLLastUsed"
 	OptsSesTTLMaxDelay   = "*sesTTLMaxDelay"
 	OptsSesTTLUsage      = "*sesTTLUsage"
+	OptsSesForceUsage    = "*sesForceUsage"
 
 	OptsSesAttributeSDerivedReply = "*sesAttributeSDerivedReply"
 	OptsSesBlockerError           = "*sesBlockerError"
@@ -2458,7 +2459,6 @@ const (
 	OptsSesSTIRInitiate           = "*sesSTIRInitiate"
 	OptsSesThresholdSDerivedReply = "*sesThresholdSDerivedReply"
 	OptsSesMaxUsage               = "*sesMaxUsage"
-	OptsSesForceDuration          = "*sesForceDuration"
 	OptsSesInitiate               = "*sesInitiate"
 	OptsSesUpdate                 = "*sesUpdate"
 	OptsSesTerminate              = "*sesTerminate"
@@ -2466,6 +2466,7 @@ const (
 
 	// Accounts
 	OptsAccountsUsage      = "*acntUsage"
+	OptsAccountsForceUsage = "*accountSForceUsage"
 	OptsAccountsProfileIDs = "*acntProfileIDs"
 
 	// Actions

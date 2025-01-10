@@ -282,8 +282,8 @@ func (dS *DispatcherService) SessionSv1STIRIdentity(ctx *context.Context, args *
 }
 func (dS *DispatcherService) SessionSv1SetPassiveSession(ctx *context.Context, args *sessions.Session, reply *string) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args != nil && len(args.Tenant) != 0 {
-		tnt = args.Tenant
+	if args != nil && len(args.OriginCGREvent.Tenant) != 0 {
+		tnt = args.OriginCGREvent.Tenant
 	}
 	ev := make(map[string]any)
 	opts := make(map[string]any)

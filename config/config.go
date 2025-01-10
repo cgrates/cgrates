@@ -166,7 +166,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				StatsDerivedReply:      []*DynamicBoolOpt{},
 				ThresholdsDerivedReply: []*DynamicBoolOpt{},
 				MaxUsage:               []*DynamicBoolOpt{},
-				ForceDuration:          []*DynamicBoolOpt{},
+				ForceUsage:             []*DynamicBoolOpt{},
 				TTL:                    []*DynamicDurationOpt{},
 				Chargeable:             []*DynamicBoolOpt{},
 				TTLLastUsage:           []*DynamicDurationPointerOpt{},
@@ -174,6 +174,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				DebitInterval:          []*DynamicDurationOpt{},
 				TTLMaxDelay:            []*DynamicDurationOpt{},
 				TTLUsage:               []*DynamicDurationPointerOpt{},
+>>>>>>> Sessions struct changes
 			},
 		},
 		fsAgentCfg:       new(FsAgentCfg),

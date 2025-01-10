@@ -156,6 +156,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 			restoreAccounts(ctx, aS.dm, acnts, acntBkps)
 		}
 	}()
+	cgrEvDP := cgrEv.AsDataProvider()
 	for i, acnt := range acnts {
 		if usage.Cmp(decimal.New(0, 0)) == 0 {
 			return // no more debits
@@ -189,13 +190,22 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		// check for blockers for every profile
 		var blocker bool
 		if blocker, err = engine.BlockerFromDynamics(ctx, acnt.Blockers, aS.fltrS,
-			cgrEv.Tenant, cgrEv.AsDataProvider()); err != nil {
+			cgrEv.Tenant, cgrEvDP); err != nil {
 			return
 		}
 		// if blockers active, do not debit from the other accounts
 		if blocker {
 			break
 		}
+	}
+	var forceUsage bool
+	if forceUsage, err = engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEvDP, aS.fltrS, nil,
+		false, utils.OptsAccountsForceUsage); err != nil {
+		return
+	}
+	if usage.Cmp(dbted) == 1 && forceUsage {
+		err = utils.ErrInsufficientCredit
+		return
 	}
 	return
 }

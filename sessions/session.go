@@ -40,83 +40,52 @@ func (s *SessionID) OptsOriginID() string {
 
 // ExternalSession is used when displaying active sessions via RPC
 type ExternalSession struct {
-	//CGRID         string
+	ID            string
 	RunID         string
-	ToR           string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
-	OriginID      string            // represents the unique accounting id given by the telecom switch generating the CDR
-	OriginHost    string            // represents the IP address of the host generating the CDR (automatically populated by the server)
-	Source        string            // formally identifies the source of the CDR (free form field)
-	RequestType   string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>
-	Tenant        string            // tenant whom this record belongs
-	Category      string            // free-form filter for this record, matching the category defined in rating profiles.
-	Account       string            // account id (accounting subsystem) the record should be attached to
-	Subject       string            // rating subject (rating subsystem) this record should be attached to
-	Destination   string            // destination to be charged
-	SetupTime     time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
-	AnswerTime    time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
-	Usage         time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
-	ExtraFields   map[string]string // Extra fields to be stored in CDR
+	CGREvent      *utils.CGREvent
 	NodeID        string
-	LoopIndex     float64       // indicates the position of this segment in a cost request loop
-	DurationIndex time.Duration // the call duration so far (till TimeEnd)
-	MaxRate       float64
-	MaxRateUnit   time.Duration
-	MaxCostSoFar  float64
+	TotalUsage    time.Duration // the call duration so far (till TimeEnd)
+	TotalCost     float64
 	DebitInterval time.Duration
 	NextAutoDebit time.Time
 }
 
+// NewSession is the constructor for one Session
+func NewSession(origCGREv *utils.CGREvent, clientConnID string, runEvents []*utils.CGREvent) (s *Session) {
+	s = &Session{
+		ID:             utils.IfaceAsString(origCGREv.APIOpts[utils.MetaOriginID]),
+		OriginCGREvent: origCGREv,
+		ClientConnID:   clientConnID,
+	}
+	if runEvents != nil {
+		s.SRuns = make([]*SRun, len(runEvents))
+		for i, runEv := range runEvents {
+			s.SRuns[i] = NewSRun(runEv)
+		}
+	}
+	return
+}
+
 // Session is the main structure to describe a call
 type Session struct {
-	lk            sync.RWMutex
-	Tenant        string
-	ResourceID    string
-	ClientConnID  string          // connection ID towards the client so we can recover from passive
-	EventStart    engine.MapEvent // Event which started the session
-	DebitInterval time.Duration   // execute debits for *prepaid runs
-	Chargeable    bool            // used in case of pausing debit
-	SRuns         []*SRun         // forked based on ChargerS
-	OptsStart     engine.MapEvent
+	ID             string          // Unique identifier per Session, defaults to APIOpts[*originID]
+	OriginCGREvent *utils.CGREvent // initial CGREvent received
+	ClientConnID   string          // connection ID towards the client so we can recover from passive
+	DebitInterval  *time.Duration  // execute debits for *prepaid runs
+	SRuns          []*SRun         // forked based on ChargerS
 
+	lk          sync.RWMutex
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
 }
 
-// Lock exported function from sync.RWMutex
-func (s *Session) Lock() {
-	s.lk.Lock()
-}
-
-// Unlock exported function from sync.RWMutex
-func (s *Session) Unlock() {
-	s.lk.Unlock()
-}
-
-// RLock exported function from sync.RWMutex
-func (s *Session) RLock() {
-	s.lk.RLock()
-}
-
-// RUnlock exported function from sync.RWMutex
-func (s *Session) RUnlock() {
-	s.lk.RUnlock()
-}
-
-// originID is method to return the originID of a session
-// not thread safe
-func (s *Session) originID() string {
-	return utils.IfaceAsString(s.OptsStart[utils.MetaOriginID])
-}
-
 // Clone is a thread safe method to clone the sessions information
 func (s *Session) Clone() (cln *Session) {
-	s.RLock()
+	s.lk.RLock()
 	cln = &Session{
-		Tenant:        s.Tenant,
-		ResourceID:    s.ResourceID,
-		ClientConnID:  s.ClientConnID,
-		EventStart:    s.EventStart.Clone(),
-		DebitInterval: s.DebitInterval,
+		OriginCGREvent: s.OriginCGREvent.Clone(),
+		ClientConnID:   s.ClientConnID,
+		DebitInterval:  s.DebitInterval,
 	}
 	if s.SRuns != nil {
 		cln.SRuns = make([]*SRun, len(s.SRuns))
@@ -124,69 +93,41 @@ func (s *Session) Clone() (cln *Session) {
 			cln.SRuns[i] = sR.Clone()
 		}
 	}
-	s.RUnlock()
+	s.lk.RUnlock()
 	return
 }
 
 // AsExternalSessions returns the session as a list of ExternalSession using all SRuns (thread safe)
 func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
-	s.RLock()
+	s.lk.RLock()
 	aSs = make([]*ExternalSession, len(s.SRuns))
 	for i, sr := range s.SRuns {
 		aSs[i] = &ExternalSession{
-			//CGRID:         utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]),
-			RunID:         sr.RunID,
-			ToR:           sr.Event.GetStringIgnoreErrors(utils.ToR),
-			OriginID:      s.EventStart.GetStringIgnoreErrors(utils.OriginID),
-			OriginHost:    s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
-			Source:        utils.SessionS + "_" + s.EventStart.GetStringIgnoreErrors(utils.EventName),
-			RequestType:   sr.Event.GetStringIgnoreErrors(utils.RequestType),
-			Tenant:        s.Tenant,
-			Category:      sr.Event.GetStringIgnoreErrors(utils.Category),
-			Account:       sr.Event.GetStringIgnoreErrors(utils.AccountField),
-			Subject:       sr.Event.GetStringIgnoreErrors(utils.Subject),
-			Destination:   sr.Event.GetStringIgnoreErrors(utils.Destination),
-			SetupTime:     sr.Event.GetTimeIgnoreErrors(utils.SetupTime, tmz),
-			AnswerTime:    sr.Event.GetTimeIgnoreErrors(utils.AnswerTime, tmz),
-			Usage:         sr.TotalUsage,
-			ExtraFields:   sr.Event.AsMapString(utils.MainCDRFields),
-			NodeID:        nodeID,
-			DebitInterval: s.DebitInterval,
+			ID:       s.ID,
+			RunID:    sr.ID,
+			CGREvent: sr.CGREvent,
+			NodeID:   utils.EmptyString,
 		}
+
 		if sr.NextAutoDebit != nil {
 			aSs[i].NextAutoDebit = *sr.NextAutoDebit
 		}
 	}
-	s.RUnlock()
+	s.lk.RUnlock()
 	return
 }
 
 // AsExternalSession returns the session as an ExternalSession using the SRuns given
-func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalSession) {
+func (s *Session) AsExternalSession(sRunIdx int, nodeID string) (aS *ExternalSession) {
 	aS = &ExternalSession{
-		//CGRID:         utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]),
-		RunID:         sr.RunID,
-		ToR:           sr.Event.GetStringIgnoreErrors(utils.ToR),
-		OriginID:      s.EventStart.GetStringIgnoreErrors(utils.OriginID),
-		OriginHost:    s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
-		Source:        utils.SessionS + "_" + s.EventStart.GetStringIgnoreErrors(utils.EventName),
-		RequestType:   sr.Event.GetStringIgnoreErrors(utils.RequestType),
-		Tenant:        s.Tenant,
-		Category:      sr.Event.GetStringIgnoreErrors(utils.Category),
-		Account:       sr.Event.GetStringIgnoreErrors(utils.AccountField),
-		Subject:       sr.Event.GetStringIgnoreErrors(utils.Subject),
-		Destination:   sr.Event.GetStringIgnoreErrors(utils.Destination),
-		SetupTime:     sr.Event.GetTimeIgnoreErrors(utils.SetupTime, tmz),
-		AnswerTime:    sr.Event.GetTimeIgnoreErrors(utils.AnswerTime, tmz),
-		Usage:         sr.TotalUsage,
-		ExtraFields:   sr.Event.AsMapString(utils.MainCDRFields),
-		NodeID:        nodeID,
-		DebitInterval: s.DebitInterval,
+		ID:       s.ID,
+		RunID:    s.SRuns[sRunIdx].ID,
+		CGREvent: s.SRuns[sRunIdx].CGREvent,
+		NodeID:   nodeID,
 	}
-	if sr.NextAutoDebit != nil {
-		aS.NextAutoDebit = *sr.NextAutoDebit
+	if s.SRuns[sRunIdx].NextAutoDebit != nil {
+		aS.NextAutoDebit = *s.SRuns[sRunIdx].NextAutoDebit
 	}
-
 	return
 }
 
@@ -208,12 +149,7 @@ func (s *Session) totalUsage() (tDur time.Duration) {
 func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent) {
 	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
 	for i, sr := range s.SRuns {
-		cgrEvs[i] = &utils.CGREvent{
-			Tenant:  s.Tenant,
-			ID:      utils.UUIDSha1Prefix(),
-			Event:   sr.Event,
-			APIOpts: s.OptsStart,
-		}
+		cgrEvs[i] = sr.CGREvent
 	}
 	return
 }
@@ -237,24 +173,32 @@ func (s *Session) stopDebitLoops() {
 	}
 }
 
+func NewSRun(cgrEv *utils.CGREvent) *SRun {
+	return &SRun{
+		ID:       utils.IfaceAsString(cgrEv.APIOpts[utils.MetaRunID]),
+		CGREvent: cgrEv,
+	}
+}
+
 // SRun is one billing run for the Session
 type SRun struct {
-	Event engine.MapEvent // Event received from ChargerS
+	ID       string          // Identifier of the SRun, inherited from CGREvent.APIOpts[*runID]
+	CGREvent *utils.CGREvent // Event received from ChargerS
 
-	ExtraDuration time.Duration // keeps the current duration debited on top of what has been asked
+	ExtraUsage    time.Duration // keeps the extra usage debited on top of what has been asked
 	LastUsage     time.Duration // last requested Duration
 	TotalUsage    time.Duration // sum of lastUsage
 	NextAutoDebit *time.Time
-	RunID         string
 }
 
 // Clone returns the cloned version of SRun
 func (sr *SRun) Clone() (clsr *SRun) {
 	clsr = &SRun{
-		Event:         sr.Event.Clone(),
-		ExtraDuration: sr.ExtraDuration,
-		LastUsage:     sr.LastUsage,
-		TotalUsage:    sr.TotalUsage,
+		ID:         sr.ID,
+		CGREvent:   sr.CGREvent.Clone(),
+		ExtraUsage: sr.ExtraUsage,
+		LastUsage:  sr.LastUsage,
+		TotalUsage: sr.TotalUsage,
 	}
 	if sr.NextAutoDebit != nil {
 		clsr.NextAutoDebit = utils.TimePointer(*sr.NextAutoDebit)
@@ -272,7 +216,7 @@ func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 			continue
 		}
 		for _, sr := range s.SRuns {
-			sr.Event[k] = v
+			sr.CGREvent.Event[k] = v
 		}
 	}
 }
@@ -282,7 +226,7 @@ func (s *Session) UpdateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 	if alterableFields.Size() == 0 { // do not lock if we can't update any field
 		return
 	}
-	s.Lock()
+	s.lk.Lock()
 	s.updateSRuns(updEv, alterableFields)
-	s.Unlock()
+	s.lk.Unlock()
 }
