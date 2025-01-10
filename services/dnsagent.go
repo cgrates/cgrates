@@ -56,7 +56,7 @@ type DNSAgent struct {
 
 // Start should handle the service start
 func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -77,7 +77,7 @@ func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Ser
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		dns.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return

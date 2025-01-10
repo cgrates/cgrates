@@ -60,7 +60,7 @@ type DiameterAgent struct {
 
 // Start should handle the sercive start
 func (da *DiameterAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		da.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
@@ -102,7 +102,7 @@ func (da *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanage
 	}
 	close(da.stopChan)
 
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		da.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err

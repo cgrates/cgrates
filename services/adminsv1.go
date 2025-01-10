@@ -58,7 +58,7 @@ type AdminSv1Service struct {
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
 func (apiService *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.FilterS,
