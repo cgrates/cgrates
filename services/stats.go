@@ -59,7 +59,7 @@ type StatService struct {
 func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	sts.srvDep[utils.DataDB].Add(1)
 
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.CacheS,

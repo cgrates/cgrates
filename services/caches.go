@@ -54,7 +54,7 @@ type CacheService struct {
 
 // Start should handle the sercive start
 func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.DataDB,

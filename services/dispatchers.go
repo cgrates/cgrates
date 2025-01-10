@@ -58,7 +58,7 @@ type DispatcherService struct {
 
 // Start should handle the sercive start
 func (dspS *DispatcherService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.CacheS,

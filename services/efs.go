@@ -57,7 +57,7 @@ func NewExportFailoverService(cfg *config.CGRConfig, connMgr *engine.ConnManager
 
 // Start should handle the service start
 func (efServ *ExportFailoverService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
+	cls, err := WaitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
 		efServ.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return

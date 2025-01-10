@@ -84,7 +84,7 @@ func (es *EventExporterService) Shutdown(_ *servmanager.ServiceRegistry) error {
 
 // Start should handle the service start
 func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.FilterS,

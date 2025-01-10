@@ -82,7 +82,7 @@ func (rs *RateService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 
 // Start should handle the service start
 func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	srvDeps, err := waitForServicesToReachState(utils.StateServiceUP,
+	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.CacheS,

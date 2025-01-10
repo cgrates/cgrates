@@ -58,7 +58,7 @@ type AnalyzerService struct {
 
 // Start should handle the sercive start
 func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	cls, err := waitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
+	cls, err := WaitForServiceState(utils.StateServiceUP, utils.CommonListenerS, registry,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
@@ -84,7 +84,7 @@ func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmana
 }
 
 func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry) {
-	fs, err := waitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
+	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
