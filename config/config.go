@@ -174,7 +174,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				DebitInterval:          []*DynamicDurationOpt{},
 				TTLMaxDelay:            []*DynamicDurationOpt{},
 				TTLUsage:               []*DynamicDurationPointerOpt{},
->>>>>>> Sessions struct changes
 			},
 		},
 		fsAgentCfg:       new(FsAgentCfg),
