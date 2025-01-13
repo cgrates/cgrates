@@ -4556,42 +4556,16 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	sessions.aSessions = map[string]*Session{
 		"sess1": {
 
-			EventStart: map[string]any{
-
-				utils.OriginID: "222",
-			},
+			ID: "1001",
 			SRuns: []*SRun{
 				{
-					Event: map[string]any{
-						utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
-						utils.OriginID:     "222",
-					},
+					ID: "Id",
 				},
-			},
-			OptsStart: map[string]any{
-
-				utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
 			},
 		},
 		"CGRATES_ID": {
-			Tenant: "cgrates.org",
-			EventStart: map[string]any{
-				utils.Usage:    7 * time.Minute,
-				utils.OriginID: "1234",
-			},
-			ResourceID:   "res_id_forcesterminate",
+
 			ClientConnID: "client1",
-			SRuns: []*SRun{
-				{
-					Event: map[string]any{
-						utils.MetaOriginID: "dfa2adaa5ab49349777c1ab3bcf3455df0259880",
-						utils.OriginID:     "222",
-					},
-				},
-			},
-			OptsStart: map[string]any{
-				utils.MetaOriginID: "CGRATES1_ID",
-			},
 		},
 	}
 	time.Sleep(50 * time.Millisecond)

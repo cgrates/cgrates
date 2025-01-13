@@ -157,9 +157,9 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			StatsDerivedReply:      []*DynamicBoolOpt{},
 			ThresholdsDerivedReply: []*DynamicBoolOpt{},
 			MaxUsage:               []*DynamicBoolOpt{},
-			ForceDuration:          []*DynamicBoolOpt{},
 			TTL:                    []*DynamicDurationOpt{},
 			Chargeable:             []*DynamicBoolOpt{},
+			ForceUsage:             []*DynamicBoolOpt{},
 			DebitInterval: []*DynamicDurationOpt{
 				{
 					Value: 2 * time.Second,
@@ -386,10 +386,10 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			StatsDerivedReply:      []*DynamicBoolOpt{},
 			ThresholdsDerivedReply: []*DynamicBoolOpt{},
 			MaxUsage:               []*DynamicBoolOpt{},
-			ForceDuration:          []*DynamicBoolOpt{},
 			TTL:                    []*DynamicDurationOpt{},
 			Chargeable:             []*DynamicBoolOpt{},
 			DebitInterval:          []*DynamicDurationOpt{},
+			ForceUsage:             []*DynamicBoolOpt{},
 			TTLLastUsage: []*DynamicDurationPointerOpt{
 				{
 					Value: utils.DurationPointer(1),
@@ -540,7 +540,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaStatsDerivedReplyCfg:      []*DynamicBoolOpt{},
 			utils.MetaThresholdsDerivedReplyCfg: []*DynamicBoolOpt{},
 			utils.MetaMaxUsageCfg:               []*DynamicBoolOpt{},
-			utils.MetaForceDurationCfg:          []*DynamicBoolOpt{},
 			utils.MetaTTLCfg:                    []*DynamicDurationOpt{},
 			utils.MetaChargeableCfg:             []*DynamicBoolOpt{},
 			utils.MetaDebitIntervalCfg:          []*DynamicDurationOpt{},
@@ -548,6 +547,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaTTLLastUsedCfg:            []*DynamicDurationPointerOpt{},
 			utils.MetaTTLMaxDelayCfg:            []*DynamicDurationOpt{},
 			utils.MetaTTLUsageCfg:               []*DynamicDurationPointerOpt{},
+			utils.MetaForceUsageCfg:             []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -657,7 +657,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaStatsDerivedReplyCfg:      []*DynamicBoolOpt{},
 			utils.MetaThresholdsDerivedReplyCfg: []*DynamicBoolOpt{},
 			utils.MetaMaxUsageCfg:               []*DynamicBoolOpt{},
-			utils.MetaForceDurationCfg:          []*DynamicBoolOpt{},
 			utils.MetaTTLCfg: []*DynamicDurationOpt{
 				{
 					Value: time.Second,
@@ -673,6 +672,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaTTLLastUsedCfg:  []*DynamicDurationPointerOpt{},
 			utils.MetaTTLMaxDelayCfg:  []*DynamicDurationOpt{},
 			utils.MetaTTLUsageCfg:     []*DynamicDurationPointerOpt{},
+			utils.MetaForceUsageCfg:   []*DynamicBoolOpt{},
 		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
@@ -2102,12 +2102,6 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  false,
 			},
 		},
-		ForceDuration: []*DynamicBoolOpt{
-			{
-				Tenant: "cgrates.org",
-				Value:  false,
-			},
-		},
 		TTL: []*DynamicDurationOpt{
 			{
 				Tenant: "cgrates.org",
@@ -2286,12 +2280,6 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			},
 		},
 		MaxUsage: []*DynamicBoolOpt{
-			{
-				Tenant: "cgrates.net",
-				Value:  true,
-			},
-		},
-		ForceDuration: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  true,
@@ -2480,12 +2468,7 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  true,
 			},
 		},
-		ForceDuration: []*DynamicBoolOpt{
-			{
-				Tenant: "cgrates.net",
-				Value:  true,
-			},
-		},
+
 		TTL: []*DynamicStringOpt{
 			{
 				Tenant: "cgrates.net",
