@@ -2046,7 +2046,7 @@ func TestFiltersPassTimingsCallErr(t *testing.T) {
 	}
 	rcv, err := fltr.passTimings(dtP)
 
-	if err != nil {
+	if err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Error(err)
 	}
 
@@ -2106,7 +2106,7 @@ func TestFiltersPassDestinationsCallErr(t *testing.T) {
 
 	rcv, err := fltr.passDestinations(dtP)
 
-	if err != nil {
+	if err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Error(err)
 	}
 
@@ -2371,7 +2371,7 @@ func TestWeightFromDynamics(t *testing.T) {
 		connMgr: nil,
 	}
 
-	if _, err := WeightFromDynamics(dWs, fltrS, "cgrates.org", pEv); err != nil {
+	if _, err := WeightFromDynamics(dWs, fltrS, "cgrates.org", pEv); err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Error(err)
 	}
 

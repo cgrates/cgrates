@@ -37,6 +37,11 @@
 	"enabled": true
 },
 
+"filters": {			
+	"apiers_conns": ["*internal"],	
+},
+
+
 "rals": {
 	"enabled": true
 },

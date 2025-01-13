@@ -3,7 +3,7 @@
 //
 
 "general": {
-    "log_level": 6,
+    "log_level": 7,
 },
 
 
@@ -21,6 +21,10 @@
 
 "stor_db": {
 	"db_type": "*internal",	
+},
+
+"filters": {			
+	"apiers_conns": ["*localhost"],	
 },
 
 "rals": {
