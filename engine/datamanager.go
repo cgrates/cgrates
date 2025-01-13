@@ -1829,6 +1829,13 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
+	// Check if time strings can be split in a time format before storing in db
+	if t.StartTime != utils.EmptyString && t.StartTime != utils.MetaASAP && !utils.IsTimeFormated(t.StartTime) {
+		return utils.ErrInvalidTime(t.StartTime)
+	}
+	if t.EndTime != utils.EmptyString && t.EndTime != utils.MetaASAP && !utils.IsTimeFormated(t.EndTime) {
+		return utils.ErrInvalidTime(t.EndTime)
+	}
 	if err = dm.DataDB().SetTimingDrv(t); err != nil {
 		return
 	}
