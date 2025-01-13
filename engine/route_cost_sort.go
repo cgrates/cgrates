@@ -37,7 +37,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 	}
 	var usage *decimal.Big
 	if usage, err = GetDecimalBigOpts(ctx, ev.Tenant, ev, fltrS, cfg.RouteSCfg().Opts.Usage,
-		config.RoutesUsageDftOpt, utils.OptsRoutesUsage, utils.MetaUsage); err != nil {
+		utils.OptsRoutesUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	ev.APIOpts[utils.MetaUsage] = usage

@@ -54,7 +54,7 @@ func TestAnzDocIT(t *testing.T) {
 		"*processRuns": [{
 			"Tenant": "cgrates.org",
 			"FilterIDs": [],
-			"Value": 2
+			"Value": "2"
 		}]
 	}
 },

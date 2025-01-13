@@ -50,7 +50,7 @@ func TestConfigSetGetConfig(t *testing.T) {
 	"opts": {
 		"*processRuns": [
 				{
-					"Value": 3,
+					"Value": "3",
 				},
 			],
 		},					
@@ -91,12 +91,10 @@ func TestConfigSetGetConfig(t *testing.T) {
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs: []*config.DynamicStringSliceOpt{},
 				utils.MetaProcessRunsCfg: []*config.DynamicIntOpt{
-					{
-						Value: 3,
-					},
+					config.NewDynamicIntOpt(nil, "", 3, nil), config.NewDynamicIntOpt(nil, "", config.AttributesProcessRunsDftOpt, nil),
 				},
-				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProfileRunsDftOpt, nil)},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{{}},
 			},
 		},
 	}
@@ -126,10 +124,8 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 				"exists_indexed_fields":    []string{},
 				"notexists_indexed_fields": []string{},
 				utils.OptsCfg: map[string]any{
-					utils.MetaProcessRunsCfg: []*config.DynamicIntOpt{
-						{
-							Value: 2,
-						},
+					utils.MetaProcessRunsCfg: []*config.DynamicInterfaceOpt{
+						{Value: 2},
 					},
 				},
 			},
@@ -159,9 +155,9 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
+				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", 1, nil)},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProfileRunsDftOpt, nil)},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{{}},
 			},
 		},
 	}
@@ -199,9 +195,9 @@ func TestConfigSetGetReloadConfig(t *testing.T) {
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
+				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProcessRunsDftOpt, nil)},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProfileRunsDftOpt, nil)},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{{}},
 			},
 		},
 	}
@@ -260,7 +256,7 @@ func TestConfigGetSetConfigFromJSONErr(t *testing.T) {
 		Tenant:   utils.CGRateSorg,
 		Sections: []string{"attributes"},
 	}
-	expectedGet := `{"attributes":{"accounts_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := rlcCfg.GetConfigAsJSON(context.Background(), argsGet, &replyGet); err != nil {
 		t.Error(err)

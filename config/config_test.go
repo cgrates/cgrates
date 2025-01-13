@@ -319,16 +319,16 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 		AccountSConns:   []string{},
 		ExtraFields:     RSRParsers{},
 		Opts: &CdrsOpts{
-			Accounts:   []*DynamicBoolOpt{},
-			Attributes: []*DynamicBoolOpt{},
-			Chargers:   []*DynamicBoolOpt{},
-			Export:     []*DynamicBoolOpt{},
-			Rates:      []*DynamicBoolOpt{},
-			Stats:      []*DynamicBoolOpt{},
-			Thresholds: []*DynamicBoolOpt{},
-			Refund:     []*DynamicBoolOpt{},
-			Rerate:     []*DynamicBoolOpt{},
-			Store:      []*DynamicBoolOpt{},
+			Accounts:   []*DynamicBoolOpt{{}},
+			Attributes: []*DynamicBoolOpt{{}},
+			Chargers:   []*DynamicBoolOpt{{}},
+			Export:     []*DynamicBoolOpt{{}},
+			Rates:      []*DynamicBoolOpt{{}},
+			Stats:      []*DynamicBoolOpt{{}},
+			Thresholds: []*DynamicBoolOpt{{}},
+			Refund:     []*DynamicBoolOpt{{}},
+			Rerate:     []*DynamicBoolOpt{{}},
+			Store:      []*DynamicBoolOpt{{value: true}},
 		},
 	}
 	if !reflect.DeepEqual(eCdrsCfg, cgrCfg.cdrsCfg) {
@@ -391,35 +391,35 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			utils.MetaSMS:   1,
 		},
 		Opts: &SessionsOpts{
-			Accounts:               []*DynamicBoolOpt{},
-			Attributes:             []*DynamicBoolOpt{},
-			CDRs:                   []*DynamicBoolOpt{},
-			Chargers:               []*DynamicBoolOpt{},
-			Resources:              []*DynamicBoolOpt{},
-			Routes:                 []*DynamicBoolOpt{},
-			Stats:                  []*DynamicBoolOpt{},
-			Thresholds:             []*DynamicBoolOpt{},
-			Initiate:               []*DynamicBoolOpt{},
-			Update:                 []*DynamicBoolOpt{},
-			Terminate:              []*DynamicBoolOpt{},
-			Message:                []*DynamicBoolOpt{},
-			AttributesDerivedReply: []*DynamicBoolOpt{},
-			BlockerError:           []*DynamicBoolOpt{},
-			CDRsDerivedReply:       []*DynamicBoolOpt{},
-			ResourcesAuthorize:     []*DynamicBoolOpt{},
-			ResourcesAllocate:      []*DynamicBoolOpt{},
-			ResourcesRelease:       []*DynamicBoolOpt{},
-			ResourcesDerivedReply:  []*DynamicBoolOpt{},
-			RoutesDerivedReply:     []*DynamicBoolOpt{},
-			StatsDerivedReply:      []*DynamicBoolOpt{},
-			ThresholdsDerivedReply: []*DynamicBoolOpt{},
-			MaxUsage:               []*DynamicBoolOpt{},
-			TTL:                    []*DynamicDurationOpt{},
-			Chargeable:             []*DynamicBoolOpt{},
+			Accounts:               []*DynamicBoolOpt{{}},
+			Attributes:             []*DynamicBoolOpt{{}},
+			CDRs:                   []*DynamicBoolOpt{{}},
+			Chargers:               []*DynamicBoolOpt{{}},
+			Resources:              []*DynamicBoolOpt{{}},
+			Routes:                 []*DynamicBoolOpt{{}},
+			Stats:                  []*DynamicBoolOpt{{}},
+			Thresholds:             []*DynamicBoolOpt{{}},
+			Initiate:               []*DynamicBoolOpt{{}},
+			Update:                 []*DynamicBoolOpt{{}},
+			Terminate:              []*DynamicBoolOpt{{}},
+			Message:                []*DynamicBoolOpt{{}},
+			AttributesDerivedReply: []*DynamicBoolOpt{{}},
+			BlockerError:           []*DynamicBoolOpt{{}},
+			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
+			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
+			ResourcesAllocate:      []*DynamicBoolOpt{{}},
+			ResourcesRelease:       []*DynamicBoolOpt{{}},
+			ResourcesDerivedReply:  []*DynamicBoolOpt{{}},
+			RoutesDerivedReply:     []*DynamicBoolOpt{{}},
+			StatsDerivedReply:      []*DynamicBoolOpt{{}},
+			ThresholdsDerivedReply: []*DynamicBoolOpt{{}},
+			MaxUsage:               []*DynamicBoolOpt{{}},
+			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
+			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			TTLLastUsage:           []*DynamicDurationPointerOpt{},
 			TTLLastUsed:            []*DynamicDurationPointerOpt{},
-			DebitInterval:          []*DynamicDurationOpt{},
-			TTLMaxDelay:            []*DynamicDurationOpt{},
+			DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
+			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 			ForceUsage:             []*DynamicBoolOpt{},
 		},
@@ -596,9 +596,9 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		ExistsIndexedFields:    &[]string{},
 		NotExistsIndexedFields: &[]string{},
 		Opts: &ResourcesOpts{
-			UsageID:  []*DynamicStringOpt{},
-			UsageTTL: []*DynamicDurationOpt{},
-			Units:    []*DynamicFloat64Opt{},
+			UsageID:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
+			UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
+			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.resourceSCfg, eResLiCfg) {
@@ -620,7 +620,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		NotExistsIndexedFields: &[]string{},
 		Opts: &StatsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
 			RoundingDecimals:     []*DynamicIntOpt{},
 			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
@@ -644,7 +644,7 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		ActionSConns:           []string{},
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	if !reflect.DeepEqual(eThresholdSCfg, cgrCfg.thresholdSCfg) {
@@ -668,14 +668,14 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		AccountSConns:          []string{},
 		DefaultRatio:           1,
 		Opts: &RoutesOpts{
-			Context:      []*DynamicStringOpt{},
-			ProfileCount: []*DynamicIntPointerOpt{},
-			IgnoreErrors: []*DynamicBoolOpt{},
+			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
+			ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
+			IgnoreErrors: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
 			MaxCost:      []*DynamicInterfaceOpt{},
 			Limit:        []*DynamicIntPointerOpt{},
 			Offset:       []*DynamicIntPointerOpt{},
 			MaxItems:     []*DynamicIntPointerOpt{},
-			Usage:        []*DynamicDecimalOpt{},
+			Usage:        []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
 		},
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.routeSCfg) {
@@ -985,27 +985,6 @@ func TestLoadCdrsCfgError(t *testing.T) {
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.cdrsCfg.Load(context.Background(), cgrCfgJSON, cgrCfg); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestLoadSessionSCfgError(t *testing.T) {
-	cfgJSONStr := `{
-	"sessions": {
-		"opts": {
-			"*ttlUsage": [
-				{
-					"Value": 1,
-				},
-			],
-		},
-    },
-}`
-	expected := "json: cannot unmarshal number into Go struct field DynamicStringOpt.Opts.*ttlUsage.Value of type string"
-	cgrConfig := NewDefaultCGRConfig()
-	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if err := cgrConfig.sessionSCfg.Load(context.Background(), cgrCfgJSON, cgrCfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1571,9 +1550,9 @@ func TestAttributeSConfig(t *testing.T) {
 		NestedFields:           false,
 		Opts: &AttributesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProcessRuns:          []*DynamicIntOpt{},
-			ProfileRuns:          []*DynamicIntOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
+			ProfileRuns:          []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AttributesProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1613,9 +1592,9 @@ func TestResourceSConfig(t *testing.T) {
 		NotExistsIndexedFields: &[]string{},
 		NestedFields:           false,
 		Opts: &ResourcesOpts{
-			UsageID:  []*DynamicStringOpt{},
-			UsageTTL: []*DynamicDurationOpt{},
-			Units:    []*DynamicFloat64Opt{},
+			UsageID:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
+			UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
+			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1639,7 +1618,7 @@ func TestStatSConfig(t *testing.T) {
 		NestedFields:           false,
 		Opts: &StatsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
 			RoundingDecimals:     []*DynamicIntOpt{},
 			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
@@ -1665,7 +1644,7 @@ func TestThresholdSConfig(t *testing.T) {
 		ActionSConns:           []string{},
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1691,14 +1670,14 @@ func TestRouteSConfig(t *testing.T) {
 		DefaultRatio:           1,
 		NestedFields:           false,
 		Opts: &RoutesOpts{
-			Context:      []*DynamicStringOpt{},
-			ProfileCount: []*DynamicIntPointerOpt{},
-			IgnoreErrors: []*DynamicBoolOpt{},
+			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
+			ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
+			IgnoreErrors: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
 			MaxCost:      []*DynamicInterfaceOpt{},
 			Limit:        []*DynamicIntPointerOpt{},
 			Offset:       []*DynamicIntPointerOpt{},
 			MaxItems:     []*DynamicIntPointerOpt{},
-			Usage:        []*DynamicDecimalOpt{},
+			Usage:        []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1743,35 +1722,35 @@ func TestSessionSConfig(t *testing.T) {
 			utils.MetaSMS:   1,
 		},
 		Opts: &SessionsOpts{
-			Accounts:               []*DynamicBoolOpt{},
-			Attributes:             []*DynamicBoolOpt{},
-			CDRs:                   []*DynamicBoolOpt{},
-			Chargers:               []*DynamicBoolOpt{},
-			Resources:              []*DynamicBoolOpt{},
-			Routes:                 []*DynamicBoolOpt{},
-			Stats:                  []*DynamicBoolOpt{},
-			Thresholds:             []*DynamicBoolOpt{},
-			Initiate:               []*DynamicBoolOpt{},
-			Update:                 []*DynamicBoolOpt{},
-			Terminate:              []*DynamicBoolOpt{},
-			Message:                []*DynamicBoolOpt{},
-			AttributesDerivedReply: []*DynamicBoolOpt{},
-			BlockerError:           []*DynamicBoolOpt{},
-			CDRsDerivedReply:       []*DynamicBoolOpt{},
-			ResourcesAuthorize:     []*DynamicBoolOpt{},
-			ResourcesAllocate:      []*DynamicBoolOpt{},
-			ResourcesRelease:       []*DynamicBoolOpt{},
-			ResourcesDerivedReply:  []*DynamicBoolOpt{},
-			RoutesDerivedReply:     []*DynamicBoolOpt{},
-			StatsDerivedReply:      []*DynamicBoolOpt{},
-			ThresholdsDerivedReply: []*DynamicBoolOpt{},
-			MaxUsage:               []*DynamicBoolOpt{},
-			TTL:                    []*DynamicDurationOpt{},
-			Chargeable:             []*DynamicBoolOpt{},
+			Accounts:               []*DynamicBoolOpt{{}},
+			Attributes:             []*DynamicBoolOpt{{}},
+			CDRs:                   []*DynamicBoolOpt{{}},
+			Chargers:               []*DynamicBoolOpt{{}},
+			Resources:              []*DynamicBoolOpt{{}},
+			Routes:                 []*DynamicBoolOpt{{}},
+			Stats:                  []*DynamicBoolOpt{{}},
+			Thresholds:             []*DynamicBoolOpt{{}},
+			Initiate:               []*DynamicBoolOpt{{}},
+			Update:                 []*DynamicBoolOpt{{}},
+			Terminate:              []*DynamicBoolOpt{{}},
+			Message:                []*DynamicBoolOpt{{}},
+			AttributesDerivedReply: []*DynamicBoolOpt{{}},
+			BlockerError:           []*DynamicBoolOpt{{}},
+			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
+			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
+			ResourcesAllocate:      []*DynamicBoolOpt{{}},
+			ResourcesRelease:       []*DynamicBoolOpt{{}},
+			ResourcesDerivedReply:  []*DynamicBoolOpt{{}},
+			RoutesDerivedReply:     []*DynamicBoolOpt{{}},
+			StatsDerivedReply:      []*DynamicBoolOpt{{}},
+			ThresholdsDerivedReply: []*DynamicBoolOpt{{}},
+			MaxUsage:               []*DynamicBoolOpt{{}},
+			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
+			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			TTLLastUsage:           []*DynamicDurationPointerOpt{},
 			TTLLastUsed:            []*DynamicDurationPointerOpt{},
-			DebitInterval:          []*DynamicDurationOpt{},
-			TTLMaxDelay:            []*DynamicDurationOpt{},
+			DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
+			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 			ForceUsage:             []*DynamicBoolOpt{},
 		},
@@ -2034,10 +2013,10 @@ func TestRateSConfig(t *testing.T) {
 		Verbosity:                  1000,
 		Opts: &RatesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			StartTime:            []*DynamicStringOpt{},
-			Usage:                []*DynamicDecimalOpt{},
-			IntervalStart:        []*DynamicDecimalOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			StartTime:            []*DynamicStringOpt{{value: RatesStartTimeDftOpt}},
+			Usage:                []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
+			IntervalStart:        []*DynamicDecimalOpt{{value: RatesIntervalStartDftOpt}},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -3289,10 +3268,10 @@ func TestCgrCfgJSONDefaultRateCfg(t *testing.T) {
 		Verbosity:                  1000,
 		Opts: &RatesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			StartTime:            []*DynamicStringOpt{},
-			Usage:                []*DynamicDecimalOpt{},
-			IntervalStart:        []*DynamicDecimalOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			StartTime:            []*DynamicStringOpt{{value: RatesStartTimeDftOpt}},
+			Usage:                []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
+			IntervalStart:        []*DynamicDecimalOpt{{value: RatesIntervalStartDftOpt}},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.rateSCfg, eCfg) {
@@ -3638,16 +3617,16 @@ func TestV1GetConfigCdrs(t *testing.T) {
 			utils.RateSConnsCfg:       []string{},
 			utils.AccountSConnsCfg:    []string{},
 			utils.OptsCfg: map[string]any{
-				utils.MetaAccounts:   []*DynamicBoolOpt{},
-				utils.MetaAttributes: []*DynamicBoolOpt{},
-				utils.MetaChargers:   []*DynamicBoolOpt{},
-				utils.MetaEEs:        []*DynamicBoolOpt{},
-				utils.MetaRates:      []*DynamicBoolOpt{},
-				utils.MetaStats:      []*DynamicBoolOpt{},
-				utils.MetaThresholds: []*DynamicBoolOpt{},
-				utils.MetaRefund:     []*DynamicBoolOpt{},
-				utils.MetaRerate:     []*DynamicBoolOpt{},
-				utils.MetaStore:      []*DynamicBoolOpt{},
+				utils.MetaAccounts:   []*DynamicBoolOpt{{}},
+				utils.MetaAttributes: []*DynamicBoolOpt{{}},
+				utils.MetaChargers:   []*DynamicBoolOpt{{}},
+				utils.MetaEEs:        []*DynamicBoolOpt{{}},
+				utils.MetaRates:      []*DynamicBoolOpt{{}},
+				utils.MetaStats:      []*DynamicBoolOpt{{}},
+				utils.MetaThresholds: []*DynamicBoolOpt{{}},
+				utils.MetaRefund:     []*DynamicBoolOpt{{}},
+				utils.MetaRerate:     []*DynamicBoolOpt{{}},
+				utils.MetaStore:      []*DynamicBoolOpt{{value: true}},
 			},
 		},
 	}
@@ -3698,35 +3677,35 @@ func TestV1GetConfigSessionS(t *testing.T) {
 				utils.MetaSMS:   "1",
 			},
 			utils.OptsCfg: map[string]any{
-				utils.MetaAccounts:                  []*DynamicBoolOpt{},
-				utils.MetaAttributes:                []*DynamicBoolOpt{},
-				utils.MetaCDRs:                      []*DynamicBoolOpt{},
-				utils.MetaChargers:                  []*DynamicBoolOpt{},
-				utils.MetaResources:                 []*DynamicBoolOpt{},
-				utils.MetaRoutes:                    []*DynamicBoolOpt{},
-				utils.MetaStats:                     []*DynamicBoolOpt{},
-				utils.MetaThresholds:                []*DynamicBoolOpt{},
-				utils.MetaInitiate:                  []*DynamicBoolOpt{},
-				utils.MetaUpdate:                    []*DynamicBoolOpt{},
-				utils.MetaTerminate:                 []*DynamicBoolOpt{},
-				utils.MetaMessage:                   []*DynamicBoolOpt{},
-				utils.MetaAttributesDerivedReplyCfg: []*DynamicBoolOpt{},
-				utils.MetaBlockerErrorCfg:           []*DynamicBoolOpt{},
-				utils.MetaCDRsDerivedReplyCfg:       []*DynamicBoolOpt{},
-				utils.MetaResourcesAuthorizeCfg:     []*DynamicBoolOpt{},
-				utils.MetaResourcesAllocateCfg:      []*DynamicBoolOpt{},
-				utils.MetaResourcesReleaseCfg:       []*DynamicBoolOpt{},
-				utils.MetaResourcesDerivedReplyCfg:  []*DynamicBoolOpt{},
-				utils.MetaRoutesDerivedReplyCfg:     []*DynamicBoolOpt{},
-				utils.MetaStatsDerivedReplyCfg:      []*DynamicBoolOpt{},
-				utils.MetaThresholdsDerivedReplyCfg: []*DynamicBoolOpt{},
-				utils.MetaMaxUsageCfg:               []*DynamicBoolOpt{},
-				utils.MetaTTLCfg:                    []*DynamicDurationOpt{},
-				utils.MetaChargeableCfg:             []*DynamicBoolOpt{},
-				utils.MetaDebitIntervalCfg:          []*DynamicDurationOpt{},
+				utils.MetaAccounts:                  []*DynamicBoolOpt{{}},
+				utils.MetaAttributes:                []*DynamicBoolOpt{{}},
+				utils.MetaCDRs:                      []*DynamicBoolOpt{{}},
+				utils.MetaChargers:                  []*DynamicBoolOpt{{}},
+				utils.MetaResources:                 []*DynamicBoolOpt{{}},
+				utils.MetaRoutes:                    []*DynamicBoolOpt{{}},
+				utils.MetaStats:                     []*DynamicBoolOpt{{}},
+				utils.MetaThresholds:                []*DynamicBoolOpt{{}},
+				utils.MetaInitiate:                  []*DynamicBoolOpt{{}},
+				utils.MetaUpdate:                    []*DynamicBoolOpt{{}},
+				utils.MetaTerminate:                 []*DynamicBoolOpt{{}},
+				utils.MetaMessage:                   []*DynamicBoolOpt{{}},
+				utils.MetaAttributesDerivedReplyCfg: []*DynamicBoolOpt{{}},
+				utils.MetaBlockerErrorCfg:           []*DynamicBoolOpt{{}},
+				utils.MetaCDRsDerivedReplyCfg:       []*DynamicBoolOpt{{}},
+				utils.MetaResourcesAuthorizeCfg:     []*DynamicBoolOpt{{}},
+				utils.MetaResourcesAllocateCfg:      []*DynamicBoolOpt{{}},
+				utils.MetaResourcesReleaseCfg:       []*DynamicBoolOpt{{}},
+				utils.MetaResourcesDerivedReplyCfg:  []*DynamicBoolOpt{{}},
+				utils.MetaRoutesDerivedReplyCfg:     []*DynamicBoolOpt{{}},
+				utils.MetaStatsDerivedReplyCfg:      []*DynamicBoolOpt{{}},
+				utils.MetaThresholdsDerivedReplyCfg: []*DynamicBoolOpt{{}},
+				utils.MetaMaxUsageCfg:               []*DynamicBoolOpt{{}},
+				utils.MetaTTLCfg:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
+				utils.MetaChargeableCfg:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
+				utils.MetaDebitIntervalCfg:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
 				utils.MetaTTLLastUsageCfg:           []*DynamicDurationPointerOpt{},
 				utils.MetaTTLLastUsedCfg:            []*DynamicDurationPointerOpt{},
-				utils.MetaTTLMaxDelayCfg:            []*DynamicDurationOpt{},
+				utils.MetaTTLMaxDelayCfg:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 				utils.MetaTTLUsageCfg:               []*DynamicDurationPointerOpt{},
 				utils.MetaForceUsageCfg:             []*DynamicBoolOpt{},
 			},
@@ -3922,9 +3901,9 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.NestedFieldsCfg:           false,
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+				utils.MetaProcessRunsCfg:       []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
+				utils.MetaProfileRunsCfg:       []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: AttributesProfileIgnoreFiltersDftOpt}},
 			},
 		},
 	}
@@ -3972,9 +3951,9 @@ func TestV1GetConfigResourceS(t *testing.T) {
 			utils.NotExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:           false,
 			utils.OptsCfg: map[string]any{
-				utils.MetaUsageIDCfg:  []*DynamicStringOpt{},
-				utils.MetaUsageTTLCfg: []*DynamicDurationOpt{},
-				utils.MetaUnitsCfg:    []*DynamicFloat64Opt{},
+				utils.MetaUsageIDCfg:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
+				utils.MetaUsageTTLCfg: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
+				utils.MetaUnitsCfg:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
 			},
 		},
 	}
@@ -4002,7 +3981,7 @@ func TestV1GetConfigStats(t *testing.T) {
 			utils.NestedFieldsCfg:           false,
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
 				utils.OptsRoundingDecimals:     []*DynamicIntOpt{},
 				utils.OptsPrometheusStatIDs:    []*DynamicStringSliceOpt{},
 			},
@@ -4033,7 +4012,7 @@ func TestV1GetConfigThresholds(t *testing.T) {
 			utils.ActionSConnsCfg:           []string{},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
 			},
 		},
 	}
@@ -4063,8 +4042,8 @@ func TestV1GetConfigAcounts(t *testing.T) {
 			utils.MaxUsage:                  "259200000000000", // 72h in ns
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-				utils.MetaUsage:                []*DynamicDecimalOpt{},
-				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+				utils.MetaUsage:                []*DynamicDecimalOpt{{value: AccountsUsageDftOpt}},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},
 			},
 		},
 	}
@@ -4094,14 +4073,14 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.AccountSConnsCfg:          []string{},
 			utils.DefaultRatioCfg:           1,
 			utils.OptsCfg: map[string]any{
-				utils.OptsContext:         []*DynamicStringOpt{},
-				utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{},
-				utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{},
+				utils.OptsContext:         []*DynamicStringOpt{{value: RoutesContextDftOpt}},
+				utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
+				utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
 				utils.MetaMaxCostCfg:      []*DynamicInterfaceOpt{},
 				utils.MetaLimitCfg:        []*DynamicIntPointerOpt{},
 				utils.MetaOffsetCfg:       []*DynamicIntPointerOpt{},
 				utils.MetaMaxItemsCfg:     []*DynamicIntPointerOpt{},
-				utils.MetaUsage:           []*DynamicDecimalOpt{},
+				utils.MetaUsage:           []*DynamicDecimalOpt{{value: RoutesUsageDftOpt}},
 			},
 		},
 	}
@@ -4550,10 +4529,10 @@ func TestV1GetConfigSectionRateS(t *testing.T) {
 			utils.Verbosity:                     1000,
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-				utils.MetaStartTime:            []*DynamicStringOpt{},
-				utils.MetaUsage:                []*DynamicDecimalOpt{},
-				utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{},
-				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+				utils.MetaStartTime:            []*DynamicStringOpt{{value: RatesStartTimeDftOpt}},
+				utils.MetaUsage:                []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
+				utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{{value: RatesIntervalStartDftOpt}},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 			},
 		},
 	}
@@ -4673,7 +4652,7 @@ func TestV1GetConfigAsJSONTListen(t *testing.T) {
 
 func TestV1GetConfigAsJSONAccounts(t *testing.T) {
 	var reply string
-	expected := `{"accounts":{"attributes_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"max_iterations":1000,"max_usage":"259200000000000","nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*usage":[]},"prefix_indexed_fields":[],"rates_conns":[],"suffix_indexed_fields":[],"thresholds_conns":[]}}`
+	expected := `{"accounts":{"attributes_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"max_iterations":1000,"max_usage":"259200000000000","nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"rates_conns":[],"suffix_indexed_fields":[],"thresholds_conns":[]}}`
 	cfg := NewDefaultCGRConfig()
 	if err := cfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{AccountSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4706,7 +4685,7 @@ func TestV1GetConfigAsJSONFilterS(t *testing.T) {
 
 func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 	var reply string
-	expected := `{"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[],"*attributes":[],"*chargers":[],"*ees":[],"*rates":[],"*refund":[],"*rerate":[],"*stats":[],"*store":[],"*thresholds":[]},"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"thresholds_conns":[]}}`
+	expected := `{"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*ees":[{"FilterIDs":null,"Tenant":""}],"*rates":[{"FilterIDs":null,"Tenant":""}],"*refund":[{"FilterIDs":null,"Tenant":""}],"*rerate":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*store":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}]},"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"thresholds_conns":[]}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{CDRsJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4717,7 +4696,7 @@ func TestV1GetConfigAsJSONCdrs(t *testing.T) {
 
 func TestV1GetConfigAsJSONSessionS(t *testing.T) {
 	var reply string
-	expected := `{"sessions":{"accounts_conns":[],"actions_conns":[],"alterable_fields":[],"attributes_conns":[],"cdrs_conns":[],"channel_sync_interval":"0","chargers_conns":[],"client_protocol":1,"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":false,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[],"*attributes":[],"*attributesDerivedReply":[],"*blockerError":[],"*cdrs":[],"*cdrsDerivedReply":[],"*chargeable":[],"*chargers":[],"*debitInterval":[],"*forceUsage":[],"*initiate":[],"*maxUsage":[],"*message":[],"*resources":[],"*resourcesAllocate":[],"*resourcesAuthorize":[],"*resourcesDerivedReply":[],"*resourcesRelease":[],"*routes":[],"*routesDerivedReply":[],"*stats":[],"*statsDerivedReply":[],"*terminate":[],"*thresholds":[],"*thresholdsDerivedReply":[],"*ttl":[],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[],"*ttlUsage":[],"*update":[]},"rates_conns":[],"replication_conns":[],"resources_conns":[],"routes_conns":[],"session_indexes":[],"stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
+	expected := `{"sessions":{"accounts_conns":[],"actions_conns":[],"alterable_fields":[],"attributes_conns":[],"cdrs_conns":[],"channel_sync_interval":"0","chargers_conns":[],"client_protocol":1,"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":false,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*attributesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*blockerError":[{"FilterIDs":null,"Tenant":""}],"*cdrs":[{"FilterIDs":null,"Tenant":""}],"*cdrsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*chargeable":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*debitInterval":[{"FilterIDs":null,"Tenant":""}],"*forceUsage":[],"*initiate":[{"FilterIDs":null,"Tenant":""}],"*maxUsage":[{"FilterIDs":null,"Tenant":""}],"*message":[{"FilterIDs":null,"Tenant":""}],"*resources":[{"FilterIDs":null,"Tenant":""}],"*resourcesAllocate":[{"FilterIDs":null,"Tenant":""}],"*resourcesAuthorize":[{"FilterIDs":null,"Tenant":""}],"*resourcesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*resourcesRelease":[{"FilterIDs":null,"Tenant":""}],"*routes":[{"FilterIDs":null,"Tenant":""}],"*routesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*statsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*terminate":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}],"*thresholdsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*ttl":[{"FilterIDs":null,"Tenant":""}],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[{"FilterIDs":null,"Tenant":""}],"*ttlUsage":[],"*update":[{"FilterIDs":null,"Tenant":""}]},"rates_conns":[],"replication_conns":[],"resources_conns":[],"routes_conns":[],"session_indexes":[],"stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
 	cfgCgr := NewDefaultCGRConfig()
 	if err := cfgCgr.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{SessionSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4794,7 +4773,7 @@ func TestV1GetConfigAsJSONDNSAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONAttributes(t *testing.T) {
 	var reply string
-	expected := `{"attributes":{"accounts_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expected := `{"attributes":{"accounts_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{AttributeSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4816,7 +4795,7 @@ func TestV1GetConfigAsJSONChargerS(t *testing.T) {
 
 func TestV1GetConfigAsJSONResourceS(t *testing.T) {
 	var reply string
-	expected := `{"resources":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[],"*usageID":[],"*usageTTL":[]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[],"thresholds_conns":[]}}`
+	expected := `{"resources":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[],"thresholds_conns":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{ResourceSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4827,7 +4806,7 @@ func TestV1GetConfigAsJSONResourceS(t *testing.T) {
 
 func TestV1GetConfigAsJSONStatS(t *testing.T) {
 	var reply string
-	expected := `{"stats":{"ees_conns":[],"ees_exporter_ids":null,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*prometheusStatIDs":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]}}`
+	expected := `{"stats":{"ees_conns":[],"ees_exporter_ids":null,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*prometheusStatIDs":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{StatSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4838,7 +4817,7 @@ func TestV1GetConfigAsJSONStatS(t *testing.T) {
 
 func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 	var reply string
-	expected := `{"thresholds":{"actions_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]}}`
+	expected := `{"thresholds":{"actions_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{ThresholdSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -4849,7 +4828,7 @@ func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 
 func TestV1GetConfigAsJSONRouteS(t *testing.T) {
 	var reply string
-	expected := `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_ratio":1,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*context":[],"*ignoreErrors":[],"*limit":[],"*maxCost":[],"*maxItems":[],"*offset":[],"*profileCount":[],"*usage":[]},"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expected := `{"routes":{"accounts_conns":[],"attributes_conns":[],"default_ratio":1,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{RouteSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5016,7 +4995,7 @@ func TestV1GetConfigAsJSONAnalyzer(t *testing.T) {
 
 func TestV1GetConfigAsJSONRateS(t *testing.T) {
 	var reply string
-	expected := `{"rates":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*intervalStart":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*startTime":[],"*usage":[]},"prefix_indexed_fields":[],"rate_exists_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_notexists_indexed_fields":[],"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[],"verbosity":1000}}`
+	expected := `{"rates":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*intervalStart":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*startTime":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"rate_exists_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_notexists_indexed_fields":[],"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[],"verbosity":1000}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{RateSJSON}}, &reply); err != nil {
 		t.Error(err)
@@ -5090,7 +5069,7 @@ func TestV1GetConfigAsJSONAllConfig(t *testing.T) {
 	  }
 }`
 	var reply string
-	expected := `{"accounts":{"attributes_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"max_iterations":1000,"max_usage":"259200000000000","nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*usage":[]},"prefix_indexed_fields":[],"rates_conns":[],"suffix_indexed_fields":[],"thresholds_conns":[]},"actions":{"accounts_conns":[],"cdrs_conns":[],"dynaprepaid_actionprofile":[],"ees_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*posterAttempts":[],"*profileIDs":[],"*profileIgnoreFilters":[]},"prefix_indexed_fields":[],"stats_conns":[],"suffix_indexed_fields":[],"tenants":[],"thresholds_conns":[]},"admins":{"actions_conns":[],"attributes_conns":[],"caches_conns":["*internal"],"ees_conns":[],"enabled":false},"analyzers":{"cleanup_interval":"1h0m0s","db_path":"/var/spool/cgrates/analyzers","ees_conns":[],"enabled":false,"index_type":"*scorch","opts":{"*exporterIDs":[]},"ttl":"24h0m0s"},"apiban":{"enabled":false,"keys":[]},"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"create_cdr":false,"enabled":false,"sessions_conns":["*birpc_internal"]},"attributes":{"accounts_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]},"caches":{"partitions":{"*account_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*apiban":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"2m0s"},"*attribute_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*caps_events":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*cdr_ids":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10m0s"},"*charger_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*closed_sessions":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*diameter_messages":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*event_charges":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*event_resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*ranking_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rankings":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*replication_hosts":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rpc_connections":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rpc_responses":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"2s"},"*sentrypeer":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":true,"ttl":"24h0m0s"},"*stat_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*stir":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*threshold_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*trend_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*trends":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*uch":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"}},"remote_conns":[],"replication_conns":[]},"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[],"*attributes":[],"*chargers":[],"*ees":[],"*rates":[],"*refund":[],"*rerate":[],"*stats":[],"*store":[],"*thresholds":[]},"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"thresholds_conns":[]},"chargers":{"attributes_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"config_db":{"db_host":"","db_name":"","db_password":"","db_port":0,"db_type":"*internal","db_user":"","opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"}},"configs":{"enabled":false,"root_dir":"/var/spool/cgrates/configs","url":"/configs/"},"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*busy","ees_conns":[],"shutdown_timeout":"1s"},"data_db":{"db_host":"127.0.0.1","db_name":"10","db_password":"","db_port":6379,"db_type":"*redis","db_user":"cgrates","items":{"*account_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*actions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ranking_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rankings":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*stat_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*trend_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*trends":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*versions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false}},"opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_filtered":false},"diameter_agent":{"asr_template":"","dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":0},"dns_agent":{"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"request_processors":[],"sessions_conns":["*internal"],"timezone":""},"ees":{"attributes_conns":[],"cache":{"*fileCSV":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"enabled":false,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"blocker":false,"concurrent_requests":0,"efs_conns":["*internal"],"export_path":"/var/spool/cgrates/ees","failed_posts_dir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","opts":{},"synchronous":false,"timezone":"","type":"*none"}]},"efs":{"enabled":false,"failed_posts_dir":"/var/spool/cgrates/failed_posts","failed_posts_ttl":"5s","poster_attempts":3},"ers":{"enabled":false,"partial_cache_ttl":"1s","readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"id":"*default","max_reconnect_interval":"5m0s","opts":{"csvFieldSeparator":",","csvHeaderDefineChar":":","csvRowLength":0,"natsSubject":"cgrates_cdrs","partialCacheAction":"*none","partialOrderField":"~*req.AnswerTime"},"partial_commit_fields":[],"processed_path":"/var/spool/cgrates/ers/out","reconnects":-1,"run_delay":"0","source_path":"/var/spool/cgrates/ers/in","tenant":"","timezone":"","type":"*none"}],"sessions_conns":["*internal"]},"filters":{"accounts_conns":[],"rankings_conns":[],"resources_conns":[],"stats_conns":[],"trends_conns":[]},"freeswitch_agent":{"active_session_delimiter":",","create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5,"reply_timeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","sessions_conns":["*birpc_internal"],"subscribe_park":true},"general":{"caching_delay":"0","connect_attempts":5,"connect_timeout":"1s","dbdata_encoding":"*msgpack","decimal_max_scale":0,"decimal_min_scale":0,"decimal_precision":0,"decimal_rounding_mode":"*toNearestEven","default_caching":"*reload","default_category":"call","default_request_type":"*rated","default_tenant":"cgrates.org","default_timezone":"Local","digest_equal":":","digest_separator":",","locking_timeout":"0","max_parallel_conns":100,"max_reconnect_interval":"0","node_id":"ENGINE1","opts":{"*exporterIDs":[]},"reconnects":-1,"reply_timeout":"2s","rounding_decimals":5,"rsr_separator":";","tpexport_dir":"/var/spool/cgrates/tpe"},"http":{"auth_users":{},"client_opts":{"dialFallbackDelay":"300ms","dialKeepAlive":"30s","dialTimeout":"30s","disableCompression":false,"disableKeepAlives":false,"expectContinueTimeout":"0s","forceAttemptHttp2":true,"idleConnTimeout":"1m30s","maxConnsPerHost":0,"maxIdleConns":100,"maxIdleConnsPerHost":2,"responseHeaderTimeout":"0s","skipTLSVerification":false,"tlsHandshakeTimeout":"10s"},"freeswitch_cdrs_url":"/freeswitch_json","http_cdrs":"/cdr_http","json_rpc_url":"/jsonrpc","pprof_path":"/debug/pprof/","prometheus_url":"/prometheus","registrars_url":"/registrar","use_basic_auth":false,"ws_url":"/ws"},"http_agent":[],"janus_agent":{"enabled":false,"janus_conns":[{"address":"127.0.0.1:8088","admin_address":"localhost:7188","admin_password":"","type":"*ws"}],"request_processors":[],"sessions_conns":["*internal"],"url":"/janus"},"kamailio_agent":{"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","max_reconnect_interval":"0s","reconnects":5}],"sessions_conns":["*birpc_internal"],"timezone":""},"listen":{"http":"127.0.0.1:2080","http_tls":"127.0.0.1:2280","rpc_gob":"127.0.0.1:2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":"127.0.0.1:2012","rpc_json_tls":"127.0.0.1:2022"},"loader":{"actions_conns":["*localhost"],"caches_conns":["*localhost"],"data_path":"./","disable_reverse":false,"field_separator":",","gapi_credentials":".gapi/credentials.json","gapi_token":".gapi/token.json","tpid":""},"loaders":[{"action":"*store","cache":{"*accounts":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*action_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*attributes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*chargers":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*filters":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*rankings":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*rate_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*routes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*stats":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*thresholds":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*trends":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"caches_conns":["*internal"],"data":[{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"new_branch":true,"path":"Rules.Type","tag":"Type","type":"*variable","value":"~*req.2"},{"path":"Rules.Element","tag":"Element","type":"*variable","value":"~*req.3"},{"path":"Rules.Values","tag":"Values","type":"*variable","value":"~*req.4"}],"file_name":"Filters.csv","flags":null,"type":"*filters"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"TenantID","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ProfileID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"new_branch":true,"path":"Attributes.FilterIDs","tag":"AttributeFilterIDs","type":"*variable","value":"~*req.5"},{"path":"Attributes.Blockers","tag":"AttributeBlockers","type":"*variable","value":"~*req.6"},{"path":"Attributes.Path","tag":"Path","type":"*variable","value":"~*req.7"},{"path":"Attributes.Type","tag":"Type","type":"*variable","value":"~*req.8"},{"path":"Attributes.Value","tag":"Value","type":"*variable","value":"~*req.9"}],"file_name":"Attributes.csv","flags":null,"type":"*attributes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"UsageTTL","tag":"TTL","type":"*variable","value":"~*req.4"},{"path":"Limit","tag":"Limit","type":"*variable","value":"~*req.5"},{"path":"AllocationMessage","tag":"AllocationMessage","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.9"}],"file_name":"Resources.csv","flags":null,"type":"*resources"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.5"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.6"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.9"},{"new_branch":true,"path":"Metrics.MetricID","tag":"MetricIDs","type":"*variable","value":"~*req.10"},{"path":"Metrics.FilterIDs","tag":"MetricFilterIDs","type":"*variable","value":"~*req.11"},{"path":"Metrics.Blockers","tag":"MetricBlockers","type":"*variable","value":"~*req.12"}],"file_name":"Stats.csv","flags":null,"type":"*stats"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"MaxHits","tag":"MaxHits","type":"*variable","value":"~*req.4"},{"path":"MinHits","tag":"MinHits","type":"*variable","value":"~*req.5"},{"path":"MinSleep","tag":"MinSleep","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"ActionProfileIDs","tag":"ActionProfileIDs","type":"*variable","value":"~*req.8"},{"path":"Async","tag":"Async","type":"*variable","value":"~*req.9"}],"file_name":"Thresholds.csv","flags":null,"type":"*thresholds"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.2"},{"path":"StatID","tag":"StatID","type":"*variable","value":"~*req.3"},{"path":"Metrics","tag":"Metrics","type":"*variable","value":"~*req.4"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.5"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.6"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.7"},{"path":"CorrelationType","tag":"CorrelationType","type":"*variable","value":"~*req.8"},{"path":"Tolerance","tag":"Tolerance","type":"*variable","value":"~*req.9"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.10"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.11"}],"file_name":"Trends.csv","flags":null,"type":"*trends"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.2"},{"path":"StatIDs","tag":"StatIDs","type":"*variable","value":"~*req.3"},{"path":"MetricIDs","tag":"MetricIDs","type":"*variable","value":"~*req.4"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.5"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.6"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.7"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.8"}],"file_name":"Rankings.csv","flags":null,"type":"*rankings"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.5"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.6"},{"new_branch":true,"path":"Routes.ID","tag":"RouteID","type":"*variable","value":"~*req.7"},{"path":"Routes.FilterIDs","tag":"RouteFilterIDs","type":"*variable","value":"~*req.8"},{"path":"Routes.AccountIDs","tag":"RouteAccountIDs","type":"*variable","value":"~*req.9"},{"path":"Routes.RateProfileIDs","tag":"RouteRateProfileIDs","type":"*variable","value":"~*req.10"},{"path":"Routes.ResourceIDs","tag":"RouteResourceIDs","type":"*variable","value":"~*req.11"},{"path":"Routes.StatIDs","tag":"RouteStatIDs","type":"*variable","value":"~*req.12"},{"path":"Routes.Weights","tag":"RouteWeights","type":"*variable","value":"~*req.13"},{"path":"Routes.Blockers","tag":"RouteBlockers","type":"*variable","value":"~*req.14"},{"path":"Routes.RouteParameters","tag":"RouteParameters","type":"*variable","value":"~*req.15"}],"file_name":"Routes.csv","flags":null,"type":"*routes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"RunID","tag":"RunID","type":"*variable","value":"~*req.5"},{"path":"AttributeIDs","tag":"AttributeIDs","type":"*variable","value":"~*req.6"}],"file_name":"Chargers.csv","flags":null,"type":"*chargers"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"MinCost","tag":"MinCost","type":"*variable","value":"~*req.4"},{"path":"MaxCost","tag":"MaxCost","type":"*variable","value":"~*req.5"},{"path":"MaxCostStrategy","tag":"MaxCostStrategy","type":"*variable","value":"~*req.6"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].FilterIDs","tag":"RateFilterIDs","type":"*variable","value":"~*req.8"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].ActivationTimes","tag":"RateActivationTimes","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].Weights","tag":"RateWeights","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].Blocker","tag":"RateBlocker","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.7:"],"new_branch":true,"path":"Rates[\u003c~*req.7\u003e].IntervalRates.IntervalStart","tag":"RateIntervalStart","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.FixedFee","tag":"RateFixedFee","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.RecurrentFee","tag":"RateRecurrentFee","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.Unit","tag":"RateUnit","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.Increment","tag":"RateIncrement","type":"*variable","value":"~*req.16"}],"file_name":"Rates.csv","flags":null,"type":"*rate_profiles"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.5"},{"path":"Targets[\u003c~*req.6\u003e]","tag":"TargetIDs","type":"*variable","value":"~*req.7"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].FilterIDs","tag":"ActionFilterIDs","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].TTL","tag":"ActionTTL","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Type","tag":"ActionType","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Opts","tag":"ActionOpts","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.8:"],"new_branch":true,"path":"Actions[\u003c~*req.8\u003e].Diktats.Path","tag":"ActionPath","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.Value","tag":"ActionValue","type":"*variable","value":"~*req.14"}],"file_name":"Actions.csv","flags":null,"type":"*action_profiles"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Opts","tag":"Opts","type":"*variable","value":"~*req.5"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].FilterIDs","tag":"BalanceFilterIDs","type":"*variable","value":"~*req.7"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Weights","tag":"BalanceWeights","type":"*variable","value":"~*req.8"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Blockers","tag":"BalanceBlockers","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Type","tag":"BalanceType","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Units","tag":"BalanceUnits","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].UnitFactors","tag":"BalanceUnitFactors","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Opts","tag":"BalanceOpts","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].CostIncrements","tag":"BalanceCostIncrements","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].AttributeIDs","tag":"BalanceAttributeIDs","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].RateProfileIDs","tag":"BalanceRateProfileIDs","type":"*variable","value":"~*req.16"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.17"}],"file_name":"Accounts.csv","flags":null,"type":"*accounts"}],"enabled":false,"field_separator":",","id":"*default","lockfile_path":".cgr.lck","opts":{"*cache":"","*forceLock":false,"*stopOnError":false,"*withIndex":true},"run_delay":"0","tenant":"","tp_in_dir":"/var/spool/cgrates/loader/in","tp_out_dir":"/var/spool/cgrates/loader/out"}],"logger":{"efs_conns":["*internal"],"level":6,"opts":{"failed_posts_dir":"/var/spool/cgrates/failed_posts","kafka_attempts":1,"kafka_conn":"","kafka_topic":""},"type":"*syslog"},"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"*redis","out_datadb_user":"cgrates","users_filters":null},"radius_agent":{"client_dictionaries":{"*default":"/usr/share/cgrates/radius/dict/"},"client_secrets":{"*default":"CGRateS.org"},"enabled":false,"listen_acct":"127.0.0.1:1813","listen_auth":"127.0.0.1:1812","listen_net":"udp","request_processors":[],"sessions_conns":["*internal"]},"rankings":{"ees_conns":[],"ees_exporter_ids":null,"enabled":false,"scheduled_ids":{},"stats_conns":[],"store_interval":"","thresholds_conns":[]},"rates":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*intervalStart":[],"*profileIDs":[],"*profileIgnoreFilters":[],"*startTime":[],"*usage":[]},"prefix_indexed_fields":[],"rate_exists_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_notexists_indexed_fields":[],"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[],"verbosity":1000},"registrarc":{"rpc":{"hosts":[],"refresh_interval":"5m0s","registrars_conns":[]}},"resources":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[],"*usageID":[],"*usageTTL":[]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[],"thresholds_conns":[]},"routes":{"accounts_conns":[],"attributes_conns":[],"default_ratio":1,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*context":[],"*ignoreErrors":[],"*limit":[],"*maxCost":[],"*maxItems":[],"*offset":[],"*profileCount":[],"*usage":[]},"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]},"rpc_conns":{"*bijson_localhost":{"conns":[{"address":"127.0.0.1:2014","transport":"*birpc_json"}],"poolSize":0,"strategy":"*first"},"*birpc_internal":{"conns":[{"address":"*birpc_internal","transport":""}],"poolSize":0,"strategy":"*first"},"*internal":{"conns":[{"address":"*internal","transport":""}],"poolSize":0,"strategy":"*first"},"*localhost":{"conns":[{"address":"127.0.0.1:2012","transport":"*json"}],"poolSize":0,"strategy":"*first"}},"sentrypeer":{"audience":"https://sentrypeer.com/api","client_id":"","client_secret":"","grant_type":"client_credentials","ips_url":"https://sentrypeer.com/api/ip-addresses","numbers_url":"https://sentrypeer.com/api/phone-numbers","token_url":"https://authz.sentrypeer.com/oauth/token"},"sessions":{"accounts_conns":[],"actions_conns":[],"alterable_fields":[],"attributes_conns":[],"cdrs_conns":[],"channel_sync_interval":"0","chargers_conns":[],"client_protocol":1,"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":false,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[],"*attributes":[],"*attributesDerivedReply":[],"*blockerError":[],"*cdrs":[],"*cdrsDerivedReply":[],"*chargeable":[],"*chargers":[],"*debitInterval":[],"*forceUsage":[],"*initiate":[],"*maxUsage":[],"*message":[],"*resources":[],"*resourcesAllocate":[],"*resourcesAuthorize":[],"*resourcesDerivedReply":[],"*resourcesRelease":[],"*routes":[],"*routesDerivedReply":[],"*stats":[],"*statsDerivedReply":[],"*terminate":[],"*thresholds":[],"*thresholdsDerivedReply":[],"*ttl":[],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[],"*ttlUsage":[],"*update":[]},"rates_conns":[],"replication_conns":[],"resources_conns":[],"routes_conns":[],"session_indexes":[],"stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]},"sip_agent":{"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","sessions_conns":["*internal"],"timezone":""},"stats":{"ees_conns":[],"ees_exporter_ids":null,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[],"*prometheusStatIDs":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]},"stor_db":{"db_host":"127.0.0.1","db_name":"cgrates","db_password":"CGRateS.org","db_port":3306,"db_type":"**mysql","db_user":"cgrates","items":{"*cdrs":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false}},"opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","mysqlDSNParams":{},"mysqlLocation":"Local","pgSSLMode":"disable","sqlConnMaxLifetime":"0s","sqlMaxIdleConns":10,"sqlMaxOpenConns":100},"prefix_indexed_fields":[],"remote_conns":null,"replication_conns":null,"string_indexed_fields":[]},"suretax":{"bill_to_number":"","business_unit":"","client_number":"","client_tracking":"~*opts.*originID","customer_number":"~*req.Subject","include_local_cost":false,"orig_number":"~*req.Subject","p2pplus4":"","p2pzipcode":"","plus4":"","regulatory_code":"03","response_group":"03","response_type":"D4","return_file_code":"0","sales_type_code":"R","tax_exemption_code_list":"","tax_included":"0","tax_situs_rule":"04","term_number":"~*req.Destination","timezone":"UTC","trans_type_code":"010101","unit_type":"00","units":"1","url":"","validation_key":"","zipcode":""},"templates":{"*asr":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"}],"*cca":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"path":"*rep.Result-Code","tag":"ResultCode","type":"*constant","value":"2001"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"},{"mandatory":true,"path":"*rep.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"mandatory":true,"path":"*rep.CC-Request-Type","tag":"CCRequestType","type":"*variable","value":"~*req.CC-Request-Type"},{"mandatory":true,"path":"*rep.CC-Request-Number","tag":"CCRequestNumber","type":"*variable","value":"~*req.CC-Request-Number"}],"*cdrLog":[{"mandatory":true,"path":"*cdr.ToR","tag":"ToR","type":"*variable","value":"~*req.BalanceType"},{"mandatory":true,"path":"*cdr.OriginHost","tag":"OriginHost","type":"*constant","value":"127.0.0.1"},{"mandatory":true,"path":"*cdr.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"mandatory":true,"path":"*cdr.Tenant","tag":"Tenant","type":"*variable","value":"~*req.Tenant"},{"mandatory":true,"path":"*cdr.Account","tag":"Account","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Subject","tag":"Subject","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Cost","tag":"Cost","type":"*variable","value":"~*req.Cost"},{"mandatory":true,"path":"*cdr.Source","tag":"Source","type":"*constant","value":"*cdrLog"},{"mandatory":true,"path":"*cdr.Usage","tag":"Usage","type":"*constant","value":"1"},{"mandatory":true,"path":"*cdr.RunID","tag":"RunID","type":"*variable","value":"~*req.ActionType"},{"mandatory":true,"path":"*cdr.SetupTime","tag":"SetupTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.AnswerTime","tag":"AnswerTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.PreRated","tag":"PreRated","type":"*constant","value":"true"}],"*err":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"}],"*errSip":[{"mandatory":true,"path":"*rep.Request","tag":"Request","type":"*constant","value":"SIP/2.0 500 Internal Server Error"}],"*rar":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"path":"*diamreq.Re-Auth-Request-Type","tag":"ReAuthRequestType","type":"*constant","value":"0"}]},"thresholds":{"actions_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]},"tls":{"ca_certificate":"","client_certificate":"","client_key":"","server_certificate":"","server_key":"","server_name":"","server_policy":4},"tpes":{"enabled":false},"trends":{"ees_conns":[],"ees_exporter_ids":null,"enabled":false,"scheduled_ids":{},"stats_conns":[],"store_interval":"","store_uncompressed_limit":0,"thresholds_conns":[]}}`
+	expected := `{"accounts":{"attributes_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"max_iterations":1000,"max_usage":"259200000000000","nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"rates_conns":[],"suffix_indexed_fields":[],"thresholds_conns":[]},"actions":{"accounts_conns":[],"cdrs_conns":[],"dynaprepaid_actionprofile":[],"ees_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*posterAttempts":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"stats_conns":[],"suffix_indexed_fields":[],"tenants":[],"thresholds_conns":[]},"admins":{"actions_conns":[],"attributes_conns":[],"caches_conns":["*internal"],"ees_conns":[],"enabled":false},"analyzers":{"cleanup_interval":"1h0m0s","db_path":"/var/spool/cgrates/analyzers","ees_conns":[],"enabled":false,"index_type":"*scorch","opts":{"*exporterIDs":[]},"ttl":"24h0m0s"},"apiban":{"enabled":false,"keys":[]},"asterisk_agent":{"asterisk_conns":[{"address":"127.0.0.1:8088","alias":"","connect_attempts":3,"max_reconnect_interval":"0s","password":"CGRateS.org","reconnects":5,"user":"cgrates"}],"create_cdr":false,"enabled":false,"sessions_conns":["*birpc_internal"]},"attributes":{"accounts_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]},"caches":{"partitions":{"*account_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*apiban":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"2m0s"},"*attribute_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*caps_events":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*cdr_ids":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10m0s"},"*charger_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*closed_sessions":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*diameter_messages":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*event_charges":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"10s"},"*event_resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*ranking_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rankings":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*replication_hosts":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rpc_connections":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*rpc_responses":{"limit":0,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"2s"},"*sentrypeer":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":true,"ttl":"24h0m0s"},"*stat_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*stir":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"},"*threshold_filter_indexes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*trend_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*trends":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false},"*uch":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"3h0m0s"}},"remote_conns":[],"replication_conns":[]},"cdrs":{"accounts_conns":[],"actions_conns":[],"attributes_conns":[],"chargers_conns":[],"ees_conns":[],"enabled":false,"extra_fields":[],"online_cdr_exports":null,"opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*ees":[{"FilterIDs":null,"Tenant":""}],"*rates":[{"FilterIDs":null,"Tenant":""}],"*refund":[{"FilterIDs":null,"Tenant":""}],"*rerate":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*store":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}]},"rates_conns":[],"session_cost_retries":5,"stats_conns":[],"thresholds_conns":[]},"chargers":{"attributes_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"prefix_indexed_fields":[],"suffix_indexed_fields":[]},"config_db":{"db_host":"","db_name":"","db_password":"","db_port":0,"db_type":"*internal","db_user":"","opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"}},"configs":{"enabled":false,"root_dir":"/var/spool/cgrates/configs","url":"/configs/"},"cores":{"caps":0,"caps_stats_interval":"0","caps_strategy":"*busy","ees_conns":[],"shutdown_timeout":"1s"},"data_db":{"db_host":"127.0.0.1","db_name":"10","db_password":"","db_port":6379,"db_type":"*redis","db_user":"cgrates","items":{"*account_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*accounts":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*action_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*actions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*attribute_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*charger_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*filters":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*load_ids":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*ranking_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rankings":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profile_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*rate_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resource_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*resources":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*reverse_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*route_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*stat_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueue_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*statqueues":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_filter_indexes":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*threshold_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*thresholds":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*trend_profiles":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*trends":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false},"*versions":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false}},"opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"remote_conn_id":"","remote_conns":[],"replication_cache":"","replication_conns":[],"replication_filtered":false},"diameter_agent":{"asr_template":"","dictionaries_path":"/usr/share/cgrates/diameter/dict/","enabled":false,"forced_disconnect":"*none","listen":"127.0.0.1:3868","listen_net":"tcp","origin_host":"CGR-DA","origin_realm":"cgrates.org","product_name":"CGRateS","rar_template":"","request_processors":[],"sessions_conns":["*birpc_internal"],"synced_conn_requests":false,"vendor_id":0},"dns_agent":{"enabled":false,"listeners":[{"address":"127.0.0.1:53","network":"udp"}],"request_processors":[],"sessions_conns":["*internal"],"timezone":""},"ees":{"attributes_conns":[],"cache":{"*fileCSV":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"enabled":false,"exporters":[{"attempts":1,"attribute_context":"","attribute_ids":[],"blocker":false,"concurrent_requests":0,"efs_conns":["*internal"],"export_path":"/var/spool/cgrates/ees","failed_posts_dir":"/var/spool/cgrates/failed_posts","fields":[],"filters":[],"flags":[],"id":"*default","opts":{},"synchronous":false,"timezone":"","type":"*none"}]},"efs":{"enabled":false,"failed_posts_dir":"/var/spool/cgrates/failed_posts","failed_posts_ttl":"5s","poster_attempts":3},"ers":{"enabled":false,"partial_cache_ttl":"1s","readers":[{"cache_dump_fields":[],"concurrent_requests":1024,"fields":[{"mandatory":true,"path":"*cgreq.ToR","tag":"ToR","type":"*variable","value":"~*req.2"},{"mandatory":true,"path":"*cgreq.OriginID","tag":"OriginID","type":"*variable","value":"~*req.3"},{"mandatory":true,"path":"*cgreq.RequestType","tag":"RequestType","type":"*variable","value":"~*req.4"},{"mandatory":true,"path":"*cgreq.Tenant","tag":"Tenant","type":"*variable","value":"~*req.6"},{"mandatory":true,"path":"*cgreq.Category","tag":"Category","type":"*variable","value":"~*req.7"},{"mandatory":true,"path":"*cgreq.Account","tag":"Account","type":"*variable","value":"~*req.8"},{"mandatory":true,"path":"*cgreq.Subject","tag":"Subject","type":"*variable","value":"~*req.9"},{"mandatory":true,"path":"*cgreq.Destination","tag":"Destination","type":"*variable","value":"~*req.10"},{"mandatory":true,"path":"*cgreq.SetupTime","tag":"SetupTime","type":"*variable","value":"~*req.11"},{"mandatory":true,"path":"*cgreq.AnswerTime","tag":"AnswerTime","type":"*variable","value":"~*req.12"},{"mandatory":true,"path":"*cgreq.Usage","tag":"Usage","type":"*variable","value":"~*req.13"}],"filters":[],"flags":[],"id":"*default","max_reconnect_interval":"5m0s","opts":{"csvFieldSeparator":",","csvHeaderDefineChar":":","csvRowLength":0,"natsSubject":"cgrates_cdrs","partialCacheAction":"*none","partialOrderField":"~*req.AnswerTime"},"partial_commit_fields":[],"processed_path":"/var/spool/cgrates/ers/out","reconnects":-1,"run_delay":"0","source_path":"/var/spool/cgrates/ers/in","tenant":"","timezone":"","type":"*none"}],"sessions_conns":["*internal"]},"filters":{"accounts_conns":[],"rankings_conns":[],"resources_conns":[],"stats_conns":[],"trends_conns":[]},"freeswitch_agent":{"active_session_delimiter":",","create_cdr":false,"empty_balance_ann_file":"","empty_balance_context":"","enabled":false,"event_socket_conns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","max_reconnect_interval":"0s","password":"ClueCon","reconnects":5,"reply_timeout":"1m0s"}],"extra_fields":[],"low_balance_ann_file":"","max_wait_connection":"2s","sessions_conns":["*birpc_internal"],"subscribe_park":true},"general":{"caching_delay":"0","connect_attempts":5,"connect_timeout":"1s","dbdata_encoding":"*msgpack","decimal_max_scale":0,"decimal_min_scale":0,"decimal_precision":0,"decimal_rounding_mode":"*toNearestEven","default_caching":"*reload","default_category":"call","default_request_type":"*rated","default_tenant":"cgrates.org","default_timezone":"Local","digest_equal":":","digest_separator":",","locking_timeout":"0","max_parallel_conns":100,"max_reconnect_interval":"0","node_id":"ENGINE1","opts":{"*exporterIDs":[]},"reconnects":-1,"reply_timeout":"2s","rounding_decimals":5,"rsr_separator":";","tpexport_dir":"/var/spool/cgrates/tpe"},"http":{"auth_users":{},"client_opts":{"dialFallbackDelay":"300ms","dialKeepAlive":"30s","dialTimeout":"30s","disableCompression":false,"disableKeepAlives":false,"expectContinueTimeout":"0s","forceAttemptHttp2":true,"idleConnTimeout":"1m30s","maxConnsPerHost":0,"maxIdleConns":100,"maxIdleConnsPerHost":2,"responseHeaderTimeout":"0s","skipTLSVerification":false,"tlsHandshakeTimeout":"10s"},"freeswitch_cdrs_url":"/freeswitch_json","http_cdrs":"/cdr_http","json_rpc_url":"/jsonrpc","pprof_path":"/debug/pprof/","prometheus_url":"/prometheus","registrars_url":"/registrar","use_basic_auth":false,"ws_url":"/ws"},"http_agent":[],"janus_agent":{"enabled":false,"janus_conns":[{"address":"127.0.0.1:8088","admin_address":"localhost:7188","admin_password":"","type":"*ws"}],"request_processors":[],"sessions_conns":["*internal"],"url":"/janus"},"kamailio_agent":{"create_cdr":false,"enabled":false,"evapi_conns":[{"address":"127.0.0.1:8448","alias":"","max_reconnect_interval":"0s","reconnects":5}],"sessions_conns":["*birpc_internal"],"timezone":""},"listen":{"http":"127.0.0.1:2080","http_tls":"127.0.0.1:2280","rpc_gob":"127.0.0.1:2013","rpc_gob_tls":"127.0.0.1:2023","rpc_json":"127.0.0.1:2012","rpc_json_tls":"127.0.0.1:2022"},"loader":{"actions_conns":["*localhost"],"caches_conns":["*localhost"],"data_path":"./","disable_reverse":false,"field_separator":",","gapi_credentials":".gapi/credentials.json","gapi_token":".gapi/token.json","tpid":""},"loaders":[{"action":"*store","cache":{"*accounts":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*action_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*attributes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*chargers":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*filters":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*rankings":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*rate_profiles":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*resources":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*routes":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*stats":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*thresholds":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"},"*trends":{"limit":-1,"precache":false,"remote":false,"replicate":false,"static_ttl":false,"ttl":"5s"}},"caches_conns":["*internal"],"data":[{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"new_branch":true,"path":"Rules.Type","tag":"Type","type":"*variable","value":"~*req.2"},{"path":"Rules.Element","tag":"Element","type":"*variable","value":"~*req.3"},{"path":"Rules.Values","tag":"Values","type":"*variable","value":"~*req.4"}],"file_name":"Filters.csv","flags":null,"type":"*filters"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"TenantID","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ProfileID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"new_branch":true,"path":"Attributes.FilterIDs","tag":"AttributeFilterIDs","type":"*variable","value":"~*req.5"},{"path":"Attributes.Blockers","tag":"AttributeBlockers","type":"*variable","value":"~*req.6"},{"path":"Attributes.Path","tag":"Path","type":"*variable","value":"~*req.7"},{"path":"Attributes.Type","tag":"Type","type":"*variable","value":"~*req.8"},{"path":"Attributes.Value","tag":"Value","type":"*variable","value":"~*req.9"}],"file_name":"Attributes.csv","flags":null,"type":"*attributes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"UsageTTL","tag":"TTL","type":"*variable","value":"~*req.4"},{"path":"Limit","tag":"Limit","type":"*variable","value":"~*req.5"},{"path":"AllocationMessage","tag":"AllocationMessage","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.9"}],"file_name":"Resources.csv","flags":null,"type":"*resources"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.5"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.6"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.7"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.8"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.9"},{"new_branch":true,"path":"Metrics.MetricID","tag":"MetricIDs","type":"*variable","value":"~*req.10"},{"path":"Metrics.FilterIDs","tag":"MetricFilterIDs","type":"*variable","value":"~*req.11"},{"path":"Metrics.Blockers","tag":"MetricBlockers","type":"*variable","value":"~*req.12"}],"file_name":"Stats.csv","flags":null,"type":"*stats"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"MaxHits","tag":"MaxHits","type":"*variable","value":"~*req.4"},{"path":"MinHits","tag":"MinHits","type":"*variable","value":"~*req.5"},{"path":"MinSleep","tag":"MinSleep","type":"*variable","value":"~*req.6"},{"path":"Blocker","tag":"Blocker","type":"*variable","value":"~*req.7"},{"path":"ActionProfileIDs","tag":"ActionProfileIDs","type":"*variable","value":"~*req.8"},{"path":"Async","tag":"Async","type":"*variable","value":"~*req.9"}],"file_name":"Thresholds.csv","flags":null,"type":"*thresholds"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.2"},{"path":"StatID","tag":"StatID","type":"*variable","value":"~*req.3"},{"path":"Metrics","tag":"Metrics","type":"*variable","value":"~*req.4"},{"path":"TTL","tag":"TTL","type":"*variable","value":"~*req.5"},{"path":"QueueLength","tag":"QueueLength","type":"*variable","value":"~*req.6"},{"path":"MinItems","tag":"MinItems","type":"*variable","value":"~*req.7"},{"path":"CorrelationType","tag":"CorrelationType","type":"*variable","value":"~*req.8"},{"path":"Tolerance","tag":"Tolerance","type":"*variable","value":"~*req.9"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.10"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.11"}],"file_name":"Trends.csv","flags":null,"type":"*trends"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.2"},{"path":"StatIDs","tag":"StatIDs","type":"*variable","value":"~*req.3"},{"path":"MetricIDs","tag":"MetricIDs","type":"*variable","value":"~*req.4"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.5"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.6"},{"path":"Stored","tag":"Stored","type":"*variable","value":"~*req.7"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.8"}],"file_name":"Rankings.csv","flags":null,"type":"*rankings"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Sorting","tag":"Sorting","type":"*variable","value":"~*req.5"},{"path":"SortingParameters","tag":"SortingParameters","type":"*variable","value":"~*req.6"},{"new_branch":true,"path":"Routes.ID","tag":"RouteID","type":"*variable","value":"~*req.7"},{"path":"Routes.FilterIDs","tag":"RouteFilterIDs","type":"*variable","value":"~*req.8"},{"path":"Routes.AccountIDs","tag":"RouteAccountIDs","type":"*variable","value":"~*req.9"},{"path":"Routes.RateProfileIDs","tag":"RouteRateProfileIDs","type":"*variable","value":"~*req.10"},{"path":"Routes.ResourceIDs","tag":"RouteResourceIDs","type":"*variable","value":"~*req.11"},{"path":"Routes.StatIDs","tag":"RouteStatIDs","type":"*variable","value":"~*req.12"},{"path":"Routes.Weights","tag":"RouteWeights","type":"*variable","value":"~*req.13"},{"path":"Routes.Blockers","tag":"RouteBlockers","type":"*variable","value":"~*req.14"},{"path":"Routes.RouteParameters","tag":"RouteParameters","type":"*variable","value":"~*req.15"}],"file_name":"Routes.csv","flags":null,"type":"*routes"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"RunID","tag":"RunID","type":"*variable","value":"~*req.5"},{"path":"AttributeIDs","tag":"AttributeIDs","type":"*variable","value":"~*req.6"}],"file_name":"Chargers.csv","flags":null,"type":"*chargers"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"MinCost","tag":"MinCost","type":"*variable","value":"~*req.4"},{"path":"MaxCost","tag":"MaxCost","type":"*variable","value":"~*req.5"},{"path":"MaxCostStrategy","tag":"MaxCostStrategy","type":"*variable","value":"~*req.6"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].FilterIDs","tag":"RateFilterIDs","type":"*variable","value":"~*req.8"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].ActivationTimes","tag":"RateActivationTimes","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].Weights","tag":"RateWeights","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].Blocker","tag":"RateBlocker","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.7:"],"new_branch":true,"path":"Rates[\u003c~*req.7\u003e].IntervalRates.IntervalStart","tag":"RateIntervalStart","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.FixedFee","tag":"RateFixedFee","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.RecurrentFee","tag":"RateRecurrentFee","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.Unit","tag":"RateUnit","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.7:"],"path":"Rates[\u003c~*req.7\u003e].IntervalRates.Increment","tag":"RateIncrement","type":"*variable","value":"~*req.16"}],"file_name":"Rates.csv","flags":null,"type":"*rate_profiles"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Schedule","tag":"Schedule","type":"*variable","value":"~*req.5"},{"path":"Targets[\u003c~*req.6\u003e]","tag":"TargetIDs","type":"*variable","value":"~*req.7"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].FilterIDs","tag":"ActionFilterIDs","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].TTL","tag":"ActionTTL","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Type","tag":"ActionType","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Opts","tag":"ActionOpts","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.8:"],"new_branch":true,"path":"Actions[\u003c~*req.8\u003e].Diktats.Path","tag":"ActionPath","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.8:"],"path":"Actions[\u003c~*req.8\u003e].Diktats.Value","tag":"ActionValue","type":"*variable","value":"~*req.14"}],"file_name":"Actions.csv","flags":null,"type":"*action_profiles"},{"fields":[{"mandatory":true,"path":"Tenant","tag":"Tenant","type":"*variable","value":"~*req.0"},{"mandatory":true,"path":"ID","tag":"ID","type":"*variable","value":"~*req.1"},{"path":"FilterIDs","tag":"FilterIDs","type":"*variable","value":"~*req.2"},{"path":"Weights","tag":"Weights","type":"*variable","value":"~*req.3"},{"path":"Blockers","tag":"Blockers","type":"*variable","value":"~*req.4"},{"path":"Opts","tag":"Opts","type":"*variable","value":"~*req.5"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].FilterIDs","tag":"BalanceFilterIDs","type":"*variable","value":"~*req.7"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Weights","tag":"BalanceWeights","type":"*variable","value":"~*req.8"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Blockers","tag":"BalanceBlockers","type":"*variable","value":"~*req.9"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Type","tag":"BalanceType","type":"*variable","value":"~*req.10"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Units","tag":"BalanceUnits","type":"*variable","value":"~*req.11"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].UnitFactors","tag":"BalanceUnitFactors","type":"*variable","value":"~*req.12"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].Opts","tag":"BalanceOpts","type":"*variable","value":"~*req.13"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].CostIncrements","tag":"BalanceCostIncrements","type":"*variable","value":"~*req.14"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].AttributeIDs","tag":"BalanceAttributeIDs","type":"*variable","value":"~*req.15"},{"filters":["*notempty:~*req.6:"],"path":"Balances[\u003c~*req.6\u003e].RateProfileIDs","tag":"BalanceRateProfileIDs","type":"*variable","value":"~*req.16"},{"path":"ThresholdIDs","tag":"ThresholdIDs","type":"*variable","value":"~*req.17"}],"file_name":"Accounts.csv","flags":null,"type":"*accounts"}],"enabled":false,"field_separator":",","id":"*default","lockfile_path":".cgr.lck","opts":{"*cache":"","*forceLock":false,"*stopOnError":false,"*withIndex":true},"run_delay":"0","tenant":"","tp_in_dir":"/var/spool/cgrates/loader/in","tp_out_dir":"/var/spool/cgrates/loader/out"}],"logger":{"efs_conns":["*internal"],"level":6,"opts":{"failed_posts_dir":"/var/spool/cgrates/failed_posts","kafka_attempts":1,"kafka_conn":"","kafka_topic":""},"type":"*syslog"},"migrator":{"out_datadb_encoding":"msgpack","out_datadb_host":"127.0.0.1","out_datadb_name":"10","out_datadb_opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","redisCACertificate":"","redisClientCertificate":"","redisClientKey":"","redisCluster":false,"redisClusterOndownDelay":"0s","redisClusterSync":"5s","redisConnectAttempts":20,"redisConnectTimeout":"0s","redisMaxConns":10,"redisPoolPipelineLimit":0,"redisPoolPipelineWindow":"150µs","redisReadTimeout":"0s","redisSentinel":"","redisTLS":false,"redisWriteTimeout":"0s"},"out_datadb_password":"","out_datadb_port":"6379","out_datadb_type":"*redis","out_datadb_user":"cgrates","users_filters":null},"radius_agent":{"client_dictionaries":{"*default":"/usr/share/cgrates/radius/dict/"},"client_secrets":{"*default":"CGRateS.org"},"enabled":false,"listen_acct":"127.0.0.1:1813","listen_auth":"127.0.0.1:1812","listen_net":"udp","request_processors":[],"sessions_conns":["*internal"]},"rankings":{"ees_conns":[],"ees_exporter_ids":null,"enabled":false,"scheduled_ids":{},"stats_conns":[],"store_interval":"","thresholds_conns":[]},"rates":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*intervalStart":[{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*startTime":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"rate_exists_indexed_fields":[],"rate_indexed_selects":true,"rate_nested_fields":false,"rate_notexists_indexed_fields":[],"rate_prefix_indexed_fields":[],"rate_suffix_indexed_fields":[],"suffix_indexed_fields":[],"verbosity":1000},"registrarc":{"rpc":{"hosts":[],"refresh_interval":"5m0s","registrars_conns":[]}},"resources":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*units":[{"FilterIDs":null,"Tenant":""}],"*usageID":[{"FilterIDs":null,"Tenant":""}],"*usageTTL":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[],"thresholds_conns":[]},"routes":{"accounts_conns":[],"attributes_conns":[],"default_ratio":1,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*context":[{"FilterIDs":null,"Tenant":""}],"*ignoreErrors":[{"FilterIDs":null,"Tenant":""}],"*limit":[],"*maxCost":[],"*maxItems":[],"*offset":[],"*profileCount":[{"FilterIDs":null,"Tenant":""}],"*usage":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"rates_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]},"rpc_conns":{"*bijson_localhost":{"conns":[{"address":"127.0.0.1:2014","transport":"*birpc_json"}],"poolSize":0,"strategy":"*first"},"*birpc_internal":{"conns":[{"address":"*birpc_internal","transport":""}],"poolSize":0,"strategy":"*first"},"*internal":{"conns":[{"address":"*internal","transport":""}],"poolSize":0,"strategy":"*first"},"*localhost":{"conns":[{"address":"127.0.0.1:2012","transport":"*json"}],"poolSize":0,"strategy":"*first"}},"sentrypeer":{"audience":"https://sentrypeer.com/api","client_id":"","client_secret":"","grant_type":"client_credentials","ips_url":"https://sentrypeer.com/api/ip-addresses","numbers_url":"https://sentrypeer.com/api/phone-numbers","token_url":"https://authz.sentrypeer.com/oauth/token"},"sessions":{"accounts_conns":[],"actions_conns":[],"alterable_fields":[],"attributes_conns":[],"cdrs_conns":[],"channel_sync_interval":"0","chargers_conns":[],"client_protocol":1,"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":false,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*attributesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*blockerError":[{"FilterIDs":null,"Tenant":""}],"*cdrs":[{"FilterIDs":null,"Tenant":""}],"*cdrsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*chargeable":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*debitInterval":[{"FilterIDs":null,"Tenant":""}],"*forceUsage":[],"*initiate":[{"FilterIDs":null,"Tenant":""}],"*maxUsage":[{"FilterIDs":null,"Tenant":""}],"*message":[{"FilterIDs":null,"Tenant":""}],"*resources":[{"FilterIDs":null,"Tenant":""}],"*resourcesAllocate":[{"FilterIDs":null,"Tenant":""}],"*resourcesAuthorize":[{"FilterIDs":null,"Tenant":""}],"*resourcesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*resourcesRelease":[{"FilterIDs":null,"Tenant":""}],"*routes":[{"FilterIDs":null,"Tenant":""}],"*routesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*statsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*terminate":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}],"*thresholdsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*ttl":[{"FilterIDs":null,"Tenant":""}],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[{"FilterIDs":null,"Tenant":""}],"*ttlUsage":[],"*update":[{"FilterIDs":null,"Tenant":""}]},"rates_conns":[],"replication_conns":[],"resources_conns":[],"routes_conns":[],"session_indexes":[],"stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]},"sip_agent":{"enabled":false,"listen":"127.0.0.1:5060","listen_net":"udp","request_processors":[],"retransmission_timer":"1s","sessions_conns":["*internal"],"timezone":""},"stats":{"ees_conns":[],"ees_exporter_ids":null,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*prometheusStatIDs":[],"*roundingDecimals":[]},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]},"stor_db":{"db_host":"127.0.0.1","db_name":"cgrates","db_password":"CGRateS.org","db_port":3306,"db_type":"**mysql","db_user":"cgrates","items":{"*cdrs":{"limit":-1,"remote":false,"replicate":false,"static_ttl":false}},"opts":{"mongoConnScheme":"mongodb","mongoQueryTimeout":"10s","mysqlDSNParams":{},"mysqlLocation":"Local","pgSSLMode":"disable","sqlConnMaxLifetime":"0s","sqlMaxIdleConns":10,"sqlMaxOpenConns":100},"prefix_indexed_fields":[],"remote_conns":null,"replication_conns":null,"string_indexed_fields":[]},"suretax":{"bill_to_number":"","business_unit":"","client_number":"","client_tracking":"~*opts.*originID","customer_number":"~*req.Subject","include_local_cost":false,"orig_number":"~*req.Subject","p2pplus4":"","p2pzipcode":"","plus4":"","regulatory_code":"03","response_group":"03","response_type":"D4","return_file_code":"0","sales_type_code":"R","tax_exemption_code_list":"","tax_included":"0","tax_situs_rule":"04","term_number":"~*req.Destination","timezone":"UTC","trans_type_code":"010101","unit_type":"00","units":"1","url":"","validation_key":"","zipcode":""},"templates":{"*asr":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"}],"*cca":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"path":"*rep.Result-Code","tag":"ResultCode","type":"*constant","value":"2001"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"},{"mandatory":true,"path":"*rep.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"mandatory":true,"path":"*rep.CC-Request-Type","tag":"CCRequestType","type":"*variable","value":"~*req.CC-Request-Type"},{"mandatory":true,"path":"*rep.CC-Request-Number","tag":"CCRequestNumber","type":"*variable","value":"~*req.CC-Request-Number"}],"*cdrLog":[{"mandatory":true,"path":"*cdr.ToR","tag":"ToR","type":"*variable","value":"~*req.BalanceType"},{"mandatory":true,"path":"*cdr.OriginHost","tag":"OriginHost","type":"*constant","value":"127.0.0.1"},{"mandatory":true,"path":"*cdr.RequestType","tag":"RequestType","type":"*constant","value":"*none"},{"mandatory":true,"path":"*cdr.Tenant","tag":"Tenant","type":"*variable","value":"~*req.Tenant"},{"mandatory":true,"path":"*cdr.Account","tag":"Account","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Subject","tag":"Subject","type":"*variable","value":"~*req.Account"},{"mandatory":true,"path":"*cdr.Cost","tag":"Cost","type":"*variable","value":"~*req.Cost"},{"mandatory":true,"path":"*cdr.Source","tag":"Source","type":"*constant","value":"*cdrLog"},{"mandatory":true,"path":"*cdr.Usage","tag":"Usage","type":"*constant","value":"1"},{"mandatory":true,"path":"*cdr.RunID","tag":"RunID","type":"*variable","value":"~*req.ActionType"},{"mandatory":true,"path":"*cdr.SetupTime","tag":"SetupTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.AnswerTime","tag":"AnswerTime","type":"*constant","value":"*now"},{"mandatory":true,"path":"*cdr.PreRated","tag":"PreRated","type":"*constant","value":"true"}],"*err":[{"mandatory":true,"path":"*rep.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*rep.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*vars.OriginHost"},{"mandatory":true,"path":"*rep.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*vars.OriginRealm"}],"*errSip":[{"mandatory":true,"path":"*rep.Request","tag":"Request","type":"*constant","value":"SIP/2.0 500 Internal Server Error"}],"*rar":[{"mandatory":true,"path":"*diamreq.Session-Id","tag":"SessionId","type":"*variable","value":"~*req.Session-Id"},{"mandatory":true,"path":"*diamreq.Origin-Host","tag":"OriginHost","type":"*variable","value":"~*req.Destination-Host"},{"mandatory":true,"path":"*diamreq.Origin-Realm","tag":"OriginRealm","type":"*variable","value":"~*req.Destination-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Realm","tag":"DestinationRealm","type":"*variable","value":"~*req.Origin-Realm"},{"mandatory":true,"path":"*diamreq.Destination-Host","tag":"DestinationHost","type":"*variable","value":"~*req.Origin-Host"},{"mandatory":true,"path":"*diamreq.Auth-Application-Id","tag":"AuthApplicationId","type":"*variable","value":"~*vars.*appid"},{"path":"*diamreq.Re-Auth-Request-Type","tag":"ReAuthRequestType","type":"*constant","value":"0"}]},"thresholds":{"actions_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]},"tls":{"ca_certificate":"","client_certificate":"","client_key":"","server_certificate":"","server_key":"","server_name":"","server_policy":4},"tpes":{"enabled":false},"trends":{"ees_conns":[],"ees_exporter_ids":null,"enabled":false,"scheduled_ids":{},"stats_conns":[],"store_interval":"","store_uncompressed_limit":0,"thresholds_conns":[]}}`
 
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSON)
 	if err != nil {
@@ -5470,8 +5449,8 @@ func TestActionSConfig(t *testing.T) {
 		DynaprepaidActionProfile: []string{},
 		Opts: &ActionsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
-			PosterAttempts:       []*DynamicIntOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
+			PosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
 		},
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -5501,8 +5480,8 @@ func TestV1GetConfigSectionActionSJSON(t *testing.T) {
 			utils.DynaprepaidActionplansCfg: []string{},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
-				utils.MetaPosterAttempts:       []*DynamicIntOpt{},
+				utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{}},
+				utils.MetaPosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
 			},
 		},
 	}
@@ -5599,7 +5578,7 @@ func TestSetCfgInDb(t *testing.T) {
 		Opts: &AttributesOpts{
 			ProcessRuns: []*DynamicIntOpt{
 				{
-					Value: 2,
+					value: int(2),
 				},
 			},
 		},
@@ -5621,9 +5600,9 @@ func TestSetCfgInDb(t *testing.T) {
 				Exists_indexed_fields:    &[]string{"field2"},
 				Notexists_indexed_fields: &[]string{"field2"},
 				Opts: &AttributesOptsJson{
-					ProcessRuns: []*DynamicIntOpt{
+					ProcessRuns: []*DynamicInterfaceOpt{
 						{
-							Value: 3,
+							Value: int(3),
 						},
 					},
 				},
@@ -5643,12 +5622,12 @@ func TestSetCfgInDb(t *testing.T) {
 		Exists_indexed_fields:    &[]string{"field2"},
 		Notexists_indexed_fields: &[]string{"field2"},
 		Opts: &AttributesOptsJson{
-			ProcessRuns: []*DynamicIntOpt{
+			ProcessRuns: []*DynamicInterfaceOpt{
 				{
-					Value: 2,
+					Value: float64(3),
 				},
 				{
-					Value: 3,
+					Value: float64(2),
 				},
 			},
 		},
@@ -5687,7 +5666,7 @@ func TestSetNilCfgInDb(t *testing.T) {
 			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     2,
+					value:     2,
 				},
 			},
 		},

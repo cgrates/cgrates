@@ -53,7 +53,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		NestedFields:           true,
 		Opts: &StatsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 			RoundingDecimals:     []*DynamicIntOpt{},
 			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
@@ -80,7 +80,7 @@ func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 		},
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
-				Value: false,
+				value: false,
 			},
 		},
 	}
@@ -93,7 +93,7 @@ func TestStatSCfgloadFromJsonCfgOptsNil(t *testing.T) {
 		},
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
-				Value: false,
+				value: false,
 			},
 		},
 	}
@@ -132,7 +132,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 			utils.OptsRoundingDecimals:     []*DynamicIntOpt{},
 			utils.OptsPrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
@@ -176,7 +176,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 			utils.OptsRoundingDecimals:     []*DynamicIntOpt{},
 			utils.OptsPrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
@@ -243,13 +243,13 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  false,
+					value:  false,
 				},
 			},
 			RoundingDecimals: []*DynamicIntOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  1,
+					value:  1,
 				},
 			},
 			PrometheusStatIDs: []*DynamicStringSliceOpt{
@@ -281,13 +281,13 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  true,
+					value:  true,
 				},
 			},
 			RoundingDecimals: []*DynamicIntOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  2,
+					value:  2,
 				},
 			},
 			PrometheusStatIDs: []*DynamicStringSliceOpt{
@@ -316,13 +316,13 @@ func TestDiffStatServJsonCfg(t *testing.T) {
 					Values: []string{"statsid2"},
 				},
 			},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
 				},
 			},
-			RoundingDecimals: []*DynamicIntOpt{
+			RoundingDecimals: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  2,

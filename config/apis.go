@@ -169,7 +169,6 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 	if b, err = json.Marshal(args.Config); err != nil {
 		return
 	}
-
 	cfgV.reloadDPCache(sectionNms...)
 	cfgV.LockSections(sectionNms...)
 	err = loadConfigFromReader(ctx, bytes.NewBuffer(b), sections, false, cfgV)
@@ -182,7 +181,6 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 	cfgV.rLockSections()
 
 	err = cfgV.checkConfigSanity()
-
 	cfgV.rUnlockSections() // unlock before checking the error
 	if err != nil {
 		return

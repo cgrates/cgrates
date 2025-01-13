@@ -52,7 +52,7 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		ActionSConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions)},
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -79,7 +79,7 @@ func TestThresholdSLoadFromJsonOpts(t *testing.T) {
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
-				Value:  true,
+				value:  true,
 			},
 		},
 	}
@@ -93,7 +93,7 @@ func TestThresholdSLoadFromJsonOpts(t *testing.T) {
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
-				Value:  true,
+				value:  true,
 			},
 		},
 	}
@@ -129,8 +129,10 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.ActionSConnsCfg:           []string{},
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{
+				{},
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -167,8 +169,10 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.ActionSConnsCfg:           []string{utils.MetaInternal},
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{
+				{},
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -225,7 +229,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  false,
+					value:  false,
 				},
 			},
 		},
@@ -250,7 +254,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  true,
+					value:  true,
 				},
 			},
 		},
@@ -272,7 +276,7 @@ func TestDiffThresholdSJsonCfg(t *testing.T) {
 					Values: []string{"thsr_p2"},
 				},
 			},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,

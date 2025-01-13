@@ -551,7 +551,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 
 	if cfg.attributeSCfg.Enabled {
 		for _, opt := range cfg.attributeSCfg.Opts.ProcessRuns {
-			if opt.Value < 1 {
+			if opt.value < 1 {
 				return fmt.Errorf("<%s> processRuns needs to be bigger than 0", utils.AttributeS)
 			}
 		}

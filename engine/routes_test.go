@@ -499,7 +499,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 }
 
 func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
-	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{{Value: true}}
+	config.CgrConfig().RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{config.NewDynamicBoolOpt(nil, "", true, nil)}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{},
 	}
@@ -1764,11 +1764,7 @@ func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     false,
-		},
+		config.NewDynamicBoolOpt([]string{"*string.invalid:filter"}, "cgrates.org", false, nil),
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -1797,11 +1793,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.Limit = []*config.DynamicIntPointerOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     utils.IntPointer(4),
-		},
+		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -1830,11 +1822,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.Offset = []*config.DynamicIntPointerOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     utils.IntPointer(4),
-		},
+		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -1863,11 +1851,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.MaxItems = []*config.DynamicIntPointerOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     utils.IntPointer(4),
-		},
+		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -1929,11 +1913,7 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     utils.IntPointer(4),
-		},
+		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -2018,11 +1998,7 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     utils.IntPointer(4),
-		},
+		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -2105,11 +2081,7 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     false,
-		},
+		config.NewDynamicBoolOpt([]string{"*string.invalid:filter"}, "cgrates.org", false, nil),
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -2192,16 +2164,10 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.MaxItems = []*config.DynamicIntPointerOpt{
-		{
-			Tenant: "cgrates.org",
-			Value:  utils.IntPointer(1),
-		},
+		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(1), nil),
 	}
 	cfg.RouteSCfg().Opts.Limit = []*config.DynamicIntPointerOpt{
-		{
-			Tenant: "cgrates.org",
-			Value:  utils.IntPointer(2),
-		},
+		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(2), nil),
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -2283,11 +2249,7 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.Context = []*config.DynamicStringOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     "value2",
-		},
+		config.NewDynamicStringOpt([]string{"*string.invalid:filter"}, "cgrates.org", "value2", nil),
 	}
 	cfg.RouteSCfg().AttributeSConns = []string{"testConn"}
 
@@ -2440,11 +2402,7 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     utils.IntPointer(4),
-		},
+		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(4), nil),
 	}
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
@@ -2941,9 +2899,7 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.Offset = []*config.DynamicIntPointerOpt{
-		{
-			Value: utils.IntPointer(10),
-		},
+		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(10), nil),
 	}
 
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)

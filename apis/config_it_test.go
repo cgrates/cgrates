@@ -191,9 +191,9 @@ func testCfgSetGetConfig(t *testing.T) {
 					"stats_conns":           []string{"*internal"},
 					"suffix_indexed_fields": []string{},
 					utils.OptsCfg: map[string]any{
-						utils.MetaProcessRunsCfg: []*config.DynamicIntOpt{
+						utils.MetaProcessRunsCfg: []*config.DynamicInterfaceOpt{
 							{
-								Value: 2,
+								Value: "2",
 							},
 						},
 					},
@@ -257,6 +257,13 @@ func testCfgSetEmptyReload(t *testing.T) {
 				"rates": map[string]any{
 					"enabled":         true,
 					"indexed_selects": false,
+					utils.OptsCfg: map[string]any{
+						utils.MetaProcessRunsCfg: []*config.DynamicInterfaceOpt{
+							{
+								Value: 2,
+							},
+						},
+					},
 				},
 			},
 			DryRun: false,
@@ -355,7 +362,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"Tenant":"","Value":2},{"Tenant":"","Value":2}],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"Tenant":"","Value":2},{"Tenant":"","Value":"2"}],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -577,7 +584,7 @@ func testCfgMdfSectConfigStore(t *testing.T) {
 		Suffix_indexed_fields: nil,
 		Nested_fields:         nil,
 		Opts: &config.AttributesOptsJson{
-			ProcessRuns: []*config.DynamicIntOpt{
+			ProcessRuns: []*config.DynamicInterfaceOpt{
 				{
 					Value: 2,
 				},

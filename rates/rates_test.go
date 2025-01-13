@@ -1067,7 +1067,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 		"rates": {
 			"enabled": true,
 		},
-	}
+	} 
 `
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(jsonCfg)
 	if err != nil {
@@ -1182,9 +1182,7 @@ func TestCDRProcessRatesCostForEvent(t *testing.T) {
 func TestRateProfileCostForEventProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RateSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)

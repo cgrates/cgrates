@@ -76,13 +76,15 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 	}
 	if jsnCfg.Usage != nil {
 		var usage []*DynamicDecimalOpt
-		if usage, err = StringToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
+		if usage, err = IfaceToDecimalBigDynamicOpts(jsnCfg.Usage); err != nil {
 			return
 		}
-		accOpts.Usage = append(accOpts.Usage, usage...)
+		accOpts.Usage = append(usage, accOpts.Usage...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		accOpts.ProfileIgnoreFilters = append(accOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
+		var prfIgnFltrs []*DynamicBoolOpt
+		prfIgnFltrs, err = IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
+		accOpts.ProfileIgnoreFilters = append(prfIgnFltrs, accOpts.ProfileIgnoreFilters...)
 	}
 	return
 }
@@ -243,8 +245,8 @@ func (acS AccountSCfg) Clone() (cln *AccountSCfg) {
 
 type AccountsOptsJson struct {
 	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
-	Usage                []*DynamicStringOpt      `json:"*usage"`
-	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	Usage                []*DynamicInterfaceOpt   `json:"*usage"`
+	ProfileIgnoreFilters []*DynamicInterfaceOpt   `json:"*profileIgnoreFilters"`
 }
 
 // Account service config section
@@ -273,10 +275,10 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 		d.ProfileIDs = v2.ProfileIDs
 	}
 	if !DynamicDecimalOptEqual(v1.Usage, v2.Usage) {
-		d.Usage = DecimalToStringDynamicOpts(v2.Usage)
+		d.Usage = DecimalToIfaceDynamicOpts(v2.Usage)
 	}
 	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
+		d.ProfileIgnoreFilters = BoolToIfaceDynamicOpts(v2.ProfileIgnoreFilters)
 	}
 	return d
 }

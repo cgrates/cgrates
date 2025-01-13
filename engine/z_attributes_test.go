@@ -155,9 +155,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	filterS := NewFilterS(cfg, conMng, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
 	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	acPrf := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -5019,9 +5017,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
 	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	acPrf := &AttributeProfile{
 		Tenant:    "cgrates.org",

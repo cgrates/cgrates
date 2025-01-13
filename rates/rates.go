@@ -171,12 +171,12 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	}
 	var sTime time.Time
 	if sTime, err = engine.GetTimeOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.StartTime,
-		rS.cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime, utils.MetaStartTime); err != nil {
+		rS.cfg.GeneralCfg().DefaultTimezone, utils.OptsRatesStartTime, utils.MetaStartTime); err != nil {
 		return
 	}
 	var usage *decimal.Big
 	if usage, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.Usage,
-		config.RatesUsageDftOpt, utils.OptsRatesUsage, utils.MetaUsage); err != nil {
+		utils.OptsRatesUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	var ordRts []*orderedRate
@@ -195,7 +195,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	}
 	var ivalStart *decimal.Big
 	if ivalStart, err = engine.GetDecimalBigOpts(ctx, args.Tenant, args, rS.fltrS, rS.cfg.RateSCfg().Opts.IntervalStart,
-		config.RatesIntervalStartDftOpt, utils.OptsRatesIntervalStart); err != nil {
+		utils.OptsRatesIntervalStart); err != nil {
 		return
 	}
 	var costIntervals []*utils.RateSInterval

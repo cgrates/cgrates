@@ -65,7 +65,7 @@ func (alS *AttributeSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConf
 	return alS.loadFromJSONCfg(jsnAttributeSCfg)
 }
 
-func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) {
+func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -73,14 +73,29 @@ func (attrOpts *AttributesOpts) loadFromJSONCfg(jsnCfg *AttributesOptsJson) {
 		attrOpts.ProfileIDs = append(attrOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.ProcessRuns != nil {
-		attrOpts.ProcessRuns = append(attrOpts.ProcessRuns, jsnCfg.ProcessRuns...)
+		var procRuns []*DynamicIntOpt
+		procRuns, err = IfaceToIntDynamicOpts(jsnCfg.ProcessRuns)
+		procRuns = append(procRuns, attrOpts.ProcessRuns...)
+		attrOpts.ProcessRuns = procRuns
 	}
 	if jsnCfg.ProfileRuns != nil {
-		attrOpts.ProfileRuns = append(attrOpts.ProfileRuns, jsnCfg.ProfileRuns...)
+		var profRuns []*DynamicIntOpt
+		profRuns, err = IfaceToIntDynamicOpts(jsnCfg.ProfileRuns)
+		if err != nil {
+			return
+		}
+		profRuns = append(profRuns, attrOpts.ProfileRuns...)
+		attrOpts.ProfileRuns = profRuns
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		attrOpts.ProfileIgnoreFilters = append(attrOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
+		var profIgnFltrs []*DynamicBoolOpt
+		profIgnFltrs, err = IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
+		if err != nil {
+			return
+		}
+		attrOpts.ProfileIgnoreFilters = append(profIgnFltrs, attrOpts.ProfileIgnoreFilters...)
 	}
+	return
 }
 
 func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -121,7 +136,7 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Opts != nil {
-		alS.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		err = alS.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	return
 }
@@ -233,9 +248,9 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 
 type AttributesOptsJson struct {
 	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
-	ProcessRuns          []*DynamicIntOpt         `json:"*processRuns"`
-	ProfileRuns          []*DynamicIntOpt         `json:"*profileRuns"`
-	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	ProcessRuns          []*DynamicInterfaceOpt   `json:"*processRuns"`
+	ProfileRuns          []*DynamicInterfaceOpt   `json:"*profileRuns"`
+	ProfileIgnoreFilters []*DynamicInterfaceOpt   `json:"*profileIgnoreFilters"`
 }
 
 // Attribute service config section
@@ -262,13 +277,13 @@ func diffAttributesOptsJsonCfg(d *AttributesOptsJson, v1, v2 *AttributesOpts) *A
 		d.ProfileIDs = v2.ProfileIDs
 	}
 	if !DynamicIntOptEqual(v1.ProcessRuns, v2.ProcessRuns) {
-		d.ProcessRuns = v2.ProcessRuns
+		d.ProcessRuns = IntToIfaceDynamicOpts(v2.ProcessRuns)
 	}
 	if !DynamicIntOptEqual(v1.ProfileRuns, v2.ProfileRuns) {
-		d.ProfileRuns = v2.ProfileRuns
+		d.ProfileRuns = IntToIfaceDynamicOpts(v2.ProfileRuns)
 	}
 	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
+		d.ProfileIgnoreFilters = BoolToIfaceDynamicOpts(v2.ProfileIgnoreFilters)
 	}
 	return d
 }

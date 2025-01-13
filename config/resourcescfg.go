@@ -67,17 +67,22 @@ func (rsOpts *ResourcesOpts) loadFromJSONCfg(jsnCfg *ResourcesOptsJson) (err err
 		return
 	}
 	if jsnCfg.UsageID != nil {
-		rsOpts.UsageID = append(rsOpts.UsageID, jsnCfg.UsageID...)
+		var usageID []*DynamicStringOpt
+		usageID, err = InterfaceToDynamicStringOpts(jsnCfg.UsageID)
+		rsOpts.UsageID = append(usageID, rsOpts.UsageID...)
 	}
 	if jsnCfg.UsageTTL != nil {
 		var usageTTL []*DynamicDurationOpt
-		if usageTTL, err = StringToDurationDynamicOpts(jsnCfg.UsageTTL); err != nil {
+		if usageTTL, err = IfaceToDurationDynamicOpts(jsnCfg.UsageTTL); err != nil {
 			return
 		}
-		rsOpts.UsageTTL = append(rsOpts.UsageTTL, usageTTL...)
+		rsOpts.UsageTTL = append(usageTTL, rsOpts.UsageTTL...)
 	}
+
 	if jsnCfg.Units != nil {
-		rsOpts.Units = append(rsOpts.Units, jsnCfg.Units...)
+		var units []*DynamicFloat64Opt
+		units, err = InterfaceToFloat64DynamicOpts(jsnCfg.Units)
+		rsOpts.Units = append(units, rsOpts.Units...)
 	}
 	return
 }
@@ -218,9 +223,9 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 }
 
 type ResourcesOptsJson struct {
-	UsageID  []*DynamicStringOpt  `json:"*usageID"`
-	UsageTTL []*DynamicStringOpt  `json:"*usageTTL"`
-	Units    []*DynamicFloat64Opt `json:"*units"`
+	UsageID  []*DynamicInterfaceOpt `json:"*usageID"`
+	UsageTTL []*DynamicInterfaceOpt `json:"*usageTTL"`
+	Units    []*DynamicInterfaceOpt `json:"*units"`
 }
 
 // ResourceLimiter service config section
@@ -243,13 +248,13 @@ func diffResourcesOptsJsonCfg(d *ResourcesOptsJson, v1, v2 *ResourcesOpts) *Reso
 		d = new(ResourcesOptsJson)
 	}
 	if !DynamicStringOptEqual(v1.UsageID, v2.UsageID) {
-		d.UsageID = v2.UsageID
+		d.UsageID = DynamicStringToInterfaceOpts(v2.UsageID)
 	}
 	if !DynamicDurationOptEqual(v1.UsageTTL, v2.UsageTTL) {
-		d.UsageTTL = DurationToStringDynamicOpts(v2.UsageTTL)
+		d.UsageTTL = DurationToIfaceDynamicOpts(v2.UsageTTL)
 	}
 	if !DynamicFloat64OptEqual(v1.Units, v2.Units) {
-		d.Units = v2.Units
+		d.Units = Float64ToInterfaceDynamicOpts(v2.Units)
 	}
 	return d
 }

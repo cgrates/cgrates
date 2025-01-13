@@ -974,7 +974,7 @@ func TestConfigSanityAttributesCfg(t *testing.T) {
 			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     0,
+					value:     0,
 				},
 			},
 		},
@@ -1882,7 +1882,7 @@ func TestCGRConfigcheckConfigSanityCacheSIdErr(t *testing.T) {
 		Opts: &AttributesOpts{
 			ProcessRuns: []*DynamicIntOpt{
 				{
-					Value: 2,
+					value: 2,
 				},
 			},
 		},

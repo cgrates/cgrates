@@ -1522,7 +1522,7 @@ func TestReloadCfgInDb(t *testing.T) {
 			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     2,
+					value:     2,
 				},
 			},
 		},
@@ -1544,9 +1544,9 @@ func TestReloadCfgInDb(t *testing.T) {
 		Exists_indexed_fields:    &[]string{"field2"},
 		Notexists_indexed_fields: &[]string{"field2"},
 		Opts: &AttributesOptsJson{
-			ProcessRuns: []*DynamicIntOpt{
+			ProcessRuns: []*DynamicInterfaceOpt{
 				{
-					Value: 3,
+					Value: "3",
 				},
 			},
 		},
@@ -1568,10 +1568,10 @@ func TestReloadCfgInDb(t *testing.T) {
 			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     2,
+					value:     2,
 				},
 				{
-					Value: 3,
+					value: 3,
 				},
 			},
 		},

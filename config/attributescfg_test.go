@@ -53,9 +53,9 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		NestedFields:           true,
 		Opts: &AttributesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProcessRuns:          []*DynamicIntOpt{},
-			ProfileRuns:          []*DynamicIntOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
+			ProfileRuns:          []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ActionsProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -80,17 +80,17 @@ func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
 		},
 		ProcessRuns: []*DynamicIntOpt{
 			{
-				Value: 1,
+				value: 1,
 			},
 		},
 		ProfileRuns: []*DynamicIntOpt{
 			{
-				Value: 0,
+				value: 0,
 			},
 		},
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
-				Value: false,
+				value: false,
 			},
 		},
 	}
@@ -103,17 +103,17 @@ func TestAttributeSLoadFromJsonCfgOpts(t *testing.T) {
 		},
 		ProcessRuns: []*DynamicIntOpt{
 			{
-				Value: 1,
+				value: 1,
 			},
 		},
 		ProfileRuns: []*DynamicIntOpt{
 			{
-				Value: 0,
+				value: 0,
 			},
 		},
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
-				Value: false,
+				value: false,
 			},
 		},
 	}
@@ -138,7 +138,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"opts": {
 		"*processRuns": [
 				{
-					"Value": 3,
+					"Value": "3",
 				},
 			],
 	},					
@@ -160,11 +160,14 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg: []*DynamicIntOpt{
 				{
-					Value: 3,
+					value: 3,
+				},
+				{
+					value: AttributesProcessRunsDftOpt,
 				},
 			},
-			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -184,7 +187,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
            "opts": {
 			"*processRuns": [
 				{
-					"Value": 7,
+					"Value": "7",
 				},
 			],
 		},	
@@ -205,11 +208,14 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 			utils.MetaProfileIDs: []*DynamicStringSliceOpt{},
 			utils.MetaProcessRunsCfg: []*DynamicIntOpt{
 				{
-					Value: 7,
+					value: 7,
+				},
+				{
+					value: AttributesProcessRunsDftOpt,
 				},
 			},
-			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -238,9 +244,9 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaProcessRunsCfg:       []*DynamicIntOpt{},
-			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaProcessRunsCfg:       []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
+			utils.MetaProfileRunsCfg:       []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	if conv, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
@@ -310,19 +316,19 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     1,
+					value:     1,
 				},
 			},
 			ProfileRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     1,
+					value:     1,
 				},
 			},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  false,
+					value:  false,
 				},
 			},
 		},
@@ -348,19 +354,19 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     2,
+					value:     2,
 				},
 			},
 			ProfileRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     2,
+					value:     2,
 				},
 			},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
-					Value:  true,
+					value:  true,
 				},
 			},
 		},
@@ -383,19 +389,19 @@ func TestDiffAttributeSJsonCfg(t *testing.T) {
 					Values: []string{"prf2"},
 				},
 			},
-			ProcessRuns: []*DynamicIntOpt{
+			ProcessRuns: []*DynamicInterfaceOpt{
 				{
 					FilterIDs: []string{},
 					Value:     2,
 				},
 			},
-			ProfileRuns: []*DynamicIntOpt{
+			ProfileRuns: []*DynamicInterfaceOpt{
 				{
 					FilterIDs: []string{},
 					Value:     2,
 				},
 			},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
@@ -434,7 +440,7 @@ func TestAttributeSCloneSection(t *testing.T) {
 			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     1,
+					value:     1,
 				},
 			},
 		},
@@ -454,7 +460,7 @@ func TestAttributeSCloneSection(t *testing.T) {
 			ProcessRuns: []*DynamicIntOpt{
 				{
 					FilterIDs: []string{},
-					Value:     1,
+					value:     1,
 				},
 			},
 		},

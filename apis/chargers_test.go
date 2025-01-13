@@ -1121,9 +1121,7 @@ func TestChargersAPIs(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	cfg.AttributeSCfg().Opts.ProcessRuns = []*config.DynamicIntOpt{
-		{
-			Value: 2,
-		},
+		config.NewDynamicIntOpt(nil, "", 2, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
