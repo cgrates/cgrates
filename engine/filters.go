@@ -527,6 +527,9 @@ func (fltr *FilterRule) passTimings(dDP utils.DataProvider) (bool, error) {
 		if err = connMgr.Call(context.TODO(), config.CgrConfig().FilterSCfg().ApierSConns,
 			utils.APIerSv1GetTiming,
 			&utils.ArgsGetTimingID{ID: valTmID}, &tm); err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				return false, err
+			}
 			continue
 		}
 		ritm := &RITiming{
@@ -558,6 +561,9 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 		if err = connMgr.Call(context.TODO(), config.CgrConfig().FilterSCfg().ApierSConns,
 			utils.APIerSv1GetReverseDestination,
 			&p, &destIDs); err != nil {
+			if err.Error() != utils.ErrNotFound.Error() {
+				return false, err
+			}
 			continue
 		}
 		for _, dID := range destIDs {

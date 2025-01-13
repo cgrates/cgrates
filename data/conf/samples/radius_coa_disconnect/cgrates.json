@@ -12,6 +12,10 @@
 	"db_type": "*internal"
 },
 
+"filters": {			
+	"apiers_conns": ["*localhost"],	
+},
+
 "rals": {
 	"enabled": true,
 	"thresholds_conns": ["*localhost"]

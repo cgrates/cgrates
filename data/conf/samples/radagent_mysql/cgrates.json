@@ -3,7 +3,7 @@
 //
 
 "general": {
-    "log_level": 6,
+    "log_level": 7,
 },
 
 
@@ -21,6 +21,10 @@
 
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
+"filters": {			
+	"apiers_conns": ["*localhost"],	
 },
 
 "rals": {
