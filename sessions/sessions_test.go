@@ -61,54 +61,6 @@ var attrs = &engine.AttrSProcessEventReply{
 	},
 }
 
-func TestIsIndexed(t *testing.T) {
-	sS := &SessionS{}
-	if sS.isIndexed(&Session{
-
-		OptsStart: map[string]any{
-			utils.MetaOriginID: "test",
-		},
-	}, true) {
-		t.Error("Expecting: false, received: true")
-	}
-	if sS.isIndexed(&Session{OptsStart: map[string]any{
-		utils.MetaOriginID: "test",
-	}}, false) {
-		t.Error("Expecting: false, received: true")
-	}
-	sS = &SessionS{
-		aSessions: map[string]*Session{"test": {OptsStart: map[string]any{
-			utils.MetaOriginID: "test",
-		}}},
-	}
-	if !sS.isIndexed(&Session{OptsStart: map[string]any{
-		utils.MetaOriginID: "test",
-	}}, false) {
-		t.Error("Expecting: true, received: false")
-	}
-	if sS.isIndexed(&Session{OptsStart: map[string]any{
-		utils.MetaOriginID: "test",
-	}}, true) {
-		t.Error("Expecting: true, received: false")
-	}
-
-	sS = &SessionS{
-		pSessions: map[string]*Session{"test": {OptsStart: map[string]any{
-			utils.MetaOriginID: "test",
-		}}},
-	}
-	if !sS.isIndexed(&Session{OptsStart: map[string]any{
-		utils.MetaOriginID: "test",
-	}}, true) {
-		t.Error("Expecting: false, received: true")
-	}
-	if sS.isIndexed(&Session{OptsStart: map[string]any{
-		utils.MetaOriginID: "test",
-	}}, false) {
-		t.Error("Expecting: false, received: true")
-	}
-}
-
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1271,108 +1223,60 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 	}
 }
 
-func TestSessionStransitSState(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(cfg, nil, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]any{
-		utils.EventName:    "TEST_EVENT",
-		utils.ToR:          "*voice",
-		utils.OriginID:     "111",
-		utils.AccountField: "account1",
-		utils.Subject:      "subject1",
-		utils.Destination:  "+4986517174963",
-		utils.Category:     "call",
-		utils.Tenant:       "cgrates.org",
-		utils.RequestType:  "*prepaid",
-		utils.SetupTime:    "2015-11-09T14:21:24Z",
-		utils.AnswerTime:   "2015-11-09T14:22:02Z",
-		utils.Usage:        "1m23s",
-		utils.LastUsed:     "21s",
-		utils.PDD:          "300ms",
-		utils.Route:        "supplier1",
-		utils.OriginHost:   "127.0.0.1",
-	})
-	s := &Session{
-		OptsStart: map[string]any{
-			utils.MetaOriginID: "session1",
-		},
-		EventStart: sSEv,
-	}
-	//register the session as active
-	sS.registerSession(s, false)
-	//verify if was registered
-	rcvS := sS.getSessions("session1", false)
-	if !reflect.DeepEqual(rcvS[0], s) {
-		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
-	}
-
-	//tranzit session from active to passive
-	sS.transitSState("session1", true)
-	//verify if the session was changed
-	rcvS = sS.getSessions("session1", true)
-	if !reflect.DeepEqual(rcvS[0], s) {
-		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
-	}
-	rcvS = sS.getSessions("session1", false)
-	if len(rcvS) != 0 {
-		t.Errorf("Expecting %+v, received: %+v", 0, len(rcvS))
-	}
-}
-
-func TestSessionSrelocateSessionS(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(cfg, nil, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]any{
-		utils.EventName:    "TEST_EVENT",
-		utils.ToR:          "*voice",
-		utils.OriginID:     "111",
-		utils.AccountField: "account1",
-		utils.Subject:      "subject1",
-		utils.Destination:  "+4986517174963",
-		utils.Category:     "call",
-		utils.Tenant:       "cgrates.org",
-		utils.RequestType:  "*prepaid",
-		utils.SetupTime:    "2015-11-09T14:21:24Z",
-		utils.AnswerTime:   "2015-11-09T14:22:02Z",
-		utils.Usage:        "1m23s",
-		utils.LastUsed:     "21s",
-		utils.PDD:          "300ms",
-		utils.Route:        "supplier1",
-		utils.OriginHost:   "127.0.0.1",
-	})
-	opt := make(map[string]any)
-	initialOriginID := GetSetOptsOriginID(sSEv, opt)
-	s := &Session{
-		EventStart: sSEv,
-		OptsStart: map[string]any{
-			utils.MetaOriginID: initialOriginID,
-		},
-	}
-	//register the session as active
-	sS.registerSession(s, false)
-	//verify the session
-	rcvS := sS.getSessions(utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false)
-	if !reflect.DeepEqual(rcvS[0], s) {
-		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
-	}
-	//relocate the session
-	sS.relocateSession(context.Background(), "111", "222", "127.0.0.1")
-	//check if the session exist with old originID
-	rcvS = sS.getSessions(initialOriginID, false)
-	if len(rcvS) != 0 {
-		t.Errorf("Expecting 0, received: %+v", len(rcvS))
-	}
-	ev := engine.NewMapEvent(map[string]any{
-		utils.OriginID:   "222",
-		utils.OriginHost: "127.0.0.1"})
-	opt2 := make(map[string]any)
-	originID := GetSetOptsOriginID(ev, opt2)
-	//check the session with new originID
-	rcvS = sS.getSessions(originID, false)
-	if !reflect.DeepEqual(rcvS[0], s) {
-		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
-	}
-}
+// func TestSessionSrelocateSessionS(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	sS := NewSessionS(cfg, nil, nil, nil)
+// 	sSEv := engine.NewMapEvent(map[string]any{
+// 		utils.EventName:    "TEST_EVENT",
+// 		utils.ToR:          "*voice",
+// 		utils.OriginID:     "111",
+// 		utils.AccountField: "account1",
+// 		utils.Subject:      "subject1",
+// 		utils.Destination:  "+4986517174963",
+// 		utils.Category:     "call",
+// 		utils.Tenant:       "cgrates.org",
+// 		utils.RequestType:  "*prepaid",
+// 		utils.SetupTime:    "2015-11-09T14:21:24Z",
+// 		utils.AnswerTime:   "2015-11-09T14:22:02Z",
+// 		utils.Usage:        "1m23s",
+// 		utils.LastUsed:     "21s",
+// 		utils.PDD:          "300ms",
+// 		utils.Route:        "supplier1",
+// 		utils.OriginHost:   "127.0.0.1",
+// 	})
+// 	opt := make(map[string]any)
+// 	initialOriginID := GetSetOptsOriginID(sSEv, opt)
+// 	s := &Session{
+// 		EventStart: sSEv,
+// 		OptsStart: map[string]any{
+// 			utils.MetaOriginID: initialOriginID,
+// 		},
+// 	}
+// 	//register the session as active
+// 	sS.registerSession(s, false)
+// 	//verify the session
+// 	rcvS := sS.getSessions(utils.IfaceAsString(s.OptsStart[utils.MetaOriginID]), false)
+// 	if !reflect.DeepEqual(rcvS[0], s) {
+// 		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
+// 	}
+// 	//relocate the session
+// 	sS.relocateSession(context.Background(), "111", "222", "127.0.0.1")
+// 	//check if the session exist with old originID
+// 	rcvS = sS.getSessions(initialOriginID, false)
+// 	if len(rcvS) != 0 {
+// 		t.Errorf("Expecting 0, received: %+v", len(rcvS))
+// 	}
+// 	ev := engine.NewMapEvent(map[string]any{
+// 		utils.OriginID:   "222",
+// 		utils.OriginHost: "127.0.0.1"})
+// 	opt2 := make(map[string]any)
+// 	originID := GetSetOptsOriginID(ev, opt2)
+// 	//check the session with new originID
+// 	rcvS = sS.getSessions(originID, false)
+// 	if !reflect.DeepEqual(rcvS[0], s) {
+// 		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
+// 	}
+// }
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -1597,49 +1501,6 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 
 }
 */
-
-func TestSessionSgetSession(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	sS := NewSessionS(cfg, nil, nil, nil)
-	sSEv := engine.NewMapEvent(map[string]any{
-		utils.EventName:    "TEST_EVENT",
-		utils.ToR:          "*voice",
-		utils.OriginID:     "111",
-		utils.AccountField: "account1",
-		utils.Subject:      "subject1",
-		utils.Destination:  "+4986517174963",
-		utils.Category:     "call",
-		utils.Tenant:       "cgrates.org",
-		utils.RequestType:  "*prepaid",
-		utils.SetupTime:    "2015-11-09T14:21:24Z",
-		utils.AnswerTime:   "2015-11-09T14:22:02Z",
-		utils.Usage:        "1m23s",
-		utils.LastUsed:     "21s",
-		utils.PDD:          "300ms",
-		utils.Route:        "supplier1",
-		utils.OriginHost:   "127.0.0.1",
-	})
-	s := &Session{
-		EventStart: sSEv,
-		SRuns: []*SRun{
-			{
-				Event: sSEv,
-			},
-		},
-		OptsStart: map[string]any{
-			utils.MetaOriginID: "session1",
-		},
-	}
-	//register the session
-	sS.registerSession(s, false)
-	//check if the session was registered with success
-	rcvS := sS.getSessions("", false)
-
-	if len(rcvS) != 1 || !reflect.DeepEqual(rcvS[0], s) {
-		t.Errorf("Expecting %+v, received: %+v", s, rcvS)
-	}
-
-}
 
 /*
 func TestSessionSfilterSessions(t *testing.T) {

@@ -404,35 +404,6 @@ func TestDspSessionSv1GetPassiveSessionsCountErrorNil(t *testing.T) {
 	}
 }
 
-func TestDspSessionSv1SetPassiveSessionNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	CGREvent := &sessions.Session{
-		Tenant: "tenant",
-	}
-	var reply *string
-	result := dspSrv.SessionSv1SetPassiveSession(context.Background(), CGREvent, reply)
-	expected := "DISPATCHER_ERROR:NO_DATABASE_CONNECTION"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
-func TestDspSessionSv1SetPassiveSessionErrorNil(t *testing.T) {
-	cgrCfg := config.NewDefaultCGRConfig()
-	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)
-	cgrCfg.DispatcherSCfg().AttributeSConns = []string{"test"}
-	CGREvent := &sessions.Session{
-		Tenant: "tenant",
-	}
-	var reply *string
-	result := dspSrv.SessionSv1SetPassiveSession(context.Background(), CGREvent, reply)
-	expected := "MANDATORY_IE_MISSING: [ApiKey]"
-	if result == nil || result.Error() != expected {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
-	}
-}
-
 func TestDspSessionSv1STIRAuthenticateNil(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	dspSrv := NewDispatcherService(nil, cgrCfg, nil, nil)

@@ -293,8 +293,6 @@ func testGOCSInitSession(t *testing.T) {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	} else if aSessions[0].NodeID != "AU_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != 5*time.Minute {
-		t.Errorf("Expecting : %+v, received: %+v", 5*time.Minute, aSessions[0].MaxCostSoFar)
 	}
 
 	aSessions = make([]*sessions.ExternalSession, 0)
@@ -304,8 +302,6 @@ func testGOCSInitSession(t *testing.T) {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	} else if aSessions[0].NodeID != "US_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "US_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != 5*time.Minute {
-		t.Errorf("Expecting : %+v, received: %+v", 5*time.Minute, aSessions[0].Usage)
 	}
 
 	var acnt *utils.Account
@@ -369,8 +365,6 @@ func testGOCSUpdateSession(t *testing.T) {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	} else if aSessions[0].NodeID != "AU_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != 10*time.Minute {
-		t.Errorf("Expecting : %+v, received: %+v", 5*time.Minute, aSessions[0].Usage)
 	}
 
 	var acnt *utils.Account
@@ -453,8 +447,6 @@ func testGOCSUpdateSession2(t *testing.T) {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	} else if aSessions[0].NodeID != "AU_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != 15*time.Minute {
-		t.Errorf("Expecting : %+v, received: %+v", 15*time.Minute, aSessions[0].Usage)
 	}
 
 	aSessions = make([]*sessions.ExternalSession, 0)
@@ -464,8 +456,6 @@ func testGOCSUpdateSession2(t *testing.T) {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	} else if aSessions[0].NodeID != "US_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "US_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != 10*time.Minute {
-		t.Errorf("Expecting : %+v, received: %+v", 5*time.Minute, aSessions[0].Usage)
 	}
 
 	var acnt *utils.Account

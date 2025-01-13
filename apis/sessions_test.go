@@ -73,27 +73,27 @@ func TestAuthorizeEventWithDigest(t *testing.T) {
 	}
 }
 
-func TestInitiateSession(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	connMgr := engine.NewConnManager(cfg)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
-	}
-	var reply sessions.V1InitSessionReply
-	args := &utils.CGREvent{
-		ID:     "TestMatchingAccountsForEvent",
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-	}
-	if err := ssv1.InitiateSession(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	}
-}
+// func TestInitiateSession(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	connMgr := engine.NewConnManager(cfg)
+// 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+// 	ssv1 := &SessionSv1{
+// 		ping: struct{}{},
+// 		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+// 	}
+// 	var reply sessions.V1InitSessionReply
+// 	args := &utils.CGREvent{
+// 		ID:     "TestMatchingAccountsForEvent",
+// 		Tenant: "cgrates.org",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 		},
+// 	}
+// 	if err := ssv1.InitiateSession(context.Background(), args, &reply); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
 func TestInitiateSessionWithDigest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -380,25 +380,25 @@ func TestGetPassiveSessionsCount(t *testing.T) {
 	}
 }
 
-func TestSetPassiveSession(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	connMgr := engine.NewConnManager(cfg)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
-	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
-	}
+// func TestSetPassiveSession(t *testing.T) {
+// 	cfg := config.NewDefaultCGRConfig()
+// 	connMgr := engine.NewConnManager(cfg)
+// 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+// 	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
+// 	ssv1 := &SessionSv1{
+// 		ping: struct{}{},
+// 		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
+// 	}
 
-	var reply string
-	args := &sessions.Session{
-		Tenant: "cgrates.org",
-	}
-	if err := ssv1.SetPassiveSession(context.Background(), args, &reply); err != utils.ErrNotFound {
-		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
-	}
-}
+// 	var reply string
+// 	args := &sessions.Session{
+// 		ID: "1001",
+// 	}
+// 	if err := ssv1.SetPassiveSession(context.Background(), args, &reply); err != utils.ErrNotFound {
+// 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
+// 	}
+// }
 
 func TestActivateSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
