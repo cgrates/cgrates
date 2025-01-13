@@ -1254,9 +1254,7 @@ func TestCDRsProcessEventMockAttrsErr(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1314,9 +1312,7 @@ func TestCDRsProcessEventMockAttrsErrBoolOpts(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1375,9 +1371,7 @@ func TestCDRsProcessEventMockChrgsErr(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1436,9 +1430,7 @@ func TestCDRsProcessEventMockChrgsErrBoolOpts(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1498,9 +1490,7 @@ func TestCDRsProcessEventMockRateSErr(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1559,9 +1549,7 @@ func TestCDRsProcessEventMockRateSErrBoolOpts(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1621,9 +1609,7 @@ func TestCDRsProcessEventMockAcntsErr(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1682,9 +1668,7 @@ func TestCDRsProcessEventMockAcntsErrBoolOpts(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1744,10 +1728,7 @@ func TestCDRsProcessEventMockExportErr(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1806,9 +1787,7 @@ func TestCDRsProcessEventMockExportErrBoolOpts(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1868,9 +1847,7 @@ func TestCDRsProcessEventMockThdsErr(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1928,9 +1905,7 @@ func TestCDRsProcessEventMockThdsErrBoolOpts(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -1990,9 +1965,7 @@ func TestCDRsProcessEventMockStatsErr(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2051,9 +2024,7 @@ func TestCDRsProcessEventMockStatsErrGetBoolOpts(t *testing.T) {
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaEEs)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -2338,9 +2309,7 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 	cfg.CdrsCfg().AccountSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaAccounts)}
 	cfg.CdrsCfg().Opts.Attributes = []*config.DynamicBoolOpt{
-		{
-			Value: false,
-		},
+		config.NewDynamicBoolOpt(nil, "", false, nil),
 	}
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)

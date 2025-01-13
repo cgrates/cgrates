@@ -193,7 +193,7 @@ func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt strin
 func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
 	var ignoreErrors bool
 	if ignoreErrors, err = GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS, cfgOpts.IgnoreErrors,
-		config.RoutesIgnoreErrorsDftOpt, utils.OptsRoutesIgnoreErrors); err != nil {
+		utils.OptsRoutesIgnoreErrors); err != nil {
 		return
 	}
 	opts = &optsGetRoutes{
@@ -281,7 +281,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
 		var context string
 		if context, err = GetStringOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.Context,
-			config.RoutesContextDftOpt, utils.OptsContext); err != nil {
+			utils.OptsContext); err != nil {
 			return
 		}
 		args.APIOpts[utils.OptsContext] = context

@@ -159,7 +159,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 	}
 	var ignFilters bool
 	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
-		config.AttributesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var attrPrf *AttributeProfile
@@ -261,7 +261,7 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 	}
 	var ignFilters bool
 	if ignFilters, err = GetBoolOpts(ctx, tnt, evNM, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
-		config.AttributesProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	attrPrf, err := alS.attributeProfileForEvent(ctx, tnt, attrIDs, evNM,
@@ -286,13 +286,13 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 
 	var processRuns int
 	if processRuns, err = GetIntOpts(ctx, tnt, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProcessRuns,
-		config.AttributesProcessRunsDftOpt, utils.OptsAttributesProcessRuns); err != nil {
+		utils.OptsAttributesProcessRuns); err != nil {
 		return
 	}
 
 	var profileRuns int
 	if profileRuns, err = GetIntOpts(ctx, tnt, args, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileRuns,
-		config.AttributesProfileRunsDftOpt, utils.OptsAttributesProfileRuns); err != nil {
+		utils.OptsAttributesProfileRuns); err != nil {
 		return
 	}
 	args = args.Clone()

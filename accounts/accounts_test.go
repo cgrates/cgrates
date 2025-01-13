@@ -2803,9 +2803,7 @@ func TestV1AccountsForEventProfileIgnoreFilters(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	//inactive MetaProfileIgnoreFilters opt but correct filter
 	accPrf := &utils.Account{
@@ -2876,9 +2874,7 @@ func TestV1MaxAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3010,9 +3006,7 @@ func TestV1MaxAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3051,9 +3045,7 @@ func TestV1DebitAbstractsMetaProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3201,9 +3193,7 @@ func TestV1DebitAbstractsMetaProfileIgnoreFiltersError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3279,9 +3269,7 @@ func TestV1MaxConcretesProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3432,9 +3420,7 @@ func TestV1MaxConcretesProfileIgnoreFiltersError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3474,9 +3460,7 @@ func TestV1DebitConcretesProfileIgnoreFilters(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3639,9 +3623,7 @@ func TestV1DebitConcretesProfileIgnoreFiltersError(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AccountSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)

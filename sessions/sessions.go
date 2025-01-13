@@ -897,7 +897,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	var chrgS bool
 	if chrgS, err = engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(),
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.Chargers,
-		config.SessionsChargersDftOpt, utils.MetaChargers); err != nil {
+		utils.MetaChargers); err != nil {
 		return
 	}
 	if chrgS {

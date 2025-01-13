@@ -188,11 +188,12 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent) ([]*utils.EventsWithOpts, error) {
 	for _, ev := range evs {
 		attrS, err := engine.GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
-			config.CDRsAttributesDftOpt, utils.MetaAttributes)
+			utils.MetaAttributes)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaAttributes, err)
 		}
 		if !attrS {
+
 			continue
 		}
 		if err = cdrS.attrSProcessEvent(ctx, ev); err != nil {
@@ -208,7 +209,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 
 	for _, ev := range evs {
 		chrgS, err := engine.GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Chargers,
-			config.CDRsChargersDftOpt, utils.MetaChargers)
+			utils.MetaChargers)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaChargers, err)
 		}
@@ -230,7 +231,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 
 	for _, cgrEv := range cgrEvs {
 		rateS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rates,
-			config.CDRsRatesDftOpt, utils.MetaRates)
+			utils.MetaRates)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRates, err)
 		}
@@ -247,7 +248,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 
 	for _, cgrEv := range cgrEvs {
 		acntS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Accounts,
-			config.CDRsAccountsDftOpt, utils.MetaAccounts)
+			utils.MetaAccounts)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaAccounts, err)
 		}
@@ -295,7 +296,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 
 	for _, cgrEv := range cgrEvs {
 		store, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Store,
-			config.CDRsStoreDftOpt, utils.MetaStore)
+			utils.MetaStore)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaStore, err)
 		}
@@ -303,7 +304,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 			continue
 		}
 		rerate, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rerate,
-			config.CDRsRerateDftOpt, utils.MetaRerate)
+			utils.MetaRerate)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRerate, err)
 		}
@@ -335,7 +336,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 
 	for _, cgrEv := range cgrEvs {
 		export, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
-			config.CDRsExportDftOpt, utils.OptsCDRsExport)
+			utils.OptsCDRsExport)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.OptsCDRsExport, err)
 		}
@@ -356,7 +357,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 
 	for _, cgrEv := range cgrEvs {
 		thdS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
-			config.CDRsThresholdsDftOpt, utils.MetaThresholds)
+			utils.MetaThresholds)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaThresholds, err)
 		}
@@ -373,7 +374,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 
 	for _, cgrEv := range cgrEvs {
 		stS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Stats,
-			config.CDRsStatsDftOpt, utils.MetaStats)
+			utils.MetaStats)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaStats, err)
 		}

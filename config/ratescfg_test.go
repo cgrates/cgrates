@@ -64,10 +64,10 @@ func TestRateSConfigloadFromJsonCfg(t *testing.T) {
 		Verbosity:                  20,
 		Opts: &RatesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			StartTime:            []*DynamicStringOpt{},
-			Usage:                []*DynamicDecimalOpt{},
-			IntervalStart:        []*DynamicDecimalOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			StartTime:            []*DynamicStringOpt{{value: RatesStartTimeDftOpt}},
+			Usage:                []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
+			IntervalStart:        []*DynamicDecimalOpt{{value: RatesIntervalStartDftOpt}},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -103,10 +103,10 @@ func TestRatesCfgAsMapInterface(t *testing.T) {
 		utils.Verbosity:                     1000,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaStartTime:            []*DynamicStringOpt{},
-			utils.MetaUsage:                []*DynamicDecimalOpt{},
-			utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaStartTime:            []*DynamicStringOpt{{value: RatesStartTimeDftOpt}},
+			utils.MetaUsage:                []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
+			utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{{value: RatesIntervalStartDftOpt}},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -155,10 +155,10 @@ func TestRatesCfgAsMapInterface1(t *testing.T) {
 		utils.Verbosity:                     1000,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaStartTime:            []*DynamicStringOpt{},
-			utils.MetaUsage:                []*DynamicDecimalOpt{},
-			utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
+			utils.MetaStartTime:            []*DynamicStringOpt{{value: RatesStartTimeDftOpt}},
+			utils.MetaUsage:                []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
+			utils.MetaIntervalStartCfg:     []*DynamicDecimalOpt{{value: RatesIntervalStartDftOpt}},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -241,7 +241,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			StartTime: []*DynamicStringOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  "",
+					value:  "",
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
@@ -253,7 +253,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  false,
+					value:  false,
 				},
 			},
 		},
@@ -282,7 +282,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			StartTime: []*DynamicStringOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  utils.MetaNow,
+					value:  utils.MetaNow,
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
@@ -294,7 +294,7 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  true,
+					value:  true,
 				},
 			},
 		},
@@ -320,25 +320,25 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 					Values: []string{"RP2"},
 				},
 			},
-			StartTime: []*DynamicStringOpt{
+			StartTime: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  utils.MetaNow,
 				},
 			},
-			Usage: []*DynamicStringOpt{
+			Usage: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  "3",
 				},
 			},
-			IntervalStart: []*DynamicStringOpt{
+			IntervalStart: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  "3",
 				},
 			},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  true,
@@ -422,7 +422,7 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 		},
 		StartTime: []*DynamicStringOpt{
 			{
-				Value: utils.MetaNow,
+				value: utils.MetaNow,
 			},
 		},
 		Usage: []*DynamicDecimalOpt{
@@ -433,7 +433,7 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 		},
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
-				Value: false,
+				value: false,
 			},
 		},
 	}
@@ -450,7 +450,7 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 				Values: []string{"RP2"},
 			},
 		},
-		Usage: []*DynamicStringOpt{
+		Usage: []*DynamicInterfaceOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  "error",
@@ -463,7 +463,7 @@ func TestRatesOptsLoadFromJSON(t *testing.T) {
 	}
 
 	jsnCfg = &RatesOptsJson{
-		IntervalStart: []*DynamicStringOpt{
+		IntervalStart: []*DynamicInterfaceOpt{
 			{
 				Tenant: "cgrates.org",
 				Value:  "error",

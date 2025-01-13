@@ -1072,9 +1072,7 @@ func TestACScheduledActions(t *testing.T) {
 func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
@@ -1128,9 +1126,7 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)

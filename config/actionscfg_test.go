@@ -61,8 +61,8 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		DynaprepaidActionProfile: []string{"val1", "val2"},
 		Opts: &ActionsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
-			PosterAttempts:       []*DynamicIntOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
+			PosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -87,7 +87,7 @@ func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 		},
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
-				Value: false,
+				value: false,
 			},
 		},
 	}
@@ -99,7 +99,7 @@ func TestActionoSLoadConfigFromJSONOpts(t *testing.T) {
 		},
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
-				Value: false,
+				value: false,
 			},
 		},
 	}
@@ -148,8 +148,8 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.DynaprepaidActionplansCfg: []string{},
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{},
-			utils.MetaPosterAttempts:       []*DynamicIntOpt{},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{}},
+			utils.MetaPosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -239,7 +239,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.org",
-					Value:  false,
+					value:  false,
 				},
 			},
 		},
@@ -269,7 +269,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.nett",
-					Value:  true,
+					value:  true,
 				},
 			},
 		},
@@ -296,7 +296,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 					Values: []string{"prf2"},
 				},
 			},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{
+			ProfileIgnoreFilters: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.nett",
 					Value:  true,
@@ -384,13 +384,14 @@ func TestDiffActionsOptsJsonCfg(t *testing.T) {
 	}
 	exp := &ActionsOptsJson{
 
-		PosterAttempts: []*DynamicIntOpt{{
+		PosterAttempts: []*DynamicInterfaceOpt{{
 			FilterIDs: []string{"fltr1"},
+			Value:     0,
 		},
 		},
 	}
 	if rcv := diffActionsOptsJsonCfg(d, v1, v2); utils.ToJSON(rcv) != utils.ToJSON(exp) {
-		t.Errorf("Expected <%v> \n Received \n <%v>", exp, rcv)
+		t.Errorf("Expected <%v> \n Received \n <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
 	}
 
 }

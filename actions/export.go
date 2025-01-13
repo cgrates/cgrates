@@ -39,7 +39,7 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 	}
 	for i, actD := range aL.cfg().Diktats {
 		attempts, err := engine.GetIntOpts(ctx, tnt, cgrEv, fltrS, cfg.ActionSCfg().Opts.PosterAttempts,
-			1, utils.MetaPosterAttempts)
+			utils.MetaPosterAttempts)
 		if err != nil {
 			return nil, err
 		}

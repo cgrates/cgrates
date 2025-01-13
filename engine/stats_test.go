@@ -3036,9 +3036,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	sqPrf := &StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -3110,9 +3108,7 @@ func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	sS := NewStatService(dm, cfg, filterS, nil)
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	sqPrf := &StatQueueProfile{
 		Tenant:    "cgrates.org",
@@ -3166,9 +3162,7 @@ func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
@@ -3464,11 +3458,7 @@ func TestStatSV1GetQueueStringMetricsIntOptsErr(t *testing.T) {
 	cfg.StatSCfg().PrefixIndexedFields = nil
 	cfg.StatSCfg().Opts.RoundingDecimals = []*config.DynamicIntOpt{
 		// function will return error after trying to parse the filter
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     4,
-		},
+		config.NewDynamicIntOpt([]string{"*string.invalid:filter"}, "cgrates.org", 4, nil),
 	}
 	statService := NewStatService(dmSTS, cfg,
 		&FilterS{dm: dmSTS, cfg: cfg}, nil)
@@ -3581,11 +3571,7 @@ func TestStatSV1GetStatQueuesForEventignFiltersErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		// function will return error after trying to parse the filter
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Value:     false,
-		},
+		config.NewDynamicBoolOpt([]string{"*string.invalid:filter"}, "cgrates.org", false, nil),
 	}
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)

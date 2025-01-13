@@ -139,7 +139,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	var usage *decimal.Big // total event usage
 	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
-		config.AccountsUsageDftOpt, utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
+		utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
 		return
 	}
 	dbted := decimal.New(0, 0) // amount debited so far
@@ -192,9 +192,19 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWi
 		}
 	}
 	var forceUsage bool
-	if forceUsage, err = engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEvDP, aS.fltrS, nil,
-		false, utils.OptsAccountsForceUsage); err != nil {
+	values, err := cgrEvDP.FieldAsInterface([]string{utils.MetaOpts})
+	if err != nil {
 		return
+	}
+	opts, err := engine.ConvertOptsToMapStringAny(values)
+	if err != nil {
+		return
+	}
+	if opt, has := opts[utils.OptsAccountsForceUsage]; has {
+		forceUsage, err = utils.IfaceAsBool(opt)
+		if err != nil {
+			return
+		}
 	}
 	if usage.Cmp(dbted) == 1 && forceUsage {
 		err = utils.ErrInsufficientCredit

@@ -59,7 +59,7 @@ func (t *ThresholdSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig
 	return t.loadFromJSONCfg(jsnThresholdSCfg)
 }
 
-func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) {
+func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -67,8 +67,14 @@ func (thdOpts *ThresholdsOpts) loadFromJSONCfg(jsnCfg *ThresholdsOptsJson) {
 		thdOpts.ProfileIDs = append(thdOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		thdOpts.ProfileIgnoreFilters = append(thdOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
+		var profileIgnFltr []*DynamicBoolOpt
+		profileIgnFltr, err = IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
+		if err != nil {
+			return
+		}
+		thdOpts.ProfileIgnoreFilters = append(profileIgnFltr, thdOpts.ProfileIgnoreFilters...)
 	}
+	return
 }
 
 func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
@@ -108,7 +114,7 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 		t.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
 	}
 	if jsnCfg.Opts != nil {
-		t.Opts.loadFromJSONCfg(jsnCfg.Opts)
+		err = t.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
 	return
 }
@@ -202,7 +208,7 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 
 type ThresholdsOptsJson struct {
 	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
-	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
+	ProfileIgnoreFilters []*DynamicInterfaceOpt   `json:"*profileIgnoreFilters"`
 }
 
 // Threshold service config section
@@ -228,7 +234,7 @@ func diffThresholdsOptsJsonCfg(d *ThresholdsOptsJson, v1, v2 *ThresholdsOpts) *T
 		d.ProfileIDs = v2.ProfileIDs
 	}
 	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
+		d.ProfileIgnoreFilters = BoolToIfaceDynamicOpts(v2.ProfileIgnoreFilters)
 	}
 	return d
 }

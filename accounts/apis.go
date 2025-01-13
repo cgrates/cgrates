@@ -34,7 +34,7 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -58,7 +58,7 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -88,7 +88,7 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -118,7 +118,7 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight
@@ -148,7 +148,7 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIgnoreFilters,
-		config.AccountsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var acnts utils.AccountsWithWeight

@@ -3010,9 +3010,7 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -3076,9 +3074,7 @@ func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(dm, cfg, filterS, nil)
 	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Value: true,
-		},
+		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -3371,10 +3367,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 		},
 	}
 	cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
-		{
-			Tenant: "cgrates.org",
-			Value:  true,
-		},
+		config.NewDynamicBoolOpt(nil, "cgrates.org", true, nil),
 	}
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)

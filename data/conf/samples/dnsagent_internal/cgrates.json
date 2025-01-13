@@ -29,24 +29,24 @@
 			{
 				"Tenant": "*any",
 				"FilterIDs": [],
-				"Value": true,
+				"Value": "true",
 			},
 		],
 		"*routes": [						
 			{
 				"Tenant": "*any",
 				"FilterIDs": ["*string:~*req.Account:1001"],
-				"Value": true,
+				"Value": "true",
 			},
 			{
 				"Tenant": "*any",
 				"FilterIDs": ["*string:~*req.Account:1002"],
-				"Value": true,
+				"Value": "true",
 			},
 			{
 				"Tenant": "*any",
 				"FilterIDs": ["*string:~*req.Account:1003"],
-				"Value": true,
+				"Value": "true",
 			},
 		],
 	}

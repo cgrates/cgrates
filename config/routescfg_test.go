@@ -59,14 +59,14 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		DefaultRatio:           10,
 		NestedFields:           true,
 		Opts: &RoutesOpts{
-			Context:      []*DynamicStringOpt{},
-			ProfileCount: []*DynamicIntPointerOpt{},
-			IgnoreErrors: []*DynamicBoolOpt{},
+			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
+			ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
+			IgnoreErrors: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
 			MaxCost:      []*DynamicInterfaceOpt{},
 			Limit:        []*DynamicIntPointerOpt{},
 			Offset:       []*DynamicIntPointerOpt{},
 			MaxItems:     []*DynamicIntPointerOpt{},
-			Usage:        []*DynamicDecimalOpt{},
+			Usage:        []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -76,7 +76,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.routeSCfg))
 	}
 
-	cfgJSON.Opts.Usage = []*DynamicStringOpt{
+	cfgJSON.Opts.Usage = []*DynamicInterfaceOpt{
 		{
 			Tenant: "cgrates.org",
 			Value:  "error",
@@ -119,14 +119,14 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 		utils.AccountSConnsCfg:          []string{},
 		utils.DefaultRatioCfg:           1,
 		utils.OptsCfg: map[string]any{
-			utils.OptsContext:         []*DynamicStringOpt{},
+			utils.OptsContext:         []*DynamicStringOpt{{value: RoutesContextDftOpt}},
 			utils.MetaLimitCfg:        []*DynamicIntPointerOpt{},
 			utils.MetaOffsetCfg:       []*DynamicIntPointerOpt{},
 			utils.MetaMaxItemsCfg:     []*DynamicIntPointerOpt{},
-			utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{},
-			utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{},
+			utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
+			utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
 			utils.MetaMaxCostCfg:      []*DynamicInterfaceOpt{},
-			utils.MetaUsage:           []*DynamicDecimalOpt{},
+			utils.MetaUsage:           []*DynamicDecimalOpt{{value: RoutesUsageDftOpt}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -171,14 +171,14 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.AccountSConnsCfg:          []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:           2,
 		utils.OptsCfg: map[string]any{
-			utils.OptsContext:         []*DynamicStringOpt{},
+			utils.OptsContext:         []*DynamicStringOpt{{value: RoutesContextDftOpt}},
 			utils.MetaLimitCfg:        []*DynamicIntPointerOpt{},
 			utils.MetaOffsetCfg:       []*DynamicIntPointerOpt{},
 			utils.MetaMaxItemsCfg:     []*DynamicIntPointerOpt{},
-			utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{},
-			utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{},
+			utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
+			utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
 			utils.MetaMaxCostCfg:      []*DynamicInterfaceOpt{},
-			utils.MetaUsage:           []*DynamicDecimalOpt{},
+			utils.MetaUsage:           []*DynamicDecimalOpt{{value: RoutesUsageDftOpt}},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -247,12 +247,12 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Opts: &RoutesOpts{
 			Context: []*DynamicStringOpt{
 				{
-					Value: utils.MetaAny,
+					value: utils.MetaAny,
 				},
 			},
 			IgnoreErrors: []*DynamicBoolOpt{
 				{
-					Value: true,
+					value: true,
 				},
 			},
 			MaxCost: []*DynamicInterfaceOpt{
@@ -262,17 +262,17 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 			},
 			Limit: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(2),
+					value: utils.IntPointer(2),
 				},
 			},
 			Offset: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(2),
+					value: utils.IntPointer(2),
 				},
 			},
 			ProfileCount: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(1),
+					value: utils.IntPointer(1),
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
@@ -282,7 +282,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 				{
 					FilterIDs: []string{"id1"},
 					Tenant:    "cgrates.net",
-					Value:     utils.IntPointer(1),
+					value:     utils.IntPointer(1),
 				},
 			},
 		},
@@ -304,12 +304,12 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Opts: &RoutesOpts{
 			Context: []*DynamicStringOpt{
 				{
-					Value: utils.MetaSessionS,
+					value: utils.MetaSessionS,
 				},
 			},
 			IgnoreErrors: []*DynamicBoolOpt{
 				{
-					Value: false,
+					value: false,
 				},
 			},
 			MaxCost: []*DynamicInterfaceOpt{
@@ -319,17 +319,17 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 			},
 			Limit: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(3),
+					value: utils.IntPointer(3),
 				},
 			},
 			Offset: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(3),
+					value: utils.IntPointer(3),
 				},
 			},
 			ProfileCount: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(2),
+					value: utils.IntPointer(2),
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
@@ -339,7 +339,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 				{
 					FilterIDs: []string{"id2"},
 					Tenant:    "cgrates.org",
-					Value:     utils.IntPointer(2),
+					value:     utils.IntPointer(2),
 				},
 			},
 		},
@@ -359,12 +359,12 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 		Accounts_conns:        &[]string{"*birpc"},
 		Default_ratio:         utils.IntPointer(3),
 		Opts: &RoutesOptsJson{
-			Context: []*DynamicStringOpt{
+			Context: []*DynamicInterfaceOpt{
 				{
 					Value: utils.MetaSessionS,
 				},
 			},
-			IgnoreErrors: []*DynamicBoolOpt{
+			IgnoreErrors: []*DynamicInterfaceOpt{
 				{
 					Value: false,
 				},
@@ -374,32 +374,32 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 					Value: 6,
 				},
 			},
-			Limit: []*DynamicIntOpt{
+			Limit: []*DynamicInterfaceOpt{
 				{
-					Value: 3,
+					Value: utils.IntPointer(3),
 				},
 			},
-			Offset: []*DynamicIntOpt{
+			Offset: []*DynamicInterfaceOpt{
 				{
-					Value: 3,
+					Value: utils.IntPointer(3),
 				},
 			},
-			ProfileCount: []*DynamicIntOpt{
+			ProfileCount: []*DynamicInterfaceOpt{
 				{
-					Value: 2,
+					Value: utils.IntPointer(2),
 				},
 			},
-			Usage: []*DynamicStringOpt{
+			Usage: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.org",
 					Value:  "2",
 				},
 			},
-			MaxItems: []*DynamicIntOpt{
+			MaxItems: []*DynamicInterfaceOpt{
 				{
 					FilterIDs: []string{"id2"},
 					Tenant:    "cgrates.org",
-					Value:     2,
+					Value:     utils.IntPointer(2),
 				},
 			},
 		},
@@ -436,12 +436,12 @@ func TestRouteSCloneSection(t *testing.T) {
 		Opts: &RoutesOpts{
 			Context: []*DynamicStringOpt{
 				{
-					Value: utils.MetaAny,
+					value: utils.MetaAny,
 				},
 			},
 			IgnoreErrors: []*DynamicBoolOpt{
 				{
-					Value: true,
+					value: true,
 				},
 			},
 			MaxCost: []*DynamicInterfaceOpt{
@@ -451,17 +451,17 @@ func TestRouteSCloneSection(t *testing.T) {
 			},
 			Limit: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(1),
+					value: utils.IntPointer(1),
 				},
 			},
 			Offset: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(1),
+					value: utils.IntPointer(1),
 				},
 			},
 			ProfileCount: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(1),
+					value: utils.IntPointer(1),
 				},
 			},
 		},
@@ -481,12 +481,12 @@ func TestRouteSCloneSection(t *testing.T) {
 		Opts: &RoutesOpts{
 			Context: []*DynamicStringOpt{
 				{
-					Value: utils.MetaAny,
+					value: utils.MetaAny,
 				},
 			},
 			IgnoreErrors: []*DynamicBoolOpt{
 				{
-					Value: true,
+					value: true,
 				},
 			},
 			MaxCost: []*DynamicInterfaceOpt{
@@ -496,17 +496,17 @@ func TestRouteSCloneSection(t *testing.T) {
 			},
 			Limit: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(1),
+					value: utils.IntPointer(1),
 				},
 			},
 			Offset: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(1),
+					value: utils.IntPointer(1),
 				},
 			},
 			ProfileCount: []*DynamicIntPointerOpt{
 				{
-					Value: utils.IntPointer(1),
+					value: utils.IntPointer(1),
 				},
 			},
 		},

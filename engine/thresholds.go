@@ -339,7 +339,7 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 	}
 	var ignFilters bool
 	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, tS.fltrS, tS.cfg.ThresholdSCfg().Opts.ProfileIgnoreFilters,
-		config.ThresholdsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 

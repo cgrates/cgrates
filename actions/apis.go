@@ -34,7 +34,7 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
-		config.ActionsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args},
@@ -54,7 +54,7 @@ func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, 
 	}
 	var ignFilters bool
 	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIgnoreFilters,
-		config.ActionsProfileIgnoreFiltersDftOpt, utils.MetaProfileIgnoreFilters); err != nil {
+		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
 	var schedActSet []*scheduledActs

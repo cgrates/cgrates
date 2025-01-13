@@ -272,14 +272,14 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
-	strOpts := []*config.DynamicStringOpt{
+	strOpts := []*config.DynamicInterfaceOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
 			Tenant:    "cgrates.org",
 			Value:     "-1",
 		},
 	}
-	dynOpts, _ := config.StringToDecimalBigDynamicOpts(strOpts)
+	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 	cfg.RouteSCfg().Opts.Usage = dynOpts
 	cM := NewConnManager(cfg)
 	fltrS := NewFilterS(cfg, cM, nil)

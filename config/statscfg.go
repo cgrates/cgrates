@@ -64,7 +64,7 @@ func (st *StatSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (e
 	return st.loadFromJSONCfg(jsnStatSCfg)
 }
 
-func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
+func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -72,14 +72,22 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) {
 		sqOpts.ProfileIDs = append(sqOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
 	if jsnCfg.ProfileIgnoreFilters != nil {
-		sqOpts.ProfileIgnoreFilters = append(sqOpts.ProfileIgnoreFilters, jsnCfg.ProfileIgnoreFilters...)
+		var prfIgnFltrs []*DynamicBoolOpt
+		prfIgnFltrs, err = IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
+		if err != nil {
+			return
+		}
+		sqOpts.ProfileIgnoreFilters = append(prfIgnFltrs, sqOpts.ProfileIgnoreFilters...)
 	}
 	if jsnCfg.RoundingDecimals != nil {
-		sqOpts.RoundingDecimals = append(sqOpts.RoundingDecimals, jsnCfg.RoundingDecimals...)
+		var roundDec []*DynamicIntOpt
+		roundDec, err = IfaceToIntDynamicOpts(jsnCfg.RoundingDecimals)
+		sqOpts.RoundingDecimals = append(roundDec, sqOpts.RoundingDecimals...)
 	}
 	if jsnCfg.PrometheusStatIDs != nil {
 		sqOpts.PrometheusStatIDs = append(sqOpts.PrometheusStatIDs, jsnCfg.PrometheusStatIDs...)
 	}
+	return
 }
 
 func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -244,8 +252,8 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 
 type StatsOptsJson struct {
 	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
-	ProfileIgnoreFilters []*DynamicBoolOpt        `json:"*profileIgnoreFilters"`
-	RoundingDecimals     []*DynamicIntOpt         `json:"*roundingDecimals"`
+	ProfileIgnoreFilters []*DynamicInterfaceOpt   `json:"*profileIgnoreFilters"`
+	RoundingDecimals     []*DynamicInterfaceOpt   `json:"*roundingDecimals"`
 	PrometheusStatIDs    []*DynamicStringSliceOpt `json:"*prometheusStatIDs"`
 }
 
@@ -275,10 +283,10 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 		d.ProfileIDs = v2.ProfileIDs
 	}
 	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
-		d.ProfileIgnoreFilters = v2.ProfileIgnoreFilters
+		d.ProfileIgnoreFilters = BoolToIfaceDynamicOpts(v2.ProfileIgnoreFilters)
 	}
 	if !DynamicIntOptEqual(v1.RoundingDecimals, v2.RoundingDecimals) {
-		d.RoundingDecimals = v2.RoundingDecimals
+		d.RoundingDecimals = IntToIfaceDynamicOpts(v2.RoundingDecimals)
 	}
 	if !DynamicStringSliceOptEqual(v1.PrometheusStatIDs, v2.PrometheusStatIDs) {
 		d.PrometheusStatIDs = v2.PrometheusStatIDs
