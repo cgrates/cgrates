@@ -849,6 +849,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			StatsDerivedReply:      []*DynamicBoolOpt{},
 			ThresholdsDerivedReply: []*DynamicBoolOpt{},
 			MaxUsage:               []*DynamicBoolOpt{},
+			ForceUsage:             []*DynamicBoolOpt{},
 			TTL:                    []*DynamicDurationOpt{},
 			Chargeable:             []*DynamicBoolOpt{},
 			TTLLastUsage:           []*DynamicDurationPointerOpt{},
@@ -936,6 +937,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			StatsDerivedReply:      []*DynamicBoolOpt{},
 			ThresholdsDerivedReply: []*DynamicBoolOpt{},
 			MaxUsage:               []*DynamicBoolOpt{},
+			ForceUsage:             []*DynamicBoolOpt{},
 			TTL:                    []*DynamicDurationOpt{},
 			Chargeable:             []*DynamicBoolOpt{},
 			TTLLastUsage:           []*DynamicDurationPointerOpt{},
@@ -950,7 +952,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	}
 
 	var rcv string
-	expected := `{"sessions":{"accounts_conns":[],"actions_conns":[],"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[],"*attributes":[],"*attributesDerivedReply":[],"*blockerError":[],"*cdrs":[],"*cdrsDerivedReply":[],"*chargeable":[],"*chargers":[],"*debitInterval":[],"*forceDuration":[],"*initiate":[],"*maxUsage":[],"*message":[],"*resources":[],"*resourcesAllocate":[],"*resourcesAuthorize":[],"*resourcesDerivedReply":[],"*resourcesRelease":[],"*routes":[],"*routesDerivedReply":[],"*stats":[],"*statsDerivedReply":[],"*terminate":[],"*thresholds":[],"*thresholdsDerivedReply":[],"*ttl":[],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[],"*ttlUsage":[],"*update":[]},"rates_conns":[],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"session_indexes":[],"stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
+	expected := `{"sessions":{"accounts_conns":[],"actions_conns":[],"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[],"*attributes":[],"*attributesDerivedReply":[],"*blockerError":[],"*cdrs":[],"*cdrsDerivedReply":[],"*chargeable":[],"*chargers":[],"*debitInterval":[],"*forceUsage":[],"*initiate":[],"*maxUsage":[],"*message":[],"*resources":[],"*resourcesAllocate":[],"*resourcesAuthorize":[],"*resourcesDerivedReply":[],"*resourcesRelease":[],"*routes":[],"*routesDerivedReply":[],"*stats":[],"*statsDerivedReply":[],"*terminate":[],"*thresholds":[],"*thresholdsDerivedReply":[],"*ttl":[],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[],"*ttlUsage":[],"*update":[]},"rates_conns":[],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"session_indexes":[],"stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
 	if err := cfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{SessionSJSON}}, &rcv); err != nil {
 		t.Error(err)
 	} else if expected != rcv {
@@ -1026,6 +1028,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 			StatsDerivedReply:      []*DynamicBoolOpt{},
 			ThresholdsDerivedReply: []*DynamicBoolOpt{},
 			MaxUsage:               []*DynamicBoolOpt{},
+			ForceUsage:             []*DynamicBoolOpt{},
 			TTL:                    []*DynamicDurationOpt{},
 			Chargeable:             []*DynamicBoolOpt{},
 			TTLLastUsage:           []*DynamicDurationPointerOpt{},
