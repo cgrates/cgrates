@@ -293,3 +293,15 @@ func TestDMSetReverseDestination(t *testing.T) {
 	}
 
 }
+
+func TestDMSetTimingInvalidTime(t *testing.T) {
+	dm := NewDataManager(nil, nil, nil)
+	expErr := "INVALID_TIME:*any"
+	if err := dm.SetTiming(&utils.TPTiming{StartTime: "*any"}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+
+	if err := dm.SetTiming(&utils.TPTiming{EndTime: "*any"}); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+}

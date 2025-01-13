@@ -273,6 +273,10 @@ func ErrNotConvertibleTF(from, to string) error {
 	return fmt.Errorf("%s : from: %s to:%s", ErrNotConvertibleNoCaps.Error(), from, to)
 }
 
+func ErrInvalidTime(s string) error {
+	return fmt.Errorf("INVALID_TIME:%s", s)
+}
+
 // NewSTIRError returns a error with a *stir_authorize prefix
 func NewSTIRError(reason string) error {
 	return fmt.Errorf("%s: %s", MetaSTIRAuthenticate, reason)

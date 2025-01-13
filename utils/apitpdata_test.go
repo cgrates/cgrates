@@ -1180,3 +1180,17 @@ func TestGetRightMargin(t *testing.T) {
 		})
 	}
 }
+
+func TestIsTimeFormatedTrue(t *testing.T) {
+	timeString := "12:12:12"
+	if !IsTimeFormated(timeString) {
+		t.Error("expected time to be formated, but returned false")
+	}
+}
+
+func TestIsTimeFormatedFalse(t *testing.T) {
+	timeString := "*any"
+	if IsTimeFormated(timeString) {
+		t.Error("expected invalid time format, but returned true")
+	}
+}

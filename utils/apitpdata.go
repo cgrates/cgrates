@@ -221,6 +221,11 @@ func (t *TPTiming) IsActiveAt(tm time.Time) bool {
 	return true
 }
 
+// Returns true if string can be split in 3 sperated by ":" signs. "00:00:00"
+func IsTimeFormated(t string) bool {
+	return len(strings.Split(t, ":")) == 3
+}
+
 // Returns a time object that represents the end of the interval realtive to the received time
 func (t *TPTiming) getRightMargin(tm time.Time) (rigthtTime time.Time) {
 	year, month, day := tm.Year(), tm.Month(), tm.Day()
