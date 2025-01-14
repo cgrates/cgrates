@@ -29,34 +29,14 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func TestLoggerNewLoggerExportKafkaLog(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
-
-	exp := NewExportLogger(context.Background(), "123", "cgrates.org", 6, cM, cfg)
-	if rcv, err := NewLogger(context.Background(), utils.MetaKafkaLog, "cgrates.org", "123", cM, cfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-}
-
-func TestLoggerNewLoggerDefault(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
-	experr := `unsupported logger: <invalid>`
-	if _, err := NewLogger(context.Background(), "invalid", "cgrates.org", "123", cM, cfg); err == nil ||
-		err.Error() != experr {
-		t.Errorf("expected: <%s>, \nreceived: <%s>", experr, err)
-	}
-}
-
 func TestLoggerNewExportLogger(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cfg.LoggerCfg().Level = 7
+	cfg.GeneralCfg().NodeID = "123"
 	cM := NewConnManager(cfg)
 	exp := &ExportLogger{
 		ctx:        context.Background(),
-		cfg:        cfg,
+		efsConns:   []string{"*internal:*efs"},
 		connMgr:    cM,
 		FldPostDir: "/var/spool/cgrates/failed_posts",
 		LogLevel:   7,
@@ -68,18 +48,20 @@ func TestLoggerNewExportLogger(t *testing.T) {
 			MaxAttempts: cfg.LoggerCfg().Opts.KafkaAttempts,
 		},
 	}
-	if rcv := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg); !reflect.DeepEqual(rcv, exp) {
+	if rcv := NewExportLogger(context.Background(), "cgrates.org", cM, cfg); !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
 	}
 }
 
 func TestCloseExportLogger(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	cfg.LoggerCfg().Level = 7
+	cfg.GeneralCfg().NodeID = "123"
 	cM := NewConnManager(cfg)
-	el := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg)
+	el := NewExportLogger(context.Background(), "cgrates.org", cM, cfg)
 
 	if el == nil {
-		t.Error("Export logger should'nt be empty")
+		t.Error("Export logger shouldn't be empty")
 	}
 
 	if err := el.Close(); err != nil {
@@ -88,7 +70,7 @@ func TestCloseExportLogger(t *testing.T) {
 	exp := &ExportLogger{
 		ctx:        context.Background(),
 		connMgr:    cM,
-		cfg:        cfg,
+		efsConns:   []string{"*internal:*efs"},
 		LogLevel:   7,
 		FldPostDir: cfg.LoggerCfg().Opts.FailedPostsDir,
 		NodeID:     "123",
@@ -137,7 +119,7 @@ func TestExportLoggerCallErrWriter(t *testing.T) {
 	dm := NewDataManager(db, cfg.CacheCfg(), cM)
 	Cache = NewCacheS(cfg, dm, cM, nil)
 
-	el := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg)
+	el := NewExportLogger(context.Background(), "cgrates.org", cM, cfg)
 
 	if err := el.call("test msg", 7); err != utils.ErrLoggerChanged || err == nil {
 		t.Error(err)
@@ -155,7 +137,7 @@ func TestLoggerExportEmergNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := NewConnManager(cfg)
 
-	el := NewExportLogger(context.Background(), "123", "cgrates.org", -1, cM, cfg)
+	el := NewExportLogger(context.Background(), "cgrates.org", cM, cfg)
 
 	if err := el.Emerg("Emergency message"); err != nil {
 		t.Error(err)
@@ -544,7 +526,7 @@ func TestLoggerExportDebug(t *testing.T) {
 func TestLoggerSetGetLogLevel(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := NewConnManager(cfg)
-	el := NewExportLogger(context.Background(), "123", "cgrates.org", 6, cM, cfg)
+	el := NewExportLogger(context.Background(), "cgrates.org", cM, cfg)
 	if rcv := el.GetLogLevel(); rcv != 6 {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", 6, rcv)
 	}
@@ -557,7 +539,7 @@ func TestLoggerSetGetLogLevel(t *testing.T) {
 func TestLoggerGetSyslog(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := NewConnManager(cfg)
-	el := NewExportLogger(context.Background(), "123", "cgrates.org", 6, cM, cfg)
+	el := NewExportLogger(context.Background(), "cgrates.org", cM, cfg)
 	if el.GetSyslog() != nil {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, el.GetSyslog())
 	}

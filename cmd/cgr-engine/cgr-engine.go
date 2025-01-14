@@ -36,7 +36,6 @@ import (
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/services"
@@ -72,8 +71,25 @@ func runCGREngine(fs []string) (err error) {
 	}
 
 	var cfg *config.CGRConfig
-	if cfg, err = services.InitConfigFromPath(context.TODO(), *flags.CfgPath, *flags.NodeID, *flags.LogLevel); err != nil || *flags.CheckConfig {
+	if cfg, err = services.InitConfigFromPath(context.TODO(), *flags.CfgPath, *flags.NodeID,
+		*flags.Logger, *flags.LogLevel); err != nil || *flags.CheckConfig {
 		return
+	}
+
+	if cfg.LoggerCfg().Level >= 0 {
+		switch cfg.LoggerCfg().Type {
+		case utils.MetaSysLog:
+			utils.Logger, err = utils.NewSysLogger(cfg.GeneralCfg().NodeID, cfg.LoggerCfg().Level)
+			if err != nil {
+				return
+			}
+		case utils.MetaStdLog, utils.MetaKafkaLog:
+			// If the logger is of type *kafka, use the *stdout logger until
+			// LoggerService finishes startup.
+			utils.Logger = utils.NewStdLogger(cfg.GeneralCfg().NodeID, cfg.LoggerCfg().Level)
+		default:
+			return fmt.Errorf("unsupported logger type: %q", cfg.LoggerCfg().Type)
+		}
 	}
 
 	var cpuPrfF *os.File
@@ -107,15 +123,6 @@ func runCGREngine(fs []string) (err error) {
 		}()
 	}
 
-	// init syslog
-	if utils.Logger, err = engine.NewLogger(context.TODO(),
-		utils.FirstNonEmpty(*flags.Logger, cfg.LoggerCfg().Type),
-		cfg.GeneralCfg().DefaultTenant,
-		cfg.GeneralCfg().NodeID,
-		nil, cfg); err != nil {
-		return fmt.Errorf("Could not initialize syslog connection, err: <%s>", err)
-	}
-	efs.SetFailedPostCacheTTL(cfg.EFsCfg().FailedPostsTTL) // init failedPosts to posts loggers/exporters in case of failing
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 
 	caps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
@@ -129,6 +136,7 @@ func runCGREngine(fs []string) (err error) {
 	cls := services.NewCommonListenerService(cfg, caps)
 	anzS := services.NewAnalyzerService(cfg)
 	cms := services.NewConnManagerService(cfg)
+	lgs := services.NewLoggerService(cfg, *flags.Logger)
 	dmS := services.NewDataDBService(cfg, *flags.SetVersions, srvDep)
 	sdbS := services.NewStorDBService(cfg, *flags.SetVersions)
 	configS := services.NewConfigService(cfg)
@@ -172,6 +180,7 @@ func runCGREngine(fs []string) (err error) {
 		cls,
 		anzS,
 		cms,
+		lgs,
 		dmS,
 		sdbS,
 		configS,

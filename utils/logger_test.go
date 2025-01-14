@@ -28,30 +28,6 @@ import (
 	"testing"
 )
 
-func TestLoggerNewLoggerSyslogOK(t *testing.T) {
-	if noSysLog {
-		t.SkipNow()
-	}
-	exp := &SysLogger{
-		logLevel: 7,
-	}
-	if rcv, err := NewLogger(MetaSysLog, EmptyString, 7); err != nil {
-		t.Error(err)
-	} else {
-		exp.syslog = rcv.GetSyslog()
-		if !reflect.DeepEqual(rcv, exp) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, rcv)
-		}
-	}
-}
-
-func TestLoggerNewLoggerUnsupported(t *testing.T) {
-	experr := `unsupported logger: <unsupported>`
-	if _, err := NewLogger("unsupported", EmptyString, 7); err == nil || err.Error() != experr {
-		t.Errorf("expected: <%s>, \nreceived: <%+v>", experr, err)
-	}
-}
-
 func TestLoggerSysloggerSetGetLogLevel(t *testing.T) {
 	if noSysLog {
 		t.SkipNow()

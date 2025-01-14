@@ -994,6 +994,7 @@ const (
 	ServiceManagerS = "ServiceManager"
 	CommonListenerS = "CommonListenerS"
 	ConnManager     = "ConnManager"
+	LoggerS         = "LoggerS"
 )
 
 // Lower service names
