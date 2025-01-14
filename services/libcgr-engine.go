@@ -102,7 +102,7 @@ func waitForFilterS(ctx *context.Context, fsCh chan *engine.FilterS) (filterS *e
 	return
 }
 
-func InitConfigFromPath(ctx *context.Context, path, nodeID string, lgLevel int) (cfg *config.CGRConfig, err error) {
+func InitConfigFromPath(ctx *context.Context, path, nodeID, logType string, logLevel int) (cfg *config.CGRConfig, err error) {
 	// Init config
 	if cfg, err = config.NewCGRConfigFromPath(ctx, path); err != nil {
 		err = fmt.Errorf("could not parse config: <%s>", err)
@@ -126,8 +126,11 @@ func InitConfigFromPath(ctx *context.Context, path, nodeID string, lgLevel int) 
 	if nodeID != utils.EmptyString {
 		cfg.GeneralCfg().NodeID = nodeID
 	}
-	if lgLevel != -1 { // Modify the log level if provided by command arguments
-		cfg.LoggerCfg().Level = lgLevel
+	if logLevel != -1 { // Modify the log level if provided by command arguments
+		cfg.LoggerCfg().Level = logLevel
+	}
+	if logType != utils.EmptyString {
+		cfg.LoggerCfg().Type = logType
 	}
 	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
 		cfg.CoreSCfg().Caps = utils.ConcurrentReqsLimit

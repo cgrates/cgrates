@@ -111,7 +111,10 @@ type ReplayEventsParams struct {
 // V1ReplayEvents will read the Events from gob files that were failed to be exported and try to re-export them again.
 func (efS *EfS) V1ReplayEvents(ctx *context.Context, args ReplayEventsParams, reply *string) error {
 
-	// Set default directories if not provided.
+	// Set default tenant and directories if not provided.
+	if args.Tenant == "" {
+		args.Tenant = efS.cfg.GeneralCfg().DefaultTenant
+	}
 	if args.SourcePath == "" {
 		args.SourcePath = efS.cfg.EFsCfg().FailedPostsDir
 	}

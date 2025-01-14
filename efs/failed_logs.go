@@ -70,15 +70,24 @@ func NewExportEventsFromFile(filePath string) (*FailedExportersLog, error) {
 	return &expEv, nil
 }
 
-// ReplayFailedPosts tryies to post cdrs again
+// ReplayFailedPosts tries to repost failed cdrs.
 func (expEv *FailedExportersLog) ReplayFailedPosts(ctx *context.Context, attempts int, tnt string) error {
-	nodeID := utils.IfaceAsString(expEv.Opts[utils.NodeID])
-	logLvl, err := utils.IfaceAsInt(expEv.Opts[utils.Level])
-	if err != nil {
-		return err
-	}
-	expLogger := engine.NewExportLogger(ctx, nodeID, tnt, logLvl,
+	expLogger := engine.NewExportLogger(ctx, tnt,
 		expEv.connMngr, expEv.cfg)
+
+	// Fall back to config values even if LogLevel and NodeID are always passed to
+	// the opts (through the GetMeta method on the ExportLogger), just to be safe.
+	if v, has := expEv.Opts[utils.NodeID]; has {
+		expLogger.NodeID = utils.IfaceAsString(v)
+	}
+	if v, has := expEv.Opts[utils.Level]; has {
+		lvl, err := utils.IfaceAsInt(v)
+		if err != nil {
+			return err
+		}
+		expLogger.LogLevel = lvl
+	}
+
 	for _, event := range expEv.Events {
 		content, err := utils.ToUnescapedJSON(event)
 		if err != nil {

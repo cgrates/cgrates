@@ -31,9 +31,9 @@ var noSysLog bool
 
 func init() {
 	var err error
-	if Logger, err = NewLogger(MetaSysLog, EmptyString, 0); err != nil {
-		noSysLog = true
-		Logger, _ = NewLogger(MetaStdLog, EmptyString, 0)
+	Logger, err = NewSysLogger(EmptyString, 0)
+	if err != nil {
+		Logger = NewStdLogger(EmptyString, 0)
 	}
 }
 
@@ -63,20 +63,6 @@ type LoggerInterface interface {
 	Info(m string) error
 	Debug(m string) error
 	Write(p []byte) (n int, err error)
-}
-
-func NewLogger(loggerType, nodeID string, logLvl int) (LoggerInterface, error) {
-	switch loggerType {
-	case MetaStdLog:
-		return NewStdLogger(nodeID, logLvl), nil
-	case MetaSysLog:
-		if noSysLog {
-			return NewStdLogger(nodeID, logLvl), nil
-		}
-		return NewSysLogger(nodeID, logLvl)
-	default:
-		return nil, fmt.Errorf("unsupported logger: <%+s>", loggerType)
-	}
 }
 
 type SysLogger struct {

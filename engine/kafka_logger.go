@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"log"
 	"log/syslog"
 	"sync"
 	"time"
@@ -31,24 +30,12 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-func NewLogger(ctx *context.Context, loggerType, tnt, nodeID string,
-	connMgr *ConnManager, cfg *config.CGRConfig) (utils.LoggerInterface, error) {
-	switch loggerType {
-	case utils.MetaKafkaLog:
-		return NewExportLogger(ctx, nodeID, tnt, cfg.LoggerCfg().Level, connMgr, cfg), nil
-	case utils.MetaStdLog, utils.MetaSysLog:
-		return utils.NewLogger(loggerType, nodeID, cfg.LoggerCfg().Level)
-	default:
-		return nil, fmt.Errorf("unsupported logger: <%+s>", loggerType)
-	}
-}
-
 // Logs to kafka
 type ExportLogger struct {
 	sync.Mutex
-	cfg     *config.CGRConfig
-	connMgr *ConnManager
-	ctx     *context.Context
+	efsConns []string
+	connMgr  *ConnManager
+	ctx      *context.Context
 
 	LogLevel   int
 	FldPostDir string
@@ -58,15 +45,15 @@ type ExportLogger struct {
 }
 
 // NewExportLogger will export loggers to kafka
-func NewExportLogger(ctx *context.Context, nodeID, tenant string, level int,
-	connMgr *ConnManager, cfg *config.CGRConfig) (el *ExportLogger) {
-	el = &ExportLogger{
+func NewExportLogger(ctx *context.Context, tenant string, connMgr *ConnManager,
+	cfg *config.CGRConfig) *ExportLogger {
+	return &ExportLogger{
 		ctx:        ctx,
+		efsConns:   cfg.LoggerCfg().EFsConns,
 		connMgr:    connMgr,
-		cfg:        cfg,
-		LogLevel:   level,
+		LogLevel:   cfg.LoggerCfg().Level,
 		FldPostDir: cfg.LoggerCfg().Opts.FailedPostsDir,
-		NodeID:     nodeID,
+		NodeID:     cfg.GeneralCfg().NodeID,
 		Tenant:     tenant,
 		Writer: &kafka.Writer{
 			Addr:        kafka.TCP(cfg.LoggerCfg().Opts.KafkaConn),
@@ -74,7 +61,6 @@ func NewExportLogger(ctx *context.Context, nodeID, tenant string, level int,
 			MaxAttempts: cfg.LoggerCfg().Opts.KafkaAttempts,
 		},
 	}
-	return
 }
 
 func (el *ExportLogger) Close() (err error) {
@@ -115,12 +101,10 @@ func (el *ExportLogger) call(m string, level int) (err error) {
 				APIOpts:   el.GetMeta(),
 			}
 			var reply string
-			if err = el.connMgr.Call(el.ctx, el.cfg.LoggerCfg().EFsConns,
-				utils.EfSv1ProcessEvent, args, &reply); err != nil {
-				log.Printf("err la sefprocessEvent: %v", err)
-				/* utils.Logger.Warning(
-				fmt.Sprintf("<%s> Exporter could not writte failed event with <%s> service because err: <%s>",
-					utils.Logger, utils.EFs, err.Error())) */
+			if err = el.connMgr.Call(el.ctx, el.efsConns, utils.EfSv1ProcessEvent,
+				args, &reply); err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> failed to export log event: %v", utils.EFs, err))
 			}
 		}()
 		// also the content should be printed as a stdout logger type
@@ -168,7 +152,7 @@ func (el *ExportLogger) Crit(m string) (err error) {
 	if el.LogLevel < utils.LOGLEVEL_CRITICAL {
 		return nil
 	}
-	if el.call(m, utils.LOGLEVEL_CRITICAL); err != nil {
+	if err = el.call(m, utils.LOGLEVEL_CRITICAL); err != nil {
 		if err == utils.ErrLoggerChanged {
 			utils.NewStdLogger(el.NodeID, el.LogLevel).Crit(m)
 			err = nil
