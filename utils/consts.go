@@ -2809,6 +2809,7 @@ const (
 
 	SQLDBNameOpt              = "sqlDBName"
 	SQLTableNameOpt           = "sqlTableName"
+	SQLBatchSize              = "sqlBatchSize"
 	SQLDeleteIndexedFieldsOpt = "sqlDeleteIndexedFields"
 	SQLUpdateIndexedFieldsOpt = "sqlUpdateIndexedFields"
 

@@ -451,6 +451,7 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlDBName": "cgrates", 			// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",			// the name of the table from were the events are read
+				// "sqlBatchSize: 0, 				// number of SQL rows that can be selected at a time. 0 or lower for unlimited
 				// "sqlDeleteIndexedFields": [],   		// list of fields to DELETE from the table
 				// "pgSSLMode": "disable",			// the ssl mode for postgres db
 
