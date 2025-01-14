@@ -248,6 +248,7 @@ type EventReaderOptsJson struct {
 	KafkaSkipTLSVerify       *bool     `json:"kafkaSkipTLSVerify"`
 	SQLDBName                *string   `json:"sqlDBName"`
 	SQLTableName             *string   `json:"sqlTableName"`
+	SQLBatchSize             *int      `json:"sqlBatchSize"`
 	SQLDeleteIndexedFields   *[]string `json:"sqlDeleteIndexedFields"`
 	PgSSLMode                *string   `json:"pgSSLMode"`
 	AWSRegion                *string   `json:"awsRegion"`

@@ -167,6 +167,9 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 			rdr.rdrErr <- err
 			return
 		}
+		if rdr.Config().Opts.SQL.BatchSize != nil && *rdr.Config().Opts.SQL.BatchSize > 0 {
+			tx.Limit(*rdr.Config().Opts.SQL.BatchSize) // limit how much can be selected per iteration
+		}
 		rows, err := tx.Rows() // get all rows selected
 		if err != nil {
 			rdr.rdrErr <- err
@@ -228,7 +231,7 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 						}
 					}
 				}
-				if err = tx.Delete(nil, sqlClauseVars).Error; err != nil { // to ensure we don't read it again
+				if err = db.Table(rdr.tableName).Delete(nil, sqlClauseVars).Error; err != nil { // to ensure we don't read it again
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> deleting message %s error: %s",
 							utils.ERs, utils.ToJSON(ev), err.Error()))

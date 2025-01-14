@@ -42,6 +42,7 @@
 			"opts": {
 				"sqlDBName":"cgrates2",
 				"sqlTableName":"cdrs", 
+				"sqlBatchSize": 0,
 				"sqlDeleteIndexedFields": ["id"],
 			},
 			"start_delay": "500ms", // wait for db to be populated before starting reader 

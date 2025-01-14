@@ -25,6 +25,7 @@
         "opts": {
             "sqlDBName": "cgrates2",
             "sqlTableName":"cdrs", 
+            "sqlBatchSize": -1,
             "sqlUpdateIndexedFields": ["id", "cgrid"],
         },
         "flags": ["*log"],

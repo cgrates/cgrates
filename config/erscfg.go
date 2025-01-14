@@ -258,6 +258,7 @@ func (kafkaROpts *KafkaROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err 
 type SQLROpts struct {
 	DBName              *string
 	TableName           *string
+	BatchSize           *int
 	DeleteIndexedFields *[]string
 	PgSSLMode           *string
 }
@@ -268,6 +269,9 @@ func (sqlOpts *SQLROpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err error
 	}
 	if jsnCfg.SQLTableName != nil {
 		sqlOpts.TableName = jsnCfg.SQLTableName
+	}
+	if jsnCfg.SQLBatchSize != nil {
+		sqlOpts.BatchSize = jsnCfg.SQLBatchSize
 	}
 	if jsnCfg.SQLDeleteIndexedFields != nil {
 		dif := make([]string, len(*jsnCfg.SQLDeleteIndexedFields))
@@ -671,6 +675,10 @@ func (sqlOpts *SQLROpts) Clone() *SQLROpts {
 		cln.TableName = new(string)
 		*cln.TableName = *sqlOpts.TableName
 	}
+	if sqlOpts.BatchSize != nil {
+		cln.BatchSize = new(int)
+		*cln.BatchSize = *sqlOpts.BatchSize
+	}
 	if sqlOpts.DeleteIndexedFields != nil {
 		idx := make([]string, len(*sqlOpts.DeleteIndexedFields))
 		copy(idx, *sqlOpts.DeleteIndexedFields)
@@ -927,6 +935,9 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		}
 		if sqlOpts.TableName != nil {
 			opts[utils.SQLTableNameOpt] = *sqlOpts.TableName
+		}
+		if sqlOpts.BatchSize != nil {
+			opts[utils.SQLBatchSize] = *sqlOpts.BatchSize
 		}
 		if sqlOpts.DeleteIndexedFields != nil {
 			deleteIndexedFields := make([]string, len(*sqlOpts.DeleteIndexedFields))

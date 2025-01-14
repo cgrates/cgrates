@@ -1439,8 +1439,9 @@ func TestEventReaderOptsCfg(t *testing.T) {
 		KafkaTopic:               utils.StringPointer("kafka"),
 		KafkaMaxWait:             utils.StringPointer("1m"),
 		SQLDBName:                utils.StringPointer("dbname"),
-		SQLDeleteIndexedFields:   utils.SliceStringPointer([]string{"id"}),
 		SQLTableName:             utils.StringPointer("tablename"),
+		SQLBatchSize:             utils.IntPointer(-1),
+		SQLDeleteIndexedFields:   utils.SliceStringPointer([]string{"id"}),
 		PgSSLMode:                utils.StringPointer("sslmode"),
 		AWSRegion:                utils.StringPointer("eu"),
 		AWSKey:                   utils.StringPointer("key"),
@@ -1521,6 +1522,7 @@ func TestEventReaderCfgClone(t *testing.T) {
 			SQL: &SQLROpts{
 				DBName:              utils.StringPointer("dbname"),
 				TableName:           utils.StringPointer("tablename"),
+				BatchSize:           utils.IntPointer(0),
 				DeleteIndexedFields: utils.SliceStringPointer([]string{"id"}),
 				PgSSLMode:           utils.StringPointer("sslmode"),
 			},
