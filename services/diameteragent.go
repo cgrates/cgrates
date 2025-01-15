@@ -30,10 +30,9 @@ import (
 )
 
 // NewDiameterAgent returns the Diameter Agent
-func NewDiameterAgent(cfg *config.CGRConfig, caps *engine.Caps) *DiameterAgent {
+func NewDiameterAgent(cfg *config.CGRConfig) *DiameterAgent {
 	return &DiameterAgent{
 		cfg:       cfg,
-		caps:      caps,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -44,8 +43,7 @@ type DiameterAgent struct {
 	cfg      *config.CGRConfig
 	stopChan chan struct{}
 
-	da   *agents.DiameterAgent
-	caps *engine.Caps
+	da *agents.DiameterAgent
 
 	lnet  string
 	laddr string
@@ -54,88 +52,92 @@ type DiameterAgent struct {
 }
 
 // Start should handle the sercive start
-func (da *DiameterAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
+func (s *DiameterAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
+			utils.CapS,
 			utils.ConnManager,
 			utils.FilterS,
 		},
-		registry, da.cfg.GeneralCfg().ConnectTimeout)
+		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
-	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-	fs := srvDeps[utils.FilterS].(*FilterService)
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
+	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
-	da.Lock()
-	defer da.Unlock()
-	return da.start(fs.FilterS(), cms.ConnManager(), da.caps, shutdown)
+	s.Lock()
+	defer s.Unlock()
+	return s.start(fs, cm, caps, shutdown)
 }
 
-func (da *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, caps *engine.Caps,
+func (s *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, caps *engine.Caps,
 	shutdown *utils.SyncedChan) error {
 	var err error
-	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, cm, caps)
+	s.da, err = agents.NewDiameterAgent(s.cfg, filterS, cm, caps)
 	if err != nil {
 		return err
 	}
-	da.lnet = da.cfg.DiameterAgentCfg().ListenNet
-	da.laddr = da.cfg.DiameterAgentCfg().Listen
-	da.stopChan = make(chan struct{})
+	s.lnet = s.cfg.DiameterAgentCfg().ListenNet
+	s.laddr = s.cfg.DiameterAgentCfg().Listen
+	s.stopChan = make(chan struct{})
 	go func(d *agents.DiameterAgent) {
-		if err := d.ListenAndServe(da.stopChan); err != nil {
+		if err := d.ListenAndServe(s.stopChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
 			shutdown.CloseOnce()
 		}
-	}(da.da)
+	}(s.da)
 	return nil
 }
 
 // Reload handles the change of config
-func (da *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	da.Lock()
-	defer da.Unlock()
-	if da.lnet == da.cfg.DiameterAgentCfg().ListenNet &&
-		da.laddr == da.cfg.DiameterAgentCfg().Listen {
+func (s *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+	s.Lock()
+	defer s.Unlock()
+	if s.lnet == s.cfg.DiameterAgentCfg().ListenNet &&
+		s.laddr == s.cfg.DiameterAgentCfg().Listen {
 		return
 	}
-	close(da.stopChan)
+	close(s.stopChan)
 
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
+			utils.CapS,
 			utils.ConnManager,
 			utils.FilterS,
 		},
-		registry, da.cfg.GeneralCfg().ConnectTimeout)
+		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
-	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-	fs := srvDeps[utils.FilterS].(*FilterService)
-	return da.start(fs.FilterS(), cms.ConnManager(), da.caps, shutdown)
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
+	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	return s.start(fs, cm, caps, shutdown)
 }
 
 // Shutdown stops the service
-func (da *DiameterAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	da.Lock()
-	close(da.stopChan)
-	da.da = nil
-	da.Unlock()
+func (s *DiameterAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+	s.Lock()
+	close(s.stopChan)
+	s.da = nil
+	s.Unlock()
 	return // no shutdown for the momment
 }
 
 // ServiceName returns the service name
-func (da *DiameterAgent) ServiceName() string {
+func (s *DiameterAgent) ServiceName() string {
 	return utils.DiameterAgent
 }
 
 // ShouldRun returns if the service should be running
-func (da *DiameterAgent) ShouldRun() bool {
-	return da.cfg.DiameterAgentCfg().Enabled
+func (s *DiameterAgent) ShouldRun() bool {
+	return s.cfg.DiameterAgentCfg().Enabled
 }
 
 // StateChan returns signaling channel of specific state
-func (da *DiameterAgent) StateChan(stateID string) chan struct{} {
-	return da.stateDeps.StateChan(stateID)
+func (s *DiameterAgent) StateChan(stateID string) chan struct{} {
+	return s.stateDeps.StateChan(stateID)
 }
