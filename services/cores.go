@@ -31,12 +31,10 @@ import (
 )
 
 // NewCoreService returns the Core Service
-func NewCoreService(cfg *config.CGRConfig, caps *engine.Caps,
-	fileCPU *os.File, shdWg *sync.WaitGroup) *CoreService {
+func NewCoreService(cfg *config.CGRConfig, fileCPU *os.File, shdWg *sync.WaitGroup) *CoreService {
 	return &CoreService{
 		shdWg:     shdWg,
 		cfg:       cfg,
-		caps:      caps,
 		fileCPU:   fileCPU,
 		csCh:      make(chan *cores.CoreS, 1),
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
@@ -50,7 +48,6 @@ type CoreService struct {
 	cS        *cores.CoreS
 	cl        *commonlisteners.CommonListenerS
 	fileCPU   *os.File
-	caps      *engine.Caps
 	csCh      chan *cores.CoreS
 	stopChan  chan struct{}
 	shdWg     *sync.WaitGroup
@@ -58,31 +55,33 @@ type CoreService struct {
 }
 
 // Start should handle the service start
-func (cS *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
+func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
+			utils.CapS,
 			utils.CommonListenerS,
 			utils.ConnManager,
 		},
-		registry, cS.cfg.GeneralCfg().ConnectTimeout)
+		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
-	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
+	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
-	cS.mu.Lock()
-	defer cS.mu.Unlock()
-	cS.stopChan = make(chan struct{})
-	cS.cS = cores.NewCoreService(cS.cfg, cS.caps, cS.fileCPU, cS.stopChan, cS.shdWg, shutdown)
-	cS.csCh <- cS.cS
-	srv, err := engine.NewService(cS.cS)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.stopChan = make(chan struct{})
+	s.cS = cores.NewCoreService(s.cfg, caps, s.fileCPU, s.stopChan, s.shdWg, shutdown)
+	s.csCh <- s.cS
+	srv, err := engine.NewService(s.cS)
 	if err != nil {
 		return err
 	}
-	if !cS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cS.cl.RpcRegister(s)
+	if !s.cfg.DispatcherSCfg().Enabled {
+		for _, svc := range srv {
+			s.cl.RpcRegister(svc)
 		}
 	}
 	cms.AddInternalConn(utils.CoreS, srv)
@@ -90,42 +89,42 @@ func (cS *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 }
 
 // Reload handles the change of config
-func (cS *CoreService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *CoreService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service
-func (cS *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	cS.mu.Lock()
-	defer cS.mu.Unlock()
-	cS.cS.Shutdown()
-	close(cS.stopChan)
-	cS.cS.StopCPUProfiling()
-	cS.cS.StopMemoryProfiling()
-	cS.cS = nil
-	<-cS.csCh
-	cS.cl.RpcUnregisterName(utils.CoreSv1)
+func (s *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.cS.Shutdown()
+	close(s.stopChan)
+	s.cS.StopCPUProfiling()
+	s.cS.StopMemoryProfiling()
+	s.cS = nil
+	<-s.csCh
+	s.cl.RpcUnregisterName(utils.CoreSv1)
 	return nil
 }
 
 // ServiceName returns the service name
-func (cS *CoreService) ServiceName() string {
+func (s *CoreService) ServiceName() string {
 	return utils.CoreS
 }
 
 // ShouldRun returns if the service should be running
-func (cS *CoreService) ShouldRun() bool {
+func (s *CoreService) ShouldRun() bool {
 	return true
 }
 
 // StateChan returns signaling channel of specific state
-func (cS *CoreService) StateChan(stateID string) chan struct{} {
-	return cS.stateDeps.StateChan(stateID)
+func (s *CoreService) StateChan(stateID string) chan struct{} {
+	return s.stateDeps.StateChan(stateID)
 }
 
 // CoreS returns the CoreS object.
-func (cS *CoreService) CoreS() *cores.CoreS {
-	cS.mu.RLock()
-	defer cS.mu.RUnlock()
-	return cS.cS
+func (s *CoreService) CoreS() *cores.CoreS {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.cS
 }

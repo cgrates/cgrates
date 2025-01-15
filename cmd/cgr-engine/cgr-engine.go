@@ -36,7 +36,6 @@ import (
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
@@ -125,7 +124,6 @@ func runCGREngine(fs []string) (err error) {
 
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 
-	caps := engine.NewCaps(cfg.CoreSCfg().Caps, cfg.CoreSCfg().CapsStrategy)
 	srvDep := map[string]*sync.WaitGroup{
 		utils.DataDB: new(sync.WaitGroup),
 	}
@@ -133,7 +131,8 @@ func runCGREngine(fs []string) (err error) {
 	// ServiceIndexer will share service references to all services
 	registry := servmanager.NewServiceRegistry()
 	gvS := services.NewGlobalVarS(cfg)
-	cls := services.NewCommonListenerService(cfg, caps)
+	caps := services.NewCapService(cfg)
+	cls := services.NewCommonListenerService(cfg)
 	anzS := services.NewAnalyzerService(cfg)
 	cms := services.NewConnManagerService(cfg)
 	lgs := services.NewLoggerService(cfg, *flags.Logger)
@@ -141,7 +140,7 @@ func runCGREngine(fs []string) (err error) {
 	sdbS := services.NewStorDBService(cfg, *flags.SetVersions)
 	configS := services.NewConfigService(cfg)
 	guardianS := services.NewGuardianService(cfg)
-	coreS := services.NewCoreService(cfg, caps, cpuPrfF, shdWg)
+	coreS := services.NewCoreService(cfg, cpuPrfF, shdWg)
 	cacheS := services.NewCacheService(cfg)
 	fltrS := services.NewFilterService(cfg)
 	dspS := services.NewDispatcherService(cfg)
@@ -164,7 +163,7 @@ func runCGREngine(fs []string) (err error) {
 	janusAgent := services.NewJanusAgent(cfg)
 	astAgent := services.NewAsteriskAgent(cfg)
 	radAgent := services.NewRadiusAgent(cfg)
-	diamAgent := services.NewDiameterAgent(cfg, caps)
+	diamAgent := services.NewDiameterAgent(cfg)
 	httpAgent := services.NewHTTPAgent(cfg)
 	sipAgent := services.NewSIPAgent(cfg)
 	eeS := services.NewEventExporterService(cfg)
@@ -177,6 +176,7 @@ func runCGREngine(fs []string) (err error) {
 
 	srvManager := servmanager.NewServiceManager(shdWg, cfg, registry, []servmanager.Service{
 		gvS,
+		caps,
 		cls,
 		anzS,
 		cms,

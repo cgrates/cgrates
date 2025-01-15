@@ -23,17 +23,15 @@ import (
 
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/registrarc"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewCommonListenerService instantiates a new CommonListenerService.
-func NewCommonListenerService(cfg *config.CGRConfig, caps *engine.Caps) *CommonListenerService {
+func NewCommonListenerService(cfg *config.CGRConfig) *CommonListenerService {
 	return &CommonListenerService{
 		cfg:       cfg,
-		caps:      caps,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -43,53 +41,57 @@ type CommonListenerService struct {
 	mu        sync.RWMutex
 	cfg       *config.CGRConfig
 	cls       *commonlisteners.CommonListenerS
-	caps      *engine.Caps
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start handles the service start.
-func (cl *CommonListenerService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
-	cl.mu.Lock()
-	defer cl.mu.Unlock()
-	cl.cls = commonlisteners.NewCommonListenerS(cl.caps)
-	if len(cl.cfg.HTTPCfg().RegistrarSURL) != 0 {
-		cl.cls.RegisterHTTPFunc(cl.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
+func (s *CommonListenerService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
+	cs, err := WaitForServiceState(utils.StateServiceUP, utils.CapS, registry,
+		s.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return err
 	}
-	if cl.cfg.ConfigSCfg().Enabled {
-		cl.cls.RegisterHTTPFunc(cl.cfg.ConfigSCfg().URL, config.HandlerConfigS)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.cls = commonlisteners.NewCommonListenerS(cs.(*CapService).Caps())
+	if len(s.cfg.HTTPCfg().RegistrarSURL) != 0 {
+		s.cls.RegisterHTTPFunc(s.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar)
+	}
+	if s.cfg.ConfigSCfg().Enabled {
+		s.cls.RegisterHTTPFunc(s.cfg.ConfigSCfg().URL, config.HandlerConfigS)
 	}
 	return nil
 }
 
 // Reload handles the config changes.
-func (cl *CommonListenerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+func (s *CommonListenerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
 	return nil
 }
 
 // Shutdown stops the service.
-func (cl *CommonListenerService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	cl.mu.Lock()
-	defer cl.mu.Unlock()
-	cl.cls = nil
+func (s *CommonListenerService) Shutdown(_ *servmanager.ServiceRegistry) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.cls = nil
 	return nil
 }
 
 // ServiceName returns the service name
-func (cl *CommonListenerService) ServiceName() string {
+func (s *CommonListenerService) ServiceName() string {
 	return utils.CommonListenerS
 }
 
 // ShouldRun returns if the service should be running.
-func (cl *CommonListenerService) ShouldRun() bool {
+func (s *CommonListenerService) ShouldRun() bool {
 	return true
 }
 
 // StateChan returns signaling channel of specific state
-func (cl *CommonListenerService) StateChan(stateID string) chan struct{} {
-	return cl.stateDeps.StateChan(stateID)
+func (s *CommonListenerService) StateChan(stateID string) chan struct{} {
+	return s.stateDeps.StateChan(stateID)
 }
 
 // CLS returns the CommonListenerS object.
-func (cl *CommonListenerService) CLS() *commonlisteners.CommonListenerS {
-	return cl.cls
+func (s *CommonListenerService) CLS() *commonlisteners.CommonListenerS {
+	return s.cls
 }
