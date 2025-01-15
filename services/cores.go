@@ -36,7 +36,6 @@ func NewCoreService(cfg *config.CGRConfig, fileCPU *os.File, shdWg *sync.WaitGro
 		shdWg:     shdWg,
 		cfg:       cfg,
 		fileCPU:   fileCPU,
-		csCh:      make(chan *cores.CoreS, 1),
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -48,7 +47,6 @@ type CoreService struct {
 	cS        *cores.CoreS
 	cl        *commonlisteners.CommonListenerS
 	fileCPU   *os.File
-	csCh      chan *cores.CoreS
 	stopChan  chan struct{}
 	shdWg     *sync.WaitGroup
 	stateDeps *StateDependencies // channel subscriptions for state changes
@@ -74,7 +72,6 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Se
 	defer s.mu.Unlock()
 	s.stopChan = make(chan struct{})
 	s.cS = cores.NewCoreService(s.cfg, caps, s.fileCPU, s.stopChan, s.shdWg, shutdown)
-	s.csCh <- s.cS
 	srv, err := engine.NewService(s.cS)
 	if err != nil {
 		return err
@@ -102,7 +99,6 @@ func (s *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.cS.StopCPUProfiling()
 	s.cS.StopMemoryProfiling()
 	s.cS = nil
-	<-s.csCh
 	s.cl.RpcUnregisterName(utils.CoreSv1)
 	return nil
 }
