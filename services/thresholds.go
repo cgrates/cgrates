@@ -30,11 +30,9 @@ import (
 )
 
 // NewThresholdService returns the Threshold Service
-func NewThresholdService(cfg *config.CGRConfig,
-	srvDep map[string]*sync.WaitGroup) *ThresholdService {
+func NewThresholdService(cfg *config.CGRConfig) *ThresholdService {
 	return &ThresholdService{
 		cfg:       cfg,
-		srvDep:    srvDep,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -47,14 +45,11 @@ type ThresholdService struct {
 	thrs *engine.ThresholdS
 	cl   *commonlisteners.CommonListenerS
 
-	srvDep    map[string]*sync.WaitGroup
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	thrs.srvDep[utils.DataDB].Add(1)
-
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -104,7 +99,6 @@ func (thrs *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.Service
 
 // Shutdown stops the service
 func (thrs *ThresholdService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
-	defer thrs.srvDep[utils.DataDB].Done()
 	thrs.Lock()
 	defer thrs.Unlock()
 	thrs.thrs.Shutdown(context.TODO())

@@ -31,11 +31,9 @@ import (
 )
 
 // NewRankingService returns the RankingS Service
-func NewRankingService(cfg *config.CGRConfig,
-	srvDep map[string]*sync.WaitGroup) *RankingService {
+func NewRankingService(cfg *config.CGRConfig) *RankingService {
 	return &RankingService{
 		cfg:       cfg,
-		srvDep:    srvDep,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -47,14 +45,11 @@ type RankingService struct {
 	ran *engine.RankingS
 	cl  *commonlisteners.CommonListenerS
 
-	srvDep    map[string]*sync.WaitGroup
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	ran.srvDep[utils.DataDB].Add(1)
-
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -107,7 +102,6 @@ func (ran *RankingService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceReg
 
 // Shutdown stops the service
 func (ran *RankingService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	defer ran.srvDep[utils.DataDB].Done()
 	ran.Lock()
 	defer ran.Unlock()
 	ran.ran.StopRankingS()

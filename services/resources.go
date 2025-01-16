@@ -30,11 +30,9 @@ import (
 )
 
 // NewResourceService returns the Resource Service
-func NewResourceService(cfg *config.CGRConfig,
-	srvDep map[string]*sync.WaitGroup) *ResourceService {
+func NewResourceService(cfg *config.CGRConfig) *ResourceService {
 	return &ResourceService{
 		cfg:       cfg,
-		srvDep:    srvDep,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -47,14 +45,11 @@ type ResourceService struct {
 	reS *engine.ResourceS
 	cl  *commonlisteners.CommonListenerS
 
-	srvDep    map[string]*sync.WaitGroup
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
 func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	reS.srvDep[utils.DataDB].Add(1)
-
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -104,7 +99,6 @@ func (reS *ResourceService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRe
 
 // Shutdown stops the service
 func (reS *ResourceService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	defer reS.srvDep[utils.DataDB].Done()
 	reS.Lock()
 	defer reS.Unlock()
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
