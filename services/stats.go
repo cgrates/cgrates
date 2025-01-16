@@ -30,10 +30,9 @@ import (
 )
 
 // NewStatService returns the Stat Service
-func NewStatService(cfg *config.CGRConfig, srvDep map[string]*sync.WaitGroup) *StatService {
+func NewStatService(cfg *config.CGRConfig) *StatService {
 	return &StatService{
 		cfg:       cfg,
-		srvDep:    srvDep,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -46,14 +45,11 @@ type StatService struct {
 	sts *engine.StatS
 	cl  *commonlisteners.CommonListenerS
 
-	srvDep    map[string]*sync.WaitGroup
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	sts.srvDep[utils.DataDB].Add(1)
-
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -103,7 +99,6 @@ func (sts *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegist
 
 // Shutdown stops the service
 func (sts *StatService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	defer sts.srvDep[utils.DataDB].Done()
 	sts.Lock()
 	defer sts.Unlock()
 	sts.sts.Shutdown(context.TODO())

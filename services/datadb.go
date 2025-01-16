@@ -29,12 +29,10 @@ import (
 )
 
 // NewDataDBService returns the DataDB Service
-func NewDataDBService(cfg *config.CGRConfig, setVersions bool,
-	srvDep map[string]*sync.WaitGroup) *DataDBService {
+func NewDataDBService(cfg *config.CGRConfig, setVersions bool) *DataDBService {
 	return &DataDBService{
 		cfg:         cfg,
 		setVersions: setVersions,
-		srvDep:      srvDep,
 		stateDeps:   NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -46,7 +44,6 @@ type DataDBService struct {
 	oldDBCfg    *config.DataDbCfg
 	dm          *engine.DataManager
 	setVersions bool
-	srvDep      map[string]*sync.WaitGroup
 	stateDeps   *StateDependencies // channel subscriptions for state changes
 }
 
@@ -112,13 +109,27 @@ func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegis
 }
 
 // Shutdown stops the service
-func (db *DataDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
-	db.srvDep[utils.DataDB].Wait()
+func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
+	deps := []string{
+		utils.ResourceS,
+		utils.TrendS,
+		utils.RankingS,
+		utils.StatS,
+		utils.ThresholdS,
+	}
+	for _, svcID := range deps {
+		if !servmanager.IsServiceInState(registry.Lookup(svcID), utils.StateServiceUP) {
+			continue
+		}
+		_, err := WaitForServiceState(utils.StateServiceDOWN, svcID, registry, db.cfg.GeneralCfg().ConnectTimeout)
+		if err != nil {
+			return err
+		}
+	}
 	db.Lock()
+	defer db.Unlock()
 	db.dm.DataDB().Close()
-	db.dm = nil
-	db.Unlock()
-	return
+	return nil
 }
 
 // ServiceName returns the service name

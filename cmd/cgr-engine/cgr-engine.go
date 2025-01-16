@@ -124,10 +124,6 @@ func runCGREngine(fs []string) (err error) {
 
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 
-	srvDep := map[string]*sync.WaitGroup{
-		utils.DataDB: new(sync.WaitGroup),
-	}
-
 	// ServiceIndexer will share service references to all services
 	registry := servmanager.NewServiceRegistry()
 	gvS := services.NewGlobalVarS(cfg)
@@ -136,7 +132,7 @@ func runCGREngine(fs []string) (err error) {
 	anzS := services.NewAnalyzerService(cfg)
 	cms := services.NewConnManagerService(cfg)
 	lgs := services.NewLoggerService(cfg, *flags.Logger)
-	dmS := services.NewDataDBService(cfg, *flags.SetVersions, srvDep)
+	dmS := services.NewDataDBService(cfg, *flags.SetVersions)
 	sdbS := services.NewStorDBService(cfg, *flags.SetVersions)
 	configS := services.NewConfigService(cfg)
 	guardianS := services.NewGuardianService(cfg)
@@ -151,11 +147,11 @@ func runCGREngine(fs []string) (err error) {
 	attrS := services.NewAttributeService(cfg, dspS)
 	chrgS := services.NewChargerService(cfg)
 	routeS := services.NewRouteService(cfg)
-	resourceS := services.NewResourceService(cfg, srvDep)
-	trendS := services.NewTrendService(cfg, srvDep)
-	rankingS := services.NewRankingService(cfg, srvDep)
-	thS := services.NewThresholdService(cfg, srvDep)
-	stS := services.NewStatService(cfg, srvDep)
+	resourceS := services.NewResourceService(cfg)
+	trendS := services.NewTrendService(cfg)
+	rankingS := services.NewRankingService(cfg)
+	thS := services.NewThresholdService(cfg)
+	stS := services.NewStatService(cfg)
 	erS := services.NewEventReaderService(cfg)
 	dnsAgent := services.NewDNSAgent(cfg)
 	fsAgent := services.NewFreeswitchAgent(cfg)

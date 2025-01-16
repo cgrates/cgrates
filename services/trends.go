@@ -30,11 +30,9 @@ import (
 )
 
 // NewTrendsService returns the TrendS Service
-func NewTrendService(cfg *config.CGRConfig,
-	srvDep map[string]*sync.WaitGroup) *TrendService {
+func NewTrendService(cfg *config.CGRConfig) *TrendService {
 	return &TrendService{
 		cfg:       cfg,
-		srvDep:    srvDep,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -46,14 +44,11 @@ type TrendService struct {
 	trs *engine.TrendS
 	cl  *commonlisteners.CommonListenerS
 
-	srvDep    map[string]*sync.WaitGroup
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	trs.srvDep[utils.DataDB].Add(1)
-
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -106,7 +101,6 @@ func (trs *TrendService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegis
 
 // Shutdown stops the service
 func (trs *TrendService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	defer trs.srvDep[utils.DataDB].Done()
 	trs.Lock()
 	defer trs.Unlock()
 	trs.trs.StopTrendS()
