@@ -1254,8 +1254,9 @@ func (sS *SessionS) getRelocateSession(cgrID string, initOriginID,
 	return sS.relocateSession(initOriginID, originID, originHost)
 }
 
-// syncSessions synchronizes the active sessions with the one in the clients
-// it will force-disconnect the one found in SessionS but not in clients
+// syncSessions synchronizes the active sessions with the ones in connected
+// clients by force-disconnecting sessions that exist in SessionS but not in
+// any client.
 func (sS *SessionS) syncSessions() {
 	sS.aSsMux.RLock()
 	asCount := len(sS.aSessions)
@@ -1263,32 +1264,37 @@ func (sS *SessionS) syncSessions() {
 	if asCount == 0 { // no need to sync the sessions if none is active
 		return
 	}
-	queriedCGRIDs := engine.NewSafEvent(nil) // need this to be
+	if len(sS.biJClients()) == 0 {
+		utils.Logger.Notice(fmt.Sprintf(
+			"<%s> no bidirectional clients connected - proceeding to terminate %d active sessions",
+			utils.SessionS, asCount))
+	}
+	queriedCGRIDs := engine.NewSafEvent(nil)
 	var err error
 	for _, clnt := range sS.biJClients() {
-		errChan := make(chan error)
+		errC := make(chan error)
 		go func() {
 			var queriedSessionIDs []*SessionID
 			if err := clnt.conn.Call(context.TODO(), utils.SessionSv1GetActiveSessionIDs,
 				utils.EmptyString, &queriedSessionIDs); err != nil {
-				errChan <- err
+				errC <- err
+				return
 			}
 			for _, sessionID := range queriedSessionIDs {
 				queriedCGRIDs.Set(sessionID.CGRID(), struct{}{})
 			}
-			errChan <- nil
+			errC <- nil
 		}()
 		select {
-		case err = <-errChan:
+		case err = <-errC:
 			if err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error <%s> quering session ids", utils.SessionS, err.Error()))
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> failed to query session IDs: %v", utils.SessionS, err))
 			}
 		case <-time.After(sS.cfg.GeneralCfg().ReplyTimeout):
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> timeout quering session ids ", utils.SessionS))
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> timeout while querying session IDs", utils.SessionS))
 		}
-
 	}
 	var toBeRemoved []string
 	sS.aSsMux.RLock()
@@ -1299,17 +1305,16 @@ func (sS *SessionS) syncSessions() {
 	}
 	sS.aSsMux.RUnlock()
 	for _, cgrID := range toBeRemoved {
-		ss := sS.getSessions(cgrID, false)
-		if len(ss) == 0 {
+		sess := sS.getSessions(cgrID, false)
+		if len(sess) == 0 {
 			continue
 		}
-		ss[0].Lock() // protect forceSTerminate as it is not thread safe for the session
-		if err := sS.forceSTerminate(ss[0], 0, nil, nil); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
-					utils.SessionS, cgrID, err.Error()))
+		sess[0].Lock() // protect forceSTerminate as it is not thread safe for the session
+		if err := sS.forceSTerminate(sess[0], 0, nil, nil); err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> failed to force-terminate session <%s>: %v", utils.SessionS, cgrID, err))
 		}
-		ss[0].Unlock()
+		sess[0].Unlock()
 	}
 }
 
