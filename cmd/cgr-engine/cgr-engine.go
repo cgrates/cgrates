@@ -126,94 +126,52 @@ func runCGREngine(fs []string) (err error) {
 
 	// ServiceIndexer will share service references to all services
 	registry := servmanager.NewServiceRegistry()
-	gvS := services.NewGlobalVarS(cfg)
-	caps := services.NewCapService(cfg)
-	cls := services.NewCommonListenerService(cfg)
-	anzS := services.NewAnalyzerService(cfg)
-	cms := services.NewConnManagerService(cfg)
-	lgs := services.NewLoggerService(cfg, *flags.Logger)
-	dmS := services.NewDataDBService(cfg, *flags.SetVersions)
-	sdbS := services.NewStorDBService(cfg, *flags.SetVersions)
-	configS := services.NewConfigService(cfg)
-	guardianS := services.NewGuardianService(cfg)
 	coreS := services.NewCoreService(cfg, cpuPrfF, shdWg)
-	cacheS := services.NewCacheService(cfg)
-	fltrS := services.NewFilterService(cfg)
-	dspS := services.NewDispatcherService(cfg)
-	ldrs := services.NewLoaderService(cfg)
-	efs := services.NewExportFailoverService(cfg)
-	adminS := services.NewAdminSv1Service(cfg)
-	sessionS := services.NewSessionService(cfg)
-	attrS := services.NewAttributeService(cfg, dspS)
-	chrgS := services.NewChargerService(cfg)
-	routeS := services.NewRouteService(cfg)
-	resourceS := services.NewResourceService(cfg)
-	trendS := services.NewTrendService(cfg)
-	rankingS := services.NewRankingService(cfg)
-	thS := services.NewThresholdService(cfg)
-	stS := services.NewStatService(cfg)
-	erS := services.NewEventReaderService(cfg)
-	dnsAgent := services.NewDNSAgent(cfg)
-	fsAgent := services.NewFreeswitchAgent(cfg)
-	kamAgent := services.NewKamailioAgent(cfg)
-	janusAgent := services.NewJanusAgent(cfg)
-	astAgent := services.NewAsteriskAgent(cfg)
-	radAgent := services.NewRadiusAgent(cfg)
-	diamAgent := services.NewDiameterAgent(cfg)
-	httpAgent := services.NewHTTPAgent(cfg)
-	sipAgent := services.NewSIPAgent(cfg)
-	eeS := services.NewEventExporterService(cfg)
-	cdrS := services.NewCDRServer(cfg)
-	registrarcS := services.NewRegistrarCService(cfg)
-	rateS := services.NewRateService(cfg)
-	actionS := services.NewActionService(cfg)
-	accS := services.NewAccountService(cfg)
-	tpeS := services.NewTPeService(cfg)
 
 	srvManager := servmanager.NewServiceManager(shdWg, cfg, registry, []servmanager.Service{
-		gvS,
-		caps,
-		cls,
-		anzS,
-		cms,
-		lgs,
-		dmS,
-		sdbS,
-		configS,
-		guardianS,
+		services.NewGlobalVarS(cfg),
+		services.NewCapService(cfg),
+		services.NewCommonListenerService(cfg),
+		services.NewAnalyzerService(cfg),
+		services.NewConnManagerService(cfg),
+		services.NewLoggerService(cfg, *flags.Logger),
+		services.NewDataDBService(cfg, *flags.SetVersions),
+		services.NewStorDBService(cfg, *flags.SetVersions),
+		services.NewConfigService(cfg),
+		services.NewGuardianService(cfg),
 		coreS,
-		cacheS,
-		fltrS,
-		dspS,
-		ldrs,
-		efs,
-		adminS,
-		sessionS,
-		attrS,
-		chrgS,
-		routeS,
-		resourceS,
-		trendS,
-		rankingS,
-		thS,
-		stS,
-		erS,
-		dnsAgent,
-		fsAgent,
-		kamAgent,
-		janusAgent,
-		astAgent,
-		radAgent,
-		diamAgent,
-		httpAgent,
-		sipAgent,
-		eeS,
-		cdrS,
-		registrarcS,
-		rateS,
-		actionS,
-		accS,
-		tpeS,
+		services.NewCacheService(cfg),
+		services.NewFilterService(cfg),
+		services.NewDispatcherService(cfg),
+		services.NewLoaderService(cfg),
+		services.NewExportFailoverService(cfg),
+		services.NewAdminSv1Service(cfg),
+		services.NewSessionService(cfg),
+		services.NewAttributeService(cfg),
+		services.NewChargerService(cfg),
+		services.NewRouteService(cfg),
+		services.NewResourceService(cfg),
+		services.NewTrendService(cfg),
+		services.NewRankingService(cfg),
+		services.NewThresholdService(cfg),
+		services.NewStatService(cfg),
+		services.NewEventReaderService(cfg),
+		services.NewDNSAgent(cfg),
+		services.NewFreeswitchAgent(cfg),
+		services.NewKamailioAgent(cfg),
+		services.NewJanusAgent(cfg),
+		services.NewAsteriskAgent(cfg),
+		services.NewRadiusAgent(cfg),
+		services.NewDiameterAgent(cfg),
+		services.NewHTTPAgent(cfg),
+		services.NewSIPAgent(cfg),
+		services.NewEventExporterService(cfg),
+		services.NewCDRServer(cfg),
+		services.NewRegistrarCService(cfg),
+		services.NewRateService(cfg),
+		services.NewActionService(cfg),
+		services.NewAccountService(cfg),
+		services.NewTPeService(cfg),
 	})
 
 	defer func() {

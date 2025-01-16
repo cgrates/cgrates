@@ -30,11 +30,9 @@ import (
 )
 
 // NewAttributeService returns the Attribute Service
-func NewAttributeService(cfg *config.CGRConfig,
-	dspS *DispatcherService) *AttributeService {
+func NewAttributeService(cfg *config.CGRConfig) *AttributeService {
 	return &AttributeService{
 		cfg:       cfg,
-		dspS:      dspS,
 		stateDeps: NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
@@ -43,8 +41,6 @@ func NewAttributeService(cfg *config.CGRConfig,
 type AttributeService struct {
 	sync.RWMutex
 	cfg *config.CGRConfig
-
-	dspS *DispatcherService
 
 	attrS *engine.AttributeS
 	cl    *commonlisteners.CommonListenerS
@@ -75,12 +71,12 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 		utils.CacheAttributeFilterIndexes); err != nil {
 		return
 	}
-	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dm := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
 	attrS.Lock()
 	defer attrS.Unlock()
-	attrS.attrS = engine.NewAttributeService(dbs.DataManager(), fs.FilterS(), attrS.cfg)
+	attrS.attrS = engine.NewAttributeService(dm, fs, attrS.cfg)
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
 	srv, _ := engine.NewService(attrS.rpc)
 	// srv, _ := birpc.NewService(attrS.rpc, "", false)
@@ -89,7 +85,8 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 			attrS.cl.RpcRegister(s)
 		}
 	}
-	dspShtdChan := attrS.dspS.RegisterShutdownChan(attrS.ServiceName())
+	dsps := registry.Lookup(utils.DispatcherS).(*DispatcherService)
+	dspShtdChan := dsps.RegisterShutdownChan(attrS.ServiceName())
 	go func() {
 		for {
 			if _, closed := <-dspShtdChan; closed {
@@ -111,12 +108,11 @@ func (attrS *AttributeService) Reload(_ *utils.SyncedChan, _ *servmanager.Servic
 }
 
 // Shutdown stops the service
-func (attrS *AttributeService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
+func (attrS *AttributeService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
 	attrS.Lock()
-	attrS.attrS = nil
-	attrS.rpc = nil
 	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
-	attrS.dspS.UnregisterShutdownChan(attrS.ServiceName())
+	dsps := registry.Lookup(utils.DispatcherS).(*DispatcherService)
+	dsps.UnregisterShutdownChan(attrS.ServiceName())
 	attrS.Unlock()
 	return
 }
