@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -26,6 +27,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -35,6 +38,7 @@ import (
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -46,30 +50,97 @@ func main() {
 	}
 }
 
+type flags struct {
+	*flag.FlagSet
+	config struct {
+		path    string
+		check   bool
+		version bool
+	}
+	process struct {
+		pidFile           string
+		singleCPU         bool
+		scheduledShutdown time.Duration
+	}
+	profiling struct {
+		cpu struct {
+			dir string
+		}
+		mem struct {
+			dir      string
+			interval time.Duration
+			maxFiles int
+			useTS    bool
+		}
+	}
+	logger struct {
+		level  int
+		nodeID string
+		typ    string // syslog|stdout|kafkaLog
+	}
+	data struct {
+		preloadIDs  []string
+		setVersions bool
+	}
+}
+
+func newFlags() *flags {
+	f := &flags{
+		FlagSet: flag.NewFlagSet("cgr-engine", flag.ExitOnError),
+	}
+
+	f.StringVar(&f.config.path, utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path")
+	f.BoolVar(&f.config.check, utils.CheckCfgCgr, false, "Verify the config without starting the engine")
+	f.BoolVar(&f.config.version, utils.VersionCgr, false, "Print application version and exit")
+
+	f.StringVar(&f.process.pidFile, utils.PidCgr, "", "Path to write the PID file")
+	f.BoolVar(&f.process.singleCPU, utils.SingleCpuCgr, false, "Run on a single CPU core")
+	f.DurationVar(&f.process.scheduledShutdown, utils.ScheduledShutdownCgr, 0, "Shutdown the engine after the specified duration")
+
+	f.StringVar(&f.profiling.cpu.dir, utils.CpuProfDirCgr, "", "Directory for CPU profiles")
+	f.StringVar(&f.profiling.mem.dir, utils.MemProfDirCgr, "", "Directory for memory profiles")
+	f.DurationVar(&f.profiling.mem.interval, utils.MemProfIntervalCgr, 15*time.Second, "Interval between memory profile saves")
+	f.IntVar(&f.profiling.mem.maxFiles, utils.MemProfMaxFilesCgr, 1, "Number of memory profiles to keep (most recent)")
+	f.BoolVar(&f.profiling.mem.useTS, utils.MemProfTimestampCgr, false, "Add timestamp to memory profile files")
+
+	f.IntVar(&f.logger.level, utils.LogLevelCfg, -1, "Log level (0=emergency to 7=debug)")
+	f.StringVar(&f.logger.nodeID, utils.NodeIDCfg, "", "Node ID of the engine")
+	f.StringVar(&f.logger.typ, utils.LoggerCfg, "", "Logger type <*syslog|*stdout|*kafkaLog>")
+
+	f.Func(utils.PreloadCgr, "Loader IDs used to load data before engine starts", func(val string) error {
+		f.data.preloadIDs = strings.Split(val, utils.FieldsSep)
+		return nil
+	})
+	f.BoolVar(&f.data.setVersions, utils.SetVersionsCgr, false, "Overwrite database versions")
+
+	return f
+}
+
 // runCGREngine configures the CGREngine object and runs it
 func runCGREngine(fs []string) (err error) {
-	flags := services.NewCGREngineFlags()
+	flags := newFlags()
 	flags.Parse(fs)
+
 	var vers string
 	if vers, err = utils.GetCGRVersion(); err != nil {
 		return
 	}
-	if *flags.Version {
+	if flags.config.version {
 		fmt.Println(vers)
 		return
 	}
-	if *flags.PidFile != utils.EmptyString {
-		if err = services.CgrWritePid(*flags.PidFile); err != nil {
+	if flags.process.pidFile != utils.EmptyString {
+		if err = writePIDFile(flags.process.pidFile); err != nil {
 			return
 		}
 	}
-	if *flags.SingleCPU {
+	if flags.process.singleCPU {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
 	}
 
 	var cfg *config.CGRConfig
-	if cfg, err = services.InitConfigFromPath(context.TODO(), *flags.CfgPath, *flags.NodeID,
-		*flags.Logger, *flags.LogLevel); err != nil || *flags.CheckConfig {
+	if cfg, err = initConfigFromPath(context.TODO(), flags.config.path, flags.logger.nodeID,
+		flags.logger.typ, flags.logger.level); err != nil || flags.config.check {
 		return
 	}
 
@@ -90,8 +161,8 @@ func runCGREngine(fs []string) (err error) {
 	}
 
 	var cpuPrfF *os.File
-	if *flags.CpuPrfDir != utils.EmptyString {
-		cpuPath := filepath.Join(*flags.CpuPrfDir, utils.CpuPathCgr)
+	if flags.profiling.cpu.dir != utils.EmptyString {
+		cpuPath := filepath.Join(flags.profiling.cpu.dir, utils.CpuPathCgr)
 		if cpuPrfF, err = cores.StartCPUProfiling(cpuPath); err != nil {
 			return
 		}
@@ -102,15 +173,11 @@ func runCGREngine(fs []string) (err error) {
 	shutdown := utils.NewSyncedChan()
 	go handleSignals(shutdown, cfg, shdWg)
 
-	if *flags.ScheduledShutdown != utils.EmptyString {
-		var shtDwDur time.Duration
-		if shtDwDur, err = utils.ParseDurationWithNanosecs(*flags.ScheduledShutdown); err != nil {
-			return
-		}
+	if flags.process.scheduledShutdown != 0 {
 		shdWg.Add(1)
 		go func() { // Schedule shutdown
 			defer shdWg.Done()
-			tm := time.NewTimer(shtDwDur)
+			tm := time.NewTimer(flags.process.scheduledShutdown)
 			select {
 			case <-tm.C:
 				shutdown.CloseOnce()
@@ -132,15 +199,15 @@ func runCGREngine(fs []string) (err error) {
 		services.NewCommonListenerService(cfg),
 		services.NewAnalyzerService(cfg),
 		services.NewConnManagerService(cfg),
-		services.NewLoggerService(cfg, *flags.Logger),
-		services.NewDataDBService(cfg, *flags.SetVersions),
-		services.NewStorDBService(cfg, *flags.SetVersions),
+		services.NewLoggerService(cfg, flags.logger.typ),
+		services.NewDataDBService(cfg, flags.data.setVersions),
+		services.NewStorDBService(cfg, flags.data.setVersions),
 		services.NewConfigService(cfg),
 		services.NewGuardianService(cfg),
 		coreS,
 		services.NewCacheService(cfg),
 		services.NewFilterService(cfg),
-		services.NewLoaderService(cfg, *flags.Preload),
+		services.NewLoaderService(cfg, flags.data.preloadIDs),
 		services.NewExportFailoverService(cfg),
 		services.NewAdminSv1Service(cfg),
 		services.NewSessionService(cfg),
@@ -182,8 +249,8 @@ func runCGREngine(fs []string) (err error) {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down all services in the given time",
 				utils.ServiceManager))
 		}
-		if *flags.PidFile != utils.EmptyString {
-			if err := os.Remove(*flags.PidFile); err != nil {
+		if flags.process.pidFile != utils.EmptyString {
+			if err := os.Remove(flags.process.pidFile); err != nil {
 				utils.Logger.Warning("Could not remove pid file: " + err.Error())
 			}
 		}
@@ -201,18 +268,18 @@ func runCGREngine(fs []string) (err error) {
 	}()
 
 	srvManager.StartServices(shutdown)
-	cgrInitServiceManagerV1(cfg, srvManager, registry)
+	initServiceManagerV1(cfg, srvManager, registry)
 
 	// Serve rpc connections
-	cgrStartRPC(cfg, registry, shutdown)
+	startRPC(cfg, registry, shutdown)
 
 	// TODO: find a better location for this if block
-	if *flags.MemPrfDir != "" {
+	if flags.profiling.mem.dir != "" {
 		if err := coreS.CoreS().StartMemoryProfiling(cores.MemoryProfilingParams{
-			DirPath:      *flags.MemPrfDir,
-			MaxFiles:     *flags.MemPrfMaxF,
-			Interval:     *flags.MemPrfInterval,
-			UseTimestamp: *flags.MemPrfTS,
+			DirPath:      flags.profiling.mem.dir,
+			MaxFiles:     flags.profiling.mem.maxFiles,
+			Interval:     flags.profiling.mem.interval,
+			UseTimestamp: flags.profiling.mem.useTS,
 		}); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
 		}
@@ -222,27 +289,59 @@ func runCGREngine(fs []string) (err error) {
 	return
 }
 
-func cgrInitServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceManager,
-	registry *servmanager.ServiceRegistry) {
-	srvDeps, err := services.WaitForServicesToReachState(utils.StateServiceUP,
-		[]string{
-			utils.CommonListenerS,
-			utils.ConnManager,
-		},
-		registry, cfg.GeneralCfg().ConnectTimeout)
+func writePIDFile(path string) error {
+	f, err := os.Create(path)
 	if err != nil {
-		return
+		return fmt.Errorf("failed to create pid file: %s", err)
 	}
-	cl := srvDeps[utils.CommonListenerS].(*services.CommonListenerService).CLS()
-	cms := srvDeps[utils.ConnManager].(*services.ConnManagerService)
-	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
-	cl.RpcRegister(srv)
-	cms.AddInternalConn(utils.ServiceManager, srv)
+	if _, err := f.WriteString(strconv.Itoa(os.Getpid())); err != nil {
+		f.Close()
+		return fmt.Errorf("failed to write to pid file: %s", err)
+	}
+	if err := f.Close(); err != nil {
+		return fmt.Errorf("failed to close pid file: %s", err)
+	}
+	return nil
 }
 
-func cgrStartRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown *utils.SyncedChan) {
-	cl := registry.Lookup(utils.CommonListenerS).(*services.CommonListenerService).CLS()
-	cl.StartServer(cfg, shutdown)
+func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logLevel int) (cfg *config.CGRConfig, err error) {
+	// Init config
+	if cfg, err = config.NewCGRConfigFromPath(ctx, path); err != nil {
+		err = fmt.Errorf("could not parse config: <%s>", err)
+		return
+	}
+	if cfg.ConfigDBCfg().Type != utils.MetaInternal {
+		var d config.ConfigDB
+		if d, err = engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
+			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
+			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
+			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+			cfg.ConfigDBCfg().Opts, nil); err != nil { // Cannot configure getter database, show stopper
+			err = fmt.Errorf("could not configure configDB: <%s>", err)
+			return
+		}
+		if err = cfg.LoadFromDB(ctx, d); err != nil {
+			err = fmt.Errorf("could not parse config from DB: <%s>", err)
+			return
+		}
+	}
+	if nodeID != utils.EmptyString {
+		cfg.GeneralCfg().NodeID = nodeID
+	}
+	if logLevel != -1 { // Modify the log level if provided by command arguments
+		cfg.LoggerCfg().Level = logLevel
+	}
+	if logType != utils.EmptyString {
+		cfg.LoggerCfg().Type = logType
+	}
+	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
+		cfg.CoreSCfg().Caps = utils.ConcurrentReqsLimit
+	}
+	if len(utils.ConcurrentReqsStrategy) != 0 {
+		cfg.CoreSCfg().CapsStrategy = utils.ConcurrentReqsStrategy
+	}
+	config.SetCgrConfig(cfg) // Share the config object
+	return
 }
 
 func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *sync.WaitGroup) {
@@ -270,4 +369,27 @@ func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *syn
 			}()
 		}
 	}
+}
+
+func initServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceManager,
+	registry *servmanager.ServiceRegistry) {
+	srvDeps, err := services.WaitForServicesToReachState(utils.StateServiceUP,
+		[]string{
+			utils.CommonListenerS,
+			utils.ConnManager,
+		},
+		registry, cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
+	}
+	cl := srvDeps[utils.CommonListenerS].(*services.CommonListenerService).CLS()
+	cms := srvDeps[utils.ConnManager].(*services.ConnManagerService)
+	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
+	cl.RpcRegister(srv)
+	cms.AddInternalConn(utils.ServiceManager, srv)
+}
+
+func startRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown *utils.SyncedChan) {
+	cl := registry.Lookup(utils.CommonListenerS).(*services.CommonListenerService).CLS()
+	cl.StartServer(cfg, shutdown)
 }
