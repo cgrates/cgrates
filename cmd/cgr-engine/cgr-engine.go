@@ -26,7 +26,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -36,7 +35,6 @@ import (
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
-	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -142,7 +140,7 @@ func runCGREngine(fs []string) (err error) {
 		coreS,
 		services.NewCacheService(cfg),
 		services.NewFilterService(cfg),
-		services.NewLoaderService(cfg),
+		services.NewLoaderService(cfg, *flags.Preload),
 		services.NewExportFailoverService(cfg),
 		services.NewAdminSv1Service(cfg),
 		services.NewSessionService(cfg),
@@ -205,12 +203,6 @@ func runCGREngine(fs []string) (err error) {
 	srvManager.StartServices(shutdown)
 	cgrInitServiceManagerV1(cfg, srvManager, registry)
 
-	if *flags.Preload != utils.EmptyString {
-		if err = cgrRunPreload(cfg, *flags.Preload, registry); err != nil {
-			return
-		}
-	}
-
 	// Serve rpc connections
 	cgrStartRPC(cfg, registry, shutdown)
 
@@ -227,33 +219,6 @@ func runCGREngine(fs []string) (err error) {
 	}
 
 	<-shutdown.Done()
-	return
-}
-
-// TODO: merge with LoaderService
-func cgrRunPreload(cfg *config.CGRConfig, loaderIDs string,
-	registry *servmanager.ServiceRegistry) (err error) {
-	if !cfg.LoaderCfg().Enabled() {
-		err = fmt.Errorf("<%s> not enabled but required by preload mechanism", utils.LoaderS)
-		return
-	}
-	loader := registry.Lookup(utils.LoaderS).(*services.LoaderService)
-	if utils.StructChanTimeout(loader.StateChan(utils.StateServiceUP), cfg.GeneralCfg().ConnectTimeout) {
-		return utils.NewServiceStateTimeoutError(utils.PreloadCgr, utils.LoaderS, utils.StateServiceUP)
-	}
-	var reply string
-	for _, loaderID := range strings.Split(loaderIDs, utils.FieldsSep) {
-		if err = loader.GetLoaderS().V1Run(context.TODO(), &loaders.ArgsProcessFolder{
-			APIOpts: map[string]any{
-				utils.MetaForceLock:   true, // force lock will unlock the file in case is locked and return error
-				utils.MetaStopOnError: true,
-			},
-			LoaderID: loaderID,
-		}, &reply); err != nil {
-			err = fmt.Errorf("<%s> preload failed on loadID <%s> , err: <%s>", utils.LoaderS, loaderID, err)
-			return
-		}
-	}
 	return
 }
 
