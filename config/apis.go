@@ -536,12 +536,6 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 			return
 		}
 		return db.SetSection(ctx, section, diffSureTaxJsonCfg(jsn, v1.SureTaxCfg(), v2.SureTaxCfg(), v2.GeneralCfg().RSRSep))
-	case DispatcherSJSON:
-		jsn := new(DispatcherSJsonCfg)
-		if err = db.GetSection(ctx, section, jsn); err != nil {
-			return
-		}
-		return db.SetSection(ctx, section, diffDispatcherSJsonCfg(jsn, v1.DispatcherSCfg(), v2.DispatcherSCfg()))
 	case RegistrarCJSON:
 		jsn := new(RegistrarCJsonCfgs)
 		if err = db.GetSection(ctx, section, jsn); err != nil {

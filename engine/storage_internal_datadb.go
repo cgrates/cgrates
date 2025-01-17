@@ -184,7 +184,7 @@ func (iDB *InternalDB) HasDataDrv(_ *context.Context, category, subject, tenant 
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.RouteProfilePrefix, utils.AttributeProfilePrefix,
-		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
+		utils.ChargerProfilePrefix:
 		return iDB.db.HasItem(utils.CachePrefixToInstance[category], utils.ConcatenatedKey(tenant, subject)), nil
 	}
 	return false, errors.New("Unsupported HasData category")
@@ -486,26 +486,6 @@ func (iDB *InternalDB) RemoveChargerProfileDrv(_ *context.Context, tenant, id st
 	return
 }
 
-func (iDB *InternalDB) GetDispatcherProfileDrv(_ *context.Context, tenant, id string) (dpp *DispatcherProfile, err error) {
-	x, ok := iDB.db.Get(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id))
-	if !ok || x == nil {
-		return nil, utils.ErrDSPProfileNotFound
-	}
-	return x.(*DispatcherProfile), nil
-}
-
-func (iDB *InternalDB) SetDispatcherProfileDrv(_ *context.Context, dpp *DispatcherProfile) (err error) {
-	iDB.db.Set(utils.CacheDispatcherProfiles, dpp.TenantID(), dpp, nil,
-		true, utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) RemoveDispatcherProfileDrv(_ *context.Context, tenant, id string) (err error) {
-	iDB.db.Remove(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id),
-		true, utils.NonTransactional)
-	return
-}
-
 func (iDB *InternalDB) GetItemLoadIDsDrv(_ *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	x, ok := iDB.db.Get(utils.CacheLoadIDs, utils.LoadIDs)
 	if !ok || x == nil {
@@ -520,26 +500,6 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(_ *context.Context, itemIDPrefix string
 
 func (iDB *InternalDB) SetLoadIDsDrv(_ *context.Context, loadIDs map[string]int64) (err error) {
 	iDB.db.Set(utils.CacheLoadIDs, utils.LoadIDs, loadIDs, nil,
-		true, utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) GetDispatcherHostDrv(_ *context.Context, tenant, id string) (dpp *DispatcherHost, err error) {
-	x, ok := iDB.db.Get(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, id))
-	if !ok || x == nil {
-		return nil, utils.ErrDSPHostNotFound
-	}
-	return x.(*DispatcherHost), nil
-}
-
-func (iDB *InternalDB) SetDispatcherHostDrv(_ *context.Context, dpp *DispatcherHost) (err error) {
-	iDB.db.Set(utils.CacheDispatcherHosts, dpp.TenantID(), dpp, nil,
-		true, utils.NonTransactional)
-	return
-}
-
-func (iDB *InternalDB) RemoveDispatcherHostDrv(_ *context.Context, tenant, id string) (err error) {
-	iDB.db.Remove(utils.CacheDispatcherHosts, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }

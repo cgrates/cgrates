@@ -55,7 +55,7 @@ func TestCurrentDBVersions(t *testing.T) {
 		utils.RQF: 5, utils.Resource: 1,
 		utils.Subscribers: 1,
 		utils.Chargers:    2,
-		utils.Dispatchers: 2, utils.LoadIDsVrs: 1, utils.RateProfiles: 1,
+		utils.LoadIDsVrs:  1, utils.RateProfiles: 1,
 		utils.ActionProfiles: 1,
 	}
 
@@ -85,7 +85,6 @@ func TestCurrentStorDBVersions(t *testing.T) {
 		utils.TpResources:      1,
 		utils.TpResource:       1,
 		utils.TpChargers:       1,
-		utils.TpDispatchers:    1,
 		utils.TpRateProfiles:   1,
 		utils.TpActionProfiles: 1,
 	}
@@ -118,7 +117,6 @@ func TestCurrentAllDBVersions(t *testing.T) {
 		utils.Resource:       1,
 		utils.Subscribers:    1,
 		utils.Chargers:       2,
-		utils.Dispatchers:    2,
 		utils.LoadIDsVrs:     1,
 		utils.RateProfiles:   1,
 		utils.ActionProfiles: 1,

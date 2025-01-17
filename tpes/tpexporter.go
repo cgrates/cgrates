@@ -38,24 +38,20 @@ var tpExporterTypes = utils.NewStringSet([]string{
 	utils.MetaStats,
 	utils.MetaActions,
 	utils.MetaThresholds,
-	utils.MetaDispatchers,
-	utils.MetaDispatcherHosts,
 })
 
 var exportFileName = map[string]string{
-	utils.MetaAttributes:      utils.AttributesCsv,
-	utils.MetaResources:       utils.ResourcesCsv,
-	utils.MetaFilters:         utils.FiltersCsv,
-	utils.MetaStats:           utils.StatsCsv,
-	utils.MetaThresholds:      utils.ThresholdsCsv,
-	utils.MetaTrends:          utils.TrendsCsv,
-	utils.MetaRoutes:          utils.RoutesCsv,
-	utils.MetaChargers:        utils.ChargersCsv,
-	utils.MetaDispatchers:     utils.DispatcherProfilesCsv,
-	utils.MetaDispatcherHosts: utils.DispatcherHostsCsv,
-	utils.MetaRates:           utils.RatesCsv,
-	utils.MetaActions:         utils.ActionsCsv,
-	utils.MetaAccounts:        utils.AccountsCsv,
+	utils.MetaAttributes: utils.AttributesCsv,
+	utils.MetaResources:  utils.ResourcesCsv,
+	utils.MetaFilters:    utils.FiltersCsv,
+	utils.MetaStats:      utils.StatsCsv,
+	utils.MetaThresholds: utils.ThresholdsCsv,
+	utils.MetaTrends:     utils.TrendsCsv,
+	utils.MetaRoutes:     utils.RoutesCsv,
+	utils.MetaChargers:   utils.ChargersCsv,
+	utils.MetaRates:      utils.RatesCsv,
+	utils.MetaActions:    utils.ActionsCsv,
+	utils.MetaAccounts:   utils.AccountsCsv,
 }
 
 // tpExporter is the interface implementing exports of tariff plan items
@@ -90,10 +86,6 @@ func newTPExporter(expType string, dm *engine.DataManager) (tpE tpExporter, err 
 		return newTPActions(dm), nil
 	case utils.MetaThresholds:
 		return newTPThresholds(dm), nil
-	case utils.MetaDispatchers:
-		return newTPDispatchers(dm), nil
-	case utils.MetaDispatcherHosts:
-		return newTPDispatcherHosts(dm), nil
 	default:
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, expType)
 	}

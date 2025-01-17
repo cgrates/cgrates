@@ -39,8 +39,6 @@
 		"*route_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control route profile caching
 		"*attribute_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control attribute profile caching
 		"*charger_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control charger profile caching
-		"*dispatcher_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},	// control dispatcher profile caching
-		"*dispatcher_hosts": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control dispatcher hosts caching
 		"*rate_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},			// control rate profile caching
 		"*action_profiles": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control action profile caching
 		"*accounts": {"limit": 0, "ttl": "", "static_ttl": false, "precache": false, "replicate": false},		// control account profile caching

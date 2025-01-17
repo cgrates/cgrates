@@ -55,19 +55,10 @@ func TestCallCacheForFilter(t *testing.T) {
 	if err := dm.SetThresholdProfile(context.TODO(), th, true); err != nil {
 		t.Fatal(err)
 	}
-	dsp := &engine.DispatcherProfile{
-		Tenant:    tnt,
-		ID:        "Dsp1",
-		FilterIDs: []string{flt.ID},
-	}
-	if err := dm.SetDispatcherProfile(context.TODO(), dsp, true); err != nil {
-		t.Fatal(err)
-	}
 
 	exp := map[string][]string{
-		utils.CacheFilters:                 {"cgrates.org:FLTR1"},
-		utils.CacheDispatcherFilterIndexes: {"cgrates.org:*string:*req.Account:1001"},
-		utils.CacheThresholdFilterIndexes:  {"cgrates.org:*string:*req.Account:1001"},
+		utils.CacheFilters:                {"cgrates.org:FLTR1"},
+		utils.CacheThresholdFilterIndexes: {"cgrates.org:*string:*req.Account:1001"},
 	}
 	rpl, err := composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), map[string][]string{utils.CacheFilters: {"cgrates.org:FLTR1"}})
 	if err != nil {
@@ -91,9 +82,8 @@ func TestCallCacheForFilter(t *testing.T) {
 		t.Fatal(err)
 	}
 	exp = map[string][]string{
-		utils.CacheFilters:                 {"cgrates.org:FLTR1"},
-		utils.CacheDispatcherFilterIndexes: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-		utils.CacheThresholdFilterIndexes:  {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		utils.CacheFilters:                {"cgrates.org:FLTR1"},
+		utils.CacheThresholdFilterIndexes: {"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
 	}
 	rpl, err = composeCacheArgsForFilter(dm, context.TODO(), flt, tnt, flt.TenantID(), rpl)
 	if err != nil {

@@ -77,10 +77,8 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 	routeS.routeS = engine.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(routeS.routeS)
 	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
-	if !routeS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			routeS.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		routeS.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.RouteS, srv)
 	return

@@ -80,24 +80,9 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
 	srv, _ := engine.NewService(attrS.rpc)
 	// srv, _ := birpc.NewService(attrS.rpc, "", false)
-	if !attrS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			attrS.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		attrS.cl.RpcRegister(s)
 	}
-	dsps := registry.Lookup(utils.DispatcherS).(*DispatcherService)
-	dspShtdChan := dsps.RegisterShutdownChan(attrS.ServiceName())
-	go func() {
-		for {
-			if _, closed := <-dspShtdChan; closed {
-				return
-			}
-			if servmanager.IsServiceInState(attrS, utils.StateServiceUP) {
-				attrS.cl.RpcRegister(srv)
-			}
-
-		}
-	}()
 	cms.AddInternalConn(utils.AttributeS, srv)
 	return
 }
@@ -111,8 +96,6 @@ func (attrS *AttributeService) Reload(_ *utils.SyncedChan, _ *servmanager.Servic
 func (attrS *AttributeService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
 	attrS.Lock()
 	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
-	dsps := registry.Lookup(utils.DispatcherS).(*DispatcherService)
-	dsps.UnregisterShutdownChan(attrS.ServiceName())
 	attrS.Unlock()
 	return
 }

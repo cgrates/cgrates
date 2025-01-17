@@ -65,18 +65,6 @@
             "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
         },
         {
-            "type": "*dispatchers",						
-            "file_name": "DispatcherProfiles.csv",		
-            "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]
-        },
-        {
-            "type": "*dispatcher_hosts",						
-            "file_name": "DispatcherHosts.csv",					
-            "fields": [
-                {"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}
-            ]
-        },
-        {
             "type": "*rate_profiles",						
             "file_name": "Rates.csv",				
             "fields": [{"tag": "BaseTmpl","type": "*template", "value": "baseTmpl"}]

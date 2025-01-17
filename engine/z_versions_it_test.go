@@ -262,26 +262,6 @@ func testUpdateVersionsAttributes(t *testing.T) {
 	}
 }
 
-func testUpdateVersionsDispatchers(t *testing.T) {
-	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Dispatchers] = 1
-	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command("cgr-engine", fmt.Sprintf(`-config_path=/usr/share/cgrates/conf/samples/%s`, versionsConfigDIR), `-scheduled_shutdown=4ms`)
-	output := bytes.NewBuffer(nil)
-	cmd.Stdout = output
-	if err := cmd.Run(); err != nil {
-		t.Log(cmd.Args)
-		t.Log(output.String())
-		t.Fatal(err)
-	}
-	errExpect := "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*dispatchers>\n"
-	if output.String() != errExpect {
-		t.Fatalf("Expected %q \n but received: \n %q", errExpect, output.String())
-	}
-}
-
 func testUpdateVersionsLoadIDs(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
 	delete(newVersions, utils.LoadIDsVrs)

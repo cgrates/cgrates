@@ -59,10 +59,8 @@ func (s *ConfigService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
 	svcs, _ := engine.NewServiceWithName(s.cfg, utils.ConfigS, true)
-	if !s.cfg.DispatcherSCfg().Enabled {
-		for _, svc := range svcs {
-			s.cl.RpcRegister(svc)
-		}
+	for _, svc := range svcs {
+		s.cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.ConfigS, svcs)
 	return nil

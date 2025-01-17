@@ -67,7 +67,6 @@ var sTests = []func(t *testing.T){
 	testITChargerProfileIndexes,
 	testITFlush,
 	testITIsDBEmpty,
-	testITDispatcherProfileIndexes,
 	testITFlush,
 	testITIsDBEmpty,
 	testITActionProfileIndexes,
@@ -1482,106 +1481,6 @@ func testITChargerProfileIndexes(t *testing.T) {
 		"cgrates.org", "*string:*req.Usage",
 		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.Error, err)
-	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
-	}
-}
-
-func testITDispatcherProfileIndexes(t *testing.T) {
-	fltr1 := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "DISPATCHER_FLTR1",
-		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "~*req.Destination", Values: []string{"ACC1", "ACC2", "~*req.Account"}}},
-	}
-	fltr2 := &Filter{
-		Tenant: "cgrates.org",
-		ID:     "DISPATCHER_FLTR2",
-		Rules:  []*FilterRule{{Type: utils.MetaString, Element: "10m", Values: []string{"USAGE", "~*opts.Debited", "~*req.Usage", "~*opts.Usage"}}},
-	}
-	if err := dataManager.SetFilter(context.Background(), fltr1, true); err != nil {
-		t.Error(err)
-	} else if err := dataManager.SetFilter(context.Background(), fltr2, true); err != nil {
-		t.Error(err)
-	}
-
-	dspPrf1 := &DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "DISPATCHER_PRF1",
-		FilterIDs: []string{"DISPATCHER_FLTR1"},
-	}
-	dspPrf2 := &DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "DISPATCHER_PRF2",
-		FilterIDs: []string{"DISPATCHER_FLTR2", "*prefix:23:~*req.Destination"},
-	}
-	if err := dataManager.SetDispatcherProfile(context.TODO(), dspPrf1, true); err != nil {
-		t.Error(err)
-	}
-	if err := dataManager.SetDispatcherProfile(context.TODO(), dspPrf2, true); err != nil {
-		t.Error(err)
-	}
-
-	expIdx := map[string]utils.StringSet{
-		"*string:*req.Destination:ACC1": {
-			"DISPATCHER_PRF1": struct{}{},
-		},
-		"*string:*req.Destination:ACC2": {
-			"DISPATCHER_PRF1": struct{}{},
-		},
-		"*string:*opts.Debited:10m": {
-			"DISPATCHER_PRF2": struct{}{},
-		},
-		"*string:*req.Usage:10m": {
-			"DISPATCHER_PRF2": struct{}{},
-		},
-		"*string:*opts.Usage:10m": {
-			"DISPATCHER_PRF2": struct{}{},
-		},
-		"*prefix:*req.Destination:23": {
-			"DISPATCHER_PRF2": struct{}{},
-		},
-	}
-	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheDispatcherFilterIndexes,
-		"cgrates.org", utils.EmptyString,
-		utils.NonTransactional, false, false); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
-	}
-
-	//here we will get the reverse indexes
-	expIdx = map[string]utils.StringSet{
-		utils.CacheDispatcherFilterIndexes: {
-			"DISPATCHER_PRF1": struct{}{},
-		},
-	}
-	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:DISPATCHER_FLTR1", utils.EmptyString,
-		utils.NonTransactional, false, false); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
-	}
-
-	expIdx = map[string]utils.StringSet{
-		utils.CacheDispatcherFilterIndexes: {
-			"DISPATCHER_PRF2": struct{}{},
-		},
-	}
-	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheReverseFilterIndexes,
-		"cgrates.org:DISPATCHER_FLTR2", utils.EmptyString,
-		utils.NonTransactional, false, false); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
-	}
-
-	//invalid tnt:context or index key
-	expIdx = nil
-	if rcvIDx, err := dataManager.GetIndexes(context.Background(), utils.CacheDispatcherFilterIndexes,
-		"cgrates.org:attributes", utils.EmptyString,
-		utils.NonTransactional, false, false); err == nil || err != utils.ErrNotFound {
-		t.Errorf("Expectedd %+v, received %+v", utils.ErrNotFound, err)
 	} else if !reflect.DeepEqual(rcvIDx, expIdx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIdx), utils.ToJSON(rcvIDx))
 	}

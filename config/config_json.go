@@ -54,7 +54,6 @@ const (
 	RouteSJSON          = "routes"
 	LoaderSJSON         = "loaders"
 	SureTaxJSON         = "suretax"
-	DispatcherSJSON     = "dispatchers"
 	RegistrarCJSON      = "registrarc"
 	LoaderJSON          = "loader"
 	MigratorJSON        = "migrator"
@@ -102,7 +101,6 @@ var (
 		HTTPAgentJSON:       utils.HTTPAgent,
 		LoaderSJSON:         utils.LoaderS,
 		AnalyzerSJSON:       utils.AnalyzerS,
-		DispatcherSJSON:     utils.DispatcherS,
 		DataDBJSON:          utils.DataDB,
 		StorDBJSON:          utils.StorDB,
 		EEsJSON:             utils.EEs,
@@ -199,7 +197,6 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.dnsAgentCfg,
 		cfg.sipAgentCfg,
 		cfg.migratorCgrCfg,
-		cfg.dispatcherSCfg,
 		cfg.registrarCCfg,
 		cfg.analyzerSCfg,
 		cfg.admS,

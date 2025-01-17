@@ -148,38 +148,6 @@ func register(req *http.Request) (*json.RawMessage, error) {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to register hosts because: %s",
 			utils.RegistrarC, err))
 		return sReq.Id, err
-	case utils.RegistrarSv1UnregisterDispatcherHosts:
-		var args UnregisterArgs
-		params := []any{&args}
-		if err = json.Unmarshal(*sReq.Params, &params); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> Failed to decode params because: %s",
-				utils.RegistrarC, err))
-			return sReq.Id, err
-		}
-		for _, id := range args.IDs {
-			if err = engine.Cache.Remove(context.TODO(), utils.CacheDispatcherHosts, utils.ConcatenatedKey(args.Tenant, id), true, utils.NonTransactional); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to remove DispatcherHost <%s> from cache because: %s",
-					utils.RegistrarC, id, err))
-				hasErrors = true
-				continue
-			}
-		}
-
-	case utils.RegistrarSv1RegisterDispatcherHosts:
-		dH, err := unmarshallRegisterArgs(req, *sReq.Params)
-		if err != nil {
-			return sReq.Id, err
-		}
-
-		for _, dH := range dH {
-			if err = engine.Cache.Set(context.TODO(), utils.CacheDispatcherHosts, dH.TenantID(), dH, nil,
-				true, utils.NonTransactional); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> Failed to set DispatcherHost <%s> in cache because: %s",
-					utils.RegistrarC, dH.TenantID(), err))
-				hasErrors = true
-				continue
-			}
-		}
 
 	case utils.RegistrarSv1UnregisterRPCHosts:
 		var args UnregisterArgs

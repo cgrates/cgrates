@@ -95,10 +95,8 @@ func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry) {
 
 	srv, _ := engine.NewService(anz.anz)
 	// srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
-	if !anz.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			anz.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		anz.cl.RpcRegister(s)
 	}
 	anz.Unlock()
 }

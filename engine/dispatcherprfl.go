@@ -23,7 +23,6 @@ import (
 	"slices"
 	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -99,35 +98,6 @@ func (dHPrfls DispatcherHostProfiles) HostIDs() (hostIDs []string) {
 	return
 }
 
-// DispatcherProfile is the config for one Dispatcher
-type DispatcherProfile struct {
-	Tenant         string
-	ID             string
-	FilterIDs      []string
-	Strategy       string
-	StrategyParams map[string]any         // ie for distribution, set here the pool weights
-	Weight         float64                // used for profile sorting on match
-	Hosts          DispatcherHostProfiles // dispatch to these connections
-}
-
-// DispatcherProfileWithAPIOpts is used in replicatorV1 for dispatcher
-type DispatcherProfileWithAPIOpts struct {
-	*DispatcherProfile
-	APIOpts map[string]any
-}
-
-func (dP *DispatcherProfile) TenantID() string {
-	return utils.ConcatenatedKey(dP.Tenant, dP.ID)
-}
-
-// DispatcherProfiles is a sortable list of Dispatcher profiles
-type DispatcherProfiles []*DispatcherProfile
-
-// Sort is part of sort interface, sort based on Weight
-func (dps DispatcherProfiles) Sort() {
-	sort.Slice(dps, func(i, j int) bool { return dps[i].Weight > dps[j].Weight })
-}
-
 // DispatcherHost represents one virtual host used by dispatcher
 type DispatcherHost struct {
 	Tenant string
@@ -191,83 +161,6 @@ func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
 	return
 }
 
-func (dP *DispatcherProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
-	switch len(path) {
-	default:
-		return utils.ErrWrongPath
-	case 1:
-		switch path[0] {
-		default:
-			if strings.HasPrefix(path[0], utils.StrategyParams) &&
-				path[0][14] == '[' && path[0][len(path[0])-1] == ']' {
-				dP.StrategyParams[path[0][15:len(path[0])-1]] = val
-				return
-			}
-			return utils.ErrWrongPath
-		case utils.Tenant:
-			dP.Tenant = utils.IfaceAsString(val)
-		case utils.ID:
-			dP.ID = utils.IfaceAsString(val)
-		case utils.FilterIDs:
-			var valA []string
-			valA, err = utils.IfaceAsStringSlice(val)
-			dP.FilterIDs = append(dP.FilterIDs, valA...)
-		case utils.Strategy:
-			dP.Strategy = utils.IfaceAsString(val)
-		case utils.Weight:
-			if val != utils.EmptyString {
-				dP.Weight, err = utils.IfaceAsFloat64(val)
-			}
-		case utils.StrategyParams:
-			dP.StrategyParams, err = utils.NewMapFromCSV(utils.IfaceAsString(val))
-		}
-	case 2:
-		switch path[0] {
-		default:
-			return utils.ErrWrongPath
-		case utils.StrategyParams:
-			dP.StrategyParams[path[1]] = val
-		case utils.Hosts:
-			if len(dP.Hosts) == 0 || newBranch {
-				dP.Hosts = append(dP.Hosts, &DispatcherHostProfile{Params: make(map[string]any)})
-			}
-			switch path[1] {
-			case utils.ID:
-				dP.Hosts[len(dP.Hosts)-1].ID = utils.IfaceAsString(val)
-			case utils.FilterIDs:
-				var valA []string
-				valA, err = utils.IfaceAsStringSlice(val)
-				dP.Hosts[len(dP.Hosts)-1].FilterIDs = append(dP.Hosts[len(dP.Hosts)-1].FilterIDs, valA...)
-			case utils.Weight:
-				if val != utils.EmptyString {
-					dP.Hosts[len(dP.Hosts)-1].Weight, err = utils.IfaceAsFloat64(val)
-				}
-			case utils.Blocker:
-				dP.Hosts[len(dP.Hosts)-1].Blocker, err = utils.IfaceAsBool(val)
-			case utils.Params:
-				dP.Hosts[len(dP.Hosts)-1].Params, err = utils.NewMapFromCSV(utils.IfaceAsString(val))
-			default:
-				if strings.HasPrefix(path[1], utils.Params) &&
-					path[1][6] == '[' && path[1][len(path[1])-1] == ']' {
-					dP.Hosts[len(dP.Hosts)-1].Params[path[1][7:len(path[1])-1]] = val
-					return
-				}
-				return utils.ErrWrongPath
-			}
-		}
-	case 3:
-		if path[0] != utils.Hosts ||
-			path[1] != utils.Params {
-			return utils.ErrWrongPath
-		}
-		if len(dP.Hosts) == 0 || newBranch {
-			dP.Hosts = append(dP.Hosts, &DispatcherHostProfile{Params: make(map[string]any)})
-		}
-		dP.Hosts[len(dP.Hosts)-1].Params[path[2]] = val
-	}
-	return
-}
-
 func (dH *DispatcherHost) Set(path []string, val any, newBranch bool, _ string) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
@@ -309,43 +202,6 @@ func (dH *DispatcherHost) Set(path []string, val any, newBranch bool, _ string) 
 		dH.TLS, err = utils.IfaceAsBool(val)
 	}
 	return
-}
-
-func (dP *DispatcherProfile) Merge(v2 any) {
-	vi := v2.(*DispatcherProfile)
-	if len(vi.Tenant) != 0 {
-		dP.Tenant = vi.Tenant
-	}
-	if len(vi.ID) != 0 {
-		dP.ID = vi.ID
-	}
-	dP.FilterIDs = append(dP.FilterIDs, vi.FilterIDs...)
-	if len(dP.Hosts) == 1 && dP.Hosts[0].ID == utils.EmptyString {
-		dP.Hosts = dP.Hosts[:0]
-	}
-	var equal bool
-	for _, hostV2 := range vi.Hosts {
-		for _, host := range dP.Hosts {
-			if host.ID == hostV2.ID {
-				host.Merge(hostV2)
-				equal = true
-				break
-			}
-		}
-		if !equal && hostV2.ID != utils.EmptyString {
-			dP.Hosts = append(dP.Hosts, hostV2)
-		}
-		equal = false
-	}
-	if vi.Weight != 0 {
-		dP.Weight = vi.Weight
-	}
-	for k, v := range vi.StrategyParams {
-		dP.StrategyParams[k] = v
-	}
-	if len(vi.Strategy) != 0 {
-		dP.Strategy = vi.Strategy
-	}
 }
 
 func (dspHost *DispatcherHostProfile) Merge(v2 *DispatcherHostProfile) {
@@ -448,84 +304,6 @@ func (dH *DispatcherHost) FieldAsInterface(fldPath []string) (_ any, err error) 
 		return dH.ClientCertificate, nil
 	case utils.CaCertificate:
 		return dH.CaCertificate, nil
-	}
-}
-
-func (dP *DispatcherProfile) String() string { return utils.ToJSON(dP) }
-func (dP *DispatcherProfile) FieldAsString(fldPath []string) (_ string, err error) {
-	var val any
-	if val, err = dP.FieldAsInterface(fldPath); err != nil {
-		return
-	}
-	return utils.IfaceAsString(val), nil
-}
-func (dP *DispatcherProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
-	if len(fldPath) == 1 {
-		switch fldPath[0] {
-		default:
-			fld, idxStr := utils.GetPathIndexString(fldPath[0])
-			if idxStr != nil {
-				switch fld {
-				case utils.Hosts:
-					var idx int
-					if idx, err = strconv.Atoi(*idxStr); err != nil {
-						return
-					}
-					if idx < len(dP.Hosts) {
-						return dP.Hosts[idx], nil
-					}
-				case utils.FilterIDs:
-					var idx int
-					if idx, err = strconv.Atoi(*idxStr); err != nil {
-						return
-					}
-					if idx < len(dP.FilterIDs) {
-						return dP.FilterIDs[idx], nil
-					}
-				case utils.StrategyParams:
-					return utils.MapStorage(dP.StrategyParams).FieldAsInterface([]string{*idxStr})
-				}
-			}
-			return nil, utils.ErrNotFound
-		case utils.Tenant:
-			return dP.Tenant, nil
-		case utils.ID:
-			return dP.ID, nil
-		case utils.FilterIDs:
-			return dP.FilterIDs, nil
-		case utils.Weight:
-			return dP.Weight, nil
-		case utils.Hosts:
-			return dP.Hosts, nil
-		case utils.Strategy:
-			return dP.Strategy, nil
-		}
-	}
-	if len(fldPath) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	fld, idxStr := utils.GetPathIndexString(fldPath[0])
-	switch fld {
-	default:
-		return nil, utils.ErrNotFound
-	case utils.StrategyParams:
-		path := fldPath[1:]
-		if idxStr != nil {
-			path = append([]string{*idxStr}, path...)
-		}
-		return utils.MapStorage(dP.StrategyParams).FieldAsInterface(path)
-	case utils.Hosts:
-		if idxStr == nil {
-			return nil, utils.ErrNotFound
-		}
-		var idx int
-		if idx, err = strconv.Atoi(*idxStr); err != nil {
-			return
-		}
-		if idx >= len(dP.Hosts) {
-			return nil, utils.ErrNotFound
-		}
-		return dP.Hosts[idx].FieldAsInterface(fldPath[1:])
 	}
 }
 

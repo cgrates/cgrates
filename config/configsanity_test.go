@@ -1412,7 +1412,6 @@ func TestConfigSanityRegistrarCRPC(t *testing.T) {
 				"hosts": {},
 			},
 		},
-		Dispatchers: &RegistrarCCfg{},
 	}
 
 	expected := "<RegistrarC> the register imterval needs to be bigger than 0"
@@ -1454,77 +1453,6 @@ func TestConfigSanityRegistrarCRPC(t *testing.T) {
 	}
 
 	cfg.registrarCCfg.RPC.RegistrarSConns = []string{"*conn1"}
-	expected = "<RegistrarC> connection with id: <*conn1> not defined"
-	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.rpcConns = RPCConns{
-		utils.MetaLocalHost: {},
-		"*conn1":            {},
-	}
-	expected = "<RegistrarC> connection with id: <*conn1> needs to have only one host"
-	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-}
-func TestConfigSanityRegistrarCDispatcher(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-
-	cfg.registrarCCfg = &RegistrarCCfgs{
-		Dispatchers: &RegistrarCCfg{
-			RegistrarSConns: []string{utils.MetaLocalHost},
-			Hosts: map[string][]*RemoteHost{
-				"hosts": {},
-			},
-		},
-		RPC: &RegistrarCCfg{},
-	}
-
-	cfg.registrarCCfg.Dispatchers.Hosts = nil
-	expected := "<RegistrarC> missing dispatcher host IDs"
-	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.registrarCCfg.Dispatchers.Hosts = map[string][]*RemoteHost{
-		"hosts": {},
-	}
-
-	expected = "<RegistrarC> the register imterval needs to be bigger than 0"
-	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.registrarCCfg.Dispatchers.Hosts = nil
-	cfg.registrarCCfg.Dispatchers.RefreshInterval = 2
-	cfg.registrarCCfg.Dispatchers.Hosts = map[string][]*RemoteHost{
-		"hosts": {
-			{
-				ID: "randomID",
-			},
-		},
-	}
-	expected = "<RegistrarC> unsupported transport <> for host <hosts:randomID>"
-	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.registrarCCfg.Dispatchers.Hosts["hosts"][0].Transport = utils.MetaJSON
-
-	cfg.registrarCCfg.Dispatchers.RegistrarSConns = []string{utils.MetaInternal}
-	expected = "<RegistrarC> internal connection IDs are not supported"
-	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.registrarCCfg.Dispatchers.RegistrarSConns = []string{utils.MetaLocalHost}
-	expected = "<RegistrarC> connection with id: <*localhost> unsupported transport <*json>"
-	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.registrarCCfg.Dispatchers.RegistrarSConns = []string{"*conn1"}
 	expected = "<RegistrarC> connection with id: <*conn1> not defined"
 	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -1691,22 +1619,6 @@ func TestConfigSanityAPIer(t *testing.T) {
 	}
 	cfg.admS.ActionSConns = []string{"test"}
 	expected = "<AdminS> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-}
-
-func TestConfigSanityDispatcher(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	cfg.dispatcherSCfg = &DispatcherSCfg{
-		Enabled:         true,
-		AttributeSConns: []string{utils.MetaDispatchers},
-	}
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <DispatcherS> component" {
-		t.Error(err)
-	}
-	cfg.dispatcherSCfg.AttributeSConns = []string{"test"}
-	expected := "<DispatcherS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

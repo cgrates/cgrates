@@ -46,7 +46,7 @@ func TestRemoveFromDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 	for _, lType := range []string{utils.MetaAttributes, utils.MetaResources, utils.MetaFilters, utils.MetaStats,
-		utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers, utils.MetaDispatchers, utils.MetaDispatcherHosts,
+		utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers,
 		utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccounts} {
 		if err := removeFromDB(context.Background(), dm, lType, true, false, profileTest{utils.Tenant: "cgrates.org", utils.ID: "ID"}); err != utils.ErrNotFound &&
 			err != utils.ErrDSPProfileNotFound && err != utils.ErrDSPHostNotFound {
@@ -126,10 +126,6 @@ func TestDryRun(t *testing.T) {
 		testDryRun(t, utils.MetaChargers); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
-		testDryRun(t, utils.MetaDispatchers); !strings.Contains(rplyLog, expLog) {
-		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
-	}
 
 	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: RateProfile: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaRateProfiles); !strings.Contains(rplyLog, expLog) {
@@ -141,10 +137,6 @@ func TestDryRun(t *testing.T) {
 	}
 	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: Accounts: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
 		testDryRun(t, utils.MetaAccounts); !strings.Contains(rplyLog, expLog) {
-		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
-	}
-	if expLog, rplyLog := "[INFO] <LoaderS-test> DRY_RUN: DispatcherHost: {\"ID\":\"ID\",\"Tenant\":\"cgrates.org\"}",
-		testDryRun(t, utils.MetaDispatcherHosts); !strings.Contains(rplyLog, expLog) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
@@ -176,9 +168,6 @@ func TestSetToDBWithDBError(t *testing.T) {
 	if err := setToDB(context.Background(), nil, utils.MetaChargers, newProfileFunc(utils.MetaChargers)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatchers, newProfileFunc(utils.MetaDispatchers)(), true, false); err != utils.ErrNoDatabaseConn {
-		t.Fatal(err)
-	}
 
 	if err := setToDB(context.Background(), nil, utils.MetaActionProfiles, newProfileFunc(utils.MetaActionProfiles)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
@@ -190,9 +179,7 @@ func TestSetToDBWithDBError(t *testing.T) {
 	if err := setToDB(context.Background(), nil, utils.MetaRoutes, newProfileFunc(utils.MetaRoutes)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
-	if err := setToDB(context.Background(), nil, utils.MetaDispatcherHosts, newProfileFunc(utils.MetaDispatcherHosts)(), true, false); err != utils.ErrNoDatabaseConn {
-		t.Fatal(err)
-	}
+
 	if err := setToDB(context.Background(), nil, utils.MetaRateProfiles, newProfileFunc(utils.MetaRateProfiles)(), true, false); err != utils.ErrNoDatabaseConn {
 		t.Fatal(err)
 	}
@@ -259,16 +246,6 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v5), utils.ToJSON(prf))
 	}
 
-	v6 := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]any)}
-	if err := setToDB(context.Background(), dm, utils.MetaDispatchers, v6, true, false); err != nil {
-		t.Fatal(err)
-	}
-	if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(v6, prf) {
-		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v6), utils.ToJSON(prf))
-	}
-
 	v7 := &engine.ActionProfile{Tenant: "cgrates.org", ID: "ID", Targets: map[string]utils.StringSet{}}
 	if err := setToDB(context.Background(), dm, utils.MetaActionProfiles, v7, true, false); err != nil {
 		t.Fatal(err)
@@ -298,16 +275,6 @@ func TestSetToDB(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(v9, prf) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v9), utils.ToJSON(prf))
-	}
-
-	v10 := &engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}
-	if err := setToDB(context.Background(), dm, utils.MetaDispatcherHosts, v10, true, false); err != nil {
-		t.Fatal(err)
-	}
-	if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", true, true, utils.NonTransactional); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(v10, prf) {
-		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v10), utils.ToJSON(prf))
 	}
 
 	v11 := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
@@ -612,35 +579,6 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 
 	{
-		v := &engine.DispatcherProfile{Tenant: "cgrates.org", ID: "ID", StrategyParams: make(map[string]any)}
-		if err := ld.process(context.Background(), v, utils.MetaDispatchers, utils.MetaStore,
-			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
-			t.Error(err)
-		}
-		if prf, err := dm.GetDispatcherProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-			t.Fatal(err)
-		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-		}
-		expReload := &utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]any{
-				utils.MetaCache: utils.MetaReload,
-			},
-			DispatcherProfileIDs: []string{tntID}}
-		if !reflect.DeepEqual(expReload, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expReload), utils.ToJSON(reloadCache))
-		}
-		expClear := &utils.AttrCacheIDsWithAPIOpts{
-			APIOpts: map[string]any{
-				utils.MetaCache: utils.MetaReload,
-			},
-			CacheIDs: []string{utils.CacheDispatcherFilterIndexes}}
-		if !reflect.DeepEqual(expClear, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(expClear), utils.ToJSON(clearCache))
-		}
-	}
-
-	{
 		v := &utils.RateProfile{Tenant: "cgrates.org", ID: "ID", Rates: map[string]*utils.Rate{}, MinCost: utils.NewDecimal(0, 0), MaxCost: utils.NewDecimal(0, 0)}
 		if err := ld.process(context.Background(), v, utils.MetaRateProfiles, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
@@ -716,30 +654,6 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 				utils.MetaCache: utils.MetaReload,
 			},
 			FilterIDs: []string{tntID}}
-		if !reflect.DeepEqual(exp, reloadCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
-		}
-		if !reflect.DeepEqual(nil, clearCache) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(nil), utils.ToJSON(clearCache))
-		}
-	}
-
-	{
-		v := &engine.DispatcherHost{Tenant: "cgrates.org", RemoteHost: &config.RemoteHost{ID: "ID", Address: "127.0.0.1", Transport: utils.MetaJSON}}
-		if err := ld.process(context.Background(), v, utils.MetaDispatcherHosts, utils.MetaStore,
-			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
-			t.Error(err)
-		}
-		if prf, err := dm.GetDispatcherHost(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
-			t.Fatal(err)
-		} else if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
-		}
-		exp := &utils.AttrReloadCacheWithAPIOpts{
-			APIOpts: map[string]any{
-				utils.MetaCache: utils.MetaReload,
-			},
-			DispatcherHostIDs: []string{tntID}}
 		if !reflect.DeepEqual(exp, reloadCache) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(reloadCache))
 		}

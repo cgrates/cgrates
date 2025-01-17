@@ -289,20 +289,6 @@ func newProfileFunc(lType string) func() profile {
 		return func() profile {
 			return new(engine.ChargerProfile)
 		}
-	case utils.MetaDispatchers:
-		return func() profile {
-			return &engine.DispatcherProfile{
-				StrategyParams: make(map[string]any),
-			}
-		}
-	case utils.MetaDispatcherHosts:
-		return func() profile {
-			return &engine.DispatcherHost{
-				RemoteHost: &config.RemoteHost{
-					Transport: utils.MetaJSON,
-				},
-			}
-		}
 	case utils.MetaRateProfiles:
 		return func() profile {
 			return &utils.RateProfile{

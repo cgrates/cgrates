@@ -284,7 +284,7 @@ func (rs *RedisStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.RouteProfilePrefix, utils.AttributeProfilePrefix,
-		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix,
+		utils.ChargerProfilePrefix,
 		utils.RateProfilePrefix:
 		err := rs.Cmd(&i, redisEXISTS, category+utils.ConcatenatedKey(tenant, subject))
 		return i == 1, err
@@ -770,54 +770,6 @@ func (rs *RedisStorage) SetChargerProfileDrv(_ *context.Context, r *ChargerProfi
 
 func (rs *RedisStorage) RemoveChargerProfileDrv(_ *context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ChargerProfilePrefix+utils.ConcatenatedKey(tenant, id))
-}
-
-func (rs *RedisStorage) GetDispatcherProfileDrv(ctx *context.Context, tenant, id string) (r *DispatcherProfile, err error) {
-	var values []byte
-	if err = rs.Cmd(&values, redisGET, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
-		return
-	} else if len(values) == 0 {
-		err = utils.ErrDSPProfileNotFound
-		return
-	}
-	err = rs.ms.Unmarshal(values, &r)
-	return
-}
-
-func (rs *RedisStorage) SetDispatcherProfileDrv(ctx *context.Context, r *DispatcherProfile) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(r); err != nil {
-		return
-	}
-	return rs.Cmd(nil, redisSET, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
-}
-
-func (rs *RedisStorage) RemoveDispatcherProfileDrv(ctx *context.Context, tenant, id string) (err error) {
-	return rs.Cmd(nil, redisDEL, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(tenant, id))
-}
-
-func (rs *RedisStorage) GetDispatcherHostDrv(ctx *context.Context, tenant, id string) (r *DispatcherHost, err error) {
-	var values []byte
-	if err = rs.Cmd(&values, redisGET, utils.DispatcherHostPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
-		return
-	} else if len(values) == 0 {
-		err = utils.ErrDSPHostNotFound
-		return
-	}
-	err = rs.ms.Unmarshal(values, &r)
-	return
-}
-
-func (rs *RedisStorage) SetDispatcherHostDrv(ctx *context.Context, r *DispatcherHost) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(r); err != nil {
-		return
-	}
-	return rs.Cmd(nil, redisSET, utils.DispatcherHostPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
-}
-
-func (rs *RedisStorage) RemoveDispatcherHostDrv(ctx *context.Context, tenant, id string) (err error) {
-	return rs.Cmd(nil, redisDEL, utils.DispatcherHostPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 func (rs *RedisStorage) GetStorageType() string {

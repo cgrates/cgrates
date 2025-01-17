@@ -88,9 +88,7 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 		return err
 	}
 
-	if !acts.cfg.DispatcherSCfg().Enabled {
-		acts.cl.RpcRegister(srv)
-	}
+	acts.cl.RpcRegister(srv)
 
 	cms.AddInternalConn(utils.AccountS, srv)
 	return

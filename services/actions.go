@@ -88,9 +88,7 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 		return
 	}
 	// srv, _ := birpc.NewService(apis.NewActionSv1(acts.acts), "", false)
-	if !acts.cfg.DispatcherSCfg().Enabled {
-		acts.cl.RpcRegister(srv)
-	}
+	acts.cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ActionS, srv)
 	return
 }

@@ -31,17 +31,17 @@ var (
 	GitCommitDate string // If set, it will be processed as part of versioning
 	GitCommitHash string // If set, it will be processed as part of versioning
 
-	extraDBPartition = NewStringSet([]string{CacheDispatchers,
-		CacheDispatcherRoutes, CacheDispatcherLoads, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
+	extraDBPartition = NewStringSet([]string{
+		CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheCapsEvents, CacheReplicationHosts})
 
 	DataDBPartitions = NewStringSet([]string{
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheStatQueues,
 		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheTrendProfiles,
-		CacheChargerProfiles, CacheActionProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheRankingProfiles, CacheRankings, CacheTrends,
+		CacheChargerProfiles, CacheActionProfiles, CacheRankingProfiles, CacheRankings, CacheTrends,
 		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
-		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
+		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheLoadIDs,
 		CacheRateProfiles, CacheRateProfilesFilterIndexes, CacheRateFilterIndexes,
 		CacheActionProfilesFilterIndexes, CacheAccountsFilterIndexes, CacheReverseFilterIndexes,
 		CacheAccounts})
@@ -64,8 +64,6 @@ var (
 		CacheRankings:                    RankingProfilePrefix,
 		CacheAttributeProfiles:           AttributeProfilePrefix,
 		CacheChargerProfiles:             ChargerProfilePrefix,
-		CacheDispatcherProfiles:          DispatcherProfilePrefix,
-		CacheDispatcherHosts:             DispatcherHostPrefix,
 		CacheRateProfiles:                RateProfilePrefix,
 		CacheActionProfiles:              ActionProfilePrefix,
 		CacheAccounts:                    AccountPrefix,
@@ -75,7 +73,6 @@ var (
 		CacheRouteFilterIndexes:          RouteFilterIndexes,
 		CacheAttributeFilterIndexes:      AttributeFilterIndexes,
 		CacheChargerFilterIndexes:        ChargerFilterIndexes,
-		CacheDispatcherFilterIndexes:     DispatcherFilterIndexes,
 		CacheRateProfilesFilterIndexes:   RateProfilesFilterIndexPrfx,
 		CacheActionProfilesFilterIndexes: ActionProfilesFilterIndexPrfx,
 		CacheAccountsFilterIndexes:       AccountFilterIndexPrfx,
@@ -84,7 +81,6 @@ var (
 		CacheRateFilterIndexes:    RateFilterIndexPrfx,
 		CacheReverseFilterIndexes: FilterIndexPrfx,
 		MetaAPIBan:                MetaAPIBan, // special case as it is not in a DB
-		CacheDispatchers:          MetaDispatchers,
 	}
 	CachePrefixToInstance map[string]string    // will be built on init
 	CacheIndexesToPrefix  = map[string]string{ // used by match index to get all the ids when index selects is disabled and for compute indexes
@@ -94,7 +90,6 @@ var (
 		CacheRouteFilterIndexes:          RouteProfilePrefix,
 		CacheAttributeFilterIndexes:      AttributeProfilePrefix,
 		CacheChargerFilterIndexes:        ChargerProfilePrefix,
-		CacheDispatcherFilterIndexes:     DispatcherProfilePrefix,
 		CacheRateProfilesFilterIndexes:   RateProfilePrefix,
 		CacheActionProfilesFilterIndexes: ActionProfilePrefix,
 		CacheAccountsFilterIndexes:       AccountPrefix,
@@ -102,17 +97,16 @@ var (
 	}
 
 	CacheInstanceToCacheIndex = map[string]string{
-		CacheThresholdProfiles:  CacheThresholdFilterIndexes,
-		CacheResourceProfiles:   CacheResourceFilterIndexes,
-		CacheStatQueueProfiles:  CacheStatFilterIndexes,
-		CacheRouteProfiles:      CacheRouteFilterIndexes,
-		CacheAttributeProfiles:  CacheAttributeFilterIndexes,
-		CacheChargerProfiles:    CacheChargerFilterIndexes,
-		CacheDispatcherProfiles: CacheDispatcherFilterIndexes,
-		CacheRateProfiles:       CacheRateProfilesFilterIndexes,
-		CacheActionProfiles:     CacheActionProfilesFilterIndexes,
-		CacheFilters:            CacheReverseFilterIndexes,
-		CacheAccounts:           CacheAccountsFilterIndexes,
+		CacheThresholdProfiles: CacheThresholdFilterIndexes,
+		CacheResourceProfiles:  CacheResourceFilterIndexes,
+		CacheStatQueueProfiles: CacheStatFilterIndexes,
+		CacheRouteProfiles:     CacheRouteFilterIndexes,
+		CacheAttributeProfiles: CacheAttributeFilterIndexes,
+		CacheChargerProfiles:   CacheChargerFilterIndexes,
+		CacheRateProfiles:      CacheRateProfilesFilterIndexes,
+		CacheActionProfiles:    CacheActionProfilesFilterIndexes,
+		CacheFilters:           CacheReverseFilterIndexes,
+		CacheAccounts:          CacheAccountsFilterIndexes,
 	}
 
 	// ProtectedSFlds are the fields that sessions should not alter
@@ -257,11 +251,9 @@ const (
 	RouteProfilePrefix        = "rpp_"
 	AttributeProfilePrefix    = "alp_"
 	ChargerProfilePrefix      = "cpp_"
-	DispatcherProfilePrefix   = "dpp_"
 	RateProfilePrefix         = "rtp_"
 	ActionProfilePrefix       = "acp_"
 	AccountPrefix             = "acn_"
-	DispatcherHostPrefix      = "dph_"
 	ThresholdProfilePrefix    = "thp_"
 	StatQueuePrefix           = "stq_"
 	RankingProfilePrefix      = "rgp_"
@@ -367,8 +359,6 @@ const (
 	MetaChargers             = "*chargers"
 	MetaConfig               = "*config"
 	MetaTpes                 = "*tpes"
-	MetaDispatchers          = "*dispatchers"
-	MetaDispatcherHosts      = "*dispatcher_hosts"
 	MetaFilters              = "*filters"
 	MetaCDRs                 = "*cdrs"
 	MetaDC                   = "*dc"
@@ -420,8 +410,6 @@ const (
 	Rankings             = "Rankings"
 	Trends               = "Trends"
 	Filters              = "Filters"
-	DispatcherProfiles   = "DispatcherProfiles"
-	DispatcherHosts      = "DispatcherHosts"
 	RateProfiles         = "RateProfiles"
 	ActionProfiles       = "ActionProfiles"
 	AccountsString       = "Accounts"
@@ -452,7 +440,6 @@ const (
 	Routes       = "Routes"
 	Attributes   = "Attributes"
 	Chargers     = "Chargers"
-	Dispatchers  = "Dispatchers"
 	StatS        = "StatS"
 	LoadIDsVrs   = "LoadIDs"
 	GlobalVarS   = "GlobalVarS"
@@ -934,26 +921,25 @@ const (
 
 // Meta Items
 const (
-	MetaAccounts           = "*accounts"
-	MetaActions            = "*actions"
-	MetaResourceProfile    = "*resource_profiles"
-	MetaStatQueueProfiles  = "*statqueue_profiles"
-	MetaStatQueues         = "*statqueues"
-	MetaRankingProfiles    = "*ranking_profiles"
-	MetaTrendProfiles      = "*trend_profiles"
-	MetaThresholdProfiles  = "*threshold_profiles"
-	MetaRouteProfiles      = "*route_profiles"
-	MetaAttributeProfiles  = "*attribute_profiles"
-	MetaDispatcherProfiles = "*dispatcher_profiles"
-	MetaRateProfiles       = "*rate_profiles"
-	MetaRateProfileRates   = "*rate_profile_rates"
-	MetaChargerProfiles    = "*charger_profiles"
-	MetaThresholds         = "*thresholds"
-	MetaRoutes             = "*routes"
-	MetaAttributes         = "*attributes"
-	MetaActionProfiles     = "*action_profiles"
-	MetaLoadIDs            = "*load_ids"
-	MetaNodeID             = "*node_id"
+	MetaAccounts          = "*accounts"
+	MetaActions           = "*actions"
+	MetaResourceProfile   = "*resource_profiles"
+	MetaStatQueueProfiles = "*statqueue_profiles"
+	MetaStatQueues        = "*statqueues"
+	MetaRankingProfiles   = "*ranking_profiles"
+	MetaTrendProfiles     = "*trend_profiles"
+	MetaThresholdProfiles = "*threshold_profiles"
+	MetaRouteProfiles     = "*route_profiles"
+	MetaAttributeProfiles = "*attribute_profiles"
+	MetaRateProfiles      = "*rate_profiles"
+	MetaRateProfileRates  = "*rate_profile_rates"
+	MetaChargerProfiles   = "*charger_profiles"
+	MetaThresholds        = "*thresholds"
+	MetaRoutes            = "*routes"
+	MetaAttributes        = "*attributes"
+	MetaActionProfiles    = "*action_profiles"
+	MetaLoadIDs           = "*load_ids"
+	MetaNodeID            = "*node_id"
 )
 
 // MetaMetrics
@@ -982,7 +968,6 @@ const (
 	ThresholdS      = "ThresholdS"
 	TrendS          = "TrendS"
 	RankingS        = "RankingS"
-	DispatcherS     = "DispatcherS"
 	RegistrarC      = "RegistrarC"
 	LoaderS         = "LoaderS"
 	ChargerS        = "ChargerS"
@@ -1007,7 +992,6 @@ const (
 	ResourcesLow   = "resources"
 	StatServiceLow = "stats"
 	ThresholdsLow  = "thresholds"
-	DispatcherSLow = "dispatchers"
 	AnalyzerSLow   = "analyzers"
 	SchedulerSLow  = "schedulers"
 	LoaderSLow     = "loaders"
@@ -1063,7 +1047,6 @@ const (
 	MetaTpRateProfiles      = "*tp_rate_profiles"
 	MetaTpResources         = "*tp_resources"
 	MetaTpChargers          = "*tp_chargers"
-	MetaTpDispatchers       = "*tp_dispatchers"
 	MetaDurationSeconds     = "*duration_seconds"
 	MetaDurationNanoseconds = "*duration_nanoseconds"
 	CapAttributes           = "Attributes"
@@ -1076,20 +1059,17 @@ const (
 )
 
 const (
-	TpFilters            = "TpFilters"
-	TpThresholds         = "TpThresholds"
-	TpRoutes             = "TpRoutes"
-	TpAttributes         = "TpAttributes"
-	TpStats              = "TpStats"
-	TpResources          = "TpResources"
-	TpResource           = "TpResource"
-	TpChargers           = "TpChargers"
-	TpDispatchers        = "TpDispatchers"
-	TpDispatcherProfiles = "TpDispatcherProfiles"
-	TpDispatcherHosts    = "TpDispatcherHosts"
-	TpRateProfiles       = "TpRateProfiles"
-	TpActionProfiles     = "TpActionProfiles"
-	TpAccounts           = "TpAccounts"
+	TpFilters        = "TpFilters"
+	TpThresholds     = "TpThresholds"
+	TpRoutes         = "TpRoutes"
+	TpAttributes     = "TpAttributes"
+	TpStats          = "TpStats"
+	TpResources      = "TpResources"
+	TpResource       = "TpResource"
+	TpChargers       = "TpChargers"
+	TpRateProfiles   = "TpRateProfiles"
+	TpActionProfiles = "TpActionProfiles"
+	TpAccounts       = "TpAccounts"
 )
 
 // Dispatcher Const
@@ -1197,40 +1177,36 @@ const (
 	ReplicatorSv1SetRanking           = "ReplicatorSv1.SetRanking"
 	ReplicatorSv1SetTrendProfile      = "ReplicatorSv1.SetTrendProfile"
 	ReplicatorSv1SetTrend
-	ReplicatorSv1SetResource          = "ReplicatorSv1.SetResource"
-	ReplicatorSv1SetResourceProfile   = "ReplicatorSv1.SetResourceProfile"
-	ReplicatorSv1SetRouteProfile      = "ReplicatorSv1.SetRouteProfile"
-	ReplicatorSv1SetAttributeProfile  = "ReplicatorSv1.SetAttributeProfile"
-	ReplicatorSv1SetChargerProfile    = "ReplicatorSv1.SetChargerProfile"
-	ReplicatorSv1SetDispatcherProfile = "ReplicatorSv1.SetDispatcherProfile"
-	ReplicatorSv1SetRateProfile       = "ReplicatorSv1.SetRateProfile"
-	ReplicatorSv1SetActionProfile     = "ReplicatorSv1.SetActionProfile"
-	ReplicatorSv1SetAccount           = "ReplicatorSv1.SetAccount"
-	ReplicatorSv1SetDispatcherHost    = "ReplicatorSv1.SetDispatcherHost"
-	ReplicatorSv1SetLoadIDs           = "ReplicatorSv1.SetLoadIDs"
-	ReplicatorSv1RemoveThreshold      = "ReplicatorSv1.RemoveThreshold"
+	ReplicatorSv1SetResource         = "ReplicatorSv1.SetResource"
+	ReplicatorSv1SetResourceProfile  = "ReplicatorSv1.SetResourceProfile"
+	ReplicatorSv1SetRouteProfile     = "ReplicatorSv1.SetRouteProfile"
+	ReplicatorSv1SetAttributeProfile = "ReplicatorSv1.SetAttributeProfile"
+	ReplicatorSv1SetChargerProfile   = "ReplicatorSv1.SetChargerProfile"
+	ReplicatorSv1SetRateProfile      = "ReplicatorSv1.SetRateProfile"
+	ReplicatorSv1SetActionProfile    = "ReplicatorSv1.SetActionProfile"
+	ReplicatorSv1SetAccount          = "ReplicatorSv1.SetAccount"
+	ReplicatorSv1SetLoadIDs          = "ReplicatorSv1.SetLoadIDs"
+	ReplicatorSv1RemoveThreshold     = "ReplicatorSv1.RemoveThreshold"
 
-	ReplicatorSv1RemoveStatQueue         = "ReplicatorSv1.RemoveStatQueue"
-	ReplicatorSv1RemoveFilter            = "ReplicatorSv1.RemoveFilter"
-	ReplicatorSv1RemoveThresholdProfile  = "ReplicatorSv1.RemoveThresholdProfile"
-	ReplicatorSv1RemoveStatQueueProfile  = "ReplicatorSv1.RemoveStatQueueProfile"
-	ReplicatorSv1RemoveRankingProfile    = "ReplicatorSv1.RemoveRankingProfile"
-	ReplicatorSv1RemoveRanking           = "ReplicatorSv1.RemoveRanking"
-	ReplicatorSv1RemoveTrendProfile      = "ReplicatorSv1.RemoveTrendProfile"
-	ReplicatorSv1RemoveTrend             = "ReplicatorSv1.RemoveTrend"
-	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
-	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
-	ReplicatorSv1RemoveRouteProfile      = "ReplicatorSv1.RemoveRouteProfile"
-	ReplicatorSv1RemoveAttributeProfile  = "ReplicatorSv1.RemoveAttributeProfile"
-	ReplicatorSv1RemoveChargerProfile    = "ReplicatorSv1.RemoveChargerProfile"
-	ReplicatorSv1RemoveDispatcherProfile = "ReplicatorSv1.RemoveDispatcherProfile"
-	ReplicatorSv1RemoveRateProfile       = "ReplicatorSv1.RemoveRateProfile"
-	ReplicatorSv1RemoveActionProfile     = "ReplicatorSv1.RemoveActionProfile"
-	ReplicatorSv1RemoveDispatcherHost    = "ReplicatorSv1.RemoveDispatcherHost"
-	ReplicatorSv1RemoveAccount           = "ReplicatorSv1.RemoveAccount"
-	ReplicatorSv1GetIndexes              = "ReplicatorSv1.GetIndexes"
-	ReplicatorSv1SetIndexes              = "ReplicatorSv1.SetIndexes"
-	ReplicatorSv1RemoveIndexes           = "ReplicatorSv1.RemoveIndexes"
+	ReplicatorSv1RemoveStatQueue        = "ReplicatorSv1.RemoveStatQueue"
+	ReplicatorSv1RemoveFilter           = "ReplicatorSv1.RemoveFilter"
+	ReplicatorSv1RemoveThresholdProfile = "ReplicatorSv1.RemoveThresholdProfile"
+	ReplicatorSv1RemoveStatQueueProfile = "ReplicatorSv1.RemoveStatQueueProfile"
+	ReplicatorSv1RemoveRankingProfile   = "ReplicatorSv1.RemoveRankingProfile"
+	ReplicatorSv1RemoveRanking          = "ReplicatorSv1.RemoveRanking"
+	ReplicatorSv1RemoveTrendProfile     = "ReplicatorSv1.RemoveTrendProfile"
+	ReplicatorSv1RemoveTrend            = "ReplicatorSv1.RemoveTrend"
+	ReplicatorSv1RemoveResource         = "ReplicatorSv1.RemoveResource"
+	ReplicatorSv1RemoveResourceProfile  = "ReplicatorSv1.RemoveResourceProfile"
+	ReplicatorSv1RemoveRouteProfile     = "ReplicatorSv1.RemoveRouteProfile"
+	ReplicatorSv1RemoveAttributeProfile = "ReplicatorSv1.RemoveAttributeProfile"
+	ReplicatorSv1RemoveChargerProfile   = "ReplicatorSv1.RemoveChargerProfile"
+	ReplicatorSv1RemoveRateProfile      = "ReplicatorSv1.RemoveRateProfile"
+	ReplicatorSv1RemoveActionProfile    = "ReplicatorSv1.RemoveActionProfile"
+	ReplicatorSv1RemoveAccount          = "ReplicatorSv1.RemoveAccount"
+	ReplicatorSv1GetIndexes             = "ReplicatorSv1.GetIndexes"
+	ReplicatorSv1SetIndexes             = "ReplicatorSv1.SetIndexes"
+	ReplicatorSv1RemoveIndexes          = "ReplicatorSv1.RemoveIndexes"
 )
 
 // AdminSv1 APIs
@@ -1734,20 +1710,18 @@ const (
 
 // CSV file name
 const (
-	ResourcesCsv          = "Resources.csv"
-	StatsCsv              = "Stats.csv"
-	RankingsCsv           = "Rankings.csv"
-	TrendsCsv             = "Trends.csv"
-	ThresholdsCsv         = "Thresholds.csv"
-	FiltersCsv            = "Filters.csv"
-	RoutesCsv             = "Routes.csv"
-	AttributesCsv         = "Attributes.csv"
-	ChargersCsv           = "Chargers.csv"
-	DispatcherProfilesCsv = "DispatcherProfiles.csv"
-	DispatcherHostsCsv    = "DispatcherHosts.csv"
-	RatesCsv              = "Rates.csv"
-	ActionsCsv            = "Actions.csv"
-	AccountsCsv           = "Accounts.csv"
+	ResourcesCsv  = "Resources.csv"
+	StatsCsv      = "Stats.csv"
+	RankingsCsv   = "Rankings.csv"
+	TrendsCsv     = "Trends.csv"
+	ThresholdsCsv = "Thresholds.csv"
+	FiltersCsv    = "Filters.csv"
+	RoutesCsv     = "Routes.csv"
+	AttributesCsv = "Attributes.csv"
+	ChargersCsv   = "Chargers.csv"
+	RatesCsv      = "Rates.csv"
+	ActionsCsv    = "Actions.csv"
+	AccountsCsv   = "Accounts.csv"
 )
 
 // Table Name
@@ -1790,11 +1764,6 @@ const (
 	CacheRouteProfiles               = "*route_profiles"
 	CacheAttributeProfiles           = "*attribute_profiles"
 	CacheChargerProfiles             = "*charger_profiles"
-	CacheDispatcherProfiles          = "*dispatcher_profiles"
-	CacheDispatcherHosts             = "*dispatcher_hosts"
-	CacheDispatchers                 = "*dispatchers"
-	CacheDispatcherRoutes            = "*dispatcher_routes"
-	CacheDispatcherLoads             = "*dispatcher_loads"
 	CacheRateProfiles                = "*rate_profiles"
 	CacheActionProfiles              = "*action_profiles"
 	CacheAccounts                    = "*accounts"
@@ -1804,7 +1773,6 @@ const (
 	CacheRouteFilterIndexes          = "*route_filter_indexes"
 	CacheAttributeFilterIndexes      = "*attribute_filter_indexes"
 	CacheChargerFilterIndexes        = "*charger_filter_indexes"
-	CacheDispatcherFilterIndexes     = "*dispatcher_filter_indexes"
 	CacheDiameterMessages            = "*diameter_messages"
 	CacheRPCResponses                = "*rpc_responses"
 	CacheClosedSessions              = "*closed_sessions"
@@ -2182,9 +2150,6 @@ const (
 	AttributeIDsCfg       = "attribute_ids"
 	ConcurrentRequestsCfg = "concurrent_requests"
 
-	// DispatcherSCfg
-	MetaDispatcherSCfg = "*dispatchers"
-
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"
 	LockFilePathCfg = "lockfile_path"
@@ -2423,7 +2388,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProfileIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsRoutesMaxItems,
 	OptsSesChargeable, RemoteHostOpt, MetaCache, OptsThresholdsProfileIDs, OptsRoutesProfilesCount,
-	OptsDispatchersProfilesCount, OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
+	OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
 	MetaCDRs, OptsSesCDRsDerivedReply, MetaResources, OptsSesResourceSAuthorize,
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, MetaRoutes,
 	OptsSesRouteSDerivedReply, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
@@ -2432,7 +2397,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesMessage, MetaAttributes, MetaChargers, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, MetaStats, OptsCDRsStore, MetaThresholds, MetaRates, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
-	OptsRoundingDecimals, MetaDispatchers})
+	OptsRoundingDecimals})
 
 // Event Opts
 const (

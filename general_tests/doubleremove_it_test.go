@@ -52,8 +52,6 @@ var (
 		testdoubleRemoveAttributeProfile,
 		testdoubleRemoveChargerProfile,
 		testdoubleRemoveResourceProfile,
-		testdoubleRemoveDispatcherProfile,
-		testdoubleRemoveDispatcherHost,
 		testdoubleRemoveRateProfile,
 		testdoubleRemoveActionProfile,
 
@@ -502,117 +500,6 @@ func testdoubleRemoveResourceProfile(t *testing.T) {
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "RESOURCE_PROFILE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-}
-
-func testdoubleRemoveDispatcherProfile(t *testing.T) {
-	// check
-	var reply *engine.DispatcherProfile
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &reply); err == nil ||
-		err.Error() != utils.ErrDSPProfileNotFound.Error() {
-		t.Error(err)
-	}
-	// set
-	dspPrf := &engine.DispatcherProfileWithAPIOpts{
-		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:    doubleRemoveTenant,
-			ID:        "DSP_PRF",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-		},
-	}
-	var result string
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, dspPrf, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	//check
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dspPrf.DispatcherProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", dspPrf.DispatcherProfile, reply)
-	}
-
-	//remove
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherProfile,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherProfile,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &result); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherProfile,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &result); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	// check
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_PRF"}, &reply); err == nil ||
-		err.Error() != utils.ErrDSPProfileNotFound.Error() {
-		t.Error(err)
-	}
-}
-
-func testdoubleRemoveDispatcherHost(t *testing.T) {
-	// check
-	var reply *engine.DispatcherHost
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_HOST"}, &reply); err == nil ||
-		err.Error() != utils.ErrDSPHostNotFound.Error() {
-		t.Error(err)
-	}
-	// set
-	dspHost := &engine.DispatcherHostWithAPIOpts{
-		DispatcherHost: &engine.DispatcherHost{
-			Tenant: doubleRemoveTenant,
-			RemoteHost: &config.RemoteHost{
-				ID: "DSP_HOST",
-			},
-		},
-	}
-	var result string
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, dspHost, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	//check
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_HOST"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dspHost.DispatcherHost, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", dspHost.DispatcherHost, reply)
-	}
-
-	//remove
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherHost,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_HOST"}, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherHost,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_HOST"}, &result); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1RemoveDispatcherHost,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_HOST"}, &result); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
-	}
-	// check
-	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
-		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "DSP_HOST"}, &reply); err == nil ||
-		err.Error() != utils.ErrDSPHostNotFound.Error() {
 		t.Error(err)
 	}
 }

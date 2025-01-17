@@ -82,10 +82,8 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	if err != nil {
 		return err
 	}
-	if !trs.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			trs.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		trs.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.TrendS, srv)
 	return nil

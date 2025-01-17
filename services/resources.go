@@ -80,10 +80,8 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 	reS.reS.StartLoop(context.TODO())
 	srv, _ := engine.NewService(reS.reS)
 	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
-	if !reS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			reS.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		reS.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.ResourceS, srv)
 	return

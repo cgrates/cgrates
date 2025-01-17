@@ -76,10 +76,8 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Se
 	if err != nil {
 		return err
 	}
-	if !s.cfg.DispatcherSCfg().Enabled {
-		for _, svc := range srv {
-			s.cl.RpcRegister(svc)
-		}
+	for _, svc := range srv {
+		s.cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.CoreS, srv)
 	return nil

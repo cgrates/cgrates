@@ -295,50 +295,6 @@ func (ChargerMdl) TableName() string {
 	return utils.TBLTPChargers
 }
 
-type DispatcherProfileMdl struct {
-	PK                 uint    `gorm:"primary_key"`
-	Tpid               string  //
-	Tenant             string  `index:"0" re:".*"`
-	ID                 string  `index:"1" re:".*"`
-	FilterIDs          string  `index:"2" re:".*"`
-	Weight             float64 `index:"3" re:".*"`
-	Strategy           string  `index:"4" re:".*"`
-	StrategyParameters string  `index:"5" re:".*"`
-	ConnID             string  `index:"6" re:".*"`
-	ConnFilterIDs      string  `index:"7" re:".*"`
-	ConnWeight         float64 `index:"8" re:".*"`
-	ConnBlocker        bool    `index:"9" re:".*"`
-	ConnParameters     string  `index:"10" re:".*"`
-	CreatedAt          time.Time
-}
-
-func (DispatcherProfileMdl) TableName() string {
-	return utils.TBLTPDispatchers
-}
-
-type DispatcherHostMdl struct {
-	PK                   uint   `gorm:"primary_key"`
-	Tpid                 string //
-	Tenant               string `index:"0" re:".*"`
-	ID                   string `index:"1" re:".*"`
-	Address              string `index:"2" re:".*"`
-	Transport            string `index:"3" re:".*"`
-	ConnectAttempts      int    `index:"4" re:".*"`
-	Reconnects           int    `index:"5" re:".*"`
-	MaxReconnectInterval string `index:"6" re:".*"`
-	ConnectTimeout       string `index:"7" re:".*"`
-	ReplyTimeout         string `index:"8" re:".*"`
-	TLS                  bool   `index:"9" re:".*"`
-	ClientKey            string `index:"10" re:".*"`
-	ClientCertificate    string `index:"11" re:".*"`
-	CaCertificate        string `index:"12" re:".*"`
-	CreatedAt            time.Time
-}
-
-func (DispatcherHostMdl) TableName() string {
-	return utils.TBLTPDispatcherHosts
-}
-
 type RateProfileMdl struct {
 	PK                  uint `gorm:"primary_key"`
 	Tpid                string

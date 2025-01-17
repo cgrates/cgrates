@@ -212,25 +212,6 @@ func TestRemoveFilterIndexes(t *testing.T) {
 		t.Errorf("Expected %v\n but received %v", utils.CacheRateFilterIndexes, args.ItemType)
 	}
 
-	//Dispatchers
-	args = &AttrRemFilterIndexes{
-		Tenant:   "cgrates.org",
-		Context:  "cgrates",
-		ItemType: utils.MetaDispatchers,
-		APIOpts: map[string]any{
-			utils.MetaCache: utils.MetaNone,
-		},
-	}
-	if err := adms.RemoveFilterIndexes(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	}
-	if reply != utils.OK {
-		t.Error("Expected OK")
-	}
-	if args.ItemType != utils.CacheDispatcherFilterIndexes {
-		t.Errorf("Expected %v\n but received %v", utils.DispatcherFilterIndexes, args.ItemType)
-	}
-
 	//Attributes
 	args = &AttrRemFilterIndexes{
 		Tenant:   "cgrates.org",
@@ -413,15 +394,6 @@ func TestComputeFilterIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	//DispatcherProfile
-	args = &utils.ArgsComputeFilterIndexes{
-		Tenant:      "cgrates.org",
-		DispatcherS: true,
-		APIOpts: map[string]any{
-			utils.MetaCache: utils.MetaNone,
-		},
-	}
-
 	if err := adms.ComputeFilterIndexes(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
@@ -559,18 +531,6 @@ func TestComputeFilterIndexIDs(t *testing.T) {
 		t.Error(err)
 	}
 
-	//DispatcherProfile
-	args = &utils.ArgsComputeFilterIndexIDs{
-		Tenant: "cgrates.org",
-		APIOpts: map[string]any{
-			utils.MetaCache: utils.MetaNone,
-		},
-		DispatcherIDs: []string{""},
-	}
-
-	if err := adms.ComputeFilterIndexIDs(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	}
 }
 
 func TestGetFilterIndexes(t *testing.T) {
@@ -712,16 +672,6 @@ func TestGetFilterIndexes(t *testing.T) {
 
 	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
-	}
-
-	//Dispatchers
-	args = &AttrGetFilterIndexes{
-		Tenant:   "cgrates.org",
-		Context:  "cgrates",
-		ItemType: utils.MetaDispatchers,
-		APIOpts: map[string]any{
-			utils.MetaCache: utils.MetaNone,
-		},
 	}
 
 	if err := adms.GetFilterIndexes(context.Background(), args, &reply); err != utils.ErrNotFound {
@@ -928,33 +878,6 @@ func TestGetChargersIndexHealth(t *testing.T) {
 	}
 
 	if err := adms.GetChargersIndexesHealth(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestGetDispatchersIndexesHealth(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
-	connMgr := engine.NewConnManager(cfg)
-	cfg.AdminSCfg().CachesConns = []string{"*internal"}
-	adms := &AdminSv1{
-		cfg:     cfg,
-		dm:      dm,
-		connMgr: connMgr,
-		ping:    struct{}{},
-	}
-
-	var reply engine.FilterIHReply
-
-	args := &engine.IndexHealthArgs{
-		Tenant: "cgrates.org",
-		APIOpts: map[string]any{
-			utils.MetaCache: utils.MetaNone,
-		},
-	}
-
-	if err := adms.GetDispatchersIndexesHealth(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 }

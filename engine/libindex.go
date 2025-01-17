@@ -740,24 +740,6 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
-		case utils.CacheDispatcherFilterIndexes:
-			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
-				removeIndexKeys, indx); err != nil {
-				return
-			}
-			idxSlice := indx.AsSlice()
-			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
-				&idxSlice, utils.NonTransactional, func(tnt, id, _ string) (*[]string, error) {
-					dp, e := dm.GetDispatcherProfile(ctx, tnt, id, true, false, utils.NonTransactional)
-					if e != nil {
-						return nil, e
-					}
-					fltrIDs := make([]string, len(dp.FilterIDs))
-					copy(fltrIDs, dp.FilterIDs)
-					return &fltrIDs, nil
-				}, newFlt); err != nil && err != utils.ErrDSPProfileNotFound {
-				return utils.APIErrorHandler(err)
-			}
 		}
 	}
 	return

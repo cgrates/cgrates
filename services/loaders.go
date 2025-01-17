@@ -82,10 +82,8 @@ func (ldrs *LoaderService) Start(_ *utils.SyncedChan, registry *servmanager.Serv
 	}
 	srv, _ := engine.NewService(ldrs.ldrs)
 	// srv, _ := birpc.NewService(apis.NewLoaderSv1(ldrs.ldrs), "", false)
-	if !ldrs.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			ldrs.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		ldrs.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.LoaderS, srv)
 	return

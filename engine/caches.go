@@ -62,10 +62,6 @@ func init() {
 	// Filters
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithAPIOpts))
-	// Dispatcher
-	gob.Register(new(DispatcherHost))
-	gob.Register(new(DispatcherHostProfile))
-	gob.Register(new(DispatcherHostWithAPIOpts))
 	// RateProfiles
 	gob.Register(new(utils.RateProfile))
 	gob.Register(new(utils.RateProfileWithAPIOpts))

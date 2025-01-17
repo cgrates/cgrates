@@ -83,10 +83,8 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	if err != nil {
 		return err
 	}
-	if !ran.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			ran.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		ran.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.RankingS, srv)
 	return nil

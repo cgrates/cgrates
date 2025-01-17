@@ -222,12 +222,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		}},
 		tpeSCfg:    new(TpeSCfg),
 		sureTaxCfg: new(SureTaxCfg),
-		dispatcherSCfg: &DispatcherSCfg{Opts: &DispatchersOpts{
-			Dispatchers: []*DynamicBoolOpt{},
-		}},
 		registrarCCfg: &RegistrarCCfgs{
-			RPC:         &RegistrarCCfg{Hosts: make(map[string][]*RemoteHost)},
-			Dispatchers: &RegistrarCCfg{Hosts: make(map[string][]*RemoteHost)},
+			RPC: &RegistrarCCfg{Hosts: make(map[string][]*RemoteHost)},
 		},
 		loaderCgrCfg: new(LoaderCgrCfg),
 		migratorCgrCfg: &MigratorCgrCfg{
@@ -363,7 +359,6 @@ type CGRConfig struct {
 	trendSCfg        *TrendSCfg        // TrendS config
 	rankingSCfg      *RankingSCfg      // RankingS config
 	sureTaxCfg       *SureTaxCfg       // SureTax config
-	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
 	registrarCCfg    *RegistrarCCfgs   // RegistrarC config
 	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
@@ -390,7 +385,7 @@ type CGRConfig struct {
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 	utils.MetaResources, utils.MetaFilters, utils.MetaStats, utils.MetaTrends,
 	utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers, utils.MetaRankings,
-	utils.MetaDispatchers, utils.MetaDispatcherHosts, utils.MetaRateProfiles,
+	utils.MetaRateProfiles,
 	utils.MetaAccounts, utils.MetaActionProfiles})
 
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
@@ -579,17 +574,10 @@ func (cfg *CGRConfig) LoaderCgrCfg() *LoaderCgrCfg {
 	return cfg.loaderCgrCfg
 }
 
-// DispatcherSCfg returns the config for DispatcherS
-func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
-	cfg.lks[DispatcherSJSON].Lock()
-	defer cfg.lks[DispatcherSJSON].Unlock()
-	return cfg.dispatcherSCfg
-}
-
 // RegistrarCCfg returns the config for RegistrarC
 func (cfg *CGRConfig) RegistrarCCfg() *RegistrarCCfgs {
-	cfg.lks[DispatcherSJSON].Lock()
-	defer cfg.lks[DispatcherSJSON].Unlock()
+	cfg.lks[RegistrarCJSON].Lock()
+	defer cfg.lks[RegistrarCJSON].Unlock()
 	return cfg.registrarCCfg
 }
 
@@ -997,7 +985,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DataDBJSON,
 		CDRsJSON, SessionSJSON, AttributeSJSON,
 		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON,
-		RouteSJSON, LoaderSJSON, DispatcherSJSON, RateSJSON, AdminSJSON, AccountSJSON,
+		RouteSJSON, LoaderSJSON, RateSJSON, AdminSJSON, AccountSJSON,
 		ActionSJSON})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{StorDBJSON, CDRsJSON})
 	needsDataDB := false
@@ -1067,7 +1055,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		rankingSCfg:      cfg.rankingSCfg.Clone(),
 		routeSCfg:        cfg.routeSCfg.Clone(),
 		sureTaxCfg:       cfg.sureTaxCfg.Clone(),
-		dispatcherSCfg:   cfg.dispatcherSCfg.Clone(),
 		registrarCCfg:    cfg.registrarCCfg.Clone(),
 		loaderCgrCfg:     cfg.loaderCgrCfg.Clone(),
 		migratorCgrCfg:   cfg.migratorCgrCfg.Clone(),

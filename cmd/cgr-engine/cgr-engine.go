@@ -142,7 +142,6 @@ func runCGREngine(fs []string) (err error) {
 		coreS,
 		services.NewCacheService(cfg),
 		services.NewFilterService(cfg),
-		services.NewDispatcherService(cfg),
 		services.NewLoaderService(cfg),
 		services.NewExportFailoverService(cfg),
 		services.NewAdminSv1Service(cfg),
@@ -272,20 +271,11 @@ func cgrInitServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.Service
 	cl := srvDeps[utils.CommonListenerS].(*services.CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*services.ConnManagerService)
 	srv, _ := birpc.NewService(apis.NewServiceManagerV1(srvMngr), utils.EmptyString, false)
-	if !cfg.DispatcherSCfg().Enabled {
-		cl.RpcRegister(srv)
-	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ServiceManager, srv)
 }
 
 func cgrStartRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown *utils.SyncedChan) {
-	if cfg.DispatcherSCfg().Enabled { // wait only for dispatcher as cache is allways registered before this
-		if utils.StructChanTimeout(
-			registry.Lookup(utils.DispatcherS).StateChan(utils.StateServiceUP),
-			cfg.GeneralCfg().ConnectTimeout) {
-			return
-		}
-	}
 	cl := registry.Lookup(utils.CommonListenerS).(*services.CommonListenerService).CLS()
 	cl.StartServer(cfg, shutdown)
 }

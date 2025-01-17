@@ -164,8 +164,6 @@
 			"*thresholds":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*routes":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*chargers":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*dispatchers":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*dispatcher_hosts":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*rate_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*action_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false},
@@ -282,41 +280,6 @@
 					{"tag": "Blockers", "path": "Blockers", "type": "*variable", "value": "~*req.4"},
 					{"tag": "RunID", "path": "RunID", "type": "*variable", "value": "~*req.5"},
 					{"tag": "AttributeIDs", "path": "AttributeIDs", "type": "*variable", "value": "~*req.6"},
-				],
-			},
-			{
-				"type": "*dispatchers",						// data source type
-				"file_name": "DispatcherProfiles.csv",		// file name in the tp_in_dir
-				"fields": [
-					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
-					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
-					{"tag": "Strategy", "path": "Strategy", "type": "*variable", "value": "~*req.4"},
-					{"tag": "StrategyParameters", "path": "StrategyParams", "type": "*variable", "value": "~*req.5"},
-					{"tag": "ConnID", "path": "Hosts.ID", "type": "*variable", "value": "~*req.6","new_branch":true},
-					{"tag": "ConnFilterIDs", "path": "Hosts.FilterIDs", "type": "*variable", "value": "~*req.7"},
-					{"tag": "ConnWeight", "path": "Hosts.Weight", "type": "*variable", "value": "~*req.8"},
-					{"tag": "ConnBlocker", "path": "Hosts.Blocker", "type": "*variable", "value": "~*req.9"},
-					{"tag": "ConnParameters", "path": "Hosts.Params", "type": "*variable", "value": "~*req.10"},
-				],
-			},
-			{
-				"type": "*dispatcher_hosts",						// data source type
-				"file_name": "DispatcherHosts.csv",					// file name in the tp_in_dir
-				"fields": [
-					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
-					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~*req.2"},
-					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
-					{"tag": "ConnectAttempts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.4"},
-					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.5"},
-					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.6"},
-					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.7"},
-					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.8"},
-					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.9"},
-					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.10"},
-					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.11"},
 				],
 			},
 			{

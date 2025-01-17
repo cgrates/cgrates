@@ -28,15 +28,10 @@
 	
 "caches":{
 	"partitions": {
-		"*dispatcher_routes": {"limit": -1, "ttl": "1h"}
 	},
 },
 	
-"dispatchers":{
-	 "enabled": true,
-},
-	
-	
+ 
 "admins": {
 	"enabled": true,
 },

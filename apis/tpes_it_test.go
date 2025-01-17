@@ -61,8 +61,6 @@ var (
 		testTPeSetStatQueueProfile,
 		testTPeSetActions,
 		testTPeSetThresholds,
-		testTPeSetDispatcherProfiles,
-		testSeTPeSetDispatcherHosts,
 		testTPeSExportTariffPlanHalfTariffPlan,
 		testTPeSExportTariffPlanAllTariffPlan,
 		// export again after we will flush the database
@@ -978,122 +976,22 @@ func testTPeSetThresholds(t *testing.T) {
 	}
 }
 
-func testTPeSetDispatcherProfiles(t *testing.T) {
-	dspPrf := &DispatcherWithAPIOpts{
-		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Dsp1",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-			Strategy:  utils.MetaFirst,
-			StrategyParams: map[string]any{
-				utils.MetaDefaultRatio: "false",
-			},
-			Weight: 20,
-			Hosts: engine.DispatcherHostProfiles{
-				{
-					ID:        "C1",
-					FilterIDs: []string{},
-					Weight:    10,
-					Params:    map[string]any{"0": "192.168.54.203"},
-					Blocker:   false,
-				},
-			},
-		},
-	}
-
-	var result string
-	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, dspPrf, &result); err != nil {
-		t.Fatal(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-
-	dspPrf2 := &DispatcherWithAPIOpts{
-		DispatcherProfile: &engine.DispatcherProfile{
-			Tenant:    "cgrates.org",
-			ID:        "Dsp2",
-			FilterIDs: []string{"*string:~*opts.EventType:LoadDispatcher"},
-			Strategy:  utils.MetaWeight,
-			Weight:    10,
-			Hosts: engine.DispatcherHostProfiles{
-				{
-					ID:        "Conn2",
-					FilterIDs: []string{"*suffix:~*opts.*answerTime:45T"},
-					Params:    map[string]any{utils.MetaRatio: 1},
-					Blocker:   false,
-				},
-			},
-		},
-	}
-
-	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, dspPrf2, &result); err != nil {
-		t.Fatal(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-}
-
-func testSeTPeSetDispatcherHosts(t *testing.T) {
-	dspPrf := &engine.DispatcherHostWithAPIOpts{
-		DispatcherHost: &engine.DispatcherHost{
-			Tenant: "cgrates.org",
-			RemoteHost: &config.RemoteHost{
-				ID:                   "DSH1",
-				Address:              "*internal",
-				ConnectAttempts:      1,
-				Reconnects:           3,
-				MaxReconnectInterval: 5 * time.Minute,
-				ConnectTimeout:       time.Minute,
-				ReplyTimeout:         2 * time.Minute,
-			},
-		},
-	}
-	var result string
-	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, dspPrf, &result); err != nil {
-		t.Fatal(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-
-	dspPrf2 := &engine.DispatcherHostWithAPIOpts{
-		DispatcherHost: &engine.DispatcherHost{
-			Tenant: "cgrates.org",
-			RemoteHost: &config.RemoteHost{
-				ID:              "DSH2",
-				Address:         "127.0.0.1:6012",
-				Transport:       utils.MetaJSON,
-				ConnectAttempts: 1,
-				Reconnects:      3,
-				ConnectTimeout:  time.Minute,
-				ReplyTimeout:    2 * time.Minute,
-			},
-		},
-	}
-	if err := tpeSRPC.Call(context.Background(), utils.AdminSv1SetDispatcherHost, dspPrf2, &result); err != nil {
-		t.Fatal(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
-}
-
 func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 	var replyBts []byte
 	// we will get only the wantes tariff plans in the csv format
 	if err := tpeSRPC.Call(context.Background(), utils.TPeSv1ExportTariffPlan, &tpes.ArgsExportTP{
 		Tenant: "cgrates.org",
 		ExportItems: map[string][]string{
-			utils.MetaAttributes:      {"TEST_ATTRIBUTES_IT_TEST"},
-			utils.MetaResources:       {"ResGroup1"},
-			utils.MetaFilters:         {"fltr_for_prf"},
-			utils.MetaRates:           {"MultipleRates"},
-			utils.MetaChargers:        {"Chargers1"},
-			utils.MetaRoutes:          {"ROUTE_2003"},
-			utils.MetaAccounts:        {"Account_balances"},
-			utils.MetaStats:           {"SQ_basic"},
-			utils.MetaActions:         {"Execute_thd"},
-			utils.MetaThresholds:      {"TH_Stats1"},
-			utils.MetaDispatchers:     {"Dsp1"},
-			utils.MetaDispatcherHosts: {"DSH1"},
+			utils.MetaAttributes: {"TEST_ATTRIBUTES_IT_TEST"},
+			utils.MetaResources:  {"ResGroup1"},
+			utils.MetaFilters:    {"fltr_for_prf"},
+			utils.MetaRates:      {"MultipleRates"},
+			utils.MetaChargers:   {"Chargers1"},
+			utils.MetaRoutes:     {"ROUTE_2003"},
+			utils.MetaAccounts:   {"Account_balances"},
+			utils.MetaStats:      {"SQ_basic"},
+			utils.MetaActions:    {"Execute_thd"},
+			utils.MetaThresholds: {"TH_Stats1"},
 		},
 	}, &replyBts); err != nil {
 		t.Error(err)
@@ -1179,14 +1077,6 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "TH_Stats1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "", "0", "0", "", "false", "", "false"},
 			{"cgrates.org", "TH_Stats1", "*string:~*req.Destination:1011", "", "0", "0", "", "false", "", "false"},
 		},
-		utils.DispatcherProfilesCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weight", "Strategy", "StrategyParameters", "ConnID", "ConnFilterIDs", "ConnWeight", "ConnBlocker", "ConnParameters"},
-			{"cgrates.org", "Dsp1", "*string:~*req.Account:1001;*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "20", "*first", "false", "C1", "", "10", "false", "192.168.54.203"},
-		},
-		utils.DispatcherHostsCsv: {
-			{"#Tenant", "ID", "Address", "Transport", "ConnectAttempts", "Reconnects", "MaxReconnectInterval", "ConnectTimeout", "ReplyTimeout", "Tls", "ClientKey", "ClientCertificate", "CaCertificate"},
-			{"cgrates.org", "DSH1", "*internal", "", "1", "3", "5m0s", "1m0s", "2m0s", "false", "", "", ""},
-		},
 	}
 	// we do this copy of the value one xpected because there are some values in a slice that are hard to concatenate as sorted
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
@@ -1203,18 +1093,16 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 	if err := tpeSRPC.Call(context.Background(), utils.TPeSv1ExportTariffPlan, &tpes.ArgsExportTP{
 		Tenant: "cgrates.org",
 		ExportItems: map[string][]string{
-			utils.MetaAttributes:      {"TEST_ATTRIBUTES_IT_TEST", "TEST_ATTRIBUTES_IT_TEST_SECOND"},
-			utils.MetaResources:       {"ResGroup1", "ResGroup2"},
-			utils.MetaFilters:         {"fltr_for_prf", "fltr_changed2"},
-			utils.MetaRates:           {"MultipleRates", "TEST_RATE_IT_TEST"},
-			utils.MetaChargers:        {"Chargers1", "DifferentCharger"},
-			utils.MetaRoutes:          {"ROUTE_2003", "ROUTE_ACNT_1001"},
-			utils.MetaAccounts:        {"Account_balances", "Account_simple"},
-			utils.MetaStats:           {"SQ_basic", "SQ_2"},
-			utils.MetaActions:         {"Execute_thd", "SET_BAL"},
-			utils.MetaThresholds:      {"TH_Stats1", "THD_2"},
-			utils.MetaDispatchers:     {"Dsp1", "Dsp2"},
-			utils.MetaDispatcherHosts: {"DSH1", "DSH2"},
+			utils.MetaAttributes: {"TEST_ATTRIBUTES_IT_TEST", "TEST_ATTRIBUTES_IT_TEST_SECOND"},
+			utils.MetaResources:  {"ResGroup1", "ResGroup2"},
+			utils.MetaFilters:    {"fltr_for_prf", "fltr_changed2"},
+			utils.MetaRates:      {"MultipleRates", "TEST_RATE_IT_TEST"},
+			utils.MetaChargers:   {"Chargers1", "DifferentCharger"},
+			utils.MetaRoutes:     {"ROUTE_2003", "ROUTE_ACNT_1001"},
+			utils.MetaAccounts:   {"Account_balances", "Account_simple"},
+			utils.MetaStats:      {"SQ_basic", "SQ_2"},
+			utils.MetaActions:    {"Execute_thd", "SET_BAL"},
+			utils.MetaThresholds: {"TH_Stats1", "THD_2"},
 		},
 	}, &replyBts); err != nil {
 		t.Error(err)
@@ -1318,16 +1206,6 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "TH_Stats1", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-14T14:36:00Z", "", "0", "0", "", "false", "", "false"},
 			{"cgrates.org", "TH_Stats1", "*string:~*req.Destination:1011", "", "0", "0", "", "false", "", "false"},
 			{"cgrates.org", "THD_2", "*string:~*req.Account:1001", ";20", "7", "0", "", "false", "actPrfID", "true"},
-		},
-		utils.DispatcherProfilesCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weight", "Strategy", "StrategyParameters", "ConnID", "ConnFilterIDs", "ConnWeight", "ConnBlocker", "ConnParameters"},
-			{"cgrates.org", "Dsp1", "*string:~*req.Account:1001;*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "20", "*first", "false", "C1", "", "10", "false", "192.168.54.203"},
-			{"cgrates.org", "Dsp2", "*string:~*opts.EventType:LoadDispatcher", "10", "*weight", "", "Conn2", "*suffix:~*opts.*answerTime:45T", "0", "false", "*ratio:1"},
-		},
-		utils.DispatcherHostsCsv: {
-			{"#Tenant", "ID", "Address", "Transport", "ConnectAttempts", "Reconnects", "MaxReconnectInterval", "ConnectTimeout", "ReplyTimeout", "Tls", "ClientKey", "ClientCertificate", "CaCertificate"},
-			{"cgrates.org", "DSH1", "*internal", "", "1", "3", "5m0s", "1m0s", "2m0s", "false", "", "", ""},
-			{"cgrates.org", "DSH2", "127.0.0.1:6012", "*json", "1", "3", "0s", "1m0s", "2m0s", "false", "", "", ""},
 		},
 	}
 	expected[utils.RatesCsv] = csvRply[utils.RatesCsv]
