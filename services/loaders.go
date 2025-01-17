@@ -20,7 +20,6 @@ package services
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc/context"
@@ -33,11 +32,11 @@ import (
 )
 
 // NewLoaderService returns the Loader Service
-func NewLoaderService(cfg *config.CGRConfig, preloadIDs string) *LoaderService {
+func NewLoaderService(cfg *config.CGRConfig, preloadIDs []string) *LoaderService {
 	return &LoaderService{
 		cfg:        cfg,
 		stopChan:   make(chan struct{}),
-		preloadIDs: strings.Split(preloadIDs, utils.FieldsSep),
+		preloadIDs: preloadIDs,
 		stateDeps:  NewStateDependencies([]string{utils.StateServiceUP, utils.StateServiceDOWN}),
 	}
 }
