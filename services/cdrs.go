@@ -78,9 +78,7 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	if err != nil {
 		return err
 	}
-	if !cs.cfg.DispatcherSCfg().Enabled {
-		cs.cl.RpcRegister(srv)
-	}
+	cs.cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.CDRServer, srv)
 	return
 }

@@ -190,7 +190,6 @@ func (TestRPCDspMock) AttributeSv1Do(*context.Context, any, *string) error     {
 func (TestRPCDspMock) CacheSv1Do(*context.Context, any, *string) error         { return nil }
 func (TestRPCDspMock) ChargerSv1Do(*context.Context, any, *string) error       { return nil }
 func (TestRPCDspMock) ConfigSv1Do(*context.Context, any, *string) error        { return nil }
-func (TestRPCDspMock) DispatcherSv1Do(*context.Context, any, *string) error    { return nil }
 func (TestRPCDspMock) GuardianSv1Do(*context.Context, any, *string) error      { return nil }
 func (TestRPCDspMock) RateSv1Do(*context.Context, any, *string) error          { return nil }
 func (TestRPCDspMock) ReplicatorSv1Do(*context.Context, any, *string) error    { return nil }
@@ -206,48 +205,6 @@ func (TestRPCDspMock) AnalyzerSv1Do(*context.Context, any, *string) error      {
 func (TestRPCDspMock) AdminSv1Do(*context.Context, any, *string) error         { return nil }
 func (TestRPCDspMock) LoaderSv1Do(*context.Context, any, *string) error        { return nil }
 func (TestRPCDspMock) ServiceManagerv1Do(*context.Context, any, *string) error { return nil }
-
-func TestIntServiceNewDispatcherService(t *testing.T) {
-	expErrMsg := `rpc.Register: no service name for type struct {}`
-	if _, err := NewDispatcherService(struct{}{}); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	s, err := NewDispatcherService(new(TestRPCDspMock))
-	if err != nil {
-		t.Fatal(err)
-	}
-	methods := getMethods(s)
-	exp := map[string][]string{
-		"AccountSv1":     {"Do", "Ping"},
-		"ActionSv1":      {"Do", "Ping"},
-		"AttributeSv1":   {"Do", "Ping"},
-		"CDRsV1":         {"Do", "Ping"},
-		"CacheSv1":       {"Do", "Ping"},
-		"ChargerSv1":     {"Do", "Ping"},
-		"ConfigSv1":      {"Do", "Ping"},
-		"DispatcherSv1":  {"Do", "Ping"},
-		"GuardianSv1":    {"Do", "Ping"},
-		"RateSv1":        {"Do", "Ping"},
-		"ResourceSv1":    {"Do", "Ping"},
-		"RouteSv1":       {"Do", "Ping"},
-		"SessionSv1":     {"Do", "Ping"},
-		"StatSv1":        {"Do", "Ping"},
-		"TestRPCDspMock": {"AccountSv1Do", "ActionSv1Do", "AdminSv1Do", "AnalyzerSv1Do", "AttributeSv1Do", "CDRsv1Do", "CacheSv1Do", "ChargerSv1Do", "ConfigSv1Do", "CoreSv1Do", "DispatcherSv1Do", "EeSv1Do", "GuardianSv1Do", "LoaderSv1Do", "Ping", "RateSv1Do", "ReplicatorSv1Do", "ResourceSv1Do", "RouteSv1Do", "ServiceManagerv1Do", "SessionSv1Do", "StatSv1Do", "ThresholdSv1Do"},
-		"ThresholdSv1":   {"Do", "Ping"},
-		"ReplicatorSv1":  {"Do", "Ping"},
-
-		"EeSv1":            {"Do", "Ping"},
-		"CoreSv1":          {"Do", "Ping"},
-		"AnalyzerSv1":      {"Do", "Ping"},
-		"AdminSv1":         {"Do", "Ping"},
-		"LoaderSv1":        {"Do", "Ping"},
-		"ServiceManagerV1": {"Do", "Ping"},
-	}
-	if !reflect.DeepEqual(exp, methods) {
-		t.Errorf("Expeceted: %v, \nreceived: \n%v", utils.ToJSON(exp), utils.ToJSON(methods))
-	}
-}
 
 func TestNewRPCPoolUnsupportedTransport(t *testing.T) {
 	tmp := Cache

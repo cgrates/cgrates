@@ -100,13 +100,6 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 			return
 		}
 		filterIDs = ch.FilterIDs
-	case utils.CacheDispatcherFilterIndexes:
-		var ds *DispatcherProfile
-		if ds, err = dm.GetDispatcherProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
-			return
-		}
-		filterIDs = ds.FilterIDs
-
 	case utils.CacheRateProfilesFilterIndexes:
 		var rp *utils.RateProfile
 		if rp, err = dm.GetRateProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {

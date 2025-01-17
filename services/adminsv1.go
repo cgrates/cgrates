@@ -76,14 +76,12 @@ func (apiService *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmana
 	srv, _ := engine.NewService(apiService.api)
 	// srv, _ := birpc.NewService(apiService.api, "", false)
 
-	if !apiService.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			apiService.cl.RpcRegister(s)
-		}
-		rpl, _ := engine.NewService(apis.NewReplicatorSv1(dbs.DataManager(), apiService.api))
-		for _, s := range rpl {
-			apiService.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		apiService.cl.RpcRegister(s)
+	}
+	rpl, _ := engine.NewService(apis.NewReplicatorSv1(dbs.DataManager(), apiService.api))
+	for _, s := range rpl {
+		apiService.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.AdminS, srv)
 	return

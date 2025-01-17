@@ -711,20 +711,6 @@ func TestStoreDiffSectionSureTax(t *testing.T) {
 	}
 }
 
-func TestStoreDiffSectionDispatcherS(t *testing.T) {
-	section := DispatcherSJSON
-
-	cgrCfgV1 := NewDefaultCGRConfig()
-	cgrCfgV1.dispatcherSCfg = &DispatcherSCfg{}
-
-	cgrCfgV2 := NewDefaultCGRConfig()
-	cgrCfgV2.dispatcherSCfg = &DispatcherSCfg{}
-
-	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
-		t.Error(err)
-	}
-}
-
 func TestStoreDiffSectionRegistrarC(t *testing.T) {
 	section := RegistrarCJSON
 

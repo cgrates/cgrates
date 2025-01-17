@@ -161,25 +161,23 @@ type ArgsComputeFilterIndexIDs struct {
 	RouteIDs         []string
 	ThresholdIDs     []string
 	ChargerIDs       []string
-	DispatcherIDs    []string
 	RateProfileIDs   []string
 	AccountIDs       []string
 	ActionProfileIDs []string
 }
 
 type ArgsComputeFilterIndexes struct {
-	Tenant      string
-	APIOpts     map[string]any
-	AttributeS  bool
-	ResourceS   bool
-	StatS       bool
-	RouteS      bool
-	ThresholdS  bool
-	ChargerS    bool
-	DispatcherS bool
-	RateS       bool
-	AccountS    bool
-	ActionS     bool
+	Tenant     string
+	APIOpts    map[string]any
+	AttributeS bool
+	ResourceS  bool
+	StatS      bool
+	RouteS     bool
+	ThresholdS bool
+	ChargerS   bool
+	RateS      bool
+	AccountS   bool
+	ActionS    bool
 }
 
 // TPActivationInterval represents an activation interval for an item
@@ -375,50 +373,6 @@ type TPTntID struct {
 	ID     string
 }
 
-// TPDispatcherProfile is used in APIs to manage remotely offline DispatcherProfile
-type TPDispatcherProfile struct {
-	TPid           string
-	Tenant         string
-	ID             string
-	FilterIDs      []string
-	Strategy       string
-	StrategyParams []any // ie for distribution, set here the pool weights
-	Weight         float64
-	Hosts          []*TPDispatcherHostProfile
-}
-
-// TPDispatcherHostProfile is used in TPDispatcherProfile
-type TPDispatcherHostProfile struct {
-	ID        string
-	FilterIDs []string
-	Weight    float64 // applied in case of multiple connections need to be ordered
-	Params    []any   // additional parameters stored for a session
-	Blocker   bool    // no connection after this one
-}
-
-// TPDispatcherHost is used in APIs to manage remotely offline DispatcherHost
-type TPDispatcherHost struct {
-	TPid   string
-	Tenant string
-	ID     string
-	Conn   *TPDispatcherHostConn
-}
-
-// TPDispatcherHostConn is used in TPDispatcherHost
-type TPDispatcherHostConn struct {
-	Address              string
-	Transport            string
-	ConnectAttempts      int
-	Reconnects           int
-	MaxReconnectInterval time.Duration
-	ConnectTimeout       time.Duration
-	ReplyTimeout         time.Duration
-	TLS                  bool
-	ClientKey            string
-	ClientCertificate    string
-	CaCertificate        string
-}
-
 type AttrRemoteLock struct {
 	ReferenceID string        // reference ID for this lock if available
 	LockIDs     []string      // List of IDs to obtain lock for
@@ -459,9 +413,6 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		RouteProfileIDs:      []string{MetaAny},
 		AttributeProfileIDs:  []string{MetaAny},
 		ChargerProfileIDs:    []string{MetaAny},
-		DispatcherProfileIDs: []string{MetaAny},
-		DispatcherHostIDs:    []string{MetaAny},
-		Dispatchers:          []string{MetaAny},
 		RateProfileIDs:       []string{MetaAny},
 		ActionProfileIDs:     []string{MetaAny},
 		AccountIDs:           []string{MetaAny},
@@ -473,7 +424,6 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		ThresholdFilterIndexIDs:      []string{MetaAny},
 		RouteFilterIndexIDs:          []string{MetaAny},
 		ChargerFilterIndexIDs:        []string{MetaAny},
-		DispatcherFilterIndexIDs:     []string{MetaAny},
 		RateProfilesFilterIndexIDs:   []string{MetaAny},
 		RateFilterIndexIDs:           []string{MetaAny},
 		FilterIndexIDs:               []string{MetaAny},
@@ -499,9 +449,6 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		RouteProfileIDs:              arg[CacheRouteProfiles],
 		AttributeProfileIDs:          arg[CacheAttributeProfiles],
 		ChargerProfileIDs:            arg[CacheChargerProfiles],
-		DispatcherProfileIDs:         arg[CacheDispatcherProfiles],
-		DispatcherHostIDs:            arg[CacheDispatcherHosts],
-		Dispatchers:                  arg[CacheDispatchers],
 		RateProfileIDs:               arg[CacheRateProfiles],
 		ActionProfileIDs:             arg[CacheActionProfiles],
 		AccountIDs:                   arg[CacheAccounts],
@@ -511,7 +458,6 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		RouteFilterIndexIDs:          arg[CacheRouteFilterIndexes],
 		AttributeFilterIndexIDs:      arg[CacheAttributeFilterIndexes],
 		ChargerFilterIndexIDs:        arg[CacheChargerFilterIndexes],
-		DispatcherFilterIndexIDs:     arg[CacheDispatcherFilterIndexes],
 		RateProfilesFilterIndexIDs:   arg[CacheRateProfilesFilterIndexes],
 		ActionProfilesFilterIndexIDs: arg[CacheActionProfilesFilterIndexes],
 		AccountsFilterIndexIDs:       arg[CacheAccountsFilterIndexes],
@@ -540,9 +486,6 @@ type AttrReloadCacheWithAPIOpts struct {
 	RouteProfileIDs      []string `json:",omitempty"`
 	AttributeProfileIDs  []string `json:",omitempty"`
 	ChargerProfileIDs    []string `json:",omitempty"`
-	DispatcherProfileIDs []string `json:",omitempty"`
-	DispatcherHostIDs    []string `json:",omitempty"`
-	Dispatchers          []string `json:",omitempty"`
 	RateProfileIDs       []string `json:",omitempty"`
 	ActionProfileIDs     []string `json:",omitempty"`
 	AccountIDs           []string `json:",omitempty"`
@@ -553,7 +496,6 @@ type AttrReloadCacheWithAPIOpts struct {
 	ThresholdFilterIndexIDs      []string `json:",omitempty"`
 	RouteFilterIndexIDs          []string `json:",omitempty"`
 	ChargerFilterIndexIDs        []string `json:",omitempty"`
-	DispatcherFilterIndexIDs     []string `json:",omitempty"`
 	RateProfilesFilterIndexIDs   []string `json:",omitempty"`
 	RateFilterIndexIDs           []string `json:",omitempty"`
 	FilterIndexIDs               []string `json:",omitempty"`
@@ -577,9 +519,6 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheChargerProfiles:             a.ChargerProfileIDs,
 		CacheRankingProfiles:             a.RankingProfileIDs,
 		CacheRankings:                    a.RankingIDs,
-		CacheDispatcherProfiles:          a.DispatcherProfileIDs,
-		CacheDispatcherHosts:             a.DispatcherHostIDs,
-		CacheDispatchers:                 a.Dispatchers,
 		CacheRateProfiles:                a.RateProfileIDs,
 		CacheActionProfiles:              a.ActionProfileIDs,
 		CacheAccounts:                    a.AccountIDs,
@@ -589,7 +528,6 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheRouteFilterIndexes:          a.RouteFilterIndexIDs,
 		CacheAttributeFilterIndexes:      a.AttributeFilterIndexIDs,
 		CacheChargerFilterIndexes:        a.ChargerFilterIndexIDs,
-		CacheDispatcherFilterIndexes:     a.DispatcherFilterIndexIDs,
 		CacheRateProfilesFilterIndexes:   a.RateProfilesFilterIndexIDs,
 		CacheActionProfilesFilterIndexes: a.ActionProfilesFilterIndexIDs,
 		CacheAccountsFilterIndexes:       a.AccountsFilterIndexIDs,

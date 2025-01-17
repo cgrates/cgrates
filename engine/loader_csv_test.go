@@ -23,7 +23,6 @@ import (
 	"sort"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -193,12 +192,6 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 	}
 	if err := csvr.LoadChargerProfiles(); err != nil {
 		log.Print("error in LoadChargerProfiles:", err)
-	}
-	if err := csvr.LoadDispatcherProfiles(); err != nil {
-		log.Print("error in LoadDispatcherProfiles:", err)
-	}
-	if err := csvr.LoadDispatcherHosts(); err != nil {
-		log.Print("error in LoadDispatcherHosts:", err)
 	}
 	if err := csvr.LoadRateProfiles(); err != nil {
 		log.Print("error in LoadRateProfiles:", err)
@@ -580,48 +573,6 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 		}
 	})
 
-	t.Run("load DispatcherProfiles", func(t *testing.T) {
-		eDispatcherProfiles := &utils.TPDispatcherProfile{
-			TPid:      testTPID,
-			Tenant:    "cgrates.org",
-			ID:        "D1",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Strategy:  utils.MetaFirst,
-			Weight:    20,
-			Hosts: []*utils.TPDispatcherHostProfile{
-				{
-					ID:        "C1",
-					FilterIDs: []string{"*gt:~*req.Usage:10"},
-					Weight:    10,
-					Params:    []any{"192.168.56.203"},
-					Blocker:   false,
-				},
-				{
-					ID:        "C2",
-					FilterIDs: []string{"*lt:~*req.Usage:10"},
-					Weight:    10,
-					Params:    []any{"192.168.56.204"},
-					Blocker:   false,
-				},
-			},
-		}
-		if len(csvr.dispatcherProfiles) != 1 {
-			t.Errorf("Failed to load dispatcherProfiles: %s", utils.ToIJSON(csvr.dispatcherProfiles))
-		}
-		dppKey := utils.TenantID{Tenant: "cgrates.org", ID: "D1"}
-		sort.Slice(eDispatcherProfiles.Hosts, func(i, j int) bool {
-			return eDispatcherProfiles.Hosts[i].ID < eDispatcherProfiles.Hosts[j].ID
-		})
-		sort.Slice(csvr.dispatcherProfiles[dppKey].Hosts, func(i, j int) bool {
-			return csvr.dispatcherProfiles[dppKey].Hosts[i].ID < csvr.dispatcherProfiles[dppKey].Hosts[j].ID
-		})
-
-		if !reflect.DeepEqual(eDispatcherProfiles, csvr.dispatcherProfiles[dppKey]) {
-			t.Errorf("Expecting: %+v, received: %+v",
-				utils.ToJSON(eDispatcherProfiles), utils.ToJSON(csvr.dispatcherProfiles[dppKey]))
-		}
-	})
-
 	t.Run("load RateProfiles", func(t *testing.T) {
 		eRatePrf := &utils.TPRateProfile{
 			TPid:            testTPID,
@@ -782,32 +733,6 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 		if !reflect.DeepEqual(csvr.actionProfiles[actPrfKey], expected) {
 			t.Errorf("Expecting: %+v,\n received: %+v",
 				utils.ToJSON(expected), utils.ToJSON(csvr.actionProfiles[actPrfKey]))
-		}
-	})
-
-	t.Run("load DispatcherHosts", func(t *testing.T) {
-		eDispatcherHosts := &utils.TPDispatcherHost{
-			TPid:   testTPID,
-			Tenant: "cgrates.org",
-			ID:     "ALL",
-			Conn: &utils.TPDispatcherHostConn{
-				Address:              "127.0.0.1:6012",
-				Transport:            utils.MetaJSON,
-				ConnectAttempts:      1,
-				Reconnects:           3,
-				MaxReconnectInterval: 5 * time.Minute,
-				ConnectTimeout:       1 * time.Minute,
-				ReplyTimeout:         2 * time.Minute,
-				TLS:                  false,
-			},
-		}
-
-		dphKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALL"}
-		if len(csvr.dispatcherHosts) != 1 {
-			t.Fatalf("Failed to load DispatcherHosts: %v", len(csvr.dispatcherHosts))
-		}
-		if !reflect.DeepEqual(eDispatcherHosts, csvr.dispatcherHosts[dphKey]) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eDispatcherHosts), utils.ToJSON(csvr.dispatcherHosts[dphKey]))
 		}
 	})
 

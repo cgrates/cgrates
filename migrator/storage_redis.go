@@ -585,32 +585,6 @@ func (v1rs *redisMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfil
 	return
 }
 
-func (v1rs *redisMigrator) getV1DispatcherProfile() (v1chrPrf *engine.DispatcherProfile, err error) {
-	if v1rs.qryIdx == nil {
-		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.DispatcherProfilePrefix)
-		if err != nil {
-			return
-		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNoMoreData
-		}
-		v1rs.qryIdx = utils.IntPointer(0)
-	}
-	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
-		var strVal []byte
-		if err = v1rs.rds.Cmd(&strVal, "GET", v1rs.dataKeys[*v1rs.qryIdx]); err != nil {
-			return nil, err
-		}
-		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v1chrPrf); err != nil {
-			return nil, err
-		}
-		*v1rs.qryIdx = *v1rs.qryIdx + 1
-	} else {
-		v1rs.qryIdx = nil
-		return nil, utils.ErrNoMoreData
-	}
-	return
-}
-
 func (v1rs *redisMigrator) getV1RouteProfile() (v1chrPrf *engine.RouteProfile, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix)

@@ -88,15 +88,9 @@ type DataDB interface {
 	GetChargerProfileDrv(*context.Context, string, string) (*ChargerProfile, error)
 	SetChargerProfileDrv(*context.Context, *ChargerProfile) error
 	RemoveChargerProfileDrv(*context.Context, string, string) error
-	GetDispatcherProfileDrv(*context.Context, string, string) (*DispatcherProfile, error)
-	SetDispatcherProfileDrv(*context.Context, *DispatcherProfile) error
-	RemoveDispatcherProfileDrv(*context.Context, string, string) error
 	GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error)
 	SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error
 	RemoveLoadIDsDrv() error
-	GetDispatcherHostDrv(*context.Context, string, string) (*DispatcherHost, error)
-	SetDispatcherHostDrv(*context.Context, *DispatcherHost) error
-	RemoveDispatcherHostDrv(*context.Context, string, string) error
 	GetRateProfileDrv(*context.Context, string, string) (*utils.RateProfile, error)
 	GetRateProfileRatesDrv(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error)
 	SetRateProfileDrv(*context.Context, *utils.RateProfile, bool) error
@@ -145,8 +139,6 @@ type LoadReader interface {
 	GetTPRoutes(string, string, string) ([]*utils.TPRouteProfile, error)
 	GetTPAttributes(string, string, string) ([]*utils.TPAttributeProfile, error)
 	GetTPChargers(string, string, string) ([]*utils.TPChargerProfile, error)
-	GetTPDispatcherProfiles(string, string, string) ([]*utils.TPDispatcherProfile, error)
-	GetTPDispatcherHosts(string, string, string) ([]*utils.TPDispatcherHost, error)
 	GetTPRateProfiles(string, string, string) ([]*utils.TPRateProfile, error)
 	GetTPActionProfiles(string, string, string) ([]*utils.TPActionProfile, error)
 	GetTPAccounts(string, string, string) ([]*utils.TPAccount, error)
@@ -161,8 +153,6 @@ type LoadWriter interface {
 	SetTPRoutes([]*utils.TPRouteProfile) error
 	SetTPAttributes([]*utils.TPAttributeProfile) error
 	SetTPChargers([]*utils.TPChargerProfile) error
-	SetTPDispatcherProfiles([]*utils.TPDispatcherProfile) error
-	SetTPDispatcherHosts([]*utils.TPDispatcherHost) error
 	SetTPRateProfiles([]*utils.TPRateProfile) error
 	SetTPActionProfiles([]*utils.TPActionProfile) error
 	SetTPAccounts([]*utils.TPAccount) error

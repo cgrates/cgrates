@@ -189,28 +189,6 @@ func (rplSv1 *ReplicatorSv1) GetChargerProfile(ctx *context.Context, tntID *util
 	return nil
 }
 
-// GetDispatcherProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetDispatcherProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherProfile) error {
-	engine.UpdateReplicationFilters(utils.DispatcherProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetDispatcherProfileDrv(ctx, tntID.Tenant, tntID.ID)
-	if err != nil {
-		return err
-	}
-	*reply = *rcv
-	return nil
-}
-
-// GetDispatcherHost is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetDispatcherHost(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.DispatcherHost) error {
-	engine.UpdateReplicationFilters(utils.DispatcherHostPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetDispatcherHostDrv(ctx, tntID.Tenant, tntID.ID)
-	if err != nil {
-		return err
-	}
-	*reply = *rcv
-	return nil
-}
-
 // GetItemLoadIDs is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(ctx *context.Context, itemID *utils.StringWithAPIOpts, reply *map[string]int64) error {
 	engine.UpdateReplicationFilters(utils.LoadIDPrefix, itemID.Arg, utils.IfaceAsString(itemID.APIOpts[utils.RemoteHostOpt]))
@@ -453,42 +431,6 @@ func (rplSv1 *ReplicatorSv1) SetChargerProfile(ctx *context.Context, cp *engine.
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(cp.APIOpts[utils.MetaCache]),
 		cp.Tenant, utils.CacheChargerProfiles, cp.TenantID(), utils.EmptyString, &cp.FilterIDs, cp.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// SetDispatcherProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(ctx *context.Context, dpp *engine.DispatcherProfileWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetDispatcherProfileDrv(ctx, dpp.DispatcherProfile); err != nil {
-		return
-	}
-	// delay if needed before cache call
-	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
-		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetDispatcherProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
-		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
-	}
-	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(dpp.APIOpts[utils.MetaCache]),
-		dpp.Tenant, utils.CacheDispatcherProfiles, dpp.TenantID(), utils.EmptyString, &dpp.FilterIDs, dpp.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// SetDispatcherHost is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetDispatcherHost(ctx *context.Context, dpp *engine.DispatcherHostWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetDispatcherHostDrv(ctx, dpp.DispatcherHost); err != nil {
-		return
-	}
-	// delay if needed before cache call
-	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
-		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.SetDispatcherHost> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
-		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
-	}
-	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(dpp.APIOpts[utils.MetaCache]),
-		dpp.Tenant, utils.CacheDispatcherHosts, dpp.TenantID(), utils.EmptyString, nil, dpp.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -749,42 +691,6 @@ func (rplSv1 *ReplicatorSv1) RemoveChargerProfile(ctx *context.Context, args *ut
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
 		args.Tenant, utils.CacheChargerProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveDispatcherProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveDispatcherProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveDispatcherProfileDrv(ctx, args.Tenant, args.ID); err != nil {
-		return
-	}
-	// delay if needed before cache call
-	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
-		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveDispatcherProfile> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
-		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
-	}
-	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheDispatcherProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
-		return
-	}
-	*reply = utils.OK
-	return
-}
-
-// RemoveDispatcherHost is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveDispatcherHostDrv(ctx, args.Tenant, args.ID); err != nil {
-		return
-	}
-	// delay if needed before cache call
-	if rplSv1.v1.cfg.GeneralCfg().CachingDelay != 0 {
-		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1.RemoveDispatcherHost> Delaying cache call for %v", rplSv1.v1.cfg.GeneralCfg().CachingDelay))
-		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
-	}
-	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheDispatcherHosts, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

@@ -78,8 +78,6 @@ func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 		}
 		arg.ItemType = utils.CacheRateFilterIndexes
 		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
-	case utils.MetaDispatchers:
-		arg.ItemType = utils.CacheDispatcherFilterIndexes
 	case utils.MetaAttributes:
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 	}
@@ -134,8 +132,6 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 		}
 		arg.ItemType = utils.CacheRateFilterIndexes
 		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
-	case utils.MetaDispatchers:
-		arg.ItemType = utils.CacheDispatcherFilterIndexes
 	case utils.MetaAttributes:
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 	}
@@ -386,21 +382,6 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 		}
 		args.RateS = indexes.Size() != 0
 	}
-	//DispatcherProfile Indexes
-	if args.DispatcherS {
-		cacheIDs[utils.CacheDispatcherFilterIndexes] = []string{utils.MetaAny}
-		if indexes, err = engine.ComputeIndexes(ctx, adms.dm, tnt, utils.EmptyString, utils.CacheDispatcherFilterIndexes,
-			nil, transactionID, func(tnt, id, grp string) (*[]string, error) {
-				dsp, e := adms.dm.GetDispatcherProfile(ctx, tnt, id, true, false, utils.NonTransactional)
-				if e != nil {
-					return nil, e
-				}
-				return utils.SliceStringPointer(slices.Clone(dsp.FilterIDs)), nil
-			}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
-			return utils.APIErrorHandler(err)
-		}
-		args.DispatcherS = indexes.Size() != 0
-	}
 
 	//Now we move from tmpKey to the right key for each type
 	//ThresholdProfile Indexes
@@ -461,12 +442,6 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 				return err
 			}
 
-		}
-	}
-	//DispatcherProfile Indexes
-	if args.DispatcherS {
-		if err = adms.dm.SetIndexes(ctx, utils.CacheDispatcherFilterIndexes, tnt, nil, true, transactionID); err != nil {
-			return
 		}
 	}
 	//generate a load
@@ -641,20 +616,6 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 	if indexes.Size() != 0 {
 		cacheIDs[utils.CacheRateProfilesFilterIndexes] = indexes.AsSlice()
 	}
-	//DispatcherProfile Indexes
-	if indexes, err = engine.ComputeIndexes(ctx, adms.dm, tnt, utils.EmptyString, utils.CacheDispatcherFilterIndexes,
-		&args.DispatcherIDs, transactionID, func(tnt, id, grp string) (*[]string, error) {
-			dsp, e := adms.dm.GetDispatcherProfile(ctx, tnt, id, true, false, utils.NonTransactional)
-			if e != nil {
-				return nil, e
-			}
-			return utils.SliceStringPointer(slices.Clone(dsp.FilterIDs)), nil
-		}, nil); err != nil && err != utils.ErrDSPProfileNotFound {
-		return utils.APIErrorHandler(err)
-	}
-	if indexes.Size() != 0 {
-		cacheIDs[utils.CacheDispatcherFilterIndexes] = indexes.AsSlice()
-	}
 	//generate a load
 	//ID for CacheFilterIndexes and store it in database
 
@@ -764,20 +725,6 @@ func (adms *AdminSv1) GetChargersIndexesHealth(ctx *context.Context, args *engin
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
 		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
 		utils.CacheChargerFilterIndexes,
-	)
-	if err != nil {
-		return err
-	}
-	*reply = *rp
-	return nil
-}
-
-func (adms *AdminSv1) GetDispatchersIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
-	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
-		utils.CacheDispatcherFilterIndexes,
 	)
 	if err != nil {
 		return err

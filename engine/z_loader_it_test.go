@@ -150,12 +150,6 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadChargerProfiles(); err != nil {
 		t.Error("Failed loading Charger profiles: ", err.Error())
 	}
-	if err = loader.LoadDispatcherProfiles(); err != nil {
-		t.Error("Failed loading Dispatcher profiles: ", err.Error())
-	}
-	if err = loader.LoadDispatcherHosts(); err != nil {
-		t.Error("Failed loading Dispatcher hosts: ", err.Error())
-	}
 	if err := loader.WriteToDatabase(false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
 	}
@@ -201,12 +195,6 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadChargerProfiles(); err != nil {
 		t.Error("Failed loading Charger profiles: ", err.Error())
-	}
-	if err = loader.LoadDispatcherProfiles(); err != nil {
-		t.Error("Failed loading Dispatcher profiles: ", err.Error())
-	}
-	if err = loader.LoadDispatcherHosts(); err != nil {
-		t.Error("Failed loading Dispatcher hosts: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
@@ -311,27 +299,6 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
-	for tenatid, dpp := range loader.dispatcherProfiles {
-		rcv, err := loader.dm.GetDispatcherProfile(context.TODO(), tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
-		if err != nil {
-			t.Errorf("Failed GetDispatcherProfile, tenant: %s, id: %s,  error: %s ", dpp.Tenant, dpp.ID, err.Error())
-		}
-		dp := APItoDispatcherProfile(dpp, "UTC")
-		if !reflect.DeepEqual(dp, rcv) {
-			t.Errorf("Expecting: %v, received: %v", dp, rcv)
-		}
-	}
-
-	for tenatid, dph := range loader.dispatcherHosts {
-		rcv, err := loader.dm.GetDispatcherHost(context.TODO(), tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
-		if err != nil {
-			t.Errorf("Failed GetDispatcherHost, tenant: %s, id: %s,  error: %s ", dph.Tenant, dph.ID, err.Error())
-		}
-		dp := APItoDispatcherHost(dph)
-		if !reflect.DeepEqual(dp, rcv) {
-			t.Errorf("Expecting: %v, received: %v", dp, rcv)
-		}
-	}
 }
 
 /*

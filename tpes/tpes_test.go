@@ -21,7 +21,6 @@ package tpes
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -343,52 +342,6 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	dm.SetThresholdProfile(context.Background(), thd, false)
 	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaThresholds)
 	exp = []string{"THD_2"}
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("Expected %v\n but received %v", exp, rcv)
-	}
-
-	//Dispatchers
-	dsp := &engine.DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Dsp1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-		Strategy:  utils.MetaFirst,
-		StrategyParams: map[string]any{
-			utils.MetaDefaultRatio: "false",
-		},
-		Weight: 20,
-		Hosts: engine.DispatcherHostProfiles{
-			{
-				ID:        "C1",
-				FilterIDs: []string{},
-				Weight:    10,
-				Params:    map[string]any{"0": "192.168.54.203"},
-				Blocker:   false,
-			},
-		},
-	}
-	dm.SetDispatcherProfile(context.Background(), dsp, false)
-	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaDispatchers)
-	exp = []string{"Dsp1"}
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("Expected %v\n but received %v", exp, rcv)
-	}
-
-	//DispatcherHosts
-	dsph := &engine.DispatcherHost{
-		Tenant: "cgrates.org",
-		RemoteHost: &config.RemoteHost{
-			ID:              "DSH1",
-			Address:         "*internal",
-			ConnectAttempts: 1,
-			Reconnects:      3,
-			ConnectTimeout:  time.Minute,
-			ReplyTimeout:    2 * time.Minute,
-		},
-	}
-	dm.SetDispatcherHost(context.Background(), dsph)
-	rcv, _ = getTariffPlansKeys(context.Background(), dm, "cgrates.org", utils.MetaDispatcherHosts)
-	exp = []string{"DSH1"}
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
 	}

@@ -289,52 +289,7 @@ func TestChargerMdlTableName(t *testing.T) {
 		t.Errorf("Expected <%v>, Received <%v>", utils.TBLTPChargers, rcv)
 	}
 }
-func TestDispatcherProfileMdlTableName(t *testing.T) {
-	model := DispatcherProfileMdl{
-		PK:                 2,
-		Tpid:               "tpid",
-		Tenant:             "tenant",
-		ID:                 "id",
-		FilterIDs:          "fltrId",
-		Weight:             98,
-		Strategy:           "testStrategy",
-		StrategyParameters: "testStratParams",
-		ConnID:             "testConnId",
-		ConnFilterIDs:      "testConnFltrIds",
-		ConnWeight:         76,
-		ConnBlocker:        true,
-		ConnParameters:     "testConnParams",
-		CreatedAt:          time.Now(),
-	}
-	rcv := model.TableName()
-	if !reflect.DeepEqual(rcv, utils.TBLTPDispatchers) {
-		t.Errorf("Expected <%v>, Received <%v>", utils.TBLTPDispatchers, rcv)
-	}
-}
-func TestDispatcherHostMdlTableName(t *testing.T) {
-	model := DispatcherHostMdl{
-		PK:                   2,
-		Tpid:                 "tpid",
-		Tenant:               "tenant",
-		ID:                   "id",
-		Address:              "testAddress",
-		Transport:            "testTransport",
-		ConnectAttempts:      3,
-		Reconnects:           2,
-		MaxReconnectInterval: "testMaxReconnInterval",
-		ConnectTimeout:       "testConnTimeout",
-		ReplyTimeout:         "testReplyTimeout",
-		TLS:                  true,
-		ClientKey:            "testClientKey",
-		ClientCertificate:    "testClientCertificate",
-		CaCertificate:        "testCaCertificate",
-		CreatedAt:            time.Now(),
-	}
-	rcv := model.TableName()
-	if !reflect.DeepEqual(rcv, utils.TBLTPDispatcherHosts) {
-		t.Errorf("Expected <%v>, Received <%v>", utils.TBLTPDispatcherHosts, rcv)
-	}
-}
+
 func TestRateProfileMdlTableName(t *testing.T) {
 	model := RateProfileMdl{
 		PK:                  2,

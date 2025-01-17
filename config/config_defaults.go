@@ -132,8 +132,6 @@ const CGRATES_CFG_JSON = `
 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -148,7 +146,6 @@ const CGRATES_CFG_JSON = `
 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
@@ -270,8 +267,6 @@ const CGRATES_CFG_JSON = `
 		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control route profile caching
 		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control attribute profile caching
 		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control charger profile caching
-		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control dispatcher profile caching
-		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control dispatcher hosts caching
 		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control rate profile caching
 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control action profile caching
 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control account profile caching
@@ -283,15 +278,11 @@ const CGRATES_CFG_JSON = `
 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control ranking profile caching
 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control rankings caching
 		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control charger filter indexes caching
-		"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control dispatcher filter indexes caching
 		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control rate profile filter indexes caching
 		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control rate filter indexes caching
 		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control action profile filter indexes caching
 		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control coount profile filter indexes caching
 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control reverse filter indexes caching used only for set and remove filters
-		"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control dispatcher routes caching
-		"*dispatcher_loads": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// control dispatcher load( in case of *ratio ConnParams is present)
-		"*dispatchers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 				// control dispatcher interface
 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},			// diameter messages caching
 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "remote":false, "replicate": false},				// RPC responses caching
 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
@@ -1312,8 +1303,6 @@ const CGRATES_CFG_JSON = `
 			"*thresholds":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*routes":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*chargers":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*dispatchers":{"limit": -1, "ttl": "5s", "static_ttl": false},
-			"*dispatcher_hosts":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*rate_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*action_profiles":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*accounts":{"limit": -1, "ttl": "5s", "static_ttl": false},
@@ -1468,42 +1457,6 @@ const CGRATES_CFG_JSON = `
 				]
 			},
 			{
-				"type": "*dispatchers",			// data source type
-				"file_name": "DispatcherProfiles.csv",	// file name in the tp_in_dir
-				"fields": [
-					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
-					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
-					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.3"},
-					{"tag": "Strategy", "path": "Strategy", "type": "*variable", "value": "~*req.4"},
-					{"tag": "StrategyParameters", "path": "StrategyParams", "type": "*variable", "value": "~*req.5"},
-					{"tag": "ConnID", "path": "Hosts.ID", "type": "*variable", "value": "~*req.6","new_branch":true},
-					{"tag": "ConnFilterIDs", "path": "Hosts.FilterIDs", "type": "*variable", "value": "~*req.7"},
-					{"tag": "ConnWeight", "path": "Hosts.Weight", "type": "*variable", "value": "~*req.8"},
-					{"tag": "ConnBlocker", "path": "Hosts.Blocker", "type": "*variable", "value": "~*req.9"},
-					{"tag": "ConnParameters", "path": "Hosts.Params", "type": "*variable", "value": "~*req.10"}
-				]
-			},
-			{
-				"type": "*dispatcher_hosts",		// data source type
-				"file_name": "DispatcherHosts.csv",	// file name in the tp_in_dir
-				"fields": [
-					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
-					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
-					{"tag": "Address", "path": "Address", "type": "*variable", "value": "~*req.2"},
-					{"tag": "Transport", "path": "Transport", "type": "*variable", "value": "~*req.3"},
-					{"tag": "ConnectAttempts", "path": "ConnectAttempts", "type": "*variable", "value":"~*req.4"},
-					{"tag": "Reconnects", "path": "Reconnects", "type": "*variable", "value":"~*req.5"},
-					{"tag": "MaxReconnectInterval", "path": "MaxReconnectInterval", "type": "*variable", "value":"~*req.6"},
-					{"tag": "ConnectTimeout", "path": "ConnectTimeout", "type": "*variable", "value":"~*req.7"},
-					{"tag": "ReplyTimeout", "path": "ReplyTimeout", "type": "*variable", "value":"~*req.8"},
-					{"tag": "TLS", "path": "TLS", "type": "*variable", "value": "~*req.9"},
-					{"tag": "ClientKey", "path": "ClientKey", "type": "*variable", "value":"~*req.10"},
-					{"tag": "ClientCertificate", "path": "ClientCertificate", "type": "*variable", "value":"~*req.11"},
-					{"tag": "CaCertificate", "path": "CaCertificate", "type": "*variable", "value":"~*req.12"}
-				]
-			},
-			{
 				"type": "*rate_profiles",	// data source type
 				"file_name": "Rates.csv",	// file name in the tp_in_dir
 				"fields": [
@@ -1649,36 +1602,8 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"dispatchers":{
-	"enabled": false,			// starts DispatcherS service: <true|false>.
-	"indexed_selects": true,		// enable profile matching exclusively on indexes
-	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
-	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
-	"attributes_conns": [],			// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
-	"opts": {
-		// "*dispatchers": [
-		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": false,
-		// 	},
-		// ],
-	},
-},
-
-
 "registrarc":{
     "rpc":{
-        "enabled": false,
-        "registrars_conns": [],
-        "hosts": [],  
-        "refresh_interval": "5m"
-    },
-    "dispatchers":{
         "enabled": false,
         "registrars_conns": [],
         "hosts": [],  

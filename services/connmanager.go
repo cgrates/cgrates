@@ -198,10 +198,6 @@ var serviceMethods = map[string]internalRoute{
 		receiver:     utils.RateSv1,
 		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates),
 	},
-	utils.DispatcherS: {
-		receiver:     utils.DispatcherSv1,
-		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers),
-	},
 	utils.AccountS: {
 		receiver:     utils.AccountSv1,
 		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts),

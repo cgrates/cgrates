@@ -63,10 +63,8 @@ func (s *GuardianService) Start(_ *utils.SyncedChan, registry *servmanager.Servi
 	defer s.mu.Unlock()
 
 	svcs, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
-	if !s.cfg.DispatcherSCfg().Enabled {
-		for _, svc := range svcs {
-			s.cl.RpcRegister(svc)
-		}
+	for _, svc := range svcs {
+		s.cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.GuardianS, svcs)
 	return nil

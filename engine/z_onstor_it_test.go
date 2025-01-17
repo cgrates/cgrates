@@ -60,7 +60,6 @@ var (
 		testOnStorITIsDBEmpty,
 		testOnStorITTestAttributeSubstituteIface,
 		testOnStorITChargerProfile,
-		testOnStorITDispatcherProfile,
 		testOnStorITRateProfile,
 		testOnStorITActionProfile,
 		testOnStorITAccount,
@@ -958,59 +957,6 @@ func testOnStorITChargerProfile(t *testing.T) {
 	//check database if removed
 	if _, rcvErr := onStor.GetChargerProfile(context.Background(), "cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
-	}
-}
-
-func testOnStorITDispatcherProfile(t *testing.T) {
-	dpp := &DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Dsp1",
-		FilterIDs: []string{"*string:Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
-		Strategy:  utils.MetaFirst,
-		// Hosts:    []string{"192.168.56.203"},
-		Weight: 20,
-	}
-	if _, rcvErr := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
-		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrDSPProfileNotFound {
-		t.Error(rcvErr)
-	}
-	if err := onStor.SetDispatcherProfile(context.TODO(), dpp, false); err != nil {
-		t.Error(err)
-	}
-	//get from database
-	if rcv, err := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
-		false, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dpp, rcv) {
-		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
-	}
-	expectedT := []string{"dpp_cgrates.org:Dsp1"}
-	if itm, err := onStor.DataDB().GetKeysForPrefix(context.TODO(), utils.DispatcherProfilePrefix); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedT, itm) {
-		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
-	}
-	//update
-	dpp.FilterIDs = []string{"*string:~*req.Accout:1001", "*prefix:~*req.Destination:10"}
-	if err := onStor.SetDispatcherProfile(context.TODO(), dpp, false); err != nil {
-		t.Error(err)
-	}
-
-	//get from database
-	if rcv, err := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
-		false, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dpp, rcv) {
-		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
-	}
-	if err := onStor.RemoveDispatcherProfile(context.TODO(), dpp.Tenant, dpp.ID,
-		false); err != nil {
-		t.Error(err)
-	}
-	//check database if removed
-	if _, rcvErr := onStor.GetDispatcherProfile(context.TODO(), "cgrates.org", "Dsp1",
-		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrDSPProfileNotFound {
 		t.Error(rcvErr)
 	}
 }

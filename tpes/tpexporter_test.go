@@ -146,30 +146,6 @@ func TestNewTPExporter(t *testing.T) {
 		t.Errorf("Expected %v\n but received %v", expThd, rcv)
 	}
 
-	//Dispatchers
-	rcv, err = newTPExporter(utils.MetaDispatchers, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	expDsp := &TPDispatchers{
-		dm: nil,
-	}
-	if !reflect.DeepEqual(rcv, expDsp) {
-		t.Errorf("Expected %v\n but received %v", expDsp, rcv)
-	}
-
-	//DispatcherHost
-	rcv, err = newTPExporter(utils.MetaDispatcherHosts, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	expDsph := &TPDispatcherHosts{
-		dm: nil,
-	}
-	if !reflect.DeepEqual(rcv, expDsph) {
-		t.Errorf("Expected %v\n but received %v", expDsph, rcv)
-	}
-
 	//Unsupported type
 	_, err = newTPExporter("does not exist", nil)
 	errExpect := "UNSUPPORTED_TPEXPORTER_TYPE:does not exist"

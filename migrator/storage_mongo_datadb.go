@@ -431,25 +431,6 @@ func (v1ms *mongoMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfil
 	return
 }
 
-func (v1ms *mongoMigrator) getV1DispatcherProfile() (v1dppPrf *engine.DispatcherProfile, err error) {
-	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColDpp).Find(v1ms.mgoDB.GetContext(), bson.D{})
-		if err != nil {
-			return nil, err
-		}
-	}
-	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
-		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
-		v1ms.cursor = nil
-		return nil, utils.ErrNoMoreData
-	}
-	v1dppPrf = new(engine.DispatcherProfile)
-	if err := (*v1ms.cursor).Decode(v1dppPrf); err != nil {
-		return nil, err
-	}
-	return
-}
-
 func (v1ms *mongoMigrator) getV1RouteProfile() (v1dppPrf *engine.RouteProfile, err error) {
 	if v1ms.cursor == nil {
 		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColRpp).Find(v1ms.mgoDB.GetContext(), bson.D{})

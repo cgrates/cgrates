@@ -30,25 +30,23 @@ import (
 )
 
 type TpReader struct {
-	tpid               string
-	timezone           string
-	dm                 *DataManager
-	lr                 LoadReader
-	resProfiles        map[utils.TenantID]*utils.TPResourceProfile
-	sqProfiles         map[utils.TenantID]*utils.TPStatProfile
-	trProfiles         map[utils.TenantID]*utils.TPTrendsProfile
-	rgProfiles         map[utils.TenantID]*utils.TPRankingProfile
-	thProfiles         map[utils.TenantID]*utils.TPThresholdProfile
-	filters            map[utils.TenantID]*utils.TPFilterProfile
-	routeProfiles      map[utils.TenantID]*utils.TPRouteProfile
-	attributeProfiles  map[utils.TenantID]*utils.TPAttributeProfile
-	chargerProfiles    map[utils.TenantID]*utils.TPChargerProfile
-	dispatcherProfiles map[utils.TenantID]*utils.TPDispatcherProfile
-	dispatcherHosts    map[utils.TenantID]*utils.TPDispatcherHost
-	rateProfiles       map[utils.TenantID]*utils.TPRateProfile
-	actionProfiles     map[utils.TenantID]*utils.TPActionProfile
-	accounts           map[utils.TenantID]*utils.TPAccount
-	cacheConns         []string
+	tpid              string
+	timezone          string
+	dm                *DataManager
+	lr                LoadReader
+	resProfiles       map[utils.TenantID]*utils.TPResourceProfile
+	sqProfiles        map[utils.TenantID]*utils.TPStatProfile
+	trProfiles        map[utils.TenantID]*utils.TPTrendsProfile
+	rgProfiles        map[utils.TenantID]*utils.TPRankingProfile
+	thProfiles        map[utils.TenantID]*utils.TPThresholdProfile
+	filters           map[utils.TenantID]*utils.TPFilterProfile
+	routeProfiles     map[utils.TenantID]*utils.TPRouteProfile
+	attributeProfiles map[utils.TenantID]*utils.TPAttributeProfile
+	chargerProfiles   map[utils.TenantID]*utils.TPChargerProfile
+	rateProfiles      map[utils.TenantID]*utils.TPRateProfile
+	actionProfiles    map[utils.TenantID]*utils.TPActionProfile
+	accounts          map[utils.TenantID]*utils.TPAccount
+	cacheConns        []string
 	//schedulerConns     []string
 	isInternalDB bool // do not reload cache if we use internalDB
 }
@@ -79,8 +77,6 @@ func (tpr *TpReader) Init() {
 	tpr.routeProfiles = make(map[utils.TenantID]*utils.TPRouteProfile)
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
-	tpr.dispatcherProfiles = make(map[utils.TenantID]*utils.TPDispatcherProfile)
-	tpr.dispatcherHosts = make(map[utils.TenantID]*utils.TPDispatcherHost)
 	tpr.rateProfiles = make(map[utils.TenantID]*utils.TPRateProfile)
 	tpr.actionProfiles = make(map[utils.TenantID]*utils.TPActionProfile)
 	tpr.accounts = make(map[utils.TenantID]*utils.TPAccount)
@@ -264,39 +260,6 @@ func (tpr *TpReader) LoadChargerProfiles() error {
 	return tpr.LoadChargerProfilesFiltered("")
 }
 
-func (tpr *TpReader) LoadDispatcherProfilesFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPDispatcherProfiles(tpr.tpid, "", tag)
-	if err != nil {
-		return err
-	}
-	mapDispatcherProfile := make(map[utils.TenantID]*utils.TPDispatcherProfile)
-	for _, rl := range rls {
-		if err = verifyInlineFilterS(rl.FilterIDs); err != nil {
-			return
-		}
-		mapDispatcherProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
-	}
-	tpr.dispatcherProfiles = mapDispatcherProfile
-	return nil
-}
-
-func (tpr *TpReader) LoadDispatcherProfiles() error {
-	return tpr.LoadDispatcherProfilesFiltered("")
-}
-
-func (tpr *TpReader) LoadDispatcherHostsFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPDispatcherHosts(tpr.tpid, "", tag)
-	if err != nil {
-		return err
-	}
-	mapDispatcherHost := make(map[utils.TenantID]*utils.TPDispatcherHost)
-	for _, rl := range rls {
-		mapDispatcherHost[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
-	}
-	tpr.dispatcherHosts = mapDispatcherHost
-	return nil
-}
-
 func (tpr *TpReader) LoadRateProfiles() error {
 	return tpr.LoadRateProfilesFiltered("")
 }
@@ -357,10 +320,6 @@ func (tpr *TpReader) LoadAccountsFiltered(tag string) (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadDispatcherHosts() error {
-	return tpr.LoadDispatcherHostsFiltered("")
-}
-
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadFilters(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -387,12 +346,6 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadChargerProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
-	if err = tpr.LoadDispatcherProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
-		return
-	}
-	if err = tpr.LoadDispatcherHosts(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	if err = tpr.LoadRateProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
@@ -580,37 +533,6 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		loadIDs[utils.CacheChargerProfiles] = loadID
 	}
 	if verbose {
-		log.Print("DispatcherProfiles:")
-	}
-	for _, tpTH := range tpr.dispatcherProfiles {
-		th := APItoDispatcherProfile(tpTH, tpr.timezone)
-		if err = tpr.dm.SetDispatcherProfile(context.TODO(), th, true); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", th.TenantID())
-		}
-	}
-	if len(tpr.dispatcherProfiles) != 0 {
-		loadIDs[utils.CacheDispatcherProfiles] = loadID
-	}
-	if verbose {
-		log.Print("DispatcherHosts:")
-	}
-	for _, tpTH := range tpr.dispatcherHosts {
-		th := APItoDispatcherHost(tpTH)
-		if err = tpr.dm.SetDispatcherHost(context.TODO(), th); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", th.TenantID())
-		}
-	}
-	if len(tpr.dispatcherHosts) != 0 {
-		loadIDs[utils.CacheDispatcherHosts] = loadID
-	}
-
-	if verbose {
 		log.Print("RateProfiles:")
 	}
 	for _, tpTH := range tpr.rateProfiles {
@@ -685,10 +607,6 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("AttributeProfiles: ", len(tpr.attributeProfiles))
 	// Charger profiles
 	log.Print("ChargerProfiles: ", len(tpr.chargerProfiles))
-	// Dispatcher profiles
-	log.Print("DispatcherProfiles: ", len(tpr.dispatcherProfiles))
-	// Dispatcher Hosts
-	log.Print("DispatcherHosts: ", len(tpr.dispatcherHosts))
 	// Rate profiles
 	log.Print("RateProfiles: ", len(tpr.rateProfiles))
 	// Action profiles
@@ -759,24 +677,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.DispatcherProfilePrefix:
-		keys := make([]string, len(tpr.dispatcherProfiles))
-		i := 0
-		for k := range tpr.dispatcherProfiles {
-			keys[i] = k.TenantID()
-			i++
-		}
-		return keys, nil
-
-	case utils.DispatcherHostPrefix:
-		keys := make([]string, len(tpr.dispatcherHosts))
-		i := 0
-		for k := range tpr.dispatcherHosts {
-			keys[i] = k.TenantID()
-			i++
-		}
-		return keys, nil
-
 	case utils.RateProfilePrefix:
 		keys := make([]string, len(tpr.rateProfiles))
 		i := 0
@@ -872,30 +772,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	}
 
 	if verbose {
-		log.Print("DispatcherProfiles:")
-	}
-	for _, tpDsp := range tpr.dispatcherProfiles {
-		if err = tpr.dm.RemoveDispatcherProfile(context.TODO(), tpDsp.Tenant, tpDsp.ID,
-			true); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", utils.ConcatenatedKey(tpDsp.Tenant, tpDsp.ID))
-		}
-	}
-	if verbose {
-		log.Print("DispatcherHosts:")
-	}
-	for _, tpDsh := range tpr.dispatcherHosts {
-		if err = tpr.dm.RemoveDispatcherHost(context.TODO(), tpDsh.Tenant, tpDsh.ID); err != nil {
-			return
-		}
-		if verbose {
-			log.Print("\t", utils.ConcatenatedKey(tpDsh.Tenant, tpDsh.ID))
-		}
-	}
-
-	if verbose {
 		log.Print("RateProfiles:")
 	}
 	for _, tpRp := range tpr.rateProfiles {
@@ -971,12 +847,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 	if len(tpr.chargerProfiles) != 0 {
 		loadIDs[utils.CacheChargerProfiles] = loadID
 	}
-	if len(tpr.dispatcherProfiles) != 0 {
-		loadIDs[utils.CacheDispatcherProfiles] = loadID
-	}
-	if len(tpr.dispatcherHosts) != 0 {
-		loadIDs[utils.CacheDispatcherHosts] = loadID
-	}
 	if len(tpr.rateProfiles) != 0 {
 		loadIDs[utils.CacheRateProfiles] = loadID
 	}
@@ -1005,28 +875,24 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 	routeIDs, _ := tpr.GetLoadedIds(utils.RouteProfilePrefix)
 	apfIDs, _ := tpr.GetLoadedIds(utils.AttributeProfilePrefix)
 	chargerIDs, _ := tpr.GetLoadedIds(utils.ChargerProfilePrefix)
-	dppIDs, _ := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
-	dphIDs, _ := tpr.GetLoadedIds(utils.DispatcherHostPrefix)
 	ratePrfIDs, _ := tpr.GetLoadedIds(utils.RateProfilePrefix)
 	actionPrfIDs, _ := tpr.GetLoadedIds(utils.ActionProfilePrefix)
 	accountPrfIDs, _ := tpr.GetLoadedIds(utils.AccountPrefix)
 
 	//compose Reload Cache argument
 	cacheArgs := map[string][]string{
-		utils.CacheResourceProfiles:   rspIDs,
-		utils.CacheResources:          rspIDs,
-		utils.CacheStatQueues:         stqpIDs,
-		utils.CacheStatQueueProfiles:  stqpIDs,
-		utils.CacheThresholds:         trspfIDs,
-		utils.CacheThresholdProfiles:  trspfIDs,
-		utils.CacheFilters:            flrIDs,
-		utils.CacheRouteProfiles:      routeIDs,
-		utils.CacheAttributeProfiles:  apfIDs,
-		utils.CacheChargerProfiles:    chargerIDs,
-		utils.CacheDispatcherProfiles: dppIDs,
-		utils.CacheDispatcherHosts:    dphIDs,
-		utils.CacheRateProfiles:       ratePrfIDs,
-		utils.CacheActionProfiles:     actionPrfIDs,
+		utils.CacheResourceProfiles:  rspIDs,
+		utils.CacheResources:         rspIDs,
+		utils.CacheStatQueues:        stqpIDs,
+		utils.CacheStatQueueProfiles: stqpIDs,
+		utils.CacheThresholds:        trspfIDs,
+		utils.CacheThresholdProfiles: trspfIDs,
+		utils.CacheFilters:           flrIDs,
+		utils.CacheRouteProfiles:     routeIDs,
+		utils.CacheAttributeProfiles: apfIDs,
+		utils.CacheChargerProfiles:   chargerIDs,
+		utils.CacheRateProfiles:      ratePrfIDs,
+		utils.CacheActionProfiles:    actionPrfIDs,
 	}
 
 	// verify if we need to clear indexes
@@ -1048,9 +914,6 @@ func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose b
 	}
 	if len(chargerIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheChargerFilterIndexes)
-	}
-	if len(dppIDs) != 0 {
-		cacheIDs = append(cacheIDs, utils.CacheDispatcherFilterIndexes)
 	}
 	if len(ratePrfIDs) != 0 {
 		cacheIDs = append(cacheIDs, utils.CacheRateProfilesFilterIndexes)

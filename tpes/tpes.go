@@ -91,10 +91,6 @@ func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expTy
 		prfx = utils.RankingProfilePrefix + tnt + utils.ConcatenatedKeySep
 	case utils.MetaTrends:
 		prfx = utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep
-	case utils.MetaDispatchers:
-		prfx = utils.DispatcherProfilePrefix + tnt + utils.ConcatenatedKeySep
-	case utils.MetaDispatcherHosts:
-		prfx = utils.DispatcherHostPrefix + tnt + utils.ConcatenatedKeySep
 	default:
 		return nil, fmt.Errorf("Unsuported exporter type")
 	}

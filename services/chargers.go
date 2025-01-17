@@ -77,10 +77,8 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(chrS.chrS)
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
-	if !chrS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			chrS.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		chrS.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.ChargerS, srv)
 	return nil

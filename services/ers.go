@@ -83,9 +83,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	if err != nil {
 		return err
 	}
-	if !erS.cfg.DispatcherSCfg().Enabled {
-		erS.cl.RpcRegister(srv)
-	}
+	erS.cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ERs, srv)
 	return
 }

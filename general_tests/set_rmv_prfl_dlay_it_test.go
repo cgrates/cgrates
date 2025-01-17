@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -111,52 +110,6 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 		var result string
 		startTime := time.Now()
 		if err := client.Call(context.Background(), utils.AdminSv1RemoveAttributeProfile, eAttrPrf, &result); err != nil {
-			t.Error(err)
-		} else if result != utils.OK {
-			t.Error("Unexpected reply returned", result)
-		}
-		elapsedTime := time.Since(startTime)
-		expectedDuration := 1 * time.Second
-		if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
-			t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
-		}
-	})
-
-	t.Run("SetDispatcherProfile", func(t *testing.T) {
-
-		eDspPrf := &apis.DispatcherWithAPIOpts{
-			DispatcherProfile: &engine.DispatcherProfile{
-				Tenant: "cgrates.org",
-				ID:     "DSP_1",
-			},
-		}
-
-		var result string
-		startTime := time.Now()
-		if err := client.Call(context.Background(), utils.AdminSv1SetDispatcherProfile, eDspPrf, &result); err != nil {
-			t.Error(err)
-		} else if result != utils.OK {
-			t.Error("Unexpected reply returned", result)
-		}
-		elapsedTime := time.Since(startTime)
-		expectedDuration := 3 * time.Second
-		if elapsedTime < expectedDuration || elapsedTime >= 4*time.Second {
-			t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
-		}
-	})
-
-	t.Run("RemoveDispatcherProfile", func(t *testing.T) {
-
-		eDspPrf := &utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-				ID:     "DSP_1",
-			},
-		}
-
-		var result string
-		startTime := time.Now()
-		if err := client.Call(context.Background(), utils.AdminSv1RemoveDispatcherProfile, eDspPrf, &result); err != nil {
 			t.Error(err)
 		} else if result != utils.OK {
 			t.Error("Unexpected reply returned", result)
@@ -480,29 +433,6 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 		var result string
 		startTime := time.Now()
 		if err := client.Call(context.Background(), utils.ReplicatorSv1SetChargerProfile, eChrgPrf, &result); err != nil {
-			t.Error(err)
-		} else if result != utils.OK {
-			t.Error("Unexpected reply returned", result)
-		}
-		elapsedTime := time.Since(startTime)
-		expectedDuration := 1 * time.Second
-		if elapsedTime < expectedDuration || elapsedTime >= 2*time.Second {
-			t.Errorf("Expected elapsed time of at least %v, but got %v", expectedDuration, elapsedTime)
-		}
-	})
-
-	t.Run("ReplicatorSv1SetDispatcherProfile", func(t *testing.T) {
-
-		eDspPrf := &engine.DispatcherProfileWithAPIOpts{
-			DispatcherProfile: &engine.DispatcherProfile{
-				Tenant: "cgrates.org",
-				ID:     "DSP_1",
-			},
-		}
-
-		var result string
-		startTime := time.Now()
-		if err := client.Call(context.Background(), utils.ReplicatorSv1SetDispatcherProfile, eDspPrf, &result); err != nil {
 			t.Error(err)
 		} else if result != utils.OK {
 			t.Error("Unexpected reply returned", result)

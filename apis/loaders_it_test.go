@@ -60,8 +60,6 @@ var (
 		testLoadersGetActionProfiles,
 		testLoadersGetAttributeProfiles,
 		testLoadersGetChargerProfiles,
-		testLoadersGetDispatcherProfiles,
-		testLoadersGetDispatcherHosts,
 		testLoadersGetFilters,
 		testLoadersGetRateProfiles,
 		testLoadersGetResourceProfiles,
@@ -74,8 +72,6 @@ var (
 		testLoadersGetActionProfileAfterRemove,
 		testLoadersGetAttributeProfileAfterRemove,
 		testLoadersGetChargerProfileAfterRemove,
-		testLoadersGetDispatcherProfileAfterRemove,
-		testLoadersGetDispatcherHostAfterRemove,
 		testLoadersGetFilterAfterRemove,
 		testLoadersGetRateProfileAfterRemove,
 		testLoadersGetResourceProfileAfterRemove,
@@ -233,30 +229,6 @@ cgrates.org,Charger1,*string:~*req.Account:1001,;20,;true,,
 cgrates.org,Charger1,,,,*rated,ATTR_1001_SIMPLEAUTH
 cgrates.org,Charger2,,,,*rated,ATTR_1002_SIMPLEAUTH
 cgrates.org,Charger2,*string:~*req.Account:1002,;15,;false,,
-`); err != nil {
-		t.Fatal(err)
-	}
-
-	// Create and populate DispatcherProfiles.csv
-	if err := writeFile(utils.DispatcherProfilesCsv, `
-#Tenant,ID,FilterIDs,Weight,Strategy,StrategyParameters,ConnID,ConnFilterIDs,ConnWeight,ConnBlocker,ConnParameters
-cgrates.org,D1,,,,,,,,,
-cgrates.org,D1,*string:~*req.Account:1001,20,*first,,,,,,
-cgrates.org,D1,,,,,C1,fltr1,10,true,*ratio:1;param1:value1
-cgrates.org,D1,,,,,,,,,
-cgrates.org,D1,,,,,C1,fltr2;fltr4,,false,param2:value2
-cgrates.org,D2,,,*first,,C3,fltr2,20,true,
-cgrates.org,D2,*string:~*req.Account:1002,20,,,C2,fltr3,10,,param3:value3
-`); err != nil {
-		t.Fatal(err)
-	}
-
-	// Create and populate DispatcherHosts.csv
-	if err := writeFile(utils.DispatcherHostsCsv, `
-#Tenant[0],ID[1],Address[2],Transport[3],ConnectAttempts[4],Reconnects[5],MaxReconnectInterval[6],ConnectTimeout[7],ReplyTimeout[8],Tls[9],ClientKey[10],ClientCertificate[11],CaCertificate[12]
-cgrates.org,ALL,,,,,5m,,,,,,
-cgrates.org,ALL,127.0.0.1:6012,,1,3,5m,1m,2m,true,,,
-cgrates.org,ALL,,*json,1,3,5m,1m,2m,false,,,
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -757,100 +729,6 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 		if !reflect.DeepEqual(chrgs, expChrgs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expChrgs), utils.ToJSON(chrgs))
 		}
-	}
-}
-
-func testLoadersGetDispatcherProfiles(t *testing.T) {
-	expDspPrfs := []*engine.DispatcherProfile{
-		{
-			Tenant:         "cgrates.org",
-			ID:             "D1",
-			FilterIDs:      []string{"*string:~*req.Account:1001"},
-			Strategy:       utils.MetaFirst,
-			StrategyParams: map[string]any{},
-			Weight:         20,
-			Hosts: engine.DispatcherHostProfiles{
-				{
-					ID:        "C1",
-					FilterIDs: []string{"fltr1", "fltr2", "fltr4"},
-					Weight:    10,
-					Params: map[string]any{
-						utils.MetaRatio: "1",
-						"param1":        "value1",
-						"param2":        "value2",
-					},
-					Blocker: true,
-				},
-			},
-		},
-		{
-			Tenant:         "cgrates.org",
-			ID:             "D2",
-			FilterIDs:      []string{"*string:~*req.Account:1002"},
-			Strategy:       utils.MetaFirst,
-			StrategyParams: map[string]any{},
-			Weight:         20,
-			Hosts: engine.DispatcherHostProfiles{
-				{
-					ID:        "C3",
-					FilterIDs: []string{"fltr2"},
-					Weight:    20,
-					Params:    map[string]any{},
-					Blocker:   true,
-				},
-				{
-					ID:        "C2",
-					FilterIDs: []string{"fltr3"},
-					Weight:    10,
-					Params: map[string]any{
-						"param3": "value3",
-					},
-					Blocker: false,
-				},
-			},
-		},
-	}
-	var dspPrfs []*engine.DispatcherProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfiles,
-		&utils.ArgsItemIDs{
-			Tenant: "cgrates.org",
-		}, &dspPrfs); err != nil {
-		t.Error(err)
-	} else {
-		sort.Slice(dspPrfs, func(i, j int) bool {
-			return dspPrfs[i].ID < dspPrfs[j].ID
-		})
-		if !reflect.DeepEqual(dspPrfs, expDspPrfs) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expDspPrfs), utils.ToJSON(dspPrfs))
-		}
-	}
-}
-
-func testLoadersGetDispatcherHosts(t *testing.T) {
-	expDspHosts := []*engine.DispatcherHost{
-		{
-			Tenant: "cgrates.org",
-			RemoteHost: &config.RemoteHost{
-				ID:                   "ALL",
-				Address:              "127.0.0.1:6012",
-				Transport:            utils.MetaJSON,
-				ConnectAttempts:      1,
-				Reconnects:           3,
-				MaxReconnectInterval: 5 * time.Minute,
-				ConnectTimeout:       time.Minute,
-				ReplyTimeout:         2 * time.Minute,
-				TLS:                  true,
-			},
-		},
-	}
-	var dspHosts []*engine.DispatcherHost
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHosts,
-		&utils.ArgsItemIDs{
-			Tenant: "cgrates.org",
-		}, &dspHosts); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dspHosts, expDspHosts) {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expDspHosts), utils.ToJSON(dspHosts))
 	}
 }
 
@@ -1466,44 +1344,6 @@ func testLoadersGetChargerProfileAfterRemove(t *testing.T) {
 			ID:     "Raw",
 		}, &rplyChgPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	}
-}
-
-func testLoadersGetDispatcherProfileAfterRemove(t *testing.T) {
-	var dspPrfIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfileIDs,
-		&utils.ArgsItemIDs{
-			Tenant: "cgrates.org",
-		}, &dspPrfIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	}
-
-	var rplyDspPrf engine.ChargerProfile
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherProfile,
-		utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "DSP1",
-		}, &rplyDspPrf); err == nil || err.Error() != utils.ErrDSPProfileNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDSPProfileNotFound, err)
-	}
-}
-
-func testLoadersGetDispatcherHostAfterRemove(t *testing.T) {
-	var dspHostIDs []string
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHostIDs,
-		&utils.ArgsItemIDs{
-			Tenant: "cgrates.org",
-		}, &dspHostIDs); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
-	}
-
-	var rplyDspHost engine.DispatcherHost
-	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetDispatcherHost,
-		utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "DSPHOST1",
-		}, &rplyDspHost); err == nil || err.Error() != utils.ErrDSPHostNotFound.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrDSPHostNotFound, err)
 	}
 }
 

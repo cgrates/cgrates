@@ -74,10 +74,8 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 
 	srv, _ := engine.NewService(engine.Cache)
 	// srv, _ := birpc.NewService(apis.NewCacheSv1(engine.Cache), "", false)
-	if !cS.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			cS.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		cS.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.CacheS, srv)
 	return

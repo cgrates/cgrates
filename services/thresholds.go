@@ -80,10 +80,8 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 	thrs.thrs.StartLoop(context.TODO())
 	srv, _ := engine.NewService(thrs.thrs)
 	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
-	if !thrs.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			thrs.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		thrs.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.ThresholdS, srv)
 	return

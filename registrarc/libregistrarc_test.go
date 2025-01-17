@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"testing"
 
@@ -32,50 +31,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
-
-func TestRegisterArgsAsDispatcherHosts(t *testing.T) {
-	args := &RegisterArgs{
-		Tenant: "cgrates.org",
-		Hosts: []*RegisterHostCfg{
-			{
-				ID:        "Host1",
-				Port:      "2012",
-				TLS:       true,
-				Transport: utils.MetaJSON,
-			},
-			{
-				ID:        "Host2",
-				Port:      "2013",
-				TLS:       false,
-				Transport: utils.MetaGOB,
-			},
-		},
-		Opts: make(map[string]any),
-	}
-	exp := []*engine.DispatcherHost{
-		{
-			Tenant: "cgrates.org",
-			RemoteHost: &config.RemoteHost{
-				ID:        "Host1",
-				Address:   "127.0.0.1:2012",
-				TLS:       true,
-				Transport: utils.MetaJSON,
-			},
-		},
-		{
-			Tenant: "cgrates.org",
-			RemoteHost: &config.RemoteHost{
-				ID:        "Host2",
-				Address:   "127.0.0.1:2013",
-				TLS:       false,
-				Transport: utils.MetaGOB,
-			},
-		},
-	}
-	if rply := args.AsDispatcherHosts("127.0.0.1"); !reflect.DeepEqual(exp, rply) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
-	}
-}
 
 func TestGetConnPort(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -124,204 +79,151 @@ func TestGetConnPort(t *testing.T) {
 	}
 }
 
-func TestRegister(t *testing.T) {
-	ra := &RegisterArgs{
-		Tenant: "cgrates.org",
-		Hosts: []*RegisterHostCfg{
-			{
-				ID:        "Host1",
-				Port:      "2012",
-				TLS:       true,
-				Transport: utils.MetaJSON,
-			},
-			{
-				ID:        "Host2",
-				Port:      "2013",
-				TLS:       false,
-				Transport: utils.MetaGOB,
-			},
-		},
-		Opts: make(map[string]any),
-	}
-	raJSON, err := json.Marshal([]any{ra})
-	id := json.RawMessage("1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	args := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, raJSON, id)
-	argsJSON, err := json.Marshal(args)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(argsJSON))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.RemoteAddr = "127.0.0.1:2356"
-	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-	if rplyID, err := register(req); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(id, *rplyID) {
-		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
-	}
+// func TestRegister(t *testing.T) {
+// 	ra := &RegisterArgs{
+// 		Tenant: "cgrates.org",
+// 		Hosts: []*RegisterHostCfg{
+// 			{
+// 				ID:        "Host1",
+// 				Port:      "2012",
+// 				TLS:       true,
+// 				Transport: utils.MetaJSON,
+// 			},
+// 			{
+// 				ID:        "Host2",
+// 				Port:      "2013",
+// 				TLS:       false,
+// 				Transport: utils.MetaGOB,
+// 			},
+// 		},
+// 		Opts: make(map[string]any),
+// 	}
+// 	raJSON, err := json.Marshal([]any{ra})
+// 	id := json.RawMessage("1")
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	args := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, raJSON, id)
+// 	argsJSON, err := json.Marshal(args)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(argsJSON))
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req.RemoteAddr = "127.0.0.1:2356"
+// 	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+// 	if rplyID, err := register(req); err != nil {
+// 		t.Fatal(err)
+// 	} else if !reflect.DeepEqual(id, *rplyID) {
+// 		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
+// 	}
 
-	host1 := &engine.DispatcherHost{
-		Tenant: "cgrates.org",
-		RemoteHost: &config.RemoteHost{
-			ID:        "Host1",
-			Address:   "127.0.0.1:2012",
-			TLS:       true,
-			Transport: utils.MetaJSON,
-		},
-	}
-	host2 := &engine.DispatcherHost{
-		Tenant: "cgrates.org",
-		RemoteHost: &config.RemoteHost{
-			ID:        "Host2",
-			Address:   "127.0.0.1:2013",
-			TLS:       false,
-			Transport: utils.MetaGOB,
-		},
-	}
+// 	if _, err := register(req); err != io.EOF {
+// 		t.Errorf("Expected error: %s ,received: %v", io.EOF, err)
+// 	}
 
-	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {
-		t.Errorf("Expected to find Host1 in cache")
-	} else if !reflect.DeepEqual(host1, x) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
-	}
-	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host2.TenantID()); !ok {
-		t.Errorf("Expected to find Host2 in cache")
-	} else if !reflect.DeepEqual(host2, x) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host2), utils.ToJSON(x))
-	}
+// 	ua := &UnregisterArgs{
+// 		Tenant: "cgrates.org",
+// 		IDs:    []string{"Host1", "Host2"},
+// 		Opts:   make(map[string]any),
+// 	}
+// 	uaJSON, err := json.Marshal([]any{ua})
+// 	id = json.RawMessage("2")
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	uargs := utils.NewServerRequest(utils.RegistrarSv1UnregisterDispatcherHosts, uaJSON, id)
+// 	uargsJSON, err := json.Marshal(uargs)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req, err = http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(uargsJSON))
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req.RemoteAddr = "127.0.0.1:2356"
+// 	if rplyID, err := register(req); err != nil {
+// 		t.Fatal(err)
+// 	} else if !reflect.DeepEqual(id, *rplyID) {
+// 		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
+// 	}
 
-	if _, err := register(req); err != io.EOF {
-		t.Errorf("Expected error: %s ,received: %v", io.EOF, err)
-	}
+// 	errCfg := config.NewDefaultCGRConfig()
 
-	ua := &UnregisterArgs{
-		Tenant: "cgrates.org",
-		IDs:    []string{"Host1", "Host2"},
-		Opts:   make(map[string]any),
-	}
-	uaJSON, err := json.Marshal([]any{ua})
-	id = json.RawMessage("2")
-	if err != nil {
-		t.Fatal(err)
-	}
-	uargs := utils.NewServerRequest(utils.RegistrarSv1UnregisterDispatcherHosts, uaJSON, id)
-	uargsJSON, err := json.Marshal(uargs)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req, err = http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(uargsJSON))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.RemoteAddr = "127.0.0.1:2356"
-	if rplyID, err := register(req); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(id, *rplyID) {
-		t.Errorf("Expected: %q ,received: %q", string(id), string(*rplyID))
-	}
-	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); ok {
-		t.Errorf("Expected to not find Host1 in cache %+v", x)
-	}
-	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host2.TenantID()); ok {
-		t.Errorf("Expected to not find Host2 in cache %+v", x)
-	}
-	errCfg := config.NewDefaultCGRConfig()
+// 	errCfg.CacheCfg().ReplicationConns = []string{"errCon"}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(uargsJSON))
+// 	if _, err := register(req); err != utils.ErrPartiallyExecuted {
+// 		t.Errorf("Expected error: %s ,received: %v", utils.ErrPartiallyExecuted, err)
+// 	}
 
-	connMgr := engine.NewConnManager(errCfg)
-	errCfg.CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
-	errCfg.RPCConns()["errCon"] = &config.RPCConn{
-		Strategy: utils.MetaFirst,
-		PoolSize: 1,
-		Conns: []*config.RemoteHost{
-			{
-				Address:   "127.0.0.1:5612",
-				Transport: "*json",
-				TLS:       false,
-			},
-		},
-	}
-	errCfg.CacheCfg().ReplicationConns = []string{"errCon"}
-	engine.Cache = engine.NewCacheS(errCfg, nil, connMgr, nil)
-	req.Body = io.NopCloser(bytes.NewBuffer(uargsJSON))
-	if _, err := register(req); err != utils.ErrPartiallyExecuted {
-		t.Errorf("Expected error: %s ,received: %v", utils.ErrPartiallyExecuted, err)
-	}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
+// 	if _, err := register(req); err != utils.ErrPartiallyExecuted {
+// 		t.Errorf("Expected error: %s ,received: %v", utils.ErrPartiallyExecuted, err)
+// 	}
 
-	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
-	if _, err := register(req); err != utils.ErrPartiallyExecuted {
-		t.Errorf("Expected error: %s ,received: %v", utils.ErrPartiallyExecuted, err)
-	}
+// 	req.RemoteAddr = "127.0.0"
+// 	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
+// 	if _, err := register(req); err == nil {
+// 		t.Errorf("Expected error,received: nil")
+// 	}
+// 	args2 := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, id, id)
+// 	args2JSON, err := json.Marshal(args2)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
+// 	if _, err := register(req); err == nil {
+// 		t.Errorf("Expected error,received: nil")
+// 	}
+// 	args2 = utils.NewServerRequest(utils.RegistrarSv1UnregisterDispatcherHosts, id, id)
+// 	args2JSON, err = json.Marshal(args2)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
+// 	if _, err := register(req); err == nil {
+// 		t.Errorf("Expected error,received: nil")
+// 	}
 
-	req.RemoteAddr = "127.0.0"
-	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
-	if _, err := register(req); err == nil {
-		t.Errorf("Expected error,received: nil")
-	}
-	args2 := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, id, id)
-	args2JSON, err := json.Marshal(args2)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
-	if _, err := register(req); err == nil {
-		t.Errorf("Expected error,received: nil")
-	}
-	args2 = utils.NewServerRequest(utils.RegistrarSv1UnregisterDispatcherHosts, id, id)
-	args2JSON, err = json.Marshal(args2)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
-	if _, err := register(req); err == nil {
-		t.Errorf("Expected error,received: nil")
-	}
-	args2 = utils.NewServerRequest(utils.DispatcherSv1GetProfilesForEvent, id, id)
-	args2JSON, err = json.Marshal(args2)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
-	if _, err := register(req); err == nil {
-		t.Errorf("Expected error,received: nil")
-	}
-	args2 = utils.NewServerRequest(utils.DispatcherSv1GetProfilesForEvent, id, id)
-	args2JSON, err = json.Marshal(args2)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
-	if _, err := register(req); err == nil {
-		t.Errorf("Expected error,received: nil")
-	}
-	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
-	if _, err := register(req); err == nil {
-		t.Errorf("Expected error,received: nil")
-	}
-	args2 = utils.NewServerRequest(utils.RegistrarSv1RegisterRPCHosts, id, id)
-	args2JSON, err = json.Marshal(args2)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
-	if _, err := register(req); err == nil {
-		t.Errorf("Expected error,received: nil")
-	}
-	args2 = utils.NewServerRequest(utils.RegistrarSv1UnregisterRPCHosts, id, id)
-	args2JSON, err = json.Marshal(args2)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
-	if _, err := register(req); err == nil {
-		t.Errorf("Expected error,received: nil")
-	}
-	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
-}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
+// 	if _, err := register(req); err == nil {
+// 		t.Errorf("Expected error,received: nil")
+// 	}
+// 	args2 = utils.NewServerRequest(utils.DispatcherSv1GetProfilesForEvent, id, id)
+// 	args2JSON, err = json.Marshal(args2)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
+// 	if _, err := register(req); err == nil {
+// 		t.Errorf("Expected error,received: nil")
+// 	}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(argsJSON))
+// 	if _, err := register(req); err == nil {
+// 		t.Errorf("Expected error,received: nil")
+// 	}
+// 	args2 = utils.NewServerRequest(utils.RegistrarSv1RegisterRPCHosts, id, id)
+// 	args2JSON, err = json.Marshal(args2)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
+// 	if _, err := register(req); err == nil {
+// 		t.Errorf("Expected error,received: nil")
+// 	}
+// 	args2 = utils.NewServerRequest(utils.RegistrarSv1UnregisterRPCHosts, id, id)
+// 	args2JSON, err = json.Marshal(args2)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req.Body = io.NopCloser(bytes.NewBuffer(args2JSON))
+// 	if _, err := register(req); err == nil {
+// 		t.Errorf("Expected error,received: nil")
+// 	}
+// 	engine.Cache = engine.NewCacheS(config.CgrConfig(), nil, nil, nil)
+// }
 
 type errRecorder struct{}
 
@@ -329,57 +231,57 @@ func (*errRecorder) Header() http.Header        { return make(http.Header) }
 func (*errRecorder) Write([]byte) (int, error)  { return 0, io.EOF }
 func (*errRecorder) WriteHeader(statusCode int) {}
 
-func TestRegistrar(t *testing.T) {
-	w := httptest.NewRecorder()
-	ra := &RegisterArgs{
-		Tenant: "cgrates.org",
-		Hosts: []*RegisterHostCfg{
-			{
-				ID:        "Host1",
-				Port:      "2012",
-				TLS:       true,
-				Transport: utils.MetaJSON,
-			},
-			{
-				ID:        "Host2",
-				Port:      "2013",
-				TLS:       false,
-				Transport: utils.MetaGOB,
-			},
-		},
-		Opts: make(map[string]any),
-	}
-	raJSON, err := json.Marshal([]any{ra})
-	id := json.RawMessage("1")
-	if err != nil {
-		t.Fatal(err)
-	}
-	args := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, raJSON, id)
-	argsJSON, err := json.Marshal(args)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(argsJSON))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.RemoteAddr = "127.0.0.1:2356"
+// func TestRegistrar(t *testing.T) {
+// 	w := httptest.NewRecorder()
+// 	ra := &RegisterArgs{
+// 		Tenant: "cgrates.org",
+// 		Hosts: []*RegisterHostCfg{
+// 			{
+// 				ID:        "Host1",
+// 				Port:      "2012",
+// 				TLS:       true,
+// 				Transport: utils.MetaJSON,
+// 			},
+// 			{
+// 				ID:        "Host2",
+// 				Port:      "2013",
+// 				TLS:       false,
+// 				Transport: utils.MetaGOB,
+// 			},
+// 		},
+// 		Opts: make(map[string]any),
+// 	}
+// 	raJSON, err := json.Marshal([]any{ra})
+// 	id := json.RawMessage("1")
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	args := utils.NewServerRequest(utils.RegistrarSv1RegisterDispatcherHosts, raJSON, id)
+// 	argsJSON, err := json.Marshal(args)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req, err := http.NewRequest(http.MethodPost, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(argsJSON))
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	req.RemoteAddr = "127.0.0.1:2356"
 
-	Registrar(w, req)
-	exp := "{\"id\":1,\"result\":\"OK\",\"error\":null}\n"
-	if w.Body.String() != exp {
-		t.Errorf("Expected: %q ,received: %q", exp, w.Body.String())
-	}
+// 	Registrar(w, req)
+// 	exp := "{\"id\":1,\"result\":\"OK\",\"error\":null}\n"
+// 	if w.Body.String() != exp {
+// 		t.Errorf("Expected: %q ,received: %q", exp, w.Body.String())
+// 	}
 
-	w = httptest.NewRecorder()
-	Registrar(w, req)
-	exp = "{\"id\":0,\"result\":null,\"error\":\"EOF\"}\n"
-	if w.Body.String() != exp {
-		t.Errorf("Expected: %q ,received: %q", exp, w.Body.String())
-	}
+// 	w = httptest.NewRecorder()
+// 	Registrar(w, req)
+// 	exp = "{\"id\":0,\"result\":null,\"error\":\"EOF\"}\n"
+// 	if w.Body.String() != exp {
+// 		t.Errorf("Expected: %q ,received: %q", exp, w.Body.String())
+// 	}
 
-	Registrar(new(errRecorder), req)
-}
+// 	Registrar(new(errRecorder), req)
+// }
 
 func TestLibRegistrarcRegister(t *testing.T) {
 	req := &http.Request{

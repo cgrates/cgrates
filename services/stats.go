@@ -80,10 +80,8 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	sts.sts.StartLoop(context.TODO())
 	srv, _ := engine.NewService(sts.sts)
 	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
-	if !sts.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			sts.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		sts.cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.StatS, srv)
 	return

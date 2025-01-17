@@ -229,9 +229,6 @@ func toggleService(id string, status bool, srvMngr *ServiceManager) (err error) 
 	case utils.ChargerS:
 		srvMngr.cfg.ChargerSCfg().Enabled = status
 		srvMngr.cfg.GetReloadChan() <- id
-	case utils.DispatcherS:
-		srvMngr.cfg.DispatcherSCfg().Enabled = status
-		srvMngr.cfg.GetReloadChan() <- id
 	case utils.EEs:
 		srvMngr.cfg.EEsCfg().Enabled = status
 		srvMngr.cfg.GetReloadChan() <- id

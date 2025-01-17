@@ -48,10 +48,6 @@ type RegistrarCService struct {
 func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) {
 	dTm, rTm := &time.Timer{}, &time.Timer{}
 	var dTmStarted, rTmStarted bool
-	if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
-		dTm = time.NewTimer(dhS.cfg.RegistrarCCfg().Dispatchers.RefreshInterval)
-		dhS.registerDispHosts()
-	}
 	if len(dhS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
 		rTm = time.NewTimer(dhS.cfg.RegistrarCCfg().RPC.RefreshInterval)
 		dhS.registerRPCHosts()
@@ -65,25 +61,15 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 			if dTmStarted {
 				dTm.Stop()
 			}
-			if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
-				dTm = time.NewTimer(dhS.cfg.RegistrarCCfg().Dispatchers.RefreshInterval)
-				dhS.registerDispHosts()
-			}
 			if len(dhS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
 				rTm = time.NewTimer(dhS.cfg.RegistrarCCfg().RPC.RefreshInterval)
 				dhS.registerRPCHosts()
 			}
 		case <-stopChan:
-			if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
-				dTm.Stop()
-			}
 			if len(dhS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
 				rTm.Stop()
 			}
 			return
-		case <-dTm.C:
-			dhS.registerDispHosts()
-			dTm.Reset(dhS.cfg.RegistrarCCfg().Dispatchers.RefreshInterval)
 		case <-rTm.C:
 			dhS.registerRPCHosts()
 			rTm.Reset(dhS.cfg.RegistrarCCfg().RPC.RefreshInterval)
@@ -93,33 +79,9 @@ func (dhS *RegistrarCService) ListenAndServe(stopChan, rldChan <-chan struct{}) 
 
 // Shutdown is called to shutdown the service
 func (dhS *RegistrarCService) Shutdown() {
-	if len(dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns) != 0 {
-		unregisterHosts(dhS.connMgr, dhS.cfg.RegistrarCCfg().Dispatchers,
-			dhS.cfg.GeneralCfg().DefaultTenant, utils.RegistrarSv1UnregisterDispatcherHosts)
-	}
 	if len(dhS.cfg.RegistrarCCfg().RPC.RegistrarSConns) != 0 {
 		unregisterHosts(dhS.connMgr, dhS.cfg.RegistrarCCfg().RPC,
 			dhS.cfg.GeneralCfg().DefaultTenant, utils.RegistrarSv1UnregisterRPCHosts)
-	}
-}
-
-func (dhS *RegistrarCService) registerDispHosts() {
-	for _, connID := range dhS.cfg.RegistrarCCfg().Dispatchers.RegistrarSConns {
-		for tnt, hostCfgs := range dhS.cfg.RegistrarCCfg().Dispatchers.Hosts {
-			if tnt == utils.MetaDefault {
-				tnt = dhS.cfg.GeneralCfg().DefaultTenant
-			}
-			args, err := NewRegisterArgs(dhS.cfg, tnt, hostCfgs)
-			if err != nil {
-				continue
-			}
-			var rply string
-			if err := dhS.connMgr.Call(context.TODO(), []string{connID}, utils.RegistrarSv1RegisterDispatcherHosts, args, &rply); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> Unable to set the hosts to the conn with ID <%s> because : %s",
-					utils.RegistrarC, connID, err))
-				continue
-			}
-		}
 	}
 }
 

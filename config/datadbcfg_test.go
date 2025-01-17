@@ -421,8 +421,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 				"redisSentinel":"sentinel",			// redisSentinel is the name of sentinel
 			},
 			"remote_conns":["Conn1"],
-			"items":{
-				"*dispatcher_hosts":{"remote":true, "replicate":true}, 
+			"items":{ 
 				"*load_ids":{"remote":true, "replicate":true}, 
 			
 			  }	
@@ -441,11 +440,6 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		},
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpts{
-			utils.MetaDispatcherHosts: {
-				Limit:     -1,
-				Remote:    true,
-				Replicate: true,
-			},
 			utils.MetaLoadIDs: {
 				Limit:     -1,
 				Remote:    true,

@@ -566,60 +566,6 @@ func TestTPReaderGetLoadedIdsChargerProfiles(t *testing.T) {
 	}
 }
 
-func TestTPReaderGetLoadedIdsDispatcherProfiles(t *testing.T) {
-	tpr := &TpReader{
-		dispatcherProfiles: map[utils.TenantID]*utils.TPDispatcherProfile{
-			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:      "tp_test",
-				Tenant:    "cgrates.org",
-				ID:        "ResGroup1",
-				FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-29T15:00:00Z"},
-				Strategy:  utils.MetaMaxCostDisconnect,
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	expRcv := []string{"cgrates.org:cgratesID"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
-
-func TestTPReaderGetLoadedIdsEmptyObject(t *testing.T) {
-	tpr := &TpReader{}
-	rcv, err := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	expRcv := make([]string, 0)
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
-
-func TestTPReaderGetLoadedIdsDispatcherHosts(t *testing.T) {
-	tpr := &TpReader{
-		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
-			{Tenant: "cgrates.org", ID: "cgratesID"}: {
-				TPid:   "tp_test",
-				Tenant: "cgrates.org",
-				ID:     "ResGroup1",
-			},
-		},
-	}
-	rcv, err := tpr.GetLoadedIds(utils.DispatcherHostPrefix)
-	if err != nil {
-		t.Error(err)
-	}
-	expRcv := []string{"cgrates.org:cgratesID"}
-	if !reflect.DeepEqual(expRcv, rcv) {
-		t.Errorf("\nExpected %v but received \n%v", expRcv, rcv)
-	}
-}
-
 func TestTPReaderGetLoadedIdsError(t *testing.T) {
 	tpr := &TpReader{}
 	errExpect := "Unsupported load category"
@@ -642,8 +588,6 @@ func TestTPReaderReloadCache(t *testing.T) {
 		RouteProfileIDs:      []string{"cgrates.org:routeProfilesID"},
 		AttributeProfileIDs:  []string{"cgrates.org:attributeProfilesID"},
 		ChargerProfileIDs:    []string{"cgrates.org:chargerProfilesID"},
-		DispatcherProfileIDs: []string{"cgrates.org:dispatcherProfilesID"},
-		DispatcherHostIDs:    []string{"cgrates.org:dispatcherHostsID"},
 		ResourceIDs:          []string{"cgrates.org:resourceProfilesID"},
 		StatsQueueIDs:        []string{"cgrates.org:statProfilesID"},
 		ThresholdIDs:         []string{"cgrates.org:thresholdProfilesID"},
@@ -689,12 +633,6 @@ func TestTPReaderReloadCache(t *testing.T) {
 		},
 		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
 			{Tenant: "cgrates.org", ID: "chargerProfilesID"}: {},
-		},
-		dispatcherProfiles: map[utils.TenantID]*utils.TPDispatcherProfile{
-			{Tenant: "cgrates.org", ID: "dispatcherProfilesID"}: {},
-		},
-		dispatcherHosts: map[utils.TenantID]*utils.TPDispatcherHost{
-			{Tenant: "cgrates.org", ID: "dispatcherHostsID"}: {},
 		},
 		dm:         NewDataManager(data, config.CgrConfig().CacheCfg(), cnMgr),
 		cacheConns: []string{connID},

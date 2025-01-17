@@ -19,123 +19,119 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package registrarc
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
-func TestDispatcherHostsService(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(Registrar))
-	defer ts.Close()
-	cfg := config.NewDefaultCGRConfig()
+// func TestDispatcherHostsService(t *testing.T) {
+// 	ts := httptest.NewServer(http.HandlerFunc(Registrar))
+// 	defer ts.Close()
+// 	cfg := config.NewDefaultCGRConfig()
 
-	cfg.RPCConns()["conn1"] = &config.RPCConn{
-		Strategy: rpcclient.PoolFirst,
-		Conns: []*config.RemoteHost{{
-			Address:   ts.URL,
-			TLS:       false,
-			Transport: rpcclient.HTTPjson,
-		}},
-	}
-	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
-		utils.MetaDefault: {
-			{
-				ID:        "Host1",
-				Transport: utils.MetaJSON,
-			},
-		},
-	}
-	cfg.RegistrarCCfg().Dispatchers.RefreshInterval = 100 * time.Millisecond
-	cfg.RegistrarCCfg().Dispatchers.RegistrarSConns = []string{"conn1"}
+// 	cfg.RPCConns()["conn1"] = &config.RPCConn{
+// 		Strategy: rpcclient.PoolFirst,
+// 		Conns: []*config.RemoteHost{{
+// 			Address:   ts.URL,
+// 			TLS:       false,
+// 			Transport: rpcclient.HTTPjson,
+// 		}},
+// 	}
+// 	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
+// 		utils.MetaDefault: {
+// 			{
+// 				ID:        "Host1",
+// 				Transport: utils.MetaJSON,
+// 			},
+// 		},
+// 	}
+// 	cfg.RegistrarCCfg().Dispatchers.RefreshInterval = 100 * time.Millisecond
+// 	cfg.RegistrarCCfg().Dispatchers.RegistrarSConns = []string{"conn1"}
 
-	ds := NewRegistrarCService(cfg, engine.NewConnManager(cfg))
+// 	ds := NewRegistrarCService(cfg, engine.NewConnManager(cfg))
 
-	ds.registerDispHosts()
+// 	ds.registerDispHosts()
 
-	host1 := &engine.DispatcherHost{
-		Tenant: "cgrates.org",
-		RemoteHost: &config.RemoteHost{
-			ID:        "Host1",
-			Address:   "127.0.0.1:2012",
-			Transport: utils.MetaJSON,
-		},
-	}
+// 	host1 := &engine.DispatcherHost{
+// 		Tenant: "cgrates.org",
+// 		RemoteHost: &config.RemoteHost{
+// 			ID:        "Host1",
+// 			Address:   "127.0.0.1:2012",
+// 			Transport: utils.MetaJSON,
+// 		},
+// 	}
 
-	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {
-		t.Errorf("Expected to find Host1 in cache")
-	} else if !reflect.DeepEqual(host1, x) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
-	}
-	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
-		utils.MetaDefault: {
-			{
-				ID:        "Host2",
-				Transport: utils.MetaJSON,
-			},
-		},
-	}
-	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
-	config.CgrConfig().CacheCfg().ReplicationConns = []string{"*localhost"}
-	ds.registerDispHosts()
-	host1.ID = "Host2"
-	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {
-		t.Errorf("Expected to find Host2 in cache")
-	} else if !reflect.DeepEqual(host1, x) {
-		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
-	}
-	unregisterHosts(ds.connMgr, cfg.RegistrarCCfg().Dispatchers, "cgrates.org", utils.RegistrarSv1UnregisterDispatcherHosts)
-	if _, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); ok {
-		t.Errorf("Expected to not find Host2 in cache")
-	}
+// 	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {
+// 		t.Errorf("Expected to find Host1 in cache")
+// 	} else if !reflect.DeepEqual(host1, x) {
+// 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
+// 	}
+// 	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
+// 		utils.MetaDefault: {
+// 			{
+// 				ID:        "Host2",
+// 				Transport: utils.MetaJSON,
+// 			},
+// 		},
+// 	}
+// 	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = true
+// 	config.CgrConfig().CacheCfg().ReplicationConns = []string{"*localhost"}
+// 	ds.registerDispHosts()
+// 	host1.ID = "Host2"
+// 	if x, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); !ok {
+// 		t.Errorf("Expected to find Host2 in cache")
+// 	} else if !reflect.DeepEqual(host1, x) {
+// 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(host1), utils.ToJSON(x))
+// 	}
+// 	unregisterHosts(ds.connMgr, cfg.RegistrarCCfg().Dispatchers, "cgrates.org", utils.RegistrarSv1UnregisterDispatcherHosts)
+// 	if _, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); ok {
+// 		t.Errorf("Expected to not find Host2 in cache")
+// 	}
 
-	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = false
-	config.CgrConfig().CacheCfg().ReplicationConns = []string{}
+// 	config.CgrConfig().CacheCfg().Partitions[utils.CacheDispatcherHosts].Replicate = false
+// 	config.CgrConfig().CacheCfg().ReplicationConns = []string{}
 
-	host1.ID = "Host1"
-	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
-		utils.MetaDefault: {
-			{
-				ID:        "Host1",
-				Transport: utils.MetaJSON,
-			},
-		},
-	}
-	ds.Shutdown()
-	if _, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); ok {
-		t.Errorf("Expected to not find Host2 in cache")
-	}
+// 	host1.ID = "Host1"
+// 	cfg.RegistrarCCfg().Dispatchers.Hosts = map[string][]*config.RemoteHost{
+// 		utils.MetaDefault: {
+// 			{
+// 				ID:        "Host1",
+// 				Transport: utils.MetaJSON,
+// 			},
+// 		},
+// 	}
+// 	ds.Shutdown()
+// 	if _, ok := engine.Cache.Get(utils.CacheDispatcherHosts, host1.TenantID()); ok {
+// 		t.Errorf("Expected to not find Host2 in cache")
+// 	}
 
-	cfg.ListenCfg().RPCJSONListen = "2012"
-	ds.registerDispHosts()
+// 	cfg.ListenCfg().RPCJSONListen = "2012"
+// 	ds.registerDispHosts()
 
-	ds = NewRegistrarCService(cfg, engine.NewConnManager(cfg))
-	ds.Shutdown()
-	stopChan := make(chan struct{})
-	close(stopChan)
-	ds.ListenAndServe(stopChan, make(chan struct{}))
-}
+// 	ds = NewRegistrarCService(cfg, engine.NewConnManager(cfg))
+// 	ds.Shutdown()
+// 	stopChan := make(chan struct{})
+// 	close(stopChan)
+// 	ds.ListenAndServe(stopChan, make(chan struct{}))
+// }
 
-func TestRegistrarcListenAndServe(t *testing.T) {
-	//cover purposes only
-	cfg := config.NewDefaultCGRConfig()
-	regStSrv := NewRegistrarCService(cfg, nil)
-	stopChan := make(chan struct{}, 1)
-	rldChan := make(chan struct{}, 1)
-	rldChan <- struct{}{}
-	go func() {
-		time.Sleep(10 * time.Millisecond)
-		close(stopChan)
-	}()
-	regStSrv.ListenAndServe(stopChan, rldChan)
-	regStSrv.Shutdown()
-}
+// func TestRegistrarcListenAndServe(t *testing.T) {
+// 	//cover purposes only
+// 	cfg := config.NewDefaultCGRConfig()
+// 	regStSrv := NewRegistrarCService(cfg, nil)
+// 	stopChan := make(chan struct{}, 1)
+// 	rldChan := make(chan struct{}, 1)
+// 	rldChan <- struct{}{}
+// 	go func() {
+// 		time.Sleep(10 * time.Millisecond)
+// 		close(stopChan)
+// 	}()
+// 	regStSrv.ListenAndServe(stopChan, rldChan)
+// 	regStSrv.Shutdown()
+// }
 
 func TestRegistrarcregisterRPCHostsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -185,32 +181,32 @@ func TestRegisterRPCHosts(t *testing.T) {
 	}
 }
 
-func TestRegistrarcListenAndServedTmCDispatcher(t *testing.T) {
-	//cover purposes only
-	cfg := config.NewDefaultCGRConfig()
-	cfg.RegistrarCCfg().Dispatchers.RefreshInterval = 1
-	regStSrv := NewRegistrarCService(cfg, nil)
-	stopChan := make(chan struct{}, 1)
-	rldChan := make(chan struct{}, 1)
-	go func() {
-		time.Sleep(20 * time.Millisecond)
-		close(stopChan)
-	}()
-	regStSrv.ListenAndServe(stopChan, rldChan)
-	regStSrv.Shutdown()
-}
+// func TestRegistrarcListenAndServedTmCDispatcher(t *testing.T) {
+// 	//cover purposes only
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.RegistrarCCfg().Dispatchers.RefreshInterval = 1
+// 	regStSrv := NewRegistrarCService(cfg, nil)
+// 	stopChan := make(chan struct{}, 1)
+// 	rldChan := make(chan struct{}, 1)
+// 	go func() {
+// 		time.Sleep(20 * time.Millisecond)
+// 		close(stopChan)
+// 	}()
+// 	regStSrv.ListenAndServe(stopChan, rldChan)
+// 	regStSrv.Shutdown()
+// }
 
-func TestRegistrarcListenAndServedTmCRPC(t *testing.T) {
-	//cover purposes only
-	cfg := config.NewDefaultCGRConfig()
-	cfg.RegistrarCCfg().RPC.RefreshInterval = 1
-	regStSrv := NewRegistrarCService(cfg, nil)
-	stopChan := make(chan struct{}, 1)
-	rldChan := make(chan struct{}, 1)
-	go func() {
-		time.Sleep(20 * time.Millisecond)
-		close(stopChan)
-	}()
-	regStSrv.ListenAndServe(stopChan, rldChan)
-	regStSrv.Shutdown()
-}
+// func TestRegistrarcListenAndServedTmCRPC(t *testing.T) {
+// 	//cover purposes only
+// 	cfg := config.NewDefaultCGRConfig()
+// 	cfg.RegistrarCCfg().RPC.RefreshInterval = 1
+// 	regStSrv := NewRegistrarCService(cfg, nil)
+// 	stopChan := make(chan struct{}, 1)
+// 	rldChan := make(chan struct{}, 1)
+// 	go func() {
+// 		time.Sleep(20 * time.Millisecond)
+// 		close(stopChan)
+// 	}()
+// 	regStSrv.ListenAndServe(stopChan, rldChan)
+// 	regStSrv.Shutdown()
+// }

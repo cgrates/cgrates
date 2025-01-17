@@ -222,9 +222,6 @@ func NewDispatcherService(val any) (_ IntService, err error) {
 		case strings.HasPrefix(m, utils.ConfigS):
 			m = strings.TrimPrefix(m, utils.ConfigS)
 			key = utils.ConfigS
-		case strings.HasPrefix(m, utils.DispatcherS):
-			m = strings.TrimPrefix(m, utils.DispatcherS)
-			key = utils.DispatcherS
 		case strings.HasPrefix(m, utils.GuardianS):
 			m = strings.TrimPrefix(m, utils.GuardianS)
 			key = utils.GuardianS

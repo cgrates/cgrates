@@ -26,10 +26,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// RegistrarCCfgs is the configuration of registrarc rpc and dispatcher
+// RegistrarCCfgs is the configuration of registrarc rpc
 type RegistrarCCfgs struct {
-	RPC         *RegistrarCCfg
-	Dispatchers *RegistrarCCfg
+	RPC *RegistrarCCfg
 }
 
 // loadRegistrarCCfg loads the RegistrarC section of the configuration
@@ -45,17 +44,13 @@ func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err erro
 	if jsnCfg == nil {
 		return nil
 	}
-	if err = dps.RPC.loadFromJSONCfg(jsnCfg.RPC); err != nil {
-		return
-	}
-	return dps.Dispatchers.loadFromJSONCfg(jsnCfg.Dispatchers)
+	return dps.RPC.loadFromJSONCfg(jsnCfg.RPC)
 }
 
 // AsMapInterface returns the config as a map[string]any
 func (dps RegistrarCCfgs) AsMapInterface(string) any {
 	return map[string]any{
-		utils.RPCCfg:        dps.RPC.AsMapInterface(),
-		utils.DispatcherCfg: dps.Dispatchers.AsMapInterface(),
+		utils.RPCCfg: dps.RPC.AsMapInterface(),
 	}
 }
 
@@ -65,8 +60,7 @@ func (dps RegistrarCCfgs) CloneSection() Section { return dps.Clone() }
 // Clone returns a deep copy of DispatcherHCfg
 func (dps RegistrarCCfgs) Clone() (cln *RegistrarCCfgs) {
 	return &RegistrarCCfgs{
-		RPC:         dps.RPC.Clone(),
-		Dispatchers: dps.Dispatchers.Clone(),
+		RPC: dps.RPC.Clone(),
 	}
 }
 
@@ -198,8 +192,7 @@ func diffRegistrarCJsonCfg(d *RegistrarCJsonCfg, v1, v2 *RegistrarCCfg) *Registr
 }
 
 type RegistrarCJsonCfgs struct {
-	RPC         *RegistrarCJsonCfg
-	Dispatchers *RegistrarCJsonCfg
+	RPC *RegistrarCJsonCfg
 }
 
 func diffRegistrarCJsonCfgs(d *RegistrarCJsonCfgs, v1, v2 *RegistrarCCfgs) *RegistrarCJsonCfgs {
@@ -207,6 +200,5 @@ func diffRegistrarCJsonCfgs(d *RegistrarCJsonCfgs, v1, v2 *RegistrarCCfgs) *Regi
 		d = new(RegistrarCJsonCfgs)
 	}
 	d.RPC = diffRegistrarCJsonCfg(d.RPC, v1.RPC, v2.RPC)
-	d.Dispatchers = diffRegistrarCJsonCfg(d.Dispatchers, v1.Dispatchers, v2.Dispatchers)
 	return d
 }

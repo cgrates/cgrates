@@ -40,8 +40,6 @@
       "*route_profiles":{"remote":true},
       "*attribute_profiles":{"remote":true},
       "*charger_profiles": {"remote":true},
-      "*dispatcher_profiles":{"remote":true},
-      "*dispatcher_hosts":{"remote":true},
       "*load_ids":{"remote":true},
       "*indexes":{"remote":true}
     }

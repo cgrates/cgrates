@@ -771,30 +771,6 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
-		"*dispatcher_filter_indexes": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*dispatcher_hosts": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*dispatcher_loads": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*dispatcher_profiles": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*dispatcher_routes": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*dispatchers": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
 		"*event_charges": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
@@ -904,14 +880,6 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Groups": 0.,
 		},
 		"*tp_chargers": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_dispatcher_hosts": map[string]any{
-			"Items":  0.,
-			"Groups": 0.,
-		},
-		"*tp_dispatcher_profiles": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
 		},

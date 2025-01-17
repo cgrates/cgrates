@@ -113,9 +113,7 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 		return err
 	}
 	// srv, _ := birpc.NewService(apis.NewRateSv1(rs.rateS), "", false)
-	if !rs.cfg.DispatcherSCfg().Enabled {
-		rs.cl.RpcRegister(srv)
-	}
+	rs.cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.RateS, srv)
 	return
 }

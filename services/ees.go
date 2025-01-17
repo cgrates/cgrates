@@ -102,9 +102,7 @@ func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager
 
 	srv, _ := engine.NewServiceWithPing(es.eeS, utils.EeSv1, utils.V1Prfx)
 	// srv, _ := birpc.NewService(es.rpc, "", false)
-	if !es.cfg.DispatcherSCfg().Enabled {
-		es.cl.RpcRegister(srv)
-	}
+	es.cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.EEs, srv)
 	return nil
 }

@@ -59,10 +59,6 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, wi
 		return dm.RemoveRouteProfile(ctx, tnt, id, withIndex)
 	case utils.MetaChargers:
 		return dm.RemoveChargerProfile(ctx, tnt, id, withIndex)
-	case utils.MetaDispatchers:
-		return dm.RemoveDispatcherProfile(ctx, tnt, id, withIndex)
-	case utils.MetaDispatcherHosts:
-		return dm.RemoveDispatcherHost(ctx, tnt, id)
 	case utils.MetaRateProfiles:
 		if ratesPartial {
 			rt := obj.(*utils.RateProfile)
@@ -102,10 +98,6 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 		return dm.SetRouteProfile(ctx, data.(*engine.RouteProfile), withIndex)
 	case utils.MetaChargers:
 		return dm.SetChargerProfile(ctx, data.(*engine.ChargerProfile), withIndex)
-	case utils.MetaDispatchers:
-		return dm.SetDispatcherProfile(ctx, data.(*engine.DispatcherProfile), withIndex)
-	case utils.MetaDispatcherHosts:
-		return dm.SetDispatcherHost(ctx, data.(*engine.DispatcherHost))
 	case utils.MetaRateProfiles:
 		rpl := data.(*utils.RateProfile)
 		if ratesPartial {
@@ -151,10 +143,6 @@ func dryRun(ctx *context.Context, lType, ldrID string, obj profile) (err error) 
 		msg = "<%s-%s> DRY_RUN: RouteProfile: %s"
 	case utils.MetaChargers:
 		msg = "<%s-%s> DRY_RUN: ChargerProfile: %s"
-	case utils.MetaDispatchers:
-		msg = "<%s-%s> DRY_RUN: DispatcherProfile: %s"
-	case utils.MetaDispatcherHosts:
-		msg = "<%s-%s> DRY_RUN: DispatcherHost: %s"
 	case utils.MetaRateProfiles:
 		msg = "<%s-%s> DRY_RUN: RateProfile: %s"
 	case utils.MetaActionProfiles:
@@ -242,11 +230,6 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 	case utils.MetaChargers:
 		cacheIDs = []string{utils.CacheChargerFilterIndexes}
 		cacheArgs[utils.CacheChargerProfiles] = []string{tntId}
-	case utils.MetaDispatchers:
-		cacheIDs = []string{utils.CacheDispatcherFilterIndexes}
-		cacheArgs[utils.CacheDispatcherProfiles] = []string{tntId}
-	case utils.MetaDispatcherHosts:
-		cacheArgs[utils.CacheDispatcherHosts] = []string{tntId}
 	case utils.MetaRateProfiles:
 		cacheIDs = []string{utils.CacheRateProfilesFilterIndexes, utils.CacheRateFilterIndexes}
 		cacheArgs[utils.CacheRateProfiles] = []string{tntId}

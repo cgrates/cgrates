@@ -83,10 +83,8 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	// Register RPC handler
 	srv, _ := engine.NewServiceWithName(smg.sm, utils.SessionS, true) // methods with multiple options
 	// srv, _ := birpc.NewService(apis.NewSessionSv1(smg.sm), utils.EmptyString, false) // methods with multiple options
-	if !smg.cfg.DispatcherSCfg().Enabled {
-		for _, s := range srv {
-			smg.cl.RpcRegister(s)
-		}
+	for _, s := range srv {
+		smg.cl.RpcRegister(s)
 	}
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {

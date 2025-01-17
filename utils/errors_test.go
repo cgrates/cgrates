@@ -223,14 +223,6 @@ func TestNewAttributeS(t *testing.T) {
 	}
 }
 
-func TestNewDispatcherS(t *testing.T) {
-	err := errors.New("TEST_DISPATCHER_ERROR")
-	exp := "DISPATCHER_ERROR:TEST_DISPATCHER_ERROR"
-	if rcv := NewErrDispatcherS(err); rcv.Error() != exp {
-		t.Errorf("Expected %v \n but received %v\n", exp, rcv)
-	}
-}
-
 func TestAPIErrorHandler(t *testing.T) {
 	errIn := &CGRError{
 		context:      "*sessions",
