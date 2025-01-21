@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -623,5 +624,24 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.FilterS, connID)
 		}
 	}
+	if cfg.SessionSCfg().ChannelSyncInterval > 0 {
+		// When channel sync is enabled and at least one supported agent
+		// (FreeSWITCH, Kamailio, Asterisk) is enabled, verify they have at least
+		// one *internal connection between them. Skip check if no agent is enabled.
+		hasEnabledAgent := cfg.fsAgentCfg.Enabled || cfg.kamAgentCfg.Enabled || cfg.asteriskAgentCfg.Enabled
+		hasInternalConn := (cfg.fsAgentCfg.Enabled && hasInternalConn(cfg.fsAgentCfg.SessionSConns)) ||
+			(cfg.kamAgentCfg.Enabled && hasInternalConn(cfg.kamAgentCfg.SessionSConns)) ||
+			(cfg.asteriskAgentCfg.Enabled && hasInternalConn(cfg.asteriskAgentCfg.SessionSConns))
+		if hasEnabledAgent && !hasInternalConn {
+			return fmt.Errorf("<%s> channel_sync_interval requires agent-session connection to be *internal", utils.SessionS)
+		}
+	}
 	return nil
+}
+
+// hasInternalConn checks for *internal connections in the given slice
+func hasInternalConn(conns []string) bool {
+	return slices.ContainsFunc(conns, func(connID string) bool {
+		return strings.HasPrefix(connID, utils.MetaInternal)
+	})
 }
