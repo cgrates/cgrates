@@ -30,8 +30,12 @@ import (
 )
 
 func TestFilterPassDestinations(t *testing.T) {
-	if err := engine.Cache.Set(utils.CacheReverseDestinations, "+49",
-		[]string{"DE", "EU_LANDLINE"}, nil, true, ""); err != nil {
+	if err := engine.Cache.Set(utils.CacheDestinations, "DE",
+		&engine.Destination{Id: "DE", Prefixes: []string{"+49"}}, nil, true, ""); err != nil {
+		t.Errorf("Expecting: nil, received: %s", err)
+	}
+	if err := engine.Cache.Set(utils.CacheDestinations, "EU_LANDLINE",
+		&engine.Destination{Id: "EU_LANDLINE", Prefixes: []string{"+49"}}, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
 	config.CgrConfig().FilterSCfg().ApierSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)}

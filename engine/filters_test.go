@@ -2056,7 +2056,7 @@ func TestFiltersPassTimingsCallErr(t *testing.T) {
 }
 
 func TestFiltersPassDestinationsErrParseNotFound(t *testing.T) {
-	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Destination", []string{"DST_1001"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2073,7 +2073,7 @@ func TestFiltersPassDestinationsErrParseNotFound(t *testing.T) {
 }
 
 func TestFiltersPassDestinationsErrParseWrongPath(t *testing.T) {
-	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Destination", []string{"DST_1001"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2094,13 +2094,13 @@ func TestFiltersPassDestinationsErrParseWrongPath(t *testing.T) {
 }
 
 func TestFiltersPassDestinationsCallErr(t *testing.T) {
-	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Destination", []string{"DST_1001"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	dtP := utils.MapStorage{
 		utils.MetaReq: map[string]any{
-			utils.AccountField: "1001",
+			utils.Destination: "DST_1001",
 		},
 	}
 
@@ -2130,9 +2130,11 @@ func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
 	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.APIerSv1GetReverseDestination: func(ctx *context.Context, args, reply any) error {
-				rply := []string{"1002"}
-				*reply.(*[]string) = rply
+			utils.APIerSv1GetDestination: func(ctx *context.Context, args, reply any) error {
+				*reply.(*Destination) = Destination{
+					Id:       "DST_1002",
+					Prefixes: []string{"1002"},
+				}
 				return nil
 			},
 		},
@@ -2143,13 +2145,13 @@ func TestFiltersPassDestinationsCallSuccessSameDest(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
 	})
 
-	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1002"})
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Destination", []string{"DST_1002"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	dtP := utils.MapStorage{
 		utils.MetaReq: map[string]any{
-			utils.AccountField: "1002",
+			utils.Destination: "1002",
 		},
 	}
 
@@ -2179,9 +2181,11 @@ func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
 	client := make(chan birpc.ClientConnector, 1)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.APIerSv1GetReverseDestination: func(ctx *context.Context, args, reply any) error {
-				rply := []string{"1002"}
-				*reply.(*[]string) = rply
+			utils.APIerSv1GetDestination: func(ctx *context.Context, args, reply any) error {
+				*reply.(*Destination) = Destination{
+					Id:       "DST_1002",
+					Prefixes: []string{"1002"},
+				}
 				return nil
 			},
 		},
@@ -2192,13 +2196,13 @@ func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): client,
 	})
 
-	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"~1002"})
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Destination", []string{"~DST_1002"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	dtP := utils.MapStorage{
 		utils.MetaReq: map[string]any{
-			utils.AccountField: "1002",
+			utils.Destination: "DST_1002",
 		},
 	}
 
@@ -2214,7 +2218,7 @@ func TestFiltersPassDestinationsCallSuccessParseErr(t *testing.T) {
 }
 
 func TestFiltersPassRSRErrParseWrongPath(t *testing.T) {
-	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Account", []string{"1001"})
+	fltr, err := NewFilterRule(utils.MetaDestinations, "~*req.Destination", []string{"DST_1001"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -556,29 +556,29 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
-	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
-		var destIDs []string
-		if err = connMgr.Call(context.TODO(), config.CgrConfig().FilterSCfg().ApierSConns,
-			utils.APIerSv1GetReverseDestination,
-			&p, &destIDs); err != nil {
-			if err.Error() != utils.ErrNotFound.Error() {
-				return false, err
-			}
+	// iterate the DestinationIDs gotten from filter values, and try to get their prefixes from DataDB
+	for _, valDstIDVal := range fltr.rsrValues {
+		valDstID, err := valDstIDVal.ParseDataProvider(dDP)
+		if err != nil {
 			continue
 		}
-		for _, dID := range destIDs {
-			for _, valDstIDVal := range fltr.rsrValues {
-				valDstID, err := valDstIDVal.ParseDataProvider(dDP)
-				if err != nil {
-					continue
-				}
-				if valDstID == dID {
-					return true, nil
-				}
+		var rplDest Destination
+		if err = connMgr.Call(context.TODO(), config.CgrConfig().FilterSCfg().ApierSConns,
+			utils.APIerSv1GetDestination,
+			&valDstID, &rplDest); err != nil {
+			if err.Error() == utils.ErrNotFound.Error() {
+				continue // if destination not found, continue on next filter value
+			}
+			return false, err
+		}
+		// return true if any prefixes found from GetDestination match the destination gotten from filter element
+		for _, rplPrfx := range rplDest.Prefixes {
+			if strings.HasPrefix(dst, rplPrfx) {
+				return true, nil
 			}
 		}
 	}
-	return false, nil
+	return false, err
 }
 
 func (fltr *FilterRule) passRSR(dDP utils.DataProvider) (bool, error) {
