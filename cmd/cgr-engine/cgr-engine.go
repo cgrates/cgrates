@@ -50,6 +50,7 @@ func main() {
 	}
 }
 
+// flags holds all command line arguments. Flag descriptions are set in newFlags.
 type flags struct {
 	*flag.FlagSet
 	config struct {
@@ -84,6 +85,7 @@ type flags struct {
 	}
 }
 
+// newFlags creates and initializes a new flags instance with default values.
 func newFlags() *flags {
 	f := &flags{
 		FlagSet: flag.NewFlagSet("cgr-engine", flag.ExitOnError),
@@ -116,7 +118,7 @@ func newFlags() *flags {
 	return f
 }
 
-// runCGREngine configures the CGREngine object and runs it
+// runCGREngine initializes and runs the CGREngine with the provided command line arguments.
 func runCGREngine(fs []string) (err error) {
 	flags := newFlags()
 	flags.Parse(fs)
@@ -289,6 +291,7 @@ func runCGREngine(fs []string) (err error) {
 	return
 }
 
+// writePIDFile creates a file at the specified path containing the current process ID.
 func writePIDFile(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
@@ -304,8 +307,8 @@ func writePIDFile(path string) error {
 	return nil
 }
 
+// initConfigFromPath loads and initializes the CGR configuration from the specified path.
 func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logLevel int) (cfg *config.CGRConfig, err error) {
-	// Init config
 	if cfg, err = config.NewCGRConfigFromPath(ctx, path); err != nil {
 		err = fmt.Errorf("could not parse config: <%s>", err)
 		return
@@ -344,6 +347,7 @@ func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logL
 	return
 }
 
+// handleSignals manages system signals for graceful shutdown and configuration reload.
 func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *sync.WaitGroup) {
 	defer shdWg.Done()
 	shutdownSignal := make(chan os.Signal, 1)
@@ -371,6 +375,7 @@ func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *syn
 	}
 }
 
+// initServiceManagerV1 registers the ServiceManager methods.
 func initServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceManager,
 	registry *servmanager.ServiceRegistry) {
 	srvDeps, err := services.WaitForServicesToReachState(utils.StateServiceUP,
@@ -389,6 +394,7 @@ func initServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceMan
 	cms.AddInternalConn(utils.ServiceManager, srv)
 }
 
+// startRPC initializes and starts the RPC server.
 func startRPC(cfg *config.CGRConfig, registry *servmanager.ServiceRegistry, shutdown *utils.SyncedChan) {
 	cl := registry.Lookup(utils.CommonListenerS).(*services.CommonListenerService).CLS()
 	cl.StartServer(cfg, shutdown)
