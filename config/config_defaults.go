@@ -894,6 +894,13 @@ const CGRATES_CFG_JSON = `
 		// 		"FilterIDs": [],
 		// 		"Value": ""
 		// 	}
+		// ],
+		// "*sessionsOriginID": [
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": ""
+		// 	}
 		// ]
 	}
 },
