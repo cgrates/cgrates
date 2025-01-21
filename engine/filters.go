@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"reflect"
@@ -556,6 +557,28 @@ func (fltr *FilterRule) passDestinations(dDP utils.DataProvider) (bool, error) {
 		}
 		return false, err
 	}
+	// if RatingFilters is found in the DataProvider, compare the value of the filter to it instead of getting DestinationID from APIerSv1GetReverseDestination
+	if dDPIf, err := dDP.FieldAsString([]string{utils.MetaReq, utils.CostDetails, utils.RatingFilters}); err == nil {
+		var rfMap map[string]any // RatingFilters map
+		if err := json.Unmarshal([]byte(dDPIf), &rfMap); err != nil {
+			return false, err
+		}
+		for _, rfIf := range rfMap {
+			if rf, canCast := rfIf.(map[string]any); canCast {
+				dID := utils.IfaceAsString(rf[utils.DestinationID]) // DestinationID gotten from DataProvider
+				for _, valDstIDVal := range fltr.rsrValues {
+					valDstID, err := valDstIDVal.ParseDataProvider(dDP)
+					if err != nil {
+						continue
+					}
+					if valDstID == dID {
+						return true, nil
+					}
+				}
+			}
+		}
+	}
+	// if DestinationID isnt fount on the DataProvider, try to get it from DataDB
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
 		var destIDs []string
 		if err = connMgr.Call(context.TODO(), config.CgrConfig().FilterSCfg().ApierSConns,
