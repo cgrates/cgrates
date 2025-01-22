@@ -580,9 +580,7 @@ func TestFileXML(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	err := os.MkdirAll(eR.sourceDir, 0777)
 	if err != nil {
 		t.Error(err)
@@ -633,9 +631,7 @@ func TestFileXMLError(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	err := os.MkdirAll(eR.sourceDir, 0777)
 	if err != nil {
 		t.Error(err)
@@ -676,9 +672,7 @@ func TestFileXMLExit(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
