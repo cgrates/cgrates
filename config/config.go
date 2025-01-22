@@ -213,7 +213,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		routeSCfg: &RouteSCfg{Opts: &RoutesOpts{
 			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
 			IgnoreErrors: []*DynamicBoolOpt{{value: RatesProfileIgnoreFiltersDftOpt}},
-			MaxCost:      []*DynamicInterfaceOpt{},
+			MaxCost:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
 			ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
 			Limit:        []*DynamicIntPointerOpt{},
 			Offset:       []*DynamicIntPointerOpt{},

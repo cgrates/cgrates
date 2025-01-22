@@ -838,11 +838,11 @@ func (dynFlt *DynamicBoolOpt) Value(dP utils.DataProvider) (bool, error) {
 
 func (dynDec *DynamicDecimalOpt) Value(dP utils.DataProvider) (*decimal.Big, error) {
 	if dynDec.rsVal != nil {
-		out, err := dynDec.rsVal.ParseDataProvider(dP)
+		out, err := dynDec.rsVal.ParseDataProviderWithInterfaces2(dP)
 		if err != nil {
 			return nil, err
 		}
-		return utils.StringAsBig(out)
+		return utils.IfaceAsBig(out)
 	}
 	return dynDec.value, nil
 }

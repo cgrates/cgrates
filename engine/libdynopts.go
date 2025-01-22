@@ -233,7 +233,7 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS 
 // GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as any, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *FilterS, dynOpts []*config.DynamicInterfaceOpt,
-	dftOpt any, optNames ...string) (cfgOpt any, err error) {
+	optNames ...string) (cfgOpt any, err error) {
 	for _, optName := range optNames {
 		if opt, has := ev.APIOpts[optName]; has {
 			return opt, nil
@@ -250,7 +250,7 @@ func GetInterfaceOpts(ctx *context.Context, tnt string, ev *utils.CGREvent, fS *
 			return opt.Value, nil
 		}
 	}
-	return dftOpt, nil // return the default value if there are no options and none of the filters pass
+	return
 }
 
 // GetIntPointerOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *int, otherwise it

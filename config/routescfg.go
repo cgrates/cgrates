@@ -98,7 +98,7 @@ func (rtsOpts *RoutesOpts) loadFromJSONCfg(jsnCfg *RoutesOptsJson) (err error) {
 		rtsOpts.IgnoreErrors = append(ignoreErrs, rtsOpts.IgnoreErrors...)
 	}
 	if jsnCfg.MaxCost != nil {
-		rtsOpts.MaxCost = append(rtsOpts.MaxCost, jsnCfg.MaxCost...)
+		rtsOpts.MaxCost = append(jsnCfg.MaxCost, rtsOpts.MaxCost...)
 	}
 	if jsnCfg.Limit != nil {
 		var limit []*DynamicIntPointerOpt

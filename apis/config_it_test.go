@@ -153,9 +153,9 @@ func testCfgGetConfig(t *testing.T) {
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
+				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProcessRunsDftOpt, nil)},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProfileRunsDftOpt, nil)},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{config.NewDynamicBoolOpt(nil, "", config.AttributesProfileIgnoreFiltersDftOpt, nil)},
 			},
 		},
 	}
@@ -223,12 +223,26 @@ func testCfgSetGetConfig(t *testing.T) {
 				utils.MetaProfileIDs: []any{},
 				utils.MetaProcessRunsCfg: []any{
 					map[string]any{
-						"Value":  2.,
-						"Tenant": utils.EmptyString,
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
+					},
+					map[string]any{
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
 					},
 				},
-				utils.MetaProfileRunsCfg:       []any{},
-				utils.MetaProfileIgnoreFilters: []any{},
+				utils.MetaProfileRunsCfg: []any{
+					map[string]any{
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
+					},
+				},
+				utils.MetaProfileIgnoreFilters: []any{
+					map[string]any{
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
+					},
+				},
 			},
 		},
 	}
@@ -306,10 +320,10 @@ func testCfgSetEmptyReload(t *testing.T) {
 			"verbosity":                     1000,
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
-				utils.MetaStartTime:            []*config.DynamicStringOpt{},
-				utils.MetaUsage:                []*config.DynamicDecimalOpt{},
-				utils.MetaIntervalStartCfg:     []*config.DynamicDecimalOpt{},
-				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
+				utils.MetaStartTime:            []*config.DynamicStringOpt{config.NewDynamicStringOpt(nil, "", config.RatesStartTimeDftOpt, nil)},
+				utils.MetaUsage:                []*config.DynamicDecimalOpt{config.NewDynamicDecimalOpt(nil, "", config.RatesUsageDftOpt, nil)},
+				utils.MetaIntervalStartCfg:     []*config.DynamicDecimalOpt{config.NewDynamicDecimalOpt(nil, "", config.RatesIntervalStartDftOpt, nil)},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{config.NewDynamicBoolOpt(nil, "", config.RatesProfileIgnoreFiltersDftOpt, nil)},
 			},
 		},
 	}
@@ -362,7 +376,7 @@ func testCfgSetJSONGetJSONConfig(t *testing.T) {
 	if !reflect.DeepEqual(`"OK"`, utils.ToJSON(reply)) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "OK", utils.ToJSON(reply))
 	}
-	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"Tenant":"","Value":2},{"Tenant":"","Value":"2"}],"*profileIDs":[],"*profileIgnoreFilters":[],"*profileRuns":[]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
+	expectedGet := `{"attributes":{"accounts_conns":["*internal"],"enabled":true,"exists_indexed_fields":[],"indexed_selects":false,"nested_fields":false,"notexists_indexed_fields":[],"opts":{"*processRuns":[{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""},{"FilterIDs":null,"Tenant":""}],"*profileIDs":[],"*profileIgnoreFilters":[{"FilterIDs":null,"Tenant":""}],"*profileRuns":[{"FilterIDs":null,"Tenant":""}]},"prefix_indexed_fields":[],"resources_conns":["*internal"],"stats_conns":["*localhost"],"suffix_indexed_fields":[]}}`
 	var replyGet string
 	if err := cfgRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON,
 		&config.SectionWithAPIOpts{
@@ -529,9 +543,9 @@ func testCfgSetGetConfigStore(t *testing.T) {
 			"notexists_indexed_fields": []string{},
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:           []*config.DynamicStringSliceOpt{},
-				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{},
-				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{},
+				utils.MetaProcessRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProcessRunsDftOpt, nil)},
+				utils.MetaProfileRunsCfg:       []*config.DynamicIntOpt{config.NewDynamicIntOpt(nil, "", config.AttributesProfileRunsDftOpt, nil)},
+				utils.MetaProfileIgnoreFilters: []*config.DynamicBoolOpt{config.NewDynamicBoolOpt(nil, "", config.AttributesProfileIgnoreFiltersDftOpt, nil)},
 			},
 		},
 	}
@@ -632,12 +646,26 @@ func testCfgGetAfterReloadStore(t *testing.T) {
 				utils.MetaProfileIDs: []any{},
 				utils.MetaProcessRunsCfg: []any{
 					map[string]any{
-						"Tenant": utils.EmptyString,
-						"Value":  2.,
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
+					},
+					map[string]any{
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
 					},
 				},
-				utils.MetaProfileRunsCfg:       []any{},
-				utils.MetaProfileIgnoreFilters: []any{},
+				utils.MetaProfileRunsCfg: []any{
+					map[string]any{
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
+					},
+				},
+				utils.MetaProfileIgnoreFilters: []any{
+					map[string]any{
+						"Tenant":    utils.EmptyString,
+						"FilterIDs": nil,
+					},
+				},
 			},
 		},
 	}

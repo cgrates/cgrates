@@ -158,11 +158,10 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		IndexedSelects:         true,
 		Opts: &AttributesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProcessRuns:          []*DynamicIntOpt{},
-			ProfileRuns:          []*DynamicIntOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
-		},
-	}
+			ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
+			ProfileRuns:          []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AttributesProfileIgnoreFiltersDftOpt}},
+		}}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.AttributeSCfg()))
 	}
@@ -199,9 +198,9 @@ func testCGRConfigReloadAttributeSWithDB(t *testing.T) {
 		IndexedSelects:         true,
 		Opts: &AttributesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProcessRuns:          []*DynamicIntOpt{},
-			ProfileRuns:          []*DynamicIntOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
+			ProfileRuns:          []*DynamicIntOpt{{value: AttributesProfileRunsDftOpt}},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
@@ -277,9 +276,8 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		IndexedSelects:         true,
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
-		},
-	}
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
+		}}
 	if !reflect.DeepEqual(expAttr, cfg.ThresholdSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ThresholdSCfg()))
 	}
@@ -308,7 +306,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		ThresholdSConns:        []string{utils.MetaLocalHost},
 		Opts: &StatsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
-			ProfileIgnoreFilters: []*DynamicBoolOpt{},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
 			RoundingDecimals:     []*DynamicIntOpt{},
 			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
@@ -341,9 +339,9 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		IndexedSelects:         true,
 		ThresholdSConns:        []string{utils.MetaLocalHost},
 		Opts: &ResourcesOpts{
-			UsageID:  []*DynamicStringOpt{},
-			UsageTTL: []*DynamicDurationOpt{},
-			Units:    []*DynamicFloat64Opt{},
+			UsageID:  []*DynamicStringOpt{{value: ResourcesUsageIDDftOpt}},
+			UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
+			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ResourceSCfg()) {
@@ -378,13 +376,13 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		IndexedSelects:         true,
 		DefaultRatio:           1,
 		Opts: &RoutesOpts{
-			Context:      []*DynamicStringOpt{},
-			ProfileCount: []*DynamicIntPointerOpt{},
-			IgnoreErrors: []*DynamicBoolOpt{},
-			MaxCost:      []*DynamicInterfaceOpt{},
+			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
+			ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
+			IgnoreErrors: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
+			MaxCost:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
 			Limit:        []*DynamicIntPointerOpt{},
 			Offset:       []*DynamicIntPointerOpt{},
-			Usage:        []*DynamicDecimalOpt{},
+			Usage:        []*DynamicDecimalOpt{{value: RatesUsageDftOpt}},
 			MaxItems:     []*DynamicIntPointerOpt{},
 		},
 	}
@@ -826,41 +824,41 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			utils.MetaSMS:   1,
 		},
 		Opts: &SessionsOpts{
-			Accounts:               []*DynamicBoolOpt{},
-			Attributes:             []*DynamicBoolOpt{},
-			CDRs:                   []*DynamicBoolOpt{},
-			Chargers:               []*DynamicBoolOpt{},
-			Resources:              []*DynamicBoolOpt{},
-			Routes:                 []*DynamicBoolOpt{},
-			Stats:                  []*DynamicBoolOpt{},
-			Thresholds:             []*DynamicBoolOpt{},
-			Initiate:               []*DynamicBoolOpt{},
-			Update:                 []*DynamicBoolOpt{},
-			Terminate:              []*DynamicBoolOpt{},
-			Message:                []*DynamicBoolOpt{},
-			AttributesDerivedReply: []*DynamicBoolOpt{},
-			BlockerError:           []*DynamicBoolOpt{},
-			CDRsDerivedReply:       []*DynamicBoolOpt{},
-			ResourcesAuthorize:     []*DynamicBoolOpt{},
-			ResourcesAllocate:      []*DynamicBoolOpt{},
-			ResourcesRelease:       []*DynamicBoolOpt{},
-			ResourcesDerivedReply:  []*DynamicBoolOpt{},
-			RoutesDerivedReply:     []*DynamicBoolOpt{},
-			StatsDerivedReply:      []*DynamicBoolOpt{},
-			ThresholdsDerivedReply: []*DynamicBoolOpt{},
-			MaxUsage:               []*DynamicBoolOpt{},
+			Accounts:               []*DynamicBoolOpt{{}},
+			Attributes:             []*DynamicBoolOpt{{}},
+			CDRs:                   []*DynamicBoolOpt{{}},
+			Chargers:               []*DynamicBoolOpt{{}},
+			Resources:              []*DynamicBoolOpt{{}},
+			Routes:                 []*DynamicBoolOpt{{}},
+			Stats:                  []*DynamicBoolOpt{{}},
+			Thresholds:             []*DynamicBoolOpt{{}},
+			Initiate:               []*DynamicBoolOpt{{}},
+			Update:                 []*DynamicBoolOpt{{}},
+			Terminate:              []*DynamicBoolOpt{{}},
+			Message:                []*DynamicBoolOpt{{}},
+			AttributesDerivedReply: []*DynamicBoolOpt{{}},
+			BlockerError:           []*DynamicBoolOpt{{}},
+			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
+			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
+			ResourcesAllocate:      []*DynamicBoolOpt{{}},
+			ResourcesRelease:       []*DynamicBoolOpt{{}},
+			ResourcesDerivedReply:  []*DynamicBoolOpt{{}},
+			RoutesDerivedReply:     []*DynamicBoolOpt{{}},
+			StatsDerivedReply:      []*DynamicBoolOpt{{}},
+			ThresholdsDerivedReply: []*DynamicBoolOpt{{}},
+			MaxUsage:               []*DynamicBoolOpt{{}},
 			ForceUsage:             []*DynamicBoolOpt{},
-			TTL:                    []*DynamicDurationOpt{},
-			Chargeable:             []*DynamicBoolOpt{},
+			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
+			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			TTLLastUsage:           []*DynamicDurationPointerOpt{},
 			TTLLastUsed:            []*DynamicDurationPointerOpt{},
-			DebitInterval:          []*DynamicDurationOpt{},
-			TTLMaxDelay:            []*DynamicDurationOpt{},
+			DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
+			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
-		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+		t.Errorf("Expected %s ,\n received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
 	}
 }
 
@@ -914,45 +912,45 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			utils.MetaSMS:   1,
 		},
 		Opts: &SessionsOpts{
-			Accounts:               []*DynamicBoolOpt{},
-			Attributes:             []*DynamicBoolOpt{},
-			CDRs:                   []*DynamicBoolOpt{},
-			Chargers:               []*DynamicBoolOpt{},
-			Resources:              []*DynamicBoolOpt{},
-			Routes:                 []*DynamicBoolOpt{},
-			Stats:                  []*DynamicBoolOpt{},
-			Thresholds:             []*DynamicBoolOpt{},
-			Initiate:               []*DynamicBoolOpt{},
-			Update:                 []*DynamicBoolOpt{},
-			Terminate:              []*DynamicBoolOpt{},
-			Message:                []*DynamicBoolOpt{},
-			AttributesDerivedReply: []*DynamicBoolOpt{},
-			BlockerError:           []*DynamicBoolOpt{},
-			CDRsDerivedReply:       []*DynamicBoolOpt{},
-			ResourcesAuthorize:     []*DynamicBoolOpt{},
-			ResourcesAllocate:      []*DynamicBoolOpt{},
-			ResourcesRelease:       []*DynamicBoolOpt{},
-			ResourcesDerivedReply:  []*DynamicBoolOpt{},
-			RoutesDerivedReply:     []*DynamicBoolOpt{},
-			StatsDerivedReply:      []*DynamicBoolOpt{},
-			ThresholdsDerivedReply: []*DynamicBoolOpt{},
-			MaxUsage:               []*DynamicBoolOpt{},
+			Accounts:               []*DynamicBoolOpt{{}},
+			Attributes:             []*DynamicBoolOpt{{}},
+			CDRs:                   []*DynamicBoolOpt{{}},
+			Chargers:               []*DynamicBoolOpt{{}},
+			Resources:              []*DynamicBoolOpt{{}},
+			Routes:                 []*DynamicBoolOpt{{}},
+			Stats:                  []*DynamicBoolOpt{{}},
+			Thresholds:             []*DynamicBoolOpt{{}},
+			Initiate:               []*DynamicBoolOpt{{}},
+			Update:                 []*DynamicBoolOpt{{}},
+			Terminate:              []*DynamicBoolOpt{{}},
+			Message:                []*DynamicBoolOpt{{}},
+			AttributesDerivedReply: []*DynamicBoolOpt{{}},
+			BlockerError:           []*DynamicBoolOpt{{}},
+			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
+			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
+			ResourcesAllocate:      []*DynamicBoolOpt{{}},
+			ResourcesRelease:       []*DynamicBoolOpt{{}},
+			ResourcesDerivedReply:  []*DynamicBoolOpt{{}},
+			RoutesDerivedReply:     []*DynamicBoolOpt{{}},
+			StatsDerivedReply:      []*DynamicBoolOpt{{}},
+			ThresholdsDerivedReply: []*DynamicBoolOpt{{}},
+			MaxUsage:               []*DynamicBoolOpt{{}},
 			ForceUsage:             []*DynamicBoolOpt{},
-			TTL:                    []*DynamicDurationOpt{},
-			Chargeable:             []*DynamicBoolOpt{},
+			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
+			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			TTLLastUsage:           []*DynamicDurationPointerOpt{},
 			TTLLastUsed:            []*DynamicDurationPointerOpt{},
-			DebitInterval:          []*DynamicDurationOpt{},
-			TTLMaxDelay:            []*DynamicDurationOpt{},
+			DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
+			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
-		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+		t.Errorf("Expected %s ,\n received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
 	}
 
 	var rcv string
-	expected := `{"sessions":{"accounts_conns":[],"actions_conns":[],"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[],"*attributes":[],"*attributesDerivedReply":[],"*blockerError":[],"*cdrs":[],"*cdrsDerivedReply":[],"*chargeable":[],"*chargers":[],"*debitInterval":[],"*forceUsage":[],"*initiate":[],"*maxUsage":[],"*message":[],"*resources":[],"*resourcesAllocate":[],"*resourcesAuthorize":[],"*resourcesDerivedReply":[],"*resourcesRelease":[],"*routes":[],"*routesDerivedReply":[],"*stats":[],"*statsDerivedReply":[],"*terminate":[],"*thresholds":[],"*thresholdsDerivedReply":[],"*ttl":[],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[],"*ttlUsage":[],"*update":[]},"rates_conns":[],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"session_indexes":[],"stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
+	expected := `{"sessions":{"accounts_conns":[],"actions_conns":[],"alterable_fields":[],"attributes_conns":["*localhost"],"cdrs_conns":["*internal"],"channel_sync_interval":"0","chargers_conns":["*localhost"],"client_protocol":1,"default_usage":{"*any":"3h0m0s","*data":"1048576","*sms":"1","*voice":"3h0m0s"},"enabled":true,"listen_bigob":"","listen_bijson":"127.0.0.1:2014","min_dur_low_balance":"0","opts":{"*accounts":[{"FilterIDs":null,"Tenant":""}],"*attributes":[{"FilterIDs":null,"Tenant":""}],"*attributesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*blockerError":[{"FilterIDs":null,"Tenant":""}],"*cdrs":[{"FilterIDs":null,"Tenant":""}],"*cdrsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*chargeable":[{"FilterIDs":null,"Tenant":""}],"*chargers":[{"FilterIDs":null,"Tenant":""}],"*debitInterval":[{"FilterIDs":null,"Tenant":""}],"*forceUsage":[],"*initiate":[{"FilterIDs":null,"Tenant":""}],"*maxUsage":[{"FilterIDs":null,"Tenant":""}],"*message":[{"FilterIDs":null,"Tenant":""}],"*resources":[{"FilterIDs":null,"Tenant":""}],"*resourcesAllocate":[{"FilterIDs":null,"Tenant":""}],"*resourcesAuthorize":[{"FilterIDs":null,"Tenant":""}],"*resourcesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*resourcesRelease":[{"FilterIDs":null,"Tenant":""}],"*routes":[{"FilterIDs":null,"Tenant":""}],"*routesDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*stats":[{"FilterIDs":null,"Tenant":""}],"*statsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*terminate":[{"FilterIDs":null,"Tenant":""}],"*thresholds":[{"FilterIDs":null,"Tenant":""}],"*thresholdsDerivedReply":[{"FilterIDs":null,"Tenant":""}],"*ttl":[{"FilterIDs":null,"Tenant":""}],"*ttlLastUsage":[],"*ttlLastUsed":[],"*ttlMaxDelay":[{"FilterIDs":null,"Tenant":""}],"*ttlUsage":[],"*update":[{"FilterIDs":null,"Tenant":""}]},"rates_conns":[],"replication_conns":[],"resources_conns":["*localhost"],"routes_conns":["*localhost"],"session_indexes":[],"stats_conns":[],"stir":{"allowed_attest":["*any"],"default_attest":"A","payload_maxduration":"-1","privatekey_path":"","publickey_path":""},"store_session_costs":false,"terminate_attempts":5,"thresholds_conns":[]}}`
 	if err := cfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Sections: []string{SessionSJSON}}, &rcv); err != nil {
 		t.Error(err)
 	} else if expected != rcv {
@@ -1005,41 +1003,41 @@ func testCGRConfigReloadAll(t *testing.T) {
 			utils.MetaSMS:   1,
 		},
 		Opts: &SessionsOpts{
-			Accounts:               []*DynamicBoolOpt{},
-			Attributes:             []*DynamicBoolOpt{},
-			CDRs:                   []*DynamicBoolOpt{},
-			Chargers:               []*DynamicBoolOpt{},
-			Resources:              []*DynamicBoolOpt{},
-			Routes:                 []*DynamicBoolOpt{},
-			Stats:                  []*DynamicBoolOpt{},
-			Thresholds:             []*DynamicBoolOpt{},
-			Initiate:               []*DynamicBoolOpt{},
-			Update:                 []*DynamicBoolOpt{},
-			Terminate:              []*DynamicBoolOpt{},
-			Message:                []*DynamicBoolOpt{},
-			AttributesDerivedReply: []*DynamicBoolOpt{},
-			BlockerError:           []*DynamicBoolOpt{},
-			CDRsDerivedReply:       []*DynamicBoolOpt{},
-			ResourcesAuthorize:     []*DynamicBoolOpt{},
-			ResourcesAllocate:      []*DynamicBoolOpt{},
-			ResourcesRelease:       []*DynamicBoolOpt{},
-			ResourcesDerivedReply:  []*DynamicBoolOpt{},
-			RoutesDerivedReply:     []*DynamicBoolOpt{},
-			StatsDerivedReply:      []*DynamicBoolOpt{},
-			ThresholdsDerivedReply: []*DynamicBoolOpt{},
-			MaxUsage:               []*DynamicBoolOpt{},
+			Accounts:               []*DynamicBoolOpt{{}},
+			Attributes:             []*DynamicBoolOpt{{}},
+			CDRs:                   []*DynamicBoolOpt{{}},
+			Chargers:               []*DynamicBoolOpt{{}},
+			Resources:              []*DynamicBoolOpt{{}},
+			Routes:                 []*DynamicBoolOpt{{}},
+			Stats:                  []*DynamicBoolOpt{{}},
+			Thresholds:             []*DynamicBoolOpt{{}},
+			Initiate:               []*DynamicBoolOpt{{}},
+			Update:                 []*DynamicBoolOpt{{}},
+			Terminate:              []*DynamicBoolOpt{{}},
+			Message:                []*DynamicBoolOpt{{}},
+			AttributesDerivedReply: []*DynamicBoolOpt{{}},
+			BlockerError:           []*DynamicBoolOpt{{}},
+			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
+			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
+			ResourcesAllocate:      []*DynamicBoolOpt{{}},
+			ResourcesRelease:       []*DynamicBoolOpt{{}},
+			ResourcesDerivedReply:  []*DynamicBoolOpt{{}},
+			RoutesDerivedReply:     []*DynamicBoolOpt{{}},
+			StatsDerivedReply:      []*DynamicBoolOpt{{}},
+			ThresholdsDerivedReply: []*DynamicBoolOpt{{}},
+			MaxUsage:               []*DynamicBoolOpt{{}},
 			ForceUsage:             []*DynamicBoolOpt{},
-			TTL:                    []*DynamicDurationOpt{},
-			Chargeable:             []*DynamicBoolOpt{},
+			TTL:                    []*DynamicDurationOpt{{value: SessionsTTLDftOpt}},
+			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			TTLLastUsage:           []*DynamicDurationPointerOpt{},
 			TTLLastUsed:            []*DynamicDurationPointerOpt{},
-			DebitInterval:          []*DynamicDurationOpt{},
-			TTLMaxDelay:            []*DynamicDurationOpt{},
+			DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
+			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
-		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+		t.Errorf("Expected %s ,\n received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
 	}
 }
 
@@ -1567,11 +1565,12 @@ func TestReloadCfgInDb(t *testing.T) {
 		Opts: &AttributesOpts{
 			ProcessRuns: []*DynamicIntOpt{
 				{
-					FilterIDs: []string{},
-					value:     2,
+					FilterIDs: nil,
+					value:     3,
 				},
 				{
-					value: 3,
+					FilterIDs: []string{},
+					value:     2,
 				},
 			},
 		},

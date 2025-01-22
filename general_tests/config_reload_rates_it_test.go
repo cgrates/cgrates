@@ -103,7 +103,7 @@ func testRateConfigSReloadRates(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := "{\"rates\":{\"enabled\":true,\"exists_indexed_fields\":[],\"indexed_selects\":true,\"nested_fields\":false,\"notexists_indexed_fields\":[],\"opts\":{\"*intervalStart\":[],\"*profileIDs\":[],\"*profileIgnoreFilters\":[],\"*startTime\":[],\"*usage\":[]},\"prefix_indexed_fields\":[],\"rate_exists_indexed_fields\":[],\"rate_indexed_selects\":true,\"rate_nested_fields\":false,\"rate_notexists_indexed_fields\":[],\"rate_prefix_indexed_fields\":[],\"rate_suffix_indexed_fields\":[],\"suffix_indexed_fields\":[],\"verbosity\":1000}}"
+	cfgStr := "{\"rates\":{\"enabled\":true,\"exists_indexed_fields\":[],\"indexed_selects\":true,\"nested_fields\":false,\"notexists_indexed_fields\":[],\"opts\":{\"*intervalStart\":[{\"FilterIDs\":null,\"Tenant\":\"\"}],\"*profileIDs\":[],\"*profileIgnoreFilters\":[{\"FilterIDs\":null,\"Tenant\":\"\"}],\"*startTime\":[{\"FilterIDs\":null,\"Tenant\":\"\"}],\"*usage\":[{\"FilterIDs\":null,\"Tenant\":\"\"}]},\"prefix_indexed_fields\":[],\"rate_exists_indexed_fields\":[],\"rate_indexed_selects\":true,\"rate_nested_fields\":false,\"rate_notexists_indexed_fields\":[],\"rate_prefix_indexed_fields\":[],\"rate_suffix_indexed_fields\":[],\"suffix_indexed_fields\":[],\"verbosity\":1000}}"
 	var rpl string
 	if err := testRateRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

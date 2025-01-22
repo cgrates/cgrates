@@ -62,7 +62,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 			Context:      []*DynamicStringOpt{{value: RoutesContextDftOpt}},
 			ProfileCount: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
 			IgnoreErrors: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
-			MaxCost:      []*DynamicInterfaceOpt{},
+			MaxCost:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
 			Limit:        []*DynamicIntPointerOpt{},
 			Offset:       []*DynamicIntPointerOpt{},
 			MaxItems:     []*DynamicIntPointerOpt{},
@@ -125,7 +125,7 @@ func TestRouteSCfgAsMapInterface(t *testing.T) {
 			utils.MetaMaxItemsCfg:     []*DynamicIntPointerOpt{},
 			utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
 			utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
-			utils.MetaMaxCostCfg:      []*DynamicInterfaceOpt{},
+			utils.MetaMaxCostCfg:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
 			utils.MetaUsage:           []*DynamicDecimalOpt{{value: RoutesUsageDftOpt}},
 		},
 	}
@@ -177,7 +177,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			utils.MetaMaxItemsCfg:     []*DynamicIntPointerOpt{},
 			utils.MetaProfileCountCfg: []*DynamicIntPointerOpt{{value: RoutesProfileCountDftOpt}},
 			utils.MetaIgnoreErrorsCfg: []*DynamicBoolOpt{{value: RoutesIgnoreErrorsDftOpt}},
-			utils.MetaMaxCostCfg:      []*DynamicInterfaceOpt{},
+			utils.MetaMaxCostCfg:      []*DynamicInterfaceOpt{{Value: RoutesMaxCostDftOpt}},
 			utils.MetaUsage:           []*DynamicDecimalOpt{{value: RoutesUsageDftOpt}},
 		},
 	}
