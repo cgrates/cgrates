@@ -668,9 +668,7 @@ func TestFileCSV(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
@@ -688,10 +686,8 @@ func TestFileCSVServeDefault(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
 	var err error
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/ers/out/"
 	err = os.MkdirAll(filePath, 0777)
 	if err != nil {
@@ -725,9 +721,7 @@ func TestFileCSVExit(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)

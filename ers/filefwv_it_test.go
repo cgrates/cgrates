@@ -366,9 +366,7 @@ func TestFileFWV(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/fwvErs/out"
 	err := os.MkdirAll(filePath, 0777)
 	if err != nil {
@@ -401,9 +399,7 @@ func TestFileFWVServeDefault(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/fwvErs/out"
 	err := os.MkdirAll(filePath, 0777)
 	if err != nil {
@@ -437,9 +433,7 @@ func TestFileFWVExit(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
@@ -461,7 +455,6 @@ func TestFileFWVProcessTrailer(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -470,7 +463,6 @@ func TestFileFWVProcessTrailer(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/TestFileFWVProcessTrailer/"
 	if err := os.MkdirAll(filePath, 0777); err != nil {
 		t.Error(err)
@@ -521,9 +513,7 @@ func TestFileFWVProcessTrailerError1(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/TestFileFWVProcessTrailer/"
 	if err := os.MkdirAll(filePath, 0777); err != nil {
 		t.Error(err)
@@ -557,9 +547,7 @@ func TestFileFWVProcessTrailerError2(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().Tenant = config.RSRParsers{
 		{
 			Rules: "cgrates.org",
@@ -604,9 +592,7 @@ func TestFileFWVProcessTrailerError3(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	trailerFields := []*config.FCTemplate{
 		{
 			Tag:   "OriginId",
@@ -635,9 +621,7 @@ func TestFileFWVCreateHeaderMap(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	expEvent := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]any{
@@ -684,9 +668,7 @@ func TestFileFWVCreateHeaderMapError1(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	trailerFields := []*config.FCTemplate{
 		{},
 	}
@@ -710,9 +692,7 @@ func TestFileFWVCreateHeaderMapError2(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	record := "testRecord"
 	trailerFields := []*config.FCTemplate{
 		{

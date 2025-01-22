@@ -541,9 +541,7 @@ func TestFileJSON(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
 	}
@@ -560,9 +558,7 @@ func TestFileJSONServeDefault(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	filePath := "/tmp/ErsJSON/out/"
 	err := os.MkdirAll(filePath, 0777)
 	if err != nil {
@@ -596,9 +592,7 @@ func TestFileJSONExit(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		rdrError:  make(chan error, 1),
 		rdrExit:   make(chan struct{}),
-		conReqs:   make(chan struct{}, 1),
 	}
-	eR.conReqs <- struct{}{}
 	eR.Config().RunDelay = 1 * time.Millisecond
 	if err := eR.Serve(); err != nil {
 		t.Error(err)
