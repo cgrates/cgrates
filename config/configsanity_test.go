@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -927,5 +929,107 @@ func TestConfigSanityERsXmlRootPath(t *testing.T) {
 	err = cfg.checkConfigSanity()
 	if err == nil || err.Error() != experr {
 		t.Errorf("expected: %s, received: %s", experr, err)
+	}
+}
+
+func TestCheckAgentSyncConfig(t *testing.T) {
+	tests := []struct {
+		name          string
+		channelSync   time.Duration
+		fs            *FsAgentCfg
+		kam           *KamAgentCfg
+		ast           *AsteriskAgentCfg
+		expectedError string
+	}{
+		{
+			name:        "sync disabled no check",
+			channelSync: 0,
+			fs:          &FsAgentCfg{Enabled: true},
+			kam:         &KamAgentCfg{Enabled: false},
+			ast:         &AsteriskAgentCfg{Enabled: false},
+		},
+		{
+			name:        "no agents enabled",
+			channelSync: time.Second,
+			fs:          &FsAgentCfg{Enabled: false},
+			kam:         &KamAgentCfg{Enabled: false},
+			ast:         &AsteriskAgentCfg{Enabled: false},
+		},
+		{
+			name:        "fs enabled internal conn",
+			channelSync: time.Second,
+			fs:          &FsAgentCfg{Enabled: true, SessionSConns: []string{"*internal:*sessions"}},
+			kam:         &KamAgentCfg{Enabled: false},
+			ast:         &AsteriskAgentCfg{Enabled: false},
+		},
+		{
+			name:          "fs enabled no internal",
+			channelSync:   time.Second,
+			fs:            &FsAgentCfg{Enabled: true, SessionSConns: []string{"test_conn"}},
+			kam:           &KamAgentCfg{Enabled: false},
+			ast:           &AsteriskAgentCfg{Enabled: false},
+			expectedError: "channel_sync_interval requires agent-session connection to be *internal",
+		},
+		{
+			name:        "multiple agents one internal",
+			channelSync: time.Second,
+			fs:          &FsAgentCfg{Enabled: true, SessionSConns: []string{"test_conn"}},
+			kam:         &KamAgentCfg{Enabled: true, SessionSConns: []string{"*internal:*sessions"}},
+			ast:         &AsteriskAgentCfg{Enabled: true, SessionSConns: []string{"test_conn"}},
+		},
+		{
+			name:          "multiple agents no internal",
+			channelSync:   time.Second,
+			fs:            &FsAgentCfg{Enabled: true, SessionSConns: []string{"test_conn"}},
+			kam:           &KamAgentCfg{Enabled: true, SessionSConns: []string{"test_conn"}},
+			ast:           &AsteriskAgentCfg{Enabled: true, SessionSConns: []string{"test_conn"}},
+			expectedError: "channel_sync_interval requires agent-session connection to be *internal",
+		},
+		{
+			name:          "disabled with internal enabled without",
+			channelSync:   time.Second,
+			fs:            &FsAgentCfg{Enabled: false, SessionSConns: []string{"*internal:*sessions"}},
+			kam:           &KamAgentCfg{Enabled: true, SessionSConns: []string{"test_conn"}},
+			ast:           &AsteriskAgentCfg{Enabled: false},
+			expectedError: "channel_sync_interval requires agent-session connection to be *internal",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg, err := NewDefaultCGRConfig()
+			if err != nil {
+				t.Error(err)
+			}
+			cfg.rpcConns["test_conn"] = NewDfltRPCConn()
+			cfg.sessionSCfg.Enabled = true
+			cfg.sessionSCfg.ChannelSyncInterval = tt.channelSync
+			cfg.fsAgentCfg.Enabled = tt.fs.Enabled
+			if tt.fs.SessionSConns != nil {
+				cfg.fsAgentCfg.SessionSConns = tt.fs.SessionSConns
+			}
+			cfg.kamAgentCfg.Enabled = tt.kam.Enabled
+			if tt.kam.SessionSConns != nil {
+				cfg.kamAgentCfg.SessionSConns = tt.kam.SessionSConns
+			}
+			cfg.asteriskAgentCfg.Enabled = tt.ast.Enabled
+			if tt.ast.SessionSConns != nil {
+				cfg.asteriskAgentCfg.SessionSConns = tt.ast.SessionSConns
+			}
+			err = cfg.checkConfigSanity()
+			if tt.expectedError != "" {
+				if err == nil {
+					t.Error("expected error, got none")
+					return
+				}
+				if !strings.Contains(err.Error(), tt.expectedError) {
+					t.Errorf("expected error containing %q, got %q", tt.expectedError, err.Error())
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+		})
 	}
 }
