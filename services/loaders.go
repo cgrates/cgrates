@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -43,10 +42,9 @@ func NewLoaderService(cfg *config.CGRConfig, preloadIDs []string) *LoaderService
 
 // LoaderService implements Service interface
 type LoaderService struct {
-	sync.RWMutex
+	mu         sync.RWMutex
 	cfg        *config.CGRConfig
 	ldrs       *loaders.LoaderS
-	cl         *commonlisteners.CommonListenerS
 	preloadIDs []string
 	stopChan   chan struct{}
 	stateDeps  *StateDependencies // channel subscriptions for state changes
@@ -65,13 +63,13 @@ func (s *LoaderService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 	if err != nil {
 		return err
 	}
-	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	s.ldrs = loaders.NewLoaderS(s.cfg, dbs, fs, cms.ConnManager())
 	if !s.ldrs.Enabled() {
@@ -97,7 +95,7 @@ func (s *LoaderService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 	srv, _ := engine.NewService(s.ldrs)
 	// srv, _ := birpc.NewService(apis.NewLoaderSv1(ldrs.ldrs), "", false)
 	for _, svc := range srv {
-		s.cl.RpcRegister(svc)
+		cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.LoaderS, srv)
 	return nil
@@ -121,21 +119,21 @@ func (s *LoaderService) Reload(_ *utils.SyncedChan, registry *servmanager.Servic
 	close(s.stopChan)
 	s.stopChan = make(chan struct{})
 
-	s.RLock()
-	defer s.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	s.ldrs.Reload(dbs, fs, cms)
 	return s.ldrs.ListenAndServe(s.stopChan)
 }
 
 // Shutdown stops the service
-func (s *LoaderService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
-	s.Lock()
-	s.ldrs = nil
+func (s *LoaderService) Shutdown(registry *servmanager.ServiceRegistry) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	close(s.stopChan)
-	s.cl.RpcUnregisterName(utils.LoaderSv1)
-	s.Unlock()
-	return
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.LoaderSv1)
+	return nil
 }
 
 // ServiceName returns the service name
@@ -146,11 +144,6 @@ func (s *LoaderService) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (s *LoaderService) ShouldRun() bool {
 	return s.cfg.LoaderCfg().Enabled()
-}
-
-// GetLoaderS returns the initialized LoaderService
-func (s *LoaderService) GetLoaderS() *loaders.LoaderS {
-	return s.ldrs
 }
 
 // StateChan returns signaling channel of specific state

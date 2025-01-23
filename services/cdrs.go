@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/cdrs"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -40,12 +39,9 @@ func NewCDRServer(cfg *config.CGRConfig) *CDRService {
 
 // CDRService implements Service interface
 type CDRService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	cdrS *cdrs.CDRServer
-	cl   *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	cdrS      *cdrs.CDRServer
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -63,14 +59,14 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	if err != nil {
 		return err
 	}
-	cs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 	sdbs := srvDeps[utils.StorDB].(*StorDBService).DB()
 
-	cs.Lock()
-	defer cs.Unlock()
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
 
 	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs, cms.ConnManager(), sdbs)
 	runtime.Gosched()
@@ -78,7 +74,7 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	if err != nil {
 		return err
 	}
-	cs.cl.RpcRegister(srv)
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.CDRServer, srv)
 	return
 }
@@ -89,11 +85,12 @@ func (cs *CDRService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry
 }
 
 // Shutdown stops the service
-func (cs *CDRService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	cs.Lock()
+func (cs *CDRService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
 	cs.cdrS = nil
-	cs.Unlock()
-	cs.cl.RpcUnregisterName(utils.CDRsV1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.CDRsV1)
 	return
 }
 

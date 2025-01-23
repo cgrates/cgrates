@@ -47,10 +47,9 @@ func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 
 // AnalyzerService implements Service interface
 type AnalyzerService struct {
-	sync.RWMutex
+	mu         sync.RWMutex
 	cfg        *config.CGRConfig
 	anz        *analyzers.AnalyzerS
-	cl         *commonlisteners.CommonListenerS
 	cancelFunc context.CancelFunc
 	stateDeps  *StateDependencies // channel subscriptions for state changes
 
@@ -63,10 +62,10 @@ func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	if err != nil {
 		return
 	}
-	anz.cl = cls.(*CommonListenerService).CLS()
+	cl := cls.(*CommonListenerService).CLS()
 
-	anz.Lock()
-	defer anz.Unlock()
+	anz.mu.Lock()
+	defer anz.mu.Unlock()
 	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
 		return
 	}
@@ -79,26 +78,26 @@ func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmana
 			shutdown.CloseOnce()
 		}
 	}(anz.anz)
-	anz.cl.SetAnalyzer(anz.anz)
-	go anz.start(registry)
+	cl.SetAnalyzer(anz.anz)
+	go anz.start(registry, cl)
 	return
 }
 
-func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry) {
+func (anz *AnalyzerService) start(registry *servmanager.ServiceRegistry, cl *commonlisteners.CommonListenerS) {
 	fs, err := WaitForServiceState(utils.StateServiceUP, utils.FilterS, registry,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
-	anz.Lock()
+	anz.mu.Lock()
 	anz.anz.SetFilterS(fs.(*FilterService).FilterS())
 
 	srv, _ := engine.NewService(anz.anz)
 	// srv, _ := birpc.NewService(apis.NewAnalyzerSv1(anz.anz), "", false)
 	for _, s := range srv {
-		anz.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
-	anz.Unlock()
+	anz.mu.Unlock()
 }
 
 // Reload handles the change of config
@@ -107,14 +106,15 @@ func (anz *AnalyzerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRe
 }
 
 // Shutdown stops the service
-func (anz *AnalyzerService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	anz.Lock()
+func (anz *AnalyzerService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	anz.mu.Lock()
 	anz.cancelFunc()
-	anz.cl.SetAnalyzer(nil)
+	cl.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
-	anz.Unlock()
-	anz.cl.RpcUnregisterName(utils.AnalyzerSv1)
+	anz.mu.Unlock()
+	cl.RpcUnregisterName(utils.AnalyzerSv1)
 	return
 }
 

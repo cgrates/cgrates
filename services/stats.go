@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -39,12 +38,9 @@ func NewStatService(cfg *config.CGRConfig) *StatService {
 
 // StatService implements Service interface
 type StatService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	sts *engine.StatS
-	cl  *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	sts       *engine.StatS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -62,7 +58,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	if err != nil {
 		return err
 	}
-	sts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -74,14 +70,14 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	sts.Lock()
-	defer sts.Unlock()
+	sts.mu.Lock()
+	defer sts.mu.Unlock()
 	sts.sts = engine.NewStatService(dbs.DataManager(), sts.cfg, fs.FilterS(), cms.ConnManager())
 	sts.sts.StartLoop(context.TODO())
 	srv, _ := engine.NewService(sts.sts)
 	// srv, _ := birpc.NewService(apis.NewStatSv1(sts.sts), "", false)
 	for _, s := range srv {
-		sts.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.StatS, srv)
 	return
@@ -89,19 +85,20 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 
 // Reload handles the change of config
 func (sts *StatService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
-	sts.Lock()
+	sts.mu.Lock()
 	sts.sts.Reload(context.TODO())
-	sts.Unlock()
+	sts.mu.Unlock()
 	return
 }
 
 // Shutdown stops the service
-func (sts *StatService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	sts.Lock()
-	defer sts.Unlock()
+func (sts *StatService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	sts.mu.Lock()
+	defer sts.mu.Unlock()
 	sts.sts.Shutdown(context.TODO())
 	sts.sts = nil
-	sts.cl.RpcUnregisterName(utils.StatSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.StatSv1)
 	return
 }
 

@@ -22,7 +22,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -45,7 +44,6 @@ type CoreService struct {
 	mu        sync.RWMutex
 	cfg       *config.CGRConfig
 	cS        *cores.CoreS
-	cl        *commonlisteners.CommonListenerS
 	fileCPU   *os.File
 	stopChan  chan struct{}
 	shdWg     *sync.WaitGroup
@@ -65,7 +63,7 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Se
 		return err
 	}
 	caps := srvDeps[utils.CapS].(*CapService).Caps()
-	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
 	s.mu.Lock()
@@ -77,7 +75,7 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Se
 		return err
 	}
 	for _, svc := range srv {
-		s.cl.RpcRegister(svc)
+		cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.CoreS, srv)
 	return nil
@@ -89,7 +87,7 @@ func (s *CoreService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry
 }
 
 // Shutdown stops the service
-func (s *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
+func (s *CoreService) Shutdown(registry *servmanager.ServiceRegistry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.cS.Shutdown()
@@ -97,7 +95,8 @@ func (s *CoreService) Shutdown(_ *servmanager.ServiceRegistry) error {
 	s.cS.StopCPUProfiling()
 	s.cS.StopMemoryProfiling()
 	s.cS = nil
-	s.cl.RpcUnregisterName(utils.CoreSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.CoreSv1)
 	return nil
 }
 

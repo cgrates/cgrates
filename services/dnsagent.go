@@ -37,7 +37,7 @@ func NewDNSAgent(cfg *config.CGRConfig) *DNSAgent {
 
 // DNSAgent implements Agent interface
 type DNSAgent struct {
-	sync.RWMutex
+	mu  sync.RWMutex
 	cfg *config.CGRConfig
 
 	stopChan chan struct{}
@@ -61,8 +61,8 @@ func (dns *DNSAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.Ser
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	dns.Lock()
-	defer dns.Unlock()
+	dns.mu.Lock()
+	defer dns.mu.Unlock()
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, fs.FilterS(), cms.ConnManager())
 	if err != nil {
 		dns.dns = nil
@@ -87,8 +87,8 @@ func (dns *DNSAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.Se
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	dns.Lock()
-	defer dns.Unlock()
+	dns.mu.Lock()
+	defer dns.mu.Unlock()
 
 	if dns.dns != nil {
 		close(dns.stopChan)
@@ -122,8 +122,8 @@ func (dns *DNSAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
 		return
 	}
 	close(dns.stopChan)
-	dns.Lock()
-	defer dns.Unlock()
+	dns.mu.Lock()
+	defer dns.mu.Unlock()
 	dns.dns = nil
 	return
 }

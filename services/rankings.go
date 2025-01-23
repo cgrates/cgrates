@@ -23,7 +23,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -39,12 +38,9 @@ func NewRankingService(cfg *config.CGRConfig) *RankingService {
 }
 
 type RankingService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	ran *engine.RankingS
-	cl  *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	ran       *engine.RankingS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -62,7 +58,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	if err != nil {
 		return err
 	}
-	ran.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -73,8 +69,8 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	ran.Lock()
-	defer ran.Unlock()
+	ran.mu.Lock()
+	defer ran.mu.Unlock()
 	ran.ran = engine.NewRankingS(dbs.DataManager(), cms.ConnManager(), fs.FilterS(), ran.cfg)
 	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
@@ -84,7 +80,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 		return err
 	}
 	for _, s := range srv {
-		ran.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.RankingS, srv)
 	return nil
@@ -92,19 +88,20 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 
 // Reload handles the change of config
 func (ran *RankingService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
-	ran.Lock()
+	ran.mu.Lock()
 	ran.ran.Reload(context.TODO())
-	ran.Unlock()
+	ran.mu.Unlock()
 	return
 }
 
 // Shutdown stops the service
-func (ran *RankingService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	ran.Lock()
-	defer ran.Unlock()
+func (ran *RankingService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	ran.mu.Lock()
+	defer ran.mu.Unlock()
 	ran.ran.StopRankingS()
 	ran.ran = nil
-	ran.cl.RpcUnregisterName(utils.RankingSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.RankingSv1)
 	return
 }
 

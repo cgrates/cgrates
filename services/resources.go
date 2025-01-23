@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -39,12 +38,9 @@ func NewResourceService(cfg *config.CGRConfig) *ResourceService {
 
 // ResourceService implements Service interface
 type ResourceService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	reS *engine.ResourceS
-	cl  *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	reS       *engine.ResourceS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -62,7 +58,7 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 	if err != nil {
 		return err
 	}
-	reS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -74,14 +70,14 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	reS.Lock()
-	defer reS.Unlock()
+	reS.mu.Lock()
+	defer reS.mu.Unlock()
 	reS.reS = engine.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), cms.ConnManager())
 	reS.reS.StartLoop(context.TODO())
 	srv, _ := engine.NewService(reS.reS)
 	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)
 	for _, s := range srv {
-		reS.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.ResourceS, srv)
 	return
@@ -89,19 +85,20 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 
 // Reload handles the change of config
 func (reS *ResourceService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
-	reS.Lock()
+	reS.mu.Lock()
 	reS.reS.Reload(context.TODO())
-	reS.Unlock()
+	reS.mu.Unlock()
 	return
 }
 
 // Shutdown stops the service
-func (reS *ResourceService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	reS.Lock()
-	defer reS.Unlock()
+func (reS *ResourceService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	reS.mu.Lock()
+	defer reS.mu.Unlock()
 	reS.reS.Shutdown(context.TODO()) //we don't verify the error because shutdown never returns an error
 	reS.reS = nil
-	reS.cl.RpcUnregisterName(utils.ResourceSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.ResourceSv1)
 	return
 }
 

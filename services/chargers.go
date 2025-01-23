@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -38,12 +37,9 @@ func NewChargerService(cfg *config.CGRConfig) *ChargerService {
 
 // ChargerService implements Service interface
 type ChargerService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	chrS *engine.ChargerS
-	cl   *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	chrS      *engine.ChargerS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -61,7 +57,7 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	if err != nil {
 		return err
 	}
-	chrS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -72,13 +68,13 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	chrS.Lock()
-	defer chrS.Unlock()
+	chrS.mu.Lock()
+	defer chrS.mu.Unlock()
 	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(chrS.chrS)
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
 	for _, s := range srv {
-		chrS.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.ChargerS, srv)
 	return nil
@@ -90,11 +86,12 @@ func (chrS *ChargerService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRe
 }
 
 // Shutdown stops the service
-func (chrS *ChargerService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	chrS.Lock()
-	defer chrS.Unlock()
+func (chrS *ChargerService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	chrS.mu.Lock()
+	defer chrS.mu.Unlock()
 	chrS.chrS = nil
-	chrS.cl.RpcUnregisterName(utils.ChargerSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.ChargerSv1)
 	return
 }
 

@@ -39,10 +39,9 @@ func NewJanusAgent(cfg *config.CGRConfig) *JanusAgent {
 
 // JanusAgent implements Service interface
 type JanusAgent struct {
-	sync.RWMutex
+	mu  sync.RWMutex
 	cfg *config.CGRConfig
-
-	jA *agents.JanusAgent
+	jA  *agents.JanusAgent
 
 	// we can realy stop the JanusAgent so keep a flag
 	// if we registerd the jandlers
@@ -67,9 +66,9 @@ func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	ja.Lock()
+	ja.mu.Lock()
+	defer ja.mu.Unlock()
 	if ja.started {
-		ja.Unlock()
 		return utils.ErrServiceAlreadyRunning
 	}
 	ja.jA, err = agents.NewJanusAgent(ja.cfg, cms.ConnManager(), fs.FilterS())
@@ -89,7 +88,6 @@ func (ja *JanusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	cl.RegisterHttpHandler(fmt.Sprintf("POST %s/{sessionID}/{handleID}", ja.cfg.JanusAgentCfg().URL), http.HandlerFunc(ja.jA.HandlePlugin))
 
 	ja.started = true
-	ja.Unlock()
 	return
 }
 
@@ -100,10 +98,10 @@ func (ja *JanusAgent) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry
 
 // Shutdown stops the service
 func (ja *JanusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	ja.Lock()
+	ja.mu.Lock()
 	err = ja.jA.Shutdown()
 	ja.started = false
-	ja.Unlock()
+	ja.mu.Unlock()
 	return // no shutdown for the momment
 }
 

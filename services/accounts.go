@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/accounts"
-	"github.com/cgrates/cgrates/commonlisteners"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -41,15 +40,11 @@ func NewAccountService(cfg *config.CGRConfig) *AccountService {
 
 // AccountService implements Service interface
 type AccountService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	acts *accounts.AccountS
-	cl   *commonlisteners.CommonListenerS
-
-	rldChan  chan struct{}
-	stopChan chan struct{}
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	acts      *accounts.AccountS
+	rldChan   chan struct{}
+	stopChan  chan struct{}
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -67,7 +62,7 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 	if err != nil {
 		return err
 	}
-	acts.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -78,8 +73,8 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	acts.Lock()
-	defer acts.Unlock()
+	acts.mu.Lock()
+	defer acts.mu.Unlock()
 	acts.acts = accounts.NewAccountS(acts.cfg, fs, cms.ConnManager(), dbs)
 	acts.stopChan = make(chan struct{})
 	go acts.acts.ListenAndServe(acts.stopChan, acts.rldChan)
@@ -87,9 +82,7 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 	if err != nil {
 		return err
 	}
-
-	acts.cl.RpcRegister(srv)
-
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.AccountS, srv)
 	return
 }
@@ -101,12 +94,13 @@ func (acts *AccountService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRe
 }
 
 // Shutdown stops the service
-func (acts *AccountService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	acts.Lock()
+func (acts *AccountService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	acts.mu.Lock()
+	defer acts.mu.Unlock()
 	close(acts.stopChan)
 	acts.acts = nil
-	acts.Unlock()
-	acts.cl.RpcUnregisterName(utils.AccountSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.AccountSv1)
 	return
 }
 

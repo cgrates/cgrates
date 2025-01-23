@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -38,12 +37,9 @@ func NewRouteService(cfg *config.CGRConfig) *RouteService {
 
 // RouteService implements Service interface
 type RouteService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	routeS *engine.RouteS
-	cl     *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	routeS    *engine.RouteS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -61,7 +57,7 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 	if err != nil {
 		return err
 	}
-	routeS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -72,13 +68,13 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	routeS.Lock()
-	defer routeS.Unlock()
+	routeS.mu.Lock()
+	defer routeS.mu.Unlock()
 	routeS.routeS = engine.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(routeS.routeS)
 	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
 	for _, s := range srv {
-		routeS.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.RouteS, srv)
 	return
@@ -90,11 +86,12 @@ func (routeS *RouteService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRe
 }
 
 // Shutdown stops the service
-func (routeS *RouteService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	routeS.Lock()
-	defer routeS.Unlock()
+func (routeS *RouteService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	routeS.mu.Lock()
+	defer routeS.mu.Unlock()
 	routeS.routeS = nil
-	routeS.cl.RpcUnregisterName(utils.RouteSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.RouteSv1)
 	return
 }
 

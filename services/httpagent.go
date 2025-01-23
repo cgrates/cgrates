@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -38,10 +37,8 @@ func NewHTTPAgent(cfg *config.CGRConfig) *HTTPAgent {
 
 // HTTPAgent implements Agent interface
 type HTTPAgent struct {
-	sync.RWMutex
+	mu  sync.RWMutex
 	cfg *config.CGRConfig
-
-	cl *commonlisteners.CommonListenerS
 
 	// we can realy stop the HTTPAgent so keep a flag
 	// if we registerd the handlers
@@ -63,16 +60,16 @@ func (ha *HTTPAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceReg
 		return err
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	cms := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
-	fs := srvDeps[utils.FilterS].(*FilterService)
+	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
-	ha.Lock()
-	defer ha.Unlock()
+	ha.mu.Lock()
+	defer ha.mu.Unlock()
 
 	ha.started = true
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		cl.RegisterHttpHandler(agntCfg.URL,
-			agents.NewHTTPAgent(cms, agntCfg.SessionSConns, fs.FilterS(),
+			agents.NewHTTPAgent(cm, agntCfg.SessionSConns, fs,
 				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
@@ -86,9 +83,9 @@ func (ha *HTTPAgent) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry)
 
 // Shutdown stops the service
 func (ha *HTTPAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	ha.Lock()
+	ha.mu.Lock()
 	ha.started = false
-	ha.Unlock()
+	ha.mu.Unlock()
 	return // no shutdown for the momment
 }
 

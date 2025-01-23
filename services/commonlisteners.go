@@ -69,7 +69,45 @@ func (s *CommonListenerService) Reload(_ *utils.SyncedChan, _ *servmanager.Servi
 }
 
 // Shutdown stops the service.
-func (s *CommonListenerService) Shutdown(_ *servmanager.ServiceRegistry) error {
+func (s *CommonListenerService) Shutdown(registry *servmanager.ServiceRegistry) error {
+	deps := []string{
+		utils.AccountS,
+		utils.ActionS,
+		utils.AdminS,
+		utils.AnalyzerS,
+		utils.AttributeS,
+		utils.CacheS,
+		utils.CDRServer,
+		utils.ChargerS,
+		utils.ConfigS,
+		utils.CoreS,
+		utils.EEs,
+		utils.EFs,
+		utils.ERs,
+		utils.GuardianS,
+		utils.HTTPAgent,
+		utils.JanusAgent,
+		utils.LoaderS,
+		utils.RankingS,
+		utils.RateS,
+		utils.RegistrarC,
+		utils.ResourceS,
+		utils.RouteS,
+		utils.SessionS,
+		utils.StatS,
+		utils.ThresholdS,
+		utils.TPeS,
+		utils.TrendS,
+	}
+	for _, svcID := range deps {
+		if !servmanager.IsServiceInState(registry.Lookup(svcID), utils.StateServiceUP) {
+			continue
+		}
+		_, err := WaitForServiceState(utils.StateServiceDOWN, svcID, registry, s.cfg.GeneralCfg().ConnectTimeout)
+		if err != nil {
+			return err
+		}
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.cls = nil

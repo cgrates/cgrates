@@ -39,7 +39,7 @@ func NewDiameterAgent(cfg *config.CGRConfig) *DiameterAgent {
 
 // DiameterAgent implements Agent interface
 type DiameterAgent struct {
-	sync.RWMutex
+	mu       sync.RWMutex
 	cfg      *config.CGRConfig
 	stopChan chan struct{}
 
@@ -67,8 +67,8 @@ func (s *DiameterAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	return s.start(fs, cm, caps, shutdown)
 }
 
@@ -94,8 +94,8 @@ func (s *DiameterAgent) start(filterS *engine.FilterS, cm *engine.ConnManager, c
 
 // Reload handles the change of config
 func (s *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if s.lnet == s.cfg.DiameterAgentCfg().ListenNet &&
 		s.laddr == s.cfg.DiameterAgentCfg().Listen {
 		return
@@ -120,10 +120,10 @@ func (s *DiameterAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager
 
 // Shutdown stops the service
 func (s *DiameterAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	s.Lock()
+	s.mu.Lock()
 	close(s.stopChan)
 	s.da = nil
-	s.Unlock()
+	s.mu.Unlock()
 	return // no shutdown for the momment
 }
 
