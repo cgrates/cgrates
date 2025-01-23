@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/efs"
@@ -40,10 +38,8 @@ func NewLoggerService(cfg *config.CGRConfig, loggerType string) *LoggerService {
 
 // LoggerService implements Service interface.
 type LoggerService struct {
-	mu        sync.RWMutex
-	cfg       *config.CGRConfig
-	stateDeps *StateDependencies // channel subscriptions for state changes
-
+	cfg        *config.CGRConfig
+	stateDeps  *StateDependencies // channel subscriptions for state changes
 	loggerType string
 }
 

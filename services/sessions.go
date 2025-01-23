@@ -41,16 +41,12 @@ func NewSessionService(cfg *config.CGRConfig) *SessionService {
 
 // SessionService implements Service interface
 type SessionService struct {
-	sync.RWMutex
-
-	sm *sessions.SessionS
-	cl *commonlisteners.CommonListenerS
-
+	mu           sync.RWMutex
+	sm           *sessions.SessionS
 	bircpEnabled bool // to stop birpc server if needed
 	stopChan     chan struct{}
 	cfg          *config.CGRConfig
-
-	stateDeps *StateDependencies // channel subscriptions for state changes
+	stateDeps    *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the service start
@@ -66,15 +62,15 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	if err != nil {
 		return err
 	}
-	smg.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	smg.Lock()
-	defer smg.Unlock()
+	smg.mu.Lock()
+	defer smg.mu.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, dbs.DataManager(), fs.FilterS(), cms.ConnManager())
+	smg.sm = sessions.NewSessionS(smg.cfg, dbs, fs, cms.ConnManager())
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
 	go smg.sm.ListenAndServe(smg.stopChan)
@@ -84,28 +80,28 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	srv, _ := engine.NewServiceWithName(smg.sm, utils.SessionS, true) // methods with multiple options
 	// srv, _ := birpc.NewService(apis.NewSessionSv1(smg.sm), utils.EmptyString, false) // methods with multiple options
 	for _, s := range srv {
-		smg.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
 		smg.bircpEnabled = true
 		for n, s := range srv {
-			smg.cl.BiRPCRegisterName(n, s)
+			cl.BiRPCRegisterName(n, s)
 		}
 		// run this in it's own goroutine
-		go smg.start(shutdown)
+		go smg.start(shutdown, cl)
 	}
 	cms.AddInternalConn(utils.SessionS, srv)
 	return
 }
 
-func (smg *SessionService) start(shutdown *utils.SyncedChan) (err error) {
-	if err := smg.cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
+func (smg *SessionService) start(shutdown *utils.SyncedChan, cl *commonlisteners.CommonListenerS) (err error) {
+	if err := cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
 		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
-		smg.Lock()
+		smg.mu.Lock()
 		smg.bircpEnabled = false
-		smg.Unlock()
+		smg.mu.Unlock()
 		shutdown.CloseOnce()
 	}
 	return
@@ -117,19 +113,20 @@ func (smg *SessionService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceReg
 }
 
 // Shutdown stops the service
-func (smg *SessionService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	smg.Lock()
-	defer smg.Unlock()
+func (smg *SessionService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	smg.mu.Lock()
+	defer smg.mu.Unlock()
 	close(smg.stopChan)
 	if err = smg.sm.Shutdown(); err != nil {
 		return
 	}
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	if smg.bircpEnabled {
-		smg.cl.StopBiRPC()
+		cl.StopBiRPC()
 		smg.bircpEnabled = false
 	}
 	smg.sm = nil
-	smg.cl.RpcUnregisterName(utils.SessionSv1)
+	cl.RpcUnregisterName(utils.SessionSv1)
 	// smg.server.BiRPCUnregisterName(utils.SessionSv1)
 	return
 }

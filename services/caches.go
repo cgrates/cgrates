@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -41,7 +40,6 @@ func NewCacheService(cfg *config.CGRConfig) *CacheService {
 type CacheService struct {
 	mu        sync.Mutex
 	cfg       *config.CGRConfig
-	cl        *commonlisteners.CommonListenerS
 	cacheCh   chan *engine.CacheS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
@@ -59,7 +57,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	if err != nil {
 		return err
 	}
-	cS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cs := srvDeps[utils.CoreS].(*CoreService)
@@ -75,7 +73,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	srv, _ := engine.NewService(engine.Cache)
 	// srv, _ := birpc.NewService(apis.NewCacheSv1(engine.Cache), "", false)
 	for _, s := range srv {
-		cS.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.CacheS, srv)
 	return
@@ -87,8 +85,11 @@ func (cS *CacheService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegist
 }
 
 // Shutdown stops the service
-func (cS *CacheService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
-	cS.cl.RpcUnregisterName(utils.CacheSv1)
+func (cS *CacheService) Shutdown(registry *servmanager.ServiceRegistry) (_ error) {
+	cS.mu.Lock()
+	cS.mu.Unlock()
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.CacheSv1)
 	return
 }
 

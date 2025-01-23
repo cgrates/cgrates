@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -38,12 +37,9 @@ func NewTrendService(cfg *config.CGRConfig) *TrendService {
 }
 
 type TrendService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	trs *engine.TrendS
-	cl  *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	trs       *engine.TrendS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -61,7 +57,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	if err != nil {
 		return err
 	}
-	trs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -72,8 +68,8 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	trs.Lock()
-	defer trs.Unlock()
+	trs.mu.Lock()
+	defer trs.mu.Unlock()
 	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), cms.ConnManager())
 	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
@@ -83,7 +79,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 		return err
 	}
 	for _, s := range srv {
-		trs.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.TrendS, srv)
 	return nil
@@ -91,19 +87,20 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 
 // Reload handles the change of config
 func (trs *TrendService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
-	trs.Lock()
+	trs.mu.Lock()
 	trs.trs.Reload(context.TODO())
-	trs.Unlock()
+	trs.mu.Unlock()
 	return
 }
 
 // Shutdown stops the service
-func (trs *TrendService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	trs.Lock()
-	defer trs.Unlock()
+func (trs *TrendService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	trs.mu.Lock()
+	defer trs.mu.Unlock()
 	trs.trs.StopTrendS()
 	trs.trs = nil
-	trs.cl.RpcUnregisterName(utils.TrendSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.TrendSv1)
 	return
 }
 

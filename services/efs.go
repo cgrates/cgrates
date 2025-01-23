@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/engine"
@@ -32,15 +31,11 @@ import (
 
 // ExportFailoverService is the service structure for ExportFailover
 type ExportFailoverService struct {
-	sync.Mutex
-
-	efS *efs.EfS
-	cl  *commonlisteners.CommonListenerS
-	srv *birpc.Service
-
-	stopChan chan struct{}
-	cfg      *config.CGRConfig
-
+	mu        sync.Mutex
+	efS       *efs.EfS
+	srv       *birpc.Service
+	stopChan  chan struct{}
+	cfg       *config.CGRConfig
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -53,54 +48,59 @@ func NewExportFailoverService(cfg *config.CGRConfig) *ExportFailoverService {
 }
 
 // Start should handle the service start
-func (efServ *ExportFailoverService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+func (s *ExportFailoverService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 		},
-		registry, efServ.cfg.GeneralCfg().ConnectTimeout)
+		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
-	efServ.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
-	efServ.Lock()
-	defer efServ.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
-	efServ.efS = efs.NewEfs(efServ.cfg, cms.ConnManager())
-	efServ.stopChan = make(chan struct{})
-	efServ.srv, _ = engine.NewServiceWithPing(efServ.efS, utils.EfSv1, utils.V1Prfx)
-	efServ.cl.RpcRegister(efServ.srv)
-	cms.AddInternalConn(utils.EFs, efServ.srv)
+	s.efS = efs.NewEfs(s.cfg, cms.ConnManager())
+	s.stopChan = make(chan struct{})
+	s.srv, _ = engine.NewServiceWithPing(s.efS, utils.EfSv1, utils.V1Prfx)
+	cl.RpcRegister(s.srv)
+	cms.AddInternalConn(utils.EFs, s.srv)
 	return
 }
 
 // Reload handles the change of config
-func (efServ *ExportFailoverService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (s *ExportFailoverService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (efServ *ExportFailoverService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	efServ.srv = nil
-	close(efServ.stopChan)
+func (s *ExportFailoverService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.srv = nil
+	close(s.stopChan)
+
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.EfSv1)
 	// NEXT SHOULD EXPORT ALL THE SHUTDOWN LOGGERS TO WRITE
 	return
 }
 
 // ShouldRun returns if the service should be running
-func (efServ *ExportFailoverService) ShouldRun() bool {
-	return efServ.cfg.EFsCfg().Enabled
+func (s *ExportFailoverService) ShouldRun() bool {
+	return s.cfg.EFsCfg().Enabled
 }
 
 // ServiceName returns the service name
-func (efServ *ExportFailoverService) ServiceName() string {
+func (s *ExportFailoverService) ServiceName() string {
 	return utils.EFs
 }
 
 // StateChan returns signaling channel of specific state
-func (efServ *ExportFailoverService) StateChan(stateID string) chan struct{} {
-	return efServ.stateDeps.StateChan(stateID)
+func (s *ExportFailoverService) StateChan(stateID string) chan struct{} {
+	return s.stateDeps.StateChan(stateID)
 }

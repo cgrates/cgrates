@@ -37,21 +37,18 @@ func NewRegistrarCService(cfg *config.CGRConfig) *RegistrarCService {
 
 // RegistrarCService implements Service interface
 type RegistrarCService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	dspS *registrarc.RegistrarCService
-
-	stopChan chan struct{}
-	rldChan  chan struct{}
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	dspS      *registrarc.RegistrarCService
+	stopChan  chan struct{}
+	rldChan   chan struct{}
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 func (dspS *RegistrarCService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	dspS.Lock()
-	defer dspS.Unlock()
+	dspS.mu.Lock()
+	defer dspS.mu.Unlock()
 
 	cms, err := WaitForServiceState(utils.StateServiceUP, utils.ConnManager, registry, dspS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -73,11 +70,11 @@ func (dspS *RegistrarCService) Reload(_ *utils.SyncedChan, _ *servmanager.Servic
 
 // Shutdown stops the service
 func (dspS *RegistrarCService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	dspS.Lock()
+	dspS.mu.Lock()
+	defer dspS.mu.Unlock()
 	close(dspS.stopChan)
 	dspS.dspS.Shutdown()
 	dspS.dspS = nil
-	dspS.Unlock()
 	return
 }
 

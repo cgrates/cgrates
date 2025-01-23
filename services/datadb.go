@@ -39,7 +39,7 @@ func NewDataDBService(cfg *config.CGRConfig, setVersions bool) *DataDBService {
 
 // DataDBService implements Service interface
 type DataDBService struct {
-	sync.RWMutex
+	mu          sync.RWMutex
 	cfg         *config.CGRConfig
 	oldDBCfg    *config.DataDbCfg
 	dm          *engine.DataManager
@@ -53,8 +53,8 @@ func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.Servic
 	if err != nil {
 		return
 	}
-	db.Lock()
-	defer db.Unlock()
+	db.mu.Lock()
+	defer db.mu.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
 	dbConn, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
 		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
@@ -81,8 +81,8 @@ func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.Servic
 
 // Reload handles the change of config
 func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
-	db.Lock()
-	defer db.Unlock()
+	db.mu.Lock()
+	defer db.mu.Unlock()
 	if db.needsConnectionReload() {
 		var d engine.DataDBDriver
 		d, err = engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
@@ -126,8 +126,8 @@ func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
 			return err
 		}
 	}
-	db.Lock()
-	defer db.Unlock()
+	db.mu.Lock()
+	defer db.mu.Unlock()
 	db.dm.DataDB().Close()
 	return nil
 }

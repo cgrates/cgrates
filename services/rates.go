@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
@@ -40,39 +39,12 @@ func NewRateService(cfg *config.CGRConfig) *RateService {
 
 // RateService is the service structure for RateS
 type RateService struct {
-	sync.RWMutex
+	mu        sync.RWMutex
 	cfg       *config.CGRConfig
 	rateS     *rates.RateS
-	cl        *commonlisteners.CommonListenerS
 	rldChan   chan struct{}
 	stopChan  chan struct{}
 	stateDeps *StateDependencies // channel subscriptions for state changes
-}
-
-// ServiceName returns the service name
-func (rs *RateService) ServiceName() string {
-	return utils.RateS
-}
-
-// ShouldRun returns if the service should be running
-func (rs *RateService) ShouldRun() (should bool) {
-	return rs.cfg.RateSCfg().Enabled
-}
-
-// Reload handles the change of config
-func (rs *RateService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (_ error) {
-	rs.rldChan <- struct{}{}
-	return
-}
-
-// Shutdown stops the service
-func (rs *RateService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	rs.Lock()
-	defer rs.Unlock()
-	close(rs.stopChan)
-	rs.rateS = nil
-	rs.cl.RpcUnregisterName(utils.RateSv1)
-	return
 }
 
 // Start should handle the service start
@@ -89,7 +61,7 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 	if err != nil {
 		return err
 	}
-	rs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -101,9 +73,9 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	rs.Lock()
+	rs.mu.Lock()
 	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)
-	rs.Unlock()
+	rs.mu.Unlock()
 
 	rs.stopChan = make(chan struct{})
 	go rs.rateS.ListenAndServe(rs.stopChan, rs.rldChan)
@@ -113,12 +85,39 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 		return err
 	}
 	// srv, _ := birpc.NewService(apis.NewRateSv1(rs.rateS), "", false)
-	rs.cl.RpcRegister(srv)
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.RateS, srv)
+	return
+}
+
+// Reload handles the change of config
+func (rs *RateService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (_ error) {
+	rs.rldChan <- struct{}{}
+	return
+}
+
+// Shutdown stops the service
+func (rs *RateService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	rs.mu.Lock()
+	defer rs.mu.Unlock()
+	close(rs.stopChan)
+	rs.rateS = nil
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.RateSv1)
 	return
 }
 
 // StateChan returns signaling channel of specific state
 func (rs *RateService) StateChan(stateID string) chan struct{} {
 	return rs.stateDeps.StateChan(stateID)
+}
+
+// ServiceName returns the service name
+func (rs *RateService) ServiceName() string {
+	return utils.RateS
+}
+
+// ShouldRun returns if the service should be running
+func (rs *RateService) ShouldRun() (should bool) {
+	return rs.cfg.RateSCfg().Enabled
 }

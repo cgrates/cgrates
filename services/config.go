@@ -19,9 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -38,9 +35,7 @@ func NewConfigService(cfg *config.CGRConfig) *ConfigService {
 
 // ConfigService implements Service interface.
 type ConfigService struct {
-	mu        sync.RWMutex
 	cfg       *config.CGRConfig
-	cl        *commonlisteners.CommonListenerS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -55,12 +50,12 @@ func (s *ConfigService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 	if err != nil {
 		return err
 	}
-	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
 	svcs, _ := engine.NewServiceWithName(s.cfg, utils.ConfigS, true)
 	for _, svc := range svcs {
-		s.cl.RpcRegister(svc)
+		cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.ConfigS, svcs)
 	return nil
@@ -72,8 +67,9 @@ func (s *ConfigService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegist
 }
 
 // Shutdown stops the service.
-func (s *ConfigService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	s.cl.RpcUnregisterName(utils.ConfigSv1)
+func (s *ConfigService) Shutdown(registry *servmanager.ServiceRegistry) error {
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.ConfigSv1)
 	return nil
 }
 

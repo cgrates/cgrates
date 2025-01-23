@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/apis"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -39,13 +38,10 @@ func NewAttributeService(cfg *config.CGRConfig) *AttributeService {
 
 // AttributeService implements Service interface
 type AttributeService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	attrS *engine.AttributeS
-	cl    *commonlisteners.CommonListenerS
-	rpc   *apis.AttributeSv1 // useful on restart
-
+	mu        sync.Mutex
+	cfg       *config.CGRConfig
+	attrS     *engine.AttributeS
+	rpc       *apis.AttributeSv1 // useful on restart
 	stateDeps *StateDependencies
 }
 
@@ -63,7 +59,7 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 	if err != nil {
 		return
 	}
-	attrS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -74,14 +70,14 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dm := srvDeps[utils.DataDB].(*DataDBService).DataManager()
 
-	attrS.Lock()
-	defer attrS.Unlock()
+	attrS.mu.Lock()
+	defer attrS.mu.Unlock()
 	attrS.attrS = engine.NewAttributeService(dm, fs, attrS.cfg)
 	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
 	srv, _ := engine.NewService(attrS.rpc)
 	// srv, _ := birpc.NewService(attrS.rpc, "", false)
 	for _, s := range srv {
-		attrS.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.AttributeS, srv)
 	return
@@ -94,9 +90,10 @@ func (attrS *AttributeService) Reload(_ *utils.SyncedChan, _ *servmanager.Servic
 
 // Shutdown stops the service
 func (attrS *AttributeService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
-	attrS.Lock()
-	attrS.cl.RpcUnregisterName(utils.AttributeSv1)
-	attrS.Unlock()
+	attrS.mu.Lock()
+	defer attrS.mu.Unlock()
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.AttributeSv1)
 	return
 }
 

@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -37,7 +35,6 @@ func NewCapService(cfg *config.CGRConfig) *CapService {
 
 // CapService implements Service interface.
 type CapService struct {
-	mu        sync.RWMutex
 	cfg       *config.CGRConfig
 	caps      *engine.Caps
 	stateDeps *StateDependencies // channel subscriptions for state changes

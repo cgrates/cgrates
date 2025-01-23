@@ -39,7 +39,7 @@ func NewStorDBService(cfg *config.CGRConfig, setVersions bool) *StorDBService {
 
 // StorDBService implements Service interface
 type StorDBService struct {
-	sync.RWMutex
+	mu          sync.RWMutex
 	cfg         *config.CGRConfig
 	oldDBCfg    *config.StorDbCfg
 	db          engine.StorDB
@@ -49,8 +49,8 @@ type StorDBService struct {
 
 // Start should handle the service start
 func (db *StorDBService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
-	db.Lock()
-	defer db.Unlock()
+	db.mu.Lock()
+	defer db.mu.Unlock()
 	db.oldDBCfg = db.cfg.StorDbCfg().Clone()
 	dbConn, err := engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
@@ -76,8 +76,8 @@ func (db *StorDBService) Start(_ *utils.SyncedChan, _ *servmanager.ServiceRegist
 
 // Reload handles the change of config
 func (db *StorDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
-	db.Lock()
-	defer db.Unlock()
+	db.mu.Lock()
+	defer db.mu.Unlock()
 	if db.needsConnectionReload() {
 		var d engine.StorDB
 		if d, err = engine.NewStorDBConn(db.cfg.StorDbCfg().Type, db.cfg.StorDbCfg().Host,
@@ -123,10 +123,10 @@ func (db *StorDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegis
 
 // Shutdown stops the service
 func (db *StorDBService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
-	db.Lock()
+	db.mu.Lock()
+	defer db.mu.Unlock()
 	db.db.Close()
 	db.db = nil
-	db.Unlock()
 	return
 }
 

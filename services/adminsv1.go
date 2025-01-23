@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/apis"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -39,17 +38,16 @@ func NewAdminSv1Service(cfg *config.CGRConfig) *AdminSv1Service {
 
 // AdminSv1Service implements Service interface
 type AdminSv1Service struct {
-	sync.RWMutex
+	mu        sync.RWMutex
 	cfg       *config.CGRConfig
 	api       *apis.AdminSv1
-	cl        *commonlisteners.CommonListenerS
 	stopChan  chan struct{}
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (apiService *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+func (s *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -58,61 +56,62 @@ func (apiService *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmana
 			utils.DataDB,
 			utils.StorDB,
 		},
-		registry, apiService.cfg.GeneralCfg().ConnectTimeout)
+		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
-	apiService.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	sdbs := srvDeps[utils.StorDB].(*StorDBService)
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	dm := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+	sdb := srvDeps[utils.StorDB].(*StorDBService).DB()
 
-	apiService.Lock()
-	defer apiService.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
-	apiService.api = apis.NewAdminSv1(apiService.cfg, dbs.DataManager(), cms.ConnManager(), fs.FilterS(), sdbs.DB())
+	s.api = apis.NewAdminSv1(s.cfg, dm, cms.ConnManager(), fs, sdb)
 
-	srv, _ := engine.NewService(apiService.api)
-	// srv, _ := birpc.NewService(apiService.api, "", false)
+	srv, _ := engine.NewService(s.api)
+	// srv, _ := birpc.NewService(s.api, "", false)
 
 	for _, s := range srv {
-		apiService.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
-	rpl, _ := engine.NewService(apis.NewReplicatorSv1(dbs.DataManager(), apiService.api))
-	for _, s := range rpl {
-		apiService.cl.RpcRegister(s)
+	rpl, _ := engine.NewService(apis.NewReplicatorSv1(dm, s.api))
+	for _, svc := range rpl {
+		cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.AdminS, srv)
 	return
 }
 
 // Reload handles the change of config
-func (apiService *AdminSv1Service) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
+func (s *AdminSv1Service) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (apiService *AdminSv1Service) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	apiService.Lock()
-	// close(apiService.stopChan)
-	apiService.api = nil
-	apiService.cl.RpcUnregisterName(utils.AdminSv1)
-	apiService.Unlock()
+func (s *AdminSv1Service) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	// close(s.stopChan)
+	s.api = nil
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.AdminSv1)
 	return
 }
 
 // ServiceName returns the service name
-func (apiService *AdminSv1Service) ServiceName() string {
+func (s *AdminSv1Service) ServiceName() string {
 	return utils.AdminS
 }
 
 // ShouldRun returns if the service should be running
-func (apiService *AdminSv1Service) ShouldRun() bool {
-	return apiService.cfg.AdminSCfg().Enabled
+func (s *AdminSv1Service) ShouldRun() bool {
+	return s.cfg.AdminSCfg().Enabled
 }
 
 // StateChan returns signaling channel of specific state
-func (apiService *AdminSv1Service) StateChan(stateID string) chan struct{} {
-	return apiService.stateDeps.StateChan(stateID)
+func (s *AdminSv1Service) StateChan(stateID string) chan struct{} {
+	return s.stateDeps.StateChan(stateID)
 }

@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
@@ -41,15 +40,11 @@ func NewEventReaderService(cfg *config.CGRConfig) *EventReaderService {
 
 // EventReaderService implements Service interface
 type EventReaderService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	ers *ers.ERService
-	cl  *commonlisteners.CommonListenerS
-
-	rldChan  chan struct{}
-	stopChan chan struct{}
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	ers       *ers.ERService
+	rldChan   chan struct{}
+	stopChan  chan struct{}
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -65,12 +60,12 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	if err != nil {
 		return err
 	}
-	erS.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
 
-	erS.Lock()
-	defer erS.Unlock()
+	erS.mu.Lock()
+	defer erS.mu.Unlock()
 
 	// remake the stop chan
 	erS.stopChan = make(chan struct{})
@@ -83,7 +78,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	if err != nil {
 		return err
 	}
-	erS.cl.RpcRegister(srv)
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ERs, srv)
 	return
 }
@@ -98,19 +93,20 @@ func (erS *EventReaderService) listenAndServe(ers *ers.ERService, stopChan, rldC
 
 // Reload handles the change of config
 func (erS *EventReaderService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (err error) {
-	erS.RLock()
+	erS.mu.RLock()
 	erS.rldChan <- struct{}{}
-	erS.RUnlock()
+	erS.mu.RUnlock()
 	return
 }
 
 // Shutdown stops the service
-func (erS *EventReaderService) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	erS.Lock()
-	defer erS.Unlock()
+func (erS *EventReaderService) Shutdown(registry *servmanager.ServiceRegistry) (err error) {
+	erS.mu.Lock()
+	defer erS.mu.Unlock()
 	close(erS.stopChan)
 	erS.ers = nil
-	erS.cl.RpcUnregisterName(utils.ErSv1)
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.ErSv1)
 	return
 }
 

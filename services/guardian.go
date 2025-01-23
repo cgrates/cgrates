@@ -19,9 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"sync"
-
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -39,9 +36,7 @@ func NewGuardianService(cfg *config.CGRConfig) *GuardianService {
 
 // GuardianService implements Service interface.
 type GuardianService struct {
-	mu        sync.RWMutex
 	cfg       *config.CGRConfig
-	cl        *commonlisteners.CommonListenerS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -56,15 +51,12 @@ func (s *GuardianService) Start(_ *utils.SyncedChan, registry *servmanager.Servi
 	if err != nil {
 		return err
 	}
-	s.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
 
 	svcs, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
 	for _, svc := range svcs {
-		s.cl.RpcRegister(svc)
+		cl.RpcRegister(svc)
 	}
 	cms.AddInternalConn(utils.GuardianS, svcs)
 	return nil
@@ -76,10 +68,9 @@ func (s *GuardianService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegi
 }
 
 // Shutdown stops the service.
-func (s *GuardianService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.cl.RpcUnregisterName(utils.GuardianSv1)
+func (s *GuardianService) Shutdown(registry *servmanager.ServiceRegistry) error {
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.GuardianSv1)
 	return nil
 }
 

@@ -22,7 +22,6 @@ import (
 	"sync"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -39,12 +38,9 @@ func NewThresholdService(cfg *config.CGRConfig) *ThresholdService {
 
 // ThresholdService implements Service interface
 type ThresholdService struct {
-	sync.RWMutex
-	cfg *config.CGRConfig
-
-	thrs *engine.ThresholdS
-	cl   *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	thrs      *engine.ThresholdS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -62,7 +58,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 	if err != nil {
 		return err
 	}
-	thrs.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err = cacheS.WaitToPrecache(shutdown,
@@ -74,35 +70,36 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 	fs := srvDeps[utils.FilterS].(*FilterService)
 	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
-	thrs.Lock()
-	defer thrs.Unlock()
+	thrs.mu.Lock()
+	defer thrs.mu.Unlock()
 	thrs.thrs = engine.NewThresholdService(dbs.DataManager(), thrs.cfg, fs.FilterS(), cms.ConnManager())
 	thrs.thrs.StartLoop(context.TODO())
 	srv, _ := engine.NewService(thrs.thrs)
 	// srv, _ := birpc.NewService(apis.NewThresholdSv1(thrs.thrs), "", false)
 	for _, s := range srv {
-		thrs.cl.RpcRegister(s)
+		cl.RpcRegister(s)
 	}
 	cms.AddInternalConn(utils.ThresholdS, srv)
 	return
 }
 
 // Reload handles the change of config
-func (thrs *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) (_ error) {
-	thrs.Lock()
+func (thrs *ThresholdService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+	thrs.mu.Lock()
 	thrs.thrs.Reload(context.TODO())
-	thrs.Unlock()
-	return
+	thrs.mu.Unlock()
+	return nil
 }
 
 // Shutdown stops the service
-func (thrs *ThresholdService) Shutdown(_ *servmanager.ServiceRegistry) (_ error) {
-	thrs.Lock()
-	defer thrs.Unlock()
+func (thrs *ThresholdService) Shutdown(registry *servmanager.ServiceRegistry) error {
+	thrs.mu.Lock()
+	defer thrs.mu.Unlock()
 	thrs.thrs.Shutdown(context.TODO())
 	thrs.thrs = nil
-	thrs.cl.RpcUnregisterName(utils.ThresholdSv1)
-	return
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.ThresholdSv1)
+	return nil
 }
 
 // ServiceName returns the service name

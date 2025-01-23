@@ -21,7 +21,6 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -39,41 +38,10 @@ func NewEventExporterService(cfg *config.CGRConfig) *EventExporterService {
 
 // EventExporterService is the service structure for EventExporterS
 type EventExporterService struct {
-	mu  sync.RWMutex
-	cfg *config.CGRConfig
-
-	eeS *ees.EeS
-	cl  *commonlisteners.CommonListenerS
-
+	mu        sync.RWMutex
+	cfg       *config.CGRConfig
+	eeS       *ees.EeS
 	stateDeps *StateDependencies // channel subscriptions for state changes
-}
-
-// ServiceName returns the service name
-func (es *EventExporterService) ServiceName() string {
-	return utils.EEs
-}
-
-// ShouldRun returns if the service should be running
-func (es *EventExporterService) ShouldRun() (should bool) {
-	return es.cfg.EEsCfg().Enabled
-}
-
-// Reload handles the change of config
-func (es *EventExporterService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
-	es.mu.Lock()
-	defer es.mu.Unlock()
-	es.eeS.ClearExporterCache()
-	return es.eeS.SetupExporterCache()
-}
-
-// Shutdown stops the service
-func (es *EventExporterService) Shutdown(_ *servmanager.ServiceRegistry) error {
-	es.mu.Lock()
-	defer es.mu.Unlock()
-	es.eeS.ClearExporterCache()
-	es.eeS = nil
-	es.cl.RpcUnregisterName(utils.EeSv1)
-	return nil
 }
 
 // Start should handle the service start
@@ -88,7 +56,7 @@ func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager
 	if err != nil {
 		return err
 	}
-	es.cl = srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
@@ -102,9 +70,38 @@ func (es *EventExporterService) Start(_ *utils.SyncedChan, registry *servmanager
 
 	srv, _ := engine.NewServiceWithPing(es.eeS, utils.EeSv1, utils.V1Prfx)
 	// srv, _ := birpc.NewService(es.rpc, "", false)
-	es.cl.RpcRegister(srv)
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.EEs, srv)
 	return nil
+}
+
+// Reload handles the change of config
+func (es *EventExporterService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegistry) error {
+	es.mu.Lock()
+	defer es.mu.Unlock()
+	es.eeS.ClearExporterCache()
+	return es.eeS.SetupExporterCache()
+}
+
+// Shutdown stops the service
+func (es *EventExporterService) Shutdown(registry *servmanager.ServiceRegistry) error {
+	es.mu.Lock()
+	defer es.mu.Unlock()
+	es.eeS.ClearExporterCache()
+	es.eeS = nil
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.RpcUnregisterName(utils.EeSv1)
+	return nil
+}
+
+// ServiceName returns the service name
+func (es *EventExporterService) ServiceName() string {
+	return utils.EEs
+}
+
+// ShouldRun returns if the service should be running
+func (es *EventExporterService) ShouldRun() (should bool) {
+	return es.cfg.EEsCfg().Enabled
 }
 
 // StateChan returns signaling channel of specific state
