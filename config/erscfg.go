@@ -201,6 +201,8 @@ type EventReaderCfg struct {
 	// 	- Any positive duration sets a fixed time interval for automatic reading cycles.
 	RunDelay time.Duration
 
+	// StartDelay adds a delay before starting reading loop
+	StartDelay           time.Duration
 	ConcurrentReqs       int
 	SourcePath           string
 	ProcessedPath        string
@@ -371,6 +373,11 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.RunDelay != nil {
 		if er.RunDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.RunDelay); err != nil {
+			return
+		}
+	}
+	if jsnCfg.StartDelay != nil {
+		if er.StartDelay, err = utils.ParseDurationWithNanosecs(*jsnCfg.StartDelay); err != nil {
 			return
 		}
 	}
@@ -627,6 +634,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln = &EventReaderCfg{
 		ID:                   er.ID,
 		Type:                 er.Type,
+		StartDelay:           er.StartDelay,
 		RunDelay:             er.RunDelay,
 		ConcurrentReqs:       er.ConcurrentReqs,
 		SourcePath:           er.SourcePath,
@@ -804,6 +812,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.FiltersCfg:              er.Filters,
 		utils.FlagsCfg:                []string{},
 		utils.RunDelayCfg:             "0",
+		utils.StartDelayCfg:           "0",
 		utils.ReconnectsCfg:           er.Reconnects,
 		utils.MaxReconnectIntervalCfg: "0",
 		utils.OptsCfg:                 opts,
@@ -847,6 +856,9 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		initialMP[utils.RunDelayCfg] = er.RunDelay.String()
 	} else if er.RunDelay < 0 {
 		initialMP[utils.RunDelayCfg] = "-1"
+	}
+	if er.StartDelay > 0 {
+		initialMP[utils.StartDelayCfg] = er.StartDelay.String()
 	}
 	return
 }
@@ -901,6 +913,7 @@ type EventReaderJsonCfg struct {
 	ID                   *string               `json:"id"`
 	Type                 *string               `json:"type"`
 	RunDelay             *string               `json:"run_delay"`
+	StartDelay           *string               `json:"start_delay"`
 	ConcurrentRequests   *int                  `json:"concurrent_requests"`
 	SourcePath           *string               `json:"source_path"`
 	ProcessedPath        *string               `json:"processed_path"`
@@ -1273,6 +1286,9 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 	}
 	if v1.RunDelay != v2.RunDelay {
 		d.RunDelay = utils.StringPointer(v2.RunDelay.String())
+	}
+	if v1.StartDelay != v2.StartDelay {
+		d.StartDelay = utils.StringPointer(v2.StartDelay.String())
 	}
 	if v1.ConcurrentReqs != v2.ConcurrentReqs {
 		d.ConcurrentRequests = utils.IntPointer(v2.ConcurrentReqs)

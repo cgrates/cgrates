@@ -2317,6 +2317,7 @@ const (
 	CacheCfg               = "cache"
 	FieldSepCfg            = "field_separator"
 	RunDelayCfg            = "run_delay"
+	StartDelayCfg          = "start_delay"
 	SourcePathCfg          = "source_path"
 	ProcessedPathCfg       = "processed_path"
 	TenantCfg              = "tenant"
