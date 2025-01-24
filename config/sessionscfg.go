@@ -90,6 +90,7 @@ type SessionsOpts struct {
 	DebitInterval          []*DynamicDurationOpt
 	TTLMaxDelay            []*DynamicDurationOpt
 	TTLUsage               []*DynamicDurationPointerOpt
+	SessionsOriginID       []*DynamicStringOpt
 }
 
 // SessionSCfg is the config section for SessionS
@@ -301,6 +302,15 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err erro
 		}
 		sesOpts.TTLUsage = append(usage, sesOpts.TTLUsage...)
 	}
+	if jsnCfg.SessionsOriginID != nil {
+		var sessionsOriginID []*DynamicStringOpt
+		sessionsOriginID, err = InterfaceToDynamicStringOpts(jsnCfg.SessionsOriginID)
+		if err != nil {
+			return
+		}
+		sesOpts.SessionsOriginID = append(sessionsOriginID, sesOpts.SessionsOriginID...)
+	}
+
 	return
 }
 
@@ -450,6 +460,7 @@ func (scfg SessionSCfg) AsMapInterface(string) any {
 		utils.MetaTTLLastUsedCfg:            scfg.Opts.TTLLastUsed,
 		utils.MetaTTLMaxDelayCfg:            scfg.Opts.TTLMaxDelay,
 		utils.MetaTTLUsageCfg:               scfg.Opts.TTLUsage,
+		utils.MetaSessionsOriginID:          scfg.Opts.SessionsOriginID,
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:             scfg.Enabled,
@@ -634,6 +645,10 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 	if sesOpts.TTLUsage != nil {
 		usg = CloneDynamicDurationPointerOpt(sesOpts.TTLUsage)
 	}
+	var sID []*DynamicStringOpt
+	if sesOpts.SessionsOriginID != nil {
+		sID = CloneDynamicStringOpt(sesOpts.SessionsOriginID)
+	}
 	return &SessionsOpts{
 		Accounts:               acntS,
 		Attributes:             attrS,
@@ -666,6 +681,7 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 		TTLLastUsed:            lastUsed,
 		TTLMaxDelay:            maxDelay,
 		TTLUsage:               usg,
+		SessionsOriginID:       sID,
 	}
 }
 
@@ -852,6 +868,7 @@ type SessionsOptsJson struct {
 	TTLLastUsed            []*DynamicInterfaceOpt `json:"*ttlLastUsed"`
 	TTLMaxDelay            []*DynamicInterfaceOpt `json:"*ttlMaxDelay"`
 	TTLUsage               []*DynamicInterfaceOpt `json:"*ttlUsage"`
+	SessionsOriginID       []*DynamicInterfaceOpt `json:"*sessionsOriginID"`
 }
 
 // SessionSJsonCfg config section
@@ -978,6 +995,9 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicDurationPointerOptEqual(v1.TTLUsage, v2.TTLUsage) {
 		d.TTLUsage = DurationPointerToIfaceDynamicOpts(v2.TTLUsage)
+	}
+	if !DynamicStringOptEqual(v1.SessionsOriginID, v2.SessionsOriginID) {
+		d.SessionsOriginID = DynamicStringToInterfaceOpts(v2.SessionsOriginID)
 	}
 	return d
 }
