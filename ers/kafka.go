@@ -145,6 +145,13 @@ func (rdr *KafkaER) Serve() (err error) {
 }
 
 func (rdr *KafkaER) readLoop(r *kafka.Reader) {
+	if rdr.Config().StartDelay > 0 {
+		select {
+		case <-time.After(rdr.Config().StartDelay):
+		case <-rdr.rdrExit:
+			return
+		}
+	}
 	for {
 		if rdr.Config().ConcurrentReqs != -1 {
 			<-rdr.cap // do not try to read if the limit is reached
