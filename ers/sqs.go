@@ -187,6 +187,13 @@ func (rdr *SQSER) getQueueURLWithClient(svc sqsClient) (err error) {
 }
 
 func (rdr *SQSER) readLoop(scv sqsClient) (err error) {
+	if rdr.Config().StartDelay > 0 {
+		select {
+		case <-time.After(rdr.Config().StartDelay):
+		case <-rdr.rdrExit:
+			return
+		}
+	}
 	// scv := sqs.New(rdr.session)
 	for !rdr.isClosed() {
 		if rdr.Config().ConcurrentReqs != -1 {
