@@ -635,6 +635,70 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		cln.ElsWaitForActiveShards = new(string)
 		*cln.ElsWaitForActiveShards = *eeOpts.ElsWaitForActiveShards
 	}
+	if eeOpts.ElsCAPath != nil {
+		cln.ElsCAPath = new(string)
+		*cln.ElsCAPath = *eeOpts.ElsCAPath
+	}
+	if eeOpts.ElsDiscoverNodesOnStart != nil {
+		cln.ElsDiscoverNodesOnStart = new(bool)
+		*cln.ElsDiscoverNodesOnStart = *eeOpts.ElsDiscoverNodesOnStart
+	}
+	if eeOpts.ElsDiscoverNodeInterval != nil {
+		cln.ElsDiscoverNodeInterval = new(time.Duration)
+		*cln.ElsDiscoverNodeInterval = *eeOpts.ElsDiscoverNodeInterval
+	}
+	if eeOpts.ElsCloud != nil {
+		cln.ElsCloud = new(bool)
+		*cln.ElsCloud = *eeOpts.ElsCloud
+	}
+	if eeOpts.ElsAPIKey != nil {
+		cln.ElsAPIKey = new(string)
+		*cln.ElsAPIKey = *eeOpts.ElsAPIKey
+	}
+	if eeOpts.ElsCertificateFingerprint != nil {
+		cln.ElsCertificateFingerprint = new(string)
+		*cln.ElsCertificateFingerprint = *eeOpts.ElsCertificateFingerprint
+	}
+	if eeOpts.ElsServiceToken != nil {
+		cln.ElsServiceToken = new(string)
+		*cln.ElsServiceToken = *eeOpts.ElsServiceToken
+	}
+	if eeOpts.ElsUsername != nil {
+		cln.ElsUsername = new(string)
+		*cln.ElsUsername = *eeOpts.ElsUsername
+	}
+	if eeOpts.ElsPassword != nil {
+		cln.ElsPassword = new(string)
+		*cln.ElsPassword = *eeOpts.ElsPassword
+	}
+	if eeOpts.ElsEnableDebugLogger != nil {
+		cln.ElsEnableDebugLogger = new(bool)
+		*cln.ElsEnableDebugLogger = *eeOpts.ElsEnableDebugLogger
+	}
+	if eeOpts.ElsLogger != nil {
+		cln.ElsLogger = new(string)
+		*cln.ElsLogger = *eeOpts.ElsLogger
+	}
+	if eeOpts.ElsCompressRequestBody != nil {
+		cln.ElsCompressRequestBody = new(bool)
+		*cln.ElsCompressRequestBody = *eeOpts.ElsCompressRequestBody
+	}
+	if eeOpts.ElsCompressRequestBodyLevel != nil {
+		cln.ElsCompressRequestBodyLevel = new(int)
+		*cln.ElsCompressRequestBodyLevel = *eeOpts.ElsCompressRequestBodyLevel
+	}
+	if eeOpts.ElsRetryOnStatus != nil {
+		cln.ElsRetryOnStatus = new([]int)
+		*cln.ElsRetryOnStatus = *eeOpts.ElsRetryOnStatus
+	}
+	if eeOpts.ElsMaxRetries != nil {
+		cln.ElsMaxRetries = new(int)
+		*cln.ElsMaxRetries = *eeOpts.ElsMaxRetries
+	}
+	if eeOpts.ElsDisableRetry != nil {
+		cln.ElsDisableRetry = new(bool)
+		*cln.ElsDisableRetry = *eeOpts.ElsDisableRetry
+	}
 	if eeOpts.SQLMaxIdleConns != nil {
 		cln.SQLMaxIdleConns = new(int)
 		*cln.SQLMaxIdleConns = *eeOpts.SQLMaxIdleConns
@@ -915,6 +979,54 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	}
 	if optsEes.ElsWaitForActiveShards != nil {
 		opts[utils.ElsWaitForActiveShards] = *optsEes.ElsWaitForActiveShards
+	}
+	if optsEes.ElsCAPath != nil {
+		opts[utils.ElsCAPath] = *optsEes.ElsCAPath
+	}
+	if optsEes.ElsDiscoverNodesOnStart != nil {
+		opts[utils.ElsDiscoverNodesOnStart] = *optsEes.ElsDiscoverNodesOnStart
+	}
+	if optsEes.ElsDiscoverNodeInterval != nil {
+		opts[utils.ElsDiscoverNodeInterval] = *optsEes.ElsDiscoverNodeInterval
+	}
+	if optsEes.ElsCloud != nil {
+		opts[utils.ElsCloud] = *optsEes.ElsCloud
+	}
+	if optsEes.ElsAPIKey != nil {
+		opts[utils.ElsAPIKey] = *optsEes.ElsAPIKey
+	}
+	if optsEes.ElsCertificateFingerprint != nil {
+		opts[utils.ElsCertificateFingerprint] = *optsEes.ElsCertificateFingerprint
+	}
+	if optsEes.ElsServiceToken != nil {
+		opts[utils.ElsServiceToken] = *optsEes.ElsServiceToken
+	}
+	if optsEes.ElsUsername != nil {
+		opts[utils.ElsUsername] = *optsEes.ElsUsername
+	}
+	if optsEes.ElsPassword != nil {
+		opts[utils.ElsPassword] = *optsEes.ElsPassword
+	}
+	if optsEes.ElsEnableDebugLogger != nil {
+		opts[utils.ElsEnableDebugLogger] = *optsEes.ElsEnableDebugLogger
+	}
+	if optsEes.ElsLogger != nil {
+		opts[utils.ElsLogger] = *optsEes.ElsLogger
+	}
+	if optsEes.ElsCompressRequestBody != nil {
+		opts[utils.ElsCompressRequestBody] = *optsEes.ElsCompressRequestBody
+	}
+	if optsEes.ElsCompressRequestBodyLevel != nil {
+		opts[utils.ElsCompressRequestBodyLevel] = *optsEes.ElsCompressRequestBodyLevel
+	}
+	if optsEes.ElsRetryOnStatus != nil {
+		opts[utils.ElsRetryOnStatus] = *optsEes.ElsRetryOnStatus
+	}
+	if optsEes.ElsMaxRetries != nil {
+		opts[utils.ElsMaxRetries] = *optsEes.ElsMaxRetries
+	}
+	if optsEes.ElsDisableRetry != nil {
+		opts[utils.ElsDisableRetry] = *optsEes.ElsDisableRetry
 	}
 	if optsEes.SQLMaxIdleConns != nil {
 		opts[utils.SQLMaxIdleConnsCfg] = *optsEes.SQLMaxIdleConns
