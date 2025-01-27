@@ -43,7 +43,7 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 		if err != nil {
 			return nil, err
 		}
-		eeCfg := config.NewEventExporterCfg(aL.id(), "", actD.Path, cfg.EEsCfg().GetDefaultExporter().FailedPostsDir,
+		eeCfg := config.NewEventExporterCfg(aL.id(), "", actD.Path, cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir,
 			attempts, nil)
 		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(eeCfg, cfg, nil, nil)
 	}

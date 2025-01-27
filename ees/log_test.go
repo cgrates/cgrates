@@ -37,11 +37,11 @@ func TestNewLogEE(t *testing.T) {
 	}
 
 	expected := &LogEE{
-		cfg: cfg.EEsCfg().GetDefaultExporter(),
+		cfg: cfg.EEsCfg().ExporterCfg(utils.MetaDefault),
 		dc:  dc,
 	}
 
-	rcv := NewLogEE(cfg.EEsCfg().GetDefaultExporter(), dc)
+	rcv := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", expected, rcv)
 	}
@@ -53,7 +53,7 @@ func TestLogEEExportEvent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	logEE := NewLogEE(cfg.EEsCfg().GetDefaultExporter(), dc)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	mp := map[string]any{
 		"field1": 2,
 		"field2": "value",
@@ -86,7 +86,7 @@ func TestLogEEGetMetrics(t *testing.T) {
 			"metric1": "value",
 		},
 	}
-	logEE := NewLogEE(cfg.EEsCfg().GetDefaultExporter(), dc)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	rcv := logEE.GetMetrics()
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %T \n but received \n %T", expected, rcv)
@@ -99,7 +99,7 @@ func TestLogEEPrepareMap(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	logEE := NewLogEE(cfg.EEsCfg().GetDefaultExporter(), dc)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	mp := &utils.CGREvent{
 		Event: map[string]any{
 			"field1": 2,
@@ -118,7 +118,7 @@ func TestLogEEPrepareOrderMap(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	logEE := NewLogEE(cfg.EEsCfg().GetDefaultExporter(), dc)
+	logEE := NewLogEE(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	mp := utils.NewOrderedNavigableMap()
 	fullPath := &utils.FullPath{
 		PathSlice: []string{"*path1"},

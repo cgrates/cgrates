@@ -35,12 +35,12 @@ type ERsCfg struct {
 	PartialCacheTTL time.Duration
 }
 
-// ReaderCfg iterates over the Readers slice and returns if it finds any
-// reader configuration where the ID is equal to the "ID" parameter. If
-// none were found, the method will return nil.
-func (erS *ERsCfg) ReaderCfg(ID string) *EventReaderCfg {
+// ReaderCfg iterates over the Readers slice and returns the reader
+// configuration associated with the specified "id". If none were found, the
+// method will return nil.
+func (erS *ERsCfg) ReaderCfg(id string) *EventReaderCfg {
 	for _, rdr := range erS.Readers {
-		if rdr.ID == ID {
+		if rdr.ID == id {
 			return rdr
 		}
 	}
