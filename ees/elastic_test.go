@@ -70,8 +70,8 @@ func TestInitCase1(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := "test"
-	if !reflect.DeepEqual(ee.opts.Index, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", eeExpect, ee.opts.Index)
+	if !reflect.DeepEqual(ee.indexReqOpts.Index, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", eeExpect, ee.indexReqOpts.Index)
 	}
 }
 
@@ -87,8 +87,8 @@ func TestInitCase2(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := utils.IntPointer(20)
-	if !reflect.DeepEqual(ee.opts.IfPrimaryTerm, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.IfPrimaryTerm))
+	if !reflect.DeepEqual(ee.indexReqOpts.IfPrimaryTerm, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.indexReqOpts.IfPrimaryTerm))
 	}
 }
 
@@ -104,8 +104,8 @@ func TestInitCase3(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := utils.IntPointer(20)
-	if !reflect.DeepEqual(ee.opts.IfSeqNo, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.IfSeqNo))
+	if !reflect.DeepEqual(ee.indexReqOpts.IfSeqNo, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.indexReqOpts.IfSeqNo))
 	}
 }
 
@@ -121,8 +121,8 @@ func TestInitCase4(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := "test"
-	if !reflect.DeepEqual(ee.opts.OpType, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.OpType))
+	if !reflect.DeepEqual(ee.indexReqOpts.OpType, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.indexReqOpts.OpType))
 	}
 }
 
@@ -138,8 +138,8 @@ func TestInitCase5(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := "test"
-	if !reflect.DeepEqual(ee.opts.Pipeline, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.Pipeline))
+	if !reflect.DeepEqual(ee.indexReqOpts.Pipeline, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.indexReqOpts.Pipeline))
 	}
 }
 
@@ -155,8 +155,8 @@ func TestInitCase6(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := "test"
-	if !reflect.DeepEqual(ee.opts.Routing, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.Routing))
+	if !reflect.DeepEqual(ee.indexReqOpts.Routing, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.indexReqOpts.Routing))
 	}
 }
 
@@ -172,8 +172,8 @@ func TestInitCase8(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := utils.IntPointer(20)
-	if !reflect.DeepEqual(ee.opts.Version, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.Version))
+	if !reflect.DeepEqual(ee.indexReqOpts.Version, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.indexReqOpts.Version))
 	}
 }
 
@@ -189,8 +189,8 @@ func TestInitCase9(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := "test"
-	if !reflect.DeepEqual(ee.opts.VersionType, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.VersionType))
+	if !reflect.DeepEqual(ee.indexReqOpts.VersionType, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.indexReqOpts.VersionType))
 	}
 }
 
@@ -206,8 +206,8 @@ func TestInitCase10(t *testing.T) {
 		t.Error(err)
 	}
 	eeExpect := "test"
-	if !reflect.DeepEqual(ee.opts.WaitForActiveShards, eeExpect) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.opts.WaitForActiveShards))
+	if !reflect.DeepEqual(ee.indexReqOpts.WaitForActiveShards, eeExpect) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(eeExpect), utils.ToJSON(ee.indexReqOpts.WaitForActiveShards))
 	}
 }
 
@@ -235,7 +235,7 @@ func TestElasticExportEvent(t *testing.T) {
 	if err = eEe.Connect(); err != nil {
 		t.Error(err)
 	}
-	eEe.eClnt.Transport = new(mockClientErr)
+	eEe.client.Transport = new(mockClientErr)
 	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err != nil {
 		t.Error(err)
 	}
@@ -265,7 +265,7 @@ func TestElasticExportEvent2(t *testing.T) {
 	if err = eEe.Connect(); err != nil {
 		t.Error(err)
 	}
-	eEe.eClnt.Transport = new(mockClientErr2)
+	eEe.client.Transport = new(mockClientErr2)
 
 	errExpect := io.EOF
 	if err := eEe.ExportEvent(context.Background(), []byte{}, ""); err == nil || err != errExpect {
@@ -296,7 +296,7 @@ func TestElasticExportEvent3(t *testing.T) {
 	if err = eEe.Connect(); err != nil {
 		t.Error(err)
 	}
-	eEe.eClnt.Transport = new(mockClient)
+	eEe.client.Transport = new(mockClient)
 	errExpect := `the client noticed that the server is not Elasticsearch and we do not support this unknown product`
 
 	cgrCfg.EEsCfg().Exporters[0].ComputeFields()
