@@ -1239,6 +1239,7 @@ func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 	exp := &EventExporterOptsJson{
 		CSVFieldSeparator:        utils.StringPointer(","),
 		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsRefresh:               utils.StringPointer("true"),
 		ElsOpType:                utils.StringPointer("op_type"),
 		ElsPipeline:              utils.StringPointer("pipeline"),
 		ElsRouting:               utils.StringPointer("routing"),
@@ -1426,6 +1427,7 @@ func TestLoadFromJSONCfg(t *testing.T) {
 	eeSJson := &EventExporterOptsJson{
 		CSVFieldSeparator:        utils.StringPointer(","),
 		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsRefresh:               utils.StringPointer("true"),
 		ElsOpType:                utils.StringPointer("op_type"),
 		ElsPipeline:              utils.StringPointer("pipeline"),
 		ElsRouting:               utils.StringPointer("routing"),
@@ -1694,6 +1696,7 @@ func TestEEsAsMapInterface(t *testing.T) {
 			"certPath":                 "cp",
 			"csvFieldSeparator":        ",",
 			"elsIndex":                 "idx1",
+			"elsRefresh":               "true",
 			"elsOpType":                "op_type",
 			"elsPipeline":              "pipeline",
 			"elsRouting":               "routing",
@@ -1865,6 +1868,7 @@ func TestEescfgloadFromJSONCfg(t *testing.T) {
 		ElsMaxRetries:               &nm,
 		ElsDisableRetry:             &bl,
 		ElsIndex:                    &str,
+		ElsRefresh:                  &str,
 		ElsOpType:                   &str,
 		ElsPipeline:                 &str,
 		ElsRouting:                  &str,
