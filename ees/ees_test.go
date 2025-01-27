@@ -391,9 +391,9 @@ func TestV1ProcessEvent5(t *testing.T) {
 		t.Fatal(err)
 	}
 	var rply map[string]map[string]any
-	errExpect := "unsupported exporter type: <invalid_type>"
+	errExpect := `failed to init EventExporter "SQLExporterFull": unsupported exporter type: <invalid_type>`
 	if err := eeS.V1ProcessEvent(context.TODO(), cgrEv, &rply); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v but received %v", errExpect, err)
+		t.Errorf("expected %q, received %q", errExpect, err)
 	}
 }
 
