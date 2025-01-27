@@ -169,6 +169,7 @@ type EventExporterOpts struct {
 	ElsWaitForActiveShards *string
 
 	// elasticsearch client opts
+	ElsCAPath                   *string
 	ElsDiscoverNodesOnStart     *bool
 	ElsDiscoverNodeInterval     *time.Duration
 	ElsCloud                    *bool
@@ -305,6 +306,9 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.ElsPassword != nil {
 		eeOpts.ElsPassword = jsnCfg.ElsPassword
+	}
+	if jsnCfg.ElsCAPath != nil {
+		eeOpts.ElsCAPath = jsnCfg.ElsCAPath
 	}
 	if jsnCfg.ElsDiscoverNodesOnStart != nil {
 		eeOpts.ElsDiscoverNodesOnStart = jsnCfg.ElsDiscoverNodesOnStart
@@ -1052,6 +1056,7 @@ type EventExporterOptsJson struct {
 	ElsCertificateFingerprint   *string           `json:"elsCertificateFingerPrint"`
 	ElsUsername                 *string           `json:"elsUsername"`
 	ElsPassword                 *string           `json:"elsPassword"`
+	ElsCAPath                   *string           `json:"elsCAPath"`
 	ElsDiscoverNodesOnStart     *bool             `json:"elsDiscoverNodesOnStart"`
 	ElsDiscoverNodesInterval    *string           `json:"elsDiscoverNodesInterval"`
 	ElsEnableDebugLogger        *bool             `json:"elsEnableDebugLogger"`
