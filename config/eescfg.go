@@ -174,14 +174,10 @@ type EventExporterOpts struct {
 	ElsRetryOnStatus            *[]int
 	ElsMaxRetries               *int
 	ElsDisableRetry             *bool
-	ElsIfPrimaryTerm            *int
-	ElsIfSeqNo                  *int
 	ElsOpType                   *string
 	ElsPipeline                 *string
 	ElsRouting                  *string
 	ElsTimeout                  *time.Duration
-	ElsVersion                  *int
-	ElsVersionType              *string
 	ElsWaitForActiveShards      *string
 	SQLMaxIdleConns             *int
 	SQLMaxOpenConns             *int
@@ -326,12 +322,6 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	if jsnCfg.ElsIndex != nil {
 		eeOpts.ElsIndex = jsnCfg.ElsIndex
 	}
-	if jsnCfg.ElsIfPrimaryTerm != nil {
-		eeOpts.ElsIfPrimaryTerm = jsnCfg.ElsIfPrimaryTerm
-	}
-	if jsnCfg.ElsIfSeqNo != nil {
-		eeOpts.ElsIfSeqNo = jsnCfg.ElsIfSeqNo
-	}
 	if jsnCfg.ElsOpType != nil {
 		eeOpts.ElsOpType = jsnCfg.ElsOpType
 	}
@@ -347,12 +337,6 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 			return
 		}
 		eeOpts.ElsTimeout = utils.DurationPointer(elsTimeout)
-	}
-	if jsnCfg.ElsVersion != nil {
-		eeOpts.ElsVersion = jsnCfg.ElsVersion
-	}
-	if jsnCfg.ElsVersionType != nil {
-		eeOpts.ElsVersionType = jsnCfg.ElsVersionType
 	}
 	if jsnCfg.ElsWaitForActiveShards != nil {
 		eeOpts.ElsWaitForActiveShards = jsnCfg.ElsWaitForActiveShards
@@ -614,14 +598,6 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		cln.ElsIndex = new(string)
 		*cln.ElsIndex = *eeOpts.ElsIndex
 	}
-	if eeOpts.ElsIfPrimaryTerm != nil {
-		cln.ElsIfPrimaryTerm = new(int)
-		*cln.ElsIfPrimaryTerm = *eeOpts.ElsIfPrimaryTerm
-	}
-	if eeOpts.ElsIfSeqNo != nil {
-		cln.ElsIfSeqNo = new(int)
-		*cln.ElsIfSeqNo = *eeOpts.ElsIfSeqNo
-	}
 	if eeOpts.ElsOpType != nil {
 		cln.ElsOpType = new(string)
 		*cln.ElsOpType = *eeOpts.ElsOpType
@@ -637,14 +613,6 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.ElsTimeout != nil {
 		cln.ElsTimeout = new(time.Duration)
 		*cln.ElsTimeout = *eeOpts.ElsTimeout
-	}
-	if eeOpts.ElsVersion != nil {
-		cln.ElsVersion = new(int)
-		*cln.ElsVersion = *eeOpts.ElsVersion
-	}
-	if eeOpts.ElsVersionType != nil {
-		cln.ElsVersionType = new(string)
-		*cln.ElsVersionType = *eeOpts.ElsVersionType
 	}
 	if eeOpts.ElsWaitForActiveShards != nil {
 		cln.ElsWaitForActiveShards = new(string)
@@ -913,12 +881,6 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	if optsEes.ElsIndex != nil {
 		opts[utils.ElsIndex] = *optsEes.ElsIndex
 	}
-	if optsEes.ElsIfPrimaryTerm != nil {
-		opts[utils.ElsIfPrimaryTerm] = *optsEes.ElsIfPrimaryTerm
-	}
-	if optsEes.ElsIfSeqNo != nil {
-		opts[utils.ElsIfSeqNo] = *optsEes.ElsIfSeqNo
-	}
 	if optsEes.ElsOpType != nil {
 		opts[utils.ElsOpType] = *optsEes.ElsOpType
 	}
@@ -930,12 +892,6 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	}
 	if optsEes.ElsTimeout != nil {
 		opts[utils.ElsTimeout] = optsEes.ElsTimeout.String()
-	}
-	if optsEes.ElsVersion != nil {
-		opts[utils.ElsVersionLow] = *optsEes.ElsVersion
-	}
-	if optsEes.ElsVersionType != nil {
-		opts[utils.ElsVersionType] = *optsEes.ElsVersionType
 	}
 	if optsEes.ElsWaitForActiveShards != nil {
 		opts[utils.ElsWaitForActiveShards] = *optsEes.ElsWaitForActiveShards
@@ -1090,14 +1046,10 @@ type EventExporterOptsJson struct {
 	ElsMaxRetries               *int              `json:"elsMaxRetries"`
 	ElsDisableRetry             *bool             `json:"elsDisableRetry"`
 	ElsIndex                    *string           `json:"elsIndex"`
-	ElsIfPrimaryTerm            *int              `json:"elsIfPrimaryTerm"`
-	ElsIfSeqNo                  *int              `json:"elsIfSeqNo"`
 	ElsOpType                   *string           `json:"elsOpType"`
 	ElsPipeline                 *string           `json:"elsPipeline"`
 	ElsRouting                  *string           `json:"elsRouting"`
 	ElsTimeout                  *string           `json:"elsTimeout"`
-	ElsVersion                  *int              `json:"elsVersion"`
-	ElsVersionType              *string           `json:"elsVersionType"`
 	ElsWaitForActiveShards      *string           `json:"elsWaitForActiveShards"`
 	SQLMaxIdleConns             *int              `json:"sqlMaxIdleConns"`
 	SQLMaxOpenConns             *int              `json:"sqlMaxOpenConns"`
@@ -1184,22 +1136,6 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 	} else {
 		d.ElsIndex = nil
 	}
-	if v2.ElsIfPrimaryTerm != nil {
-		if v1.ElsIfPrimaryTerm == nil ||
-			*v1.ElsIfPrimaryTerm != *v2.ElsIfPrimaryTerm {
-			d.ElsIfPrimaryTerm = v2.ElsIfPrimaryTerm
-		}
-	} else {
-		d.ElsIfPrimaryTerm = nil
-	}
-	if v2.ElsIfSeqNo != nil {
-		if v1.ElsIfSeqNo == nil ||
-			*v1.ElsIfSeqNo != *v2.ElsIfSeqNo {
-			d.ElsIfSeqNo = v2.ElsIfSeqNo
-		}
-	} else {
-		d.ElsIfSeqNo = nil
-	}
 	if v2.ElsOpType != nil {
 		if v1.ElsOpType == nil ||
 			*v1.ElsOpType != *v2.ElsOpType {
@@ -1231,22 +1167,6 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 		}
 	} else {
 		d.ElsTimeout = nil
-	}
-	if v2.ElsVersion != nil {
-		if v1.ElsVersion == nil ||
-			*v1.ElsVersion != *v2.ElsVersion {
-			d.ElsVersion = v2.ElsVersion
-		}
-	} else {
-		d.ElsVersion = nil
-	}
-	if v2.ElsVersionType != nil {
-		if v1.ElsVersionType == nil ||
-			*v1.ElsVersionType != *v2.ElsVersionType {
-			d.ElsVersionType = v2.ElsVersionType
-		}
-	} else {
-		d.ElsVersionType = nil
 	}
 	if v2.ElsWaitForActiveShards != nil {
 		if v1.ElsWaitForActiveShards == nil ||
