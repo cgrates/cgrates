@@ -28,7 +28,7 @@ import (
 )
 
 func TestNewRpcEE(t *testing.T) {
-	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().GetDefaultExporter()
+	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
 	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
@@ -101,7 +101,7 @@ func TestRPCCfg(t *testing.T) {
 }
 
 func TestRPCConnect(t *testing.T) {
-	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().GetDefaultExporter()
+	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
 	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
@@ -117,7 +117,7 @@ func TestRPCConnect(t *testing.T) {
 }
 
 // func TestRPCExportEvent(t *testing.T) {
-// 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().GetDefaultExporter()
+// 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
 // 	dc, err := newEEMetrics("Local")
 // 	if err != nil {
 // 		t.Error(err)
@@ -146,7 +146,7 @@ func TestRPCConnect(t *testing.T) {
 // }
 
 func TestRPCClose(t *testing.T) {
-	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().GetDefaultExporter()
+	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
 	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)
@@ -165,7 +165,7 @@ func TestRPCClose(t *testing.T) {
 }
 
 func TestRPCGetMetrics(t *testing.T) {
-	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().GetDefaultExporter()
+	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
 	dc := &utils.SafeMapStorage{
 		MapStorage: utils.MapStorage{
 			"time":         "now",
@@ -184,7 +184,7 @@ func TestRPCGetMetrics(t *testing.T) {
 }
 
 func TestRPCPrepareMap(t *testing.T) {
-	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().GetDefaultExporter()
+	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
 	dc, err := newEEMetrics("Local")
 	if err != nil {
 		t.Error(err)

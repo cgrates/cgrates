@@ -34,16 +34,16 @@ func TestNewAMQPee(t *testing.T) {
 			utils.PositiveExports: utils.StringSet{},
 			utils.NegativeExports: 5,
 		}}
-	cfg.EEsCfg().GetDefaultExporter().ConcurrentRequests = 2
-	rcv := NewAMQPee(cfg.EEsCfg().GetDefaultExporter(), dc)
+	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).ConcurrentRequests = 2
+	rcv := NewAMQPee(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 	exp := &AMQPee{
-		cfg:  cfg.EEsCfg().GetDefaultExporter(),
+		cfg:  cfg.EEsCfg().ExporterCfg(utils.MetaDefault),
 		dc:   dc,
-		reqs: newConcReq(cfg.EEsCfg().GetDefaultExporter().ConcurrentRequests),
+		reqs: newConcReq(cfg.EEsCfg().ExporterCfg(utils.MetaDefault).ConcurrentRequests),
 	}
 	rcv.reqs = nil
 	exp.reqs = nil
-	exp.parseOpts(cfg.EEsCfg().GetDefaultExporter().Opts)
+	exp.parseOpts(cfg.EEsCfg().ExporterCfg(utils.MetaDefault).Opts)
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
 	}
@@ -57,11 +57,11 @@ func TestNewAMQPee(t *testing.T) {
 // 			utils.PositiveExports: utils.StringSet{},
 // 			utils.NegativeExports: 5,
 // 		}}
-// 	// cfg.EEsCfg().GetDefaultExporter().ConcurrentRequests = 2
-// 	// cfg.EEsCfg().GetDefaultExporter().Opts = &config.EventExporterOpts{
+// 	// cfg.EEsCfg().ExporterCfg(utils.MetaDefault).ConcurrentRequests = 2
+// 	// cfg.EEsCfg().ExporterCfg(utils.MetaDefault).Opts = &config.EventExporterOpts{
 
 // 	// }
-// 	pstr := NewAMQPee(cfg.EEsCfg().GetDefaultExporter(), dc)
+// 	pstr := NewAMQPee(cfg.EEsCfg().ExporterCfg(utils.MetaDefault), dc)
 // 	content := "some_content"
 // 	pstr.postChan =
 // 	if err := pstr.ExportEvent(context.Background(), content, ""); err != nil {

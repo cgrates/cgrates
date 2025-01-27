@@ -94,8 +94,8 @@ func TestACHTTPPostExecute(t *testing.T) {
 
 func TestACHTTPPostValues(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.EEsCfg().GetDefaultExporter().Attempts = 1
-	cfg.EEsCfg().GetDefaultExporter().FailedPostsDir = utils.MetaNone
+	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).Attempts = 1
+	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir = utils.MetaNone
 	apAction := &engine.APAction{
 		ID:   "TEST_ACTION_HTTPPostValues",
 		Type: utils.MetaHTTPPost,
