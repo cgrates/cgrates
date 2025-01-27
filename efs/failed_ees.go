@@ -52,6 +52,9 @@ func AsOptsEESConfig(opts map[string]any) (*config.EventExporterOpts, error) {
 	if _, has := opts[utils.ElsIndex]; has {
 		optsCfg.ElsIndex = utils.StringPointer(utils.IfaceAsString(utils.ElsIndex))
 	}
+	if _, has := opts[utils.ElsRefresh]; has {
+		optsCfg.ElsRefresh = utils.StringPointer(utils.IfaceAsString(utils.ElsRefresh))
+	}
 	if _, has := opts[utils.ElsOpType]; has {
 		optsCfg.ElsOpType = utils.StringPointer(utils.IfaceAsString(utils.ElsOpType))
 	}

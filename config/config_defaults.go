@@ -556,6 +556,7 @@ const CGRATES_CFG_JSON = `
 				// "elsMaxRetries": 0,                  // Default: 3.
 				// "elsDisableRetry": false,            // Default: false.
 				// "elsIndex": "",			// ElsIndex
+				// "elsRefresh": "false",		// controls when changes become visible <true|false|wait_for>
 				// "elsOpType": "",			// ElsOpType
 				// "elsPipeline": "",			// ElsPipeline
 				// "elsRouting": "",			// ElsRouting

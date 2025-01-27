@@ -157,8 +157,18 @@ func (eeS *EEsCfg) exporterIDs() []string {
 }
 
 type EventExporterOpts struct {
-	CSVFieldSeparator           *string
-	ElsIndex                    *string
+	CSVFieldSeparator *string
+
+	// elasticsearch index request opts
+	ElsIndex               *string
+	ElsRefresh             *string
+	ElsOpType              *string
+	ElsPipeline            *string
+	ElsRouting             *string
+	ElsTimeout             *time.Duration
+	ElsWaitForActiveShards *string
+
+	// elasticsearch client opts
 	ElsDiscoverNodesOnStart     *bool
 	ElsDiscoverNodeInterval     *time.Duration
 	ElsCloud                    *bool
@@ -174,54 +184,50 @@ type EventExporterOpts struct {
 	ElsRetryOnStatus            *[]int
 	ElsMaxRetries               *int
 	ElsDisableRetry             *bool
-	ElsOpType                   *string
-	ElsPipeline                 *string
-	ElsRouting                  *string
-	ElsTimeout                  *time.Duration
-	ElsWaitForActiveShards      *string
-	SQLMaxIdleConns             *int
-	SQLMaxOpenConns             *int
-	SQLConnMaxLifetime          *time.Duration
-	MYSQLDSNParams              map[string]string
-	SQLTableName                *string
-	SQLDBName                   *string
-	PgSSLMode                   *string
-	KafkaTopic                  *string
-	KafkaBatchSize              *int
-	KafkaTLS                    *bool
-	KafkaCAPath                 *string
-	KafkaSkipTLSVerify          *bool
-	AMQPRoutingKey              *string
-	AMQPQueueID                 *string
-	AMQPExchange                *string
-	AMQPExchangeType            *string
-	AMQPUsername                *string
-	AMQPPassword                *string
-	AWSRegion                   *string
-	AWSKey                      *string
-	AWSSecret                   *string
-	AWSToken                    *string
-	SQSQueueID                  *string
-	S3BucketID                  *string
-	S3FolderPath                *string
-	NATSJetStream               *bool
-	NATSSubject                 *string
-	NATSJWTFile                 *string
-	NATSSeedFile                *string
-	NATSCertificateAuthority    *string
-	NATSClientCertificate       *string
-	NATSClientKey               *string
-	NATSJetStreamMaxWait        *time.Duration
-	RPCCodec                    *string
-	ServiceMethod               *string
-	KeyPath                     *string
-	CertPath                    *string
-	CAPath                      *string
-	TLS                         *bool
-	ConnIDs                     *[]string
-	RPCConnTimeout              *time.Duration
-	RPCReplyTimeout             *time.Duration
-	RPCAPIOpts                  map[string]any
+
+	SQLMaxIdleConns          *int
+	SQLMaxOpenConns          *int
+	SQLConnMaxLifetime       *time.Duration
+	MYSQLDSNParams           map[string]string
+	SQLTableName             *string
+	SQLDBName                *string
+	PgSSLMode                *string
+	KafkaTopic               *string
+	KafkaBatchSize           *int
+	KafkaTLS                 *bool
+	KafkaCAPath              *string
+	KafkaSkipTLSVerify       *bool
+	AMQPRoutingKey           *string
+	AMQPQueueID              *string
+	AMQPExchange             *string
+	AMQPExchangeType         *string
+	AMQPUsername             *string
+	AMQPPassword             *string
+	AWSRegion                *string
+	AWSKey                   *string
+	AWSSecret                *string
+	AWSToken                 *string
+	SQSQueueID               *string
+	S3BucketID               *string
+	S3FolderPath             *string
+	NATSJetStream            *bool
+	NATSSubject              *string
+	NATSJWTFile              *string
+	NATSSeedFile             *string
+	NATSCertificateAuthority *string
+	NATSClientCertificate    *string
+	NATSClientKey            *string
+	NATSJetStreamMaxWait     *time.Duration
+	RPCCodec                 *string
+	ServiceMethod            *string
+	KeyPath                  *string
+	CertPath                 *string
+	CAPath                   *string
+	TLS                      *bool
+	ConnIDs                  *[]string
+	RPCConnTimeout           *time.Duration
+	RPCReplyTimeout          *time.Duration
+	RPCAPIOpts               map[string]any
 }
 
 // EventExporterCfg the config for a Event Exporter
@@ -321,6 +327,9 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.ElsIndex != nil {
 		eeOpts.ElsIndex = jsnCfg.ElsIndex
+	}
+	if jsnCfg.ElsRefresh != nil {
+		eeOpts.ElsRefresh = jsnCfg.ElsRefresh
 	}
 	if jsnCfg.ElsOpType != nil {
 		eeOpts.ElsOpType = jsnCfg.ElsOpType
@@ -597,6 +606,10 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 	if eeOpts.ElsIndex != nil {
 		cln.ElsIndex = new(string)
 		*cln.ElsIndex = *eeOpts.ElsIndex
+	}
+	if eeOpts.ElsRefresh != nil {
+		cln.ElsRefresh = new(string)
+		*cln.ElsRefresh = *eeOpts.ElsRefresh
 	}
 	if eeOpts.ElsOpType != nil {
 		cln.ElsOpType = new(string)
@@ -881,6 +894,9 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	if optsEes.ElsIndex != nil {
 		opts[utils.ElsIndex] = *optsEes.ElsIndex
 	}
+	if optsEes.ElsRefresh != nil {
+		opts[utils.ElsRefresh] = *optsEes.ElsRefresh
+	}
 	if optsEes.ElsOpType != nil {
 		opts[utils.ElsOpType] = *optsEes.ElsOpType
 	}
@@ -1046,6 +1062,7 @@ type EventExporterOptsJson struct {
 	ElsMaxRetries               *int              `json:"elsMaxRetries"`
 	ElsDisableRetry             *bool             `json:"elsDisableRetry"`
 	ElsIndex                    *string           `json:"elsIndex"`
+	ElsRefresh                  *string           `json:"elsRefresh"`
 	ElsOpType                   *string           `json:"elsOpType"`
 	ElsPipeline                 *string           `json:"elsPipeline"`
 	ElsRouting                  *string           `json:"elsRouting"`
@@ -1135,6 +1152,14 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 		}
 	} else {
 		d.ElsIndex = nil
+	}
+	if v2.ElsRefresh != nil {
+		if v1.ElsRefresh == nil ||
+			*v1.ElsRefresh != *v2.ElsRefresh {
+			d.ElsRefresh = v2.ElsRefresh
+		}
+	} else {
+		d.ElsRefresh = nil
 	}
 	if v2.ElsOpType != nil {
 		if v1.ElsOpType == nil ||

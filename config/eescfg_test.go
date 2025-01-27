@@ -1189,6 +1189,7 @@ func TestDiffEventExporterOptsJsonCfg(t *testing.T) {
 	v2 := &EventExporterOpts{
 		CSVFieldSeparator:        utils.StringPointer(","),
 		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsRefresh:               utils.StringPointer("true"),
 		ElsOpType:                utils.StringPointer("op_type"),
 		ElsPipeline:              utils.StringPointer("pipeline"),
 		ElsRouting:               utils.StringPointer("routing"),
@@ -1313,6 +1314,7 @@ func TestEventExporterOptsClone(t *testing.T) {
 	eeOpts := &EventExporterOpts{
 		CSVFieldSeparator:        utils.StringPointer(","),
 		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsRefresh:               utils.StringPointer("true"),
 		ElsOpType:                utils.StringPointer("op_type"),
 		ElsPipeline:              utils.StringPointer("pipeline"),
 		ElsRouting:               utils.StringPointer("routing"),
@@ -1364,6 +1366,7 @@ func TestEventExporterOptsClone(t *testing.T) {
 	exp := &EventExporterOpts{
 		CSVFieldSeparator:        utils.StringPointer(","),
 		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsRefresh:               utils.StringPointer("true"),
 		ElsOpType:                utils.StringPointer("op_type"),
 		ElsPipeline:              utils.StringPointer("pipeline"),
 		ElsRouting:               utils.StringPointer("routing"),
@@ -1473,6 +1476,7 @@ func TestLoadFromJSONCfg(t *testing.T) {
 	exp := &EventExporterOpts{
 		CSVFieldSeparator:        utils.StringPointer(","),
 		ElsIndex:                 utils.StringPointer("idx1"),
+		ElsRefresh:               utils.StringPointer("true"),
 		ElsOpType:                utils.StringPointer("op_type"),
 		ElsPipeline:              utils.StringPointer("pipeline"),
 		ElsRouting:               utils.StringPointer("routing"),
@@ -1626,6 +1630,7 @@ func TestEEsAsMapInterface(t *testing.T) {
 		Opts: &EventExporterOpts{
 			CSVFieldSeparator:        utils.StringPointer(","),
 			ElsIndex:                 utils.StringPointer("idx1"),
+			ElsRefresh:               utils.StringPointer("true"),
 			ElsOpType:                utils.StringPointer("op_type"),
 			ElsPipeline:              utils.StringPointer("pipeline"),
 			ElsRouting:               utils.StringPointer("routing"),
@@ -1741,6 +1746,7 @@ func TestEescfgNewEventExporterCfg(t *testing.T) {
 	eeo := &EventExporterOpts{
 		CSVFieldSeparator:           &str,
 		ElsIndex:                    &str,
+		ElsRefresh:                  &str,
 		ElsDiscoverNodesOnStart:     &bl,
 		ElsDiscoverNodeInterval:     &tm,
 		ElsCloud:                    &bl,
@@ -1917,6 +1923,7 @@ func TestEescfgloadFromJSONCfg(t *testing.T) {
 	exp := &EventExporterOpts{
 		CSVFieldSeparator:           &str,
 		ElsIndex:                    &str,
+		ElsRefresh:                  &str,
 		ElsDiscoverNodesOnStart:     &bl,
 		ElsDiscoverNodeInterval:     &tm,
 		ElsCloud:                    &bl,
