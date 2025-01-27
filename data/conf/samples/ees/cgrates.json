@@ -360,15 +360,11 @@
 			"attempts": 1,
 			"opts": {
 					"elsIndex": "cdrs",
-					//"elsIfPrimaryTerm": 0,
-					//"elsIfSeqNo": 0,
 					"elsOpType": "",
 					"elsPipeline": "",
 					// "require_alias": "",
 					"elsRouting": "",
 					"elsTimeout": "0",
-					//"elsVersion": 0,
-					"elsVersionType": "",
 					"elsWaitForActiveShards": "",
 			},
 			"fields":[
@@ -405,15 +401,11 @@
 					// "elsMaxRetries": 0, 
 					// "elsDisableRetry": false, 
 
-					//"elsIfPrimaryTerm": 0,
-					//"elsIfSeqNo": 0,
 					"elsOpType": "",
 					"elsPipeline": "",
 					"require_alias": "",
 					"elsRouting": "",
 					"elsTimeout": "0",
-					//"elsVersion": 0,
-					"elsVersionType": "",
 					"elsWaitForActiveShards": "",
 			},
 			"fields":[
@@ -453,15 +445,11 @@
 					// "elsMaxRetries": 0, 
 					// "elsDisableRetry": false, 
 
-					//"elsIfPrimaryTerm": 0,
-					//"elsIfSeqNo": 0,
 					"elsOpType": "",
 					"elsPipeline": "",
 					"require_alias": "",
 					"elsRouting": "",
 					"elsTimeout": "0",
-					//"elsVersion": 0,
-					"elsVersionType": "",
 					"elsWaitForActiveShards": "",
 			},
 			"fields":[
@@ -504,15 +492,11 @@
 					// "elsMaxRetries": 0, 
 					// "elsDisableRetry": false, 
 
-					//"elsIfPrimaryTerm": 0,
-					//"elsIfSeqNo": 0,
 					"elsOpType": "",
 					"elsPipeline": "",
 					"require_alias": "",
 					"elsRouting": "",
 					"elsTimeout": "0",
-					//"elsVersion": 0,
-					"elsVersionType": "",
 					"elsWaitForActiveShards": "",
 			},
 			"fields":[

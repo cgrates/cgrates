@@ -2632,14 +2632,10 @@ const (
 
 	// EEs Elasticsearch options
 	ElsIndex               = "elsIndex"
-	ElsIfPrimaryTerm       = "elsIfPrimaryTerm"
-	ElsIfSeqNo             = "elsIfSeqNo"
 	ElsOpType              = "elsOpType"
 	ElsPipeline            = "elsPipeline"
 	ElsRouting             = "elsRouting"
 	ElsTimeout             = "elsTimeout"
-	ElsVersionLow          = "elsVersion"
-	ElsVersionType         = "elsVersionType"
 	ElsWaitForActiveShards = "elsWaitForActiveShards"
 	//EES ElasticSearch Logger Options
 	ElsJson  = "elsJson"

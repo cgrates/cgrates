@@ -21,14 +21,12 @@ package ees
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/elastic/elastic-transport-go/v8/elastictransport"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/optype"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/refresh"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/versiontype"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -178,12 +176,6 @@ func (e *ElasticEE) ExportEvent(ctx *context.Context, event, extraData any) erro
 		Request(event).
 		Refresh(refresh.True)
 
-	if opts.ElsIfPrimaryTerm != nil {
-		req.IfPrimaryTerm(strconv.Itoa(*opts.ElsIfPrimaryTerm))
-	}
-	if opts.ElsIfSeqNo != nil {
-		req.IfSeqNo(strconv.Itoa(*opts.ElsIfSeqNo))
-	}
 	if opts.ElsOpType != nil {
 		req.OpType(optype.OpType{Name: *opts.ElsOpType})
 	}
@@ -195,12 +187,6 @@ func (e *ElasticEE) ExportEvent(ctx *context.Context, event, extraData any) erro
 	}
 	if opts.ElsTimeout != nil {
 		req.Timeout((*opts.ElsTimeout).String())
-	}
-	if opts.ElsVersion != nil {
-		req.Version(strconv.Itoa(*opts.ElsVersion))
-	}
-	if opts.ElsVersionType != nil {
-		req.VersionType(versiontype.VersionType{Name: *opts.ElsVersionType})
 	}
 	if opts.ElsWaitForActiveShards != nil {
 		req.WaitForActiveShards(*opts.ElsWaitForActiveShards)

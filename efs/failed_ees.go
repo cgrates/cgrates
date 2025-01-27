@@ -52,20 +52,6 @@ func AsOptsEESConfig(opts map[string]any) (*config.EventExporterOpts, error) {
 	if _, has := opts[utils.ElsIndex]; has {
 		optsCfg.ElsIndex = utils.StringPointer(utils.IfaceAsString(utils.ElsIndex))
 	}
-	if _, has := opts[utils.ElsIfPrimaryTerm]; has {
-		x, err := utils.IfaceAsInt(utils.ElsIfPrimaryTerm)
-		if err != nil {
-			return nil, err
-		}
-		optsCfg.ElsIfPrimaryTerm = utils.IntPointer(x)
-	}
-	if _, has := opts[utils.ElsIfSeqNo]; has {
-		x, err := utils.IfaceAsInt(utils.ElsIfSeqNo)
-		if err != nil {
-			return nil, err
-		}
-		optsCfg.ElsIfSeqNo = utils.IntPointer(x)
-	}
 	if _, has := opts[utils.ElsOpType]; has {
 		optsCfg.ElsOpType = utils.StringPointer(utils.IfaceAsString(utils.ElsOpType))
 	}
@@ -81,16 +67,6 @@ func AsOptsEESConfig(opts map[string]any) (*config.EventExporterOpts, error) {
 			return nil, err
 		}
 		optsCfg.ElsTimeout = &t
-	}
-	if _, has := opts[utils.ElsVersionLow]; has {
-		x, err := utils.IfaceAsInt(utils.ElsVersionLow)
-		if err != nil {
-			return nil, err
-		}
-		optsCfg.ElsVersion = utils.IntPointer(x)
-	}
-	if _, has := opts[utils.ElsVersionType]; has {
-		optsCfg.ElsVersionType = utils.StringPointer(utils.IfaceAsString(utils.ElsVersionType))
 	}
 	if _, has := opts[utils.ElsWaitForActiveShards]; has {
 		optsCfg.ElsWaitForActiveShards = utils.StringPointer(utils.IfaceAsString(utils.ElsWaitForActiveShards))

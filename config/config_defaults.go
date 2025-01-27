@@ -556,14 +556,10 @@ const CGRATES_CFG_JSON = `
 				// "elsMaxRetries": 0,                  // Default: 3.
 				// "elsDisableRetry": false,            // Default: false.
 				// "elsIndex": "",			// ElsIndex
-				// "elsIfPrimaryTerm": 0,		// ElsIfPrimaryTerm
- 				// "elsIfSeqNo": 0,			// ElsIfSeqNo
 				// "elsOpType": "",			// ElsOpType
 				// "elsPipeline": "",			// ElsPipeline
 				// "elsRouting": "",			// ElsRouting
 				// "elsTimeout": "",			// ElsTimeout
-				// "elsVersion": 0,			// ElsVersionLow
-				// "elsVersionType": "",		// ElsVersionType
 				// "elsWaitForActiveShards": "",	// ElsWaitForActiveShards
 
 
