@@ -540,21 +540,23 @@ const CGRATES_CFG_JSON = `
 
 
 				// Elasticsearch options
-				// "elsCloud":true,                     // whether ExportPath represents a cloud ID deployment
-				// "elsApiKey": "",                     // Base64-encoded token for authorization; if set, overrides username/password and service token.
-				// "elsUsername":"",                    // Username for HTTP Basic Authentication.
-				// "elsPassword":"",			// Password for HTTP Basic Authentication.
-				// "elsServiceToken":""                 // Service token for authorization; if set, overrides username/password.
-				// "elsCertificateFingerPrint":""       // SHA256 hex fingerprint given by Elasticsearch on first launch.
-				// "elsDiscoverNodesOnStart":false,     // Discover nodes when initializing the client. Default: false.
-				// "elsDiscoverNodesInterval":"10s",    // Discover nodes periodically. Default: disabled.
-				// "elsEnableDebugLogger":"false",      // Enable the debug logging.
-				// "elsLogger":"",                      // The logger type can either be elsJson,elsColor and elsText
-				// "elsCompressRequestBody":false,      // Enable compression on requests
-				// "elsCompressRequestBodyLevel":0,     // Default: gzip.DefaultCompression, 9:BestCompression,-2:HuffmanOnly,1:BestSpeed
-				// "elsRetryOnStatus":[],               // List of status codes for retry. Default: 502, 503, 504.
-				// "elsMaxRetries": 0,                  // Default: 3.
-				// "elsDisableRetry": false,            // Default: false.
+				// "elsCloud": true,			// if true, use cloud ID deployment
+				// "elsApiKey": "",			// base64-encoded token for auth; overrides username/password and service token
+				// "elsUsername": "",			// username for HTTP Basic Authentication
+				// "elsPassword": "",			// password for HTTP Basic Authentication
+				// "elsServiceToken": "",		// service token for auth; if set, overrides username/password
+				// "elsCertificateFingerPrint": "",	// SHA256 hex fingerprint given by Elasticsearch on first launch
+				// "elsCAPath": "",			// path to CA certificate
+				// "elsDiscoverNodesOnStart": false,	// discover nodes when initializing the client
+				// "elsDiscoverNodesInterval": "10s",	// discover nodes periodically
+				// "elsEnableDebugLogger": "false",	// enable the debug logging
+				// "elsLogger": "",			// logger type <elsJson|elsColor|elsText>
+				// "elsCompressRequestBody": false,	// enable compression on requests
+				// "elsCompressRequestBodyLevel": 0,	// compression level <0(gzip)|9(best compression)|-2(HuffmanOnly)|1(best speed)>
+				// "elsRetryOnStatus": [502,503,504],	// status codes for retry
+				// "elsMaxRetries": 3,			// maximum number of retries
+				// "elsDisableRetry": false,		// disable retry mechanism
+
 				// "elsIndex": "",			// target elasticsearch index
 				// "elsRefresh": "false",		// controls when changes become searchable <true|false|wait_for>
 				// "elsOpType": "index",		// operation type <index|create>
@@ -562,7 +564,6 @@ const CGRATES_CFG_JSON = `
 				// "elsRouting": "",			// custom routing value for document storage
 				// "elsTimeout": "1m",			// maximum time to wait for operation
 				// "elsWaitForActiveShards": "1",	// number of shard copies required before indexing (default: 1)
-
 
 
 				// SQL

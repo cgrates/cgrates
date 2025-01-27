@@ -74,8 +74,8 @@ func (e *ElasticEE) parseClientOpts() error {
 	if opts.ElsAPIKey != nil {
 		e.clientCfg.APIKey = *opts.ElsAPIKey
 	}
-	if opts.CAPath != nil {
-		cacert, err := os.ReadFile(*opts.CAPath)
+	if opts.ElsCAPath != nil {
+		cacert, err := os.ReadFile(*opts.ElsCAPath)
 		if err != nil {
 			return err
 		}
