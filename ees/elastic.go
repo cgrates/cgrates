@@ -117,8 +117,6 @@ func (e *ElasticEE) parseClientOpts() error {
 				EnableRequestBody:  true,
 				EnableResponseBody: true,
 			}
-		default:
-			return fmt.Errorf("invalid logger type: %q", *loggerType)
 		}
 		e.clientCfg.Logger = logger
 	}
