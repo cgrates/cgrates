@@ -2630,6 +2630,7 @@ const (
 
 	// EEs Elasticsearch options
 	ElsIndex               = "elsIndex"
+	ElsRefresh             = "elsRefresh"
 	ElsOpType              = "elsOpType"
 	ElsPipeline            = "elsPipeline"
 	ElsRouting             = "elsRouting"
