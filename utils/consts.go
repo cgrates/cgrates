@@ -2213,6 +2213,7 @@ const (
 	MetaTTLMaxDelayCfg            = "*ttlMaxDelay"
 	MetaTTLUsageCfg               = "*ttlUsage"
 	MetaSessionsOriginID          = "*sessionsOriginID"
+	MetaAccountsForceUsage        = "*accountsForceUsage"
 
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"

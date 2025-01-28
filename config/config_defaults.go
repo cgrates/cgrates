@@ -901,6 +901,13 @@ const CGRATES_CFG_JSON = `
 		// 		"FilterIDs": [],
 		// 		"Value": ""
 		// 	}
+		// ],
+		// "*accountsForceUsage": [
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": ""
+		// 	}
 		// ]
 	}
 },
