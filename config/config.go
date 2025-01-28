@@ -175,6 +175,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 				TTLUsage:               []*DynamicDurationPointerOpt{},
 				SessionsOriginID:       []*DynamicStringOpt{},
+				AccountsForceUsage:     []*DynamicBoolOpt{},
 			},
 		},
 		fsAgentCfg:       new(FsAgentCfg),

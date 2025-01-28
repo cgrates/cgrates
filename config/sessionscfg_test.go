@@ -168,11 +168,12 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 					value: SessionsDebitIntervalDftOpt,
 				},
 			},
-			TTLLastUsage:     []*DynamicDurationPointerOpt{},
-			TTLLastUsed:      []*DynamicDurationPointerOpt{},
-			TTLMaxDelay:      []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
-			TTLUsage:         []*DynamicDurationPointerOpt{},
-			SessionsOriginID: []*DynamicStringOpt{},
+			TTLLastUsage:       []*DynamicDurationPointerOpt{},
+			TTLLastUsed:        []*DynamicDurationPointerOpt{},
+			TTLMaxDelay:        []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
+			TTLUsage:           []*DynamicDurationPointerOpt{},
+			SessionsOriginID:   []*DynamicStringOpt{},
+			AccountsForceUsage: []*DynamicBoolOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -395,6 +396,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
 			ForceUsage:             []*DynamicBoolOpt{},
 			SessionsOriginID:       []*DynamicStringOpt{},
+			AccountsForceUsage:     []*DynamicBoolOpt{},
 			TTLLastUsage: []*DynamicDurationPointerOpt{
 				{
 					value: utils.DurationPointer(1),
@@ -557,6 +559,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaTTLUsageCfg:               []*DynamicDurationPointerOpt{},
 			utils.MetaForceUsageCfg:             []*DynamicBoolOpt{},
 			utils.MetaSessionsOriginID:          []*DynamicStringOpt{},
+			utils.MetaAccountsForceUsage:        []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -683,12 +686,13 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 					value: SessionsDebitIntervalDftOpt,
 				},
 			},
-			utils.MetaTTLLastUsageCfg:  []*DynamicDurationPointerOpt{},
-			utils.MetaTTLLastUsedCfg:   []*DynamicDurationPointerOpt{},
-			utils.MetaTTLMaxDelayCfg:   []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
-			utils.MetaTTLUsageCfg:      []*DynamicDurationPointerOpt{},
-			utils.MetaForceUsageCfg:    []*DynamicBoolOpt{},
-			utils.MetaSessionsOriginID: []*DynamicStringOpt{},
+			utils.MetaTTLLastUsageCfg:    []*DynamicDurationPointerOpt{},
+			utils.MetaTTLLastUsedCfg:     []*DynamicDurationPointerOpt{},
+			utils.MetaTTLMaxDelayCfg:     []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
+			utils.MetaTTLUsageCfg:        []*DynamicDurationPointerOpt{},
+			utils.MetaForceUsageCfg:      []*DynamicBoolOpt{},
+			utils.MetaSessionsOriginID:   []*DynamicStringOpt{},
+			utils.MetaAccountsForceUsage: []*DynamicBoolOpt{},
 		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
