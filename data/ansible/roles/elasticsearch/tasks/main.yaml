@@ -1,42 +1,41 @@
 ---
 - name: Install Elasticsearch dependencies
   become: true
-  apt:
+  ansible.builtin.apt:
     name: "{{ elasticsearch_dependencies }}"
     state: present
-    update_cache: yes
-    cache_valid_time: 86400
 
 - name: Import Elasticsearch PGP Key
   become: true
-  apt_key:
+  ansible.builtin.apt_key:
     url: "{{ elasticsearch_gpg_key_url }}"
     keyring: "{{ elasticsearch_gpg_keyring }}"
     state: present
 
 - name: Add Elasticsearch APT repository
   become: true
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "{{ elasticsearch_repository }}"
     state: present
 
 - name: Update APT cache and install Elasticsearch
   become: true
-  apt:
+  ansible.builtin.apt:
     name: elasticsearch
-    update_cache: yes
     state: present
-
-- name: Enable and start Elasticsearch service
-  become: true
-  systemd:
-    name: elasticsearch.service
-    enabled: "{{ elasticsearch_service_enabled }}"
-    state: "{{ elasticsearch_service_state }}"
-    masked: "{{ elasticsearch_service_masked }}"
+    update_cache: true
 
 - name: Configure Elasticsearch
   become: true
-  template:
+  ansible.builtin.template:
     src: elasticsearch.yml.j2
     dest: /etc/elasticsearch/elasticsearch.yml
+    mode: "0644"
+  notify: Restart elasticsearch
+
+- name: Ensure elasticsearch service is in desired state
+  become: true
+  ansible.builtin.systemd:
+    name: elasticsearch.service
+    enabled: "{{ elasticsearch_service_enabled }}"
+    state: "{{ elasticsearch_service_state }}"
