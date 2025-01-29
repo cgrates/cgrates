@@ -256,9 +256,9 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 			continue
 		}
 		if ecCostIface, wasCharged := cgrEv.APIOpts[utils.MetaAccountSCost]; wasCharged {
-			ecCostMap, ok := ecCostIface.(map[string]any)
+			ecCostMap, ok := ecCostIface.(*utils.EventCharges)
 			if !ok {
-				return nil, fmt.Errorf("expected %s to be a map[string]any, got %T", utils.MetaAccountSCost, ecCostIface)
+				return nil, fmt.Errorf("expected %s to be a  *utils.EventCharges, got %T", utils.MetaAccountSCost, ecCostMap)
 			}
 
 			// before converting into EventChargers, we must get the JSON encoding and Unmarshal it into an EventChargers
