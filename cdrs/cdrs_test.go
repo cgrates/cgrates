@@ -2350,8 +2350,8 @@ func TestCDRsProcessEventMockThdsEcCostIface(t *testing.T) {
 		APIOpts: map[string]any{
 			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
-			utils.MetaAccountSCost: map[string]any{
-				"Concretes": utils.NewDecimal(400, 0),
+			utils.MetaAccountSCost: &utils.EventCharges{
+				Concretes: utils.NewDecimal(400, 0),
 			},
 		},
 	}
@@ -2388,13 +2388,13 @@ func TestCDRsProcessEventMockThdsEcCostIfaceMarshalErr(t *testing.T) {
 		APIOpts: map[string]any{
 			utils.MetaAccounts: true,
 			"*context":         utils.MetaCDRs,
-			utils.MetaAccountSCost: map[string]any{
-				"Concretes": make(chan string),
+			utils.MetaAccountSCost: &utils.EventCharges{
+				Concretes: utils.NewDecimal(1, 2),
 			},
 		},
 	}
 	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
-	if err == nil || err.Error() != "json: unsupported type: chan string" {
+	if err == nil || err.Error() != "PARTIALLY_EXECUTED" {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", "json: unsupported type: chan string", err)
 	}
 }
@@ -2424,14 +2424,12 @@ func TestCDRsProcessEventMockThdsEcCostIfaceUnmarshalErr(t *testing.T) {
 
 	cgrEv := &utils.CGREvent{
 		APIOpts: map[string]any{
-			utils.MetaAccounts: true,
-			"*context":         utils.MetaCDRs,
-			utils.MetaAccountSCost: map[string]any{
-				"Charges": "not unmarshable",
-			},
+			utils.MetaAccounts:     true,
+			"*context":             utils.MetaCDRs,
+			utils.MetaAccountSCost: &utils.EventCharges{},
 		},
 	}
-	expErr := "json: cannot unmarshal string into Go struct field EventCharges.Charges of type []*utils.ChargeEntry"
+	expErr := "PARTIALLY_EXECUTED"
 	_, err := newCDRSrv.processEvents(context.Background(), []*utils.CGREvent{cgrEv})
 	if err == nil || err.Error() != expErr {
 		t.Errorf("\nExpected <%+v> \n, received <%+v>", expErr, err)
