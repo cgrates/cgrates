@@ -479,7 +479,7 @@ ActionType
 	**\*remove_expired**
 		Removes expired balances of type matching the filter.
 
-	**\*cdr_account**
+	**\*reset_account_cdr**
 		Creates the account out of last *CDR* saved in :ref:`StorDB` matching the account details in the filter. The *CDR* should contain *AccountSummary* within it's *CostDetails*.
 
 
