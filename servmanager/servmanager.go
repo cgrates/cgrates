@@ -20,6 +20,7 @@ package servmanager
 
 import (
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/cgrates/birpc/context"
@@ -53,17 +54,17 @@ type ServiceManager struct {
 func (m *ServiceManager) StartServices(shutdown *utils.SyncedChan) {
 	go m.handleReload(shutdown)
 	for _, svc := range m.registry.List() {
-		// TODO: verify if IsServiceInState check is needed. It should
+		// TODO: verify if service state check is needed. It should
 		// be redundant since ServManager manages all services and this
 		// runs only at startup
-		if svc.ShouldRun() && !IsServiceInState(svc, utils.StateServiceUP) {
+		if svc.ShouldRun() && State(svc) == utils.StateServiceDOWN {
 			m.shdWg.Add(1)
 			go func() {
 				if err := svc.Start(shutdown, m.registry); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 					shutdown.CloseOnce()
 				}
-				close(svc.StateChan(utils.StateServiceUP))
+				MustSetState(svc, utils.StateServiceUP)
 				utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, svc.ServiceName()))
 			}()
 		}
@@ -87,10 +88,13 @@ func (m *ServiceManager) handleReload(shutdown *utils.SyncedChan) {
 
 func (m *ServiceManager) reloadService(id string, shutdown *utils.SyncedChan) (err error) {
 	svc := m.registry.Lookup(id)
-	isUp := IsServiceInState(svc, utils.StateServiceUP)
+
+	// Consider services in pending states (not up/down) to be up. This assumes
+	// Start/Reload/Shutdown functions are handled synchronously.
+	isUp := State(svc) != utils.StateServiceDOWN
+
 	if svc.ShouldRun() {
 		if isUp {
-			// TODO: state channels must be reinitiated for both SERVICE_UP and SERVICE_DOWN.
 			if err = svc.Reload(shutdown, m.registry); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 				shutdown.CloseOnce()
@@ -104,7 +108,7 @@ func (m *ServiceManager) reloadService(id string, shutdown *utils.SyncedChan) (e
 				shutdown.CloseOnce()
 				return // stop if we encounter an error
 			}
-			close(svc.StateChan(utils.StateServiceUP))
+			MustSetState(svc, utils.StateServiceUP)
 			utils.Logger.Info(fmt.Sprintf("<%s> started <%s> service", utils.ServiceManager, svc.ServiceName()))
 		}
 	} else if isUp {
@@ -112,7 +116,7 @@ func (m *ServiceManager) reloadService(id string, shutdown *utils.SyncedChan) (e
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down <%s> service: %v", utils.ServiceManager, svc.ServiceName(), err))
 			shutdown.CloseOnce()
 		}
-		close(svc.StateChan(utils.StateServiceDOWN))
+		MustSetState(svc, utils.StateServiceDOWN)
 		utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, svc.ServiceName()))
 		m.shdWg.Done()
 	}
@@ -122,7 +126,7 @@ func (m *ServiceManager) reloadService(id string, shutdown *utils.SyncedChan) (e
 // ShutdownServices will stop all services
 func (m *ServiceManager) ShutdownServices() {
 	for _, svc := range m.registry.List() {
-		if IsServiceInState(svc, utils.StateServiceUP) {
+		if State(svc) != utils.StateServiceDOWN {
 			go func() {
 				defer m.shdWg.Done()
 				if err := svc.Shutdown(m.registry); err != nil {
@@ -130,7 +134,7 @@ func (m *ServiceManager) ShutdownServices() {
 						utils.ServiceManager, svc.ServiceName(), err))
 					return
 				}
-				close(svc.StateChan(utils.StateServiceDOWN))
+				MustSetState(svc, utils.StateServiceDOWN)
 				utils.Logger.Info(fmt.Sprintf("<%s> stopped <%s> service", utils.ServiceManager, svc.ServiceName()))
 			}()
 		}
@@ -302,5 +306,43 @@ func IsServiceInState(svc Service, state string) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+// MustSetState changes a service's state, panicking if it fails.
+func MustSetState(svc Service, state string) {
+	if err := SetState(svc, state); err != nil {
+		panic(err)
+	}
+}
+
+// SetServiceState moves the state signal to a new valid state.
+// Returns an error if the state is invalid or if no current state was found.
+func SetState(svc Service, state string) error {
+	if !slices.Contains([]string{utils.StateServiceUP, utils.StateServiceDOWN}, state) {
+		return fmt.Errorf("invalid service state: %q", state)
+	}
+	select {
+	case <-svc.StateChan(utils.StateServiceUP):
+	case <-svc.StateChan(utils.StateServiceDOWN):
+	default:
+		return fmt.Errorf("service %q in undefined state", svc.ServiceName())
+	}
+	svc.StateChan(state) <- struct{}{}
+	return nil
+}
+
+// State returns the current state of a service by checking which channel holds
+// the state signal. Returns empty string if no valid state is found.
+func State(svc Service) string {
+	select {
+	case <-svc.StateChan(utils.StateServiceUP):
+		svc.StateChan(utils.StateServiceUP) <- struct{}{}
+		return utils.StateServiceUP
+	case <-svc.StateChan(utils.StateServiceDOWN):
+		svc.StateChan(utils.StateServiceDOWN) <- struct{}{}
+		return utils.StateServiceDOWN
+	default:
+		return ""
 	}
 }

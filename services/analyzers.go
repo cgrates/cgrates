@@ -37,7 +37,6 @@ func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 	anz := &AnalyzerService{
 		cfg: cfg,
 		stateDeps: NewStateDependencies([]string{
-			utils.StateServiceInit,
 			utils.StateServiceUP,
 			utils.StateServiceDOWN,
 		}),
@@ -69,7 +68,6 @@ func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
 		return
 	}
-	close(anz.stateDeps.StateChan(utils.StateServiceInit))
 	anzCtx, cancel := context.WithCancel(context.TODO())
 	anz.cancelFunc = cancel
 	go func(a *analyzers.AnalyzerS) {

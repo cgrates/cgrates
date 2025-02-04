@@ -50,7 +50,7 @@ type ConnManagerService struct {
 func (s *ConnManagerService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
 	s.anz = registry.Lookup(utils.AnalyzerS).(*AnalyzerService)
 	if s.anz.ShouldRun() { // wait for AnalyzerS only if it should run
-		if _, err := WaitForServiceState(utils.StateServiceInit, utils.AnalyzerS, registry,
+		if _, err := WaitForServiceState(utils.StateServiceUP, utils.AnalyzerS, registry,
 			s.cfg.GeneralCfg().ConnectTimeout); err != nil {
 			return err
 		}

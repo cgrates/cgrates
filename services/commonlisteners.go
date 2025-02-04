@@ -100,7 +100,7 @@ func (s *CommonListenerService) Shutdown(registry *servmanager.ServiceRegistry) 
 		utils.TrendS,
 	}
 	for _, svcID := range deps {
-		if !servmanager.IsServiceInState(registry.Lookup(svcID), utils.StateServiceUP) {
+		if servmanager.State(registry.Lookup(svcID)) != utils.StateServiceUP {
 			continue
 		}
 		_, err := WaitForServiceState(utils.StateServiceDOWN, svcID, registry, s.cfg.GeneralCfg().ConnectTimeout)
