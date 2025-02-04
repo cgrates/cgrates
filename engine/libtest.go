@@ -555,18 +555,104 @@ func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, extra
 	}
 }
 
-func WaitForService(t testing.TB, ctx *context.Context, client *birpc.Client, service string) {
+// serviceReceivers maps service names to their RPC receiver names.
+// Services with empty receiver names don't implement a Ping method.
+// Used for service availability testing (through pinging).
+var serviceReceivers = map[string]string{
+	utils.CacheS:          utils.CacheSv1,
+	utils.ConfigS:         utils.ConfigSv1,
+	utils.CoreS:           utils.CoreSv1,
+	utils.GuardianS:       utils.GuardianSv1,
+	utils.AccountS:        utils.AccountSv1,
+	utils.ActionS:         utils.ActionSv1,
+	utils.AdminS:          utils.AdminSv1,
+	utils.AnalyzerS:       utils.AnalyzerSv1,
+	utils.AttributeS:      utils.AttributeSv1,
+	utils.CDRServer:       utils.CDRsV1,
+	utils.ChargerS:        utils.ChargerSv1,
+	utils.EEs:             utils.EeSv1,
+	utils.EFs:             utils.EfSv1,
+	utils.ERs:             utils.ErSv1,
+	utils.RateS:           utils.RateSv1,
+	utils.ResourceS:       utils.ResourceSv1,
+	utils.RouteS:          utils.RouteSv1,
+	utils.SessionS:        utils.SessionSv1,
+	utils.StatS:           utils.StatSv1,
+	utils.TPeS:            utils.TPeSv1,
+	utils.ThresholdS:      utils.ThresholdSv1,
+	utils.LoaderS:         utils.LoaderSv1,
+	utils.TrendS:          utils.TrendSv1,
+	utils.RankingS:        utils.RankingSv1,
+	utils.CapS:            "",
+	utils.CommonListenerS: "",
+	utils.ConnManager:     "",
+	utils.DataDB:          "",
+	utils.FilterS:         "",
+	utils.GlobalVarS:      "",
+	utils.LoggerS:         "",
+	utils.StorDB:          "",
+	utils.RegistrarC:      "",
+	utils.AsteriskAgent:   "",
+	utils.DiameterAgent:   "",
+	utils.DNSAgent:        "",
+	utils.FreeSWITCHAgent: "",
+	utils.HTTPAgent:       "",
+	utils.JanusAgent:      "",
+	utils.KamailioAgent:   "",
+	utils.RadiusAgent:     "",
+	utils.SIPAgent:        "",
+}
+
+// WaitForServiceStart tries to ping the service until it receives a "Pong"
+// reply or times out. Test will be marked as failed on timeout.
+func WaitForServiceStart(t testing.TB, client *birpc.Client, service string, timeout time.Duration) {
 	t.Helper()
-	method := service + ".Ping"
+
+	receiver := serviceReceivers[service]
+	if receiver == "" {
+		// Skip services that don't have a Ping method.
+		return
+	}
+	method := receiver + ".Ping"
+
 	backoff := utils.FibDuration(time.Millisecond, 0)
-	var reply any
+	var reply string
 	for {
 		select {
-		case <-ctx.Done():
-			t.Fatalf("%s service did not become available: %v", service, ctx.Err())
+		case <-time.After(timeout):
+			t.Fatalf("service %q did not become available within %s", service, timeout)
 		default:
 			err := client.Call(context.Background(), method, nil, &reply)
 			if err == nil && reply == utils.Pong {
+				return
+			}
+			time.Sleep(backoff())
+		}
+	}
+}
+
+// WaitForServiceShutdown tries to ping the service until it receives a "can't
+// find service" error reply or times out. Test will be marked as failed on
+// timeout.
+func WaitForServiceShutdown(t testing.TB, client *birpc.Client, service string, timeout time.Duration) {
+	t.Helper()
+
+	receiver := serviceReceivers[service]
+	if receiver == "" {
+		// Skip services that don't have a Ping method.
+		return
+	}
+	method := receiver + ".Ping"
+
+	backoff := utils.FibDuration(time.Millisecond, 0)
+	var reply string
+	for {
+		select {
+		case <-time.After(timeout):
+			t.Fatalf("service %q did not shut down within %s", service, timeout)
+		default:
+			err := client.Call(context.Background(), method, nil, &reply)
+			if err != nil && strings.Contains(err.Error(), "can't find service") {
 				return
 			}
 			time.Sleep(backoff())
