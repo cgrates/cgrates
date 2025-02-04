@@ -32,14 +32,14 @@ type ServiceManagerV1 struct {
 	ping
 }
 
-func (servManager *ServiceManagerV1) StartService(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) (err error) {
+func (servManager *ServiceManagerV1) StartService(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) error {
 	return servManager.sm.V1StartService(ctx, args, reply)
 }
 
-func (servManager *ServiceManagerV1) StopService(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) (err error) {
+func (servManager *ServiceManagerV1) StopService(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) error {
 	return servManager.sm.V1StopService(ctx, args, reply)
 }
 
-func (servManager *ServiceManagerV1) ServiceStatus(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) (err error) {
+func (servManager *ServiceManagerV1) ServiceStatus(ctx *context.Context, args *servmanager.ArgsServiceID, reply *map[string]string) error {
 	return servManager.sm.V1ServiceStatus(ctx, args, reply)
 }

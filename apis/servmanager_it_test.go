@@ -144,15 +144,16 @@ func testSrvMngPing(t *testing.T) {
 		Run the following tests for each service:
 
 		- ping before enabling service (expect can't find service error)
-		- query for service status (expect "STOPPED" reply)
+		- query for service status (expect service to be in state "SERVICE_DOWN")
 		- start the service
-		- query for service status (expect "RUNNING" reply)
+		- query for service status (expect service to be in state "SERVICE_UP")
 		- ping (expect "Pong")
 		- stop service
-		- query for service status (expect "STOPPED" reply)
+		- query for service status (expect service to be in state "SERVICE_DOWN" reply)
 		- ping after stopping service (expect "can't find service" error)
 	*/
 
+	var statusReply map[string]string
 	for serviceID, serviceMethod := range serviceToMethod {
 		t.Run(fmt.Sprintf("test for service %s", serviceID), func(t *testing.T) {
 			rpcErr := fmt.Sprintf("rpc: can't find service %s", serviceMethod)
@@ -166,10 +167,10 @@ func testSrvMngPing(t *testing.T) {
 			}
 
 			if err := srvMngRPC.Call(context.Background(), utils.ServiceManagerV1ServiceStatus, args,
-				&reply); err != nil {
+				&statusReply); err != nil {
 				t.Error(err)
-			} else if reply != utils.StoppedCaps {
-				t.Errorf("Unexpected reply: %s", reply)
+			} else if statusReply[serviceID] != utils.StateServiceDOWN {
+				t.Errorf("Unexpected reply: %s", utils.ToJSON(statusReply))
 			}
 
 			if err := srvMngRPC.Call(context.Background(), utils.ServiceManagerV1StartService, args,
@@ -180,10 +181,10 @@ func testSrvMngPing(t *testing.T) {
 			}
 
 			if err := srvMngRPC.Call(context.Background(), utils.ServiceManagerV1ServiceStatus, args,
-				&reply); err != nil {
+				&statusReply); err != nil {
 				t.Error(err)
-			} else if reply != utils.RunningCaps {
-				t.Errorf("Unexpected reply: %s", reply)
+			} else if statusReply[serviceID] != utils.StateServiceUP {
+				t.Errorf("Unexpected reply: %s", utils.ToJSON(statusReply))
 			}
 
 			if err := srvMngRPC.Call(context.Background(), serviceMethod, nil,
@@ -201,10 +202,10 @@ func testSrvMngPing(t *testing.T) {
 			}
 
 			if err := srvMngRPC.Call(context.Background(), utils.ServiceManagerV1ServiceStatus, args,
-				&reply); err != nil {
+				&statusReply); err != nil {
 				t.Error(err)
-			} else if reply != utils.StoppedCaps {
-				t.Errorf("Unexpected reply: %s", reply)
+			} else if statusReply[serviceID] != utils.StateServiceDOWN {
+				t.Errorf("Unexpected reply: %s", utils.ToJSON(statusReply))
 			}
 
 			if err := srvMngRPC.Call(context.Background(), serviceMethod, nil,

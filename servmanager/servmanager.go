@@ -21,6 +21,7 @@ package servmanager
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc/context"
@@ -183,21 +184,27 @@ func (m *ServiceManager) V1StopService(ctx *context.Context, args *ArgsServiceID
 	return
 }
 
-// V1ServiceStatus  returns the service status
-func (m *ServiceManager) V1ServiceStatus(ctx *context.Context, args *ArgsServiceID, reply *string) error {
+// V1ServiceStatus returns the current state of the specified services.
+func (m *ServiceManager) V1ServiceStatus(ctx *context.Context, args *ArgsServiceID, reply *map[string]string) error {
 	m.RLock()
 	defer m.RUnlock()
-
-	svc := m.registry.Lookup(args.ServiceID)
-	if svc == nil {
-		return utils.ErrUnsupportedServiceID
+	states := make(map[string]string)
+	switch args.ServiceID {
+	case utils.MetaAll:
+		for _, svc := range m.registry.List() {
+			states[svc.ServiceName()] = State(svc)
+		}
+	default:
+		ids := strings.Split(args.ServiceID, utils.FieldsSep)
+		for _, id := range ids {
+			svc := m.registry.Lookup(id)
+			if svc == nil {
+				return fmt.Errorf("unsupported service ID: %q", id)
+			}
+			states[id] = State(svc)
+		}
 	}
-
-	if IsServiceInState(svc, utils.StateServiceUP) {
-		*reply = utils.RunningCaps
-	} else {
-		*reply = utils.StoppedCaps
-	}
+	*reply = states
 	return nil
 }
 
@@ -297,16 +304,6 @@ func toggleService(id string, status bool, srvMngr *ServiceManager) (err error) 
 		err = utils.ErrUnsupportedServiceID
 	}
 	return
-}
-
-// IsServiceInState performs a non-blocking check to determine if a service is in the specified state.
-func IsServiceInState(svc Service, state string) bool {
-	select {
-	case <-svc.StateChan(state):
-		return true
-	default:
-		return false
-	}
 }
 
 // MustSetState changes a service's state, panicking if it fails.
