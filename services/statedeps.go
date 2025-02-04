@@ -27,12 +27,22 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewStateDependencies constructs a StateDependencies struct
+// NewStateDependencies sets up state tracking using buffered channels, where
+// each service state has its own channel and they pass around a single signal.
 func NewStateDependencies(servStates []string) (stDeps *StateDependencies) {
 	stDeps = &StateDependencies{stateDeps: make(map[string]chan struct{})}
 	for _, stateID := range servStates {
-		stDeps.stateDeps[stateID] = make(chan struct{})
+		stDeps.stateDeps[stateID] = make(chan struct{}, 1) // non-blocking
 	}
+
+	// A single state signal is shared between all state channels.
+	// Initially placed in SERVICE_DOWN during initialization.
+	c, has := stDeps.stateDeps[utils.StateServiceDOWN]
+	if !has {
+		panic(fmt.Sprintf("missing required initial state %q", utils.StateServiceDOWN))
+	}
+	c <- struct{}{}
+
 	return
 }
 
@@ -82,8 +92,10 @@ func WaitForServiceState(state, serviceID string, registry *servmanager.ServiceR
 			return srv, nil
 		}
 	}
+	stateCh := srv.StateChan(state)
 	select {
-	case <-srv.StateChan(state):
+	case <-stateCh:
+		stateCh <- struct{}{}
 		return srv, nil
 	case <-time.After(timeout):
 		return nil, fmt.Errorf("timed out waiting for service %q state %q", serviceID, state)

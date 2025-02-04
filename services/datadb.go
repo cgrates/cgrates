@@ -118,7 +118,7 @@ func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
 		utils.ThresholdS,
 	}
 	for _, svcID := range deps {
-		if !servmanager.IsServiceInState(registry.Lookup(svcID), utils.StateServiceUP) {
+		if servmanager.State(registry.Lookup(svcID)) != utils.StateServiceUP {
 			continue
 		}
 		_, err := WaitForServiceState(utils.StateServiceDOWN, svcID, registry, db.cfg.GeneralCfg().ConnectTimeout)
