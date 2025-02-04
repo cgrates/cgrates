@@ -1,4 +1,4 @@
-//go:build flaky
+//go:build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -18,23 +18,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// TODO: also test how toggling dispatchers behaves
 func TestServiceToggle(t *testing.T) {
-	t.Skip("skipping until Reload is implemented for all services")
 	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -113,28 +111,6 @@ func TestServiceToggle(t *testing.T) {
 // 	"store_interval": "-1"
 // }
 }`
-	// List of services that can be toggled (by setting "enabled" true/false).
-	services := []string{
-		utils.AccountSv1,
-		utils.ActionSv1,
-		utils.AdminSv1,
-		utils.AnalyzerSv1,
-		utils.AttributeSv1,
-		utils.CDRsV1,
-		utils.ChargerSv1,
-		utils.ConfigSv1,
-		utils.EeSv1,
-		utils.ErSv1,
-		utils.EfSv1,
-		// utils.RankingSv1,
-		utils.ResourceSv1,
-		utils.RouteSv1,
-		utils.SessionSv1,
-		utils.StatSv1,
-		utils.ThresholdSv1,
-		utils.TPeSv1,
-		// utils.TrendSv1,
-	}
 
 	// Start a cgr-engine instance that has all the services
 	// from the slice above enabled.
@@ -142,20 +118,14 @@ func TestServiceToggle(t *testing.T) {
 		ConfigJSON: fmt.Sprintf(cfgJSON, "true"),
 		DBCfg:      dbCfg,
 		Encoding:   *utils.Encoding,
-		LogBuffer:  &bytes.Buffer{},
+		// LogBuffer:  &bytes.Buffer{},
 	}
-	defer fmt.Println(ng.LogBuffer)
+	// defer fmt.Println(ng.LogBuffer)
 	client, cfg := ng.Run(t)
-
-	// Ensure the services are up by calling waitForService helper for each service.
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
-	for _, service := range services {
-		engine.WaitForService(t, ctx, client, service)
-	}
+	checkServiceStates(t, client, utils.StateServiceUP)
 
 	// Toggle the state of all services via config reload.
-	fullCfgPath := filepath.Join(cfg.ConfigPath, "cgrates.json") // path to the original json config file
+	fullCfgPath := filepath.Join(cfg.ConfigPath, "zzz_dynamic_cgrates.json") // path to the original json config file
 	if err := os.WriteFile(fullCfgPath, []byte(fmt.Sprintf(cfgJSON, "false")), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -165,13 +135,102 @@ func TestServiceToggle(t *testing.T) {
 	}, &reply); err != nil {
 		t.Errorf("ConfigSv1.ReloadConfig unexpected err: %v", err)
 	}
+	checkServiceStates(t, client, utils.StateServiceDOWN)
 
-	// Ping the services again to ensure they aren't reachable anymore.
-	for _, service := range services {
-		method := service + ".Ping"
-		if err := client.Call(context.Background(), method, nil, &reply); err == nil ||
-			!strings.HasPrefix(err.Error(), "rpc: can't find service") {
-			t.Errorf("could still ping %s when disabled", service)
+	// Toggle the state once again to make sure the actions are repeatable.
+	if err := os.WriteFile(fullCfgPath, []byte(fmt.Sprintf(cfgJSON, "true")), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
+		Section: utils.MetaAll,
+	}, &reply); err != nil {
+		t.Errorf("ConfigSv1.ReloadConfig unexpected err: %v", err)
+	}
+	checkServiceStates(t, client, utils.StateServiceUP)
+}
+
+func checkServiceStates(t *testing.T, client *birpc.Client, want string) {
+	t.Helper()
+
+	// The following services' ShouldRun method always returns true, therefore
+	// they cannot be stopped.
+	// NOTE: Some services are not needed for cgr-engine to properly function
+	// and could have their ShouldRun methods revised. For example, while
+	// CGRConfig is definitely needed, ConfigService just registers the
+	// CGRConfig service methods. We could call the Shutdown function on it to
+	// unregister them without affecting other services at all.
+	alwaysUp := []string{
+		utils.CacheS,
+		utils.CapS,
+		utils.CommonListenerS,
+		utils.ConfigS,
+		utils.ConnManager,
+		utils.CoreS,
+		utils.DataDB,
+		utils.FilterS,
+		utils.GlobalVarS,
+		utils.GuardianS,
+		utils.LoggerS,
+	}
+
+	services := []string{
+		utils.AccountS,
+		utils.ActionS,
+		utils.AdminS,
+		utils.AnalyzerS,
+		utils.AttributeS,
+		utils.CDRServer,
+		utils.ChargerS,
+		utils.EEs,
+		utils.EFs,
+		utils.ERs,
+		utils.RateS,
+		utils.ResourceS,
+		utils.RouteS,
+		utils.SessionS,
+		utils.StatS,
+		utils.TPeS,
+		utils.ThresholdS,
+		utils.StorDB,
+		// utils.RegistrarC,
+		// utils.LoaderS,
+		// utils.TrendS,
+		// utils.RankingS,
+	}
+
+	// Ensure the service manager finished processing before checking states.
+	// Applies only for services that have ping methods defined.
+	timeout := 100 * time.Millisecond
+	afterShutdown := want == utils.StateServiceDOWN
+	if !afterShutdown {
+		for _, id := range alwaysUp {
+			engine.WaitForServiceStart(t, client, id, timeout)
+		}
+	}
+	waitForService := engine.WaitForServiceStart
+	if afterShutdown {
+		waitForService = engine.WaitForServiceShutdown
+	}
+	for _, id := range services {
+		waitForService(t, client, id, timeout)
+	}
+
+	var status map[string]string
+	if err := client.Call(context.Background(), utils.ServiceManagerV1ServiceStatus,
+		&servmanager.ArgsServiceID{
+			ServiceID: utils.MetaAll,
+		}, &status); err != nil {
+		t.Error(err)
+	}
+
+	for _, id := range alwaysUp {
+		if got := status[id]; got != utils.StateServiceUP {
+			t.Errorf("service %q state=%q, should always be %q", id, got, utils.StateServiceUP)
+		}
+	}
+	for _, id := range services {
+		if got := status[id]; got != want {
+			t.Errorf("service %q state=%q, want %q", id, got, want)
 		}
 	}
 }
