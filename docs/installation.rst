@@ -1,3 +1,4 @@
+.. _Docker: https://docs.docker.com/get-started/get-docker/
 .. _Redis: https://redis.io/
 .. _MySQL: https://dev.mysql.com/
 .. _PostgreSQL: https://www.postgresql.org/
@@ -172,6 +173,108 @@ Installation:
    sudo ln -s $HOME/go/bin/cgr-migrator /usr/bin/cgr-migrator
    sudo ln -s $HOME/go/bin/cgr-console /usr/bin/cgr-console
    sudo ln -s $HOME/go/bin/cgr-tester /usr/bin/cgr-tester
+
+Installing Using Docker
+-----------------------
+
+CGRateS is also available as Docker images.
+
+Prerequisites
+^^^^^^^^^^^^^
+
+- `Docker`_
+
+Pull Docker Images
+^^^^^^^^^^^^^^^^^^
+
+The following commands will pull the CGRateS components:
+
+::
+
+    sudo docker pull dkr.cgrates.org/master/cgr-engine
+    sudo docker pull dkr.cgrates.org/master/cgr-loader
+    sudo docker pull dkr.cgrates.org/master/cgr-migrator
+    sudo docker pull dkr.cgrates.org/master/cgr-console
+    sudo docker pull dkr.cgrates.org/master/cgr-tester
+
+Verify the images were pulled successfully:
+
+::
+
+    sudo docker images dkr.cgrates.org/master/cgr-*
+    REPOSITORY                           TAG       IMAGE ID       CREATED       SIZE
+    dkr.cgrates.org/master/cgr-loader    latest    5b667e92a475   6 weeks ago   46.5MB
+    dkr.cgrates.org/master/cgr-console   latest    464bd1992ab2   6 weeks ago   103MB
+    dkr.cgrates.org/master/cgr-engine    latest    e20f43491aa8   6 weeks ago   111MB
+    ...
+
+.. note::
+    While other version-specific tags are available, we recommend using the default **latest** tag for most use cases.
+    You can check available versions with:
+
+    ::
+
+        curl -X GET https://dkr.cgrates.org/v2/master/cgr-engine/tags/list
+
+
+cgr-engine Container
+^^^^^^^^^^^^^^^^^^^^
+
+The current cgr-engine container entrypoint is:
+
+::
+
+    [
+      "/usr/bin/cgr-engine",
+      "-logger=*stdout"
+    ]
+
+.. note::
+    Verify the entrypoint configuration with:
+
+    ::
+
+        sudo docker inspect --format='{{json .Config.Entrypoint}}' dkr.cgrates.org/master/cgr-engine:latest
+
+Running cgr-engine
+^^^^^^^^^^^^^^^^^^
+
+Here's a basic example of running cgr-engine with common Docker parameters:
+
+::
+
+    sudo docker run --rm \
+      -v /path/on/host:/etc/cgrates \
+      -p 2012:2012 \
+      -e DOCKER_IP=127.0.0.1 \
+      -e REDIS_HOST=192.168.122.91 \
+      --network bridge \
+      --name cgr-engine \
+      dkr.cgrates.org/master/cgr-engine:latest \
+      -config_path=/etc/cgrates \
+      -logger=*stdout
+
+Verify cgr-engine is responding:
+
+::
+
+    sudo docker run --rm \
+      --name cgr-console \
+      --network host \
+      dkr.cgrates.org/master/cgr-console:latest \
+      status
+
+Key parameters:
+
+- ``--rm``: automatically remove container when it exits
+- ``-v``: mount host directory into container (format: host_path:container_path)
+- ``-p``: publish container port to host (format: host_port:container_port)
+- ``-e``: set environment variables (optional, only needed if referenced in configuration files)
+- ``--network``: specify container networking mode (bridge for isolation, host for direct host network access)
+- ``--name``: assign name to container
+
+.. note::
+    The ``-config_path`` and ``-logger`` flags above are cgr-engine specific flags and optional, as those values are already the defaults.
 
 Creating Your Own Packages
 --------------------------
