@@ -351,3 +351,95 @@ func TestGetDerivedEvents(t *testing.T) {
 		t.Errorf("Expected %s received %s", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 }
+
+func TestSetMaxUsageNeeded(t *testing.T) {
+	tests := []struct {
+		name          string
+		input         bool
+		expectedValue bool
+	}{
+		{
+			name:          "Set needsMaxUsage to true",
+			input:         true,
+			expectedValue: true,
+		},
+		{
+			name:          "Set needsMaxUsage to false",
+			input:         false,
+			expectedValue: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v1Reply := &V1UpdateSessionReply{}
+			v1Reply.SetMaxUsageNeeded(tt.input)
+
+			if v1Reply.needsMaxUsage != tt.expectedValue {
+				t.Errorf("Expected needsMaxUsage to be %v, got %v", tt.expectedValue, v1Reply.needsMaxUsage)
+			}
+		})
+	}
+}
+
+func TestGetMaxUsageFromRuns(t *testing.T) {
+	tests := []struct {
+		name             string
+		maxAbstractsRuns map[string]*utils.Decimal
+		expectedMin      *utils.Decimal
+	}{
+		{
+			name: "single entry",
+			maxAbstractsRuns: map[string]*utils.Decimal{
+				"run1": utils.NewDecimalFromFloat64(10.0),
+			},
+			expectedMin: utils.NewDecimalFromFloat64(10.0),
+		},
+		{
+			name: "multiple entries, min at first",
+			maxAbstractsRuns: map[string]*utils.Decimal{
+				"run1": utils.NewDecimalFromFloat64(20.0),
+				"run2": utils.NewDecimalFromFloat64(15.0),
+				"run3": utils.NewDecimalFromFloat64(5.0),
+			},
+			expectedMin: utils.NewDecimalFromFloat64(5.0),
+		},
+		{
+			name: "multiple entries, min at last",
+			maxAbstractsRuns: map[string]*utils.Decimal{
+				"run1": utils.NewDecimalFromFloat64(10.0),
+				"run2": utils.NewDecimalFromFloat64(15.0),
+				"run3": utils.NewDecimalFromFloat64(5.0),
+			},
+			expectedMin: utils.NewDecimalFromFloat64(5.0),
+		},
+		{
+			name: "multiple entries, all equal",
+			maxAbstractsRuns: map[string]*utils.Decimal{
+				"run1": utils.NewDecimalFromFloat64(10.0),
+				"run2": utils.NewDecimalFromFloat64(10.0),
+				"run3": utils.NewDecimalFromFloat64(10.0),
+			},
+			expectedMin: utils.NewDecimalFromFloat64(10.0),
+		},
+		{
+			name:             "empty map",
+			maxAbstractsRuns: map[string]*utils.Decimal{},
+			expectedMin:      nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := getMaxUsageFromRuns(tt.maxAbstractsRuns)
+
+			if result != nil && tt.expectedMin != nil {
+				if result.Compare(tt.expectedMin) != 0 {
+					t.Errorf("For test case '%s', expected min %v, got %v", tt.name, tt.expectedMin, result)
+				}
+			} else if result != nil && tt.expectedMin == nil || result == nil && tt.expectedMin != nil {
+				t.Errorf("For test case '%s', expected min to be %v, got %v", tt.name, tt.expectedMin, result)
+			}
+		})
+	}
+}
