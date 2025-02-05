@@ -20,6 +20,7 @@ package sessions
 
 import (
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -401,4 +402,169 @@ func TestSessionstopDebitLoops(t *testing.T) {
 	if session.debitStop != nil {
 		t.Errorf("Expecting: nil, received: %s", utils.ToJSON(session.debitStop))
 	}
+}
+
+func TestUnindexSession(t *testing.T) {
+	sessionService := &SessionS{
+		aSIMux: sync.RWMutex{},
+		aSessionsIdx: map[string]map[string]map[string]utils.StringSet{
+			"idx1": {
+				"opt1": {"origin1": {}, "origin2": {}},
+			},
+		},
+		aSessionsRIdx: map[string][]*riFieldNameVal{
+			"origin1": {
+				&riFieldNameVal{"idx1", "opt1"},
+			},
+		},
+	}
+
+	t.Run("unindex existing session", func(t *testing.T) {
+		result := sessionService.unindexSession("origin1", false)
+		if result != true {
+			t.Errorf("Expected unindex to succeed but it failed, got: %v", result)
+		}
+
+		if _, found := sessionService.aSessionsIdx["idx1"]["opt1"]["origin1"]; found {
+			t.Errorf("Expected session to be removed from aSessionsIdx, but it wasn't")
+		}
+
+		if _, found := sessionService.aSessionsRIdx["origin1"]; found {
+			t.Errorf("Expected session to be removed from aSessionsRIdx, but it wasn't")
+		}
+	})
+
+	t.Run("unindex nonexistent session", func(t *testing.T) {
+		result := sessionService.unindexSession("origin_nonexistent", false)
+		if result != false {
+			t.Errorf("Expected unindex to fail, but it succeeded, got: %v", result)
+		}
+	})
+
+	sessionService.pSIMux = sync.RWMutex{}
+	sessionService.pSessionsIdx = map[string]map[string]map[string]utils.StringSet{
+		"idx2": {
+			"opt2": {"origin3": {}},
+		},
+	}
+	sessionService.pSessionsRIdx = map[string][]*riFieldNameVal{
+		"origin3": {
+			&riFieldNameVal{"idx2", "opt2"},
+		},
+	}
+
+	t.Run("unindex with pSessions", func(t *testing.T) {
+		result := sessionService.unindexSession("origin3", true)
+		if result != true {
+			t.Errorf("Expected unindex to succeed but it failed, got: %v", result)
+		}
+
+		if _, found := sessionService.pSessionsIdx["idx2"]["opt2"]["origin3"]; found {
+			t.Errorf("Expected session to be removed from pSessionsIdx, but it wasn't")
+		}
+
+		if _, found := sessionService.pSessionsRIdx["origin3"]; found {
+			t.Errorf("Expected session to be removed from pSessionsRIdx, but it wasn't")
+		}
+	})
+}
+
+func TestGetSessionIDsMatchingIndexes(t *testing.T) {
+	sessionService := &SessionS{
+
+		aSIMux: sync.RWMutex{},
+		aSessionsIdx: map[string]map[string]map[string]utils.StringSet{
+			"idx1": {
+				"opt1": {
+					"origin1": {"run1": {}, "run2": {}},
+					"origin2": {"run1": {}},
+				},
+				"opt2": {
+					"origin3": {"run3": {}},
+				},
+			},
+		},
+		pSIMux: sync.RWMutex{},
+		pSessionsIdx: map[string]map[string]map[string]utils.StringSet{
+			"idx2": {
+				"opt3": {
+					"origin4": {"run4": {}},
+				},
+			},
+		},
+	}
+
+	t.Run("active sessions matching", func(t *testing.T) {
+		fltrs := map[string][]string{
+			"idx1": {"opt1"},
+		}
+
+		originIDs, matchingSessions := sessionService.getSessionIDsMatchingIndexes(fltrs, false)
+
+		expectedOriginIDs := []string{"origin1", "origin2"}
+		if len(originIDs) != len(expectedOriginIDs) {
+			t.Errorf("Expected originIDs length %d but got %d", len(expectedOriginIDs), len(originIDs))
+		}
+
+		if len(matchingSessions["origin1"]) != 2 {
+			t.Errorf("Expected 2 runIDs for origin1 but got %d", len(matchingSessions["origin1"]))
+		}
+
+		if len(matchingSessions["origin2"]) != 1 {
+			t.Errorf("Expected 1 runID for origin2 but got %d", len(matchingSessions["origin2"]))
+		}
+	})
+
+	t.Run("passive sessions matching", func(t *testing.T) {
+		fltrs := map[string][]string{
+			"idx2": {"opt3"},
+		}
+
+		originIDs, matchingSessions := sessionService.getSessionIDsMatchingIndexes(fltrs, true)
+
+		expectedOriginIDs := []string{"origin4"}
+		if len(originIDs) != len(expectedOriginIDs) {
+			t.Errorf("Expected originIDs length %d but got %d", len(expectedOriginIDs), len(originIDs))
+		}
+
+		if len(matchingSessions["origin4"]) != 1 {
+			t.Errorf("Expected 1 runID for origin4 but got %d", len(matchingSessions["origin4"]))
+		}
+	})
+
+	t.Run("no matching sessions", func(t *testing.T) {
+		fltrs := map[string][]string{
+			"idx1": {"origin1001"},
+		}
+
+		originIDs, matchingSessions := sessionService.getSessionIDsMatchingIndexes(fltrs, false)
+
+		if len(originIDs) != 0 {
+			t.Errorf("Expected no matching originIDs but got %d", len(originIDs))
+		}
+		if len(matchingSessions) != 0 {
+			t.Errorf("Expected no matching sessions but got %d", len(matchingSessions))
+		}
+	})
+
+	t.Run("multiple filters partial match", func(t *testing.T) {
+		fltrs := map[string][]string{
+			"idx1": {"opt1", "opt2"},
+		}
+
+		originIDs, matchingSessions := sessionService.getSessionIDsMatchingIndexes(fltrs, false)
+
+		expectedOriginIDs := []string{"origin1", "origin2", "origin3"}
+		if len(originIDs) != len(expectedOriginIDs) {
+			t.Errorf("Expected originIDs length %d but got %d", len(expectedOriginIDs), len(originIDs))
+		}
+
+		if len(matchingSessions["origin1"]) != 2 {
+			t.Errorf("Expected 2 runIDs for origin1 but got %d", len(matchingSessions["origin1"]))
+		}
+
+		if len(matchingSessions["origin3"]) != 1 {
+			t.Errorf("Expected 1 runID for origin3 but got %d", len(matchingSessions["origin3"]))
+		}
+	})
 }
