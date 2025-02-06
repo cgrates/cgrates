@@ -52,7 +52,7 @@ func TestLibFiltersGetFloat64OptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := 5.
-	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsResourcesUnits); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -80,7 +80,7 @@ func TestLibFiltersGetFloat64OptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetFloat64Opts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetFloat64Opts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsResourcesUnits); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -106,7 +106,7 @@ func TestLibFiltersGetFloat64OptsReturnDefaultOpt(t *testing.T) {
 		config.NewDynamicFloat64Opt(nil, utils.EmptyString, config.ResourcesUnitsDftOpt, nil),
 	}
 
-	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsResourcesUnits); err != nil {
 		t.Error(err)
 	} else if rcv != config.ResourcesUnitsDftOpt {
@@ -136,7 +136,7 @@ func TestLibFiltersGetFloat64OptsReturnOptFromAPIOpts(t *testing.T) {
 	}
 
 	expected := 6.
-	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		"nonExistingAPIOpt", utils.OptsResourcesUnits); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -167,7 +167,7 @@ func TestLibFiltersGetStringOptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := "value3"
-	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -194,7 +194,7 @@ func TestLibFiltersGetStringOptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetStringOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetStringOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -219,7 +219,7 @@ func TestLibFiltersGetStringOptsReturnDefaultOpt(t *testing.T) {
 		config.NewDynamicStringOpt([]string{"*string:~*req.Account:1002"}, "cgrates.org", "value2", nil),
 	}
 
-	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.ResourcesUsageIDDftOpt, utils.OptsResourcesUsageID); err != nil {
 		t.Error(err)
 	} else if rcv != config.ResourcesUsageIDDftOpt {
@@ -249,7 +249,7 @@ func TestLibFiltersGetStringOptsReturnOptFromAPIOpts(t *testing.T) {
 	}
 
 	expected := "value4"
-	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.ResourcesUsageIDDftOpt, "nonExistingAPIOpt", utils.OptsResourcesUsageID); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -279,7 +279,7 @@ func TestLibFiltersGetDurationOptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := time.Minute
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsResourcesUsageTTL); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -306,7 +306,7 @@ func TestLibFiltersGetDurationOptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetDurationOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsResourcesUsageTTL); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -332,7 +332,7 @@ func TestLibFiltersGetDurationOptsReturnDefaultOpt(t *testing.T) {
 		config.NewDynamicDurationOpt(nil, "", config.ResourcesUsageTTLDftOpt, nil),
 	}
 
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsResourcesUsageTTL); err != nil {
 		t.Error(err)
 	} else if rcv != config.ResourcesUsageTTLDftOpt {
@@ -362,7 +362,7 @@ func TestLibFiltersGetDurationOptsReturnOptFromAPIOpts(t *testing.T) {
 	}
 
 	expected := time.Hour
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		"nonExistingAPIOpt", utils.OptsResourcesUsageTTL); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -392,7 +392,7 @@ func TestLibFiltersGetIntOptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := 5
-	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsAttributesProcessRuns); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -419,7 +419,7 @@ func TestLibFiltersGetIntOptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetIntOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetIntOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsAttributesProcessRuns); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -445,7 +445,7 @@ func TestLibFiltersGetIntOptsReturnDefaultOpt(t *testing.T) {
 		config.NewDynamicIntOpt(nil, utils.EmptyString, config.AttributesProcessRunsDftOpt, nil),
 	}
 
-	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsAttributesProcessRuns); err != nil {
 		t.Error(err)
 	} else if rcv != config.AttributesProcessRunsDftOpt {
@@ -475,7 +475,7 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	}
 
 	expected := 6
-	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		"nonExistingAPIOpt", utils.OptsAttributesProcessRuns); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -505,7 +505,7 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOptsErr(t *testing.T) {
 	}
 
 	experr := `cannot convert field<bool>: true to int`
-	if _, err := GetIntOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetIntOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		"nonExistingAPIOpt", utils.OptsAttributesProcessRuns); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -533,7 +533,7 @@ func TestLibFiltersGetTimeOptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := time.Now().AddDate(0, 1, 0)
-	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime); err != nil {
 		t.Error(err)
 	} else if !dateEqual(rcv, expected) {
@@ -560,7 +560,7 @@ func TestLibFiltersGetTimeOptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetTimeOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetTimeOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -590,7 +590,7 @@ func TestLibFiltersGetTimeOptsReturnDefaultOpt(t *testing.T) {
 		config.NewDynamicStringOpt(nil, "", config.RatesStartTimeDftOpt, nil),
 	}
 
-	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, utils.OptsRatesStartTime); err != nil {
 		t.Error(err)
 	} else if !dateEqual(rcv, expected) {
@@ -620,7 +620,7 @@ func TestLibFiltersGetTimeOptsReturnOptFromAPIOpts(t *testing.T) {
 	}
 
 	expected := time.Now().AddDate(1, 0, 0)
-	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetTimeOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		cfg.GeneralCfg().DefaultTimezone, config.RatesStartTimeDftOpt, "nonExistingAPIOpt", utils.OptsRatesStartTime); err != nil {
 		t.Error(err)
 	} else if !dateEqual(rcv, expected) {
@@ -780,7 +780,7 @@ func TestLibFiltersGetInterfaceOptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := "value3"
-	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.RoutesMaxCostDftOpt, utils.OptsRoutesMaxCost); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -811,7 +811,7 @@ func TestLibFiltersGetInterfaceOptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.RoutesMaxCostDftOpt, utils.OptsRoutesMaxCost); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -843,7 +843,7 @@ func TestLibFiltersGetInterfaceOptsReturnDefaultOpt(t *testing.T) {
 		},
 	}
 
-	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsRoutesMaxCost); err != nil {
 		t.Error(err)
 	} else if rcv != config.RoutesMaxCostDftOpt {
@@ -877,7 +877,7 @@ func TestLibFiltersGetInterfaceOptsReturnOptFromAPIOpts(t *testing.T) {
 	}
 
 	expected := 4
-	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetInterfaceOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.RoutesMaxCostDftOpt, "nonExistingAPIOpt", utils.OptsRoutesMaxCost); err != nil {
 		t.Error(err)
 	} else if rcv != expected {
@@ -919,7 +919,7 @@ func TestLibFiltersGetStringSliceOptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := []string{"value3"}
-	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expected) {
@@ -950,7 +950,7 @@ func TestLibFiltersGetStringSliceOptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -979,7 +979,7 @@ func TestLibFiltersGetStringSliceOptsReturnDefaultOpt(t *testing.T) {
 		},
 	}
 
-	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, config.AttributesProfileIDsDftOpt) {
@@ -1013,7 +1013,7 @@ func TestLibFiltersGetStringSliceOptsReturnOptFromAPIOpts(t *testing.T) {
 	}
 
 	expected := []string{"value4"}
-	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetStringSliceOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		config.AttributesProfileIDsDftOpt, "nonExistingAPIOpt", utils.OptsAttributesProfileIDs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expected) {
@@ -1055,7 +1055,7 @@ func TestLibFiltersGetDecimalBigOptsReturnConfigOpt(t *testing.T) {
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 
 	expected := decimal.New(1234, 0)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsRatesUsage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(expected) != 0 {
@@ -1143,7 +1143,7 @@ func TestDynamicDecimalBigOptsDynVal(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			out, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fs, dynOpts, utils.OptsRatesUsage)
+			out, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fs, dynOpts, utils.OptsRatesUsage)
 			if tt.expErr != nil {
 				if err == nil {
 					t.Error("expected err,received nil")
@@ -1243,7 +1243,7 @@ func TestDynamicIntOptsDynVal(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			out, err := GetIntOpts(context.Background(), "cgrates.org", ev, fs, dynOpts, utils.OptsRatesUsage)
+			out, err := GetIntOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fs, dynOpts, utils.OptsRatesUsage)
 			if tt.expErr != nil {
 				if err == nil {
 					t.Error("expected err,received nil")
@@ -1343,7 +1343,7 @@ func TestDynamicFloat64OptsDynVal(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			out, err := GetFloat64Opts(context.Background(), "cgrates.org", ev, fs, dynOpts, utils.OptsRatesUsage)
+			out, err := GetFloat64Opts(context.Background(), "cgrates.org", ev.AsDataProvider(), fs, dynOpts, utils.OptsRatesUsage)
 			if tt.expErr != nil {
 				if err == nil {
 					t.Error("expected err,received nil")
@@ -1543,7 +1543,7 @@ func TestDynamicDurationOptsDynVal(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			out, err := GetDurationOpts(context.Background(), "cgrates.org", ev, fs, dynOpts, utils.OptsRatesUsage)
+			out, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fs, dynOpts, utils.OptsRatesUsage)
 			if tt.expErr != nil {
 				if err == nil {
 					t.Error("expected err,received nil")
@@ -1622,7 +1622,7 @@ func TestDynamicStringOptsDynVal(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			out, err := GetStringOpts(context.Background(), "cgrates.org", ev, fs, dynOpts)
+			out, err := GetStringOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fs, dynOpts)
 			if tt.expErr != nil {
 				if err == nil {
 					t.Error("expected err,received nil")
@@ -1717,28 +1717,28 @@ func TestAttrDynamicOptsFromJson(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 	fltrs := NewFilterS(cgrCfg, nil, nil)
-	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.AttributeSCfg().Opts.ProcessRuns); err != nil {
+	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.AttributeSCfg().Opts.ProcessRuns); err != nil {
 		t.Error(err)
 	} else if rcv != 4 {
 		t.Errorf("expected %d,received %d", 4, rcv)
 	}
-	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev3, fltrs, cgrCfg.AttributeSCfg().Opts.ProcessRuns); err != nil {
+	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev3.AsDataProvider(), fltrs, cgrCfg.AttributeSCfg().Opts.ProcessRuns); err != nil {
 		t.Error(err)
 	} else if rcv != 11 {
 		t.Errorf("expected %d,received %d", 11, rcv)
 	}
-	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev2, fltrs, cgrCfg.AttributeSCfg().Opts.ProcessRuns); err != nil {
+	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev2.AsDataProvider(), fltrs, cgrCfg.AttributeSCfg().Opts.ProcessRuns); err != nil {
 		t.Error(err)
 	} else if rcv != config.AttributesProcessRunsDftOpt {
 		t.Errorf("expected %d,received %d", config.AttributesProcessRunsDftOpt, rcv)
 	}
 
-	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.AttributeSCfg().Opts.ProfileRuns); err != nil {
+	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.AttributeSCfg().Opts.ProfileRuns); err != nil {
 		t.Error(err)
 	} else if rcv != 5 {
 		t.Errorf("expected %d,received %d", 5, rcv)
 	}
-	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev2, fltrs, cgrCfg.AttributeSCfg().Opts.ProfileRuns); err != nil {
+	if rcv, err := GetIntOpts(context.Background(), "cgrates.org", ev2.AsDataProvider(), fltrs, cgrCfg.AttributeSCfg().Opts.ProfileRuns); err != nil {
 		t.Error(err)
 	} else if rcv != config.AttributesProfileRunsDftOpt {
 		t.Errorf("expected %d,received %d", config.AttributesProcessRunsDftOpt, rcv)
@@ -1848,23 +1848,23 @@ func TestSessionDynamicOptsFromJson(t *testing.T) {
 		t.Errorf("expected %v,received %v", config.SessionsAttributesDftOpt, rcv)
 	}
 
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.SessionSCfg().Opts.TTL); err != nil {
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.SessionSCfg().Opts.TTL); err != nil {
 		t.Error(err)
 	} else if rcv != time.Second {
 		t.Errorf("expected %v,received %v", time.Second, rcv)
 	}
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev2, fltrs, cgrCfg.SessionSCfg().Opts.TTL); err != nil {
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev2.AsDataProvider(), fltrs, cgrCfg.SessionSCfg().Opts.TTL); err != nil {
 		t.Error(err)
 	} else if rcv != config.SessionsTTLDftOpt {
 		t.Errorf("expected %v,received %v", config.SessionsTTLDftOpt, rcv)
 	}
 
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.SessionSCfg().Opts.DebitInterval); err != nil {
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.SessionSCfg().Opts.DebitInterval); err != nil {
 		t.Error(err)
 	} else if rcv != (8 * time.Second) {
 		t.Errorf("expected %v,received %v", 8*time.Second, rcv)
 	}
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev2, fltrs, cgrCfg.SessionSCfg().Opts.DebitInterval); err != nil {
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev2.AsDataProvider(), fltrs, cgrCfg.SessionSCfg().Opts.DebitInterval); err != nil {
 		t.Error(err)
 	} else if rcv != config.SessionsDebitIntervalDftOpt {
 		t.Errorf("expected %v,received %v", config.SessionsDebitIntervalDftOpt, rcv)
@@ -1931,34 +1931,34 @@ func TestResDynamicOptsFromJson(t *testing.T) {
 		},
 	}
 	fltrs := NewFilterS(cgrCfg, nil, nil)
-	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.ResourceSCfg().Opts.UsageID); err != nil {
+	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.ResourceSCfg().Opts.UsageID); err != nil {
 		t.Error(err)
 	} else if rcv != "UsgID3232" {
 		t.Errorf("expected %s,received %s", "UsgID3232", rcv)
 	}
-	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev2, fltrs, cgrCfg.ResourceSCfg().Opts.UsageID); err != nil {
+	if rcv, err := GetStringOpts(context.Background(), "cgrates.org", ev2.AsDataProvider(), fltrs, cgrCfg.ResourceSCfg().Opts.UsageID); err != nil {
 		t.Error(err)
 	} else if rcv != config.ResourcesUsageIDDftOpt {
 		t.Errorf("expected %s,received %s", config.ResourcesUsageTTLDftOpt, rcv)
 	}
 
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.ResourceSCfg().Opts.UsageTTL); err != nil {
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.ResourceSCfg().Opts.UsageTTL); err != nil {
 		t.Error(err)
 	} else if rcv != 3*time.Second {
 		t.Errorf("expected %v,received %d", 3*time.Second, rcv)
 	}
-	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev2, fltrs, cgrCfg.ResourceSCfg().Opts.UsageTTL); err != nil {
+	if rcv, err := GetDurationOpts(context.Background(), "cgrates.org", ev2.AsDataProvider(), fltrs, cgrCfg.ResourceSCfg().Opts.UsageTTL); err != nil {
 		t.Error(err)
 	} else if rcv != config.ResourcesUsageTTLDftOpt {
 		t.Errorf("expected %d,received %d", config.ResourcesUsageTTLDftOpt, rcv)
 	}
 
-	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.ResourceSCfg().Opts.Units); err != nil {
+	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.ResourceSCfg().Opts.Units); err != nil {
 		t.Error(err)
 	} else if rcv != 23.22 {
 		t.Errorf("expected %f,received %f", 23.22, rcv)
 	}
-	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev2, fltrs, cgrCfg.ResourceSCfg().Opts.Units); err != nil {
+	if rcv, err := GetFloat64Opts(context.Background(), "cgrates.org", ev2.AsDataProvider(), fltrs, cgrCfg.ResourceSCfg().Opts.Units); err != nil {
 		t.Error(err)
 	} else if rcv != config.ResourcesUnitsDftOpt {
 		t.Errorf("expected %v,received %v", config.ResourcesUnitsDftOpt, rcv)
@@ -2012,34 +2012,34 @@ func TestRoutesDynamicOptsFromJson(t *testing.T) {
 	dec.SetFloat64(43364.4)
 
 	fltrs := NewFilterS(cgrCfg, nil, nil)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(&dec) != 0 {
 		t.Errorf("expected %v,received %v", dec.String(), rcv.String())
 	}
 	ev.Event[utils.AccountField] = 1002
 	dec.SetUint64(15555)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(&dec) != 0 {
 		t.Errorf("expected %v,received %v", dec.String(), rcv.String())
 	}
 	ev.Event[utils.AccountField] = 1003
 	dec = *decimal.New(int64(5*time.Minute), 0)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(&dec) != 0 {
 		t.Errorf("expected %v,received %v", dec.String(), rcv.String())
 	}
 	ev.Event[utils.AccountField] = 1004
 	dec = *decimal.New(int64(12*time.Minute), 0)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(&dec) != 0 {
 		t.Errorf("expected %v,received %v", dec.String(), rcv.String())
 	}
 	ev.Event[utils.AccountField] = 1005
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(config.RatesUsageDftOpt) != 0 {
 		t.Errorf("expected %v,received %v", config.RatesUsageDftOpt.String(), rcv.String())
@@ -2069,7 +2069,7 @@ func TestLibFiltersGetDecimalBigOptsFilterCheckErr(t *testing.T) {
 	}
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsRatesUsage); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -2101,7 +2101,7 @@ func TestLibFiltersGetDecimalBigOptsReturnDefaultOpt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsRatesUsage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(config.RatesUsageDftOpt) != 0 {
@@ -2137,7 +2137,7 @@ func TestLibFiltersGetDecimalBigOptsReturnOptFromAPIOpts(t *testing.T) {
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 
 	expected := decimal.New(4321, 5)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		"nonExistingAPIOpt", utils.OptsRatesUsage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(expected) != 0 {
@@ -2167,7 +2167,7 @@ func TestLibFiltersGetIntPointerOptsReturnConfigOpt(t *testing.T) {
 	}
 
 	expected := 5
-	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsRoutesProfilesCount); err != nil {
 		t.Error(err)
 	} else if *rcv != expected {
@@ -2194,7 +2194,7 @@ func TestLibFiltersGetIntPointerOptsFilterCheckErr(t *testing.T) {
 	}
 
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsRoutesProfilesCount); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -2219,7 +2219,7 @@ func TestLibFiltersGetIntPointerOptsReturnDft(t *testing.T) {
 		config.NewDynamicIntPointerOpt([]string{"*string:~*req.Account:1002"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
-	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		utils.OptsRoutesProfilesCount); err != nil {
 		t.Error(err)
 	} else if rcv != nil {
@@ -2249,7 +2249,7 @@ func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	}
 
 	expected := 6
-	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if rcv, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		"nonExistingAPIOpt", utils.OptsRoutesProfilesCount); err != nil {
 		t.Error(err)
 	} else if *rcv != expected {
@@ -2279,7 +2279,7 @@ func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsErr(t *testing.T) {
 	}
 
 	experr := `cannot convert field<bool>: true to int`
-	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev, fS, dynOpts,
+	if _, err := GetIntPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
 		"nonExistingAPIOpt", utils.OptsRoutesProfilesCount); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}

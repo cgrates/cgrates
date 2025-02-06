@@ -172,7 +172,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			TTLLastUsed:        []*DynamicDurationPointerOpt{},
 			TTLMaxDelay:        []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:           []*DynamicDurationPointerOpt{},
-			SessionsOriginID:   []*DynamicStringOpt{},
+			OriginID:           []*DynamicStringOpt{},
 			AccountsForceUsage: []*DynamicBoolOpt{},
 		},
 	}
@@ -395,7 +395,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
 			ForceUsage:             []*DynamicBoolOpt{},
-			SessionsOriginID:       []*DynamicStringOpt{},
+			OriginID:               []*DynamicStringOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
 			TTLLastUsage: []*DynamicDurationPointerOpt{
 				{
@@ -558,7 +558,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaTTLMaxDelayCfg:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			utils.MetaTTLUsageCfg:               []*DynamicDurationPointerOpt{},
 			utils.MetaForceUsageCfg:             []*DynamicBoolOpt{},
-			utils.MetaSessionsOriginID:          []*DynamicStringOpt{},
+			utils.MetaOriginID:                  []*DynamicStringOpt{},
 			utils.MetaAccountsForceUsage:        []*DynamicBoolOpt{},
 		},
 	}
@@ -691,7 +691,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaTTLMaxDelayCfg:     []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			utils.MetaTTLUsageCfg:        []*DynamicDurationPointerOpt{},
 			utils.MetaForceUsageCfg:      []*DynamicBoolOpt{},
-			utils.MetaSessionsOriginID:   []*DynamicStringOpt{},
+			utils.MetaOriginID:           []*DynamicStringOpt{},
 			utils.MetaAccountsForceUsage: []*DynamicBoolOpt{},
 		},
 	}

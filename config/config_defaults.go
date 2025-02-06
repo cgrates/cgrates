@@ -895,7 +895,7 @@ const CGRATES_CFG_JSON = `
 		// 		"Value": ""
 		// 	}
 		// ],
-		// "*sessionsOriginID": [
+		// "*originID": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],

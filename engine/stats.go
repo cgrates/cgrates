@@ -373,7 +373,7 @@ func (sS *StatS) processEEs(ctx *context.Context, sQs StatQueues, opts map[strin
 func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
 	evNm := args.AsDataProvider()
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, evNm, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
@@ -415,7 +415,7 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	}
 
 	var promIDs []string
-	if promIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.PrometheusStatIDs,
+	if promIDs, err = GetStringSliceOpts(ctx, tnt, evNm, sS.fltrS, sS.cfg.StatSCfg().Opts.PrometheusStatIDs,
 		[]string{}, utils.OptsPrometheusStatIDs); err != nil {
 		return
 	}
@@ -467,7 +467,8 @@ func (sS *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREv
 		tnt = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, args, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
+	dP := args.AsDataProvider()
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, dP, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
@@ -531,7 +532,7 @@ func (sS *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenan
 		return err
 	}
 	var rnd int
-	if rnd, err = GetIntOpts(ctx, tnt, &utils.CGREvent{Tenant: tnt}, sS.fltrS,
+	if rnd, err = GetIntOpts(ctx, tnt, MapEvent{utils.Tenant: tnt, "*opts": map[string]any{}}, sS.fltrS,
 		sS.cfg.StatSCfg().Opts.RoundingDecimals,
 		utils.OptsRoundingDecimals); err != nil {
 		return

@@ -5301,7 +5301,7 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 	}
 
 	reply := &AttrSProcessEventReply{}
-	exrErr := `strconv.ParseInt: parsing "errVal": invalid syntax`
+	exrErr := `strconv.Atoi: parsing "errVal": invalid syntax`
 	if err := alS.V1ProcessEvent(context.Background(), ev, reply); err == nil || err.Error() != exrErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exrErr, err)
 	}
@@ -5353,7 +5353,7 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 	}
 
 	reply := &AttrSProcessEventReply{}
-	exrErr := `strconv.ParseInt: parsing "errVal": invalid syntax`
+	exrErr := `strconv.Atoi: parsing "errVal": invalid syntax`
 	if err := alS.V1ProcessEvent(context.Background(), ev, reply); err == nil || err.Error() != exrErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exrErr, err)
 	}
