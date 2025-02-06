@@ -192,7 +192,8 @@ func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt strin
 
 func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
 	var ignoreErrors bool
-	if ignoreErrors, err = GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), fS, cfgOpts.IgnoreErrors,
+	evNM := ev.AsDataProvider()
+	if ignoreErrors, err = GetBoolOpts(ctx, ev.Tenant, evNM, fS, cfgOpts.IgnoreErrors,
 		utils.OptsRoutesIgnoreErrors); err != nil {
 		return
 	}
@@ -201,21 +202,21 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, cfg
 		paginator:    &utils.Paginator{},
 	}
 	var limit *int
-	if limit, err = GetIntPointerOpts(ctx, ev.Tenant, ev, fS, cfgOpts.Limit,
+	if limit, err = GetIntPointerOpts(ctx, ev.Tenant, evNM, fS, cfgOpts.Limit,
 		utils.OptsRoutesLimit); err != nil {
 		return
 	} else {
 		opts.paginator.Limit = limit
 	}
 	var offset *int
-	if offset, err = GetIntPointerOpts(ctx, ev.Tenant, ev, fS, cfgOpts.Offset,
+	if offset, err = GetIntPointerOpts(ctx, ev.Tenant, evNM, fS, cfgOpts.Offset,
 		utils.OptsRoutesOffset); err != nil {
 		return
 	} else {
 		opts.paginator.Offset = offset
 	}
 	var maxItems *int
-	if maxItems, err = GetIntPointerOpts(ctx, ev.Tenant, ev, fS, cfgOpts.MaxItems,
+	if maxItems, err = GetIntPointerOpts(ctx, ev.Tenant, evNM, fS, cfgOpts.MaxItems,
 		utils.OptsRoutesMaxItems); err != nil {
 		return
 	} else {
@@ -223,7 +224,7 @@ func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *FilterS, cfg
 	}
 
 	var maxCost any
-	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, ev, fS, cfgOpts.MaxCost, config.RoutesMaxCostDftOpt,
+	if maxCost, err = GetInterfaceOpts(ctx, ev.Tenant, evNM, fS, cfgOpts.MaxCost, config.RoutesMaxCostDftOpt,
 		utils.OptsRoutesMaxCost); err != nil {
 		return
 	}
@@ -280,7 +281,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 	if len(rpS.cfg.RouteSCfg().AttributeSConns) != 0 {
 		args.APIOpts[utils.MetaSubsys] = utils.MetaRoutes
 		var context string
-		if context, err = GetStringOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.Context,
+		if context, err = GetStringOpts(ctx, tnt, args.AsDataProvider(), rpS.fltrS, rpS.cfg.RouteSCfg().Opts.Context,
 			utils.OptsContext); err != nil {
 			return
 		}
@@ -408,7 +409,7 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
 	var prfCountOpt *int
-	if prfCountOpt, err = GetIntPointerOpts(ctx, tnt, args, rpS.fltrS, rpS.cfg.RouteSCfg().Opts.ProfileCount,
+	if prfCountOpt, err = GetIntPointerOpts(ctx, tnt, args.AsDataProvider(), rpS.fltrS, rpS.cfg.RouteSCfg().Opts.ProfileCount,
 		utils.OptsRoutesProfilesCount); err != nil && err != utils.ErrNotFound {
 		// if the error is NOT_FOUND, it means that in opts or config, countProfiles field is not defined
 		return

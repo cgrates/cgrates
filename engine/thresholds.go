@@ -333,7 +333,7 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 		utils.MetaOpts: args.APIOpts,
 	}
 	var thIDs []string
-	if thIDs, err = GetStringSliceOpts(ctx, tnt, args, tS.fltrS, tS.cfg.ThresholdSCfg().Opts.ProfileIDs,
+	if thIDs, err = GetStringSliceOpts(ctx, tnt, evNm, tS.fltrS, tS.cfg.ThresholdSCfg().Opts.ProfileIDs,
 		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdsProfileIDs); err != nil {
 		return
 	}

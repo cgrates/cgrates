@@ -174,7 +174,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				DebitInterval:          []*DynamicDurationOpt{{value: SessionsDebitIntervalDftOpt}},
 				TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 				TTLUsage:               []*DynamicDurationPointerOpt{},
-				SessionsOriginID:       []*DynamicStringOpt{},
+				OriginID:               []*DynamicStringOpt{},
 				AccountsForceUsage:     []*DynamicBoolOpt{},
 			},
 		},

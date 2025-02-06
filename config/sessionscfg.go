@@ -90,7 +90,7 @@ type SessionsOpts struct {
 	DebitInterval          []*DynamicDurationOpt
 	TTLMaxDelay            []*DynamicDurationOpt
 	TTLUsage               []*DynamicDurationPointerOpt
-	SessionsOriginID       []*DynamicStringOpt
+	OriginID               []*DynamicStringOpt
 	AccountsForceUsage     []*DynamicBoolOpt
 }
 
@@ -303,13 +303,13 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err erro
 		}
 		sesOpts.TTLUsage = append(usage, sesOpts.TTLUsage...)
 	}
-	if jsnCfg.SessionsOriginID != nil {
-		var sessionsOriginID []*DynamicStringOpt
-		sessionsOriginID, err = InterfaceToDynamicStringOpts(jsnCfg.SessionsOriginID)
+	if jsnCfg.OriginID != nil {
+		var originID []*DynamicStringOpt
+		originID, err = InterfaceToDynamicStringOpts(jsnCfg.OriginID)
 		if err != nil {
 			return
 		}
-		sesOpts.SessionsOriginID = append(sessionsOriginID, sesOpts.SessionsOriginID...)
+		sesOpts.OriginID = append(originID, sesOpts.OriginID...)
 	}
 	if jsnCfg.AccountsForceUsage != nil {
 		var accountsForceUsage []*DynamicBoolOpt
@@ -465,7 +465,7 @@ func (scfg SessionSCfg) AsMapInterface(string) any {
 		utils.MetaTTLLastUsedCfg:            scfg.Opts.TTLLastUsed,
 		utils.MetaTTLMaxDelayCfg:            scfg.Opts.TTLMaxDelay,
 		utils.MetaTTLUsageCfg:               scfg.Opts.TTLUsage,
-		utils.MetaSessionsOriginID:          scfg.Opts.SessionsOriginID,
+		utils.MetaOriginID:                  scfg.Opts.OriginID,
 		utils.MetaAccountsForceUsage:        scfg.Opts.AccountsForceUsage,
 	}
 	mp := map[string]any{
@@ -652,8 +652,8 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 		usg = CloneDynamicDurationPointerOpt(sesOpts.TTLUsage)
 	}
 	var sID []*DynamicStringOpt
-	if sesOpts.SessionsOriginID != nil {
-		sID = CloneDynamicStringOpt(sesOpts.SessionsOriginID)
+	if sesOpts.OriginID != nil {
+		sID = CloneDynamicStringOpt(sesOpts.OriginID)
 	}
 	var accForceUsage []*DynamicBoolOpt
 	if sesOpts.AccountsForceUsage != nil {
@@ -691,7 +691,7 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 		TTLLastUsed:            lastUsed,
 		TTLMaxDelay:            maxDelay,
 		TTLUsage:               usg,
-		SessionsOriginID:       sID,
+		OriginID:               sID,
 		AccountsForceUsage:     accForceUsage,
 	}
 }
@@ -879,7 +879,7 @@ type SessionsOptsJson struct {
 	TTLLastUsed            []*DynamicInterfaceOpt `json:"*ttlLastUsed"`
 	TTLMaxDelay            []*DynamicInterfaceOpt `json:"*ttlMaxDelay"`
 	TTLUsage               []*DynamicInterfaceOpt `json:"*ttlUsage"`
-	SessionsOriginID       []*DynamicInterfaceOpt `json:"*sessionsOriginID"`
+	OriginID               []*DynamicInterfaceOpt `json:"*originID"`
 	AccountsForceUsage     []*DynamicInterfaceOpt `json:"*accountsForceUsage"`
 }
 
@@ -1008,8 +1008,8 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !DynamicDurationPointerOptEqual(v1.TTLUsage, v2.TTLUsage) {
 		d.TTLUsage = DurationPointerToIfaceDynamicOpts(v2.TTLUsage)
 	}
-	if !DynamicStringOptEqual(v1.SessionsOriginID, v2.SessionsOriginID) {
-		d.SessionsOriginID = DynamicStringToInterfaceOpts(v2.SessionsOriginID)
+	if !DynamicStringOptEqual(v1.OriginID, v2.OriginID) {
+		d.OriginID = DynamicStringToInterfaceOpts(v2.OriginID)
 	}
 	if !DynamicBoolOptEqual(v1.AccountsForceUsage, v2.AccountsForceUsage) {
 		d.AccountsForceUsage = BoolToIfaceDynamicOpts(v2.AccountsForceUsage)

@@ -2212,7 +2212,6 @@ const (
 	MetaTTLLastUsedCfg            = "*ttlLastUsed"
 	MetaTTLMaxDelayCfg            = "*ttlMaxDelay"
 	MetaTTLUsageCfg               = "*ttlUsage"
-	MetaSessionsOriginID          = "*sessionsOriginID"
 	MetaAccountsForceUsage        = "*accountsForceUsage"
 
 	// AnalyzerSCfg

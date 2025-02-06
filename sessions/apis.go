@@ -263,7 +263,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	// end of RPC caching
 
 	var originID string
-	if originID, err = engine.GetStringOpts(ctx, args.Tenant, args, sS.fltrS, nil,
+	dP := args.AsDataProvider()
+	if originID, err = engine.GetStringOpts(ctx, args.Tenant, dP, sS.fltrS, nil,
 		utils.MetaOriginID); err != nil {
 		return
 	} else if originID == utils.EmptyString {
@@ -274,7 +275,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 
 	rply.MaxUsage = utils.DurationPointer(time.Duration(utils.InvalidUsage)) // temp
-	dP := args.AsDataProvider()
 
 	var acntS bool
 	if acntS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.MaxUsage,
@@ -362,7 +362,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			return
 		}
 		var dbtItvl time.Duration
-		if dbtItvl, err = engine.GetDurationOpts(ctx, args.Tenant, args, sS.fltrS, sS.cfg.SessionSCfg().Opts.DebitInterval,
+		if dbtItvl, err = engine.GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), sS.fltrS, sS.cfg.SessionSCfg().Opts.DebitInterval,
 			utils.OptsSesDebitInterval); err != nil {
 			return
 		}
