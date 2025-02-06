@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -567,4 +568,78 @@ func TestGetSessionIDsMatchingIndexes(t *testing.T) {
 			t.Errorf("Expected 1 runID for origin3 but got %d", len(matchingSessions["origin3"]))
 		}
 	})
+}
+
+func TestSRunClone(t *testing.T) {
+	origTime := time.Now()
+
+	origSRun := &SRun{
+		ID: "run1",
+		CGREvent: &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			ID:      "event1",
+			Event:   map[string]any{"id": "1"},
+			APIOpts: map[string]any{"runID": "run1"},
+		},
+		ExtraUsage:    5 * time.Second,
+		LastUsage:     10 * time.Second,
+		TotalUsage:    50 * time.Second,
+		NextAutoDebit: &origTime,
+	}
+
+	clonedSRun := origSRun.Clone()
+
+	if clonedSRun == nil {
+		t.Fatal("Clone() returned nil")
+	}
+
+	if clonedSRun.ID != origSRun.ID {
+		t.Error("ID does not match")
+	}
+
+	if clonedSRun.CGREvent == nil {
+		t.Error("CGREvent is nil in cloned SRun")
+	} else {
+		if clonedSRun.CGREvent.Tenant != origSRun.CGREvent.Tenant {
+			t.Error("CGREvent.Tenant does not match")
+		}
+		if clonedSRun.CGREvent.ID != origSRun.CGREvent.ID {
+			t.Error("CGREvent.ID does not match")
+		}
+	}
+
+	if clonedSRun.ExtraUsage != origSRun.ExtraUsage {
+		t.Error("ExtraUsage does not match")
+	}
+
+	if clonedSRun.LastUsage != origSRun.LastUsage {
+		t.Error("LastUsage does not match")
+	}
+
+	if clonedSRun.TotalUsage != origSRun.TotalUsage {
+		t.Error("TotalUsage does not match")
+	}
+
+	if clonedSRun.NextAutoDebit == nil || *clonedSRun.NextAutoDebit != *origSRun.NextAutoDebit {
+		t.Error("NextAutoDebit does not match")
+	}
+}
+
+func TestUpdateSRuns(t *testing.T) {
+	session := &Session{
+		SRuns: []*SRun{
+			{CGREvent: &utils.CGREvent{Event: map[string]any{"ID": "1"}}},
+		},
+	}
+	updateEvent := engine.MapEvent{"ID": "2", "UID": "101010"}
+	alterableFields := utils.NewStringSet([]string{"ID"})
+	session.updateSRuns(updateEvent, alterableFields)
+	for _, sr := range session.SRuns {
+		if sr.CGREvent.Event["ID"] != "2" {
+			t.Errorf("expected ID to be updated to '2', got %v", sr.CGREvent.Event["ID"])
+		}
+		if _, exists := sr.CGREvent.Event["UID"]; exists {
+			t.Errorf("UID should not exist in event")
+		}
+	}
 }
