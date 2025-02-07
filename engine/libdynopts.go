@@ -33,18 +33,10 @@ import (
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetFloat64Opts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicFloat64Opt,
 	optNames ...string) (cfgOpt float64, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return utils.IfaceAsFloat64(opt)
+	} else if !errors.Is(err, utils.ErrNotFound) {
 		return 0, err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return utils.IfaceAsFloat64(opt)
-		}
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -63,18 +55,10 @@ func GetFloat64Opts(ctx *context.Context, tnt string, dP utils.DataProvider, fS 
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetDurationOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicDurationOpt,
 	optNames ...string) (cfgOpt time.Duration, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return utils.IfaceAsDuration(opt)
+	} else if !errors.Is(err, utils.ErrNotFound) {
 		return 0, err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return utils.IfaceAsDuration(opt)
-		}
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -93,18 +77,10 @@ func GetDurationOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetStringOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicStringOpt,
 	optNames ...string) (cfgOpt string, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return utils.IfaceAsString(opt), nil
+	} else if !errors.Is(err, utils.ErrNotFound) {
 		return "", err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return utils.IfaceAsString(opt), nil
-		}
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -123,18 +99,10 @@ func GetStringOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetTimeOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicStringOpt,
 	tmz string, optNames ...string) (_ time.Time, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
-		return
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return utils.IfaceAsTime(opt, tmz)
-		}
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return utils.IfaceAsTime(opt, tmz)
+	} else if !errors.Is(err, utils.ErrNotFound) {
+		return time.Time{}, err
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -159,18 +127,10 @@ func GetTimeOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fi
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetStringSliceOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicStringSliceOpt,
 	dftOpt []string, optNames ...string) (cfgOpt []string, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return utils.IfaceAsStringSlice(opt)
+	} else if !errors.Is(err, utils.ErrNotFound) {
 		return nil, err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return utils.IfaceAsStringSlice(opt)
-		}
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -189,18 +149,10 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, dP utils.DataProvider,
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetIntOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicIntOpt,
 	optNames ...string) (cfgOpt int, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return utils.IfaceAsInt(opt)
+	} else if !errors.Is(err, utils.ErrNotFound) {
 		return 0, err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return utils.IfaceAsInt(opt)
-		}
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -219,18 +171,10 @@ func GetIntOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fil
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicBoolOpt,
 	optNames ...string) (cfgOpt bool, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return utils.IfaceAsBool(opt)
+	} else if !errors.Is(err, utils.ErrNotFound) {
 		return false, err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return utils.IfaceAsBool(opt)
-		}
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -249,18 +193,10 @@ func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fi
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetDecimalBigOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicDecimalOpt,
 	optNames ...string) (cfgOpt *decimal.Big, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return utils.IfaceAsBig(opt)
+	} else if !errors.Is(err, utils.ErrNotFound) {
 		return nil, err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return utils.IfaceAsBig(opt)
-		}
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -279,18 +215,10 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, dP utils.DataProvider, 
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetInterfaceOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicInterfaceOpt,
 	optNames ...string) (cfgOpt any, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
-		return nil, err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			return opt, nil
-		}
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		return opt, nil
+	} else if !errors.Is(err, utils.ErrNotFound) {
+		return false, err
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -309,22 +237,14 @@ func GetInterfaceOpts(ctx *context.Context, tnt string, dP utils.DataProvider, f
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
 func GetIntPointerOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicIntPointerOpt,
 	optNames ...string) (cfgOpt *int, err error) {
-	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
-	if err != nil {
-		return nil, err
-	}
-	opts, err := ConvertOptsToMapStringAny(values)
-	if err != nil {
-		return
-	}
-	for _, optName := range optNames {
-		if opt, has := opts[optName]; has {
-			var value int64
-			if value, err = utils.IfaceAsTInt64(opt); err != nil {
-				return nil, err
-			}
-			return utils.IntPointer(int(value)), nil
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		var value int
+		if value, err = utils.IfaceAsInt(opt); err != nil {
+			return nil, err
 		}
+		return utils.IntPointer(value), nil
+	} else if !errors.Is(err, utils.ErrNotFound) {
+		return nil, err
 	}
 	for _, opt := range dynOpts { // iterate through the options
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
@@ -422,4 +342,22 @@ func ConvertOptsToMapStringAny(in any) (map[string]any, error) {
 		return nil, errors.New("cannot convert to map[string]any")
 	}
 	return out, nil
+}
+
+// getOptIfaceFromDP is a helper that returns the first option (as interface{}) found in the data provider
+func optIfaceFromDP(dP utils.DataProvider, optNames []string) (any, error) {
+	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
+	if err != nil {
+		return nil, err
+	}
+	opts, err := ConvertOptsToMapStringAny(values)
+	if err != nil {
+		return nil, err
+	}
+	for _, optName := range optNames {
+		if opt, ok := opts[optName]; ok {
+			return opt, nil
+		}
+	}
+	return nil, utils.ErrNotFound
 }
