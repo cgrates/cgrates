@@ -2668,3 +2668,42 @@ func TestGetBoolOptsCantCastErr(t *testing.T) {
 	}
 
 }
+
+func TestOptIfaceFromDP(t *testing.T) {
+	tests := []struct {
+		name   string
+		values []string
+		exp    any
+		err    error
+	}{
+		{name: "TestOptBoolValue", values: []string{utils.MetaProfileIgnoreFilters}, exp: true, err: nil},
+		{name: "TestOptBoolValue", values: []string{utils.OptsRoutesIgnoreErrors}, exp: true, err: nil},
+		{name: "TestOptFloat64Value", values: []string{utils.OptsAttributesProcessRuns}, exp: 5, err: nil},
+		{name: "TestOptIntValue", values: []string{utils.OptsResourcesUnits}, exp: float64(23.1), err: nil},
+		{name: "TestOptIntValue", values: []string{utils.OptsAttributesProfileRuns}, exp: 3, err: nil},
+		{name: "TestOptStringValue", values: []string{utils.OptsRatesStartTime}, exp: "2021-01-01T00:00:00Z", err: nil},
+		{name: "TestOptFloat64Value", values: []string{utils.OptsResourcesUsageID}, exp: "RES1", err: nil},
+		{name: "TestFieldNotExist", values: []string{"field1"}, err: utils.ErrNotFound},
+	}
+	cgrEv := utils.MapStorage{
+		utils.MetaReq: map[string]any{},
+		utils.MetaOpts: map[string]any{
+			utils.MetaProfileIgnoreFilters:  true,
+			utils.OptsRoutesIgnoreErrors:    true,
+			utils.OptsAttributesProcessRuns: 5,
+			utils.OptsAttributesProfileRuns: 3,
+			utils.OptsRatesStartTime:        "2021-01-01T00:00:00Z",
+			utils.OptsResourcesUsageID:      "RES1",
+			utils.OptsResourcesUnits:        23.1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if rcv, err := optIfaceFromDP(cgrEv, tt.values); err != tt.err {
+				t.Errorf("expected: <%v>,\nreceived: <%v>", tt.err, err)
+			} else if rcv != tt.exp {
+				t.Errorf("expected: <%v>,\nreceived: <%v>", tt.exp, rcv)
+			}
+		})
+	}
+}
