@@ -643,3 +643,110 @@ func TestUpdateSRuns(t *testing.T) {
 		}
 	}
 }
+
+func TestCloneSession(t *testing.T) {
+	originEvent := &utils.CGREvent{Event: map[string]any{"origin": "event"}}
+
+	session := &Session{
+		ID:             "session1",
+		OriginCGREvent: originEvent,
+		ClientConnID:   "conn1",
+		DebitInterval:  utils.DurationPointer(time.Duration(5)),
+		SRuns: []*SRun{
+			{ID: "run1", CGREvent: &utils.CGREvent{Event: map[string]any{"tor": "voice"}}},
+		},
+	}
+
+	clonedSession := session.Clone()
+
+	if clonedSession.ClientConnID != "conn1" {
+		t.Errorf("Expected ClientConnID to be 'conn1', got %s", clonedSession.ClientConnID)
+	}
+
+	if clonedSession.DebitInterval == nil || *clonedSession.DebitInterval != 5 {
+		t.Errorf("Expected DebitInterval to be 5, got %v", clonedSession.DebitInterval)
+	}
+
+	if clonedSession.OriginCGREvent.Event["origin"] != "event" {
+		t.Errorf("Expected OriginCGREvent to have origin=event, got %s", clonedSession.OriginCGREvent.Event["origin"])
+	}
+
+	if len(clonedSession.SRuns) != 1 || clonedSession.SRuns[0].ID != "run1" {
+		t.Errorf("Expected cloned session to have 1 SRuns with ID 'run1', got %v", clonedSession.SRuns)
+	}
+}
+
+func TestNewSRun(t *testing.T) {
+	cgrEv := &utils.CGREvent{
+		APIOpts: map[string]interface{}{
+			utils.MetaRunID: "RunId1",
+		},
+	}
+
+	sRun := NewSRun(cgrEv)
+
+	if sRun.ID != "RunId1" {
+		t.Errorf("Expected ID to be 'RunId1', got %s", sRun.ID)
+	}
+
+	if sRun.CGREvent != cgrEv {
+		t.Errorf("Expected CGREvent to be the same as input, but got different instance")
+	}
+}
+
+func TestAsCGREvents(t *testing.T) {
+	session := &Session{
+		SRuns: []*SRun{
+			{CGREvent: &utils.CGREvent{Event: map[string]any{"SRUN": "ID1001"}}},
+			{CGREvent: &utils.CGREvent{Event: map[string]any{"SRUN": "ID1002"}}},
+		},
+	}
+
+	cgrEvs := session.asCGREvents()
+
+	if len(cgrEvs) != 2 {
+		t.Errorf("Expected 2 CGREvents, got %d", len(cgrEvs))
+	}
+
+	if cgrEvs[0].Event["SRUN"] != "ID1001" {
+		t.Errorf("Expected first CGREvent to have SRUN=ID1001, got %s", cgrEvs[0].Event["SRUN"])
+	}
+
+	if cgrEvs[1].Event["SRUN"] != "ID1002" {
+		t.Errorf("Expected second CGREvent to have SRUN=ID1002, got %s", cgrEvs[1].Event["SRUN"])
+	}
+}
+
+func TestNewSession(t *testing.T) {
+	origCGREv := &utils.CGREvent{
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "session1",
+		},
+	}
+	runEvents := []*utils.CGREvent{
+		{APIOpts: map[string]any{"runID": "run1"}},
+		{APIOpts: map[string]any{"runID": "run2"}},
+	}
+
+	session := NewSession(origCGREv, "conn1", runEvents)
+
+	if session.ID != "session1" {
+		t.Errorf("Expected session ID to be 'session1', got %s", session.ID)
+	}
+
+	if session.ClientConnID != "conn1" {
+		t.Errorf("Expected ClientConnID to be 'conn1', got %s", session.ClientConnID)
+	}
+
+	if len(session.SRuns) != 2 {
+		t.Errorf("Expected 2 SRuns, got %d", len(session.SRuns))
+	}
+
+	if session.SRuns[0].CGREvent.APIOpts["runID"] != "run1" {
+		t.Errorf("Expected first SRuns to have runID 'run1', got %s", session.SRuns[0].CGREvent.APIOpts["runID"])
+	}
+
+	if session.SRuns[1].CGREvent.APIOpts["runID"] != "run2" {
+		t.Errorf("Expected second SRuns to have runID 'run2', got %s", session.SRuns[1].CGREvent.APIOpts["runID"])
+	}
+}
