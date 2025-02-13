@@ -367,6 +367,9 @@ func TestEEsReplayFailedPosts(t *testing.T) {
 
 "ees": {
 	"enabled": true,
+	"cache": {
+		"*nats_json_map": {"limit": 0, "ttl": "", "static_ttl": false}
+	},
 	"exporters": [
 		{
 			"id": "nats_exporter",										

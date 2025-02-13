@@ -122,6 +122,62 @@ func TestEESClone(t *testing.T) {
 				Precache:  false,
 				Replicate: false,
 			},
+			utils.MetaAMQPV1jsonMap: {
+				Limit: -1,
+
+				StaticTTL: false,
+				Precache:  false,
+				Replicate: false,
+			},
+			utils.MetaAMQPjsonMap: {
+				Limit: -1,
+
+				StaticTTL: false,
+				Precache:  false,
+				Replicate: false,
+			},
+			utils.MetaElastic: {
+				Limit: -1,
+
+				StaticTTL: false,
+				Precache:  false,
+				Replicate: false,
+			},
+			utils.MetaS3jsonMap: {
+				Limit: -1,
+
+				StaticTTL: false,
+				Precache:  false,
+				Replicate: false,
+			},
+			utils.MetaSQL: {
+				Limit: -1,
+
+				StaticTTL: false,
+				Precache:  false,
+				Replicate: false,
+			},
+			utils.MetaSQSjsonMap: {
+				Limit: -1,
+
+				StaticTTL: false,
+				Precache:  false,
+				Replicate: false,
+			},
+			utils.MetaNatsjsonMap: {
+				Limit: -1,
+
+				StaticTTL: false,
+				Precache:  false,
+				Replicate: false,
+			},
+			utils.MetaKafkajsonMap: {
+				Limit: -1,
+
+				StaticTTL: false,
+				Precache:  false,
+				Replicate: false,
+			},
 		},
 		Exporters: []*EventExporterCfg{
 			{
@@ -497,7 +553,38 @@ func TestEventExporterSameID(t *testing.T) {
 		Cache: map[string]*CacheParamCfg{
 			utils.MetaFileCSV: {
 				Limit:     -1,
-				TTL:       5 * time.Second,
+				StaticTTL: false,
+			},
+			utils.MetaSQL: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaElastic: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaAMQPV1jsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaAMQPjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaS3jsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaSQSjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaNatsjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaKafkajsonMap: {
+				Limit:     -1,
 				StaticTTL: false,
 			},
 		},
@@ -638,6 +725,38 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 				TTL:       time.Second,
 				StaticTTL: false,
 			},
+			utils.MetaSQL: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaElastic: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaAMQPV1jsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaAMQPjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaS3jsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaSQSjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaNatsjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaKafkajsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
 		},
 		Exporters: []*EventExporterCfg{
 			{
@@ -765,6 +884,38 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 			utils.MetaFileCSV: {
 				Limit:     -2,
 				TTL:       time.Second,
+				StaticTTL: false,
+			},
+			utils.MetaSQL: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaElastic: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaAMQPV1jsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaAMQPjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaS3jsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaSQSjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaNatsjsonMap: {
+				Limit:     -1,
+				StaticTTL: false,
+			},
+			utils.MetaKafkajsonMap: {
+				Limit:     -1,
 				StaticTTL: false,
 			},
 		},
@@ -962,6 +1113,62 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 				utils.ReplicateCfg: false,
 				utils.RemoteCfg:    false,
 				utils.TTLCfg:       "1s",
+				utils.StaticTTLCfg: false,
+			},
+			utils.MetaAMQPjsonMap: map[string]any{
+				utils.LimitCfg:     -1,
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
+				utils.StaticTTLCfg: false,
+			},
+			utils.MetaAMQPV1jsonMap: map[string]any{
+				utils.LimitCfg:     -1,
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
+				utils.StaticTTLCfg: false,
+			},
+			utils.MetaNatsjsonMap: map[string]any{
+				utils.LimitCfg:     -1,
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
+				utils.StaticTTLCfg: false,
+			},
+			utils.MetaSQSjsonMap: map[string]any{
+				utils.LimitCfg:     -1,
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
+				utils.StaticTTLCfg: false,
+			},
+			utils.MetaS3jsonMap: map[string]any{
+				utils.LimitCfg:     -1,
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
+				utils.StaticTTLCfg: false,
+			},
+			utils.MetaElastic: map[string]any{
+				utils.LimitCfg:     -1,
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
+				utils.StaticTTLCfg: false,
+			},
+			utils.MetaSQL: map[string]any{
+				utils.LimitCfg:     -1,
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
+				utils.StaticTTLCfg: false,
+			},
+			utils.MetaKafkajsonMap: map[string]any{
+				utils.LimitCfg:     -1,
+				utils.PrecacheCfg:  false,
+				utils.ReplicateCfg: false,
+				utils.RemoteCfg:    false,
 				utils.StaticTTLCfg: false,
 			},
 		},
