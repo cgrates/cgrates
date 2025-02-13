@@ -399,8 +399,18 @@ func testConfigSSetConfigEEs(t *testing.T) {
 	exp := map[string]any{
 		"enabled":          true,
 		"attributes_conns": []any{},
-		"cache":            map[string]any{"*file_csv": map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false, "ttl": "5s"}},
-		"exporters":        []any{eporter},
+		"cache": map[string]any{
+			"*file_csv":        map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*amqp_json_map":   map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*amqpv1_json_map": map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*els":             map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*kafka_json_map":  map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*nats_json_map":   map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*s3_json_map":     map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*sql":             map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*sqs_json_map":    map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+		},
+		"exporters": []any{eporter},
 	}
 	exp = map[string]any{
 		config.EEsJson: exp,

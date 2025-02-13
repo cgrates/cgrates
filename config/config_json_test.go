@@ -2148,7 +2148,47 @@ func TestDfEventExporterCfg(t *testing.T) {
 		Cache: &map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer("5s"),
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+			},
+			utils.MetaSQL: {
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+			},
+			utils.MetaElastic: {
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+			},
+			utils.MetaAMQPV1jsonMap: {
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+			},
+			utils.MetaAMQPjsonMap: {
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+			},
+			utils.MetaS3jsonMap: {
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+			},
+			utils.MetaSQSjsonMap: {
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+			},
+			utils.MetaNatsjsonMap: {
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+			},
+			utils.MetaKafkajsonMap: {
+				Limit:      utils.IntPointer(-1),
+				Ttl:        utils.StringPointer(""),
 				Static_ttl: utils.BoolPointer(false),
 			},
 		},
