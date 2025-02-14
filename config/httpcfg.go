@@ -166,7 +166,7 @@ func (httpcfg *HTTPCfg) loadFromJSONCfg(jsnHTTPCfg *HTTPJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (httpcfg HTTPCfg) AsMapInterface(string) any {
+func (httpcfg HTTPCfg) AsMapInterface() any {
 	clientOpts := map[string]any{
 		utils.HTTPClientSkipTLSVerificationCfg:   false,
 		utils.HTTPClientTLSHandshakeTimeoutCfg:   httpcfg.ClientOpts.TLSHandshakeTimeout.String(),

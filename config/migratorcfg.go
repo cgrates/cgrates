@@ -89,7 +89,7 @@ func (mg *MigratorCgrCfg) loadFromJSONCfg(jsnCfg *MigratorCfgJson) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (mg MigratorCgrCfg) AsMapInterface(string) any {
+func (mg MigratorCgrCfg) AsMapInterface() any {
 	outDataDBOpts := map[string]any{
 		utils.RedisMaxConnsCfg:           mg.OutDataDBOpts.RedisMaxConns,
 		utils.RedisConnectAttemptsCfg:    mg.OutDataDBOpts.RedisConnectAttempts,

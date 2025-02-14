@@ -296,7 +296,7 @@ func main() {
 		log.Fatal(err)
 	}
 	if *printConfig {
-		cfgJSON := utils.ToIJSON(mgrCfg.AsMapInterface(mgrCfg.GeneralCfg().RSRSep))
+		cfgJSON := utils.ToIJSON(mgrCfg.AsMapInterface())
 		log.Printf("Configuration loaded from %q:\n%s", *cfgPath, cfgJSON)
 	}
 

@@ -149,7 +149,7 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (cCfg CacheCfg) AsMapInterface(string) any {
+func (cCfg CacheCfg) AsMapInterface() any {
 	partitions := make(map[string]any, len(cCfg.Partitions))
 	for key, value := range cCfg.Partitions {
 		partitions[key] = value.AsMapInterface()

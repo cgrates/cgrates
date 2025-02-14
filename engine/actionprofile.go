@@ -81,11 +81,11 @@ type APDiktat struct {
 }
 
 // RSRValues returns the Value as RSRParsers
-func (dk *APDiktat) RSRValues(sep string) (_ config.RSRParsers, err error) {
+func (dk *APDiktat) RSRValues() (config.RSRParsers, error) {
 	if dk.valRSR == nil {
-		dk.valRSR, err = config.NewRSRParsers(dk.Value, sep)
+		return config.NewRSRParsers(dk.Value, utils.RSRSep)
 	}
-	return dk.valRSR, err
+	return dk.valRSR, nil
 }
 
 // ActionProfileWithAPIOpts is used in API calls
@@ -94,7 +94,7 @@ type ActionProfileWithAPIOpts struct {
 	APIOpts map[string]any
 }
 
-func (aP *ActionProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
+func (aP *ActionProfile) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	case 0:
 		return utils.ErrWrongPath

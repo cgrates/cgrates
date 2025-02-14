@@ -142,7 +142,7 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (st StatSCfg) AsMapInterface(string) any {
+func (st StatSCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.MetaProfileIDs:           st.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFilters: st.Opts.ProfileIgnoreFilters,

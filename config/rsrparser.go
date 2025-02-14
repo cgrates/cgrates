@@ -32,7 +32,7 @@ var (
 )
 
 // NewRSRParsers creates a new RSRParsers by spliting the rule using the separator
-func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, err error) {
+func NewRSRParsers(parsersRules, sep string) (prsrs RSRParsers, err error) {
 	if parsersRules == utils.EmptyString {
 		return
 	}
@@ -82,7 +82,7 @@ func NewRSRParsers(parsersRules string, rsrSeparator string) (prsrs RSRParsers, 
 		}
 		return NewRSRParsersFromSlice(splitedRule)
 	}
-	return NewRSRParsersFromSlice(strings.Split(parsersRules, rsrSeparator))
+	return NewRSRParsersFromSlice(strings.Split(parsersRules, sep))
 }
 
 // NewRSRParsersFromSlice creates a new RSRParsers from a slice
@@ -111,9 +111,9 @@ func NewRSRParsersMustCompile(parsersRules string, rsrSeparator string) (prsrs R
 type RSRParsers []*RSRParser
 
 // GetRule returns the original string from which the rules were composed
-func (prsrs RSRParsers) GetRule(sep string) (out string) {
+func (prsrs RSRParsers) GetRule() (out string) {
 	for _, prsr := range prsrs {
-		out += sep + prsr.Rules
+		out += utils.RSRSep + prsr.Rules
 	}
 	if len(out) != 0 {
 		out = out[1:]
@@ -263,7 +263,7 @@ func (prsr *RSRParser) Compile() (err error) {
 		if dynIdxEnd := strings.IndexByte(parserRules[dynIdxStart:], utils.RSRDynEndChar); dynIdxEnd != -1 {
 			var dynrules RSRParsers
 			if dynrules, err = NewRSRParsers(parserRules[dynIdxStart+1:dynIdxStart+dynIdxEnd],
-				CgrConfig().GeneralCfg().RSRSep); err != nil {
+				utils.RSRSep); err != nil {
 				return
 			}
 			prsr.dynRules = dynrules

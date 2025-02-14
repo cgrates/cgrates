@@ -71,7 +71,7 @@ func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (cS CoreSCfg) AsMapInterface(string) any {
+func (cS CoreSCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.CapsCfg:              cS.Caps,
 		utils.CapsStrategyCfg:      cS.CapsStrategy,

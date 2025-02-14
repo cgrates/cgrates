@@ -912,7 +912,7 @@ func TestLoaderDataTypeLoadFromJSONNil(t *testing.T) {
 		},
 	}
 
-	if err := lData.loadFromJSONCfg(nil, nil, ""); err != nil {
+	if err := lData.loadFromJSONCfg(nil, nil); err != nil {
 		t.Error(err)
 	}
 }
@@ -930,7 +930,7 @@ func TestLoaderSCfgloadFromJsonCfgCase3(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -949,7 +949,7 @@ func TestLoaderSCfgloadFromJsonCfgCase4(t *testing.T) {
 	}
 	expected := "no template with id: <>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1000,7 +1000,7 @@ func TestLoaderSCfgloadFromJsonCfgCase5(t *testing.T) {
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, msgTemplates, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, msgTemplates); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.loaderCfg[0].Data[1].Fields[0], expectedFields[0].Data[0].Fields[0]) {
 		t.Errorf("Expected %+v,\n received %+v", utils.ToJSON(expectedFields[0].Data[0].Fields[0]), utils.ToJSON(jsonCfg.loaderCfg[0].Data[1].Fields[0]))
@@ -1012,14 +1012,14 @@ func TestLoaderSCfgloadFromJsonCfgCase6(t *testing.T) {
 		Data: &[]*LoaderJsonDataType{nil},
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.loaderCfg[0].loadFromJSONCfg(cfg, jsonCfg.templates); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestLoaderSCfgloadFromJsonCfgCase7(t *testing.T) {
 	cfg := &LoaderSCfg{}
-	if err := cfg.loadFromJSONCfg(nil, nil, ""); err != nil {
+	if err := cfg.loadFromJSONCfg(nil, nil); err != nil {
 		t.Error(err)
 	}
 }
@@ -2042,7 +2042,7 @@ func TestLoaderCfgAsMapInterfaceCase1(t *testing.T) {
 	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cfgCgr.loaderCfg.AsMapInterface(cfgCgr.generalCfg.RSRSep)
+		rcv := cfgCgr.loaderCfg.AsMapInterface()
 		if len(cfgCgr.loaderCfg) != 1 {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", 1, len(cfgCgr.loaderCfg))
 		} else if !reflect.DeepEqual(rcv, eMap) {
@@ -2113,7 +2113,7 @@ func TestLoaderCfgAsMapInterfaceCase2(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := jsonCfg.loaderCfg.AsMapInterface(jsonCfg.generalCfg.RSRSep).([]map[string]any); !reflect.DeepEqual(rcv[0][utils.Tenant], eMap[0][utils.Tenant]) {
+	} else if rcv := jsonCfg.loaderCfg.AsMapInterface().([]map[string]any); !reflect.DeepEqual(rcv[0][utils.Tenant], eMap[0][utils.Tenant]) {
 		t.Errorf("Expected %+v, received %+v", rcv[0][utils.Tenant], eMap[0][utils.Tenant])
 	}
 }
@@ -2297,14 +2297,14 @@ func TestDiffLoaderJsonCfg(t *testing.T) {
 		Cache: map[string]*CacheParamJsonCfg{},
 	}
 
-	rcv := diffLoaderJsonCfg(v1, v2, ";")
+	rcv := diffLoaderJsonCfg(v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
 	v1 = v2
 	expected = &LoaderJsonCfg{Opts: &LoaderJsonOptsCfg{}, Cache: make(map[string]*CacheParamJsonCfg)}
-	rcv = diffLoaderJsonCfg(v1, v2, ";")
+	rcv = diffLoaderJsonCfg(v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -2458,14 +2458,14 @@ func TestDiffLoadersJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffLoadersJsonCfg(d, v1, v2, ";")
+	rcv := diffLoadersJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
 	v1 = v2
 	expected = nil
-	rcv = diffLoadersJsonCfg(d, v1, v2, ";")
+	rcv = diffLoadersJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -2488,7 +2488,7 @@ func TestLockFolderRelativePath(t *testing.T) {
 		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
 	expPath := path.Join(ldr.LockFilePath)
-	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}); err != nil {
 		t.Error(err)
 	} else if ldr.LockFilePath != expPath {
 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
@@ -2511,7 +2511,7 @@ func TestLockFolderNonRelativePath(t *testing.T) {
 		Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out/"),
 	}
 	expPath := path.Join("/tmp/", utils.ResourcesCsv)
-	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}); err != nil {
 		t.Error(err)
 	} else if ldr.LockFilePath != expPath {
 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
@@ -2534,7 +2534,7 @@ func TestLockFolderIsDir(t *testing.T) {
 	}
 	expPath := path.Join("/tmp")
 
-	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}, utils.InfieldSep); err != nil {
+	if err := ldr.loadFromJSONCfg(jsonCfg, map[string][]*FCTemplate{}); err != nil {
 		t.Error(err)
 	} else if ldr.LockFilePath != expPath {
 		t.Errorf("Expected %v \n but received \n %v", expPath, ldr.LockFilePath)
@@ -2616,7 +2616,7 @@ func TestLoaderDataTypeLoadFromJSONId(t *testing.T) {
 		Id: utils.StringPointer("IdTest"),
 	}
 
-	if err := lData.loadFromJSONCfg(jsnCfg, nil, ""); err != nil {
+	if err := lData.loadFromJSONCfg(jsnCfg, nil); err != nil {
 		t.Errorf("Expected error <%v>, Received error <%v>", nil, err)
 	}
 }
@@ -2630,7 +2630,7 @@ func TestLoaderSCfgloadFromJSONCfgDataId(t *testing.T) {
 			},
 		},
 	}
-	if err := l.loadFromJSONCfg(jsnCfg, nil, ""); err != nil {
+	if err := l.loadFromJSONCfg(jsnCfg, nil); err != nil {
 
 		t.Errorf("Expected error <%v>, Received error <%v>", nil, err)
 	}
@@ -2646,7 +2646,7 @@ func TestLoaderSCfgloadFromJSONCacheErr(t *testing.T) {
 	}
 
 	expErr := `time: invalid duration "invalid"`
-	if err := l.loadFromJSONCfg(jsnCfg, nil, ""); err.Error() != expErr {
+	if err := l.loadFromJSONCfg(jsnCfg, nil); err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
 	}
 }

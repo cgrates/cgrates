@@ -150,6 +150,7 @@ const (
 	CSVSep                   = ','
 	FallbackSep              = ';'
 	InfieldSep               = ";"
+	RSRSep                   = ";"
 	MetaPipe                 = "*|"
 	FieldsSep                = ","
 	InInFieldSep             = ":"
@@ -1867,7 +1868,6 @@ const (
 	LockingTimeoutCfg       = "locking_timeout"
 	DigestSeparatorCfg      = "digest_separator"
 	DigestEqualCfg          = "digest_equal"
-	RSRSepCfg               = "rsr_separator"
 	MaxParallelConnsCfg     = "max_parallel_conns"
 	EEsConnsCfg             = "ees_conns"
 	DecimalMaxScaleCfg      = "decimal_max_scale"

@@ -55,7 +55,7 @@ func (ldrs *LoaderSCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRCon
 			*ldrs = append(*ldrs, ldr) // use append so the loaderS profile to be loaded from multiple files
 		}
 
-		if err = ldr.loadFromJSONCfg(profile, cfg.templates, cfg.generalCfg.RSRSep); err != nil {
+		if err = ldr.loadFromJSONCfg(profile, cfg.templates); err != nil {
 			return
 		}
 	}
@@ -63,10 +63,10 @@ func (ldrs *LoaderSCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRCon
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (ldrs LoaderSCfgs) AsMapInterface(separator string) any {
+func (ldrs LoaderSCfgs) AsMapInterface() any {
 	mp := make([]map[string]any, len(ldrs))
 	for i, item := range ldrs {
-		mp[i] = item.AsMapInterface(separator)
+		mp[i] = item.AsMapInterface()
 	}
 	return mp
 }
@@ -144,7 +144,7 @@ func (l *LoaderSOptsCfg) loadFromJSONCfg(jsnCfg *LoaderJsonOptsCfg) {
 		l.StopOnError = *jsnCfg.StopOnError
 	}
 }
-func (lData *LoaderDataType) loadFromJSONCfg(jsnCfg *LoaderJsonDataType, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
+func (lData *LoaderDataType) loadFromJSONCfg(jsnCfg *LoaderJsonDataType, msgTemplates map[string][]*FCTemplate) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -161,7 +161,7 @@ func (lData *LoaderDataType) loadFromJSONCfg(jsnCfg *LoaderJsonDataType, msgTemp
 		lData.Flags = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags)
 	}
 	if jsnCfg.Fields != nil {
-		if lData.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields, separator); err != nil {
+		if lData.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields); err != nil {
 			return
 		}
 		if tpls, err := InflateTemplates(lData.Fields, msgTemplates); err != nil {
@@ -173,7 +173,7 @@ func (lData *LoaderDataType) loadFromJSONCfg(jsnCfg *LoaderJsonDataType, msgTemp
 	return nil
 }
 
-func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
+func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -230,7 +230,7 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 				ldrDataType = new(LoaderDataType)
 				l.Data = append(l.Data, ldrDataType) // use append so the loaderS profile to be loaded from multiple files
 			}
-			if err := ldrDataType.loadFromJSONCfg(jsnLoCfg, msgTemplates, separator); err != nil {
+			if err := ldrDataType.loadFromJSONCfg(jsnLoCfg, msgTemplates); err != nil {
 				return err
 			}
 		}
@@ -303,7 +303,7 @@ func (l LoaderSCfg) Clone() (cln *LoaderSCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (lData LoaderDataType) AsMapInterface(separator string) (initialMP map[string]any) {
+func (lData LoaderDataType) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
 		utils.TypeCf:      lData.Type,
 		utils.FilenameCfg: lData.Filename,
@@ -312,14 +312,14 @@ func (lData LoaderDataType) AsMapInterface(separator string) (initialMP map[stri
 
 	fields := make([]map[string]any, len(lData.Fields))
 	for i, item := range lData.Fields {
-		fields[i] = item.AsMapInterface(separator)
+		fields[i] = item.AsMapInterface()
 	}
 	initialMP[utils.FieldsCfg] = fields
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (l LoaderSCfg) AsMapInterface(separator string) (mp map[string]any) {
+func (l LoaderSCfg) AsMapInterface() (mp map[string]any) {
 	mp = map[string]any{
 		utils.IDCfg:           l.ID,
 		utils.TenantCfg:       l.Tenant,
@@ -340,7 +340,7 @@ func (l LoaderSCfg) AsMapInterface(separator string) (mp map[string]any) {
 	if l.Data != nil {
 		data := make([]map[string]any, len(l.Data))
 		for i, item := range l.Data {
-			data[i] = item.AsMapInterface(separator)
+			data[i] = item.AsMapInterface()
 		}
 		mp[utils.DataCfg] = data
 	}
@@ -424,7 +424,7 @@ func diffLoaderJsonOptsCfg(v1, v2 *LoaderSOptsCfg) (d *LoaderJsonOptsCfg) {
 	}
 	return
 }
-func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) {
+func diffLoaderJsonCfg(v1, v2 *LoaderSCfg) (d *LoaderJsonCfg) {
 	d = new(LoaderJsonCfg)
 	if v1.ID != v2.ID {
 		d.ID = utils.StringPointer(v2.ID)
@@ -457,7 +457,7 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg, separator string) (d *LoaderJsonCfg) 
 		data := make([]*LoaderJsonDataType, len(v2.Data))
 		for i, val2 := range v2.Data {
 			var req []*FcTemplateJsonCfg
-			req = diffFcTemplateJsonCfg(req, nil, val2.Fields, separator)
+			req = diffFcTemplateJsonCfg(req, nil, val2.Fields)
 			data[i] = &LoaderJsonDataType{
 				Id:        utils.StringPointer(val2.ID),
 				Type:      utils.StringPointer(val2.Type),
@@ -501,14 +501,14 @@ func equalsLoadersJsonCfg(v1, v2 LoaderSCfgs) bool {
 	}
 	return true
 }
-func diffLoadersJsonCfg(d []*LoaderJsonCfg, v1, v2 LoaderSCfgs, separator string) []*LoaderJsonCfg {
+func diffLoadersJsonCfg(d []*LoaderJsonCfg, v1, v2 LoaderSCfgs) []*LoaderJsonCfg {
 	if equalsLoadersJsonCfg(v1, v2) {
 		return d
 	}
 	d = make([]*LoaderJsonCfg, len(v2))
 	dft := getDftLoaderCfg()
 	for i, val2 := range v2 {
-		d[i] = diffLoaderJsonCfg(dft, val2, separator)
+		d[i] = diffLoaderJsonCfg(dft, val2)
 	}
 	return d
 }

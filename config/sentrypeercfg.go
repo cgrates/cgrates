@@ -68,7 +68,7 @@ func (sentrypeer *SentryPeerCfg) loadFromJSONCfg(jsnCfg *SentryPeerJsonCfg) (err
 	}
 	return
 }
-func (sentrypeer SentryPeerCfg) AsMapInterface(string) any {
+func (sentrypeer SentryPeerCfg) AsMapInterface() any {
 	return map[string]any{
 		utils.ClientIDCfg:     sentrypeer.ClientID,
 		utils.ClientSecretCfg: sentrypeer.ClientSecret,

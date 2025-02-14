@@ -290,7 +290,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *v2AttributePr
 	for _, mp := range v1AttrPrf.Attributes {
 		for _, attr := range mp {
 
-			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, config.CgrConfig().GeneralCfg().RSRSep)
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -358,7 +358,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV1To4() (attrPrf *v4Attrib
 				filterIDs = append(filterIDs, utils.MetaString+utils.ConcatenatedKeySep+attr.FieldName+utils.ConcatenatedKeySep+attr.Initial)
 			}
 			// create RSRParser
-			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, config.CgrConfig().GeneralCfg().RSRSep)
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -404,12 +404,12 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *v6AttributePr
 		Weight:    v4AttrPrf.Weight,
 	}
 	for _, attr := range v4AttrPrf.Attributes { // ToDo:redo this
-		val := attr.Value.GetRule(utils.InfieldSep)
+		val := attr.Value.GetRule()
 		rsrVal := attr.Value
 		if strings.HasPrefix(val, utils.DynamicDataPrefix) {
 			val = val[1:] // remove the DynamicDataPrefix
 			val = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
-			rsrVal, err = config.NewRSRParsers(val, config.CgrConfig().GeneralCfg().RSRSep)
+			rsrVal, err = config.NewRSRParsers(val, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}

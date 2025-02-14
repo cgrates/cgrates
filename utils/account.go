@@ -519,7 +519,7 @@ type ArgsActRemoveBalances struct {
 	APIOpts    map[string]any
 }
 
-func (ap *Account) Set(path []string, val any, newBranch bool, _ string) (err error) {
+func (ap *Account) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	case 0:
 		return ErrWrongPath

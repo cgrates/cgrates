@@ -124,7 +124,7 @@ func (ar *record) FieldAsInterface(fldPath []string) (val any, err error) {
 }
 
 // SetFields will populate fields of record out of templates
-func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, filterS *engine.FilterS, rndDec int, dftTmz, rsrSep string) (err error) {
+func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, filterS *engine.FilterS, rndDec int, dftTmz string) (err error) {
 	ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	for _, fld := range tmpls {
 		if pass, err := filterS.Pass(context.TODO(), ar.tenant,
@@ -147,7 +147,7 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 		default:
 			var out any
 			if out, err = engine.ParseAttribute(ar, fld.Type, fld.Path, fld.Value, rndDec,
-				utils.FirstNonEmpty(fld.Timezone, dftTmz), fld.Layout, rsrSep); err != nil {
+				utils.FirstNonEmpty(fld.Timezone, dftTmz), fld.Layout); err != nil {
 				if err == utils.ErrNotFound {
 					if !fld.Mandatory {
 						err = nil
@@ -170,9 +170,9 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 			nMItm := &utils.DataLeaf{Data: out, NewBranch: fld.NewBranch, AttributeID: fld.AttributeID}
 			switch fld.Type {
 			case utils.MetaComposed:
-				err = ar.Compose(fullPath, nMItm, rsrSep)
+				err = ar.Compose(fullPath, nMItm)
 			default:
-				err = ar.Set(fullPath, nMItm, rsrSep)
+				err = ar.Set(fullPath, nMItm)
 			}
 			if err != nil {
 				return
@@ -215,7 +215,7 @@ func (ar *record) Remove(fullPath *utils.FullPath) error {
 
 // Set sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
-func (ar *record) Compose(fullPath *utils.FullPath, val *utils.DataLeaf, sep string) (err error) {
+func (ar *record) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch fullPath.PathSlice[0] {
 	case utils.MetaTmp:
 		return ar.tmp.Compose(fullPath.PathSlice[1:], val)
@@ -234,15 +234,15 @@ func (ar *record) Compose(fullPath *utils.FullPath, val *utils.DataLeaf, sep str
 		if valStr, err = ar.FieldAsString(fullPath.PathSlice); err != nil && err != utils.ErrNotFound {
 			return
 		}
-		return ar.data.Set(fullPath.PathSlice, valStr+utils.IfaceAsString(val.Data), val.NewBranch, utils.InfieldSep)
+		return ar.data.Set(fullPath.PathSlice, valStr+utils.IfaceAsString(val.Data), val.NewBranch)
 	}
 }
 
 // Set implements utils.NMInterface
-func (ar *record) Set(fullPath *utils.FullPath, nm *utils.DataLeaf, sep string) (err error) {
+func (ar *record) Set(fullPath *utils.FullPath, nm *utils.DataLeaf) (err error) {
 	switch fullPath.PathSlice[0] {
 	default:
-		return ar.data.Set(fullPath.PathSlice, nm.Data, nm.NewBranch, sep)
+		return ar.data.Set(fullPath.PathSlice, nm.Data, nm.NewBranch)
 	case utils.MetaTmp:
 		_, err = ar.tmp.Set(fullPath.PathSlice[1:], nm.Data)
 		return
@@ -254,7 +254,7 @@ func (ar *record) Set(fullPath *utils.FullPath, nm *utils.DataLeaf, sep string) 
 
 type profile interface {
 	utils.DataProvider
-	Set([]string, any, bool, string) error
+	Set([]string, any, bool) error
 	Merge(any)
 	TenantID() string
 }

@@ -228,7 +228,7 @@ func (rts *RoutesOpts) Clone() (cln *RoutesOpts) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (rts RouteSCfg) AsMapInterface(string) any {
+func (rts RouteSCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.OptsContext:         rts.Opts.Context,
 		utils.MetaProfileCountCfg: rts.Opts.ProfileCount,

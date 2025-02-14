@@ -1404,58 +1404,58 @@ func TestStatQueueProfileSet(t *testing.T) {
 			FilterIDs: []string{"fltr1"},
 		}},
 	}
-	if err := sq.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := sq.Set([]string{}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{""}, "", false, utils.EmptyString); err != nil {
+	if err := sq.Set([]string{""}, "", false); err != nil {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{"NotAField"}, ";", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := sq.Set([]string{"NotAField"}, ";", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{"NotAField", "1"}, ";", false, utils.EmptyString); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-
-	if err := sq.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.QueueLength}, 10, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.TTL}, 10, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.MinItems}, 10, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.Stored}, true, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := sq.Set([]string{utils.ThresholdIDs}, "TH1", false, utils.EmptyString); err != nil {
+	if err := sq.Set([]string{"NotAField", "1"}, ";", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := sq.Set([]string{utils.Metrics, utils.MetricID}, "*tcd;*acd", false, utils.EmptyString); err != nil {
+	if err := sq.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := sq.Set([]string{utils.Metrics, utils.FilterIDs}, "fltr1", false, utils.EmptyString); err != nil {
+	if err := sq.Set([]string{utils.ID}, "ID", false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.Weights}, ";10", false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.QueueLength}, 10, false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.TTL}, 10, false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.MinItems}, 10, false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.Stored}, true, false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.Blockers}, ";true", false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.ThresholdIDs}, "TH1", false); err != nil {
 		t.Error(err)
 	}
 
-	if err := sq.Set([]string{utils.Metrics, "wrong"}, "fltr1", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := sq.Set([]string{utils.Metrics, utils.MetricID}, "*tcd;*acd", false); err != nil {
+		t.Error(err)
+	}
+	if err := sq.Set([]string{utils.Metrics, utils.FilterIDs}, "fltr1", false); err != nil {
+		t.Error(err)
+	}
+
+	if err := sq.Set([]string{utils.Metrics, "wrong"}, "fltr1", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(exp, sq) {
@@ -1702,7 +1702,6 @@ func TestStatQueueProfile_Set(t *testing.T) {
 		path      []string
 		val       any
 		newBranch bool
-		in3       string
 	}
 	tests := []struct {
 		name    string
@@ -1728,7 +1727,7 @@ func TestStatQueueProfile_Set(t *testing.T) {
 				ThresholdIDs: tt.fields.ThresholdIDs,
 				lkID:         tt.fields.lkID,
 			}
-			if err := sqp.Set(tt.args.path, tt.args.val, tt.args.newBranch, tt.args.in3); err != nil != tt.wantErr {
+			if err := sqp.Set(tt.args.path, tt.args.val, tt.args.newBranch); err != nil != tt.wantErr {
 				t.Errorf("StatQueueProfile.Set() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -1824,7 +1823,7 @@ func TestStatQueueProfileSetBlockersErr(t *testing.T) {
 	sq := StatQueueProfile{}
 
 	expErr := "invalid DynamicBlocker format for string <incorrect input>"
-	if err := sq.Set([]string{utils.Metrics, utils.Blockers}, "incorrect input", false, utils.EmptyString); err == nil || err.Error() != expErr {
+	if err := sq.Set([]string{utils.Metrics, utils.Blockers}, "incorrect input", false); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}
 
@@ -1851,7 +1850,7 @@ func TestStatQueueProfileSetBlockersOK(t *testing.T) {
 		},
 	}
 
-	if err := sq.Set([]string{utils.Metrics, utils.Blockers}, "*string:~*opts.*cost:0;false;*suffix:~*req.Destination:+4432&eq:~*opts.*usage:10s;false;*notstring:~*req.RequestType:*prepaid;true;;false", false, utils.EmptyString); err != nil {
+	if err := sq.Set([]string{utils.Metrics, utils.Blockers}, "*string:~*opts.*cost:0;false;*suffix:~*req.Destination:+4432&eq:~*opts.*usage:10s;false;*notstring:~*req.RequestType:*prepaid;true;;false", false); err != nil {
 		t.Error(err)
 	}
 

@@ -69,14 +69,14 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err := jsnCfg.diameterAgentCfg.loadFromJSONCfg(jsonCFG, jsnCfg.generalCfg.RSRSep); err != nil {
+	if err := jsnCfg.diameterAgentCfg.loadFromJSONCfg(jsonCFG); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, jsnCfg.diameterAgentCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsnCfg.diameterAgentCfg))
 	}
 
 	jsonCFG = nil
-	if err := jsnCfg.diameterAgentCfg.loadFromJSONCfg(jsonCFG, jsnCfg.generalCfg.RSRSep); err != nil {
+	if err := jsnCfg.diameterAgentCfg.loadFromJSONCfg(jsonCFG); err != nil {
 		t.Error(err)
 	}
 }
@@ -91,7 +91,7 @@ func TestRequestProcessorloadFromJsonCfg1(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.diameterAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.diameterAgentCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -115,7 +115,7 @@ func TestRequestProcessorloadFromJsonCfg2(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err := jsonCfg.diameterAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err := jsonCfg.diameterAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 }
@@ -193,7 +193,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		for _, v := range cgrCfg.diameterAgentCfg.RequestProcessors[0].RequestFields {
 			v.ComputePath()
 		}
-		rcv := cgrCfg.diameterAgentCfg.AsMapInterface(utils.InfieldSep)
+		rcv := cgrCfg.diameterAgentCfg.AsMapInterface()
 		if !reflect.DeepEqual(rcv, eMap) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 		}
@@ -226,7 +226,7 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.diameterAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.diameterAgentCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
 	}
 }
@@ -327,7 +327,7 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffDiameterAgentJsonCfg(d, v1, v2, "")
+	rcv := diffDiameterAgentJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -338,7 +338,7 @@ func TestDiffDiameterAgentJsonCfg(t *testing.T) {
 			{},
 		},
 	}
-	rcv = diffDiameterAgentJsonCfg(d, v1, v2, "")
+	rcv = diffDiameterAgentJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

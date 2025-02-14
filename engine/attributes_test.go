@@ -39,7 +39,7 @@ func TestParseAtributeUsageDiffVal1(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.wrong;~*req.usage2", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -54,7 +54,7 @@ func TestParseAtributeUsageDiffVal2(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.usage1;~*req.wrong", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -68,7 +68,7 @@ func TestParseAtributeUsageDiffTimeVal1(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.usage1;~*req.usage2", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := "Unsupported time format"
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -83,7 +83,7 @@ func TestParseAtributeUsageDiffTimeVal2(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.usage1;~*req.usage2", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := "Unsupported time format"
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -97,7 +97,7 @@ func TestParseAtributeSum(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaSum, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.valid", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -110,7 +110,7 @@ func TestParseAtributeDifference(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.valid", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -123,7 +123,7 @@ func TestParseAtributeMultiply(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaMultiply, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.valid", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -136,7 +136,7 @@ func TestParseAtributeDivide(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaDivide, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.valid", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -150,7 +150,7 @@ func TestParseAtributeExponentVal1(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaValueExponent, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.wrong;~*req.exponent", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -164,7 +164,7 @@ func TestParseAtributeExponentVal2(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaValueExponent, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.number;~*req.wrong", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -178,7 +178,7 @@ func TestParseAtributeExponentWrongNumber(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaValueExponent, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.number;~*req.exponent", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := "invalid value <not_a_number> to *valueExponent"
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -193,7 +193,7 @@ func TestParseAtributeExponentWrongExponent(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaValueExponent, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.number;~*req.exponent", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := `strconv.Atoi: parsing "NaN": invalid syntax`
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -207,7 +207,7 @@ func TestParseAtributeUnixTimestampWrongField(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaUnixTimestamp, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.wrong", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -220,7 +220,7 @@ func TestParseAtributeUnixTimestampWrongVal(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaUnixTimestamp, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.unix_timestamp", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := "Unsupported time format"
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -234,7 +234,7 @@ func TestParseAtributePrefixPath(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaPrefix, "```", config.NewRSRParsersMustCompile("~*req.prefix", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := "Closed unspilit syntax"
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -248,7 +248,7 @@ func TestParseAtributePrefixField(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaPrefix, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.wrong", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -261,7 +261,7 @@ func TestParseAtributeSuffixPath(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaSuffix, "```", config.NewRSRParsersMustCompile("~*req.suffix", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := "Closed unspilit syntax"
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -275,7 +275,7 @@ func TestParseAtributeSuffixField(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaSuffix, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.wrong", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -290,7 +290,7 @@ func TestParseAtributeCCUsageLessThanTwo(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := `invalid arguments <[{"Rules":"~*req.cc1"},{"Rules":"~*req.cc2"}]> to *ccUsage`
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -306,7 +306,7 @@ func TestParseAtributeCCUsageField1(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.wrong;~*req.cc2;~*req.cc3", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -321,7 +321,7 @@ func TestParseAtributeCCUsageVal1(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2;~*req.cc3", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := `invalid requestNumber <not_valid> to *ccUsage`
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -337,7 +337,7 @@ func TestParseAtributeCCUsageField2(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.wrong;~*req.cc3", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -352,7 +352,7 @@ func TestParseAtributeCCUsageVal2(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2;~*req.cc3", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := `invalid usedCCTime <sfx> to *ccUsage`
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -368,7 +368,7 @@ func TestParseAtributeCCUsageField3(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2;~*req.wrong", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -383,7 +383,7 @@ func TestParseAtributeCCUsageVal3(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2;~*req.cc3", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := `invalid debitInterval <sfx> to *ccUsage`
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -399,7 +399,7 @@ func TestParseAtributeCCUsageNoErr(t *testing.T) {
 		},
 	}
 	out, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2;~*req.cc3", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err != nil {
 		t.Error(err)
 	}
@@ -442,7 +442,7 @@ func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
+	value := config.NewRSRParsersMustCompile("abcd123", utils.RSRSep)
 
 	attrPrf := &AttributeProfile{
 		Tenant: "cgrates.org",
@@ -506,7 +506,7 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
 
-	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
+	value := config.NewRSRParsersMustCompile("abcd123", utils.RSRSep)
 
 	attrPrf := &AttributeProfile{
 		Tenant: "cgrates.org",
@@ -587,7 +587,7 @@ func TestAttributeSProcessEventPassErr(t *testing.T) {
 				FilterIDs: []string{"*apiban:~*req.<~*req.IP>{*}:*all"},
 				Path:      "*req.Password",
 				Type:      utils.MetaPassword,
-				Value:     config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep),
+				Value:     config.NewRSRParsersMustCompile("abcd123", utils.RSRSep),
 			},
 		},
 		Weights: utils.DynamicWeights{
@@ -654,7 +654,7 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 				}},
 				Path:  "*req.Password",
 				Type:  utils.MetaPassword,
-				Value: config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep),
+				Value: config.NewRSRParsersMustCompile("abcd123", utils.RSRSep),
 			},
 		},
 		Weights: utils.DynamicWeights{
@@ -712,7 +712,7 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 			{
 				Path:  utils.MetaRemove,
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile(utils.MetaRemove, config.CgrConfig().GeneralCfg().RSRSep),
+				Value: config.NewRSRParsersMustCompile(utils.MetaRemove, utils.RSRSep),
 			},
 			{
 				Blockers: utils.DynamicBlockers{{
@@ -720,7 +720,7 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 				}},
 				Path:  "*req.Password",
 				Type:  utils.MetaPassword,
-				Value: config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep),
+				Value: config.NewRSRParsersMustCompile("abcd123", utils.RSRSep),
 			},
 		},
 		Weights: utils.DynamicWeights{
@@ -881,7 +881,7 @@ func TestParseAtributeUsageDiffDetectLayoutErr2(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.usage2", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	errExp := "Unsupported time format"
 	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
@@ -892,7 +892,7 @@ func TestParseAtributeMetaPrefixParseDPErr(t *testing.T) {
 	dp := utils.MapStorage{}
 
 	_, err := ParseAttribute(dp, utils.MetaPrefix, "constant;`>;q=0.7;expires=3600`;~*req.Account", config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.usage2", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -902,7 +902,7 @@ func TestParseAtributeMetaSuffixParseDPErr(t *testing.T) {
 	dp := utils.MapStorage{}
 
 	_, err := ParseAttribute(dp, utils.MetaSuffix, "constant;`>;q=0.7;expires=3600`;~*req.Account", config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.usage2", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err != utils.ErrNotFound {
 		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
 	}
@@ -917,7 +917,7 @@ func TestParseAtributeCCUsageNegativeReqNr(t *testing.T) {
 		},
 	}
 	out, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2;~*req.cc3", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err != nil {
 		t.Error(err)
 	}
@@ -965,7 +965,7 @@ func TestAttributeFromHTTP(t *testing.T) {
 
 	attr := attrPrf.Attributes[0]
 	if out, err := ParseAttribute(dp, attr.Type, attr.Path, attr.Value,
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		0, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Fatal(err)
 	} else if exp != out {
 		t.Errorf("Expected %q, Received %q", exp, out)

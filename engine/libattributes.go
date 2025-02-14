@@ -127,7 +127,7 @@ func NewAPIAttributeProfile(attr *AttributeProfile) (ext *APIAttributeProfile) {
 			Blockers:  at.Blockers,
 			Path:      at.Path,
 			Type:      at.Type,
-			Value:     at.Value.GetRule(utils.InfieldSep),
+			Value:     at.Value.GetRule(),
 		}
 	}
 	return
@@ -199,7 +199,7 @@ func externalAttributeAPI(httpType string, dDP utils.DataProvider) (string, erro
 	return externalAPI(urlS, bytes.NewReader([]byte(dDP.String())))
 }
 
-func (ap *AttributeProfile) Set(path []string, val any, newBranch bool, rsrSep string) (err error) {
+func (ap *AttributeProfile) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	case 1:
 		switch path[0] {
@@ -243,7 +243,7 @@ func (ap *AttributeProfile) Set(path []string, val any, newBranch bool, rsrSep s
 		case utils.Type:
 			ap.Attributes[len(ap.Attributes)-1].Type = utils.IfaceAsString(val)
 		case utils.Value:
-			ap.Attributes[len(ap.Attributes)-1].Value, err = config.NewRSRParsers(utils.IfaceAsString(val), rsrSep)
+			ap.Attributes[len(ap.Attributes)-1].Value, err = config.NewRSRParsers(utils.IfaceAsString(val), utils.RSRSep)
 		default:
 			return utils.ErrWrongPath
 		}
@@ -359,6 +359,6 @@ func (at *Attribute) FieldAsInterface(fldPath []string) (_ any, err error) {
 	case utils.Type:
 		return at.Type, nil
 	case utils.Value:
-		return at.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep), nil
+		return at.Value.GetRule(), nil
 	}
 }

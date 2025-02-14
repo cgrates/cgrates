@@ -245,54 +245,54 @@ func TestDispatcherHostSet(t *testing.T) {
 			CaCertificate:        "ca",
 		},
 	}
-	if err := dp.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := dp.Set([]string{}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := dp.Set([]string{"NotAField"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-
-	if err := dp.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.Address}, "127.0.0.1", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.Transport}, utils.MetaJSON, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.ConnectAttempts}, 1, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.Reconnects}, 1, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.MaxReconnectInterval}, 1, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.ConnectTimeout}, 1, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.ReplyTimeout}, 1, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := dp.Set([]string{utils.TLS}, true, false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{"NotAField", "1"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := dp.Set([]string{utils.ClientKey}, "key", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.ClientCertificate}, "ce", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.ID}, "ID", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.CaCertificate}, "ca", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Address}, "127.0.0.1", false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.Transport}, utils.MetaJSON, false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.ConnectAttempts}, 1, false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.Reconnects}, 1, false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.MaxReconnectInterval}, 1, false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.ConnectTimeout}, 1, false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.ReplyTimeout}, 1, false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.TLS}, true, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := dp.Set([]string{utils.ClientKey}, "key", false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.ClientCertificate}, "ce", false); err != nil {
+		t.Error(err)
+	}
+	if err := dp.Set([]string{utils.CaCertificate}, "ca", false); err != nil {
 		t.Error(err)
 	}
 

@@ -39,32 +39,32 @@ func TestChargerProfileSet(t *testing.T) {
 		RunID:        utils.MetaDefault,
 		AttributeIDs: []string{"attr1"},
 	}
-	if err := cp.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := cp.Set([]string{}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := cp.Set([]string{"NotAField"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := cp.Set([]string{"NotAField", "1"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := cp.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.ID}, "ID", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Weights}, ";10", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.RunID}, utils.MetaDefault, false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.RunID}, utils.MetaDefault, false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.AttributeIDs}, "attr1", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.AttributeIDs}, "attr1", false); err != nil {
 		t.Error(err)
 	}
 
@@ -208,7 +208,7 @@ func TestChargerProfileSetBlockers(t *testing.T) {
 		},
 	}
 
-	err := cp.Set([]string{utils.Blockers}, ";true", false, "")
+	err := cp.Set([]string{utils.Blockers}, ";true", false)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	} else if !reflect.DeepEqual(exp, cp) {

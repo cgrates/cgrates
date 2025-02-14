@@ -212,7 +212,7 @@ func TestEventExporterFieldloadFromJsonCfg(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -231,7 +231,7 @@ func TestEventExporterFieldloadFromJsonCfg1(t *testing.T) {
 	}
 	expected := "no template with id: <>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.eesCfg.loadFromJSONCfg(eventExporterJSON, jsonCfg.templates); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -240,7 +240,7 @@ func TestEventExporterloadFromJsonCfg(t *testing.T) {
 	jsonCfg := NewDefaultCGRConfig()
 
 	eventExporter := new(EventExporterCfg)
-	if err := eventExporter.loadFromJSONCfg(nil, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := eventExporter.loadFromJSONCfg(nil, jsonCfg.templates); err != nil {
 		t.Error(err)
 	}
 }
@@ -255,7 +255,7 @@ func TestEESCacheloadFromJsonCfg(t *testing.T) {
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.eesCfg.loadFromJSONCfg(eesCfg, jsonCfg.templates, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.eesCfg.loadFromJSONCfg(eesCfg, jsonCfg.templates); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -452,9 +452,9 @@ func TestEEsCfgloadFromJsonCfgCase1(t *testing.T) {
 		}
 	}
 	cgrCfg := NewDefaultCGRConfig()
-	if err := cgrCfg.eesCfg.loadFromJSONCfg(nil, cgrCfg.templates, cgrCfg.generalCfg.RSRSep); err != nil {
+	if err := cgrCfg.eesCfg.loadFromJSONCfg(nil, cgrCfg.templates); err != nil {
 		t.Error(err)
-	} else if err := cgrCfg.eesCfg.loadFromJSONCfg(jsonCfg, cgrCfg.templates, cgrCfg.generalCfg.RSRSep); err != nil {
+	} else if err := cgrCfg.eesCfg.loadFromJSONCfg(jsonCfg, cgrCfg.templates); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCfg, cgrCfg.eesCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedCfg), utils.ToJSON(cgrCfg.eesCfg))
@@ -594,7 +594,7 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 		}
 	}
 	jsnCfg := NewDefaultCGRConfig()
-	if err := jsnCfg.eesCfg.loadFromJSONCfg(jsonCfg, msgTemplates, jsnCfg.generalCfg.RSRSep); err != nil {
+	if err := jsnCfg.eesCfg.loadFromJSONCfg(jsonCfg, msgTemplates); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedCfg, jsnCfg.eesCfg) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedCfg), utils.ToJSON(jsnCfg.eesCfg))
@@ -685,7 +685,7 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cgrCfg.eesCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string]any)
+		rcv := cgrCfg.eesCfg.AsMapInterface().(map[string]any)
 		if len(rcv[utils.ExportersCfg].([]map[string]any)) != 2 {
 			t.Errorf("Expected %+v, received %+v", 2, len(rcv[utils.ExportersCfg].([]map[string]any)))
 		} else if !reflect.DeepEqual(eMap[utils.ExportersCfg].([]map[string]any)[0][utils.FieldsCfg].([]map[string]any)[0][utils.ValueCfg],
@@ -824,7 +824,7 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		Efs_conns: utils.SliceStringPointer([]string{"efs test"}),
 	}
 
-	rcv := diffEventExporterJsonCfg(d, v1, v2, ";")
+	rcv := diffEventExporterJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -833,7 +833,7 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 	expected = &EventExporterJsonCfg{
 		Opts: &EventExporterOptsJson{},
 	}
-	rcv = diffEventExporterJsonCfg(d, v1, v2, ";")
+	rcv = diffEventExporterJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -855,7 +855,7 @@ func TestDiffEventExporterJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv = diffEventExporterJsonCfg(d, v1, v2, ";")
+	rcv = diffEventExporterJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1037,7 +1037,7 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffEventExportersJsonCfg(d, v1, v2, ";")
+	rcv := diffEventExportersJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1048,7 +1048,7 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 			Opts: &EventExporterOptsJson{},
 		},
 	}
-	rcv = diffEventExportersJsonCfg(d, v1, v2, ";")
+	rcv = diffEventExportersJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1066,7 +1066,7 @@ func TestDiffEventExportersJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv = diffEventExportersJsonCfg(d, v1, v2, ";")
+	rcv = diffEventExportersJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1123,7 +1123,7 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffEEsJsonCfg(d, v1, v2, ";")
+	rcv := diffEEsJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1146,7 +1146,7 @@ func TestDiffEEsJsonCfg(t *testing.T) {
 			},
 		},
 	}
-	rcv = diffEEsJsonCfg(d, v1, v2, ";")
+	rcv = diffEEsJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -1734,7 +1734,7 @@ func TestEEsAsMapInterface(t *testing.T) {
 		},
 	}
 
-	rcv := eeCfg.AsMapInterface(",")
+	rcv := eeCfg.AsMapInterface()
 
 	if !reflect.DeepEqual(exp[utils.OptsCfg], rcv[utils.OptsCfg]) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp["opts"]), utils.ToJSON(rcv["opts"]))

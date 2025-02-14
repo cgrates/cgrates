@@ -266,47 +266,47 @@ func TestAttributeProfileSet(t *testing.T) {
 	exp.Weights[0] = &utils.DynamicWeight{
 		Weight: 10,
 	}
-	if err := dp.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := dp.Set([]string{}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := dp.Set([]string{"NotAField"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := dp.Set([]string{"NotAField", "1"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := dp.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.ID}, "ID", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Weights}, ";10", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Blockers}, ";true", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Attributes, utils.Path}, "*req.Account", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Attributes, utils.Path}, "*req.Account", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Attributes, utils.Type}, utils.MetaConstant, false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Attributes, utils.Type}, utils.MetaConstant, false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Attributes, utils.Value}, "10", false, utils.InfieldSep); err != nil {
+	if err := dp.Set([]string{utils.Attributes, utils.Value}, "10", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Attributes, utils.FilterIDs}, "fltr1", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Attributes, utils.FilterIDs}, "fltr1", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Attributes, utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
+	if err := dp.Set([]string{utils.Attributes, utils.Blockers}, ";true", false); err != nil {
 		t.Error(err)
 	}
-	if err := dp.Set([]string{utils.Attributes, "Wrong"}, true, false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := dp.Set([]string{utils.Attributes, "Wrong"}, true, false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 

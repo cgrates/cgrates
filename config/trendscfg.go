@@ -78,7 +78,7 @@ func (t *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendSJsonCfg) (err error) {
 	return
 }
 
-func (t *TrendSCfg) AsMapInterface(string) any {
+func (t *TrendSCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:                t.Enabled,
 		utils.StoreIntervalCfg:          utils.EmptyString,

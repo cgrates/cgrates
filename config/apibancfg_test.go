@@ -74,7 +74,7 @@ func TestAPIBanCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if err = alS.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
-	} else if rcv := alS.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

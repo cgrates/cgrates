@@ -544,7 +544,7 @@ func TestDataDbCfgAsMapInterface(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cgrCfg.dataDbCfg.AsMapInterface("").(map[string]any)
+		rcv := cgrCfg.dataDbCfg.AsMapInterface().(map[string]any)
 		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts],
 			rcv[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts]) {
 			t.Errorf("Expected %+v, received %+v", eMap[utils.ItemsCfg].(map[string]any)[utils.MetaAccounts],

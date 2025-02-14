@@ -38,15 +38,15 @@ type RadiusAgentCfg struct {
 }
 
 // loadRadiusAgentCfg loads the RadiusAgent section of the configuration
-func (ra *RadiusAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (ra *RadiusAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRACfg := new(RadiusAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, RadiusAgentJSON, jsnRACfg); err != nil {
 		return
 	}
-	return ra.loadFromJSONCfg(jsnRACfg, cfg.generalCfg.RSRSep)
+	return ra.loadFromJSONCfg(jsnRACfg)
 }
 
-func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator string) (err error) {
+func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -75,12 +75,12 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 	if jsnCfg.Sessions_conns != nil {
 		ra.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
-	ra.RequestProcessors, err = appendRequestProcessors(ra.RequestProcessors, jsnCfg.Request_processors, separator)
+	ra.RequestProcessors, err = appendRequestProcessors(ra.RequestProcessors, jsnCfg.Request_processors)
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (ra RadiusAgentCfg) AsMapInterface(separator string) any {
+func (ra RadiusAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:    ra.Enabled,
 		utils.ListenNetCfg:  ra.ListenNet,
@@ -90,7 +90,7 @@ func (ra RadiusAgentCfg) AsMapInterface(separator string) any {
 
 	requestProcessors := make([]map[string]any, len(ra.RequestProcessors))
 	for i, item := range ra.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface(separator)
+		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 
@@ -153,7 +153,7 @@ type RadiusAgentJsonCfg struct {
 	Request_processors  *[]*ReqProcessorJsnCfg
 }
 
-func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg, separator string) *RadiusAgentJsonCfg {
+func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *RadiusAgentJsonCfg {
 	if d == nil {
 		d = new(RadiusAgentJsonCfg)
 	}
@@ -174,7 +174,7 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg, separ
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
-	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }
 

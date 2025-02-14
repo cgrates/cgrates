@@ -49,7 +49,6 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Locking_timeout:        utils.StringPointer("0"),
 		Digest_separator:       utils.StringPointer(","),
 		Digest_equal:           utils.StringPointer(":"),
-		Rsr_separator:          utils.StringPointer(";"),
 		Max_parallel_conns:     utils.IntPointer(100),
 		Decimal_max_scale:      utils.IntPointer(0),
 		Decimal_min_scale:      utils.IntPointer(0),

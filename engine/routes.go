@@ -485,7 +485,7 @@ func (rpS *RouteS) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, r
 	return
 }
 
-func (rp *RouteProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
+func (rp *RouteProfile) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	default:
 		return utils.ErrWrongPath

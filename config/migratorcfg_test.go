@@ -121,7 +121,7 @@ func TestMigratorCgrCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.migratorCgrCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.migratorCgrCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -167,7 +167,7 @@ func TestMigratorCgrCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.migratorCgrCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.migratorCgrCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -209,7 +209,7 @@ func TestMigratorCgrCfgAsMapInterface2(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.migratorCgrCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.migratorCgrCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 

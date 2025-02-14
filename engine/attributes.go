@@ -191,7 +191,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 			}
 		}
 		var out any
-		if out, err = ParseAttribute(dynDP, utils.FirstNonEmpty(attribute.Type, utils.MetaVariable), utils.DynamicDataPrefix+attribute.Path, attribute.Value, alS.cfg.GeneralCfg().RoundingDecimals, alS.cfg.GeneralCfg().DefaultTimezone, time.RFC3339, alS.cfg.GeneralCfg().RSRSep); err != nil {
+		if out, err = ParseAttribute(dynDP, utils.FirstNonEmpty(attribute.Type, utils.MetaVariable), utils.DynamicDataPrefix+attribute.Path, attribute.Value, alS.cfg.GeneralCfg().RoundingDecimals, alS.cfg.GeneralCfg().DefaultTimezone, time.RFC3339); err != nil {
 			rply = nil
 			return
 		}
@@ -364,7 +364,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	return
 }
 
-func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.RSRParsers, roundingDec int, timeZone, layout, rsrSep string) (
+func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.RSRParsers, roundingDec int, timeZone, layout string) (
 	out any, err error) {
 	switch attrType {
 	case utils.MetaNone:
@@ -468,7 +468,7 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.R
 		out = dtFld.Format(layout)
 	case utils.MetaPrefix:
 		var pathRsr config.RSRParsers
-		pathRsr, err = config.NewRSRParsers(path, rsrSep)
+		pathRsr, err = config.NewRSRParsers(path, utils.RSRSep)
 		if err != nil {
 			return
 		}
@@ -483,7 +483,7 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value config.R
 		out = val + pathVal
 	case utils.MetaSuffix:
 		var pathRsr config.RSRParsers
-		pathRsr, err = config.NewRSRParsers(path, rsrSep)
+		pathRsr, err = config.NewRSRParsers(path, utils.RSRSep)
 		if err != nil {
 			return
 		}

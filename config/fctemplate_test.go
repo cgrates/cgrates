@@ -42,7 +42,7 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 		Layout:  time.RFC3339,
 	}
 	expected.ComputePath()
-	if rcv, err := NewFCTemplateFromFCTemplateJSONCfg(jsonCfg, utils.InfieldSep); err != nil {
+	if rcv, err := NewFCTemplateFromFCTemplateJSONCfg(jsonCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -112,7 +112,7 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 	for _, v := range expected {
 		v.ComputePath()
 	}
-	if rcv, err := FCTemplatesFromFCTemplatesJSONCfg(jsnCfgs, utils.InfieldSep); err != nil {
+	if rcv, err := FCTemplatesFromFCTemplatesJSONCfg(jsnCfgs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(rcv))
@@ -415,7 +415,7 @@ func TestFCTemplateAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string][]map[string]any); !reflect.DeepEqual(eMap["custom_template"], rcv["custom_template"]) {
+	} else if rcv := cgrCfg.templates.AsMapInterface().(map[string][]map[string]any); !reflect.DeepEqual(eMap["custom_template"], rcv["custom_template"]) {
 		t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap["custom_template"]), utils.ToJSON(rcv["custom_template"]))
 	}
 }
@@ -474,7 +474,7 @@ func TestFCTemplateAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cgrCfg.templates.AsMapInterface(cgrCfg.generalCfg.RSRSep).(map[string][]map[string]any)
+		rcv := cgrCfg.templates.AsMapInterface().(map[string][]map[string]any)
 		if !reflect.DeepEqual(eMap[utils.MetaErr], rcv[utils.MetaErr]) {
 			t.Errorf("Expected %+v \n, recieved %+v", utils.ToJSON(eMap[utils.MetaErr]), utils.ToJSON(rcv[utils.MetaErr]))
 		} else if !reflect.DeepEqual(eMap[utils.MetaASR], rcv[utils.MetaASR]) {
@@ -669,7 +669,7 @@ func TestDiffFcTemplateJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffFcTemplateJsonCfg(d, v1, v2, ";")
+	rcv := diffFcTemplateJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -686,7 +686,7 @@ func TestDiffFcTemplateJsonCfg(t *testing.T) {
 			Tag: utils.StringPointer("Tag"),
 		},
 	}
-	rcv = diffFcTemplateJsonCfg(d, v1, v2, ";")
+	rcv = diffFcTemplateJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -751,7 +751,7 @@ func TestDiffFcTemplatesJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffFcTemplatesJsonCfg(d, v1, v2, ";")
+	rcv := diffFcTemplatesJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -760,7 +760,7 @@ func TestDiffFcTemplatesJsonCfg(t *testing.T) {
 	expected = FcTemplatesJsonCfg{
 		"T1": nil,
 	}
-	rcv = diffFcTemplatesJsonCfg(d, v1, v2, ";")
+	rcv = diffFcTemplatesJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

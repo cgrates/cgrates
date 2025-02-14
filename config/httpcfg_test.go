@@ -76,11 +76,11 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	cfgJsn := NewDefaultCGRConfig()
 	if err := cfgJsn.httpCfg.loadFromJSONCfg(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected.AsMapInterface(utils.InfieldSep),
-		cfgJsn.httpCfg.AsMapInterface(utils.InfieldSep)) {
+	} else if !reflect.DeepEqual(expected.AsMapInterface(),
+		cfgJsn.httpCfg.AsMapInterface()) {
 		t.Errorf("Expected %+v \n, received %+v",
-			expected.AsMapInterface(utils.InfieldSep),
-			cfgJsn.httpCfg.AsMapInterface(utils.InfieldSep))
+			expected.AsMapInterface(),
+			cfgJsn.httpCfg.AsMapInterface())
 	}
 
 	cfgJSONStr = nil
@@ -122,7 +122,7 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.httpCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.httpCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -168,7 +168,7 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.httpCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.httpCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -208,9 +208,9 @@ func TestHTTPCfgClone(t *testing.T) {
 		},
 	}
 	rcv := ban.Clone()
-	if !reflect.DeepEqual(rcv.AsMapInterface(utils.InfieldSep), ban.AsMapInterface(utils.InfieldSep)) {
-		t.Errorf("Expected: %+v\nReceived: %+v", ban.AsMapInterface(utils.InfieldSep),
-			rcv.AsMapInterface(utils.InfieldSep))
+	if !reflect.DeepEqual(rcv.AsMapInterface(), ban.AsMapInterface()) {
+		t.Errorf("Expected: %+v\nReceived: %+v", ban.AsMapInterface(),
+			rcv.AsMapInterface())
 	}
 	if rcv.ClientOpts.MaxIdleConns = 50; ban.ClientOpts.MaxIdleConns != 100 {
 		t.Errorf("Expected clone to not modify the cloned")
@@ -317,11 +317,10 @@ func TestHttpCfgCloneSection(t *testing.T) {
 	}
 
 	rcv := httpCfg.CloneSection()
-	if !reflect.DeepEqual(rcv.AsMapInterface(utils.InfieldSep),
-		exp.AsMapInterface(utils.InfieldSep)) {
+	if !reflect.DeepEqual(rcv.AsMapInterface(), exp.AsMapInterface()) {
 		t.Errorf("Expected %v \n but received \n %v",
-			utils.ToJSON(exp.AsMapInterface(utils.InfieldSep)),
-			utils.ToJSON(rcv.AsMapInterface(utils.InfieldSep)))
+			utils.ToJSON(exp.AsMapInterface()),
+			utils.ToJSON(rcv.AsMapInterface()))
 	}
 }
 

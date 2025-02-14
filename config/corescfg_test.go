@@ -94,7 +94,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if err := alS.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
-	} else if rcv := alS.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 	eMap[utils.CapsStatsIntervalCfg] = "1s"
@@ -105,7 +105,7 @@ func TestCoreSAsMapInterface(t *testing.T) {
 		ShutdownTimeout:   time.Second,
 		CapsStrategy:      utils.MetaBusy,
 	}
-	if rcv := alS.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	if rcv := alS.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

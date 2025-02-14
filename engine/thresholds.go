@@ -600,7 +600,7 @@ func (tS *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.Tenant
 	return
 }
 
-func (tp *ThresholdProfile) Set(path []string, val any, _ bool, _ string) (err error) {
+func (tp *ThresholdProfile) Set(path []string, val any, _ bool) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}

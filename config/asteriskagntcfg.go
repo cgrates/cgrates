@@ -135,7 +135,7 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (aCfg AsteriskAgentCfg) AsMapInterface(string) any {
+func (aCfg AsteriskAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:   aCfg.Enabled,
 		utils.CreateCDRCfg: aCfg.CreateCDR,

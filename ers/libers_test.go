@@ -89,7 +89,7 @@ func TestLibErsMergePartialEvents(t *testing.T) {
 		},
 	}
 	if rcv, err := mergePartialEvents(cgrEvs, confg.ERsCfg().Readers[0], fltrS, confg.GeneralCfg().DefaultTenant,
-		confg.GeneralCfg().DefaultTimezone, confg.GeneralCfg().RSRSep); err != nil {
+		confg.GeneralCfg().DefaultTimezone); err != nil {
 		t.Error(err)
 	} else {
 		rcv.ID = utils.EmptyString

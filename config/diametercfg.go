@@ -49,10 +49,10 @@ func (da *DiameterAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGR
 	if err = jsnCfg.GetSection(ctx, DiameterAgentJSON, jsnDACfg); err != nil {
 		return
 	}
-	return da.loadFromJSONCfg(jsnDACfg, cfg.generalCfg.RSRSep)
+	return da.loadFromJSONCfg(jsnDACfg)
 }
 
-func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separator string) (err error) {
+func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -95,12 +95,12 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	if jsnCfg.Forced_disconnect != nil {
 		da.ForcedDisconnect = *jsnCfg.Forced_disconnect
 	}
-	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.Request_processors, separator)
+	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.Request_processors)
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (da DiameterAgentCfg) AsMapInterface(separator string) any {
+func (da DiameterAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:          da.Enabled,
 		utils.ListenNetCfg:        da.ListenNet,
@@ -118,7 +118,7 @@ func (da DiameterAgentCfg) AsMapInterface(separator string) any {
 
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface(separator)
+		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 
@@ -177,7 +177,7 @@ type DiameterAgentJsonCfg struct {
 	Request_processors   *[]*ReqProcessorJsnCfg
 }
 
-func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg, separator string) *DiameterAgentJsonCfg {
+func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg) *DiameterAgentJsonCfg {
 	if d == nil {
 		d = new(DiameterAgentJsonCfg)
 	}
@@ -220,6 +220,6 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg,
 	if v1.ForcedDisconnect != v2.ForcedDisconnect {
 		d.Forced_disconnect = utils.StringPointer(v2.ForcedDisconnect)
 	}
-	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }

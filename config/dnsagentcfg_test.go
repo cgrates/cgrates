@@ -76,25 +76,25 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 		v.ComputePath()
 	}
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(jsnCfg, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(jsnCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(jsonCfg.dnsAgentCfg, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(jsonCfg.dnsAgentCfg))
 	}
 	jsnCfg = nil
-	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(jsnCfg, jsonCfg.generalCfg.RSRSep); err != nil {
+	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(jsnCfg); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	var dareq, expected RequestProcessor
-	if err := dareq.loadFromJSONCfg(nil, utils.InfieldSep); err != nil {
+	if err := dareq.loadFromJSONCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, dareq)
 	}
-	if err := dareq.loadFromJSONCfg(new(ReqProcessorJsnCfg), utils.InfieldSep); err != nil {
+	if err := dareq.loadFromJSONCfg(new(ReqProcessorJsnCfg)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dareq, expected) {
 		t.Errorf("Expected: %+v ,received: %+v", expected, dareq)
@@ -111,7 +111,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 		Filters: []string{"filter1", "filter2"},
 		Flags:   utils.FlagsWithParams{"flag1": {}, "flag2": {}},
 	}
-	if err := dareq.loadFromJSONCfg(json, utils.InfieldSep); err != nil {
+	if err := dareq.loadFromJSONCfg(json); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dareq) {
 		t.Errorf("Expected: %+v , received: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))
@@ -128,7 +128,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -152,7 +152,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
 	}
 	if jsonCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err != nil {
+	} else if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON); err != nil {
 		t.Error(err)
 	}
 }
@@ -172,7 +172,7 @@ func TestRequestProcessorReplyFieldsloadFromJsonCfg(t *testing.T) {
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
 
-	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -191,7 +191,7 @@ func TestRequestProcessorRequestFieldsloadFromJsonCfg(t *testing.T) {
 	}
 	expected := "invalid converter terminator in rule: <a{*>"
 	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON, jsonCfg.generalCfg.RSRSep); err == nil || err.Error() != expected {
+	if err := jsonCfg.dnsAgentCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -223,7 +223,7 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(utils.EmptyString); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
@@ -294,7 +294,7 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.dnsAgentCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToIJSON(eMap), utils.ToIJSON(rcv))
 	}
 }
@@ -409,7 +409,7 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffDNSAgentJsonCfg(d, v1, v2, ";")
+	rcv := diffDNSAgentJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -420,7 +420,7 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 
-	rcv = diffDNSAgentJsonCfg(d, v1, v2_2, ";")
+	rcv = diffDNSAgentJsonCfg(d, v1, v2_2)
 	if !reflect.DeepEqual(rcv, expected2) {
 		t.Errorf("Expected %v \n but received \n %v", expected2, rcv)
 	}
@@ -468,7 +468,7 @@ func TestDiffDNSAgentJsonCfgExtraV1(t *testing.T) {
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 
-	rcv := diffDNSAgentJsonCfg(d, v1, v2, ";")
+	rcv := diffDNSAgentJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -516,7 +516,7 @@ func TestDiffDNSAgentJsonCfgExtraV2(t *testing.T) {
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 
-	rcv := diffDNSAgentJsonCfg(d, v1, v2, ";")
+	rcv := diffDNSAgentJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

@@ -424,7 +424,7 @@ func (scfg SessionSCfg) GetDefaultUsage(tor string) time.Duration {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (scfg SessionSCfg) AsMapInterface(string) any {
+func (scfg SessionSCfg) AsMapInterface() any {
 	maxComputed := make(map[string]string)
 	for key, item := range scfg.DefaultUsage {
 		if key == utils.MetaAny || key == utils.MetaVoice {

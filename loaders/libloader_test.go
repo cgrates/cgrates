@@ -67,12 +67,12 @@ func TestNewRecord(t *testing.T) {
 		SetFields(context.Background(), []*config.FCTemplate{
 			{Filters: []string{"*exists:~*req.NoField:"}},
 			{Filters: []string{"*string"}},
-		}, fs, 0, "", utils.InfieldSep); err == nil || err.Error() != expErrMsg {
+		}, fs, 0, ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
 	}
 	pt := profileTest{}
 	if err := newRecord(utils.MapStorage{}, pt, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
-		SetFields(context.Background(), []*config.FCTemplate{}, fs, 0, "", utils.InfieldSep); err != nil {
+		SetFields(context.Background(), []*config.FCTemplate{}, fs, 0, ""); err != nil {
 		t.Error(err)
 	}
 	if len(pt) != 0 {
@@ -107,7 +107,7 @@ func TestNewRecordWithCahe(t *testing.T) {
 	}
 	r := profileTest{}
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
-		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != nil {
+		SetFields(context.Background(), fc, fs, 0, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected %+v, received %+v", exp, r)
@@ -136,7 +136,7 @@ func TestNewRecordWithTmp(t *testing.T) {
 	}
 	r := profileTest{}
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
-		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != nil {
+		SetFields(context.Background(), fc, fs, 0, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected %+v, received %+v", exp, r)
@@ -145,7 +145,7 @@ func TestNewRecordWithTmp(t *testing.T) {
 
 type profileTest utils.MapStorage
 
-func (p profileTest) Set(path []string, val any, _ bool, _ string) error {
+func (p profileTest) Set(path []string, val any, _ bool) error {
 	return utils.MapStorage(p).Set(path, val)
 }
 func (p profileTest) Merge(v2 any) {
@@ -195,7 +195,7 @@ func TestNewRecordWithTmp2(t *testing.T) {
 	}
 	r := profileTest{}
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
-		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != nil {
+		SetFields(context.Background(), fc, fs, 0, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
 		t.Errorf("Expected %+v, received %+v", exp, r)
@@ -218,7 +218,7 @@ func TestNewRecordWithComposeError(t *testing.T) {
 		"Value": []string{},
 	}
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
-		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != utils.ErrWrongPath {
+		SetFields(context.Background(), fc, fs, 0, ""); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 }
@@ -238,7 +238,7 @@ func TestNewRecordWithRemoveError(t *testing.T) {
 	}
 	expErrMsg := `strconv.Atoi: parsing "NotVal": invalid syntax`
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
-		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err == nil || err.Error() != expErrMsg {
+		SetFields(context.Background(), fc, fs, 0, ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }
@@ -257,7 +257,7 @@ func TestNewRecordSetFieldsError(t *testing.T) {
 		"Value": []string{},
 	}
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
-		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err != utils.ErrWrongPath {
+		SetFields(context.Background(), fc, fs, 0, ""); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 }
@@ -276,7 +276,7 @@ func TestNewRecordSetFieldsMandatoryError(t *testing.T) {
 	}
 	expErrMsg := `NOT_FOUND:`
 	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil)).
-		SetFields(context.Background(), fc, fs, 0, "", utils.InfieldSep); err == nil || err.Error() != expErrMsg {
+		SetFields(context.Background(), fc, fs, 0, ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 }

@@ -352,7 +352,7 @@ func TestRankingSCfgAsMapInterfaceStoreInterval(t *testing.T) {
 	rnk := &RankingSCfg{
 		StoreInterval: 30 * time.Second,
 	}
-	result := rnk.AsMapInterface("")
+	result := rnk.AsMapInterface()
 	resultMap, ok := result.(map[string]any)
 	if !ok {
 		t.Fatalf("Expected result to be of type map[string]any, got %T", result)

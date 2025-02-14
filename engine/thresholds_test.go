@@ -3129,45 +3129,45 @@ func TestThresholdProfileSet(t *testing.T) {
 		Async:            true,
 		ActionProfileIDs: []string{"acc1"},
 	}
-	if err := th.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := th.Set([]string{}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := th.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := th.Set([]string{"NotAField"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := th.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-
-	if err := th.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := th.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := th.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := th.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := th.Set([]string{utils.MaxHits}, 10, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := th.Set([]string{utils.MinHits}, 10, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := th.Set([]string{utils.MinSleep}, 10, false, utils.EmptyString); err != nil {
+	if err := th.Set([]string{"NotAField", "1"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := th.Set([]string{utils.Blocker}, true, false, utils.EmptyString); err != nil {
+	if err := th.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := th.Set([]string{utils.Async}, true, false, utils.EmptyString); err != nil {
+	if err := th.Set([]string{utils.ID}, "ID", false); err != nil {
 		t.Error(err)
 	}
-	if err := th.Set([]string{utils.ActionProfileIDs}, "acc1", false, utils.EmptyString); err != nil {
+	if err := th.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.Weights}, ";10", false); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.MaxHits}, 10, false); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.MinHits}, 10, false); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.MinSleep}, 10, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := th.Set([]string{utils.Blocker}, true, false); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.Async}, true, false); err != nil {
+		t.Error(err)
+	}
+	if err := th.Set([]string{utils.ActionProfileIDs}, "acc1", false); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(exp, th) {

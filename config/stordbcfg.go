@@ -245,7 +245,7 @@ func (dbcfg StorDbCfg) Clone() (cln *StorDbCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (dbcfg StorDbCfg) AsMapInterface(string) any {
+func (dbcfg StorDbCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.SQLMaxOpenConnsCfg:   dbcfg.Opts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:   dbcfg.Opts.SQLMaxIdleConns,

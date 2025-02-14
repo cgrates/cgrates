@@ -235,7 +235,7 @@ func TestRSRParserGetRule(t *testing.T) {
 	ruleStr := "constant;~*req.Account"
 	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if rule := rsrParsers.GetRule(utils.InfieldSep); rule != ruleStr {
+	} else if rule := rsrParsers.GetRule(); rule != ruleStr {
 		t.Errorf("Expected: %q received: %q", ruleStr, rule)
 	}
 }

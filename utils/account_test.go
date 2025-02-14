@@ -992,146 +992,146 @@ func TestAccountSet(t *testing.T) {
 			},
 		},
 	}
-	if err := acc.Set([]string{}, "", false, EmptyString); err != ErrWrongPath {
+	if err := acc.Set([]string{}, "", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{"NotAField"}, "", false, EmptyString); err != ErrWrongPath {
+	if err := acc.Set([]string{"NotAField"}, "", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{"NotAField", "1"}, "", false, EmptyString); err != ErrWrongPath {
+	if err := acc.Set([]string{"NotAField", "1"}, "", false); err != ErrWrongPath {
 		t.Error(err)
 	}
 	expErr := `malformed map pair: <"bal">`
-	if err := acc.Set([]string{Opts}, "bal", false, EmptyString); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Opts}, "bal", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Opts}, "bal:val;bal2:val2", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Opts}, "bal:val;bal2:val2", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Opts, "bal3"}, "val2", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Opts, "bal3"}, "val2", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Opts + "[bal4]"}, "val2", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Opts + "[bal4]"}, "val2", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Opts + "[bal5]", "bal6"}, "val3", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Opts + "[bal5]", "bal6"}, "val3", false); err != nil {
 		t.Error(err)
 	}
 
-	if err := acc.Set([]string{Tenant}, "cgrates.org", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{ID}, "ID", false, EmptyString); err != nil {
+	if err := acc.Set([]string{ID}, "ID", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{FilterIDs}, "fltr1;*string:~*req.Account:1001", false, EmptyString); err != nil {
+	if err := acc.Set([]string{FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{ThresholdIDs}, "TH1", false, EmptyString); err != nil {
+	if err := acc.Set([]string{ThresholdIDs}, "TH1", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Weights}, ";0", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Weights}, ";0", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Blockers}, ";0", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Blockers}, ";0", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances + "[bal1]", ID}, "bal1", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances + "[bal1]", ID}, "bal1", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Type}, MetaConcrete, false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", Type}, MetaConcrete, false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Opts}, "", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", Opts}, "", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Opts + "bal7]"}, "val3", false, EmptyString); err != ErrWrongPath {
+	if err := acc.Set([]string{Balances, "bal1", Opts + "bal7]"}, "val3", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Opts + "bal7]", ""}, "val3", false, EmptyString); err != ErrWrongPath {
+	if err := acc.Set([]string{Balances, "bal1", Opts + "bal7]", ""}, "val3", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Opts + "[bal7]"}, "val3", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", Opts + "[bal7]"}, "val3", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Opts + "[bal8]", "bal9"}, "val3", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", Opts + "[bal8]", "bal9"}, "val3", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Opts, "bal10"}, "val3", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", Opts, "bal10"}, "val3", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", FilterIDs}, "*string:~*req.Account:1001", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", FilterIDs}, "*string:~*req.Account:1001", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", AttributeIDs}, "Attr1;Attr2", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", AttributeIDs}, "Attr1;Attr2", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", RateProfileIDs}, "Attr1;Attr2", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", RateProfileIDs}, "Attr1;Attr2", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Units}, "10", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", Units}, "10", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Weights}, ";10", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", Weights}, ";10", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", Blockers}, ";false", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", Blockers}, ";false", false); err != nil {
 		t.Error(err)
 	}
 
 	expErr = `invalid key: <1> for BalanceUnitFactors`
-	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "1", false, EmptyString); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "1", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
 	expErr = `can't convert <a> to decimal`
-	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "a;a", false, EmptyString); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "a;a", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "fltr1;10", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors}, "fltr1;10", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", UnitFactors, "Wrong"}, "fltr1;10", false, EmptyString); err != ErrWrongPath {
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors, "Wrong"}, "fltr1;10", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", UnitFactors, Factor}, "101", true, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors, Factor}, "101", true); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", UnitFactors, FilterIDs}, "fltr1", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", UnitFactors, FilterIDs}, "fltr1", false); err != nil {
 		t.Error(err)
 	}
 
 	expErr = `invalid key: <1> for BalanceCostIncrements`
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "1", false, EmptyString); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "1", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
 	expErr = `can't convert <a> to decimal`
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;a;10", false, EmptyString); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;a;10", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;a;10;10", false, EmptyString); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;a;10;10", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;a", false, EmptyString); err == nil || err.Error() != expErr {
-		t.Error(err)
-	}
-
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;10", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;a", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
 
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements, FixedFee}, "101", true, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;10", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements, RecurrentFee}, "101", false, EmptyString); err != nil {
+
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, FixedFee}, "101", true); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements, Increment}, "101", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, RecurrentFee}, "101", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements, FilterIDs}, "fltr1", false, EmptyString); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, Increment}, "101", false); err != nil {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements, "Wrong"}, "fltr1", false, EmptyString); err != ErrWrongPath {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, FilterIDs}, "fltr1", false); err != nil {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, "Wrong"}, "fltr1", false); err != ErrWrongPath {
 		t.Error(err)
 	}
 

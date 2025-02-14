@@ -45,10 +45,10 @@ func (da *DNSAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfi
 	if err = jsnCfg.GetSection(ctx, DNSAgentJSON, jsnDNSCfg); err != nil {
 		return
 	}
-	return da.loadFromJSONCfg(jsnDNSCfg, cfg.generalCfg.RSRSep)
+	return da.loadFromJSONCfg(jsnDNSCfg)
 }
 
-func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err error) {
+func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -74,11 +74,11 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	if jsnCfg.Sessions_conns != nil {
 		da.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
-	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.Request_processors, sep)
+	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.Request_processors)
 	return
 }
 
-func (lstn *Listener) AsMapInterface(separator string) map[string]any {
+func (lstn *Listener) AsMapInterface() map[string]any {
 	return map[string]any{
 		utils.AddressCfg: lstn.Address,
 		utils.NetworkCfg: lstn.Network,
@@ -86,7 +86,7 @@ func (lstn *Listener) AsMapInterface(separator string) map[string]any {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (da DNSAgentCfg) AsMapInterface(separator string) any {
+func (da DNSAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:  da.Enabled,
 		utils.TimezoneCfg: da.Timezone,
@@ -94,13 +94,13 @@ func (da DNSAgentCfg) AsMapInterface(separator string) any {
 
 	listeners := make([]map[string]any, len(da.Listeners))
 	for i, item := range da.Listeners {
-		listeners[i] = item.AsMapInterface(separator)
+		listeners[i] = item.AsMapInterface()
 	}
 	mp[utils.ListenersCfg] = listeners
 
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface(separator)
+		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 
@@ -151,7 +151,7 @@ type DNSAgentJsonCfg struct {
 	Request_processors *[]*ReqProcessorJsnCfg
 }
 
-func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg, separator string) *DNSAgentJsonCfg {
+func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonCfg {
 	if d == nil {
 		d = new(DNSAgentJsonCfg)
 	}
@@ -202,6 +202,6 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg, separator stri
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}
-	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }

@@ -167,13 +167,13 @@ func TestTrendSCfgAsMapInterface(t *testing.T) {
 		utils.EEsConnsCfg:               getInternalJSONConns(eesConns),
 		utils.EEsExporterIDsCfg:         eesExporterIDs,
 	}
-	result := trendCfg.AsMapInterface("").(map[string]any)
+	result := trendCfg.AsMapInterface().(map[string]any)
 	if !reflect.DeepEqual(result, expectedMap) {
 		t.Errorf("Expected: %+v, got: %+v", expectedMap, result)
 	}
 	trendCfg.StoreInterval = 0
 	expectedMap[utils.StoreIntervalCfg] = utils.EmptyString
-	result = trendCfg.AsMapInterface("").(map[string]any)
+	result = trendCfg.AsMapInterface().(map[string]any)
 	if result[utils.StoreIntervalCfg] != utils.EmptyString {
 		t.Errorf("Expected StoreInterval to be '%s', but got: %v", utils.EmptyString, result[utils.StoreIntervalCfg])
 	}

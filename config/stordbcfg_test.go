@@ -261,7 +261,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 	if cfgCgr, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else {
-		rcv := cfgCgr.storDbCfg.AsMapInterface("").(map[string]any)
+		rcv := cfgCgr.storDbCfg.AsMapInterface().(map[string]any)
 		if !reflect.DeepEqual(eMap[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg],
 			rcv[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg]) {
 			t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg]),

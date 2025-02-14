@@ -111,7 +111,7 @@ func TestActionAPDiktatRSRValues(t *testing.T) {
 			},
 		},
 	}
-	rsrPars, err := apdDiktat.RSRValues(";")
+	rsrPars, err := apdDiktat.RSRValues()
 	if err != nil {
 		t.Error(err)
 	}
@@ -131,7 +131,7 @@ func TestActionAPDiktatRSRValues(t *testing.T) {
 
 func TestActionAPDiktatRSRValuesNil(t *testing.T) {
 	apdDiktat := APDiktat{}
-	rsrPars, err := apdDiktat.RSRValues(";")
+	rsrPars, err := apdDiktat.RSRValues()
 	if err != nil {
 		t.Error(err)
 	}
@@ -147,7 +147,7 @@ func TestActionAPDiktatRSRValuesError(t *testing.T) {
 		Value: "val`val2val3",
 	}
 	expErr := "Closed unspilit syntax"
-	_, err := apdDiktat.RSRValues(";")
+	_, err := apdDiktat.RSRValues()
 	if err == nil || err.Error() != expErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expErr, err)
 	}
@@ -155,7 +155,7 @@ func TestActionAPDiktatRSRValuesError(t *testing.T) {
 }
 func TestAPDiktatRSRValues(t *testing.T) {
 	dk := &APDiktat{Value: "1001"}
-	if rply, err := dk.RSRValues(utils.InfieldSep); err != nil {
+	if rply, err := dk.RSRValues(); err != nil {
 		return
 	} else if exp := config.NewRSRParsersMustCompile("1001", utils.InfieldSep); !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected: %+v ,received: %+v", exp, rply)
@@ -200,85 +200,85 @@ func TestActionProfileSet(t *testing.T) {
 			}},
 		}},
 	}
-	if err := ap.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := ap.Set([]string{}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := ap.Set([]string{"NotAField"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-
-	if err := ap.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := ap.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := ap.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := ap.Set([]string{utils.Schedule}, utils.MetaNow, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := ap.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := ap.Set([]string{utils.Targets + "[" + utils.MetaAccounts + "]"}, "1001;1002", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := ap.Set([]string{utils.Targets, utils.MetaThresholds}, "TH1;TH2", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{"NotAField", "1"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := ap.Set([]string{utils.Actions + "[acc1]", utils.ID}, "acc1", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", "Wrong", "path", "2"}, "acc1", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := ap.Set([]string{utils.ID}, "ID", false); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", "Wrong", "path"}, "acc1", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := ap.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", "Wrong"}, "acc1", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := ap.Set([]string{utils.Schedule}, utils.MetaNow, false); err != nil {
 		t.Error(err)
 	}
-
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.Opts}, "opt0:val1", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Weights}, ";10", false); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.Opts + "[opt1]"}, "val1", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Targets + "[" + utils.MetaAccounts + "]"}, "1001;1002", false); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.Opts, "opt2"}, "val1", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.Opts, "opt3", "opt4"}, "val1", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Targets, utils.MetaThresholds}, "TH1;TH2", false); err != nil {
 		t.Error(err)
 	}
 
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.Type}, "val1", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Actions + "[acc1]", utils.ID}, "acc1", false); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.FilterIDs}, "fltr1", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Actions, "acc1", "Wrong", "path", "2"}, "acc1", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.TTL}, "10", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Actions, "acc1", "Wrong", "path"}, "acc1", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.Diktats, utils.Path}, "path", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Actions, "acc1", "Wrong"}, "acc1", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := ap.Set([]string{utils.Actions, "acc1", utils.Diktats, utils.Value}, "val1", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.Opts}, "opt0:val1", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.Opts + "[opt1]"}, "val1", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.Opts, "opt2"}, "val1", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.Opts, "opt3", "opt4"}, "val1", false); err != nil {
+		t.Error(err)
+	}
+
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.Type}, "val1", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.FilterIDs}, "fltr1", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.TTL}, "10", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.Diktats, utils.Path}, "path", false); err != nil {
+		t.Error(err)
+	}
+
+	if err := ap.Set([]string{utils.Actions, "acc1", utils.Diktats, utils.Value}, "val1", false); err != nil {
 		t.Error(err)
 	}
 
 	if err := ap.Actions[0].Set(nil, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
+	if err := ap.Set([]string{utils.Blockers}, ";true", false); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(exp, ap) {

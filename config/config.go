@@ -1016,8 +1016,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
-	return cfg.sections.AsMapInterface(separator)
+func (cfg *CGRConfig) AsMapInterface() (mp map[string]any) {
+	return cfg.sections.AsMapInterface()
 }
 
 // Clone returns a deep copy of CGRConfig
@@ -1090,7 +1090,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 func (cfg *CGRConfig) GetDataProvider() utils.MapStorage {
 	cfg.cacheDPMux.RLock()
 	if len(cfg.cacheDP) < len(cfg.sections) {
-		cfg.cacheDP = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
+		cfg.cacheDP = cfg.AsMapInterface()
 	}
 	mp := cfg.cacheDP.Clone()
 	cfg.cacheDPMux.RUnlock()

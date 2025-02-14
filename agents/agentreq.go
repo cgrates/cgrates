@@ -360,7 +360,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaGroup:
 		tmpType = utils.MetaVariable
 	}
-	out, err = engine.ParseAttribute(ar, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout, config.CgrConfig().GeneralCfg().RSRSep)
+	out, err = engine.ParseAttribute(ar, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout)
 
 	if err != nil &&
 		!strings.HasPrefix(err.Error(), "Could not find") {

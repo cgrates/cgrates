@@ -270,7 +270,7 @@ func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config
 
 		tmp := newPrf()
 		if err = newRecord(config.NewSliceDP(record, nil), tmp, l.ldrCfg.Tenant, l.cfg, l.dataCache[lType]).
-			SetFields(ctx, tmpls, l.filterS, l.cfg.GeneralCfg().RoundingDecimals, l.cfg.GeneralCfg().DefaultTimezone, l.cfg.GeneralCfg().RSRSep); err != nil {
+			SetFields(ctx, tmpls, l.filterS, l.cfg.GeneralCfg().RoundingDecimals, l.cfg.GeneralCfg().DefaultTimezone); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> <%s> file<%s> line: %d, error: %s",
 					utils.LoaderS, l.ldrCfg.ID, csv.Path(), lineNr, err))

@@ -80,7 +80,7 @@ func (ld *LoaderCgrCfg) loadFromJSONCfg(jsnCfg *LoaderCfgJson) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (ld LoaderCgrCfg) AsMapInterface(string) any {
+func (ld LoaderCgrCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.TpIDCfg:           ld.TpID,
 		utils.DataPathCfg:       ld.DataPath,

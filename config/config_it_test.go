@@ -1152,7 +1152,7 @@ func testHttpHandlerConfigSForFolder(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	mp := cfg.AsMapInterface(cfg.generalCfg.RSRSep)
+	mp := cfg.AsMapInterface()
 
 	str := utils.ToJSON(mp)
 	// we compare the length of the string because flags is a map and we receive it in different order

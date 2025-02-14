@@ -875,73 +875,73 @@ func TestRouteProfileSet(t *testing.T) {
 			RouteParameters: "params",
 		}},
 	}
-	if err := rp.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := rp.Set([]string{}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{"", ""}, "", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{"", ""}, "", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := rp.Set([]string{"NotAField"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{"NotAField", "1"}, ":", false, utils.EmptyString); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-
-	if err := rp.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Weights}, ";0", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Blockers}, ";false", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Sorting}, utils.MetaQOS, false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.SortingParameters}, "param", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{"NotAField", "1"}, ":", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := rp.Set([]string{utils.Routes, utils.ID}, "RT1", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.FilterIDs}, "fltr1", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.ID}, "ID", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.AccountIDs}, "acc1", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.RateProfileIDs}, "rp1", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.Weights}, ";0", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.ResourceIDs}, "res1", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.Blockers}, ";false", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.StatIDs}, "stat1", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.Sorting}, utils.MetaQOS, false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, utils.Weights}, ";0", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.Blockers}, ";true", false, utils.EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.RouteParameters}, "params", false, utils.EmptyString); err != nil {
+	if err := rp.Set([]string{utils.SortingParameters}, "param", false); err != nil {
 		t.Error(err)
 	}
 
-	if err := rp.Set([]string{utils.SortingParameters, "wrong"}, "param", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := rp.Set([]string{utils.Routes, utils.ID}, "RT1", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{utils.Routes, "wrong"}, "param", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := rp.Set([]string{utils.Routes, utils.FilterIDs}, "fltr1", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Routes, utils.AccountIDs}, "acc1", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Routes, utils.RateProfileIDs}, "rp1", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Routes, utils.ResourceIDs}, "res1", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Routes, utils.StatIDs}, "stat1", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Routes, utils.Weights}, ";0", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Routes, utils.Blockers}, ";true", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Routes, utils.RouteParameters}, "params", false); err != nil {
+		t.Error(err)
+	}
+
+	if err := rp.Set([]string{utils.SortingParameters, "wrong"}, "param", false); err != utils.ErrWrongPath {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{utils.Routes, "wrong"}, "param", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 

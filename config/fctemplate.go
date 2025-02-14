@@ -28,7 +28,7 @@ import (
 )
 
 // NewFCTemplateFromFCTemplateJSONCfg creates a FCTemplate from json
-func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg, separator string) (*FCTemplate, error) {
+func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg) (*FCTemplate, error) {
 	fcTmp := new(FCTemplate)
 	var err error
 	if jsnCfg.Type != nil {
@@ -46,7 +46,7 @@ func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg, separator str
 		fcTmp.Filters = slices.Clone(*jsnCfg.Filters)
 	}
 	if jsnCfg.Value != nil {
-		if fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, separator); err != nil {
+		if fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, utils.RSRSep); err != nil {
 			return nil, err
 		}
 	}
@@ -118,10 +118,10 @@ type FCTemplate struct {
 }
 
 // FCTemplatesFromFCTemplatesJSONCfg will build a list of FCTemplates from json
-func FCTemplatesFromFCTemplatesJSONCfg(jsnCfgFlds []*FcTemplateJsonCfg, separator string) (retFields []*FCTemplate, err error) {
+func FCTemplatesFromFCTemplatesJSONCfg(jsnCfgFlds []*FcTemplateJsonCfg) (retFields []*FCTemplate, err error) {
 	retFields = make([]*FCTemplate, len(jsnCfgFlds))
 	for i, jsnFld := range jsnCfgFlds {
-		if retFields[i], err = NewFCTemplateFromFCTemplateJSONCfg(jsnFld, separator); err != nil {
+		if retFields[i], err = NewFCTemplateFromFCTemplateJSONCfg(jsnFld); err != nil {
 			return nil, err
 		}
 	}
@@ -202,7 +202,7 @@ func (sCft FCTemplates) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConf
 		return
 	}
 	for k, val := range jsnTemplateCfg {
-		if sCft[k], err = FCTemplatesFromFCTemplatesJSONCfg(val, cfg.generalCfg.RSRSep); err != nil {
+		if sCft[k], err = FCTemplatesFromFCTemplatesJSONCfg(val); err != nil {
 			return
 		}
 	}
@@ -210,12 +210,12 @@ func (sCft FCTemplates) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConf
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (sCft FCTemplates) AsMapInterface(separator string) any {
+func (sCft FCTemplates) AsMapInterface() any {
 	mp := make(map[string][]map[string]any)
 	for key, value := range sCft {
 		mp[key] = make([]map[string]any, len(value))
 		for i, item := range value {
-			mp[key][i] = item.AsMapInterface(separator)
+			mp[key][i] = item.AsMapInterface()
 		}
 	}
 	return mp
@@ -238,7 +238,7 @@ func (sCft FCTemplates) Clone() (cln FCTemplates) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]any) {
+func (fc *FCTemplate) AsMapInterface() (mp map[string]any) {
 	mp = make(map[string]any)
 	if fc.Tag != utils.EmptyString {
 		mp[utils.TagCfg] = fc.Tag
@@ -253,7 +253,7 @@ func (fc *FCTemplate) AsMapInterface(separator string) (mp map[string]any) {
 		mp[utils.FiltersCfg] = fc.Filters
 	}
 	if fc.Value != nil {
-		mp[utils.ValueCfg] = fc.Value.GetRule(separator)
+		mp[utils.ValueCfg] = fc.Value.GetRule()
 	}
 	if fc.Width != 0 {
 		mp[utils.WidthCfg] = fc.Width
@@ -366,7 +366,7 @@ func fcTemplatesEqual(v1, v2 []*FCTemplate) bool {
 	return true
 }
 
-func diffFcTemplateJsonCfg(d []*FcTemplateJsonCfg, v1, v2 []*FCTemplate, separator string) []*FcTemplateJsonCfg {
+func diffFcTemplateJsonCfg(d []*FcTemplateJsonCfg, v1, v2 []*FCTemplate) []*FcTemplateJsonCfg {
 	if !fcTemplatesEqual(v1, v2) {
 		d = make([]*FcTemplateJsonCfg, len(v2))
 		for i, v := range v2 {
@@ -384,7 +384,7 @@ func diffFcTemplateJsonCfg(d []*FcTemplateJsonCfg, v1, v2 []*FCTemplate, separat
 				d[i].Filters = &v.Filters
 			}
 			if v.Value != nil {
-				d[i].Value = utils.StringPointer(v.Value.GetRule(separator))
+				d[i].Value = utils.StringPointer(v.Value.GetRule())
 			}
 			if v.Width != 0 {
 				d[i].Width = utils.IntPointer(v.Width)
@@ -430,12 +430,12 @@ func diffFcTemplateJsonCfg(d []*FcTemplateJsonCfg, v1, v2 []*FCTemplate, separat
 	return d
 }
 
-func diffFcTemplatesJsonCfg(d FcTemplatesJsonCfg, v1, v2 FCTemplates, separator string) FcTemplatesJsonCfg {
+func diffFcTemplatesJsonCfg(d FcTemplatesJsonCfg, v1, v2 FCTemplates) FcTemplatesJsonCfg {
 	if d == nil {
 		d = make(FcTemplatesJsonCfg)
 	}
 	for k, val := range v2 {
-		d[k] = diffFcTemplateJsonCfg(d[k], v1[k], val, separator)
+		d[k] = diffFcTemplateJsonCfg(d[k], v1[k], val)
 	}
 	return d
 }

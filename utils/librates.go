@@ -669,7 +669,7 @@ type RemoveRPrfRates struct {
 	APIOpts map[string]any
 }
 
-func (rp *RateProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
+func (rp *RateProfile) Set(path []string, val any, newBranch bool) (err error) {
 	if len(path) == 0 {
 		return ErrWrongPath
 	}
