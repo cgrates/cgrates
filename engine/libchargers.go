@@ -54,7 +54,7 @@ func (cps ChargerProfiles) Sort() {
 	sort.Slice(cps, func(i, j int) bool { return cps[i].weight > cps[j].weight })
 }
 
-func (cp *ChargerProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
+func (cp *ChargerProfile) Set(path []string, val any, newBranch bool) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}

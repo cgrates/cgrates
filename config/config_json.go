@@ -151,7 +151,7 @@ func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn any)
 type Section interface {
 	SName() string
 	Load(*context.Context, ConfigDB, *CGRConfig) error
-	AsMapInterface(string) any
+	AsMapInterface() any
 	CloneSection() Section
 	// UpdateDB(*context.Context) // not know
 }
@@ -241,10 +241,10 @@ func (r Sections) LoadWithout(ctx *context.Context, db ConfigDB, cfg *CGRConfig,
 	}
 	return
 }
-func (r Sections) AsMapInterface(sep string) (m map[string]any) {
+func (r Sections) AsMapInterface() (m map[string]any) {
 	m = make(map[string]any)
 	for _, sec := range r {
-		m[sec.SName()] = sec.AsMapInterface(sep)
+		m[sec.SName()] = sec.AsMapInterface()
 	}
 	return
 }

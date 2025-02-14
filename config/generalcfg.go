@@ -51,7 +51,6 @@ type GeneralCfg struct {
 	LockingTimeout       time.Duration // locking mechanism timeout to avoid deadlocks
 	DigestSeparator      string        //
 	DigestEqual          string        //
-	RSRSep               string        // separator used to split RSRParser (by default is used ";")
 	MaxParallelConns     int           // the maximum number of connections used by the *parallel strategy
 
 	DecimalMaxScale     int
@@ -148,9 +147,6 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	if jsnGeneralCfg.Digest_equal != nil {
 		gencfg.DigestEqual = *jsnGeneralCfg.Digest_equal
 	}
-	if jsnGeneralCfg.Rsr_separator != nil {
-		gencfg.RSRSep = *jsnGeneralCfg.Rsr_separator
-	}
 	if jsnGeneralCfg.Max_parallel_conns != nil {
 		gencfg.MaxParallelConns = *jsnGeneralCfg.Max_parallel_conns
 	}
@@ -174,7 +170,7 @@ func (gencfg *GeneralCfg) loadFromJSONCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (gencfg GeneralCfg) AsMapInterface(string) any {
+func (gencfg GeneralCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.MetaExporterIDs: gencfg.Opts.ExporterIDs,
 	}
@@ -194,7 +190,6 @@ func (gencfg GeneralCfg) AsMapInterface(string) any {
 		utils.MaxReconnectIntervalCfg: "0",
 		utils.DigestSeparatorCfg:      gencfg.DigestSeparator,
 		utils.DigestEqualCfg:          gencfg.DigestEqual,
-		utils.RSRSepCfg:               gencfg.RSRSep,
 		utils.MaxParallelConnsCfg:     gencfg.MaxParallelConns,
 		utils.LockingTimeoutCfg:       "0",
 		utils.ConnectTimeoutCfg:       "0",
@@ -261,7 +256,6 @@ func (gencfg GeneralCfg) Clone() *GeneralCfg {
 		LockingTimeout:       gencfg.LockingTimeout,
 		DigestSeparator:      gencfg.DigestSeparator,
 		DigestEqual:          gencfg.DigestEqual,
-		RSRSep:               gencfg.RSRSep,
 		MaxParallelConns:     gencfg.MaxParallelConns,
 		DecimalMaxScale:      gencfg.DecimalMaxScale,
 		DecimalMinScale:      gencfg.DecimalMinScale,
@@ -295,7 +289,6 @@ type GeneralJsonCfg struct {
 	Locking_timeout        *string
 	Digest_separator       *string
 	Digest_equal           *string
-	Rsr_separator          *string
 	Max_parallel_conns     *int
 
 	Decimal_max_scale     *int
@@ -370,9 +363,6 @@ func diffGeneralJsonCfg(d *GeneralJsonCfg, v1, v2 *GeneralCfg) *GeneralJsonCfg {
 	}
 	if v1.DigestEqual != v2.DigestEqual {
 		d.Digest_equal = utils.StringPointer(v2.DigestEqual)
-	}
-	if v1.RSRSep != v2.RSRSep {
-		d.Rsr_separator = utils.StringPointer(v2.RSRSep)
 	}
 	if v1.MaxParallelConns != v2.MaxParallelConns {
 		d.Max_parallel_conns = utils.IntPointer(v2.MaxParallelConns)

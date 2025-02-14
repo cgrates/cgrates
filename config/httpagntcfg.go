@@ -30,14 +30,14 @@ import (
 type HTTPAgentCfgs []*HTTPAgentCfg
 
 // loadHTTPAgentCfg loads the HttpAgent section of the configuration
-func (hcfgs *HTTPAgentCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (hcfgs *HTTPAgentCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnHTTPAgntCfg := new([]*HttpAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, HTTPAgentJSON, jsnHTTPAgntCfg); err != nil {
 		return
 	}
-	return hcfgs.loadFromJSONCfg(jsnHTTPAgntCfg, cfg.generalCfg.RSRSep)
+	return hcfgs.loadFromJSONCfg(jsnHTTPAgntCfg)
 }
-func (hcfgs *HTTPAgentCfgs) loadFromJSONCfg(jsnHTTPAgntCfg *[]*HttpAgentJsonCfg, separator string) (err error) {
+func (hcfgs *HTTPAgentCfgs) loadFromJSONCfg(jsnHTTPAgntCfg *[]*HttpAgentJsonCfg) (err error) {
 	if jsnHTTPAgntCfg == nil {
 		return nil
 	}
@@ -54,7 +54,7 @@ func (hcfgs *HTTPAgentCfgs) loadFromJSONCfg(jsnHTTPAgntCfg *[]*HttpAgentJsonCfg,
 			}
 		}
 
-		if err := hac.loadFromJSONCfg(jsnCfg, separator); err != nil {
+		if err := hac.loadFromJSONCfg(jsnCfg); err != nil {
 			return err
 		}
 		if !haveID {
@@ -65,10 +65,10 @@ func (hcfgs *HTTPAgentCfgs) loadFromJSONCfg(jsnHTTPAgntCfg *[]*HttpAgentJsonCfg,
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (hcfgs HTTPAgentCfgs) AsMapInterface(separator string) any {
+func (hcfgs HTTPAgentCfgs) AsMapInterface() any {
 	mp := make([]map[string]any, len(hcfgs))
 	for i, item := range hcfgs {
-		mp[i] = item.AsMapInterface(separator)
+		mp[i] = item.AsMapInterface()
 	}
 	return mp
 }
@@ -95,7 +95,7 @@ type HTTPAgentCfg struct {
 	RequestProcessors []*RequestProcessor
 }
 
-func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg, separator string) (err error) {
+func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -122,12 +122,12 @@ func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 	if jsnCfg.Reply_payload != nil {
 		ha.ReplyPayload = *jsnCfg.Reply_payload
 	}
-	ha.RequestProcessors, err = appendRequestProcessors(ha.RequestProcessors, jsnCfg.Request_processors, separator)
+	ha.RequestProcessors, err = appendRequestProcessors(ha.RequestProcessors, jsnCfg.Request_processors)
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (ha *HTTPAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+func (ha *HTTPAgentCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
 		utils.IDCfg:             ha.ID,
 		utils.URLCfg:            ha.URL,
@@ -149,7 +149,7 @@ func (ha *HTTPAgentCfg) AsMapInterface(separator string) (initialMP map[string]a
 	}
 	requestProcessors := make([]map[string]any, len(ha.RequestProcessors))
 	for i, item := range ha.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface(separator)
+		requestProcessors[i] = item.AsMapInterface()
 	}
 	initialMP[utils.RequestProcessorsCfg] = requestProcessors
 	return
@@ -184,7 +184,7 @@ type HttpAgentJsonCfg struct {
 	Request_processors *[]*ReqProcessorJsnCfg
 }
 
-func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg, separator string) *HttpAgentJsonCfg {
+func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg) *HttpAgentJsonCfg {
 	if d == nil {
 		d = new(HttpAgentJsonCfg)
 	}
@@ -204,7 +204,7 @@ func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg, separator s
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
 
-	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }
 
@@ -242,14 +242,14 @@ func getHTTPAgentCfg(d HTTPAgentCfgs, id string) *HTTPAgentCfg {
 	}
 	return new(HTTPAgentCfg)
 }
-func diffHttpAgentsJsonCfg(d *[]*HttpAgentJsonCfg, v1, v2 HTTPAgentCfgs, separator string) *[]*HttpAgentJsonCfg {
+func diffHttpAgentsJsonCfg(d *[]*HttpAgentJsonCfg, v1, v2 HTTPAgentCfgs) *[]*HttpAgentJsonCfg {
 	if d == nil {
 		d = new([]*HttpAgentJsonCfg)
 	}
 	if !equalsHTTPAgentCfgs(v1, v2) {
 		for _, val := range v2 {
 			dv, i := getHttpAgentJsonCfg(*d, val.ID)
-			dv = diffHttpAgentJsonCfg(dv, getHTTPAgentCfg(v1, val.ID), val, separator)
+			dv = diffHttpAgentJsonCfg(dv, getHTTPAgentCfg(v1, val.ID), val)
 			if i == -1 {
 				*d = append(*d, dv)
 			} else {

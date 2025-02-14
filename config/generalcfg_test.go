@@ -61,7 +61,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		DigestSeparator:  ",",
 		DigestEqual:      ":",
 		MaxParallelConns: 100,
-		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*DynamicStringSliceOpt{},
@@ -126,7 +125,6 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 			"locking_timeout": "1s",									
 			"digest_separator": ",",								
 			"digest_equal": ":",									
-			"rsr_separator": ";",									
 			"max_parallel_conns": 100,								
 		},
 	}`
@@ -149,7 +147,6 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 		utils.LockingTimeoutCfg:       "1s",
 		utils.DigestSeparatorCfg:      ",",
 		utils.DigestEqualCfg:          ":",
-		utils.RSRSepCfg:               ";",
 		utils.MaxParallelConnsCfg:     100,
 		utils.DecimalMaxScaleCfg:      0,
 		utils.DecimalMinScaleCfg:      0,
@@ -161,7 +158,7 @@ func TestGeneralCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.generalCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -196,7 +193,6 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 		utils.LockingTimeoutCfg:       "0",
 		utils.DigestSeparatorCfg:      ",",
 		utils.DigestEqualCfg:          ":",
-		utils.RSRSepCfg:               ";",
 		utils.MaxParallelConnsCfg:     100,
 		utils.DecimalMaxScaleCfg:      0,
 		utils.DecimalMinScaleCfg:      0,
@@ -208,7 +204,7 @@ func TestGeneralCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.generalCfg.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.generalCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, recevied %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -230,7 +226,6 @@ func TestGeneralCfgClone(t *testing.T) {
 		DigestSeparator:  ",",
 		DigestEqual:      ":",
 		MaxParallelConns: 100,
-		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*DynamicStringSliceOpt{
@@ -268,7 +263,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		DigestSeparator:  "",
 		DigestEqual:      "",
 		MaxParallelConns: 50,
-		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*DynamicStringSliceOpt{
@@ -300,7 +294,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		DigestSeparator:  ",",
 		DigestEqual:      ":",
 		MaxParallelConns: 100,
-		RSRSep:           ";",
 		DefaultCaching:   utils.MetaReload,
 		LockingTimeout:   2 * time.Second,
 		Opts: &GeneralOpts{
@@ -333,7 +326,6 @@ func TestDiffGeneralJsonCfg(t *testing.T) {
 		Reply_timeout:        utils.StringPointer("2s"),
 		Locking_timeout:      utils.StringPointer("2s"),
 		Digest_separator:     utils.StringPointer(","),
-		Rsr_separator:        utils.StringPointer(";"),
 		Digest_equal:         utils.StringPointer(":"),
 		Max_parallel_conns:   utils.IntPointer(100),
 		Opts: &GeneralOptsJson{
@@ -383,7 +375,6 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		DigestSeparator:  "",
 		DigestEqual:      "",
 		MaxParallelConns: 50,
-		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		Opts:             &GeneralOpts{},
 	}
@@ -404,7 +395,6 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		DigestSeparator:  "",
 		DigestEqual:      "",
 		MaxParallelConns: 50,
-		RSRSep:           "",
 		DefaultCaching:   utils.MetaClear,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*DynamicStringSliceOpt{},

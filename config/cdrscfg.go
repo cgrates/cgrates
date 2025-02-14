@@ -214,7 +214,7 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (cdrscfg CdrsCfg) AsMapInterface(string) any {
+func (cdrscfg CdrsCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.MetaAccounts:   cdrscfg.Opts.Accounts,
 		utils.MetaAttributes: cdrscfg.Opts.Attributes,

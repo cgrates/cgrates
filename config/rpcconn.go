@@ -83,7 +83,7 @@ func (rC RPCConns) loadFromJSONCfg(jsn RPCConnsJson) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (rC RPCConns) AsMapInterface(string) any {
+func (rC RPCConns) AsMapInterface() any {
 	rpcConns := make(map[string]any)
 	for key, value := range rC {
 		rpcConns[key] = value.AsMapInterface()

@@ -174,7 +174,7 @@ func (rCfg *RateSCfg) loadFromJSONCfg(jsnCfg *RateSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (rCfg RateSCfg) AsMapInterface(string) any {
+func (rCfg RateSCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.MetaProfileIDs:           rCfg.Opts.ProfileIDs,
 		utils.MetaStartTime:            rCfg.Opts.StartTime,

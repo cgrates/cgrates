@@ -31,7 +31,7 @@ import (
 // getSectionAsMap returns a section from config as a map[string]interface
 func (cfg *CGRConfig) getSectionAsMap(section string) (mp any, err error) {
 	if sec, has := cfg.sections.Get(section); has {
-		mp = sec.AsMapInterface(cfg.GeneralCfg().RSRSep)
+		mp = sec.AsMapInterface()
 		return
 	}
 	err = errors.New("Invalid section ")
@@ -114,7 +114,7 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 		return
 	}
 	if sections.Size() == len(cfg.sections) {
-		mp = cfg.AsMapInterface(cfg.GeneralCfg().RSRSep)
+		mp = cfg.AsMapInterface()
 	} else {
 		for section := range sections {
 			var val any
@@ -413,13 +413,13 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffERsJsonCfg(jsn, v1.ERsCfg(), v2.ERsCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffERsJsonCfg(jsn, v1.ERsCfg(), v2.ERsCfg()))
 	case EEsJSON:
 		jsn := new(EEsJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffEEsJsonCfg(jsn, v1.EEsCfg(), v2.EEsCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffEEsJsonCfg(jsn, v1.EEsCfg(), v2.EEsCfg()))
 	case SessionSJSON:
 		jsn := new(SessionSJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
@@ -449,31 +449,31 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffDiameterAgentJsonCfg(jsn, v1.DiameterAgentCfg(), v2.DiameterAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffDiameterAgentJsonCfg(jsn, v1.DiameterAgentCfg(), v2.DiameterAgentCfg()))
 	case RadiusAgentJSON:
 		jsn := new(RadiusAgentJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, v1.RadiusAgentCfg(), v2.RadiusAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffRadiusAgentJsonCfg(jsn, v1.RadiusAgentCfg(), v2.RadiusAgentCfg()))
 	case HTTPAgentJSON:
 		jsn := new([]*HttpAgentJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffHttpAgentsJsonCfg(jsn, v1.HTTPAgentCfg(), v2.HTTPAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffHttpAgentsJsonCfg(jsn, v1.HTTPAgentCfg(), v2.HTTPAgentCfg()))
 	case JanusAgentJSON:
 		jsn := new(JanusAgentJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffJanusAgentSJsonCfg(jsn, v1.JanusAgentCfg(), v2.JanusAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffJanusAgentSJsonCfg(jsn, v1.JanusAgentCfg(), v2.JanusAgentCfg()))
 	case DNSAgentJSON:
 		jsn := new(DNSAgentJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffDNSAgentJsonCfg(jsn, v1.DNSAgentCfg(), v2.DNSAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffDNSAgentJsonCfg(jsn, v1.DNSAgentCfg(), v2.DNSAgentCfg()))
 	case AttributeSJSON:
 		jsn := new(AttributeSJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
@@ -527,13 +527,13 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 		if err = db.GetSection(ctx, section, &jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffLoadersJsonCfg(jsn, v1.LoaderCfg(), v2.LoaderCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffLoadersJsonCfg(jsn, v1.LoaderCfg(), v2.LoaderCfg()))
 	case SureTaxJSON:
 		jsn := new(SureTaxJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffSureTaxJsonCfg(jsn, v1.SureTaxCfg(), v2.SureTaxCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffSureTaxJsonCfg(jsn, v1.SureTaxCfg(), v2.SureTaxCfg()))
 	case RegistrarCJSON:
 		jsn := new(RegistrarCJsonCfgs)
 		if err = db.GetSection(ctx, section, jsn); err != nil {
@@ -581,13 +581,13 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 		if err = db.GetSection(ctx, section, jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffSIPAgentJsonCfg(jsn, v1.SIPAgentCfg(), v2.SIPAgentCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffSIPAgentJsonCfg(jsn, v1.SIPAgentCfg(), v2.SIPAgentCfg()))
 	case TemplatesJSON:
 		jsn := make(FcTemplatesJsonCfg)
 		if err = db.GetSection(ctx, section, &jsn); err != nil {
 			return
 		}
-		return db.SetSection(ctx, section, diffFcTemplatesJsonCfg(jsn, v1.TemplatesCfg(), v2.TemplatesCfg(), v2.GeneralCfg().RSRSep))
+		return db.SetSection(ctx, section, diffFcTemplatesJsonCfg(jsn, v1.TemplatesCfg(), v2.TemplatesCfg()))
 	case ConfigSJSON:
 		jsn := new(ConfigSCfgJson)
 		if err = db.GetSection(ctx, section, jsn); err != nil {

@@ -54,7 +54,7 @@ func (ban *APIBanCfg) loadFromJSONCfg(jsnCfg *APIBanJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (ban APIBanCfg) AsMapInterface(string) any {
+func (ban APIBanCfg) AsMapInterface() any {
 	return map[string]any{
 		utils.EnabledCfg: ban.Enabled,
 		utils.KeysCfg:    ban.Keys,

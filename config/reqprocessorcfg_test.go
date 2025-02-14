@@ -107,7 +107,7 @@ func TestDiffReqProcessorJsnCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffReqProcessorJsnCfg(d, v1, v2, ";")
+	rcv := diffReqProcessorJsnCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -143,7 +143,7 @@ func TestDiffReqProcessorJsnCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	rcv = diffReqProcessorJsnCfg(d, v1, v2, ";")
+	rcv = diffReqProcessorJsnCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -236,7 +236,7 @@ func TestDiffReqProcessorsJsnCfg(t *testing.T) {
 		},
 	}
 
-	rcv := diffReqProcessorsJsnCfg(d, v1, v2, ";")
+	rcv := diffReqProcessorsJsnCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -267,7 +267,7 @@ func TestDiffReqProcessorsJsnCfg(t *testing.T) {
 			},
 		},
 	}
-	rcv = diffReqProcessorsJsnCfg(d, v1, v2, ";")
+	rcv = diffReqProcessorsJsnCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
@@ -278,7 +278,7 @@ func TestDiffReqProcessorsJsnCfg(t *testing.T) {
 	expected = &[]*ReqProcessorJsnCfg{
 		{},
 	}
-	rcv = diffReqProcessorsJsnCfg(d, v1, v2, ";")
+	rcv = diffReqProcessorsJsnCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

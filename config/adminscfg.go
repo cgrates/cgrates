@@ -66,7 +66,7 @@ func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (aCfg AdminSCfg) AsMapInterface(string) any {
+func (aCfg AdminSCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg: aCfg.Enabled,
 	}

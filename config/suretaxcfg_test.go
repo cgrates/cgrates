@@ -344,7 +344,7 @@ func TestSureTaxCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.sureTaxCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := cgrCfg.sureTaxCfg.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -484,14 +484,14 @@ func TestDiffSureTaxJson(t *testing.T) {
 		Tax_exemption_code_list: utils.StringPointer(utils.EmptyString),
 	}
 
-	rcv := diffSureTaxJsonCfg(d, v1, v2, ";")
+	rcv := diffSureTaxJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
 	v1 = v2
 	expected = &SureTaxJsonCfg{}
-	rcv = diffSureTaxJsonCfg(d, v1, v2, ";")
+	rcv = diffSureTaxJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

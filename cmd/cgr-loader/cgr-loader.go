@@ -345,7 +345,7 @@ func main() {
 		return
 	}
 	if *printConfig {
-		cfgJSON := utils.ToIJSON(ldrCfg.AsMapInterface(ldrCfg.GeneralCfg().RSRSep))
+		cfgJSON := utils.ToIJSON(ldrCfg.AsMapInterface())
 		log.Printf("Configuration loaded from %q:\n%s", *cfgPath, cfgJSON)
 	}
 	if *remove {

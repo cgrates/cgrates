@@ -42,12 +42,12 @@ type JanusAgentCfg struct {
 	RequestProcessors []*RequestProcessor
 }
 
-func (jacfg *JanusAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (jacfg *JanusAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnJACfg := new(JanusAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, JanusAgentJSON, jsnJACfg); err != nil {
 		return
 	}
-	return jacfg.loadFromJSONCfg(jsnJACfg, cfg.generalCfg.RSRSep)
+	return jacfg.loadFromJSONCfg(jsnJACfg)
 }
 
 func (jc *JanusConn) loadFromJSONCfg(jsnCfg *JanusConnJsonCfg) (err error) {
@@ -89,7 +89,7 @@ func (jc *JanusConn) Clone() (cln *JanusConn) {
 	return
 }
 
-func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg, separator string) (err error) {
+func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg) (err error) {
 	if jaCfg == nil {
 		return
 	}
@@ -115,19 +115,19 @@ func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg, separator
 			jaCfg.JanusConns[idx] = jc
 		}
 	}
-	jaCfg.RequestProcessors, err = appendRequestProcessors(jaCfg.RequestProcessors, jsnCfg.Request_processors, separator)
+	jaCfg.RequestProcessors, err = appendRequestProcessors(jaCfg.RequestProcessors, jsnCfg.Request_processors)
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (jaCfg JanusAgentCfg) AsMapInterface(separator string) any {
+func (jaCfg JanusAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg: jaCfg.Enabled,
 		utils.URLCfg:     jaCfg.URL,
 	}
 	requestProcessors := make([]map[string]any, len(jaCfg.RequestProcessors))
 	for i, item := range jaCfg.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface(separator)
+		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 	if jaCfg.SessionSConns != nil {
@@ -235,7 +235,7 @@ func diffJanusConnsJsonCfg(d *[]*JanusConnJsonCfg, v1, v2 []*JanusConn) *[]*Janu
 	return d
 }
 
-func diffJanusAgentSJsonCfg(d *JanusAgentJsonCfg, v1, v2 *JanusAgentCfg, separator string) *JanusAgentJsonCfg {
+func diffJanusAgentSJsonCfg(d *JanusAgentJsonCfg, v1, v2 *JanusAgentCfg) *JanusAgentJsonCfg {
 	if d == nil {
 		d = new(JanusAgentJsonCfg)
 	}
@@ -248,7 +248,7 @@ func diffJanusAgentSJsonCfg(d *JanusAgentJsonCfg, v1, v2 *JanusAgentCfg, separat
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
 	}
-	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	d.Janus_conns = diffJanusConnsJsonCfg(d.Janus_conns, v1.JanusConns, v2.JanusConns)
 	return d
 }

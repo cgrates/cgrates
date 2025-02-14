@@ -73,7 +73,7 @@ func (rnk *RankingSCfg) loadFromJSONCfg(jsnCfg *RankingSJsonCfg) (err error) {
 	return
 }
 
-func (rnk *RankingSCfg) AsMapInterface(string) any {
+func (rnk *RankingSCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:        rnk.Enabled,
 		utils.StoreIntervalCfg:  utils.EmptyString,

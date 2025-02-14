@@ -737,7 +737,7 @@ func testAttrITV1ToV5(t *testing.T) {
 	}
 
 	// Construct the exepected output
-	sbstPrsr, err := config.NewRSRParsers("Al1", config.CgrConfig().GeneralCfg().RSRSep)
+	sbstPrsr, err := config.NewRSRParsers("Al1", utils.RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}
@@ -825,7 +825,7 @@ func testAttrITV1ToV5(t *testing.T) {
 
 func testAttrITV2ToV5(t *testing.T) {
 	// contruct the first v2 attributeProfile with all fields filled up
-	sbstPrsr, err := config.NewRSRParsers("Al1", config.CgrConfig().GeneralCfg().RSRSep)
+	sbstPrsr, err := config.NewRSRParsers("Al1", utils.RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}
@@ -953,7 +953,7 @@ func testAttrITV2ToV5(t *testing.T) {
 
 func testAttrITV3ToV5(t *testing.T) {
 	// contruct the first v3 attributeProfile with all fields filled up
-	sbstPrsr, err := config.NewRSRParsers("Al1", config.CgrConfig().GeneralCfg().RSRSep)
+	sbstPrsr, err := config.NewRSRParsers("Al1", utils.RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}
@@ -1089,7 +1089,7 @@ func testAttrITV3ToV5(t *testing.T) {
 func testAttrITdryRunV2ToV5(t *testing.T) {
 	// Test with dryRun on true
 	// contruct the v2 attributeProfile with all fields filled up
-	sbstPrsr, err := config.NewRSRParsers("Al1", config.CgrConfig().GeneralCfg().RSRSep)
+	sbstPrsr, err := config.NewRSRParsers("Al1", utils.RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}
@@ -1148,7 +1148,7 @@ func testAttrITdryRunV2ToV5(t *testing.T) {
 func testAttrITdryRunV3ToV5(t *testing.T) {
 	// Test with dryRun on true
 	// contruct the v3 attributeProfile with all fields filled up
-	sbstPrsr, err := config.NewRSRParsers("Al1", config.CgrConfig().GeneralCfg().RSRSep)
+	sbstPrsr, err := config.NewRSRParsers("Al1", utils.RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}

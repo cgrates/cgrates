@@ -35,7 +35,7 @@ type RequestProcessor struct {
 	ReplyFields   []*FCTemplate
 }
 
-func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep string) (err error) {
+func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -52,17 +52,17 @@ func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 		rp.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Tenant != nil {
-		if rp.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, sep); err != nil {
+		if rp.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, utils.RSRSep); err != nil {
 			return
 		}
 	}
 	if jsnCfg.Request_fields != nil {
-		if rp.RequestFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Request_fields, sep); err != nil {
+		if rp.RequestFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Request_fields); err != nil {
 			return
 		}
 	}
 	if jsnCfg.Reply_fields != nil {
-		if rp.ReplyFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Reply_fields, sep); err != nil {
+		if rp.ReplyFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Reply_fields); err != nil {
 			return
 		}
 	}
@@ -70,7 +70,7 @@ func (rp *RequestProcessor) loadFromJSONCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[string]any) {
+func (rp *RequestProcessor) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
 		utils.IDCfg:       rp.ID,
 		utils.FiltersCfg:  slices.Clone(rp.Filters),
@@ -78,19 +78,19 @@ func (rp *RequestProcessor) AsMapInterface(separator string) (initialMP map[stri
 		utils.TimezoneCfg: rp.Timezone,
 	}
 	if rp.Tenant != nil {
-		initialMP[utils.TenantCfg] = rp.Tenant.GetRule(separator)
+		initialMP[utils.TenantCfg] = rp.Tenant.GetRule()
 	}
 	if rp.RequestFields != nil {
 		requestFields := make([]map[string]any, len(rp.RequestFields))
 		for i, item := range rp.RequestFields {
-			requestFields[i] = item.AsMapInterface(separator)
+			requestFields[i] = item.AsMapInterface()
 		}
 		initialMP[utils.RequestFieldsCfg] = requestFields
 	}
 	if rp.ReplyFields != nil {
 		replyFields := make([]map[string]any, len(rp.ReplyFields))
 		for i, item := range rp.ReplyFields {
-			replyFields[i] = item.AsMapInterface(separator)
+			replyFields[i] = item.AsMapInterface()
 		}
 		initialMP[utils.ReplyFieldsCfg] = replyFields
 	}
@@ -133,15 +133,15 @@ type ReqProcessorJsnCfg struct {
 	Reply_fields   *[]*FcTemplateJsonCfg
 }
 
-func diffReqProcessorJsnCfg(d *ReqProcessorJsnCfg, v1, v2 *RequestProcessor, separator string) *ReqProcessorJsnCfg {
+func diffReqProcessorJsnCfg(d *ReqProcessorJsnCfg, v1, v2 *RequestProcessor) *ReqProcessorJsnCfg {
 	if d == nil {
 		d = new(ReqProcessorJsnCfg)
 	}
 	if v1.ID != v2.ID {
 		d.ID = utils.StringPointer(v2.ID)
 	}
-	tnt1 := v1.Tenant.GetRule(separator)
-	tnt2 := v2.Tenant.GetRule(separator)
+	tnt1 := v1.Tenant.GetRule()
+	tnt2 := v2.Tenant.GetRule()
 	if tnt1 != tnt2 {
 		d.Tenant = utils.StringPointer(tnt2)
 	}
@@ -160,7 +160,7 @@ func diffReqProcessorJsnCfg(d *ReqProcessorJsnCfg, v1, v2 *RequestProcessor, sep
 	if d.Request_fields != nil {
 		req = *d.Request_fields
 	}
-	req = diffFcTemplateJsonCfg(req, v1.RequestFields, v2.RequestFields, separator)
+	req = diffFcTemplateJsonCfg(req, v1.RequestFields, v2.RequestFields)
 	if req != nil {
 		d.Request_fields = &req
 	}
@@ -168,7 +168,7 @@ func diffReqProcessorJsnCfg(d *ReqProcessorJsnCfg, v1, v2 *RequestProcessor, sep
 	if d.Reply_fields != nil {
 		rply = *d.Reply_fields
 	}
-	rply = diffFcTemplateJsonCfg(rply, v1.ReplyFields, v2.ReplyFields, separator)
+	rply = diffFcTemplateJsonCfg(rply, v1.ReplyFields, v2.ReplyFields)
 	if rply != nil {
 		d.Reply_fields = &rply
 	}
@@ -192,13 +192,13 @@ func getRequestProcessor(d []*RequestProcessor, id string) *RequestProcessor {
 	return new(RequestProcessor)
 }
 
-func diffReqProcessorsJsnCfg(d *[]*ReqProcessorJsnCfg, v1, v2 []*RequestProcessor, separator string) *[]*ReqProcessorJsnCfg {
+func diffReqProcessorsJsnCfg(d *[]*ReqProcessorJsnCfg, v1, v2 []*RequestProcessor) *[]*ReqProcessorJsnCfg {
 	if d == nil || *d == nil {
 		d = &[]*ReqProcessorJsnCfg{}
 	}
 	for _, val := range v2 {
 		dv, i := getReqProcessorJsnCfg(*d, val.ID)
-		dv = diffReqProcessorJsnCfg(dv, getRequestProcessor(v1, val.ID), val, separator)
+		dv = diffReqProcessorJsnCfg(dv, getRequestProcessor(v1, val.ID), val)
 		if i == -1 {
 			*d = append(*d, dv)
 		} else {
@@ -208,7 +208,7 @@ func diffReqProcessorsJsnCfg(d *[]*ReqProcessorJsnCfg, v1, v2 []*RequestProcesso
 	return d
 }
 
-func appendRequestProcessors(to []*RequestProcessor, from *[]*ReqProcessorJsnCfg, separator string) (_ []*RequestProcessor, err error) {
+func appendRequestProcessors(to []*RequestProcessor, from *[]*ReqProcessorJsnCfg) (_ []*RequestProcessor, err error) {
 	if from == nil {
 		return to, nil
 	}
@@ -224,7 +224,7 @@ func appendRequestProcessors(to []*RequestProcessor, from *[]*ReqProcessorJsnCfg
 				}
 			}
 		}
-		if err = rp.loadFromJSONCfg(rpJsn, separator); err != nil {
+		if err = rp.loadFromJSONCfg(rpJsn); err != nil {
 			return
 		}
 		if !haveID {

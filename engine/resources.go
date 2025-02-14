@@ -1023,7 +1023,7 @@ func (rS *ResourceS) V1GetResourceWithConfig(ctx *context.Context, arg *utils.Te
 	return
 }
 
-func (rp *ResourceProfile) Set(path []string, val any, _ bool, _ string) (err error) {
+func (rp *ResourceProfile) Set(path []string, val any, _ bool) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}

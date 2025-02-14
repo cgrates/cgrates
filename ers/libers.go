@@ -31,7 +31,7 @@ import (
 )
 
 // mergePartialEvents will unite the events using the reader configuration
-func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fltrS *engine.FilterS, dftTnt, dftTmz, rsrSep string) (cgrEv *utils.CGREvent, err error) {
+func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fltrS *engine.FilterS, dftTnt, dftTmz string) (cgrEv *utils.CGREvent, err error) {
 	cgrEv = cgrEvs[0]     // by default there is at least one event
 	if len(cgrEvs) != 1 { // need to merge the incoming events
 		// prepare the field after which the events are ordered
@@ -40,7 +40,7 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 			ordFld = *cfg.Opts.PartialOrderField
 		}
 		var ordPath config.RSRParsers
-		if ordPath, err = config.NewRSRParsers(ordFld, rsrSep); err != nil { // convert the option to rsrParsers
+		if ordPath, err = config.NewRSRParsers(ordFld, utils.RSRSep); err != nil { // convert the option to rsrParsers
 			return nil, err
 		}
 

@@ -69,7 +69,7 @@ func (lstcfg *ListenCfg) loadFromJSONCfg(jsnListenCfg *ListenJsonCfg) (err error
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (lstcfg ListenCfg) AsMapInterface(string) any {
+func (lstcfg ListenCfg) AsMapInterface() any {
 	return map[string]any{
 		utils.RPCJSONListenCfg:    lstcfg.RPCJSONListen,
 		utils.RPCGOBListenCfg:     lstcfg.RPCGOBListen,

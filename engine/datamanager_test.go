@@ -7546,7 +7546,7 @@ func TestDMSetAttributeProfileComputeHashErr(t *testing.T) {
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg.CacheCfg(), cM)
-	value := config.NewRSRParsersMustCompile("31 0a 0a 32 0a 0a 33 0a 0a 34 0a 0a 35 0a 0a 36 0a 0a 37 0a 0a 38 0a 0a 39 0a 0a 31 30 0a 0a 31", config.CgrConfig().GeneralCfg().RSRSep)
+	value := config.NewRSRParsersMustCompile("31 0a 0a 32 0a 0a 33 0a 0a 34 0a 0a 35 0a 0a 36 0a 0a 37 0a 0a 38 0a 0a 39 0a 0a 31 30 0a 0a 31", utils.RSRSep)
 	attrPrfl := &AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",

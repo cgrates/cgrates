@@ -53,10 +53,10 @@ func (eeS *EEsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (
 	if err = jsnCfg.GetSection(ctx, EEsJSON, jsnEEsCfg); err != nil {
 		return
 	}
-	return eeS.loadFromJSONCfg(jsnEEsCfg, cfg.templates, cfg.generalCfg.RSRSep)
+	return eeS.loadFromJSONCfg(jsnEEsCfg, cfg.templates)
 }
 
-func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
+func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -73,10 +73,10 @@ func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][
 	if jsnCfg.Attributes_conns != nil {
 		eeS.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
-	return eeS.appendEEsExporters(jsnCfg.Exporters, msgTemplates, sep)
+	return eeS.appendEEsExporters(jsnCfg.Exporters, msgTemplates)
 }
 
-func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
+func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
 	if exporters == nil {
 		return
 	}
@@ -94,7 +94,7 @@ func (eeS *EEsCfg) appendEEsExporters(exporters *[]*EventExporterJsonCfg, msgTem
 			exp = getDftEvExpCfg()
 			eeS.Exporters = append(eeS.Exporters, exp)
 		}
-		if err = exp.loadFromJSONCfg(jsnExp, msgTemplates, separator); err != nil {
+		if err = exp.loadFromJSONCfg(jsnExp, msgTemplates); err != nil {
 			return
 		}
 	}
@@ -124,7 +124,7 @@ func (eeS EEsCfg) Clone() (cln *EEsCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (eeS EEsCfg) AsMapInterface(separator string) any {
+func (eeS EEsCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg: eeS.Enabled,
 	}
@@ -141,7 +141,7 @@ func (eeS EEsCfg) AsMapInterface(separator string) any {
 	if eeS.Exporters != nil {
 		exporters := make([]map[string]any, len(eeS.Exporters))
 		for i, item := range eeS.Exporters {
-			exporters[i] = item.AsMapInterface(separator)
+			exporters[i] = item.AsMapInterface()
 		}
 		mp[utils.ExportersCfg] = exporters
 	}
@@ -504,7 +504,7 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	return
 }
 
-func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate, separator string) (err error) {
+func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
 	if jsnEec == nil {
 		return
 	}
@@ -545,7 +545,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.ConcurrentRequests = *jsnEec.Concurrent_requests
 	}
 	if jsnEec.Fields != nil {
-		eeC.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnEec.Fields, separator)
+		eeC.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnEec.Fields)
 		if err != nil {
 			return
 		}
@@ -919,7 +919,7 @@ func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+func (eeC *EventExporterCfg) AsMapInterface() (initialMP map[string]any) {
 	flgs := eeC.Flags.SliceFlags()
 	if flgs == nil {
 		flgs = []string{}
@@ -946,7 +946,7 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 	if eeC.Fields != nil {
 		fields := make([]map[string]any, 0, len(eeC.Fields))
 		for _, fld := range eeC.Fields {
-			fields = append(fields, fld.AsMapInterface(separator))
+			fields = append(fields, fld.AsMapInterface())
 		}
 		initialMP[utils.FieldsCfg] = fields
 	}
@@ -1662,7 +1662,7 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 	return d
 }
 
-func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg, separator string) *EventExporterJsonCfg {
+func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg) *EventExporterJsonCfg {
 	if d == nil {
 		d = new(EventExporterJsonCfg)
 	}
@@ -1709,7 +1709,7 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg,
 	if d.Fields != nil {
 		flds = *d.Fields
 	}
-	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields, separator)
+	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields)
 	if flds != nil {
 		d.Fields = &flds
 	}
@@ -1742,13 +1742,13 @@ func getEventExporterCfg(d []*EventExporterCfg, id string) *EventExporterCfg {
 	}
 }
 
-func diffEventExportersJsonCfg(d *[]*EventExporterJsonCfg, v1, v2 []*EventExporterCfg, separator string) *[]*EventExporterJsonCfg {
+func diffEventExportersJsonCfg(d *[]*EventExporterJsonCfg, v1, v2 []*EventExporterCfg) *[]*EventExporterJsonCfg {
 	if d == nil || *d == nil {
 		d = &[]*EventExporterJsonCfg{}
 	}
 	for _, val := range v2 {
 		dv, i := getEventExporterJsonCfg(*d, val.ID)
-		dv = diffEventExporterJsonCfg(dv, getEventExporterCfg(v1, val.ID), val, separator)
+		dv = diffEventExporterJsonCfg(dv, getEventExporterCfg(v1, val.ID), val)
 		if i == -1 {
 			*d = append(*d, dv)
 		} else {
@@ -1767,7 +1767,7 @@ type EEsJsonCfg struct {
 	Exporters        *[]*EventExporterJsonCfg
 }
 
-func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg, separator string) *EEsJsonCfg {
+func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg) *EEsJsonCfg {
 	if d == nil {
 		d = new(EEsJsonCfg)
 	}
@@ -1778,6 +1778,6 @@ func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg, separator string) *EEsJsonCfg
 		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
 	d.Cache = diffCacheParamsJsonCfg(d.Cache, v2.Cache)
-	d.Exporters = diffEventExportersJsonCfg(d.Exporters, v1.Exporters, v2.Exporters, separator)
+	d.Exporters = diffEventExportersJsonCfg(d.Exporters, v1.Exporters, v2.Exporters)
 	return d
 }

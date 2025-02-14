@@ -1802,81 +1802,81 @@ func TestRateProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := rp.Set([]string{}, "", false, EmptyString); err != ErrWrongPath {
+	if err := rp.Set([]string{}, "", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{"NotAField"}, "", false, EmptyString); err != ErrWrongPath {
+	if err := rp.Set([]string{"NotAField"}, "", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{"NotAField", "1"}, "", false, EmptyString); err != ErrWrongPath {
-		t.Error(err)
-	}
-
-	if err := rp.Set([]string{Tenant}, "cgrates.org", false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{ID}, ID, false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{FilterIDs}, "fltr1;*string:~*req.Account:1001", false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{Weights}, ";10", false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{MinCost}, "10", false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{MaxCost}, "10", false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{MaxCostStrategy}, "strategy", false, EmptyString); err != nil {
+	if err := rp.Set([]string{"NotAField", "1"}, "", false); err != ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := rp.Set([]string{Rates + "[rat1]", ID}, "rat1", false, EmptyString); err != nil {
+	if err := rp.Set([]string{Tenant}, "cgrates.org", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{ID}, ID, false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{Weights}, ";10", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{MinCost}, "10", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{MaxCost}, "10", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{MaxCostStrategy}, "strategy", false); err != nil {
 		t.Error(err)
 	}
 
-	if err := rp.Set([]string{Rates, "rat1", FilterIDs}, "fltr1", false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{Rates, "rat1", Weights}, ";20", false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{Rates, "rat1", ActivationTimes}, "* * * * *", false, EmptyString); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{Rates, "rat1", Blocker}, "true", false, EmptyString); err != nil {
+	if err := rp.Set([]string{Rates + "[rat1]", ID}, "rat1", false); err != nil {
 		t.Error(err)
 	}
 
-	if err := rp.Set([]string{Rates, "rat1", "Wrong"}, "true", false, EmptyString); err != ErrWrongPath {
+	if err := rp.Set([]string{Rates, "rat1", FilterIDs}, "fltr1", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Rates, "rat1", "Wrong", "Path"}, "true", false, EmptyString); err != ErrWrongPath {
+	if err := rp.Set([]string{Rates, "rat1", Weights}, ";20", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Rates, "rat1", "Wrong", "Path", "2"}, "true", false, EmptyString); err != ErrWrongPath {
+	if err := rp.Set([]string{Rates, "rat1", ActivationTimes}, "* * * * *", false); err != nil {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Rates, "rat1", IntervalRates, "Wrong"}, "true", false, EmptyString); err != ErrWrongPath {
+	if err := rp.Set([]string{Rates, "rat1", Blocker}, "true", false); err != nil {
 		t.Error(err)
 	}
 
-	if err := rp.Set([]string{Rates, "rat1", IntervalRates, IntervalStart}, "10", false, EmptyString); err != nil {
+	if err := rp.Set([]string{Rates, "rat1", "Wrong"}, "true", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Rates, "rat1", IntervalRates, FixedFee}, "10", false, EmptyString); err != nil {
+	if err := rp.Set([]string{Rates, "rat1", "Wrong", "Path"}, "true", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Rates, "rat1", IntervalRates, RecurrentFee}, "10", false, EmptyString); err != nil {
+	if err := rp.Set([]string{Rates, "rat1", "Wrong", "Path", "2"}, "true", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Rates, "rat1", IntervalRates, Unit}, "10", false, EmptyString); err != nil {
+	if err := rp.Set([]string{Rates, "rat1", IntervalRates, "Wrong"}, "true", false); err != ErrWrongPath {
 		t.Error(err)
 	}
-	if err := rp.Set([]string{Rates, "rat1", IntervalRates, Increment}, "10", false, EmptyString); err != nil {
+
+	if err := rp.Set([]string{Rates, "rat1", IntervalRates, IntervalStart}, "10", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{Rates, "rat1", IntervalRates, FixedFee}, "10", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{Rates, "rat1", IntervalRates, RecurrentFee}, "10", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{Rates, "rat1", IntervalRates, Unit}, "10", false); err != nil {
+		t.Error(err)
+	}
+	if err := rp.Set([]string{Rates, "rat1", IntervalRates, Increment}, "10", false); err != nil {
 		t.Error(err)
 	}
 

@@ -231,7 +231,6 @@ func TestConfigLoadFromDB(t *testing.T) {
 		DigestSeparator:  ",",
 		DigestEqual:      ":",
 		MaxParallelConns: 100,
-		RSRSep:           ";",
 		Opts: &GeneralOpts{
 			ExporterIDs: []*DynamicStringSliceOpt{},
 		},
@@ -1028,7 +1027,6 @@ func TestV1GetConfig(t *testing.T) {
 		Reply_timeout:        utils.StringPointer("2s"),
 		Locking_timeout:      utils.StringPointer("2s"),
 		Digest_separator:     utils.StringPointer(","),
-		Rsr_separator:        utils.StringPointer(";"),
 		Digest_equal:         utils.StringPointer(":"),
 		Max_parallel_conns:   utils.IntPointer(100),
 	}
@@ -1053,7 +1051,6 @@ func TestV1GetConfig(t *testing.T) {
 		Reply_timeout:        utils.StringPointer("2s"),
 		Locking_timeout:      utils.StringPointer("2s"),
 		Digest_separator:     utils.StringPointer(","),
-		Rsr_separator:        utils.StringPointer(";"),
 		Digest_equal:         utils.StringPointer(":"),
 		Max_parallel_conns:   utils.IntPointer(100),
 	}

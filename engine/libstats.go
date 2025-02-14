@@ -588,7 +588,7 @@ func (ssq *StatQueueWithAPIOpts) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
-func (sqp *StatQueueProfile) Set(path []string, val any, newBranch bool, _ string) (err error) {
+func (sqp *StatQueueProfile) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	default:
 		return utils.ErrWrongPath

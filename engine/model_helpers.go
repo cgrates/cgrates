@@ -1503,7 +1503,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 			err = fmt.Errorf("empty path in AttributeProfile <%s>", attrPrf.TenantID())
 			return
 		}
-		sbstPrsr, err := config.NewRSRParsers(reqAttr.Value, config.CgrConfig().GeneralCfg().RSRSep)
+		sbstPrsr, err := config.NewRSRParsers(reqAttr.Value, utils.RSRSep)
 		if err != nil {
 			return nil, err
 		}
@@ -1538,7 +1538,7 @@ func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttribute
 			Blockers:  attr.Blockers.String(utils.InfieldSep, utils.ANDSep),
 			Path:      attr.Path,
 			Type:      attr.Type,
-			Value:     attr.Value.GetRule(utils.InfieldSep),
+			Value:     attr.Value.GetRule(),
 		}
 	}
 	return

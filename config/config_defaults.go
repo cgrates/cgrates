@@ -49,7 +49,6 @@ const CGRATES_CFG_JSON = `
 	"locking_timeout": "0",				// timeout internal locks to avoid deadlocks
 	"digest_separator": ",",			// separator to use in replies containing data digests
 	"digest_equal": ":",				// equal symbol used in case of digests
-	"rsr_separator": ";",				// separator used within RSR fields
 	"max_parallel_conns": 100,			// the maximum number of connection used by the *parallel strategy
 	"decimal_max_scale": 0,				// the maximum scale for decimal numbers
 	"decimal_min_scale": 0,				// the minimum scale for decimal numbers

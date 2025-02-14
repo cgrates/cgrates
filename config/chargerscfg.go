@@ -82,7 +82,7 @@ func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (cS ChargerSCfg) AsMapInterface(string) any {
+func (cS ChargerSCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:        cS.Enabled,
 		utils.IndexedSelectsCfg: cS.IndexedSelects,

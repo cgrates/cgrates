@@ -275,7 +275,7 @@ func TestAsAttributeProfileV2(t *testing.T) {
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
-	sbstPrsr, err := config.NewRSRParsers("Al1", config.CgrConfig().GeneralCfg().RSRSep)
+	sbstPrsr, err := config.NewRSRParsers("Al1", utils.RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}
@@ -464,7 +464,7 @@ func TestAsAttributeProfileV1To4(t *testing.T) {
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
-	sbstPrsr, err := config.NewRSRParsers("Al1", config.CgrConfig().GeneralCfg().RSRSep)
+	sbstPrsr, err := config.NewRSRParsers("Al1", utils.RSRSep)
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}

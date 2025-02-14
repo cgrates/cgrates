@@ -48,7 +48,7 @@ func (dps *RegistrarCCfgs) loadFromJSONCfg(jsnCfg *RegistrarCJsonCfgs) (err erro
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (dps RegistrarCCfgs) AsMapInterface(string) any {
+func (dps RegistrarCCfgs) AsMapInterface() any {
 	return map[string]any{
 		utils.RPCCfg: dps.RPC.AsMapInterface(),
 	}

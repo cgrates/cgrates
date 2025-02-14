@@ -38,15 +38,15 @@ type SIPAgentCfg struct {
 }
 
 // loadSIPAgentCfg loads the sip_agent section of the configuration
-func (sa *SIPAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (sa *SIPAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnSIPAgentCfg := new(SIPAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, SIPAgentJSON, jsnSIPAgentCfg); err != nil {
 		return
 	}
-	return sa.loadFromJSONCfg(jsnSIPAgentCfg, cfg.generalCfg.RSRSep)
+	return sa.loadFromJSONCfg(jsnSIPAgentCfg)
 }
 
-func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err error) {
+func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -70,12 +70,12 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 			return err
 		}
 	}
-	sa.RequestProcessors, err = appendRequestProcessors(sa.RequestProcessors, jsnCfg.Request_processors, sep)
+	sa.RequestProcessors, err = appendRequestProcessors(sa.RequestProcessors, jsnCfg.Request_processors)
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (sa SIPAgentCfg) AsMapInterface(separator string) any {
+func (sa SIPAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:             sa.Enabled,
 		utils.ListenCfg:              sa.Listen,
@@ -86,7 +86,7 @@ func (sa SIPAgentCfg) AsMapInterface(separator string) any {
 
 	requestProcessors := make([]map[string]any, len(sa.RequestProcessors))
 	for i, item := range sa.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface(separator)
+		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 
@@ -131,7 +131,7 @@ type SIPAgentJsonCfg struct {
 	Request_processors   *[]*ReqProcessorJsnCfg
 }
 
-func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg, separator string) *SIPAgentJsonCfg {
+func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonCfg {
 	if d == nil {
 		d = new(SIPAgentJsonCfg)
 	}
@@ -153,6 +153,6 @@ func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg, separator stri
 	if v1.RetransmissionTimer != v2.RetransmissionTimer {
 		d.Retransmission_timer = utils.StringPointer(v2.RetransmissionTimer.String())
 	}
-	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors, separator)
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }

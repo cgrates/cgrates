@@ -298,8 +298,7 @@ func (erS *ERService) processPartialEvent(ev *utils.CGREvent, rdrCfg *config.Eve
 	var cgrEv *utils.CGREvent
 	if cgrEv, err = mergePartialEvents(cgrEvs.events, cgrEvs.rdrCfg, erS.filterS, // merge the events
 		erS.cfg.GeneralCfg().DefaultTenant,
-		erS.cfg.GeneralCfg().DefaultTimezone,
-		erS.cfg.GeneralCfg().RSRSep); err != nil {
+		erS.cfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
 	}
 	if partial := cgrEv.APIOpts[utils.PartialOpt]; !slices.Contains([]string{utils.FalseStr, utils.EmptyString},
@@ -332,8 +331,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 	case utils.MetaPostCDR: // merge the events and post the to erS
 		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS,
 			erS.cfg.GeneralCfg().DefaultTenant,
-			erS.cfg.GeneralCfg().DefaultTimezone,
-			erS.cfg.GeneralCfg().RSRSep)
+			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed posting expired parial events <%s> due error <%s>",
@@ -351,8 +349,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		}
 		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS, // merge the partial events
 			erS.cfg.GeneralCfg().DefaultTenant,
-			erS.cfg.GeneralCfg().DefaultTimezone,
-			erS.cfg.GeneralCfg().RSRSep)
+			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed posting expired parial events <%s> due error <%s>",
@@ -420,8 +417,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		}
 		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.filterS, // merge the partial events
 			erS.cfg.GeneralCfg().DefaultTenant,
-			erS.cfg.GeneralCfg().DefaultTimezone,
-			erS.cfg.GeneralCfg().RSRSep)
+			erS.cfg.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed posting expired parial events <%s> due error <%s>",

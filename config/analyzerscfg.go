@@ -92,7 +92,7 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (alS AnalyzerSCfg) AsMapInterface(string) any {
+func (alS AnalyzerSCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.MetaExporterIDs: alS.Opts.ExporterIDs,
 	}

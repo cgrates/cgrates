@@ -307,7 +307,7 @@ func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (dbcfg DataDbCfg) AsMapInterface(string) any {
+func (dbcfg DataDbCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.RedisMaxConnsCfg:           dbcfg.Opts.RedisMaxConns,
 		utils.RedisConnectAttemptsCfg:    dbcfg.Opts.RedisConnectAttempts,

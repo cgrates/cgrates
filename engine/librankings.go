@@ -305,7 +305,7 @@ type RankingSummary struct {
 	SortedStatIDs []string
 }
 
-func (tp *RankingProfile) Set(path []string, val any, _ bool, _ string) (err error) {
+func (tp *RankingProfile) Set(path []string, val any, _ bool) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}

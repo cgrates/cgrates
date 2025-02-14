@@ -67,7 +67,7 @@ func TestListenCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.listenCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.listenCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }
@@ -92,7 +92,7 @@ func TestListenCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.listenCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.listenCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v, received %+v", eMap, rcv)
 	}
 }

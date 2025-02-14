@@ -816,7 +816,7 @@ func (fltr *FilterRule) passHttp(dDP utils.DataProvider) (bool, error) {
 
 }
 
-func (fltr *Filter) Set(path []string, val any, newBranch bool, _ string) (err error) {
+func (fltr *Filter) Set(path []string, val any, newBranch bool) (err error) {
 	switch len(path) {
 	default:
 		return utils.ErrWrongPath

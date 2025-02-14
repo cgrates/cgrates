@@ -53,10 +53,10 @@ func (erS *ERsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (
 	if err = jsnCfg.GetSection(ctx, ERsJSON, jsnERsCfg); err != nil {
 		return
 	}
-	return erS.loadFromJSONCfg(jsnERsCfg, cfg.templates, cfg.generalCfg.RSRSep)
+	return erS.loadFromJSONCfg(jsnERsCfg, cfg.templates)
 }
 
-func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
+func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -74,10 +74,10 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 			return
 		}
 	}
-	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep)
+	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates)
 }
 
-func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
+func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
 	if jsnReaders == nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 			rdr = getDftEvRdrCfg()
 			erS.Readers = append(erS.Readers, rdr)
 		}
-		if err := rdr.loadFromJSONCfg(jsnReader, msgTemplates, sep); err != nil {
+		if err := rdr.loadFromJSONCfg(jsnReader, msgTemplates); err != nil {
 			return err
 		}
 
@@ -121,7 +121,7 @@ func (erS ERsCfg) Clone() (cln *ERsCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (erS ERsCfg) AsMapInterface(separator string) any {
+func (erS ERsCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:         erS.Enabled,
 		utils.PartialCacheTTLCfg: "0",
@@ -138,7 +138,7 @@ func (erS ERsCfg) AsMapInterface(separator string) any {
 	if erS.Readers != nil {
 		readers := make([]map[string]any, len(erS.Readers))
 		for i, item := range erS.Readers {
-			readers[i] = item.AsMapInterface(separator)
+			readers[i] = item.AsMapInterface()
 		}
 		mp[utils.ReadersCfg] = readers
 	}
@@ -361,7 +361,7 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	return
 }
 
-func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string) (err error) {
+func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -391,7 +391,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		er.ProcessedPath = *jsnCfg.ProcessedPath
 	}
 	if jsnCfg.Tenant != nil {
-		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, sep); err != nil {
+		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, utils.RSRSep); err != nil {
 			return err
 		}
 	}
@@ -421,7 +421,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		}
 	}
 	if jsnCfg.Fields != nil {
-		if er.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields, sep); err != nil {
+		if er.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.Fields); err != nil {
 			return err
 		}
 		if tpls, err := InflateTemplates(er.Fields, msgTemplates); err != nil {
@@ -431,7 +431,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		}
 	}
 	if jsnCfg.CacheDumpFields != nil {
-		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.CacheDumpFields, sep); err != nil {
+		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.CacheDumpFields); err != nil {
 			return err
 		}
 		if tpls, err := InflateTemplates(er.CacheDumpFields, msgTemplates); err != nil {
@@ -441,7 +441,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		}
 	}
 	if jsnCfg.PartialCommitFields != nil {
-		if er.PartialCommitFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.PartialCommitFields, sep); err != nil {
+		if er.PartialCommitFields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnCfg.PartialCommitFields); err != nil {
 			return err
 		}
 		if tpls, err := InflateTemplates(er.PartialCommitFields, msgTemplates); err != nil {
@@ -671,7 +671,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string]any) {
+func (er *EventReaderCfg) AsMapInterface() (initialMP map[string]any) {
 	opts := map[string]any{}
 
 	if er.Opts.PartialPath != nil {
@@ -807,7 +807,7 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 		utils.ConcurrentRequestsCfg:   er.ConcurrentReqs,
 		utils.SourcePathCfg:           er.SourcePath,
 		utils.ProcessedPathCfg:        er.ProcessedPath,
-		utils.TenantCfg:               er.Tenant.GetRule(separator),
+		utils.TenantCfg:               er.Tenant.GetRule(),
 		utils.TimezoneCfg:             er.Timezone,
 		utils.FiltersCfg:              er.Filters,
 		utils.FlagsCfg:                []string{},
@@ -833,21 +833,21 @@ func (er *EventReaderCfg) AsMapInterface(separator string) (initialMP map[string
 	if er.Fields != nil {
 		fields := make([]map[string]any, len(er.Fields))
 		for i, item := range er.Fields {
-			fields[i] = item.AsMapInterface(separator)
+			fields[i] = item.AsMapInterface()
 		}
 		initialMP[utils.FieldsCfg] = fields
 	}
 	if er.CacheDumpFields != nil {
 		cacheDumpFields := make([]map[string]any, len(er.CacheDumpFields))
 		for i, item := range er.CacheDumpFields {
-			cacheDumpFields[i] = item.AsMapInterface(separator)
+			cacheDumpFields[i] = item.AsMapInterface()
 		}
 		initialMP[utils.CacheDumpFieldsCfg] = cacheDumpFields
 	}
 	if er.PartialCommitFields != nil {
 		parCFields := make([]map[string]any, len(er.PartialCommitFields))
 		for i, item := range er.PartialCommitFields {
-			parCFields[i] = item.AsMapInterface(separator)
+			parCFields[i] = item.AsMapInterface()
 		}
 		initialMP[utils.PartialCommitFieldsCfg] = parCFields
 	}
@@ -1274,7 +1274,7 @@ func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts)
 	return d
 }
 
-func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separator string) *EventReaderJsonCfg {
+func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg) *EventReaderJsonCfg {
 	if d == nil {
 		d = new(EventReaderJsonCfg)
 	}
@@ -1306,8 +1306,8 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 		d.MaxReconnectInterval = utils.StringPointer(v2.MaxReconnectInterval.String())
 	}
 	d.Opts = diffEventReaderOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
-	tnt1 := v1.Tenant.GetRule(separator)
-	tnt2 := v2.Tenant.GetRule(separator)
+	tnt1 := v1.Tenant.GetRule()
+	tnt2 := v2.Tenant.GetRule()
 	if tnt1 != tnt2 {
 		d.Tenant = utils.StringPointer(tnt2)
 	}
@@ -1332,7 +1332,7 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 	if d.Fields != nil {
 		flds = *d.Fields
 	}
-	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields, separator)
+	flds = diffFcTemplateJsonCfg(flds, v1.Fields, v2.Fields)
 	if flds != nil {
 		d.Fields = &flds
 	}
@@ -1341,7 +1341,7 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 	if d.PartialCommitFields != nil {
 		pcf = *d.PartialCommitFields
 	}
-	pcf = diffFcTemplateJsonCfg(pcf, v1.PartialCommitFields, v2.PartialCommitFields, separator)
+	pcf = diffFcTemplateJsonCfg(pcf, v1.PartialCommitFields, v2.PartialCommitFields)
 	if pcf != nil {
 		d.PartialCommitFields = &pcf
 	}
@@ -1350,7 +1350,7 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg, separ
 	if d.CacheDumpFields != nil {
 		cdf = *d.CacheDumpFields
 	}
-	cdf = diffFcTemplateJsonCfg(cdf, v1.CacheDumpFields, v2.CacheDumpFields, separator)
+	cdf = diffFcTemplateJsonCfg(cdf, v1.CacheDumpFields, v2.CacheDumpFields)
 	if cdf != nil {
 		d.CacheDumpFields = &cdf
 	}
@@ -1378,13 +1378,13 @@ func getEventReaderCfg(d []*EventReaderCfg, id string) *EventReaderCfg {
 	}
 }
 
-func diffEventReadersJsonCfg(d *[]*EventReaderJsonCfg, v1, v2 []*EventReaderCfg, separator string) *[]*EventReaderJsonCfg {
+func diffEventReadersJsonCfg(d *[]*EventReaderJsonCfg, v1, v2 []*EventReaderCfg) *[]*EventReaderJsonCfg {
 	if d == nil || *d == nil {
 		d = &[]*EventReaderJsonCfg{}
 	}
 	for _, val := range v2 {
 		dv, i := getEventReaderJsonCfg(*d, val.ID)
-		dv = diffEventReaderJsonCfg(dv, getEventReaderCfg(v1, val.ID), val, separator)
+		dv = diffEventReaderJsonCfg(dv, getEventReaderCfg(v1, val.ID), val)
 		if i == -1 {
 			*d = append(*d, dv)
 		} else {
@@ -1404,7 +1404,7 @@ type ERsJsonCfg struct {
 	PartialCacheTTL *string                `json:"partial_cache_ttl"`
 }
 
-func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg {
+func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {
 	if d == nil {
 		d = new(ERsJsonCfg)
 	}
@@ -1420,6 +1420,6 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg, separator string) *ERsJsonCfg
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {
 		d.PartialCacheTTL = utils.StringPointer(v2.PartialCacheTTL.String())
 	}
-	d.Readers = diffEventReadersJsonCfg(d.Readers, v1.Readers, v2.Readers, separator)
+	d.Readers = diffEventReadersJsonCfg(d.Readers, v1.Readers, v2.Readers)
 	return d
 }

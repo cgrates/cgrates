@@ -4256,7 +4256,7 @@ func TestAttributesParseAttributeSIPCID(t *testing.T) {
 		},
 	}
 	if out, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		0, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Fatal(err)
 	} else if exp != out {
 		t.Errorf("Expected %q, Received %q", exp, out)
@@ -4270,7 +4270,7 @@ func TestAttributesParseAttributeSIPCID(t *testing.T) {
 		},
 	}
 	if out, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		0, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Fatal(err)
 	} else if exp != out {
 		t.Errorf("Expected %q, Received %q", exp, out)
@@ -4286,7 +4286,7 @@ func TestAttributesParseAttributeSIPCID(t *testing.T) {
 		},
 	}
 	if out, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.extra;~*req.from",
-		utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Fatal(err)
 	} else if exp != out {
 		t.Errorf("Expected %q, Received %q", exp, out)
@@ -4301,7 +4301,7 @@ func TestAttributesParseAttributeSIPCID(t *testing.T) {
 		},
 	}
 	if out, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from",
-		utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Fatal(err)
 	} else if exp != out {
 		t.Errorf("Expected %q, Received %q", exp, out)
@@ -4313,7 +4313,7 @@ func TestAttributesParseAttributeSIPCID(t *testing.T) {
 		},
 	}
 	if _, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.extra;~*req.to;~*req.from", utils.
-		InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != utils.ErrNotFound {
+		InfieldSep), 0, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Errorf("Expected <%+v>, received <%+v>", utils.ErrNotFound, err)
 	}
 }
@@ -4329,7 +4329,7 @@ func TestAttributesParseAttributeSIPCIDWrongPathErr(t *testing.T) {
 	}
 	value := config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from;~*opts.WrongPath", utils.InfieldSep)
 	if _, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, value,
-		0, time.UTC.String(), utils.EmptyString, utils.InfieldSep); err == nil ||
+		0, time.UTC.String(), utils.EmptyString); err == nil ||
 		err.Error() != utils.ErrWrongPath.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrWrongPath, err)
 	}
@@ -4344,7 +4344,7 @@ func TestAttributesParseAttributeSIPCIDNotFoundErr(t *testing.T) {
 	}
 	value := config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep)
 	if _, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, value,
-		0, time.UTC.String(), utils.EmptyString, utils.InfieldSep); err == nil ||
+		0, time.UTC.String(), utils.EmptyString); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
@@ -4360,7 +4360,7 @@ func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
 	value := config.RSRParsers{}
 	experr := `invalid number of arguments <[]> to *sipcid`
 	if _, err := ParseAttribute(dp, utils.MetaSIPCID, utils.EmptyString, value,
-		0, time.UTC.String(), utils.EmptyString, utils.InfieldSep); err == nil ||
+		0, time.UTC.String(), utils.EmptyString); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -5176,7 +5176,7 @@ func TestAttributesParseAttributeMetaNone(t *testing.T) {
 		},
 	}
 	if out, err := ParseAttribute(dp, utils.MetaNone, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		0, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Fatal(err)
 	} else if out != nil {
 		t.Errorf("Expected %+v, Received %+v", nil, out)
@@ -5191,7 +5191,7 @@ func TestAttributesParseAttributeMetaUsageDifferenceBadValError(t *testing.T) {
 			"from": "1002",
 		},
 	}
-	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("", utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+	_, err := ParseAttribute(dp, utils.MetaUsageDifference, utils.EmptyString, config.NewRSRParsersMustCompile("", utils.InfieldSep), 0, utils.EmptyString, utils.EmptyString)
 
 	if err == nil || err.Error() != "invalid arguments <null> to *usageDifference" {
 		t.Fatal(err)
@@ -5207,7 +5207,7 @@ func TestAttributesParseAttributeMetaCCUsageError(t *testing.T) {
 		},
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, config.NewRSRParsersMustCompile("::;~*req.to;~*req.from", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep)
+		0, utils.EmptyString, utils.EmptyString)
 	if err == nil || err.Error() != "invalid requestNumber <::> to *ccUsage" {
 		t.Fatal(err)
 	}
@@ -5369,7 +5369,7 @@ func TestAttributesParseAttributeMetaGeneric(t *testing.T) {
 		},
 	}
 	if out, err := ParseAttribute(dp, utils.MetaGeneric, utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err != nil {
+		0, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Fatal(err)
 	} else if exp != out {
 		t.Errorf("Expected %q, Received %q", exp, out)
@@ -5385,7 +5385,7 @@ func TestAttributesParseAttributeError(t *testing.T) {
 		},
 	}
 	if _, err := ParseAttribute(dp, "badType", utils.EmptyString, config.NewRSRParsersMustCompile("~*req.cid;~*req.to;~*req.from", utils.InfieldSep),
-		0, utils.EmptyString, utils.EmptyString, utils.InfieldSep); err == nil || err.Error() != "unsupported type: <badType>" {
+		0, utils.EmptyString, utils.EmptyString); err == nil || err.Error() != "unsupported type: <badType>" {
 		t.Errorf("Expected %q, Received %q", "unsupported type: <badType>", err)
 	}
 }
@@ -5405,7 +5405,7 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
 
-	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
+	value := config.NewRSRParsersMustCompile("abcd123", utils.RSRSep)
 
 	attrPrf := &AttributeProfile{
 		Tenant: "cgrates.org",
@@ -5471,7 +5471,7 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 		}
 	}
 
-	value = config.NewRSRParsersMustCompile(hashedPw, config.CgrConfig().GeneralCfg().RSRSep)
+	value = config.NewRSRParsersMustCompile(hashedPw, utils.RSRSep)
 	expAttrPrf := &AttributeProfile{
 		Tenant: "cgrates.org",
 		ID:     "ATTR_TEST",
@@ -5509,7 +5509,7 @@ func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 
-	value := config.NewRSRParsersMustCompile("abcd123", config.CgrConfig().GeneralCfg().RSRSep)
+	value := config.NewRSRParsersMustCompile("abcd123", utils.RSRSep)
 	attrPrf := &AttributeProfile{
 		Tenant: "cgrates.org",
 		ID:     "ATTR_TEST",
@@ -5549,7 +5549,7 @@ func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
 	if rcv, err := dm.GetAttributeProfile(context.Background(), attrPrf.Tenant, attrPrf.ID, true, true,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
-	} else if hashedPw := rcv.Attributes[0].Value.GetRule(cfg.GeneralCfg().RSRSep); !utils.VerifyHash(hashedPw, "abcd123") {
+	} else if hashedPw := rcv.Attributes[0].Value.GetRule(); !utils.VerifyHash(hashedPw, "abcd123") {
 		t.Errorf("Received an incorrect password")
 	} else {
 		rcv.Attributes[0].Value = nil

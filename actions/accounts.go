@@ -59,7 +59,7 @@ func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 	}
 	for i, actD := range aL.cfg().Diktats {
 		var rsr config.RSRParsers
-		if rsr, err = actD.RSRValues(aL.config.GeneralCfg().RSRSep); err != nil {
+		if rsr, err = actD.RSRValues(); err != nil {
 			return
 		}
 		var val string

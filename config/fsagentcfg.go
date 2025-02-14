@@ -166,7 +166,7 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (fscfg FsAgentCfg) AsMapInterface(separator string) any {
+func (fscfg FsAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:                fscfg.Enabled,
 		utils.SubscribeParkCfg:          fscfg.SubscribePark,

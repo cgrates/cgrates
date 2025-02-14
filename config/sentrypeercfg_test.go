@@ -90,7 +90,7 @@ func TestSentryPeerCfgAsMapInterface(t *testing.T) {
 		t.Error(err)
 	} else if err = sp.Load(context.Background(), jsnCfg, nil); err != nil {
 		t.Error(err)
-	} else if rcv := sp.AsMapInterface(""); !reflect.DeepEqual(rcv, eMap) {
+	} else if rcv := sp.AsMapInterface(); !reflect.DeepEqual(rcv, eMap) {
 		t.Errorf("Expected: %+v ,received: %+v", eMap, rcv)
 	}
 }

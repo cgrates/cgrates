@@ -255,7 +255,7 @@ func DynamicStringOptEqual(v1, v2 []*DynamicStringOpt) bool {
 		if v1[i].value != v2[i].value {
 			return false
 		}
-		if v1[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) != v2[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) {
+		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
 			return false
 		}
 	}
@@ -276,7 +276,7 @@ func DynamicBoolOptEqual(v1, v2 []*DynamicBoolOpt) bool {
 		if v1[i].value != v2[i].value {
 			return false
 		}
-		if v1[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) != v2[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) {
+		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
 			return false
 		}
 	}
@@ -297,7 +297,7 @@ func DynamicIntOptEqual(v1, v2 []*DynamicIntOpt) bool {
 		if v1[i].value != v2[i].value {
 			return false
 		}
-		if v1[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) != v2[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) {
+		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
 			return false
 		}
 	}
@@ -318,7 +318,7 @@ func DynamicFloat64OptEqual(v1, v2 []*DynamicFloat64Opt) bool {
 		if v1[i].value != v2[i].value {
 			return false
 		}
-		if v1[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) != v2[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) {
+		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
 			return false
 		}
 	}
@@ -339,7 +339,7 @@ func DynamicDurationOptEqual(v1, v2 []*DynamicDurationOpt) bool {
 		if v1[i].value != v2[i].value {
 			return false
 		}
-		if v1[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) != v2[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) {
+		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
 			return false
 		}
 	}
@@ -358,7 +358,7 @@ func DynamicDecimalOptEqual(v1, v2 []*DynamicDecimalOpt) bool {
 			v1[i].value.Cmp(v2[i].value) != 0 {
 			return false
 		}
-		if v1[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) != v2[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) {
+		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
 			return false
 		}
 	}
@@ -397,7 +397,7 @@ func DynamicIntPointerOptEqual(v1, v2 []*DynamicIntPointerOpt) bool {
 		if *v1[i].value != *v2[i].value {
 			return false
 		}
-		if v1[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) != v2[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) {
+		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
 			return false
 		}
 	}
@@ -418,7 +418,7 @@ func DynamicDurationPointerOptEqual(v1, v2 []*DynamicDurationPointerOpt) bool {
 		if *v1[i].value != *v2[i].value {
 			return false
 		}
-		if v1[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) != v2[i].rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep) {
+		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
 			return false
 		}
 	}
@@ -434,7 +434,7 @@ func InterfaceToDynamicStringOpts(strJsOpts []*DynamicInterfaceOpt) (strOpts []*
 		}
 		strval := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strval, utils.DynamicDataPrefix) {
-			strOpts[indx].rsVal, err = NewRSRParsers(strval, CgrConfig().GeneralCfg().RSRSep)
+			strOpts[indx].rsVal, err = NewRSRParsers(strval, utils.RSRSep)
 			if err != nil {
 				return
 			}
@@ -453,7 +453,7 @@ func DynamicStringToInterfaceOpts(strOpts []*DynamicStringOpt) (strJsOpts []*Dyn
 			FilterIDs: opt.FilterIDs,
 		}
 		if opt.rsVal != nil {
-			strOpts[index].value = opt.rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep)
+			strOpts[index].value = opt.rsVal.GetRule()
 			continue
 		}
 		strJsOpts[index].Value = opt.value
@@ -470,7 +470,7 @@ func InterfaceToFloat64DynamicOpts(strJsOpts []*DynamicInterfaceOpt) (flOpts []*
 		}
 		strVal := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strVal, utils.DynamicDataPrefix) {
-			flOpts[index].rsVal, err = NewRSRParsers(strVal, CgrConfig().GeneralCfg().RSRSep)
+			flOpts[index].rsVal, err = NewRSRParsers(strVal, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -507,7 +507,7 @@ func IfaceToIntDynamicOpts(strJsOpts []*DynamicInterfaceOpt) (intPtOpts []*Dynam
 		}
 		strval := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strval, utils.DynamicDataPrefix) {
-			intPtOpts[index].rsVal, err = NewRSRParsers(strval, CgrConfig().GeneralCfg().RSRSep)
+			intPtOpts[index].rsVal, err = NewRSRParsers(strval, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -544,7 +544,7 @@ func IfaceToDecimalBigDynamicOpts(strOpts []*DynamicInterfaceOpt) (decOpts []*Dy
 		}
 		strVal := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strVal, utils.DynamicDataPrefix) {
-			decOpts[index].rsVal, err = NewRSRParsers(strVal, CgrConfig().GeneralCfg().RSRSep)
+			decOpts[index].rsVal, err = NewRSRParsers(strVal, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -565,7 +565,7 @@ func DecimalToIfaceDynamicOpts(decOpts []*DynamicDecimalOpt) (strOpts []*Dynamic
 			FilterIDs: opt.FilterIDs,
 		}
 		if opt.value == nil {
-			strOpts[index].Value = opt.rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep)
+			strOpts[index].Value = opt.rsVal.GetRule()
 			continue
 		}
 		strOpts[index].Value = opt.value.String()
@@ -582,7 +582,7 @@ func IfaceToDurationDynamicOpts(ifOpts []*DynamicInterfaceOpt) (durOpts []*Dynam
 		}
 		strVal := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strVal, utils.DynamicDataPrefix) {
-			durOpts[index].rsVal, err = NewRSRParsers(strVal, CgrConfig().GeneralCfg().RSRSep)
+			durOpts[index].rsVal, err = NewRSRParsers(strVal, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -603,7 +603,7 @@ func DurationToIfaceDynamicOpts(durOpts []*DynamicDurationOpt) (strOpts []*Dynam
 			FilterIDs: opt.FilterIDs,
 		}
 		if opt.rsVal != nil {
-			strOpts[index].Value = opt.rsVal.GetRule(CgrConfig().GeneralCfg().RSRSep)
+			strOpts[index].Value = opt.rsVal.GetRule()
 			continue
 		}
 		strOpts[index].Value = opt.value
@@ -620,7 +620,7 @@ func IfaceToIntPointerDynamicOpts(ifOpts []*DynamicInterfaceOpt) (intPtOpts []*D
 		}
 		strval := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strval, utils.DynamicDataPrefix) {
-			intPtOpts[index].rsVal, err = NewRSRParsers(strval, CgrConfig().GeneralCfg().RSRSep)
+			intPtOpts[index].rsVal, err = NewRSRParsers(strval, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -657,7 +657,7 @@ func IfaceToDurationPointerDynamicOpts(ifOpts []*DynamicInterfaceOpt) (durPtOpts
 		}
 		strVal := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strVal, utils.DynamicDataPrefix) {
-			durPtOpts[index].rsVal, err = NewRSRParsers(strVal, CgrConfig().GeneralCfg().RSRSep)
+			durPtOpts[index].rsVal, err = NewRSRParsers(strVal, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -692,7 +692,7 @@ func IfaceToBoolDynamicOpts(strOpts []*DynamicInterfaceOpt) (boolOpts []*Dynamic
 			Tenant:    opt.Tenant,
 		}
 		if dynVal := utils.IfaceAsString(opt.Value); strings.HasPrefix(dynVal, utils.DynamicDataPrefix) {
-			boolOpts[index].rsVal, err = NewRSRParsers(dynVal, CgrConfig().GeneralCfg().RSRSep)
+			boolOpts[index].rsVal, err = NewRSRParsers(dynVal, utils.RSRSep)
 			if err != nil {
 				return
 			}

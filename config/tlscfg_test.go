@@ -71,7 +71,7 @@ func TestTlsCfgAsMapInterface(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.tlsCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.tlsCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
@@ -99,7 +99,7 @@ func TestTlsCfgAsMapInterface1(t *testing.T) {
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
-	} else if rcv := cgrCfg.tlsCfg.AsMapInterface(""); !reflect.DeepEqual(eMap, rcv) {
+	} else if rcv := cgrCfg.tlsCfg.AsMapInterface(); !reflect.DeepEqual(eMap, rcv) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }

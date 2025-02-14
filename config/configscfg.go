@@ -95,7 +95,7 @@ func handleConfigSFolder(ctx *context.Context, path string, w http.ResponseWrite
 	}
 
 	// convert the config into a json and send it
-	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface(cfg.generalCfg.RSRSep)))); err != nil {
+	if _, err := w.Write([]byte(utils.ToJSON(cfg.AsMapInterface()))); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write resonse because: %s",
 			utils.ConfigSv1, err))
 	}
@@ -116,7 +116,7 @@ func handleConfigSFile(path string, w http.ResponseWriter) {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (cScfg ConfigSCfg) AsMapInterface(string) any {
+func (cScfg ConfigSCfg) AsMapInterface() any {
 	return map[string]any{
 		utils.EnabledCfg: cScfg.Enabled,
 		utils.URLCfg:     cScfg.URL,

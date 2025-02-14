@@ -71,7 +71,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		LockingTimeout:   0,
 		DigestSeparator:  ",",
 		DigestEqual:      ":",
-		RSRSep:           ";",
 		MaxParallelConns: 100,
 		Opts: &GeneralOpts{
 			ExporterIDs: []*DynamicStringSliceOpt{},

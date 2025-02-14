@@ -141,7 +141,7 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (alS AttributeSCfg) AsMapInterface(string) any {
+func (alS AttributeSCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.MetaProfileIDs:           alS.Opts.ProfileIDs,
 		utils.MetaProcessRunsCfg:       alS.Opts.ProcessRuns,

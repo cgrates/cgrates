@@ -62,7 +62,7 @@ func (loggCfg *LoggerCfg) loadFromJSONCfg(jsnLoggerCfg *LoggerJsonCfg) (err erro
 }
 
 // AsMapInterface returns the config of logger as a map[string]any
-func (loggCfg *LoggerCfg) AsMapInterface(string) any {
+func (loggCfg *LoggerCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.TypeCfg:  loggCfg.Type,
 		utils.LevelCfg: loggCfg.Level,

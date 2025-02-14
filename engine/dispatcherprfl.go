@@ -161,7 +161,7 @@ func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
 	return
 }
 
-func (dH *DispatcherHost) Set(path []string, val any, newBranch bool, _ string) (err error) {
+func (dH *DispatcherHost) Set(path []string, val any, newBranch bool) (err error) {
 	if len(path) != 1 {
 		return utils.ErrWrongPath
 	}

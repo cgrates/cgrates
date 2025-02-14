@@ -1875,11 +1875,11 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *AttributePr
 	}
 	for _, attribute := range ap.Attributes {
 		if attribute.Type == utils.MetaPassword {
-			password := attribute.Value.GetRule(config.CgrConfig().GeneralCfg().RSRSep)
+			password := attribute.Value.GetRule()
 			if password, err = utils.ComputeHash(password); err != nil {
 				return
 			}
-			if attribute.Value, err = config.NewRSRParsers(password, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
+			if attribute.Value, err = config.NewRSRParsers(password, utils.RSRSep); err != nil {
 				return
 			}
 			attribute.Type = utils.MetaConstant

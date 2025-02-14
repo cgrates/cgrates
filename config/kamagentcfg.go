@@ -120,7 +120,7 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (ka KamAgentCfg) AsMapInterface(string) any {
+func (ka KamAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:   ka.Enabled,
 		utils.CreateCdrCfg: ka.CreateCdr,

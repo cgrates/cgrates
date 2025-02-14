@@ -45,7 +45,7 @@ func (tp *TpeSCfg) Load(ctx *context.Context, db ConfigDB, _ *CGRConfig) (err er
 	return
 }
 
-func (tp TpeSCfg) AsMapInterface(string) any {
+func (tp TpeSCfg) AsMapInterface() any {
 	return map[string]any{
 		utils.EnabledCfg: tp.Enabled,
 	}

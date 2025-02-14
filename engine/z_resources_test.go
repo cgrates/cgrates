@@ -6913,44 +6913,44 @@ func TestResourceProfileSet(t *testing.T) {
 		Stored:            true,
 		ThresholdIDs:      []string{"TH1"},
 	}
-	if err := cp.Set([]string{}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := cp.Set([]string{}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{"NotAField"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := cp.Set([]string{"NotAField"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{"NotAField", "1"}, "", false, utils.EmptyString); err != utils.ErrWrongPath {
+	if err := cp.Set([]string{"NotAField", "1"}, "", false); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := cp.Set([]string{utils.Tenant}, "cgrates.org", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.ID}, "ID", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.ID}, "ID", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.Weights}, ";10", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Weights}, ";10", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.UsageTTL}, 10, false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.UsageTTL}, 10, false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.Limit}, 10, false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Limit}, 10, false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.AllocationMessage}, "new", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.AllocationMessage}, "new", false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.Blocker}, true, false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Blocker}, true, false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.Stored}, true, false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.Stored}, true, false); err != nil {
 		t.Error(err)
 	}
-	if err := cp.Set([]string{utils.ThresholdIDs}, "TH1", false, utils.EmptyString); err != nil {
+	if err := cp.Set([]string{utils.ThresholdIDs}, "TH1", false); err != nil {
 		t.Error(err)
 	}
 

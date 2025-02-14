@@ -1805,7 +1805,7 @@ func TestCGRConfigcheckConfigSanityAdminSErrExportersCSV(t *testing.T) {
 	}
 	// if !reflect.DeepEqual(CfgCopy, cfg) {
 	// 	t.Errorf("Expected cfg not to change, was <%+v> \nnow is <%+v>",
-	// 		utils.ToJSON(CfgCopy.AsMapInterface(";")), utils.ToJSON(cfg.AsMapInterface(";")))
+	// 		utils.ToJSON(CfgCopy.AsMapInterface()), utils.ToJSON(cfg.AsMapInterface(";")))
 	// }
 }
 func TestCGRConfigcheckConfigSanityEEsCfgExportersFWV(t *testing.T) {
