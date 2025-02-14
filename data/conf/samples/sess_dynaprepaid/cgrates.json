@@ -1,0 +1,56 @@
+{
+    // CGRateS Configuration file
+    //
+    // Used in apier_local_tests
+    // Starts rater, cdrs and mediator connecting over internal channel
+    
+    "general": {
+        "log_level": 7,
+    },
+    
+    
+    "stor_db": {
+        "db_password": "CGRateS.org",
+    },
+    
+    
+    "rals": {
+        "enabled": true,
+    },
+    
+    "schedulers": {
+        "enabled": true,
+        "dynaprepaid_actionplans": ["PACKAGE_1001"]
+    },
+    
+    "cdrs": {
+        "enabled": true,
+        "chargers_conns":["*localhost"],
+        "rals_conns": ["*localhost"],
+        "scheduler_conns": ["*localhost"],
+    },
+    
+    "chargers": {
+        "enabled": true,
+	    "attributes_conns": ["*localhost"],
+    },
+    
+    "attributes": {
+    	"enabled": true,
+    },
+    
+    "sessions": {
+	    "enabled": true,
+    	"rals_conns": ["*localhost"],
+    	"cdrs_conns": ["*localhost"],
+    	"chargers_conns": ["*localhost"],
+        "scheduler_conns": ["*localhost"],
+    },
+    
+    "apiers": {
+        "enabled": true,
+        "scheduler_conns": ["*localhost"],
+    },
+    
+    }
+    

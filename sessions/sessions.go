@@ -1542,9 +1542,11 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 		return
 	}
 	for i, sr := range s.SRuns {
-		if s.DebitInterval > 0 &&
-			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaPrepaid {
-			if s.debitStop == nil { // init the debitStop only for the first sRun with DebitInterval and RequestType MetaPrepaid
+		if (s.DebitInterval > 0 &&
+			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaPrepaid) ||
+			(s.DebitInterval > 0 && sr.Event.GetStringIgnoreErrors(utils.RequestType) ==
+				utils.MetaDynaprepaid) {
+			if s.debitStop == nil { // init the debitStop only for the first sRun with DebitInterval and RequestType MetaPrepaids.DebitInterval > 0 &&
 				s.debitStop = make(chan struct{})
 			}
 			go sS.debitLoopSession(s, i, s.DebitInterval)
@@ -1666,7 +1668,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 		reqType := sr.Event.GetStringIgnoreErrors(utils.RequestType)
 		var rplyMaxUsage time.Duration
 		switch reqType {
-		case utils.MetaPrepaid:
+		case utils.MetaPrepaid, utils.MetaDynaprepaid:
 			if s.debitStop == nil {
 				if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
 					updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
@@ -2455,9 +2457,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			return err
 		}
 		s.RLock() // avoid concurrency with activeDebit
-		isPrepaid := s.debitStop != nil
+		hasDebitLoops := s.debitStop != nil
 		s.RUnlock()
-		if isPrepaid { //active debit
+		if hasDebitLoops { //active debit
 			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().GetDefaultUsage(utils.IfaceAsString(args.CGREvent.Event[utils.ToR])))
 		} else {
 			var sRunsUsage map[string]time.Duration
