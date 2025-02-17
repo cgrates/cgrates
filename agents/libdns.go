@@ -24,7 +24,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/miekg/dns"
 )
@@ -54,8 +53,8 @@ func dnsWriteMsg(w dns.ResponseWriter, msg *dns.Msg) (err error) {
 
 func newDnsDP(req *dns.Msg) utils.DataProvider {
 	return &dnsDP{
-		req:  config.NewObjectDP(req),
-		opts: config.NewObjectDP(req.IsEdns0()),
+		req:  utils.NewObjectDP(req),
+		opts: utils.NewObjectDP(req.IsEdns0()),
 	}
 }
 

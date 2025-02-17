@@ -24,7 +24,6 @@ import (
 	"github.com/nyaruka/phonenumbers"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -104,7 +103,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 			return
 		}
 		//construct dataProvider from account and set it further
-		dp := config.NewObjectDP(account)
+		dp := utils.NewObjectDP(account)
 		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaResources:
@@ -114,7 +113,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &reply); err != nil {
 			return nil, err
 		}
-		dp := config.NewObjectDP(&reply)
+		dp := utils.NewObjectDP(&reply)
 		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaStats:
@@ -136,7 +135,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 		if err := connMgr.Call(context.TODO(), dDP.trdConns, utils.TrendSv1GetTrendSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &trendSum); err != nil {
 			return nil, err
 		}
-		dp := config.NewObjectDP(trendSum)
+		dp := utils.NewObjectDP(trendSum)
 		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaRankings:
@@ -145,7 +144,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 		if err := connMgr.Call(context.TODO(), dDP.rnkConns, utils.RankingSv1GetRankingSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &rankingSum); err != nil {
 			return nil, err
 		}
-		dp := config.NewObjectDP(rankingSum)
+		dp := utils.NewObjectDP(rankingSum)
 		dDP.cache.Set(fldPath[:2], dp)
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaLibPhoneNumber:

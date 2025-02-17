@@ -16,17 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package utils
 
 import (
 	"fmt"
 	"strings"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
-// NewObjectDP constructs a utils.DataProvider
-func NewObjectDP(obj any) utils.DataProvider {
+// NewObjectDP constructs a DataProvider
+func NewObjectDP(obj any) DataProvider {
 	return &ObjectDP{
 		obj:   obj,
 		cache: make(map[string]any),
@@ -48,20 +46,20 @@ func (objDP *ObjectDP) getCache(path string) (val any, has bool) {
 	return
 }
 
-// String is part of engine.utils.DataProvider interface
+// String is part of engine.DataProvider interface
 // when called, it will display the already parsed values out of cache
 func (objDP *ObjectDP) String() string {
-	return utils.ToJSON(objDP.obj)
+	return ToJSON(objDP.obj)
 }
 
-// FieldAsInterface is part of engine.utils.DataProvider interface
+// FieldAsInterface is part of engine.DataProvider interface
 func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data any, err error) {
 	obj := objDP.obj
 	// []string{ BalanceMap *monetary[0] Value }
 	var has bool
-	if data, has = objDP.getCache(strings.Join(fldPath, utils.NestingSep)); has {
+	if data, has = objDP.getCache(strings.Join(fldPath, NestingSep)); has {
 		if data == nil {
-			err = utils.ErrNotFound
+			err = ErrNotFound
 		}
 		return
 	}
@@ -69,21 +67,21 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data any, err error) 
 	var prevFld string
 	for _, fld := range fldPath {
 		var slctrStr string
-		if splt := strings.Split(fld, utils.IdxStart); len(splt) != 1 { // check if we have selector
+		if splt := strings.Split(fld, IdxStart); len(splt) != 1 { // check if we have selector
 			fld = splt[0]
-			if splt[1][len(splt[1])-1:] != utils.IdxEnd {
+			if splt[1][len(splt[1])-1:] != IdxEnd {
 				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", splt[1])
 			}
 			slctrStr = splt[1][:len(splt[1])-1] // also strip the last ]
 		}
-		if prevFld == utils.EmptyString {
+		if prevFld == EmptyString {
 			prevFld += fld
 		} else {
-			prevFld += utils.NestingSep + fld
+			prevFld += NestingSep + fld
 		}
 		// check if we take the current path from cache
 		if data, has = objDP.getCache(prevFld); !has {
-			if data, err = utils.ReflectFieldMethodInterface(obj, fld); err != nil { // take the object the field for current path
+			if data, err = ReflectFieldMethodInterface(obj, fld); err != nil { // take the object the field for current path
 				// in case of error set nil for the current path and return err
 				objDP.setCache(prevFld, nil)
 				return nil, err
@@ -93,11 +91,11 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data any, err error) 
 		}
 		// change the obj to be the current data and continue the processing
 		obj = data
-		if slctrStr != utils.EmptyString { //we have selector so we need to do an aditional get
-			prevFld += utils.IdxStart + slctrStr + utils.IdxEnd
+		if slctrStr != EmptyString { //we have selector so we need to do an aditional get
+			prevFld += IdxStart + slctrStr + IdxEnd
 			// check if we take the current path from cache
 			if data, has = objDP.getCache(prevFld); !has {
-				if data, err = utils.ReflectFieldMethodInterface(obj, slctrStr); err != nil { // take the object the field for current path
+				if data, err = ReflectFieldMethodInterface(obj, slctrStr); err != nil { // take the object the field for current path
 					// in case of error set nil for the current path and return err
 					objDP.setCache(prevFld, nil)
 					return nil, err
@@ -111,15 +109,15 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data any, err error) 
 
 	}
 	//add in cache the initial path
-	objDP.setCache(strings.Join(fldPath, utils.NestingSep), data)
+	objDP.setCache(strings.Join(fldPath, NestingSep), data)
 	return
 }
 
-// FieldAsString is part of engine.utils.DataProvider interface
+// FieldAsString is part of engine.DataProvider interface
 func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) {
 	var valIface any
 	if valIface, err = objDP.FieldAsInterface(fldPath); err != nil {
 		return
 	}
-	return utils.IfaceAsString(valIface), nil
+	return IfaceAsString(valIface), nil
 }

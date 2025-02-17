@@ -16,13 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package utils
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewObjectDP(t *testing.T) {
@@ -194,7 +192,7 @@ func TestFieldAsInterfaceObjDPMultiplePaths(t *testing.T) {
 	}
 }
 
-func TestFieldAsInterface(t *testing.T) {
+func TestObjectDPFieldAsInterface(t *testing.T) {
 	type aNewStruct struct {
 		Field1 int
 		Field2 int
@@ -218,7 +216,7 @@ func TestFieldAsInterface(t *testing.T) {
 		},
 	}
 	_, err := objDp.FieldAsInterface([]string{"field1"})
-	if err == nil || err != utils.ErrNotFound {
+	if err == nil || err != ErrNotFound {
 		t.Error(err)
 	}
 }
