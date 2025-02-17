@@ -73,6 +73,33 @@ func GetDurationOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS
 	return
 }
 
+// GetDurationPointerOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *time.Duration, otherwise it
+// returns the config option if at least one filter passes or the default value if none of them do
+func GetDurationPointerOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicDurationPointerOpt,
+	optNames ...string) (cfgOpt *time.Duration, err error) {
+	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+		var value time.Duration
+		value, err = utils.IfaceAsDuration(opt)
+		if err != nil {
+			return nil, err
+		}
+		return utils.DurationPointer(value), nil
+	} else if !errors.Is(err, utils.ErrNotFound) {
+		return nil, err
+	}
+	for _, opt := range dynOpts { // iterate through the options
+		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
+			continue
+		}
+		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+			return nil, err
+		} else if pass {
+			return opt.Value(dP)
+		}
+	}
+	return
+}
+
 // GetStringOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as string, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetStringOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicStringOpt,

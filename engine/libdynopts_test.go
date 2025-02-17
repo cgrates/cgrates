@@ -340,6 +340,118 @@ func TestLibFiltersGetDurationOptsReturnDefaultOpt(t *testing.T) {
 	}
 }
 
+func TestLibFiltersGetDurationPointerOptsReturnOptFromAPIOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]any{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]any{
+			utils.OptsResourcesUsageTTL: time.Hour,
+		},
+	}
+	dynOpts := []*config.DynamicDurationPointerOpt{
+		// will never get to this opt because it will return once it
+		// finds the one set in APIOpts
+		config.NewDynamicDurationPointerOpt([]string{"*string:~*req.Account:1001"}, "cgrates.org", utils.DurationPointer(time.Minute), nil),
+	}
+
+	expected := time.Hour
+	if rcv, err := GetDurationPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
+		"nonExistingAPIOpt", utils.OptsResourcesUsageTTL); err != nil {
+		t.Error(err)
+	} else if *rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+func TestLibFiltersGetDurationPointerOptsReturnConfigOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]any{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]any{},
+	}
+	dynOpts := []*config.DynamicDurationPointerOpt{
+		// tenant will not be recognized, will ignore this opt
+		config.NewDynamicDurationPointerOpt([]string{"*string:~*req.Account:1001"}, "cgrates.net", utils.DurationPointer(time.Millisecond), nil),
+		// filter will not pass, will ignore this opt
+		config.NewDynamicDurationPointerOpt([]string{"*string:~*req.Account:1002"}, "cgrates.net", utils.DurationPointer(time.Second), nil),
+		config.NewDynamicDurationPointerOpt([]string{"*string:~*req.Account:1001"}, "cgrates.org", utils.DurationPointer(time.Minute), nil),
+	}
+
+	expected := time.Minute
+	if rcv, err := GetDurationPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
+		utils.OptsResourcesUsageTTL); err != nil {
+		t.Error(err)
+	} else if *rcv != expected {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", expected, rcv)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsFilterCheckErr(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]any{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]any{},
+	}
+	dynOpts := []*config.DynamicDurationPointerOpt{
+		// function will return error after trying to parse the filter
+		config.NewDynamicDurationPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.DurationPointer(time.Second), nil),
+	}
+
+	experr := `inline parse error for string: <*string.invalid:filter>`
+	if _, err := GetDurationPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
+		utils.OptsResourcesUsageTTL); err == nil ||
+		err.Error() != experr {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
+	}
+}
+
+func TestLibFiltersGetDurationPointerOptsReturnDefaultOpt(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB(nil, nil, nil)
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestEvent",
+		Event: map[string]any{
+			utils.AccountField: 1001,
+		},
+		APIOpts: map[string]any{},
+	}
+	dynOpts := []*config.DynamicDurationPointerOpt{
+		// filter will not pass, will ignore this opt
+		config.NewDynamicDurationPointerOpt([]string{"*string:~*req.Account:1002"}, "cgrates.org", utils.DurationPointer(time.Second), nil),
+		config.NewDynamicDurationPointerOpt(nil, "", utils.DurationPointer(config.ResourcesUsageTTLDftOpt), nil),
+	}
+
+	if rcv, err := GetDurationPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fS, dynOpts,
+		utils.OptsResourcesUsageTTL); err != nil {
+		t.Error(err)
+	} else if *rcv != config.ResourcesUsageTTLDftOpt {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", config.ResourcesUsageTTLDftOpt, rcv)
+	}
+}
+
 func TestLibFiltersGetDurationOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, nil)
@@ -1557,6 +1669,106 @@ func TestDynamicDurationOptsDynVal(t *testing.T) {
 				t.Errorf("unexpected err %v", err)
 			}
 			if tt.expVal != out {
+				t.Errorf("expected %v,received %v", tt.expVal, out)
+			}
+		})
+	}
+}
+
+func TestDynamicDurationPointerOptsDynVal(t *testing.T) {
+	tests := []struct {
+		name    string
+		dynOpts []*config.DynamicInterfaceOpt
+		expVal  *time.Duration
+		expErr  error
+	}{
+		{
+			name: "DynOptsVal",
+			dynOpts: []*config.DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  "~*opts.Usage",
+				},
+			},
+			expVal: utils.DurationPointer(time.Second * 10),
+		},
+		{
+			name: "DynReqVal",
+			dynOpts: []*config.DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  "~*req.*acd",
+				},
+			},
+			expVal: utils.DurationPointer(3500000),
+		},
+		{
+			name: "StaticVal",
+			dynOpts: []*config.DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  1000000000,
+				},
+			},
+			expVal: utils.DurationPointer(1 * time.Second),
+		},
+		{
+			name: "NotFound",
+			dynOpts: []*config.DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  "~*req.RandomField",
+				},
+			},
+			expErr: utils.ErrNotFound,
+		},
+		{
+			name: "ValueNotConvertedCorrectly",
+			dynOpts: []*config.DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  "~*req.Usage2",
+				},
+			},
+			expErr: fmt.Errorf("time: invalid duration \"twenty-five\""),
+		},
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: utils.CGRateSorg,
+		ID:     "testIDEvent",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			"*acd":             3500000,
+			"Usage2":           "twenty-five",
+		},
+		APIOpts: map[string]any{
+			"Usage": "10s",
+		},
+	}
+	fs := NewFilterS(config.CgrConfig(), nil, nil)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dynOpts, err := config.IfaceToDurationPointerDynamicOpts(tt.dynOpts)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			out, err := GetDurationPointerOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), fs, dynOpts, utils.OptsRatesUsage)
+			if tt.expErr != nil {
+				if err == nil {
+					t.Error("expected err,received nil")
+				}
+				if err.Error() != tt.expErr.Error() {
+					t.Errorf("expected error %v,received %v", tt.expErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("unexpected err %v", err)
+			}
+			if *tt.expVal != *out {
 				t.Errorf("expected %v,received %v", tt.expVal, out)
 			}
 		})
