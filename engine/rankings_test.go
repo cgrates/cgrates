@@ -20,7 +20,9 @@ package engine
 
 import (
 	"testing"
+	"time"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 )
 
@@ -119,5 +121,41 @@ func TestNewRankingService(t *testing.T) {
 
 	if rankingService.connMgr != connMgr {
 		t.Errorf("Expected connMgr to be %v, got %v", connMgr, rankingService.connMgr)
+	}
+}
+
+func TestStoreRanking(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB := NewInternalDB([]string{}, []string{}, map[string]*config.ItemOpts{})
+	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	rkg := NewRankingS(dm, nil, nil, cfg)
+	ranking := &Ranking{
+		rkPrfl: &RankingProfile{
+			Tenant:            "cgrates.org",
+			ID:                "ID1",
+			Schedule:          "@every 1s",
+			StatIDs:           []string{"stat1", "stat2"},
+			MetricIDs:         []string{"metric1", "metric2"},
+			Sorting:           "asc",
+			SortingParameters: []string{"metric1:true"},
+			Stored:            true,
+			ThresholdIDs:      []string{"threshold1"},
+		},
+	}
+	ctx := context.Background()
+	cfg.RankingSCfg().StoreInterval = 0
+	if err := rkg.storeRanking(ctx, ranking); err != nil {
+		t.Errorf("Expected no error when StoreInterval is 0, but got: %v", err)
+	}
+	if len(rkg.storedRankings) != 0 {
+		t.Error("Expected storedRankings to be empty when StoreInterval is 0")
+	}
+	cfg.RankingSCfg().StoreInterval = -1
+	if err := rkg.storeRanking(ctx, ranking); err != nil {
+		t.Errorf("Expected no error when StoreInterval is -1, but got: %v", err)
+	}
+	cfg.RankingSCfg().StoreInterval = time.Second
+	if err := rkg.storeRanking(ctx, ranking); err != nil {
+		t.Errorf("Expected no error when StoreInterval is positive, but got: %v", err)
 	}
 }
