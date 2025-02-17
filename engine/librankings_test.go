@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
@@ -369,6 +370,331 @@ func TestRankingProfileFieldAsString(t *testing.T) {
 			}
 			if val != tc.val {
 				t.Errorf("expected %v,received %v", tc.val, val)
+			}
+		})
+	}
+}
+
+func TestNewRankingSorter(t *testing.T) {
+	Metrics := map[string]map[string]float64{
+		"STATS1": {"*acc": 12.1, "*tcc": 24.2},
+		"STATS2": {"*acc": 12.1, "*tcc": 24.3},
+		"STATS3": {"*acc": 10.1, "*tcc": 25.3},
+		"STATS4": {"*tcc": 26.3},
+	}
+
+	tests := []struct {
+		sortingType      string
+		sortingParams    []string
+		expectErr        bool
+		expectSorterType string
+	}{
+		{
+			sortingType:      utils.MetaAsc,
+			sortingParams:    []string{"*acc"},
+			expectErr:        false,
+			expectSorterType: "RankingAscSorter",
+		},
+		{
+			sortingType:      utils.MetaDesc,
+			sortingParams:    []string{"*tcc"},
+			expectErr:        false,
+			expectSorterType: "RankingDescSorter",
+		},
+		{
+			sortingType:      "unsupported",
+			sortingParams:    []string{"*tcc"},
+			expectErr:        true,
+			expectSorterType: "",
+		},
+	}
+
+	for _, test := range tests {
+		rkSorter, err := newRankingSorter(test.sortingType, test.sortingParams, Metrics)
+
+		if test.expectErr {
+			if err == nil {
+				t.Errorf("Expected an error for sorting type %q, but got none", test.sortingType)
+			}
+		} else {
+			if err != nil {
+				t.Errorf("Did not expect an error for sorting type %q, but got: %v", test.sortingType, err)
+			}
+			switch test.sortingType {
+			case utils.MetaAsc:
+				if _, ok := rkSorter.(*rankingAscSorter); !ok {
+					t.Errorf("Expected sorter type 'rankingAscSorter', but got %T", rkSorter)
+				}
+			case utils.MetaDesc:
+				if _, ok := rkSorter.(*rankingDescSorter); !ok {
+					t.Errorf("Expected sorter type 'rankingDescSorter', but got %T", rkSorter)
+				}
+			}
+		}
+	}
+}
+
+func TestRankingProfileSet(t *testing.T) {
+	tests := []struct {
+		name        string
+		path        []string
+		val         any
+		expectedErr error
+		expectedRP  RankingProfile
+	}{
+		{
+			name:        "Set Tenant",
+			path:        []string{utils.Tenant},
+			val:         "cgrates.org",
+			expectedErr: nil,
+			expectedRP:  RankingProfile{Tenant: "cgrates.org"},
+		},
+		{
+			name:        "Set ID",
+			path:        []string{utils.ID},
+			val:         "profile1",
+			expectedErr: nil,
+			expectedRP:  RankingProfile{ID: "profile1"},
+		},
+		{
+			name:        "Set Schedule",
+			path:        []string{utils.Schedule},
+			val:         "0 0 * * *",
+			expectedErr: nil,
+			expectedRP:  RankingProfile{Schedule: "0 0 * * *"},
+		},
+		{
+			name:        "Set StatIDs",
+			path:        []string{utils.StatIDs},
+			val:         []string{"stat1", "stat2"},
+			expectedErr: nil,
+			expectedRP:  RankingProfile{StatIDs: []string{"stat1", "stat2"}},
+		},
+		{
+			name:        "Set MetricIDs",
+			path:        []string{utils.MetricIDs},
+			val:         []string{"metric1", "metric2"},
+			expectedErr: nil,
+			expectedRP:  RankingProfile{MetricIDs: []string{"metric1", "metric2"}},
+		},
+		{
+			name:        "Set Sorting",
+			path:        []string{utils.Sorting},
+			val:         "asc",
+			expectedErr: nil,
+			expectedRP:  RankingProfile{Sorting: "asc"},
+		},
+		{
+			name:        "Set SortingParameters",
+			path:        []string{utils.SortingParameters},
+			val:         []string{"param1", "param2"},
+			expectedErr: nil,
+			expectedRP:  RankingProfile{SortingParameters: []string{"param1", "param2"}},
+		},
+		{
+			name:        "Set Stored",
+			path:        []string{utils.Stored},
+			val:         true,
+			expectedErr: nil,
+			expectedRP:  RankingProfile{Stored: true},
+		},
+		{
+			name:        "Set ThresholdIDs",
+			path:        []string{utils.ThresholdIDs},
+			val:         []string{"threshold1", "threshold2"},
+			expectedErr: nil,
+			expectedRP:  RankingProfile{ThresholdIDs: []string{"threshold1", "threshold2"}},
+		},
+		{
+			name:        "Wrong path",
+			path:        []string{"wrongpath"},
+			val:         "value",
+			expectedErr: utils.ErrWrongPath,
+			expectedRP:  RankingProfile{},
+		},
+		{
+			name:        "Empty path",
+			path:        []string{},
+			val:         "value",
+			expectedErr: utils.ErrWrongPath,
+			expectedRP:  RankingProfile{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rp := &RankingProfile{}
+			err := rp.Set(tt.path, tt.val, false, "")
+
+			if err != tt.expectedErr {
+				t.Errorf("Test %s failed: expected error %v, got %v", tt.name, tt.expectedErr, err)
+			}
+
+			if rp.Tenant != tt.expectedRP.Tenant {
+				t.Errorf("Test %s failed: expected Tenant %s, got %s", tt.name, tt.expectedRP.Tenant, rp.Tenant)
+			}
+			if rp.ID != tt.expectedRP.ID {
+				t.Errorf("Test %s failed: expected ID %s, got %s", tt.name, tt.expectedRP.ID, rp.ID)
+			}
+			if rp.Schedule != tt.expectedRP.Schedule {
+				t.Errorf("Test %s failed: expected Schedule %s, got %s", tt.name, tt.expectedRP.Schedule, rp.Schedule)
+			}
+
+			if !reflect.DeepEqual(rp.StatIDs, tt.expectedRP.StatIDs) {
+				t.Errorf("Test %s failed: expected StatIDs %v, got %v", tt.name, tt.expectedRP.StatIDs, rp.StatIDs)
+			}
+			if !reflect.DeepEqual(rp.MetricIDs, tt.expectedRP.MetricIDs) {
+				t.Errorf("Test %s failed: expected MetricIDs %v, got %v", tt.name, tt.expectedRP.MetricIDs, rp.MetricIDs)
+			}
+			if !reflect.DeepEqual(rp.SortingParameters, tt.expectedRP.SortingParameters) {
+				t.Errorf("Test %s failed: expected SortingParameters %v, got %v", tt.name, tt.expectedRP.SortingParameters, rp.SortingParameters)
+			}
+			if !reflect.DeepEqual(rp.ThresholdIDs, tt.expectedRP.ThresholdIDs) {
+				t.Errorf("Test %s failed: expected ThresholdIDs %v, got %v", tt.name, tt.expectedRP.ThresholdIDs, rp.ThresholdIDs)
+			}
+			if rp.Sorting != tt.expectedRP.Sorting {
+				t.Errorf("Test %s failed: expected Sorting %s, got %s", tt.name, tt.expectedRP.Sorting, rp.Sorting)
+			}
+			if rp.Stored != tt.expectedRP.Stored {
+				t.Errorf("Test %s failed: expected Stored %v, got %v", tt.name, tt.expectedRP.Stored, rp.Stored)
+			}
+		})
+	}
+}
+
+func TestRankingProfileStringJson(t *testing.T) {
+	tests := []struct {
+		name         string
+		rp           RankingProfile
+		expectedJSON string
+	}{
+		{
+			name: "Valid RankingProfile",
+			rp: RankingProfile{
+				Tenant:            "cgrates.org",
+				ID:                "profile1",
+				Schedule:          "0 0 * * *",
+				StatIDs:           []string{"stat1", "stat2"},
+				MetricIDs:         []string{"metric1", "metric2"},
+				Sorting:           "asc",
+				SortingParameters: []string{"param1", "param2"},
+				Stored:            true,
+				ThresholdIDs:      []string{"threshold1"},
+			},
+			expectedJSON: `{"Tenant":"cgrates.org","ID":"profile1","Schedule":"0 0 * * *","StatIDs":["stat1","stat2"],"MetricIDs":["metric1","metric2"],"Sorting":"asc","SortingParameters":["param1","param2"],"Stored":true,"ThresholdIDs":["threshold1"]}`,
+		},
+		{
+			name: "Empty RankingProfile",
+			rp: RankingProfile{
+				Tenant:            "",
+				ID:                "",
+				Schedule:          "",
+				StatIDs:           []string{},
+				MetricIDs:         []string{},
+				Sorting:           "",
+				SortingParameters: []string{},
+				Stored:            false,
+				ThresholdIDs:      []string{},
+			},
+			expectedJSON: `{"Tenant":"","ID":"","Schedule":"","StatIDs":[],"MetricIDs":[],"Sorting":"","SortingParameters":[],"Stored":false,"ThresholdIDs":[]}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.rp.String()
+
+			var resultMap map[string]interface{}
+			err := json.Unmarshal([]byte(result), &resultMap)
+			if err != nil {
+				t.Errorf("Error unmarshalling result: %v", err)
+			}
+
+			expectedMap := map[string]interface{}{}
+			err = json.Unmarshal([]byte(tt.expectedJSON), &expectedMap)
+			if err != nil {
+				t.Errorf("Error unmarshalling expected JSON: %v", err)
+			}
+
+			for key, value1 := range resultMap {
+				if value2, exists := expectedMap[key]; exists {
+					if value1Slice, ok1 := value1.([]interface{}); ok1 {
+						if value2Slice, ok2 := value2.([]interface{}); ok2 {
+							if len(value1Slice) != len(value2Slice) {
+								t.Errorf("Test %s failed: slice length mismatch for key %s", tt.name, key)
+							}
+							for i, v1 := range value1Slice {
+								if v1 != value2Slice[i] {
+									t.Errorf("Test %s failed: slice mismatch for key %s at index %d", tt.name, key, i)
+								}
+							}
+						}
+					} else {
+						if value1 != value2 {
+							t.Errorf("Test %s failed: expected %v for key %s, got %v", tt.name, value2, key, value1)
+						}
+					}
+				} else {
+					t.Errorf("Test %s failed: key %s not found in expected result", tt.name, key)
+				}
+			}
+		})
+	}
+}
+
+func TestTpRankingProfileFieldAsString(t *testing.T) {
+	tests := []struct {
+		name      string
+		profile   RankingProfile
+		fldPath   []string
+		expected  string
+		expectErr bool
+	}{
+		{
+			name: "Valid field path",
+			profile: RankingProfile{
+				Tenant:            "cgrates.org",
+				ID:                "profile1",
+				Schedule:          "0 0 * * *",
+				StatIDs:           []string{"stat1", "stat2"},
+				MetricIDs:         []string{"metric1", "metric2"},
+				SortingParameters: []string{"param1", "param2"},
+				ThresholdIDs:      []string{"threshold1", "threshold2"},
+			},
+			fldPath:   []string{"Tenant"},
+			expected:  "cgrates.org",
+			expectErr: false,
+		},
+		{
+			name: "Invalid field path",
+			profile: RankingProfile{
+				Tenant:            "cgrates.org",
+				ID:                "profile1",
+				Schedule:          "0 0 * * *",
+				StatIDs:           []string{"stat1", "stat2"},
+				MetricIDs:         []string{"metric1", "metric2"},
+				SortingParameters: []string{"param1", "param2"},
+				ThresholdIDs:      []string{"threshold1", "threshold2"},
+			},
+			fldPath:   []string{"NonExistentField"},
+			expected:  "",
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := tt.profile.FieldAsString(tt.fldPath)
+
+			if tt.expectErr && err == nil {
+				t.Errorf("Expected an error for test %s, but got none", tt.name)
+			}
+			if !tt.expectErr && err != nil {
+				t.Errorf("Unexpected error for test %s: %v", tt.name, err)
+			}
+
+			if result != tt.expected {
+				t.Errorf("Test %s failed: expected %v, got %v", tt.name, tt.expected, result)
 			}
 		})
 	}

@@ -18,6 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package accounts
 
+import (
+	"testing"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
 /*
 func TestCBDebitUnits(t *testing.T) {
 	// with limit and unit factor
@@ -820,3 +826,16 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 	}
 }
 */
+
+func TestConcreteBalanceID(t *testing.T) {
+	balance := &utils.Balance{
+		ID: "1001",
+	}
+	concreteBalanceInstance := &concreteBalance{
+		blnCfg: balance,
+	}
+	result := concreteBalanceInstance.id()
+	if result != "1001" {
+		t.Errorf("Expected id to be '1001', but got '%s'", result)
+	}
+}
