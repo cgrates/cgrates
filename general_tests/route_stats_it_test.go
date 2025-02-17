@@ -100,11 +100,7 @@ func testV1RtStatsStartEngine(t *testing.T) {
 }
 
 func testV1RtStatsRpcConn(t *testing.T) {
-	var err error
-	RtStatsSv1BiRpc, err = newBiRPCClient(RtStatsSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal("Could not connect to rater: ", err.Error())
-	}
+	RtStatsSv1BiRpc = engine.NewRPCClient(t, RtStatsSv1Cfg.ListenCfg(), *utils.Encoding)
 }
 
 func testV1RtStatsFromFolder(t *testing.T) {
