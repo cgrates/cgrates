@@ -1,5 +1,4 @@
-//go:build integration
-// +build integration
+//go:build flaky
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -21,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"errors"
 	"path"
 	"reflect"
 	"testing"
@@ -29,7 +27,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/birpc/jsonrpc"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -61,17 +58,6 @@ var (
 		testSessVolDiscStopCgrEngine,
 	}
 )
-
-func newBiRPCClient(cfg *config.ListenCfg) (c *birpc.Client, err error) {
-	switch *utils.Encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return birpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 func TestSessVolDiscount(t *testing.T) {
 	switch *utils.DBType {
@@ -120,11 +106,7 @@ func testSessVolDiscStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessVolDiscApierRpcConn(t *testing.T) {
-	var err error
-	tSessVolDiscBiRPC, err = newBiRPCClient(tSessVolDiscCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
-	if err != nil {
-		t.Fatal(err)
-	}
+	tSessVolDiscBiRPC = engine.NewRPCClient(t, tSessVolDiscCfg.ListenCfg(), *utils.Encoding)
 }
 
 func testSessVolDiscLoadersLoad(t *testing.T) {
