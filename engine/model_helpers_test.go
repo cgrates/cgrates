@@ -25,7 +25,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1086,7 +1085,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
 		Weights: make(utils.DynamicWeights, 1),
@@ -1122,7 +1121,7 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
 		Weights: make(utils.DynamicWeights, 1),
@@ -1160,11 +1159,11 @@ func TestAttributeProfileToAPI2(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Test",
-				Value: config.NewRSRParsersMustCompile("~*req.Account", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("~*req.Account", utils.InfieldSep),
 			},
 		},
 		Weights: make(utils.DynamicWeights, 1),

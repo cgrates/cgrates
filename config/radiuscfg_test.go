@@ -70,14 +70,14 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
 				Timezone:      utils.EmptyString,
-				Tenant:        NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
+				Tenant:        utils.NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{
 					{
 						Tag:       "Allow",
 						Path:      "*rep.response.Allow",
 						Type:      utils.MetaConstant,
-						Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
+						Value:     utils.NewRSRParsersMustCompile("1", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
 					},
@@ -247,14 +247,14 @@ func TestRadiusAgentCfgClone(t *testing.T) {
 				Filters:       []string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
 				Flags:         utils.FlagsWithParams{utils.MetaDryRun: {}},
 				Timezone:      utils.EmptyString,
-				Tenant:        NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
+				Tenant:        utils.NewRSRParsersMustCompile("~*opts.*originID", utils.InfieldSep),
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{
 					{
 						Tag:       "Allow",
 						Path:      "*rep.response.Allow",
 						Type:      utils.MetaConstant,
-						Value:     NewRSRParsersMustCompile("1", utils.InfieldSep),
+						Value:     utils.NewRSRParsersMustCompile("1", utils.InfieldSep),
 						Mandatory: true,
 						Layout:    time.RFC3339,
 					},

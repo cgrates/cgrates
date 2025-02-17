@@ -170,7 +170,7 @@ func TestConfigSanityLoaders(t *testing.T) {
 	}
 	cfg.loaderCfg[0].Data[0].Fields[0].Path = "~*req.Destination"
 
-	cfg.loaderCfg[0].Data[0].Fields[0].Value = RSRParsers{{}}
+	cfg.loaderCfg[0].Data[0].Fields[0].Value = utils.RSRParsers{{}}
 	cfg.loaderCfg[0].Data[0].Fields[0].Value[0].path = "~req."
 	expected = "<LoaderS> Empty field path  for ~req. at Values"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
@@ -387,7 +387,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 	cfg.templates = FCTemplates{
 		utils.MetaEEs: {
 			{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-				Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+				Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 		},
 	}
 	cfg.diameterAgentCfg = &DiameterAgentCfg{
@@ -398,11 +398,11 @@ func TestConfigSanityDAgent(t *testing.T) {
 				Timezone: "Local",
 				RequestFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				ReplyFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -526,11 +526,11 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 				Timezone: "Local",
 				RequestFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				ReplyFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -627,11 +627,11 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 				Timezone: "Local",
 				RequestFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				ReplyFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -730,11 +730,11 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 					Timezone: "Local",
 					RequestFields: []*FCTemplate{
 						{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-							Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+							Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 					},
 					ReplyFields: []*FCTemplate{
 						{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-							Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+							Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 					},
 				},
 			},
@@ -782,7 +782,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Value = RSRParsers{
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1..Field2[0]",
@@ -793,7 +793,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Value = RSRParsers{
+	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1.Field2[0]",
@@ -812,7 +812,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Value = RSRParsers{
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1..Field2[0]",
@@ -825,7 +825,7 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Value = RSRParsers{
+	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1.Field2[0]",
@@ -856,11 +856,11 @@ func TestConfigSanitySipAgent(t *testing.T) {
 				Timezone: "Local",
 				RequestFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				ReplyFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -900,7 +900,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Value = RSRParsers{
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1..Field2[0]",
@@ -912,7 +912,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Value = RSRParsers{
+	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1.Field2[0]",
@@ -932,7 +932,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Value = RSRParsers{
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1..Field2[0]",
@@ -945,7 +945,7 @@ func TestConfigSanitySipAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Value = RSRParsers{
+	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1.Field2[0]",
@@ -1180,11 +1180,11 @@ func TestConfigSanityEventReader(t *testing.T) {
 				Type: utils.MetaKafkajsonMap,
 				CacheDumpFields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				Fields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 				Opts: &EventReaderOpts{
 					PartialCacheAction: utils.StringPointer(utils.MetaNone),
@@ -1210,7 +1210,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.ersCfg.Readers[0].CacheDumpFields[0].Value = RSRParsers{
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1..Field2[0]",
@@ -1224,7 +1224,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Type = utils.MetaNone
-	cfg.ersCfg.Readers[0].CacheDumpFields[0].Value = RSRParsers{
+	cfg.ersCfg.Readers[0].CacheDumpFields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1.Field2[0]",
@@ -1244,7 +1244,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.ersCfg.Readers[0].Fields[0].Value = RSRParsers{
+	cfg.ersCfg.Readers[0].Fields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1..Field2[0]",
@@ -1258,7 +1258,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 
 	cfg.ersCfg.Readers[0].Fields[0].Type = utils.MetaNone
-	cfg.ersCfg.Readers[0].Fields[0].Value = RSRParsers{
+	cfg.ersCfg.Readers[0].Fields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1.Field2[0]",
@@ -1288,7 +1288,7 @@ func TestConfigSanityEventExporter(t *testing.T) {
 			{
 				Fields: []*FCTemplate{
 					{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-						Value: NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+						Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 				},
 			},
 		},
@@ -1350,7 +1350,7 @@ func TestConfigSanityEventExporter(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.eesCfg.Exporters[0].Fields[0].Value = RSRParsers{
+	cfg.eesCfg.Exporters[0].Fields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1..Field2[0]",
@@ -1364,7 +1364,7 @@ func TestConfigSanityEventExporter(t *testing.T) {
 	}
 
 	cfg.eesCfg.Exporters[0].Fields[0].Type = utils.MetaNone
-	cfg.eesCfg.Exporters[0].Fields[0].Value = RSRParsers{
+	cfg.eesCfg.Exporters[0].Fields[0].Value = utils.RSRParsers{
 		&RSRParser{
 			Rules: "~*req.Session-Id2",
 			path:  "~Field1.Field2[0]",

@@ -773,7 +773,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if rdr.Type == utils.MetaFileXML && len(field.Value) != 0 &&
 					!slices.Contains([]string{utils.MetaNone, utils.MetaConstant}, field.Type) {
 
-					// Find the minimum rule length for dynamic RSRParser within the field value.
+					// Find the minimum rule length for dynamic utils.RSRParser within the field value.
 					minRuleLength := math.MaxInt
 					for _, parser := range field.Value {
 						if !strings.HasPrefix(parser.Rules, utils.MetaDynReq) {
@@ -783,7 +783,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 						minRuleLength = min(minRuleLength, ruleLen)
 					}
 
-					// If a dynamic RSRParser is found, verify xmlRootPath length against minRuleLength.
+					// If a dynamic utils.RSRParser is found, verify xmlRootPath length against minRuleLength.
 					if minRuleLength != math.MaxInt {
 						var rootHP utils.HierarchyPath
 						if rdr.Opts.XMLRootPath != nil {

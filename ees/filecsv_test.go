@@ -70,11 +70,11 @@ func TestFileCsvComposeHeader(t *testing.T) {
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*hdr.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fCsv.Cfg().Fields {
@@ -95,12 +95,12 @@ func TestFileCsvComposeHeader(t *testing.T) {
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 		{
 			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 	}
@@ -133,11 +133,11 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*trl.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fCsv.Cfg().Fields {
@@ -158,12 +158,12 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 	}
@@ -229,12 +229,12 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 		{
 			Path: "*trl.2", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 	}
@@ -263,11 +263,11 @@ func TestFileCsvOnEvictedClose(t *testing.T) {
 	fCsv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*trl.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fCsv.Cfg().Fields {

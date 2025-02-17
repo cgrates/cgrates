@@ -167,7 +167,7 @@ func TestKafkaERProcessMessage(t *testing.T) {
 		{
 			Tag:   "Tor",
 			Type:  utils.MetaConstant,
-			Value: config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
 			Path:  "*cgreq.ToR",
 		},
 	}

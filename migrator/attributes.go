@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -290,7 +289,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *v2AttributePr
 	for _, mp := range v1AttrPrf.Attributes {
 		for _, attr := range mp {
 
-			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, utils.RSRSep)
+			sbstPrsr, err := utils.NewRSRParsers(attr.Substitute, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -358,7 +357,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfileV1To4() (attrPrf *v4Attrib
 				filterIDs = append(filterIDs, utils.MetaString+utils.ConcatenatedKeySep+attr.FieldName+utils.ConcatenatedKeySep+attr.Initial)
 			}
 			// create RSRParser
-			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, utils.RSRSep)
+			sbstPrsr, err := utils.NewRSRParsers(attr.Substitute, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -409,7 +408,7 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *v6AttributePr
 		if strings.HasPrefix(val, utils.DynamicDataPrefix) {
 			val = val[1:] // remove the DynamicDataPrefix
 			val = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
-			rsrVal, err = config.NewRSRParsers(val, utils.RSRSep)
+			rsrVal, err = utils.NewRSRParsers(val, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -431,7 +430,7 @@ func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *v6AttributePr
 type v2Attribute struct {
 	FieldName  string
 	Initial    any
-	Substitute config.RSRParsers
+	Substitute utils.RSRParsers
 	Append     bool
 }
 
@@ -448,7 +447,7 @@ type v2AttributeProfile struct {
 type v3Attribute struct {
 	FilterIDs  []string
 	FieldName  string
-	Substitute config.RSRParsers
+	Substitute utils.RSRParsers
 }
 
 type v3AttributeProfile struct {
@@ -465,7 +464,7 @@ type v4Attribute struct {
 	FilterIDs []string
 	FieldName string
 	Type      string
-	Value     config.RSRParsers
+	Value     utils.RSRParsers
 }
 
 type v4AttributeProfile struct {
@@ -484,7 +483,7 @@ type v6Attribute struct {
 	FilterIDs []string
 	Path      string
 	Type      string
-	Value     config.RSRParsers
+	Value     utils.RSRParsers
 }
 
 // AttributeProfile the profile definition for the attributes

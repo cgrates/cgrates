@@ -272,7 +272,7 @@ func testLoadItCheckAttributes(t *testing.T) {
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Password",
 				Type:      utils.MetaConstant,
-				Value:     config.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
+				Value:     utils.NewRSRParsersMustCompile("CGRateS.org", utils.InfieldSep),
 			},
 		},
 		Blockers: utils.DynamicBlockers{

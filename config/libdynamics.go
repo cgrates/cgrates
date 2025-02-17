@@ -37,42 +37,42 @@ type DynamicStringOpt struct {
 	FilterIDs []string
 	Tenant    string
 	value     string
-	rsVal     RSRParsers
+	rsVal     utils.RSRParsers
 }
 
 type DynamicIntOpt struct {
 	FilterIDs []string
 	Tenant    string
 	value     int
-	rsVal     RSRParsers
+	rsVal     utils.RSRParsers
 }
 
 type DynamicFloat64Opt struct {
 	FilterIDs []string
 	Tenant    string
 	value     float64
-	rsVal     RSRParsers
+	rsVal     utils.RSRParsers
 }
 
 type DynamicBoolOpt struct {
 	FilterIDs []string
 	Tenant    string
 	value     bool
-	rsVal     RSRParsers
+	rsVal     utils.RSRParsers
 }
 
 type DynamicDurationOpt struct {
 	FilterIDs []string
 	Tenant    string
 	value     time.Duration
-	rsVal     RSRParsers
+	rsVal     utils.RSRParsers
 }
 
 type DynamicDecimalOpt struct {
 	FilterIDs []string
 	Tenant    string
 	value     *decimal.Big
-	rsVal     RSRParsers
+	rsVal     utils.RSRParsers
 }
 
 type DynamicInterfaceOpt struct {
@@ -85,14 +85,14 @@ type DynamicIntPointerOpt struct {
 	FilterIDs []string
 	Tenant    string
 	value     *int
-	rsVal     RSRParsers
+	rsVal     utils.RSRParsers
 }
 
 type DynamicDurationPointerOpt struct {
 	FilterIDs []string
 	Tenant    string
 	value     *time.Duration
-	rsVal     RSRParsers
+	rsVal     utils.RSRParsers
 }
 
 func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) (cl []*DynamicStringSliceOpt) {
@@ -434,7 +434,7 @@ func InterfaceToDynamicStringOpts(strJsOpts []*DynamicInterfaceOpt) (strOpts []*
 		}
 		strval := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strval, utils.DynamicDataPrefix) {
-			strOpts[indx].rsVal, err = NewRSRParsers(strval, utils.RSRSep)
+			strOpts[indx].rsVal, err = utils.NewRSRParsers(strval, utils.RSRSep)
 			if err != nil {
 				return
 			}
@@ -470,7 +470,7 @@ func InterfaceToFloat64DynamicOpts(strJsOpts []*DynamicInterfaceOpt) (flOpts []*
 		}
 		strVal := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strVal, utils.DynamicDataPrefix) {
-			flOpts[index].rsVal, err = NewRSRParsers(strVal, utils.RSRSep)
+			flOpts[index].rsVal, err = utils.NewRSRParsers(strVal, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -507,7 +507,7 @@ func IfaceToIntDynamicOpts(strJsOpts []*DynamicInterfaceOpt) (intPtOpts []*Dynam
 		}
 		strval := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strval, utils.DynamicDataPrefix) {
-			intPtOpts[index].rsVal, err = NewRSRParsers(strval, utils.RSRSep)
+			intPtOpts[index].rsVal, err = utils.NewRSRParsers(strval, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -544,7 +544,7 @@ func IfaceToDecimalBigDynamicOpts(strOpts []*DynamicInterfaceOpt) (decOpts []*Dy
 		}
 		strVal := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strVal, utils.DynamicDataPrefix) {
-			decOpts[index].rsVal, err = NewRSRParsers(strVal, utils.RSRSep)
+			decOpts[index].rsVal, err = utils.NewRSRParsers(strVal, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -582,7 +582,7 @@ func IfaceToDurationDynamicOpts(ifOpts []*DynamicInterfaceOpt) (durOpts []*Dynam
 		}
 		strVal := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strVal, utils.DynamicDataPrefix) {
-			durOpts[index].rsVal, err = NewRSRParsers(strVal, utils.RSRSep)
+			durOpts[index].rsVal, err = utils.NewRSRParsers(strVal, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -620,7 +620,7 @@ func IfaceToIntPointerDynamicOpts(ifOpts []*DynamicInterfaceOpt) (intPtOpts []*D
 		}
 		strval := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strval, utils.DynamicDataPrefix) {
-			intPtOpts[index].rsVal, err = NewRSRParsers(strval, utils.RSRSep)
+			intPtOpts[index].rsVal, err = utils.NewRSRParsers(strval, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -657,7 +657,7 @@ func IfaceToDurationPointerDynamicOpts(ifOpts []*DynamicInterfaceOpt) (durPtOpts
 		}
 		strVal := utils.IfaceAsString(opt.Value)
 		if strings.HasPrefix(strVal, utils.DynamicDataPrefix) {
-			durPtOpts[index].rsVal, err = NewRSRParsers(strVal, utils.RSRSep)
+			durPtOpts[index].rsVal, err = utils.NewRSRParsers(strVal, utils.RSRSep)
 			if err != nil {
 				return nil, err
 			}
@@ -692,7 +692,7 @@ func IfaceToBoolDynamicOpts(strOpts []*DynamicInterfaceOpt) (boolOpts []*Dynamic
 			Tenant:    opt.Tenant,
 		}
 		if dynVal := utils.IfaceAsString(opt.Value); strings.HasPrefix(dynVal, utils.DynamicDataPrefix) {
-			boolOpts[index].rsVal, err = NewRSRParsers(dynVal, utils.RSRSep)
+			boolOpts[index].rsVal, err = utils.NewRSRParsers(dynVal, utils.RSRSep)
 			if err != nil {
 				return
 			}
@@ -720,7 +720,7 @@ func BoolToIfaceDynamicOpts(boolOpts []*DynamicBoolOpt) (strOpts []*DynamicInter
 	return
 }
 
-func NewDynamicStringOpt(filterIDs []string, tenant string, value string, dynValue RSRParsers) *DynamicStringOpt {
+func NewDynamicStringOpt(filterIDs []string, tenant string, value string, dynValue utils.RSRParsers) *DynamicStringOpt {
 	return &DynamicStringOpt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,
@@ -729,7 +729,7 @@ func NewDynamicStringOpt(filterIDs []string, tenant string, value string, dynVal
 	}
 }
 
-func NewDynamicIntOpt(filterIDs []string, tenant string, value int, dynValue RSRParsers) *DynamicIntOpt {
+func NewDynamicIntOpt(filterIDs []string, tenant string, value int, dynValue utils.RSRParsers) *DynamicIntOpt {
 	return &DynamicIntOpt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,
@@ -738,7 +738,7 @@ func NewDynamicIntOpt(filterIDs []string, tenant string, value int, dynValue RSR
 	}
 }
 
-func NewDynamicFloat64Opt(filterIDs []string, tenant string, value float64, dynValue RSRParsers) *DynamicFloat64Opt {
+func NewDynamicFloat64Opt(filterIDs []string, tenant string, value float64, dynValue utils.RSRParsers) *DynamicFloat64Opt {
 	return &DynamicFloat64Opt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,
@@ -747,7 +747,7 @@ func NewDynamicFloat64Opt(filterIDs []string, tenant string, value float64, dynV
 	}
 }
 
-func NewDynamicDecimalOpt(filterIDs []string, tenant string, value *decimal.Big, dynValue RSRParsers) *DynamicDecimalOpt {
+func NewDynamicDecimalOpt(filterIDs []string, tenant string, value *decimal.Big, dynValue utils.RSRParsers) *DynamicDecimalOpt {
 	return &DynamicDecimalOpt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,
@@ -756,7 +756,7 @@ func NewDynamicDecimalOpt(filterIDs []string, tenant string, value *decimal.Big,
 	}
 }
 
-func NewDynamicDurationOpt(filterIDs []string, tenant string, value time.Duration, dynValue RSRParsers) *DynamicDurationOpt {
+func NewDynamicDurationOpt(filterIDs []string, tenant string, value time.Duration, dynValue utils.RSRParsers) *DynamicDurationOpt {
 	return &DynamicDurationOpt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,
@@ -765,7 +765,7 @@ func NewDynamicDurationOpt(filterIDs []string, tenant string, value time.Duratio
 	}
 }
 
-func NewDynamicBoolOpt(filterIDs []string, tenant string, value bool, dynValue RSRParsers) *DynamicBoolOpt {
+func NewDynamicBoolOpt(filterIDs []string, tenant string, value bool, dynValue utils.RSRParsers) *DynamicBoolOpt {
 	return &DynamicBoolOpt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,
@@ -774,7 +774,7 @@ func NewDynamicBoolOpt(filterIDs []string, tenant string, value bool, dynValue R
 	}
 }
 
-func NewDynamicIntPointerOpt(filterIDs []string, tenant string, value *int, dynValue RSRParsers) *DynamicIntPointerOpt {
+func NewDynamicIntPointerOpt(filterIDs []string, tenant string, value *int, dynValue utils.RSRParsers) *DynamicIntPointerOpt {
 	return &DynamicIntPointerOpt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,
@@ -783,7 +783,7 @@ func NewDynamicIntPointerOpt(filterIDs []string, tenant string, value *int, dynV
 	}
 }
 
-func NewDynamicDurationPointerOpt(filterIDs []string, tenant string, value *time.Duration, dynValue RSRParsers) *DynamicDurationPointerOpt {
+func NewDynamicDurationPointerOpt(filterIDs []string, tenant string, value *time.Duration, dynValue utils.RSRParsers) *DynamicDurationPointerOpt {
 	return &DynamicDurationPointerOpt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,

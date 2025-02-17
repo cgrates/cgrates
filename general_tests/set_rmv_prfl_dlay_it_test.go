@@ -395,7 +395,7 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 				Attributes: []*engine.Attribute{
 					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
-						Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+						Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 					},
 				},
 				Weights: utils.DynamicWeights{

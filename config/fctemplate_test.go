@@ -38,7 +38,7 @@ func TestNewFCTemplateFromFCTemplateJsonCfg(t *testing.T) {
 		Type:    "*composed",
 		Path:    "Tenant",
 		Filters: []string{"Filter1", "Filter2"},
-		Value:   NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+		Value:   utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		Layout:  time.RFC3339,
 	}
 	expected.ComputePath()
@@ -53,7 +53,7 @@ func TestFCTemplateInflateTemplate(t *testing.T) {
 	fcTemplate := []*FCTemplate{
 		{
 			Type:  utils.MetaTemplate,
-			Value: NewRSRParsersMustCompile("1sa{*duration}", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("1sa{*duration}", utils.InfieldSep),
 		},
 	}
 	expected := "time: unknown unit \"sa\" in duration \"1sa\""
@@ -97,7 +97,7 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 			Type:    "*composed",
 			Path:    "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			Layout:  time.RFC3339,
 		},
 		{
@@ -105,7 +105,7 @@ func TestFCTemplatesFromFCTemplatesJsonCfg(t *testing.T) {
 			Type:    "*composed",
 			Path:    "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
 			Layout:  time.RFC3339,
 		},
 	}
@@ -126,20 +126,20 @@ func TestFCTemplateInflate1(t *testing.T) {
 			Type:    "*composed",
 			Path:    "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		},
 		{
 			Tag:     "RunID",
 			Type:    "*composed",
 			Path:    "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
 		},
 		{
 			Tag:     "TmpMap",
 			Type:    "*template",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("TmpMap", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("TmpMap", utils.InfieldSep),
 		},
 	}
 	fcTmpMp := map[string][]*FCTemplate{
@@ -149,14 +149,14 @@ func TestFCTemplateInflate1(t *testing.T) {
 				Type:    "*composed",
 				Path:    "Elem1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem1", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem1", utils.InfieldSep),
 			},
 			{
 				Tag:     "Elem2",
 				Type:    "*composed",
 				Path:    "Elem2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem2", utils.InfieldSep),
 			},
 		},
 		"TmpMap2": {
@@ -165,14 +165,14 @@ func TestFCTemplateInflate1(t *testing.T) {
 				Type:    "*composed",
 				Path:    "Elem2.1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem2.1", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem2.1", utils.InfieldSep),
 			},
 			{
 				Tag:     "Elem2.2",
 				Type:    "*composed",
 				Path:    "Elem2.2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2.2", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem2.2", utils.InfieldSep),
 			},
 		},
 	}
@@ -182,28 +182,28 @@ func TestFCTemplateInflate1(t *testing.T) {
 			Type:    "*composed",
 			Path:    "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		},
 		{
 			Tag:     "RunID",
 			Type:    "*composed",
 			Path:    "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
 		},
 		{
 			Tag:     "Elem1",
 			Type:    "*composed",
 			Path:    "Elem1",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("Elem1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("Elem1", utils.InfieldSep),
 		},
 		{
 			Tag:     "Elem2",
 			Type:    "*composed",
 			Path:    "Elem2",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("Elem2", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("Elem2", utils.InfieldSep),
 		},
 	}
 	if rcv, err := InflateTemplates(fcTmp1, fcTmpMp); err != nil {
@@ -220,20 +220,20 @@ func TestFCTemplateInflate2(t *testing.T) {
 			Type:    "*composed",
 			Path:    "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		},
 		{
 			Tag:     "RunID",
 			Type:    "*composed",
 			Path:    "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
 		},
 		{
 			Tag:     "TmpMap3",
 			Type:    "*template",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("TmpMap3", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("TmpMap3", utils.InfieldSep),
 		},
 	}
 	fcTmpMp := map[string][]*FCTemplate{
@@ -243,14 +243,14 @@ func TestFCTemplateInflate2(t *testing.T) {
 				Type:    "*composed",
 				Path:    "Elem1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem1", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem1", utils.InfieldSep),
 			},
 			{
 				Tag:     "Elem2",
 				Type:    "*composed",
 				Path:    "Elem2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem2", utils.InfieldSep),
 			},
 		},
 		"TmpMap2": {
@@ -259,14 +259,14 @@ func TestFCTemplateInflate2(t *testing.T) {
 				Type:    "*composed",
 				Path:    "Elem2.1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem2.1", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem2.1", utils.InfieldSep),
 			},
 			{
 				Tag:     "Elem2.2",
 				Type:    "*composed",
 				Path:    "Elem2.2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2.2", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem2.2", utils.InfieldSep),
 			},
 		},
 	}
@@ -283,20 +283,20 @@ func TestFCTemplateInflate3(t *testing.T) {
 			Type:    "*composed",
 			Path:    "Tenant",
 			Filters: []string{"Filter1", "Filter2"},
-			Value:   NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		},
 		{
 			Tag:     "RunID",
 			Type:    "*composed",
 			Path:    "RunID",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("SampleValue", utils.InfieldSep),
 		},
 		{
 			Tag:     "TmpMap",
 			Type:    "*template",
 			Filters: []string{"Filter1_1", "Filter2_2"},
-			Value:   NewRSRParsersMustCompile("TmpMap", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("TmpMap", utils.InfieldSep),
 		},
 	}
 	fcTmpMp := map[string][]*FCTemplate{
@@ -307,14 +307,14 @@ func TestFCTemplateInflate3(t *testing.T) {
 				Type:    "*composed",
 				Path:    "Elem2.1",
 				Filters: []string{"Filter1", "Filter2"},
-				Value:   NewRSRParsersMustCompile("Elem2.1", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem2.1", utils.InfieldSep),
 			},
 			{
 				Tag:     "Elem2.2",
 				Type:    "*composed",
 				Path:    "Elem2.2",
 				Filters: []string{"Filter1_1", "Filter2_2"},
-				Value:   NewRSRParsersMustCompile("Elem2.2", utils.InfieldSep),
+				Value:   utils.NewRSRParsersMustCompile("Elem2.2", utils.InfieldSep),
 			},
 		},
 	}
@@ -338,7 +338,7 @@ func TestFCTemplateClone(t *testing.T) {
 		Type:             "*composed",
 		Path:             "Tenant",
 		Filters:          []string{"Filter1", "Filter2"},
-		Value:            NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+		Value:            utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		RoundingDecimals: utils.IntPointer(2),
 	}
 	smpl.ComputePath()
@@ -351,12 +351,12 @@ func TestFCTemplateClone(t *testing.T) {
 		Type:             "*composed",
 		Path:             "Tenant",
 		Filters:          []string{"Filter1", "Filter2"},
-		Value:            NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+		Value:            utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		RoundingDecimals: utils.IntPointer(2),
 	}
 	initialSmpl.ComputePath()
 	smpl.Filters = []string{"SingleFilter"}
-	smpl.Value = NewRSRParsersMustCompile("cgrates.com", utils.InfieldSep)
+	smpl.Value = utils.NewRSRParsersMustCompile("cgrates.com", utils.InfieldSep)
 	if !reflect.DeepEqual(cloned, initialSmpl) {
 		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialSmpl), utils.ToJSON(cloned))
 	}
@@ -490,7 +490,7 @@ func TestFCTemplatesClone(t *testing.T) {
 			Type:             "*composed",
 			Path:             "Tenant",
 			Filters:          []string{"Filter1", "Filter2"},
-			Value:            NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Value:            utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			RoundingDecimals: utils.IntPointer(2),
 		}},
 	}
@@ -505,7 +505,7 @@ func TestFCTemplatesClone(t *testing.T) {
 			Type:             "*composed",
 			Path:             "Tenant",
 			Filters:          []string{"Filter1", "Filter2"},
-			Value:            NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+			Value:            utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 			RoundingDecimals: utils.IntPointer(2),
 		}},
 	}
@@ -522,7 +522,7 @@ func TestFcTemplatesEqual(t *testing.T) {
 			Tag:  "TenantID",
 			Type: utils.MetaVariable,
 			Path: utils.Tenant,
-			Value: RSRParsers{
+			Value: utils.RSRParsers{
 				{
 					Rules: "*req.0",
 				},
@@ -549,7 +549,7 @@ func TestFcTemplatesEqual(t *testing.T) {
 			Tag:  "TenantID",
 			Type: utils.MetaVariable,
 			Path: utils.Tenant,
-			Value: RSRParsers{
+			Value: utils.RSRParsers{
 				{
 					Rules: "*req.0",
 				},
@@ -584,7 +584,7 @@ func TestFcTemplatesEqual(t *testing.T) {
 		Tag:  "TenantID",
 		Type: utils.MetaVariable,
 		Path: utils.Tenant,
-		Value: RSRParsers{
+		Value: utils.RSRParsers{
 			{
 				Rules: "*req.0",
 			},
@@ -624,7 +624,7 @@ func TestDiffFcTemplateJsonCfg(t *testing.T) {
 			Tag:  "TenantID",
 			Type: utils.MetaVariable,
 			Path: utils.Tenant,
-			Value: RSRParsers{
+			Value: utils.RSRParsers{
 				{
 					Rules: "*req.0",
 				},
@@ -703,7 +703,7 @@ func TestDiffFcTemplatesJsonCfg(t *testing.T) {
 				Tag:  "TenantID",
 				Type: utils.MetaVariable,
 				Path: utils.Tenant,
-				Value: RSRParsers{
+				Value: utils.RSRParsers{
 					{
 						Rules: "*req.0",
 					},
@@ -773,7 +773,7 @@ func TestFCTemplatecloneSection(t *testing.T) {
 				Tag:  "TenantID",
 				Type: utils.MetaVariable,
 				Path: utils.Tenant,
-				Value: RSRParsers{
+				Value: utils.RSRParsers{
 					{
 						Rules: "*req.0",
 					},
@@ -802,7 +802,7 @@ func TestFCTemplatecloneSection(t *testing.T) {
 				Tag:  "TenantID",
 				Type: utils.MetaVariable,
 				Path: utils.Tenant,
-				Value: RSRParsers{
+				Value: utils.RSRParsers{
 					{
 						Rules: "*req.0",
 					},

@@ -2162,7 +2162,7 @@ func TestPassNever(t *testing.T) {
 
 func TestFilterRulePassRegexParseErrNotFound(t *testing.T) {
 
-	rsrBadParse := config.NewRSRParserMustCompile("~*opts.<~*opts.*originID;~*req.RunID;-Cost>")
+	rsrBadParse := utils.NewRSRParserMustCompile("~*opts.<~*opts.*originID;~*req.RunID;-Cost>")
 
 	fltr := &FilterRule{
 
@@ -2182,7 +2182,7 @@ func TestFilterRulePassRegexParseErrNotFound(t *testing.T) {
 
 func TestFilterRulePassRegexParseErr(t *testing.T) {
 
-	rsrBadParse, err := config.NewRSRParser("~*opts.*originID<~*opts.Converter>")
+	rsrBadParse, err := utils.NewRSRParser("~*opts.*originID<~*opts.Converter>")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2393,15 +2393,15 @@ func TestFRPassMetaNever(t *testing.T) {
 }
 
 func TestFRPassStringParseDataProviderErr(t *testing.T) {
-	rsrParse := &config.RSRParser{
+	rsrParse := &utils.RSRParser{
 		Rules: "~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
 	}
 	if err := rsrParse.Compile(); err != nil {
 		t.Error(err)
 	}
 
-	valParse := config.RSRParsers{
-		&config.RSRParser{
+	valParse := utils.RSRParsers{
+		&utils.RSRParser{
 			Rules: "~*opts.*originID;~*req.RunID;-Cost",
 		},
 	}

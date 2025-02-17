@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -734,10 +733,10 @@ type v1Filter struct {
 }
 
 type v1FilterRule struct {
-	Type      string            // Filter type (*string,  *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	FieldName string            // Name of the field providing us the Values to check (used in case of some )
-	Values    []string          // Filter definition
-	rsrFields config.RSRParsers // Cache here the RSRFilter Values
+	Type      string           // Filter type (*string,  *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	FieldName string           // Name of the field providing us the Values to check (used in case of some )
+	Values    []string         // Filter definition
+	rsrFields utils.RSRParsers // Cache here the RSRFilter Values
 	negative  *bool
 }
 

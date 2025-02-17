@@ -763,7 +763,7 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		EmptyBalanceContext:    "randomEmptyContext",
 		ActiveSessionDelimiter: "/",
 		MaxWaitConnection:      2,
-		ExtraFields:            RSRParsers{},
+		ExtraFields:            utils.RSRParsers{},
 		EventSocketConns: []*FsConnCfg{
 			{
 				Address:      "1.2.3.4:8021",
@@ -1306,7 +1306,7 @@ func TestFsAgentCfgClone(t *testing.T) {
 		SubscribePark:       true,
 		EmptyBalanceAnnFile: "file",
 		EmptyBalanceContext: "context",
-		ExtraFields:         NewRSRParsersMustCompile("tenant", utils.InfieldSep),
+		ExtraFields:         utils.NewRSRParsersMustCompile("tenant", utils.InfieldSep),
 		LowBalanceAnnFile:   "file2",
 		MaxWaitConnection:   time.Second,
 		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
@@ -1408,7 +1408,7 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 		SessionSConns: []string{},
 		SubscribePark: false,
 		CreateCDR:     false,
-		ExtraFields: RSRParsers{
+		ExtraFields: utils.RSRParsers{
 			{
 				Rules: "ExtraField",
 			},
@@ -1425,7 +1425,7 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 		SessionSConns: []string{"*localhost"},
 		SubscribePark: true,
 		CreateCDR:     true,
-		ExtraFields: RSRParsers{
+		ExtraFields: utils.RSRParsers{
 			{
 				Rules: "ExtraField2",
 			},

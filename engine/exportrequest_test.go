@@ -33,7 +33,7 @@ func TestExportRequestParseFieldDateTimeDaily(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "",
 	}
@@ -61,7 +61,7 @@ func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -89,7 +89,7 @@ func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile("*monthly", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*monthly", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -116,7 +116,7 @@ func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*monthly_estimated", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -143,7 +143,7 @@ func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile("*yearly", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*yearly", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -170,7 +170,7 @@ func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile(utils.MetaUnlimited, utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -197,7 +197,7 @@ func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile("", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -224,7 +224,7 @@ func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "Local",
 	}
@@ -251,7 +251,7 @@ func TestExportReqParseFieldDateTimeError(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
-		Value:    config.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*month_endTest", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "/",
 	}
@@ -263,7 +263,7 @@ func TestExportReqParseFieldDateTimeError(t *testing.T) {
 }
 
 func TestExportReqParseFieldDateTimeError2(t *testing.T) {
-	prsr, err := config.NewRSRParsersFromSlice([]string{"2.", "~*opts.*originID<~*opts.Converter>"})
+	prsr, err := utils.NewRSRParsersFromSlice([]string{"2.", "~*opts.*originID<~*opts.Converter>"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -448,7 +448,7 @@ func TestExportRequestParseFieldMetaFiller(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaFiller,
-		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "",
 	}
@@ -467,7 +467,7 @@ func TestExportRequestParseFieldMetaGroup(t *testing.T) {
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", nil, nil)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaGroup,
-		Value:    config.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
+		Value:    utils.NewRSRParsersMustCompile("*daily", utils.InfieldSep),
 		Layout:   "“Mon Jan _2 15:04:05 2006”",
 		Timezone: "",
 	}
@@ -973,7 +973,7 @@ func TestExportRequestSetFieldsPassErr(t *testing.T) {
 		{
 			Tag:     "Tor",
 			Type:    utils.MetaConstant,
-			Value:   config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
 			Path:    "*cgreq.ToR",
 			Filters: []string{"inexistant"},
 		},
@@ -1009,7 +1009,7 @@ func TestExportRequestSetFieldsPassFalse(t *testing.T) {
 		{
 			Tag:     "Tor",
 			Type:    utils.MetaConstant,
-			Value:   config.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("*voice", utils.InfieldSep),
 			Path:    "*cgreq.ToR",
 			Filters: []string{"*gt:~*opts.*rateSCost.Cost:0.5"},
 		},

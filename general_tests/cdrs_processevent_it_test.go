@@ -181,7 +181,7 @@ package general_tests
 // 			Attributes: []*engine.Attribute{
 // 				{
 // 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
-// 					Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+// 					Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 // 				},
 // 			},
 // 			Weights: utils.DynamicWeights{

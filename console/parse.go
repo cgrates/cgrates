@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -74,7 +73,7 @@ func (self *CmdParse) LocalExecute() string {
 	if self.rpcParams.Value == utils.EmptyString {
 		return "Empty value error"
 	}
-	if rsrField, err := config.NewRSRParser(self.rpcParams.Expression); err != nil {
+	if rsrField, err := utils.NewRSRParser(self.rpcParams.Expression); err != nil {
 		return err.Error()
 	} else if parsed, err := rsrField.ParseValue(self.rpcParams.Value); err != nil {
 		return err.Error()

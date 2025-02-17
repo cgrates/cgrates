@@ -1253,7 +1253,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 					Tag:         "*tor",
 					Type:        utils.MetaComposed,
 					Path:        "~*req.ToR",
-					Value:       config.NewRSRParsersMustCompile(utils.MetaVoice, utils.InfieldSep),
+					Value:       utils.NewRSRParsersMustCompile(utils.MetaVoice, utils.InfieldSep),
 					NewBranch:   false,
 					AttributeID: "ATTR_FLD_1001",
 				},
@@ -1324,14 +1324,14 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 			},
 			Fields: []*config.FCTemplate{
 				{Tag: "SessionId", Path: utils.EmptyString, Type: "*variable",
-					Value: config.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
+					Value: utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep), Mandatory: true},
 			},
 			CacheDumpFields: []*config.FCTemplate{
 				{
 					Tag:       "OriginID",
 					Type:      utils.MetaConstant,
 					Path:      "*exp.OriginID",
-					Value:     config.NewRSRParsersMustCompile("25160047719:0", utils.InfieldSep),
+					Value:     utils.NewRSRParsersMustCompile("25160047719:0", utils.InfieldSep),
 					Mandatory: true,
 				},
 			},

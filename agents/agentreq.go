@@ -34,7 +34,7 @@ func NewAgentRequest(req utils.DataProvider,
 	vars, cgrRply *utils.DataNode,
 	rply *utils.OrderedNavigableMap,
 	opts utils.MapStorage,
-	tntTpl config.RSRParsers,
+	tntTpl utils.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS,
 	extraDP map[string]utils.DataProvider) (ar *AgentRequest) {

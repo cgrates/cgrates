@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1503,7 +1502,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 			err = fmt.Errorf("empty path in AttributeProfile <%s>", attrPrf.TenantID())
 			return
 		}
-		sbstPrsr, err := config.NewRSRParsers(reqAttr.Value, utils.RSRSep)
+		sbstPrsr, err := utils.NewRSRParsers(reqAttr.Value, utils.RSRSep)
 		if err != nil {
 			return nil, err
 		}

@@ -102,8 +102,8 @@ func TestNewLoaderService(t *testing.T) {
 func TestLoaderServiceV1Run(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fc := []*config.FCTemplate{
-		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
-		{Path: utils.ID, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
 	}
 	tmpIn, err := os.MkdirTemp(utils.EmptyString, "TestLoaderServiceV1RunIn")
 	if err != nil {
@@ -311,8 +311,8 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 func TestLoaderServiceV1ImportZip(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fc := []*config.FCTemplate{
-		{Path: utils.Tenant, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
-		{Path: utils.ID, Type: utils.MetaVariable, Value: config.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
+		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
+		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
 	}
 	for _, f := range fc {
 		f.ComputePath()

@@ -102,11 +102,11 @@ func TestActionProfileSort(t *testing.T) {
 
 func TestActionAPDiktatRSRValues(t *testing.T) {
 	apdDiktat := APDiktat{
-		valRSR: config.RSRParsers{
-			&config.RSRParser{
+		valRSR: utils.RSRParsers{
+			&utils.RSRParser{
 				Rules: ">;q=0.7;expires=3600",
 			},
-			&config.RSRParser{
+			&utils.RSRParser{
 				Rules: ">;q=0.7;expires=3600",
 			},
 		},
@@ -115,11 +115,11 @@ func TestActionAPDiktatRSRValues(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expected := config.RSRParsers{
-		&config.RSRParser{
+	expected := utils.RSRParsers{
+		&utils.RSRParser{
 			Rules: ">;q=0.7;expires=3600",
 		},
-		&config.RSRParser{
+		&utils.RSRParser{
 			Rules: ">;q=0.7;expires=3600",
 		},
 	}
@@ -135,7 +135,7 @@ func TestActionAPDiktatRSRValuesNil(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	var expected config.RSRParsers
+	var expected utils.RSRParsers
 	if !reflect.DeepEqual(rsrPars, expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expected), utils.ToJSON(rsrPars))
 
@@ -157,7 +157,7 @@ func TestAPDiktatRSRValues(t *testing.T) {
 	dk := &APDiktat{Value: "1001"}
 	if rply, err := dk.RSRValues(); err != nil {
 		return
-	} else if exp := config.NewRSRParsersMustCompile("1001", utils.InfieldSep); !reflect.DeepEqual(exp, rply) {
+	} else if exp := utils.NewRSRParsersMustCompile("1001", utils.InfieldSep); !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expected: %+v ,received: %+v", exp, rply)
 	}
 }
