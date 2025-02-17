@@ -1389,9 +1389,10 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 	}
 	tplFlds[0].ComputePath()
 
+	expErr := "invalid arguments <[{\"Rules\":\"~*req.Session-Id\",\"Path\":\"~*req.Session-Id\"}]> to *ccUsage"
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *ccUsage` {
-		t.Error(err)
+		err.Error() != expErr {
+		t.Errorf("expected %q, received %q", expErr, err)
 	}
 
 	tplFlds = []*config.FCTemplate{
@@ -1471,9 +1472,10 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 			Value:     utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep),
 			Mandatory: true},
 	}
+	expErr := "invalid arguments <[{\"Rules\":\"~*req.Session-Id\",\"Path\":\"~*req.Session-Id\"}]> to *usageDifference"
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *usageDifference` {
-		t.Error(err)
+		err.Error() != expErr {
+		t.Errorf("expected %q, received %q", expErr, err)
 	}
 
 	tplFlds = []*config.FCTemplate{
@@ -1713,9 +1715,10 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 			Value:     utils.NewRSRParsersMustCompile("~*req.Session-Id", utils.InfieldSep),
 			Mandatory: true},
 	}
+	expErr := "invalid arguments <[{\"Rules\":\"~*req.Session-Id\",\"Path\":\"~*req.Session-Id\"}]> to *valueExponent"
 	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
-		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id"}]> to *valueExponent` {
-		t.Error(err)
+		err.Error() != expErr {
+		t.Errorf("expected %q, received %q", expErr, err)
 	}
 
 	tplFlds = []*config.FCTemplate{

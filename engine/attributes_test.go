@@ -291,9 +291,9 @@ func TestParseAtributeCCUsageLessThanTwo(t *testing.T) {
 	}
 	_, err := ParseAttribute(dp, utils.MetaCCUsage, utils.EmptyString, utils.NewRSRParsersMustCompile("~*req.cc1;~*req.cc2", utils.InfieldSep),
 		0, utils.EmptyString, utils.EmptyString)
-	errExp := `invalid arguments <[{"Rules":"~*req.cc1"},{"Rules":"~*req.cc2"}]> to *ccUsage`
+	errExp := "invalid arguments <[{\"Rules\":\"~*req.cc1\",\"Path\":\"~*req.cc1\"},{\"Rules\":\"~*req.cc2\",\"Path\":\"~*req.cc2\"}]> to *ccUsage"
 	if err == nil || err.Error() != errExp {
-		t.Errorf("Expected %v\n but received %v", errExp, err)
+		t.Errorf("expected %q, received %q", errExp, err)
 	}
 }
 

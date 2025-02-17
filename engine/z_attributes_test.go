@@ -4057,9 +4057,9 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	}
 	rply := &AttrSProcessEventReply{}
 	err = alS.V1ProcessEvent(context.Background(), ev, rply)
-	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\"}]> to *valueExponent"
+	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\",\"Path\":\"CGRATES.ORG\"}]> to *valueExponent"
 	if err == nil || err.Error() != expErr {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expErr, err)
+		t.Errorf("expected %q, received %q", expErr, err)
 	}
 
 }
