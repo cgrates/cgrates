@@ -171,12 +171,12 @@ func TestConfigSanityLoaders(t *testing.T) {
 	cfg.loaderCfg[0].Data[0].Fields[0].Path = "~*req.Destination"
 
 	cfg.loaderCfg[0].Data[0].Fields[0].Value = utils.RSRParsers{{}}
-	cfg.loaderCfg[0].Data[0].Fields[0].Value[0].path = "~req."
+	cfg.loaderCfg[0].Data[0].Fields[0].Value[0].Path = "~req."
 	expected = "<LoaderS> Empty field path  for ~req. at Values"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.loaderCfg[0].Data[0].Fields[0].Value[0].path = "*req.Destination"
+	cfg.loaderCfg[0].Data[0].Fields[0].Value[0].Path = "*req.Destination"
 
 	cfg.loaderCfg[0].Data[0].Fields[0].Filters = make([]string, 1)
 	cfg.loaderCfg[0].Data[0].Fields[0].Filters = []string{"*string:~*req..Field"}
@@ -437,12 +437,12 @@ func TestConfigSanityDAgent(t *testing.T) {
 	}
 	cfg.templates[utils.MetaEEs][0].Path = "*req.OriginID"
 
-	cfg.templates[utils.MetaEEs][0].Value[0].path = "~Req."
+	cfg.templates[utils.MetaEEs][0].Value[0].Path = "~Req."
 	expected = "<DiameterAgent> Empty field path  for ~Req. at Values"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.templates[utils.MetaEEs][0].Value[0].path = "*req.OriginID"
+	cfg.templates[utils.MetaEEs][0].Value[0].Path = "*req.OriginID"
 
 	cfg.templates[utils.MetaEEs][0].Filters = []string{"*string:~*req..Field"}
 	expected = "<DiameterAgent> inline parse error for string: <*string:~*req..Field> for [*string:~*req..Field] at templates"
@@ -472,12 +472,12 @@ func TestConfigSanityDAgent(t *testing.T) {
 	}
 	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*req.Valid.Field"
 
-	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "~REQ."
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "~REQ."
 	expected = "<DiameterAgent> Empty field path  for ~REQ. at Values of request_fields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "*req.Valid.Field"
+	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "*req.Valid.Field"
 	cfg.diameterAgentCfg.RequestProcessors[0].RequestFields = []*FCTemplate{}
 
 	expected = "<DiameterAgent> MANDATORY_IE_MISSING: [Path] for cgrates at SessionId"
@@ -500,12 +500,12 @@ func TestConfigSanityDAgent(t *testing.T) {
 	}
 	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*req.Valid.Field"
 
-	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "~REQ."
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "~REQ."
 	expected = "<DiameterAgent> Empty field path  for ~REQ. at Values of reply_fields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "*req.Valid.Field"
+	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "*req.Valid.Field"
 	cfg.diameterAgentCfg.RequestProcessors[0].ReplyFields = []*FCTemplate{}
 
 	cfg.diameterAgentCfg.RequestProcessors[0].Filters = []string{"*string:~*req..Field"}
@@ -565,12 +565,12 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	}
 	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Path = "*req.OriginID"
 
-	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "~req."
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "~req."
 	expected = "<RadiusAgent> Empty field path  for ~req. at Values of request_fields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "*req.OriginID"
+	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "*req.OriginID"
 
 	cfg.radiusAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:*ec"}
 	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at request_fields"
@@ -587,12 +587,12 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	}
 	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*req.OriginID"
 
-	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "~req."
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "~req."
 	expected = "<RadiusAgent> Empty field path  for ~req. at Values of reply_fields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "*req.OriginID"
+	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "*req.OriginID"
 
 	cfg.radiusAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:*ec"}
 	expected = "<RadiusAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at reply_fields"
@@ -659,12 +659,12 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	}
 	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Type = utils.MetaNone
 
-	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "~req."
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "~req."
 	expected = "<DNSAgent> Empty field path  for ~req. at Values of request_fields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].path = "*req.Value"
+	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Value[0].Path = "*req.Value"
 
 	cfg.dnsAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~*req"}
 	expected = "<DNSAgent> inline parse error for string: <*empty:~*req> for [*empty:~*req] at request_fields"
@@ -695,12 +695,12 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 	}
 	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Path = "*empty:*ec"
 
-	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "~req."
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "~req."
 	expected = "<DNSAgent> Empty field path  for ~req. at Values of reply_fields"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].path = "*empty:*ec"
+	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Value[0].Path = "*empty:*ec"
 
 	cfg.dnsAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:*ec"}
 	expected = "<DNSAgent> inline parse error for string: <*empty:*ec> for [*empty:*ec] at reply_fields"
@@ -783,9 +783,9 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	}
 
 	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1..Field2[0]",
+			Path:  "~Field1..Field2[0]",
 		},
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Path = utils.EmptyString
@@ -794,9 +794,9 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1.Field2[0]",
+			Path:  "~Field1.Field2[0]",
 		},
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
@@ -813,9 +813,9 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	}
 
 	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1..Field2[0]",
+			Path:  "~Field1..Field2[0]",
 		},
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Path = utils.EmptyString
@@ -826,9 +826,9 @@ func TestConfigSanityHTTPAgent1(t *testing.T) {
 	}
 
 	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1.Field2[0]",
+			Path:  "~Field1.Field2[0]",
 		},
 	}
 	cfg.httpAgentCfg[0].RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
@@ -901,9 +901,9 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	}
 
 	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1..Field2[0]",
+			Path:  "~Field1..Field2[0]",
 		},
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Path = utils.EmptyString
@@ -913,9 +913,9 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	}
 
 	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1.Field2[0]",
+			Path:  "~Field1.Field2[0]",
 		},
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].RequestFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
@@ -933,9 +933,9 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	}
 
 	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1..Field2[0]",
+			Path:  "~Field1..Field2[0]",
 		},
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Path = utils.EmptyString
@@ -946,9 +946,9 @@ func TestConfigSanitySipAgent(t *testing.T) {
 	}
 
 	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1.Field2[0]",
+			Path:  "~Field1.Field2[0]",
 		},
 	}
 	cfg.sipAgentCfg.RequestProcessors[0].ReplyFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
@@ -1211,9 +1211,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1..Field2[0]",
+			Path:  "~Field1..Field2[0]",
 		},
 	}
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Path = "~Field1.Field3[0]"
@@ -1225,9 +1225,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Type = utils.MetaNone
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1.Field2[0]",
+			Path:  "~Field1.Field2[0]",
 		},
 	}
 	cfg.ersCfg.Readers[0].CacheDumpFields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
@@ -1245,9 +1245,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 
 	cfg.ersCfg.Readers[0].Fields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1..Field2[0]",
+			Path:  "~Field1..Field2[0]",
 		},
 	}
 	cfg.ersCfg.Readers[0].Fields[0].Path = "~Field1.Field3[0]"
@@ -1259,9 +1259,9 @@ func TestConfigSanityEventReader(t *testing.T) {
 
 	cfg.ersCfg.Readers[0].Fields[0].Type = utils.MetaNone
 	cfg.ersCfg.Readers[0].Fields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1.Field2[0]",
+			Path:  "~Field1.Field2[0]",
 		},
 	}
 	cfg.ersCfg.Readers[0].Fields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}
@@ -1351,9 +1351,9 @@ func TestConfigSanityEventExporter(t *testing.T) {
 	}
 
 	cfg.eesCfg.Exporters[0].Fields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1..Field2[0]",
+			Path:  "~Field1..Field2[0]",
 		},
 	}
 	cfg.eesCfg.Exporters[0].Fields[0].Path = "~Field1.Field3[0]"
@@ -1365,9 +1365,9 @@ func TestConfigSanityEventExporter(t *testing.T) {
 
 	cfg.eesCfg.Exporters[0].Fields[0].Type = utils.MetaNone
 	cfg.eesCfg.Exporters[0].Fields[0].Value = utils.RSRParsers{
-		&RSRParser{
+		&utils.RSRParser{
 			Rules: "~*req.Session-Id2",
-			path:  "~Field1.Field2[0]",
+			Path:  "~Field1.Field2[0]",
 		},
 	}
 	cfg.eesCfg.Exporters[0].Fields[0].Filters = []string{"*empty:~Field1..Field2[0]:*Test3:*Test4"}

@@ -27,11 +27,11 @@ import (
 func TestNewRSRParsers(t *testing.T) {
 	ruleStr := `Value1;Value2;~Header3;~Header4:s/a/${1}b/{*duration_seconds&*round:2};Value5{*duration_seconds&*round:2}`
 	eRSRParsers := RSRParsers{
-		&RSRParser{Rules: "Value1", path: "Value1"},
-		&RSRParser{Rules: "Value2", path: "Value2"},
-		&RSRParser{Rules: "~Header3", path: "~Header3", rsrRules: make([]*ReSearchReplace, 0)},
+		&RSRParser{Rules: "Value1", Path: "Value1"},
+		&RSRParser{Rules: "Value2", Path: "Value2"},
+		&RSRParser{Rules: "~Header3", Path: "~Header3", rsrRules: make([]*ReSearchReplace, 0)},
 		&RSRParser{Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
-			path: "~Header4",
+			Path: "~Header4",
 			rsrRules: []*ReSearchReplace{{
 				SearchRegexp:    regexp.MustCompile(`a`),
 				ReplaceTemplate: "${1}b"}},
@@ -40,7 +40,7 @@ func TestNewRSRParsers(t *testing.T) {
 		},
 
 		&RSRParser{Rules: "Value5{*duration_seconds&*round:2}",
-			path: "Value5",
+			Path: "Value5",
 			converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
 				NewDataConverterMustCompile("*round:2")},
 		},
@@ -55,7 +55,7 @@ func TestNewRSRParsers(t *testing.T) {
 func TestRSRParserCompile(t *testing.T) {
 	ePrsr := &RSRParser{
 		Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
-		path:  "~Header4",
+		Path:  "~Header4",
 		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`a`),
 			ReplaceTemplate: "${1}b"}},
@@ -109,7 +109,7 @@ func TestRSRParserNotConstant(t *testing.T) {
 func TestNewRSRParsersConstant(t *testing.T) {
 	ruleStr := "`>;q=0.7;expires=3600`"
 	eRSRParsers := RSRParsers{
-		&RSRParser{Rules: ">;q=0.7;expires=3600", path: ">;q=0.7;expires=3600"},
+		&RSRParser{Rules: ">;q=0.7;expires=3600", Path: ">;q=0.7;expires=3600"},
 	}
 	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -177,7 +177,7 @@ func TestRSRParserCompileConstant(t *testing.T) {
 	ePrsr := &RSRParser{
 		Rules: ":>;q=0.7;expires=3600",
 
-		path: ":>;q=0.7;expires=3600",
+		Path: ":>;q=0.7;expires=3600",
 	}
 	prsr := &RSRParser{
 		Rules: ":>;q=0.7;expires=3600",
@@ -245,7 +245,7 @@ func TestRSRParsersCompile(t *testing.T) {
 	ePrsr := RSRParsers{&RSRParser{
 		Rules: ":>;q=0.7;expires=3600",
 
-		path: ":>;q=0.7;expires=3600",
+		Path: ":>;q=0.7;expires=3600",
 	}}
 	if err := prsrs.Compile(); err != nil {
 		t.Error(err)
@@ -275,7 +275,7 @@ func TestNewRSRParserMustCompile(t *testing.T) {
 	ePrsr := &RSRParser{
 		Rules:    "~*req.Account",
 		rsrRules: make([]*ReSearchReplace, 0),
-		path:     "~*req.Account",
+		Path:     "~*req.Account",
 	}
 	if !reflect.DeepEqual(rsr, ePrsr) {
 		t.Errorf("Expected %+v received %+v", ePrsr, rsr)
@@ -584,7 +584,7 @@ func TestNewRSRParser(t *testing.T) {
 	// Normal case
 	rulesStr := `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
 	expRSRField1 := &RSRParser{
-		path:  "~sip_redirected_to",
+		Path:  "~sip_redirected_to",
 		Rules: rulesStr,
 		rsrRules: []*ReSearchReplace{
 			{
@@ -604,7 +604,7 @@ func TestNewRSRParser(t *testing.T) {
 	// with dataConverters
 	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/{*duration_seconds&*round:5:*middle}`
 	expRSRField := &RSRParser{
-		path:  "~sip_redirected_to",
+		Path:  "~sip_redirected_to",
 		Rules: rulesStr,
 		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
@@ -623,7 +623,7 @@ func TestNewRSRParser(t *testing.T) {
 	// One extra separator but escaped
 	rulesStr = `~sip_redirected_to:s/sip:\+49(\d+)\/@/0$1/`
 	expRSRField3 := &RSRParser{
-		path:  "~sip_redirected_to",
+		Path:  "~sip_redirected_to",
 		Rules: rulesStr,
 		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)\/@`),
@@ -641,7 +641,7 @@ func TestNewRSRParser(t *testing.T) {
 func TestNewRSRParserDDz(t *testing.T) {
 	rulesStr := `~effective_caller_id_number:s/(\d+)/+$1/`
 	expectRSRField := &RSRParser{
-		path:  "~effective_caller_id_number",
+		Path:  "~effective_caller_id_number",
 		Rules: rulesStr,
 		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`(\d+)`),
@@ -658,7 +658,7 @@ func TestNewRSRParserDDz(t *testing.T) {
 func TestNewRSRParserIvo(t *testing.T) {
 	rulesStr := `~cost_details:s/MatchedDestId":".+_(\s\s\s\s\s)"/$1/`
 	expectRSRField := &RSRParser{
-		path:  "~cost_details",
+		Path:  "~cost_details",
 		Rules: rulesStr,
 		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`MatchedDestId":".+_(\s\s\s\s\s)"`),
@@ -678,7 +678,7 @@ func TestNewRSRParserIvo(t *testing.T) {
 func TestConvertPlusNationalAnd00(t *testing.T) {
 	rulesStr := `~effective_caller_id_number:s/\+49(\d+)/0$1/:s/\+(\d+)/00$1/`
 	expectRSRField := &RSRParser{
-		path:  "~effective_caller_id_number",
+		Path:  "~effective_caller_id_number",
 		Rules: rulesStr,
 		rsrRules: []*ReSearchReplace{
 			{
@@ -712,7 +712,7 @@ func TestConvertPlusNationalAnd00(t *testing.T) {
 func TestConvertDurToSecs(t *testing.T) {
 	rulesStr := `~9:s/^(\d+)$/${1}s/`
 	expectRSRField := &RSRParser{
-		path:  "~9",
+		Path:  "~9",
 		Rules: rulesStr,
 		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`^(\d+)$`),
@@ -735,7 +735,7 @@ func TestConvertDurToSecs(t *testing.T) {
 func TestPrefix164(t *testing.T) {
 	rulesStr := `~0:s/^([1-9]\d+)$/+$1/`
 	expectRSRField := &RSRParser{
-		path:  "~0",
+		Path:  "~0",
 		Rules: rulesStr,
 		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`^([1-9]\d+)$`),
@@ -778,11 +778,11 @@ func TestNewRSRParsers2(t *testing.T) {
 	fields := `host,~sip_redirected_to:s/sip:\+49(\d+)@/0$1/,destination`
 	expectParsedFields := RSRParsers{
 		{
-			path:  "host",
+			Path:  "host",
 			Rules: "host",
 		},
 		{
-			path:  "~sip_redirected_to",
+			Path:  "~sip_redirected_to",
 			Rules: `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`,
 			rsrRules: []*ReSearchReplace{{
 				SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
@@ -790,7 +790,7 @@ func TestNewRSRParsers2(t *testing.T) {
 			}},
 		},
 		{
-			path:  "destination",
+			Path:  "destination",
 			Rules: "destination",
 		},
 	}

@@ -239,7 +239,7 @@ func NewRSRParserMustCompile(parserRules string) (rsrPrsr *RSRParser) {
 type RSRParser struct {
 	Rules string // Rules container holding the string rules, public so it can be stored
 
-	path       string             // instruct extracting info out of header in event
+	Path       string             // instruct extracting info out of header in event
 	rsrRules   []*ReSearchReplace // rules to use when parsing value
 	converters DataConverters     // set of converters to apply on output
 
@@ -250,7 +250,7 @@ type RSRParser struct {
 
 // AttrName exports the attribute name of the RSRParser
 func (prsr *RSRParser) AttrName() string {
-	return strings.TrimPrefix(prsr.path, DynamicDataPrefix)
+	return strings.TrimPrefix(prsr.Path, DynamicDataPrefix)
 }
 
 // Compile parses Rules string and repopulates other fields
@@ -291,12 +291,12 @@ func (prsr *RSRParser) Compile() (err error) {
 	}
 	if !strings.HasPrefix(parserRules, DynamicDataPrefix) ||
 		len(parserRules) == 1 { // special case when RSR is defined as static attribute
-		prsr.path = parserRules
+		prsr.Path = parserRules
 		return
 	}
 	// dynamic content via attributeNames
 	spltRules := spltRgxp.Split(parserRules, -1)
-	prsr.path = spltRules[0] // in form ~hdr_name
+	prsr.Path = spltRules[0] // in form ~hdr_name
 	prsr.rsrRules = make([]*ReSearchReplace, 0, len(spltRules[1:]))
 	if len(spltRules) > 1 {
 		for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
@@ -335,7 +335,7 @@ func (prsr *RSRParser) parseValueInterface(value any) (out any, err error) {
 
 // ParseValue will parse the value out considering converters
 func (prsr *RSRParser) ParseValue(value any) (out string, err error) {
-	out = prsr.path
+	out = prsr.Path
 	if out != DynamicDataPrefix &&
 		strings.HasPrefix(out, DynamicDataPrefix) { // Enforce parsing of static values
 		out = IfaceAsString(value)
@@ -357,7 +357,7 @@ func (prsr *RSRParser) ParseDataProvider(dP DataProvider) (out string, err error
 		return dynRSR.ParseDataProvider(dP)
 	}
 	var outStr string
-	if outStr, err = DPDynamicString(prsr.path, dP); err != nil {
+	if outStr, err = DPDynamicString(prsr.Path, dP); err != nil {
 		return
 	}
 	return prsr.parseValue(outStr)
@@ -377,7 +377,7 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP DataProvider) (out str
 		return dynRSR.ParseDataProviderWithInterfaces(dP)
 	}
 	var outIface any
-	if outIface, err = DPDynamicInterface(prsr.path, dP); err != nil {
+	if outIface, err = DPDynamicInterface(prsr.Path, dP); err != nil {
 		return
 	}
 	return prsr.parseValue(IfaceAsString(outIface))
@@ -397,7 +397,7 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces2(dP DataProvider) (out an
 		return dynRSR.ParseDataProviderWithInterfaces2(dP)
 	}
 	var outIface any
-	if outIface, err = DPDynamicInterface(prsr.path, dP); err != nil {
+	if outIface, err = DPDynamicInterface(prsr.Path, dP); err != nil {
 		return
 	}
 	return prsr.parseValueInterface(outIface)
@@ -419,7 +419,7 @@ func (prsr *RSRParser) CompileDynRule(dP DataProvider) (p string, err error) {
 func (prsr RSRParser) Clone() (cln *RSRParser) {
 	cln = &RSRParser{
 		Rules:       prsr.Rules,
-		path:        prsr.path,
+		Path:        prsr.Path,
 		dynIdxStart: prsr.dynIdxStart,
 		dynIdxEnd:   prsr.dynIdxEnd,
 		dynRules:    prsr.dynRules.Clone(),
