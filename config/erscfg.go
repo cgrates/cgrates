@@ -206,7 +206,7 @@ type EventReaderCfg struct {
 	ConcurrentReqs       int
 	SourcePath           string
 	ProcessedPath        string
-	Tenant               RSRParsers
+	Tenant               utils.RSRParsers
 	Timezone             string
 	EEsSuccessIDs        []string
 	EEsFailedIDs         []string
@@ -391,7 +391,7 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 		er.ProcessedPath = *jsnCfg.ProcessedPath
 	}
 	if jsnCfg.Tenant != nil {
-		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, utils.RSRSep); err != nil {
+		if er.Tenant, err = utils.NewRSRParsers(*jsnCfg.Tenant, utils.RSRSep); err != nil {
 			return err
 		}
 	}

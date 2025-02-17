@@ -191,7 +191,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
-				Value: config.NewRSRParsersMustCompile("1002", utils.RSRSep),
+				Value: utils.NewRSRParsersMustCompile("1002", utils.RSRSep),
 			},
 		},
 	}
@@ -222,7 +222,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
-				Value: config.NewRSRParsersMustCompile("1002", utils.RSRSep),
+				Value: utils.NewRSRParsersMustCompile("1002", utils.RSRSep),
 			},
 		},
 	}
@@ -248,7 +248,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
-				Value: config.NewRSRParsersMustCompile("1002", utils.RSRSep),
+				Value: utils.NewRSRParsersMustCompile("1002", utils.RSRSep),
 			},
 		},
 	}
@@ -279,7 +279,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
-				Value: config.NewRSRParsersMustCompile("1002", utils.RSRSep),
+				Value: utils.NewRSRParsersMustCompile("1002", utils.RSRSep),
 			},
 		},
 	}
@@ -313,7 +313,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
-				Value: config.NewRSRParsersMustCompile("1002", utils.RSRSep),
+				Value: utils.NewRSRParsersMustCompile("1002", utils.RSRSep),
 			},
 		},
 	}
@@ -378,7 +378,7 @@ func TestLibIndexModifyAttrPrfFilter(t *testing.T) {
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
-				Value: config.NewRSRParsersMustCompile("1002", utils.RSRSep),
+				Value: utils.NewRSRParsersMustCompile("1002", utils.RSRSep),
 			},
 		},
 	}

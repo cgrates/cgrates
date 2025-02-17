@@ -37,22 +37,22 @@ type SureTaxCfg struct {
 	ResponseGroup        string
 	ResponseType         string
 	RegulatoryCode       string
-	ClientTracking       RSRParsers // Concatenate all of them to get value
-	CustomerNumber       RSRParsers
-	OrigNumber           RSRParsers
-	TermNumber           RSRParsers
-	BillToNumber         RSRParsers
-	Zipcode              RSRParsers
-	Plus4                RSRParsers
-	P2PZipcode           RSRParsers
-	P2PPlus4             RSRParsers
-	Units                RSRParsers
-	UnitType             RSRParsers
-	TaxIncluded          RSRParsers
-	TaxSitusRule         RSRParsers
-	TransTypeCode        RSRParsers
-	SalesTypeCode        RSRParsers
-	TaxExemptionCodeList RSRParsers
+	ClientTracking       utils.RSRParsers // Concatenate all of them to get value
+	CustomerNumber       utils.RSRParsers
+	OrigNumber           utils.RSRParsers
+	TermNumber           utils.RSRParsers
+	BillToNumber         utils.RSRParsers
+	Zipcode              utils.RSRParsers
+	Plus4                utils.RSRParsers
+	P2PZipcode           utils.RSRParsers
+	P2PPlus4             utils.RSRParsers
+	Units                utils.RSRParsers
+	UnitType             utils.RSRParsers
+	TaxIncluded          utils.RSRParsers
+	TaxSitusRule         utils.RSRParsers
+	TransTypeCode        utils.RSRParsers
+	SalesTypeCode        utils.RSRParsers
+	TaxExemptionCodeList utils.RSRParsers
 }
 
 // loadSureTaxCfg loads the SureTax section of the configuration
@@ -102,82 +102,82 @@ func (st *SureTaxCfg) loadFromJSONCfg(jsnCfg *SureTaxJsonCfg) (err error) {
 		st.RegulatoryCode = *jsnCfg.Regulatory_code
 	}
 	if jsnCfg.Client_tracking != nil {
-		if st.ClientTracking, err = NewRSRParsers(*jsnCfg.Client_tracking, utils.InfieldSep); err != nil {
+		if st.ClientTracking, err = utils.NewRSRParsers(*jsnCfg.Client_tracking, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Customer_number != nil {
-		if st.CustomerNumber, err = NewRSRParsers(*jsnCfg.Customer_number, utils.InfieldSep); err != nil {
+		if st.CustomerNumber, err = utils.NewRSRParsers(*jsnCfg.Customer_number, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Orig_number != nil {
-		if st.OrigNumber, err = NewRSRParsers(*jsnCfg.Orig_number, utils.InfieldSep); err != nil {
+		if st.OrigNumber, err = utils.NewRSRParsers(*jsnCfg.Orig_number, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Term_number != nil {
-		if st.TermNumber, err = NewRSRParsers(*jsnCfg.Term_number, utils.InfieldSep); err != nil {
+		if st.TermNumber, err = utils.NewRSRParsers(*jsnCfg.Term_number, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Bill_to_number != nil {
-		if st.BillToNumber, err = NewRSRParsers(*jsnCfg.Bill_to_number, utils.InfieldSep); err != nil {
+		if st.BillToNumber, err = utils.NewRSRParsers(*jsnCfg.Bill_to_number, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Zipcode != nil {
-		if st.Zipcode, err = NewRSRParsers(*jsnCfg.Zipcode, utils.InfieldSep); err != nil {
+		if st.Zipcode, err = utils.NewRSRParsers(*jsnCfg.Zipcode, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Plus4 != nil {
-		if st.Plus4, err = NewRSRParsers(*jsnCfg.Plus4, utils.InfieldSep); err != nil {
+		if st.Plus4, err = utils.NewRSRParsers(*jsnCfg.Plus4, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.P2PZipcode != nil {
-		if st.P2PZipcode, err = NewRSRParsers(*jsnCfg.P2PZipcode, utils.InfieldSep); err != nil {
+		if st.P2PZipcode, err = utils.NewRSRParsers(*jsnCfg.P2PZipcode, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.P2PPlus4 != nil {
-		if st.P2PPlus4, err = NewRSRParsers(*jsnCfg.P2PPlus4, utils.InfieldSep); err != nil {
+		if st.P2PPlus4, err = utils.NewRSRParsers(*jsnCfg.P2PPlus4, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Units != nil {
-		if st.Units, err = NewRSRParsers(*jsnCfg.Units, utils.InfieldSep); err != nil {
+		if st.Units, err = utils.NewRSRParsers(*jsnCfg.Units, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Unit_type != nil {
-		if st.UnitType, err = NewRSRParsers(*jsnCfg.Unit_type, utils.InfieldSep); err != nil {
+		if st.UnitType, err = utils.NewRSRParsers(*jsnCfg.Unit_type, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Tax_included != nil {
-		if st.TaxIncluded, err = NewRSRParsers(*jsnCfg.Tax_included, utils.InfieldSep); err != nil {
+		if st.TaxIncluded, err = utils.NewRSRParsers(*jsnCfg.Tax_included, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Tax_situs_rule != nil {
-		if st.TaxSitusRule, err = NewRSRParsers(*jsnCfg.Tax_situs_rule, utils.InfieldSep); err != nil {
+		if st.TaxSitusRule, err = utils.NewRSRParsers(*jsnCfg.Tax_situs_rule, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Trans_type_code != nil {
-		if st.TransTypeCode, err = NewRSRParsers(*jsnCfg.Trans_type_code, utils.InfieldSep); err != nil {
+		if st.TransTypeCode, err = utils.NewRSRParsers(*jsnCfg.Trans_type_code, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Sales_type_code != nil {
-		if st.SalesTypeCode, err = NewRSRParsers(*jsnCfg.Sales_type_code, utils.InfieldSep); err != nil {
+		if st.SalesTypeCode, err = utils.NewRSRParsers(*jsnCfg.Sales_type_code, utils.InfieldSep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Tax_exemption_code_list != nil {
-		if st.TaxExemptionCodeList, err = NewRSRParsers(*jsnCfg.Tax_exemption_code_list, utils.InfieldSep); err != nil {
+		if st.TaxExemptionCodeList, err = utils.NewRSRParsers(*jsnCfg.Tax_exemption_code_list, utils.InfieldSep); err != nil {
 			return err
 		}
 	}

@@ -51,7 +51,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		RateSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "*conn1"},
 		AccountSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"},
-		ExtraFields:      RSRParsers{},
+		ExtraFields:      utils.RSRParsers{},
 		Opts: &CdrsOpts{
 			Accounts:   []*DynamicBoolOpt{{}},
 			Attributes: []*DynamicBoolOpt{{}},
@@ -168,7 +168,7 @@ func TestExtraFieldsinloadFromJsonCfg(t *testing.T) {
 	expectedErrMessage := "empty RSRParser in rule: <>"
 	jsonCfg := NewDefaultCGRConfig()
 	if err := jsonCfg.cdrsCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expectedErrMessage {
-		t.Errorf("Expected %+v, received %+v", expectedErrMessage, err)
+		t.Errorf("expected %q, received %q", expectedErrMessage, err)
 	}
 }
 
@@ -276,7 +276,7 @@ func TestCdrsCfgClone(t *testing.T) {
 		ActionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"},
 		EEsConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
 		OnlineCDRExports: []string{"randomVal"},
-		ExtraFields:      RSRParsers{},
+		ExtraFields:      utils.RSRParsers{},
 		Opts:             &CdrsOpts{},
 	}
 	rcv := ban.Clone()
@@ -312,7 +312,7 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 
 	v1 := &CdrsCfg{
 		Enabled: false,
-		ExtraFields: RSRParsers{
+		ExtraFields: utils.RSRParsers{
 			{
 				Rules: "Rule1",
 			},
@@ -376,7 +376,7 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 
 	v2 := &CdrsCfg{
 		Enabled: true,
-		ExtraFields: RSRParsers{
+		ExtraFields: utils.RSRParsers{
 			{
 				Rules: "Rule2",
 			},
@@ -516,7 +516,7 @@ func TestDiffCdrsJsonCfg(t *testing.T) {
 func TestCdrsCfgCloneSection(t *testing.T) {
 	cdrsCfg := &CdrsCfg{
 		Enabled: false,
-		ExtraFields: RSRParsers{
+		ExtraFields: utils.RSRParsers{
 			{
 				Rules: "Rule1",
 			},
@@ -534,7 +534,7 @@ func TestCdrsCfgCloneSection(t *testing.T) {
 
 	exp := &CdrsCfg{
 		Enabled: false,
-		ExtraFields: RSRParsers{
+		ExtraFields: utils.RSRParsers{
 			{
 				Rules: "Rule1",
 			},

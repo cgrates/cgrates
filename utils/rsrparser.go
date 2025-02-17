@@ -16,14 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package utils
 
 import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -33,22 +31,22 @@ var (
 
 // NewRSRParsers creates a new RSRParsers by spliting the rule using the separator
 func NewRSRParsers(parsersRules, sep string) (prsrs RSRParsers, err error) {
-	if parsersRules == utils.EmptyString {
+	if parsersRules == EmptyString {
 		return
 	}
-	if count := strings.Count(parsersRules, utils.RSRConstSep); count%2 != 0 { // check if we have matching `
+	if count := strings.Count(parsersRules, RSRConstSep); count%2 != 0 { // check if we have matching `
 		return nil, fmt.Errorf("Closed unspilit syntax")
 	} else if count != 0 {
 		var splitedRule []string
-		for idx := strings.IndexByte(parsersRules, utils.RSRConstChar); idx != -1; idx = strings.IndexByte(parsersRules, utils.RSRConstChar) {
-			insideARulePrefix := !strings.HasSuffix(parsersRules[:idx], utils.InfieldSep) // if doesn't have ; we need to concatenate it with last rule
+		for idx := strings.IndexByte(parsersRules, RSRConstChar); idx != -1; idx = strings.IndexByte(parsersRules, RSRConstChar) {
+			insideARulePrefix := !strings.HasSuffix(parsersRules[:idx], InfieldSep) // if doesn't have ; we need to concatenate it with last rule
 			if insideARulePrefix {
-				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx], utils.InfieldSep)...)
+				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx], InfieldSep)...)
 			} else {
-				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx-1], utils.InfieldSep)...)
+				splitedRule = append(splitedRule, strings.Split(parsersRules[:idx-1], InfieldSep)...)
 			}
 			parsersRules = parsersRules[idx+1:]
-			idx = strings.IndexByte(parsersRules, utils.RSRConstChar)
+			idx = strings.IndexByte(parsersRules, RSRConstChar)
 			if insideARulePrefix {
 				splitedRule[len(splitedRule)-1] += parsersRules[:idx]
 			} else {
@@ -59,9 +57,9 @@ func NewRSRParsers(parsersRules, sep string) (prsrs RSRParsers, err error) {
 			if len(parsersRules) == 0 {
 				continue
 			}
-			insideARuleSufix := !strings.HasPrefix(parsersRules, utils.InfieldSep) // if doesn't have ; we need to concatenate it with last rule
+			insideARuleSufix := !strings.HasPrefix(parsersRules, InfieldSep) // if doesn't have ; we need to concatenate it with last rule
 			if insideARuleSufix {
-				idx = strings.IndexByte(parsersRules, utils.FallbackSep) // ';'
+				idx = strings.IndexByte(parsersRules, FallbackSep) // ';'
 				if idx == -1 {
 					idx = len(parsersRules)
 					splitedRule[len(splitedRule)-1] += parsersRules[:idx]
@@ -76,7 +74,7 @@ func NewRSRParsers(parsersRules, sep string) (prsrs RSRParsers, err error) {
 				break
 			}
 			if count == 0 { // no more ` so add the rest
-				splitedRule = append(splitedRule, strings.Split(parsersRules, utils.InfieldSep)...)
+				splitedRule = append(splitedRule, strings.Split(parsersRules, InfieldSep)...)
 				break
 			}
 		}
@@ -113,7 +111,7 @@ type RSRParsers []*RSRParser
 // GetRule returns the original string from which the rules were composed
 func (prsrs RSRParsers) GetRule() (out string) {
 	for _, prsr := range prsrs {
-		out += utils.RSRSep + prsr.Rules
+		out += RSRSep + prsr.Rules
 	}
 	if len(out) != 0 {
 		out = out[1:]
@@ -136,7 +134,7 @@ func (prsrs RSRParsers) ParseValue(value any) (out string, err error) {
 	for _, prsr := range prsrs {
 		var outPrsr string
 		if outPrsr, err = prsr.ParseValue(value); err != nil {
-			return utils.EmptyString, err
+			return EmptyString, err
 		}
 		out += outPrsr
 	}
@@ -144,11 +142,11 @@ func (prsrs RSRParsers) ParseValue(value any) (out string, err error) {
 }
 
 // ParseDataProvider will parse the dataprovider using DPDynamicString
-func (prsrs RSRParsers) ParseDataProvider(dP utils.DataProvider) (out string, err error) {
+func (prsrs RSRParsers) ParseDataProvider(dP DataProvider) (out string, err error) {
 	for _, prsr := range prsrs {
 		var outPrsr string
 		if outPrsr, err = prsr.ParseDataProvider(dP); err != nil {
-			return utils.EmptyString, err
+			return EmptyString, err
 		}
 		out += outPrsr
 	}
@@ -156,11 +154,11 @@ func (prsrs RSRParsers) ParseDataProvider(dP utils.DataProvider) (out string, er
 }
 
 // ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
-func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP utils.DataProvider) (out string, err error) {
+func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP DataProvider) (out string, err error) {
 	for _, prsr := range prsrs {
 		var outPrsr string
 		if outPrsr, err = prsr.ParseDataProviderWithInterfaces(dP); err != nil {
-			return utils.EmptyString, err
+			return EmptyString, err
 		}
 		out += outPrsr
 	}
@@ -168,7 +166,7 @@ func (prsrs RSRParsers) ParseDataProviderWithInterfaces(dP utils.DataProvider) (
 }
 
 // ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
-func (prsrs RSRParsers) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (out any, err error) {
+func (prsrs RSRParsers) ParseDataProviderWithInterfaces2(dP DataProvider) (out any, err error) {
 	for i, prsr := range prsrs {
 		outPrsr, err := prsr.ParseDataProviderWithInterfaces2(dP)
 		if err != nil {
@@ -177,21 +175,21 @@ func (prsrs RSRParsers) ParseDataProviderWithInterfaces2(dP utils.DataProvider) 
 		if i == 0 {
 			out = outPrsr
 		} else {
-			out = utils.IfaceAsString(out) + utils.IfaceAsString(outPrsr)
+			out = IfaceAsString(out) + IfaceAsString(outPrsr)
 		}
 	}
 	return
 }
 
 // GetIfaceFromValues returns an interface for each RSRParser
-func (prsrs RSRParsers) GetIfaceFromValues(evNm utils.DataProvider) (iFaceVals []any, err error) {
+func (prsrs RSRParsers) GetIfaceFromValues(evNm DataProvider) (iFaceVals []any, err error) {
 	iFaceVals = make([]any, len(prsrs))
 	for i, val := range prsrs {
 		var strVal string
 		if strVal, err = val.ParseDataProvider(evNm); err != nil {
 			return
 		}
-		iFaceVals[i] = utils.StringToInterface(strVal)
+		iFaceVals[i] = StringToInterface(strVal)
 	}
 	return
 }
@@ -241,9 +239,9 @@ func NewRSRParserMustCompile(parserRules string) (rsrPrsr *RSRParser) {
 type RSRParser struct {
 	Rules string // Rules container holding the string rules, public so it can be stored
 
-	path       string                   // instruct extracting info out of header in event
-	rsrRules   []*utils.ReSearchReplace // rules to use when parsing value
-	converters utils.DataConverters     // set of converters to apply on output
+	path       string             // instruct extracting info out of header in event
+	rsrRules   []*ReSearchReplace // rules to use when parsing value
+	converters DataConverters     // set of converters to apply on output
 
 	dynIdxStart int
 	dynIdxEnd   int
@@ -252,18 +250,18 @@ type RSRParser struct {
 
 // AttrName exports the attribute name of the RSRParser
 func (prsr *RSRParser) AttrName() string {
-	return strings.TrimPrefix(prsr.path, utils.DynamicDataPrefix)
+	return strings.TrimPrefix(prsr.path, DynamicDataPrefix)
 }
 
 // Compile parses Rules string and repopulates other fields
 func (prsr *RSRParser) Compile() (err error) {
 	parserRules := prsr.Rules
 
-	if dynIdxStart := strings.IndexByte(parserRules, utils.RSRDynStartChar); dynIdxStart != -1 {
-		if dynIdxEnd := strings.IndexByte(parserRules[dynIdxStart:], utils.RSRDynEndChar); dynIdxEnd != -1 {
+	if dynIdxStart := strings.IndexByte(parserRules, RSRDynStartChar); dynIdxStart != -1 {
+		if dynIdxEnd := strings.IndexByte(parserRules[dynIdxStart:], RSRDynEndChar); dynIdxEnd != -1 {
 			var dynrules RSRParsers
 			if dynrules, err = NewRSRParsers(parserRules[dynIdxStart+1:dynIdxStart+dynIdxEnd],
-				utils.RSRSep); err != nil {
+				RSRSep); err != nil {
 				return
 			}
 			prsr.dynRules = dynrules
@@ -273,17 +271,17 @@ func (prsr *RSRParser) Compile() (err error) {
 		}
 	}
 
-	if idxConverters := strings.Index(parserRules, utils.RSRDataConverterPrefix); idxConverters != -1 { // converters in the string
-		if !strings.HasSuffix(parserRules, utils.RSRDataConverterSufix) {
+	if idxConverters := strings.Index(parserRules, RSRDataConverterPrefix); idxConverters != -1 { // converters in the string
+		if !strings.HasSuffix(parserRules, RSRDataConverterSufix) {
 			return fmt.Errorf("invalid converter terminator in rule: <%s>",
 				parserRules)
 		}
 		convertersStr := parserRules[idxConverters+1 : len(parserRules)-1] // strip also {}
-		convsSplt := strings.Split(convertersStr, utils.ANDSep)
-		prsr.converters = make(utils.DataConverters, len(convsSplt))
+		convsSplt := strings.Split(convertersStr, ANDSep)
+		prsr.converters = make(DataConverters, len(convsSplt))
 		for i, convStr := range convsSplt {
-			var conv utils.DataConverter
-			if conv, err = utils.NewDataConverter(convStr); err != nil {
+			var conv DataConverter
+			if conv, err = NewDataConverter(convStr); err != nil {
 				return fmt.Errorf("invalid converter value in string: <%s>, err: %s",
 					convStr, err.Error())
 			}
@@ -291,7 +289,7 @@ func (prsr *RSRParser) Compile() (err error) {
 		}
 		parserRules = parserRules[:idxConverters]
 	}
-	if !strings.HasPrefix(parserRules, utils.DynamicDataPrefix) ||
+	if !strings.HasPrefix(parserRules, DynamicDataPrefix) ||
 		len(parserRules) == 1 { // special case when RSR is defined as static attribute
 		prsr.path = parserRules
 		return
@@ -299,7 +297,7 @@ func (prsr *RSRParser) Compile() (err error) {
 	// dynamic content via attributeNames
 	spltRules := spltRgxp.Split(parserRules, -1)
 	prsr.path = spltRules[0] // in form ~hdr_name
-	prsr.rsrRules = make([]*utils.ReSearchReplace, 0, len(spltRules[1:]))
+	prsr.rsrRules = make([]*ReSearchReplace, 0, len(spltRules[1:]))
 	if len(spltRules) > 1 {
 		for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
 			allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
@@ -310,7 +308,7 @@ func (prsr *RSRParser) Compile() (err error) {
 			if srRegexp, err = regexp.Compile(allMatches[1]); err != nil {
 				return fmt.Errorf("invalid Search&Replace subfield rule: <%s>", allMatches[1])
 			}
-			prsr.rsrRules = append(prsr.rsrRules, &utils.ReSearchReplace{
+			prsr.rsrRules = append(prsr.rsrRules, &ReSearchReplace{
 				SearchRegexp:    srRegexp,
 				ReplaceTemplate: allMatches[2],
 			})
@@ -330,7 +328,7 @@ func (prsr *RSRParser) parseValue(value string) (out string, err error) {
 // parseValue the field value from a string
 func (prsr *RSRParser) parseValueInterface(value any) (out any, err error) {
 	for _, rsRule := range prsr.rsrRules {
-		value = rsRule.Process(utils.IfaceAsString(value))
+		value = rsRule.Process(IfaceAsString(value))
 	}
 	return prsr.converters.ConvertInterface(value)
 }
@@ -338,15 +336,15 @@ func (prsr *RSRParser) parseValueInterface(value any) (out any, err error) {
 // ParseValue will parse the value out considering converters
 func (prsr *RSRParser) ParseValue(value any) (out string, err error) {
 	out = prsr.path
-	if out != utils.DynamicDataPrefix &&
-		strings.HasPrefix(out, utils.DynamicDataPrefix) { // Enforce parsing of static values
-		out = utils.IfaceAsString(value)
+	if out != DynamicDataPrefix &&
+		strings.HasPrefix(out, DynamicDataPrefix) { // Enforce parsing of static values
+		out = IfaceAsString(value)
 	}
 	return prsr.parseValue(out)
 }
 
 // ParseDataProvider will parse the dataprovider using DPDynamicString
-func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider) (out string, err error) {
+func (prsr *RSRParser) ParseDataProvider(dP DataProvider) (out string, err error) {
 	if prsr.dynRules != nil {
 		var dynPath string
 		if dynPath, err = prsr.dynRules.ParseDataProvider(dP); err != nil {
@@ -359,14 +357,14 @@ func (prsr *RSRParser) ParseDataProvider(dP utils.DataProvider) (out string, err
 		return dynRSR.ParseDataProvider(dP)
 	}
 	var outStr string
-	if outStr, err = utils.DPDynamicString(prsr.path, dP); err != nil {
+	if outStr, err = DPDynamicString(prsr.path, dP); err != nil {
 		return
 	}
 	return prsr.parseValue(outStr)
 }
 
 // ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
-func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (out string, err error) {
+func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP DataProvider) (out string, err error) {
 	if prsr.dynRules != nil {
 		var dynPath string
 		if dynPath, err = prsr.dynRules.ParseDataProvider(dP); err != nil {
@@ -379,14 +377,14 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces(dP utils.DataProvider) (o
 		return dynRSR.ParseDataProviderWithInterfaces(dP)
 	}
 	var outIface any
-	if outIface, err = utils.DPDynamicInterface(prsr.path, dP); err != nil {
+	if outIface, err = DPDynamicInterface(prsr.path, dP); err != nil {
 		return
 	}
-	return prsr.parseValue(utils.IfaceAsString(outIface))
+	return prsr.parseValue(IfaceAsString(outIface))
 }
 
 // ParseDataProviderWithInterfaces will parse the dataprovider using DPDynamicInterface
-func (prsr *RSRParser) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (out any, err error) {
+func (prsr *RSRParser) ParseDataProviderWithInterfaces2(dP DataProvider) (out any, err error) {
 	if prsr.dynRules != nil {
 		var dynPath string
 		if dynPath, err = prsr.dynRules.ParseDataProvider(dP); err != nil {
@@ -399,14 +397,14 @@ func (prsr *RSRParser) ParseDataProviderWithInterfaces2(dP utils.DataProvider) (
 		return dynRSR.ParseDataProviderWithInterfaces2(dP)
 	}
 	var outIface any
-	if outIface, err = utils.DPDynamicInterface(prsr.path, dP); err != nil {
+	if outIface, err = DPDynamicInterface(prsr.path, dP); err != nil {
 		return
 	}
 	return prsr.parseValueInterface(outIface)
 }
 
 // CompileDynRule will return the compiled dynamic rule
-func (prsr *RSRParser) CompileDynRule(dP utils.DataProvider) (p string, err error) {
+func (prsr *RSRParser) CompileDynRule(dP DataProvider) (p string, err error) {
 	if prsr.dynRules == nil {
 		return prsr.Rules, nil
 	}
@@ -427,13 +425,13 @@ func (prsr RSRParser) Clone() (cln *RSRParser) {
 		dynRules:    prsr.dynRules.Clone(),
 	}
 	if prsr.rsrRules != nil {
-		cln.rsrRules = make([]*utils.ReSearchReplace, len(prsr.rsrRules))
+		cln.rsrRules = make([]*ReSearchReplace, len(prsr.rsrRules))
 		for i, rsr := range prsr.rsrRules {
 			cln.rsrRules[i] = rsr.Clone()
 		}
 	}
 	if prsr.converters != nil {
-		cln.converters = make(utils.DataConverters, len(prsr.converters))
+		cln.converters = make(DataConverters, len(prsr.converters))
 		// we can't modify the convertor only overwrite it
 		// safe to copy it's value
 		copy(cln.converters, prsr.converters)

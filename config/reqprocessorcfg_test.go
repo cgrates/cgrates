@@ -32,7 +32,7 @@ func TestDiffReqProcessorJsnCfg(t *testing.T) {
 	v1 := &RequestProcessor{
 		ID:      "req_proc_id1",
 		Filters: []string{"filter1"},
-		Tenant: RSRParsers{
+		Tenant: utils.RSRParsers{
 			{
 				Rules: "cgrates.org",
 			},
@@ -60,7 +60,7 @@ func TestDiffReqProcessorJsnCfg(t *testing.T) {
 	v2 := &RequestProcessor{
 		ID:      "req_proc_id2",
 		Filters: []string{"filter2"},
-		Tenant: RSRParsers{
+		Tenant: utils.RSRParsers{
 			{
 				Rules: "itsyscom.com",
 			},
@@ -156,7 +156,7 @@ func TestDiffReqProcessorsJsnCfg(t *testing.T) {
 		{
 			ID:      "req_proc_id1",
 			Filters: []string{"filter1"},
-			Tenant: RSRParsers{
+			Tenant: utils.RSRParsers{
 				{
 					Rules: "cgrates.org",
 				},
@@ -186,7 +186,7 @@ func TestDiffReqProcessorsJsnCfg(t *testing.T) {
 		{
 			ID:      "req_proc_id2",
 			Filters: []string{"filter2"},
-			Tenant: RSRParsers{
+			Tenant: utils.RSRParsers{
 				{
 					Rules: "itsyscom.com",
 				},
@@ -311,7 +311,7 @@ func TestEqualsRequestProcessors(t *testing.T) {
 		{
 			ID:      "req_proc_id1",
 			Filters: []string{"filter1"},
-			Tenant: RSRParsers{
+			Tenant: utils.RSRParsers{
 				{
 					Rules: "cgrates.org",
 				},
@@ -341,7 +341,7 @@ func TestEqualsRequestProcessors(t *testing.T) {
 		{
 			ID:      "req_proc_id2",
 			Filters: []string{"filter2"},
-			Tenant: RSRParsers{
+			Tenant: utils.RSRParsers{
 				{
 					Rules: "itsyscom.com",
 				},

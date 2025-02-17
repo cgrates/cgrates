@@ -97,7 +97,7 @@ type FsAgentCfg struct {
 	SessionSConns          []string
 	SubscribePark          bool
 	CreateCDR              bool
-	ExtraFields            RSRParsers
+	ExtraFields            utils.RSRParsers
 	LowBalanceAnnFile      string
 	EmptyBalanceContext    string
 	EmptyBalanceAnnFile    string
@@ -133,7 +133,7 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		fscfg.CreateCDR = *jsnCfg.CreateCDR
 	}
 	if jsnCfg.ExtraFields != nil {
-		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.ExtraFields); err != nil {
+		if fscfg.ExtraFields, err = utils.NewRSRParsersFromSlice(*jsnCfg.ExtraFields); err != nil {
 			return err
 		}
 	}

@@ -42,7 +42,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
 				Path:      utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
+				Value:     utils.NewRSRParsersMustCompile("Sub1", utils.InfieldSep),
 			},
 		},
 		Blockers: utils.DynamicBlockers{
@@ -65,7 +65,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Password",
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("admin", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("admin", utils.InfieldSep),
 			},
 		},
 		Blockers: utils.DynamicBlockers{
@@ -88,7 +88,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "RequestType",
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
 			},
 		},
 		Blockers: utils.DynamicBlockers{
@@ -111,7 +111,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "TCC",
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("203", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("203", utils.InfieldSep),
 			},
 		},
 		Blockers: utils.DynamicBlockers{

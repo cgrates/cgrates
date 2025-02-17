@@ -245,7 +245,7 @@ func testExpVerifyAttributes(t *testing.T) {
 				Path:      utils.MetaReq + utils.NestingSep + "OfficeGroup",
 				FilterIDs: []string{},
 				Type:      utils.MetaConstant,
-				Value:     config.NewRSRParsersMustCompile("Marketing", utils.InfieldSep),
+				Value:     utils.NewRSRParsersMustCompile("Marketing", utils.InfieldSep),
 			},
 		},
 		Blockers: utils.DynamicBlockers{

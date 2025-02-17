@@ -46,7 +46,7 @@ func NewFCTemplateFromFCTemplateJSONCfg(jsnCfg *FcTemplateJsonCfg) (*FCTemplate,
 		fcTmp.Filters = slices.Clone(*jsnCfg.Filters)
 	}
 	if jsnCfg.Value != nil {
-		if fcTmp.Value, err = NewRSRParsers(*jsnCfg.Value, utils.RSRSep); err != nil {
+		if fcTmp.Value, err = utils.NewRSRParsers(*jsnCfg.Value, utils.RSRSep); err != nil {
 			return nil, err
 		}
 	}
@@ -100,7 +100,7 @@ type FCTemplate struct {
 	Type             string   // Type of field
 	Path             string   // Field identifier
 	Filters          []string // list of filter profiles
-	Value            RSRParsers
+	Value            utils.RSRParsers
 	Width            int
 	Strip            string
 	Padding          string

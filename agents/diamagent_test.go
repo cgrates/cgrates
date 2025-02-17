@@ -69,38 +69,38 @@ func TestProcessRequest(t *testing.T) {
 	}
 	reqProcessor := &config.RequestProcessor{
 		ID:      "Default",
-		Tenant:  config.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+		Tenant:  utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		Filters: []string{},
 		RequestFields: []*config.FCTemplate{
 			{Tag: utils.ToR,
 				Type: utils.MetaConstant, Path: utils.MetaCgreq + utils.NestingSep + utils.ToR,
-				Value: config.NewRSRParsersMustCompile(utils.MetaVoice, utils.InfieldSep)},
+				Value: utils.NewRSRParsersMustCompile(utils.MetaVoice, utils.InfieldSep)},
 			{Tag: utils.OriginID,
 				Type: utils.MetaComposed, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginID,
-				Value: config.NewRSRParsersMustCompile("~*req.SessionId", utils.InfieldSep), Mandatory: true},
+				Value: utils.NewRSRParsersMustCompile("~*req.SessionId", utils.InfieldSep), Mandatory: true},
 			{Tag: utils.OriginHost,
 				Type: utils.MetaVariable, Path: utils.MetaCgreq + utils.NestingSep + utils.OriginHost,
-				Value: config.NewRSRParsersMustCompile("~*vars.RemoteHost", utils.InfieldSep), Mandatory: true},
+				Value: utils.NewRSRParsersMustCompile("~*vars.RemoteHost", utils.InfieldSep), Mandatory: true},
 			{Tag: utils.Category,
 				Type: utils.MetaConstant, Path: utils.MetaCgreq + utils.NestingSep + utils.Category,
-				Value: config.NewRSRParsersMustCompile(utils.Call, utils.InfieldSep)},
+				Value: utils.NewRSRParsersMustCompile(utils.Call, utils.InfieldSep)},
 			{Tag: utils.AccountField,
 				Type: utils.MetaComposed, Path: utils.MetaCgreq + utils.NestingSep + utils.AccountField,
-				Value: config.NewRSRParsersMustCompile("~*req.Account", utils.InfieldSep), Mandatory: true},
+				Value: utils.NewRSRParsersMustCompile("~*req.Account", utils.InfieldSep), Mandatory: true},
 			{Tag: utils.Destination,
 				Type: utils.MetaComposed, Path: utils.MetaCgreq + utils.NestingSep + utils.Destination,
-				Value: config.NewRSRParsersMustCompile("~*req.Destination", utils.InfieldSep), Mandatory: true},
+				Value: utils.NewRSRParsersMustCompile("~*req.Destination", utils.InfieldSep), Mandatory: true},
 			{Tag: utils.Usage,
 				Type: utils.MetaComposed, Path: utils.MetaCgreq + utils.NestingSep + utils.Usage,
-				Value: config.NewRSRParsersMustCompile("~*req.Usage", utils.InfieldSep), Mandatory: true},
+				Value: utils.NewRSRParsersMustCompile("~*req.Usage", utils.InfieldSep), Mandatory: true},
 		},
 		ReplyFields: []*config.FCTemplate{
 			{Tag: "ResultCode",
 				Type: utils.MetaConstant, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
-				Value: config.NewRSRParsersMustCompile("2001", utils.InfieldSep)},
+				Value: utils.NewRSRParsersMustCompile("2001", utils.InfieldSep)},
 			{Tag: "GrantedUnits",
 				Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
-				Value:     config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep),
+				Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", utils.InfieldSep),
 				Mandatory: true},
 		},
 	}
@@ -466,9 +466,9 @@ func TestProcessRequest(t *testing.T) {
 
 	tmpls := []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesInitiate,
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
 		v.ComputePath()
@@ -495,9 +495,9 @@ func TestProcessRequest(t *testing.T) {
 
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesUpdate,
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
 		v.ComputePath()
@@ -522,14 +522,14 @@ func TestProcessRequest(t *testing.T) {
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesTerminate,
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
 		v.ComputePath()
 	}
 	reqProcessor.ReplyFields = []*config.FCTemplate{{Tag: "ResultCode",
 		Type: utils.MetaConstant, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
-		Value: config.NewRSRParsersMustCompile("2001", utils.InfieldSep)}}
+		Value: utils.NewRSRParsersMustCompile("2001", utils.InfieldSep)}}
 	for _, v := range reqProcessor.ReplyFields {
 		v.ComputePath()
 	}
@@ -554,9 +554,9 @@ func TestProcessRequest(t *testing.T) {
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesMessage,
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {
 		v.ComputePath()

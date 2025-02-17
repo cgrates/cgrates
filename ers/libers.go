@@ -39,8 +39,8 @@ func mergePartialEvents(cgrEvs []*utils.CGREvent, cfg *config.EventReaderCfg, fl
 		if cfg.Opts.PartialOrderField != nil {
 			ordFld = *cfg.Opts.PartialOrderField
 		}
-		var ordPath config.RSRParsers
-		if ordPath, err = config.NewRSRParsers(ordFld, utils.RSRSep); err != nil { // convert the option to rsrParsers
+		var ordPath utils.RSRParsers
+		if ordPath, err = utils.NewRSRParsers(ordFld, utils.RSRSep); err != nil { // convert the option to rsrParsers
 			return nil, err
 		}
 

@@ -368,7 +368,7 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data any, err error) {
 					slctrStr = slctrStr[:fltrStart] // Take the filter part out before compiling further
 				}
 
-				slctr, err := config.NewRSRParser(slctrStr)
+				slctr, err := utils.NewRSRParser(slctrStr)
 				if err != nil {
 					return nil, err
 				}

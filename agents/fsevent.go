@@ -304,7 +304,7 @@ func (fsev FSEvent) GetExtraFields() map[string]string {
 }
 
 // Used in derived charging and sittuations when we need to run regexp on fields
-func (fsev FSEvent) ParseEventValue(attrName string, rsrFld *config.RSRParser, timezone string) (parsed string, err error) {
+func (fsev FSEvent) ParseEventValue(attrName string, rsrFld *utils.RSRParser, timezone string) (parsed string, err error) {
 	switch attrName {
 	case utils.ToR:
 		return rsrFld.ParseValue(utils.MetaVoice)

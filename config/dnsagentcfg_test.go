@@ -107,7 +107,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 	}
 	expected = RequestProcessor{
 		ID:      "cgrates",
-		Tenant:  NewRSRParsersMustCompile("tenant", utils.InfieldSep),
+		Tenant:  utils.NewRSRParsersMustCompile("tenant", utils.InfieldSep),
 		Filters: []string{"filter1", "filter2"},
 		Flags:   utils.FlagsWithParams{"flag1": {}, "flag2": {}},
 	}
@@ -302,7 +302,7 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 func TestRequestProcessorClone(t *testing.T) {
 	rp := &RequestProcessor{
 		ID:            "cgrates",
-		Tenant:        NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
+		Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
 		Filters:       []string{"*string:~req.Account:1001"},
 		Flags:         utils.FlagsWithParams{utils.MetaAttributes: {}},
 		Timezone:      "UTC",

@@ -52,7 +52,7 @@ func TestConvertExternalToProfile(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
-				Value: config.NewRSRParsersMustCompile("1001", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
 			},
 		},
 		Weights: make(utils.DynamicWeights, 1),
@@ -124,12 +124,12 @@ func TestNewAttributeFromInline(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field2",
 				Type:  utils.MetaSum,
-				Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("10;~*req.NumField;20", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Field3",
 				Type:  utils.MetaSum,
-				Value: config.NewRSRParsersMustCompile("10;~*req.NumField4;20", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("10;~*req.NumField4;20", utils.InfieldSep),
 			},
 		},
 	}
@@ -150,12 +150,12 @@ func TestNewAttributeFromInlineWithMultipleRuns(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "RequestType",
 				Type:  utils.MetaConstant,
-				Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Category",
 				Type:  utils.MetaConstant,
-				Value: config.NewRSRParsersMustCompile("call", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("call", utils.InfieldSep),
 			},
 		},
 	}
@@ -190,12 +190,12 @@ func TestNewAttributeFromInlineWithMultipleVaslues(t *testing.T) {
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Category",
 				Type:  utils.MetaVariable,
-				Value: config.NewRSRParsersMustCompile("call_;*req.OriginID", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("call_;*req.OriginID", utils.InfieldSep),
 			},
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "RequestType",
 				Type:  utils.MetaConstant,
-				Value: config.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("*rated", utils.InfieldSep),
 			},
 		},
 	}
@@ -253,7 +253,7 @@ func TestAttributeProfileSet(t *testing.T) {
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
 			Type:      utils.MetaConstant,
-			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+			Value:     utils.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			FilterIDs: []string{"fltr1"},
 			Blockers: utils.DynamicBlockers{
 				{
@@ -329,7 +329,7 @@ func TestAttributeProfileAsInterface(t *testing.T) {
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
 			Type:      utils.MetaConstant,
-			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+			Value:     utils.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			FilterIDs: []string{"fltr1"},
 		}},
 	}
@@ -465,7 +465,7 @@ func TestAttributeProfileMerge(t *testing.T) {
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
 			Type:      utils.MetaConstant,
-			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+			Value:     utils.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			FilterIDs: []string{"fltr1"},
 		}},
 	}
@@ -485,7 +485,7 @@ func TestAttributeProfileMerge(t *testing.T) {
 		Attributes: []*Attribute{{
 			Path:      "*req.Account",
 			Type:      utils.MetaConstant,
-			Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+			Value:     utils.NewRSRParsersMustCompile("10", utils.InfieldSep),
 			FilterIDs: []string{"fltr1"},
 		}},
 	})
@@ -501,7 +501,7 @@ func TestAttributeProfilCompileSubstitutes(t *testing.T) {
 
 	ap := &AttributeProfile{
 		Attributes: []*Attribute{
-			{Value: config.RSRParsers{&config.RSRParser{
+			{Value: utils.RSRParsers{&utils.RSRParser{
 				Rules: "~*req.Account{*unuportedConverter}",
 			}}},
 		},
@@ -517,7 +517,7 @@ func TestAttributeFieldAsInterface(t *testing.T) {
 	at := &Attribute{
 		Path:      "*req.Account",
 		Type:      utils.MetaConstant,
-		Value:     config.NewRSRParsersMustCompile("10", utils.InfieldSep),
+		Value:     utils.NewRSRParsersMustCompile("10", utils.InfieldSep),
 		FilterIDs: []string{"fltr1"},
 		Blockers: utils.DynamicBlockers{
 			{

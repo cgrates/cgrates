@@ -768,7 +768,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",
-				Value: config.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
 			},
 		},
 		Weights: utils.DynamicWeights{
@@ -847,7 +847,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",
-				Value: config.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
+				Value: utils.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
 			},
 		},
 		Weights: utils.DynamicWeights{
@@ -873,7 +873,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile.Attributes = []*Attribute{
 		{
 			Path:  utils.MetaReq + utils.NestingSep + "FN1",
-			Value: config.NewRSRParsersMustCompile("123.123", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("123.123", utils.InfieldSep),
 		},
 	}
 	if err := onStor.SetAttributeProfile(context.TODO(), attrProfile, false); err != nil {
@@ -889,7 +889,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	attrProfile.Attributes = []*Attribute{
 		{
 			Path:  utils.MetaReq + utils.NestingSep + "FN1",
-			Value: config.NewRSRParsersMustCompile("true", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep),
 		},
 	}
 	if err := onStor.SetAttributeProfile(context.TODO(), attrProfile, false); err != nil {

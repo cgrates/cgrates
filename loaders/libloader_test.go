@@ -88,14 +88,14 @@ func TestNewRecordWithCahe(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	fc := []*config.FCTemplate{
-		{Type: utils.MetaVariable, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*req.0", ";")},
-		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
-		{Type: utils.MetaComposed, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaVariable, Path: "Value", Value: config.NewRSRParsersMustCompile("~*uch.*tntID.Value", ";")},
-		{Type: utils.MetaRemove, Path: "Value", Value: config.NewRSRParsersMustCompile("~*uch.*tntID.Value", ";")}, //ignored
-		{Type: utils.MetaComposed, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaRemove, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaRemoveAll, Path: "*uch", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaVariable, Path: "Tenant", Value: utils.NewRSRParsersMustCompile("~*req.0", ";")},
+		{Type: utils.MetaVariable, Path: "ID", Value: utils.NewRSRParsersMustCompile("~*req.1", ";")},
+		{Type: utils.MetaComposed, Path: "*uch.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaVariable, Path: "Value", Value: utils.NewRSRParsersMustCompile("~*uch.*tntID.Value", ";")},
+		{Type: utils.MetaRemove, Path: "Value", Value: utils.NewRSRParsersMustCompile("~*uch.*tntID.Value", ";")}, //ignored
+		{Type: utils.MetaComposed, Path: "*uch.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaRemove, Path: "*uch.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaRemoveAll, Path: "*uch", Value: utils.NewRSRParsersMustCompile("0", ";")},
 	}
 	for _, f := range fc {
 		f.ComputePath()
@@ -118,13 +118,13 @@ func TestNewRecordWithTmp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	fc := []*config.FCTemplate{
-		{Type: utils.MetaVariable, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*req.0", ";")},
-		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
-		{Type: utils.MetaComposed, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaVariable, Path: "Value", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
-		{Type: utils.MetaComposed, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaRemove, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaRemoveAll, Path: "*tmp", Value: config.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaVariable, Path: "Tenant", Value: utils.NewRSRParsersMustCompile("~*req.0", ";")},
+		{Type: utils.MetaVariable, Path: "ID", Value: utils.NewRSRParsersMustCompile("~*req.1", ";")},
+		{Type: utils.MetaComposed, Path: "*tmp.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaVariable, Path: "Value", Value: utils.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
+		{Type: utils.MetaComposed, Path: "*tmp.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaRemove, Path: "*tmp.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaRemoveAll, Path: "*tmp", Value: utils.NewRSRParsersMustCompile("0", ";")},
 	}
 	for _, f := range fc {
 		f.ComputePath()
@@ -178,12 +178,12 @@ func TestNewRecordWithTmp2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	fc := []*config.FCTemplate{
-		{Type: utils.MetaVariable, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*req.0", ";")},
-		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
-		{Type: utils.MetaVariable, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaVariable, Path: "*uch.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaComposed, Path: "Value", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";"), Blocker: true},
-		{Type: utils.MetaComposed, Path: "Value", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
+		{Type: utils.MetaVariable, Path: "Tenant", Value: utils.NewRSRParsersMustCompile("~*req.0", ";")},
+		{Type: utils.MetaVariable, Path: "ID", Value: utils.NewRSRParsersMustCompile("~*req.1", ";")},
+		{Type: utils.MetaVariable, Path: "*tmp.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaVariable, Path: "*uch.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaComposed, Path: "Value", Value: utils.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";"), Blocker: true},
+		{Type: utils.MetaComposed, Path: "Value", Value: utils.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
 	}
 	for _, f := range fc {
 		f.ComputePath()
@@ -206,10 +206,10 @@ func TestNewRecordWithComposeError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	fc := []*config.FCTemplate{
-		{Type: utils.MetaVariable, Path: "Tenant", Value: config.NewRSRParsersMustCompile("~*req.0", ";")},
-		{Type: utils.MetaVariable, Path: "ID", Value: config.NewRSRParsersMustCompile("~*req.1", ";")},
-		{Type: utils.MetaVariable, Path: "*tmp.*tntID.Value", Value: config.NewRSRParsersMustCompile("0", ";")},
-		{Type: utils.MetaComposed, Path: "Value.NotVal", Value: config.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
+		{Type: utils.MetaVariable, Path: "Tenant", Value: utils.NewRSRParsersMustCompile("~*req.0", ";")},
+		{Type: utils.MetaVariable, Path: "ID", Value: utils.NewRSRParsersMustCompile("~*req.1", ";")},
+		{Type: utils.MetaVariable, Path: "*tmp.*tntID.Value", Value: utils.NewRSRParsersMustCompile("0", ";")},
+		{Type: utils.MetaComposed, Path: "Value.NotVal", Value: utils.NewRSRParsersMustCompile("~*tmp.*tntID.Value", ";")},
 	}
 	for _, f := range fc {
 		f.ComputePath()
@@ -227,8 +227,8 @@ func TestNewRecordWithRemoveError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	fc := []*config.FCTemplate{
-		{Type: utils.MetaVariable, Path: "*tmp.Value.0.Field", Value: config.NewRSRParsersMustCompile("tmp", ";")},
-		{Type: utils.MetaRemove, Path: "*tmp.Value.NotVal", Value: config.NewRSRParsersMustCompile("tmp", ";")},
+		{Type: utils.MetaVariable, Path: "*tmp.Value.0.Field", Value: utils.NewRSRParsersMustCompile("tmp", ";")},
+		{Type: utils.MetaRemove, Path: "*tmp.Value.NotVal", Value: utils.NewRSRParsersMustCompile("tmp", ";")},
 	}
 	for _, f := range fc {
 		f.ComputePath()
@@ -247,8 +247,8 @@ func TestNewRecordSetFieldsError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	fc := []*config.FCTemplate{
-		{Type: utils.MetaVariable, Path: "*tmp.Value<0.Field", Value: config.NewRSRParsersMustCompile("~*cfg.tmp", ";")},
-		{Type: utils.MetaVariable, Path: "*tmp.Value<0.Field", Value: config.NewRSRParsersMustCompile("tmp", ";")},
+		{Type: utils.MetaVariable, Path: "*tmp.Value<0.Field", Value: utils.NewRSRParsersMustCompile("~*cfg.tmp", ";")},
+		{Type: utils.MetaVariable, Path: "*tmp.Value<0.Field", Value: utils.NewRSRParsersMustCompile("tmp", ";")},
 	}
 	for _, f := range fc {
 		f.ComputePath()
@@ -266,7 +266,7 @@ func TestNewRecordSetFieldsMandatoryError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	fc := []*config.FCTemplate{
-		{Type: utils.MetaVariable, Path: "path", Value: config.NewRSRParsersMustCompile("~*cfg.tmp", ";"), Mandatory: true},
+		{Type: utils.MetaVariable, Path: "path", Value: utils.NewRSRParsersMustCompile("~*cfg.tmp", ";"), Mandatory: true},
 	}
 	for _, f := range fc {
 		f.ComputePath()

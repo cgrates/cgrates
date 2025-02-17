@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1593,14 +1592,14 @@ func TestRouteLazyPassErr(t *testing.T) {
 
 func TestRouteLazyPassTrue(t *testing.T) {
 
-	rsrParse := &config.RSRParser{
+	rsrParse := &utils.RSRParser{
 		Rules: "~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
 	}
 	if err := rsrParse.Compile(); err != nil {
 		t.Error(err)
 	}
-	valParse := config.RSRParsers{
-		&config.RSRParser{
+	valParse := utils.RSRParsers{
+		&utils.RSRParser{
 			Rules: "~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
 		},
 	}

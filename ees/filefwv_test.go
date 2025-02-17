@@ -60,11 +60,11 @@ func TestFileFwvComposeHeader(t *testing.T) {
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*hdr.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fFwv.Cfg().Fields {
@@ -85,12 +85,12 @@ func TestFileFwvComposeHeader(t *testing.T) {
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 		{
 			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 	}
@@ -122,11 +122,11 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*trl.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fFwv.Cfg().Fields {
@@ -147,12 +147,12 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value:   config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value:   utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 			Filters: []string{"*wrong-type"},
 		},
 	}
@@ -242,11 +242,11 @@ func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*hdr.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*hdr.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fFwv.Cfg().Fields {
@@ -274,11 +274,11 @@ func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*trl.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fFwv.Cfg().Fields {
@@ -305,11 +305,11 @@ func TestFileFwvOnEvictedTrailer(t *testing.T) {
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*trl.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fFwv.Cfg().Fields {
@@ -343,11 +343,11 @@ func TestFileFwvOnEvictedClose(t *testing.T) {
 	fFwv.Cfg().Fields = []*config.FCTemplate{
 		{
 			Path: "*trl.1", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field1", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field1", utils.InfieldSep),
 		},
 		{
 			Path: "*trl.2", Type: utils.MetaVariable,
-			Value: config.NewRSRParsersMustCompile("field2", utils.InfieldSep),
+			Value: utils.NewRSRParsersMustCompile("field2", utils.InfieldSep),
 		},
 	}
 	for _, field := range fFwv.Cfg().Fields {

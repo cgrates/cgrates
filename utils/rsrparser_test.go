@@ -16,14 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package utils
 
 import (
 	"reflect"
 	"regexp"
 	"testing"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewRSRParsers(t *testing.T) {
@@ -31,23 +29,23 @@ func TestNewRSRParsers(t *testing.T) {
 	eRSRParsers := RSRParsers{
 		&RSRParser{Rules: "Value1", path: "Value1"},
 		&RSRParser{Rules: "Value2", path: "Value2"},
-		&RSRParser{Rules: "~Header3", path: "~Header3", rsrRules: make([]*utils.ReSearchReplace, 0)},
+		&RSRParser{Rules: "~Header3", path: "~Header3", rsrRules: make([]*ReSearchReplace, 0)},
 		&RSRParser{Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
 			path: "~Header4",
-			rsrRules: []*utils.ReSearchReplace{{
+			rsrRules: []*ReSearchReplace{{
 				SearchRegexp:    regexp.MustCompile(`a`),
 				ReplaceTemplate: "${1}b"}},
-			converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
-				utils.NewDataConverterMustCompile("*round:2")},
+			converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
+				NewDataConverterMustCompile("*round:2")},
 		},
 
 		&RSRParser{Rules: "Value5{*duration_seconds&*round:2}",
 			path: "Value5",
-			converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
-				utils.NewDataConverterMustCompile("*round:2")},
+			converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
+				NewDataConverterMustCompile("*round:2")},
 		},
 	}
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(eRSRParsers, rsrParsers) {
 		t.Errorf("expecting: %+v, received: %+v", eRSRParsers, rsrParsers)
@@ -58,11 +56,11 @@ func TestRSRParserCompile(t *testing.T) {
 	ePrsr := &RSRParser{
 		Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
 		path:  "~Header4",
-		rsrRules: []*utils.ReSearchReplace{{
+		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`a`),
 			ReplaceTemplate: "${1}b"}},
-		converters: utils.DataConverters{utils.NewDataConverterMustCompile("*duration_seconds"),
-			utils.NewDataConverterMustCompile("*round:2")},
+		converters: DataConverters{NewDataConverterMustCompile("*duration_seconds"),
+			NewDataConverterMustCompile("*round:2")},
 	}
 	prsr := &RSRParser{
 		Rules: "~Header4:s/a/${1}b/{*duration_seconds&*round:2}",
@@ -84,7 +82,7 @@ func TestRSRParserCompile(t *testing.T) {
 
 func TestRSRParserConstant(t *testing.T) {
 	rule := "cgrates.org"
-	rsrParsers, err := NewRSRParsers(rule, utils.InfieldSep)
+	rsrParsers, err := NewRSRParsers(rule, InfieldSep)
 	if err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
@@ -97,7 +95,7 @@ func TestRSRParserConstant(t *testing.T) {
 
 func TestRSRParserNotConstant(t *testing.T) {
 	rule := "~Header1;~Header2"
-	rsrParsers, err := NewRSRParsers(rule, utils.InfieldSep)
+	rsrParsers, err := NewRSRParsers(rule, InfieldSep)
 	if err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
@@ -113,11 +111,11 @@ func TestNewRSRParsersConstant(t *testing.T) {
 	eRSRParsers := RSRParsers{
 		&RSRParser{Rules: ">;q=0.7;expires=3600", path: ">;q=0.7;expires=3600"},
 	}
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(eRSRParsers, rsrParsers) {
 		t.Errorf("expecting: %+v, received: %+v", eRSRParsers, rsrParsers)
-	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != nil {
+	} else if out, err := rsrParsers.ParseDataProvider(MapStorage{}); err != nil {
 		t.Error(err)
 	} else if expected := ">;q=0.7;expires=3600"; out != expected {
 		t.Errorf("Expected %+v ,received %+v", expected, out)
@@ -126,50 +124,50 @@ func TestNewRSRParsersConstant(t *testing.T) {
 
 func TestNewRSRParsersConstant2(t *testing.T) {
 	ruleStr := "constant;something`>;q=0.7;expires=3600`new;constant"
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != nil {
+	} else if out, err := rsrParsers.ParseDataProvider(MapStorage{}); err != nil {
 		t.Error(err)
 	} else if expected := "constantsomething>;q=0.7;expires=3600newconstant"; out != expected {
 		t.Errorf("Expected %q ,received %q", expected, out)
 	}
 
 	ruleStr = "constant;`>;q=0.7;expires=3600`;constant"
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != nil {
+	} else if out, err := rsrParsers.ParseDataProvider(MapStorage{}); err != nil {
 		t.Error(err)
 	} else if expected := "constant>;q=0.7;expires=3600constant"; out != expected {
 		t.Errorf("Expected %q ,received %q", expected, out)
 	}
 
 	ruleStr = "constant;`>;q=0.7;expires=3600`constant"
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != nil {
+	} else if out, err := rsrParsers.ParseDataProvider(MapStorage{}); err != nil {
 		t.Error(err)
 	} else if expected := "constant>;q=0.7;expires=3600constant"; out != expected {
 		t.Errorf("Expected %q ,received %q", expected, out)
 	}
 
 	ruleStr = "constant;`>;q=0.7;expires=3600`;"
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if out, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != nil {
+	} else if out, err := rsrParsers.ParseDataProvider(MapStorage{}); err != nil {
 		t.Error(err)
 	} else if expected := "constant>;q=0.7;expires=3600"; out != expected {
 		t.Errorf("Expected %q ,received %q", expected, out)
 	}
 
 	ruleStr = "constant;`>;q=0.7;expires=3600constant"
-	if _, err := NewRSRParsers(ruleStr, utils.InfieldSep); err == nil {
+	if _, err := NewRSRParsers(ruleStr, InfieldSep); err == nil {
 		t.Error("Unexpected error: ", err)
 	}
 
 	ruleStr = "constant;`>;q=0.7;expires=3600`;~*req.Account"
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err)
-	} else if _, err := rsrParsers.ParseDataProvider(utils.MapStorage{}); err != utils.ErrNotFound {
+	} else if _, err := rsrParsers.ParseDataProvider(MapStorage{}); err != ErrNotFound {
 		t.Error(err)
 	}
 
@@ -193,11 +191,11 @@ func TestRSRParserCompileConstant(t *testing.T) {
 
 func TestNewRSRParsersParseDataProviderWithInterfaces(t *testing.T) {
 	ruleStr := "~;*accounts.;~*req.Account"
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if out, err := rsrParsers.ParseDataProviderWithInterfaces(
-		utils.MapStorage{
-			utils.MetaReq: utils.MapStorage{utils.AccountField: "1001"},
+		MapStorage{
+			MetaReq: MapStorage{AccountField: "1001"},
 		}); err != nil {
 		t.Error(err)
 	} else if expected := "~*accounts.1001"; out != expected {
@@ -205,9 +203,9 @@ func TestNewRSRParsersParseDataProviderWithInterfaces(t *testing.T) {
 	}
 
 	ruleStr = "constant;`>;q=0.7;expires=3600`;~*req.Account"
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if _, err := rsrParsers.ParseDataProviderWithInterfaces(utils.MapStorage{}); err != utils.ErrNotFound {
+	} else if _, err := rsrParsers.ParseDataProviderWithInterfaces(MapStorage{}); err != ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -233,7 +231,7 @@ func TestNewRSRParsersMustCompile(t *testing.T) {
 
 func TestRSRParserGetRule(t *testing.T) {
 	ruleStr := "constant;~*req.Account"
-	if rsrParsers, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if rsrParsers, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if rule := rsrParsers.GetRule(); rule != ruleStr {
 		t.Errorf("Expected: %q received: %q", ruleStr, rule)
@@ -263,7 +261,7 @@ func TestRSRParsersCompile(t *testing.T) {
 }
 
 func TestRSRParsersParseValue(t *testing.T) {
-	rsrParsers, err := NewRSRParsers("~*req.Account{*round}", utils.InfieldSep)
+	rsrParsers, err := NewRSRParsers("~*req.Account{*round}", InfieldSep)
 	if err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
@@ -276,7 +274,7 @@ func TestNewRSRParserMustCompile(t *testing.T) {
 	rsr := NewRSRParserMustCompile("~*req.Account")
 	ePrsr := &RSRParser{
 		Rules:    "~*req.Account",
-		rsrRules: make([]*utils.ReSearchReplace, 0),
+		rsrRules: make([]*ReSearchReplace, 0),
 		path:     "~*req.Account",
 	}
 	if !reflect.DeepEqual(rsr, ePrsr) {
@@ -325,13 +323,13 @@ func TestRSRParserDynamic(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", ePrsr, prsr)
 	}
 
-	dP := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
+	dP := MapStorage{
+		MetaReq: MapStorage{
 
-			utils.RunID: utils.MetaDefault,
+			RunID: MetaDefault,
 		},
-		utils.MetaOpts: utils.MapStorage{
-			utils.MetaOriginID:  "Uniq",
+		MetaOpts: MapStorage{
+			MetaOriginID:        "Uniq",
 			"Uniq*default-Cost": 10,
 		},
 	}
@@ -357,13 +355,13 @@ func TestRSRParserDynamic2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dP := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
+	dP := MapStorage{
+		MetaReq: MapStorage{
 
-			utils.RunID: utils.MetaDefault,
+			RunID: MetaDefault,
 		},
-		utils.MetaOpts: utils.MapStorage{
-			utils.MetaOriginID:          "originIDUniq",
+		MetaOpts: MapStorage{
+			MetaOriginID:                "originIDUniq",
 			"originIDUniq*default-Cost": 10,
 		},
 	}
@@ -395,25 +393,25 @@ func TestRSRParserDynamic2(t *testing.T) {
 		t.Errorf("Expected 2.10 received: %q", out)
 	}
 
-	dP = utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{},
-		utils.MetaOpts: utils.MapStorage{
-			utils.MetaOriginID: "originIDUniq",
+	dP = MapStorage{
+		MetaReq: MapStorage{},
+		MetaOpts: MapStorage{
+			MetaOriginID: "originIDUniq",
 		},
 	}
-	if _, err := prsr.ParseDataProvider(dP); err != utils.ErrNotFound {
-		t.Errorf("Expected error %s, received: %v", utils.ErrNotFound, err)
+	if _, err := prsr.ParseDataProvider(dP); err != ErrNotFound {
+		t.Errorf("Expected error %s, received: %v", ErrNotFound, err)
 	}
 
 	prsr, err = NewRSRParsersFromSlice([]string{"2.", "~*opts.*originID<~*opts.Converter>"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	dP = utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{},
-		utils.MetaOpts: utils.MapStorage{
-			"Converter":        "{*",
-			utils.MetaOriginID: "originIDUniq",
+	dP = MapStorage{
+		MetaReq: MapStorage{},
+		MetaOpts: MapStorage{
+			"Converter":  "{*",
+			MetaOriginID: "originIDUniq",
 		},
 	}
 	if _, err := prsr.ParseDataProvider(dP); err == nil {
@@ -427,18 +425,18 @@ func TestRSRParserDynamic3(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dP := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
+	dP := MapStorage{
+		MetaReq: MapStorage{
 
-			utils.RunID: utils.MetaDefault,
+			RunID: MetaDefault,
 
 			"UnitField": "Unit",
 			"Unit":      "MB",
 			"IP":        "127.0.0.1",
 		},
-		utils.MetaOpts: utils.MapStorage{
+		MetaOpts: MapStorage{
 
-			utils.MetaOriginID:          "originIDUniq",
+			MetaOriginID:                "originIDUniq",
 			"originIDUniq*default-Cost": 10,
 		},
 	}
@@ -457,13 +455,13 @@ func TestRSRParserParseDataProviderWithInterfaces(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dP := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
+	dP := MapStorage{
+		MetaReq: MapStorage{
 
-			utils.RunID: utils.MetaDefault,
+			RunID: MetaDefault,
 		},
-		utils.MetaOpts: utils.MapStorage{
-			utils.MetaOriginID:          "originIDUniq",
+		MetaOpts: MapStorage{
+			MetaOriginID:                "originIDUniq",
 			"originIDUniq*default-Cost": 10,
 		},
 	}
@@ -495,25 +493,25 @@ func TestRSRParserParseDataProviderWithInterfaces(t *testing.T) {
 		t.Errorf("Expected 210 received: %q", out)
 	}
 
-	dP = utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{},
-		utils.MetaOpts: utils.MapStorage{
-			utils.MetaOriginID: "originIDUniq",
+	dP = MapStorage{
+		MetaReq: MapStorage{},
+		MetaOpts: MapStorage{
+			MetaOriginID: "originIDUniq",
 		},
 	}
-	if _, err := prsr.ParseDataProviderWithInterfaces(dP); err != utils.ErrNotFound {
-		t.Errorf("Expected error %s, received: %v", utils.ErrNotFound, err)
+	if _, err := prsr.ParseDataProviderWithInterfaces(dP); err != ErrNotFound {
+		t.Errorf("Expected error %s, received: %v", ErrNotFound, err)
 	}
 
 	prsr, err = NewRSRParsersFromSlice([]string{"2.", "~*opts.*originID<~*opts.Converter>"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	dP = utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{},
-		utils.MetaOpts: utils.MapStorage{
-			"Converter":        "{*",
-			utils.MetaOriginID: "originIDUniq",
+	dP = MapStorage{
+		MetaReq: MapStorage{},
+		MetaOpts: MapStorage{
+			"Converter":  "{*",
+			MetaOriginID: "originIDUniq",
 		},
 	}
 	if _, err := prsr.ParseDataProviderWithInterfaces(dP); err == nil {
@@ -527,13 +525,13 @@ func TestRSRParserCompileDynRule(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dP := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
+	dP := MapStorage{
+		MetaReq: MapStorage{
 
-			utils.RunID: utils.MetaDefault,
+			RunID: MetaDefault,
 		},
-		utils.MetaOpts: utils.MapStorage{
-			utils.MetaOriginID:          "originIDUniq",
+		MetaOpts: MapStorage{
+			MetaOriginID:                "originIDUniq",
 			"originIDUniq*default-Cost": 10,
 		},
 	}
@@ -543,14 +541,14 @@ func TestRSRParserCompileDynRule(t *testing.T) {
 		t.Errorf("Expected ~*opts.originIDUniq*default-Cost received: %q", out)
 	}
 
-	dP = utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{},
-		utils.MetaOpts: utils.MapStorage{
-			utils.MetaOriginID: "originIDUniq",
+	dP = MapStorage{
+		MetaReq: MapStorage{},
+		MetaOpts: MapStorage{
+			MetaOriginID: "originIDUniq",
 		},
 	}
-	if _, err := prsr.CompileDynRule(dP); err != utils.ErrNotFound {
-		t.Errorf("Expected error %s, received: %v", utils.ErrNotFound, err)
+	if _, err := prsr.CompileDynRule(dP); err != ErrNotFound {
+		t.Errorf("Expected error %s, received: %v", ErrNotFound, err)
 	}
 
 	prsr, err = NewRSRParser("~*opts.*originID")
@@ -566,18 +564,18 @@ func TestRSRParserCompileDynRule(t *testing.T) {
 }
 
 func TestRSRParsersGetIfaceFromValues(t *testing.T) {
-	dp := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
-			utils.Category: "call",
+	dp := MapStorage{
+		MetaReq: MapStorage{
+			Category: "call",
 		},
 	}
 	exp := []any{"*rated", "call"}
-	if rply, err := NewRSRParsersMustCompile("*rated;~*req.Category", utils.InfieldSep).GetIfaceFromValues(dp); err != nil {
+	if rply, err := NewRSRParsersMustCompile("*rated;~*req.Category", InfieldSep).GetIfaceFromValues(dp); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting %q, received: %q", exp, rply)
 	}
-	if _, err := NewRSRParsersMustCompile("*rated;~req.Category", utils.InfieldSep).GetIfaceFromValues(utils.MapStorage{}); err != utils.ErrNotFound {
+	if _, err := NewRSRParsersMustCompile("*rated;~req.Category", InfieldSep).GetIfaceFromValues(MapStorage{}); err != ErrNotFound {
 		t.Error(err)
 	}
 }
@@ -588,7 +586,7 @@ func TestNewRSRParser(t *testing.T) {
 	expRSRField1 := &RSRParser{
 		path:  "~sip_redirected_to",
 		Rules: rulesStr,
-		rsrRules: []*utils.ReSearchReplace{
+		rsrRules: []*ReSearchReplace{
 			{
 				SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
 				ReplaceTemplate: "0$1",
@@ -608,13 +606,13 @@ func TestNewRSRParser(t *testing.T) {
 	expRSRField := &RSRParser{
 		path:  "~sip_redirected_to",
 		Rules: rulesStr,
-		rsrRules: []*utils.ReSearchReplace{{
+		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
 			ReplaceTemplate: "0$1",
 		}},
-		converters: []utils.DataConverter{
-			new(utils.DurationSecondsConverter),
-			&utils.RoundConverter{Decimals: 5, Method: "*middle"},
+		converters: []DataConverter{
+			new(DurationSecondsConverter),
+			&RoundConverter{Decimals: 5, Method: "*middle"},
 		},
 	}
 	if rsrField, err := NewRSRParser(rulesStr); err != nil {
@@ -627,7 +625,7 @@ func TestNewRSRParser(t *testing.T) {
 	expRSRField3 := &RSRParser{
 		path:  "~sip_redirected_to",
 		Rules: rulesStr,
-		rsrRules: []*utils.ReSearchReplace{{
+		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)\/@`),
 			ReplaceTemplate: "0$1",
 		}},
@@ -645,7 +643,7 @@ func TestNewRSRParserDDz(t *testing.T) {
 	expectRSRField := &RSRParser{
 		path:  "~effective_caller_id_number",
 		Rules: rulesStr,
-		rsrRules: []*utils.ReSearchReplace{{
+		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`(\d+)`),
 			ReplaceTemplate: "+$1",
 		}},
@@ -662,7 +660,7 @@ func TestNewRSRParserIvo(t *testing.T) {
 	expectRSRField := &RSRParser{
 		path:  "~cost_details",
 		Rules: rulesStr,
-		rsrRules: []*utils.ReSearchReplace{{
+		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`MatchedDestId":".+_(\s\s\s\s\s)"`),
 			ReplaceTemplate: "$1",
 		}},
@@ -682,7 +680,7 @@ func TestConvertPlusNationalAnd00(t *testing.T) {
 	expectRSRField := &RSRParser{
 		path:  "~effective_caller_id_number",
 		Rules: rulesStr,
-		rsrRules: []*utils.ReSearchReplace{
+		rsrRules: []*ReSearchReplace{
 			{
 				SearchRegexp:    regexp.MustCompile(`\+49(\d+)`),
 				ReplaceTemplate: "0$1",
@@ -716,7 +714,7 @@ func TestConvertDurToSecs(t *testing.T) {
 	expectRSRField := &RSRParser{
 		path:  "~9",
 		Rules: rulesStr,
-		rsrRules: []*utils.ReSearchReplace{{
+		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`^(\d+)$`),
 			ReplaceTemplate: "${1}s",
 		}},
@@ -739,7 +737,7 @@ func TestPrefix164(t *testing.T) {
 	expectRSRField := &RSRParser{
 		path:  "~0",
 		Rules: rulesStr,
-		rsrRules: []*utils.ReSearchReplace{{
+		rsrRules: []*ReSearchReplace{{
 			SearchRegexp:    regexp.MustCompile(`^([1-9]\d+)$`),
 			ReplaceTemplate: "+$1",
 		}},
@@ -772,7 +770,7 @@ func TestNewRSRParsers2(t *testing.T) {
 		t.Fatal(err)
 	}
 	eRSRFields := RSRParsers{rsrFld1, rsrFld2, rsrFld4}
-	if rsrFlds, err := NewRSRParsers(fieldsStr1, utils.InfieldSep); err != nil {
+	if rsrFlds, err := NewRSRParsers(fieldsStr1, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err)
 	} else if !reflect.DeepEqual(eRSRFields, rsrFlds) {
 		t.Errorf("Expecting: %v, received: %v", eRSRFields, rsrFlds)
@@ -786,7 +784,7 @@ func TestNewRSRParsers2(t *testing.T) {
 		{
 			path:  "~sip_redirected_to",
 			Rules: `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`,
-			rsrRules: []*utils.ReSearchReplace{{
+			rsrRules: []*ReSearchReplace{{
 				SearchRegexp:    regexp.MustCompile(`sip:\+49(\d+)@`),
 				ReplaceTemplate: "0$1",
 			}},
@@ -796,10 +794,10 @@ func TestNewRSRParsers2(t *testing.T) {
 			Rules: "destination",
 		},
 	}
-	if parsedFields, err := NewRSRParsers(fields, utils.FieldsSep); err != nil {
+	if parsedFields, err := NewRSRParsers(fields, FieldsSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(parsedFields, expectParsedFields) {
-		t.Errorf("Expected: %s ,received: %s ", utils.ToJSON(expectParsedFields), utils.ToJSON(parsedFields))
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expectParsedFields), ToJSON(parsedFields))
 	}
 }
 
@@ -881,15 +879,15 @@ func TestRSRFldParse(t *testing.T) {
 }
 
 func TestRSRParsersClone(t *testing.T) {
-	rsrs, err := NewRSRParsers(`~subject:s/^0\d{9}$//{*duration}`, utils.InfieldSep)
+	rsrs, err := NewRSRParsers(`~subject:s/^0\d{9}$//{*duration}`, InfieldSep)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cln := rsrs.Clone()
 	if !reflect.DeepEqual(rsrs, cln) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(rsrs), utils.ToJSON(cln))
+		t.Errorf("Expected: %+v\nReceived: %+v", ToJSON(rsrs), ToJSON(cln))
 	}
-	cln[0].converters[0] = utils.NewDataConverterMustCompile(utils.MetaIP2Hex)
+	cln[0].converters[0] = NewDataConverterMustCompile(MetaIP2Hex)
 	if reflect.DeepEqual(cln[0].converters[0], rsrs[0].converters[0]) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
@@ -897,10 +895,10 @@ func TestRSRParsersClone(t *testing.T) {
 
 func TestRSRParsersParseDataProviderWithInterfaces2(t *testing.T) {
 	ruleStr := "~;*accounts.;~*req.Account"
-	if prsrs, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if prsrs, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if rcv, err := prsrs.ParseDataProviderWithInterfaces2(utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{utils.AccountField: "1001"},
+	} else if rcv, err := prsrs.ParseDataProviderWithInterfaces2(MapStorage{
+		MetaReq: MapStorage{AccountField: "1001"},
 	}); err != nil {
 		t.Errorf("Expected error <nil>, Received error <%v>", err)
 
@@ -908,10 +906,10 @@ func TestRSRParsersParseDataProviderWithInterfaces2(t *testing.T) {
 		t.Errorf("Expected %q ,received %q", expected, rcv)
 	}
 	ruleStr = "constant;`>;q=0.7;expires=3600`;~*req.Account"
-	if prsrs, err := NewRSRParsers(ruleStr, utils.InfieldSep); err != nil {
+	if prsrs, err := NewRSRParsers(ruleStr, InfieldSep); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if _, err := prsrs.ParseDataProviderWithInterfaces2(utils.MapStorage{}); err != utils.ErrNotFound {
-		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	} else if _, err := prsrs.ParseDataProviderWithInterfaces2(MapStorage{}); err != ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", ErrNotFound, err)
 	}
 
 }
@@ -919,7 +917,7 @@ func TestRSRParsersParseDataProviderWithInterfaces2(t *testing.T) {
 func TestRSRParserParseValueInterface(t *testing.T) {
 
 	prsr := &RSRParser{
-		rsrRules: []*utils.ReSearchReplace{
+		rsrRules: []*ReSearchReplace{
 			{
 				SearchRegexp:    regexp.MustCompile(`a`),
 				ReplaceTemplate: "${1}b",
@@ -940,10 +938,10 @@ func TestRSRParserParseDataProviderWithInterfaces2(t *testing.T) {
 		dynRules: NewRSRParsersMustCompile("~*opts.*originID;~*req.RunID;-Cost", ";"),
 	}
 
-	if _, err := prsr.ParseDataProviderWithInterfaces2(utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{utils.AccountField: "1001"},
-	}); err != utils.ErrNotFound {
-		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
+	if _, err := prsr.ParseDataProviderWithInterfaces2(MapStorage{
+		MetaReq: MapStorage{AccountField: "1001"},
+	}); err != ErrNotFound {
+		t.Errorf("Expected error <%v>, Received error <%v>", ErrNotFound, err)
 
 	}
 
@@ -953,8 +951,8 @@ func TestRSRParserParseDataProviderWithInterfaces2(t *testing.T) {
 		dynRules: rsrParser,
 	}
 	expErr := "invalid converter value in string: <*>, err: unsupported converter definition: <*>"
-	if _, err := prsr.ParseDataProviderWithInterfaces2(utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{utils.AccountField: "1001"},
+	if _, err := prsr.ParseDataProviderWithInterfaces2(MapStorage{
+		MetaReq: MapStorage{AccountField: "1001"},
 	}); err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
 
@@ -963,13 +961,13 @@ func TestRSRParserParseDataProviderWithInterfaces2(t *testing.T) {
 	prsr = &RSRParser{
 		dynRules: NewRSRParsersMustCompile("~*opts.*originID;~*req.RunID;-Cost", ";"),
 	}
-	dP := utils.MapStorage{
-		utils.MetaReq: utils.MapStorage{
+	dP := MapStorage{
+		MetaReq: MapStorage{
 
-			utils.RunID: utils.MetaDefault,
+			RunID: MetaDefault,
 		},
-		utils.MetaOpts: utils.MapStorage{
-			utils.MetaOriginID:  "Uniq",
+		MetaOpts: MapStorage{
+			MetaOriginID:        "Uniq",
 			"Uniq*default-Cost": 10,
 		},
 	}

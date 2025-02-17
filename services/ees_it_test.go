@@ -79,7 +79,7 @@ package services
 // 	fcTmp := &config.FCTemplate{Tag: "TenantID",
 // 		Path:      "Tenant",
 // 		Type:      utils.MetaVariable,
-// 		Value:     config.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
+// 		Value:     utils.NewRSRParsersMustCompile("~*req.0", utils.InfieldSep),
 // 		Mandatory: true,
 // 		Layout:    time.RFC3339,
 // 	}

@@ -321,12 +321,12 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 // FilterRule filters requests coming into various places
 // Pass rule: default negative, one matching rule should pass the filter
 type FilterRule struct {
-	Type        string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	Element     string            // Name of the field providing us the Values to check (used in case of some )
-	Values      []string          // Filter definition
-	rsrValues   config.RSRParsers // Cache here the
-	rsrElement  *config.RSRParser // Cache here the
-	rsrFilters  utils.RSRFilters  // Cache here the RSRFilter Values
+	Type        string           // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	Element     string           // Name of the field providing us the Values to check (used in case of some )
+	Values      []string         // Filter definition
+	rsrValues   utils.RSRParsers // Cache here the
+	rsrElement  *utils.RSRParser // Cache here the
+	rsrFilters  utils.RSRFilters // Cache here the RSRFilter Values
 	regexValues []*regexp.Regexp
 	negative    *bool
 }
@@ -364,20 +364,20 @@ func (fltr *FilterRule) CompileValues() (err error) {
 		}
 	case utils.MetaExists, utils.MetaNotExists, utils.MetaEmpty, utils.MetaNotEmpty: // only the element is built
 	case utils.MetaActivationInterval, utils.MetaNotActivationInterval:
-		fltr.rsrValues = make(config.RSRParsers, len(fltr.Values))
+		fltr.rsrValues = make(utils.RSRParsers, len(fltr.Values))
 		for i, strVal := range fltr.Values {
-			if fltr.rsrValues[i], err = config.NewRSRParser(strVal); err != nil {
+			if fltr.rsrValues[i], err = utils.NewRSRParser(strVal); err != nil {
 				return
 			}
 		}
 	case utils.MetaNever: //return since there is not need for the values to be compiled in this case
 		return
 	default:
-		if fltr.rsrValues, err = config.NewRSRParsersFromSlice(fltr.Values); err != nil {
+		if fltr.rsrValues, err = utils.NewRSRParsersFromSlice(fltr.Values); err != nil {
 			return
 		}
 	}
-	if fltr.rsrElement, err = config.NewRSRParser(fltr.Element); err != nil {
+	if fltr.rsrElement, err = utils.NewRSRParser(fltr.Element); err != nil {
 		return
 	} else if fltr.rsrElement == nil {
 		return fmt.Errorf("empty RSRParser in rule: <%s>", fltr.Element)
@@ -718,7 +718,7 @@ func (fltr *FilterRule) passSentryPeer(ctx *context.Context, dDP utils.DataProvi
 	return GetSentryPeer(ctx, strVal, config.CgrConfig().SentryPeerCfg(), fltr.Values[0])
 }
 
-func parseTime(rsr *config.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {
+func parseTime(rsr *utils.RSRParser, dDp utils.DataProvider) (_ time.Time, err error) {
 	var str string
 	if str, err = rsr.ParseDataProvider(dDp); err != nil {
 		return
