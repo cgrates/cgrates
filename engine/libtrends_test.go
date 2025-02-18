@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -540,5 +541,381 @@ func TestTrendCleanUp(t *testing.T) {
 				t.Error("expected trend to not be altered")
 			}
 		})
+	}
+}
+
+func TestTrendProfileString(t *testing.T) {
+	profile := &TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "Trend1",
+		Schedule:        "@every 1m",
+		StatID:          "Stat1",
+		Metrics:         []string{"*acc", "*tcd"},
+		TTL:             10 * time.Minute,
+		QueueLength:     100,
+		MinItems:        10,
+		CorrelationType: "*average",
+		Tolerance:       0.05,
+		Stored:          true,
+		ThresholdIDs:    []string{"Thresh1", "Thresh2"},
+	}
+
+	jsonStr := profile.String()
+	if jsonStr == "" {
+		t.Errorf("Expected non-empty JSON string representation of TrendProfile")
+	}
+
+	expectedFields := []string{
+		`"cgrates.org"`, `"Trend1"`, `"@every 1m"`, `"Stat1"`,
+		`"*acc"`, `"*tcd"`, `"*average"`, `true`, `"Thresh1"`, `"Thresh2"`,
+	}
+
+	for _, field := range expectedFields {
+		if !strings.Contains(jsonStr, field) {
+			t.Errorf("Expected JSON output to contain field: %s", field)
+		}
+	}
+}
+
+func TestTrendProfileFieldAssString(t *testing.T) {
+	tests := []struct {
+		name     string
+		fldPath  []string
+		expected string
+		hasError bool
+	}{
+		{
+			name:     "Valid Tenant Field",
+			fldPath:  []string{"Tenant"},
+			expected: "cgrates.org",
+			hasError: false,
+		},
+		{
+			name:     "Valid ID Field",
+			fldPath:  []string{"ID"},
+			expected: "Trend1",
+			hasError: false,
+		},
+		{
+			name:     "Valid Schedule Field",
+			fldPath:  []string{"Schedule"},
+			expected: "@every 1m",
+			hasError: false,
+		},
+		{
+			name:     "Invalid Field Path",
+			fldPath:  []string{"NonExistentField"},
+			expected: "",
+			hasError: true,
+		},
+	}
+
+	tp := &TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "Trend1",
+		Schedule:        "@every 1m",
+		StatID:          "Stat1",
+		Metrics:         []string{"*acc", "*tcd"},
+		TTL:             10 * time.Minute,
+		QueueLength:     100,
+		MinItems:        10,
+		CorrelationType: "*average",
+		Tolerance:       0.05,
+		Stored:          true,
+		ThresholdIDs:    []string{"Thresh1", "Thresh2"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := tp.FieldAsString(tt.fldPath)
+
+			if tt.hasError && err == nil {
+				t.Errorf("Expected error for fldPath %v, but got none", tt.fldPath)
+			} else if !tt.hasError && err != nil {
+				t.Errorf("Expected no error for fldPath %v, but got: %v", tt.fldPath, err)
+			}
+
+			if result != tt.expected {
+				t.Errorf("For fldPath %v, expected %v, but got %v", tt.fldPath, tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestTrendProfileSet(t *testing.T) {
+	tp := &TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "Trend1",
+		Schedule:        "@every 1m",
+		StatID:          "Stat1",
+		Metrics:         []string{"*acc", "*tcd"},
+		TTL:             10 * time.Minute,
+		QueueLength:     100,
+		MinItems:        10,
+		CorrelationType: "*average",
+		Tolerance:       0.05,
+		Stored:          true,
+		ThresholdIDs:    []string{"Thresh1", "Thresh2"},
+	}
+
+	tests := []struct {
+		name     string
+		path     []string
+		val      any
+		expected any
+		hasError bool
+	}{
+		{
+			name:     "Set Tenant",
+			path:     []string{utils.Tenant},
+			val:      "newTenant",
+			expected: "newTenant",
+			hasError: false,
+		},
+		{
+			name:     "Set ID",
+			path:     []string{utils.ID},
+			val:      "newID",
+			expected: "newID",
+			hasError: false,
+		},
+		{
+			name:     "Set Schedule",
+			path:     []string{utils.Schedule},
+			val:      "@every 2m",
+			expected: "@every 2m",
+			hasError: false,
+		},
+		{
+			name:     "Set StatID",
+			path:     []string{utils.StatID},
+			val:      "newStatID",
+			expected: "newStatID",
+			hasError: false,
+		},
+		{
+			name:     "Set Metrics",
+			path:     []string{utils.Metrics},
+			val:      []string{"*newMetric"},
+			expected: []string{"*acc", "*tcd", "*newMetric"},
+			hasError: false,
+		},
+		{
+			name:     "Set TTL",
+			path:     []string{utils.TTL},
+			val:      "15m",
+			expected: 15 * time.Minute,
+			hasError: false,
+		},
+		{
+			name:     "Set QueueLength",
+			path:     []string{utils.QueueLength},
+			val:      50,
+			expected: 50,
+			hasError: false,
+		},
+		{
+			name:     "Set MinItems",
+			path:     []string{utils.MinItems},
+			val:      20,
+			expected: 20,
+			hasError: false,
+		},
+		{
+			name:     "Set CorrelationType",
+			path:     []string{utils.CorrelationType},
+			val:      "*sum",
+			expected: "*sum",
+			hasError: false,
+		},
+		{
+			name:     "Set Tolerance",
+			path:     []string{utils.Tolerance},
+			val:      0.1,
+			expected: 0.1,
+			hasError: false,
+		},
+		{
+			name:     "Set Stored",
+			path:     []string{utils.Stored},
+			val:      false,
+			expected: false,
+			hasError: false,
+		},
+		{
+			name:     "Set ThresholdIDs",
+			path:     []string{utils.ThresholdIDs},
+			val:      []string{"Thresh3", "Thresh4"},
+			expected: []string{"Thresh1", "Thresh2", "Thresh3", "Thresh4"},
+			hasError: false,
+		},
+		{
+			name:     "Set Invalid Path",
+			path:     []string{"InvalidPath"},
+			val:      "invalid",
+			expected: nil,
+			hasError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tp.Set(tt.path, tt.val, false, "")
+
+			if tt.hasError && err == nil {
+				t.Errorf("Expected error for path %v, but got none", tt.path)
+			} else if !tt.hasError && err != nil {
+				t.Errorf("Expected no error for path %v, but got: %v", tt.path, err)
+			}
+
+			switch tt.path[0] {
+			case utils.Tenant:
+				if tp.Tenant != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Tenant)
+				}
+			case utils.ID:
+				if tp.ID != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.ID)
+				}
+			case utils.Schedule:
+				if tp.Schedule != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Schedule)
+				}
+			case utils.StatID:
+				if tp.StatID != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.StatID)
+				}
+			case utils.Metrics:
+				if len(tp.Metrics) != len(tt.expected.([]string)) {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Metrics)
+				} else {
+					for i := range tp.Metrics {
+						if tp.Metrics[i] != tt.expected.([]string)[i] {
+							t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Metrics)
+							break
+						}
+					}
+				}
+			case utils.TTL:
+				if tp.TTL != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.TTL)
+				}
+			case utils.QueueLength:
+				if tp.QueueLength != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.QueueLength)
+				}
+			case utils.MinItems:
+				if tp.MinItems != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.MinItems)
+				}
+			case utils.CorrelationType:
+				if tp.CorrelationType != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.CorrelationType)
+				}
+			case utils.Tolerance:
+				if tp.Tolerance != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Tolerance)
+				}
+			case utils.Stored:
+				if tp.Stored != tt.expected {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Stored)
+				}
+			case utils.ThresholdIDs:
+				if len(tp.ThresholdIDs) != len(tt.expected.([]string)) {
+					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.ThresholdIDs)
+				} else {
+					for i := range tp.ThresholdIDs {
+						if tp.ThresholdIDs[i] != tt.expected.([]string)[i] {
+							t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.ThresholdIDs)
+							break
+						}
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestTrendProfileMergeV2(t *testing.T) {
+	tp1 := &TrendProfile{
+		Tenant:          "tenant1",
+		ID:              "id1",
+		Schedule:        "schedule1",
+		StatID:          "stat1",
+		Metrics:         []string{"metric1", "metric2"},
+		ThresholdIDs:    []string{"threshold1"},
+		Stored:          true,
+		TTL:             10,
+		QueueLength:     100,
+		MinItems:        5,
+		CorrelationType: "type1",
+		Tolerance:       0.5,
+	}
+
+	tp2 := &TrendProfile{
+		Tenant:          "tenant2",
+		ID:              "id2",
+		Schedule:        "schedule2",
+		StatID:          "stat2",
+		Metrics:         []string{"metric3", "metric4"},
+		ThresholdIDs:    []string{"threshold2"},
+		Stored:          true,
+		TTL:             20,
+		QueueLength:     200,
+		MinItems:        10,
+		CorrelationType: "type2",
+		Tolerance:       1.5,
+	}
+
+	tp1.Merge(tp2)
+
+	if tp1.Tenant != "tenant2" {
+		t.Errorf("Expected Tenant to be 'tenant2', but got: %s", tp1.Tenant)
+	}
+
+	if tp1.ID != "id2" {
+		t.Errorf("Expected ID to be 'id2', but got: %s", tp1.ID)
+	}
+
+	if tp1.Schedule != "schedule2" {
+		t.Errorf("Expected Schedule to be 'schedule2', but got: %s", tp1.Schedule)
+	}
+
+	if tp1.StatID != "stat2" {
+		t.Errorf("Expected StatID to be 'stat2', but got: %s", tp1.StatID)
+	}
+
+	expectedMetrics := []string{"metric1", "metric2", "metric3", "metric4"}
+	if len(tp1.Metrics) != len(expectedMetrics) {
+		t.Errorf("Expected Metrics to be %v, but got: %v", expectedMetrics, tp1.Metrics)
+	}
+
+	expectedThresholdIDs := []string{"threshold1", "threshold2"}
+	if len(tp1.ThresholdIDs) != len(expectedThresholdIDs) {
+		t.Errorf("Expected ThresholdIDs to be %v, but got: %v", expectedThresholdIDs, tp1.ThresholdIDs)
+	}
+
+	if tp1.Stored != true {
+		t.Errorf("Expected Stored to be 'true', but got: %v", tp1.Stored)
+	}
+
+	if tp1.TTL != 20 {
+		t.Errorf("Expected TTL to be 20, but got: %d", tp1.TTL)
+	}
+
+	if tp1.QueueLength != 200 {
+		t.Errorf("Expected QueueLength to be 200, but got: %d", tp1.QueueLength)
+	}
+
+	if tp1.MinItems != 10 {
+		t.Errorf("Expected MinItems to be 10, but got: %d", tp1.MinItems)
+	}
+
+	if tp1.CorrelationType != "type2" {
+		t.Errorf("Expected CorrelationType to be 'type2', but got: %s", tp1.CorrelationType)
+	}
+
+	if tp1.Tolerance != 1.5 {
+		t.Errorf("Expected Tolerance to be 1.5, but got: %f", tp1.Tolerance)
 	}
 }
