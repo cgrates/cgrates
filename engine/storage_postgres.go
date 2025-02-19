@@ -25,12 +25,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // NewPostgresStorage returns the posgres storDB
 func NewPostgresStorage(host, port, name, user, password, pgSchema,
 	sslmode, sslcert, sslkey, sslpassword, sslcertmode, sslrootcert string,
-	maxConn, maxIdleConn int, connMaxLifetime time.Duration) (*SQLStorage, error) {
+	maxConn, maxIdleConn, logLevel int, connMaxLifetime time.Duration) (*SQLStorage, error) {
 	connStr := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
 		host, port, name, user, password, sslmode)
@@ -49,7 +50,7 @@ func NewPostgresStorage(host, port, name, user, password, pgSchema,
 	if sslrootcert != "" {
 		connStr = connStr + " sslrootcert=" + sslrootcert
 	}
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{AllowGlobalUpdate: true})
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{AllowGlobalUpdate: true, Logger: logger.Default.LogMode(logger.LogLevel(logLevel))})
 	if err != nil {
 		return nil, err
 	}

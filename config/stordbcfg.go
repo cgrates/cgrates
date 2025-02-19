@@ -31,6 +31,7 @@ type StorDBOpts struct {
 	SQLMaxOpenConns    int
 	SQLMaxIdleConns    int
 	SQLConnMaxLifetime time.Duration
+	SQLLogLevel        int
 	MongoQueryTimeout  time.Duration
 	MongoConnScheme    string
 	PgSSLMode          string
@@ -69,6 +70,9 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.SQLMaxIdleConns != nil {
 		dbOpts.SQLMaxIdleConns = *jsnCfg.SQLMaxIdleConns
+	}
+	if jsnCfg.SQLLogLevel != nil {
+		dbOpts.SQLLogLevel = *jsnCfg.SQLLogLevel
 	}
 	if jsnCfg.SQLConnMaxLifetime != nil {
 		if dbOpts.SQLConnMaxLifetime, err = utils.ParseDurationWithNanosecs(*jsnCfg.SQLConnMaxLifetime); err != nil {
@@ -189,6 +193,7 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 		SQLMaxOpenConns:    dbOpts.SQLMaxOpenConns,
 		SQLMaxIdleConns:    dbOpts.SQLMaxIdleConns,
 		SQLConnMaxLifetime: dbOpts.SQLConnMaxLifetime,
+		SQLLogLevel:        dbOpts.SQLLogLevel,
 		MySQLDSNParams:     dbOpts.MySQLDSNParams,
 		MongoQueryTimeout:  dbOpts.MongoQueryTimeout,
 		MongoConnScheme:    dbOpts.MongoConnScheme,
@@ -244,6 +249,7 @@ func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.SQLMaxOpenConnsCfg:   dbcfg.Opts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:   dbcfg.Opts.SQLMaxIdleConns,
 		utils.SQLConnMaxLifetime:   dbcfg.Opts.SQLConnMaxLifetime.String(),
+		utils.SQLLogLevel:          dbcfg.Opts.SQLLogLevel,
 		utils.MYSQLDSNParams:       dbcfg.Opts.MySQLDSNParams,
 		utils.MongoQueryTimeoutCfg: dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.MongoConnSchemeCfg:   dbcfg.Opts.MongoConnScheme,

@@ -2815,6 +2815,7 @@ const (
 
 	SQLMaxOpenConns    = "sqlMaxOpenConns"
 	SQLConnMaxLifetime = "sqlConnMaxLifetime"
+	SQLLogLevel        = "sqlLogLevel"
 	MYSQLDSNParams     = "mysqlDSNParams"
 
 	// fileCSV
