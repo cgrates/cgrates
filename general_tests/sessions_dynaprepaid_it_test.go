@@ -32,7 +32,107 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestSessDynaprepaidAuth(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	ng := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+	t.Run("GetAccount", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err == nil ||
+			err.Error() != utils.ErrNotFound.Error() {
+			t.Error(err)
+		}
+	})
+
+	t.Run("AuthSession", func(t *testing.T) {
+		args1 := &sessions.V1AuthorizeArgs{
+			GetMaxUsage: true,
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.OriginID:     "sessDynaprepaid",
+					utils.OriginHost:   "192.168.1.1",
+					utils.Source:       "sessDynaprepaid",
+					utils.ToR:          utils.MetaData,
+					utils.RequestType:  utils.MetaDynaprepaid,
+					utils.AccountField: "CreatedAccount",
+					utils.Subject:      "NoSubject",
+					utils.Destination:  "+1234567",
+					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:        1024,
+				},
+			},
+		}
+		var rply1 sessions.V1AuthorizeReply
+		if err := client.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
+			args1, &rply1); err != nil {
+			t.Error(err)
+			return
+		} else if *rply1.MaxUsage != 1024*time.Nanosecond {
+			t.Errorf("Expected <%+v>, received <%+v>", 1024*time.Nanosecond, *rply1.MaxUsage)
+		}
+	})
+
+	t.Run("GetAccount2", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+			t.Error(err)
+		}
+		expAcc := &engine.Account{
+			ID: "cgrates.org:CreatedAccount",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:             "",
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+						Value:          9.99966,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+					},
+				},
+				utils.MetaSMS: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaSMS][0].Uuid,
+						Value:          500,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+					},
+				},
+			},
+			UpdateTime: acnt.UpdateTime,
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		}
+	})
+}
+
 func TestSessDynaprepaidInit(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
 	ng := engine.TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
@@ -119,6 +219,13 @@ func TestSessDynaprepaidInit(t *testing.T) {
 }
 
 func TestSessDynaprepaidUpdate(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
 	ng := engine.TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
@@ -203,6 +310,13 @@ func TestSessDynaprepaidUpdate(t *testing.T) {
 }
 
 func TestSessDynaprepaidTerminate(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
 	ng := engine.TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
