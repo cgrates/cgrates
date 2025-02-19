@@ -1583,8 +1583,30 @@ func (sS *SessionS) authEvent(cgrEv *utils.CGREvent, forceDuration bool) (usage 
 				CallDescriptor: sr.CD,
 				APIOpts:        s.OptsStart,
 			}, &rplyMaxUsage); err != nil {
-			err = utils.NewErrRALs(err)
-			return
+			if err.Error() == utils.ErrAccountNotFound.Error() &&
+				sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaDynaprepaid {
+				var reply string
+				// execute the actionPlan configured in Scheduler
+				if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().SchedulerConns,
+					utils.SchedulerSv1ExecuteActionPlans, &utils.AttrsExecuteActionPlans{
+						ActionPlanIDs: sS.cgrCfg.SchedulerCfg().DynaprepaidActionPlans,
+						Tenant:        sr.CD.Tenant,
+						AccountID:     sr.CD.Account},
+					&reply); err != nil {
+					return
+				}
+				// execute again the GetMaxSessionTime operation
+				err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().RALsConns,
+					utils.ResponderGetMaxSessionTime,
+					&engine.CallDescriptorWithAPIOpts{
+						CallDescriptor: sr.CD,
+						APIOpts:        s.OptsStart,
+					}, &rplyMaxUsage)
+			}
+			if err != nil {
+				err = utils.NewErrRALs(err)
+				return
+			}
 		}
 		if rplyMaxUsage > eventUsage {
 			rplyMaxUsage = eventUsage
