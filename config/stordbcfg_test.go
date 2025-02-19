@@ -82,6 +82,7 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 			SQLMaxOpenConns:    100,
 			SQLMaxIdleConns:    10,
 			SQLConnMaxLifetime: 0,
+			SQLLogLevel:        3,
 			MongoQueryTimeout:  10 * time.Second,
 			MongoConnScheme:    "mongodb",
 			PgSSLMode:          "disable",
@@ -242,6 +243,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		utils.OptsCfg: map[string]any{
 			utils.SQLMaxOpenConnsCfg:    100,
 			utils.SQLMaxIdleConnsCfg:    10,
+			utils.SQLLogLevel:           3,
 			utils.SQLConnMaxLifetimeCfg: "0s",
 			utils.MYSQLDSNParams:        make(map[string]string),
 			utils.MongoQueryTimeoutCfg:  "10s",

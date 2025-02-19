@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type MySQLStorage struct {
@@ -32,11 +33,10 @@ type MySQLStorage struct {
 }
 
 func NewMySQLStorage(host, port, name, user, password string,
-	maxConn, maxIdleConn int, connMaxLifetime time.Duration, location string, dsnParams map[string]string) (*SQLStorage, error) {
+	maxConn, maxIdleConn, logLevel int, connMaxLifetime time.Duration, location string, dsnParams map[string]string) (*SQLStorage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=%s&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		user, password, host, port, name, location)
-	db, err := gorm.Open(mysql.Open(connectString+AppendToMysqlDSNOpts(dsnParams)), &gorm.Config{AllowGlobalUpdate: true})
-
+	db, err := gorm.Open(mysql.Open(connectString+AppendToMysqlDSNOpts(dsnParams)), &gorm.Config{AllowGlobalUpdate: true, Logger: logger.Default.LogMode(logger.LogLevel(logLevel))})
 	if err != nil {
 		return nil, err
 	}

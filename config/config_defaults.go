@@ -173,6 +173,7 @@ const CGRATES_CFG_JSON = `
 	"opts": {
 		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
 		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
+		"sqlLogLevel": 3,	        // sql logger verbosity: 1=Silent, 2=Error, 3=Warn, 4=Info
 		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 		"mysqlDSNParams": {},           // DSN extra paramss
 		"mongoQueryTimeout": "10s",	// timeout for query when mongo is used

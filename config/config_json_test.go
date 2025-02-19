@@ -607,6 +607,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		Opts: &DBOptsJson{
 			SQLMaxOpenConns:    utils.IntPointer(100),
 			SQLMaxIdleConns:    utils.IntPointer(10),
+			SQLLogLevel:        utils.IntPointer(3),
 			MongoQueryTimeout:  utils.StringPointer("10s"),
 			MongoConnScheme:    utils.StringPointer("mongodb"),
 			SQLConnMaxLifetime: utils.StringPointer("0"),
