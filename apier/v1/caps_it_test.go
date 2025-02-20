@@ -319,12 +319,12 @@ func benchmarkCall(b *testing.B) {
 	}
 }
 
-// func BenchmarkcapsWithLimit(b *testing.B) {
-// 	benchmarkInit(b, "caps_queue_bench")
-// 	benchmarkCall(b)
-// }
+func BenchmarkCapsWithLimit(b *testing.B) {
+	benchmarkInit(b, "caps_queue_bench")
+	benchmarkCall(b)
+}
 
-// func BenchmarkcapsWithoutLimit(b *testing.B) {
-// 	benchmarkInit(b, "tutmysql")
-// 	benchmarkCall(b)
-// }
+func BenchmarkCapsWithoutLimit(b *testing.B) {
+	benchmarkInit(b, "tutmysql")
+	benchmarkCall(b)
+}

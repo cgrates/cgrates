@@ -910,7 +910,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*string:~*req.Account:1007"}, fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -918,14 +918,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*string:~*req.Account:1007"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*notstring:~*req.Account:1007"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -941,32 +941,32 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*prefix:~*req.Account:10"}, fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*prefix:~*req.Account:10"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*suffix:~*req.Account:07"}, fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*suffix:~*req.Account:07"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*notsuffix:~*req.Account:07"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -982,20 +982,20 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Tenant:~^cgr.*\\.org$"}, fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Tenant:~^cgr.*\\.org$"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*notrsr:~*req.Tenant:~^cgr.*\\.org$"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -1011,13 +1011,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*gte:~*req.Weight:20"}, fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*gte:~*req.Weight:10"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
@@ -1048,26 +1048,26 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	for key := range failEvent {
 		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:~*req." + key + ":"},
 			fEv); err != nil {
-			t.Errorf(err.Error())
+			t.Error(err)
 		} else if pass {
 			t.Errorf("For %s expecting: %+v, received: %+v", key, false, pass)
 		}
 		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:~*req." + key + ":"},
 			pEv); err != nil {
-			t.Errorf(err.Error())
+			t.Error(err)
 		} else if !pass {
 			t.Errorf("For %s expecting: %+v, received: %+v", key, true, pass)
 		}
 	}
 	if pass, err := filterS.Pass("cgrates.org", []string{"*exists:~*req.NewKey:"},
 		fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("For NewKey expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org", []string{"*notexists:~*req.NewKey:"},
 		fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("For NewKey expecting: %+v, received: %+v", true, pass)
 	}
@@ -1088,7 +1088,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*regex:~*req.Account:\\d{3}7"}, fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -1096,14 +1096,14 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*regex:~*req.Account:\\d{3}7"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*notregex:~*req.Account:\\d{3}7"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -1111,19 +1111,19 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv = utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.AccountField: "sip:12345678901234567@abcdefg"}}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*regex:~*req.Account:.{29,}"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*regex:~*req.Account:^.{28}$"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*gte:~*req.Account{*len}:29"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
@@ -1131,7 +1131,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv = utils.MapStorage{utils.MetaReq: utils.MapStorage{utils.AccountField: "[1,2,3]"}}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*eq:~*req.Account{*slice&*len}:3"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
@@ -1164,13 +1164,13 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv2.Set([]string{utils.MetaReq}, passEvent2)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{}, pEv1); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("itsyscom.com",
 		[]string{}, pEv2); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
@@ -1181,7 +1181,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Test:~^\\w{30,}"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -1192,7 +1192,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Test:~^\\w{30,}"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
@@ -1206,7 +1206,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Test.Test2:~^\\w{30,}"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -1219,7 +1219,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, ev)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Test.Test2:~^\\w{30,}"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
@@ -1240,7 +1240,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 			"*suffix:~*req.Subject:03",
 			"*rsr:~*req.Destination:1002"},
 		pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
@@ -1262,7 +1262,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent1)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*gt:~*req.MaxUsage:0s"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: false , received: %+v", pass)
 	}
@@ -1274,7 +1274,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent2)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*gt:~*req.MaxUsage:0s"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: false, received: %+v", pass)
 	}
@@ -1286,13 +1286,13 @@ func TestPassFilterMaxCost(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent3)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*gt:~*req.MaxUsage:0"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true, received: %+v", pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*gt:~*req.MaxUsage:0"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true, received: %+v", pass)
 	}
@@ -1314,7 +1314,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent1)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
@@ -1326,7 +1326,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent2)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
@@ -1338,7 +1338,7 @@ func TestPassFilterMissingField(t *testing.T) {
 	pEv.Set([]string{utils.MetaReq}, passEvent3)
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*rsr:~*req.Category:^$"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: false , received: %+v", pass)
 	}
@@ -1483,31 +1483,31 @@ func TestEventCostFilter(t *testing.T) {
 
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*string:~*ec.Charges[0].Increments[0].Accounting.Balance.Value:50"}, cgrDp); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*string:~*ec.Charges[0].Increments[0].Accounting.AccountID:cgrates.org:1001"}, cgrDp); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*string:~*ec.Charges[0].Rating.Rates[0].Value:0.1574"}, cgrDp); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*string:~*ec.Charges[0].Increments[0].Accounting.Balance.ID:MONETARY_POSTPAID"}, cgrDp); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*lt:~*ec.AccountSummary.BalanceSummaries.MONETARY_POSTPAID.Value:60"}, cgrDp); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
 	}
@@ -1581,7 +1581,7 @@ func TestPassPartial(t *testing.T) {
 	prefixes := []string{utils.DynamicDataPrefix + utils.MetaReq}
 	if pass, ruleList, err := filterS.LazyPass("cgrates.org",
 		[]string{"*string:~*req.Account:1007"}, fEv, prefixes); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	} else if len(ruleList) != 0 {
@@ -1590,7 +1590,7 @@ func TestPassPartial(t *testing.T) {
 	// in PartialPass we verify the filters matching the prefixes
 	if pass, ruleList, err := filterS.LazyPass("cgrates.org",
 		[]string{"*string:~*req.Account:1007", "*string:~*vars.Field1:Val1"}, fEv, prefixes); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	} else if len(ruleList) != 1 {
@@ -1598,7 +1598,7 @@ func TestPassPartial(t *testing.T) {
 	}
 	if pass, ruleList, err := filterS.LazyPass("cgrates.org",
 		[]string{"*string:~*req.Account:1010", "*string:~*vars.Field1:Val1"}, fEv, prefixes); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	} else if len(ruleList) != 0 {
@@ -2455,7 +2455,7 @@ func TestFilterLazyPassErr(t *testing.T) {
 	Cache.Set(utils.CacheFilters, utils.ConcatenatedKey("cgrates.org", fltrID), nil, []string{}, true, utils.NonTransactional)
 	if _, _, err := filterS.LazyPass("cgrates.org",
 		[]string{fltrID}, fEv, prefixes); err == nil || err.Error() != utils.ErrPrefixNotFound(fltrID).Error() {
-		t.Errorf(err.Error())
+		t.Error(err)
 	}
 }
 

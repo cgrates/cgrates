@@ -208,7 +208,7 @@ func testTrsITMigrateAndMove(t *testing.T) {
 		ID:                 v1trs.ID,
 		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
 		Weight:             v1trs.Weight,
-		ActivationInterval: &utils.ActivationInterval{v1trs.ExpirationDate, v1trs.ActivationDate},
+		ActivationInterval: &utils.ActivationInterval{ActivationTime: v1trs.ExpirationDate, ExpiryTime: v1trs.ActivationDate},
 		MinSleep:           v1trs.MinSleep,
 	}
 
