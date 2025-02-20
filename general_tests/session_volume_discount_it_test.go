@@ -411,7 +411,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 				},
 				Opts:  make(map[string]any),
 				Type:  "*abstract",
-				Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // this should be -0
+				Units: utils.SumDecimal(&utils.Decimal{Big: utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)), // this should be -0
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment: utils.NewDecimal(int64(time.Second), 0),
@@ -429,7 +429,7 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 				},
 				Opts:  make(map[string]any),
 				Type:  "*abstract",
-				Units: utils.SumDecimal(&utils.Decimal{utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)),
+				Units: utils.SumDecimal(&utils.Decimal{Big: utils.NewDecimal(0, 0).Neg(utils.NewDecimal(1, 0).Big)}, utils.NewDecimal(1, 0)),
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment: utils.NewDecimal(int64(time.Second), 0),
