@@ -1,5 +1,5 @@
 ---
-go_version: 1.23.2
+go_version: 1.24.0
 go_platform: linux
 go_arch: amd64
 go_tarball: go{{ go_version }}.{{ go_platform }}-{{ go_arch }}.tar.gz

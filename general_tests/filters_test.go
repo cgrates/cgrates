@@ -122,13 +122,13 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	pEv := utils.MapStorage{utils.MetaReq: passEvent}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*destinations:~*req.Destination:EU"}, fEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
 		[]string{"*destinations:~*req.Destination:EU_LANDLINE"}, pEv); err != nil {
-		t.Errorf(err.Error())
+		t.Error(err)
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}

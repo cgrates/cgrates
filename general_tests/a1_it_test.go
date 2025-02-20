@@ -167,7 +167,7 @@ func testA1itAddBalance1(t *testing.T) {
 	if err := a1rpc.Call(context.Background(), utils.APIerSv1AddBalance, argAdd, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Errorf(reply)
+		t.Errorf("unexpected reply returned: %s", reply)
 	}
 	argGet := &utils.AttrGetAccount{Tenant: argAdd.Tenant, Account: argAdd.Account}
 	var acnt *engine.Account
