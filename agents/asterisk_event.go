@@ -48,6 +48,29 @@ type SMAsteriskEvent struct { // Standalone struct so we can cache the fields wh
 	opts          map[string]any
 }
 
+// Clone returns a deep copy of SMAsteriskEvent.
+func (e *SMAsteriskEvent) Clone() *SMAsteriskEvent {
+	ariEvClone := make(map[string]any, len(e.ariEv))
+	for k, v := range e.ariEv {
+		ariEvClone[k] = v
+	}
+	cachedFieldsClone := make(map[string]string, len(e.cachedFields))
+	for k, v := range e.cachedFields {
+		cachedFieldsClone[k] = v
+	}
+	optsClone := make(map[string]any, len(e.opts))
+	for k, v := range e.opts {
+		optsClone[k] = v
+	}
+	return &SMAsteriskEvent{
+		ariEv:         ariEvClone,
+		asteriskIP:    e.asteriskIP,
+		asteriskAlias: e.asteriskAlias,
+		cachedFields:  cachedFieldsClone,
+		opts:          optsClone,
+	}
+}
+
 // parseStasisArgs will convert the args passed to Stasis into CGRateS attribute/value pairs understood by CGRateS and store them in cachedFields
 // args need to be in the form of []string{"key=value", "key2=value2"}
 func (smaEv *SMAsteriskEvent) parseStasisArgs() {

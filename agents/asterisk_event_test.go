@@ -663,3 +663,36 @@ func TestRestoreAndUpdateFieldsFail(t *testing.T) {
 	}
 
 }
+
+func TestSMAsteriskEventClone(t *testing.T) {
+	e := &SMAsteriskEvent{
+		ariEv: map[string]any{
+			"EV": "ID1",
+			"Id": 1001,
+		},
+		asteriskIP:    "192.168.1.1",
+		asteriskAlias: "pbx-1",
+		cachedFields: map[string]string{
+			"eventType": "ARIChannelStateChange",
+		},
+		opts: map[string]any{
+			"opt1": true,
+		},
+	}
+	clone := e.Clone()
+	if !reflect.DeepEqual(clone.ariEv, e.ariEv) {
+		t.Errorf("ariEv maps are not deeply equal")
+	}
+	clone.ariEv["EV"] = "modified"
+	clone.cachedFields["eventType"] = "modified"
+	clone.opts["opt1"] = false
+	if e.ariEv["EV"] == "modified" {
+		t.Errorf("Modifying clone affected original ariEv")
+	}
+	if e.cachedFields["eventType"] == "modified" {
+		t.Errorf("Modifying clone affected original cachedFields")
+	}
+	if e.opts["opt1"] == false {
+		t.Errorf("Modifying clone affected original opts")
+	}
+}
