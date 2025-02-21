@@ -356,6 +356,8 @@ func TestSessDynaprepaidTerminate(t *testing.T) {
 			args1, &rply1); err != nil {
 			t.Error(err)
 			return
+		} else if rply1 != utils.OK {
+			t.Errorf("Expected OK, received <%s>", rply1)
 		}
 	})
 
@@ -364,6 +366,564 @@ func TestSessDynaprepaidTerminate(t *testing.T) {
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
 			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
 			t.Error(err)
+		}
+		expAcc := &engine.Account{
+			ID: "cgrates.org:CreatedAccount",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:             "",
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+						Value:          9.99966,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+					},
+				},
+				utils.MetaSMS: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaSMS][0].Uuid,
+						Value:          500,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+					},
+				},
+			},
+			UpdateTime: acnt.UpdateTime,
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		}
+	})
+}
+
+func TestSessDynaprepaidProcessEventAuth(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	ng := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+	t.Run("GetAccount", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err == nil ||
+			err.Error() != utils.ErrNotFound.Error() {
+			t.Error(err)
+		}
+	})
+
+	t.Run("ProcessEventAuthSession", func(t *testing.T) {
+		args1 := &sessions.V1ProcessEventArgs{
+			Flags: []string{utils.MetaRALs + ":" + utils.MetaAuthorize},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.OriginID:     "sessDynaprepaid",
+					utils.OriginHost:   "192.168.1.1",
+					utils.Source:       "sessDynaprepaid",
+					utils.ToR:          utils.MetaData,
+					utils.RequestType:  utils.MetaDynaprepaid,
+					utils.AccountField: "CreatedAccount",
+					utils.Subject:      "NoSubject",
+					utils.Destination:  "+1234567",
+					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:        1024,
+				},
+			},
+		}
+		var rply1 sessions.V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			args1, &rply1); err != nil {
+			t.Error(err)
+			return
+		} else if !reflect.DeepEqual(rply1.MaxUsage, map[string]time.Duration{utils.MetaRaw: 1024 * time.Nanosecond}) {
+			t.Errorf("Expected <%+v>, received <%+v>", map[string]time.Duration{utils.MetaRaw: 1024 * time.Nanosecond}, rply1.MaxUsage)
+		}
+	})
+
+	t.Run("GetAccount2", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+			t.Error(err)
+		}
+		expAcc := &engine.Account{
+			ID: "cgrates.org:CreatedAccount",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:             "",
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+						Value:          9.99966,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+					},
+				},
+				utils.MetaSMS: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaSMS][0].Uuid,
+						Value:          500,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+					},
+				},
+			},
+			UpdateTime: acnt.UpdateTime,
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		}
+	})
+}
+
+func TestSessDynaprepaidProcessEventInit(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	ng := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+	t.Run("GetAccount", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err == nil ||
+			err.Error() != utils.ErrNotFound.Error() {
+			t.Error(err)
+		}
+	})
+
+	t.Run("ProcessEventInitSession", func(t *testing.T) {
+		args1 := &sessions.V1ProcessEventArgs{
+			Flags: []string{utils.MetaRALs + ":" + utils.MetaInitiate},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.OriginID:     "sessDynaprepaid",
+					utils.OriginHost:   "192.168.1.1",
+					utils.Source:       "sessDynaprepaid",
+					utils.ToR:          utils.MetaData,
+					utils.RequestType:  utils.MetaDynaprepaid,
+					utils.AccountField: "CreatedAccount",
+					utils.Subject:      "NoSubject",
+					utils.Destination:  "+1234567",
+					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:        1024,
+				},
+			},
+		}
+		var rply1 sessions.V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			args1, &rply1); err != nil {
+			t.Error(err)
+			return
+		} else if !reflect.DeepEqual(rply1.MaxUsage, map[string]time.Duration{utils.MetaRaw: 1024 * time.Nanosecond}) {
+			t.Errorf("Expected <%+v>, received <%+v>", map[string]time.Duration{utils.MetaRaw: 1024 * time.Nanosecond}, rply1.MaxUsage)
+		}
+	})
+
+	t.Run("GetAccount2", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+			t.Error(err)
+		}
+		expAcc := &engine.Account{
+			ID: "cgrates.org:CreatedAccount",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:             "",
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+						Value:          9.99966,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+					},
+				},
+				utils.MetaSMS: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaSMS][0].Uuid,
+						Value:          500,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+					},
+				},
+			},
+			UpdateTime: acnt.UpdateTime,
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		}
+	})
+}
+
+func TestSessDynaprepaidProcessEventUpdate(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	ng := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+	t.Run("GetAccount", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err == nil ||
+			err.Error() != utils.ErrNotFound.Error() {
+			t.Error(err)
+		}
+	})
+
+	t.Run("ProcessEventUpdateSession", func(t *testing.T) {
+		args1 := &sessions.V1ProcessEventArgs{
+			Flags: []string{utils.MetaRALs + ":" + utils.MetaUpdate},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.OriginID:     "sessDynaprepaid",
+					utils.OriginHost:   "192.168.1.1",
+					utils.Source:       "sessDynaprepaid",
+					utils.ToR:          utils.MetaData,
+					utils.RequestType:  utils.MetaDynaprepaid,
+					utils.AccountField: "CreatedAccount",
+					utils.Subject:      "NoSubject",
+					utils.Destination:  "+1234567",
+					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:        1024,
+				},
+			},
+		}
+		var rply1 sessions.V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			args1, &rply1); err != nil {
+			t.Error(err)
+			return
+		} else if !reflect.DeepEqual(rply1.MaxUsage, map[string]time.Duration{utils.MetaRaw: 1024 * time.Nanosecond}) {
+			t.Errorf("Expected <%+v>, received <%+v>", map[string]time.Duration{utils.MetaRaw: 1024 * time.Nanosecond}, rply1.MaxUsage)
+		}
+	})
+
+	t.Run("GetAccount2", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+			t.Error(err)
+		}
+		expAcc := &engine.Account{
+			ID: "cgrates.org:CreatedAccount",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:             "",
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+						Value:          9.99966,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+					},
+				},
+				utils.MetaSMS: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaSMS][0].Uuid,
+						Value:          500,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+					},
+				},
+			},
+			UpdateTime: acnt.UpdateTime,
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		}
+	})
+}
+
+func TestSessDynaprepaidProcessEventTerminate(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	ng := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+	t.Run("GetAccount", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err == nil ||
+			err.Error() != utils.ErrNotFound.Error() {
+			t.Error(err)
+		}
+	})
+
+	t.Run("ProcessEventTerminateSession", func(t *testing.T) {
+		args1 := &sessions.V1ProcessEventArgs{
+			Flags: []string{utils.MetaRALs + ":" + utils.MetaTerminate},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.OriginID:     "sessDynaprepaid",
+					utils.OriginHost:   "192.168.1.1",
+					utils.Source:       "sessDynaprepaid",
+					utils.ToR:          utils.MetaData,
+					utils.RequestType:  utils.MetaDynaprepaid,
+					utils.AccountField: "CreatedAccount",
+					utils.Subject:      "NoSubject",
+					utils.Destination:  "+1234567",
+					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:        1024,
+				},
+			},
+		}
+		var rply1 sessions.V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			args1, &rply1); err != nil {
+			t.Error(err)
+			return
+		} else if rply1.MaxUsage != nil {
+			t.Errorf("Expected <nil>, received <%+v>", rply1.MaxUsage)
+		}
+	})
+
+	t.Run("GetAccount2", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		expAcc := &engine.Account{
+			ID: "cgrates.org:CreatedAccount",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:             "",
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+						Value:          9.99966,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+					},
+				},
+				utils.MetaSMS: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaSMS][0].Uuid,
+						Value:          500,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+					},
+				},
+			},
+			UpdateTime: acnt.UpdateTime,
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		}
+	})
+}
+
+func TestSessDynaprepaidProcessEventCDRs(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	ng := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+	t.Run("GetAccount", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err == nil ||
+			err.Error() != utils.ErrNotFound.Error() {
+			t.Error(err)
+		}
+	})
+
+	t.Run("ProcessEventCDRsSession", func(t *testing.T) {
+		args1 := &sessions.V1ProcessEventArgs{
+			Flags: []string{utils.MetaCDRs},
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.OriginID:     "sessDynaprepaid",
+					utils.OriginHost:   "192.168.1.1",
+					utils.Source:       "sessDynaprepaid",
+					utils.ToR:          utils.MetaData,
+					utils.RequestType:  utils.MetaDynaprepaid,
+					utils.AccountField: "CreatedAccount",
+					utils.Subject:      "NoSubject",
+					utils.Destination:  "+1234567",
+					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:        1024,
+				},
+			},
+		}
+		var rply1 sessions.V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			args1, &rply1); err != nil {
+			t.Error(err)
+			return
+		} else if rply1.MaxUsage != nil {
+			t.Errorf("Expected <nil>, received <%+v>", rply1.MaxUsage)
+		}
+	})
+
+	t.Run("GetAccount2", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		expAcc := &engine.Account{
+			ID: "cgrates.org:CreatedAccount",
+			BalanceMap: map[string]engine.Balances{
+				utils.MetaMonetary: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaMonetary][0].Uuid,
+						ID:             "",
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+						Value:          9.99966,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+					},
+				},
+				utils.MetaSMS: {
+					&engine.Balance{
+						Uuid:           acnt.BalanceMap[utils.MetaSMS][0].Uuid,
+						Value:          500,
+						Weight:         10,
+						DestinationIDs: utils.StringMap{},
+						Categories:     utils.StringMap{},
+						SharedGroups:   utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+					},
+				},
+			},
+			UpdateTime: acnt.UpdateTime,
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		}
+	})
+}
+
+func TestSessDynaprepaidProcessMessage(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	ng := engine.TestEngine{
+		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "sess_dynaprepaid"),
+		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(50 * time.Millisecond)
+	t.Run("GetAccount", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err == nil ||
+			err.Error() != utils.ErrNotFound.Error() {
+			t.Error(err)
+		}
+	})
+
+	t.Run("ProcessMessageSession", func(t *testing.T) {
+		args1 := &sessions.V1ProcessMessageArgs{
+			Debit: true,
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.OriginID:     "sessDynaprepaid",
+					utils.OriginHost:   "192.168.1.1",
+					utils.Source:       "sessDynaprepaid",
+					utils.ToR:          utils.MetaData,
+					utils.RequestType:  utils.MetaDynaprepaid,
+					utils.AccountField: "CreatedAccount",
+					utils.Subject:      "NoSubject",
+					utils.Destination:  "+1234567",
+					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+					utils.Usage:        1024,
+				},
+			},
+		}
+		var rply1 sessions.V1ProcessMessageReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessMessage,
+			args1, &rply1); err != nil {
+			t.Error(err)
+			return
+		} else if *rply1.MaxUsage != 1024*time.Nanosecond {
+			t.Errorf("Expected <%+v>, received <%+v>", 1024*time.Nanosecond, *rply1.MaxUsage)
+		}
+	})
+
+	t.Run("GetAccount2", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+			t.Fatal(err)
 		}
 		expAcc := &engine.Account{
 			ID: "cgrates.org:CreatedAccount",

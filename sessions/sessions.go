@@ -3704,6 +3704,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 						dbtItvl, false, ralsOpts.Has(utils.MetaFD)); err != nil {
 						return err
 					}
+					if _, err = sS.updateSession(s, ev, opts, false); err != nil {
+						return err
+					}
 				} else {
 					s.Lock()
 					s.Chargeable = opts.GetBoolOrDefault(utils.OptsChargeable, true)
