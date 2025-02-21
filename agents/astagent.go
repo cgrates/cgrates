@@ -312,8 +312,23 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	cgrEvDisp, hasIt := sma.eventsCache[chID]
 	sma.evCacheMux.RUnlock()
 	if !hasIt {
-		if cgrReqType, _ := ev.ariEv["channel"].(map[string]any)["channelvars"].(map[string]any)[utils.CGRReqType].(string); cgrReqType == utils.EmptyString {
-			return // Not handled by us
+		channelVar, ok := ev.ariEv["channel"].(map[string]any)
+		if !ok {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> missing or invalid 'channel' field in event: %s",
+				utils.AsteriskAgent, utils.ToJSON(ev.ariEv)))
+			return
+		}
+
+		channelVars, ok := channelVar["channelvars"].(map[string]any)
+		if !ok {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> missing or invalid 'channelvars' field in 'channel': %s",
+				utils.AsteriskAgent, utils.ToJSON(channelVar)))
+			return
+		}
+		if cgrReqType := utils.IfaceAsString(channelVars[utils.CGRReqType]); cgrReqType == "" {
+			return
 		}
 		// convert received event to CGREvent
 		var err error
