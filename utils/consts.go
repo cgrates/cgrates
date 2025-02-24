@@ -1825,6 +1825,7 @@ const (
 	HTTPAgent       = "HTTPAgent"
 	SIPAgent        = "SIPAgent"
 	JanusAgent      = "JanusAgent"
+	PrometheusAgent = "PrometheusAgent"
 )
 
 // Google_API
@@ -2109,6 +2110,11 @@ const (
 	ForcedDisconnectCfg  = "forced_disconnect"
 	TemplatesCfg         = "templates"
 	RequestProcessorsCfg = "request_processors"
+
+	// PrometheusAgentCfg
+	CollectGoMetricsCfg      = "collect_go_metrics"
+	CollectProcessMetricsCfg = "collect_process_metrics"
+	StatQueueIDsCfg          = "stat_queue_ids"
 
 	// RequestProcessor
 	RequestFieldsCfg = "request_fields"

@@ -1020,6 +1020,16 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"prometheus_agent": {
+	"enabled": false,			// enables the prometheus agent: <true|false>
+	"path": "/prometheus",			// endpoint for prometheus metrics
+	"collect_go_metrics": false, 		// include Go runtime metrics (memory, GC, goroutines)
+	"collect_process_metrics": false, 	// include process metrics (CPU, file descriptors)
+	// "stats_conns": [],			// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	// "stat_queue_ids": []			// StatQueue IDs to collect metrics from <[tenant]:ID>
+},
+
+
 "attributes": {
 	"enabled": false,				// starts attribute service: <true|false>
 	"stats_conns": [],				// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>

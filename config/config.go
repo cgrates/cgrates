@@ -186,8 +186,9 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ClientDictionaries: make(map[string]string),
 			ClientSecrets:      make(map[string]string),
 		},
-		dnsAgentCfg:   new(DNSAgentCfg),
-		janusAgentCfg: new(JanusAgentCfg),
+		dnsAgentCfg:        new(DNSAgentCfg),
+		janusAgentCfg:      new(JanusAgentCfg),
+		prometheusAgentCfg: new(PrometheusAgentCfg),
 		attributeSCfg: &AttributeSCfg{Opts: &AttributesOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProcessRuns:          []*DynamicIntOpt{{value: AttributesProcessRunsDftOpt}},
@@ -334,51 +335,52 @@ type CGRConfig struct {
 	rpcConns     RPCConns
 	templates    FCTemplates
 
-	generalCfg       *GeneralCfg       // General config
-	loggerCfg        *LoggerCfg        // Logger config
-	dataDbCfg        *DataDbCfg        // Database config
-	storDbCfg        *StorDbCfg        // StorDb config
-	tlsCfg           *TLSCfg           // TLS config
-	cacheCfg         *CacheCfg         // Cache config
-	listenCfg        *ListenCfg        // Listen config
-	httpCfg          *HTTPCfg          // HTTP config
-	filterSCfg       *FilterSCfg       // FilterS config
-	cdrsCfg          *CdrsCfg          // Cdrs config
-	sessionSCfg      *SessionSCfg      // SessionS config
-	fsAgentCfg       *FsAgentCfg       // FreeSWITCHAgent config
-	kamAgentCfg      *KamAgentCfg      // KamailioAgent config
-	asteriskAgentCfg *AsteriskAgentCfg // AsteriskAgent config
-	diameterAgentCfg *DiameterAgentCfg // DiameterAgent config
-	radiusAgentCfg   *RadiusAgentCfg   // RadiusAgent config
-	dnsAgentCfg      *DNSAgentCfg      // DNSAgent config
-	janusAgentCfg    *JanusAgentCfg    // JanusAgent config
-	attributeSCfg    *AttributeSCfg    // AttributeS config
-	chargerSCfg      *ChargerSCfg      // ChargerS config
-	resourceSCfg     *ResourceSConfig  // ResourceS config
-	statsCfg         *StatSCfg         // StatS config
-	thresholdSCfg    *ThresholdSCfg    // ThresholdS config
-	routeSCfg        *RouteSCfg        // RouteS config
-	trendSCfg        *TrendSCfg        // TrendS config
-	rankingSCfg      *RankingSCfg      // RankingS config
-	sureTaxCfg       *SureTaxCfg       // SureTax config
-	registrarCCfg    *RegistrarCCfgs   // RegistrarC config
-	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
-	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
-	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
-	admS             *AdminSCfg        // APIer config
-	ersCfg           *ERsCfg           // EventReader config
-	eesCfg           *EEsCfg           // EventExporter config
-	efsCfg           *EFsCfg           // EventFailover config
-	rateSCfg         *RateSCfg         // RateS config
-	actionSCfg       *ActionSCfg       // ActionS config
-	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
-	configSCfg       *ConfigSCfg       // ConfigS config
-	apiBanCfg        *APIBanCfg        // APIBan config
-	sentryPeerCfg    *SentryPeerCfg    //SentryPeer config
-	coreSCfg         *CoreSCfg         // CoreS config
-	accountSCfg      *AccountSCfg      // AccountS config
-	tpeSCfg          *TpeSCfg          // TpeS config
-	configDBCfg      *ConfigDBCfg      // ConfigDB conifg
+	generalCfg         *GeneralCfg         // General config
+	loggerCfg          *LoggerCfg          // Logger config
+	dataDbCfg          *DataDbCfg          // Database config
+	storDbCfg          *StorDbCfg          // StorDb config
+	tlsCfg             *TLSCfg             // TLS config
+	cacheCfg           *CacheCfg           // Cache config
+	listenCfg          *ListenCfg          // Listen config
+	httpCfg            *HTTPCfg            // HTTP config
+	filterSCfg         *FilterSCfg         // FilterS config
+	cdrsCfg            *CdrsCfg            // Cdrs config
+	sessionSCfg        *SessionSCfg        // SessionS config
+	fsAgentCfg         *FsAgentCfg         // FreeSWITCHAgent config
+	kamAgentCfg        *KamAgentCfg        // KamailioAgent config
+	asteriskAgentCfg   *AsteriskAgentCfg   // AsteriskAgent config
+	diameterAgentCfg   *DiameterAgentCfg   // DiameterAgent config
+	radiusAgentCfg     *RadiusAgentCfg     // RadiusAgent config
+	dnsAgentCfg        *DNSAgentCfg        // DNSAgent config
+	prometheusAgentCfg *PrometheusAgentCfg // PrometheusAgent config
+	janusAgentCfg      *JanusAgentCfg      // JanusAgent config
+	attributeSCfg      *AttributeSCfg      // AttributeS config
+	chargerSCfg        *ChargerSCfg        // ChargerS config
+	resourceSCfg       *ResourceSConfig    // ResourceS config
+	statsCfg           *StatSCfg           // StatS config
+	thresholdSCfg      *ThresholdSCfg      // ThresholdS config
+	routeSCfg          *RouteSCfg          // RouteS config
+	trendSCfg          *TrendSCfg          // TrendS config
+	rankingSCfg        *RankingSCfg        // RankingS config
+	sureTaxCfg         *SureTaxCfg         // SureTax config
+	registrarCCfg      *RegistrarCCfgs     // RegistrarC config
+	loaderCgrCfg       *LoaderCgrCfg       // LoaderCgr config
+	migratorCgrCfg     *MigratorCgrCfg     // MigratorCgr config
+	analyzerSCfg       *AnalyzerSCfg       // AnalyzerS config
+	admS               *AdminSCfg          // APIer config
+	ersCfg             *ERsCfg             // EventReader config
+	eesCfg             *EEsCfg             // EventExporter config
+	efsCfg             *EFsCfg             // EventFailover config
+	rateSCfg           *RateSCfg           // RateS config
+	actionSCfg         *ActionSCfg         // ActionS config
+	sipAgentCfg        *SIPAgentCfg        // SIPAgent config
+	configSCfg         *ConfigSCfg         // ConfigS config
+	apiBanCfg          *APIBanCfg          // APIBan config
+	sentryPeerCfg      *SentryPeerCfg      //SentryPeer config
+	coreSCfg           *CoreSCfg           // CoreS config
+	accountSCfg        *AccountSCfg        // AccountS config
+	tpeSCfg            *TpeSCfg            // TpeS config
+	configDBCfg        *ConfigDBCfg        // ConfigDB conifg
 
 	cacheDP    utils.MapStorage
 	cacheDPMux sync.RWMutex
@@ -448,6 +450,13 @@ func (cfg *CGRConfig) DNSAgentCfg() *DNSAgentCfg {
 	cfg.lks[DNSAgentJSON].Lock()
 	defer cfg.lks[DNSAgentJSON].Unlock()
 	return cfg.dnsAgentCfg
+}
+
+// PrometheusAgentCfg returns the config for Prometheus Agent
+func (cfg *CGRConfig) PrometheusAgentCfg() *PrometheusAgentCfg {
+	cfg.lks[PrometheusAgentJSON].Lock()
+	defer cfg.lks[PrometheusAgentJSON].Unlock()
+	return cfg.prometheusAgentCfg
 }
 
 // AttributeSCfg returns the config for AttributeS
@@ -1026,57 +1035,58 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		DataFolderPath: cfg.DataFolderPath,
 		ConfigPath:     cfg.ConfigPath,
 
-		loaderCfg:        *cfg.loaderCfg.Clone(),
-		httpAgentCfg:     *cfg.httpAgentCfg.Clone(),
-		rpcConns:         cfg.rpcConns.Clone(),
-		templates:        cfg.templates.Clone(),
-		generalCfg:       cfg.generalCfg.Clone(),
-		loggerCfg:        cfg.loggerCfg.Clone(),
-		dataDbCfg:        cfg.dataDbCfg.Clone(),
-		storDbCfg:        cfg.storDbCfg.Clone(),
-		tlsCfg:           cfg.tlsCfg.Clone(),
-		cacheCfg:         cfg.cacheCfg.Clone(),
-		listenCfg:        cfg.listenCfg.Clone(),
-		httpCfg:          cfg.httpCfg.Clone(),
-		filterSCfg:       cfg.filterSCfg.Clone(),
-		cdrsCfg:          cfg.cdrsCfg.Clone(),
-		sessionSCfg:      cfg.sessionSCfg.Clone(),
-		fsAgentCfg:       cfg.fsAgentCfg.Clone(),
-		kamAgentCfg:      cfg.kamAgentCfg.Clone(),
-		janusAgentCfg:    cfg.janusAgentCfg.Clone(),
-		asteriskAgentCfg: cfg.asteriskAgentCfg.Clone(),
-		diameterAgentCfg: cfg.diameterAgentCfg.Clone(),
-		radiusAgentCfg:   cfg.radiusAgentCfg.Clone(),
-		dnsAgentCfg:      cfg.dnsAgentCfg.Clone(),
-		attributeSCfg:    cfg.attributeSCfg.Clone(),
-		chargerSCfg:      cfg.chargerSCfg.Clone(),
-		resourceSCfg:     cfg.resourceSCfg.Clone(),
-		statsCfg:         cfg.statsCfg.Clone(),
-		thresholdSCfg:    cfg.thresholdSCfg.Clone(),
-		trendSCfg:        cfg.trendSCfg.Clone(),
-		rankingSCfg:      cfg.rankingSCfg.Clone(),
-		routeSCfg:        cfg.routeSCfg.Clone(),
-		sureTaxCfg:       cfg.sureTaxCfg.Clone(),
-		registrarCCfg:    cfg.registrarCCfg.Clone(),
-		loaderCgrCfg:     cfg.loaderCgrCfg.Clone(),
-		migratorCgrCfg:   cfg.migratorCgrCfg.Clone(),
-		analyzerSCfg:     cfg.analyzerSCfg.Clone(),
-		admS:             cfg.admS.Clone(),
-		ersCfg:           cfg.ersCfg.Clone(),
-		eesCfg:           cfg.eesCfg.Clone(),
-		efsCfg:           cfg.efsCfg.Clone(),
-		rateSCfg:         cfg.rateSCfg.Clone(),
-		sipAgentCfg:      cfg.sipAgentCfg.Clone(),
-		configSCfg:       cfg.configSCfg.Clone(),
-		apiBanCfg:        cfg.apiBanCfg.Clone(),
-		sentryPeerCfg:    cfg.sentryPeerCfg.Clone(),
-		coreSCfg:         cfg.coreSCfg.Clone(),
-		actionSCfg:       cfg.actionSCfg.Clone(),
-		accountSCfg:      cfg.accountSCfg.Clone(),
-		tpeSCfg:          cfg.tpeSCfg.Clone(),
-		configDBCfg:      cfg.configDBCfg.Clone(),
-		rldCh:            make(chan string),
-		cacheDP:          make(utils.MapStorage),
+		loaderCfg:          *cfg.loaderCfg.Clone(),
+		httpAgentCfg:       *cfg.httpAgentCfg.Clone(),
+		rpcConns:           cfg.rpcConns.Clone(),
+		templates:          cfg.templates.Clone(),
+		generalCfg:         cfg.generalCfg.Clone(),
+		loggerCfg:          cfg.loggerCfg.Clone(),
+		dataDbCfg:          cfg.dataDbCfg.Clone(),
+		storDbCfg:          cfg.storDbCfg.Clone(),
+		tlsCfg:             cfg.tlsCfg.Clone(),
+		cacheCfg:           cfg.cacheCfg.Clone(),
+		listenCfg:          cfg.listenCfg.Clone(),
+		httpCfg:            cfg.httpCfg.Clone(),
+		filterSCfg:         cfg.filterSCfg.Clone(),
+		cdrsCfg:            cfg.cdrsCfg.Clone(),
+		sessionSCfg:        cfg.sessionSCfg.Clone(),
+		fsAgentCfg:         cfg.fsAgentCfg.Clone(),
+		kamAgentCfg:        cfg.kamAgentCfg.Clone(),
+		janusAgentCfg:      cfg.janusAgentCfg.Clone(),
+		asteriskAgentCfg:   cfg.asteriskAgentCfg.Clone(),
+		diameterAgentCfg:   cfg.diameterAgentCfg.Clone(),
+		radiusAgentCfg:     cfg.radiusAgentCfg.Clone(),
+		dnsAgentCfg:        cfg.dnsAgentCfg.Clone(),
+		prometheusAgentCfg: cfg.prometheusAgentCfg.Clone(),
+		attributeSCfg:      cfg.attributeSCfg.Clone(),
+		chargerSCfg:        cfg.chargerSCfg.Clone(),
+		resourceSCfg:       cfg.resourceSCfg.Clone(),
+		statsCfg:           cfg.statsCfg.Clone(),
+		thresholdSCfg:      cfg.thresholdSCfg.Clone(),
+		trendSCfg:          cfg.trendSCfg.Clone(),
+		rankingSCfg:        cfg.rankingSCfg.Clone(),
+		routeSCfg:          cfg.routeSCfg.Clone(),
+		sureTaxCfg:         cfg.sureTaxCfg.Clone(),
+		registrarCCfg:      cfg.registrarCCfg.Clone(),
+		loaderCgrCfg:       cfg.loaderCgrCfg.Clone(),
+		migratorCgrCfg:     cfg.migratorCgrCfg.Clone(),
+		analyzerSCfg:       cfg.analyzerSCfg.Clone(),
+		admS:               cfg.admS.Clone(),
+		ersCfg:             cfg.ersCfg.Clone(),
+		eesCfg:             cfg.eesCfg.Clone(),
+		efsCfg:             cfg.efsCfg.Clone(),
+		rateSCfg:           cfg.rateSCfg.Clone(),
+		sipAgentCfg:        cfg.sipAgentCfg.Clone(),
+		configSCfg:         cfg.configSCfg.Clone(),
+		apiBanCfg:          cfg.apiBanCfg.Clone(),
+		sentryPeerCfg:      cfg.sentryPeerCfg.Clone(),
+		coreSCfg:           cfg.coreSCfg.Clone(),
+		actionSCfg:         cfg.actionSCfg.Clone(),
+		accountSCfg:        cfg.accountSCfg.Clone(),
+		tpeSCfg:            cfg.tpeSCfg.Clone(),
+		configDBCfg:        cfg.configDBCfg.Clone(),
+		rldCh:              make(chan string),
+		cacheDP:            make(utils.MapStorage),
 	}
 	cln.sections = newSections(cln)
 	for _, sec := range cfg.sections[len(cln.sections):] {
