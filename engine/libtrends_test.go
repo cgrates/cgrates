@@ -760,7 +760,7 @@ func TestTrendProfileSet(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tp.Set(tt.path, tt.val, false, "")
+			err := tp.Set(tt.path, tt.val, false)
 
 			if tt.hasError && err == nil {
 				t.Errorf("Expected error for path %v, but got none", tt.path)

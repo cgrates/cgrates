@@ -33,6 +33,7 @@ import (
 type StorDBOpts struct {
 	SQLMaxOpenConns    int
 	SQLMaxIdleConns    int
+	SQLLogLevel        int
 	SQLConnMaxLifetime time.Duration
 	SQLDSNParams       map[string]string
 	PgSSLMode          string
@@ -80,6 +81,9 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	}
 	if jsnCfg.SQLMaxIdleConns != nil {
 		dbOpts.SQLMaxIdleConns = *jsnCfg.SQLMaxIdleConns
+	}
+	if jsnCfg.SQLLogLevel != nil {
+		dbOpts.SQLLogLevel = *jsnCfg.SQLLogLevel
 	}
 	if jsnCfg.SQLConnMaxLifetime != nil {
 		if dbOpts.SQLConnMaxLifetime, err = utils.ParseDurationWithNanosecs(*jsnCfg.SQLConnMaxLifetime); err != nil {
@@ -199,6 +203,7 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 	return &StorDBOpts{
 		SQLMaxOpenConns:    dbOpts.SQLMaxOpenConns,
 		SQLMaxIdleConns:    dbOpts.SQLMaxIdleConns,
+		SQLLogLevel:        dbOpts.SQLLogLevel,
 		SQLConnMaxLifetime: dbOpts.SQLConnMaxLifetime,
 		SQLDSNParams:       dbOpts.SQLDSNParams,
 		PgSSLMode:          dbOpts.PgSSLMode,
@@ -249,6 +254,7 @@ func (dbcfg StorDbCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.SQLMaxOpenConnsCfg:   dbcfg.Opts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:   dbcfg.Opts.SQLMaxIdleConns,
+		utils.SQLLogLevelCfg:       dbcfg.Opts.SQLLogLevel,
 		utils.SQLConnMaxLifetime:   dbcfg.Opts.SQLConnMaxLifetime.String(),
 		utils.MYSQLDSNParams:       dbcfg.Opts.SQLDSNParams,
 		utils.PgSSLModeCfg:         dbcfg.Opts.PgSSLMode,
@@ -306,6 +312,9 @@ func diffStorDBOptsJsonCfg(d *DBOptsJson, v1, v2 *StorDBOpts) *DBOptsJson {
 	}
 	if v1.SQLMaxIdleConns != v2.SQLMaxIdleConns {
 		d.SQLMaxIdleConns = utils.IntPointer(v2.SQLMaxIdleConns)
+	}
+	if v1.SQLLogLevel != v2.SQLLogLevel {
+		d.SQLLogLevel = utils.IntPointer(v2.SQLLogLevel)
 	}
 	if v1.SQLConnMaxLifetime != v2.SQLConnMaxLifetime {
 		d.SQLConnMaxLifetime = utils.StringPointer(v2.SQLConnMaxLifetime.String())

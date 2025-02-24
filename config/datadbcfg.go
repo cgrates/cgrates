@@ -511,6 +511,7 @@ type DBOptsJson struct {
 	MongoConnScheme         *string           `json:"mongoConnScheme"`
 	SQLMaxOpenConns         *int              `json:"sqlMaxOpenConns"`
 	SQLMaxIdleConns         *int              `json:"sqlMaxIdleConns"`
+	SQLLogLevel             *int              `json:"sqlLogLevel"`
 	SQLConnMaxLifetime      *string           `json:"sqlConnMaxLifetime"`
 	MYSQLDSNParams          map[string]string `json:"mysqlDSNParams"`
 	PgSSLMode               *string           `json:"pgSSLMode"`

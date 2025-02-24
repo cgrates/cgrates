@@ -524,7 +524,7 @@ func TestRankingProfileSet(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rp := &RankingProfile{}
-			err := rp.Set(tt.path, tt.val, false, "")
+			err := rp.Set(tt.path, tt.val, false)
 
 			if err != tt.expectedErr {
 				t.Errorf("Test %s failed: expected error %v, got %v", tt.name, tt.expectedErr, err)
