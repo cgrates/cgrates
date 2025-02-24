@@ -71,10 +71,10 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 	case utils.MetaPostgres:
 		db, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
 			opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword, opts.PgSSLCertMode, opts.PgSSLRootCert,
-			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLConnMaxLifetime)
+			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime)
 	case utils.MetaMySQL:
 		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
-			opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.SQLDSNParams)
+			opts.SQLLogLevel, opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.SQLDSNParams)
 	case utils.MetaInternal:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, itmsCfg)
 	default:

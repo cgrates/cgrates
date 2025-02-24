@@ -1887,6 +1887,7 @@ const (
 	TypeCfg                   = "type"
 	SQLMaxOpenConnsCfg        = "sqlMaxOpenConns"
 	SQLMaxIdleConnsCfg        = "sqlMaxIdleConns"
+	SQLLogLevelCfg            = "sqlLogLevel"
 	SQLConnMaxLifetimeCfg     = "sqlConnMaxLifetime"
 	StringIndexedFieldsCfg    = "string_indexed_fields"
 	PrefixIndexedFieldsCfg    = "prefix_indexed_fields"
