@@ -49,7 +49,7 @@ func watchDir(dirPath string, f func(itmPath, itmID string) error,
 			case ev := <-watcher.Events:
 				if ev.Op&fsnotify.Create == fsnotify.Create {
 					go func() { //Enable async processing here so we can simultaneously process files
-						if err = f(filepath.Dir(ev.Name), filepath.Base(ev.Name)); err != nil {
+						if err := f(filepath.Dir(ev.Name), filepath.Base(ev.Name)); err != nil {
 							utils.Logger.Warning(fmt.Sprintf("<%s> processing path <%s>, error: <%s>",
 								sysID, ev.Name, err.Error()))
 						}
