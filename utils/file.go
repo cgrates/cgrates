@@ -45,28 +45,30 @@ func watchDir(dirPath string, f func(itmID string) error, sysID string,
 	return
 }
 
+// watch monitors a directory for file creation events and processes them asynchronously.
 func watch(dirPath, sysID string, f func(itmID string) error,
-	watcher *fsnotify.Watcher, stopWatching chan struct{}) (err error) {
+	watcher *fsnotify.Watcher, stopWatching chan struct{}) error {
 	defer watcher.Close()
 	for {
 		select {
 		case <-stopWatching:
 			Logger.Info(fmt.Sprintf("<%s> stop watching path <%s>", sysID, dirPath))
-			return
+			return nil
 		case ev := <-watcher.Events:
 			if ev.Op&fsnotify.Create == fsnotify.Create {
-				go func() { //Enable async processing here so we can simultaneously process files
-					if err = f(filepath.Base(ev.Name)); err != nil {
+				// Process files asynchronously to prevent blocking the watcher.
+				go func() {
+					if err := f(filepath.Base(ev.Name)); err != nil {
 						Logger.Warning(fmt.Sprintf("<%s> processing path <%s>, error: <%s>",
 							sysID, ev.Name, err.Error()))
 					}
 				}()
 			}
-		case err = <-watcher.Errors:
-			Logger.Err(
-				fmt.Sprintf("<%s> watching path <%s>, error: <%s>, exiting!",
-					sysID, dirPath, err.Error()))
-			return
+		case err := <-watcher.Errors:
+			Logger.Err(fmt.Sprintf(
+				"<%s> watching path <%s>, error: <%s>, exiting!",
+				sysID, dirPath, err.Error()))
+			return err
 		}
 	}
 }
