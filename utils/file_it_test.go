@@ -22,9 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/fsnotify/fsnotify"
@@ -63,6 +66,14 @@ func testWatchWatcherError(t *testing.T) {
 }
 
 func testWatchWatcherEvents(t *testing.T) {
+	Logger.SetLogLevel(4)
+	Logger.SetSyslog(nil)
+	buf := new(bytes.Buffer)
+	log.SetOutput(buf)
+	t.Cleanup(func() {
+		Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	})
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		t.Fatal(err)
@@ -82,9 +93,12 @@ func testWatchWatcherEvents(t *testing.T) {
 		}
 		return fmt.Errorf("Can't match path")
 	}
-	expected := "Can't match path"
-	if err := watch(EmptyString, EmptyString, f, watcher, stopWatching); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
+	if err := watch(EmptyString, EmptyString, f, watcher, stopWatching); err != nil {
+		t.Error(err)
+	}
+	expLog := `[WARNING] <> processing path </tmp/file.txt>, error: <Can't match path>`
+	if !strings.Contains(buf.String(), expLog) {
+		t.Errorf("expected %q to be present, received:\n%s", expLog, buf.String())
 	}
 }
 
