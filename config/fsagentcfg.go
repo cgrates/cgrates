@@ -104,6 +104,7 @@ type FsAgentCfg struct {
 	MaxWaitConnection      time.Duration
 	ActiveSessionDelimiter string
 	EventSocketConns       []*FsConnCfg
+	RequestProcessors      []*RequestProcessor
 }
 
 // loadFreeswitchAgentCfg loads the FreeswitchAgent section of the configuration
@@ -162,6 +163,7 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 			fscfg.EventSocketConns[idx].loadFromJSONCfg(jsnConnCfg)
 		}
 	}
+	fscfg.RequestProcessors, err = appendRequestProcessors(fscfg.RequestProcessors, jsnCfg.Request_processors)
 	return nil
 }
 
@@ -180,6 +182,11 @@ func (fscfg FsAgentCfg) AsMapInterface() any {
 	if fscfg.SessionSConns != nil {
 		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(fscfg.SessionSConns)
 	}
+	requestProcessors := make([]map[string]any, len(fscfg.RequestProcessors))
+	for i, item := range fscfg.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
+	}
+	mp[utils.RequestProcessorsCfg] = requestProcessors
 	if fscfg.ExtraFields != nil {
 		mp[utils.ExtraFieldsCfg] = fscfg.ExtraFields.AsStringSlice()
 	}
@@ -220,6 +227,12 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 			cln.EventSocketConns[i] = req.Clone()
 		}
 	}
+	if fscfg.RequestProcessors != nil {
+		cln.RequestProcessors = make([]*RequestProcessor, len(fscfg.RequestProcessors))
+		for i, req := range fscfg.RequestProcessors {
+			cln.RequestProcessors[i] = req.Clone()
+		}
+	}
 	return
 }
 
@@ -236,6 +249,7 @@ type FreeswitchAgentJsonCfg struct {
 	MaxWaitConnection      *string           `json:"max_wait_connection"`
 	ActiveSessionDelimiter *string           `json:"active_session_delimiter"`
 	EventSocketConns       *[]*FsConnJsonCfg `json:"event_socket_conns"`
+	Request_processors     *[]*ReqProcessorJsnCfg
 }
 
 // Represents one connection instance towards FreeSWITCH

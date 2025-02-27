@@ -210,3 +210,26 @@ func (me MapEvent) GetBoolOrDefault(fldName string, dflt bool) (out bool) {
 	}
 	return out
 }
+
+type MapStringDP map[string]string // map storage for string values
+func (me MapStringDP) String() string {
+	return utils.ToJSON(me)
+}
+
+func (me MapStringDP) FieldAsInterface(fldPath []string) (any, error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	fldIface, has := me[fldPath[0]]
+	if !has {
+		return nil, utils.ErrNotFound
+	}
+	return fldIface, nil
+}
+
+func (me MapStringDP) FieldAsString(fldPath []string) (string, error) {
+	if len(fldPath) != 1 {
+		return "", utils.ErrNotFound
+	}
+	return fldPath[0], nil
+}

@@ -2071,6 +2071,117 @@ func TestDfRateSJsonCfg(t *testing.T) {
 
 func TestDfTemplateSJsonCfg(t *testing.T) {
 	eCfg := FcTemplatesJsonCfg{
+		"*fsa": {
+			{
+				Tag:   utils.StringPointer("ToR"),
+				Path:  utils.StringPointer("*cgreq.ToR"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer(utils.MetaVoice)},
+			{
+				Tag:   utils.StringPointer("PDD"),
+				Path:  utils.StringPointer("*cgreq.PDD"),
+				Type:  utils.StringPointer(utils.MetaComposed),
+				Value: utils.StringPointer("~*req.variable_progress_mediamsec;ms")},
+			{
+				Tag:   utils.StringPointer("ACD"),
+				Path:  utils.StringPointer("*cgreq.ACD"),
+				Type:  utils.StringPointer(utils.MetaComposed),
+				Value: utils.StringPointer("~*req.variable_cdr_acd;s")},
+			{
+				Tag:   utils.StringPointer("OriginID"),
+				Path:  utils.StringPointer("*cgreq.OriginID"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Unique-ID")},
+			{
+				Tag:   utils.StringPointer("*originID"),
+				Path:  utils.StringPointer("*opts.*originID"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Unique-ID")},
+			{
+				Tag:   utils.StringPointer("OriginHost"),
+				Path:  utils.StringPointer("*cgreq.OriginHost"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.variable_cgr_originhost")},
+			{
+				Tag:   utils.StringPointer("Account"),
+				Path:  utils.StringPointer("*cgreq.Account"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Caller-Username")},
+			{
+				Tag:   utils.StringPointer("Source"),
+				Path:  utils.StringPointer("*cgreq.Source"),
+				Type:  utils.StringPointer(utils.MetaComposed),
+				Value: utils.StringPointer("FS_;~*req.Event-Name")},
+			{
+				Tag:     utils.StringPointer("RequestType"),
+				Path:    utils.StringPointer("*cgreq.RequestType"),
+				Type:    utils.StringPointer(utils.MetaConstant),
+				Filters: &[]string{"*string:*req.variable_process_cdr:false"},
+				Value:   utils.StringPointer("*none")},
+			{
+				Tag:     utils.StringPointer("RequestType"),
+				Path:    utils.StringPointer("*cgreq.RequestType"),
+				Type:    utils.StringPointer(utils.MetaConstant),
+				Filters: &[]string{"*string:*req.Caller-Dialplan:inline"},
+				Value:   utils.StringPointer("*none")},
+			{
+				Tag:     utils.StringPointer("RequestType"),
+				Path:    utils.StringPointer("*cgreq.RequestType"),
+				Type:    utils.StringPointer(utils.MetaConstant),
+				Filters: &[]string{"*exists:*cgreq.RequestType:"},
+				Value:   utils.StringPointer("*prepaid")},
+			{
+				Tag:   utils.StringPointer("Tenant"),
+				Path:  utils.StringPointer("*cgreq.Tenant"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("cgrates.org")},
+			{
+				Tag:   utils.StringPointer("Category"),
+				Path:  utils.StringPointer("*cgreq.Category"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("call")},
+			{
+				Tag:   utils.StringPointer("Subject"),
+				Path:  utils.StringPointer("*cgreq.Subject"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Caller-Username")},
+			{
+				Tag:   utils.StringPointer("Destination"),
+				Path:  utils.StringPointer("*cgreq.Destination"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Caller-Destination-Number")},
+			{
+				Tag:   utils.StringPointer("SetupTime"),
+				Path:  utils.StringPointer("*cgreq.SetupTime"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Caller-Channel-Created-Time")},
+			{
+				Tag:   utils.StringPointer("AnswerTime"),
+				Path:  utils.StringPointer("*cgreq.AnswerTime"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Caller-Channel-Answered-Time")},
+			{
+				Tag:   utils.StringPointer("Usage"),
+				Path:  utils.StringPointer("*cgreq.Usage"),
+				Type:  utils.StringPointer(utils.MetaComposed),
+				Value: utils.StringPointer("~*req.variable_billsec;s")},
+			{
+				Tag:   utils.StringPointer("Route"),
+				Path:  utils.StringPointer("*cgreq.Route"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.variable_cgr_route")},
+			{
+				Tag:   utils.StringPointer("Cost"),
+				Path:  utils.StringPointer("*cgreq.Cost"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("-1.0")},
+			{
+				Tag:     utils.StringPointer("DisconnectCause"),
+				Path:    utils.StringPointer("*cgreq.DisconnectCause"),
+				Type:    utils.StringPointer(utils.MetaVariable),
+				Filters: &[]string{"*notempty:*req.Hangup-Cause:"},
+				Value:   utils.StringPointer("~*req.Hangup-Cause")},
+		},
 		"*errSip": {
 			{
 				Tag:       utils.StringPointer("Request"),

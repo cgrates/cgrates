@@ -67,7 +67,20 @@
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 	"sessions_conns": ["*birpc_internal"],
-	"create_cdr": true
+	"create_cdr": true,
+	"request_processors": [
+		{
+			"id": "FSEvent",
+			"request_fields":[
+				{
+					"tag": "BaseTmpl",
+					"type": "*template",
+					"value": "*fsa"
+				}
+	
+			]
+		}
+	]
 },
 
 
