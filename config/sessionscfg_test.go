@@ -829,6 +829,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 				utils.AliasCfg:                "127.0.0.1:8021",
 			},
 		},
+		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -871,6 +872,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 				utils.AliasCfg:                "127.0.0.1:8000",
 			},
 		},
+		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -908,6 +910,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 				utils.ReplyTimeoutCfg:         "1m0s",
 			},
 		},
+		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
