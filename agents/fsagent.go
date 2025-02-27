@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/fsock"
 )
 
-func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
+func NewFSsessions(fsAgentConfig *config.FsAgentCfg, filterS *engine.FilterS,
 	timezone string, connMgr *engine.ConnManager) (fsa *FSsessions) {
 	fsa = &FSsessions{
 		cfg:         fsAgentConfig,
@@ -41,6 +41,7 @@ func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
 		senderPools: make([]*fsock.FSockPool, len(fsAgentConfig.EventSocketConns)),
 		timezone:    timezone,
 		connMgr:     connMgr,
+		filterS:     filterS,
 	}
 	srv, _ := birpc.NewService(fsa, "", false)
 	fsa.ctx = context.WithClient(context.TODO(), srv)
@@ -57,11 +58,13 @@ type FSsessions struct {
 	timezone    string
 	connMgr     *engine.ConnManager
 	ctx         *context.Context
+	filterS     *engine.FilterS
 }
 
 func (fsa *FSsessions) createHandlers() map[string][]func(string, int) {
 	ca := func(body string, connIdx int) {
 		fsa.onChannelAnswer(
+
 			NewFSEvent(body), connIdx)
 	}
 	ch := func(body string, connIdx int) {
@@ -140,16 +143,24 @@ func (fsa *FSsessions) unparkCall(uuid string, connIdx int, callDestNb, notify s
 }
 
 func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.MetaDefault) == utils.MetaNone { // Not for us
-		return
-	}
 	if connIdx >= len(fsa.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(fsa.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
 		return
 	}
-	fsev[VarCGROriginHost] = utils.FirstNonEmpty(fsev[VarCGROriginHost], fsa.cfg.EventSocketConns[connIdx].Alias) // rewrite the OriginHost variable if it is empty
-	authArgs := fsev.AsCGREvent(fsa.timezone)
+	authArgs, err := fsa.processRequest(fsev)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.FreeSWITCHAgent, err.Error()))
+		return
+	}
+	reqType, err := authArgs.FieldAsString("RequestType")
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to retrieve RequestType: %v", utils.FreeSWITCHAgent, err))
+		return
+	}
+	if reqType == utils.MetaNone {
+		return // do not process this request
+	}
 	authArgs.Event[FsConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
 	if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
@@ -216,33 +227,43 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 }
 
 func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.MetaDefault) == utils.MetaNone { // Do not process this request
-		return
-	}
 	if connIdx >= len(fsa.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(fsa.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
 		return
 	}
-	_, err := fsa.conns[connIdx].SendApiCmd(
+	cgrEv, err := fsa.processRequest(fsev)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.FreeSWITCHAgent, err.Error()))
+		return
+	}
+	reqType, err := cgrEv.FieldAsString("RequestType")
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to retrieve RequestType: %v", utils.FreeSWITCHAgent, err))
+		return
+	}
+	if reqType == utils.MetaNone {
+		return // do not process this request
+	}
+
+	if _, err := fsa.conns[connIdx].SendApiCmd(
 		fmt.Sprintf("uuid_setvar %s %s %s\n\n", fsev.GetUUID(),
 			utils.CGROriginHost, utils.FirstNonEmpty(fsa.cfg.EventSocketConns[connIdx].Alias,
-				fsa.cfg.EventSocketConns[connIdx].Address)))
-	if err != nil {
+				fsa.cfg.EventSocketConns[connIdx].Address))); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 				utils.FreeSWITCHAgent, err.Error(), VarCGROriginHost))
 		return
 	}
-	fsev[VarCGROriginHost] = utils.FirstNonEmpty(fsev[VarCGROriginHost], fsa.cfg.EventSocketConns[connIdx].Alias) // rewrite the OriginHost variable if it is empty
 	chanUUID := fsev.GetUUID()
-	if missing := fsev.MissingParameter(fsa.timezone); missing != "" {
-		fsa.disconnectSession(connIdx, chanUUID, "",
-			utils.NewErrMandatoryIeMissing(missing).Error())
-		return
+	for _, val := range []string{utils.AccountField, utils.Subject, utils.Destination, utils.Category, utils.OriginID, utils.Tenant} {
+		if _, err := cgrEv.FieldAsString(val); err != nil {
+			utils.Logger.Debug(fmt.Sprintf("error %v", err))
+			fsa.disconnectSession(connIdx, chanUUID, "",
+				utils.NewErrMandatoryIeMissing(val).Error())
+			return
+		}
 	}
-
-	cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = map[string]any{utils.OptsSesInitiate: true}
 	}
@@ -259,18 +280,27 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 }
 
 func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.MetaDefault) == utils.MetaNone { // Do not process this request
-		return
-	}
 	if connIdx >= len(fsa.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(fsa.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
 		return
 	}
 	var reply string
-	fsev[VarCGROriginHost] = utils.FirstNonEmpty(fsev[VarCGROriginHost], fsa.cfg.EventSocketConns[connIdx].Alias) // rewrite the OriginHost variable if it is empty
-	if fsev[VarAnswerEpoch] != "0" {                                                                              // call was answered
-		cgrEv := fsev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	cgrEv, err := fsa.processRequest(fsev)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.FreeSWITCHAgent, err.Error()))
+		return
+	}
+	reqType, err := cgrEv.FieldAsString("RequestType")
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> failed to retrieve RequestType: %v", utils.FreeSWITCHAgent, err))
+		return
+	}
+	if reqType == utils.MetaNone {
+		return // do not process this request
+	}
+
+	if fsev[VarAnswerEpoch] != "0" { // call was answered
 		if cgrEv.APIOpts == nil {
 			cgrEv.APIOpts = map[string]any{utils.OptsSesTerminate: true}
 		}
@@ -281,9 +311,9 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
 					utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
 		}
+		delete(cgrEv.Event, FsConnID) // Remove the connection ID
 	}
 	if fsa.cfg.CreateCDR {
-		cgrEv := fsev.AsCGREvent(fsa.timezone)
 		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
@@ -492,4 +522,25 @@ func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]an
 	}
 	*reply = utils.OK
 	return
+}
+
+func (fsa *FSsessions) processRequest(fsev FSEvent) (*utils.CGREvent, error) {
+	for _, reqProcessor := range fsa.cfg.RequestProcessors {
+		agReq := NewAgentRequest(engine.MapStringDP(fsev), nil, nil, nil, nil, reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone,
+				config.CgrConfig().GeneralCfg().DefaultTimezone),
+			fsa.filterS, nil)
+		if pass, err := fsa.filterS.Pass(context.TODO(), agReq.Tenant,
+			reqProcessor.Filters, agReq); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		if err := agReq.SetFields(reqProcessor.RequestFields); err != nil {
+			return nil, err
+		}
+		return utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts), nil
+
+	}
+	return nil, utils.ErrNotFound
 }

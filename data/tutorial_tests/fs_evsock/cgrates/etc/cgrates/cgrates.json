@@ -67,7 +67,145 @@
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 	"sessions_conns": ["*birpc_internal"],
-	"create_cdr": true
+	"create_cdr": true,	
+	"request_processors": [
+		{
+			"id": "FSEvent",
+			"filters": [],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*voice"
+				},
+				{
+					"tag":"PDD",
+					"path":"*cgreq.PDD",
+					"type":"*composed",
+					"value":"~*req.variable_progress_mediamsec;ms"
+				},
+				{
+					"tag":"ACD",
+					"path":"*cgreq.ACD",
+					"type":"*composed",
+					"value":"~*req.variable_cdr_acd;s"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable",
+					"value": "~*req.Unique-ID"
+				},
+				{
+					"tag": "*originID",
+					"path": "*opts.*originID",
+					"type": "*variable",
+					"value": "~*req.Unique-ID"
+				},
+				{
+					"tag": "OriginHost",
+					"path": "*cgreq.OriginHost",
+					"type": "*variable",
+					"value": "~*req.variable_cgr_originhost"
+				},
+				{
+					"tag": "Account",
+					"path": "*cgreq.Account",
+					"type": "*variable",
+					"value": "~*req.Caller-Username"
+				},
+				{
+					"tag":"Source",
+					"path":"*cgreq.Source", 
+					"type":"*composed",
+					"value":"FS_;~*req.Event-Name"
+				},
+				{
+					"tag":"RequestType",
+					"path":"*cgreq.RequestType",
+					"type":"*constant",
+					"value":"*none",
+					"filters":["*string:*req.variable_process_cdr:false"]
+				},
+				{
+					"tag":"RequestType",
+					"path":"*cgreq.RequestType",
+					"type":"*constant",
+					"value":"*none",
+					"filters":["*string:*req.Caller-Dialplan:inline"]
+				},
+				{
+					"tag":"RequestType",
+					"path": "*cgreq.RequestType",
+					"type": "*constant",
+					"filters":["*exists:*cgreq.RequestType:"],
+					"value": "call"
+				},
+				{
+					"tag":"Tenant",
+					"path":"*cgreq.Tenant",
+					"type":"*constant",
+					"value":"cgrates.org"
+				},
+				{
+					"tag":"Category",
+					"path":"*cgreq.Category",
+					"type":"*constant",
+					"value":"call"
+				},
+				{
+					"tag":"Subject",
+					"path":"*cgreq.Subject",
+					"type":"*variable",
+					"value":"~*req.Caller-Username"
+				},
+				{
+					"tag":"Destination",
+					"path":"*cgreq.Destination",
+					"type":"*variable",
+					"value":"~*req.Caller-Destination-Number"
+				},
+				{
+					"tag":"SetupTime",
+					"path":"*cgreq.SetupTime",
+					"type":"*variable",
+					"value":"~*req.Caller-Channel-Created-Time"
+				},
+				{
+					"tag":"AnswerTime",
+					"path":"*cgreq.AnswerTime",
+					"type":"*variable",
+					"value":"~*req.Caller-Channel-Answered-Time"
+				},
+				{
+					"tag":"Usage",
+					"path":"*cgreq.Usage",
+					"type":"*composed",
+					"value":"~*req.variable_billsec;s"
+				},
+				{
+					"tag":"Route",
+					"path":"*cgreq.Route",
+					"type":"*variable",
+					"value":"~*req.variable_cgr_route"
+				},
+				{
+					"tag":"Cost",
+					"path":"*cgreq.Cost",
+					"type":"*constant",
+					"value":"-1.0"
+				},
+				{
+					"tag":"DisconnectCause",
+					"path":"*cgreq.DisconnectCause",
+					"filters":["*notempty:*req.Hangup-Cause:"],
+					"type":"*variable",
+					"value":"~*req.Hangup-Cause"
+				}
+			]
+		}
+	]
 },
 
 

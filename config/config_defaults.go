@@ -1736,28 +1736,28 @@ const CGRATES_CFG_JSON = `
 
 "templates": {
 	"*err": [
-			{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
-				"value": "~*req.Session-Id", "mandatory": true},
-			{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
-				"value": "~*vars.OriginHost", "mandatory": true},
-			{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
-				"value": "~*vars.OriginRealm", "mandatory": true}
+		{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
+			"value": "~*req.Session-Id", "mandatory": true},
+		{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
+			"value": "~*vars.OriginHost", "mandatory": true},
+		{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
+			"value": "~*vars.OriginRealm", "mandatory": true}
 	],
 	"*cca": [
-			{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
-				"value": "~*req.Session-Id", "mandatory": true},
-			{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant",
-				"value": "2001"},
-			{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
-				"value": "~*vars.OriginHost", "mandatory": true},
-			{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
-				"value": "~*vars.OriginRealm", "mandatory": true},
-			{"tag": "AuthApplicationId", "path": "*rep.Auth-Application-Id", "type": "*variable",
-				 "value": "~*vars.*appid", "mandatory": true},
-			{"tag": "CCRequestType", "path": "*rep.CC-Request-Type", "type": "*variable",
-				"value": "~*req.CC-Request-Type", "mandatory": true},
-			{"tag": "CCRequestNumber", "path": "*rep.CC-Request-Number", "type": "*variable",
-				"value": "~*req.CC-Request-Number", "mandatory": true}
+		{"tag": "SessionId", "path": "*rep.Session-Id", "type": "*variable",
+			"value": "~*req.Session-Id", "mandatory": true},
+		{"tag": "ResultCode", "path": "*rep.Result-Code", "type": "*constant",
+			"value": "2001"},
+		{"tag": "OriginHost", "path": "*rep.Origin-Host", "type": "*variable",
+			"value": "~*vars.OriginHost", "mandatory": true},
+		{"tag": "OriginRealm", "path": "*rep.Origin-Realm", "type": "*variable",
+			"value": "~*vars.OriginRealm", "mandatory": true},
+		{"tag": "AuthApplicationId", "path": "*rep.Auth-Application-Id", "type": "*variable",
+			 "value": "~*vars.*appid", "mandatory": true},
+		{"tag": "CCRequestType", "path": "*rep.CC-Request-Type", "type": "*variable",
+			"value": "~*req.CC-Request-Type", "mandatory": true},
+		{"tag": "CCRequestNumber", "path": "*rep.CC-Request-Number", "type": "*variable",
+			"value": "~*req.CC-Request-Number", "mandatory": true}
 	],
 	"*asr": [
 			{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
