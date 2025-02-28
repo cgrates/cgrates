@@ -1,0 +1,116 @@
+
+{
+
+"diameter_agent": {
+	"request_processors": [
+		{
+			"id": "TestSessionDisconnect",
+			"filters": [
+				"*string:~*vars.*cmd:CCR",
+				"*string:~*req.CC-Request-Type:1",
+				"*prefix:~*req.Service-Context-Id:testSessionDisconnect"
+			],
+			"flags": ["*initiate", "*accounts","*attributes"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*voice"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable", 
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "OriginHost",
+					"path": "*cgreq.OriginHost",
+					"type": "*variable", 
+					"value": "~*req.Origin-Host",
+					"mandatory": true
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType", 
+					"type": "*constant",
+					"value": "*prepaid"
+				},
+				{
+					"tag": "Category",
+					"path": "*cgreq.Category", 
+					"type": "*constant",
+					"value": "call"
+				},
+				{
+					"tag": "Account",
+					"path": "*cgreq.Account",
+					"type": "*variable",
+					"value": "~*req.Subscription-Id.Subscription-Id-Data",
+					"mandatory": true
+				},
+				{
+					"tag": "Subject",
+					"path": "*cgreq.Subject",
+					"type": "*variable",
+					"value": "~*req.Service-Information.IN-Information.Calling-Party-Address", 
+					"mandatory": true
+				},
+				{
+					"tag": "Destination",
+					"path": "*cgreq.Destination",
+					"type": "*variable", 
+					"value": "~*req.Service-Information.IN-Information.Real-Called-Number",
+					"mandatory": true
+				},
+				{
+					"tag": "AnswerTime",
+					"path": "*cgreq.AnswerTime",
+					"type": "*variable", 
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "Usage",
+					"path": "*cgreq.Usage",
+					"type": "*variable", 
+					"value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/",
+					"mandatory": true
+				},
+				{
+					"tag": "DebitInterval",
+					"path": "*opts.*sessionsDebitInterval", 
+					"type": "*constant",
+					"value": "1s"
+				},
+			],
+			"reply_fields":[
+				{
+					"tag": "CCATemplate",
+					"type": "*template",
+					"value": "*cca"
+				},
+				{
+					"tag": "ResultCode",
+					"filters": ["*notempty:~*cgrep.Error:"], 
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "5030",
+					"blocker": true
+				},
+				{
+					"tag": "GrantedUnits",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
+					"filters": ["*gte:~*cgrep.MaxUsage:0s"],
+					"type": "*variable",
+					"value": "~*cgrep.MaxUsage{*duration_seconds&*round:0}",
+					"mandatory": true
+				},
+			],
+		},
+	],
+},
+
+}

@@ -822,6 +822,9 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.Listen, testDA.Listen) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.Listen, testDA.Listen)
 	}
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.ListenNet, testDA.ListenNet) {
+		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.ListenNet, testDA.ListenNet)
+	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.DictionariesPath, testDA.DictionariesPath) {
 		t.Errorf("expecting: %+v, received: %+v", cgrCfg.diameterAgentCfg.DictionariesPath, testDA.DictionariesPath)
 	}

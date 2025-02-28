@@ -39,10 +39,10 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/fiorix/go-diameter/v4/diam"
-	"github.com/fiorix/go-diameter/v4/diam/avp"
-	"github.com/fiorix/go-diameter/v4/diam/datatype"
-	"github.com/fiorix/go-diameter/v4/diam/dict"
+	"github.com/cgrates/go-diameter/diam"
+	"github.com/cgrates/go-diameter/diam/avp"
+	"github.com/cgrates/go-diameter/diam/datatype"
+	"github.com/cgrates/go-diameter/diam/dict"
 )
 
 var (
@@ -97,6 +97,20 @@ func TestDiamItTcp(t *testing.T) {
 	case utils.MetaMongo:
 		diamConfigDIR = "diamagent_mongo"
 	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	for _, stest := range sTestsDiam {
+		t.Run(diamConfigDIR, stest)
+	}
+}
+
+func TestDiamItTcpNoDefaults(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		diamConfigDIR = "diamagent_internal_supp_apps"
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")

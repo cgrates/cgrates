@@ -29,6 +29,7 @@ type DiameterAgentCfg struct {
 	ListenNet         string // sctp or tcp
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesPath  string
+	CeApplications    []string
 	SessionSConns     []string
 	OriginHost        string
 	OriginRealm       string
@@ -56,6 +57,10 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	}
 	if jsnCfg.Dictionaries_path != nil {
 		da.DictionariesPath = *jsnCfg.Dictionaries_path
+	}
+	if jsnCfg.Ce_applications != nil {
+		da.CeApplications = make([]string, len(*jsnCfg.Ce_applications))
+		copy(da.CeApplications, *jsnCfg.Ce_applications)
 	}
 	if jsnCfg.Sessions_conns != nil {
 		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
@@ -131,6 +136,12 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 		utils.ForcedDisconnectCfg: da.ForcedDisconnect,
 	}
 
+	if da.CeApplications != nil {
+		apps := make([]string, len(da.CeApplications))
+		copy(apps, da.CeApplications)
+		initialMP[utils.CeApplicationsCfg] = apps
+	}
+
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
@@ -167,6 +178,10 @@ func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
 		ASRTemplate:      da.ASRTemplate,
 		RARTemplate:      da.RARTemplate,
 		ForcedDisconnect: da.ForcedDisconnect,
+	}
+	if da.CeApplications != nil {
+		cln.CeApplications = make([]string, len(da.CeApplications))
+		copy(cln.CeApplications, da.CeApplications)
 	}
 	if da.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(da.SessionSConns))
