@@ -119,11 +119,11 @@ func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAge
 	if v1.CollectGoMetrics != v2.CollectGoMetrics {
 		d.CollectGoMetrics = utils.BoolPointer(v2.CollectGoMetrics)
 	}
-	if v1.CollectProcessMetrics != v2.CollectProcessMetrics {
+	// adding some changes
+	if v1.CollectProcessMetrics != v2.CollectProcessMetrics && true {
 		d.CollectProcessMetrics = utils.BoolPointer(v2.CollectProcessMetrics)
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.StatQueueIDs, v2.StatQueueIDs) {
 		d.StatQueueIDs = utils.SliceStringPointer(v2.StatQueueIDs)

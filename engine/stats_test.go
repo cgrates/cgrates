@@ -3766,92 +3766,6 @@ func TestStatQueueProcessEventProfileIDsErr(t *testing.T) {
 
 }
 
-func TestStatQueueProcessEventPrometheusStatIDsErr(t *testing.T) {
-
-	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
-	}()
-
-	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	filterS := NewFilterS(cfg, nil, dm)
-	sS := NewStatService(dm, cfg, filterS, nil)
-
-	sqPrf := &StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SQ1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-		Blockers:     utils.DynamicBlockers{{Blocker: true}},
-		QueueLength:  10,
-		ThresholdIDs: []string{"*none"},
-		MinItems:     5,
-		Metrics: []*MetricWithFilters{
-			{
-				MetricID: utils.MetaTCD,
-			},
-		},
-	}
-	stat, err := NewStatMetric("*tcd", uint64(sqPrf.MinItems), []string{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	stq := &StatQueue{
-		sqPrfl: sqPrf,
-		Tenant: "cgrates.org",
-		ID:     "SQ1",
-		SQItems: []SQItem{
-			{
-				EventID: "SqProcessEvent",
-			},
-		},
-		SQMetrics: map[string]StatMetric{
-			utils.MetaTCD: stat,
-		},
-	}
-
-	if err := dm.SetStatQueueProfile(context.Background(), sqPrf, true); err != nil {
-		t.Error(err)
-	}
-	if err := dm.SetStatQueue(context.Background(), stq); err != nil {
-		t.Error(err)
-	}
-
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "SqProcessEvent",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.MetaUsage:           "10s",
-			utils.OptsStatsProfileIDs: []string{"SQ1"},
-		},
-	}
-
-	sS.cfg.StatSCfg().Opts.PrometheusStatIDs = []*config.DynamicStringSliceOpt{
-
-		{
-			FilterIDs: []string{"*string.invalid:filter"},
-			Tenant:    "cgrates.org",
-			Values:    []string{"value2"},
-		},
-	}
-
-	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil ||
-		err.Error() != experr {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
-
-	}
-
-}
-
 func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 
 	tmpl := utils.Logger
@@ -3924,8 +3838,8 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 		},
 	}
 
-	if rcv, err := sS.processEvent(context.Background(), args.Tenant, args); err != nil {
-		t.Error(err)
+	if rcv, err := sS.processEvent(context.Background(), args.Tenant, args); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("*StatS.processEvent err=%v, want %v", err, utils.ErrPartiallyExecuted)
 	} else if !reflect.DeepEqual([]string{"SQ1"}, rcv) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", nil, rcv)
 

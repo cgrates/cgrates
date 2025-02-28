@@ -207,7 +207,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
 			RoundingDecimals:     []*DynamicIntOpt{},
-			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		}},
 		thresholdSCfg: &ThresholdSCfg{Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
