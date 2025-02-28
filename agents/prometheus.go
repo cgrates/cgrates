@@ -39,8 +39,9 @@ type PrometheusAgent struct {
 	filters  *engine.FilterS
 	cm       *engine.ConnManager
 	shutdown *utils.SyncedChan
-	reg      *prometheus.Registry
 
+	handler     http.Handler
+	reg         *prometheus.Registry
 	statMetrics *prometheus.GaugeVec
 }
 
@@ -63,11 +64,18 @@ func NewPrometheusAgent(cfg *config.CGRConfig, filters *engine.FilterS, cm *engi
 	if cfg.PrometheusAgentCfg().CollectProcessMetrics {
 		reg.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 	}
+
+	handler := promhttp.InstrumentMetricHandler(
+		reg,
+		promhttp.HandlerFor(reg, promhttp.HandlerOpts{}),
+	)
+
 	return &PrometheusAgent{
 		cfg:         cfg,
 		filters:     filters,
 		cm:          cm,
 		shutdown:    shutdown,
+		handler:     handler,
 		reg:         reg,
 		statMetrics: statMetrics,
 	}
@@ -111,5 +119,5 @@ func (pa *PrometheusAgent) updateStatsMetrics() {
 // scrape request before exposing them via the Prometheus HTTP handler.
 func (pa *PrometheusAgent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	pa.updateStatsMetrics()
-	promhttp.HandlerFor(pa.reg, promhttp.HandlerOpts{}).ServeHTTP(w, r)
+	pa.handler.ServeHTTP(w, r)
 }
