@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"bytes"
+	"fmt"
 	"net/rpc"
 	"path"
 	"reflect"
@@ -755,4 +757,63 @@ func testV2CDRsKillEngine(t *testing.T) {
 	if err := engine.KillEngine(*utils.WaitRater); err != nil {
 		t.Error(err)
 	}
+}
+
+func TestCDRsUnexpectedExistsErr(t *testing.T) {
+	jsonCfg := `{
+"data_db": {
+	"db_type": "*internal"
+},
+"stor_db": {
+	"db_type": "*internal"
+},
+"rals": {
+	"enabled": true
+},
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*internal"]
+},
+"apiers": {
+	"enabled": true
+}
+}`
+
+	env := TestEnvironment{
+		ConfigJSON: jsonCfg,
+		LogBuffer:  new(bytes.Buffer),
+	}
+	defer fmt.Println(env.LogBuffer)
+	client, _ := env.Setup(t, 0)
+
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "processCDR",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2021, time.February, 2, 15, 14, 50, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2021, time.February, 2, 15, 15, 0, 0, time.UTC),
+				utils.Usage:       "invalid", // will cause conversion err (event -> cdr)
+			},
+		},
+	}
+
+	var reply string
+	if err := client.Call(utils.CDRsV1ProcessEvent, args, &reply); err == nil ||
+		err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("CDRsV1.ProcessEvent err=%v, want %v", err, utils.ErrPartiallyExecuted)
+	}
+
+	args.Event[utils.Usage] = 2 * time.Second // prevent conversion error
+	if err := client.Call(utils.CDRsV1ProcessEvent, args, &reply); err == nil ||
+		err.Error() != utils.ErrExists.Error() {
+		t.Errorf("CDRsV1.ProcessEvent err=%v, want %v", err, utils.ErrExists)
+	}
+
 }
