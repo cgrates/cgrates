@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"errors"
 	"math"
 	"path"
 	"reflect"
@@ -421,4 +422,151 @@ RP_ANY,DR_ANY,*any,10`,
 		}
 	})
 
+}
+
+func TestRerateFailedCDR(t *testing.T) {
+	jsonCfg := `{
+"rals": {
+	"enabled": true
+},
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*internal"]
+},
+"apiers": {
+	"enabled": true
+}
+}`
+
+	tpFiles := map[string]string{
+		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_ANY,*any,RT_ANY,*up,0,0,`,
+		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_ANY,0,2,1s,1s,0s`,
+		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+RP_ANY,DR_ANY,*any,10`,
+		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,1001,,RP_ANY,`,
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: jsonCfg,
+		TpFiles:    tpFiles,
+		DBCfg:      engine.InternalDBCfg,
+	}
+	client, _ := ng.Run(t)
+
+	balanceID := "test"
+	processCDR := func(t *testing.T, from, to string, usage time.Duration, wantCost float64) {
+		t.Helper()
+		var reply string
+		err := client.Call(context.Background(), utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{
+				Flags: []string{utils.MetaRALs},
+				CGREvent: utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event1",
+					Event: map[string]any{
+						utils.Tenant:       "cgrates.org",
+						utils.Category:     "call",
+						utils.ToR:          utils.MetaVoice,
+						utils.OriginID:     "processCDR",
+						utils.RequestType:  utils.MetaPostpaid,
+						utils.AccountField: from,
+						utils.Destination:  to,
+						utils.SetupTime:    time.Date(2021, time.February, 2, 16, 14, 50, 0, time.UTC),
+						utils.AnswerTime:   time.Date(2021, time.February, 2, 16, 15, 0, 0, time.UTC),
+						utils.Usage:        usage,
+					},
+				},
+			}, &reply)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				OriginIDs: []string{"processCDR"},
+			}}, &cdrs); err != nil {
+			t.Errorf("CDRsV1GetCDRs failed unexpectedly: %v", err)
+		}
+		if cdrs[0].Cost != wantCost {
+			t.Errorf("Cost=%v, want %v", cdrs[0].Cost, wantCost)
+		}
+		errMsg := "ACCOUNT_NOT_FOUND"
+		if cdrs[0].Cost == -1 && cdrs[0].ExtraInfo != errMsg {
+			t.Errorf("ExtraInfo err msg=%v, want %v", cdrs[0].ExtraInfo, errMsg)
+		}
+	}
+
+	setAccount := func(t *testing.T, acc string, value float64) {
+		t.Helper()
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
+			utils.AttrSetBalance{
+				Tenant:      "cgrates.org",
+				Account:     acc,
+				Value:       value,
+				BalanceType: utils.MetaMonetary,
+				Balance: map[string]any{
+					utils.ID: balanceID,
+				},
+			}, &reply); err != nil {
+			t.Fatal(err)
+		}
+
+	}
+
+	checkBalance := func(t *testing.T, acc string, want float64) {
+		t.Helper()
+		var acnt engine.Account
+		err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{
+				Tenant:  "cgrates.org",
+				Account: acc,
+			}, &acnt)
+		if want == -1 {
+			if err == nil || errors.Is(err, utils.ErrNotFound) {
+				t.Fatalf("APIerSv2.GetAccount err=%v, want %v", err, utils.ErrNotFound)
+			}
+			return
+		}
+		if err != nil {
+			t.Fatalf("APIerSv2GetAccount failed unexpectedly: %v", err)
+		}
+		got, _ := acnt.FindBalanceByID(balanceID)
+		if got == nil {
+			t.Errorf("acnt.FindBalanceByID(%q) could not find balance", balanceID)
+		} else if got.Value != want {
+			t.Errorf("acnt.FindBalanceByID(%q) balance value=%v, want %v", balanceID, got.Value, want)
+		}
+	}
+
+	rerateCDR := func(t *testing.T, cost float64) {
+		t.Helper()
+		var reply string
+		if err := client.Call(context.Background(), utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
+			Flags: []string{utils.MetaRerate},
+			RPCCDRsFilter: utils.RPCCDRsFilter{
+				OriginIDs: []string{"processCDR"},
+			}}, &reply); err != nil {
+			t.Fatal(err)
+		}
+		var cdrs []*engine.CDR
+		if err := client.Call(context.Background(), utils.CDRsV1GetCDRs, &utils.RPCCDRsFilterWithAPIOpts{
+			RPCCDRsFilter: &utils.RPCCDRsFilter{
+				OriginIDs: []string{"processCDR"},
+			}}, &cdrs); err != nil {
+			t.Errorf("CDRsV1GetCDRs failed unexpectedly: %v", err)
+		}
+		if cdrs[0].Cost != cost {
+			t.Errorf("Cost=%v, want %v", cdrs[0].Cost, cost)
+		}
+	}
+
+	checkBalance(t, "1001", -1)                      // account does not exist
+	processCDR(t, "1001", "1002", 3*time.Second, -1) // processCDR fails due to non-existent acc
+	setAccount(t, "1001", 10)                        // create acc with balance 10
+	rerateCDR(t, 6)                                  // rerate the failed CDR
+	checkBalance(t, "1001", 4)                       // check balance after rerate; expecting 4 (10-6)
 }
