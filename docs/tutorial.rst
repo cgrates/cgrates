@@ -484,9 +484,10 @@ Once the CDRs are mediated, they are available to be exported. To export them, y
 
 .. code-block:: bash
 
- cgr-console 'export_cdrs ExportArgs={"ExportFormat":"*file_csv", "ExportPath":"/tmp"}'
+ cgr-console 'export_cdrs ExporterIDs=["tutorial_export"]'
 
 Your exported files will be appear on your defined "export_path" folder after the command is executed. In this case the folder is /tmp 
+For all available parameters you can check by running ``cgr-console help export_cdrs``.
 
 Fraud detection
 ---------------
