@@ -34,7 +34,6 @@ type StatsOpts struct {
 	ProfileIDs           []*DynamicStringSliceOpt
 	ProfileIgnoreFilters []*DynamicBoolOpt
 	RoundingDecimals     []*DynamicIntOpt
-	PrometheusStatIDs    []*DynamicStringSliceOpt
 }
 
 // StatSCfg the stats config section
@@ -83,9 +82,6 @@ func (sqOpts *StatsOpts) loadFromJSONCfg(jsnCfg *StatsOptsJson) (err error) {
 		var roundDec []*DynamicIntOpt
 		roundDec, err = IfaceToIntDynamicOpts(jsnCfg.RoundingDecimals)
 		sqOpts.RoundingDecimals = append(roundDec, sqOpts.RoundingDecimals...)
-	}
-	if jsnCfg.PrometheusStatIDs != nil {
-		sqOpts.PrometheusStatIDs = append(sqOpts.PrometheusStatIDs, jsnCfg.PrometheusStatIDs...)
 	}
 	return
 }
@@ -147,7 +143,6 @@ func (st StatSCfg) AsMapInterface() any {
 		utils.MetaProfileIDs:           st.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFilters: st.Opts.ProfileIgnoreFilters,
 		utils.OptsRoundingDecimals:     st.Opts.RoundingDecimals,
-		utils.OptsPrometheusStatIDs:    st.Opts.PrometheusStatIDs,
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:                st.Enabled,
@@ -201,15 +196,10 @@ func (sqOpts *StatsOpts) Clone() *StatsOpts {
 	if sqOpts.RoundingDecimals != nil {
 		rounding = CloneDynamicIntOpt(sqOpts.RoundingDecimals)
 	}
-	var promMtrcs []*DynamicStringSliceOpt
-	if sqOpts.PrometheusStatIDs != nil {
-		promMtrcs = CloneDynamicStringSliceOpt(sqOpts.PrometheusStatIDs)
-	}
 	return &StatsOpts{
 		ProfileIDs:           sqIDs,
 		ProfileIgnoreFilters: profileIgnoreFilters,
 		RoundingDecimals:     rounding,
-		PrometheusStatIDs:    promMtrcs,
 	}
 }
 
@@ -254,7 +244,6 @@ type StatsOptsJson struct {
 	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
 	ProfileIgnoreFilters []*DynamicInterfaceOpt   `json:"*profileIgnoreFilters"`
 	RoundingDecimals     []*DynamicInterfaceOpt   `json:"*roundingDecimals"`
-	PrometheusStatIDs    []*DynamicStringSliceOpt `json:"*prometheusStatIDs"`
 }
 
 // Stat service config section
@@ -287,9 +276,6 @@ func diffStatsOptsJsonCfg(d *StatsOptsJson, v1, v2 *StatsOpts) *StatsOptsJson {
 	}
 	if !DynamicIntOptEqual(v1.RoundingDecimals, v2.RoundingDecimals) {
 		d.RoundingDecimals = IntToIfaceDynamicOpts(v2.RoundingDecimals)
-	}
-	if !DynamicStringSliceOptEqual(v1.PrometheusStatIDs, v2.PrometheusStatIDs) {
-		d.PrometheusStatIDs = v2.PrometheusStatIDs
 	}
 	return d
 }

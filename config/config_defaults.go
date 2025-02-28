@@ -225,7 +225,6 @@ const CGRATES_CFG_JSON = `
 "http": {						// HTTP server configuration
 	"json_rpc_url": "/jsonrpc",			// JSON RPC relative URL ("" to disable)
 	"registrars_url": "/registrar",			// registrar service relative URL
-	"prometheus_url": "/prometheus",
 	"ws_url": "/ws",				// WebSockets relative URL ("" to disable)
 	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
 	"http_cdrs": "/cdr_http",			// CDRS relative URL ("" to disable)
@@ -1159,13 +1158,6 @@ const CGRATES_CFG_JSON = `
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
 		// 		"Value": 5
-		// 	}
-		// ],	
-		// "*prometheusStatIDs": [
-		// 	{
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": []
 		// 	}
 		// ]
 	}

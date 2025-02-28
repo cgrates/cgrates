@@ -413,20 +413,6 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	if sS.processThresholds(ctx, matchSQs, args.APIOpts) != nil || sS.processEEs(ctx, matchSQs, args.APIOpts) != nil || withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
-
-	var promIDs []string
-	if promIDs, err = GetStringSliceOpts(ctx, tnt, evNm, sS.fltrS, sS.cfg.StatSCfg().Opts.PrometheusStatIDs,
-		[]string{}, utils.OptsPrometheusStatIDs); err != nil {
-		return
-	}
-	if len(promIDs) != 0 {
-		if err = exportToPrometheus(matchSQs, utils.NewStringSet(promIDs)); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<StatS> Failed to export the queues to Prometheus: error: %s",
-					err.Error()))
-			err = utils.ErrPartiallyExecuted
-		}
-	}
 	return
 }
 

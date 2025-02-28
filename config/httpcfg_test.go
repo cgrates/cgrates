@@ -32,7 +32,6 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := &HTTPJsonCfg{
 		JSONRPCURL:        utils.StringPointer("/jsonrpc"),
 		WSURL:             utils.StringPointer("/ws"),
-		PrometheusURL:     utils.StringPointer("/metrics"),
 		RegistrarsURL:     utils.StringPointer("/randomUrl"),
 		FreeswitchCDRsURL: utils.StringPointer("/freeswitch_json"),
 		HTTPCDRs:          utils.StringPointer("/cdr_http"),
@@ -42,7 +41,6 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 	expected := &HTTPCfg{
 		JsonRPCURL:        "/jsonrpc",
 		WSURL:             "/ws",
-		PrometheusURL:     "/metrics",
 		RegistrarSURL:     "/randomUrl",
 		FreeswitchCDRsURL: "/freeswitch_json",
 		CDRsURL:           "/cdr_http",
@@ -96,7 +94,6 @@ func TestHTTPCfgAsMapInterface(t *testing.T) {
 	eMap := map[string]any{
 		utils.HTTPJsonRPCURLCfg:        "/jsonrpc",
 		utils.RegistrarSURLCfg:         "/registrar",
-		utils.PrometheusURLCfg:         "/prometheus",
 		utils.HTTPWSURLCfg:             "/ws",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
@@ -139,7 +136,6 @@ func TestHTTPCfgAsMapInterface1(t *testing.T) {
 	eMap := map[string]any{
 		utils.HTTPJsonRPCURLCfg:        "/rpc",
 		utils.RegistrarSURLCfg:         "/registrar",
-		utils.PrometheusURLCfg:         "/prometheus",
 		utils.HTTPWSURLCfg:             "",
 		utils.HTTPFreeswitchCDRsURLCfg: "/freeswitch_json",
 		utils.HTTPCDRsURLCfg:           "/cdr_http",
@@ -233,9 +229,8 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 		AuthUsers: map[string]string{
 			"User1": "passUser1",
 		},
-		ClientOpts:    &http.Transport{},
-		dialer:        &net.Dialer{},
-		PrometheusURL: "PrometheusURL",
+		ClientOpts: &http.Transport{},
+		dialer:     &net.Dialer{},
 	}
 
 	v2 := &HTTPCfg{
@@ -251,8 +246,7 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 		ClientOpts: &http.Transport{
 			MaxIdleConns: 100,
 		},
-		dialer:        &net.Dialer{},
-		PrometheusURL: "PrometheusURL2",
+		dialer: &net.Dialer{},
 	}
 
 	expected := &HTTPJsonCfg{
@@ -268,7 +262,6 @@ func TestDiffHTTPJsonCfg(t *testing.T) {
 		ClientOpts: &HTTPClientOptsJson{
 			MaxIdleConns: utils.IntPointer(100),
 		},
-		PrometheusURL: utils.StringPointer("PrometheusURL2"),
 	}
 
 	rcv := diffHTTPJsonCfg(d, v1, v2)

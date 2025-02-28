@@ -1973,7 +1973,6 @@ const (
 const (
 	HTTPJsonRPCURLCfg        = "json_rpc_url"
 	RegistrarSURLCfg         = "registrars_url"
-	PrometheusURLCfg         = "prometheus_url"
 	HTTPWSURLCfg             = "ws_url"
 	HTTPFreeswitchCDRsURLCfg = "freeswitch_cdrs_url"
 	HTTPCDRsURLCfg           = "http_cdrs"
@@ -2489,9 +2488,8 @@ const (
 	OptsRoutesUsage         = "*rouUsage"
 
 	// Stats
-	OptsStatsProfileIDs   = "*statsProfileIDs"
-	OptsRoundingDecimals  = "*roundingDecimals"
-	OptsPrometheusStatIDs = "*prometheusStatIDs"
+	OptsStatsProfileIDs  = "*statsProfileIDs"
+	OptsRoundingDecimals = "*roundingDecimals"
 
 	// Thresholds
 	OptsThresholdsProfileIDs = "*thdProfileIDs"
