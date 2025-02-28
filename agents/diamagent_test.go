@@ -29,8 +29,8 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/go-diameter/diam"
 	"github.com/cgrates/rpcclient"
-	"github.com/fiorix/go-diameter/v4/diam"
 )
 
 func TestDAsSessionSClientIface(t *testing.T) {

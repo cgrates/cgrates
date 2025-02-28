@@ -30,6 +30,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:              utils.BoolPointer(true),
 		Listen_net:           utils.StringPointer("tcp"),
 		Listen:               utils.StringPointer("127.0.0.1:3868"),
+		Ce_applications:      utils.SliceStringPointer([]string{"Base"}),
 		Dictionaries_path:    utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		Sessions_conns:       &[]string{utils.MetaInternal, "*conn1"},
 		Origin_host:          utils.StringPointer("CGR-DA"),
@@ -51,6 +52,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:          true,
 		ListenNet:        "tcp",
 		Listen:           "127.0.0.1:3868",
+		CeApplications:   []string{"Base"},
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
 		SessionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		OriginHost:       "CGR-DA",
@@ -121,6 +123,9 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		"enabled": false,											
 		"listen": "127.0.0.1:3868",									
 		"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	
+		"ce_applications": [
+			"Base",
+		],
 		"sessions_conns": ["*birpc_internal","*internal", "*conn1"],
 		"origin_host": "CGR-DA",									
 		"origin_realm": "cgrates.org",								
@@ -145,6 +150,7 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := map[string]any{
 		utils.ASRTemplateCfg:      "",
+		utils.CeApplicationsCfg:   []string{"Base"},
 		utils.DictionariesPathCfg: "/usr/share/cgrates/diameter/dict/",
 		utils.EnabledCfg:          false,
 		utils.ForcedDisconnectCfg: "*none",
@@ -199,12 +205,16 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 	cfgJSONStr := `{
 	"diameter_agent": {
 		"enabled": true,
-		"dictionaries_path": "/usr/share/cgrates/diameter",			
+		"dictionaries_path": "/usr/share/cgrates/diameter",		
+		"ce_applications": [
+			"Nokia.4",
+		],	
 		"synced_conn_requests": false,
 	},
 }`
 	eMap := map[string]any{
 		utils.ASRTemplateCfg:       "",
+		utils.CeApplicationsCfg:    []string{"Nokia.4"},
 		utils.DictionariesPathCfg:  "/usr/share/cgrates/diameter",
 		utils.EnabledCfg:           true,
 		utils.ForcedDisconnectCfg:  "*none",
@@ -231,6 +241,7 @@ func TestDiameterAgentCfgClone(t *testing.T) {
 		Enabled:          true,
 		ListenNet:        "tcp",
 		Listen:           "127.0.0.1:3868",
+		CeApplications:   []string{"Base"},
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
 		SessionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		OriginHost:       "CGR-DA",
