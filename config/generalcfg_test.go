@@ -396,9 +396,7 @@ func TestGeneralCfgCloneSection(t *testing.T) {
 		DigestEqual:      "",
 		MaxParallelConns: 50,
 		DefaultCaching:   utils.MetaClear,
-		Opts: &GeneralOpts{
-			ExporterIDs: []*DynamicStringSliceOpt{},
-		},
+		Opts:             &GeneralOpts{},
 	}
 
 	rcv := gnrCfg.CloneSection()

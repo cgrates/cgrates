@@ -29,16 +29,7 @@
     "stats": {
         "enabled": true,
         "store_interval": "-1",
-        "thresholds_conns": ["*internal"],
-        "opts": {								
-          "*prometheusStatIDs": [
-            {
-             	"Tenant": "*any",
-             	"FilterIDs": [],
-             	"Value": ["SQ_1"],
-            },
-          ],								
-        },	   
+        "thresholds_conns": ["*internal"]
     },
 
     "thresholds": {	

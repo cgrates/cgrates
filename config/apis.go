@@ -474,6 +474,12 @@ func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 
 			return
 		}
 		return db.SetSection(ctx, section, diffDNSAgentJsonCfg(jsn, v1.DNSAgentCfg(), v2.DNSAgentCfg()))
+	case PrometheusAgentJSON:
+		jsn := new(PrometheusAgentJsonCfg)
+		if err = db.GetSection(ctx, section, jsn); err != nil {
+			return
+		}
+		return db.SetSection(ctx, section, diffPrometheusAgentJsonCfg(jsn, v1.PrometheusAgentCfg(), v2.PrometheusAgentCfg()))
 	case AttributeSJSON:
 		jsn := new(AttributeSJsonCfg)
 		if err = db.GetSection(ctx, section, jsn); err != nil {

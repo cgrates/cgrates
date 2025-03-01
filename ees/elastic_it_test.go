@@ -98,7 +98,7 @@ func exportElsEvent(t *testing.T, client *birpc.Client, exporterSuffix string, i
 			EeIDs: []string{fmt.Sprintf("els_%s", exporterSuffix)},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
-				Event: map[string]interface{}{
+				Event: map[string]any{
 					utils.AccountField: "1001",
 					utils.ToR:          utils.MetaData,
 					utils.RequestType:  utils.MetaPostpaid,
@@ -158,8 +158,12 @@ func verifyElsExports(t *testing.T, client *elasticsearch.TypedClient, exporterT
 			expSource[utils.Usage] = float64(wantUsage)
 		} else {
 			expSource[utils.Usage] = strconv.Itoa(wantUsage)
+
+			// OriginID can only be passed via templates, as it's part of
+			// APIOpts. If none are configured, only the Event would be
+			// exported.
+			expSource[utils.OriginID] = wantOriginID
 		}
-		expSource[utils.OriginID] = wantOriginID
 		wantDocID := wantOriginID + ":*default"
 		if *hit.Id_ != wantDocID {
 			t.Errorf("hit.Id_ = %s, want %s", *hit.Id_, wantDocID)

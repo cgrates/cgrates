@@ -238,6 +238,7 @@ func runCGREngine(fs []string) (err error) {
 		services.NewActionService(cfg),
 		services.NewAccountService(cfg),
 		services.NewTPeService(cfg),
+		services.NewPrometheusAgent(cfg),
 	})
 
 	defer func() {

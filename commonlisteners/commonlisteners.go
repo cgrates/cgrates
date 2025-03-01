@@ -35,7 +35,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/net/websocket"
 )
 
@@ -157,7 +156,7 @@ func (c *CommonListenerS) ServeGOB(addr string, shutdown *utils.SyncedChan) (err
 	})
 }
 
-func (c *CommonListenerS) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string,
+func (c *CommonListenerS) ServeHTTP(addr, jsonRPCURL, wsRPCURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string, shutdown *utils.SyncedChan) {
 	c.mu.Lock()
 	c.httpEnabled = c.httpEnabled || jsonRPCURL != "" || wsRPCURL != "" || pprofPath != ""
@@ -181,15 +180,6 @@ func (c *CommonListenerS) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPa
 			c.httpMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			c.httpMux.Handle(wsRPCURL, wsHandler)
-		}
-	}
-	if promURL != "" {
-		utils.Logger.Info("<HTTP> enabling handler for Prometheus connections")
-		wsHandler := promhttp.Handler()
-		if useBasicAuth {
-			c.httpMux.HandleFunc(promURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
-		} else {
-			c.httpMux.Handle(promURL, wsHandler)
 		}
 	}
 	if pprofPath != "" {
@@ -388,7 +378,6 @@ func (c *CommonListenerS) StartServer(cfg *config.CGRConfig, shutdown *utils.Syn
 			cfg.ListenCfg().HTTPListen,
 			cfg.HTTPCfg().JsonRPCURL,
 			cfg.HTTPCfg().WSURL,
-			cfg.HTTPCfg().PrometheusURL,
 			cfg.HTTPCfg().PprofPath,
 			cfg.HTTPCfg().UseBasicAuth,
 			cfg.HTTPCfg().AuthUsers,

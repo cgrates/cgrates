@@ -308,7 +308,6 @@ func testCGRConfigReloadStatS(t *testing.T) {
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: StatsProfileIgnoreFilters}},
 			RoundingDecimals:     []*DynamicIntOpt{},
-			PrometheusStatIDs:    []*DynamicStringSliceOpt{},
 		},
 		EEsConns: []string{},
 	}

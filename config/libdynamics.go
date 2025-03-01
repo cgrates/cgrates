@@ -95,8 +95,11 @@ type DynamicDurationPointerOpt struct {
 	rsVal     utils.RSRParsers
 }
 
-func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) (cl []*DynamicStringSliceOpt) {
-	cl = make([]*DynamicStringSliceOpt, len(in))
+func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) []*DynamicStringSliceOpt {
+	if in == nil {
+		return nil
+	}
+	cl := make([]*DynamicStringSliceOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicStringSliceOpt{
 			Tenant:    val.Tenant,
@@ -104,7 +107,7 @@ func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) (cl []*DynamicStrin
 			Values:    slices.Clone(val.Values),
 		}
 	}
-	return
+	return cl
 }
 
 func CloneDynamicStringOpt(in []*DynamicStringOpt) (cl []*DynamicStringOpt) {

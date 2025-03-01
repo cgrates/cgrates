@@ -42,6 +42,7 @@ const (
 	DiameterAgentJSON   = "diameter_agent"
 	RadiusAgentJSON     = "radius_agent"
 	HTTPAgentJSON       = "http_agent"
+	PrometheusAgentJSON = "prometheus_agent"
 	AttributeSJSON      = "attributes"
 	ResourceSJSON       = "resources"
 	JanusAgentJSON      = "janus_agent"
@@ -99,6 +100,7 @@ var (
 		RadiusAgentJSON:     utils.RadiusAgent,
 		DiameterAgentJSON:   utils.DiameterAgent,
 		HTTPAgentJSON:       utils.HTTPAgent,
+		PrometheusAgentJSON: utils.PrometheusAgent,
 		LoaderSJSON:         utils.LoaderS,
 		AnalyzerSJSON:       utils.AnalyzerS,
 		DataDBJSON:          utils.DataDB,
@@ -191,6 +193,7 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.fsAgentCfg,
 		cfg.kamAgentCfg,
 		cfg.diameterAgentCfg,
+		cfg.prometheusAgentCfg,
 		cfg.radiusAgentCfg,
 		cfg.janusAgentCfg,
 		&cfg.httpAgentCfg,
