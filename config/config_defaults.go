@@ -738,12 +738,7 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:3868",					// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
 	"listen_net": "tcp",						// transport type for diameter <tcp|sctp>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	// "ce_applications": [						// list of applications in dictionaries wanted to be included in Capability-Exchange. Written as any of the four below
-	// 	"Base",									// application name
-	// 	"4",									// application ID
-	// 	"Cisco.4",								// vandorName.appID
-	// 	"Cisco.Charging Control",				// vendorName.app name
-	// ],
+	// "ce_applications": [],					// list of applications in dictionaries wanted to be included in Capability-Exchange. Needed either "app name", "app ID", or "vendor name.app name/ID"
 	"sessions_conns": ["*birpc_internal"],
 	"origin_host": "CGR-DA",					// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",					// diameter Origin-Realm AVP used in replies
