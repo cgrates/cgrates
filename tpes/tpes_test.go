@@ -32,7 +32,7 @@ func TestNewTPeS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpExporterTypes.Add("not_valid")
 	// utils.Logger, err = utils.NewLogger(utils.MetaStdLog, utils.EmptyString, 6)
 	// if err != nil {
@@ -52,7 +52,7 @@ func TestNewTPeS(t *testing.T) {
 func TestGetTariffPlansKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 
 	//Attributes
 	attr := &engine.AttributeProfile{
@@ -358,7 +358,7 @@ func TestV1ExportTariffPlan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	attr := &engine.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
@@ -400,7 +400,7 @@ func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -417,7 +417,7 @@ func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{
@@ -436,7 +436,7 @@ func TestV1ExportTariffPlanInvalidExpType(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
 	args := &ArgsExportTP{

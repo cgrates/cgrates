@@ -151,7 +151,7 @@ func TestAttributesV1GetAttributeForEventProfileIgnoreOpts(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
 	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
@@ -242,7 +242,7 @@ func TestAttributesV1GetAttributeForEventErr(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -326,7 +326,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	cfg.AttributeSCfg().StringIndexedFields = nil
 	cfg.AttributeSCfg().PrefixIndexedFields = nil
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 }
 
@@ -2034,7 +2034,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	//refresh the DM
 	if err := dmAtr.DataDB().Flush(""); err != nil {
@@ -2094,7 +2094,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 
 	//refresh the DM
@@ -2173,7 +2173,8 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 			Value: utils.NewRSRParsersMustCompile("10;~*req.NumField;20", utils.InfieldSep),
 		}},
 	}
-	attr, err := NewDataManager(nil, nil, nil).GetAttributeProfile(context.TODO(), config.CgrConfig().GeneralCfg().DefaultTenant, attrID, false, false, "")
+	cfg := config.NewDefaultCGRConfig()
+	attr, err := NewDataManager(nil, cfg, nil).GetAttributeProfile(context.TODO(), config.CgrConfig().GeneralCfg().DefaultTenant, attrID, false, false, "")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expAttrPrf1, attr) {
@@ -2184,7 +2185,7 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 func TestProcessAttributeConstant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
 		Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
@@ -2247,7 +2248,7 @@ func TestProcessAttributeConstant(t *testing.T) {
 func TestProcessAttributeVariable(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2313,7 +2314,7 @@ func TestProcessAttributeVariable(t *testing.T) {
 func TestProcessAttributeComposed(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2385,7 +2386,7 @@ func TestProcessAttributeComposed(t *testing.T) {
 func TestProcessAttributeUsageDifference(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2452,7 +2453,7 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 func TestProcessAttributeSum(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2519,7 +2520,7 @@ func TestProcessAttributeSum(t *testing.T) {
 func TestProcessAttributeDiff(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2586,7 +2587,7 @@ func TestProcessAttributeDiff(t *testing.T) {
 func TestProcessAttributeMultiply(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2653,7 +2654,7 @@ func TestProcessAttributeMultiply(t *testing.T) {
 func TestProcessAttributeDivide(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2720,7 +2721,7 @@ func TestProcessAttributeDivide(t *testing.T) {
 func TestProcessAttributeValueExponent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2787,7 +2788,7 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2854,7 +2855,7 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 func TestProcessAttributePrefix(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2920,7 +2921,7 @@ func TestProcessAttributePrefix(t *testing.T) {
 func TestProcessAttributeSuffix(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -2990,7 +2991,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 	cfg.AttributeSCfg().PrefixIndexedFields = nil
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 
 	//refresh the DM
@@ -3044,7 +3045,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 func TestProcessAttributeWithSameWeight(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf := &AttributeProfile{
@@ -3133,7 +3134,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf1Exists := &AttributeProfile{
@@ -3238,7 +3239,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmAtr = NewDataManager(data, cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: cfg}, cfg)
 	attrPrf1NotEmpty := &AttributeProfile{
@@ -3342,7 +3343,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 func TestAttributeMetaTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
-	dm := NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dm, &FilterS{dm: dm, cfg: cfg}, cfg)
 	attr1 := &AttributeProfile{
@@ -3405,7 +3406,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 	cfg.AttributeSCfg().Enabled = true
 	cfg.AttributeSCfg().IndexedSelects = false
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm := NewDataManager(db, cfg, nil)
 	fltrS := NewFilterS(cfg, nil, dm)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -3512,7 +3513,7 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 func TestAttributeMultipleProfileRunns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
-	dm := NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dm := NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, nil)
 	Cache.Clear(nil)
 	attrS = NewAttributeService(dm, &FilterS{dm: dm, cfg: cfg}, cfg)
 	attrPrf1Exists := &AttributeProfile{
@@ -3659,7 +3660,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -3783,7 +3784,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	conMng := NewConnManager(cfg)
 	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -3878,7 +3879,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -3974,7 +3975,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	conMng := NewConnManager(cfg)
 	Cache.Clear(nil)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -4072,7 +4073,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := &AttributeS{
 		cfg:   cfg,
@@ -4153,7 +4154,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := &AttributeS{
 		cfg:   cfg,
@@ -4191,7 +4192,7 @@ func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := &AttributeS{
 		cfg:   cfg,
@@ -4375,7 +4376,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := NewAttributeService(dm, filterS, cfg)
@@ -4485,7 +4486,7 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := NewAttributeService(dm, filterS, cfg)
@@ -4610,7 +4611,7 @@ func TestAttributesV1GetAttributeForEvent(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -4739,7 +4740,7 @@ func TestAttributesV1GetAttributeForEventErrorBoolOpts(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -4835,7 +4836,7 @@ func TestAttributesV1GetAttributeForEventErrorNil(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -4920,7 +4921,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -5013,7 +5014,7 @@ func TestAttributesV1GetAttributeForEventErrOptsI(t *testing.T) {
 func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
 	cfg.AttributeSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
@@ -5118,7 +5119,7 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
 	args2 := &utils.CGREvent{
@@ -5144,7 +5145,7 @@ func TestAttributeServicesProcessEventGetStringSliceOptsError(t *testing.T) {
 func TestAttributeServicesProcessEventGetBoolOptsError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
 	args2 := &utils.CGREvent{
@@ -5216,7 +5217,7 @@ func TestAttributesParseAttributeMetaCCUsageError(t *testing.T) {
 func TestAttributesProcessEventSetError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	aA := NewAttributeService(dm, filterS, cfg)
 	acPrf := &AttributeProfile{
@@ -5264,7 +5265,7 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := NewAttributeService(dm, filterS, cfg)
@@ -5316,7 +5317,7 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	alS := NewAttributeService(dm, filterS, cfg)
@@ -5400,7 +5401,7 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
@@ -5506,7 +5507,7 @@ func TestAttributesSetAttributeProfilePasswordAttr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 
 	value := utils.NewRSRParsersMustCompile("abcd123", utils.RSRSep)

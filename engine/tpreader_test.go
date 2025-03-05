@@ -634,7 +634,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
 			{Tenant: "cgrates.org", ID: "chargerProfilesID"}: {},
 		},
-		dm:         NewDataManager(data, config.CgrConfig().CacheCfg(), cnMgr),
+		dm:         NewDataManager(data, cfg, cnMgr),
 		cacheConns: []string{connID},
 	}
 	if err := tpr.ReloadCache(context.Background(), utils.MetaReload, false, make(map[string]any), "cgrates.org"); err != nil {

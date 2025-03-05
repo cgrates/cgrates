@@ -62,7 +62,7 @@ func TestTPEnewTPFilters(t *testing.T) {
 			}
 			return fltr, nil
 		},
-	}, nil, connMng)
+	}, cfg, connMng)
 	exp := &TPFilters{
 		dm: dm,
 	}
@@ -76,7 +76,7 @@ func TestTPEExportItemsFilters(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpFltr := TPFilters{
 		dm: dm,
 	}
@@ -154,7 +154,7 @@ func TestTPEExportItemsFiltersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpFltr := TPFilters{
 		dm: dm,
 	}

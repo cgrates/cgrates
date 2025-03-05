@@ -130,7 +130,7 @@ func testChrgITConnect(t *testing.T) {
 		chrgCfgIn.DataDbCfg().Host, chrgCfgIn.DataDbCfg().Port,
 		chrgCfgIn.DataDbCfg().Name, chrgCfgIn.DataDbCfg().User,
 		chrgCfgIn.DataDbCfg().Password, chrgCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), chrgCfgIn.DataDbCfg().Opts, chrgCfgIn.DataDbCfg().Items)
+		config.CgrConfig(), chrgCfgIn.DataDbCfg().Opts, chrgCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func testChrgITConnect(t *testing.T) {
 		chrgCfgOut.DataDbCfg().Host, chrgCfgOut.DataDbCfg().Port,
 		chrgCfgOut.DataDbCfg().Name, chrgCfgOut.DataDbCfg().User,
 		chrgCfgOut.DataDbCfg().Password, chrgCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), chrgCfgOut.DataDbCfg().Opts, chrgCfgOut.DataDbCfg().Items)
+		config.CgrConfig(), chrgCfgOut.DataDbCfg().Opts, chrgCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

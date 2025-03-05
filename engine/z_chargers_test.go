@@ -52,7 +52,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dmFilter := NewDataManager(dbm, cfg.CacheCfg(), nil)
+	dmFilter := NewDataManager(dbm, cfg, nil)
 	cS := &ChargerS{
 		dm: dmFilter,
 		fltrS: &FilterS{
@@ -95,7 +95,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "1001",
@@ -193,7 +193,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "1001",
@@ -281,7 +281,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -353,7 +353,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -431,7 +431,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -543,7 +543,7 @@ func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -605,7 +605,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 			return []string{":"}, nil
 		},
 	}
-	dm := NewDataManager(dbm, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dbm, cfg, nil)
 
 	cS := &ChargerS{
 		dm: dm,

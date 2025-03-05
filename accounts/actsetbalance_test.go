@@ -49,7 +49,7 @@ func TestActSetAccountBalance(t *testing.T) {
 		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 
 	expected = "WRONG_PATH"
 	if err := actSetAccount(context.Background(), dm, "cgrates.org",
@@ -111,7 +111,7 @@ func TestActSetAccount(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 
 	acntID := "TestActSetAccount"
 	diktats := []*utils.BalDiktat{

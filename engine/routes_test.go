@@ -217,7 +217,7 @@ func prepareRoutesData(t *testing.T, dm *DataManager) {
 func TestRoutesCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	prepareRoutesData(t, dmSPP)
@@ -227,7 +227,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	routeService := NewRouteService(dmSPP, &FilterS{
@@ -250,7 +250,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	routeService := NewRouteService(dmSPP, &FilterS{
@@ -355,7 +355,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	routeService := NewRouteService(dmSPP, &FilterS{
@@ -403,7 +403,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	routeService := NewRouteService(dmSPP, &FilterS{
@@ -442,7 +442,7 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	routeService := NewRouteService(dmSPP, &FilterS{
@@ -539,7 +539,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	cfg.RouteSCfg().IndexedSelects = false
@@ -633,7 +633,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	routeService := NewRouteService(dmSPP, &FilterS{
@@ -700,7 +700,7 @@ func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	routeService := NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: cfg}, cfg, nil)
 	var reply SortedRoutesList
@@ -718,7 +718,7 @@ func TestRoutesV1GetRoutesMsnStructFieldEventError(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	routeService := NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: cfg}, cfg, nil)
 	var reply SortedRoutesList
@@ -736,7 +736,7 @@ func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	routeService := NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: cfg}, cfg, nil)
 	var reply SortedRoutesList
@@ -755,7 +755,7 @@ func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmSPP := NewDataManager(data, cfg, nil)
 	routeService := NewRouteService(dmSPP, &FilterS{
 		dm: dmSPP, cfg: cfg}, cfg, nil)
 	var reply SortedRoutesList
@@ -776,7 +776,7 @@ func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 	cfg.RouteSCfg().AttributeSConns = []string{"testConn"}
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	dmSPP := NewDataManager(data, cfg, connMng)
 	routeService := NewRouteService(dmSPP, nil, cfg, connMng)
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
@@ -795,7 +795,7 @@ func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	dmSPP := NewDataManager(data, cfg, connMng)
 	fltr := &FilterS{dm: dmSPP, cfg: cfg}
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
 	var reply []*RouteProfile
@@ -814,7 +814,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	dmSPP := NewDataManager(data, cfg, connMng)
 	fltr := &FilterS{dm: dmSPP, cfg: cfg}
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
 	var reply []*RouteProfile
@@ -833,7 +833,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	dmSPP := NewDataManager(data, cfg, connMng)
 	fltr := &FilterS{dm: dmSPP, cfg: cfg}
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
 	var reply []*RouteProfile
@@ -1377,7 +1377,7 @@ func TestRouteSV1GetRoutesListErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, config.CgrConfig().CacheCfg(), connMng)
+	dmSPP := NewDataManager(data, cfg, connMng)
 	fltr := &FilterS{dm: dmSPP, cfg: cfg}
 
 	var reply *[]string
@@ -1398,7 +1398,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	fltrS := NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1457,7 +1457,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	fltrS := NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1524,7 +1524,7 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	fltrS := NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1595,7 +1595,7 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	fltrS := NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1680,7 +1680,7 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	fltrS := NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -1768,7 +1768,7 @@ func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1797,7 +1797,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1826,7 +1826,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1855,7 +1855,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1888,7 +1888,7 @@ func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -1917,7 +1917,7 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2002,7 +2002,7 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2085,7 +2085,7 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2171,7 +2171,7 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 	}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2254,7 +2254,7 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 	cfg.RouteSCfg().AttributeSConns = []string{"testConn"}
 
 	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2330,7 +2330,7 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, cc)
 
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	fS := NewFilterS(cfg, cM, dm)
 	routeService := NewRouteService(dm, fS, cfg, cM)
 
@@ -2405,7 +2405,7 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(4), nil),
 	}
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2467,7 +2467,7 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	fltrS := NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
@@ -2534,7 +2534,7 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	rpS := NewRouteService(dm, &FilterS{
 		dm: dm, cfg: cfg}, cfg, nil)
 
@@ -2586,7 +2586,7 @@ func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2644,7 +2644,7 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2708,7 +2708,7 @@ func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2770,7 +2770,7 @@ func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
@@ -2837,7 +2837,7 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 
@@ -2903,7 +2903,7 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 	}
 
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 
@@ -2952,7 +2952,7 @@ func TestRouteSV1GetRoutesListOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 

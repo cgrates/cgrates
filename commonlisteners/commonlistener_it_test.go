@@ -173,7 +173,7 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 	server.RpcRegister(new(mockRegister))
 
 	data := engine.NewInternalDB(nil, nil, cfgDflt.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfgDflt, nil)
 
 	ss := sessions.NewSessionS(cfgDflt, dm, nil, nil)
 
@@ -194,7 +194,7 @@ func testServeBiGoBInvalidPort(t *testing.T) {
 	server.birpcSrv = birpc.NewBirpcServer()
 
 	data := engine.NewInternalDB(nil, nil, cfgDflt.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfgDflt.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfgDflt, nil)
 
 	ss := sessions.NewSessionS(cfgDflt, dm, nil, nil)
 

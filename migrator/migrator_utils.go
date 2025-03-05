@@ -31,14 +31,14 @@ var (
 )
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass,
-	marshaler string, cacheCfg *config.CacheCfg,
+	marshaler string, cfg *config.CGRConfig,
 	opts *config.DataDBOpts, itmsCfg map[string]*config.ItemOpts) (db MigratorDataDB, err error) {
 	dbCon, err := engine.NewDataDBConn(db_type, host,
 		port, name, user, pass, marshaler, opts, itmsCfg)
 	if err != nil {
 		return nil, err
 	}
-	dm := engine.NewDataManager(dbCon, cacheCfg, nil)
+	dm := engine.NewDataManager(dbCon, cfg, nil)
 	var d MigratorDataDB
 	switch db_type {
 	case utils.MetaRedis:

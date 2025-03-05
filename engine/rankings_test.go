@@ -127,7 +127,7 @@ func TestNewRankingService(t *testing.T) {
 func TestStoreRanking(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB([]string{}, []string{}, map[string]*config.ItemOpts{})
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	rkg := NewRankingS(dm, nil, nil, cfg)
 	ranking := &Ranking{
 		rkPrfl: &RankingProfile{

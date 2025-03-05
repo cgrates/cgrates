@@ -57,7 +57,7 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
-		dm:         NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr), // ToDo: add ChacheCfg as parameter to the NewTpReader
+		dm:         NewDataManager(db, config.CgrConfig(), connMgr), // ToDo: add CGRConfig as parameter to the NewTpReader
 		lr:         lr,
 		cacheConns: cacheConns,
 		//schedulerConns: schedulerConns,

@@ -93,10 +93,11 @@ var sTests = []func(t *testing.T){
 }
 
 func TestFilterIndexerIT(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		dataManager = NewDataManager(NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items),
-			config.CgrConfig().CacheCfg(), nil)
+		dataManager = NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items),
+			cfg, nil)
 	case utils.MetaMySQL:
 		cfg := config.NewDefaultCGRConfig()
 		redisDB, err := NewRedisStorage(fmt.Sprintf("%s:%s",
@@ -113,7 +114,7 @@ func TestFilterIndexerIT(t *testing.T) {
 		}
 		cfgDBName = cfg.DataDbCfg().Name
 		defer redisDB.Close()
-		dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil)
+		dataManager = NewDataManager(redisDB, cfg, nil)
 	case utils.MetaPostgres, utils.MetaMongo:
 		t.SkipNow()
 	default:
