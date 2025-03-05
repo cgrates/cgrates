@@ -30,7 +30,7 @@ import (
 func TestLoadersNewLoaderSv1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	ldrS := loaders.NewLoaderS(cfg, dm, fltrs, nil)
 

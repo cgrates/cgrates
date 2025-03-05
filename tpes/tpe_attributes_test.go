@@ -59,7 +59,7 @@ func TestTPEnewTPAttributes(t *testing.T) {
 			}
 			return attr, nil
 		},
-	}, nil, connMng)
+	}, cfg, connMng)
 	exp := &TPAttributes{
 		dm: dm,
 	}
@@ -73,7 +73,7 @@ func TestTPEExportItemsAttributes(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpAttr := TPAttributes{
 		dm: dm,
 	}
@@ -145,7 +145,7 @@ func TestTPEExportItemsAttributesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpAct := TPAttributes{
 		dm: dm,
 	}

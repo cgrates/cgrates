@@ -65,7 +65,7 @@ func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.Servic
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
-	db.dm = engine.NewDataManager(dbConn, db.cfg.CacheCfg(), cms.(*ConnManagerService).ConnManager())
+	db.dm = engine.NewDataManager(dbConn, db.cfg, cms.(*ConnManagerService).ConnManager())
 
 	if db.setVersions {
 		err = engine.OverwriteDBVersions(dbConn)

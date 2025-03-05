@@ -73,7 +73,7 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 	}
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmCharger = NewDataManager(data, cfg.CacheCfg(), nil)
+	dmCharger = NewDataManager(data, cfg, nil)
 
 	fltrCP1 := &Filter{
 		Tenant: cfg.GeneralCfg().DefaultTenant,
@@ -222,7 +222,7 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	}
 
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmCharger = NewDataManager(data, cfg.CacheCfg(), nil)
+	dmCharger = NewDataManager(data, cfg, nil)
 	chargerSrv = NewChargerService(dmCharger,
 		&FilterS{dm: dmCharger, cfg: cfg}, cfg, nil)
 
@@ -395,7 +395,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	}
 
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmCharger = NewDataManager(data, cfg.CacheCfg(), nil)
+	dmCharger = NewDataManager(data, cfg, nil)
 	chargerSrv = NewChargerService(dmCharger,
 		&FilterS{dm: dmCharger, cfg: cfg}, cfg, nil)
 
@@ -521,7 +521,7 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 	cfg.ChargerSCfg().NestedFields = false
 
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmCharger := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dmCharger := NewDataManager(dataDB, cfg, nil)
 	cS := &ChargerS{
 		dm: dmCharger,
 		fltrS: &FilterS{
@@ -567,7 +567,7 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 	cfg.ChargerSCfg().NestedFields = false
 
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmCharger := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dmCharger := NewDataManager(dataDB, cfg, nil)
 	cS := &ChargerS{
 		dm: dmCharger,
 		fltrS: &FilterS{
@@ -617,7 +617,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 			return []string{":"}, nil
 		},
 	}
-	dmCharger := NewDataManager(dbm, cfg.CacheCfg(), nil)
+	dmCharger := NewDataManager(dbm, cfg, nil)
 	cS := &ChargerS{
 		dm: dmCharger,
 		fltrS: &FilterS{
@@ -698,7 +698,7 @@ func TestChargersmatchingChargerProfilesForEventCacheReadErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
@@ -753,7 +753,7 @@ func TestChargersmatchingChargerProfilesForEventWeightFromDynamicsErr(t *testing
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
@@ -806,7 +806,7 @@ func TestChargersmatchingChargerProfilesForEventBlockerFromDynamicsErr(t *testin
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{
@@ -864,7 +864,7 @@ func TestChargersmatchingChargerProfilesForEventBlockerTrue(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	cS := &ChargerS{
 		dm: dm,
 		fltrS: &FilterS{

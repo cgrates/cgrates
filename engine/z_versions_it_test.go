@@ -81,7 +81,7 @@ func testInitDataDB(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dm3 = NewDataManager(dbConn, vrsCfg.CacheCfg(), nil)
+	dm3 = NewDataManager(dbConn, vrsCfg, nil)
 
 	if err != nil {
 		log.Fatal(err)

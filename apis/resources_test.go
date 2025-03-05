@@ -35,7 +35,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -116,7 +116,7 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -150,7 +150,7 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -208,7 +208,7 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms.dm = engine.NewDataManager(dbMock, cfg, nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.SetResourceProfile(context.Background(), resPrf, &reply); err == nil ||
@@ -224,7 +224,7 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -322,7 +322,7 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	adms.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	adms.dm = engine.NewDataManager(dbMock, cfg, nil)
 	experr = "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.RemoveResourceProfile(context.Background(),
@@ -356,7 +356,7 @@ func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -384,7 +384,7 @@ func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -421,7 +421,7 @@ func TestResourcesGetResourceProfilesCountErrMock(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -446,7 +446,7 @@ func TestResourcesGetResourceProfilesCountErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -466,7 +466,7 @@ func TestResourcesNewResourceSv1(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
 	rls := engine.NewResourceService(dm, cfg, nil, nil)
 
 	exp := &ResourceSv1{
@@ -494,7 +494,7 @@ func TestResourcesGetResource(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rls := engine.NewResourceService(dm, cfg, fltrs, nil)
 	adms := &AdminSv1{
@@ -602,7 +602,7 @@ func TestResourcesAuthorizeAllocateReleaseResource(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rls := engine.NewResourceService(dm, cfg, fltrs, nil)
 	adms := &AdminSv1{
@@ -665,7 +665,7 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args1 := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
@@ -785,7 +785,7 @@ func TestResourcesGetResourceProfilesGetIDsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &engine.ResourceProfileWithAPIOpts{
 		ResourceProfile: &engine.ResourceProfile{
@@ -843,7 +843,7 @@ func TestResourcesGetResourceProfilesGetProfileErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -885,7 +885,7 @@ func TestResourcesGetResourceProfileIDsGetOptsErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -930,7 +930,7 @@ func TestResourcesGetResourceProfileIDsPaginateErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,

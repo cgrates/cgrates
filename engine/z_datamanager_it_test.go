@@ -67,7 +67,7 @@ func TestDMitinitDB(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+	dm2 = NewDataManager(dataDB, cfg, nil)
 
 	for _, stest := range sTestsDMit {
 		t.Run(*utils.DBType, stest)

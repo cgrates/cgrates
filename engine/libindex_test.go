@@ -58,7 +58,7 @@ func TestSplitFilterIndexesWrongFormat(t *testing.T) {
 func TestComputeIndexes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
@@ -96,7 +96,7 @@ func TestComputeIndexes(t *testing.T) {
 func TestComputeIndexesIDsNotNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
@@ -129,7 +129,7 @@ func TestComputeIndexesIDsNotNil(t *testing.T) {
 func TestRemoveIndexFiltersItem(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
@@ -154,7 +154,7 @@ func TestRemoveIndexFiltersItem(t *testing.T) {
 func TestRemoveFilterIndexesForFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
@@ -181,7 +181,7 @@ func TestRemoveFilterIndexesForFilter(t *testing.T) {
 func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	// Set an AttributeProfile without filterIDs
 	attrPrf := &AttributeProfile{
@@ -350,7 +350,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 func TestLibIndexModifyAttrPrfFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	// Set a non-indexed type filter
 	fltr := &Filter{
@@ -441,7 +441,7 @@ func TestUpdateFilterIndexThreshold(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -607,7 +607,7 @@ func TestUpdateFilterIndexGetIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -686,7 +686,7 @@ func TestUpdateFilterIndexGetIndexErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -766,7 +766,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -824,7 +824,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -882,7 +882,7 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -986,7 +986,7 @@ func TestUpdateFilterIndexStatErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1040,7 +1040,7 @@ func TestUpdateFilterIndexStatErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1094,7 +1094,7 @@ func TestUpdateFilterIndexResourceIndex(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -1188,7 +1188,7 @@ func TestUpdateFilterIndexResourcetErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1242,7 +1242,7 @@ func TestUpdateFilterIndexResourceErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1296,7 +1296,7 @@ func TestUpdateFilterIndexRouteIndex(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -1399,7 +1399,7 @@ func TestUpdateFilterIndexRouteErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1453,7 +1453,7 @@ func TestUpdateFilterIndexRouteErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1507,7 +1507,7 @@ func TestUpdateFilterIndexChargerIndex(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -1601,7 +1601,7 @@ func TestUpdateFilterIndexChargerErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1655,7 +1655,7 @@ func TestUpdateFilterIndexChargerErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1709,7 +1709,7 @@ func TestUpdateFilterIndexAccountsIndex(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -1814,7 +1814,7 @@ func TestUpdateFilterIndexAccountsErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1868,7 +1868,7 @@ func TestUpdateFilterIndexAccountsErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1922,7 +1922,7 @@ func TestUpdateFilterIndexAttributeErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -1976,7 +1976,7 @@ func TestUpdateFilterIndexAttributeErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -2030,7 +2030,7 @@ func TestUpdateFilterIndexActionProfilesIndex(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -2136,7 +2136,7 @@ func TestUpdateFilterActionProfilesIndexErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -2190,7 +2190,7 @@ func TestUpdateFilterIndexActionProfilesErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -2244,7 +2244,7 @@ func TestUpdateFilterIndexRateProfilesIndex(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -2350,7 +2350,7 @@ func TestUpdateFilterRateProfilesIndexErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -2404,7 +2404,7 @@ func TestUpdateFilterIndexRateProfilesErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -2452,7 +2452,7 @@ func TestUpdateFilterIndexRateProfilesErr2(t *testing.T) {
 func TestRemoveFilterIndexesForFilterErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
 		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
@@ -2470,7 +2470,7 @@ func TestRemoveItemFromFilterIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	expErr := `broken reference to filter: stringFilter for itemType: *attribute_filter_indexes and ID: stringFilterID`
 	if err := removeItemFromFilterIndex(context.Background(), dm, utils.CacheAttributeFilterIndexes, utils.CGRateSorg, utils.MetaRating, "stringFilterID", []string{"stringFilter"}); err == nil || err.Error() != expErr {
@@ -2505,7 +2505,7 @@ func TestRemoveIndexFiltersItemCacheRemoveErr(t *testing.T) {
 
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	indexes := map[string]utils.StringSet{utils.CacheRateFilterIndexes: {"Rate1": {}, "Rate2": {}}}
@@ -2535,7 +2535,7 @@ func TestRemoveIndexFiltersItemSetIndexesErr(t *testing.T) {
 		},
 	}
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	tntGrp := utils.ConcatenatedKey("cgrates.org", "fltrID1")
 	tntxKey := utils.ConcatenatedKey(tntGrp, utils.CacheRateFilterIndexes)
@@ -2578,7 +2578,7 @@ func TestAddIndexFiltersItemCacheRemoveErr(t *testing.T) {
 
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	indexes := map[string]utils.StringSet{utils.CacheRateFilterIndexes: {"Rate1": {}, "Rate2": {}}}
@@ -2604,7 +2604,7 @@ func TestAddIndexFiltersItemSetIndexesErr(t *testing.T) {
 		},
 	}
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	if err := addIndexFiltersItem(context.Background(), dm, utils.CacheRateFilterIndexes, "cgrates.org", "RPP_1", []string{"fltrID1"}); err != utils.ErrNotImplemented {
 		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNotImplemented, err)
@@ -2622,7 +2622,7 @@ func TestAddItemToFilterIndexNewFilterIndexErr(t *testing.T) {
 	}
 
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	if err := addItemToFilterIndex(context.Background(), dm, "", "cgrates.org", "", "", []string{""}); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received <%v>", utils.ErrNotImplemented, err)
@@ -2644,7 +2644,7 @@ func TestNewFilterIndexGetIdxErr(t *testing.T) {
 	}
 
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	cFltr := &Filter{
 		Tenant: "cgrates.org",
@@ -2692,7 +2692,7 @@ func TestAddItemToFilterIndexCacheRemoveErr(t *testing.T) {
 
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	cFltr := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "fltrID1",
@@ -2740,7 +2740,7 @@ func TestRemoveItemFromFilterIndexCacheRemoveErr(t *testing.T) {
 
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 	cFltr := &Filter{
 		Tenant: "cgrates.org",
 		ID:     "fltrID1",
@@ -2791,7 +2791,7 @@ func TestComputeIndexesGetKeysForPrefixErr(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	expErr := "unsupported prefix in GetKeysForPrefix: "
 	if _, err := ComputeIndexes(context.Background(), dm, "cgrates.org", "", utils.CacheRateFilterIndexes, nil, "", nil, nil); err == nil || err.Error() != expErr {
@@ -2807,7 +2807,7 @@ func TestComputeIndexesNilFilterIDs(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
 		ID:               "THD_2",
@@ -2881,7 +2881,7 @@ func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
 		SetThresholdProfileDrvF: func(ctx *context.Context, tp *ThresholdProfile) (err error) { return nil },
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *ThresholdProfile, err error) { return thd, nil },
 	}
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	_, err := ComputeIndexes(context.Background(), dm, "cgrates.org", utils.EmptyString, utils.CacheThresholdFilterIndexes,
 		&[]string{"THD_2"}, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
@@ -2901,7 +2901,7 @@ func TestUpdateFilterIndexRatedSplitErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -2950,7 +2950,7 @@ func TestUpdateFilterIndexRatedGetRateProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -3009,7 +3009,7 @@ func TestUpdateFilterIndexRatedRemoveFilterErr(t *testing.T) {
 			return utils.ErrNotImplemented
 		},
 	}
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -3048,7 +3048,7 @@ func TestUpdateFilterIndexRatedNoRatesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
 		Tenant: "cgrates.org",
@@ -3122,7 +3122,7 @@ func TestUpdateFilterIndexRatedNoRatesErr(t *testing.T) {
 func TestLibIndexRemoveFilterIndexesForFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
+	dm := NewDataManager(dataDB, cfg, nil)
 	tntCtx := "cgrates.org:*sessions"
 
 	tests := []struct {

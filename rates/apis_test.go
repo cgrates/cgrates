@@ -40,7 +40,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 		t.Error(err)
 	}
 	db := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(db, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(db, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rts := NewRateS(cfg, fltrs, dm)
 
@@ -152,7 +152,7 @@ func TestRatesCostForEvent(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	rateS := NewRateS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{

@@ -190,7 +190,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, nil)
 	anz, err := NewAnalyzerS(cfg)
 
 	if err != nil {

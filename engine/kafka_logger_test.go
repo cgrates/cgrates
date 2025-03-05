@@ -116,7 +116,7 @@ func TestExportLoggerCallErrWriter(t *testing.T) {
 	cM.connCache.Set(connID, nil, nil)
 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), cM)
+	dm := NewDataManager(db, cfg, cM)
 	Cache = NewCacheS(cfg, dm, cM, nil)
 
 	el := NewExportLogger(context.Background(), "cgrates.org", cM, cfg)

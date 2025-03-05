@@ -55,8 +55,9 @@ func (s *testMockSessionConn) Handlers() (b map[string]any) {
 }
 
 func TestProcessRequest(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, dm) // no need for filterS but still try to configure the dm :D
 
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}

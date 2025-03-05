@@ -68,7 +68,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
@@ -95,7 +95,7 @@ func TestAttrSProcessEvent2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.EEsNoLksCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- testMock
@@ -121,7 +121,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].ExportPath = filePath
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil)
 	if err != nil {
@@ -177,7 +177,7 @@ func TestV1ProcessEvent2(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].Filters = []string{"*prefix:~*req.Subject:20"}
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil)
 	if err != nil {
@@ -219,7 +219,7 @@ func TestV1ProcessEvent3(t *testing.T) {
 		utils.MetaAttributes: utils.FlagParams{},
 	}
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil)
 	if err != nil {
@@ -255,7 +255,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].Synchronous = true
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	connMngr := engine.NewConnManager(cfg)
 	clientConn := make(chan birpc.ClientConnector, 1)
@@ -333,7 +333,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].Synchronous = true
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil)
 	if err != nil {
@@ -384,7 +384,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 		},
 	}
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil)
 	if err != nil {
@@ -402,7 +402,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil)
 	if err != nil {
@@ -538,7 +538,7 @@ func TestEeSProcessEvent(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].ExportPath = filePath
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil)
 	if err != nil {
@@ -593,7 +593,7 @@ func TestArchiveEventsInReply(t *testing.T) {
 	// cfg.EEsCfg().Exporters[0].Type = "*fileCSV"
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
+	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	eeS, err := NewEventExporterS(cfg, filterS, nil)
 	if err != nil {

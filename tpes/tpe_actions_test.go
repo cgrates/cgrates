@@ -61,7 +61,7 @@ func TestTPEnewTPActions(t *testing.T) {
 			}
 			return act, nil
 		},
-	}, nil, connMng)
+	}, cfg, connMng)
 	exp := &TPActions{
 		dm: dm,
 	}
@@ -75,7 +75,7 @@ func TestTPEExportItemsActions(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpAct := TPActions{
 		dm: dm,
 	}
@@ -114,7 +114,7 @@ func TestTPEExportItemsActionsEmpty(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpAct := TPActions{
 		dm: dm,
 	}
@@ -167,7 +167,7 @@ func TestTPEExportItemsActionsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpAct := TPActions{
 		dm: dm,
 	}
