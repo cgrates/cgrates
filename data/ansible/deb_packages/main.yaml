@@ -92,6 +92,26 @@
         mode: "0644"
       when: not downloaded_go_tarball.stat.exists
 
+    - name: Check Go version in chroots
+      become: true
+      ansible.builtin.command: >-
+        chroot /var/cache/pbuilder/base-{{ item.codename }}+go.cow
+        bash -c "GOROOT=/usr/local/go /usr/local/go/bin/go version"
+      register: chroot_go_version
+      ignore_errors: true
+      with_items: "{{ distributions }}"
+      changed_when: false
+
+    - name: Remove old Go from chroots when version differs
+      become: true
+      ansible.builtin.file:
+        path: "/var/cache/pbuilder/base-{{ item.item.codename }}+go.cow/usr/local/go"
+        state: absent
+      with_items: "{{ chroot_go_version.results }}"
+      when:
+        - item.rc == 0
+        - go_version not in item.stdout
+
     - name: Install Go in chroots
       become: true
       ansible.builtin.unarchive:
