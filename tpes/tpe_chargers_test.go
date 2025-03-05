@@ -48,7 +48,7 @@ func TestTPEnewTPChargers(t *testing.T) {
 			}
 			return chgr, nil
 		},
-	}, nil, connMng)
+	}, cfg, connMng)
 	exp := &TPChargers{
 		dm: dm,
 	}
@@ -62,7 +62,7 @@ func TestTPEExportItemsChargers(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpChgr := TPChargers{
 		dm: dm,
 	}
@@ -112,7 +112,7 @@ func TestTPEExportItemsChargersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpChgr := TPChargers{
 		dm: dm,
 	}

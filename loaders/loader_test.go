@@ -44,7 +44,7 @@ import (
 
 func TestRemoveFromDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, nil)
 	for _, lType := range []string{utils.MetaAttributes, utils.MetaResources, utils.MetaFilters, utils.MetaStats,
 		utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers,
 		utils.MetaRateProfiles, utils.MetaActionProfiles, utils.MetaAccounts} {
@@ -195,7 +195,7 @@ func TestSetToDBWithDBError(t *testing.T) {
 
 func TestSetToDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, nil)
 	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 	if err := setToDB(context.Background(), dm, utils.MetaAttributes, v1, true, false); err != nil {
 		t.Fatal(err)
@@ -311,7 +311,7 @@ func TestSetToDB(t *testing.T) {
 func TestLoaderProcess(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -399,7 +399,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		utils.CacheSv1Clear:       func(_ *context.Context, args, _ any) error { clearCache = args; return nil },
 	}
 	cM.AddInternalConn(connID, utils.CacheSv1, iCh)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -698,7 +698,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 func TestLoaderProcessData(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -743,7 +743,7 @@ func (mockReader) Read([]byte) (int, error) { return 0, utils.ErrNotFound }
 func TestLoaderProcessDataErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -787,7 +787,7 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported",
 func TestLoaderProcessFileURL(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -848,7 +848,7 @@ func (mockLock) IsLockFile(string) (_ bool) { return }
 func TestLoaderProcessIFile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -938,7 +938,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 func TestLoaderProcessFolder(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -1058,7 +1058,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 func TestLoaderProcessFolderErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -1272,7 +1272,7 @@ func TestLoaderListenAndServeI(t *testing.T) {
 func TestLoaderProcessZipErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg.CacheCfg(), cM)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {

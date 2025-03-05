@@ -129,7 +129,7 @@ func testRatePrfITConnect(t *testing.T) {
 		ratePrfCfgIn.DataDbCfg().Host, ratePrfCfgIn.DataDbCfg().Port,
 		ratePrfCfgIn.DataDbCfg().Name, ratePrfCfgIn.DataDbCfg().User,
 		ratePrfCfgIn.DataDbCfg().Password, ratePrfCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), ratePrfCfgIn.DataDbCfg().Opts, ratePrfCfgIn.DataDbCfg().Items)
+		config.CgrConfig(), ratePrfCfgIn.DataDbCfg().Opts, ratePrfCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,7 +137,7 @@ func testRatePrfITConnect(t *testing.T) {
 		ratePrfCfgOut.DataDbCfg().Host, ratePrfCfgOut.DataDbCfg().Port,
 		ratePrfCfgOut.DataDbCfg().Name, ratePrfCfgOut.DataDbCfg().User,
 		ratePrfCfgOut.DataDbCfg().Password, ratePrfCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), ratePrfCfgOut.DataDbCfg().Opts, ratePrfCfgOut.DataDbCfg().Items)
+		config.CgrConfig(), ratePrfCfgOut.DataDbCfg().Opts, ratePrfCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

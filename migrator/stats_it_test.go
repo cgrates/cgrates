@@ -112,7 +112,7 @@ func testStsITConnect(t *testing.T) {
 		stsCfgIn.DataDbCfg().Host, stsCfgIn.DataDbCfg().Port,
 		stsCfgIn.DataDbCfg().Name, stsCfgIn.DataDbCfg().User,
 		stsCfgIn.DataDbCfg().Password, stsCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), stsCfgIn.DataDbCfg().Opts, stsCfgIn.DataDbCfg().Items)
+		config.CgrConfig(), stsCfgIn.DataDbCfg().Opts, stsCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func testStsITConnect(t *testing.T) {
 		stsCfgOut.DataDbCfg().Host, stsCfgOut.DataDbCfg().Port,
 		stsCfgOut.DataDbCfg().Name, stsCfgOut.DataDbCfg().User,
 		stsCfgOut.DataDbCfg().Password, stsCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), stsCfgOut.DataDbCfg().Opts, stsCfgOut.DataDbCfg().Items)
+		config.CgrConfig(), stsCfgOut.DataDbCfg().Opts, stsCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

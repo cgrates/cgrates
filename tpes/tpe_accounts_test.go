@@ -63,7 +63,7 @@ func TestTPEnewTPAccounts(t *testing.T) {
 			}
 			return acc, nil
 		},
-	}, nil, connMng)
+	}, cfg, connMng)
 	exp := &TPAccounts{
 		dm: dm,
 	}
@@ -88,7 +88,7 @@ func TestTPEExportItemsAccount(t *testing.T) {
 	// defer dataDB.Close()
 	// dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpAcc := TPAccounts{
 		dm: dm,
 	}
@@ -204,7 +204,7 @@ func TestTPEExportItemsAccountNoDbConn(t *testing.T) {
 // 			}
 // 			return acc, nil
 // 		},
-// 	}, nil, connMng)
+// 	}, cfg, connMng)
 // 	tpAcc := &TPAccounts{
 // 		dm: dm,
 // 	}
@@ -218,7 +218,7 @@ func TestTPEExportItemsAccountIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpAcc := TPAccounts{
 		dm: dm,
 	}

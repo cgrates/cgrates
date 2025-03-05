@@ -966,7 +966,7 @@ func TestExportRequestSetFieldsPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fltr := NewFilterS(cfg, nil, dm)
 
 	tplFlds := []*config.FCTemplate{
@@ -1002,7 +1002,7 @@ func TestExportRequestSetFieldsPassFalse(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	fltr := NewFilterS(cfg, nil, dm)
 
 	tplFlds := []*config.FCTemplate{
