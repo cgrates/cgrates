@@ -49,7 +49,7 @@ func (tpSts TPRankings) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 		return
 	}
 	for _, rankingsID := range itmIDs {
-		var rankingPrf *engine.RankingProfile
+		var rankingPrf *utils.RankingProfile
 		rankingPrf, err = tpSts.dm.GetRankingProfile(ctx, tnt, rankingsID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

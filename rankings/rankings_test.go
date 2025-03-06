@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package rankings
 
 import (
 	"testing"
@@ -24,10 +24,12 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestTenantID(t *testing.T) {
-	rp := &RankingProfile{
+	rp := &utils.RankingProfile{
 		Tenant:            "cgrates.org",
 		ID:                "01",
 		StatIDs:           []string{"stat1", "stat2"},
@@ -47,7 +49,7 @@ func TestTenantID(t *testing.T) {
 }
 
 func TestRankingProfileWithAPIOpts(t *testing.T) {
-	rp := &RankingProfile{
+	rp := &utils.RankingProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ID",
 		StatIDs:           []string{"stat1", "stat2"},
@@ -57,7 +59,7 @@ func TestRankingProfileWithAPIOpts(t *testing.T) {
 		ThresholdIDs:      []string{"threshold1"},
 	}
 
-	rpo := RankingProfileWithAPIOpts{
+	rpo := utils.RankingProfileWithAPIOpts{
 		RankingProfile: rp,
 		APIOpts:        map[string]any{"option1": "value1"},
 	}
@@ -87,7 +89,7 @@ func TestRankingProfileLockKey(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := rankingProfileLockKey(test.tenant, test.id)
+		result := utils.RankingProfileLockKey(test.tenant, test.id)
 
 		if result != test.expected {
 			t.Errorf("rankingProfileLockKey(%q, %q) = %v; want %v", test.tenant, test.id, result, test.expected)
@@ -96,10 +98,10 @@ func TestRankingProfileLockKey(t *testing.T) {
 }
 
 func TestNewRankingService(t *testing.T) {
-	dm := &DataManager{}
+	dm := &engine.DataManager{}
 	cgrcfg := &config.CGRConfig{}
-	filterS := &FilterS{}
-	connMgr := &ConnManager{}
+	filterS := &engine.FilterS{}
+	connMgr := &engine.ConnManager{}
 
 	rankingService := NewRankingS(dm, connMgr, filterS, cgrcfg)
 
@@ -126,22 +128,21 @@ func TestNewRankingService(t *testing.T) {
 
 func TestStoreRanking(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB([]string{}, []string{}, map[string]*config.ItemOpts{})
-	dm := NewDataManager(dataDB, cfg, nil)
+	dataDB := engine.NewInternalDB([]string{}, []string{}, map[string]*config.ItemOpts{})
+	dm := engine.NewDataManager(dataDB, cfg, nil)
 	rkg := NewRankingS(dm, nil, nil, cfg)
-	ranking := &Ranking{
-		rkPrfl: &RankingProfile{
-			Tenant:            "cgrates.org",
-			ID:                "ID1",
-			Schedule:          "@every 1s",
-			StatIDs:           []string{"stat1", "stat2"},
-			MetricIDs:         []string{"metric1", "metric2"},
-			Sorting:           "asc",
-			SortingParameters: []string{"metric1:true"},
-			Stored:            true,
-			ThresholdIDs:      []string{"threshold1"},
-		},
-	}
+	ranking := &utils.Ranking{}
+	ranking.SetConfig(&utils.RankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "ID1",
+		Schedule:          "@every 1s",
+		StatIDs:           []string{"stat1", "stat2"},
+		MetricIDs:         []string{"metric1", "metric2"},
+		Sorting:           "asc",
+		SortingParameters: []string{"metric1:true"},
+		Stored:            true,
+		ThresholdIDs:      []string{"threshold1"},
+	})
 	ctx := context.Background()
 	cfg.RankingSCfg().StoreInterval = 0
 	if err := rkg.storeRanking(ctx, ranking); err != nil {

@@ -672,8 +672,8 @@ func APItoModelTPRanking(tpRG *utils.TPRankingProfile) (mdls RankingMdls) {
 	return
 }
 
-func APItoRanking(tpRG *utils.TPRankingProfile) (rg *RankingProfile, err error) {
-	rg = &RankingProfile{
+func APItoRanking(tpRG *utils.TPRankingProfile) (rg *utils.RankingProfile, err error) {
+	rg = &utils.RankingProfile{
 		Tenant:            tpRG.Tenant,
 		ID:                tpRG.ID,
 		Schedule:          tpRG.Schedule,
@@ -691,7 +691,7 @@ func APItoRanking(tpRG *utils.TPRankingProfile) (rg *RankingProfile, err error) 
 	return rg, nil
 }
 
-func RankingProfileToAPI(rg *RankingProfile) (tpRG *utils.TPRankingProfile) {
+func RankingProfileToAPI(rg *utils.RankingProfile) (tpRG *utils.TPRankingProfile) {
 	tpRG = &utils.TPRankingProfile{
 		Tenant:            rg.Tenant,
 		ID:                rg.ID,

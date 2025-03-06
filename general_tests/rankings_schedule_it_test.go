@@ -131,7 +131,7 @@ cgrates.org,Stats4,*string:~*req.Account:1004,;30,,,-1,0,,,*acc;*acd;*pdd,,`,
 	time.Sleep(1 * time.Second)
 
 	t.Run("GetRankings", func(t *testing.T) {
-		var rnk engine.Ranking
+		var rnk utils.Ranking
 		sortedStatIds := []string{"Stats3", "Stats2", "Stats1", "Stats4"}
 		if err := client.Call(context.Background(), utils.RankingSv1GetRanking, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RANK1"}}, &rnk); err != nil {
 			t.Error(err)

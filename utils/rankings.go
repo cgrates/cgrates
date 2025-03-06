@@ -15,15 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package utils
 
 import (
 	"sort"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 type RankingProfileWithAPIOpts struct {
@@ -44,7 +42,7 @@ type RankingProfile struct {
 }
 
 func (sgp *RankingProfile) TenantID() string {
-	return utils.ConcatenatedKey(sgp.Tenant, sgp.ID)
+	return ConcatenatedKey(sgp.Tenant, sgp.ID)
 }
 
 // Clone will clone a RankingProfile
@@ -75,9 +73,9 @@ func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 	return
 }
 
-// rankingProfileLockKey returns the ID used to lock a RankingProfile with guardian
-func rankingProfileLockKey(tnt, id string) string {
-	return utils.ConcatenatedKey(utils.CacheRankingProfiles, tnt, id)
+// RankingProfileLockKey returns the ID used to lock a RankingProfile with guardian
+func RankingProfileLockKey(tnt, id string) string {
+	return ConcatenatedKey(CacheRankingProfiles, tnt, id)
 }
 func NewRankingFromProfile(rkP *RankingProfile) (rk *Ranking) {
 	rk = &Ranking{
@@ -87,7 +85,7 @@ func NewRankingFromProfile(rkP *RankingProfile) (rk *Ranking) {
 		Metrics: make(map[string]map[string]float64),
 
 		rkPrfl:    rkP,
-		metricIDs: utils.NewStringSet(rkP.MetricIDs),
+		metricIDs: NewStringSet(rkP.MetricIDs),
 	}
 	if rkP.SortingParameters != nil {
 		rk.SortingParameters = make([]string, len(rkP.SortingParameters))
@@ -115,16 +113,16 @@ type Ranking struct {
 	SortedStatIDs []string
 
 	rkPrfl    *RankingProfile // store here the ranking profile so we can have it at hands further
-	metricIDs utils.StringSet // convert the metricIDs here for faster matching
+	metricIDs StringSet       // convert the metricIDs here for faster matching
 
 }
 
 func (r *Ranking) TenantID() string {
-	return utils.ConcatenatedKey(r.Tenant, r.ID)
+	return ConcatenatedKey(r.Tenant, r.ID)
 }
 
-// asRankingSummary converts the Ranking instance into a RankingSummary one
-func (rk *Ranking) asRankingSummary() (rkSm *RankingSummary) {
+// AsRankingSummary converts the Ranking instance into a RankingSummary one
+func (rk *Ranking) AsRankingSummary() (rkSm *RankingSummary) {
 	rkSm = &RankingSummary{
 		Tenant:     rk.Tenant,
 		ID:         rk.ID,
@@ -139,8 +137,8 @@ type rankingSorter interface {
 	sortStatIDs() []string // sortStatIDs returns the sorted list of statIDs
 }
 
-// rankingSortStats will return the list of sorted statIDs out of the sortingData map
-func rankingSortStats(sortingType string, sortingParams []string,
+// RankingSortStats will return the list of sorted statIDs out of the sortingData map
+func RankingSortStats(sortingType string, sortingParams []string,
 	Metrics map[string]map[string]float64) (sortedStatIDs []string, err error) {
 	var rnkSrtr rankingSorter
 	if rnkSrtr, err = newRankingSorter(sortingType, sortingParams, Metrics); err != nil {
@@ -156,11 +154,11 @@ func newRankingSorter(sortingType string, sortingParams []string,
 	Metrics map[string]map[string]float64) (rkStr rankingSorter, err error) {
 	switch sortingType {
 	default:
-		err = utils.ErrPrefixNotErrNotImplemented(sortingType)
+		err = ErrPrefixNotErrNotImplemented(sortingType)
 		return
-	case utils.MetaDesc:
+	case MetaDesc:
 		return newRankingDescSorter(sortingParams, Metrics), nil
-	case utils.MetaAsc:
+	case MetaAsc:
 		return newRankingAscSorter(sortingParams, Metrics), nil
 	}
 }
@@ -169,11 +167,11 @@ func newRankingSorter(sortingType string, sortingParams []string,
 func newRankingDescSorter(sortingParams []string,
 	Metrics map[string]map[string]float64) (rkDsrtr *rankingDescSorter) {
 	clnSp := make([]string, len(sortingParams))
-	sPReversed := make(utils.StringSet)
+	sPReversed := make(StringSet)
 	for i, sP := range sortingParams { // clean the sortingParams, out of param:false or param:true definitions
-		sPSlc := strings.Split(sP, utils.InInFieldSep)
+		sPSlc := strings.Split(sP, InInFieldSep)
 		clnSp[i] = sPSlc[0]
-		if len(sPSlc) > 1 && sPSlc[1] == utils.FalseStr {
+		if len(sPSlc) > 1 && sPSlc[1] == FalseStr {
 			sPReversed.Add(sPSlc[0]) // param defined as param:false which should be added to reversing comparison
 		}
 	}
@@ -191,7 +189,7 @@ func newRankingDescSorter(sortingParams []string,
 // rankingDescSorter will sort data descendent for metrics in sortingParams or random if all equal
 type rankingDescSorter struct {
 	sMetricIDs []string
-	sMetricRev utils.StringSet // list of exceptios for sortingParams, reverting the sorting logic
+	sMetricRev StringSet // list of exceptios for sortingParams, reverting the sorting logic
 	Metrics    map[string]map[string]float64
 
 	statIDs []string // list of keys of the Metrics
@@ -226,7 +224,7 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 			return ret
 		}
 		//in case that we have the same value for all params we return randomly
-		return utils.BoolGenerator().RandomBool()
+		return BoolGenerator().RandomBool()
 	})
 	return rkDsrtr.statIDs
 }
@@ -235,11 +233,11 @@ func (rkDsrtr *rankingDescSorter) sortStatIDs() []string {
 func newRankingAscSorter(sortingParams []string,
 	Metrics map[string]map[string]float64) (rkASrtr *rankingAscSorter) {
 	clnSp := make([]string, len(sortingParams))
-	sPReversed := make(utils.StringSet)
+	sPReversed := make(StringSet)
 	for i, sP := range sortingParams { // clean the sortingParams, out of param:false or param:true definitions
-		sPSlc := strings.Split(sP, utils.InInFieldSep)
+		sPSlc := strings.Split(sP, InInFieldSep)
 		clnSp[i] = sPSlc[0]
-		if len(sPSlc) > 1 && sPSlc[1] == utils.FalseStr {
+		if len(sPSlc) > 1 && sPSlc[1] == FalseStr {
 			sPReversed.Add(sPSlc[0]) // param defined as param:false which should be added to reversing comparison
 		}
 	}
@@ -257,7 +255,7 @@ func newRankingAscSorter(sortingParams []string,
 // rankingAscSorter will sort data ascendent for metrics in sortingParams or randomly if all equal
 type rankingAscSorter struct {
 	sMetricIDs []string
-	sMetricRev utils.StringSet // list of exceptios for sortingParams, reverting the sorting logic
+	sMetricRev StringSet // list of exceptios for sortingParams, reverting the sorting logic
 	Metrics    map[string]map[string]float64
 
 	statIDs []string // list of keys of the Metrics
@@ -292,7 +290,7 @@ func (rkASrtr *rankingAscSorter) sortStatIDs() []string {
 			return ret
 		}
 		//in case that we have the same value for all params we return randomly
-		return utils.BoolGenerator().RandomBool()
+		return BoolGenerator().RandomBool()
 	})
 	return rkASrtr.statIDs
 }
@@ -307,37 +305,37 @@ type RankingSummary struct {
 
 func (tp *RankingProfile) Set(path []string, val any, _ bool) (err error) {
 	if len(path) != 1 {
-		return utils.ErrWrongPath
+		return ErrWrongPath
 	}
 
 	switch path[0] {
 	default:
-		return utils.ErrWrongPath
-	case utils.Tenant:
-		tp.Tenant = utils.IfaceAsString(val)
-	case utils.ID:
-		tp.ID = utils.IfaceAsString(val)
-	case utils.Schedule:
-		tp.Schedule = utils.IfaceAsString(val)
-	case utils.StatIDs:
+		return ErrWrongPath
+	case Tenant:
+		tp.Tenant = IfaceAsString(val)
+	case ID:
+		tp.ID = IfaceAsString(val)
+	case Schedule:
+		tp.Schedule = IfaceAsString(val)
+	case StatIDs:
 		var valA []string
-		valA, err = utils.IfaceAsStringSlice(val)
+		valA, err = IfaceAsStringSlice(val)
 		tp.StatIDs = append(tp.StatIDs, valA...)
-	case utils.MetricIDs:
+	case MetricIDs:
 		var valA []string
-		valA, err = utils.IfaceAsStringSlice(val)
+		valA, err = IfaceAsStringSlice(val)
 		tp.MetricIDs = append(tp.MetricIDs, valA...)
-	case utils.Sorting:
-		tp.Sorting = utils.IfaceAsString(val)
-	case utils.SortingParameters:
+	case Sorting:
+		tp.Sorting = IfaceAsString(val)
+	case SortingParameters:
 		var valA []string
-		valA, err = utils.IfaceAsStringSlice(val)
+		valA, err = IfaceAsStringSlice(val)
 		tp.SortingParameters = append(tp.SortingParameters, valA...)
-	case utils.Stored:
-		tp.Stored, err = utils.IfaceAsBool(val)
-	case utils.ThresholdIDs:
+	case Stored:
+		tp.Stored, err = IfaceAsBool(val)
+	case ThresholdIDs:
 		var valA []string
-		valA, err = utils.IfaceAsStringSlice(val)
+		valA, err = IfaceAsStringSlice(val)
 		tp.ThresholdIDs = append(tp.ThresholdIDs, valA...)
 	}
 	return
@@ -366,51 +364,84 @@ func (tp *RankingProfile) Merge(v2 any) {
 	}
 }
 
-func (tp *RankingProfile) String() string { return utils.ToJSON(tp) }
+func (tp *RankingProfile) String() string { return ToJSON(tp) }
 func (tp *RankingProfile) FieldAsString(fldPath []string) (_ string, err error) {
 	var val any
 	if val, err = tp.FieldAsInterface(fldPath); err != nil {
 		return
 	}
-	return utils.IfaceAsString(val), nil
+	return IfaceAsString(val), nil
 }
 func (tp *RankingProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
-		return nil, utils.ErrNotFound
+		return nil, ErrNotFound
 	}
 	switch fldPath[0] {
 	default:
-		fld, idx := utils.GetPathIndex(fldPath[0])
+		fld, idx := GetPathIndex(fldPath[0])
 		if idx != nil {
 			switch fld {
-			case utils.StatIDs:
+			case StatIDs:
 				if *idx < len(tp.StatIDs) {
 					return tp.StatIDs[*idx], nil
 				}
-			case utils.MetricIDs:
+			case MetricIDs:
 				if *idx < len(tp.MetricIDs) {
 					return tp.MetricIDs[*idx], nil
 				}
-			case utils.SortingParameters:
+			case SortingParameters:
 				if *idx < len(tp.SortingParameters) {
 					return tp.SortingParameters[*idx], nil
 				}
-			case utils.ThresholdIDs:
+			case ThresholdIDs:
 				if *idx < len(tp.ThresholdIDs) {
 					return tp.ThresholdIDs[*idx], nil
 				}
 			}
 		}
-		return nil, utils.ErrNotFound
-	case utils.Tenant:
+		return nil, ErrNotFound
+	case Tenant:
 		return tp.Tenant, nil
-	case utils.ID:
+	case ID:
 		return tp.ID, nil
-	case utils.Schedule:
+	case Schedule:
 		return tp.Schedule, nil
-	case utils.Sorting:
+	case Sorting:
 		return tp.Sorting, nil
-	case utils.Stored:
+	case Stored:
 		return tp.Stored, nil
 	}
+}
+
+// Config returns the ranking's profile configuration.
+func (r *Ranking) Config() *RankingProfile {
+	return r.rkPrfl
+}
+
+func (t *Ranking) SetConfig(rp *RankingProfile) {
+	t.rkPrfl = rp
+}
+
+// Lock locks the ranking mutex.
+func (r *Ranking) Lock() {
+	r.rMux.Lock()
+}
+
+// Unlock unlocks the ranking mutex.
+func (r *Ranking) Unlock() {
+	r.rMux.Unlock()
+}
+
+// RLock locks the ranking mutex for reading.
+func (r *Ranking) RLock() {
+	r.rMux.RLock()
+}
+
+// RUnlock unlocks the read lock on the ranking mutex.
+func (r *Ranking) RUnlock() {
+	r.rMux.RUnlock()
+}
+
+func (r *Ranking) MetricIDs() StringSet {
+	return r.metricIDs
 }

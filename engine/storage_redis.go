@@ -577,7 +577,7 @@ func (rs *RedisStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) 
 	return rs.Cmd(nil, redisDEL, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) SetRankingProfileDrv(ctx *context.Context, sg *RankingProfile) (err error) {
+func (rs *RedisStorage) SetRankingProfileDrv(ctx *context.Context, sg *utils.RankingProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sg); err != nil {
 		return
@@ -585,7 +585,7 @@ func (rs *RedisStorage) SetRankingProfileDrv(ctx *context.Context, sg *RankingPr
 	return rs.Cmd(nil, redisSET, utils.RankingProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
 }
 
-func (rs *RedisStorage) GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sg *RankingProfile, err error) {
+func (rs *RedisStorage) GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sg *utils.RankingProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.RankingProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -601,7 +601,7 @@ func (rs *RedisStorage) RemRankingProfileDrv(ctx *context.Context, tenant string
 	return rs.Cmd(nil, redisDEL, utils.RankingProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (rn *Ranking, err error) {
+func (rs *RedisStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (rn *utils.Ranking, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.RankingPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -613,7 +613,7 @@ func (rs *RedisStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (
 	return rn, err
 }
 
-func (rs *RedisStorage) SetRankingDrv(_ *context.Context, rn *Ranking) (err error) {
+func (rs *RedisStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(rn); err != nil {
 		return

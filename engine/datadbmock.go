@@ -51,8 +51,8 @@ type DataDBMock struct {
 	SetTrendProfileDrvF        func(ctx *context.Context, tr *utils.TrendProfile) (err error)
 	GetTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (sq *utils.TrendProfile, err error)
 	RemTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (err error)
-	SetRankingProfileDrvF      func(ctx *context.Context, sq *RankingProfile) (err error)
-	GetRankingProfileDrvF      func(ctx *context.Context, tenant string, id string) (sq *RankingProfile, err error)
+	SetRankingProfileDrvF      func(ctx *context.Context, sq *utils.RankingProfile) (err error)
+	GetRankingProfileDrvF      func(ctx *context.Context, tenant string, id string) (sq *utils.RankingProfile, err error)
 	RemRankingProfileDrvF      func(ctx *context.Context, tenant string, id string) (err error)
 	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *StatQueueProfile) (err error)
@@ -228,14 +228,14 @@ func (dbM *DataDBMock) RemStatQueueDrv(ctx *context.Context, tenant, id string) 
 	}
 	return utils.ErrNotImplemented
 }
-func (dbM *DataDBMock) GetRankingProfileDrv(ctx *context.Context, tenant, id string) (sg *RankingProfile, err error) {
+func (dbM *DataDBMock) GetRankingProfileDrv(ctx *context.Context, tenant, id string) (sg *utils.RankingProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
 		return dbM.GetRankingProfileDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRankingProfileDrv(ctx *context.Context, rg *RankingProfile) (err error) {
+func (dbM *DataDBMock) SetRankingProfileDrv(ctx *context.Context, rg *utils.RankingProfile) (err error) {
 	if dbM.SetRankingProfileDrvF(ctx, rg) != nil {
 		return dbM.SetRankingProfileDrvF(ctx, rg)
 	}
@@ -249,11 +249,11 @@ func (dbM *DataDBMock) RemRankingProfileDrv(ctx *context.Context, tenant string,
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRankingDrv(ctx *context.Context, tenant, id string) (*Ranking, error) {
+func (dbM *DataDBMock) GetRankingDrv(ctx *context.Context, tenant, id string) (*utils.Ranking, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRankingDrv(ctx *context.Context, _ *Ranking) error {
+func (dbM *DataDBMock) SetRankingDrv(ctx *context.Context, _ *utils.Ranking) error {
 	return utils.ErrNotImplemented
 }
 

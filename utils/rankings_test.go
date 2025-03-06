@@ -15,15 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package utils
 
 import (
 	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestRankingProfileTenantID(t *testing.T) {
@@ -112,7 +110,7 @@ func TestNewRankingFromProfile(t *testing.T) {
 		t.Error("Expected Metrics map to be initialized, but it is nil")
 	}
 
-	expectedMetricIDs := utils.NewStringSet(profile.MetricIDs)
+	expectedMetricIDs := NewStringSet(profile.MetricIDs)
 	if !ranking.metricIDs.Equals(expectedMetricIDs) {
 		t.Errorf("Expected metricIDs %v, got %v", expectedMetricIDs, ranking.metricIDs)
 	}
@@ -151,7 +149,7 @@ func TestRanking_asRankingSummary(t *testing.T) {
 		SortedStatIDs: []string{"stat1", "stat2", "stat3"},
 	}
 
-	rkSummary := rk.asRankingSummary()
+	rkSummary := rk.AsRankingSummary()
 
 	if rkSummary.Tenant != rk.Tenant {
 		t.Errorf("Expected Tenant %s, but got %s", rk.Tenant, rkSummary.Tenant)
@@ -196,14 +194,14 @@ func TestRankingSortStats(t *testing.T) {
 	}{
 		{
 			name:          "Sort Descending by metric1",
-			sortingType:   utils.MetaDesc,
+			sortingType:   MetaDesc,
 			sortingParams: []string{"metric1"},
 			expectedOrder: []string{"stat3", "stat1", "stat2"},
 			expectError:   false,
 		},
 		{
 			name:          "Sort Ascending by metric2",
-			sortingType:   utils.MetaAsc,
+			sortingType:   MetaAsc,
 			sortingParams: []string{"metric2"},
 			expectedOrder: []string{"stat3", "stat1", "stat2"},
 			expectError:   false,
@@ -219,7 +217,7 @@ func TestRankingSortStats(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sortedStatIDs, err := rankingSortStats(tt.sortingType, tt.sortingParams, metrics)
+			sortedStatIDs, err := RankingSortStats(tt.sortingType, tt.sortingParams, metrics)
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("expected error but got nil")
@@ -327,20 +325,20 @@ func TestRankingProfileFieldAsString(t *testing.T) {
 		err     error
 		val     any
 	}{
-		{utils.ID, []string{utils.ID}, nil, "RP1"},
-		{utils.Tenant, []string{utils.Tenant}, nil, "cgrates.org"},
-		{utils.Schedule, []string{utils.Schedule}, nil, "@every 2s"},
-		{utils.StatIDs, []string{utils.StatIDs + "[0]"}, nil, "Stat1"},
-		{utils.StatIDs, []string{utils.StatIDs + "[1]"}, nil, "Stat2"},
-		{utils.MetricIDs, []string{utils.MetricIDs + "[0]"}, nil, "*tcc"},
-		{utils.MetricIDs, []string{utils.MetricIDs + "[1]"}, nil, "*acc"},
-		{utils.Sorting, []string{utils.Sorting}, nil, "*asc"},
-		{utils.Stored, []string{utils.Stored}, nil, false},
-		{utils.SortingParameters, []string{utils.SortingParameters + "[0]"}, nil, "*acc"},
-		{utils.SortingParameters, []string{utils.SortingParameters + "[1]"}, nil, "*pdd:false"},
-		{utils.ThresholdIDs, []string{utils.ThresholdIDs + "[0]"}, nil, "Threshold1"},
-		{utils.ThresholdIDs, []string{utils.ThresholdIDs + "[1]"}, nil, "Threshold2"},
-		{"NonExistingField", []string{"Field1"}, utils.ErrNotFound, nil},
+		{ID, []string{ID}, nil, "RP1"},
+		{Tenant, []string{Tenant}, nil, "cgrates.org"},
+		{Schedule, []string{Schedule}, nil, "@every 2s"},
+		{StatIDs, []string{StatIDs + "[0]"}, nil, "Stat1"},
+		{StatIDs, []string{StatIDs + "[1]"}, nil, "Stat2"},
+		{MetricIDs, []string{MetricIDs + "[0]"}, nil, "*tcc"},
+		{MetricIDs, []string{MetricIDs + "[1]"}, nil, "*acc"},
+		{Sorting, []string{Sorting}, nil, "*asc"},
+		{Stored, []string{Stored}, nil, false},
+		{SortingParameters, []string{SortingParameters + "[0]"}, nil, "*acc"},
+		{SortingParameters, []string{SortingParameters + "[1]"}, nil, "*pdd:false"},
+		{ThresholdIDs, []string{ThresholdIDs + "[0]"}, nil, "Threshold1"},
+		{ThresholdIDs, []string{ThresholdIDs + "[1]"}, nil, "Threshold2"},
+		{"NonExistingField", []string{"Field1"}, ErrNotFound, nil},
 	}
 	rp := &RankingProfile{
 		Tenant:            "cgrates.org",
@@ -390,13 +388,13 @@ func TestNewRankingSorter(t *testing.T) {
 		expectSorterType string
 	}{
 		{
-			sortingType:      utils.MetaAsc,
+			sortingType:      MetaAsc,
 			sortingParams:    []string{"*acc"},
 			expectErr:        false,
 			expectSorterType: "RankingAscSorter",
 		},
 		{
-			sortingType:      utils.MetaDesc,
+			sortingType:      MetaDesc,
 			sortingParams:    []string{"*tcc"},
 			expectErr:        false,
 			expectSorterType: "RankingDescSorter",
@@ -421,11 +419,11 @@ func TestNewRankingSorter(t *testing.T) {
 				t.Errorf("Did not expect an error for sorting type %q, but got: %v", test.sortingType, err)
 			}
 			switch test.sortingType {
-			case utils.MetaAsc:
+			case MetaAsc:
 				if _, ok := rkSorter.(*rankingAscSorter); !ok {
 					t.Errorf("Expected sorter type 'rankingAscSorter', but got %T", rkSorter)
 				}
-			case utils.MetaDesc:
+			case MetaDesc:
 				if _, ok := rkSorter.(*rankingDescSorter); !ok {
 					t.Errorf("Expected sorter type 'rankingDescSorter', but got %T", rkSorter)
 				}
@@ -444,63 +442,63 @@ func TestRankingProfileSet(t *testing.T) {
 	}{
 		{
 			name:        "Set Tenant",
-			path:        []string{utils.Tenant},
+			path:        []string{Tenant},
 			val:         "cgrates.org",
 			expectedErr: nil,
 			expectedRP:  RankingProfile{Tenant: "cgrates.org"},
 		},
 		{
 			name:        "Set ID",
-			path:        []string{utils.ID},
+			path:        []string{ID},
 			val:         "profile1",
 			expectedErr: nil,
 			expectedRP:  RankingProfile{ID: "profile1"},
 		},
 		{
 			name:        "Set Schedule",
-			path:        []string{utils.Schedule},
+			path:        []string{Schedule},
 			val:         "0 0 * * *",
 			expectedErr: nil,
 			expectedRP:  RankingProfile{Schedule: "0 0 * * *"},
 		},
 		{
 			name:        "Set StatIDs",
-			path:        []string{utils.StatIDs},
+			path:        []string{StatIDs},
 			val:         []string{"stat1", "stat2"},
 			expectedErr: nil,
 			expectedRP:  RankingProfile{StatIDs: []string{"stat1", "stat2"}},
 		},
 		{
 			name:        "Set MetricIDs",
-			path:        []string{utils.MetricIDs},
+			path:        []string{MetricIDs},
 			val:         []string{"metric1", "metric2"},
 			expectedErr: nil,
 			expectedRP:  RankingProfile{MetricIDs: []string{"metric1", "metric2"}},
 		},
 		{
 			name:        "Set Sorting",
-			path:        []string{utils.Sorting},
+			path:        []string{Sorting},
 			val:         "asc",
 			expectedErr: nil,
 			expectedRP:  RankingProfile{Sorting: "asc"},
 		},
 		{
 			name:        "Set SortingParameters",
-			path:        []string{utils.SortingParameters},
+			path:        []string{SortingParameters},
 			val:         []string{"param1", "param2"},
 			expectedErr: nil,
 			expectedRP:  RankingProfile{SortingParameters: []string{"param1", "param2"}},
 		},
 		{
 			name:        "Set Stored",
-			path:        []string{utils.Stored},
+			path:        []string{Stored},
 			val:         true,
 			expectedErr: nil,
 			expectedRP:  RankingProfile{Stored: true},
 		},
 		{
 			name:        "Set ThresholdIDs",
-			path:        []string{utils.ThresholdIDs},
+			path:        []string{ThresholdIDs},
 			val:         []string{"threshold1", "threshold2"},
 			expectedErr: nil,
 			expectedRP:  RankingProfile{ThresholdIDs: []string{"threshold1", "threshold2"}},
@@ -509,14 +507,14 @@ func TestRankingProfileSet(t *testing.T) {
 			name:        "Wrong path",
 			path:        []string{"wrongpath"},
 			val:         "value",
-			expectedErr: utils.ErrWrongPath,
+			expectedErr: ErrWrongPath,
 			expectedRP:  RankingProfile{},
 		},
 		{
 			name:        "Empty path",
 			path:        []string{},
 			val:         "value",
-			expectedErr: utils.ErrWrongPath,
+			expectedErr: ErrWrongPath,
 			expectedRP:  RankingProfile{},
 		},
 	}
@@ -604,13 +602,13 @@ func TestRankingProfileStringJson(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.rp.String()
 
-			var resultMap map[string]interface{}
+			var resultMap map[string]any
 			err := json.Unmarshal([]byte(result), &resultMap)
 			if err != nil {
 				t.Errorf("Error unmarshalling result: %v", err)
 			}
 
-			expectedMap := map[string]interface{}{}
+			expectedMap := map[string]any{}
 			err = json.Unmarshal([]byte(tt.expectedJSON), &expectedMap)
 			if err != nil {
 				t.Errorf("Error unmarshalling expected JSON: %v", err)
@@ -618,8 +616,8 @@ func TestRankingProfileStringJson(t *testing.T) {
 
 			for key, value1 := range resultMap {
 				if value2, exists := expectedMap[key]; exists {
-					if value1Slice, ok1 := value1.([]interface{}); ok1 {
-						if value2Slice, ok2 := value2.([]interface{}); ok2 {
+					if value1Slice, ok1 := value1.([]any); ok1 {
+						if value2Slice, ok2 := value2.([]any); ok2 {
 							if len(value1Slice) != len(value2Slice) {
 								t.Errorf("Test %s failed: slice length mismatch for key %s", tt.name, key)
 							}

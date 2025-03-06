@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apis
+package rankings
 
 import (
 	"path"
@@ -120,7 +120,7 @@ func testRankingsRPCConn(t *testing.T) {
 }
 
 func testRankingsGetRankingProfileBeforeSet(t *testing.T) {
-	var replyRankingProfile engine.RankingProfile
+	var replyRankingProfile utils.RankingProfile
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -132,7 +132,7 @@ func testRankingsGetRankingProfileBeforeSet(t *testing.T) {
 }
 
 func testRankingsGetRankingProfilesBeforeSet(t *testing.T) {
-	var replyRankingProfiles *[]*engine.RankingProfile
+	var replyRankingProfiles *[]*utils.RankingProfile
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -164,9 +164,9 @@ func testRankingsGetRankingProfileCountBeforeSet(t *testing.T) {
 }
 
 func testRankingsSetRankingProfiles(t *testing.T) {
-	rankingProfiles := []*engine.RankingProfileWithAPIOpts{
+	rankingProfiles := []*utils.RankingProfileWithAPIOpts{
 		{
-			RankingProfile: &engine.RankingProfile{
+			RankingProfile: &utils.RankingProfile{
 				ID:     "TestA_Ranking1",
 				Tenant: "cgrates.org",
 
@@ -175,7 +175,7 @@ func testRankingsSetRankingProfiles(t *testing.T) {
 			},
 		},
 		{
-			RankingProfile: &engine.RankingProfile{
+			RankingProfile: &utils.RankingProfile{
 				ID:     "TestA_Ranking2",
 				Tenant: "cgrates.org",
 
@@ -184,7 +184,7 @@ func testRankingsSetRankingProfiles(t *testing.T) {
 			},
 		},
 		{
-			RankingProfile: &engine.RankingProfile{
+			RankingProfile: &utils.RankingProfile{
 				ID:     "TestA_Ranking3",
 				Tenant: "cgrates.org",
 
@@ -193,7 +193,7 @@ func testRankingsSetRankingProfiles(t *testing.T) {
 			},
 		},
 		{
-			RankingProfile: &engine.RankingProfile{
+			RankingProfile: &utils.RankingProfile{
 				ID:                "TestB_Ranking1",
 				Tenant:            "cgrates.org",
 				Sorting:           utils.MetaWeight,
@@ -201,7 +201,7 @@ func testRankingsSetRankingProfiles(t *testing.T) {
 			},
 		},
 		{
-			RankingProfile: &engine.RankingProfile{
+			RankingProfile: &utils.RankingProfile{
 				ID:                "TestB_Ranking2",
 				Tenant:            "cgrates.org",
 				Sorting:           utils.MetaWeight,
@@ -222,13 +222,13 @@ func testRankingsSetRankingProfiles(t *testing.T) {
 }
 
 func testRankingsGetRankingProfileAfterSet(t *testing.T) {
-	expectedRankingProfile := engine.RankingProfile{
+	expectedRankingProfile := utils.RankingProfile{
 		ID:                "TestA_Ranking1",
 		Tenant:            "cgrates.org",
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
 	}
-	var replyRankingProfile engine.RankingProfile
+	var replyRankingProfile utils.RankingProfile
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -319,7 +319,7 @@ func testRankingsGetRankingProfileCountAfterSet(t *testing.T) {
 }
 
 func testRankingsGetRankingProfilesAfterSet(t *testing.T) {
-	expectedRankingProfiles := []*engine.RankingProfile{
+	expectedRankingProfiles := []*utils.RankingProfile{
 		{
 			ID:                "TestA_Ranking1",
 			Tenant:            "cgrates.org",
@@ -352,7 +352,7 @@ func testRankingsGetRankingProfilesAfterSet(t *testing.T) {
 			SortingParameters: []string{},
 		},
 	}
-	var replyRankingProfiles []*engine.RankingProfile
+	var replyRankingProfiles []*utils.RankingProfile
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -390,7 +390,7 @@ func testRankingsRemoveRankingProfile(t *testing.T) {
 }
 
 func testRankingsGetRankingProfileAfterRemove(t *testing.T) {
-	var replyRankingProfile engine.RankingProfile
+	var replyRankingProfile utils.RankingProfile
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -478,7 +478,7 @@ func testRankingsGetRankingProfileCountAfterRemove(t *testing.T) {
 }
 
 func testRankingsGetRankingProfilesAfterRemove(t *testing.T) {
-	expectedRankingProfiles := []*engine.RankingProfile{
+	expectedRankingProfiles := []*utils.RankingProfile{
 		{
 			ID:                "TestA_Ranking1",
 			Tenant:            "cgrates.org",
@@ -504,7 +504,7 @@ func testRankingsGetRankingProfilesAfterRemove(t *testing.T) {
 			SortingParameters: []string{},
 		},
 	}
-	var replyRankingProfiles []*engine.RankingProfile
+	var replyRankingProfiles []*utils.RankingProfile
 	if err := raRPC.Call(context.Background(), utils.AdminSv1GetRankingProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",

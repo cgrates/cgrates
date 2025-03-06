@@ -2633,14 +2633,14 @@ func TestFilterRanking(t *testing.T) {
 					return fmt.Errorf("wrong args")
 				}
 				if argTntID.ID == "Ranking1" && argTntID.Tenant == "cgrates.org" {
-					rn := Ranking{
+					rn := utils.Ranking{
 						Tenant:        "cgrates.org",
 						ID:            "Ranking1",
 						LastUpdate:    time.Now(),
 						SortedStatIDs: []string{"Stat5", "Stat6", "Stat7", "Stat4", "Stat3", "Stat1", "Stat2"},
 					}
-					rnS := rn.asRankingSummary()
-					*reply.(*RankingSummary) = *rnS
+					rnS := rn.AsRankingSummary()
+					*reply.(*utils.RankingSummary) = *rnS
 					return nil
 				}
 				return utils.ErrNotFound
