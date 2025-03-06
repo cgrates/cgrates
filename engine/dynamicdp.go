@@ -140,7 +140,7 @@ func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaRankings:
 		// sample of fieldName : ~*rankings.RankingID.SortedStatIDs[0]
-		var rankingSum RankingSummary
+		var rankingSum utils.RankingSummary
 		if err := connMgr.Call(context.TODO(), dDP.rnkConns, utils.RankingSv1GetRankingSummary, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &rankingSum); err != nil {
 			return nil, err
 		}

@@ -124,12 +124,12 @@ cgrates.org,Stats4,*string:~*req.Account:1004,,,,-1,,,,*acc;*acd;*pdd,,`}
 	})
 
 	t.Run("GetRankingsAfterStoreInterval", func(t *testing.T) {
-		rankingsChan := make(chan *engine.Ranking, 1)
+		rankingsChan := make(chan *utils.Ranking, 1)
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 		go func() {
 			ticker := time.NewTicker(600 * time.Millisecond)
-			var rnk engine.Ranking
+			var rnk utils.Ranking
 			for {
 				select {
 				case <-ticker.C:
@@ -213,7 +213,7 @@ cgrates.org,Stats4,*string:~*req.Account:1004,,,,-1,,,,*acc;*acd;*pdd,,`}
 	})
 
 	t.Run("GetRankingsNotStored", func(t *testing.T) {
-		metricsChan := make(chan *engine.Ranking, 1)
+		metricsChan := make(chan *utils.Ranking, 1)
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		go func() {
@@ -221,7 +221,7 @@ cgrates.org,Stats4,*string:~*req.Account:1004,,,,-1,,,,*acc;*acd;*pdd,,`}
 				ticker := time.NewTicker(700 * time.Millisecond)
 				select {
 				case <-ticker.C:
-					var rnk engine.Ranking
+					var rnk utils.Ranking
 					err := client.Call(context.Background(), utils.RankingSv1GetRanking, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RANK1"}}, &rnk)
 					if err != nil {
 						if err.Error() != utils.ErrNotFound.Error() {
@@ -273,7 +273,7 @@ cgrates.org,Stats4,*string:~*req.Account:1004,,,,-1,,,,*acc;*acd;*pdd,,`}
 		}
 	})
 	t.Run("GetRankingsStoredUnlimited", func(t *testing.T) {
-		rankingChan := make(chan *engine.Ranking, 1)
+		rankingChan := make(chan *utils.Ranking, 1)
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 		go func() {
@@ -281,7 +281,7 @@ cgrates.org,Stats4,*string:~*req.Account:1004,,,,-1,,,,*acc;*acd;*pdd,,`}
 			for {
 				select {
 				case <-ticker.C:
-					var rnk engine.Ranking
+					var rnk utils.Ranking
 					err := client.Call(context.Background(), utils.RankingSv1GetRanking, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RANK1"}}, &rnk)
 					if err != nil {
 						if err.Error() != utils.ErrNotFound.Error() {

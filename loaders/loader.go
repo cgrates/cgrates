@@ -112,7 +112,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 	case utils.MetaTrends:
 		return dm.SetTrendProfile(ctx, data.(*utils.TrendProfile))
 	case utils.MetaRankings:
-		return dm.SetRankingProfile(ctx, data.(*engine.RankingProfile))
+		return dm.SetRankingProfile(ctx, data.(*utils.RankingProfile))
 	}
 	return
 }
