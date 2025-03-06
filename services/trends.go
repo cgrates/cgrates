@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/trends"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,7 @@ func NewTrendService(cfg *config.CGRConfig) *TrendService {
 type TrendService struct {
 	mu        sync.RWMutex
 	cfg       *config.CGRConfig
-	trs       *engine.TrendS
+	trs       *trends.TrendS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -70,7 +71,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 
 	trs.mu.Lock()
 	defer trs.mu.Unlock()
-	trs.trs = engine.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), cms.ConnManager())
+	trs.trs = trends.NewTrendService(dbs.DataManager(), trs.cfg, fs.FilterS(), cms.ConnManager())
 	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
 	}

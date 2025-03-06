@@ -49,7 +49,7 @@ func (tpSts TPTrends) exportItems(ctx *context.Context, wrtr io.Writer, tnt stri
 		return
 	}
 	for _, trendsID := range itmIDs {
-		var trendPrf *engine.TrendProfile
+		var trendPrf *utils.TrendProfile
 		trendPrf, err = tpSts.dm.GetTrendProfile(ctx, tnt, trendsID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

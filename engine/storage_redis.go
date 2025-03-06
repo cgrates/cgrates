@@ -529,7 +529,7 @@ func (rs *RedisStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string)
 	return rs.Cmd(nil, redisDEL, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) SetTrendProfileDrv(ctx *context.Context, sg *TrendProfile) (err error) {
+func (rs *RedisStorage) SetTrendProfileDrv(ctx *context.Context, sg *utils.TrendProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sg); err != nil {
 		return
@@ -537,7 +537,7 @@ func (rs *RedisStorage) SetTrendProfileDrv(ctx *context.Context, sg *TrendProfil
 	return rs.Cmd(nil, redisSET, utils.TrendProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
 }
 
-func (rs *RedisStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sg *TrendProfile, err error) {
+func (rs *RedisStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sg *utils.TrendProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.TrendProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -553,7 +553,7 @@ func (rs *RedisStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, 
 	return rs.Cmd(nil, redisDEL, utils.TrendProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (r *Trend, err error) {
+func (rs *RedisStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (r *utils.Trend, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -565,7 +565,7 @@ func (rs *RedisStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (r 
 	return
 }
 
-func (rs *RedisStorage) SetTrendDrv(ctx *context.Context, r *Trend) (err error) {
+func (rs *RedisStorage) SetTrendDrv(ctx *context.Context, r *utils.Trend) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return

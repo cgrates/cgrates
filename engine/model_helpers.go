@@ -820,8 +820,8 @@ func APItoModelTrends(tr *utils.TPTrendsProfile) (mdls TrendMdls) {
 	return
 }
 
-func APItoTrends(tpTR *utils.TPTrendsProfile) (tr *TrendProfile, err error) {
-	tr = &TrendProfile{
+func APItoTrends(tpTR *utils.TPTrendsProfile) (tr *utils.TrendProfile, err error) {
+	tr = &utils.TrendProfile{
 		Tenant:          tpTR.Tenant,
 		ID:              tpTR.ID,
 		StatID:          tpTR.StatID,
@@ -844,7 +844,7 @@ func APItoTrends(tpTR *utils.TPTrendsProfile) (tr *TrendProfile, err error) {
 	return
 }
 
-func TrendProfileToAPI(tr *TrendProfile) (tpTR *utils.TPTrendsProfile) {
+func TrendProfileToAPI(tr *utils.TrendProfile) (tpTR *utils.TPTrendsProfile) {
 	tpTR = &utils.TPTrendsProfile{
 		Tenant:          tr.Tenant,
 		ID:              tr.ID,

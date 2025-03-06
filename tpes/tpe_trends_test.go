@@ -34,8 +34,8 @@ func TestTPEnewTPTrends(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetTrendProfileDrvF: func(ctx *context.Context, tnt string, id string) (*engine.TrendProfile, error) {
-			trd := &engine.TrendProfile{
+		GetTrendProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.TrendProfile, error) {
+			trd := &utils.TrendProfile{
 				Tenant: "cgrates.org",
 				ID:     "TRD_2",
 			}
@@ -59,7 +59,7 @@ func TestTPEExportTrends(t *testing.T) {
 	tpTrd := TPTrends{
 		dm: dm,
 	}
-	trd := &engine.TrendProfile{
+	trd := &utils.TrendProfile{
 		Tenant: "cgrates.org",
 		ID:     "TRD_2",
 	}
@@ -76,7 +76,7 @@ func TestTPEExportItemsTrendsNoDbConn(t *testing.T) {
 	tpTrd := TPTrends{
 		dm: nil,
 	}
-	trd := &engine.TrendProfile{
+	trd := &utils.TrendProfile{
 		Tenant: "cgrates.org",
 		ID:     "TRD_2",
 	}
@@ -95,7 +95,7 @@ func TestTPEExportItemsTrendsIDNotFound(t *testing.T) {
 	tpTrd := TPTrends{
 		dm: dm,
 	}
-	trd := &engine.TrendProfile{
+	trd := &utils.TrendProfile{
 		Tenant: "cgrates.org",
 		ID:     "TRD_2",
 	}

@@ -119,9 +119,9 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,tru
 
 	client, _ := ng.Run(t)
 	time.Sleep(100 * time.Millisecond)
-	var tr *engine.Trend
+	var tr *utils.Trend
 	t.Run("TrendSchedule", func(t *testing.T) {
-		var replyTrendProfiles *[]*engine.TrendProfile
+		var replyTrendProfiles *[]*utils.TrendProfile
 		if err := client.Call(context.Background(), utils.AdminSv1GetTrendProfiles,
 			&utils.ArgsItemIDs{
 				Tenant: "cgrates.org",
@@ -265,7 +265,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,tru
 		}
 
 		// GetTrend with RunIndexEnd large than Runtimes length
-		var tr *engine.Trend
+		var tr *utils.Trend
 		if err := client.Call(context.Background(), utils.TrendSv1GetTrend, &utils.ArgGetTrend{ID: "TREND_2", RunIndexEnd: 3, TenantWithAPIOpts: utils.TenantWithAPIOpts{Tenant: "cgrates.org"}}, &tr); err != nil {
 			t.Error(err)
 		} else if len(tr.RunTimes) != 2 || len(tr.Metrics) != 2 {
@@ -298,7 +298,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,tru
 	time.Sleep(2 * time.Second)
 	t.Run("GetTrends", func(t *testing.T) {
 		// GetTrend with all correctParameters
-		var tr *engine.Trend
+		var tr *utils.Trend
 		timeStart := time.Now().Add(-4 * time.Second).Format(time.RFC3339)
 		timeEnd := time.Now().Add(-1 * time.Second).Format(time.RFC3339)
 		if err := client.Call(context.Background(), utils.TrendSv1GetTrend, &utils.ArgGetTrend{ID: "TREND_1", RunIndexStart: 1, RunIndexEnd: 3, RunTimeStart: timeStart, RunTimeEnd: timeEnd, TenantWithAPIOpts: utils.TenantWithAPIOpts{Tenant: "cgrates.org"}}, &tr); err != nil {
@@ -316,7 +316,7 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,tru
 		if err := client.Call(context.Background(), utils.TrendSv1GetTrend, &utils.ArgGetTrend{ID: "TREND_2", RunTimeStart: timeStart, RunTimeEnd: timeEnd, TenantWithAPIOpts: utils.TenantWithAPIOpts{Tenant: "cgrates.org"}}, &tr); err == nil || err.Error() != utils.ErrNotFound.Error() {
 			t.Error(err)
 		}
-		var tr2 engine.Trend
+		var tr2 utils.Trend
 		// GetTrend with both index args
 		if err := client.Call(context.Background(), utils.TrendSv1GetTrend, &utils.ArgGetTrend{ID: "TREND_1", RunIndexStart: 3, RunIndexEnd: 4, TenantWithAPIOpts: utils.TenantWithAPIOpts{Tenant: "cgrates.org"}}, &tr2); err != nil {
 			t.Error(err)
