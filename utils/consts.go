@@ -587,7 +587,7 @@ const (
 	Tolerance                = "Tolerance"
 	TTL                      = "TTL"
 	PurgeFilterIDs           = "PurgeFilterIDs"
-	Trend                    = "Trend"
+	TrendStr                 = "Trend"
 	MinItems                 = "MinItems"
 	MetricIDs                = "MetricIDs"
 	MetricFilterIDs          = "MetricFilterIDs"

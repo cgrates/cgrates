@@ -804,8 +804,8 @@ func (ms *MongoStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string
 	})
 }
 
-func (ms *MongoStorage) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (*TrendProfile, error) {
-	srProfile := new(TrendProfile)
+func (ms *MongoStorage) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (*utils.TrendProfile, error) {
+	srProfile := new(utils.TrendProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColTrs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(srProfile)
@@ -817,7 +817,7 @@ func (ms *MongoStorage) GetTrendProfileDrv(ctx *context.Context, tenant, id stri
 	return srProfile, err
 }
 
-func (ms *MongoStorage) SetTrendProfileDrv(ctx *context.Context, srp *TrendProfile) (err error) {
+func (ms *MongoStorage) SetTrendProfileDrv(ctx *context.Context, srp *utils.TrendProfile) (err error) {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColTrs).UpdateOne(sctx, bson.M{"tenant": srp.Tenant, "id": srp.ID},
 			bson.M{"$set": srp},
@@ -836,8 +836,8 @@ func (ms *MongoStorage) RemTrendProfileDrv(ctx *context.Context, tenant, id stri
 	})
 }
 
-func (ms *MongoStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (*Trend, error) {
-	tr := new(Trend)
+func (ms *MongoStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (*utils.Trend, error) {
+	tr := new(utils.Trend)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColTrd).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(tr)
@@ -849,7 +849,7 @@ func (ms *MongoStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (*T
 	return tr, err
 }
 
-func (ms *MongoStorage) SetTrendDrv(ctx *context.Context, tr *Trend) error {
+func (ms *MongoStorage) SetTrendDrv(ctx *context.Context, tr *utils.Trend) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColTrd).UpdateOne(sctx, bson.M{"tenant": tr.Tenant, "id": tr.ID},
 			bson.M{"$set": tr},

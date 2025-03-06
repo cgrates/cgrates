@@ -2533,11 +2533,11 @@ func TestFilterTrends(t *testing.T) {
 				if argGetTrend.ID == "Trend1" && argGetTrend.Tenant == "cgrates.org" {
 					now := time.Now()
 					now2 := now.Add(time.Second)
-					tr := Trend{
+					tr := utils.Trend{
 						Tenant:   "cgrates.org",
 						ID:       "Trend1",
 						RunTimes: []time.Time{now, now2},
-						Metrics: map[time.Time]map[string]*MetricWithTrend{
+						Metrics: map[time.Time]map[string]*utils.MetricWithTrend{
 							now: {
 								"*acc": {ID: "*acc", Value: 45, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
 								"*acd": {ID: "*acd", Value: 50, TrendGrowth: -1.0, TrendLabel: utils.NotAvailable},
@@ -2548,8 +2548,8 @@ func TestFilterTrends(t *testing.T) {
 							},
 						},
 					}
-					trS := tr.asTrendSummary()
-					*reply.(*TrendSummary) = *trS
+					trS := tr.AsTrendSummary()
+					*reply.(*utils.TrendSummary) = *trS
 					return nil
 				}
 				return utils.ErrNotFound

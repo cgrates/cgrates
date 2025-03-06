@@ -949,7 +949,7 @@ func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id s
 
 // GetTrend retrieves a Trend from dataDB
 func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
-	cacheRead, cacheWrite bool, transactionID string) (tr *Trend, err error) {
+	cacheRead, cacheWrite bool, transactionID string) (tr *utils.Trend, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 
 	if cacheRead {
@@ -957,7 +957,7 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*Trend), nil
+			return x.(*utils.Trend), nil
 		}
 	}
 	if dm == nil {
@@ -996,7 +996,7 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 			return
 		}
 	}
-	if err = tr.uncompress(dm.ms); err != nil {
+	if err = tr.Uncompress(dm.ms); err != nil {
 		return nil, err
 	}
 	if cacheWrite {
@@ -1010,12 +1010,12 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 }
 
 // SetTrend stores Trend in dataDB
-func (dm *DataManager) SetTrend(ctx *context.Context, tr *Trend) (err error) {
+func (dm *DataManager) SetTrend(ctx *context.Context, tr *utils.Trend) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	if dm.dataDB.GetStorageType() != utils.MetaInternal {
-		if tr, err = tr.compress(dm.ms); err != nil {
+		if tr, err = tr.Compress(dm.ms, dm.cfg.TrendSCfg().StoreUncompressedLimit); err != nil {
 			return
 		}
 	}
@@ -1027,7 +1027,7 @@ func (dm *DataManager) SetTrend(ctx *context.Context, tr *Trend) (err error) {
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.TrendPrefix, tr.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetTrend,
-			&TrendWithAPIOpts{
+			&utils.TrendWithAPIOpts{
 				Trend: tr,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)}); err != nil {
@@ -1059,14 +1059,14 @@ func (dm *DataManager) RemoveTrend(ctx *context.Context, tenant, id string) (err
 }
 
 func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (trp *TrendProfile, err error) {
+	transactionID string) (trp *utils.TrendProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheTrendProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*TrendProfile), nil
+			return x.(*utils.TrendProfile), nil
 		}
 	}
 	if dm == nil {
@@ -1140,7 +1140,7 @@ func (dm *DataManager) GetTrendProfileIDs(ctx *context.Context, tenants []string
 	return
 }
 
-func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *TrendProfile) (err error) {
+func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *utils.TrendProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1156,7 +1156,7 @@ func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *TrendProfile) 
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.TrendProfilePrefix, trp.TenantID(),
 			utils.ReplicatorSv1SetTrendProfile,
-			&TrendProfileWithAPIOpts{
+			&utils.TrendProfileWithAPIOpts{
 				TrendProfile: trp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)})
@@ -1164,7 +1164,7 @@ func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *TrendProfile) 
 	if oldTrd == nil ||
 		oldTrd.QueueLength != trp.QueueLength ||
 		oldTrd.Schedule != trp.Schedule {
-		if err = dm.SetTrend(ctx, NewTrendFromProfile(trp)); err != nil {
+		if err = dm.SetTrend(ctx, utils.NewTrendFromProfile(trp)); err != nil {
 			return
 		}
 	}

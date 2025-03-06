@@ -16,23 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apis
+package admins
 
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// GetTrendProfile returns a Trend profile
-func (adms *AdminSv1) GetTrendProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.TrendProfile) (err error) {
+// V1GetTrendProfile returns a Trend profile
+func (a *AdminS) V1GetTrendProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.TrendProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
-		tnt = adms.cfg.GeneralCfg().DefaultTenant
+		tnt = a.cfg.GeneralCfg().DefaultTenant
 	}
-	sCfg, err := adms.dm.GetTrendProfile(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
+	sCfg, err := a.dm.GetTrendProfile(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -40,17 +40,17 @@ func (adms *AdminSv1) GetTrendProfile(ctx *context.Context, arg *utils.TenantIDW
 	return
 }
 
-// GetTrendProfileIDs returns list of TrendProfile IDs registered for a tenant
-func (adms *AdminSv1) GetTrendProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, stsPrfIDs *[]string) (err error) {
+// V1GetTrendProfileIDs returns list of TrendProfile IDs registered for a tenant
+func (a *AdminS) V1GetTrendProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, stsPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = adms.cfg.GeneralCfg().DefaultTenant
+		tnt = a.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
 	prfx += args.ItemsPrefix
 	var keys []string
-	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = a.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -68,20 +68,20 @@ func (adms *AdminSv1) GetTrendProfileIDs(ctx *context.Context, args *utils.ArgsI
 	return
 }
 
-// GetTrendProfiles returns a list of stats profiles registered for a tenant
-func (admS *AdminSv1) GetTrendProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.TrendProfile) (err error) {
+// V1GetTrendProfiles returns a list of stats profiles registered for a tenant
+func (a *AdminS) V1GetTrendProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.TrendProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = admS.cfg.GeneralCfg().DefaultTenant
+		tnt = a.cfg.GeneralCfg().DefaultTenant
 	}
 	var sqPrfIDs []string
-	if err = admS.GetTrendProfileIDs(ctx, args, &sqPrfIDs); err != nil {
+	if err = a.V1GetTrendProfileIDs(ctx, args, &sqPrfIDs); err != nil {
 		return
 	}
 	*sqPrfs = make([]*utils.TrendProfile, 0, len(sqPrfIDs))
 	for _, sqPrfID := range sqPrfIDs {
 		var sqPrf *utils.TrendProfile
-		sqPrf, err = admS.dm.GetTrendProfile(ctx, tnt, sqPrfID, true, true, utils.NonTransactional)
+		sqPrf, err = a.dm.GetTrendProfile(ctx, tnt, sqPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
 		}
@@ -90,16 +90,16 @@ func (admS *AdminSv1) GetTrendProfiles(ctx *context.Context, args *utils.ArgsIte
 	return
 }
 
-// GetTrendProfilesCount returns the total number of TrendProfileIDs registered for a tenant
+// V1GetTrendProfilesCount returns the total number of TrendProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 TrendProfileIDs
-func (admS *AdminSv1) GetTrendProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (a *AdminS) V1GetTrendProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = admS.cfg.GeneralCfg().DefaultTenant
+		tnt = a.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
 	var keys []string
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = a.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {
@@ -109,31 +109,31 @@ func (admS *AdminSv1) GetTrendProfilesCount(ctx *context.Context, args *utils.Ar
 	return
 }
 
-// SetTrendProfile alters/creates a TrendProfile
-func (adms *AdminSv1) SetTrendProfile(ctx *context.Context, arg *utils.TrendProfileWithAPIOpts, reply *string) (err error) {
+// V1SetTrendProfile alters/creates a TrendProfile
+func (a *AdminS) V1SetTrendProfile(ctx *context.Context, arg *utils.TrendProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.TrendProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if arg.Tenant == utils.EmptyString {
-		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
+		arg.Tenant = a.cfg.GeneralCfg().DefaultTenant
 	}
-	if err = adms.dm.SetTrendProfile(ctx, arg.TrendProfile); err != nil {
+	if err = a.dm.SetTrendProfile(ctx, arg.TrendProfile); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-// RemoveTrendProfile remove a specific stat configuration
-func (adms *AdminSv1) RemoveTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+// V1RemoveTrendProfile remove a specific stat configuration
+func (a *AdminS) V1RemoveTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
-		tnt = adms.cfg.GeneralCfg().DefaultTenant
+		tnt = a.cfg.GeneralCfg().DefaultTenant
 	}
-	if err := adms.dm.RemoveTrendProfile(ctx, tnt, args.ID); err != nil {
+	if err := a.dm.RemoveTrendProfile(ctx, tnt, args.ID); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

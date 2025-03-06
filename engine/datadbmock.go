@@ -48,8 +48,8 @@ type DataDBMock struct {
 	RemoveResourceProfileDrvF  func(ctx *context.Context, tnt, id string) error
 	RemoveResourceDrvF         func(ctx *context.Context, tnt, id string) error
 	SetResourceDrvF            func(ctx *context.Context, r *Resource) error
-	SetTrendProfileDrvF        func(ctx *context.Context, tr *TrendProfile) (err error)
-	GetTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (sq *TrendProfile, err error)
+	SetTrendProfileDrvF        func(ctx *context.Context, tr *utils.TrendProfile) (err error)
+	GetTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (sq *utils.TrendProfile, err error)
 	RemTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (err error)
 	SetRankingProfileDrvF      func(ctx *context.Context, sq *RankingProfile) (err error)
 	GetRankingProfileDrvF      func(ctx *context.Context, tenant string, id string) (sq *RankingProfile, err error)
@@ -261,14 +261,14 @@ func (dbM *DataDBMock) RemoveRankingDrv(ctx *context.Context, _ string, _ string
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (sg *TrendProfile, err error) {
+func (dbM *DataDBMock) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (sg *utils.TrendProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
 		return dbM.GetTrendProfileDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetTrendProfileDrv(ctx *context.Context, trend *TrendProfile) (err error) {
+func (dbM *DataDBMock) SetTrendProfileDrv(ctx *context.Context, trend *utils.TrendProfile) (err error) {
 	if dbM.SetTrendProfileDrvF(ctx, trend) != nil {
 		return dbM.SetTrendProfileDrvF(ctx, trend)
 	}
@@ -451,11 +451,11 @@ func (dbM *DataDBMock) RemoveRateProfileDrv(ctx *context.Context, str1 string, s
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetTrendDrv(ctx *context.Context, tenant, id string) (*Trend, error) {
+func (dbM *DataDBMock) GetTrendDrv(ctx *context.Context, tenant, id string) (*utils.Trend, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetTrendDrv(ctx *context.Context, tr *Trend) error {
+func (dbM *DataDBMock) SetTrendDrv(ctx *context.Context, tr *utils.Trend) error {
 	return utils.ErrNotImplemented
 }
 
