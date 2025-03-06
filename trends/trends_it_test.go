@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apis
+package trends
 
 import (
 	"path"
@@ -41,7 +41,7 @@ var (
 	trCfg         *config.CGRConfig
 	trRPC         *birpc.Client
 	trConfigDIR   string //run tests for specific configuration
-	trendProfiles []*engine.TrendProfileWithAPIOpts
+	trendProfiles []*utils.TrendProfileWithAPIOpts
 
 	sTestsTr = []func(t *testing.T){
 		testTrendSInitCfg,
@@ -121,7 +121,7 @@ func testTrendsRPCConn(t *testing.T) {
 }
 
 func testTrendsGetTrendProfileBeforeSet(t *testing.T) {
-	var replyTrendProfile engine.TrendProfile
+	var replyTrendProfile utils.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -133,7 +133,7 @@ func testTrendsGetTrendProfileBeforeSet(t *testing.T) {
 }
 
 func testTrendsGetTrendProfilesBeforeSet(t *testing.T) {
-	var replyTrendProfiles *[]*engine.TrendProfile
+	var replyTrendProfiles *[]*utils.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -165,9 +165,9 @@ func testTrendsGetTrendProfileCountBeforeSet(t *testing.T) {
 }
 
 func testTrendsSetTrendProfiles(t *testing.T) {
-	trendProfiles = []*engine.TrendProfileWithAPIOpts{
+	trendProfiles = []*utils.TrendProfileWithAPIOpts{
 		{
-			TrendProfile: &engine.TrendProfile{
+			TrendProfile: &utils.TrendProfile{
 				ID:              "Trend1",
 				StatID:          "Stats1",
 				Tenant:          "cgrates.org",
@@ -183,7 +183,7 @@ func testTrendsSetTrendProfiles(t *testing.T) {
 			},
 		},
 		{
-			TrendProfile: &engine.TrendProfile{
+			TrendProfile: &utils.TrendProfile{
 				ID:              "Trend2",
 				StatID:          "Stats2",
 				Tenant:          "cgrates.org",
@@ -196,7 +196,7 @@ func testTrendsSetTrendProfiles(t *testing.T) {
 			},
 		},
 		{
-			TrendProfile: &engine.TrendProfile{
+			TrendProfile: &utils.TrendProfile{
 				ID:              "Trend3",
 				StatID:          "Stats3",
 				Tenant:          "cgrates.org",
@@ -227,7 +227,7 @@ func testTrendsSetTrendProfiles(t *testing.T) {
 }
 
 func testTrendsGetTrendProfileAfterSet(t *testing.T) {
-	var replyTrendProfile *engine.TrendProfile
+	var replyTrendProfile *utils.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -305,7 +305,7 @@ func testTrendsGetTrendProfileCountAfterSet(t *testing.T) {
 
 func testTrendsGetTrendProfilesAfterSet(t *testing.T) {
 
-	var replyTrendProfiles []*engine.TrendProfile
+	var replyTrendProfiles []*utils.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -347,7 +347,7 @@ func testTrendsGetTrendProfileAfterRemove(t *testing.T) {
 		}, &reply); err != nil {
 		t.Error(err)
 	}
-	var replyTrendProfile engine.TrendProfile
+	var replyTrendProfile utils.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -426,7 +426,7 @@ func testTrendsGetTrendProfileCountAfterRemove(t *testing.T) {
 
 func testTrendsGetTrendProfilesAfterRemove(t *testing.T) {
 	expectedTrendProfiles := append(trendProfiles[:1], trendProfiles[2:]...)
-	var replyTrendProfiles []*engine.TrendProfile
+	var replyTrendProfiles []*utils.TrendProfile
 	if err := trRPC.Call(context.Background(), utils.AdminSv1GetTrendProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",

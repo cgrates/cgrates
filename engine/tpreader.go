@@ -447,7 +447,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("TrendProfiles:")
 	}
 	for _, tpTR := range tpr.trProfiles {
-		var tr *TrendProfile
+		var tr *utils.TrendProfile
 		if tr, err = APItoTrends(tpTR); err != nil {
 			return
 		}

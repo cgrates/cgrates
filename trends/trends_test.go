@@ -16,19 +16,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package trends
 
 import (
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 )
 
 func TestNewTrendService(t *testing.T) {
-	dm := &DataManager{}
+	dm := &engine.DataManager{}
 	cfg := &config.CGRConfig{}
-	filterS := &FilterS{}
-	connMgr := &ConnManager{}
+	filterS := &engine.FilterS{}
+	connMgr := &engine.ConnManager{}
 
 	trendService := NewTrendService(dm, cfg, filterS, connMgr)
 

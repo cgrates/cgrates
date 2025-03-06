@@ -109,7 +109,7 @@ func (rplSv1 *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, tntID *ut
 }
 
 // GetTrend is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetTrend(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Trend) error {
+func (rplSv1 *ReplicatorSv1) GetTrend(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.Trend) error {
 	engine.UpdateReplicationFilters(utils.TrendPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetTrendDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -124,7 +124,7 @@ func (rplSv1 *ReplicatorSv1) GetTrend(ctx *context.Context, tntID *utils.TenantI
 }
 
 // GetTrendProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetTrendProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.TrendProfile) error {
+func (rplSv1 *ReplicatorSv1) GetTrendProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.TrendProfile) error {
 	engine.UpdateReplicationFilters(utils.TrendProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetTrendProfileDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -258,7 +258,7 @@ func (rplSv1 *ReplicatorSv1) SetThreshold(ctx *context.Context, th *engine.Thres
 }
 
 // SetTrendProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetTrendProfile(ctx *context.Context, trp *engine.TrendProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetTrendProfile(ctx *context.Context, trp *utils.TrendProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetTrendProfileDrv(ctx, trp.TrendProfile); err != nil {
 		return
 	}
@@ -276,7 +276,7 @@ func (rplSv1 *ReplicatorSv1) SetTrendProfile(ctx *context.Context, trp *engine.T
 }
 
 // SetTrend is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetTrend(ctx *context.Context, tr *engine.TrendWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetTrend(ctx *context.Context, tr *utils.TrendWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetTrendDrv(ctx, tr.Trend); err != nil {
 		return
 	}

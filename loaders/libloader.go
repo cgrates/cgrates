@@ -312,7 +312,7 @@ func newProfileFunc(lType string) func() profile {
 		}
 	case utils.MetaTrends:
 		return func() profile {
-			return new(engine.TrendProfile)
+			return new(utils.TrendProfile)
 		}
 	case utils.MetaRankings:
 		return func() profile {
