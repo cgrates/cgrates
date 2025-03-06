@@ -64,11 +64,11 @@ type DataDB interface {
 	GetThresholdDrv(*context.Context, string, string) (*Threshold, error)
 	SetThresholdDrv(*context.Context, *Threshold) error
 	RemoveThresholdDrv(*context.Context, string, string) error
-	SetRankingProfileDrv(ctx *context.Context, rp *RankingProfile) (err error)
-	GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sq *RankingProfile, err error)
+	SetRankingProfileDrv(ctx *context.Context, rp *utils.RankingProfile) (err error)
+	GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sq *utils.RankingProfile, err error)
 	RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error)
-	SetRankingDrv(ctx *context.Context, rn *Ranking) (err error)
-	GetRankingDrv(ctx *context.Context, tenant string, id string) (sq *Ranking, err error)
+	SetRankingDrv(ctx *context.Context, rn *utils.Ranking) (err error)
+	GetRankingDrv(ctx *context.Context, tenant string, id string) (sq *utils.Ranking, err error)
 	RemoveRankingDrv(ctx *context.Context, tenant string, id string) (err error)
 	SetTrendProfileDrv(ctx *context.Context, sq *utils.TrendProfile) (err error)
 	GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sq *utils.TrendProfile, err error)

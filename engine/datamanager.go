@@ -175,7 +175,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.RankingProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, rankingProfileLockKey(tntID.Tenant, tntID.ID))
+			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.RankingProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetRankingProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.TrendProfilePrefix:
@@ -1199,14 +1199,14 @@ func (dm *DataManager) RemoveTrendProfile(ctx *context.Context, tenant, id strin
 	return dm.RemoveTrend(ctx, tenant, id)
 }
 
-func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rgp *RankingProfile, err error) {
+func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rgp *utils.RankingProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheRankingProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*RankingProfile), nil
+			return x.(*utils.RankingProfile), nil
 		}
 	}
 	if dm == nil {
@@ -1279,7 +1279,7 @@ func (dm *DataManager) GetRankingProfileIDs(ctx *context.Context, tenants []stri
 	return
 }
 
-func (dm *DataManager) SetRankingProfile(ctx *context.Context, rnp *RankingProfile) (err error) {
+func (dm *DataManager) SetRankingProfile(ctx *context.Context, rnp *utils.RankingProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1295,14 +1295,14 @@ func (dm *DataManager) SetRankingProfile(ctx *context.Context, rnp *RankingProfi
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.RankingProfilePrefix, rnp.TenantID(),
 			utils.ReplicatorSv1SetRankingProfile,
-			&RankingProfileWithAPIOpts{
+			&utils.RankingProfileWithAPIOpts{
 				RankingProfile: rnp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)})
 	}
 	if oldRnk == nil || oldRnk.Sorting != rnp.Sorting ||
 		oldRnk.Schedule != rnp.Schedule {
-		if err = dm.SetRanking(ctx, NewRankingFromProfile(rnp)); err != nil {
+		if err = dm.SetRanking(ctx, utils.NewRankingFromProfile(rnp)); err != nil {
 			return
 		}
 	}
@@ -1335,14 +1335,14 @@ func (dm *DataManager) RemoveRankingProfile(ctx *context.Context, tenant, id str
 	}
 	return
 }
-func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rn *Ranking, err error) {
+func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rn *utils.Ranking, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheRankings, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*Ranking), nil
+			return x.(*utils.Ranking), nil
 		}
 	}
 	if dm == nil {
@@ -1384,7 +1384,7 @@ func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cache
 }
 
 // SetRanking stores Ranking in dataDB
-func (dm *DataManager) SetRanking(ctx *context.Context, rn *Ranking) (err error) {
+func (dm *DataManager) SetRanking(ctx *context.Context, rn *utils.Ranking) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1396,7 +1396,7 @@ func (dm *DataManager) SetRanking(ctx *context.Context, rn *Ranking) (err error)
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.RankingPrefix, rn.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRanking,
-			&RankingWithAPIOpts{
+			&utils.RankingWithAPIOpts{
 				Ranking: rn,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)}); err != nil {

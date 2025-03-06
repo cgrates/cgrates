@@ -316,7 +316,7 @@ func newProfileFunc(lType string) func() profile {
 		}
 	case utils.MetaRankings:
 		return func() profile {
-			return new(engine.RankingProfile)
+			return new(utils.RankingProfile)
 		}
 	default:
 		return func() profile { return nil }

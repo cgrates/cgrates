@@ -739,8 +739,8 @@ func (ms *MongoStorage) RemoveResourceDrv(ctx *context.Context, tenant, id strin
 	})
 }
 
-func (ms *MongoStorage) GetRankingProfileDrv(ctx *context.Context, tenant, id string) (*RankingProfile, error) {
-	rgProfile := new(RankingProfile)
+func (ms *MongoStorage) GetRankingProfileDrv(ctx *context.Context, tenant, id string) (*utils.RankingProfile, error) {
+	rgProfile := new(utils.RankingProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColRgp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(rgProfile)
@@ -752,7 +752,7 @@ func (ms *MongoStorage) GetRankingProfileDrv(ctx *context.Context, tenant, id st
 	return rgProfile, err
 }
 
-func (ms *MongoStorage) SetRankingProfileDrv(ctx *context.Context, sgp *RankingProfile) (err error) {
+func (ms *MongoStorage) SetRankingProfileDrv(ctx *context.Context, sgp *utils.RankingProfile) (err error) {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColRgp).UpdateOne(sctx, bson.M{"tenant": sgp.Tenant, "id": sgp.ID},
 			bson.M{"$set": sgp},
@@ -772,8 +772,8 @@ func (ms *MongoStorage) RemRankingProfileDrv(ctx *context.Context, tenant, id st
 
 }
 
-func (ms *MongoStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (*Ranking, error) {
-	rn := new(Ranking)
+func (ms *MongoStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (*utils.Ranking, error) {
+	rn := new(utils.Ranking)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColRnk).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(rn)
@@ -784,7 +784,7 @@ func (ms *MongoStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (
 	})
 	return rn, err
 }
-func (ms *MongoStorage) SetRankingDrv(ctx *context.Context, rn *Ranking) error {
+func (ms *MongoStorage) SetRankingDrv(ctx *context.Context, rn *utils.Ranking) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColRnk).UpdateOne(sctx, bson.M{"tenant": rn.Tenant, "id": rn.ID},
 			bson.M{"$set": rn},

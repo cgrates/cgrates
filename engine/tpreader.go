@@ -466,7 +466,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("RankingProfiles:")
 	}
 	for _, tpRN := range tpr.rgProfiles {
-		var rn *RankingProfile
+		var rn *utils.RankingProfile
 		if rn, err = APItoRanking(tpRN); err != nil {
 			return
 		}
