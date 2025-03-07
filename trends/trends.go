@@ -38,22 +38,19 @@ type TrendS struct {
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
 
-	crn *cron.Cron // cron refernce
-
-	crnTQsMux *sync.RWMutex                      // protects the crnTQs
-	crnTQs    map[string]map[string]cron.EntryID // save the EntryIDs for TrendQueries so we can reschedule them when needed
-
-	storedTrends   utils.StringSet // keep a record of trends which need saving, map[trendTenantID]bool
-	sTrndsMux      sync.RWMutex    // protects storedTrends
-	storingStopped chan struct{}   // signal back that the operations were stopped
-
-	loopStopped chan struct{}
-	trendStop   chan struct{} // signal to stop all operations
+	crn            *cron.Cron                         // cron refernce
+	crnTQsMux      *sync.RWMutex                      // protects the crnTQs
+	crnTQs         map[string]map[string]cron.EntryID // save the EntryIDs for TrendQueries so we can reschedule them when needed
+	sTrndsMux      sync.RWMutex                       // protects storedTrends
+	storedTrends   utils.StringSet                    // keep a record of trends which need saving, map[trendTenantID]bool
+	storingStopped chan struct{}                      // signal back that the operations were stopped
+	trendStop      chan struct{}                      // signal to stop all operations
+	loopStopped    chan struct{}
 }
 
 // NewTrendService creates a new TrendS service.
 func NewTrendService(dm *engine.DataManager,
-	cgrcfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engine.ConnManager) (tS *TrendS) {
+	cgrcfg *config.CGRConfig, filterS *engine.FilterS, connMgr *engine.ConnManager) *TrendS {
 	return &TrendS{
 		dm:             dm,
 		cfg:            cgrcfg,
@@ -71,9 +68,9 @@ func NewTrendService(dm *engine.DataManager,
 
 // computeTrend queries a stat and builds the Trend for it based on the TrendProfile configuration.
 // Called by Cron service at scheduled intervals.
-func (tS *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
+func (t *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
 	var floatMetrics map[string]float64
-	if err := tS.connMgr.Call(context.Background(), tS.cfg.TrendSCfg().StatSConns,
+	if err := t.connMgr.Call(context.Background(), t.cfg.TrendSCfg().StatSConns,
 		utils.StatSv1GetQueueFloatMetrics,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tP.Tenant, ID: tP.StatID}},
 		&floatMetrics); err != nil {
@@ -83,7 +80,7 @@ func (tS *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
 				utils.TrendS, tP.Tenant, tP.ID, tP.StatID, err.Error()))
 		return
 	}
-	trnd, err := tS.dm.GetTrend(ctx, tP.Tenant, tP.ID, true, true, utils.NonTransactional)
+	trnd, err := t.dm.GetTrend(ctx, tP.Tenant, tP.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
@@ -124,7 +121,7 @@ func (tS *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
 			continue
 		}
 		if mWt.TrendGrowth, err = trnd.GetTrendGrowth(mID, mWt.Value, tP.CorrelationType,
-			tS.cfg.GeneralCfg().RoundingDecimals); err != nil {
+			t.cfg.GeneralCfg().RoundingDecimals); err != nil {
 			mWt.TrendLabel = utils.NotAvailable
 		} else {
 			mWt.TrendLabel = utils.GetTrendLabel(mWt.TrendGrowth, tP.Tolerance)
@@ -132,20 +129,20 @@ func (tS *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
 		trnd.Metrics[now][mWt.ID] = mWt
 		trnd.IndexesAppendMetric(mWt, now)
 	}
-	if err = tS.storeTrend(ctx, trnd); err != nil {
+	if err = t.storeTrend(ctx, trnd); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> setting Trend with id: <%s:%s> DM error: <%s>",
 				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
 		return
 	}
-	if err = tS.processThresholds(trnd); err != nil {
+	if err = t.processThresholds(trnd); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> Trend with id <%s:%s> error: <%s> with ThresholdS",
 				utils.TrendS, tP.Tenant, tP.ID, err.Error()))
 	}
-	if err = tS.processEEs(trnd); err != nil {
+	if err = t.processEEs(trnd); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> Trend with id <%s:%s> error: <%s> with EEs",
@@ -155,12 +152,12 @@ func (tS *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
 }
 
 // processThresholds sends the computed trend to ThresholdS.
-func (tS *TrendS) processThresholds(trnd *utils.Trend) (err error) {
+func (t *TrendS) processThresholds(trnd *utils.Trend) (err error) {
 	if len(trnd.RunTimes) == 0 ||
 		len(trnd.RunTimes) < trnd.Config().MinItems {
 		return
 	}
-	if len(tS.cfg.TrendSCfg().ThresholdSConns) == 0 {
+	if len(t.cfg.TrendSCfg().ThresholdSConns) == 0 {
 		return
 	}
 	opts := map[string]any{
@@ -189,7 +186,7 @@ func (tS *TrendS) processThresholds(trnd *utils.Trend) (err error) {
 	}
 	var withErrs bool
 	var tIDs []string
-	if err := tS.connMgr.Call(context.TODO(), tS.cfg.TrendSCfg().ThresholdSConns,
+	if err := t.connMgr.Call(context.TODO(), t.cfg.TrendSCfg().ThresholdSConns,
 		utils.ThresholdSv1ProcessEvent, trndEv, &tIDs); err != nil &&
 		(len(thIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 		utils.Logger.Warning(
@@ -203,12 +200,12 @@ func (tS *TrendS) processThresholds(trnd *utils.Trend) (err error) {
 }
 
 // processEEs sends the computed trend to EEs.
-func (tS *TrendS) processEEs(trnd *utils.Trend) (err error) {
+func (t *TrendS) processEEs(trnd *utils.Trend) (err error) {
 	if len(trnd.RunTimes) == 0 ||
 		len(trnd.RunTimes) < trnd.Config().MinItems {
 		return
 	}
-	if len(tS.cfg.TrendSCfg().EEsConns) == 0 {
+	if len(t.cfg.TrendSCfg().EEsConns) == 0 {
 		return
 	}
 	opts := map[string]any{
@@ -226,11 +223,11 @@ func (tS *TrendS) processEEs(trnd *utils.Trend) (err error) {
 				utils.Metrics: ts.Metrics,
 			},
 		},
-		EeIDs: tS.cfg.TrendSCfg().EEsExporterIDs,
+		EeIDs: t.cfg.TrendSCfg().EEsExporterIDs,
 	}
 	var withErrs bool
 	var reply map[string]map[string]any
-	if err := tS.connMgr.Call(context.TODO(), tS.cfg.TrendSCfg().EEsConns,
+	if err := t.connMgr.Call(context.TODO(), t.cfg.TrendSCfg().EEsConns,
 		utils.EeSv1ProcessEvent, trndEv, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
@@ -244,33 +241,33 @@ func (tS *TrendS) processEEs(trnd *utils.Trend) (err error) {
 }
 
 // storeTrend stores or schedules the trend for storage based on "store_interval".
-func (tS *TrendS) storeTrend(ctx *context.Context, trnd *utils.Trend) (err error) {
-	if tS.cfg.TrendSCfg().StoreInterval == 0 {
+func (t *TrendS) storeTrend(ctx *context.Context, trnd *utils.Trend) (err error) {
+	if t.cfg.TrendSCfg().StoreInterval == 0 {
 		return
 	}
-	if tS.cfg.TrendSCfg().StoreInterval == -1 {
-		return tS.dm.SetTrend(ctx, trnd)
+	if t.cfg.TrendSCfg().StoreInterval == -1 {
+		return t.dm.SetTrend(ctx, trnd)
 	}
 
 	// schedule the asynchronous save, relies for Trend to be in cache
-	tS.sTrndsMux.Lock()
-	tS.storedTrends.Add(trnd.TenantID())
-	tS.sTrndsMux.Unlock()
+	t.sTrndsMux.Lock()
+	t.storedTrends.Add(trnd.TenantID())
+	t.sTrndsMux.Unlock()
 	return
 }
 
 // storeTrends stores modified trends from cache in dataDB
 // Reschedules failed trend IDs for next storage cycle.
 // This function is safe for concurrent use.
-func (tS *TrendS) storeTrends(ctx *context.Context) {
+func (t *TrendS) storeTrends(ctx *context.Context) {
 	var failedTrndIDs []string
 	for {
-		tS.sTrndsMux.Lock()
-		trndID := tS.storedTrends.GetOne()
+		t.sTrndsMux.Lock()
+		trndID := t.storedTrends.GetOne()
 		if trndID != utils.EmptyString {
-			tS.storedTrends.Remove(trndID)
+			t.storedTrends.Remove(trndID)
 		}
-		tS.sTrndsMux.Unlock()
+		t.sTrndsMux.Unlock()
 		if trndID == utils.EmptyString {
 			break // no more keys, backup completed
 		}
@@ -284,7 +281,7 @@ func (tS *TrendS) storeTrends(ctx *context.Context) {
 		}
 		trnd := trndIf.(*utils.Trend)
 		trnd.Lock()
-		if err := tS.dm.SetTrend(ctx, trnd); err != nil {
+		if err := t.dm.SetTrend(ctx, trnd); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed storing Trend with ID: %q, err: %q",
 					utils.TrendS, trndID, err))
@@ -295,24 +292,24 @@ func (tS *TrendS) storeTrends(ctx *context.Context) {
 		runtime.Gosched()
 	}
 	if len(failedTrndIDs) != 0 { // there were errors on save, schedule the keys for next backup
-		tS.sTrndsMux.Lock()
-		tS.storedTrends.AddSlice(failedTrndIDs)
-		tS.sTrndsMux.Unlock()
+		t.sTrndsMux.Lock()
+		t.storedTrends.AddSlice(failedTrndIDs)
+		t.sTrndsMux.Unlock()
 	}
 }
 
 // asyncStoreTrends runs as a background process that periodically calls storeTrends.
-func (tS *TrendS) asyncStoreTrends(ctx *context.Context) {
-	storeInterval := tS.cfg.TrendSCfg().StoreInterval
+func (t *TrendS) asyncStoreTrends(ctx *context.Context) {
+	storeInterval := t.cfg.TrendSCfg().StoreInterval
 	if storeInterval <= 0 {
-		close(tS.storingStopped)
+		close(t.storingStopped)
 		return
 	}
 	for {
-		tS.storeTrends(ctx)
+		t.storeTrends(ctx)
 		select {
-		case <-tS.trendStop:
-			close(tS.storingStopped)
+		case <-t.trendStop:
+			close(t.storingStopped)
 			return
 		case <-time.After(storeInterval): // continue to another storing loop
 		}
@@ -320,21 +317,21 @@ func (tS *TrendS) asyncStoreTrends(ctx *context.Context) {
 }
 
 // StartTrendS activates the Cron service with scheduled trend queries.
-func (tS *TrendS) StartTrendS(ctx *context.Context) error {
-	if err := tS.scheduleAutomaticQueries(ctx); err != nil {
+func (t *TrendS) StartTrendS(ctx *context.Context) error {
+	if err := t.scheduleAutomaticQueries(ctx); err != nil {
 		return err
 	}
-	tS.crn.Start()
-	go tS.asyncStoreTrends(ctx)
+	t.crn.Start()
+	go t.asyncStoreTrends(ctx)
 	return nil
 }
 
 // StopTrendS gracefully shuts down Cron tasks and trend operations.
-func (tS *TrendS) StopTrendS() {
-	timeEnd := time.Now().Add(tS.cfg.CoreSCfg().ShutdownTimeout)
+func (t *TrendS) StopTrendS() {
+	timeEnd := time.Now().Add(t.cfg.CoreSCfg().ShutdownTimeout)
 
-	crnctx := tS.crn.Stop()
-	close(tS.trendStop)
+	crnctx := t.crn.Stop()
+	close(t.trendStop)
 
 	// Wait for cron
 	select {
@@ -348,7 +345,7 @@ func (tS *TrendS) StopTrendS() {
 	}
 	// Wait for backup and other operations
 	select {
-	case <-tS.storingStopped:
+	case <-t.storingStopped:
 	case <-time.After(time.Until(timeEnd)):
 		utils.Logger.Warning(
 			fmt.Sprintf(
@@ -359,21 +356,21 @@ func (tS *TrendS) StopTrendS() {
 }
 
 // Reload restarts trend services with updated configuration.
-func (tS *TrendS) Reload(ctx *context.Context) {
-	crnctx := tS.crn.Stop()
-	close(tS.trendStop)
+func (t *TrendS) Reload(ctx *context.Context) {
+	crnctx := t.crn.Stop()
+	close(t.trendStop)
 	<-crnctx.Done()
-	<-tS.storingStopped
-	tS.trendStop = make(chan struct{})
-	tS.storingStopped = make(chan struct{})
-	tS.crn.Start()
-	go tS.asyncStoreTrends(ctx)
+	<-t.storingStopped
+	t.trendStop = make(chan struct{})
+	t.storingStopped = make(chan struct{})
+	t.crn.Start()
+	go t.asyncStoreTrends(ctx)
 }
 
 // scheduleAutomaticQueries schedules initial trend queries based on configuration.
-func (tS *TrendS) scheduleAutomaticQueries(ctx *context.Context) error {
+func (t *TrendS) scheduleAutomaticQueries(ctx *context.Context) error {
 	schedData := make(map[string][]string)
-	for k, v := range tS.cfg.TrendSCfg().ScheduledIDs {
+	for k, v := range t.cfg.TrendSCfg().ScheduledIDs {
 		schedData[k] = v
 	}
 	var tnts []string
@@ -386,7 +383,7 @@ func (tS *TrendS) scheduleAutomaticQueries(ctx *context.Context) error {
 		}
 	}
 	if tnts != nil {
-		qrydData, err := tS.dm.GetTrendProfileIDs(ctx, tnts)
+		qrydData, err := t.dm.GetTrendProfileIDs(ctx, tnts)
 		if err != nil {
 			return err
 		}
@@ -395,7 +392,7 @@ func (tS *TrendS) scheduleAutomaticQueries(ctx *context.Context) error {
 		}
 	}
 	for tnt, tIDs := range schedData {
-		if _, err := tS.scheduleTrendQueries(ctx, tnt, tIDs); err != nil {
+		if _, err := t.scheduleTrendQueries(ctx, tnt, tIDs); err != nil {
 			return err
 		}
 	}
@@ -404,36 +401,36 @@ func (tS *TrendS) scheduleAutomaticQueries(ctx *context.Context) error {
 
 // scheduleTrendQueries schedules or reschedules specific trend queries
 // Safe for concurrent use.
-func (tS *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []string) (scheduled int, err error) {
+func (t *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []string) (scheduled int, err error) {
 	var partial bool
-	tS.crnTQsMux.Lock()
-	if _, has := tS.crnTQs[tnt]; !has {
-		tS.crnTQs[tnt] = make(map[string]cron.EntryID)
+	t.crnTQsMux.Lock()
+	if _, has := t.crnTQs[tnt]; !has {
+		t.crnTQs[tnt] = make(map[string]cron.EntryID)
 	}
-	tS.crnTQsMux.Unlock()
+	t.crnTQsMux.Unlock()
 	for _, tID := range tIDs {
-		tS.crnTQsMux.RLock()
-		if entryID, has := tS.crnTQs[tnt][tID]; has {
-			tS.crn.Remove(entryID) // deschedule the query
+		t.crnTQsMux.RLock()
+		if entryID, has := t.crnTQs[tnt][tID]; has {
+			t.crn.Remove(entryID) // deschedule the query
 		}
-		tS.crnTQsMux.RUnlock()
-		if tP, err := tS.dm.GetTrendProfile(ctx, tnt, tID, true, true, utils.NonTransactional); err != nil {
+		t.crnTQsMux.RUnlock()
+		if tP, err := t.dm.GetTrendProfile(ctx, tnt, tID, true, true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed retrieving TrendProfile with id: <%s:%s> for scheduling, error: <%s>",
 					utils.TrendS, tnt, tID, err.Error()))
 			partial = true
-		} else if entryID, err := tS.crn.AddFunc(tP.Schedule,
-			func() { tS.computeTrend(ctx, tP.Clone()) }); err != nil {
+		} else if entryID, err := t.crn.AddFunc(tP.Schedule,
+			func() { t.computeTrend(ctx, tP.Clone()) }); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> scheduling TrendProfile <%s:%s>, error: <%s>",
 					utils.TrendS, tnt, tID, err.Error()))
 			partial = true
 		} else { // log the entry ID for debugging
-			tS.crnTQsMux.Lock()
-			tS.crnTQs[tP.Tenant][tP.ID] = entryID
-			tS.crnTQsMux.Unlock()
+			t.crnTQsMux.Lock()
+			t.crnTQs[tP.Tenant][tP.ID] = entryID
+			t.crnTQsMux.Unlock()
 			scheduled++
 		}
 	}
