@@ -48,28 +48,28 @@ type TrendProfileWithAPIOpts struct {
 }
 
 // Clone creates a deep copy of TrendProfile for thread-safe use.
-func (tP *TrendProfile) Clone() (clnTp *TrendProfile) {
+func (tp *TrendProfile) Clone() (clnTp *TrendProfile) {
 	clnTp = &TrendProfile{
-		Tenant:          tP.Tenant,
-		ID:              tP.ID,
-		Schedule:        tP.Schedule,
-		StatID:          tP.StatID,
-		QueueLength:     tP.QueueLength,
-		TTL:             tP.TTL,
-		MinItems:        tP.MinItems,
-		CorrelationType: tP.CorrelationType,
-		Tolerance:       tP.Tolerance,
-		Stored:          tP.Stored,
+		Tenant:          tp.Tenant,
+		ID:              tp.ID,
+		Schedule:        tp.Schedule,
+		StatID:          tp.StatID,
+		QueueLength:     tp.QueueLength,
+		TTL:             tp.TTL,
+		MinItems:        tp.MinItems,
+		CorrelationType: tp.CorrelationType,
+		Tolerance:       tp.Tolerance,
+		Stored:          tp.Stored,
 	}
-	if tP.Metrics != nil {
-		clnTp.Metrics = make([]string, len(tP.Metrics))
-		for i, mID := range tP.Metrics {
+	if tp.Metrics != nil {
+		clnTp.Metrics = make([]string, len(tp.Metrics))
+		for i, mID := range tp.Metrics {
 			clnTp.Metrics[i] = mID
 		}
 	}
-	if tP.ThresholdIDs != nil {
-		clnTp.ThresholdIDs = make([]string, len(tP.ThresholdIDs))
-		for i, tID := range tP.ThresholdIDs {
+	if tp.ThresholdIDs != nil {
+		clnTp.ThresholdIDs = make([]string, len(tp.ThresholdIDs))
+		for i, tID := range tp.ThresholdIDs {
 			clnTp.ThresholdIDs[i] = tID
 		}
 	}
@@ -77,10 +77,11 @@ func (tP *TrendProfile) Clone() (clnTp *TrendProfile) {
 }
 
 // TenantID returns the concatenated tenant and ID.
-func (srp *TrendProfile) TenantID() string {
-	return ConcatenatedKey(srp.Tenant, srp.ID)
+func (tp *TrendProfile) TenantID() string {
+	return ConcatenatedKey(tp.Tenant, tp.ID)
 }
 
+// Set implements the profile interface, setting values in TrendProfile based on path.
 func (tp *TrendProfile) Set(path []string, val any, _ bool) (err error) {
 	if len(path) != 1 {
 		return ErrWrongPath
@@ -121,6 +122,7 @@ func (tp *TrendProfile) Set(path []string, val any, _ bool) (err error) {
 	return
 }
 
+// Merge implements the profile interface, merging values from another TrendProfile.
 func (tp *TrendProfile) Merge(v2 any) {
 	vi := v2.(*TrendProfile)
 	if len(vi.Tenant) != 0 {
@@ -157,8 +159,10 @@ func (tp *TrendProfile) Merge(v2 any) {
 	}
 }
 
+// String implements the DataProvider interface, returning the TrendProfile in JSON format.
 func (tp *TrendProfile) String() string { return ToJSON(tp) }
 
+// FieldAsString implements the DataProvider interface, retrieving field value as string.
 func (tp *TrendProfile) FieldAsString(fldPath []string) (_ string, err error) {
 	var val any
 	if val, err = tp.FieldAsInterface(fldPath); err != nil {
@@ -167,6 +171,7 @@ func (tp *TrendProfile) FieldAsString(fldPath []string) (_ string, err error) {
 	return IfaceAsString(val), nil
 }
 
+// FieldAsInterface implements the DataProvider interface, retrieving field value as interface.
 func (tp *TrendProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
 		return nil, ErrNotFound
@@ -262,8 +267,8 @@ func NewTrendFromProfile(tP *TrendProfile) *Trend {
 	}
 }
 
-func (tr *Trend) TenantID() string {
-	return ConcatenatedKey(tr.Tenant, tr.ID)
+func (t *Trend) TenantID() string {
+	return ConcatenatedKey(t.Tenant, t.ID)
 }
 
 // Config returns the trend's profile configuration.
@@ -271,6 +276,7 @@ func (t *Trend) Config() *TrendProfile {
 	return t.tPrfl
 }
 
+// SetConfig sets the trend's profile configuration.
 func (t *Trend) SetConfig(tp *TrendProfile) {
 	t.tPrfl = tp
 }
@@ -422,23 +428,6 @@ func (t *Trend) GetTrendGrowth(mID string, mVal float64, correlation string, rou
 	return Round(diffVal*100/prevVal, roundDec, MetaRoundingMiddle), nil
 }
 
-// GetTrendLabel determines trend direction based on growth percentage and tolerance.
-// Returns "*positive", "*negative", "*constant", or "N/A" based on the growth value.
-func GetTrendLabel(tGrowth float64, tolerance float64) (lbl string) {
-	switch {
-	case tGrowth > 0:
-		lbl = MetaPositive
-	case tGrowth < 0:
-		lbl = MetaNegative
-	default:
-		lbl = MetaConstant
-	}
-	if math.Abs(tGrowth) <= tolerance { // percentage value of diff is lower than threshold
-		lbl = MetaConstant
-	}
-	return
-}
-
 // Lock locks the trend mutex.
 func (t *Trend) Lock() {
 	t.tMux.Lock()
@@ -457,4 +446,21 @@ func (t *Trend) RLock() {
 // RUnlock unlocks the read lock on the trend mutex.
 func (t *Trend) RUnlock() {
 	t.tMux.RUnlock()
+}
+
+// GetTrendLabel determines trend direction based on growth percentage and tolerance.
+// Returns "*positive", "*negative", "*constant", or "N/A" based on the growth value.
+func GetTrendLabel(tGrowth float64, tolerance float64) (lbl string) {
+	switch {
+	case tGrowth > 0:
+		lbl = MetaPositive
+	case tGrowth < 0:
+		lbl = MetaNegative
+	default:
+		lbl = MetaConstant
+	}
+	if math.Abs(tGrowth) <= tolerance { // percentage value of diff is lower than threshold
+		lbl = MetaConstant
+	}
+	return
 }
