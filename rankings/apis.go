@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cron"
 )
 
-// V1ScheduleQueries is the query for manually re-/scheduling Ranking Queries
+// V1ScheduleQueries manually schedules or reschedules ranking queries.
 func (rkS *RankingS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
 	if sched, errSched := rkS.scheduleRankingQueries(ctx, args.Tenant, args.RankingIDs); errSched != nil {
 		return errSched
@@ -37,7 +37,7 @@ func (rkS *RankingS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgSche
 	return
 }
 
-// V1GetRanking is the API to return the Ranking instance
+// V1GetRanking retrieves ranking metrics with optional filtering.
 func (rkS *RankingS) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, retRanking *utils.Ranking) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -68,7 +68,7 @@ func (rkS *RankingS) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithA
 	return
 }
 
-// V1GetSchedule returns the active schedule for Ranking queries
+// V1GetSchedule retrieves information about currently scheduled rankings.
 func (rkS *RankingS) V1GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
@@ -117,7 +117,7 @@ func (rkS *RankingS) V1GetSchedule(ctx *context.Context, args *utils.ArgSchedule
 	return nil
 }
 
-// V1GetRankingSummary returns a summary of ascending/descending stat of the last updated ranking
+// V1GetRankingSummary retrieves the most recent ranking summary.
 func (rS *RankingS) V1GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
 	var rnk *utils.Ranking
 	if rnk, err = rS.dm.GetRanking(ctx, arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
