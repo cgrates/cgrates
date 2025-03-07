@@ -897,7 +897,7 @@ func TestActionProfileGetWeightFromDynamicsErr(t *testing.T) {
 	ctx := context.Background()
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	cM := NewConnManager(cfg)
 	fltrs := NewFilterS(cfg, cM, dm)

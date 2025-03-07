@@ -292,7 +292,7 @@ func main() {
 		mgrCfg.DataDbCfg().Host, mgrCfg.DataDbCfg().Port,
 		mgrCfg.DataDbCfg().Name, mgrCfg.DataDbCfg().User,
 		mgrCfg.DataDbCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.DataDbCfg().Opts, mgrCfg.DataDbCfg().Items); err != nil {
+		mgrCfg, mgrCfg.DataDbCfg().Opts, mgrCfg.DataDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
 	if *printConfig {
@@ -306,7 +306,7 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutDataDBHost, mgrCfg.MigratorCgrCfg().OutDataDBPort,
 		mgrCfg.MigratorCgrCfg().OutDataDBName, mgrCfg.MigratorCgrCfg().OutDataDBUser,
 		mgrCfg.MigratorCgrCfg().OutDataDBPassword, mgrCfg.MigratorCgrCfg().OutDataDBEncoding,
-		mgrCfg.CacheCfg(), mgrCfg.MigratorCgrCfg().OutDataDBOpts, mgrCfg.DataDbCfg().Items); err != nil {
+		mgrCfg, mgrCfg.MigratorCgrCfg().OutDataDBOpts, mgrCfg.DataDbCfg().Items); err != nil {
 		log.Fatal(err)
 	}
 

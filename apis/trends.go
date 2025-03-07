@@ -20,12 +20,11 @@ package apis
 
 import (
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetTrendProfile returns a Trend profile
-func (adms *AdminSv1) GetTrendProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.TrendProfile) (err error) {
+func (adms *AdminSv1) GetTrendProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.TrendProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -70,7 +69,7 @@ func (adms *AdminSv1) GetTrendProfileIDs(ctx *context.Context, args *utils.ArgsI
 }
 
 // GetTrendProfiles returns a list of stats profiles registered for a tenant
-func (admS *AdminSv1) GetTrendProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*engine.TrendProfile) (err error) {
+func (admS *AdminSv1) GetTrendProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.TrendProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -79,9 +78,9 @@ func (admS *AdminSv1) GetTrendProfiles(ctx *context.Context, args *utils.ArgsIte
 	if err = admS.GetTrendProfileIDs(ctx, args, &sqPrfIDs); err != nil {
 		return
 	}
-	*sqPrfs = make([]*engine.TrendProfile, 0, len(sqPrfIDs))
+	*sqPrfs = make([]*utils.TrendProfile, 0, len(sqPrfIDs))
 	for _, sqPrfID := range sqPrfIDs {
-		var sqPrf *engine.TrendProfile
+		var sqPrf *utils.TrendProfile
 		sqPrf, err = admS.dm.GetTrendProfile(ctx, tnt, sqPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -111,7 +110,7 @@ func (admS *AdminSv1) GetTrendProfilesCount(ctx *context.Context, args *utils.Ar
 }
 
 // SetTrendProfile alters/creates a TrendProfile
-func (adms *AdminSv1) SetTrendProfile(ctx *context.Context, arg *engine.TrendProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetTrendProfile(ctx *context.Context, arg *utils.TrendProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.TrendProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -139,31 +138,4 @@ func (adms *AdminSv1) RemoveTrendProfile(ctx *context.Context, args *utils.Tenan
 	}
 	*reply = utils.OK
 	return nil
-}
-
-// NewTrendSv1 initializes TrendSV1
-func NewTrendSv1(trS *engine.TrendS) *TrendSv1 {
-	return &TrendSv1{trS: trS}
-}
-
-// TrendSv1 exports RPC from RLs
-type TrendSv1 struct {
-	ping
-	trS *engine.TrendS
-}
-
-func (trs *TrendSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) error {
-	return trs.trS.V1ScheduleQueries(ctx, args, scheduled)
-}
-
-func (trs *TrendSv1) GetTrend(ctx *context.Context, args *utils.ArgGetTrend, trend *engine.Trend) error {
-	return trs.trS.V1GetTrend(ctx, args, trend)
-}
-
-func (trs *TrendSv1) GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) error {
-	return trs.trS.V1GetScheduledTrends(ctx, args, schedTrends)
-}
-
-func (trs *TrendSv1) GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *engine.TrendSummary) error {
-	return trs.trS.V1GetTrendSummary(ctx, arg, reply)
 }

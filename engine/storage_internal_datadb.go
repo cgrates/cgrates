@@ -256,15 +256,15 @@ func (iDB *InternalDB) RemStatQueueProfileDrv(_ *context.Context, tenant, id str
 	return
 }
 
-func (iDB *InternalDB) GetRankingProfileDrv(_ *context.Context, tenant, id string) (sg *RankingProfile, err error) {
+func (iDB *InternalDB) GetRankingProfileDrv(_ *context.Context, tenant, id string) (sg *utils.RankingProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheRankingProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*RankingProfile), nil
+	return x.(*utils.RankingProfile), nil
 }
 
-func (iDB *InternalDB) SetRankingProfileDrv(_ *context.Context, sgp *RankingProfile) (err error) {
+func (iDB *InternalDB) SetRankingProfileDrv(_ *context.Context, sgp *utils.RankingProfile) (err error) {
 	iDB.db.Set(utils.CacheRankingProfiles, sgp.TenantID(), sgp, nil, true, utils.NonTransactional)
 	return nil
 }
@@ -274,15 +274,15 @@ func (iDB *InternalDB) RemRankingProfileDrv(_ *context.Context, tenant, id strin
 	return nil
 }
 
-func (iDB *InternalDB) GetRankingDrv(_ *context.Context, tenant, id string) (rn *Ranking, err error) {
+func (iDB *InternalDB) GetRankingDrv(_ *context.Context, tenant, id string) (rn *utils.Ranking, err error) {
 	x, ok := iDB.db.Get(utils.CacheRankings, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*Ranking), nil
+	return x.(*utils.Ranking), nil
 }
 
-func (iDB *InternalDB) SetRankingDrv(_ *context.Context, rn *Ranking) (err error) {
+func (iDB *InternalDB) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (err error) {
 	iDB.db.Set(utils.CacheRankings, rn.TenantID(), rn, nil,
 		true, utils.NonTransactional)
 	return
@@ -326,7 +326,7 @@ func (iDB *InternalDB) GetThresholdProfileDrv(_ *context.Context, tenant, id str
 	return x.(*ThresholdProfile), nil
 }
 
-func (iDB *InternalDB) SetTrendProfileDrv(_ *context.Context, srp *TrendProfile) (err error) {
+func (iDB *InternalDB) SetTrendProfileDrv(_ *context.Context, srp *utils.TrendProfile) (err error) {
 	iDB.db.Set(utils.CacheTrendProfiles, srp.TenantID(), srp, nil, true, utils.NonTransactional)
 	return nil
 }
@@ -336,23 +336,23 @@ func (iDB *InternalDB) RemTrendProfileDrv(_ *context.Context, tenant, id string)
 	return nil
 }
 
-func (iDB *InternalDB) GetTrendProfileDrv(_ *context.Context, tenant, id string) (sg *TrendProfile, err error) {
+func (iDB *InternalDB) GetTrendProfileDrv(_ *context.Context, tenant, id string) (sg *utils.TrendProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheTrendProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*TrendProfile), nil
+	return x.(*utils.TrendProfile), nil
 }
 
-func (iDB *InternalDB) GetTrendDrv(_ *context.Context, tenant, id string) (th *Trend, err error) {
+func (iDB *InternalDB) GetTrendDrv(_ *context.Context, tenant, id string) (th *utils.Trend, err error) {
 	x, ok := iDB.db.Get(utils.CacheTrends, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*Trend), nil
+	return x.(*utils.Trend), nil
 }
 
-func (iDB *InternalDB) SetTrendDrv(_ *context.Context, tr *Trend) (err error) {
+func (iDB *InternalDB) SetTrendDrv(_ *context.Context, tr *utils.Trend) (err error) {
 	iDB.db.Set(utils.CacheTrends, tr.TenantID(), tr, nil,
 		true, utils.NonTransactional)
 	return

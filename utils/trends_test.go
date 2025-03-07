@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package utils
 
 import (
 	"errors"
@@ -24,8 +24,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 func TestTrendProfileClone(t *testing.T) {
@@ -112,7 +110,7 @@ func TestTrendProfileTenantIDAndTrendProfileWithAPIOpts(t *testing.T) {
 
 	tenantID := tp.TenantID()
 
-	expectedTenantID := "cgrates.org" + utils.ConcatenatedKeySep + "trend1"
+	expectedTenantID := "cgrates.org" + ConcatenatedKeySep + "trend1"
 	if tenantID != expectedTenantID {
 		t.Errorf("Expected TenantID %s, but got %s", expectedTenantID, tenantID)
 	}
@@ -158,9 +156,9 @@ func TestIndexesAppendMetric(t *testing.T) {
 	rTime1 := time.Now()
 	rTime2 := rTime1.Add(10 * time.Minute)
 
-	trend.indexesAppendMetric(metric1, rTime1)
-	trend.indexesAppendMetric(metric2, rTime2)
-	trend.indexesAppendMetric(metric1, rTime2)
+	trend.IndexesAppendMetric(metric1, rTime1)
+	trend.IndexesAppendMetric(metric2, rTime2)
+	trend.IndexesAppendMetric(metric1, rTime2)
 
 	expectedMLast := map[string]time.Time{
 		"metric1": rTime2,
@@ -297,24 +295,22 @@ func TestTComputeIndexes(t *testing.T) {
 }
 
 func TestGetTrendLabel(t *testing.T) {
-	trend := &Trend{}
-
 	tests := []struct {
 		tGrowth   float64
 		tolerance float64
 		expected  string
 	}{
-		{1.0, 0.5, utils.MetaPositive},
-		{-1.0, 0.5, utils.MetaNegative},
-		{0.0, 0.5, utils.MetaConstant},
-		{0.3, 0.5, utils.MetaConstant},
-		{-0.3, 0.5, utils.MetaConstant},
-		{0.6, 0.5, utils.MetaPositive},
-		{-0.6, 0.5, utils.MetaNegative},
+		{1.0, 0.5, MetaPositive},
+		{-1.0, 0.5, MetaNegative},
+		{0.0, 0.5, MetaConstant},
+		{0.3, 0.5, MetaConstant},
+		{-0.3, 0.5, MetaConstant},
+		{0.6, 0.5, MetaPositive},
+		{-0.6, 0.5, MetaNegative},
 	}
 
 	for _, test := range tests {
-		result := trend.getTrendLabel(test.tGrowth, test.tolerance)
+		result := GetTrendLabel(test.tGrowth, test.tolerance)
 		if result != test.expected {
 			t.Errorf("For tGrowth: %f and tolerance: %f, expected %s, got %s", test.tGrowth, test.tolerance, test.expected, result)
 		}
@@ -330,16 +326,16 @@ func TestGetTrendGrowth(t *testing.T) {
 		mCounts: map[string]int{},
 	}
 
-	_, err := trend.getTrendGrowth("unknownID", 100, utils.MetaLast, 2)
-	if !errors.Is(err, utils.ErrNotFound) {
+	_, err := trend.GetTrendGrowth("unknownID", 100, MetaLast, 2)
+	if !errors.Is(err, ErrNotFound) {
 		t.Errorf("Expected error ErrNotFound, got: %v", err)
 	}
 
 	now := time.Now()
 	trend.mLast["metric1"] = now
 
-	_, err = trend.getTrendGrowth("metric1", 100, utils.MetaLast, 2)
-	if !errors.Is(err, utils.ErrNotFound) {
+	_, err = trend.GetTrendGrowth("metric1", 100, MetaLast, 2)
+	if !errors.Is(err, ErrNotFound) {
 		t.Errorf("Expected error ErrNotFound, got: %v", err)
 	}
 
@@ -349,7 +345,7 @@ func TestGetTrendGrowth(t *testing.T) {
 		},
 	}
 
-	got, err := trend.getTrendGrowth("metric1", 100, utils.MetaLast, 2)
+	got, err := trend.GetTrendGrowth("metric1", 100, MetaLast, 2)
 	if err != nil || got != 25.0 {
 		t.Errorf("Mismatch for MetaLast correlation. Got: %v, expected: %v", got, 25.0)
 	}
@@ -361,13 +357,13 @@ func TestGetTrendGrowth(t *testing.T) {
 		"metric1": 4,
 	}
 
-	got, err = trend.getTrendGrowth("metric1", 120, utils.MetaAverage, 2)
+	got, err = trend.GetTrendGrowth("metric1", 120, MetaAverage, 2)
 	if err != nil || got != 20.0 {
 		t.Errorf("Mismatch for MetaAverage correlation. Got: %v, expected: %v", got, 20.0)
 	}
 
-	_, err = trend.getTrendGrowth("metric1", 100, "invalidCorrelation", 2)
-	if !errors.Is(err, utils.ErrCorrelationUndefined) {
+	_, err = trend.GetTrendGrowth("metric1", 100, "invalidCorrelation", 2)
+	if !errors.Is(err, ErrCorrelationUndefined) {
 		t.Errorf("Expected error ErrCorrelationUndefined, got: %v", err)
 	}
 }
@@ -419,21 +415,21 @@ func TestTrendProfileFieldAsString(t *testing.T) {
 		err     error
 		val     any
 	}{
-		{utils.ID, []string{utils.ID}, nil, "Trend1"},
-		{utils.Tenant, []string{utils.Tenant}, nil, "cgrates.org"},
-		{utils.Schedule, []string{utils.Schedule}, nil, "@every 1m"},
-		{utils.StatID, []string{utils.StatID}, nil, "Stat1"},
-		{utils.Metrics, []string{utils.Metrics + "[0]"}, nil, "*acc"},
-		{utils.Metrics, []string{utils.Metrics + "[1]"}, nil, "*tcd"},
-		{utils.TTL, []string{utils.TTL}, nil, 10 * time.Minute},
-		{utils.QueueLength, []string{utils.QueueLength}, nil, 100},
-		{utils.MinItems, []string{utils.MinItems}, nil, 10},
-		{utils.CorrelationType, []string{utils.CorrelationType}, nil, "*average"},
-		{utils.Tolerance, []string{utils.Tolerance}, nil, 0.05},
-		{utils.Stored, []string{utils.Stored}, nil, true},
-		{utils.ThresholdIDs, []string{utils.ThresholdIDs + "[0]"}, nil, "Thresh1"},
-		{utils.ThresholdIDs, []string{utils.ThresholdIDs + "[1]"}, nil, "Thresh2"},
-		{"NonExistingField", []string{"Field1"}, utils.ErrNotFound, nil},
+		{ID, []string{ID}, nil, "Trend1"},
+		{Tenant, []string{Tenant}, nil, "cgrates.org"},
+		{Schedule, []string{Schedule}, nil, "@every 1m"},
+		{StatID, []string{StatID}, nil, "Stat1"},
+		{Metrics, []string{Metrics + "[0]"}, nil, "*acc"},
+		{Metrics, []string{Metrics + "[1]"}, nil, "*tcd"},
+		{TTL, []string{TTL}, nil, 10 * time.Minute},
+		{QueueLength, []string{QueueLength}, nil, 100},
+		{MinItems, []string{MinItems}, nil, 10},
+		{CorrelationType, []string{CorrelationType}, nil, "*average"},
+		{Tolerance, []string{Tolerance}, nil, 0.05},
+		{Stored, []string{Stored}, nil, true},
+		{ThresholdIDs, []string{ThresholdIDs + "[0]"}, nil, "Thresh1"},
+		{ThresholdIDs, []string{ThresholdIDs + "[1]"}, nil, "Thresh2"},
+		{"NonExistingField", []string{"Field1"}, ErrNotFound, nil},
 	}
 	rp := &TrendProfile{
 		Tenant:          "cgrates.org",
@@ -490,24 +486,24 @@ func TestTrendCleanUp(t *testing.T) {
 		},
 		Metrics: map[time.Time]map[string]*MetricWithTrend{
 			tm: {
-				utils.MetaTCC: {ID: utils.MetaTCC, Value: 13, TrendGrowth: -1, TrendLabel: utils.NotAvailable},
-				utils.MetaACC: {ID: utils.MetaACC, Value: 13, TrendGrowth: -1, TrendLabel: utils.NotAvailable},
+				MetaTCC: {ID: MetaTCC, Value: 13, TrendGrowth: -1, TrendLabel: NotAvailable},
+				MetaACC: {ID: MetaACC, Value: 13, TrendGrowth: -1, TrendLabel: NotAvailable},
 			},
 			tm2: {
-				utils.MetaTCC: {ID: utils.MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: utils.MetaPositive},
-				utils.MetaACC: {ID: utils.MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: utils.MetaPositive},
+				MetaTCC: {ID: MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: MetaPositive},
+				MetaACC: {ID: MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: MetaPositive},
 			},
 			tm3: {
-				utils.MetaTCC: {ID: utils.MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: utils.MetaPositive},
-				utils.MetaACC: {ID: utils.MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: utils.MetaPositive},
+				MetaTCC: {ID: MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: MetaPositive},
+				MetaACC: {ID: MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: MetaPositive},
 			},
 			tm4: {
-				utils.MetaTCC: {ID: utils.MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: utils.MetaPositive},
-				utils.MetaACC: {ID: utils.MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: utils.MetaPositive},
+				MetaTCC: {ID: MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: MetaPositive},
+				MetaACC: {ID: MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: MetaPositive},
 			},
 			tm5: {
-				utils.MetaTCC: {ID: utils.MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: utils.MetaPositive},
-				utils.MetaACC: {ID: utils.MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: utils.MetaPositive},
+				MetaTCC: {ID: MetaTCC, Value: 30, TrendGrowth: 120, TrendLabel: MetaPositive},
+				MetaACC: {ID: MetaACC, Value: 15, TrendGrowth: 4, TrendLabel: MetaPositive},
 			},
 		},
 	}
@@ -667,84 +663,84 @@ func TestTrendProfileSet(t *testing.T) {
 	}{
 		{
 			name:     "Set Tenant",
-			path:     []string{utils.Tenant},
+			path:     []string{Tenant},
 			val:      "newTenant",
 			expected: "newTenant",
 			hasError: false,
 		},
 		{
 			name:     "Set ID",
-			path:     []string{utils.ID},
+			path:     []string{ID},
 			val:      "newID",
 			expected: "newID",
 			hasError: false,
 		},
 		{
 			name:     "Set Schedule",
-			path:     []string{utils.Schedule},
+			path:     []string{Schedule},
 			val:      "@every 2m",
 			expected: "@every 2m",
 			hasError: false,
 		},
 		{
 			name:     "Set StatID",
-			path:     []string{utils.StatID},
+			path:     []string{StatID},
 			val:      "newStatID",
 			expected: "newStatID",
 			hasError: false,
 		},
 		{
 			name:     "Set Metrics",
-			path:     []string{utils.Metrics},
+			path:     []string{Metrics},
 			val:      []string{"*newMetric"},
 			expected: []string{"*acc", "*tcd", "*newMetric"},
 			hasError: false,
 		},
 		{
 			name:     "Set TTL",
-			path:     []string{utils.TTL},
+			path:     []string{TTL},
 			val:      "15m",
 			expected: 15 * time.Minute,
 			hasError: false,
 		},
 		{
 			name:     "Set QueueLength",
-			path:     []string{utils.QueueLength},
+			path:     []string{QueueLength},
 			val:      50,
 			expected: 50,
 			hasError: false,
 		},
 		{
 			name:     "Set MinItems",
-			path:     []string{utils.MinItems},
+			path:     []string{MinItems},
 			val:      20,
 			expected: 20,
 			hasError: false,
 		},
 		{
 			name:     "Set CorrelationType",
-			path:     []string{utils.CorrelationType},
+			path:     []string{CorrelationType},
 			val:      "*sum",
 			expected: "*sum",
 			hasError: false,
 		},
 		{
 			name:     "Set Tolerance",
-			path:     []string{utils.Tolerance},
+			path:     []string{Tolerance},
 			val:      0.1,
 			expected: 0.1,
 			hasError: false,
 		},
 		{
 			name:     "Set Stored",
-			path:     []string{utils.Stored},
+			path:     []string{Stored},
 			val:      false,
 			expected: false,
 			hasError: false,
 		},
 		{
 			name:     "Set ThresholdIDs",
-			path:     []string{utils.ThresholdIDs},
+			path:     []string{ThresholdIDs},
 			val:      []string{"Thresh3", "Thresh4"},
 			expected: []string{"Thresh1", "Thresh2", "Thresh3", "Thresh4"},
 			hasError: false,
@@ -769,23 +765,23 @@ func TestTrendProfileSet(t *testing.T) {
 			}
 
 			switch tt.path[0] {
-			case utils.Tenant:
+			case Tenant:
 				if tp.Tenant != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Tenant)
 				}
-			case utils.ID:
+			case ID:
 				if tp.ID != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.ID)
 				}
-			case utils.Schedule:
+			case Schedule:
 				if tp.Schedule != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Schedule)
 				}
-			case utils.StatID:
+			case StatID:
 				if tp.StatID != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.StatID)
 				}
-			case utils.Metrics:
+			case Metrics:
 				if len(tp.Metrics) != len(tt.expected.([]string)) {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Metrics)
 				} else {
@@ -796,31 +792,31 @@ func TestTrendProfileSet(t *testing.T) {
 						}
 					}
 				}
-			case utils.TTL:
+			case TTL:
 				if tp.TTL != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.TTL)
 				}
-			case utils.QueueLength:
+			case QueueLength:
 				if tp.QueueLength != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.QueueLength)
 				}
-			case utils.MinItems:
+			case MinItems:
 				if tp.MinItems != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.MinItems)
 				}
-			case utils.CorrelationType:
+			case CorrelationType:
 				if tp.CorrelationType != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.CorrelationType)
 				}
-			case utils.Tolerance:
+			case Tolerance:
 				if tp.Tolerance != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Tolerance)
 				}
-			case utils.Stored:
+			case Stored:
 				if tp.Stored != tt.expected {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.Stored)
 				}
-			case utils.ThresholdIDs:
+			case ThresholdIDs:
 				if len(tp.ThresholdIDs) != len(tt.expected.([]string)) {
 					t.Errorf("For path %v, expected %v, but got %v", tt.path, tt.expected, tp.ThresholdIDs)
 				} else {

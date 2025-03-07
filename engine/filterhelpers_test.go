@@ -60,7 +60,7 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 	}
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	cM := NewConnManager(cfg)
 	fltrs := NewFilterS(cfg, cM, dm)
@@ -86,7 +86,7 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 	}
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	cM := NewConnManager(cfg)
 	fltrs := NewFilterS(cfg, cM, dm)
 	tnt := utils.CGRateSorg
@@ -108,7 +108,8 @@ func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
 	data := &DataDBMock{
 		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) { return []string{}, utils.ErrNotImplemented },
 	}
-	dmMatch := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	cfg := config.NewDefaultCGRConfig()
+	dmMatch := NewDataManager(data, cfg, nil)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
 
@@ -126,7 +127,7 @@ func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
 	}}
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmMatch := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+	dmMatch := NewDataManager(data, cfg, nil)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
 

@@ -23,12 +23,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetRankingProfile returns a Ranking profile
-func (adms *AdminSv1) GetRankingProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.RankingProfile) (err error) {
+func (adms *AdminSv1) GetRankingProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -74,7 +73,7 @@ func (adms *AdminSv1) GetRankingProfileIDs(ctx *context.Context, args *utils.Arg
 }
 
 // GetRankingProfiles returns a list of ranking profiles registered for a tenant
-func (admS *AdminSv1) GetRankingProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rgPrfs *[]*engine.RankingProfile) (err error) {
+func (admS *AdminSv1) GetRankingProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rgPrfs *[]*utils.RankingProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -83,9 +82,9 @@ func (admS *AdminSv1) GetRankingProfiles(ctx *context.Context, args *utils.ArgsI
 	if err = admS.GetRankingProfileIDs(ctx, args, &sqPrfIDs); err != nil {
 		return
 	}
-	*rgPrfs = make([]*engine.RankingProfile, 0, len(sqPrfIDs))
+	*rgPrfs = make([]*utils.RankingProfile, 0, len(sqPrfIDs))
 	for _, sqPrfID := range sqPrfIDs {
-		var rgPrf *engine.RankingProfile
+		var rgPrf *utils.RankingProfile
 		rgPrf, err = admS.dm.GetRankingProfile(ctx, tnt, sqPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -115,7 +114,7 @@ func (admS *AdminSv1) GetRankingProfilesCount(ctx *context.Context, args *utils.
 }
 
 // SetRankingProfile alters/creates a RankingProfile
-func (adms *AdminSv1) SetRankingProfile(ctx *context.Context, arg *engine.RankingProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetRankingProfile(ctx *context.Context, arg *utils.RankingProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.RankingProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -173,32 +172,4 @@ func (adms *AdminSv1) RemoveRankingProfile(ctx *context.Context, args *utils.Ten
 	}
 	*reply = utils.OK
 	return nil
-}
-
-// NewRankingSv1 initializes RankingSV1
-func NewRankingSv1(rnks *engine.RankingS) *RankingSv1 {
-	return &RankingSv1{
-		rnkS: rnks,
-	}
-}
-
-type RankingSv1 struct {
-	rnkS *engine.RankingS
-}
-
-// GetRankingSummary returns summary of the last updated ranking
-func (rnks *RankingSv1) GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.RankingSummary) error {
-	return rnks.rnkS.V1GetRankingSummary(ctx, arg, reply)
-}
-
-func (rnkS *RankingSv1) GetRanking(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.Ranking) (err error) {
-	return rnkS.rnkS.V1GetRanking(ctx, arg, reply)
-}
-
-func (rnkS *RankingSv1) GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
-	return rnkS.rnkS.V1GetSchedule(ctx, args, schedRankings)
-}
-
-func (rnkS *RankingSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
-	return rnkS.rnkS.V1ScheduleQueries(ctx, args, scheduled)
 }

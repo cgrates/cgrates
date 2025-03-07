@@ -44,7 +44,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -120,7 +120,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -199,7 +199,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -281,7 +281,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -362,7 +362,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -424,7 +424,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -470,7 +470,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
@@ -521,7 +521,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 	config.SetCgrConfig(cfg)
 
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
 	storDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)

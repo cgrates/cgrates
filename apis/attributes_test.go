@@ -35,7 +35,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -111,7 +111,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -174,7 +174,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 		},
 	}
 
-	admS.dm = engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	admS.dm = engine.NewDataManager(dbMock, cfg, nil)
 	expected = "SERVER_ERROR: NOT_IMPLEMENTED"
 	if err := admS.SetAttributeProfile(context.Background(), attrPrf, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
@@ -188,7 +188,7 @@ func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -221,7 +221,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -287,7 +287,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 			}}, &reply); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
-	admS.dm = engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	admS.dm = engine.NewDataManager(data, cfg, nil)
 
 	engine.Cache.Clear(nil)
 	dm.DataDB().Flush(utils.EmptyString)
@@ -323,7 +323,7 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -364,7 +364,7 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -390,7 +390,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 			return []string{}, nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -429,7 +429,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -450,7 +450,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 		},
 	}
 	expected = "NOT_FOUND"
-	admS.dm = engine.NewDataManager(dbMockNew, cfg.CacheCfg(), nil)
+	admS.dm = engine.NewDataManager(dbMockNew, cfg, nil)
 	if err := admS.GetAttributeProfilesCount(context.Background(),
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -466,7 +466,7 @@ func TestAttributesGetAttributeForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	attrS := engine.NewAttributeService(dm, fltrs, cfg)
 	admS := &AdminSv1{
@@ -564,7 +564,7 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args1 := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
@@ -704,7 +704,7 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, nil, connMgr)
+	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &engine.APIAttributeProfileWithAPIOpts{
 		APIAttributeProfile: &engine.APIAttributeProfile{
@@ -766,7 +766,7 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -808,7 +808,7 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -853,7 +853,7 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(dbMock, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -881,7 +881,7 @@ func TestAttributesSetAttributeProfileAsAttrPrfErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	admS := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,

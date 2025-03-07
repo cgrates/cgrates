@@ -672,8 +672,8 @@ func APItoModelTPRanking(tpRG *utils.TPRankingProfile) (mdls RankingMdls) {
 	return
 }
 
-func APItoRanking(tpRG *utils.TPRankingProfile) (rg *RankingProfile, err error) {
-	rg = &RankingProfile{
+func APItoRanking(tpRG *utils.TPRankingProfile) (rg *utils.RankingProfile, err error) {
+	rg = &utils.RankingProfile{
 		Tenant:            tpRG.Tenant,
 		ID:                tpRG.ID,
 		Schedule:          tpRG.Schedule,
@@ -691,7 +691,7 @@ func APItoRanking(tpRG *utils.TPRankingProfile) (rg *RankingProfile, err error) 
 	return rg, nil
 }
 
-func RankingProfileToAPI(rg *RankingProfile) (tpRG *utils.TPRankingProfile) {
+func RankingProfileToAPI(rg *utils.RankingProfile) (tpRG *utils.TPRankingProfile) {
 	tpRG = &utils.TPRankingProfile{
 		Tenant:            rg.Tenant,
 		ID:                rg.ID,
@@ -820,8 +820,8 @@ func APItoModelTrends(tr *utils.TPTrendsProfile) (mdls TrendMdls) {
 	return
 }
 
-func APItoTrends(tpTR *utils.TPTrendsProfile) (tr *TrendProfile, err error) {
-	tr = &TrendProfile{
+func APItoTrends(tpTR *utils.TPTrendsProfile) (tr *utils.TrendProfile, err error) {
+	tr = &utils.TrendProfile{
 		Tenant:          tpTR.Tenant,
 		ID:              tpTR.ID,
 		StatID:          tpTR.StatID,
@@ -844,7 +844,7 @@ func APItoTrends(tpTR *utils.TPTrendsProfile) (tr *TrendProfile, err error) {
 	return
 }
 
-func TrendProfileToAPI(tr *TrendProfile) (tpTR *utils.TPTrendsProfile) {
+func TrendProfileToAPI(tr *utils.TrendProfile) (tpTR *utils.TPTrendsProfile) {
 	tpTR = &utils.TPTrendsProfile{
 		Tenant:          tr.Tenant,
 		ID:              tr.ID,

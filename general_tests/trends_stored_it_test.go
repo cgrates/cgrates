@@ -121,12 +121,12 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 	})
 
 	t.Run("GetTrendsAfterStoreInterval", func(t *testing.T) {
-		metricsChan := make(chan *engine.Trend, 1)
+		metricsChan := make(chan *utils.Trend, 1)
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 		go func() {
 			ticker := time.NewTicker(600 * time.Millisecond)
-			var trnd engine.Trend
+			var trnd utils.Trend
 			for {
 				select {
 				case <-ticker.C:
@@ -184,7 +184,7 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 	})
 
 	t.Run("GetTrendsNotStored", func(t *testing.T) {
-		metricsChan := make(chan *engine.Trend, 1)
+		metricsChan := make(chan *utils.Trend, 1)
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		go func() {
@@ -192,7 +192,7 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 				ticker := time.NewTicker(700 * time.Millisecond)
 				select {
 				case <-ticker.C:
-					var trnd engine.Trend
+					var trnd utils.Trend
 					//	the trend will be not updated since storeinterval is set to 0
 					err := client.Call(context.Background(), utils.TrendSv1GetTrend, &utils.ArgGetTrend{ID: "TREND_1", TenantWithAPIOpts: utils.TenantWithAPIOpts{Tenant: "cgrates.org"}}, &trnd)
 					if err != nil {
@@ -245,7 +245,7 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 		}
 	})
 	t.Run("GetTrendsStoredUnlimited", func(t *testing.T) {
-		metricsChan := make(chan *engine.Trend, 1)
+		metricsChan := make(chan *utils.Trend, 1)
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 		go func() {
@@ -253,7 +253,7 @@ cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,`}
 			for {
 				select {
 				case <-ticker.C:
-					var trnd engine.Trend
+					var trnd utils.Trend
 					err := client.Call(context.Background(), utils.TrendSv1GetTrend, &utils.ArgGetTrend{ID: "TREND_1", TenantWithAPIOpts: utils.TenantWithAPIOpts{Tenant: "cgrates.org"}}, &trnd)
 					if err != nil {
 						if err.Error() != utils.ErrNotFound.Error() {

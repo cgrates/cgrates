@@ -64,7 +64,7 @@ var attrs = &engine.AttrSProcessEventReply{
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	//connect BiJSON
@@ -94,7 +94,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	client := &birpc.Service{}
@@ -1281,7 +1281,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	mpStr := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	sS := NewSessionS(cfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil, nil)
+	sS := NewSessionS(cfg, engine.NewDataManager(mpStr, cfg, nil), nil, nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		{
@@ -1302,7 +1302,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil, nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, cfg, nil), nil, nil)
 	expIndx = map[string][]string{utils.ToR: {utils.MetaVoice}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters(context.Background(), "", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1315,7 +1315,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR1",
 	})
-	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil, nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(mpStr, cfg, nil), nil, nil)
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}

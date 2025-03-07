@@ -4488,7 +4488,7 @@ func TestBiRPCv1DisconnectPeer(t *testing.T) {
 	client := new(mkCall)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	sessions.biJIDs = map[string]*biJClient{
@@ -4534,7 +4534,7 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	ctx := context.WithClient(context.Background(), new(mkCall))
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	sessions := NewSessionS(cfg, dm, nil, nil)
 
 	var reply string
@@ -4606,7 +4606,7 @@ func TestSyncSessionsSync(t *testing.T) {
 	}
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	connMgr := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
+	dm := engine.NewDataManager(data, cfg, connMgr)
 	sessions := NewSessionS(cfg, dm, nil, connMgr)
 	sessions.aSessions = map[string]*Session{}
 	sessions.cfg.GeneralCfg().ReplyTimeout = 1

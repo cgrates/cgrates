@@ -1991,7 +1991,7 @@ func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	fltrS := NewFilterS(cfg, cM, dm)
 
@@ -2034,7 +2034,7 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	fltrS := NewFilterS(cfg, cM, dm)
 
@@ -2082,7 +2082,7 @@ func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	fltrS := NewFilterS(cfg, cM, dm)
 

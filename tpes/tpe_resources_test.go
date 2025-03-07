@@ -49,7 +49,7 @@ func TestTPEnewTPResources(t *testing.T) {
 			}
 			return rsc, nil
 		},
-	}, nil, connMng)
+	}, cfg, connMng)
 	exp := &TPResources{
 		dm: dm,
 	}
@@ -63,7 +63,7 @@ func TestTPEExportItemsResources(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpRsc := TPResources{
 		dm: dm,
 	}
@@ -115,7 +115,7 @@ func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(data, cfg, nil)
 	tpRsc := TPResources{
 		dm: dm,
 	}

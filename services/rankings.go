@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/rankings"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -40,7 +41,7 @@ func NewRankingService(cfg *config.CGRConfig) *RankingService {
 type RankingService struct {
 	mu        sync.RWMutex
 	cfg       *config.CGRConfig
-	ran       *engine.RankingS
+	ran       *rankings.RankingS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -71,7 +72,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 
 	ran.mu.Lock()
 	defer ran.mu.Unlock()
-	ran.ran = engine.NewRankingS(dbs.DataManager(), cms.ConnManager(), fs.FilterS(), ran.cfg)
+	ran.ran = rankings.NewRankingS(dbs.DataManager(), cms.ConnManager(), fs.FilterS(), ran.cfg)
 	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
 	}

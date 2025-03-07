@@ -69,10 +69,11 @@ var (
 )
 
 func TestOnStorIT(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		onStor = NewDataManager(NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items),
-			config.CgrConfig().CacheCfg(), nil)
+		onStor = NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items),
+			cfg, nil)
 	case utils.MetaMySQL:
 		cfg := config.NewDefaultCGRConfig()
 		var err error
@@ -85,7 +86,7 @@ func TestOnStorIT(t *testing.T) {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}
 		onStorCfg = cfg.DataDbCfg().Name
-		onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
+		onStor = NewDataManager(rdsITdb, cfg, nil)
 	case utils.MetaPostgres, utils.MetaMongo:
 		t.SkipNow()
 	default:

@@ -33,7 +33,7 @@ import (
 func TestGetFltrIdxHealthForRateRates(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	rt := &utils.RateProfile{
 		Tenant:          utils.CGRateSorg,
 		ID:              "TEST_RATE_TEST",
@@ -76,7 +76,7 @@ func TestGetFiltersRateProfilesErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	if _, err := getFilters(context.Background(), dm, utils.CacheRateProfilesFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
@@ -89,7 +89,7 @@ func TestGetFiltersActionProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	ap := &ActionProfile{
 		Tenant:    "cgrates.org",
@@ -138,7 +138,7 @@ func TestGetFiltersActionProfilesErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	if _, err := getFilters(context.Background(), dm, utils.CacheActionProfilesFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
@@ -151,7 +151,7 @@ func TestGetFiltersAccountsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	ap := &utils.Account{
 		Tenant:    "cgrates.org",
@@ -212,7 +212,7 @@ func TestGetFiltersAccountsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	if _, err := getFilters(context.Background(), dm, utils.CacheAccountsFilterIndexes, utils.CGRateSorg, "fltrID"); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
@@ -225,7 +225,7 @@ func TestGetFiltersDefault(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg.CacheCfg(), cM)
+	dm := NewDataManager(data, cfg, cM)
 
 	expErr := `unsupported index type:<"inexistent">`
 	if _, err := getFilters(context.Background(), dm, "inexistent", utils.CGRateSorg, "fltrID"); err == nil || err.Error() != expErr {
@@ -238,7 +238,7 @@ func TestGetFilterAsIndexSetDynamicVal(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -265,7 +265,7 @@ func TestGetFilterAsIndexSetElementNotDynamic(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -298,7 +298,7 @@ func TestGetFilterAsIndexSetGetIHFltrIdxFromCacheErr(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -325,7 +325,7 @@ func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache1Err(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	rply := &FilterIHReply{
 		MissingObjects: nil,
@@ -346,7 +346,7 @@ func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache2Err(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	rply := &FilterIHReply{
 		MissingObjects: nil,
@@ -364,7 +364,7 @@ func TestUpdateFilterIHMisingIndxReplyIndexes(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	rply := &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:ATTR2"},
@@ -394,7 +394,7 @@ func TestUpdateFilterIHMisingIndxHasNotReplyIndexes(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	rply := &FilterIHReply{
 		MissingObjects: []string{"cgrates.org:ATTR2"},
@@ -436,7 +436,7 @@ func TestUpdateFilterIHMisingIndxGetFilterAsIndexSetErr(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	rply := &FilterIHReply{
 		MissingObjects: nil,
@@ -470,7 +470,7 @@ func TestGetFltrIdxHealthGetKeysForPrefixErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
 
@@ -489,7 +489,7 @@ func TestGetFltrIdxHealthgetIHObjFromCacheErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
@@ -514,7 +514,7 @@ func TestGetFltrIdxHealthIdxKeyFormatErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
@@ -541,7 +541,7 @@ func TestGetRevFltrIdxHealthFromObjGetKeysForPrefixErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
 
@@ -560,7 +560,7 @@ func TestGetRevFltrIdxHealthFromObjIHObjFromCacheErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
@@ -589,7 +589,7 @@ func TestGetRevFltrIdxHealthFromReverseGetKeysForPrefixErr(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
 	objCaches := make(map[string]*ltcache.Cache)
@@ -607,7 +607,7 @@ func TestGetRatesFromCacheGetRateProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
 
@@ -626,7 +626,7 @@ func TestGetRatesFromCacheObjValNil(t *testing.T) {
 	useLtcache := ltcache.NewCache(20, 20*time.Second, true, nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache.Set("cgrates.org:ATTR1", nil, []string{})
 
@@ -644,7 +644,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetKeysForPrefixErr(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
 
@@ -663,7 +663,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetRatesFromCacheErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm := NewDataManager(db, cfg, nil)
 
 	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -716,7 +716,7 @@ func TestGetFltrIdxHealthForRateRatesGetKeysForPrefixErr(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(-1, 0, false, nil)
 

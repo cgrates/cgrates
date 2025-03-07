@@ -433,7 +433,7 @@ func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
 
@@ -502,7 +502,7 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 	}()
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
 
@@ -575,7 +575,7 @@ func TestAttributeSProcessEventPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
 
@@ -639,7 +639,7 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
 
@@ -701,7 +701,7 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	dm := NewDataManager(data, cfg, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	attrS := NewAttributeService(dm, filterS, cfg)
 
@@ -779,7 +779,7 @@ func TestV1GetAttributeForEventAttrProfEventErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg.CacheCfg(), conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant: "cgrates.org",
@@ -832,7 +832,7 @@ func TestAttributesV1ProcessEventFieldMissingErr(t *testing.T) {
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg)
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, nil, conMng)
+	dm := NewDataManager(db, cfg, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	attr := &AttributeProfile{
 		Tenant: "cgrates.org",

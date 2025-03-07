@@ -57,7 +57,7 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
-		dm:         NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr), // ToDo: add ChacheCfg as parameter to the NewTpReader
+		dm:         NewDataManager(db, config.CgrConfig(), connMgr), // ToDo: add CGRConfig as parameter to the NewTpReader
 		lr:         lr,
 		cacheConns: cacheConns,
 		//schedulerConns: schedulerConns,
@@ -447,7 +447,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("TrendProfiles:")
 	}
 	for _, tpTR := range tpr.trProfiles {
-		var tr *TrendProfile
+		var tr *utils.TrendProfile
 		if tr, err = APItoTrends(tpTR); err != nil {
 			return
 		}
@@ -466,7 +466,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("RankingProfiles:")
 	}
 	for _, tpRN := range tpr.rgProfiles {
-		var rn *RankingProfile
+		var rn *utils.RankingProfile
 		if rn, err = APItoRanking(tpRN); err != nil {
 			return
 		}
