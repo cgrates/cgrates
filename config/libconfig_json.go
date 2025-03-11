@@ -203,6 +203,7 @@ type CdrsJsonCfg struct {
 	Enabled              *bool
 	Extra_fields         *[]string
 	Store_cdrs           *bool
+	Compress_stored_cost *bool
 	Session_cost_retries *int
 	Chargers_conns       *[]string
 	Rals_conns           *[]string

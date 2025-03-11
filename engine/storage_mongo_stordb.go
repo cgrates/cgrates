@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -1008,14 +1009,22 @@ func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	if cdr.OrderID == 0 {
 		cdr.OrderID = ms.counter.Next()
 	}
+	var savedCDR any = cdr
+	if config.CgrConfig().CdrsCfg().CompressStoredCost && cdr.CostDetails != nil {
+		cdrC, err := cdr.AsCompressedCostCDR(ms.ms)
+		if err != nil {
+			return err
+		}
+		savedCDR = cdrC
+	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		if allowUpdate {
 			_, err = ms.getCol(ColCDRs).UpdateOne(sctx,
 				bson.M{CGRIDLow: cdr.CGRID, RunIDLow: cdr.RunID},
-				bson.M{"$set": cdr}, options.Update().SetUpsert(true))
+				bson.M{"$set": savedCDR}, options.Update().SetUpsert(true))
 			return
 		}
-		_, err = ms.getCol(ColCDRs).InsertOne(sctx, cdr)
+		_, err = ms.getCol(ColCDRs).InsertOne(sctx, savedCDR)
 		if err != nil && strings.Contains(err.Error(), "E11000") { // Mongo returns E11000 when key is duplicated
 			err = utils.ErrExists
 		}
@@ -1246,10 +1255,24 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) (cdrs []
 			return qryErr
 		}
 		for cur.Next(sctx) {
-			cdr := CDR{}
-			err := cur.Decode(&cdr)
-			if err != nil {
-				return err
+			var err error
+			var cdr CDR
+			if config.CgrConfig().CdrsCfg().CompressStoredCost {
+				cdrC := CompressedCostCDR{}
+				err = cur.Decode(&cdrC)
+				if err != nil {
+					return err
+				}
+				cdrP, err := NewCDRFromCompressedCDR(&cdrC, ms.ms)
+				if err != nil {
+					return
+				}
+				cdr = *cdrP
+			} else {
+				if err = cur.Decode(&cdr); err != nil {
+					return err
+				}
+
 			}
 			clone := cdr
 			clone.CostDetails.initCache()

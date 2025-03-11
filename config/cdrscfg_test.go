@@ -89,18 +89,19 @@ func TestCdrsCfgAsMapInterface(t *testing.T) {
 	},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:          true,
-		utils.ExtraFieldsCfg:      []string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"},
-		utils.StoreCdrsCfg:        true,
-		utils.SessionCostRetires:  5,
-		utils.ChargerSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
-		utils.RALsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
-		utils.AttributeSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
-		utils.ThresholdSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
-		utils.StatSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
-		utils.OnlineCDRExportsCfg: []string{"http_localhost", "amqp_localhost", "http_test_file"},
-		utils.SchedulerConnsCfg:   []string{utils.MetaInternal, "*conn1"},
-		utils.EEsConnsCfg:         []string{utils.MetaInternal, "*conn1"},
+		utils.EnabledCfg:            true,
+		utils.ExtraFieldsCfg:        []string{"~*req.PayPalAccount", "~*req.LCRProfile", "~*req.ResourceID"},
+		utils.StoreCdrsCfg:          true,
+		utils.SessionCostRetires:    5,
+		utils.CompressStoredCostCfg: false,
+		utils.ChargerSConnsCfg:      []string{utils.MetaInternal, "*conn1"},
+		utils.RALsConnsCfg:          []string{utils.MetaInternal, "*conn1"},
+		utils.AttributeSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.ThresholdSConnsCfg:    []string{utils.MetaInternal, "*conn1"},
+		utils.StatSConnsCfg:         []string{utils.MetaInternal, "*conn1"},
+		utils.OnlineCDRExportsCfg:   []string{"http_localhost", "amqp_localhost", "http_test_file"},
+		utils.SchedulerConnsCfg:     []string{utils.MetaInternal, "*conn1"},
+		utils.EEsConnsCfg:           []string{utils.MetaInternal, "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -119,18 +120,19 @@ func TestCdrsCfgAsMapInterface2(t *testing.T) {
        },
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:          true,
-		utils.ExtraFieldsCfg:      []string{},
-		utils.StoreCdrsCfg:        true,
-		utils.SessionCostRetires:  5,
-		utils.ChargerSConnsCfg:    []string{"conn1", "conn2"},
-		utils.RALsConnsCfg:        []string{},
-		utils.AttributeSConnsCfg:  []string{"*internal"},
-		utils.ThresholdSConnsCfg:  []string{},
-		utils.StatSConnsCfg:       []string{},
-		utils.OnlineCDRExportsCfg: []string{},
-		utils.SchedulerConnsCfg:   []string{},
-		utils.EEsConnsCfg:         []string{"conn1"},
+		utils.EnabledCfg:            true,
+		utils.ExtraFieldsCfg:        []string{},
+		utils.StoreCdrsCfg:          true,
+		utils.CompressStoredCostCfg: false,
+		utils.SessionCostRetires:    5,
+		utils.ChargerSConnsCfg:      []string{"conn1", "conn2"},
+		utils.RALsConnsCfg:          []string{},
+		utils.AttributeSConnsCfg:    []string{"*internal"},
+		utils.ThresholdSConnsCfg:    []string{},
+		utils.StatSConnsCfg:         []string{},
+		utils.OnlineCDRExportsCfg:   []string{},
+		utils.SchedulerConnsCfg:     []string{},
+		utils.EEsConnsCfg:           []string{"conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

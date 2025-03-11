@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -920,8 +921,15 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 		}
 	}
 	iDB.indexedFieldsMutex.RUnlock()
+	var saveCDR any = cdr
+	if config.CgrConfig().CdrsCfg().CompressStoredCost && cdr.CostDetails != nil {
+		saveCDR, err = cdr.AsCompressedCostCDR(iDB.ms)
+		if err != nil {
+			return
+		}
+	}
 
-	iDB.db.Set(utils.CacheCDRsTBL, cdrKey, cdr, idxs.AsSlice(),
+	iDB.db.Set(utils.CacheCDRsTBL, cdrKey, saveCDR, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 
 	return
@@ -1250,8 +1258,19 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		if !ok || x == nil {
 			return nil, 0, utils.ErrNotFound
 		}
-		cdr := x.(*CDR)
-
+		var cdr *CDR
+		if config.CgrConfig().CdrsCfg().CompressStoredCost {
+			cdrCompres, ok := x.(*CompressedCostCDR)
+			if !ok {
+				return nil, 0, utils.ErrNotFound
+			}
+			cdr, err = NewCDRFromCompressedCDR(cdrCompres, iDB.ms)
+			if err != nil {
+				return
+			}
+		} else {
+			cdr = x.(*CDR)
+		}
 		// default indexed filters
 		if (len(filter.CGRIDs) > 0 && !slices.Contains(filter.CGRIDs, cdr.CGRID)) ||
 			(len(filter.RunIDs) > 0 && !slices.Contains(filter.RunIDs, cdr.RunID)) ||

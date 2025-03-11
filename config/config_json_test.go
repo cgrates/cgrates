@@ -863,6 +863,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Enabled:              utils.BoolPointer(false),
 		Extra_fields:         &[]string{},
 		Store_cdrs:           utils.BoolPointer(true),
+		Compress_stored_cost: utils.BoolPointer(false),
 		Session_cost_retries: utils.IntPointer(5),
 		Chargers_conns:       &[]string{},
 		Rals_conns:           &[]string{},
