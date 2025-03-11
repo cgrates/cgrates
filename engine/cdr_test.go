@@ -708,7 +708,10 @@ func TestCDRAsCDRsql(t *testing.T) {
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	eCDR := cdr.AsCDRsql()
+	eCDR, err := cdr.AsCDRsql(&JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
 	eCDRSql := &CDRsql{
 		Cgrid:       cdr.CGRID,
 		RunID:       cdr.RunID,
@@ -779,17 +782,17 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 
-	if eCDR, err := NewCDRFromSQL(cdrSQL); err != nil {
+	if eCDR, err := NewCDRFromSQL(cdrSQL, &JSONMarshaler{}); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cdr, eCDR) {
 		t.Errorf("Expecting: %+v, received: %+v", cdr, eCDR)
 	}
 	cdrSQL.CostDetails = "val"
-	if _, err = NewCDRFromSQL(cdrSQL); err == nil {
+	if _, err = NewCDRFromSQL(cdrSQL, &JSONMarshaler{}); err == nil {
 		t.Error(err)
 	}
 	cdrSQL.ExtraFields = "test"
-	if _, err = NewCDRFromSQL(cdrSQL); err == nil {
+	if _, err = NewCDRFromSQL(cdrSQL, &JSONMarshaler{}); err == nil {
 		t.Error(err)
 	}
 }
@@ -913,5 +916,140 @@ func TestEngineCDRString(t *testing.T) {
 	got := TestCDR.String()
 	if string(got) != string(want) {
 		t.Errorf("Expected CDR.String() to return %s, got %s", want, got)
+	}
+}
+
+func TestCompressedCDR(t *testing.T) {
+	tmpCfg := config.CgrConfig()
+	defer func() {
+		config.SetCgrConfig(tmpCfg)
+	}()
+	config.CgrConfig().CdrsCfg().CompressStoredCost = true
+	cdr := CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2024, 03, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.MetaVoice,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      "test",
+		RequestType: utils.MetaRated,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID:       utils.MetaDefault,
+		Usage:       10 * time.Second,
+		ExtraInfo:   "extraInfo",
+		Partial:     false,
+		PreRated:    true,
+		CostSource:  "cost source",
+		CostDetails: &EventCost{
+			CGRID:     "test1",
+			RunID:     utils.MetaDefault,
+			StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+			Usage:     utils.DurationPointer(3 * time.Minute),
+			Cost:      utils.Float64Pointer(2.3),
+			Charges: []*ChargingInterval{
+				{
+					RatingID: "RatingID2",
+					Increments: []*ChargingIncrement{
+						{
+							Usage:          2 * time.Minute,
+							Cost:           2.0,
+							AccountingID:   "a012888",
+							CompressFactor: 1,
+						},
+						{
+							Usage:          time.Second,
+							Cost:           0.005,
+							AccountingID:   "44d6c02",
+							CompressFactor: 60,
+						},
+					},
+					CompressFactor: 1,
+				},
+			},
+			AccountSummary: &AccountSummary{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				BalanceSummaries: []*BalanceSummary{
+					{
+						UUID:  "uuid1",
+						Type:  utils.MetaMonetary,
+						Value: 50,
+					},
+				},
+				AllowNegative: false,
+				Disabled:      false,
+			},
+			Rating: Rating{
+				"c1a5ab9": &RatingUnit{
+					ConnectFee:       0.1,
+					RoundingMethod:   "*up",
+					RoundingDecimals: 5,
+					RatesID:          "ec1a177",
+					RatingFiltersID:  "43e77dc",
+				},
+			},
+			Accounting: Accounting{
+				"a012888": &BalanceCharge{
+					AccountID:   "cgrates.org:1001",
+					BalanceUUID: "uuid1",
+					Units:       120.7,
+				},
+				"44d6c02": &BalanceCharge{
+					AccountID:   "cgrates.org:1001",
+					BalanceUUID: "uuid1",
+					Units:       120.7,
+				},
+			},
+			Rates: ChargedRates{
+				"ec1a177": RateGroups{
+					&RGRate{
+						GroupIntervalStart: 0,
+						Value:              0.01,
+						RateIncrement:      time.Minute,
+						RateUnit:           time.Second},
+				},
+			},
+		},
+		Cost: 1.01,
+	}
+
+	cdrCompres, err := cdr.AsCompressedCostCDR(&JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
+	cdr2, err := NewCDRFromCompressedCDR(cdrCompres, &JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(cdr.CostDetails, cdr2.CostDetails) {
+		t.Errorf("expected %v,received %v", utils.ToJSON(cdr.CostDetails), utils.ToJSON(cdr2.CostDetails))
+	}
+
+	cdrsql, err := cdr.AsCDRsql(&JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
+	cdr3, err := NewCDRFromSQL(cdrsql, &JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(cdr.CostDetails, cdr3.CostDetails) {
+		t.Errorf("expected %v,received %v\n", utils.ToJSON(cdr.CostDetails), utils.ToJSON(cdr3.CostDetails))
+	}
+
+	idb := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	if err := idb.SetCDR(&cdr, true); err != nil {
+		t.Error(err)
+	}
+	if cdrs, _, err := idb.GetCDRs(&utils.CDRsFilter{}, false); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(cdrs[0].CostDetails, cdr.CostDetails) {
+		t.Errorf("expected %v,\nreceived %v\n", utils.ToJSON(cdr), utils.ToJSON(cdrs[0]))
 	}
 }

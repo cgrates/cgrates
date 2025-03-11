@@ -74,7 +74,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 			opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword, opts.PgSSLCertMode, opts.PgSSLRootCert,
 			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime)
 	case utils.MetaMySQL:
-		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLLogLevel,
+		db, err = NewMySQLStorage(host, port, name, user, pass, marshaler, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLLogLevel,
 			opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.MySQLDSNParams)
 	case utils.MetaInternal:
 		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itmsCfg)

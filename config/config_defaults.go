@@ -378,6 +378,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,		// start the CDR Server:  <true|false>
 	"extra_fields": [],		// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
 	"store_cdrs": true,		// store cdrs in StorDB
+	"compress_stored_cost": false,	// compress CostDetails before storing
 	"session_cost_retries": 5,	// number of queries to session_costs before recalculating CDR
 	"chargers_conns": [],		// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
 	"rals_conns": [],		// connections to RALs for cost calculation: <""|*internal|$rpc_conns_id>

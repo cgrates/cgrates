@@ -24,18 +24,19 @@ import (
 
 // CdrsCfg is the CDR server
 type CdrsCfg struct {
-	Enabled          bool       // Enable CDR Server service
-	ExtraFields      RSRParsers // Extra fields to store in CDRs
-	StoreCdrs        bool       // store cdrs in storDb
-	SMCostRetries    int
-	ChargerSConns    []string
-	RaterConns       []string
-	AttributeSConns  []string
-	ThresholdSConns  []string
-	StatSConns       []string
-	OnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
-	SchedulerConns   []string
-	EEsConns         []string
+	Enabled            bool       // Enable CDR Server service
+	ExtraFields        RSRParsers // Extra fields to store in CDRs
+	StoreCdrs          bool       // store cdrs in storDb
+	CompressStoredCost bool       // compress cost details in cdrs
+	SMCostRetries      int
+	ChargerSConns      []string
+	RaterConns         []string
+	AttributeSConns    []string
+	ThresholdSConns    []string
+	StatSConns         []string
+	OnlineCDRExports   []string // list of CDRE templates to use for real-time CDR exports
+	SchedulerConns     []string
+	EEsConns           []string
 }
 
 // loadFromJSONCfg loads Cdrs config from JsonCfg
@@ -53,6 +54,9 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 	}
 	if jsnCdrsCfg.Store_cdrs != nil {
 		cdrscfg.StoreCdrs = *jsnCdrsCfg.Store_cdrs
+	}
+	if jsnCdrsCfg.Compress_stored_cost != nil {
+		cdrscfg.CompressStoredCost = *jsnCdrsCfg.Compress_stored_cost
 	}
 	if jsnCdrsCfg.Session_cost_retries != nil {
 		cdrscfg.SMCostRetries = *jsnCdrsCfg.Session_cost_retries
@@ -137,9 +141,10 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]any
 func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:       cdrscfg.Enabled,
-		utils.StoreCdrsCfg:     cdrscfg.StoreCdrs,
-		utils.SMCostRetriesCfg: cdrscfg.SMCostRetries,
+		utils.EnabledCfg:            cdrscfg.Enabled,
+		utils.StoreCdrsCfg:          cdrscfg.StoreCdrs,
+		utils.CompressStoredCostCfg: cdrscfg.CompressStoredCost,
+		utils.SMCostRetriesCfg:      cdrscfg.SMCostRetries,
 	}
 
 	extraFields := make([]string, len(cdrscfg.ExtraFields))
@@ -229,10 +234,11 @@ func (cdrscfg *CdrsCfg) AsMapInterface() (initialMP map[string]any) {
 // Clone returns a deep copy of CdrsCfg
 func (cdrscfg CdrsCfg) Clone() (cln *CdrsCfg) {
 	cln = &CdrsCfg{
-		Enabled:       cdrscfg.Enabled,
-		ExtraFields:   cdrscfg.ExtraFields.Clone(),
-		StoreCdrs:     cdrscfg.StoreCdrs,
-		SMCostRetries: cdrscfg.SMCostRetries,
+		Enabled:            cdrscfg.Enabled,
+		ExtraFields:        cdrscfg.ExtraFields.Clone(),
+		StoreCdrs:          cdrscfg.StoreCdrs,
+		SMCostRetries:      cdrscfg.SMCostRetries,
+		CompressStoredCost: cdrscfg.CompressStoredCost,
 	}
 	if cdrscfg.ChargerSConns != nil {
 		cln.ChargerSConns = make([]string, len(cdrscfg.ChargerSConns))

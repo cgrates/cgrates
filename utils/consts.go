@@ -2299,6 +2299,7 @@ const (
 const (
 	ExtraFieldsCfg         = "extra_fields"
 	StoreCdrsCfg           = "store_cdrs"
+	CompressStoredCostCfg  = "compress_stored_cost"
 	SMCostRetriesCfg       = "session_cost_retries"
 	ChargerSConnsCfg       = "chargers_conns"
 	AttributeSConnsCfg     = "attributes_conns"

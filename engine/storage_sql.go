@@ -42,6 +42,7 @@ type SQLImpl interface {
 type SQLStorage struct {
 	Db *sql.DB
 	db *gorm.DB
+	ms Marshaler
 	StorDB
 	SQLImpl
 }
@@ -917,7 +918,10 @@ func (sqls *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 
 func (sqls *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	tx := sqls.db.Begin()
-	cdrSQL := cdr.AsCDRsql()
+	cdrSQL, err := cdr.AsCDRsql(sqls.ms)
+	if err != nil {
+		return err
+	}
 	cdrSQL.CreatedAt = time.Now()
 	saved := tx.Save(cdrSQL)
 	if saved.Error != nil {
@@ -1199,7 +1203,7 @@ func (sqls *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		return nil, 0, err
 	}
 	for _, result := range results {
-		if cdr, err := NewCDRFromSQL(result); err != nil {
+		if cdr, err := NewCDRFromSQL(result, sqls.ms); err != nil {
 			return nil, 0, err
 		} else {
 			cdr.CostDetails.initCache()

@@ -201,7 +201,10 @@ func testSQLInitDB(t *testing.T) {
 	tx.Commit()
 	tx = db.Begin()
 	tx = tx.Table(utils.CDRsTBL)
-	cdrSql := cdr.AsCDRsql()
+	cdrSql, err := cdr.AsCDRsql(&engine.JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
 	cdrSql.CreatedAt = time.Now()
 	saved := tx.Save(cdrSql)
 	if saved.Error != nil {
@@ -220,7 +223,10 @@ func testSQLInitDB(t *testing.T) {
 func testSQLAddData(t *testing.T) {
 	tx := db.Begin()
 	tx = tx.Table(utils.CDRsTBL)
-	cdrSql := cdr.AsCDRsql()
+	cdrSql, err := cdr.AsCDRsql(&engine.JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
 	cdrSql.CreatedAt = time.Now()
 	saved := tx.Save(cdrSql)
 	if saved.Error != nil {
@@ -447,7 +453,10 @@ func testSQLInitDB2(t *testing.T) {
 	tx.Commit()
 	tx = db.Begin()
 	tx = tx.Table(utils.CDRsTBL)
-	cdrSql := cdr.AsCDRsql()
+	cdrSql, err := cdr.AsCDRsql(&engine.JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
 	cdrSql.CreatedAt = time.Now()
 	saved := tx.Save(cdrSql)
 	if saved.Error != nil {
@@ -466,7 +475,10 @@ func testSQLInitDB2(t *testing.T) {
 func testSQLAddData2(t *testing.T) {
 	tx := db.Begin()
 	tx = tx.Table(utils.CDRsTBL)
-	cdrSql := cdr.AsCDRsql()
+	cdrSql, err := cdr.AsCDRsql(&engine.JSONMarshaler{})
+	if err != nil {
+		t.Error(err)
+	}
 	cdrSql.CreatedAt = time.Now()
 	saved := tx.Save(cdrSql)
 	if saved.Error != nil {
