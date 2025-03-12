@@ -187,7 +187,7 @@
         with_items: "{{ package_files.files }}"
         when: package_files.matched > 0
 
-      - name: Check for uniqueness of changes files per distribution
+      - name: Find Debian package changes files (.changes) for each distribution
         ansible.builtin.find:
           paths: /var/packages/debian/incoming
           patterns: "*~deb{{ item.version }}u1_amd64.changes"
@@ -195,9 +195,9 @@
         register: changes_files
         with_items: "{{ distributions }}"
 
-      - name: Fail if wrong number of changes files found
+      - name: Validate that each distribution has exactly one .changes file for proper reprepro inclusion
         ansible.builtin.fail:
-          msg: "Expected exactly 1 changes file for {{ item.item.codename }}, found {{ item.matched }} files"
+          msg: "Debian packaging error: Expected exactly 1 .changes file for {{ item.item.codename }}, found {{ item.matched }}. Each distribution should have a single .changes file for proper repository inclusion."
         when: item.matched != 1
         with_items: "{{ changes_files.results }}"
 
