@@ -31,9 +31,9 @@ import (
 
 // GetFloat64Opts checks the specified option names in order among the keys in APIOpts returning the first value it finds as float64, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetFloat64Opts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicFloat64Opt,
+func GetFloat64Opts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicFloat64Opt,
 	optNames ...string) (cfgOpt float64, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return utils.IfaceAsFloat64(opt)
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return 0, err
@@ -53,9 +53,9 @@ func GetFloat64Opts(ctx *context.Context, tnt string, dP utils.DataProvider, fS 
 
 // GetDurationOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Duration, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetDurationOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicDurationOpt,
+func GetDurationOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicDurationOpt,
 	optNames ...string) (cfgOpt time.Duration, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return utils.IfaceAsDuration(opt)
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return 0, err
@@ -75,9 +75,9 @@ func GetDurationOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS
 
 // GetDurationPointerOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *time.Duration, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetDurationPointerOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicDurationPointerOpt,
+func GetDurationPointerOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicDurationPointerOpt,
 	optNames ...string) (cfgOpt *time.Duration, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		var value time.Duration
 		value, err = utils.IfaceAsDuration(opt)
 		if err != nil {
@@ -102,9 +102,9 @@ func GetDurationPointerOpts(ctx *context.Context, tnt string, dP utils.DataProvi
 
 // GetStringOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as string, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetStringOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicStringOpt,
+func GetStringOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicStringOpt,
 	optNames ...string) (cfgOpt string, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return utils.IfaceAsString(opt), nil
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return "", err
@@ -124,9 +124,9 @@ func GetStringOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *
 
 // GetTimeOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as time.Time, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetTimeOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicStringOpt,
+func GetTimeOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicStringOpt,
 	tmz string, optNames ...string) (_ time.Time, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return utils.IfaceAsTime(opt, tmz)
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return time.Time{}, err
@@ -152,9 +152,9 @@ func GetTimeOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fi
 
 // GetStringSliceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as []string, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetStringSliceOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicStringSliceOpt,
+func GetStringSliceOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicStringSliceOpt,
 	dftOpt []string, optNames ...string) (cfgOpt []string, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return utils.IfaceAsStringSlice(opt)
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return nil, err
@@ -174,9 +174,9 @@ func GetStringSliceOpts(ctx *context.Context, tnt string, dP utils.DataProvider,
 
 // GetIntOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as int, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetIntOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicIntOpt,
+func GetIntOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicIntOpt,
 	optNames ...string) (cfgOpt int, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return utils.IfaceAsInt(opt)
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return 0, err
@@ -196,9 +196,9 @@ func GetIntOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fil
 
 // GetBoolOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as bool, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicBoolOpt,
+func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicBoolOpt,
 	optNames ...string) (cfgOpt bool, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return utils.IfaceAsBool(opt)
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return false, err
@@ -218,9 +218,9 @@ func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *Fi
 
 // GetDecimalBigOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *decimal.Big, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetDecimalBigOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicDecimalOpt,
+func GetDecimalBigOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicDecimalOpt,
 	optNames ...string) (cfgOpt *decimal.Big, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return utils.IfaceAsBig(opt)
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return nil, err
@@ -240,9 +240,9 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, dP utils.DataProvider, 
 
 // GetInterfaceOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as any, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetInterfaceOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicInterfaceOpt,
+func GetInterfaceOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicInterfaceOpt,
 	optNames ...string) (cfgOpt any, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		return opt, nil
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return false, err
@@ -262,9 +262,9 @@ func GetInterfaceOpts(ctx *context.Context, tnt string, dP utils.DataProvider, f
 
 // GetIntPointerOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *int, otherwise it
 // returns the config option if at least one filter passes or NOT_FOUND if none of them do
-func GetIntPointerOpts(ctx *context.Context, tnt string, dP utils.DataProvider, fS *FilterS, dynOpts []*config.DynamicIntPointerOpt,
+func GetIntPointerOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicIntPointerOpt,
 	optNames ...string) (cfgOpt *int, err error) {
-	if opt, err := optIfaceFromDP(dP, optNames); err == nil {
+	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
 		var value int
 		if value, err = utils.IfaceAsInt(opt); err != nil {
 			return nil, err
@@ -371,8 +371,15 @@ func ConvertOptsToMapStringAny(in any) (map[string]any, error) {
 	return out, nil
 }
 
-// getOptIfaceFromDP is a helper that returns the first option (as interface{}) found in the data provider
-func optIfaceFromDP(dP utils.DataProvider, optNames []string) (any, error) {
+// getOptIfaceFromDP is a helper that returns the first option (as interface{}) found in cache or data provider
+func optIfaceFromDP(dP utils.DataProvider, cch map[string]any, optNames []string) (any, error) {
+	if cch != nil {
+		for _, optName := range optNames {
+			if opt, ok := cch[optName]; ok {
+				return opt, nil
+			}
+		}
+	}
 	values, err := dP.FieldAsInterface([]string{utils.MetaOpts})
 	if err != nil {
 		return nil, err

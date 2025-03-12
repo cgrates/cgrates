@@ -171,12 +171,12 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 	}
 	dP := args.AsDataProvider()
 	var sTime time.Time
-	if sTime, err = engine.GetTimeOpts(ctx, args.Tenant, dP, rS.fltrS, rS.cfg.RateSCfg().Opts.StartTime,
+	if sTime, err = engine.GetTimeOpts(ctx, args.Tenant, dP, nil, rS.fltrS, rS.cfg.RateSCfg().Opts.StartTime,
 		rS.cfg.GeneralCfg().DefaultTimezone, utils.OptsRatesStartTime, utils.MetaStartTime); err != nil {
 		return
 	}
 	var usage *decimal.Big
-	if usage, err = engine.GetDecimalBigOpts(ctx, args.Tenant, dP, rS.fltrS, rS.cfg.RateSCfg().Opts.Usage,
+	if usage, err = engine.GetDecimalBigOpts(ctx, args.Tenant, dP, nil, rS.fltrS, rS.cfg.RateSCfg().Opts.Usage,
 		utils.OptsRatesUsage, utils.MetaUsage); err != nil {
 		return
 	}
@@ -195,7 +195,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		rpCost.MaxCost = rtPfl.MaxCost
 	}
 	var ivalStart *decimal.Big
-	if ivalStart, err = engine.GetDecimalBigOpts(ctx, args.Tenant, dP, rS.fltrS, rS.cfg.RateSCfg().Opts.IntervalStart,
+	if ivalStart, err = engine.GetDecimalBigOpts(ctx, args.Tenant, dP, nil, rS.fltrS, rS.cfg.RateSCfg().Opts.IntervalStart,
 		utils.OptsRatesIntervalStart); err != nil {
 		return
 	}

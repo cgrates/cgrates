@@ -38,7 +38,7 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 		pstrs:  make([]*ees.HTTPjsonMapEE, len(aCfg.Diktats)),
 	}
 	for i, actD := range aL.cfg().Diktats {
-		attempts, err := engine.GetIntOpts(ctx, tnt, cgrEv.AsDataProvider(), fltrS, cfg.ActionSCfg().Opts.PosterAttempts,
+		attempts, err := engine.GetIntOpts(ctx, tnt, cgrEv.AsDataProvider(), nil, fltrS, cfg.ActionSCfg().Opts.PosterAttempts,
 			utils.MetaPosterAttempts)
 		if err != nil {
 			return nil, err

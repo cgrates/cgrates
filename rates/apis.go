@@ -133,12 +133,12 @@ func (rS *RateS) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CG
 //	it will loop through all matching profiles for the event in the eventuality the ones with higher priority are erroring
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string
-	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIDs,
+	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIDs,
 		config.RatesProfileIDsDftOpt, utils.OptsRatesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}

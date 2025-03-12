@@ -65,22 +65,22 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	// end of RPC caching
 	dP := args.AsDataProvider()
 	var attrS bool
-	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Attributes,
+	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Attributes,
 		utils.MetaAttributes); err != nil {
 		return
 	}
 	var acntS bool
-	if acntS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.MaxUsage,
+	if acntS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.MaxUsage,
 		utils.MetaAccounts); err != nil {
 		return
 	}
 	var routeS bool
-	if routeS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Routes,
+	if routeS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Routes,
 		utils.MetaRoutes); err != nil {
 		return
 	}
 	var resourceS bool
-	if resourceS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesAuthorize,
+	if resourceS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesAuthorize,
 		utils.MetaResources); err != nil {
 		return
 	}
@@ -105,7 +105,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 	runEvents := make(map[string]*utils.CGREvent)
 
 	var chrgS bool
-	if chrgS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Chargers,
+	if chrgS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Chargers,
 		utils.MetaChargers); err != nil {
 		return
 	}
@@ -154,7 +154,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		}
 	}
 	var thdS bool
-	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Thresholds,
+	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Thresholds,
 		utils.MetaThresholds); err != nil {
 		return
 	}
@@ -169,7 +169,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		authReply.ThresholdIDs = &tIDs
 	}
 	var stS bool
-	if stS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Stats,
+	if stS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Stats,
 		utils.MetaStats); err != nil {
 		return
 	}
@@ -264,7 +264,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 
 	var originID string
 	dP := args.AsDataProvider()
-	if originID, err = engine.GetStringOpts(ctx, args.Tenant, dP, sS.fltrS, nil,
+	if originID, err = engine.GetStringOpts(ctx, args.Tenant, dP, nil, sS.fltrS, nil,
 		utils.MetaOriginID); err != nil {
 		return
 	} else if originID == utils.EmptyString {
@@ -277,12 +277,12 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	rply.MaxUsage = utils.DurationPointer(time.Duration(utils.InvalidUsage)) // temp
 
 	var acntS bool
-	if acntS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.MaxUsage,
+	if acntS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.MaxUsage,
 		utils.MetaAccounts); err != nil {
 		return
 	}
 	var resourceS bool
-	if resourceS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesAllocate,
+	if resourceS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesAllocate,
 		utils.MetaResources); err != nil {
 		return
 	}
@@ -291,7 +291,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 
 	var attrS bool
-	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Attributes,
+	if attrS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Attributes,
 		utils.MetaAttributes); err != nil {
 		return
 	}
@@ -311,7 +311,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	runEvents := make(map[string]*utils.CGREvent)
 
 	var chrgS bool
-	if chrgS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Chargers,
+	if chrgS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Chargers,
 		utils.MetaChargers); err != nil {
 		return
 	}
@@ -362,7 +362,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			return
 		}
 		var dbtItvl time.Duration
-		if dbtItvl, err = engine.GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), sS.fltrS, sS.cfg.SessionSCfg().Opts.DebitInterval,
+		if dbtItvl, err = engine.GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.DebitInterval,
 			utils.OptsSesDebitInterval); err != nil {
 			return
 		}
@@ -386,7 +386,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		}
 	}
 	var thdS bool
-	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Thresholds,
+	if thdS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Thresholds,
 		utils.MetaThresholds); err != nil {
 		return
 	}
@@ -401,7 +401,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		rply.ThresholdIDs = &tIDs
 	}
 	var stS bool
-	if stS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.Stats,
+	if stS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Stats,
 		utils.MetaStats); err != nil {
 		return
 	}

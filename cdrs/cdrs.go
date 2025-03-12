@@ -187,7 +187,7 @@ func (cdrS *CDRServer) eeSProcessEvent(ctx *context.Context, cgrEv *utils.CGREve
 // In case of partially executed, both the error and the events will be returned.
 func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent) ([]*utils.EventsWithOpts, error) {
 	for _, ev := range evs {
-		attrS, err := engine.GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
+		attrS, err := engine.GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Attributes,
 			utils.MetaAttributes)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaAttributes, err)
@@ -208,7 +208,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	cgrEvs := make([]*utils.CGREvent, 0, len(evs))
 
 	for _, ev := range evs {
-		chrgS, err := engine.GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Chargers,
+		chrgS, err := engine.GetBoolOpts(ctx, ev.Tenant, ev.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Chargers,
 			utils.MetaChargers)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaChargers, err)
@@ -230,7 +230,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	var partiallyExecuted bool // from here actions are optional and a general error is returned
 
 	for _, cgrEv := range cgrEvs {
-		rateS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rates,
+		rateS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rates,
 			utils.MetaRates)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRates, err)
@@ -247,7 +247,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		acntS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Accounts,
+		acntS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Accounts,
 			utils.MetaAccounts)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaAccounts, err)
@@ -295,7 +295,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		store, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Store,
+		store, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Store,
 			utils.MetaStore)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaStore, err)
@@ -303,7 +303,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 		if !store {
 			continue
 		}
-		rerate, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rerate,
+		rerate, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Rerate,
 			utils.MetaRerate)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaRerate, err)
@@ -335,7 +335,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		export, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
+		export, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Export,
 			utils.OptsCDRsExport)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.OptsCDRsExport, err)
@@ -356,7 +356,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		thdS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
+		thdS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Thresholds,
 			utils.MetaThresholds)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaThresholds, err)
@@ -373,7 +373,7 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 	}
 
 	for _, cgrEv := range cgrEvs {
-		stS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Stats,
+		stS, err := engine.GetBoolOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, cdrS.fltrS, cdrS.cfg.CdrsCfg().Opts.Stats,
 			utils.MetaStats)
 		if err != nil {
 			return nil, fmt.Errorf("retrieving %s option failed: %w", utils.MetaStats, err)
