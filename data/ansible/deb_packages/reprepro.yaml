@@ -1,25 +1,25 @@
 ---
 - name: Check if /var/packages/debian directory exists
   become: true
-  file:
+  ansible.builtin.file:
     path: /var/packages/debian
     state: directory
 
 - name: Check if /var/packages/debian/conf directory exists
   become: true
-  file:
+  ansible.builtin.file:
     path: /var/packages/debian/conf
     state: directory
 
 - name: Check if /var/packages/debian/incoming directory exists
   become: true
-  file:
+  ansible.builtin.file:
     path: /var/packages/debian/incoming
     state: directory
 
 - name: Add distributions file in reprepro
   become: true
-  template:
+  ansible.builtin.template:
     src: distributions.conf.j2
     dest: "/var/packages/debian/conf/distributions"
     mode: '0600'
@@ -27,7 +27,7 @@
 
 - name: Add distributions file in reprepro
   become: true
-  template:
+  ansible.builtin.template:
     src: options.conf.j2
     dest: "/var/packages/debian/conf/options"
     mode: '0600'
@@ -35,9 +35,9 @@
 
 - name: Create override.testing file
   become: true
-  copy:
+  ansible.builtin.copy:
     content: ""
     dest: /var/packages/debian/conf/override.testing
-    force: no
+    force: false
     group: root
     owner: root
