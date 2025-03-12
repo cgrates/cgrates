@@ -1,13 +1,13 @@
 ---
 - name: Check if Go is already installed.
-  command: /usr/local/go/bin/go version
+  ansible.builtin.command: /usr/local/go/bin/go version
   ignore_errors: true
   register: go_version_result
   changed_when: false
 
 - name: Remove current installation.
   become: true
-  file:
+  ansible.builtin.file:
     state: absent
     path: /usr/local/go
   when:
@@ -17,28 +17,54 @@
 
 - name: Download Go.
   become: true
-  get_url:
-    url: '{{ go_download_url }}'
-    dest: /usr/local/src/{{ go_tarball }}
-    checksum: 'sha256:{{ go_checksum }}'
+  ansible.builtin.get_url:
+    url: "{{ go_download_url }}"
+    dest: "/usr/local/src/{{ go_tarball }}"
+    checksum: "sha256:{{ go_checksum }}"
+    mode: "0644"
   when:
     - install_go | bool
     - (go_version_result is failed or go_version not in go_version_result.stdout)
 
 - name: Extract Go.
   become: true
-  unarchive:
-    src: /usr/local/src/{{ go_tarball }}
+  ansible.builtin.unarchive:
+    src: "/usr/local/src/{{ go_tarball }}"
     dest: /usr/local
-    copy: no
+    copy: false
   when:
     - install_go | bool
     - (go_version_result is failed or go_version not in go_version_result.stdout)
 
 - name: Add Go to to system-wide $PATH.
   become: true
-  copy:
+  ansible.builtin.copy:
     dest: /etc/profile.d/go-path.sh
     content: |-
       export PATH=$PATH:/usr/local/go/bin
+    mode: "0644"
   when: install_go | bool
+
+- name: Get Go modcache path
+  ansible.builtin.command: go env GOMODCACHE
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+  register: gomodcache_path
+  changed_when: false
+  when: go_clean_modcache
+
+# Using file module since go clean --modcache is just a wrapper for rm -rf $GOMODCACHE
+- name: Clean Go modcache
+  become: true
+  ansible.builtin.file:
+    path: "{{ gomodcache_path.stdout }}"
+    state: absent
+  when: go_clean_modcache
+
+- name: Clean Go build cache
+  ansible.builtin.command: go clean -x --cache
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+  register: cache_clean_result
+  when: go_clean_build_cache
+  changed_when: "'rm -rf' in cache_clean_result.stdout"

@@ -1386,7 +1386,11 @@ func testOnStorITTiming(t *testing.T) {
 
 func testOnStorITCRUDHistory(t *testing.T) {
 	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)
-	ist := &utils.LoadInstance{"Load", "RatingLoad", "Account", time}
+	ist := &utils.LoadInstance{LoadID: "Load",
+		RatingLoadID:     "RatingLoad",
+		AccountingLoadID: "Account",
+		LoadTime:         time,
+	}
 	if err := onStor.DataDB().AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}

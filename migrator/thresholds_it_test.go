@@ -198,11 +198,14 @@ func testTrsITMigrateAndMove(t *testing.T) {
 	}
 
 	tresProf := &engine.ThresholdProfile{
-		ID:                 v1trs.ID,
-		Tenant:             config.CgrConfig().GeneralCfg().DefaultTenant,
-		Weight:             v1trs.Weight,
-		ActivationInterval: &utils.ActivationInterval{v1trs.ExpirationDate, v1trs.ActivationDate},
-		MinSleep:           v1trs.MinSleep,
+		ID:     v1trs.ID,
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		Weight: v1trs.Weight,
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: v1trs.ActivationDate,
+			ExpiryTime:     v1trs.ExpirationDate,
+		},
+		MinSleep: v1trs.MinSleep,
 	}
 
 	v2trs := &v2Threshold{

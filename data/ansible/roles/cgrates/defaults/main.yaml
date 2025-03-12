@@ -1,16 +1,19 @@
 ---
-golang_gopath: '/home/{{ ansible_user }}/go'
-clone_repository: true
-cgrates_dir: '{{ golang_gopath }}/src/github.com/cgrates/cgrates'
+golang_gopath: "/home/{{ ansible_user }}/go"
 golang_install_dir: /usr/local/go
-git_version: v0.10
-cgrates_migrator_cfg_path: /usr/share/cgrates/conf/samples/tutmysql # leave empty to do nothing
+cgrates_clone_repo: true
+cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+cgrates_branch: v0.10
+
+# Leave empty to skip creating symlinks
+cgrates_data_path: "/usr/share/cgrates"
+cgrates_bin_path: "/usr/bin"
+
 cgrates_dbs:
   - mysql
   - postgres
   - mongo
 
-# CGRateS dependencies
 cgrates_dependencies:
   - git
   - redis-server
