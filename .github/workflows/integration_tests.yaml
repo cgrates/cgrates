@@ -46,7 +46,8 @@ jobs:
 
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook data/ansible/integration_tests/main.yaml -i localhost, -c local -e "ansible_user=$(whoami) cgrates_dir=$GITHUB_WORKSPACE clone_repository=false install_go=false"
+          ansible-playbook data/ansible/integration_tests/main.yaml -i localhost, -c local -e "ansible_user=$(whoami) cgrates_dir=$GITHUB_WORKSPACE cgrates_clone_repo=false install_go=false"
+
 
       # - name: Set up tmate session for debugging
       #   uses: mxschmitt/action-tmate@v3

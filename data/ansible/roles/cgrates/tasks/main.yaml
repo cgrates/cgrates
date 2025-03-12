@@ -2,68 +2,70 @@
 - name: Install CGRateS dependencies
   become: true
   ansible.builtin.package:
-    name: '{{ cgrates_dependencies }}'
+    name: "{{ cgrates_dependencies }}"
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Create cgrates directory
   ansible.builtin.file:
     state: directory
     mode: u=rwx,go=rx
-    owner: '{{ ansible_user }}'
-    dest: '{{ cgrates_dir }}'
-  when: clone_repository | bool
+    owner: "{{ ansible_user }}"
+    dest: "{{ cgrates_dir }}"
+  when: cgrates_clone_repo | bool
 
 - name: Git clone cgrates
   ansible.builtin.git:
     repo: https://github.com/cgrates/cgrates.git
-    dest: '{{ cgrates_dir }}'
-    update: yes
-    force: yes
-    version: '{{ git_version }}'
-  when: clone_repository | bool
+    dest: "{{ cgrates_dir }}"
+    update: true
+    force: true
+    version: "{{ cgrates_branch }}"
+  when: cgrates_clone_repo | bool
 
-- name: Build cgrates
-  ansible.builtin.shell:
-    cmd: bash -lc "sh {{ cgrates_dir }}/build.sh"
-  args:
-    chdir: '{{ cgrates_dir }}'
-  become_user: '{{ ansible_user }}'
+- name: Install cgrates binaries
+  ansible.builtin.command:
+    cmd: bash -c './build.sh'
+    chdir: "{{ cgrates_dir }}"
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
 
-- name: Create symbolic links
+- name: Create cgrates data folder symlink
   ansible.builtin.file:
-    src: '{{ item.src }}'
-    dest: '{{ item.dest }}'
+    src: "{{ cgrates_dir }}/data"
+    dest: "{{ cgrates_data_path }}"
     state: link
   become: true
+  when: cgrates_data_path | length > 0
+
+- name: Create cgrates binary symlinks
+  ansible.builtin.file:
+    src: "{{ golang_gopath }}/bin/{{ item }}"
+    dest: "{{ cgrates_bin_path }}/{{ item }}"
+    state: link
+  become: true
+  when: cgrates_bin_path | length > 0
   loop:
-    - { src: '{{ cgrates_dir }}/data', dest: '/usr/share/cgrates' }
-    - { src: '{{ golang_gopath }}/bin/cgr-engine', dest: '/usr/bin/cgr-engine' }
-    - { src: '{{ golang_gopath }}/bin/cgr-loader', dest: '/usr/bin/cgr-loader' }
-    - {
-        src: '{{ golang_gopath }}/bin/cgr-migrator',
-        dest: '/usr/bin/cgr-migrator',
-      }
-    - {
-        src: '{{ golang_gopath }}/bin/cgr-console',
-        dest: '/usr/bin/cgr-console',
-      }
-    - { src: '{{ golang_gopath }}/bin/cgr-tester', dest: '/usr/bin/cgr-tester' }
+    - cgr-engine
+    - cgr-loader
+    - cgr-migrator
+    - cgr-console
+    - cgr-tester
 
 - name: Run post install scripts
   become: true
   ansible.builtin.command:
-    cmd: '{{ item.cmd }}'
-    chdir: '{{ cgrates_dir }}/data/storage/{{ item.db }}'
+    cmd: "{{ item.cmd }}"
+    chdir: "{{ cgrates_dir }}/data/storage/{{ item.db }}"
   when: item.db in cgrates_dbs
   loop:
-    - { db: 'mysql', cmd: 'sh setup_ers_db.sh root CGRateS.org localhost' }
-    - { db: 'mysql', cmd: 'sh setup_cgr_db.sh root CGRateS.org localhost' }
-    - { db: 'postgres', cmd: 'sh create_db_with_users.sh' }
-    - { db: 'postgres', cmd: 'sh create_ers_db.sh' }
-    - { db: 'mongo', cmd: 'sh setup_cgr_db.sh' }
-
-- name: Set versions
-  ansible.builtin.command:
-    cmd: 'cgr-migrator -exec=*set_versions -config_path={{ cgrates_migrator_cfg_path }}'
-  when: cgrates_migrator_cfg_path != ""
+    - db: mysql
+      cmd: sh setup_ers_db.sh root CGRateS.org localhost
+    - db: mysql
+      cmd: sh setup_cgr_db.sh root CGRateS.org localhost
+    - db: postgres
+      cmd: sh create_db_with_users.sh
+    - db: postgres
+      cmd: sh create_ers_db.sh
+    - db: mongo
+      cmd: sh setup_cgr_db.sh
