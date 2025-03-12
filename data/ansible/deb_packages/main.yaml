@@ -214,19 +214,58 @@
         with_items: "{{ package_files.files }}"
 
       rescue:
-        - name: Find files in incoming directory
+        - name: Find all files in incoming directory
           ansible.builtin.find:
             paths: /var/packages/debian/incoming
             file_type: file
-          register: debug_files
+          register: all_incoming_files
 
-        - name: Display files
+        - name: Display files for debugging
           ansible.builtin.debug:
-            msg: "{{ debug_files.files | map(attribute='path') | list }}"
+            msg: "{{ all_incoming_files.files | map(attribute='path') | list }}"
+
+        - name: Find build log files
+          ansible.builtin.find:
+            paths: /var/packages/debian/incoming
+            patterns: "*.build"
+            file_type: file
+          register: build_log_files
+          ignore_errors: true
+
+        - name: Ensure log directory exists
+          become: true
+          ansible.builtin.file:
+            path: "/tmp/ansible_build_logs"
+            state: directory
+            mode: "0755"
+          ignore_errors: true
+
+        - name: Copy build logs to a safe location
+          become: true
+          ansible.builtin.copy:
+            src: "{{ item.path }}"
+            dest: "/tmp/ansible_build_logs/{{ item.path | basename }}"
+            remote_src: true
+          with_items: "{{ build_log_files.files }}"
+          ignore_errors: true
+          when: build_log_files.matched > 0
+
+        - name: Remove chroot environments
+          become: true
+          ansible.builtin.file:
+            path: "/var/cache/pbuilder/base-{{ item.codename }}+go.cow"
+            state: absent
+          with_items: "{{ distributions }}"
+
+        - name: Remove update timestamp
+          become: true
+          ansible.builtin.file:
+            path: "/var/cache/pbuilder/update-timestamp"
+            state: absent
 
         - name: Fail with error
           ansible.builtin.fail:
-            msg: "Task failed - see original error above"
+            msg: "Task failed - see original error above. Build logs saved to /tmp/ansible_build_logs/ if available."
 
       always:
         - name: Clean the incoming folder
