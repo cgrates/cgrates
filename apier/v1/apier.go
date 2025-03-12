@@ -436,13 +436,13 @@ func (apiv1 *APIerSv1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply 
 		at, err := utils.ParseTimeDetectLayout(ra.ActivationTime,
 			apiv1.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
-			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ErrServerError.Error(), ra.ActivationTime))
+			return fmt.Errorf("%s:Cannot parse activation time from %v", utils.ErrServerError.Error(), ra.ActivationTime)
 		}
 		if exists, err := apiv1.DataManager.HasData(utils.RATING_PLAN_PREFIX,
 			ra.RatingPlanId, ""); err != nil {
 			return utils.NewErrServerError(err)
 		} else if !exists {
-			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ErrNotFound.Error(), ra.RatingPlanId))
+			return fmt.Errorf("%s:RatingPlanId:%s", utils.ErrNotFound.Error(), ra.RatingPlanId)
 		}
 		rpfl.RatingPlanActivations = append(rpfl.RatingPlanActivations,
 			&engine.RatingPlanActivation{

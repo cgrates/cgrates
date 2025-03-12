@@ -182,20 +182,32 @@ func testTPitTimings(t *testing.T) {
 	}
 	// Test get
 	var rplyTmDummy *utils.ApierTPTiming
-	if err := tpRPC.Call(utils.APIerSv2GetTPTiming, v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &rplyTmDummy); err != nil {
+	if err := tpRPC.Call(utils.APIerSv2GetTPTiming,
+		v1.AttrGetTPTiming{
+			TPid: tmDummyRemove.TPid,
+			ID:   tmDummyRemove.ID,
+		}, &rplyTmDummy); err != nil {
 		t.Error("Calling APIerSv2.GetTPTiming, got error: ", err.Error())
 	} else if !reflect.DeepEqual(tmDummyRemove, rplyTmDummy) {
 		t.Errorf("Calling APIerSv2.GetTPTiming expected: %v, received: %v", tmDummyRemove, rplyTmDummy)
 	}
 	var rplyTmIDs []string
 	expectedTmIDs := []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK", tmDummyRemove.ID}
-	if err := tpRPC.Call(utils.APIerSv1GetTPTimingIds, v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
+	if err := tpRPC.Call(utils.APIerSv1GetTPTimingIds,
+		v1.AttrGetTPTimingIds{
+			TPid:                testTPid,
+			PaginatorWithSearch: utils.PaginatorWithSearch{},
+		}, &rplyTmIDs); err != nil {
 		t.Error("Calling APIerSv1.GetTPTimingIds, got error: ", err.Error())
 	} else if len(expectedTmIDs) != len(rplyTmIDs) {
 		t.Errorf("Calling APIerSv1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
 	}
 	// Test remove
-	if err := tpRPC.Call(utils.APIerSv2RemoveTPTiming, v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &reply); err != nil {
+	if err := tpRPC.Call(utils.APIerSv2RemoveTPTiming,
+		v1.AttrGetTPTiming{
+			TPid: tmDummyRemove.TPid,
+			ID:   tmDummyRemove.ID,
+		}, &reply); err != nil {
 		t.Error("Calling APIerSv2.RemoveTPTiming, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling APIerSv2.RemoveTPTiming received: ", reply)
@@ -203,7 +215,11 @@ func testTPitTimings(t *testing.T) {
 	// Test getIds
 	rplyTmIDs = []string{}
 	expectedTmIDs = []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK"}
-	if err := tpRPC.Call(utils.APIerSv1GetTPTimingIds, v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
+	if err := tpRPC.Call(utils.APIerSv1GetTPTimingIds,
+		v1.AttrGetTPTimingIds{
+			TPid:                testTPid,
+			PaginatorWithSearch: utils.PaginatorWithSearch{},
+		}, &rplyTmIDs); err != nil {
 		t.Error("Calling APIerSv1.GetTPTimingIds, got error: ", err.Error())
 	} else if len(expectedTmIDs) != len(rplyTmIDs) {
 		t.Errorf("Calling APIerSv1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
