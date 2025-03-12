@@ -19,7 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
 	"encoding/json"
+	"io"
 	"math"
 	"strconv"
 	"time"
@@ -93,6 +97,119 @@ type CDR struct {
 	CostSource  string            // The source of this cost
 	Cost        float64           //
 	CostDetails *EventCost        // Attach the cost details to CDR when possible
+}
+
+type CDRCompressed struct {
+	CGRID       string
+	RunID       string
+	OriginID    string
+	OrderID     int64
+	OriginHost  string
+	Source      string
+	ToR         string
+	RequestType string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	SetupTime   time.Time
+	AnswerTime  time.Time
+	Usage       time.Duration
+	ExtraFields map[string]string
+	ExtraInfo   string
+	Partial     bool
+	PreRated    bool
+	CostSource  string
+	Cost        float64
+	CostDetails []byte
+}
+
+func NewCompresedCDRFromCDR(cdr *CDR, ms Marshaler) (*CDRCompressed, error) {
+	cdrCompressed := &CDRCompressed{
+		CGRID:       cdr.CGRID,
+		RunID:       cdr.RunID,
+		OrderID:     cdr.OrderID,
+		OriginHost:  cdr.OriginHost,
+		Source:      cdr.Source,
+		OriginID:    cdr.OriginID,
+		ToR:         cdr.ToR,
+		RequestType: cdr.RequestType,
+		Tenant:      cdr.Tenant,
+		Category:    cdr.Category,
+		Account:     cdr.Account,
+		Subject:     cdr.Subject,
+		Destination: cdr.Destination,
+		SetupTime:   cdr.SetupTime,
+		AnswerTime:  cdr.AnswerTime,
+		Usage:       cdr.Usage,
+		ExtraFields: cdr.ExtraFields,
+		ExtraInfo:   cdr.ExtraInfo,
+		Partial:     cdr.Partial,
+		PreRated:    cdr.PreRated,
+		CostSource:  cdr.CostSource,
+		Cost:        cdr.Cost,
+	}
+
+	result, err := ms.Marshal(cdr.CostDetails)
+	if err != nil {
+		return nil, err
+	}
+	var compressedBuf bytes.Buffer
+	gzWriter := gzip.NewWriter(&compressedBuf)
+
+	if _, err := gzWriter.Write(result); err != nil {
+		return nil, err
+	}
+
+	if err := gzWriter.Close(); err != nil {
+		return nil, err
+	}
+	cdrCompressed.CostDetails = compressedBuf.Bytes()
+	return cdrCompressed, nil
+}
+
+func NewCDRFromCompressedCDR(cdrCompressed *CDRCompressed, ms Marshaler) (*CDR, error) {
+	cdr := &CDR{
+		CGRID:       cdrCompressed.CGRID,
+		RunID:       cdrCompressed.RunID,
+		OrderID:     cdrCompressed.OrderID,
+		OriginHost:  cdrCompressed.OriginHost,
+		Source:      cdrCompressed.Source,
+		OriginID:    cdrCompressed.OriginID,
+		ToR:         cdrCompressed.ToR,
+		RequestType: cdrCompressed.RequestType,
+		Tenant:      cdrCompressed.Tenant,
+		Category:    cdrCompressed.Category,
+		Account:     cdrCompressed.Account,
+		Subject:     cdrCompressed.Subject,
+		Destination: cdrCompressed.Destination,
+		SetupTime:   cdrCompressed.SetupTime,
+		AnswerTime:  cdrCompressed.AnswerTime,
+		Usage:       cdrCompressed.Usage,
+		ExtraFields: cdrCompressed.ExtraFields,
+		ExtraInfo:   cdrCompressed.ExtraInfo,
+		Partial:     cdrCompressed.Partial,
+		PreRated:    cdrCompressed.PreRated,
+		CostSource:  cdrCompressed.CostSource,
+		Cost:        cdrCompressed.Cost,
+	}
+
+	compressedReader := bytes.NewReader(cdrCompressed.CostDetails)
+	gzReader, err := gzip.NewReader(compressedReader)
+	if err != nil {
+		return nil, err
+	}
+	defer gzReader.Close()
+
+	value, err := io.ReadAll(gzReader)
+	if err != nil {
+		return nil, err
+	}
+	if err = ms.Unmarshal(value, &cdr.CostDetails); err != nil {
+		return nil, err
+	}
+	return cdr, nil
 }
 
 // AddDefaults will add missing information based on other fields
@@ -300,7 +417,19 @@ func (cdr *CDR) AsCDRsql() (cdrSQL *CDRsql) {
 	cdrSQL.ExtraFields = utils.ToJSON(cdr.ExtraFields)
 	cdrSQL.CostSource = cdr.CostSource
 	cdrSQL.Cost = cdr.Cost
-	cdrSQL.CostDetails = utils.ToJSON(cdr.CostDetails)
+	costDetails := utils.ToJSON(cdr.CostDetails)
+	if config.CgrConfig().CdrsCfg().CompressCost && cdr.CostDetails != nil {
+		var compressBuffer bytes.Buffer
+		gzWriter := gzip.NewWriter(&compressBuffer)
+		if _, err := gzWriter.Write([]byte(costDetails)); err != nil {
+			return
+		}
+		if err := gzWriter.Close(); err != nil {
+			return
+		}
+		costDetails = base64.StdEncoding.EncodeToString(compressBuffer.Bytes())
+	}
+	cdrSQL.CostDetails = costDetails
 	cdrSQL.ExtraInfo = cdr.ExtraInfo
 	cdrSQL.CreatedAt = time.Now()
 	return
@@ -345,8 +474,29 @@ func NewCDRFromSQL(cdrSQL *CDRsql) (cdr *CDR, err error) {
 		}
 	}
 	if cdrSQL.CostDetails != "" {
-		if err = json.Unmarshal([]byte(cdrSQL.CostDetails), &cdr.CostDetails); err != nil {
-			return nil, err
+		if config.CgrConfig().CdrsCfg().CompressCost {
+			decoded, err := base64.StdEncoding.DecodeString(cdrSQL.CostDetails)
+			if err != nil {
+				return nil, err
+			}
+			var decompressBuffer bytes.Buffer
+			decompressBuffer.Write(decoded)
+			gzReader, err := gzip.NewReader(&decompressBuffer)
+			if err != nil {
+				return nil, err
+			}
+			val, err := io.ReadAll(gzReader)
+			if err != nil {
+				return nil, err
+			}
+			gzReader.Close()
+			if err = json.Unmarshal(val, &cdr.CostDetails); err != nil {
+				return nil, err
+			}
+		} else {
+			if err = json.Unmarshal([]byte(cdrSQL.CostDetails), &cdr.CostDetails); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return
