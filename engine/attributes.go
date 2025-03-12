@@ -153,12 +153,12 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *AttrSProcessEventReply, err error) {
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
+	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -255,12 +255,12 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 		},
 	}
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, evNM, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
+	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, evNM, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, evNM, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, evNM, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -285,13 +285,13 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	}
 
 	var processRuns int
-	if processRuns, err = GetIntOpts(ctx, tnt, args.AsDataProvider(), alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProcessRuns,
+	if processRuns, err = GetIntOpts(ctx, tnt, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProcessRuns,
 		utils.OptsAttributesProcessRuns); err != nil {
 		return
 	}
 
 	var profileRuns int
-	if profileRuns, err = GetIntOpts(ctx, tnt, args.AsDataProvider(), alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileRuns,
+	if profileRuns, err = GetIntOpts(ctx, tnt, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileRuns,
 		utils.OptsAttributesProfileRuns); err != nil {
 		return
 	}

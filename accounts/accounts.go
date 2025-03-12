@@ -138,7 +138,7 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithWeight,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	var usage *decimal.Big // total event usage
-	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
+	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
 		utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
 		return
 	}

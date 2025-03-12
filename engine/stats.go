@@ -373,12 +373,12 @@ func (sS *StatS) processEEs(ctx *context.Context, sQs StatQueues, opts map[strin
 func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
 	evNm := args.AsDataProvider()
 	var sqIDs []string
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, evNm, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, evNm, nil, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, nil, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -454,13 +454,13 @@ func (sS *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREv
 	}
 	var sqIDs []string
 	dP := args.AsDataProvider()
-	if sqIDs, err = GetStringSliceOpts(ctx, tnt, dP, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
+	if sqIDs, err = GetStringSliceOpts(ctx, tnt, dP, nil, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIDs,
 		config.StatsProfileIDsDftOpt, utils.OptsStatsProfileIDs); err != nil {
 		return
 	}
 	evDp := args.AsDataProvider()
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, evDp, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = GetBoolOpts(ctx, tnt, evDp, nil, sS.fltrS, sS.cfg.StatSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -518,7 +518,7 @@ func (sS *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenan
 		return err
 	}
 	var rnd int
-	if rnd, err = GetIntOpts(ctx, tnt, MapEvent{utils.Tenant: tnt, "*opts": map[string]any{}}, sS.fltrS,
+	if rnd, err = GetIntOpts(ctx, tnt, MapEvent{utils.Tenant: tnt, "*opts": map[string]any{}}, nil, sS.fltrS,
 		sS.cfg.StatSCfg().Opts.RoundingDecimals,
 		utils.OptsRoundingDecimals); err != nil {
 		return

@@ -36,7 +36,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
 	}
 	var usage *decimal.Big
-	if usage, err = GetDecimalBigOpts(ctx, ev.Tenant, ev.AsDataProvider(), fltrS, cfg.RouteSCfg().Opts.Usage,
+	if usage, err = GetDecimalBigOpts(ctx, ev.Tenant, ev.AsDataProvider(), nil, fltrS, cfg.RouteSCfg().Opts.Usage,
 		utils.OptsRoutesUsage, utils.MetaUsage); err != nil {
 		return
 	}

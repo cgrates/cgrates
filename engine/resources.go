@@ -673,13 +673,13 @@ func (rS *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CG
 	}
 
 	var usageID string
-	if usageID, err = GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
+	if usageID, err = GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
 		utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
 	var ttl time.Duration
-	if ttl, err = GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
+	if ttl, err = GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
 		utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -731,19 +731,19 @@ func (rS *ResourceS) V1AuthorizeResources(ctx *context.Context, args *utils.CGRE
 	}
 
 	var usageID string
-	if usageID, err = GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
+	if usageID, err = GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
 		utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
 	var units float64
-	if units, err = GetFloat64Opts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.Units,
+	if units, err = GetFloat64Opts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.Units,
 		utils.OptsResourcesUnits); err != nil {
 		return
 	}
 
 	var ttl time.Duration
-	if ttl, err = GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
+	if ttl, err = GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
 		utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -807,19 +807,19 @@ func (rS *ResourceS) V1AllocateResources(ctx *context.Context, args *utils.CGREv
 	}
 
 	var usageID string
-	if usageID, err = GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
+	if usageID, err = GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
 		utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
 	var units float64
-	if units, err = GetFloat64Opts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.Units,
+	if units, err = GetFloat64Opts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.Units,
 		utils.OptsResourcesUnits); err != nil {
 		return
 	}
 
 	var ttl time.Duration
-	if ttl, err = GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
+	if ttl, err = GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
 		utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
@@ -887,13 +887,13 @@ func (rS *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREve
 	}
 
 	var usageID string
-	if usageID, err = GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
+	if usageID, err = GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageID,
 		utils.OptsResourcesUsageID); err != nil {
 		return
 	}
 
 	var ttl time.Duration
-	if ttl, err = GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
+	if ttl, err = GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.ResourceSCfg().Opts.UsageTTL,
 		utils.OptsResourcesUsageTTL); err != nil {
 		return
 	}
