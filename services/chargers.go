@@ -21,6 +21,7 @@ package services
 import (
 	"sync"
 
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -39,7 +40,7 @@ func NewChargerService(cfg *config.CGRConfig) *ChargerService {
 type ChargerService struct {
 	mu        sync.RWMutex
 	cfg       *config.CGRConfig
-	chrS      *engine.ChargerS
+	chrS      *chargers.ChargerS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -70,7 +71,7 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 
 	chrS.mu.Lock()
 	defer chrS.mu.Unlock()
-	chrS.chrS = engine.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
+	chrS.chrS = chargers.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(chrS.chrS)
 	// srv, _ := birpc.NewService(apis.NewChargerSv1(chrS.chrS), "", false)
 	for _, s := range srv {

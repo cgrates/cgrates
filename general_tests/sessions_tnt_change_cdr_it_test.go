@@ -99,14 +99,14 @@ package general_tests
 // }
 
 // func testSesTntChngCdrsSetChargerProfile1(t *testing.T) {
-// 	var reply *engine.ChargerProfile
+// 	var reply *utils.ChargerProfile
 // 	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger1"}, &reply); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatal(err)
 // 	}
 // 	chargerProfile := &v1.ChargerWithAPIOpts{
-// 		ChargerProfile: &engine.ChargerProfile{
+// 		ChargerProfile: &utils.ChargerProfile{
 // 			Tenant:       "cgrates.org",
 // 			ID:           "Charger1",
 // 			RunID:        utils.MetaDefault,
@@ -130,14 +130,14 @@ package general_tests
 // }
 
 // func testSesTntChngCdrsSetChargerProfile2(t *testing.T) {
-// 	var reply *engine.ChargerProfile
+// 	var reply *utils.ChargerProfile
 // 	if err := sesTntChngRPC.Call(utils.APIerSv1GetChargerProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "Charger2"}, &reply); err == nil ||
 // 		err.Error() != utils.ErrNotFound.Error() {
 // 		t.Fatal(err)
 // 	}
 // 	chargerProfile := &v1.ChargerWithAPIOpts{
-// 		ChargerProfile: &engine.ChargerProfile{
+// 		ChargerProfile: &utils.ChargerProfile{
 // 			Tenant:       "cgrates.org",
 // 			ID:           "Charger2",
 // 			RunID:        utils.MetaRaw,

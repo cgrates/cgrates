@@ -2467,7 +2467,7 @@ func TestDMCacheDataFromDBChargerProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CPP_1",
 		FilterIDs:    []string{"FLTR_CP_1"},
@@ -6662,14 +6662,14 @@ func TestDMRemoveChargerProfileGetChargerProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
-			return &ChargerProfile{}, utils.ErrNotImplemented
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			return &utils.ChargerProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CPP_1",
 		FilterIDs:    []string{"FLTR_CP_1"},
@@ -6695,14 +6695,14 @@ func TestDMRemoveChargerProfileRemoveChargerProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
-			return &ChargerProfile{}, nil
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			return &utils.ChargerProfile{}, nil
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CPP_1",
 		FilterIDs:    []string{"FLTR_CP_1"},
@@ -6746,15 +6746,15 @@ func TestDMRemoveChargerProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
-			return &ChargerProfile{}, nil
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			return &utils.ChargerProfile{}, nil
 		},
 		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CPP_1",
 		FilterIDs:    []string{"FLTR_CP_1"},
@@ -6778,7 +6778,7 @@ func TestDMRemoveChargerProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	Cache.Clear(nil)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CPP_1",
 		FilterIDs:    []string{"FLTR_CP_1"},
@@ -6793,7 +6793,7 @@ func TestDMRemoveChargerProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return cpp, nil
 		},
 		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
@@ -6817,7 +6817,7 @@ func TestDMRemoveChargerProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CPP_1",
 		FilterIDs:    []string{"FLTR_CP_1"},
@@ -6846,7 +6846,7 @@ func TestDMRemoveChargerProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return cpp, nil
 		},
 		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
@@ -7569,7 +7569,7 @@ func TestDMSetAttributeProfileComputeHashErr(t *testing.T) {
 
 func TestDMSetChargerProfileNoDMErr(t *testing.T) {
 	var dm *DataManager
-	err := dm.SetChargerProfile(context.Background(), &ChargerProfile{}, false)
+	err := dm.SetChargerProfile(context.Background(), &utils.ChargerProfile{}, false)
 	if err != utils.ErrNoDatabaseConn {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNoDatabaseConn, err)
 	}
@@ -7584,7 +7584,7 @@ func TestDMSetChargerProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "CHP_1",
 		FilterIDs: []string{"*string*req.Account1001"},
@@ -7596,7 +7596,6 @@ func TestDMSetChargerProfileCheckFiltersErr(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 
 	expErr := "broken reference to filter: <*string*req.Account1001> for item with ID: cgrates.org:CHP_1"
@@ -7610,14 +7609,14 @@ func TestDMSetChargerProfileGetChargerProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
-			return &ChargerProfile{}, utils.ErrNotImplemented
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			return &utils.ChargerProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHP_1",
 		FilterIDs:    []string{"FltrId1"},
@@ -7628,7 +7627,6 @@ func TestDMSetChargerProfileGetChargerProfileErr(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 
 	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != utils.ErrNotImplemented {
@@ -7640,15 +7638,15 @@ func TestDMSetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
-			return &ChargerProfile{}, nil
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			return &utils.ChargerProfile{}, nil
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *ChargerProfile) (err error) { return utils.ErrNotImplemented },
+		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHP_1",
 		FilterIDs:    []string{"FltrId1"},
@@ -7659,7 +7657,6 @@ func TestDMSetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -7672,15 +7669,15 @@ func TestDMSetChargerProfileUpdatedIndexesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
-			return &ChargerProfile{}, nil
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			return &utils.ChargerProfile{}, nil
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *ChargerProfile) (err error) { return nil },
+		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHP_1",
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
@@ -7691,7 +7688,6 @@ func TestDMSetChargerProfileUpdatedIndexesErr(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 
 	if err := dm.SetChargerProfile(context.Background(), cpp, true); err != utils.ErrNotImplemented {
@@ -7707,7 +7703,7 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHP_1",
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
@@ -7718,7 +7714,6 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -7737,10 +7732,10 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return cpp, nil
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *ChargerProfile) (err error) { return nil },
+		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) { return nil },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -9024,7 +9019,7 @@ func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHP_1",
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
@@ -9035,7 +9030,6 @@ func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -9054,8 +9048,10 @@ func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) { return cpp, utils.ErrNotFound },
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *ChargerProfile) (err error) { return utils.ErrNotImplemented },
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			return cpp, utils.ErrNotFound
+		},
+		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) { return utils.ErrNotImplemented },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -9067,7 +9063,7 @@ func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 
 func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHP_1",
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
@@ -9078,7 +9074,6 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 
 	cfgtmp := config.CgrConfig()
@@ -9107,7 +9102,9 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*ChargerProfile, error) { return cpp, utils.ErrNotFound },
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			return cpp, utils.ErrNotFound
+		},
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -9146,7 +9143,7 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg, cM)
 
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CHP_1",
 		FilterIDs:    []string{"*string:~*req.Account:1001"},
@@ -9157,7 +9154,6 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 
 	if err := dm.dataDB.SetChargerProfileDrv(context.Background(), cpp); err != nil {

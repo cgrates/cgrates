@@ -504,8 +504,8 @@ func testTPeSetRateProfiles(t *testing.T) {
 }
 
 func testTPeSetChargerProfiles(t *testing.T) {
-	chgrsPrf := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chgrsPrf := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Chargers1",
 			RunID:        utils.MetaDefault,
@@ -525,8 +525,8 @@ func testTPeSetChargerProfiles(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
-	chgrsPrf2 := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chgrsPrf2 := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "DifferentCharger",
 			RunID:        "Raw",

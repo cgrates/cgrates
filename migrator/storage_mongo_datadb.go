@@ -412,7 +412,7 @@ func (v1ms *mongoMigrator) remSupplier(tenant, id string) (err error) {
 	return
 }
 
-func (v1ms *mongoMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error) {
+func (v1ms *mongoMigrator) getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile, err error) {
 	if v1ms.cursor == nil {
 		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColCpp).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
@@ -424,7 +424,7 @@ func (v1ms *mongoMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfil
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
-	v1chrPrf = new(engine.ChargerProfile)
+	v1chrPrf = new(utils.ChargerProfile)
 	if err := (*v1ms.cursor).Decode(v1chrPrf); err != nil {
 		return nil, err
 	}

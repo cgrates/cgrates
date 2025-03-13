@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 
@@ -901,7 +902,7 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 		return
 	}
 	if chrgS {
-		var chrgrs []*engine.ChrgSProcessEventReply
+		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = sS.processChargerS(ctx, cgrEv); err != nil {
 			return
 		}
@@ -915,13 +916,13 @@ func (sS *SessionS) newSession(ctx *context.Context, cgrEv *utils.CGREvent,
 }
 
 // processChargerS processes the event with chargers and caches the response based on the requestID
-func (sS *SessionS) processChargerS(ctx *context.Context, cgrEv *utils.CGREvent) (chrgrs []*engine.ChrgSProcessEventReply, err error) {
+func (sS *SessionS) processChargerS(ctx *context.Context, cgrEv *utils.CGREvent) (chrgrs []*chargers.ChrgSProcessEventReply, err error) {
 	if len(sS.cfg.SessionSCfg().ChargerSConns) == 0 {
 		err = errors.New("ChargerS is disabled")
 		return
 	}
 	if x, ok := engine.Cache.Get(utils.CacheEventCharges, cgrEv.ID); ok && x != nil {
-		return x.([]*engine.ChrgSProcessEventReply), nil
+		return x.([]*chargers.ChrgSProcessEventReply), nil
 	}
 	if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().ChargerSConns,
 		utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil {
@@ -2011,7 +2012,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			return
 		}
 		if chrgS {
-			var chrgrs []*engine.ChrgSProcessEventReply
+			var chrgrs []*chargers.ChrgSProcessEventReply
 			if chrgrs, err = sS.processChargerS(ctx, args); err != nil {
 				return
 			}

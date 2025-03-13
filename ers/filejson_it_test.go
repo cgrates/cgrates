@@ -122,7 +122,7 @@ var (
 		var reply string
 		//add a charger
 		chargerProfile := &v1.ChargerWithAPIOpts{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				Tenant:       "cgrates.org",
 				ID:           "Default",
 				RunID:        utils.MetaDefault,

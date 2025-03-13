@@ -170,7 +170,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
 	dm := NewDataManager(db, cfg, nil)
 
 	// set 1 charger profile with different *libphonenumber filter to index
-	cghPfr := &ChargerProfile{
+	cghPfr := &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "CHARGER_2",
 		FilterIDs: []string{

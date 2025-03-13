@@ -98,7 +98,7 @@ func testSeSRplPrepaidApierRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testSeSRplPrepaidTPFromFolder(t *testing.T) {
 	var result string
-	if err := sesRplPrePaidRPC.Call(utils.APIerSv1SetChargerProfile, &engine.ChargerProfile{
+	if err := sesRplPrePaidRPC.Call(utils.APIerSv1SetChargerProfile, &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Default",
 		RunID:        utils.MetaRaw,

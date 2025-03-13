@@ -30,7 +30,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -981,8 +981,8 @@ func testV1FltrChargerSuffix(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Reply: ", reply)
 	}
-	chargerProfile := &apis.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chargerProfile := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "IntraCharger",
 			FilterIDs:    []string{"*suffix:~*req.Subject:intra"},
@@ -1007,8 +1007,8 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	chargerProfile2 := &apis.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chargerProfile2 := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "InterCharger",
 			FilterIDs:    []string{"*suffix:~*req.Subject:inter"},
@@ -1032,7 +1032,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	processedEv := []*engine.ChrgSProcessEventReply{
+	processedEv := []*chargers.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "IntraCharger",
 			AlteredFields: []*engine.FieldsAltered{
@@ -1072,7 +1072,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		},
 	}
 
-	var result2 []*engine.ChrgSProcessEventReply
+	var result2 []*chargers.ChrgSProcessEventReply
 	if err := fltrRpc.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
 		t.Error(err)
 	} else {
@@ -1084,7 +1084,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 		}
 	}
 
-	processedEv = []*engine.ChrgSProcessEventReply{
+	processedEv = []*chargers.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "InterCharger",
 			AlteredFields: []*engine.FieldsAltered{

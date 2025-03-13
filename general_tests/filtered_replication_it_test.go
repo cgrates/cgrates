@@ -1042,7 +1042,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // func testFltrRplChargerProfile(t *testing.T) {
 // 	chID := "CH1"
 // 	chPrf := &v1.ChargerWithAPIOpts{
-// 		ChargerProfile: &engine.ChargerProfile{
+// 		ChargerProfile: &utils.ChargerProfile{
 // 			Tenant:       "cgrates.org",
 // 			ID:           chID,
 // 			FilterIDs:    []string{"*string:~*req.Account:dan"},
@@ -1052,7 +1052,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		},
 // 	}
 // 	var result string
-// 	var replyPrfl *engine.ChargerProfile
+// 	var replyPrfl *utils.ChargerProfile
 // 	var rplyIDs []string
 // 	// empty
 // 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetChargerProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||

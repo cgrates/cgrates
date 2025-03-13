@@ -95,7 +95,7 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 		}
 		filterIDs = at.FilterIDs
 	case utils.CacheChargerFilterIndexes:
-		var ch *ChargerProfile
+		var ch *utils.ChargerProfile
 		if ch, err = dm.GetChargerProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
 			return
 		}

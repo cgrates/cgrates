@@ -680,7 +680,7 @@ func testLoadersGetAttributeProfiles(t *testing.T) {
 }
 
 func testLoadersGetChargerProfiles(t *testing.T) {
-	expChrgs := []*engine.ChargerProfile{
+	expChrgs := []*utils.ChargerProfile{
 		{
 			Tenant:       "cgrates.org",
 			ID:           "Charger1",
@@ -716,7 +716,7 @@ func testLoadersGetChargerProfiles(t *testing.T) {
 			},
 		},
 	}
-	var chrgs []*engine.ChargerProfile
+	var chrgs []*utils.ChargerProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -1337,7 +1337,7 @@ func testLoadersGetChargerProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplyChgPrf engine.ChargerProfile
+	var rplyChgPrf utils.ChargerProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

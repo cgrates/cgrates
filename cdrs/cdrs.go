@@ -24,6 +24,7 @@ import (
 	"net/http"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -68,7 +69,7 @@ type CDRServer struct {
 
 // chrgrSProcessEvent forks CGREventWithOpts into multiples based on matching ChargerS profiles
 func (cdrS *CDRServer) chrgrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (cgrEvs []*utils.CGREvent, err error) {
-	var chrgrs []*engine.ChrgSProcessEventReply
+	var chrgrs []*chargers.ChrgSProcessEventReply
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().ChargerSConns,
 		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {

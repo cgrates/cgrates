@@ -786,9 +786,9 @@ func TestReplicatorGetChargerProfile(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.ChargerProfile
+	var reply utils.ChargerProfile
 	rp := NewReplicatorSv1(dm, v1)
-	chgr := &engine.ChargerProfile{
+	chgr := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Chargers1",
 		RunID:        utils.MetaDefault,
@@ -823,9 +823,9 @@ func TestReplicatorGetChargerProfileError(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.ChargerProfile
+	var reply utils.ChargerProfile
 	rp := NewReplicatorSv1(dm, v1)
-	chgr := &engine.ChargerProfile{
+	chgr := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Chargers100",
 		RunID:        utils.MetaDefault,
@@ -1750,8 +1750,8 @@ func TestReplicatorChargerProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	chgrPrf := &engine.ChargerProfileWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chgrPrf := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Chargers1",
 			RunID:        utils.MetaDefault,
@@ -1791,8 +1791,8 @@ func TestReplicatorChargerProfileErr1(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	chgrPrf := &engine.ChargerProfileWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chgrPrf := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Chargers1",
 			RunID:        utils.MetaDefault,
@@ -2698,7 +2698,7 @@ func TestReplicatorRemoveChargerProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	chgrPrf := &engine.ChargerProfile{
+	chgrPrf := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Chargers1",
 		RunID:        utils.MetaDefault,
@@ -2740,7 +2740,7 @@ func TestReplicatorRemoveChargerProfileErr(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	chgrPrf := &engine.ChargerProfile{
+	chgrPrf := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Chargers1",
 		RunID:        utils.MetaDefault,

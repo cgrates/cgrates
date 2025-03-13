@@ -49,7 +49,7 @@ func (tpChrg TPChargers) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 		return
 	}
 	for _, chrgID := range itmIDs {
-		var chrgPrf *engine.ChargerProfile
+		var chrgPrf *utils.ChargerProfile
 		chrgPrf, err = tpChrg.dm.GetChargerProfile(ctx, tnt, chrgID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -144,7 +145,7 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			utils.Destination:  "999",
 		},
 	}
-	var result2 []*engine.ChrgSProcessEventReply
+	var result2 []*chargers.ChrgSProcessEventReply
 
 	if err := anzBiRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &result2); err != nil {
 		t.Fatal(err)

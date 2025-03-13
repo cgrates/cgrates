@@ -559,7 +559,7 @@ func (v1rs *redisMigrator) remSupplier(tenant, id string) (err error) {
 	return v1rs.rds.Cmd(nil, "DEL", key)
 }
 
-func (v1rs *redisMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error) {
+func (v1rs *redisMigrator) getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 		if err != nil {
