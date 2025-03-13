@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -110,7 +111,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		return
 	}
 	if chrgS {
-		var chrgrs []*engine.ChrgSProcessEventReply
+		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = sS.processChargerS(ctx, args); err != nil {
 			return
 		}
@@ -316,7 +317,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		return
 	}
 	if chrgS {
-		var chrgrs []*engine.ChrgSProcessEventReply
+		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = sS.processChargerS(ctx, args); err != nil {
 			return
 		}

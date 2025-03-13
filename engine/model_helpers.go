@@ -1686,8 +1686,8 @@ func APItoModelTPCharger(tpCPP *utils.TPChargerProfile) (mdls ChargerMdls) {
 	return
 }
 
-func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *ChargerProfile) {
-	cpp = &ChargerProfile{
+func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *utils.ChargerProfile) {
+	cpp = &utils.ChargerProfile{
 		Tenant:       tpCPP.Tenant,
 		ID:           tpCPP.ID,
 		RunID:        tpCPP.RunID,
@@ -1713,7 +1713,7 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 	return cpp
 }
 
-func ChargerProfileToAPI(chargerPrf *ChargerProfile) (tpCharger *utils.TPChargerProfile) {
+func ChargerProfileToAPI(chargerPrf *utils.ChargerProfile) (tpCharger *utils.TPChargerProfile) {
 	tpCharger = &utils.TPChargerProfile{
 		Tenant:       chargerPrf.Tenant,
 		ID:           chargerPrf.ID,

@@ -1797,8 +1797,8 @@ func testV1FIdxSetChargerSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set a ChargerProfile with our filter and check the indexes
-	chg := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chg := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			ID:    "1001_Charger",
 			RunID: utils.MetaDefault,
 			FilterIDs: []string{"fltr_for_attr",
@@ -1893,8 +1893,8 @@ func testV1FIdxSetChargerProfileMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our ChargerProfile with our filter
-	chg := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chg := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			ID:    "1001_Charger",
 			RunID: utils.MetaDefault,
 			FilterIDs: []string{"fltr_for_attr",
@@ -1999,8 +1999,8 @@ func testV1FIdxChargerProfileComputeIndexes(t *testing.T) {
 
 func testV1FIdxChargerMoreProfileForFilters(t *testing.T) {
 	// we will add more charger profiles for indexing
-	chg1 := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chg1 := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			ID:    "1001_Charger_2",
 			RunID: "NEW_ID",
 			FilterIDs: []string{"*string:~*req.Account:1001",
@@ -2013,8 +2013,8 @@ func testV1FIdxChargerMoreProfileForFilters(t *testing.T) {
 		},
 		APIOpts: nil,
 	}
-	chg2 := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chg2 := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			ID:    "1001_Charger_3",
 			RunID: "NEW_ID2",
 			FilterIDs: []string{"*string:~*req.Account:1001",

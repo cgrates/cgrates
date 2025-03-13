@@ -1382,7 +1382,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	chrgr1 := &ChargerProfile{
+	chrgr1 := &utils.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "CHARGER_PRF1",
 		FilterIDs: []string{"CHARGER_FLTR"},
@@ -1392,7 +1392,7 @@ func testITChargerProfileIndexes(t *testing.T) {
 			},
 		},
 	}
-	chrgr2 := &ChargerProfile{
+	chrgr2 := &utils.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "CHARGER_PRF2",
 		FilterIDs: []string{"CHARGER_FLTR", "*string:~*req.Usage:~*req.Debited"},

@@ -31,6 +31,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -150,9 +151,9 @@ func testAnalyzerSChargerSv1ProcessEvent(t *testing.T) {
 			utils.Destination:  "999",
 		},
 	}
-	var result2 []*engine.ChrgSProcessEventReply
+	var result2 []*chargers.ChrgSProcessEventReply
 
-	processedEv := []*engine.ChrgSProcessEventReply{
+	processedEv := []*chargers.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "DEFAULT",
 			AlteredFields: []*engine.FieldsAltered{

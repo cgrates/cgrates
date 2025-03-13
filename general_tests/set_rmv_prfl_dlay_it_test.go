@@ -423,8 +423,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("ReplicatorSv1SetChargerProfile", func(t *testing.T) {
 
-		eChrgPrf := &engine.ChargerProfileWithAPIOpts{
-			ChargerProfile: &engine.ChargerProfile{
+		eChrgPrf := &utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
 				Tenant: "cgrates.org",
 				ID:     "CHRG_1",
 			},

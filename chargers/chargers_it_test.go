@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apis
+package chargers
 
 import (
 	"path"
@@ -130,7 +130,7 @@ func testChargersSRPCConn(t *testing.T) {
 }
 
 func testChargersGetChargerProfileBeforeSet(t *testing.T) {
-	var replyChargerProfile engine.ChargerProfile
+	var replyChargerProfile utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -142,7 +142,7 @@ func testChargersGetChargerProfileBeforeSet(t *testing.T) {
 }
 
 func testChargersGetChargerProfilesBeforeSet(t *testing.T) {
-	var replyChargerProfiles *[]*engine.ChargerProfile
+	var replyChargerProfiles *[]*utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -174,9 +174,9 @@ func testChargersGetChargerProfileCountBeforeSet(t *testing.T) {
 }
 
 func testChargersSetChargerProfiles(t *testing.T) {
-	chargerProfiles := []*ChargerWithAPIOpts{
+	chargerProfiles := []*utils.ChargerProfileWithAPIOpts{
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "TestA_CHARGER1",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -195,7 +195,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 			},
 		},
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "TestA_CHARGER2",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -214,7 +214,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 			},
 		},
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "TestA_CHARGER3",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -228,7 +228,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 			},
 		},
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "TestB_CHARGER1",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -242,7 +242,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 			},
 		},
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "TestB_CHARGER2",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -269,7 +269,7 @@ func testChargersSetChargerProfiles(t *testing.T) {
 }
 
 func testChargersGetChargerProfileAfterSet(t *testing.T) {
-	expectedChargerProfile := engine.ChargerProfile{
+	expectedChargerProfile := utils.ChargerProfile{
 		ID:        "TestA_CHARGER1",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -286,7 +286,7 @@ func testChargersGetChargerProfileAfterSet(t *testing.T) {
 		RunID:        "run1",
 		AttributeIDs: []string{"ATTR_TEST1"},
 	}
-	var replyChargerProfile engine.ChargerProfile
+	var replyChargerProfile utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -377,7 +377,7 @@ func testChargersGetChargerProfileCountAfterSet(t *testing.T) {
 }
 
 func testChargersGetChargerProfilesAfterSet(t *testing.T) {
-	expectedChargerProfiles := []*engine.ChargerProfile{
+	expectedChargerProfiles := []*utils.ChargerProfile{
 		{
 			ID:        "TestA_CHARGER1",
 			Tenant:    "cgrates.org",
@@ -449,7 +449,7 @@ func testChargersGetChargerProfilesAfterSet(t *testing.T) {
 			AttributeIDs: []string{"ATTR_TEST5"},
 		},
 	}
-	var replyChargerProfiles []*engine.ChargerProfile
+	var replyChargerProfiles []*utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -481,7 +481,7 @@ func testChargersRemoveChargerProfile(t *testing.T) {
 }
 
 func testChargersGetChargerProfileAfterRemove(t *testing.T) {
-	var replyChargerProfile engine.ChargerProfile
+	var replyChargerProfile utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -569,7 +569,7 @@ func testChargersGetChargerProfileCountAfterRemove(t *testing.T) {
 }
 
 func testChargersGetChargerProfilesAfterRemove(t *testing.T) {
-	expectedChargerProfiles := []*engine.ChargerProfile{
+	expectedChargerProfiles := []*utils.ChargerProfile{
 		{
 			ID:        "TestA_CHARGER1",
 			Tenant:    "cgrates.org",
@@ -624,7 +624,7 @@ func testChargersGetChargerProfilesAfterRemove(t *testing.T) {
 			AttributeIDs: []string{"ATTR_TEST5"},
 		},
 	}
-	var replyChargerProfiles []*engine.ChargerProfile
+	var replyChargerProfiles []*utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -642,8 +642,8 @@ func testChargersGetChargerProfilesAfterRemove(t *testing.T) {
 }
 
 func testChargersGetChargerProfilesWithPrefix(t *testing.T) {
-	chgrsPrf := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chgrsPrf := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "aTEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
@@ -664,7 +664,7 @@ func testChargersGetChargerProfilesWithPrefix(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedChargerPrf := &engine.ChargerProfile{
+	expectedChargerPrf := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "aTEST_CHARGERS_IT_TEST",
 		RunID:        utils.MetaDefault,
@@ -675,7 +675,7 @@ func testChargersGetChargerProfilesWithPrefix(t *testing.T) {
 			},
 		},
 	}
-	var result *engine.ChargerProfile
+	var result *utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantID{
 			Tenant: utils.CGRateSorg,
@@ -685,11 +685,11 @@ func testChargersGetChargerProfilesWithPrefix(t *testing.T) {
 	} else if !reflect.DeepEqual(result, expectedChargerPrf) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expectedChargerPrf), utils.ToJSON(result))
 	}
-	var reply2 []*engine.ChargerProfile
+	var reply2 []*utils.ChargerProfile
 	args := &utils.ArgsItemIDs{
 		ItemsPrefix: "aTEST",
 	}
-	expected := []*engine.ChargerProfile{
+	expected := []*utils.ChargerProfile{
 		{
 			Tenant:       "cgrates.org",
 			ID:           "aTEST_CHARGERS_IT_TEST",
@@ -715,8 +715,8 @@ func testChargersGetChargerProfilesWithPrefix(t *testing.T) {
 }
 
 func testChargersSetGetChargerProfileEvent(t *testing.T) {
-	chgrsPrf := &ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chgrsPrf := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "TEST_CHARGERS_IT_TEST",
 			RunID:        utils.MetaDefault,
@@ -737,7 +737,7 @@ func testChargersSetGetChargerProfileEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	expectedChargerPrf := &engine.ChargerProfile{
+	expectedChargerPrf := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "TEST_CHARGERS_IT_TEST",
 		RunID:        utils.MetaDefault,
@@ -748,7 +748,7 @@ func testChargersSetGetChargerProfileEvent(t *testing.T) {
 			},
 		},
 	}
-	var result *engine.ChargerProfile
+	var result *utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantID{
 			Tenant: utils.CGRateSorg,
@@ -761,7 +761,7 @@ func testChargersSetGetChargerProfileEvent(t *testing.T) {
 }
 func testChargersGetChargersForEvent(t *testing.T) {
 
-	expected := &engine.ChargerProfiles{
+	expected := &utils.ChargerProfiles{
 		{
 			Tenant:       "cgrates.org",
 			ID:           "TEST_CHARGERS_IT_TEST",
@@ -783,7 +783,7 @@ func testChargersGetChargersForEvent(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	reply := &engine.ChargerProfiles{}
+	reply := &utils.ChargerProfiles{}
 	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
@@ -793,7 +793,7 @@ func testChargersGetChargersForEvent(t *testing.T) {
 }
 
 func testChargersProcessEvent(t *testing.T) {
-	expected := &[]*engine.ChrgSProcessEventReply{
+	expected := &[]*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "TEST_CHARGERS_IT_TEST",
 			AlteredFields: []*engine.FieldsAltered{
@@ -826,7 +826,7 @@ func testChargersProcessEvent(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	reply := &[]*engine.ChrgSProcessEventReply{}
+	reply := &[]*ChrgSProcessEventReply{}
 	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
@@ -871,9 +871,9 @@ func testChargersBlockerRemoveChargerProfiles(t *testing.T) {
 }
 
 func testChargersBlockerSetChargerProfiles(t *testing.T) {
-	chargerProfiles := []*ChargerWithAPIOpts{
+	chargerProfiles := []*utils.ChargerProfileWithAPIOpts{
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "CHARGER_TEST_1",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
@@ -891,7 +891,7 @@ func testChargersBlockerSetChargerProfiles(t *testing.T) {
 			},
 		},
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "CHARGER_TEST_2",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
@@ -909,7 +909,7 @@ func testChargersBlockerSetChargerProfiles(t *testing.T) {
 			},
 		},
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "CHARGER_TEST_3",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
@@ -922,7 +922,7 @@ func testChargersBlockerSetChargerProfiles(t *testing.T) {
 			},
 		},
 		{
-			ChargerProfile: &engine.ChargerProfile{
+			ChargerProfile: &utils.ChargerProfile{
 				ID:        "CHARGER_TEST_4",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:BlockerBehaviour"},
@@ -956,7 +956,7 @@ func testChargersBlockerGetChargersForEvent(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	expected := engine.ChargerProfiles{
+	expected := utils.ChargerProfiles{
 		{
 			ID:        "CHARGER_TEST_1",
 			Tenant:    "cgrates.org",
@@ -1001,7 +1001,7 @@ func testChargersBlockerGetChargersForEvent(t *testing.T) {
 			RunID: "run2",
 		},
 	}
-	var reply engine.ChargerProfiles
+	var reply utils.ChargerProfiles
 	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {

@@ -101,7 +101,7 @@ package general_tests
 // func testSesNoneReqTypeItAddChargerS(t *testing.T) {
 // 	//add a default charger
 // 	chargerProfile := &v1.ChargerWithAPIOpts{
-// 		ChargerProfile: &engine.ChargerProfile{
+// 		ChargerProfile: &utils.ChargerProfile{
 // 			Tenant:       "cgrates.org",
 // 			ID:           "Default",
 // 			RunID:        utils.MetaDefault,

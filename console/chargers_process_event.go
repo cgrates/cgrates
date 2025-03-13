@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -60,7 +60,7 @@ func (self *CmdChargersProcessEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdChargersProcessEvent) RpcResult() any {
-	var atr []*engine.ChrgSProcessEventReply
+	var atr []*chargers.ChrgSProcessEventReply
 	return &atr
 }
 

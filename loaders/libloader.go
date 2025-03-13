@@ -287,7 +287,7 @@ func newProfileFunc(lType string) func() profile {
 		}
 	case utils.MetaChargers:
 		return func() profile {
-			return new(engine.ChargerProfile)
+			return new(utils.ChargerProfile)
 		}
 	case utils.MetaRateProfiles:
 		return func() profile {

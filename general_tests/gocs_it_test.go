@@ -30,7 +30,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/sessions"
 
 	"github.com/cgrates/cgrates/utils"
@@ -131,8 +130,8 @@ func testGOCSApierRpcConn(t *testing.T) {
 }
 
 func testGOCSLoadData(t *testing.T) {
-	chargerProfile := &apis.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chargerProfile := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "DEFAULT",
 			RunID:        utils.MetaDefault,
@@ -150,7 +149,7 @@ func testGOCSLoadData(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var rpl *engine.ChargerProfile
+	var rpl *utils.ChargerProfile
 	if err := usRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}, &rpl); err != nil {
 		t.Error(err)

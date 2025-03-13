@@ -209,7 +209,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	//chargers
-	var replyChrgr *engine.ChargerProfile
+	var replyChrgr *utils.ChargerProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Raw"},
 		&replyChrgr); err == nil || err.Error() != utils.ErrNotFound.Error() {
