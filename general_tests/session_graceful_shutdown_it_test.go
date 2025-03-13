@@ -29,7 +29,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/sessions"
 
 	"github.com/cgrates/cgrates/engine"
@@ -136,8 +135,8 @@ func testSessionSRplcApierGetActiveSessionsNotFound(t *testing.T) {
 }
 
 func testSessionSRplcApierSetChargerS(t *testing.T) {
-	chargerProfile1 := &apis.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chargerProfile1 := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",
 			RunID:        utils.MetaDefault,
@@ -156,8 +155,8 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 		t.Error("Unexpected reply returned", result1)
 	}
 
-	chargerProfile2 := &apis.ChargerWithAPIOpts{
-		ChargerProfile: &engine.ChargerProfile{
+	chargerProfile2 := &utils.ChargerProfileWithAPIOpts{
+		ChargerProfile: &utils.ChargerProfile{
 			Tenant:       "cgrates.org",
 			ID:           "Default",
 			RunID:        utils.MetaDefault,

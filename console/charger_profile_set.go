@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apis"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -28,7 +26,7 @@ func init() {
 	c := &CmdSetChargerProfile{
 		name:      "charger_profile_set",
 		rpcMethod: utils.AdminSv1SetChargerProfile,
-		rpcParams: &apis.ChargerWithAPIOpts{},
+		rpcParams: &utils.ChargerProfileWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +35,7 @@ func init() {
 type CmdSetChargerProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *apis.ChargerWithAPIOpts
+	rpcParams *utils.ChargerProfileWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,7 +49,7 @@ func (self *CmdSetChargerProfile) RpcMethod() string {
 
 func (self *CmdSetChargerProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &apis.ChargerWithAPIOpts{ChargerProfile: new(engine.ChargerProfile)}
+		self.rpcParams = &utils.ChargerProfileWithAPIOpts{ChargerProfile: new(utils.ChargerProfile)}
 	}
 	return self.rpcParams
 }

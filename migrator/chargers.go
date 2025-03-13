@@ -65,7 +65,7 @@ func (m *Migrator) migrateChargers() (err error) {
 		return
 	}
 	migrated := true
-	var v2 *engine.ChargerProfile
+	var v2 *utils.ChargerProfile
 	for {
 		version := vrs[utils.Chargers]
 		for {
@@ -111,7 +111,7 @@ func (m *Migrator) migrateChargers() (err error) {
 	return m.ensureIndexesDataDB(engine.ColCpp)
 }
 
-func (m *Migrator) migrateV1ToV2Chargers() (v4Cpp *engine.ChargerProfile, err error) {
+func (m *Migrator) migrateV1ToV2Chargers() (v4Cpp *utils.ChargerProfile, err error) {
 	v4Cpp, err = m.dmIN.getV1ChargerProfile()
 	if err != nil {
 		return nil, err

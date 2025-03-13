@@ -1347,7 +1347,7 @@ package agents
 // 	var result string
 // 	//add the second charger
 // 	chargerProfile := &apis.ChargerWithAPIOpts{
-// 		ChargerProfile: &engine.ChargerProfile{
+// 		ChargerProfile: &utils.ChargerProfile{
 // 			Tenant:       "cgrates.com",
 // 			ID:           "CustomCharger",
 // 			RunID:        "CustomCharger",
@@ -1366,7 +1366,7 @@ package agents
 // 	}
 // 	//add the second charger
 // 	chargerProfile2 := &apis.ChargerWithAPIOpts{
-// 		ChargerProfile: &engine.ChargerProfile{
+// 		ChargerProfile: &utils.ChargerProfile{
 // 			Tenant:       "cgrates.com",
 // 			ID:           "Default",
 // 			RunID:        "*default",

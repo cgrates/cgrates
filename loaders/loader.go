@@ -97,7 +97,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 	case utils.MetaRoutes:
 		return dm.SetRouteProfile(ctx, data.(*engine.RouteProfile), withIndex)
 	case utils.MetaChargers:
-		return dm.SetChargerProfile(ctx, data.(*engine.ChargerProfile), withIndex)
+		return dm.SetChargerProfile(ctx, data.(*utils.ChargerProfile), withIndex)
 	case utils.MetaRateProfiles:
 		rpl := data.(*utils.RateProfile)
 		if ratesPartial {

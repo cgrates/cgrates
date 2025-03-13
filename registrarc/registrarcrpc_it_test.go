@@ -32,6 +32,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
@@ -128,7 +129,7 @@ func testRPCChargerSNoAttr(t *testing.T) {
 		APIOpts: map[string]any{utils.OptsAttributesProcessRuns: 1.},
 	}
 	expErr := utils.NewErrServerError(rpcclient.ErrDisconnected).Error()
-	var rply []*engine.ChrgSProcessEventReply
+	var rply []*chargers.ChrgSProcessEventReply
 	if err := rpcsRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &rply); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error: %s,received: %v", expErr, err)
 	}
@@ -151,7 +152,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 		APIOpts: map[string]any{utils.OptsAttributesProcessRuns: 1.},
 	}
 
-	processedEv := []*engine.ChrgSProcessEventReply{
+	processedEv := []*chargers.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CustomerCharges",
 			AlteredFields: []*engine.FieldsAltered{
@@ -227,7 +228,7 @@ func testRPCChargerSWithAttr(t *testing.T) {
 			},
 		},
 	}
-	var rply []*engine.ChrgSProcessEventReply
+	var rply []*chargers.ChrgSProcessEventReply
 	if err := rpcsRPC.Call(context.Background(), utils.ChargerSv1ProcessEvent, cgrEv, &rply); err != nil {
 		t.Fatal(err)
 	}

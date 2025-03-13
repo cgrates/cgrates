@@ -1119,8 +1119,8 @@ func (ms *MongoStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, 
 	})
 }
 
-func (ms *MongoStorage) GetChargerProfileDrv(ctx *context.Context, tenant, id string) (*ChargerProfile, error) {
-	chargerProfile := new(ChargerProfile)
+func (ms *MongoStorage) GetChargerProfileDrv(ctx *context.Context, tenant, id string) (*utils.ChargerProfile, error) {
+	chargerProfile := new(utils.ChargerProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColCpp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(chargerProfile)
@@ -1132,7 +1132,7 @@ func (ms *MongoStorage) GetChargerProfileDrv(ctx *context.Context, tenant, id st
 	return chargerProfile, err
 }
 
-func (ms *MongoStorage) SetChargerProfileDrv(ctx *context.Context, r *ChargerProfile) error {
+func (ms *MongoStorage) SetChargerProfileDrv(ctx *context.Context, r *utils.ChargerProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColCpp).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},

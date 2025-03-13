@@ -24,12 +24,11 @@ import (
 
 	"github.com/cgrates/birpc/context"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetChargerProfile returns a Charger Profile
-func (adms *AdminS) V1GetChargerProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
+func (adms *AdminS) V1GetChargerProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ChargerProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -74,7 +73,7 @@ func (adms *AdminS) V1GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 }
 
 // GetChargerProfiles returns a list of charger profiles registered for a tenant
-func (admS *AdminS) V1GetChargerProfiles(ctx *context.Context, args *utils.ArgsItemIDs, chrgPrfs *[]*engine.ChargerProfile) (err error) {
+func (admS *AdminS) V1GetChargerProfiles(ctx *context.Context, args *utils.ArgsItemIDs, chrgPrfs *[]*utils.ChargerProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -83,9 +82,9 @@ func (admS *AdminS) V1GetChargerProfiles(ctx *context.Context, args *utils.ArgsI
 	if err = admS.V1GetChargerProfileIDs(ctx, args, &chrgPrfIDs); err != nil {
 		return
 	}
-	*chrgPrfs = make([]*engine.ChargerProfile, 0, len(chrgPrfIDs))
+	*chrgPrfs = make([]*utils.ChargerProfile, 0, len(chrgPrfIDs))
 	for _, chrgPrfID := range chrgPrfIDs {
-		var chgrPrf *engine.ChargerProfile
+		var chgrPrf *utils.ChargerProfile
 		chgrPrf, err = admS.dm.GetChargerProfile(ctx, tnt, chrgPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -115,7 +114,7 @@ func (admS *AdminS) V1GetChargerProfilesCount(ctx *context.Context, args *utils.
 }
 
 type ChargerWithAPIOpts struct {
-	*engine.ChargerProfile
+	*utils.ChargerProfile
 	APIOpts map[string]any
 }
 

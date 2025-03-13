@@ -185,7 +185,7 @@ func (iDBMig *internalMigrator) remSupplier(tenant, id string) (err error) {
 
 func (iDBMig *internalMigrator) close() {}
 
-func (iDBMig *internalMigrator) getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error) {
+func (iDBMig *internalMigrator) getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 

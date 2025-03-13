@@ -189,7 +189,7 @@ package general_tests
 
 // func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
 // 	// //add a default charger
-// 	chargerProfile := &engine.ChargerProfile{
+// 	chargerProfile := &utils.ChargerProfile{
 // 		Tenant:       "cgrates.org",
 // 		ID:           "Default",
 // 		RunID:        utils.MetaDefault,

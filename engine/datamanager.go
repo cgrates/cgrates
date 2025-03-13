@@ -1948,14 +1948,14 @@ func (dm *DataManager) RemoveAttributeProfile(ctx *context.Context, tenant, id s
 }
 
 func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (cpp *ChargerProfile, err error) {
+	transactionID string) (cpp *utils.ChargerProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheChargerProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ChargerProfile), nil
+			return x.(*utils.ChargerProfile), nil
 		}
 	}
 	if dm == nil {
@@ -1997,7 +1997,7 @@ func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string
 	return
 }
 
-func (dm *DataManager) SetChargerProfile(ctx *context.Context, cpp *ChargerProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetChargerProfile(ctx *context.Context, cpp *utils.ChargerProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2030,7 +2030,7 @@ func (dm *DataManager) SetChargerProfile(ctx *context.Context, cpp *ChargerProfi
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.ChargerProfilePrefix, cpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetChargerProfile,
-			&ChargerProfileWithAPIOpts{
+			&utils.ChargerProfileWithAPIOpts{
 				ChargerProfile: cpp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)})

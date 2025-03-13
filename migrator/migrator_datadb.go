@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type MigratorDataDB interface {
@@ -53,7 +54,7 @@ type MigratorDataDB interface {
 	setSupplier(spl *SupplierProfile) (err error)
 	remSupplier(tenant, id string) (err error)
 
-	getV1ChargerProfile() (v1chrPrf *engine.ChargerProfile, err error)
+	getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile, err error)
 	getV1RouteProfile() (v1chrPrf *engine.RouteProfile, err error)
 
 	getV3Stats() (v1st *engine.StatQueueProfile, err error)

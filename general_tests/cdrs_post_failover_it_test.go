@@ -134,7 +134,7 @@ func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	var replyChargerPrf *engine.ChargerProfile
+	var replyChargerPrf *utils.ChargerProfile
 	if err := cdrsPostFailRpc.Call(context.Background(), utils.AdminSv1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"},
 		&replyChargerPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {

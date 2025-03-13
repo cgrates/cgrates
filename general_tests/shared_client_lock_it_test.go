@@ -31,7 +31,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -147,8 +146,8 @@ func testSharedClientLockRpcConn(t *testing.T) {
 func testSharedClientLockSetProfiles(t *testing.T) {
 	var reply string
 	err := clntLockRPC.Call(context.Background(), utils.AdminSv1SetChargerProfile,
-		&apis.ChargerWithAPIOpts{
-			ChargerProfile: &engine.ChargerProfile{
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
 				Tenant:       "cgrates.org",
 				ID:           "CHARGER_TEST",
 				RunID:        utils.MetaDefault,

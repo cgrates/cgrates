@@ -1360,7 +1360,7 @@ func TestAPItoChargerProfile(t *testing.T) {
 		Weights:      ";20",
 	}
 
-	expected := &ChargerProfile{
+	expected := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Charger1",
 		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z"},
@@ -1387,7 +1387,7 @@ func TestChargerProfileToAPI(t *testing.T) {
 		Weights:      ";20",
 	}
 
-	chargerPrf := &ChargerProfile{
+	chargerPrf := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Charger1",
 		FilterIDs:    []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z"},
@@ -2951,7 +2951,7 @@ func TestModelHelpersParamsToString(t *testing.T) {
 }
 
 func TestChargerProfileToAPILastCase(t *testing.T) {
-	testStruct := &ChargerProfile{
+	testStruct := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CPP_1",
 		FilterIDs:    []string{"*string:~*opts.*subsys:*chargers", "FLTR_CP_1", "FLTR_CP_4", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
@@ -4877,7 +4877,7 @@ func TestAPItoChargerProfileNewDynamicWeightsFromStringErr(t *testing.T) {
 		Weights:      "wrong input",
 	}
 
-	expected := &ChargerProfile{
+	expected := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Charger1",
 		FilterIDs:    []string{"", "", ""},
@@ -4903,7 +4903,7 @@ func TestAPItoChargerProfileNewDynamicBlockersFromStringErr(t *testing.T) {
 		Blockers:     "wrong input",
 	}
 
-	expected := &ChargerProfile{
+	expected := &utils.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Charger1",
 		FilterIDs: []string{"", "", ""},

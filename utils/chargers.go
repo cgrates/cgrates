@@ -16,77 +16,77 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package utils
 
 import (
 	"sort"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
-// ChargerProfile is the config for one Charger
+// ChargerProfiles is a sortable list of Charger profiles
+type ChargerProfiles []*ChargerProfile
+
+// Sort is part of sort interface, sort based on Weight.
+func (cp ChargerProfiles) Sort() {
+	sort.Slice(cp, func(i, j int) bool { return cp[i].weight > cp[j].weight })
+}
+
+// ChargerProfile defines the configuration of a Charger.
 type ChargerProfile struct {
 	Tenant       string
 	ID           string
 	FilterIDs    []string
-	Weights      utils.DynamicWeights
-	Blockers     utils.DynamicBlockers
+	Weights      DynamicWeights
+	Blockers     DynamicBlockers
 	RunID        string
 	AttributeIDs []string // perform data aliasing based on these Attributes
 	weight       float64
 }
 
-// ChargerProfileWithAPIOpts is used in replicatorV1 for dispatcher
-type ChargerProfileWithAPIOpts struct {
-	*ChargerProfile
-	APIOpts map[string]any
+// ApplySortingWeight assigns a weight value used for sorting ChargerProfiles.
+func (cp *ChargerProfile) ApplySortingWeight(weight float64) {
+	cp.weight = weight
 }
 
-func (cP *ChargerProfile) TenantID() string {
-	return utils.ConcatenatedKey(cP.Tenant, cP.ID)
+// TenantID returns the concatenated tenant and ID.
+func (cp *ChargerProfile) TenantID() string {
+	return ConcatenatedKey(cp.Tenant, cp.ID)
 }
 
-// ChargerProfiles is a sortable list of Charger profiles
-type ChargerProfiles []*ChargerProfile
-
-// Sort is part of sort interface, sort based on Weight
-func (cps ChargerProfiles) Sort() {
-	sort.Slice(cps, func(i, j int) bool { return cps[i].weight > cps[j].weight })
-}
-
+// Set implements the profile interface, setting values in ChargerProfile based on path.
 func (cp *ChargerProfile) Set(path []string, val any, newBranch bool) (err error) {
 	if len(path) != 1 {
-		return utils.ErrWrongPath
+		return ErrWrongPath
 	}
 	switch path[0] {
 	default:
-		return utils.ErrWrongPath
-	case utils.Tenant:
-		cp.Tenant = utils.IfaceAsString(val)
-	case utils.ID:
-		cp.ID = utils.IfaceAsString(val)
-	case utils.FilterIDs:
+		return ErrWrongPath
+	case Tenant:
+		cp.Tenant = IfaceAsString(val)
+	case ID:
+		cp.ID = IfaceAsString(val)
+	case FilterIDs:
 		var valA []string
-		valA, err = utils.IfaceAsStringSlice(val)
+		valA, err = IfaceAsStringSlice(val)
 		cp.FilterIDs = append(cp.FilterIDs, valA...)
-	case utils.RunID:
-		cp.RunID = utils.IfaceAsString(val)
-	case utils.AttributeIDs:
+	case RunID:
+		cp.RunID = IfaceAsString(val)
+	case AttributeIDs:
 		var valA []string
-		valA, err = utils.IfaceAsStringSlice(val)
+		valA, err = IfaceAsStringSlice(val)
 		cp.AttributeIDs = append(cp.AttributeIDs, valA...)
-	case utils.Weights:
-		if val != utils.EmptyString {
-			cp.Weights, err = utils.NewDynamicWeightsFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+	case Weights:
+		if val != EmptyString {
+			cp.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 		}
-	case utils.Blockers:
-		if val != utils.EmptyString {
-			cp.Blockers, err = utils.NewDynamicBlockersFromString(utils.IfaceAsString(val), utils.InfieldSep, utils.ANDSep)
+	case Blockers:
+		if val != EmptyString {
+			cp.Blockers, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
 		}
 	}
 	return
 }
 
+// Merge implements the profile interface, merging values from another ChargerProfile.
 func (cp *ChargerProfile) Merge(v2 any) {
 	vi := v2.(*ChargerProfile)
 	if len(vi.Tenant) != 0 {
@@ -104,47 +104,58 @@ func (cp *ChargerProfile) Merge(v2 any) {
 	cp.Blockers = append(cp.Blockers, vi.Blockers...)
 }
 
-func (cp *ChargerProfile) String() string { return utils.ToJSON(cp) }
+// String implements the DataProvider interface, returning the ChargerProfile in JSON format.
+func (cp *ChargerProfile) String() string { return ToJSON(cp) }
+
+// FieldAsString implements the DataProvider interface, retrieving field value as string.
 func (cp *ChargerProfile) FieldAsString(fldPath []string) (_ string, err error) {
 	var val any
 	if val, err = cp.FieldAsInterface(fldPath); err != nil {
 		return
 	}
-	return utils.IfaceAsString(val), nil
+	return IfaceAsString(val), nil
 }
+
+// FieldAsInterface implements the DataProvider interface, retrieving field value as interface.
 func (cp *ChargerProfile) FieldAsInterface(fldPath []string) (_ any, err error) {
 	if len(fldPath) != 1 {
-		return nil, utils.ErrNotFound
+		return nil, ErrNotFound
 	}
 	switch fldPath[0] {
 	default:
-		fld, idx := utils.GetPathIndex(fldPath[0])
+		fld, idx := GetPathIndex(fldPath[0])
 		if idx != nil {
 			switch fld {
-			case utils.AttributeIDs:
+			case AttributeIDs:
 				if *idx < len(cp.AttributeIDs) {
 					return cp.AttributeIDs[*idx], nil
 				}
-			case utils.FilterIDs:
+			case FilterIDs:
 				if *idx < len(cp.FilterIDs) {
 					return cp.FilterIDs[*idx], nil
 				}
 			}
 		}
-		return nil, utils.ErrNotFound
-	case utils.Tenant:
+		return nil, ErrNotFound
+	case Tenant:
 		return cp.Tenant, nil
-	case utils.ID:
+	case ID:
 		return cp.ID, nil
-	case utils.FilterIDs:
+	case FilterIDs:
 		return cp.FilterIDs, nil
-	case utils.Weights:
+	case Weights:
 		return cp.Weights, nil
-	case utils.Blockers:
+	case Blockers:
 		return cp.Blockers, nil
-	case utils.AttributeIDs:
+	case AttributeIDs:
 		return cp.AttributeIDs, nil
-	case utils.RunID:
+	case RunID:
 		return cp.RunID, nil
 	}
+}
+
+// ChargerProfileWithAPIOpts wraps ChargerProfile with APIOpts.
+type ChargerProfileWithAPIOpts struct {
+	*ChargerProfile
+	APIOpts map[string]any
 }

@@ -151,7 +151,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Chargers
-	chgr := &engine.ChargerProfile{
+	chgr := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Chargers1",
 		RunID:        utils.MetaDefault,

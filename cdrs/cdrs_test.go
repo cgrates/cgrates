@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
@@ -613,7 +614,7 @@ func TestCDRsChrgrSProcessEvent(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				*reply.(*[]*engine.ChrgSProcessEventReply) = []*engine.ChrgSProcessEventReply{
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = []*chargers.ChrgSProcessEventReply{
 					{
 						ChargerSProfile: "string",
 					},

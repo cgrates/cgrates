@@ -1318,7 +1318,7 @@ func TestNewSession(t *testing.T) {
 				if args.(*utils.CGREvent).ID == utils.EmptyString {
 					return utils.ErrNotImplemented
 				}
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -1328,7 +1328,7 @@ func TestNewSession(t *testing.T) {
 							},
 						}},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 		},
@@ -1722,7 +1722,7 @@ func TestAuthEvent(t *testing.T) {
 				return utils.ErrNotImplemented
 			},
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -1733,7 +1733,7 @@ func TestAuthEvent(t *testing.T) {
 						}},
 				}
 
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 		},
@@ -1795,7 +1795,7 @@ func TestAuthEventMockCall(t *testing.T) {
 				return nil
 			},
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -1806,7 +1806,7 @@ func TestAuthEventMockCall(t *testing.T) {
 							},
 						}},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 		},
@@ -1863,7 +1863,7 @@ func TestChargeEvent(t *testing.T) {
 				return utils.ErrNotImplemented
 			},
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -1877,7 +1877,7 @@ func TestChargeEvent(t *testing.T) {
 				if args.(*utils.CGREvent).Tenant != "cgrates.org" {
 					chrgrs[0].CGREvent.Event[utils.RequestType] = utils.MetaPrepaid
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 			utils.ResponderMaxDebit: func(args any, reply any) error {
@@ -2464,7 +2464,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				cghrgs := []*engine.ChrgSProcessEventReply{
+				cghrgs := []*chargers.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -2475,7 +2475,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
@@ -2610,7 +2610,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 				return nil
 			},
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				cghrgs := []*engine.ChrgSProcessEventReply{
+				cghrgs := []*chargers.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -2621,7 +2621,7 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
@@ -2710,7 +2710,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				cghrgs := []*engine.ChrgSProcessEventReply{
+				cghrgs := []*chargers.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -2721,7 +2721,7 @@ func TestBiRPCv1InitiateSession1(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
@@ -2858,7 +2858,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				cghrgs := []*engine.ChrgSProcessEventReply{
+				cghrgs := []*chargers.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -2872,7 +2872,7 @@ func TestBiRPCv1InitiateSession2(t *testing.T) {
 				if args.(*utils.CGREvent).ID == "PREPAID" {
 					cghrgs[0].CGREvent.Event[utils.RequestType] = utils.MetaPrepaid
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
 			utils.ResourceSv1AuthorizeResources: func(args any, reply any) error {
@@ -2986,7 +2986,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 				return nil
 			},
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				cghrgs := []*engine.ChrgSProcessEventReply{
+				cghrgs := []*chargers.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -2997,7 +2997,7 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
 			utils.ResourceSv1AllocateResources: func(args any, reply any) error {
@@ -3164,7 +3164,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				cghrgs := []*engine.ChrgSProcessEventReply{
+				cghrgs := []*chargers.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -3175,7 +3175,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
 		},
@@ -3238,7 +3238,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				cghrgs := []*engine.ChrgSProcessEventReply{
+				cghrgs := []*chargers.ChrgSProcessEventReply{
 					{
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -3250,7 +3250,7 @@ func TestBiRPCv1TerminateSession1(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = cghrgs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
 				return nil
 			},
 			utils.CacheSv1ReplicateSet: func(args any, reply any) error {
@@ -3583,7 +3583,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 				return nil
 			},
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -3593,7 +3593,7 @@ func TestBiRPCv1ProcessMessage2(t *testing.T) {
 							},
 						}},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 		},
@@ -3671,7 +3671,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -3681,7 +3681,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 							},
 						}},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
@@ -3813,7 +3813,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -3823,7 +3823,7 @@ func TestBiRPCv1ProcessEventStats(t *testing.T) {
 							},
 						}},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 			utils.StatSv1ProcessEvent: func(args any, reply any) error {
@@ -3998,7 +3998,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 				if args.(*utils.CGREvent).ID != "RALS_ID" {
 					return nil
 				}
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -4008,7 +4008,7 @@ func TestBiRPCv1ProcessEventRals1(t *testing.T) {
 							},
 						}},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 			utils.ResponderGetCost: func(args any, reply any) error {
@@ -4106,7 +4106,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -4117,7 +4117,7 @@ func TestBiRPCv1ProcessEventRals2(t *testing.T) {
 							},
 						}},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 			utils.CacheSv1ReplicateSet: func(args any, reply any) error {
@@ -4243,7 +4243,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
-				chrgrs := []*engine.ChrgSProcessEventReply{
+				chrgrs := []*chargers.ChrgSProcessEventReply{
 					{ChargerSProfile: "TEST_PROFILE1",
 						CGREvent: &utils.CGREvent{
 							Tenant: "cgrates.org",
@@ -4254,7 +4254,7 @@ func TestBiRPCv1ProcessEventCDRs11(t *testing.T) {
 							},
 						}},
 				}
-				*reply.(*[]*engine.ChrgSProcessEventReply) = chrgrs
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = chrgrs
 				return nil
 			},
 			utils.CDRsV1ProcessEvent: func(args any, reply any) error {

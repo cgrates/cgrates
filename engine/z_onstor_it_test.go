@@ -906,7 +906,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 }
 
 func testOnStorITChargerProfile(t *testing.T) {
-	cpp := &ChargerProfile{
+	cpp := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "CPP_1",
 		FilterIDs:    []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},

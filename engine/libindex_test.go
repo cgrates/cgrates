@@ -1528,7 +1528,7 @@ func TestUpdateFilterIndexChargerIndex(t *testing.T) {
 	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
 		t.Error(err)
 	}
-	ChProf := &ChargerProfile{
+	ChProf := &utils.ChargerProfile{
 
 		Tenant:       "cgrates.org",
 		ID:           "CPP_3",
@@ -1540,7 +1540,6 @@ func TestUpdateFilterIndexChargerIndex(t *testing.T) {
 				Weight: 20,
 			},
 		},
-		weight: 20,
 	}
 
 	if err := dm.SetChargerProfile(context.Background(), ChProf, true); err != nil {

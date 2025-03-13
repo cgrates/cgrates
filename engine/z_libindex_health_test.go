@@ -270,7 +270,7 @@ func TestHealthIndexCharger(t *testing.T) {
 	dm := NewDataManager(db, cfg, nil)
 
 	// we will set this charger but without indexing
-	chPrf := &ChargerProfile{
+	chPrf := &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Raw",
 		FilterIDs: []string{
@@ -344,7 +344,7 @@ func TestHealthIndexCharger(t *testing.T) {
 	}
 
 	//we will use an inexisting Filter(not inline) for the same ChargerProfile
-	chPrf = &ChargerProfile{
+	chPrf = &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Raw",
 		FilterIDs: []string{
@@ -874,7 +874,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 	dm := NewDataManager(db, cfg, nil)
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
-	chPrf1 := &ChargerProfile{
+	chPrf1 := &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Raw",
 		FilterIDs: []string{
@@ -889,7 +889,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 			},
 		},
 	}
-	chPrf2 := &ChargerProfile{
+	chPrf2 := &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Default",
 		FilterIDs: []string{
@@ -906,7 +906,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 			},
 		},
 	}
-	chPrf3 := &ChargerProfile{
+	chPrf3 := &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Call_Attr1",
 		FilterIDs: []string{
@@ -974,7 +974,7 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 	dm := NewDataManager(db, cfg, nil)
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
-	chPrf1 := &ChargerProfile{
+	chPrf1 := &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Raw",
 		FilterIDs: []string{
@@ -1149,7 +1149,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	}
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
-	chPrf1 := &ChargerProfile{
+	chPrf1 := &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Raw",
 		FilterIDs: []string{
@@ -1209,7 +1209,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	for indxType := range utils.CacheIndexesToPrefix {
 		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
 	}
-	chPrf1 = &ChargerProfile{
+	chPrf1 = &utils.ChargerProfile{
 		Tenant: "cgrates.org",
 		ID:     "Raw",
 		FilterIDs: []string{

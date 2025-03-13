@@ -466,15 +466,15 @@ func (iDB *InternalDB) RemoveAttributeProfileDrv(_ *context.Context, tenant, id 
 	return
 }
 
-func (iDB *InternalDB) GetChargerProfileDrv(_ *context.Context, tenant, id string) (ch *ChargerProfile, err error) {
+func (iDB *InternalDB) GetChargerProfileDrv(_ *context.Context, tenant, id string) (ch *utils.ChargerProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*ChargerProfile), nil
+	return x.(*utils.ChargerProfile), nil
 }
 
-func (iDB *InternalDB) SetChargerProfileDrv(_ *context.Context, chr *ChargerProfile) (err error) {
+func (iDB *InternalDB) SetChargerProfileDrv(_ *context.Context, chr *utils.ChargerProfile) (err error) {
 	iDB.db.Set(utils.CacheChargerProfiles, chr.TenantID(), chr, nil,
 		true, utils.NonTransactional)
 	return

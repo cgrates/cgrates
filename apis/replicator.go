@@ -179,7 +179,7 @@ func (rplSv1 *ReplicatorSv1) GetAttributeProfile(ctx *context.Context, tntID *ut
 }
 
 // GetChargerProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetChargerProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
+func (rplSv1 *ReplicatorSv1) GetChargerProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.ChargerProfile) error {
 	engine.UpdateReplicationFilters(utils.ChargerProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetChargerProfileDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -420,7 +420,7 @@ func (rplSv1 *ReplicatorSv1) SetAttributeProfile(ctx *context.Context, ap *engin
 }
 
 // SetChargerProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetChargerProfile(ctx *context.Context, cp *engine.ChargerProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetChargerProfile(ctx *context.Context, cp *utils.ChargerProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetChargerProfileDrv(ctx, cp.ChargerProfile); err != nil {
 		return
 	}

@@ -24,12 +24,11 @@ import (
 
 	"github.com/cgrates/birpc/context"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetChargerProfile returns a Charger Profile
-func (adms *AdminSv1) GetChargerProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ChargerProfile) error {
+func (adms *AdminSv1) GetChargerProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ChargerProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -74,7 +73,7 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 }
 
 // GetChargerProfiles returns a list of charger profiles registered for a tenant
-func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsItemIDs, chrgPrfs *[]*engine.ChargerProfile) (err error) {
+func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsItemIDs, chrgPrfs *[]*utils.ChargerProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -83,9 +82,9 @@ func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsI
 	if err = admS.GetChargerProfileIDs(ctx, args, &chrgPrfIDs); err != nil {
 		return
 	}
-	*chrgPrfs = make([]*engine.ChargerProfile, 0, len(chrgPrfIDs))
+	*chrgPrfs = make([]*utils.ChargerProfile, 0, len(chrgPrfIDs))
 	for _, chrgPrfID := range chrgPrfIDs {
-		var chgrPrf *engine.ChargerProfile
+		var chgrPrf *utils.ChargerProfile
 		chgrPrf, err = admS.dm.GetChargerProfile(ctx, tnt, chrgPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -114,13 +113,8 @@ func (admS *AdminSv1) GetChargerProfilesCount(ctx *context.Context, args *utils.
 	return
 }
 
-type ChargerWithAPIOpts struct {
-	*engine.ChargerProfile
-	APIOpts map[string]any
-}
-
 // SetChargerProfile add/update a new Charger Profile
-func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *ChargerWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *utils.ChargerProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -177,27 +171,4 @@ func (adms *AdminSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.Tena
 	}
 	*reply = utils.OK
 	return nil
-}
-
-// NewChargerSv1 returns the RPC Object for ChargerS
-func NewChargerSv1(cS *engine.ChargerS) *ChargerSv1 {
-	return &ChargerSv1{cS: cS}
-}
-
-// ChargerSv1 Exports RPC from ChargerS
-type ChargerSv1 struct {
-	ping
-	cS *engine.ChargerS
-}
-
-// GetChargersForEvent returns matching ChargerProfile for Event
-func (cSv1 *ChargerSv1) GetChargersForEvent(ctx *context.Context, cgrEv *utils.CGREvent,
-	reply *engine.ChargerProfiles) error {
-	return cSv1.cS.V1GetChargersForEvent(ctx, cgrEv, reply)
-}
-
-// ProcessEvent
-func (cSv1 *ChargerSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent,
-	reply *[]*engine.ChrgSProcessEventReply) error {
-	return cSv1.cS.V1ProcessEvent(ctx, args, reply)
 }

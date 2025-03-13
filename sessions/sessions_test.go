@@ -1920,11 +1920,11 @@ func TestInitSession(t *testing.T) {
 	cfg.SessionSCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	clientConect := make(chan birpc.ClientConnector, 1)
 	clientConect <- clMock(func(_ string, args any, reply any) error {
-		rply, cancast := reply.(*[]*engine.ChrgSProcessEventReply)
+		rply, cancast := reply.(*[]*chargers.ChrgSProcessEventReply)
 		if !cancast {
 			return fmt.Errorf("can't cast")
 		}
-		*rply = []*engine.ChrgSProcessEventReply{
+		*rply = []*chargers.ChrgSProcessEventReply{
 			{
 				ChargerSProfile:    "raw",
 				AttributeSProfiles: []string{utils.MetaNone},

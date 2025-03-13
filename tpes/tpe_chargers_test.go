@@ -34,8 +34,8 @@ func TestTPEnewTPChargers(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*engine.ChargerProfile, error) {
-			chgr := &engine.ChargerProfile{
+		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+			chgr := &utils.ChargerProfile{
 				Tenant:       "cgrates.org",
 				ID:           "Chargers1",
 				RunID:        utils.MetaDefault,
@@ -66,7 +66,7 @@ func TestTPEExportItemsChargers(t *testing.T) {
 	tpChgr := TPChargers{
 		dm: dm,
 	}
-	chgr := &engine.ChargerProfile{
+	chgr := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Chargers1",
 		RunID:        utils.MetaDefault,
@@ -90,7 +90,7 @@ func TestTPEExportItemsChargersNoDbConn(t *testing.T) {
 	tpChgr := TPChargers{
 		dm: nil,
 	}
-	chgr := &engine.ChargerProfile{
+	chgr := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Chargers1",
 		RunID:        utils.MetaDefault,
@@ -116,7 +116,7 @@ func TestTPEExportItemsChargersIDNotFound(t *testing.T) {
 	tpChgr := TPChargers{
 		dm: dm,
 	}
-	chgr := &engine.ChargerProfile{
+	chgr := &utils.ChargerProfile{
 		Tenant:       "cgrates.org",
 		ID:           "Chargers1",
 		RunID:        utils.MetaDefault,
