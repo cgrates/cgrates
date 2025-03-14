@@ -65,9 +65,7 @@ func (fCsv *FileCSVee) init() (err error) {
 	// create the file
 	filePath := path.Join(fCsv.Cfg().ExportPath,
 		fCsv.Cfg().ID+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)
-	fCsv.dc.Lock()
-	fCsv.dc.MapStorage[utils.ExportPath] = filePath
-	fCsv.dc.Unlock()
+	fCsv.dc.Set([]string{utils.ExportPath}, filePath)
 	if fCsv.file, err = os.Create(filePath); err != nil {
 		return
 	}

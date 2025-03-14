@@ -59,9 +59,7 @@ type FileFWVee struct {
 func (fFwv *FileFWVee) init() (err error) {
 	filePath := path.Join(fFwv.Cfg().ExportPath,
 		fFwv.Cfg().ID+utils.Underline+utils.UUIDSha1Prefix()+utils.FWVSuffix)
-	fFwv.dc.Lock()
-	fFwv.dc.MapStorage[utils.ExportPath] = filePath
-	fFwv.dc.Unlock()
+	fFwv.dc.Set([]string{utils.ExportPath}, filePath)
 	// create the file
 	if fFwv.file, err = os.Create(filePath); err != nil {
 		return
