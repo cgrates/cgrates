@@ -164,11 +164,11 @@ func TestFileFwvInit(t *testing.T) {
 	if err := os.MkdirAll("/tmp/TestInitFileFWV", 0666); err != nil {
 		t.Error(err)
 	}
-	dc := utils.NewExporterMetrics("", time.Local)
+	em := utils.NewExporterMetrics("", time.Local)
 	fFwv := &FileFWVee{
 		cgrCfg: cgrCfg,
 		cfg:    cgrCfg.EEsCfg().Exporters[0],
-		dc:     dc,
+		em:     em,
 	}
 	if err := fFwv.init(); err != nil {
 		t.Error(err)

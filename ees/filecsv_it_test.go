@@ -677,11 +677,11 @@ func TestCsvInitFileCSV(t *testing.T) {
 	if err := os.MkdirAll("/tmp/TestInitFileCSV", 0666); err != nil {
 		t.Error(err)
 	}
-	dc := utils.NewExporterMetrics("", time.Local)
+	em := utils.NewExporterMetrics("", time.Local)
 	fCsv := &FileCSVee{
 		cgrCfg: cgrCfg,
 		cfg:    cgrCfg.EEsCfg().Exporters[0],
-		dc:     dc,
+		em:     em,
 	}
 	if err := fCsv.init(); err != nil {
 		t.Error(err)

@@ -30,10 +30,10 @@ import (
 )
 
 // NewKafkaEE creates a kafka poster
-func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics) (*KafkaEE, error) {
+func NewKafkaEE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) (*KafkaEE, error) {
 	pstr := &KafkaEE{
 		cfg:  cfg,
-		dc:   dc,
+		em:   em,
 		reqs: newConcReq(cfg.ConcurrentRequests),
 	}
 
@@ -99,7 +99,7 @@ func NewKafkaEE(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics) (*Kafka
 type KafkaEE struct {
 	writer *kafka.Writer
 	cfg    *config.EventExporterCfg
-	dc     *utils.ExporterMetrics
+	em     *utils.ExporterMetrics
 	reqs   *concReq
 	bytePreparing
 }
@@ -130,4 +130,4 @@ func (k *KafkaEE) Close() error {
 	return k.writer.Close()
 }
 
-func (k *KafkaEE) GetMetrics() *utils.ExporterMetrics { return k.dc }
+func (k *KafkaEE) GetMetrics() *utils.ExporterMetrics { return k.em }

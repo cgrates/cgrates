@@ -34,10 +34,10 @@ import (
 
 func NewFileCSVee(cfg *config.EventExporterCfg,
 	cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	dc *utils.ExporterMetrics) (fCsv *FileCSVee, err error) {
+	em *utils.ExporterMetrics) (fCsv *FileCSVee, err error) {
 	fCsv = &FileCSVee{
 		cfg: cfg,
-		dc:  dc,
+		em:  em,
 
 		cgrCfg:  cgrCfg,
 		filterS: filterS,
@@ -49,7 +49,7 @@ func NewFileCSVee(cfg *config.EventExporterCfg,
 // FileCSVee implements EventExporter interface for .csv files
 type FileCSVee struct {
 	cfg       *config.EventExporterCfg
-	dc        *utils.ExporterMetrics
+	em        *utils.ExporterMetrics
 	file      io.WriteCloser
 	csvWriter *csv.Writer
 	sync.Mutex
@@ -65,7 +65,7 @@ func (fCsv *FileCSVee) init() (err error) {
 	// create the file
 	filePath := path.Join(fCsv.Cfg().ExportPath,
 		fCsv.Cfg().ID+utils.Underline+utils.UUIDSha1Prefix()+utils.CSVSuffix)
-	fCsv.dc.Set([]string{utils.ExportPath}, filePath)
+	fCsv.em.Set([]string{utils.ExportPath}, filePath)
 	if fCsv.file, err = os.Create(filePath); err != nil {
 		return
 	}
@@ -81,7 +81,7 @@ func (fCsv *FileCSVee) init() (err error) {
 func (fCsv *FileCSVee) composeHeader() (err error) {
 	if len(fCsv.Cfg().HeaderFields()) != 0 {
 		var exp *utils.OrderedNavigableMap
-		if exp, err = composeHeaderTrailer(utils.MetaHdr, fCsv.Cfg().HeaderFields(), fCsv.dc, fCsv.cgrCfg, fCsv.filterS); err != nil {
+		if exp, err = composeHeaderTrailer(utils.MetaHdr, fCsv.Cfg().HeaderFields(), fCsv.em, fCsv.cgrCfg, fCsv.filterS); err != nil {
 			return
 		}
 		return fCsv.csvWriter.Write(exp.OrderedFieldsAsStrings())
@@ -93,7 +93,7 @@ func (fCsv *FileCSVee) composeHeader() (err error) {
 func (fCsv *FileCSVee) composeTrailer() (err error) {
 	if len(fCsv.Cfg().TrailerFields()) != 0 {
 		var exp *utils.OrderedNavigableMap
-		if exp, err = composeHeaderTrailer(utils.MetaTrl, fCsv.Cfg().TrailerFields(), fCsv.dc, fCsv.cgrCfg, fCsv.filterS); err != nil {
+		if exp, err = composeHeaderTrailer(utils.MetaTrl, fCsv.Cfg().TrailerFields(), fCsv.em, fCsv.cgrCfg, fCsv.filterS); err != nil {
 			return
 		}
 		return fCsv.csvWriter.Write(exp.OrderedFieldsAsStrings())
@@ -127,4 +127,4 @@ func (fCsv *FileCSVee) Close() (err error) {
 	return
 }
 
-func (fCsv *FileCSVee) GetMetrics() *utils.ExporterMetrics { return fCsv.dc }
+func (fCsv *FileCSVee) GetMetrics() *utils.ExporterMetrics { return fCsv.em }

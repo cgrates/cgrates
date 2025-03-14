@@ -26,17 +26,17 @@ import (
 )
 
 func TestS3GetMetrics(t *testing.T) {
-	safeMapStorage := &utils.ExporterMetrics{}
+	em := &utils.ExporterMetrics{}
 	pstr := &S3EE{
-		dc: safeMapStorage,
+		em: em,
 	}
 	result := pstr.GetMetrics()
 	if result == nil {
 		t.Errorf("GetMetrics() returned nil; expected a non-nil SafeMapStorage")
 		return
 	}
-	if result != safeMapStorage {
-		t.Errorf("GetMetrics() returned unexpected result; got %v, want %v", result, safeMapStorage)
+	if result != em {
+		t.Errorf("GetMetrics() returned unexpected result; got %v, want %v", result, em)
 	}
 }
 

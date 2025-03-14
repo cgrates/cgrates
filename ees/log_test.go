@@ -77,7 +77,7 @@ func TestLogEE_GetMetrics(t *testing.T) {
 	mockMetrics := &utils.ExporterMetrics{}
 
 	vEe := &LogEE{
-		dc: mockMetrics,
+		em: mockMetrics,
 	}
 
 	result := vEe.GetMetrics()
@@ -104,9 +104,9 @@ func TestLogEE_PrepareMap(t *testing.T) {
 func TestNewLogEE(t *testing.T) {
 
 	cfg := &config.EventExporterCfg{}
-	dc := &utils.ExporterMetrics{}
+	em := &utils.ExporterMetrics{}
 
-	logEE := NewLogEE(cfg, dc)
+	logEE := NewLogEE(cfg, em)
 
 	if logEE == nil {
 		t.Fatal("NewLogEE returned nil")
@@ -116,7 +116,7 @@ func TestNewLogEE(t *testing.T) {
 		t.Errorf("Expected cfg to be %v, but got %v", cfg, logEE.cfg)
 	}
 
-	if logEE.dc != dc {
-		t.Errorf("Expected dc to be %v, but got %v", dc, logEE.dc)
+	if logEE.em != em {
+		t.Errorf("Expected em to be %v, but got %v", em, logEE.em)
 	}
 }

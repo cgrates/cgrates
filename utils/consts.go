@@ -422,7 +422,7 @@ const (
 	MetaDispatcherHosts      = "*dispatcher_hosts"
 	MetaFilters              = "*filters"
 	MetaCDRs                 = "*cdrs"
-	MetaDC                   = "*dc"
+	MetaEM                   = "*em"
 	MetaCaches               = "*caches"
 	MetaUCH                  = "*uch"
 	MetaGuardian             = "*guardians"

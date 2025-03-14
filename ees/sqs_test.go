@@ -26,11 +26,11 @@ import (
 )
 
 func TestGetMetricsT(t *testing.T) {
-	metrics := &utils.ExporterMetrics{}
-	pstr := &SQSee{dc: metrics}
+	em := &utils.ExporterMetrics{}
+	pstr := &SQSee{em: em}
 	result := pstr.GetMetrics()
-	if result != metrics {
-		t.Errorf("Expected %v, but got %v", metrics, result)
+	if result != em {
+		t.Errorf("Expected %v, but got %v", em, result)
 	}
 }
 

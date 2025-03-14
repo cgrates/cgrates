@@ -29,7 +29,7 @@ func TestKafkaEEConnect(t *testing.T) {
 	kafkaEE := &KafkaEE{
 		writer: nil,
 		cfg:    &config.EventExporterCfg{},
-		dc:     &utils.ExporterMetrics{},
+		em:     &utils.ExporterMetrics{},
 		reqs:   &concReq{},
 	}
 	err := kafkaEE.Connect()
@@ -52,7 +52,7 @@ func TestKafkaEE_Cfg(t *testing.T) {
 func TestKafkaEEGetMetrics(t *testing.T) {
 	safeMapStorage := &utils.ExporterMetrics{}
 	kafkaEE := &KafkaEE{
-		dc: safeMapStorage,
+		em: safeMapStorage,
 	}
 	result := kafkaEE.GetMetrics()
 	if result != safeMapStorage {
