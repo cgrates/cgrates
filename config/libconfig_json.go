@@ -376,20 +376,21 @@ type EventExporterOptsJson struct {
 
 // EventExporterJsonCfg is the configuration of a single EventExporter
 type EventExporterJsonCfg struct {
-	Id                  *string
-	Type                *string
-	Export_path         *string
-	Opts                *EventExporterOptsJson
-	Timezone            *string
-	Filters             *[]string
-	Flags               *[]string
-	Attribute_ids       *[]string
-	Attribute_context   *string
-	Synchronous         *bool
-	Attempts            *int
-	Failed_posts_dir    *string
-	Concurrent_requests *int
-	Fields              *[]*FcTemplateJsonCfg
+	Id                   *string
+	Type                 *string
+	Export_path          *string
+	Opts                 *EventExporterOptsJson
+	Timezone             *string
+	Filters              *[]string
+	Flags                *[]string
+	Attribute_ids        *[]string
+	Attribute_context    *string
+	Synchronous          *bool
+	Attempts             *int
+	Failed_posts_dir     *string
+	Concurrent_requests  *int
+	MetricsResetSchedule *string `json:"metrics_reset_schedule"`
+	Fields               *[]*FcTemplateJsonCfg
 }
 
 // SessionSJsonCfg config section

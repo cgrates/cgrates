@@ -32,10 +32,10 @@ import (
 )
 
 // NewS3EE creates a s3 poster
-func NewS3EE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *S3EE {
+func NewS3EE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) *S3EE {
 	pstr := &S3EE{
 		cfg:  cfg,
-		dc:   dc,
+		em:   em,
 		reqs: newConcReq(cfg.ConcurrentRequests),
 	}
 	pstr.parseOpts(cfg.Opts)
@@ -54,7 +54,7 @@ type S3EE struct {
 	up         *s3manager.Uploader
 
 	cfg          *config.EventExporterCfg
-	dc           *utils.SafeMapStorage
+	em           *utils.ExporterMetrics
 	reqs         *concReq
 	sync.RWMutex // protect connection
 	bytePreparing
@@ -137,4 +137,4 @@ func (pstr *S3EE) ExportEvent(message any, key string) (err error) {
 
 func (pstr *S3EE) Close() (_ error) { return }
 
-func (pstr *S3EE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
+func (pstr *S3EE) GetMetrics() *utils.ExporterMetrics { return pstr.em }

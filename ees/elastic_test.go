@@ -20,6 +20,7 @@ package ees
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -27,16 +28,13 @@ import (
 )
 
 func TestGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	em := utils.NewExporterMetrics("", time.Local)
 	ee := &ElasticEE{
-		dc: dc,
+		em: em,
 	}
 
-	if rcv := ee.GetMetrics(); !reflect.DeepEqual(rcv, ee.dc) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(ee.dc))
+	if rcv := ee.GetMetrics(); !reflect.DeepEqual(rcv, ee.em) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(ee.em))
 	}
 }
 
@@ -61,11 +59,8 @@ func TestInitClient(t *testing.T) {
 
 func TestElasticExportEventErr(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
-	eEe, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], dc)
+	em := utils.NewExporterMetrics("", time.Local)
+	eEe, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], em)
 	if err != nil {
 		t.Error(err)
 	}

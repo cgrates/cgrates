@@ -35,6 +35,7 @@ import (
 // onCacheEvicted is called by ltcache when evicting an item
 func onCacheEvicted(_ string, value any) {
 	ee := value.(EventExporter)
+	ee.GetMetrics().StopCron()
 	ee.Close()
 }
 
@@ -306,9 +307,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 	}()
 	var eEv any
 
-	exp.GetMetrics().Lock()
-	exp.GetMetrics().MapStorage[utils.NumberOfEvents] = exp.GetMetrics().MapStorage[utils.NumberOfEvents].(int64) + 1
-	exp.GetMetrics().Unlock()
+	exp.GetMetrics().IncrementEvents()
 	if len(exp.Cfg().ContentFields()) == 0 {
 		if eEv, err = exp.PrepareMap(ev); err != nil {
 			return
@@ -317,7 +316,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 		expNM := utils.NewOrderedNavigableMap()
 		dsMap := map[string]utils.DataStorage{
 			utils.MetaReq:  utils.MapStorage(ev.Event),
-			utils.MetaDC:   exp.GetMetrics(),
+			utils.MetaEM:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
 			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant, utils.MetaExporterID: ev.APIOpts[utils.MetaExporterID]},
@@ -410,4 +409,36 @@ func ExportWithAttempts(exp EventExporter, eEv any, key string) (err error) {
 				utils.EEs, exp.Cfg().ID, err.Error()))
 	}
 	return
+}
+
+// V1ResetExporterMetricsParams contains required parameters for resetting exporter metrics.
+type V1ResetExporterMetricsParams struct {
+	Tenant     string
+	ID         string // unique identifier of the request
+	ExporterID string
+	APIOpts    map[string]any
+}
+
+// V1ResetExporterMetrics resets the metrics for a specific exporter identified by ExporterID.
+// If the "*eesVerbose" option is present in APIOpts, it will log the metrics state before reset,
+// regardless of the option's value (similar to how EeSv1.ProcessEvent is doing it).
+//
+// Returns utils.ErrNotFound if the exporter is not found in the cache.
+func (eeS *EventExporterS) V1ResetExporterMetrics(ctx *context.Context, params V1ResetExporterMetricsParams, reply *string) error {
+	eeCfg := eeS.cfg.EEsCfg().ExporterCfg(params.ExporterID)
+	ee, ok := eeS.exporterCache[eeCfg.Type].Get(eeCfg.ID)
+	if !ok {
+		return utils.ErrNotFound
+	}
+	metrics := ee.(EventExporter).GetMetrics()
+
+	if _, has := params.APIOpts[utils.OptsEEsVerbose]; has {
+		utils.Logger.Info(fmt.Sprintf(
+			"<%s> current metrics (before reset) for exporter %q:\n%s",
+			utils.EEs, eeCfg.ID, metrics.String()))
+	}
+
+	metrics.Reset()
+	*reply = utils.OK
+	return nil
 }

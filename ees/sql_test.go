@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -32,15 +33,12 @@ import (
 )
 
 func TestSqlGetMetrics(t *testing.T) {
-	dc, err := newEEMetrics("Local")
-	if err != nil {
-		t.Error(err)
-	}
+	em := utils.NewExporterMetrics("", time.Local)
 	sqlEe := &SQLEe{
-		dc: dc,
+		em: em,
 	}
-	if rcv := sqlEe.GetMetrics(); !reflect.DeepEqual(rcv, sqlEe.dc) {
-		t.Errorf("Expected %+v but got %+v", utils.ToJSON(rcv), utils.ToJSON(sqlEe.dc))
+	if rcv := sqlEe.GetMetrics(); !reflect.DeepEqual(rcv, sqlEe.em) {
+		t.Errorf("Expected %+v but got %+v", utils.ToJSON(rcv), utils.ToJSON(sqlEe.em))
 	}
 }
 

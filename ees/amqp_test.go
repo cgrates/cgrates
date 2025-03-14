@@ -26,9 +26,9 @@ import (
 )
 
 func TestAmqpGetMetrics(t *testing.T) {
-	expectedMetrics := &utils.SafeMapStorage{}
+	expectedMetrics := &utils.ExporterMetrics{}
 	pstr := &AMQPee{
-		dc: expectedMetrics,
+		em: expectedMetrics,
 	}
 	result := pstr.GetMetrics()
 	if result != expectedMetrics {
@@ -48,9 +48,9 @@ func TestCfg(t *testing.T) {
 }
 
 func TestAmqpToGetMetrics(t *testing.T) {
-	expectedMetrics := &utils.SafeMapStorage{}
+	expectedMetrics := &utils.ExporterMetrics{}
 	amqp := &AMQPv1EE{
-		dc: expectedMetrics,
+		em: expectedMetrics,
 	}
 	result := amqp.GetMetrics()
 	if result != expectedMetrics {

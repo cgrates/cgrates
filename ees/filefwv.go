@@ -30,10 +30,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewFileFWVee(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS, dc *utils.SafeMapStorage) (fFwv *FileFWVee, err error) {
+func NewFileFWVee(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS, em *utils.ExporterMetrics) (fFwv *FileFWVee, err error) {
 	fFwv = &FileFWVee{
 		cfg: cfg,
-		dc:  dc,
+		em:  em,
 
 		cgrCfg:  cgrCfg,
 		filterS: filterS,
@@ -45,7 +45,7 @@ func NewFileFWVee(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filter
 // FileFWVee implements EventExporter interface for .fwv files
 type FileFWVee struct {
 	cfg  *config.EventExporterCfg
-	dc   *utils.SafeMapStorage
+	em   *utils.ExporterMetrics
 	file io.WriteCloser
 	sync.Mutex
 	slicePreparing
@@ -59,9 +59,7 @@ type FileFWVee struct {
 func (fFwv *FileFWVee) init() (err error) {
 	filePath := path.Join(fFwv.Cfg().ExportPath,
 		fFwv.Cfg().ID+utils.Underline+utils.UUIDSha1Prefix()+utils.FWVSuffix)
-	fFwv.dc.Lock()
-	fFwv.dc.MapStorage[utils.ExportPath] = filePath
-	fFwv.dc.Unlock()
+	fFwv.em.Set([]string{utils.ExportPath}, filePath)
 	// create the file
 	if fFwv.file, err = os.Create(filePath); err != nil {
 		return
@@ -75,7 +73,7 @@ func (fFwv *FileFWVee) composeHeader() (err error) {
 		return
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(utils.MetaHdr, fFwv.Cfg().HeaderFields(), fFwv.dc, fFwv.cgrCfg, fFwv.filterS); err != nil {
+	if exp, err = composeHeaderTrailer(utils.MetaHdr, fFwv.Cfg().HeaderFields(), fFwv.em, fFwv.cgrCfg, fFwv.filterS); err != nil {
 		return
 	}
 	for _, record := range exp.OrderedFieldsAsStrings() {
@@ -93,7 +91,7 @@ func (fFwv *FileFWVee) composeTrailer() (err error) {
 		return
 	}
 	var exp *utils.OrderedNavigableMap
-	if exp, err = composeHeaderTrailer(utils.MetaTrl, fFwv.Cfg().TrailerFields(), fFwv.dc, fFwv.cgrCfg, fFwv.filterS); err != nil {
+	if exp, err = composeHeaderTrailer(utils.MetaTrl, fFwv.Cfg().TrailerFields(), fFwv.em, fFwv.cgrCfg, fFwv.filterS); err != nil {
 		return
 	}
 	for _, record := range exp.OrderedFieldsAsStrings() {
@@ -136,4 +134,4 @@ func (fFwv *FileFWVee) Close() (err error) {
 	return
 }
 
-func (fFwv *FileFWVee) GetMetrics() *utils.SafeMapStorage { return fFwv.dc }
+func (fFwv *FileFWVee) GetMetrics() *utils.ExporterMetrics { return fFwv.em }

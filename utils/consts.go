@@ -422,7 +422,7 @@ const (
 	MetaDispatcherHosts      = "*dispatcher_hosts"
 	MetaFilters              = "*filters"
 	MetaCDRs                 = "*cdrs"
-	MetaDC                   = "*dc"
+	MetaEM                   = "*em"
 	MetaCaches               = "*caches"
 	MetaUCH                  = "*uch"
 	MetaGuardian             = "*guardians"
@@ -1907,9 +1907,10 @@ const (
 
 // EEs
 const (
-	EeSv1             = "EeSv1"
-	EeSv1Ping         = "EeSv1.Ping"
-	EeSv1ProcessEvent = "EeSv1.ProcessEvent"
+	EeSv1                     = "EeSv1"
+	EeSv1Ping                 = "EeSv1.Ping"
+	EeSv1ProcessEvent         = "EeSv1.ProcessEvent"
+	EeSv1ResetExporterMetrics = "EeSv1.ResetExporterMetrics"
 )
 
 // ERs
@@ -2433,14 +2434,15 @@ const (
 	PartitionsCfg = "partitions"
 	PrecacheCfg   = "precache"
 
-	// CdreCfg
-	ExportPathCfg         = "export_path"
-	AttributeSContextCfg  = "attributes_context"
-	SynchronousCfg        = "synchronous"
-	AttemptsCfg           = "attempts"
-	AttributeContextCfg   = "attribute_context"
-	AttributeIDsCfg       = "attribute_ids"
-	ConcurrentRequestsCfg = "concurrent_requests"
+	// EEsCfg
+	ExportPathCfg           = "export_path"
+	AttributeSContextCfg    = "attributes_context"
+	SynchronousCfg          = "synchronous"
+	AttemptsCfg             = "attempts"
+	AttributeContextCfg     = "attribute_context"
+	AttributeIDsCfg         = "attribute_ids"
+	ConcurrentRequestsCfg   = "concurrent_requests"
+	MetricsResetScheduleCfg = "metrics_reset_schedule"
 
 	//LoaderSCfg
 	DryRunCfg       = "dry_run"
