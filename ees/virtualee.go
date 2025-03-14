@@ -26,7 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewVirtualEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *VirtualEE {
+func NewVirtualEE(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics) *VirtualEE {
 	return &VirtualEE{
 		cfg: cfg,
 		dc:  dc,
@@ -36,7 +36,7 @@ func NewVirtualEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *Virtu
 // VirtualEE implements EventExporter interface for .csv files
 type VirtualEE struct {
 	cfg *config.EventExporterCfg
-	dc  *utils.SafeMapStorage
+	dc  *utils.ExporterMetrics
 }
 
 func (vEe *VirtualEE) Cfg() *config.EventExporterCfg { return vEe.cfg }
@@ -49,8 +49,8 @@ func (vEe *VirtualEE) ExportEvent(payload any, _ string) error {
 	return nil
 }
 
-func (vEe *VirtualEE) Close() error                      { return nil }
-func (vEe *VirtualEE) GetMetrics() *utils.SafeMapStorage { return vEe.dc }
+func (vEe *VirtualEE) Close() error                       { return nil }
+func (vEe *VirtualEE) GetMetrics() *utils.ExporterMetrics { return vEe.dc }
 
 func (vEe *VirtualEE) PrepareMap(cgrEv *utils.CGREvent) (any, error) {
 	return cgrEv.Event, nil

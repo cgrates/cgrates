@@ -34,7 +34,7 @@ import (
 
 func NewFileCSVee(cfg *config.EventExporterCfg,
 	cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	dc *utils.SafeMapStorage) (fCsv *FileCSVee, err error) {
+	dc *utils.ExporterMetrics) (fCsv *FileCSVee, err error) {
 	fCsv = &FileCSVee{
 		cfg: cfg,
 		dc:  dc,
@@ -49,7 +49,7 @@ func NewFileCSVee(cfg *config.EventExporterCfg,
 // FileCSVee implements EventExporter interface for .csv files
 type FileCSVee struct {
 	cfg       *config.EventExporterCfg
-	dc        *utils.SafeMapStorage
+	dc        *utils.ExporterMetrics
 	file      io.WriteCloser
 	csvWriter *csv.Writer
 	sync.Mutex
@@ -129,4 +129,4 @@ func (fCsv *FileCSVee) Close() (err error) {
 	return
 }
 
-func (fCsv *FileCSVee) GetMetrics() *utils.SafeMapStorage { return fCsv.dc }
+func (fCsv *FileCSVee) GetMetrics() *utils.ExporterMetrics { return fCsv.dc }

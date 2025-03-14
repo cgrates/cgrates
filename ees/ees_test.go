@@ -292,7 +292,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 }
 
 func newMockEventExporter() *mockEventExporter {
-	return &mockEventExporter{dc: &utils.SafeMapStorage{
+	return &mockEventExporter{dc: &utils.ExporterMetrics{
 		MapStorage: utils.MapStorage{
 			utils.NumberOfEvents:  int64(0),
 			utils.PositiveExports: utils.StringSet{},
@@ -301,11 +301,11 @@ func newMockEventExporter() *mockEventExporter {
 }
 
 type mockEventExporter struct {
-	dc *utils.SafeMapStorage
+	dc *utils.ExporterMetrics
 	bytePreparing
 }
 
-func (m mockEventExporter) GetMetrics() *utils.SafeMapStorage {
+func (m mockEventExporter) GetMetrics() *utils.ExporterMetrics {
 	return m.dc
 }
 
@@ -438,7 +438,7 @@ func TestOnCacheEvicted(t *testing.T) {
 }
 
 func TestUpdateEEMetrics(t *testing.T) {
-	dc, _ := newEEMetrics(utils.EmptyString)
+	dc := utils.NewExporterMetrics("", time.UTC)
 	tnow := time.Now()
 	ev := engine.MapEvent{
 		utils.AnswerTime: tnow,
@@ -447,7 +447,7 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.ToR:        utils.MetaVoice,
 		utils.Usage:      time.Second,
 	}
-	exp, _ := newEEMetrics(utils.EmptyString)
+	exp := utils.NewExporterMetrics("", time.UTC)
 	exp.MapStorage[utils.FirstEventATime] = tnow
 	exp.MapStorage[utils.LastEventATime] = tnow
 	exp.MapStorage[utils.FirstExpOrderID] = int64(1)

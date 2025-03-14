@@ -29,7 +29,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewRpcEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage,
+func NewRpcEE(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics,
 	connMgr *engine.ConnManager) (e *RPCee, err error) {
 	e = &RPCee{
 		cfg:     cfg,
@@ -42,7 +42,7 @@ func NewRpcEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage,
 
 type RPCee struct {
 	cfg     *config.EventExporterCfg
-	dc      *utils.SafeMapStorage
+	dc      *utils.ExporterMetrics
 	connMgr *engine.ConnManager
 
 	//opts
@@ -81,7 +81,7 @@ func (e *RPCee) Close() (err error) {
 	return
 }
 
-func (e *RPCee) GetMetrics() (mp *utils.SafeMapStorage) {
+func (e *RPCee) GetMetrics() (mp *utils.ExporterMetrics) {
 	return e.dc
 }
 

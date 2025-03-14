@@ -35,7 +35,7 @@ import (
 )
 
 func NewSQLEe(cfg *config.EventExporterCfg,
-	dc *utils.SafeMapStorage) (sqlEe *SQLEe, err error) {
+	dc *utils.ExporterMetrics) (sqlEe *SQLEe, err error) {
 	sqlEe = &SQLEe{
 		cfg:  cfg,
 		dc:   dc,
@@ -48,7 +48,7 @@ func NewSQLEe(cfg *config.EventExporterCfg,
 // SQLEe implements EventExporter interface for SQL
 type SQLEe struct {
 	cfg   *config.EventExporterCfg
-	dc    *utils.SafeMapStorage
+	dc    *utils.ExporterMetrics
 	db    *gorm.DB
 	sqldb *sql.DB
 	reqs  *concReq
@@ -156,7 +156,7 @@ func (sqlEe *SQLEe) Close() (err error) {
 	return
 }
 
-func (sqlEe *SQLEe) GetMetrics() *utils.SafeMapStorage { return sqlEe.dc }
+func (sqlEe *SQLEe) GetMetrics() *utils.ExporterMetrics { return sqlEe.dc }
 
 // Create the sqlPosterRequest used to instert the map into the table
 func (sqlEe *SQLEe) PrepareMap(cgrEv *utils.CGREvent) (any, error) {

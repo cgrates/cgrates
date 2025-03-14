@@ -34,7 +34,7 @@ import (
 )
 
 // NewNatsEE creates a kafka poster
-func NewNatsEE(cfg *config.EventExporterCfg, nodeID string, connTimeout time.Duration, dc *utils.SafeMapStorage) (natsPstr *NatsEE, err error) {
+func NewNatsEE(cfg *config.EventExporterCfg, nodeID string, connTimeout time.Duration, dc *utils.ExporterMetrics) (natsPstr *NatsEE, err error) {
 	natsPstr = &NatsEE{
 		cfg:     cfg,
 		dc:      dc,
@@ -55,7 +55,7 @@ type NatsEE struct {
 	posterJS jetstream.JetStream
 
 	cfg          *config.EventExporterCfg
-	dc           *utils.SafeMapStorage
+	dc           *utils.ExporterMetrics
 	reqs         *concReq
 	sync.RWMutex // protect writer
 	bytePreparing
@@ -140,7 +140,7 @@ func (pstr *NatsEE) Close() error {
 	return err
 }
 
-func (pstr *NatsEE) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
+func (pstr *NatsEE) GetMetrics() *utils.ExporterMetrics { return pstr.dc }
 
 func GetNatsOpts(opts *config.NATSOpts, nodeID string, connTimeout time.Duration) ([]nats.Option, error) {
 	natsOpts := make([]nats.Option, 0, 7)

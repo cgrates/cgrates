@@ -30,11 +30,11 @@ import (
 )
 
 type EventExporter interface {
-	Cfg() *config.EventExporterCfg     // return the config
-	Connect() error                    // called before exporting an event to make sure it is connected
-	ExportEvent(any, string) error     // called on each event to be exported
-	Close() error                      // called when the exporter needs to terminate
-	GetMetrics() *utils.SafeMapStorage // called to get metrics
+	Cfg() *config.EventExporterCfg      // return the config
+	Connect() error                     // called before exporting an event to make sure it is connected
+	ExportEvent(any, string) error      // called on each event to be exported
+	Close() error                       // called when the exporter needs to terminate
+	GetMetrics() *utils.ExporterMetrics // called to get metrics
 	PrepareMap(*utils.CGREvent) (any, error)
 	PrepareOrderMap(*utils.OrderedNavigableMap) (any, error)
 }
@@ -42,12 +42,13 @@ type EventExporter interface {
 // NewEventExporter produces exporters
 func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 	connMngr *engine.ConnManager) (ee EventExporter, err error) {
-	var dc *utils.SafeMapStorage
-	if dc, err = newEEMetrics(utils.FirstNonEmpty(
-		cfg.Timezone,
-		cgrCfg.GeneralCfg().DefaultTimezone)); err != nil {
-		return
+	timezone := utils.FirstNonEmpty(cfg.Timezone, cgrCfg.GeneralCfg().DefaultTimezone)
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return nil, err
 	}
+	dc := utils.NewExporterMetrics(cfg.MetricsResetSchedule, loc)
+
 	switch cfg.Type {
 	case utils.MetaFileCSV:
 		return NewFileCSVee(cfg, cgrCfg, filterS, dc)
@@ -123,20 +124,7 @@ func composeHeaderTrailer(prfx string, fields []*config.FCTemplate, dc utils.Dat
 	return
 }
 
-func newEEMetrics(location string) (*utils.SafeMapStorage, error) {
-	loc, err := time.LoadLocation(location)
-	if err != nil {
-		return nil, err
-	}
-	return &utils.SafeMapStorage{MapStorage: utils.MapStorage{
-		utils.NumberOfEvents:  int64(0),
-		utils.PositiveExports: utils.StringSet{},
-		utils.NegativeExports: utils.StringSet{},
-		utils.TimeNow:         time.Now().In(loc),
-	}}, nil
-}
-
-func updateEEMetrics(dc *utils.SafeMapStorage, cgrID string, ev engine.MapEvent, hasError bool, timezone string) {
+func updateEEMetrics(dc *utils.ExporterMetrics, cgrID string, ev engine.MapEvent, hasError bool, timezone string) {
 	dc.Lock()
 	defer dc.Unlock()
 	if hasError {

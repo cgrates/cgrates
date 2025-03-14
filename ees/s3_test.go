@@ -26,7 +26,7 @@ import (
 )
 
 func TestS3GetMetrics(t *testing.T) {
-	safeMapStorage := &utils.SafeMapStorage{}
+	safeMapStorage := &utils.ExporterMetrics{}
 	pstr := &S3EE{
 		dc: safeMapStorage,
 	}

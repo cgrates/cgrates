@@ -38,14 +38,14 @@ import (
 type ElasticEE struct {
 	mu   sync.RWMutex
 	cfg  *config.EventExporterCfg
-	dc   *utils.SafeMapStorage
+	dc   *utils.ExporterMetrics
 	reqs *concReq
 
 	client    *elasticsearch.TypedClient
 	clientCfg elasticsearch.Config
 }
 
-func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) (*ElasticEE, error) {
+func NewElasticEE(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics) (*ElasticEE, error) {
 	el := &ElasticEE{
 		cfg:  cfg,
 		dc:   dc,
@@ -222,4 +222,4 @@ func (e *ElasticEE) Close() error {
 	return nil
 }
 
-func (e *ElasticEE) GetMetrics() *utils.SafeMapStorage { return e.dc }
+func (e *ElasticEE) GetMetrics() *utils.ExporterMetrics { return e.dc }

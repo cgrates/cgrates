@@ -26,7 +26,7 @@ import (
 )
 
 func TestGetMetricsT(t *testing.T) {
-	metrics := &utils.SafeMapStorage{}
+	metrics := &utils.ExporterMetrics{}
 	pstr := &SQSee{dc: metrics}
 	result := pstr.GetMetrics()
 	if result != metrics {
