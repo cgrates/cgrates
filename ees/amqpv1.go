@@ -28,10 +28,10 @@ import (
 )
 
 // NewAMQPv1EE creates a poster for amqpv1
-func NewAMQPv1EE(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics) *AMQPv1EE {
+func NewAMQPv1EE(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) *AMQPv1EE {
 	pstr := &AMQPv1EE{
 		cfg:     cfg,
-		dc:      dc,
+		em:      em,
 		queueID: "/" + utils.DefaultQueueID,
 		reqs:    newConcReq(cfg.ConcurrentRequests),
 	}
@@ -56,7 +56,7 @@ type AMQPv1EE struct {
 	session  *amqpv1.Session
 
 	cfg          *config.EventExporterCfg
-	dc           *utils.ExporterMetrics
+	em           *utils.ExporterMetrics
 	reqs         *concReq
 	sync.RWMutex // protect connection
 	bytePreparing
@@ -121,4 +121,4 @@ func (pstr *AMQPv1EE) Close() (err error) {
 	return
 }
 
-func (pstr *AMQPv1EE) GetMetrics() *utils.ExporterMetrics { return pstr.dc }
+func (pstr *AMQPv1EE) GetMetrics() *utils.ExporterMetrics { return pstr.em }

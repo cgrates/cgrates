@@ -33,13 +33,13 @@ import (
 )
 
 func TestHttpPostGetMetrics(t *testing.T) {
-	dc := utils.NewExporterMetrics("", time.Local)
+	em := utils.NewExporterMetrics("", time.Local)
 	httpPost := &HTTPPostEE{
-		dc: dc,
+		em: em,
 	}
 
-	if rcv := httpPost.GetMetrics(); !reflect.DeepEqual(rcv, httpPost.dc) {
-		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(httpPost.dc))
+	if rcv := httpPost.GetMetrics(); !reflect.DeepEqual(rcv, httpPost.em) {
+		t.Errorf("Expected %+v \n but got %+v", utils.ToJSON(rcv), utils.ToJSON(httpPost.em))
 	}
 }
 

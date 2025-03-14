@@ -316,7 +316,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 		expNM := utils.NewOrderedNavigableMap()
 		dsMap := map[string]utils.DataStorage{
 			utils.MetaReq:  utils.MapStorage(ev.Event),
-			utils.MetaDC:   exp.GetMetrics(),
+			utils.MetaEM:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),
 			utils.MetaCfg:  cfg.GetDataProvider(),
 			utils.MetaVars: utils.MapStorage{utils.MetaTenant: ev.Tenant, utils.MetaExporterID: ev.APIOpts[utils.MetaExporterID]},

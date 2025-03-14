@@ -61,7 +61,7 @@ func TestExporterMetricsIT(t *testing.T) {
 	"synchronous": true,
 	"metrics_reset_schedule": "@every 5s",
 	"fields": [
-	  { "tag": "Number", "path": "*exp.Number", "type": "*variable", "value": "~*dc.NumberOfEvents" },
+	  { "tag": "Number", "path": "*exp.Number", "type": "*variable", "value": "~*em.NumberOfEvents" },
 	  { "tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID" },
 	  { "tag": "ToR", "path": "*exp.ToR", "type": "*constant", "value": "*sms" },
 	  { "tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account" },
@@ -70,10 +70,10 @@ func TestExporterMetricsIT(t *testing.T) {
 	  { "tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage" },
 	  { "tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}" },
 
-	  { "tag": "NumberOfEvents", "path": "*trl.NumberOfEvents", "type": "*variable", "value": "~*dc.NumberOfEvents" },
-	  { "tag": "TotalDuration", "path": "*trl.TotalDuration", "type": "*variable", "value": "~*dc.TotalDuration" },
-	  { "tag": "TotalSMSUsage", "path": "*trl.TotalSMSUsage", "type": "*variable", "value": "~*dc.TotalSMSUsage" },
-	  { "tag": "TotalCost", "path": "*trl.TotalCost", "type": "*variable", "value": "~*dc.TotalCost{*round:4}" }
+	  { "tag": "NumberOfEvents", "path": "*trl.NumberOfEvents", "type": "*variable", "value": "~*em.NumberOfEvents" },
+	  { "tag": "TotalDuration", "path": "*trl.TotalDuration", "type": "*variable", "value": "~*em.TotalDuration" },
+	  { "tag": "TotalSMSUsage", "path": "*trl.TotalSMSUsage", "type": "*variable", "value": "~*em.TotalSMSUsage" },
+	  { "tag": "TotalCost", "path": "*trl.TotalCost", "type": "*variable", "value": "~*em.TotalCost{*round:4}" }
 	]
   }
 ]

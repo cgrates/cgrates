@@ -292,7 +292,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 }
 
 func newMockEventExporter() *mockEventExporter {
-	return &mockEventExporter{dc: &utils.ExporterMetrics{
+	return &mockEventExporter{em: &utils.ExporterMetrics{
 		MapStorage: utils.MapStorage{
 			utils.NumberOfEvents:  int64(0),
 			utils.PositiveExports: utils.StringSet{},
@@ -301,12 +301,12 @@ func newMockEventExporter() *mockEventExporter {
 }
 
 type mockEventExporter struct {
-	dc *utils.ExporterMetrics
+	em *utils.ExporterMetrics
 	bytePreparing
 }
 
 func (m mockEventExporter) GetMetrics() *utils.ExporterMetrics {
-	return m.dc
+	return m.em
 }
 
 func (mockEventExporter) Cfg() *config.EventExporterCfg { return new(config.EventExporterCfg) }
@@ -438,7 +438,7 @@ func TestOnCacheEvicted(t *testing.T) {
 }
 
 func TestUpdateEEMetrics(t *testing.T) {
-	dc := utils.NewExporterMetrics("", time.UTC)
+	em := utils.NewExporterMetrics("", time.UTC)
 	tnow := time.Now()
 	ev := engine.MapEvent{
 		utils.AnswerTime: tnow,
@@ -454,10 +454,10 @@ func TestUpdateEEMetrics(t *testing.T) {
 	exp.MapStorage[utils.LastExpOrderID] = int64(1)
 	exp.MapStorage[utils.TotalCost] = float64(5.5)
 	exp.MapStorage[utils.TotalDuration] = time.Second
-	exp.MapStorage[utils.TimeNow] = dc.MapStorage[utils.TimeNow]
+	exp.MapStorage[utils.TimeNow] = em.MapStorage[utils.TimeNow]
 	exp.MapStorage[utils.PositiveExports] = utils.StringSet{"": {}}
-	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
-		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
+	if updateEEMetrics(em, "", ev, false, utils.EmptyString); !reflect.DeepEqual(em, exp) {
+		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(em))
 	}
 
 	tnow = tnow.Add(24 * time.Hour)
@@ -472,8 +472,8 @@ func TestUpdateEEMetrics(t *testing.T) {
 	exp.MapStorage[utils.LastExpOrderID] = int64(2)
 	exp.MapStorage[utils.TotalCost] = float64(11)
 	exp.MapStorage[utils.TotalSMSUsage] = time.Second
-	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
-		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
+	if updateEEMetrics(em, "", ev, false, utils.EmptyString); !reflect.DeepEqual(em, exp) {
+		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(em))
 	}
 
 	tnow = tnow.Add(24 * time.Hour)
@@ -488,8 +488,8 @@ func TestUpdateEEMetrics(t *testing.T) {
 	exp.MapStorage[utils.LastExpOrderID] = int64(3)
 	exp.MapStorage[utils.TotalCost] = float64(16.5)
 	exp.MapStorage[utils.TotalMMSUsage] = time.Second
-	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
-		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
+	if updateEEMetrics(em, "", ev, false, utils.EmptyString); !reflect.DeepEqual(em, exp) {
+		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(em))
 	}
 
 	tnow = tnow.Add(24 * time.Hour)
@@ -504,8 +504,8 @@ func TestUpdateEEMetrics(t *testing.T) {
 	exp.MapStorage[utils.LastExpOrderID] = int64(4)
 	exp.MapStorage[utils.TotalCost] = float64(22)
 	exp.MapStorage[utils.TotalGenericUsage] = time.Second
-	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
-		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
+	if updateEEMetrics(em, "", ev, false, utils.EmptyString); !reflect.DeepEqual(em, exp) {
+		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(em))
 	}
 
 	tnow = tnow.Add(24 * time.Hour)
@@ -520,7 +520,7 @@ func TestUpdateEEMetrics(t *testing.T) {
 	exp.MapStorage[utils.LastExpOrderID] = int64(5)
 	exp.MapStorage[utils.TotalCost] = float64(27.5)
 	exp.MapStorage[utils.TotalDataUsage] = time.Second
-	if updateEEMetrics(dc, "", ev, false, utils.EmptyString); !reflect.DeepEqual(dc, exp) {
-		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(dc))
+	if updateEEMetrics(em, "", ev, false, utils.EmptyString); !reflect.DeepEqual(em, exp) {
+		t.Errorf("Expected: %s,received: %s", utils.ToJSON(exp), utils.ToJSON(em))
 	}
 }

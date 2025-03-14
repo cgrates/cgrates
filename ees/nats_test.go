@@ -43,11 +43,11 @@ func TestNewNatsEE(t *testing.T) {
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
-	dc := utils.NewExporterMetrics("", time.Local)
+	em := utils.NewExporterMetrics("", time.Local)
 
 	exp := new(NatsEE)
 	exp.cfg = cfg
-	exp.dc = dc
+	exp.em = em
 	exp.subject = utils.DefaultQueueID
 	exp.reqs = newConcReq(cfg.ConcurrentRequests)
 	// err = exp.parseOpt(cfg.Opts, nodeID, connTimeout)
@@ -55,7 +55,7 @@ func TestNewNatsEE(t *testing.T) {
 	// 	t.Error(err)
 	// }
 
-	rcv, err := NewNatsEE(cfg, nodeID, connTimeout, dc)
+	rcv, err := NewNatsEE(cfg, nodeID, connTimeout, em)
 	if err != nil {
 		t.Error(err)
 	}
@@ -87,8 +87,8 @@ func TestParseOpt(t *testing.T) {
 	opts := &config.EventExporterOpts{}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
-	dc := utils.NewExporterMetrics("", time.Local)
-	pstr, err := NewNatsEE(cfg, nodeID, connTimeout, dc)
+	em := utils.NewExporterMetrics("", time.Local)
+	pstr, err := NewNatsEE(cfg, nodeID, connTimeout, em)
 	if err != nil {
 		t.Error(err)
 	}
@@ -121,8 +121,8 @@ func TestParseOptJetStream(t *testing.T) {
 	}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
-	dc := utils.NewExporterMetrics("", time.Local)
-	pstr, err := NewNatsEE(cfg, nodeID, connTimeout, dc)
+	em := utils.NewExporterMetrics("", time.Local)
+	pstr, err := NewNatsEE(cfg, nodeID, connTimeout, em)
 	if err != nil {
 		t.Error(err)
 	}
@@ -158,8 +158,8 @@ func TestParseOptSubject(t *testing.T) {
 		}}
 	nodeID := "node_id1"
 	connTimeout := 2 * time.Second
-	dc := utils.NewExporterMetrics("", time.Local)
-	pstr, err := NewNatsEE(cfg, nodeID, connTimeout, dc)
+	em := utils.NewExporterMetrics("", time.Local)
+	pstr, err := NewNatsEE(cfg, nodeID, connTimeout, em)
 	if err != nil {
 		t.Error(err)
 	}
@@ -242,7 +242,7 @@ func TestNatsEECfg(t *testing.T) {
 func TestNatsEEGetMetrics(t *testing.T) {
 	expectedMetrics := &utils.ExporterMetrics{}
 	pstr := &NatsEE{
-		dc: expectedMetrics,
+		em: expectedMetrics,
 	}
 	actualMetrics := pstr.GetMetrics()
 	if actualMetrics != expectedMetrics {
