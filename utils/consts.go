@@ -1907,9 +1907,10 @@ const (
 
 // EEs
 const (
-	EeSv1             = "EeSv1"
-	EeSv1Ping         = "EeSv1.Ping"
-	EeSv1ProcessEvent = "EeSv1.ProcessEvent"
+	EeSv1                     = "EeSv1"
+	EeSv1Ping                 = "EeSv1.Ping"
+	EeSv1ProcessEvent         = "EeSv1.ProcessEvent"
+	EeSv1ResetExporterMetrics = "EeSv1.ResetExporterMetrics"
 )
 
 // ERs
