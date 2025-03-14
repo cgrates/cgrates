@@ -528,6 +528,7 @@ const CGRATES_CFG_JSON = `
 			"attribute_context": "",				// context used to discover matching Attribute profiles
 			"synchronous": false,					// block processing until export has a result
 			"attempts": 1,						// export attempts
+			"metrics_reset_schedule": "", 				// cron schedule for resetting exporter metrics (empty disables automatic reset)
 			"opts": {
 
 				// CSV

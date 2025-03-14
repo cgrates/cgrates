@@ -380,21 +380,22 @@ func testConfigSSetConfigEEs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %s", reply)
 	}
-	eporter := map[string]any{
-		"attempts":            1.,
-		"attribute_context":   "",
-		"attribute_ids":       []any{},
-		"export_path":         "/var/spool/cgrates/ees",
-		"fields":              []any{},
-		"filters":             []any{},
-		"flags":               []any{},
-		"id":                  "*default",
-		"synchronous":         false,
-		"timezone":            "",
-		"type":                "*none",
-		"opts":                map[string]any{},
-		"concurrent_requests": 0.,
-		"failed_posts_dir":    "/var/spool/cgrates/failed_posts",
+	eeCfg := map[string]any{
+		"attempts":               1.,
+		"attribute_context":      "",
+		"attribute_ids":          []any{},
+		"export_path":            "/var/spool/cgrates/ees",
+		"fields":                 []any{},
+		"filters":                []any{},
+		"flags":                  []any{},
+		"id":                     "*default",
+		"synchronous":            false,
+		"timezone":               "",
+		"type":                   "*none",
+		"opts":                   map[string]any{},
+		"concurrent_requests":    0.,
+		"metrics_reset_schedule": "",
+		"failed_posts_dir":       "/var/spool/cgrates/failed_posts",
 	}
 	exp := map[string]any{
 		"enabled":          true,
@@ -410,7 +411,7 @@ func testConfigSSetConfigEEs(t *testing.T) {
 			"*sql":             map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
 			"*sqs_json_map":    map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
 		},
-		"exporters": []any{eporter},
+		"exporters": []any{eeCfg},
 	}
 	exp = map[string]any{
 		config.EEsJson: exp,

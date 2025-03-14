@@ -266,23 +266,24 @@ type EventExporterOpts struct {
 
 // EventExporterCfg the config for a Event Exporter
 type EventExporterCfg struct {
-	ID                 string
-	Type               string
-	ExportPath         string
-	Opts               *EventExporterOpts
-	Timezone           string
-	Filters            []string
-	Flags              utils.FlagsWithParams
-	AttributeSIDs      []string // selective AttributeS profiles
-	AttributeSCtx      string   // context to use when querying AttributeS
-	Synchronous        bool
-	Attempts           int
-	FailedPostsDir     string
-	ConcurrentRequests int
-	Fields             []*FCTemplate
-	headerFields       []*FCTemplate
-	contentFields      []*FCTemplate
-	trailerFields      []*FCTemplate
+	ID                   string
+	Type                 string
+	ExportPath           string
+	Opts                 *EventExporterOpts
+	Timezone             string
+	Filters              []string
+	Flags                utils.FlagsWithParams
+	AttributeSIDs        []string // selective AttributeS profiles
+	AttributeSCtx        string   // context to use when querying AttributeS
+	Synchronous          bool
+	Attempts             int
+	FailedPostsDir       string
+	ConcurrentRequests   int
+	MetricsResetSchedule string
+	Fields               []*FCTemplate
+	headerFields         []*FCTemplate
+	contentFields        []*FCTemplate
+	trailerFields        []*FCTemplate
 }
 
 // NewEventExporterCfg is a constructor for the EventExporterCfg, that is needed to initialize posters that are used by the
@@ -628,6 +629,9 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 	}
 	if jsnEec.Concurrent_requests != nil {
 		eeC.ConcurrentRequests = *jsnEec.Concurrent_requests
+	}
+	if jsnEec.MetricsResetSchedule != nil {
+		eeC.MetricsResetSchedule = *jsnEec.MetricsResetSchedule
 	}
 	if jsnEec.Fields != nil {
 		eeC.Fields, err = FCTemplatesFromFCTemplatesJSONCfg(*jsnEec.Fields, separator)
@@ -1020,21 +1024,22 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 // Clone returns a deep copy of EventExporterCfg
 func (eeC EventExporterCfg) Clone() (cln *EventExporterCfg) {
 	cln = &EventExporterCfg{
-		ID:                 eeC.ID,
-		Type:               eeC.Type,
-		ExportPath:         eeC.ExportPath,
-		Timezone:           eeC.Timezone,
-		Flags:              eeC.Flags.Clone(),
-		AttributeSCtx:      eeC.AttributeSCtx,
-		Synchronous:        eeC.Synchronous,
-		Attempts:           eeC.Attempts,
-		ConcurrentRequests: eeC.ConcurrentRequests,
-		Fields:             make([]*FCTemplate, len(eeC.Fields)),
-		headerFields:       make([]*FCTemplate, len(eeC.headerFields)),
-		contentFields:      make([]*FCTemplate, len(eeC.contentFields)),
-		trailerFields:      make([]*FCTemplate, len(eeC.trailerFields)),
-		Opts:               eeC.Opts.Clone(),
-		FailedPostsDir:     eeC.FailedPostsDir,
+		ID:                   eeC.ID,
+		Type:                 eeC.Type,
+		ExportPath:           eeC.ExportPath,
+		Timezone:             eeC.Timezone,
+		Flags:                eeC.Flags.Clone(),
+		AttributeSCtx:        eeC.AttributeSCtx,
+		Synchronous:          eeC.Synchronous,
+		Attempts:             eeC.Attempts,
+		ConcurrentRequests:   eeC.ConcurrentRequests,
+		MetricsResetSchedule: eeC.MetricsResetSchedule,
+		Fields:               make([]*FCTemplate, len(eeC.Fields)),
+		headerFields:         make([]*FCTemplate, len(eeC.headerFields)),
+		contentFields:        make([]*FCTemplate, len(eeC.contentFields)),
+		trailerFields:        make([]*FCTemplate, len(eeC.trailerFields)),
+		Opts:                 eeC.Opts.Clone(),
+		FailedPostsDir:       eeC.FailedPostsDir,
 	}
 
 	if eeC.Filters != nil {
@@ -1290,19 +1295,20 @@ func (eeC *EventExporterCfg) AsMapInterface(separator string) (initialMP map[str
 		flgs = []string{}
 	}
 	initialMP = map[string]any{
-		utils.IDCfg:                 eeC.ID,
-		utils.TypeCfg:               eeC.Type,
-		utils.ExportPathCfg:         eeC.ExportPath,
-		utils.TimezoneCfg:           eeC.Timezone,
-		utils.FiltersCfg:            eeC.Filters,
-		utils.FlagsCfg:              flgs,
-		utils.AttributeContextCfg:   eeC.AttributeSCtx,
-		utils.AttributeIDsCfg:       eeC.AttributeSIDs,
-		utils.SynchronousCfg:        eeC.Synchronous,
-		utils.AttemptsCfg:           eeC.Attempts,
-		utils.ConcurrentRequestsCfg: eeC.ConcurrentRequests,
-		utils.FailedPostsDirCfg:     eeC.FailedPostsDir,
-		utils.OptsCfg:               opts,
+		utils.IDCfg:                   eeC.ID,
+		utils.TypeCfg:                 eeC.Type,
+		utils.ExportPathCfg:           eeC.ExportPath,
+		utils.TimezoneCfg:             eeC.Timezone,
+		utils.FiltersCfg:              eeC.Filters,
+		utils.FlagsCfg:                flgs,
+		utils.AttributeContextCfg:     eeC.AttributeSCtx,
+		utils.AttributeIDsCfg:         eeC.AttributeSIDs,
+		utils.SynchronousCfg:          eeC.Synchronous,
+		utils.AttemptsCfg:             eeC.Attempts,
+		utils.ConcurrentRequestsCfg:   eeC.ConcurrentRequests,
+		utils.MetricsResetScheduleCfg: eeC.MetricsResetSchedule,
+		utils.FailedPostsDirCfg:       eeC.FailedPostsDir,
+		utils.OptsCfg:                 opts,
 	}
 
 	if eeC.Fields != nil {
