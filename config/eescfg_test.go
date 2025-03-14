@@ -1026,83 +1026,106 @@ func TestEEsCfgloadFromJsonCfgCase2(t *testing.T) {
 
 func TestEEsCfgAsMapInterface(t *testing.T) {
 	cfgJSONStr := `{
-      "ees": {									
-	        "enabled": true,						
-            "attributes_conns":["*internal","*conn2"],					
-            "cache": {
-		          "*file_csv": {"limit": -2, "precache": false, "replicate": false, "ttl": "1s", "static_ttl": false}
-            },
-            "exporters": [
+    "ees": {
+        "enabled": true,
+        "attributes_conns": [
+            "*internal",
+            "*conn2"
+        ],
+        "cache": {
+            "*file_csv": {
+                "limit": -2,
+                "precache": false,
+                "replicate": false,
+                "ttl": "1s",
+                "static_ttl": false
+            }
+        },
+        "exporters": [
             {
-                  "id": "CSVExporter",									
-			      "type": "*file_csv",									
-                  "export_path": "/tmp/testCSV",			
-			      "opts": {
-					"elsIndex":"test",
-					"elsRefresh": "true",
-					"kafkaTopic": "test",	
-					"elsOpType":"test2",
-					"elsPipeline":"test3",
-					"elsRouting":"test4",
-					"elsTimeout":"1m",
-					"elsWaitForActiveShards":"test6",
-					"sqlMaxIdleConns":4,
-					"sqlMaxOpenConns":6,
-					"sqlConnMaxLifetime":"1m",
-					"sqlTableName":"table",
-					"sqlDBName":"db",
-					"sqlUpdateIndexedFields": ["id"],
-					"pgSSLMode":"pg",
-					"awsToken":"token",
-					"s3FolderPath":"s3",
-					"natsJetStream":true,
-					"natsSubject":"nat",
-					"natsJWTFile":"jwt",
-					"natsSeedFile":"seed",
-					"natsCertificateAuthority":"NATS",
-					"natsClientCertificate":"NATSClient",
-					"natsClientKey":"key",
-					"natsJetStreamMaxWait":"1m",				
-					"amqpQueueID":"id",
-					"amqpRoutingKey":"key",
-					"amqpExchangeType":"type",
-					"amqpExchange":"exchange",
-					"awsRegion":"eu",
-					"awsKey":"key",
-					"awsSecret":"secretkey",
-					"sqsQueueID":"sqsid",
-					"s3BucketID":"s3",
-					"rpcCodec":"rpc",
-					"serviceMethod":"service",
-					"keyPath":"path",
-					"certPath":"certpath",
-					"caPath":"capath",
-					"tls":true,
-					"connIDs":["id1","id2"],
-					"rpcConnTimeout":"1m",
-					"rpcReplyTimeout":"1m",
-					"csvFieldSeparator":",",
-					"mysqlDSNParams":{
-						"key":"param",
-					},	
-					"rpcAPIOpts":{
-						"key":"val",
-					}				
-				  },											
-			      "timezone": "UTC",										
-			      "filters": [],										
-			      "flags": ["randomFlag"],										
-			      "attribute_ids": [],								
-			      "attribute_context": "",							
-			      "synchronous": false,								
-			      "attempts": 1,										
-			      "field_separator": ",",								
-			      "fields":[
-                      {"tag": "CGRID", "path": "*exp.CGRID", "type": "*variable", "value": "~*req.CGRID"}
-                  ]
-            }]
-	  }
-    }`
+                "id": "CSVExporter",
+                "type": "*file_csv",
+                "export_path": "/tmp/testCSV",
+                "metrics_reset_schedule": "0 12 * * *",
+                "opts": {
+                    "elsIndex": "test",
+                    "elsRefresh": "true",
+                    "kafkaTopic": "test",
+                    "elsOpType": "test2",
+                    "elsPipeline": "test3",
+                    "elsRouting": "test4",
+                    "elsTimeout": "1m",
+                    "elsWaitForActiveShards": "test6",
+                    "sqlMaxIdleConns": 4,
+                    "sqlMaxOpenConns": 6,
+                    "sqlConnMaxLifetime": "1m",
+                    "sqlTableName": "table",
+                    "sqlDBName": "db",
+                    "sqlUpdateIndexedFields": [
+                        "id"
+                    ],
+                    "pgSSLMode": "pg",
+                    "awsToken": "token",
+                    "s3FolderPath": "s3",
+                    "natsJetStream": true,
+                    "natsSubject": "nat",
+                    "natsJWTFile": "jwt",
+                    "natsSeedFile": "seed",
+                    "natsCertificateAuthority": "NATS",
+                    "natsClientCertificate": "NATSClient",
+                    "natsClientKey": "key",
+                    "natsJetStreamMaxWait": "1m",
+                    "amqpQueueID": "id",
+                    "amqpRoutingKey": "key",
+                    "amqpExchangeType": "type",
+                    "amqpExchange": "exchange",
+                    "awsRegion": "eu",
+                    "awsKey": "key",
+                    "awsSecret": "secretkey",
+                    "sqsQueueID": "sqsid",
+                    "s3BucketID": "s3",
+                    "rpcCodec": "rpc",
+                    "serviceMethod": "service",
+                    "keyPath": "path",
+                    "certPath": "certpath",
+                    "caPath": "capath",
+                    "tls": true,
+                    "connIDs": [
+                        "id1",
+                        "id2"
+                    ],
+                    "rpcConnTimeout": "1m",
+                    "rpcReplyTimeout": "1m",
+                    "csvFieldSeparator": ",",
+                    "mysqlDSNParams": {
+                        "key": "param"
+                    },
+                    "rpcAPIOpts": {
+                        "key": "val"
+                    }
+                },
+                "timezone": "UTC",
+                "filters": [],
+                "flags": [
+                    "randomFlag"
+                ],
+                "attribute_ids": [],
+                "attribute_context": "",
+                "synchronous": false,
+                "attempts": 1,
+                "field_separator": ",",
+                "fields": [
+                    {
+                        "tag": "CGRID",
+                        "path": "*exp.CGRID",
+                        "type": "*variable",
+                        "value": "~*req.CGRID"
+                    }
+                ]
+            }
+        ]
+    }
+}`
 	eMap := map[string]any{
 		utils.EnabledCfg:         true,
 		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn2"},
@@ -1229,14 +1252,15 @@ func TestEEsCfgAsMapInterface(t *testing.T) {
 						"key": "val",
 					},
 				},
-				utils.TimezoneCfg:           "UTC",
-				utils.FiltersCfg:            []string{},
-				utils.FlagsCfg:              []string{"randomFlag"},
-				utils.AttributeIDsCfg:       []string{},
-				utils.AttributeContextCfg:   utils.EmptyString,
-				utils.SynchronousCfg:        false,
-				utils.AttemptsCfg:           1,
-				utils.ConcurrentRequestsCfg: 0,
+				utils.TimezoneCfg:             "UTC",
+				utils.FiltersCfg:              []string{},
+				utils.FlagsCfg:                []string{"randomFlag"},
+				utils.AttributeIDsCfg:         []string{},
+				utils.AttributeContextCfg:     utils.EmptyString,
+				utils.SynchronousCfg:          false,
+				utils.AttemptsCfg:             1,
+				utils.ConcurrentRequestsCfg:   0,
+				utils.MetricsResetScheduleCfg: "0 12 * * *",
 				utils.FieldsCfg: []map[string]any{
 					{
 						utils.TagCfg:   utils.CGRID,
@@ -1502,19 +1526,20 @@ func TestEventExporterCfgAsMapInterface(t *testing.T) {
 		utils.AMQPPassword:     str,
 	}
 	exp := map[string]any{
-		utils.IDCfg:                 eeC.ID,
-		utils.TypeCfg:               eeC.Type,
-		utils.ExportPathCfg:         eeC.ExportPath,
-		utils.TimezoneCfg:           eeC.Timezone,
-		utils.FiltersCfg:            eeC.Filters,
-		utils.FlagsCfg:              []string{},
-		utils.AttributeContextCfg:   eeC.AttributeSCtx,
-		utils.AttributeIDsCfg:       eeC.AttributeSIDs,
-		utils.SynchronousCfg:        eeC.Synchronous,
-		utils.AttemptsCfg:           eeC.Attempts,
-		utils.ConcurrentRequestsCfg: eeC.ConcurrentRequests,
-		utils.FailedPostsDirCfg:     eeC.FailedPostsDir,
-		utils.OptsCfg:               opts,
+		utils.IDCfg:                   eeC.ID,
+		utils.TypeCfg:                 eeC.Type,
+		utils.ExportPathCfg:           eeC.ExportPath,
+		utils.TimezoneCfg:             eeC.Timezone,
+		utils.FiltersCfg:              eeC.Filters,
+		utils.FlagsCfg:                []string{},
+		utils.AttributeContextCfg:     eeC.AttributeSCtx,
+		utils.AttributeIDsCfg:         eeC.AttributeSIDs,
+		utils.SynchronousCfg:          eeC.Synchronous,
+		utils.AttemptsCfg:             eeC.Attempts,
+		utils.ConcurrentRequestsCfg:   eeC.ConcurrentRequests,
+		utils.MetricsResetScheduleCfg: eeC.MetricsResetSchedule,
+		utils.FailedPostsDirCfg:       eeC.FailedPostsDir,
+		utils.OptsCfg:                 opts,
 	}
 	rcv := eeC.AsMapInterface("")
 
