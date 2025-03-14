@@ -23,8 +23,8 @@ import (
 	"testing"
 )
 
-func TestSafeMapStorageString(t *testing.T) {
-	ms := &SafeMapStorage{
+func TestExporterMetricsString(t *testing.T) {
+	ms := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 		},
@@ -35,8 +35,8 @@ func TestSafeMapStorageString(t *testing.T) {
 	}
 }
 
-func TestSafeMapStorageFieldAsInterface(t *testing.T) {
-	ms := &SafeMapStorage{
+func TestExporterMetricsFieldAsInterface(t *testing.T) {
+	ms := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 		},
@@ -51,8 +51,8 @@ func TestSafeMapStorageFieldAsInterface(t *testing.T) {
 	}
 }
 
-func TestSafeMapStorageFieldAsString(t *testing.T) {
-	ms := &SafeMapStorage{
+func TestExporterMetricsFieldAsString(t *testing.T) {
+	ms := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 		},
@@ -67,14 +67,14 @@ func TestSafeMapStorageFieldAsString(t *testing.T) {
 	}
 }
 
-func TestSafeMapStorageSet(t *testing.T) {
-	ms := &SafeMapStorage{
+func TestExporterMetricsSet(t *testing.T) {
+	ms := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 		},
 	}
 
-	expected := &SafeMapStorage{
+	expected := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 			"field2": 3,
@@ -88,8 +88,8 @@ func TestSafeMapStorageSet(t *testing.T) {
 	}
 }
 
-func TestSafeMapStorageGetKeys(t *testing.T) {
-	ms := &SafeMapStorage{
+func TestExporterMetricsGetKeys(t *testing.T) {
+	ms := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 			"field2": 3,
@@ -104,15 +104,15 @@ func TestSafeMapStorageGetKeys(t *testing.T) {
 	}
 }
 
-func TestSafeMapStorageRemove(t *testing.T) {
-	ms := &SafeMapStorage{
+func TestExporterMetricsRemove(t *testing.T) {
+	ms := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 			"field2": 3,
 		},
 	}
 
-	expected := &SafeMapStorage{
+	expected := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 		},
@@ -125,29 +125,9 @@ func TestSafeMapStorageRemove(t *testing.T) {
 	}
 }
 
-func TestSafeMapStorageClone(t *testing.T) {
-	ms := &SafeMapStorage{
-		MapStorage: MapStorage{
-			"field1": 2,
-			"field2": 3,
-		},
-	}
+func TestExporterMetricsClonedMapStorage(t *testing.T) {
 
-	expected := &SafeMapStorage{
-		MapStorage: MapStorage{
-			"field1": 2,
-			"field2": 3,
-		},
-	}
-
-	if reply := ms.Clone(); !reflect.DeepEqual(reply, expected) {
-		t.Errorf("Expected %v \n but received \n %v", expected, reply)
-	}
-}
-
-func TestSafeMapClonedMapStorage(t *testing.T) {
-
-	ms := &SafeMapStorage{
+	ms := &ExporterMetrics{
 		MapStorage: MapStorage{
 			"field1": 2,
 			"field2": 3,

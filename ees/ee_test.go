@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -39,13 +40,7 @@ func TestNewEventExporter(t *testing.T) {
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	eeExpect, err := NewFileCSVee(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, dc)
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
@@ -73,10 +68,7 @@ func TestNewEventExporterCase2(t *testing.T) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
 
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc := utils.NewExporterMetrics("", time.Local)
 	eeExpect, err := NewFileFWVee(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, dc)
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
@@ -101,10 +93,7 @@ func TestNewEventExporterCase3(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc := utils.NewExporterMetrics("", time.Local)
 	eeExpect, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, dc)
 	if err != nil {
 		t.Error(err)
@@ -126,10 +115,7 @@ func TestNewEventExporterCase4(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc := utils.NewExporterMetrics("", time.Local)
 	eeExpect, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, dc)
 	if err != nil {
 		t.Error(err)
@@ -151,13 +137,7 @@ func TestNewEventExporterCase6(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
-	if err != nil {
-		t.Error(err)
-	}
+	dc := utils.NewExporterMetrics("", time.Local)
 	eeExpect := NewVirtualEE(cgrCfg.EEsCfg().Exporters[0], dc)
 	newEE := ee.(*VirtualEE)
 	newEE.dc.MapStorage[utils.TimeNow] = nil
@@ -190,10 +170,7 @@ func TestNewEventExporterCase7(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dc, err := newEEMetrics(utils.FirstNonEmpty(
-		"Local",
-		utils.EmptyString,
-	))
+	dc := utils.NewExporterMetrics("", time.Local)
 	if err != nil {
 		t.Error(err)
 	}

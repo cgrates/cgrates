@@ -31,7 +31,7 @@ import (
 )
 
 // NewSQSee creates a poster for sqs
-func NewSQSee(cfg *config.EventExporterCfg, dc *utils.SafeMapStorage) *SQSee {
+func NewSQSee(cfg *config.EventExporterCfg, dc *utils.ExporterMetrics) *SQSee {
 	pstr := &SQSee{
 		cfg:  cfg,
 		dc:   dc,
@@ -53,7 +53,7 @@ type SQSee struct {
 	svc       *sqs.SQS
 
 	cfg          *config.EventExporterCfg
-	dc           *utils.SafeMapStorage
+	dc           *utils.ExporterMetrics
 	reqs         *concReq
 	sync.RWMutex // protect connection
 	bytePreparing
@@ -147,4 +147,4 @@ func (pstr *SQSee) ExportEvent(message any, _ string) (err error) {
 
 func (pstr *SQSee) Close() (_ error) { return }
 
-func (pstr *SQSee) GetMetrics() *utils.SafeMapStorage { return pstr.dc }
+func (pstr *SQSee) GetMetrics() *utils.ExporterMetrics { return pstr.dc }

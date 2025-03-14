@@ -74,7 +74,7 @@ func TestLogEE_Close(t *testing.T) {
 }
 
 func TestLogEE_GetMetrics(t *testing.T) {
-	mockMetrics := &utils.SafeMapStorage{}
+	mockMetrics := &utils.ExporterMetrics{}
 
 	vEe := &LogEE{
 		dc: mockMetrics,
@@ -104,7 +104,7 @@ func TestLogEE_PrepareMap(t *testing.T) {
 func TestNewLogEE(t *testing.T) {
 
 	cfg := &config.EventExporterCfg{}
-	dc := &utils.SafeMapStorage{}
+	dc := &utils.ExporterMetrics{}
 
 	logEE := NewLogEE(cfg, dc)
 

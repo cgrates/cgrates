@@ -35,6 +35,7 @@ import (
 // onCacheEvicted is called by ltcache when evicting an item
 func onCacheEvicted(_ string, value any) {
 	ee := value.(EventExporter)
+	ee.GetMetrics().StopCron()
 	ee.Close()
 }
 
@@ -306,9 +307,7 @@ func exportEventWithExporter(exp EventExporter, ev *utils.CGREvent, oneTime bool
 	}()
 	var eEv any
 
-	exp.GetMetrics().Lock()
-	exp.GetMetrics().MapStorage[utils.NumberOfEvents] = exp.GetMetrics().MapStorage[utils.NumberOfEvents].(int64) + 1
-	exp.GetMetrics().Unlock()
+	exp.GetMetrics().IncrementEvents()
 	if len(exp.Cfg().ContentFields()) == 0 {
 		if eEv, err = exp.PrepareMap(ev); err != nil {
 			return
