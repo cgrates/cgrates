@@ -123,19 +123,6 @@ func composeHeaderTrailer(prfx string, fields []*config.FCTemplate, dc utils.Dat
 	return
 }
 
-func composeExp(fields []*config.FCTemplate, cgrEv *utils.CGREvent, dc utils.DataStorage, cfg *config.CGRConfig, fltS *engine.FilterS) (r *utils.OrderedNavigableMap, err error) {
-	r = utils.NewOrderedNavigableMap()
-	err = engine.NewExportRequest(map[string]utils.DataStorage{
-		utils.MetaReq:  utils.MapStorage(cgrEv.Event),
-		utils.MetaDC:   dc,
-		utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
-		utils.MetaCfg:  cfg.GetDataProvider(),
-	}, utils.FirstNonEmpty(cgrEv.Tenant, cfg.GeneralCfg().DefaultTenant),
-		fltS,
-		map[string]*utils.OrderedNavigableMap{utils.MetaExp: r}).SetFields(fields)
-	return
-}
-
 func newEEMetrics(location string) (*utils.SafeMapStorage, error) {
 	loc, err := time.LoadLocation(location)
 	if err != nil {
