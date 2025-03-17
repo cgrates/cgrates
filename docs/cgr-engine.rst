@@ -82,6 +82,7 @@ The components from the diagram can be found documented in the links bellow:
    apiers
    loaders
    caches
+   guardian
    datadb
    stordb
    rpcconns
