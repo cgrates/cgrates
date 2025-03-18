@@ -2148,7 +2148,7 @@ func TestDfEventExporterCfg(t *testing.T) {
 		Cache: &map[string]*CacheParamJsonCfg{
 			utils.MetaFileCSV: {
 				Limit:      utils.IntPointer(-1),
-				Ttl:        utils.StringPointer(""),
+				Ttl:        utils.StringPointer("5s"),
 				Static_ttl: utils.BoolPointer(false),
 			},
 			utils.MetaSQL: {

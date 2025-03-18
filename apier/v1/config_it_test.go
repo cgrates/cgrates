@@ -401,7 +401,7 @@ func testConfigSSetConfigEEs(t *testing.T) {
 		"enabled":          true,
 		"attributes_conns": []any{},
 		"cache": map[string]any{
-			"*file_csv":        map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
+			"*file_csv":        map[string]any{"limit": -1., "ttl": "5s", "precache": false, "replicate": false, "static_ttl": false, "remote": false},
 			"*amqp_json_map":   map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
 			"*amqpv1_json_map": map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
 			"*els":             map[string]any{"limit": -1., "precache": false, "replicate": false, "static_ttl": false, "remote": false},
