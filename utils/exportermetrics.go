@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -36,7 +37,11 @@ type ExporterMetrics struct {
 
 // NewExporterMetrics creates metrics with optional automatic reset.
 // schedule is a cron expression for reset timing (empty to disable).
-func NewExporterMetrics(schedule string, loc *time.Location) *ExporterMetrics {
+func NewExporterMetrics(schedule, timezone string) (*ExporterMetrics, error) {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return nil, err
+	}
 	m := &ExporterMetrics{
 		loc: loc,
 	}
@@ -44,12 +49,15 @@ func NewExporterMetrics(schedule string, loc *time.Location) *ExporterMetrics {
 
 	if schedule != "" {
 		m.cron = cron.New()
-		m.cron.AddFunc(schedule, func() {
+		if _, err := m.cron.AddFunc(schedule, func() {
 			m.Reset()
-		})
+		}); err != nil {
+			// Only fails if schedule is an invalid cron expression.
+			return nil, fmt.Errorf("invalid cron expr %q: %v", schedule, err)
+		}
 		m.cron.Start()
 	}
-	return m
+	return m, nil
 }
 
 // Reset immediately clears all metrics and resets them to initial values.

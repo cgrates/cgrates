@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -40,7 +39,10 @@ func TestNewEventExporter(t *testing.T) {
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	eeExpect, err := NewFileCSVee(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, em)
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
@@ -67,8 +69,10 @@ func TestNewEventExporterCase2(t *testing.T) {
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
 	}
-
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	eeExpect, err := NewFileFWVee(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, em)
 	if strings.Contains(errExpect, err.Error()) {
 		t.Errorf("Expected %+v but got %+v", errExpect, err)
@@ -93,7 +97,10 @@ func TestNewEventExporterCase3(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	eeExpect, err := NewHTTPPostEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, em)
 	if err != nil {
 		t.Error(err)
@@ -115,7 +122,10 @@ func TestNewEventExporterCase4(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	eeExpect, err := NewHTTPjsonMapEE(cgrCfg.EEsCfg().Exporters[0], cgrCfg, filterS, em)
 	if err != nil {
 		t.Error(err)
@@ -137,7 +147,10 @@ func TestNewEventExporterCase6(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	eeExpect := NewVirtualEE(cgrCfg.EEsCfg().Exporters[0], em)
 	newEE := ee.(*VirtualEE)
 	newEE.em.MapStorage[utils.TimeNow] = nil
@@ -170,9 +183,9 @@ func TestNewEventExporterCase7(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	eeExpect, err := NewElasticEE(cgrCfg.EEsCfg().Exporters[0], em)
 	if err != nil {
@@ -200,12 +213,12 @@ func TestNewEventExporterCase8(t *testing.T) {
 	}
 }
 
-// Test for invalid "dc"
-func TestNewEventExporterDcCase(t *testing.T) {
+// Test for invalid "em"
+func TestNewEventExporterEmCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.GeneralCfg().DefaultTimezone = "invalid_timezone"
 	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, nil, nil)
-	errExpect := "unknown time zone invalid_timezone"
+	errExpect := "failed to initialize exporter metrics: unknown time zone invalid_timezone"
 	if err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %+v \n but got %+v", errExpect, err)
 	}

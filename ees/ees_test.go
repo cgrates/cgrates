@@ -438,7 +438,10 @@ func TestOnCacheEvicted(t *testing.T) {
 }
 
 func TestUpdateEEMetrics(t *testing.T) {
-	em := utils.NewExporterMetrics("", time.UTC)
+	em, err := utils.NewExporterMetrics("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	tnow := time.Now()
 	ev := engine.MapEvent{
 		utils.AnswerTime: tnow,
@@ -447,7 +450,10 @@ func TestUpdateEEMetrics(t *testing.T) {
 		utils.ToR:        utils.MetaVoice,
 		utils.Usage:      time.Second,
 	}
-	exp := utils.NewExporterMetrics("", time.UTC)
+	exp, err := utils.NewExporterMetrics("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	exp.MapStorage[utils.FirstEventATime] = tnow
 	exp.MapStorage[utils.LastEventATime] = tnow
 	exp.MapStorage[utils.FirstExpOrderID] = int64(1)
