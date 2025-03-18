@@ -307,7 +307,11 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			rdrCfg.Flags.Has(utils.MetaAttributes),
+			rdrCfg.Flags.Has(utils.MetaThresholds),
+			rdrCfg.Flags.Has(utils.MetaStats),
 			rdrCfg.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			rdrCfg.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			rdrCfg.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			rdrCfg.Flags.Has(utils.MetaAccounts),
 			cgrEv, rdrCfg.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)

@@ -378,7 +378,11 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.GetBool(utils.MetaAttributes),
+			reqProcessor.Flags.GetBool(utils.MetaThresholds),
+			reqProcessor.Flags.GetBool(utils.MetaStats),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes, utils.MetaIDs),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds, utils.MetaIDs),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats, utils.MetaIDs),
 			reqProcessor.Flags.Has(utils.MetaAccounts),
 			cgrEv, reqProcessor.Flags.Has(utils.MetaFD))
 		rply := new(sessions.V1UpdateSessionReply)

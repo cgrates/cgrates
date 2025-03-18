@@ -3168,7 +3168,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 			utils.OriginID: "TEST_ID",
 		},
 	}
-	args := NewV1UpdateSessionArgs(true, []string{}, false,
+	args := NewV1UpdateSessionArgs(true, false, false, []string{}, nil, nil, false,
 		nil, true)
 	rply := new(V1UpdateSessionReply)
 
@@ -3185,7 +3185,7 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 		},
 	}
 	cgrEvent.ID = "test_id"
-	args = NewV1UpdateSessionArgs(true, []string{}, false,
+	args = NewV1UpdateSessionArgs(true, false, false, []string{}, nil, nil, false,
 		cgrEvent, true)
 	engine.Cache = caches
 	engine.Cache.SetWithoutReplicate(utils.CacheRPCResponses, utils.ConcatenatedKey(utils.SessionSv1UpdateSession, args.CGREvent.ID),
@@ -3196,20 +3196,20 @@ func TestBiRPCv1UpdateSession1(t *testing.T) {
 	engine.Cache = tmp
 
 	cgrEvent.ID = utils.EmptyString
-	args = NewV1UpdateSessionArgs(true, []string{"attrr1"}, false,
+	args = NewV1UpdateSessionArgs(true, false, false, []string{"attrr1"}, nil, nil, false,
 		cgrEvent, true)
 	expected = "ATTRIBUTES_ERROR:NOT_IMPLEMENTED"
 	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
 		t.Errorf("Exepected %+v, received %+v", expected, err)
 	}
 
-	args = NewV1UpdateSessionArgs(true, []string{}, false,
+	args = NewV1UpdateSessionArgs(true, false, false, []string{}, nil, nil, false,
 		cgrEvent, true)
 	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
 	}
 
-	args = NewV1UpdateSessionArgs(false, []string{}, false,
+	args = NewV1UpdateSessionArgs(false, false, false, []string{}, nil, nil, false,
 		cgrEvent, true)
 	expected = "MANDATORY_IE_MISSING: [Subsystems]"
 	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
@@ -3259,7 +3259,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 			utils.OptsDebitInterval: "invalid_dur_format",
 		},
 	}
-	args := NewV1UpdateSessionArgs(false, []string{}, true,
+	args := NewV1UpdateSessionArgs(false, false, false, []string{}, nil, nil, true,
 		cgrEvent, true)
 	rply := new(V1UpdateSessionReply)
 	expected := "RALS_ERROR:time: invalid duration \"invalid_dur_format\""
@@ -3268,7 +3268,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 	}
 	cgrEvent.APIOpts[utils.OptsDebitInterval] = "10s"
 
-	args = NewV1UpdateSessionArgs(false, []string{}, true,
+	args = NewV1UpdateSessionArgs(false, false, false, []string{}, nil, nil, true,
 		cgrEvent, true)
 	expected = "ChargerS is disabled"
 	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err == nil || err.Error() != expected {
@@ -3282,7 +3282,7 @@ func TestBiRPCv1UpdateSession2(t *testing.T) {
 	}
 
 	cgrEvent.Event[utils.Usage] = time.Minute
-	args = NewV1UpdateSessionArgs(false, []string{}, true,
+	args = NewV1UpdateSessionArgs(false, false, false, []string{}, nil, nil, true,
 		cgrEvent, true)
 	if err := sessions.BiRPCv1UpdateSession(context.Background(), args, rply); err != nil {
 		t.Error(err)
