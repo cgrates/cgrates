@@ -24,7 +24,6 @@ import (
 	"io"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -32,7 +31,10 @@ import (
 )
 
 func TestFileFwvGetMetrics(t *testing.T) {
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	fFwv := &FileFWVee{em: em}
 
 	if rcv := fFwv.GetMetrics(); !reflect.DeepEqual(rcv, fFwv.em) {
@@ -171,7 +173,10 @@ func TestFileFwvExportEvent(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	fFwv := &FileFWVee{
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,
@@ -204,7 +209,10 @@ func TestFileFwvExportEventWriteError(t *testing.T) {
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	fFwv := &FileFWVee{
 		cfg:     cfg.EEsCfg().Exporters[0],
 		cgrCfg:  cfg,

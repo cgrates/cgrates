@@ -24,7 +24,6 @@ import (
 	"io"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -32,7 +31,10 @@ import (
 )
 
 func TestFileCsvGetMetrics(t *testing.T) {
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	fCsv := &FileCSVee{em: em}
 
 	if rcv := fCsv.GetMetrics(); !reflect.DeepEqual(rcv, fCsv.em) {
@@ -179,7 +181,10 @@ func TestFileCsvExportEvent(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	fCsv := &FileCSVee{
 		cfg:       cfg.EEsCfg().Exporters[0],
 		cgrCfg:    cfg,

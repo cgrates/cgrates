@@ -31,7 +31,10 @@ import (
 
 func TestNewRpcEE(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 
 	rcv, err := NewRpcEE(eeSCfg, em, connMgr)
@@ -101,7 +104,10 @@ func TestRPCCfg(t *testing.T) {
 
 func TestRPCConnect(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -114,7 +120,10 @@ func TestRPCConnect(t *testing.T) {
 
 func TestRPCClose(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -149,7 +158,10 @@ func TestRPCGetMetrics(t *testing.T) {
 
 func TestRPCPrepareMap(t *testing.T) {
 	eeSCfg := config.NewDefaultCGRConfig().EEsCfg().ExporterCfg(utils.MetaDefault)
-	em := utils.NewExporterMetrics("", time.Local)
+	em, err := utils.NewExporterMetrics("", "Local")
+	if err != nil {
+		t.Fatal(err)
+	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig(), make(map[string]chan birpc.ClientConnector))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
