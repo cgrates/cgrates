@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cron"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -912,6 +913,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		for _, exp := range cfg.eesCfg.Exporters {
 			if !possibleExporterTypes.Has(exp.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for exporter with ID: %s", utils.EEs, exp.Type, exp.ID)
+			}
+
+			if exp.MetricsResetSchedule != "" {
+				parser := cron.NewParser(
+					cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor,
+				)
+				if _, err := parser.Parse(exp.MetricsResetSchedule); err != nil {
+					return fmt.Errorf("<%s> invalid cron expression %q in metrics_reset_schedule for exporter %q: %v",
+						utils.EEs, exp.MetricsResetSchedule, exp.ID, err)
+				}
 			}
 
 			switch exp.Type {
