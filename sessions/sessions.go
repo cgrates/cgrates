@@ -2574,26 +2574,38 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(ctx *context.Context,
 }
 
 // NewV1UpdateSessionArgs is a constructor for update session arguments
-func NewV1UpdateSessionArgs(attrs bool, attributeIDs []string,
+func NewV1UpdateSessionArgs(attrs, thresholds, stats bool, attributeIDs, thresholdIDs, statIDs []string,
 	acnts bool, cgrEv *utils.CGREvent, forceDuration bool) (args *V1UpdateSessionArgs) {
 	args = &V1UpdateSessionArgs{
-		GetAttributes: attrs,
-		UpdateSession: acnts,
-		CGREvent:      cgrEv,
-		ForceDuration: forceDuration,
+		GetAttributes:     attrs,
+		UpdateSession:     acnts,
+		CGREvent:          cgrEv,
+		ForceDuration:     forceDuration,
+		ProcessThresholds: thresholds,
+		ProcessStats:      stats,
 	}
 	if len(attributeIDs) != 0 {
 		args.AttributeIDs = attributeIDs
+	}
+	if len(thresholdIDs) != 0 {
+		args.ThresholdIDs = thresholdIDs
+	}
+	if len(statIDs) != 0 {
+		args.StatIDs = statIDs
 	}
 	return
 }
 
 // V1UpdateSessionArgs contains options for session update
 type V1UpdateSessionArgs struct {
-	GetAttributes bool
-	UpdateSession bool
-	ForceDuration bool
-	AttributeIDs  []string
+	GetAttributes     bool
+	UpdateSession     bool
+	ForceDuration     bool
+	ProcessThresholds bool
+	ProcessStats      bool
+	AttributeIDs      []string
+	ThresholdIDs      []string
+	StatIDs           []string
 	*utils.CGREvent
 }
 
@@ -2601,10 +2613,11 @@ func (V1UpdateSessionArgs) RPCClone() {}
 
 // V1UpdateSessionReply contains options for session update reply
 type V1UpdateSessionReply struct {
-	Attributes *engine.AttrSProcessEventReply `json:",omitempty"`
-	MaxUsage   *time.Duration                 `json:",omitempty"`
-
-	needsMaxUsage bool // for gob encoding only
+	Attributes    *engine.AttrSProcessEventReply `json:",omitempty"`
+	MaxUsage      *time.Duration                 `json:",omitempty"`
+	ThresholdIDs  *[]string                      `json:",omitempty"`
+	StatQueueIDs  *[]string                      `json:",omitempty"`
+	needsMaxUsage bool                           // for gob encoding only
 }
 
 // SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
@@ -2724,6 +2737,24 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			}
 		}
 		rply.MaxUsage = &maxUsage
+	}
+	if args.ProcessThresholds {
+		tIDs, err := sS.processThreshold(args.CGREvent, args.ThresholdIDs, true)
+		if err == nil {
+			rply.ThresholdIDs = &tIDs
+		} else if err.Error() != utils.ErrNotFound.Error() {
+			return utils.NewErrThresholdS(err)
+		}
+	}
+	if args.ProcessStats {
+		sIDs, err := sS.processStats(args.CGREvent, args.StatIDs, false)
+		if err == nil {
+			rply.StatQueueIDs = &sIDs
+		} else if err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
+					utils.SessionS, err.Error(), args.CGREvent))
+		}
 	}
 	return
 }

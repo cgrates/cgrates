@@ -1111,7 +1111,7 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 		CGREvent:      cgrEv,
 		ForceDuration: true,
 	}
-	rply := NewV1UpdateSessionArgs(true, nil, true, cgrEv, true)
+	rply := NewV1UpdateSessionArgs(true, false, false, nil, nil, nil, true, cgrEv, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1121,13 +1121,13 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 		CGREvent:      cgrEv,
 		ForceDuration: true,
 	}
-	rply = NewV1UpdateSessionArgs(false, nil, true, cgrEv, true)
+	rply = NewV1UpdateSessionArgs(false, false, false, nil, nil, nil, true, cgrEv, true)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	//test with len(AttributeIDs) != 0
 	attributeIDs := []string{"ATTR1", "ATTR2"}
-	rply = NewV1UpdateSessionArgs(false, attributeIDs, true, cgrEv, true)
+	rply = NewV1UpdateSessionArgs(false, false, false, attributeIDs, nil, nil, true, cgrEv, true)
 	expected.AttributeIDs = []string{"ATTR1", "ATTR2"}
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
