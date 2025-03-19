@@ -1,20 +1,6 @@
 ---
 - hosts: apt
   vars:
-    gpg_home: "/root"
-    gpg_realname: "CGRateS"
-    gpg_useremail: "cgrates@itsyscom.com"
-    gpg_pubkeyfileexport: "apt.cgrates.org.gpg.key"
-
-    gpg_keylength: 2048
-    gpg_subkeylength: 2048
-    gpg_expire: 360
-
-    rootUser: root
-
-    dependencies:
-      - reprepro
-
     cgrates_branch: master
     distributions:
       - codename: bookworm
@@ -22,21 +8,15 @@
       - codename: bullseye
         version: 11
 
+  roles:
+    - ../roles/reprepro
+    - ../roles/gpg
+
   tasks:
-    - name: Install dependencies
-      become: true
-      ansible.builtin.apt:
-        name: "{{ dependencies }}"
-        state: present
 
-    - name: Configure reprepro
-      ansible.builtin.import_tasks: reprepro.yaml
-
-    - name: Generate GPG Key
-      ansible.builtin.import_tasks: gpg.yaml
-
+    # TODO: Execute only when GPG keys have been updated/created
     - name: Resign packages with new GPG key
       become: true
       ansible.builtin.shell: |
-        reprepro -Vb /var/packages/debian export {{ cgrates_branch }}-{{ item.codename }}
+        reprepro -Vb {{ reprepro_basedir }} export {{ cgrates_branch }}-{{ item.codename }}
       with_items: "{{ distributions }}"
