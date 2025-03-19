@@ -1,0 +1,47 @@
+---
+- name: Restart gpg-agent
+  become: true
+  ansible.builtin.command: "gpgconf --kill all"
+
+- name: Ensure .gnupg config directory exists with right permissions
+  become: true
+  ansible.builtin.file:
+    dest: "{{ gpg_home }}/.gnupg"
+    state: directory
+    mode: "0700"
+    owner: "{{ rootUser }}"
+
+# Note: matching on realname or email doesn't allow to create multiple keys. alternative?
+- name: Check existing secret key
+  ansible.builtin.shell: "gpg --list-secret-keys | grep '{{ gpg_realname }}'"
+  changed_when: false
+  ignore_errors: true
+  become: true
+  become_user: "{{ rootUser }}"
+  register: gpgkeys
+
+- name: Check expired keys
+  become: true
+  ansible.builtin.shell: "gpg --list-keys {{ gpg_realname }} | grep 'expired'"
+  ignore_errors: true
+  failed_when: false
+  register: gpgExpKeys
+  when: gpgkeys.stdout_lines|length > 0
+
+- name: Update expired
+  become: true
+  ansible.builtin.shell: 'printf "expire\n{{ gpg_expire }}\nsave\n" | gpg --batch --command-fd 0 --status-fd=2 --edit-key {{ gpg_realname }}'
+  when: gpgkeys.stdout_lines|length > 0 and gpgExpKeys.stdout_lines|length > 0
+
+- ansible.builtin.include_tasks: gpg-gen-key.yaml
+  when: gpgkeys.stdout_lines|length < 1
+
+- name: Get user armored public key
+  become: true
+  ansible.builtin.command: "sudo gpg --armor --output {{ gpg_pubkeyfileexport }} --export {{ gpg_useremail }}"
+  when: gpgkeys.stdout_lines|length < 1 or (gpgkeys.stdout_lines|length > 0 and gpgExpKeys.stdout_lines|length > 0)
+
+- name: After export move the key to /var/packages
+  become: true
+  ansible.builtin.command: "sudo mv {{ gpg_pubkeyfileexport }} /var/packages"
+  when: gpgkeys.stdout_lines|length < 1 or (gpgkeys.stdout_lines|length > 0 and gpgExpKeys.stdout_lines|length > 0)

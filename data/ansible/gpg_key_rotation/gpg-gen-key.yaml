@@ -1,0 +1,51 @@
+---
+- name: Set defaut gpg options
+  become: true
+  ansible.builtin.template:
+    src: gpg.conf.j2
+    dest: "{{ gpg_home }}/.gnupg/gpg.conf"
+    mode: "0600"
+    owner: "{{ rootUser }}"
+
+- name: Copy default template for gpg key generation
+  become: true
+  ansible.builtin.template:
+    src: gen-key-script
+    dest: "{{ gpg_home }}/.gnupg/gen-key-script-{{ rootUser }}"
+    mode: "0600"
+    owner: "{{ rootUser }}"
+
+# Not sure what this task does, or if it's needed.
+- name: List available GPG secret keys
+  become: true
+  ansible.builtin.command: "gpg --list-secret-keys --keyid-format LONG"
+
+# rng-tools might not be needed on newer kernel versions
+- name: Install rng-tools-debian
+  become: true
+  ansible.builtin.apt:
+    name: rng-tools-debian
+    state: present
+  ignore_errors: true
+
+- name: Make sure /etc/default/rng-tools-debian exist
+  become: true
+  ansible.builtin.file:
+    path: /etc/default/rng-tools-debian
+    state: touch
+
+- name: Add HRNGDEVICE=/dev/urandom so we can execute rngd
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/default/rng-tools-debian
+    line: HRNGDEVICE=/dev/urandom
+    insertafter: last
+
+- name: Generate randomness
+  become: true
+  ansible.builtin.command: "sudo /etc/init.d/rng-tools-debian restart"
+  ignore_errors: true
+
+- name: Generate gpg key
+  become: true
+  ansible.builtin.command: "sudo gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ rootUser }}"
