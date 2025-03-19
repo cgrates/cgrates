@@ -1,0 +1,54 @@
+---
+- name: Validate distributions variable
+  ansible.builtin.fail:
+    msg: "The 'distributions' variable must be defined and contain at least one distribution with codename and version properties."
+  when: not distributions | default(false)
+
+- name: Ensure reprepro is installed
+  become: true
+  ansible.builtin.apt:
+    name: reprepro
+    state: present
+
+- name: Create debian repository base directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ reprepro_basedir }}"
+    state: directory
+
+- name: Create reprepro configuration directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ reprepro_basedir }}/conf"
+    state: directory
+
+- name: Create reprepro incoming packages directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ reprepro_basedir }}/incoming"
+    state: directory
+
+- name: Configure reprepro distribution settings
+  become: true
+  ansible.builtin.template:
+    src: distributions.conf.j2
+    dest: "{{ reprepro_basedir }}/conf/distributions"
+    mode: "0600"
+    owner: root
+
+- name: Configure reprepro general options
+  become: true
+  ansible.builtin.template:
+    src: options.conf.j2
+    dest: "{{ reprepro_basedir }}/conf/options"
+    mode: "0600"
+    owner: root
+
+- name: Initialize empty override file for testing distribution
+  become: true
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ reprepro_basedir }}/conf/override.testing"
+    force: false
+    group: root
+    owner: root
