@@ -1,0 +1,2 @@
+[all]
+apt ansible_host=h4.itsyscom.com ansible_port=60022 ansible_ssh_user=dan user=dan pkgAddr=192.168.122.132
