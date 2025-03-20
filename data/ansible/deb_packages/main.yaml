@@ -1,14 +1,6 @@
 ---
 - hosts: apt
   vars:
-    gpg_home: "/root"
-    gpg_realname: "CGRateS"
-    gpg_useremail: "cgrates@itsyscom.com"
-    gpg_pubkeyfileexport: "apt.cgrates.org.gpg.key"
-    gpg_keylength: 2048
-    gpg_subkeylength: 2048
-    gpg_expire: 360
-
     rootUser: root
 
     dependencies:
@@ -21,7 +13,6 @@
       - dpkg-dev
       - git
       - pbuilder
-      - reprepro
       - nginx
 
     distributions:
@@ -30,18 +21,16 @@
       - codename: bullseye
         version: 11
 
+  roles:
+    - ../roles/reprepro
+    - ../roles/gpg
+
   tasks:
     - name: Install dependencies
       become: true
       ansible.builtin.apt:
         name: "{{ dependencies }}"
         state: present
-
-    - name: Configure reprepro
-      ansible.builtin.import_tasks: reprepro.yaml
-
-    - name: Generate GPG Key
-      ansible.builtin.import_tasks: gpg.yaml
 
     - name: Check if NGINX needs to be configured
       become: true
@@ -200,16 +189,16 @@
 
       - name: Move package files to incoming directory
         become: true
-        ansible.builtin.command: mv {{ item.path }} /var/packages/debian/incoming/
+        ansible.builtin.command: mv {{ item.path }} {{ reprepro_basedir }}/incoming/
         args:
-          creates: "/var/packages/debian/incoming/{{ item.path | basename }}"
+          creates: "{{ reprepro_basedir }}/incoming/{{ item.path | basename }}"
           removes: "{{ item.path }}"
         with_items: "{{ package_files.files }}"
         when: package_files.matched > 0
 
       - name: Find Debian package changes files (.changes) for each distribution
         ansible.builtin.find:
-          paths: /var/packages/debian/incoming
+          paths: "{{ reprepro_basedir }}/incoming"
           patterns: "*~deb{{ item.version }}u1_amd64.changes"
           file_type: file
         register: changes_files
@@ -225,18 +214,18 @@
         become: true
         ansible.builtin.shell:
           cmd: reprepro -Vb . --ignore=wrongdistribution include {{ cgrates_branch }}-{{ item.item.codename }} {{ item.files[0].path }}
-          chdir: /var/packages/debian
+          chdir: "{{ reprepro_basedir }}"
         with_items: "{{ changes_files.results }}"
         when: cgrates_branch == 'master' or git_tag_result.stdout_lines | length > 0
 
       - name: Copy the file to PKG server
-        ansible.builtin.command: "scp /var/packages/debian/incoming/{{ item.path | basename }} {{ pkgAddr }}:/tmp/"
+        ansible.builtin.command: "scp {{ reprepro_basedir }}/incoming/{{ item.path | basename }} {{ pkgAddr }}:/tmp/"
         with_items: "{{ package_files.files }}"
 
       rescue:
         - name: Find all files in incoming directory
           ansible.builtin.find:
-            paths: /var/packages/debian/incoming
+            paths: "{{ reprepro_basedir }}/incoming"
             file_type: file
           register: all_incoming_files
 
@@ -246,7 +235,7 @@
 
         - name: Find build log files
           ansible.builtin.find:
-            paths: /var/packages/debian/incoming
+            paths: "{{ reprepro_basedir }}/incoming"
             patterns: "*.build"
             file_type: file
           register: build_log_files
@@ -291,7 +280,7 @@
         - name: Clean the incoming folder
           become: true
           ansible.builtin.file:
-            path: /var/packages/debian/incoming
+            path: "{{ reprepro_basedir }}/incoming"
             state: absent
 
         - name: Remove leftover package files
