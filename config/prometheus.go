@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -111,6 +113,27 @@ func (c PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
 		StatSConns:            slices.Clone(c.StatSConns),
 		StatQueueIDs:          slices.Clone(c.StatQueueIDs),
 	}
+}
+
+func (c PrometheusAgentCfg) validate(cfg *CGRConfig) error {
+	if !c.Enabled {
+		return nil
+	}
+	for _, connID := range c.StatSConns {
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatService, utils.PrometheusAgent)
+		}
+		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+		}
+	}
+	if len(c.CoreSConns) > 0 {
+		if c.CollectGoMetrics || c.CollectProcessMetrics {
+			return fmt.Errorf("<%s> collect_go_metrics and collect_process_metrics cannot be enabled when using CoreSConns",
+				utils.PrometheusAgent)
+		}
+	}
+	return nil
 }
 
 func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAgentCfg) *PrometheusAgentJsonCfg {
