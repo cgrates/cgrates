@@ -2111,6 +2111,7 @@ const (
 	RequestProcessorsCfg = "request_processors"
 
 	// PrometheusAgentCfg
+	CoreSConnsCfg            = "cores_conns"
 	CollectGoMetricsCfg      = "collect_go_metrics"
 	CollectProcessMetricsCfg = "collect_process_metrics"
 	StatQueueIDsCfg          = "stat_queue_ids"

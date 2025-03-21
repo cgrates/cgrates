@@ -44,7 +44,7 @@ type PrometheusAgent struct {
 }
 
 // Start should handle the sercive start
-func (s *PrometheusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
+func (s *PrometheusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
@@ -57,12 +57,11 @@ func (s *PrometheusAgent) Start(shutdown *utils.SyncedChan, registry *servmanage
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
-	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	pa := agents.NewPrometheusAgent(s.cfg, fs, cm, shutdown)
+	pa := agents.NewPrometheusAgent(s.cfg, cm)
 	cl.RegisterHttpHandler(s.cfg.PrometheusAgentCfg().Path, pa)
 	return
 }

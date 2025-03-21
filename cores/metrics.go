@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cores
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"runtime/debug"
+	"runtime/metrics"
 	"strconv"
 	"time"
 
@@ -40,6 +42,9 @@ type StatusMetrics struct {
 	GCDurationStats GCDurationStats `json:"gc_duration_stats"`
 	ProcStats       ProcStats       `json:"proc_stats"`
 	CapsStats       *CapsStats      `json:"caps_stats"`
+	GoMaxProcs      uint64          `json:"go_maxprocs"`
+	GoGCPercent     uint64          `json:"go_gc_percent"`
+	GoMemLimit      uint64          `json:"go_mem_limit"`
 }
 
 func (sm StatusMetrics) ToMap(debug bool, timezone string) (map[string]any, error) {
@@ -59,6 +64,9 @@ func (sm StatusMetrics) ToMap(debug bool, timezone string) (map[string]any, erro
 	if sm.CapsStats != nil {
 		m["caps_stats"] = sm.CapsStats.ToMap()
 	}
+	m["go_maxprocs"] = sm.GoMaxProcs
+	m["go_gc_percent"] = sm.GoGCPercent
+	m["go_mem_limit"] = sm.GoMemLimit
 	return m, nil
 }
 
@@ -104,7 +112,6 @@ type GoMemStats struct {
 	Sys          uint64  `json:"sys"`
 	Mallocs      uint64  `json:"mallocs"`
 	Frees        uint64  `json:"frees"`
-	Lookups      uint64  `json:"lookups"`
 	HeapAlloc    uint64  `json:"heap_alloc"`
 	HeapSys      uint64  `json:"heap_sys"`
 	HeapIdle     uint64  `json:"heap_idle"`
@@ -131,7 +138,6 @@ func (ms GoMemStats) ToMap() map[string]any {
 	m["sys"] = ms.Sys
 	m["mallocs"] = ms.Mallocs
 	m["frees"] = ms.Frees
-	m["lookups"] = ms.Lookups
 	m["heap_alloc"] = ms.HeapAlloc
 	m["heap_sys"] = ms.HeapSys
 	m["heap_idle"] = ms.HeapIdle
@@ -240,7 +246,6 @@ func computeAppMetrics() (StatusMetrics, error) {
 		GCSys:        m.GCSys,
 		OtherSys:     m.OtherSys,
 		NextGC:       m.NextGC,
-		Lookups:      m.Lookups,
 	}
 
 	threads, _ := runtime.ThreadCreateProfile(nil)
@@ -317,6 +322,21 @@ func computeAppMetrics() (StatusMetrics, error) {
 		return StatusMetrics{}, err
 	}
 
+	metricNames := []string{
+		"/sched/gomaxprocs:threads",
+		"/gc/gogc:percent",
+		"/memory/limit:bytes",
+		"/gc/gomemlimit:bytes",
+	}
+	samples := make([]metrics.Sample, len(metricNames))
+	for i, name := range metricNames {
+		samples[i].Name = name
+	}
+	metrics.Read(samples)
+	goMaxProcs := getUint64Metric(samples, "/sched/gomaxprocs:threads")
+	goGCPercent := getUint64Metric(samples, "/gc/gogc:percent")
+	goMemLimit := getUint64Metric(samples, "/gc/gomemlimit:bytes")
+
 	return StatusMetrics{
 		PID:             pid,
 		GoVersion:       runtime.Version(),
@@ -326,5 +346,27 @@ func computeAppMetrics() (StatusMetrics, error) {
 		MemStats:        memStats,
 		GCDurationStats: gcDur,
 		ProcStats:       procStats,
+		GoMaxProcs:      goMaxProcs,
+		GoGCPercent:     goGCPercent,
+		GoMemLimit:      goMemLimit,
 	}, nil
+}
+
+// getUint64Metric retrieves a uint64 metric by name
+func getUint64Metric(samples []metrics.Sample, name string) uint64 {
+	for _, sample := range samples {
+		if sample.Name == name {
+			switch sample.Value.Kind() {
+			case metrics.KindUint64:
+				return sample.Value.Uint64()
+			case metrics.KindFloat64:
+				return uint64(sample.Value.Float64())
+			case metrics.KindBad:
+				panic(fmt.Sprintf("metric %s has bad kind", name))
+			default:
+				panic(fmt.Sprintf("metric %s has unexpected unsupported kind: %v", name, sample.Value.Kind()))
+			}
+		}
+	}
+	return 0
 }

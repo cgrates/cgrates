@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -31,6 +33,7 @@ type PrometheusAgentJsonCfg struct {
 	Path                  *string   `json:"path"`
 	CollectGoMetrics      *bool     `json:"collect_go_metrics"`
 	CollectProcessMetrics *bool     `json:"collect_process_metrics"`
+	CoreSConns            *[]string `json:"cores_conns"`
 	StatSConns            *[]string `json:"stats_conns"`
 	StatQueueIDs          *[]string `json:"stat_queue_ids"`
 }
@@ -41,6 +44,7 @@ type PrometheusAgentCfg struct {
 	Path                  string
 	CollectGoMetrics      bool
 	CollectProcessMetrics bool
+	CoreSConns            []string
 	StatSConns            []string
 	StatQueueIDs          []string
 }
@@ -70,6 +74,9 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 	if jc.CollectProcessMetrics != nil {
 		c.CollectProcessMetrics = *jc.CollectProcessMetrics
 	}
+	if jc.CoreSConns != nil {
+		c.CoreSConns = updateBiRPCInternalConns(*jc.CoreSConns, utils.MetaStats)
+	}
 	if jc.StatSConns != nil {
 		c.StatSConns = updateBiRPCInternalConns(*jc.StatSConns, utils.MetaStats)
 	}
@@ -86,6 +93,7 @@ func (c PrometheusAgentCfg) AsMapInterface() any {
 		utils.PathCfg:                  c.Path,
 		utils.CollectGoMetricsCfg:      c.CollectGoMetrics,
 		utils.CollectProcessMetricsCfg: c.CollectProcessMetrics,
+		utils.CoreSConnsCfg:            getBiRPCInternalJSONConns(c.CoreSConns),
 		utils.StatSConnsCfg:            getBiRPCInternalJSONConns(c.StatSConns),
 		utils.StatQueueIDsCfg:          c.StatQueueIDs,
 	}
@@ -101,9 +109,31 @@ func (c PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
 		Path:                  c.Path,
 		CollectGoMetrics:      c.CollectGoMetrics,
 		CollectProcessMetrics: c.CollectProcessMetrics,
+		CoreSConns:            slices.Clone(c.CoreSConns),
 		StatSConns:            slices.Clone(c.StatSConns),
 		StatQueueIDs:          slices.Clone(c.StatQueueIDs),
 	}
+}
+
+func (c PrometheusAgentCfg) validate(cfg *CGRConfig) error {
+	if !c.Enabled {
+		return nil
+	}
+	for _, connID := range c.StatSConns {
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatService, utils.PrometheusAgent)
+		}
+		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+		}
+	}
+	if len(c.CoreSConns) > 0 {
+		if c.CollectGoMetrics || c.CollectProcessMetrics {
+			return fmt.Errorf("<%s> collect_go_metrics and collect_process_metrics cannot be enabled when using CoreSConns",
+				utils.PrometheusAgent)
+		}
+	}
+	return nil
 }
 
 func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAgentCfg) *PrometheusAgentJsonCfg {
@@ -123,7 +153,11 @@ func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAge
 	if v1.CollectProcessMetrics != v2.CollectProcessMetrics && true {
 		d.CollectProcessMetrics = utils.BoolPointer(v2.CollectProcessMetrics)
 	}
+	if !slices.Equal(v1.CoreSConns, v2.CoreSConns) {
+		d.CoreSConns = utils.SliceStringPointer(v2.CoreSConns)
+	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
+		d.StatSConns = utils.SliceStringPointer(v2.StatSConns)
 	}
 	if !slices.Equal(v1.StatQueueIDs, v2.StatQueueIDs) {
 		d.StatQueueIDs = utils.SliceStringPointer(v2.StatQueueIDs)

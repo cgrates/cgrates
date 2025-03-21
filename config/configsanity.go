@@ -1094,6 +1094,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> the CleanupInterval needs to be bigger than 0", utils.AnalyzerS)
 		}
 	}
+	if err := cfg.prometheusAgentCfg.validate(cfg); err != nil {
+		return err
+	}
 
 	return nil
 }
