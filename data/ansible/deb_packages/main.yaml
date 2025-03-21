@@ -337,13 +337,9 @@
       with_items: "{{ distributions }}"
       when: cgrates_branch == "master" or hostvars['apt']['git_tag_result'].stdout_lines | length > 0
 
-    - name: Move the new .orig.tar.gz to /var/packages/deb
-      become: true
-      ansible.builtin.shell: "mv /tmp/cgrates*.orig*.tar.* /var/packages/deb/{{ cgrates_branch }}/"
-
     - name: Move the new package to /var/packages/deb
       become: true
-      ansible.builtin.shell: "mv /tmp/cgrates*~deb{{ item.version }}u1* /var/packages/deb/{{ cgrates_branch }}/{{ item.codename }}/"
+      ansible.builtin.shell: "mv /tmp/cgrates_*~deb{{ item.version }}u1*.deb /var/packages/deb/{{ cgrates_branch }}/{{ item.codename }}/"
       with_items: "{{ distributions }}"
 
     - name: Find all package files
