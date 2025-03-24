@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/cgrates/birpc/context"
@@ -141,7 +143,7 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
 func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt string,
-	evNm utils.MapStorage, aPrflIDs []string, ignoreFilters bool) (aPfs engine.ActionProfiles, err error) {
+	evNm utils.MapStorage, aPrflIDs []string, ignoreFilters bool) (aPfs []*engine.ActionProfile, err error) {
 	if len(aPrflIDs) == 0 {
 		ignoreFilters = false
 		var aPfIDMp utils.StringSet
@@ -163,6 +165,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 		}
 		aPrflIDs = aPfIDMp.AsSlice()
 	}
+	weights := make(map[string]float64) // stores sorting weights by profile ID
 	for _, aPfID := range aPrflIDs {
 		var aPf *engine.ActionProfile
 		if aPf, err = aS.dm.GetActionProfile(ctx, tnt, aPfID,
@@ -181,15 +184,22 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 				continue
 			}
 		}
-		if err = aPf.GetWeightFromDynamics(ctx, aS.fltrS, tnt, evNm); err != nil {
-			return
+		weight, err := engine.WeightFromDynamics(ctx, aPf.Weights, aS.fltrS, tnt, evNm)
+		if err != nil {
+			return nil, err
 		}
+		weights[aPf.ID] = weight
 		aPfs = append(aPfs, aPf)
 	}
 	if len(aPfs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	aPfs.Sort()
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(aPfs, func(a, b *engine.ActionProfile) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+
 	for i, aPf := range aPfs {
 		var blocker bool
 		if blocker, err = engine.BlockerFromDynamics(ctx, aPf.Blockers, aS.fltrS, tnt, evNm); err != nil {
@@ -206,9 +216,9 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 // scheduledActions is responsible for scheduling the action profiles matching cgrEv
 func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
 	ignoreFilters, forceASAP bool) (schedActs []*scheduledActs, err error) {
-	var aPfs engine.ActionProfiles
 	evNm := cgrEv.AsDataProvider()
-	if aPfs, err = aS.matchingActionProfilesForEvent(ctx, tnt, evNm, aPrflIDs, ignoreFilters); err != nil {
+	aPfs, err := aS.matchingActionProfilesForEvent(ctx, tnt, evNm, aPrflIDs, ignoreFilters)
+	if err != nil {
 		return
 	}
 

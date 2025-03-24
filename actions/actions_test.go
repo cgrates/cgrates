@@ -72,7 +72,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	expActionPrf := engine.ActionProfiles{actPrf}
+	expActionPrf := []*engine.ActionProfile{actPrf}
 
 	if rcv, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
 		evNM, []string{}, false); err != nil {
