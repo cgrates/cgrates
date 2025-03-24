@@ -51,7 +51,7 @@ type AttributeS struct {
 
 // attributeProfileForEvent returns the matching attribute
 func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string, attrIDs []string,
-	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchAttrPrfl *AttributeProfile, err error) {
+	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchedProfile *AttributeProfile, err error) {
 	if len(attrIDs) == 0 {
 		ignoreFilters = false
 		aPrflIDs, err := MatchingItemIDsForEvent(ctx, evNm,
@@ -69,20 +69,20 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 		}
 		attrIDs = aPrflIDs.AsSlice()
 	}
-	var apWw *apWithWeight
+	var maxWeight float64
 	for _, apID := range attrIDs {
-		var aPrfl *AttributeProfile
-		aPrfl, err = alS.dm.GetAttributeProfile(ctx, tnt, apID, true, true, utils.NonTransactional)
+		var ap *AttributeProfile
+		ap, err = alS.dm.GetAttributeProfile(ctx, tnt, apID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				continue
 			}
 			return nil, err
 		}
-		tntID := aPrfl.TenantIDInline()
+		tntID := ap.TenantIDInline()
 		evNm[utils.MetaVars].(utils.MapStorage)[utils.MetaAttrPrfTenantID] = tntID
 		if !ignoreFilters {
-			if pass, err := alS.fltrS.Pass(ctx, tnt, aPrfl.FilterIDs,
+			if pass, err := alS.fltrS.Pass(ctx, tnt, ap.FilterIDs,
 				evNm); err != nil {
 				return nil, err
 			} else if !pass {
@@ -90,23 +90,23 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 			}
 		}
 
-		var apfWeight float64
-		if apfWeight, err = WeightFromDynamics(ctx, aPrfl.Weights,
-			alS.fltrS, tnt, evNm); err != nil {
-			return
+		weight, err := WeightFromDynamics(ctx, ap.Weights, alS.fltrS, tnt, evNm)
+		if err != nil {
+			return nil, err
 		}
-		if (apWw == nil || apWw.weight < apfWeight) &&
+		if (matchedProfile == nil || maxWeight < weight) &&
 			tntID != lastID &&
 			(profileRuns <= 0 || processedPrfNo[tntID] < profileRuns) {
-			apWw = &apWithWeight{aPrfl, apfWeight}
+			matchedProfile = ap
+			maxWeight = weight
 		}
 	}
 	// All good, convert from Map to Slice so we can sort
-	if apWw == nil {
+	if matchedProfile == nil {
 		return nil, utils.ErrNotFound
 	}
-	evNm[utils.MetaVars].(utils.MapStorage)[utils.MetaAttrPrfTenantID] = apWw.AttributeProfile.TenantIDInline()
-	return apWw.AttributeProfile, nil
+	evNm[utils.MetaVars].(utils.MapStorage)[utils.MetaAttrPrfTenantID] = matchedProfile.TenantIDInline()
+	return matchedProfile, nil
 }
 
 type FieldsAltered struct {

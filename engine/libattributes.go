@@ -26,11 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type apWithWeight struct {
-	*AttributeProfile
-	weight float64
-}
-
 // Attribute used by AttributeProfile to describe a single attribute
 type Attribute struct {
 	FilterIDs []string
