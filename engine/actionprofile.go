@@ -19,12 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,27 +37,10 @@ type ActionProfile struct {
 	Targets   map[string]utils.StringSet
 
 	Actions []*APAction
-	weight  float64
 }
 
 func (aP *ActionProfile) TenantID() string {
 	return utils.ConcatenatedKey(aP.Tenant, aP.ID)
-}
-
-// ActionProfiles is a sortable list of ActionProfiles
-type ActionProfiles []*ActionProfile
-
-// Sort is part of sort interface, sort based on Weight
-func (aps ActionProfiles) Sort() {
-	sort.Slice(aps, func(i, j int) bool { return aps[i].weight > aps[j].weight })
-}
-
-func (ap *ActionProfile) GetWeightFromDynamics(ctx *context.Context,
-	fltrS *FilterS, tnt string, ev utils.DataProvider) (err error) {
-	if ap.weight, err = WeightFromDynamics(ctx, ap.Weights, fltrS, tnt, ev); err != nil {
-		return
-	}
-	return
 }
 
 // APAction defines action related information used within a ActionProfile
