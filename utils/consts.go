@@ -390,7 +390,7 @@ const (
 	MetaElastic              = "*els"
 	MetaFileFWV              = "*fileFWV"
 	MetaFile                 = "*file"
-	Accounts                 = "Accounts"
+	AccountsStr              = "Accounts"
 	AccountS                 = "AccountS"
 	Actions                  = "Actions"
 	BalanceMap               = "BalanceMap"

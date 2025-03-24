@@ -37,7 +37,7 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.AccountsWithWeight
+	var acnts utils.Accounts
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
 		args, accIDs, ignFilters, false); err != nil {
 		if err != utils.ErrNotFound {
@@ -61,7 +61,7 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.AccountsWithWeight
+	var acnts utils.Accounts
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
 		args, accIDs, ignFilters, true); err != nil {
 		if err != utils.ErrNotFound {
@@ -91,7 +91,7 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.AccountsWithWeight
+	var acnts utils.Accounts
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
 		args, accIDs, ignFilters, true); err != nil {
 		if err != utils.ErrNotFound {
@@ -121,7 +121,7 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.AccountsWithWeight
+	var acnts utils.Accounts
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
 		args, accIDs, ignFilters, true); err != nil {
 		if err != utils.ErrNotFound {
@@ -151,7 +151,7 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.AccountsWithWeight
+	var acnts utils.Accounts
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
 		args, accIDs, ignFilters, true); err != nil {
 		if err != utils.ErrNotFound {

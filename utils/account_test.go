@@ -276,39 +276,8 @@ func TestAPNewDefaultBalance(t *testing.T) {
 	}
 }
 
-func TestAPApsSort(t *testing.T) {
-
-	apS := AccountsWithWeight{
-		{
-			Weight: 2,
-		},
-		{
-			Weight: 1,
-		},
-		{
-			Weight: 3,
-		},
-	}
-	expected := AccountsWithWeight{
-		{
-			Weight: 3,
-		},
-		{
-			Weight: 2,
-		},
-		{
-			Weight: 1,
-		},
-	}
-
-	apS.Sort()
-	if !reflect.DeepEqual(apS, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(apS))
-	}
-}
-
 func TestAPAccount(t *testing.T) {
-	apS := AccountsWithWeight{
+	apS := Accounts{
 		{
 			Account: &Account{
 				Tenant:    "testTenant1",
@@ -323,7 +292,6 @@ func TestAPAccount(t *testing.T) {
 					},
 				},
 			},
-			Weight: 23,
 			LockID: "testString1",
 		},
 		{
@@ -340,7 +308,6 @@ func TestAPAccount(t *testing.T) {
 					},
 				},
 			},
-			Weight: 15,
 			LockID: "testString2",
 		},
 	}
@@ -357,7 +324,7 @@ func TestAPAccount(t *testing.T) {
 }
 
 func TestAPLockIDs(t *testing.T) {
-	apS := AccountsWithWeight{
+	apS := Accounts{
 		{
 			Account: &Account{
 				Tenant:    "testTenant1",
@@ -372,7 +339,6 @@ func TestAPLockIDs(t *testing.T) {
 					},
 				},
 			},
-			Weight: 23,
 			LockID: "testString1",
 		},
 		{
@@ -389,8 +355,7 @@ func TestAPLockIDs(t *testing.T) {
 					},
 				},
 			},
-			Weight: 15,
-			LockID: "testString2",
+			LockID: "testString3",
 		},
 	}
 
@@ -1587,7 +1552,7 @@ func TestAccountUnitFactorClone(t *testing.T) {
 }
 
 func TestAccountObjectID(t *testing.T) {
-	apWws := &AccountsWithWeight{
+	apWws := &Accounts{
 		{
 			Account: &Account{
 				ID: "ID",

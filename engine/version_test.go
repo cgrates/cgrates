@@ -25,10 +25,10 @@ import (
 )
 
 func TestVersionCompare(t *testing.T) {
-	x := Versions{utils.Accounts: 2, utils.Actions: 2,
+	x := Versions{utils.AccountsStr: 2, utils.Actions: 2,
 		utils.Attributes: 2, utils.Chargers: 2,
 		utils.CostDetails: 2}
-	y := Versions{utils.Accounts: 1, utils.Actions: 2,
+	y := Versions{utils.AccountsStr: 1, utils.Actions: 2,
 		utils.Attributes: 2, utils.Chargers: 2,
 		utils.CostDetails: 2}
 
@@ -41,7 +41,7 @@ func TestVersionCompare(t *testing.T) {
 		t.Errorf("Error failed to compare to curent version expected: %s received: %s", "cgr-migrator -exec=*accounts", message7)
 	}
 
-	y[utils.Accounts] = 2
+	y[utils.AccountsStr] = 2
 	message8 := y.Compare(x, utils.MetaRedis, true)
 	if message8 != utils.EmptyString {
 		t.Errorf("Expected %+v, received %+v", utils.EmptyString, message8)
@@ -50,7 +50,7 @@ func TestVersionCompare(t *testing.T) {
 
 func TestCurrentDBVersions(t *testing.T) {
 	expVersDataDB := Versions{
-		utils.Stats: 4, utils.Accounts: 3, utils.Actions: 2,
+		utils.Stats: 4, utils.AccountsStr: 3, utils.Actions: 2,
 		utils.Thresholds: 4, utils.Routes: 2, utils.Attributes: 7,
 		utils.RQF: 5, utils.Resource: 1,
 		utils.Subscribers: 1,
@@ -108,7 +108,7 @@ func TestCurrentStorDBVersions(t *testing.T) {
 func TestCurrentAllDBVersions(t *testing.T) {
 	expected := Versions{
 		utils.Stats:          4,
-		utils.Accounts:       3,
+		utils.AccountsStr:    3,
 		utils.Actions:        2,
 		utils.Thresholds:     4,
 		utils.Routes:         2,

@@ -112,12 +112,12 @@ func testVersion(t *testing.T) {
 	case utils.MetaInternal:
 		currentVersion = allVersions
 		testVersion = allVersions
-		testVersion[utils.Accounts] = 1
+		testVersion[utils.AccountsStr] = 1
 		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	case utils.MetaMongo, utils.MetaRedis:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
-		testVersion[utils.Accounts] = 1
+		testVersion[utils.AccountsStr] = 1
 
 		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	}
@@ -153,7 +153,7 @@ func testVersion(t *testing.T) {
 	case utils.MetaInternal:
 		currentVersion = allVersions
 		testVersion = allVersions
-		testVersion[utils.Accounts] = 1
+		testVersion[utils.AccountsStr] = 1
 		test = "Migration needed: please backup cgr data and run: <cgr-migrator -exec=*accounts>"
 	case utils.MetaMongo, utils.MetaPostgres, utils.MetaMySQL:
 		testVersion = allVersions
@@ -165,7 +165,7 @@ func testVersion(t *testing.T) {
 
 func testUpdateVersionsAccounts(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Accounts] = 2
+	newVersions[utils.AccountsStr] = 2
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}

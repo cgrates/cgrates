@@ -176,10 +176,9 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	}
 	accPrf.Weights[0].FilterIDs = []string{}
 
-	expectedAccPrfWeght := utils.AccountsWithWeight{
+	expectedAccPrfWeght := utils.Accounts{
 		{
 			Account: accPrf,
-			Weight:  20,
 		},
 	}
 	if rcv, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
@@ -289,7 +288,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accntsPrf := []*utils.AccountWithWeight{
+	accntsPrf := []*utils.AccountWithLock{
 		{
 			Account: &utils.Account{
 				Tenant:    "cgrates.org",
@@ -414,7 +413,7 @@ func TestAccountsDebit(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accntsPrf := []*utils.AccountWithWeight{
+	accntsPrf := []*utils.AccountWithLock{
 		{
 			Account: &utils.Account{
 				Tenant:    "cgrates.org",

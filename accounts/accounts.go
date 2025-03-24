@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package accounts
 
 import (
+	"cmp"
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -58,15 +61,15 @@ func (aS *AccountS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 //
 //	so it becomes responsibility of upper layers to release the lock
 func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
-	acntIDs []string, ignoreFilters, lked bool) (acnts utils.AccountsWithWeight, err error) {
+	accIDs []string, ignoreFilters, lked bool) (accs utils.Accounts, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
 	}
-	if len(acntIDs) == 0 {
+	if len(accIDs) == 0 {
 		ignoreFilters = false
-		var actIDsMp utils.StringSet
-		if actIDsMp, err = engine.MatchingItemIDsForEvent(
+		var accIDsMap utils.StringSet
+		if accIDsMap, err = engine.MatchingItemIDsForEvent(
 			ctx,
 			evNm,
 			aS.cfg.AccountSCfg().StringIndexedFields,
@@ -82,60 +85,65 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 		); err != nil {
 			return
 		}
-		acntIDs = actIDsMp.AsSlice()
+		accIDs = accIDsMap.AsSlice()
 	}
-	for _, acntID := range acntIDs {
+	weights := make(map[string]float64) // stores sorting weights by acntID
+	for _, accID := range accIDs {
 		var refID string
 		if lked {
 			refID = guardian.Guardian.GuardIDs(utils.EmptyString,
 				aS.cfg.GeneralCfg().LockingTimeout,
-				utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID)) // RPC caching needs to be atomic
+				utils.ConcatenatedKey(utils.CacheAccounts, tnt, accID)) // RPC caching needs to be atomic
 		}
-		var qAcnt *utils.Account
-		if qAcnt, err = aS.dm.GetAccount(ctx, tnt, acntID); err != nil {
+		var acc *utils.Account
+		if acc, err = aS.dm.GetAccount(ctx, tnt, accID); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err == utils.ErrNotFound {
 				err = nil
 				continue
 			}
-			unlockAccounts(acnts) // in case of errors will not have unlocks in upper layers
+			unlockAccounts(accs) // in case of errors will not have unlocks in upper layers
 			return
 		}
 		if !ignoreFilters {
 			var pass bool
-			if pass, err = aS.fltrS.Pass(ctx, tnt, qAcnt.FilterIDs, evNm); err != nil {
+			if pass, err = aS.fltrS.Pass(ctx, tnt, acc.FilterIDs, evNm); err != nil {
 				guardian.Guardian.UnguardIDs(refID)
-				unlockAccounts(acnts)
+				unlockAccounts(accs)
 				return
 			} else if !pass {
 				guardian.Guardian.UnguardIDs(refID)
 				continue
 			}
 		}
-		var weight float64
-		if weight, err = engine.WeightFromDynamics(ctx, qAcnt.Weights,
-			aS.fltrS, cgrEv.Tenant, evNm); err != nil {
+		weight, err := engine.WeightFromDynamics(ctx, acc.Weights, aS.fltrS, cgrEv.Tenant, evNm)
+		if err != nil {
 			guardian.Guardian.UnguardIDs(refID)
-			unlockAccounts(acnts)
-			return
+			unlockAccounts(accs)
+			return nil, err
 		}
-		acnts = append(acnts, &utils.AccountWithWeight{
-			Account: qAcnt,
-			Weight:  weight,
+		weights[acc.ID] = weight
+		accs = append(accs, &utils.AccountWithLock{
+			Account: acc,
 			LockID:  refID,
 		})
 	}
-	if len(acnts) == 0 {
+	if len(accs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	acnts.Sort()
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(accs, func(a, b *utils.AccountWithLock) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+
 	return
 }
 
 // accountsDebit will debit an usage out of multiple accounts
 // concretes parameter limits the debits to concrete only balances
 // store is used for simulate only or complete debit
-func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithWeight,
+func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.AccountWithLock,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	var usage *decimal.Big // total event usage
 	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
@@ -283,7 +291,7 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 
 // refundCharges implements the mechanism of refunding the charges into accounts
 func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.EventCharges) (err error) {
-	acnts := make(utils.AccountsWithWeight, 0, len(ecs.Accounts))
+	acnts := make(utils.Accounts, 0, len(ecs.Accounts))
 	defer unlockAccounts(acnts) // no unlocking in upper layers
 
 	acntsIdxed := make(map[string]*utils.Account) // so we can access Account easier
@@ -301,7 +309,7 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 			}
 			return
 		}
-		acnts = append(acnts, &utils.AccountWithWeight{Account: qAcnt, Weight: 0, LockID: refID})
+		acnts = append(acnts, &utils.AccountWithLock{Account: qAcnt, LockID: refID})
 		acntsIdxed[acntID] = qAcnt
 	}
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts)) // so we can restore in case of issues
