@@ -691,7 +691,7 @@ func TestThresholdsAPIs(t *testing.T) {
 		},
 	}
 
-	expThresholds := engine.Thresholds{
+	expThresholds := []*engine.Threshold{
 		{
 			Tenant: "cgrates.org",
 			ID:     "thd1",
@@ -702,7 +702,7 @@ func TestThresholdsAPIs(t *testing.T) {
 		},
 	}
 
-	var rplyThresholds engine.Thresholds
+	var rplyThresholds []*engine.Threshold
 	if err := tSv1.GetThresholdsForEvent(context.Background(), args, &rplyThresholds); err != nil {
 		t.Error(err)
 	} else {

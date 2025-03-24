@@ -195,7 +195,7 @@ func checkThresholdsHits(t *testing.T, client *birpc.Client, expectedThHits map[
 	}
 
 	method := utils.ThresholdSv1GetThresholdsForEvent
-	var reply engine.Thresholds
+	var reply []*engine.Threshold
 	if err := client.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
