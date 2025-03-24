@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"cmp"
 	"fmt"
 	"runtime"
-	"sort"
+	"slices"
 	"sync"
 	"time"
 
@@ -101,10 +102,9 @@ type Threshold struct {
 	Hits   int       // number of hits for this threshold
 	Snooze time.Time // prevent threshold to run too early
 
-	lkID   string // ID of the lock used when matching the threshold
-	tPrfl  *ThresholdProfile
-	dirty  *bool // needs save
-	weight float64
+	lkID  string // ID of the lock used when matching the threshold
+	tPrfl *ThresholdProfile
+	dirty *bool // needs save
 }
 
 // TenantID returns the concatenated key beteen tenant and ID
@@ -187,16 +187,8 @@ func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actio
 	return
 }
 
-// Thresholds is a sortable slice of Threshold
-type Thresholds []*Threshold
-
-// Sort sorts based on Weight
-func (ts Thresholds) Sort() {
-	sort.Slice(ts, func(i, j int) bool { return ts[i].weight > ts[j].weight })
-}
-
-// unlock will unlock thresholds part of this slice
-func (ts Thresholds) unlock() {
+// unlockThresholds unlocks all locked thresholds in the given slice.
+func unlockThresholds(ts []*Threshold) {
 	for _, t := range ts {
 		t.unlock()
 		if t.tPrfl != nil {
@@ -327,7 +319,7 @@ func (tS *ThresholdS) StoreThreshold(ctx *context.Context, t *Threshold) (err er
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (ts Thresholds, err error) {
+func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (ts []*Threshold, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
@@ -360,7 +352,8 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 			return nil, err
 		}
 	}
-	ts = make(Thresholds, 0, len(tIDs))
+	ts = make([]*Threshold, 0, len(tIDs))
+	weights := make(map[string]float64) // stores sorting weights by tID
 	for tID := range tIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -372,7 +365,7 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 				err = nil
 				continue
 			}
-			ts.unlock()
+			unlockThresholds(ts)
 			return nil, err
 		}
 		tPrfl.lock(lkPrflID)
@@ -381,7 +374,7 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 			if pass, err = tS.fltrS.Pass(ctx, tnt, tPrfl.FilterIDs,
 				evNm); err != nil {
 				tPrfl.unlock()
-				ts.unlock()
+				unlockThresholds(ts)
 				return nil, err
 			} else if !pass {
 				tPrfl.unlock()
@@ -399,7 +392,7 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 				err = nil
 				continue
 			}
-			ts.unlock()
+			unlockThresholds(ts)
 			return nil, err
 		}
 		t.lock(lkID)
@@ -408,20 +401,27 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 		}
 
 		t.tPrfl = tPrfl
-		if t.weight, err = WeightFromDynamics(ctx, tPrfl.Weights,
-			tS.fltrS, tnt, evNm); err != nil {
-			return
+		weight, err := WeightFromDynamics(ctx, tPrfl.Weights,
+			tS.fltrS, tnt, evNm)
+		if err != nil {
+			return nil, err
 		}
+		weights[t.ID] = weight
 		ts = append(ts, t)
 	}
 	// All good, convert from Map to Slice so we can sort
 	if len(ts) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	ts.Sort()
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(ts, func(a, b *Threshold) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+
 	for i, t := range ts {
 		if t.tPrfl.Blocker && i != len(ts)-1 { // blocker will stop processing and we are not at last index
-			Thresholds(ts[i+1:]).unlock()
+			unlockThresholds(ts[i+1:])
 			ts = ts[:i+1]
 			break
 		}
@@ -431,8 +431,8 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 
 // processEvent processes a new event, dispatching to matching thresholds
 func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (thresholdsIDs []string, err error) {
-	var matchTs Thresholds
-	if matchTs, err = tS.matchingThresholdsForEvent(ctx, tnt, args); err != nil {
+	matchTs, err := tS.matchingThresholdsForEvent(ctx, tnt, args)
+	if err != nil {
 		return nil, err
 	}
 	var withErrors bool
@@ -478,7 +478,7 @@ func (tS *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils
 			tS.stMux.Unlock()
 		}
 	}
-	matchTs.unlock()
+	unlockThresholds(matchTs)
 	if withErrors {
 		err = utils.ErrPartiallyExecuted
 	}
@@ -508,7 +508,7 @@ func (tS *ThresholdS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (tS *ThresholdS) V1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *Thresholds) (err error) {
+func (tS *ThresholdS) V1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*Threshold) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -521,10 +521,10 @@ func (tS *ThresholdS) V1GetThresholdsForEvent(ctx *context.Context, args *utils.
 	if tnt == utils.EmptyString {
 		tnt = tS.cfg.GeneralCfg().DefaultTenant
 	}
-	var ts Thresholds
+	var ts []*Threshold
 	if ts, err = tS.matchingThresholdsForEvent(ctx, tnt, args); err == nil {
 		*reply = ts
-		ts.unlock()
+		unlockThresholds(ts)
 	}
 	return
 }

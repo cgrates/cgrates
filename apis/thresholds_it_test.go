@@ -439,20 +439,20 @@ func testThresholdsGetThresholdsForEvent(t *testing.T) {
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
-	expThs := engine.Thresholds{
-		&engine.Threshold{
+	expThs := []*engine.Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
 			Hits:   0,
 		},
-		&engine.Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "THD_1",
 			Hits:   0,
 		},
 	}
 
-	var rplyThs engine.Thresholds
+	var rplyThs []*engine.Threshold
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		args, &rplyThs); err != nil {
 		t.Error(err)
@@ -500,7 +500,7 @@ func testThresholdsGetThresholdsAfterRemove(t *testing.T) {
 		},
 	}
 
-	var rplyThs engine.Thresholds
+	var rplyThs []*engine.Threshold
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		args, &rplyThs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -621,20 +621,20 @@ func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
-	expThs := engine.Thresholds{
-		&engine.Threshold{
+	expThs := []*engine.Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
 			Hits:   1,
 		},
-		&engine.Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "THD_1",
 			Hits:   1,
 		},
 	}
 
-	var rplyThs engine.Thresholds
+	var rplyThs []*engine.Threshold
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		args, &rplyThs); err != nil {
 		t.Error(err)
@@ -660,20 +660,20 @@ func testThresholdsGetThresholdsAfterSecondEvent(t *testing.T) {
 			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
-	expThs := engine.Thresholds{
-		&engine.Threshold{
+	expThs := []*engine.Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "THD_2",
 			Hits:   0,
 		},
-		&engine.Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "THD_1",
 			Hits:   0,
 		},
 	}
 
-	var rplyThs engine.Thresholds
+	var rplyThs []*engine.Threshold
 	if err := thRPC.Call(context.Background(), utils.ThresholdSv1GetThresholdsForEvent,
 		args, &rplyThs); err != nil {
 		t.Error(err)

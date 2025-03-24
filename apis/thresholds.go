@@ -193,7 +193,7 @@ func (tSv1 *ThresholdSv1) GetThresholdIDs(ctx *context.Context, args *utils.Tena
 }
 
 // GetThresholdsForEvent returns a list of thresholds matching an event
-func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Thresholds) error {
+func (tSv1 *ThresholdSv1) GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.Threshold) error {
 	return tSv1.tS.V1GetThresholdsForEvent(ctx, args, reply)
 }
 

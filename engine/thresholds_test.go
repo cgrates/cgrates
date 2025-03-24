@@ -31,25 +31,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestThresholdsSort(t *testing.T) {
-	ts := Thresholds{
-		&Threshold{weight: 30.0, tPrfl: &ThresholdProfile{ID: "FIRST"}},
-		&Threshold{weight: 40.0, tPrfl: &ThresholdProfile{ID: "SECOND"}},
-		&Threshold{weight: 30.0, tPrfl: &ThresholdProfile{ID: "THIRD"}},
-		&Threshold{weight: 35.0, tPrfl: &ThresholdProfile{ID: "FOURTH"}},
-	}
-	ts.Sort()
-	eInst := Thresholds{
-		&Threshold{weight: 40.0, tPrfl: &ThresholdProfile{ID: "SECOND"}},
-		&Threshold{weight: 35.0, tPrfl: &ThresholdProfile{ID: "FOURTH"}},
-		&Threshold{weight: 30.0, tPrfl: &ThresholdProfile{ID: "FIRST"}},
-		&Threshold{weight: 30.0, tPrfl: &ThresholdProfile{ID: "THIRD"}},
-	}
-	if !reflect.DeepEqual(eInst, ts) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eInst), utils.ToJSON(ts))
-	}
-}
-
 func TestThresholdsCache(t *testing.T) {
 	var dmTH *DataManager
 	tPrfls := []*ThresholdProfile{
@@ -98,18 +79,18 @@ func TestThresholdsCache(t *testing.T) {
 			Async:            false,
 		},
 	}
-	ths := Thresholds{
-		&Threshold{
+	ths := []*Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "TH_1",
 			Hits:   0,
 		},
-		&Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "TH_2",
 			Hits:   0,
 		},
-		&Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "TH_3",
 			Hits:   0,
@@ -249,18 +230,18 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 			Async:            false,
 		},
 	}
-	ths := Thresholds{
-		&Threshold{
+	ths := []*Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "TH_1",
 			Hits:   0,
 		},
-		&Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "TH_2",
 			Hits:   0,
 		},
-		&Threshold{
+		{
 			Tenant: "cgrates.org",
 			ID:     "TH_3",
 			Hits:   0,
@@ -378,7 +359,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	thMatched.unlock()
+	unlockThresholds(thMatched)
 	if !reflect.DeepEqual(ths[0].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[0].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[0].ID, thMatched[0].ID) {
@@ -390,7 +371,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	thMatched.unlock()
+	unlockThresholds(thMatched)
 	if !reflect.DeepEqual(ths[1].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[1].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[1].ID, thMatched[0].ID) {
@@ -402,7 +383,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	thMatched.unlock()
+	unlockThresholds(thMatched)
 	if !reflect.DeepEqual(ths[2].Tenant, thMatched[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", ths[2].Tenant, thMatched[0].Tenant)
 	} else if !reflect.DeepEqual(ths[2].ID, thMatched[0].ID) {
@@ -1447,7 +1428,6 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 		t.Error(err)
 	} else {
 		rcv.tPrfl = nil
-		rcv.weight = 0
 		rcv.dirty = nil
 		rcv.Snooze = time.Time{}
 		if !reflect.DeepEqual(rcv, exp) {
@@ -1947,7 +1927,7 @@ func TestThresholdMatchingThresholdForEventLocks(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	defer mth.unlock()
+	defer unlockThresholds(mth)
 	for _, rPrf := range prfs {
 		if rPrf.ID == "TH1" {
 			if rPrf.isLocked() {
@@ -2079,7 +2059,7 @@ func TestThresholdMatchingThresholdForEventLocksBlocker(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	defer mres.unlock()
+	defer unlockThresholds(mres)
 	if len(mres) != 5 {
 		t.Fatal("Expected 6 Thresholds")
 	}
@@ -2202,7 +2182,7 @@ func TestThresholdMatchingThresholdForEventLocks4(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	defer mres.unlock()
+	defer unlockThresholds(mres)
 	for _, rPrf := range prfs {
 		if !rPrf.isLocked() {
 			t.Errorf("Expected profile to be locked %q", rPrf.ID)
@@ -2412,17 +2392,16 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 		},
 	}
 
-	exp := Thresholds{
+	exp := []*Threshold{
 		{
 			Tenant: "cgrates.org",
 			Hits:   0,
 			ID:     "TH1",
 			tPrfl:  thPrf,
 			dirty:  utils.BoolPointer(false),
-			weight: 10,
 		},
 	}
-	var reply Thresholds
+	var reply []*Threshold
 	if err := tS.V1GetThresholdsForEvent(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, exp) {
@@ -2464,7 +2443,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	var args *utils.CGREvent
 
 	experr := `MANDATORY_IE_MISSING: [CGREvent]`
-	var reply Thresholds
+	var reply []*Threshold
 	if err := tS.V1GetThresholdsForEvent(context.Background(), args, &reply); err == nil ||
 		err.Error() != experr {
 		t.Error(err)
