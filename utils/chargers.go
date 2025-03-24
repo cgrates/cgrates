@@ -18,18 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"sort"
-)
-
-// ChargerProfiles is a sortable list of Charger profiles
-type ChargerProfiles []*ChargerProfile
-
-// Sort is part of sort interface, sort based on Weight.
-func (cp ChargerProfiles) Sort() {
-	sort.Slice(cp, func(i, j int) bool { return cp[i].weight > cp[j].weight })
-}
-
 // ChargerProfile defines the configuration of a Charger.
 type ChargerProfile struct {
 	Tenant       string
@@ -39,12 +27,6 @@ type ChargerProfile struct {
 	Blockers     DynamicBlockers
 	RunID        string
 	AttributeIDs []string // perform data aliasing based on these Attributes
-	weight       float64
-}
-
-// ApplySortingWeight assigns a weight value used for sorting ChargerProfiles.
-func (cp *ChargerProfile) ApplySortingWeight(weight float64) {
-	cp.weight = weight
 }
 
 // TenantID returns the concatenated tenant and ID.

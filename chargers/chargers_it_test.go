@@ -761,7 +761,7 @@ func testChargersSetGetChargerProfileEvent(t *testing.T) {
 }
 func testChargersGetChargersForEvent(t *testing.T) {
 
-	expected := &utils.ChargerProfiles{
+	expected := []*utils.ChargerProfile{
 		{
 			Tenant:       "cgrates.org",
 			ID:           "TEST_CHARGERS_IT_TEST",
@@ -783,7 +783,7 @@ func testChargersGetChargersForEvent(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	reply := &utils.ChargerProfiles{}
+	var reply []*utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent,
 		cgrEv, &reply); err != nil {
 		t.Error(err)
@@ -956,7 +956,7 @@ func testChargersBlockerGetChargersForEvent(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	expected := utils.ChargerProfiles{
+	expected := []*utils.ChargerProfile{
 		{
 			ID:        "CHARGER_TEST_1",
 			Tenant:    "cgrates.org",
@@ -1001,7 +1001,7 @@ func testChargersBlockerGetChargersForEvent(t *testing.T) {
 			RunID: "run2",
 		},
 	}
-	var reply utils.ChargerProfiles
+	var reply utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {

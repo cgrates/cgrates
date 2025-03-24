@@ -59,6 +59,6 @@ func (self *CmdGetChargersForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetChargersForEvent) RpcResult() any {
-	var atr utils.ChargerProfiles
+	var atr []*utils.ChargerProfile
 	return &atr
 }

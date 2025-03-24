@@ -47,7 +47,7 @@ func (cS *ChargerS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
 func (cS *ChargerS) V1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent,
-	rply *utils.ChargerProfiles) (err error) {
+	rply *[]*utils.ChargerProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = cS.cfg.GeneralCfg().DefaultTenant
