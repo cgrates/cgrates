@@ -295,7 +295,7 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	msq.unlock()
+	unlockStatQueues(msq)
 	if !reflect.DeepEqual(testStatsQ[0].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[0].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(testStatsQ[0].ID, msq[0].ID) {
@@ -308,7 +308,7 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	msq.unlock()
+	unlockStatQueues(msq)
 	if !reflect.DeepEqual(testStatsQ[1].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[1].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(testStatsQ[1].ID, msq[0].ID) {
@@ -321,7 +321,7 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	msq.unlock()
+	unlockStatQueues(msq)
 	if !reflect.DeepEqual(testStatsQ[2].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[2].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(testStatsQ[2].ID, msq[0].ID) {
@@ -403,7 +403,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	msq.unlock()
+	unlockStatQueues(msq)
 	if !reflect.DeepEqual(testStatsQ[0].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[0].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(testStatsQ[0].ID, msq[0].ID) {
@@ -416,7 +416,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	msq.unlock()
+	unlockStatQueues(msq)
 	if !reflect.DeepEqual(testStatsQ[1].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[1].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(testStatsQ[1].ID, msq[0].ID) {
@@ -429,7 +429,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	msq.unlock()
+	unlockStatQueues(msq)
 	if !reflect.DeepEqual(testStatsQ[2].Tenant, msq[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", testStatsQ[2].Tenant, msq[0].Tenant)
 	} else if !reflect.DeepEqual(testStatsQ[2].ID, msq[0].ID) {
@@ -977,7 +977,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks4(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	defer mres.unlock()
+	defer unlockStatQueues(mres)
 	for _, rPrf := range prfs {
 		if !rPrf.isLocked() {
 			t.Errorf("Expected profile to be locked %q", rPrf.ID)
@@ -2261,9 +2261,7 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 		t.Error(err)
 	}
 
-	sQs := StatQueues{
-		sq,
-	}
+	sQs := []*StatQueue{sq}
 
 	if err := sS.processThresholds(context.Background(), sQs, nil); err != nil {
 		t.Error(err)
@@ -2366,7 +2364,7 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := sS.processThresholds(context.Background(), StatQueues{sq}, nil); err != nil {
+	if err := sS.processThresholds(context.Background(), []*StatQueue{sq}, nil); err != nil {
 		t.Error(err)
 	}
 }
@@ -2450,9 +2448,7 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 		t.Error(err)
 	}
 
-	sQs := StatQueues{
-		sq,
-	}
+	sQs := []*StatQueue{sq}
 
 	expLog := `[WARNING] <StatS> error: EXISTS`
 	if err := sS.processThresholds(context.Background(), sQs, nil); err == nil ||

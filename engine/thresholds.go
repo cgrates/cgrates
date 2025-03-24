@@ -187,7 +187,7 @@ func processEventWithThreshold(ctx *context.Context, connMgr *ConnManager, actio
 	return
 }
 
-// unlockThresholds unlocks all locked thresholds in the given slice.
+// unlockThresholds unlocks all locked Thresholds in the given slice.
 func unlockThresholds(ts []*Threshold) {
 	for _, t := range ts {
 		t.unlock()
@@ -409,7 +409,6 @@ func (tS *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt strin
 		weights[t.ID] = weight
 		ts = append(ts, t)
 	}
-	// All good, convert from Map to Slice so we can sort
 	if len(ts) == 0 {
 		return nil, utils.ErrNotFound
 	}

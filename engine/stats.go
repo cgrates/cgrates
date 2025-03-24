@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"cmp"
 	"fmt"
 	"runtime"
+	"slices"
 	"sync"
 	"time"
 
@@ -155,7 +157,7 @@ func (sS *StatS) StoreStatQueue(ctx *context.Context, sq *StatQueue) (err error)
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching statQueues which are active by the time of the call
-func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, statsIDs []string, evNm utils.MapStorage, ignoreFilters bool) (sqs StatQueues, err error) {
+func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, statsIDs []string, evNm utils.MapStorage, ignoreFilters bool) (sqs []*StatQueue, err error) {
 	sqIDs := utils.NewStringSet(statsIDs)
 	if len(sqIDs) == 0 {
 		ignoreFilters = false
@@ -173,7 +175,8 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 			return
 		}
 	}
-	sqs = make(StatQueues, 0, len(sqIDs))
+	sqs = make([]*StatQueue, 0, len(sqIDs))
+	weights := make(map[string]float64) // stores sorting weights by sqID
 	for sqID := range sqIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -185,7 +188,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 				err = nil
 				continue
 			}
-			sqs.unlock()
+			unlockStatQueues(sqs)
 			return
 		}
 		sqPrfl.lock(lkPrflID)
@@ -194,7 +197,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 			if pass, err = sS.fltrS.Pass(ctx, tnt, sqPrfl.FilterIDs,
 				evNm); err != nil {
 				sqPrfl.unlock()
-				sqs.unlock()
+				unlockStatQueues(sqs)
 				return nil, err
 			} else if !pass {
 				sqPrfl.unlock()
@@ -208,7 +211,7 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 		if sq, err = sS.dm.GetStatQueue(ctx, sqPrfl.Tenant, sqPrfl.ID, true, true, utils.EmptyString); err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			sqPrfl.unlock()
-			sqs.unlock()
+			unlockStatQueues(sqs)
 			return nil, err
 		}
 		sq.lock(lkID) // pass the lock into statQueue so we have it as reference
@@ -224,17 +227,22 @@ func (sS *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string, st
 		}
 
 		sq.sqPrfl = sqPrfl
-		if sq.weight, err = WeightFromDynamics(ctx, sqPrfl.Weights,
-			sS.fltrS, tnt, evNm); err != nil {
-			return
+		weight, err := WeightFromDynamics(ctx, sqPrfl.Weights, sS.fltrS, tnt, evNm)
+		if err != nil {
+			return nil, err
 		}
+		weights[sq.ID] = weight
 		sqs = append(sqs, sq)
 	}
 	if len(sqs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	// All good, convert from Map to Slice so we can sort
-	sqs.Sort()
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(sqs, func(a, b *StatQueue) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+
 	/*
 		// verify the Blockers from the profiles
 		for i, s := range sqs {
@@ -280,7 +288,7 @@ func (sS *StatS) storeStatQueue(ctx *context.Context, sq *StatQueue) {
 }
 
 // processThresholds will pass the event for statQueue to ThresholdS
-func (sS *StatS) processThresholds(ctx *context.Context, sQs StatQueues, opts map[string]any) (err error) {
+func (sS *StatS) processThresholds(ctx *context.Context, sQs []*StatQueue, opts map[string]any) (err error) {
 	if len(sS.cfg.StatSCfg().ThresholdSConns) == 0 {
 		return
 	}
@@ -324,7 +332,7 @@ func (sS *StatS) processThresholds(ctx *context.Context, sQs StatQueues, opts ma
 }
 
 // processThresholds will pass the event for statQueue to EEs
-func (sS *StatS) processEEs(ctx *context.Context, sQs StatQueues, opts map[string]any) (err error) {
+func (sS *StatS) processEEs(ctx *context.Context, sQs []*StatQueue, opts map[string]any) (err error) {
 	if len(sS.cfg.StatSCfg().EEsConns) == 0 {
 		return
 	}
@@ -386,9 +394,9 @@ func (sS *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGRE
 	if err != nil {
 		return nil, err
 	}
-	defer matchSQs.unlock()
+	defer unlockStatQueues(matchSQs)
 
-	statQueueIDs = matchSQs.IDs()
+	statQueueIDs = getStatQueueIDs(matchSQs)
 	var withErrors bool
 	for idx, sq := range matchSQs {
 		if err = sq.ProcessEvent(ctx, tnt, args.ID, sS.fltrS, evNm); err != nil {
@@ -464,13 +472,13 @@ func (sS *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREv
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var sQs StatQueues
-	if sQs, err = sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, evDp, ignFilters); err != nil {
+	sQs, err := sS.matchingStatQueuesForEvent(ctx, tnt, sqIDs, evDp, ignFilters)
+	if err != nil {
 		return
 	}
 
-	*reply = sQs.IDs()
-	sQs.unlock()
+	*reply = getStatQueueIDs(sQs)
+	unlockStatQueues(sQs)
 	return
 }
 
