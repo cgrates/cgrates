@@ -58,16 +58,16 @@ func (rS *RateS) ListenAndServe(stopChan, cfgRld chan struct{}) {
 }
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
-func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, rPfIDs []string, args *utils.CGREvent,
-	ignoreFilters bool, ignoredRPfIDs utils.StringSet) (rtPfl *utils.RateProfile, err error) {
+func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, rpIDs []string, args *utils.CGREvent,
+	ignoreFilters bool, ignoredRPIDs utils.StringSet) (matchedProfile *utils.RateProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,
 	}
-	if len(rPfIDs) == 0 {
+	if len(rpIDs) == 0 {
 		ignoreFilters = false
-		var rPfIDMp utils.StringSet
-		if rPfIDMp, err = engine.MatchingItemIDsForEvent(ctx,
+		var rpIDMap utils.StringSet
+		if rpIDMap, err = engine.MatchingItemIDsForEvent(ctx,
 			evNm,
 			rS.cfg.RateSCfg().StringIndexedFields,
 			rS.cfg.RateSCfg().PrefixIndexedFields,
@@ -82,15 +82,15 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 		); err != nil {
 			return
 		}
-		rPfIDs = rPfIDMp.AsSlice()
+		rpIDs = rpIDMap.AsSlice()
 	}
-	var rpWw *rpWithWeight
-	for _, rPfID := range rPfIDs {
-		if ignoredRPfIDs.Has(rPfID) { // already processed and gave errors or not appropriate for our request
+	var maxWeight float64
+	for _, rpID := range rpIDs {
+		if ignoredRPIDs.Has(rpID) { // already processed and gave errors or not appropriate for our request
 			continue
 		}
-		var rPf *utils.RateProfile
-		if rPf, err = rS.dm.GetRateProfile(ctx, tnt, rPfID,
+		var rp *utils.RateProfile
+		if rp, err = rS.dm.GetRateProfile(ctx, tnt, rpID,
 			true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
 				err = nil
@@ -100,26 +100,26 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 		}
 		if !ignoreFilters {
 			var pass bool
-			if pass, err = rS.fltrS.Pass(ctx, tnt, rPf.FilterIDs, evNm); err != nil {
+			if pass, err = rS.fltrS.Pass(ctx, tnt, rp.FilterIDs, evNm); err != nil {
 				return
 			} else if !pass {
 				continue
 			}
 		}
-		var rPfWeight float64
-		if rPfWeight, err = engine.WeightFromDynamics(ctx, rPf.Weights,
-			rS.fltrS, tnt, evNm); err != nil {
-			return
+		weight, err := engine.WeightFromDynamics(ctx, rp.Weights, rS.fltrS, tnt, evNm)
+		if err != nil {
+			return nil, err
 		}
-		if rpWw == nil || rpWw.weight < rPfWeight {
-			rpWw = &rpWithWeight{rPf, rPfWeight}
+		if matchedProfile == nil || weight > maxWeight {
+			matchedProfile = rp
+			maxWeight = weight
 		}
 	}
-	if rpWw == nil {
+	if matchedProfile == nil {
 		return nil, utils.ErrNotFound
 	}
 
-	return rpWw.RateProfile, nil
+	return matchedProfile, nil
 }
 
 // rateProfileCostForEvent computes the rateProfileCost for an event based on a preselected rate profile
