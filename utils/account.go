@@ -421,23 +421,17 @@ func (blnc *Balance) Clone() (cln *Balance) {
 	return
 }
 
-// AccountWithWeight attaches static weight to Account
-type AccountWithWeight struct {
+// AccountWithLock wraps Account with LockID.
+type AccountWithLock struct {
 	*Account
-	Weight float64
 	LockID string
 }
 
-// AccountsWithWeight is a sortable list of AccountWithWeight
-type AccountsWithWeight []*AccountWithWeight
-
-// Sort is part of sort interface, sort based on Weight
-func (aps AccountsWithWeight) Sort() {
-	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
-}
+// Accounts is a collection of AccountWithLock objects
+type Accounts []*AccountWithLock
 
 // Accounts returns the list of Account
-func (apWws AccountsWithWeight) Accounts() (aps []*Account) {
+func (apWws Accounts) Accounts() (aps []*Account) {
 	if apWws != nil {
 		aps = make([]*Account, len(apWws))
 		for i, apWw := range apWws {
@@ -448,7 +442,7 @@ func (apWws AccountsWithWeight) Accounts() (aps []*Account) {
 }
 
 // LockIDs returns the list of LockIDs
-func (apWws AccountsWithWeight) LockIDs() (lkIDs []string) {
+func (apWws Accounts) LockIDs() (lkIDs []string) {
 	if apWws != nil {
 		lkIDs = make([]string, len(apWws))
 		for i, apWw := range apWws {
@@ -459,7 +453,7 @@ func (apWws AccountsWithWeight) LockIDs() (lkIDs []string) {
 }
 
 // Account returns the Account object with ID
-func (apWws AccountsWithWeight) Account(acntID string) (acnt *Account) {
+func (apWws Accounts) Account(acntID string) (acnt *Account) {
 	for _, aWw := range apWws {
 		if aWw.Account.ID == acntID {
 			acnt = aWw.Account

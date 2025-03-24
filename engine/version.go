@@ -26,13 +26,13 @@ import (
 
 var (
 	dataDBVers = map[string]string{
-		utils.Accounts:   "cgr-migrator -exec=*accounts",
-		utils.Attributes: "cgr-migrator -exec=*attributes",
-		utils.Actions:    "cgr-migrator -exec=*actions",
-		utils.Thresholds: "cgr-migrator -exec=*thresholds",
-		utils.LoadIDsVrs: "cgr-migrator -exec=*load_ids",
-		utils.RQF:        "cgr-migrator -exec=*filters",
-		utils.Routes:     "cgr-migrator -exec=*routes",
+		utils.AccountsStr: "cgr-migrator -exec=*accounts",
+		utils.Attributes:  "cgr-migrator -exec=*attributes",
+		utils.Actions:     "cgr-migrator -exec=*actions",
+		utils.Thresholds:  "cgr-migrator -exec=*thresholds",
+		utils.LoadIDsVrs:  "cgr-migrator -exec=*load_ids",
+		utils.RQF:         "cgr-migrator -exec=*filters",
+		utils.Routes:      "cgr-migrator -exec=*routes",
 	}
 	allVers map[string]string // init will fill this with a merge of data+stor
 )
@@ -126,7 +126,7 @@ func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) st
 func CurrentDataDBVersions() Versions {
 	return Versions{
 		utils.Stats:          4,
-		utils.Accounts:       3,
+		utils.AccountsStr:    3,
 		utils.Actions:        2,
 		utils.Thresholds:     4,
 		utils.Routes:         2,

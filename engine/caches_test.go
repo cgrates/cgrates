@@ -379,7 +379,7 @@ func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
 	Cache.Clear(nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
 		ArgsGetCacheItem: utils.ArgsGetCacheItem{
-			CacheID: utils.Accounts,
+			CacheID: utils.AccountsStr,
 			ItemID:  "itemId",
 		},
 	}
@@ -389,7 +389,7 @@ func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 
 	var customRply any = utils.ArgsGetCacheItem{
-		CacheID: utils.Accounts,
+		CacheID: utils.AccountsStr,
 		ItemID:  "itemId",
 	}
 	clientconn := make(chan birpc.ClientConnector, 1)
@@ -407,7 +407,7 @@ func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
 	exp := "expected value"
-	cacheS.tCache.Set(utils.Accounts, "itemId", exp, []string{}, true, utils.EmptyString)
+	cacheS.tCache.Set(utils.AccountsStr, "itemId", exp, []string{}, true, utils.EmptyString)
 
 	if rcv, err := cacheS.GetWithRemote(context.Background(), args); err != nil {
 		t.Error(err)

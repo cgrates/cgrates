@@ -2338,7 +2338,7 @@ func TestFilterRuleCompileValuesRSRParseErr(t *testing.T) {
 
 func TestFilterRuleCompileValuesNeverParseErr(t *testing.T) {
 
-	fltr, err := NewFilterRule(utils.MetaNever, utils.Accounts, []string{"val1"})
+	fltr, err := NewFilterRule(utils.MetaNever, utils.AccountsStr, []string{"val1"})
 	if err != nil {
 		t.Error(err)
 	}

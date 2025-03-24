@@ -199,7 +199,7 @@ func TestScheduledActions(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "TEST_ACTIONS1",
 		Event: map[string]any{
-			utils.Accounts: "10",
+			utils.AccountsStr: "10",
 		},
 	}
 	if _, err := acts.scheduledActions(context.Background(), cgrEv.Tenant, cgrEv, []string{}, false, false); err == nil || err != utils.ErrNotFound {

@@ -248,11 +248,11 @@ func testOnStorITCRUDHistory(t *testing.T) {
 }
 
 func testOnStorITCRUDStructVersion(t *testing.T) {
-	if _, err := onStor.DataDB().GetVersions(utils.Accounts); err != utils.ErrNotFound {
+	if _, err := onStor.DataDB().GetVersions(utils.AccountsStr); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	vrs := Versions{
-		utils.Accounts:    3,
+		utils.AccountsStr: 3,
 		utils.Actions:     2,
 		utils.CostDetails: 1,
 	}
@@ -273,8 +273,8 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 	} else if !reflect.DeepEqual(vrs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", vrs, rcv)
 	}
-	eAcnts := Versions{utils.Accounts: vrs[utils.Accounts]}
-	if rcv, err := onStor.DataDB().GetVersions(utils.Accounts); err != nil { //query one element
+	eAcnts := Versions{utils.AccountsStr: vrs[utils.AccountsStr]}
+	if rcv, err := onStor.DataDB().GetVersions(utils.AccountsStr); err != nil { //query one element
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAcnts, rcv) {
 		t.Errorf("Expecting: %v, received: %v", eAcnts, rcv)
@@ -282,8 +282,8 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 	if _, err := onStor.DataDB().GetVersions(utils.NotAvailable); err != utils.ErrNotFound { //query non-existent
 		t.Error(err)
 	}
-	eAcnts[utils.Accounts] = 2
-	vrs[utils.Accounts] = eAcnts[utils.Accounts]
+	eAcnts[utils.AccountsStr] = 2
+	vrs[utils.AccountsStr] = eAcnts[utils.AccountsStr]
 	if err := onStor.DataDB().SetVersions(eAcnts, false); err != nil { // change one element
 		t.Error(err)
 	}
@@ -295,7 +295,7 @@ func testOnStorITCRUDStructVersion(t *testing.T) {
 	if err := onStor.DataDB().RemoveVersions(eAcnts); err != nil { // remove one element
 		t.Error(err)
 	}
-	delete(vrs, utils.Accounts)
+	delete(vrs, utils.AccountsStr)
 	if rcv, err := onStor.DataDB().GetVersions(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(vrs, rcv) {
