@@ -71,25 +71,6 @@ func TestChargerProfileSet(t *testing.T) {
 	}
 }
 
-func TestChargerProfilesSort(t *testing.T) {
-	cp := ChargerProfiles{{}, {Weights: DynamicWeights{
-		{
-			Weight: 20,
-		},
-	},
-		weight: 20}}
-	exp := ChargerProfiles{{Weights: DynamicWeights{
-		{
-			Weight: 20,
-		},
-	},
-		weight: 20}, {}}
-	cp.Sort()
-	if !reflect.DeepEqual(exp, cp) {
-		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(cp))
-	}
-}
-
 func TestChargerProfileAsInterface(t *testing.T) {
 	cp := ChargerProfile{
 		Tenant:    "cgrates.org",

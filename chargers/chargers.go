@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package chargers
 
 import (
+	"cmp"
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -40,7 +43,7 @@ func NewChargerService(dm *engine.DataManager, filterS *engine.FilterS,
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
-func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (cPs utils.ChargerProfiles, err error) {
+func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (cPs []*utils.ChargerProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
@@ -58,6 +61,8 @@ func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt st
 	if err != nil {
 		return nil, err
 	}
+
+	weights := make(map[string]float64) // stores sorting weights by profile ID
 	for cpID := range cpIDs {
 		cP, err := cS.dm.GetChargerProfile(ctx, tnt, cpID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -76,13 +81,18 @@ func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt st
 		if err != nil {
 			return nil, err
 		}
-		cP.ApplySortingWeight(weight)
+		weights[cP.ID] = weight
 		cPs = append(cPs, cP)
 	}
 	if len(cPs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	cPs.Sort()
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(cPs, func(a, b *utils.ChargerProfile) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+
 	for i, cp := range cPs {
 		var blocker bool
 		if blocker, err = engine.BlockerFromDynamics(ctx, cp.Blockers, cS.fltrS, tnt, evNm); err != nil {
@@ -104,8 +114,8 @@ type ChrgSProcessEventReply struct {
 }
 
 func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
-	var cPs utils.ChargerProfiles
-	if cPs, err = cS.matchingChargerProfilesForEvent(ctx, tnt, cgrEv); err != nil {
+	cPs, err := cS.matchingChargerProfilesForEvent(ctx, tnt, cgrEv)
+	if err != nil {
 		return nil, err
 	}
 
