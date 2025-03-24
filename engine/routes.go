@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -132,7 +134,7 @@ type RouteS struct {
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent) (matchingRPrf RouteProfilesWithWeight, err error) {
+func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent) (matchingRPrf []*RouteProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
@@ -150,7 +152,8 @@ func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt strin
 	if err != nil {
 		return nil, err
 	}
-	matchingRPrf = make(RouteProfilesWithWeight, 0, len(rPrfIDs))
+	matchingRPrf = make([]*RouteProfile, 0, len(rPrfIDs))
+	weights := make(map[string]float64) // stores sorting weights by profile ID
 	for lpID := range rPrfIDs {
 		var rPrf *RouteProfile
 		if rPrf, err = rpS.dm.GetRouteProfile(ctx, tnt, lpID, true, true, utils.NonTransactional); err != nil {
@@ -166,17 +169,22 @@ func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt strin
 		} else if !pass {
 			continue
 		}
-		var weight float64
-		if weight, err = WeightFromDynamics(ctx, rPrf.Weights,
-			rpS.fltrS, ev.Tenant, evNm); err != nil {
-			return
+		weight, err := WeightFromDynamics(ctx, rPrf.Weights, rpS.fltrS, ev.Tenant, evNm)
+		if err != nil {
+			return nil, err
 		}
-		matchingRPrf = append(matchingRPrf, &RouteProfileWithWeight{RouteProfile: rPrf, Weight: weight})
+		weights[rPrf.ID] = weight
+		matchingRPrf = append(matchingRPrf, rPrf)
 	}
 	if len(matchingRPrf) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	matchingRPrf.Sort()
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(matchingRPrf, func(a, b *RouteProfile) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+
 	for i, rp := range matchingRPrf {
 		var blocker bool
 		if blocker, err = BlockerFromDynamics(ctx, rp.Blockers, rpS.fltrS, ev.Tenant, evNm); err != nil {
@@ -324,10 +332,7 @@ func (rpS *RouteS) V1GetRouteProfilesForEvent(ctx *context.Context, args *utils.
 		}
 		return err
 	}
-	*reply = make([]*RouteProfile, len(sPs))
-	for i, sP := range sPs {
-		(*reply)[i] = sP.RouteProfile
-	}
+	*reply = sPs
 	return
 }
 
@@ -403,8 +408,8 @@ func (rpS *RouteS) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrf
 // sortedRoutesForEvent will return the list of sortedRoutes
 // for event based on filters and sorting algorithms
 func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (sortedRoutes SortedRoutesList, err error) {
-	var rPrfs RouteProfilesWithWeight
-	if rPrfs, err = rpS.matchingRouteProfilesForEvent(ctx, tnt, args); err != nil {
+	rPrfs, err := rpS.matchingRouteProfilesForEvent(ctx, tnt, args)
+	if err != nil {
 		return
 	}
 	prfCount := len(rPrfs) // if the option is not present return for all profiles
@@ -455,7 +460,7 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 			prfPag.Offset = &offset
 		}
 		var sr *SortedRoutes
-		if sr, err = rpS.sortedRoutesForProfile(ctx, tnt, rPrfl.RouteProfile, args, prfPag, extraOpts); err != nil {
+		if sr, err = rpS.sortedRoutesForProfile(ctx, tnt, rPrfl, args, prfPag, extraOpts); err != nil {
 			return
 		}
 		if len(sr.Routes) != 0 {
