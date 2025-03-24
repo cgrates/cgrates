@@ -101,7 +101,6 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 			maxWeight = weight
 		}
 	}
-	// All good, convert from Map to Slice so we can sort
 	if matchedProfile == nil {
 		return nil, utils.ErrNotFound
 	}

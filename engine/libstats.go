@@ -193,7 +193,6 @@ type StatQueue struct {
 	sqPrfl    *StatQueueProfile
 	dirty     *bool          // needs save
 	ttl       *time.Duration // timeToLeave, picked on each init
-	weight    float64
 }
 
 // statQueueLockKey returns the ID used to lock a StatQueue with guardian
@@ -432,40 +431,12 @@ func (sq *StatQueue) Expand() {
 	sq.SQItems = newSQItems
 }
 
-// StatQueues is a sortable list of StatQueue
-type StatQueues []*StatQueue
-
-// Sort is part of sort interface, sort based on Weight
-func (sis StatQueues) Sort() {
-	sort.Slice(sis, func(i, j int) bool {
-		return sis[i].weight > sis[j].weight
-	})
-}
-
 func (sq *StatQueue) MarshalJSON() (rply []byte, err error) {
 	type tmp StatQueue
 	sq.lock(utils.EmptyString)
 	rply, err = json.Marshal(tmp(*sq))
 	sq.unlock()
 	return
-}
-
-// unlock will unlock StatQueues part of this slice
-func (sis StatQueues) unlock() {
-	for _, s := range sis {
-		s.unlock()
-		if s.sqPrfl != nil {
-			s.sqPrfl.unlock()
-		}
-	}
-}
-
-func (sis StatQueues) IDs() []string {
-	ids := make([]string, len(sis))
-	for i, s := range sis {
-		ids[i] = s.ID
-	}
-	return ids
 }
 
 // UnmarshalJSON here only to fully support json for StatQueue
@@ -554,6 +525,25 @@ func (sq *StatQueue) Clone() (cln *StatQueue) {
 		cln.SQMetrics[k] = m.Clone()
 	}
 	return
+}
+
+// unlockStatQueues unlocks all locked StatQueues in the given slice.
+func unlockStatQueues(sqs []*StatQueue) {
+	for _, sq := range sqs {
+		sq.unlock()
+		if sq.sqPrfl != nil {
+			sq.sqPrfl.unlock()
+		}
+	}
+}
+
+// getStatQueueIDs returns a slice of IDs from the given StatQueues
+func getStatQueueIDs(sqs []*StatQueue) []string {
+	ids := make([]string, len(sqs))
+	for i, sq := range sqs {
+		ids[i] = sq.ID
+	}
+	return ids
 }
 
 func (ssq *StatQueueWithAPIOpts) MarshalJSON() (rply []byte, err error) {

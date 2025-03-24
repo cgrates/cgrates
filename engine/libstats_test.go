@@ -32,26 +32,6 @@ import (
 
 var sq *StatQueue
 
-func TestStatQueuesSort(t *testing.T) {
-	sInsts := StatQueues{
-		&StatQueue{weight: 30.0, sqPrfl: &StatQueueProfile{ID: "FIRST"}},
-		&StatQueue{weight: 40.0, sqPrfl: &StatQueueProfile{ID: "SECOND"}},
-		&StatQueue{weight: 30.0, sqPrfl: &StatQueueProfile{ID: "THIRD"}},
-		&StatQueue{weight: 35.0, sqPrfl: &StatQueueProfile{ID: "FOURTH"}},
-	}
-	sInsts.Sort()
-	eSInst := StatQueues{
-		&StatQueue{weight: 40.0, sqPrfl: &StatQueueProfile{ID: "SECOND"}},
-		&StatQueue{weight: 35.0, sqPrfl: &StatQueueProfile{ID: "FOURTH"}},
-		&StatQueue{weight: 30.0, sqPrfl: &StatQueueProfile{ID: "FIRST"}},
-		&StatQueue{weight: 30.0, sqPrfl: &StatQueueProfile{ID: "THIRD"}},
-	}
-
-	if !reflect.DeepEqual(eSInst, sInsts) {
-		t.Errorf("expecting: %+v, received: %+v", eSInst, sInsts)
-	}
-}
-
 func TestStatRemEventWithID(t *testing.T) {
 	sq = &StatQueue{
 		SQMetrics: map[string]StatMetric{
@@ -1766,10 +1746,9 @@ func TestStatQueueClone(t *testing.T) {
 		SQMetrics: map[string]StatMetric{
 			"key": statMetricMock("remExpired error"),
 		},
-		lkID:   "testLkId",
-		dirty:  utils.BoolPointer(false),
-		ttl:    utils.DurationPointer(time.Duration(3)),
-		weight: 2,
+		lkID:  "testLkId",
+		dirty: utils.BoolPointer(false),
+		ttl:   utils.DurationPointer(time.Duration(3)),
 	}
 	exp := &StatQueue{
 		Tenant: "testTnt",
@@ -1783,10 +1762,9 @@ func TestStatQueueClone(t *testing.T) {
 		SQMetrics: map[string]StatMetric{
 			"key": statMetricMock("remExpired error"),
 		},
-		lkID:   "testLkId",
-		dirty:  utils.BoolPointer(false),
-		ttl:    utils.DurationPointer(time.Duration(3)),
-		weight: 2,
+		lkID:  "testLkId",
+		dirty: utils.BoolPointer(false),
+		ttl:   utils.DurationPointer(time.Duration(3)),
 	}
 	if rcv := sq.Clone(); !reflect.DeepEqual(utils.ToJSON(rcv), utils.ToJSON(exp)) {
 		t.Errorf("Expected <%v>, \nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
