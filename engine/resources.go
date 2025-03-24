@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"cmp"
 	"fmt"
 	"runtime"
-	"sort"
+	"slices"
 	"sync"
 	"time"
 
@@ -126,7 +127,6 @@ type Resource struct {
 	tUsage *float64         // sum of all usages
 	dirty  *bool            // the usages were modified, needs save, *bool so we only save if enabled in config
 	rPrf   *ResourceProfile // for ordering purposes
-	weight float64
 }
 
 // resourceLockKey returns the ID used to lock a resource with guardian
@@ -266,13 +266,8 @@ func (r *Resource) clearUsage(ruID string) (err error) {
 	return
 }
 
-// Resources is an orderable list of Resources based on Weight
+// Resources is a collection of Resource objects.
 type Resources []*Resource
-
-// Sort sorts based on Weight
-func (rs Resources) Sort() {
-	sort.Slice(rs, func(i, j int) bool { return rs[i].weight > rs[j].weight })
-}
 
 // unlock will unlock resources part of this slice
 func (rs Resources) unlock() {
@@ -592,6 +587,7 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 		}
 	}
 	rs = make(Resources, 0, len(rIDs))
+	weights := make(map[string]float64) // stores sorting weights by resource ID
 	for resName := range rIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -639,17 +635,23 @@ func (rS *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string,
 			r.ttl = utils.DurationPointer(rPrf.UsageTTL)
 		}
 		r.rPrf = rPrf
-		if r.weight, err = WeightFromDynamics(ctx, rPrf.Weights,
-			rS.fltrS, tnt, evNm); err != nil {
-			return
+		weight, err := WeightFromDynamics(ctx, rPrf.Weights, rS.fltrS, tnt, evNm)
+		if err != nil {
+			return nil, err
 		}
+		weights[r.ID] = weight
 		rs = append(rs, r)
 	}
 
 	if len(rs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	rs.Sort()
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(rs, func(a, b *Resource) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+
 	for i, r := range rs {
 		if r.rPrf.Blocker && i != len(rs)-1 { // blocker will stop processing and we are not at last index
 			Resources(rs[i+1:]).unlock()
