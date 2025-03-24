@@ -382,24 +382,21 @@ func TestResourceRemoveExpiredUnits(t *testing.T) {
 	}
 }
 func TestResourceUsedUnits(t *testing.T) {
-	var r1 *Resource
-	var ru1 *ResourceUsage
-	var ru2 *ResourceUsage
-	ru1 = &ResourceUsage{
+	ru1 := &ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      1,
 	}
 
-	ru2 = &ResourceUsage{
+	ru2 := &ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU2",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      2,
 	}
 
-	r1 = &Resource{
+	r1 := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
@@ -445,114 +442,22 @@ func TestResourceUsedUnits(t *testing.T) {
 	}
 }
 
-func TestResourceSort(t *testing.T) {
-	var r1 *Resource
-	var r2 *Resource
-	var ru1 *ResourceUsage
-	var ru2 *ResourceUsage
-	var rs Resources
-	ru1 = &ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU1",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      1,
-	}
-
-	ru2 = &ResourceUsage{
-		Tenant:     "cgrates.org",
-		ID:         "RU2",
-		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-		Units:      2,
-	}
-
-	r1 = &Resource{
-		Tenant: "cgrates.org",
-		ID:     "RL1",
-		rPrf: &ResourceProfile{
-			Tenant:    "cgrates.org",
-			ID:        "RL1",
-			FilterIDs: []string{"FLTR_RES_RL1", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 100,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-
-			UsageTTL:          time.Millisecond,
-			AllocationMessage: "ALLOC",
-		},
-		Usages: map[string]*ResourceUsage{
-			ru1.ID: ru1,
-		},
-		TTLIdx: []string{ru1.ID},
-		tUsage: utils.Float64Pointer(2),
-		weight: 100,
-	}
-
-	if err := r1.recordUsage(ru2); err != nil {
-		t.Error(err.Error())
-	} else {
-		if err := r1.recordUsage(ru1); err == nil {
-			t.Error("duplicate ResourceUsage id should not be allowed")
-		}
-		if _, found := r1.Usages[ru2.ID]; !found {
-			t.Error("ResourceUsage was not recorded")
-		}
-		if *r1.tUsage != 4 {
-			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
-		}
-	}
-	r2 = &Resource{
-		Tenant: "cgrates.org",
-		ID:     "RL2",
-		rPrf: &ResourceProfile{
-			ID:        "RL2",
-			FilterIDs: []string{"FLTR_RES_RL2", "*ai:~*req.AnswerTime:2014-07-03T13:43:00Z|2014-07-03T13:44:00Z"},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 50,
-				}},
-			Limit:        2,
-			ThresholdIDs: []string{"TEST_ACTIONS"},
-			UsageTTL:     time.Millisecond,
-		},
-		// AllocationMessage: "ALLOC2",
-		Usages: map[string]*ResourceUsage{
-			ru2.ID: ru2,
-		},
-		tUsage: utils.Float64Pointer(2),
-		weight: 50,
-	}
-
-	rs = Resources{r2, r1}
-	rs.Sort()
-
-	if rs[0].rPrf.ID != "RL1" {
-		t.Error("Sort failed")
-	}
-}
-
 func TestResourceClearUsage(t *testing.T) {
-	var r1 *Resource
-	var r2 *Resource
-	var ru1 *ResourceUsage
-	var ru2 *ResourceUsage
-	ru1 = &ResourceUsage{
+	ru1 := &ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      1,
 	}
 
-	ru2 = &ResourceUsage{
+	ru2 := &ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU2",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      2,
 	}
 
-	r1 = &Resource{
+	r1 := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
@@ -574,7 +479,6 @@ func TestResourceClearUsage(t *testing.T) {
 		},
 		TTLIdx: []string{ru1.ID},
 		tUsage: utils.Float64Pointer(2),
-		weight: 100,
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -590,7 +494,7 @@ func TestResourceClearUsage(t *testing.T) {
 			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
 		}
 	}
-	r2 = &Resource{
+	r2 := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
@@ -609,15 +513,8 @@ func TestResourceClearUsage(t *testing.T) {
 			ru2.ID: ru2,
 		},
 		tUsage: utils.Float64Pointer(2),
-		weight: 50,
 	}
 
-	rs := Resources{r2, r1}
-	rs.Sort()
-
-	if rs[0].rPrf.ID != "RL1" {
-		t.Error("Sort failed")
-	}
 	r1.Usages = map[string]*ResourceUsage{
 		ru1.ID: ru1,
 	}
@@ -638,25 +535,21 @@ func TestResourceClearUsage(t *testing.T) {
 	}
 }
 func TestResourceRecordUsages(t *testing.T) {
-	var r1 *Resource
-	var r2 *Resource
-	var ru1 *ResourceUsage
-	var ru2 *ResourceUsage
-	ru1 = &ResourceUsage{
+	ru1 := &ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      1,
 	}
 
-	ru2 = &ResourceUsage{
+	ru2 := &ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU2",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      2,
 	}
 
-	r1 = &Resource{
+	r1 := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
@@ -678,7 +571,6 @@ func TestResourceRecordUsages(t *testing.T) {
 		},
 		TTLIdx: []string{ru1.ID},
 		tUsage: utils.Float64Pointer(2),
-		weight: 100,
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -694,7 +586,7 @@ func TestResourceRecordUsages(t *testing.T) {
 			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
 		}
 	}
-	r2 = &Resource{
+	r2 := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
@@ -713,15 +605,9 @@ func TestResourceRecordUsages(t *testing.T) {
 			ru2.ID: ru2,
 		},
 		tUsage: utils.Float64Pointer(2),
-		weight: 50,
 	}
 
 	rs := Resources{r2, r1}
-	rs.Sort()
-
-	if rs[0].rPrf.ID != "RL1" {
-		t.Error("Sort failed")
-	}
 	r1.Usages = map[string]*ResourceUsage{
 		ru1.ID: ru1,
 	}
@@ -734,25 +620,21 @@ func TestResourceRecordUsages(t *testing.T) {
 	}
 }
 func TestResourceAllocateResource(t *testing.T) {
-	var r1 *Resource
-	var r2 *Resource
-	var ru1 *ResourceUsage
-	var ru2 *ResourceUsage
-	ru1 = &ResourceUsage{
+	ru1 := &ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU1",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      1,
 	}
 
-	ru2 = &ResourceUsage{
+	ru2 := &ResourceUsage{
 		Tenant:     "cgrates.org",
 		ID:         "RU2",
 		ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
 		Units:      2,
 	}
 
-	r1 = &Resource{
+	r1 := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL1",
 		rPrf: &ResourceProfile{
@@ -774,7 +656,6 @@ func TestResourceAllocateResource(t *testing.T) {
 		},
 		TTLIdx: []string{ru1.ID},
 		tUsage: utils.Float64Pointer(2),
-		weight: 100,
 	}
 
 	if err := r1.recordUsage(ru2); err != nil {
@@ -790,7 +671,7 @@ func TestResourceAllocateResource(t *testing.T) {
 			t.Errorf("expecting: %+v, received: %+v", 4, r1.tUsage)
 		}
 	}
-	r2 = &Resource{
+	r2 := &Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL2",
 		rPrf: &ResourceProfile{
@@ -809,15 +690,9 @@ func TestResourceAllocateResource(t *testing.T) {
 			ru2.ID: ru2,
 		},
 		tUsage: utils.Float64Pointer(2),
-		weight: 50,
 	}
 
-	rs := Resources{r2, r1}
-	rs.Sort()
-
-	if rs[0].rPrf.ID != "RL1" {
-		t.Error("Sort failed")
-	}
+	rs := Resources{r1, r2}
 	r1.Usages = map[string]*ResourceUsage{
 		ru1.ID: ru1,
 	}
@@ -3449,7 +3324,6 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 		tUsage: utils.Float64Pointer(10),
 		ttl:    utils.DurationPointer(time.Minute),
 		TTLIdx: []string{},
-		weight: 10,
 	}
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
@@ -3489,7 +3363,6 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 			tUsage: utils.Float64Pointer(10),
 			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
-			weight: 10,
 		},
 	}
 	var reply Resources
@@ -3794,7 +3667,6 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 		tUsage: utils.Float64Pointer(10),
 		ttl:    utils.DurationPointer(time.Minute),
 		TTLIdx: []string{},
-		weight: 10,
 	}
 	err := dm.SetResourceProfile(context.Background(), rsPrf, true)
 	if err != nil {
@@ -3834,7 +3706,6 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 			tUsage: utils.Float64Pointer(10),
 			ttl:    utils.DurationPointer(72 * time.Hour),
 			TTLIdx: []string{},
-			weight: 10,
 		},
 	}
 	var reply Resources
@@ -6552,7 +6423,6 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 		Usages: make(map[string]*ResourceUsage),
 		ttl:    utils.DurationPointer(10 * time.Second),
 		dirty:  utils.BoolPointer(false),
-		weight: 10,
 	}
 
 	if rcv, err := rS.matchingResourcesForEvent(context.Background(), "cgrates.org", ev, ev.ID,
