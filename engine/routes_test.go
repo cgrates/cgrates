@@ -240,8 +240,8 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !reflect.DeepEqual(spp, sprf[0].RouteProfile) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, sprf[0].RouteProfile)
+		if !reflect.DeepEqual(spp, sprf[0]) {
+			t.Errorf("Expecting: %+v, received: %+v", spp, sprf[0])
 		}
 	}
 }
@@ -552,8 +552,8 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !reflect.DeepEqual(spp, sprf[0].RouteProfile) {
-			t.Errorf("Expecting: %+v, received: %+v", spp, sprf[0].RouteProfile)
+		if !reflect.DeepEqual(spp, sprf[0]) {
+			t.Errorf("Expecting: %+v, received: %+v", spp, sprf[0])
 		}
 	}
 }
