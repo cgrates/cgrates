@@ -278,7 +278,7 @@ func routeLazyPass(ctx *context.Context, filters []*FilterRule, ev *utils.CGREve
 		return true, nil
 	}
 
-	dynDP := newDynamicDP(ctx, resConns, statConns, acntConns, //construct the DP and pass it to filterS
+	dynDP := NewDynamicDP(ctx, resConns, statConns, acntConns, //construct the DP and pass it to filterS
 		trdConns, rnkConns, ev.Tenant, utils.MapStorage{
 			utils.MetaReq:  ev.Event,
 			utils.MetaOpts: ev.APIOpts,
