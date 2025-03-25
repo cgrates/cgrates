@@ -33,7 +33,7 @@ import (
 
 func TestDynamicDPnewDynamicDP(t *testing.T) {
 
-	expDDP := &dynamicDP{
+	expDDP := &DynamicDP{
 		resConns:  []string{"conn1"},
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
@@ -45,7 +45,7 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 		ctx:   context.Background(),
 	}
 
-	if rcv := newDynamicDP(context.Background(), []string{"conn1"}, []string{"conn2"},
+	if rcv := NewDynamicDP(context.Background(), []string{"conn1"}, []string{"conn2"},
 		[]string{"conn3"}, nil, nil, "cgrates.org",
 		utils.StringSet{"test": struct{}{}}); !reflect.DeepEqual(rcv, expDDP) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -55,7 +55,7 @@ func TestDynamicDPnewDynamicDP(t *testing.T) {
 
 func TestDynamicDPString(t *testing.T) {
 
-	rcv := &dynamicDP{
+	rcv := &DynamicDP{
 		resConns:  []string{"conn1"},
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
@@ -76,7 +76,7 @@ func TestDynamicDPString(t *testing.T) {
 
 func TestDynamicDPFieldAsInterfaceErrFilename(t *testing.T) {
 
-	rcv := &dynamicDP{
+	rcv := &DynamicDP{
 		resConns:  []string{"conn1"},
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
@@ -96,7 +96,7 @@ func TestDynamicDPFieldAsInterfaceErrFilename(t *testing.T) {
 
 func TestDynamicDPFieldAsInterfaceErrLenFldPath(t *testing.T) {
 
-	rcv := &dynamicDP{
+	rcv := &DynamicDP{
 		resConns:  []string{"conn1"},
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
@@ -116,7 +116,7 @@ func TestDynamicDPFieldAsInterfaceErrLenFldPath(t *testing.T) {
 
 func TestDynamicDPFieldAsInterface(t *testing.T) {
 
-	DDP := &dynamicDP{
+	DDP := &DynamicDP{
 		resConns:  []string{"conn1"},
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
@@ -405,7 +405,7 @@ func TestLibphonenumberDPfieldAsInterface(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceMetaLibPhoneNumber(t *testing.T) {
 
-	dDP := &dynamicDP{
+	dDP := &DynamicDP{
 		resConns:  []string{"conn1"},
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
@@ -435,7 +435,7 @@ func TestDynamicDPfieldAsInterfaceMetaLibPhoneNumber(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaLibPhoneNumber(t *testing.T) {
 
-	dDP := &dynamicDP{
+	dDP := &DynamicDP{
 		resConns:  []string{"conn1"},
 		stsConns:  []string{"conn2"},
 		actsConns: []string{"conn3"},
@@ -456,7 +456,7 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 	Cache.Clear(nil)
 
 	ms := utils.MapStorage{}
-	dDp := newDynamicDP(context.Background(), []string{}, []string{}, []string{}, nil, nil, "cgrates.org", ms)
+	dDp := NewDynamicDP(context.Background(), []string{}, []string{}, []string{}, nil, nil, "cgrates.org", ms)
 
 	if _, err := dDp.fieldAsInterface([]string{"inexistentfld1", "inexistentfld2"}); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
@@ -465,7 +465,7 @@ func TestDynamicDPfieldAsInterfaceNotFound(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 
-	dDP := &dynamicDP{
+	dDP := &DynamicDP{
 
 		stsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
 
@@ -497,7 +497,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
 
-	dDP := &dynamicDP{
+	dDP := &DynamicDP{
 		resConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
 
 		tenant: "cgrates.org",
@@ -528,7 +528,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaResources(t *testing.T) {
 
 func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 
-	dDP := &dynamicDP{
+	dDP := &DynamicDP{
 
 		actsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
 		tenant:    "cgrates.org",
@@ -560,7 +560,7 @@ func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
 	Cache.Clear(nil)
 
-	dDP := &dynamicDP{
+	dDP := &DynamicDP{
 
 		actsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
 		tenant:    "cgrates.org",
@@ -628,7 +628,7 @@ func TestDynamicDPfieldAsInterfaceMetaAccounts(t *testing.T) {
 func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	Cache.Clear(nil)
 
-	dDP := &dynamicDP{
+	dDP := &DynamicDP{
 
 		resConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
 		tenant:   "cgrates.org",
@@ -697,7 +697,7 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	Cache.Clear(nil)
 
-	dDP := &dynamicDP{
+	dDP := &DynamicDP{
 
 		stsConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
 		tenant:   "cgrates.org",

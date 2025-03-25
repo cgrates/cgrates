@@ -27,9 +27,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newDynamicDP(ctx *context.Context, resConns, stsConns, actsConns, trdConns, rnkCOnns []string,
-	tenant string, initialDP utils.DataProvider) *dynamicDP {
-	return &dynamicDP{
+func NewDynamicDP(ctx *context.Context, resConns, stsConns, actsConns, trdConns, rnkCOnns []string,
+	tenant string, initialDP utils.DataProvider) *DynamicDP {
+	return &DynamicDP{
 		resConns:  resConns,
 		stsConns:  stsConns,
 		actsConns: actsConns,
@@ -42,7 +42,7 @@ func newDynamicDP(ctx *context.Context, resConns, stsConns, actsConns, trdConns,
 	}
 }
 
-type dynamicDP struct {
+type DynamicDP struct {
 	resConns  []string
 	stsConns  []string
 	actsConns []string
@@ -55,9 +55,9 @@ type dynamicDP struct {
 	ctx   *context.Context
 }
 
-func (dDP *dynamicDP) String() string { return dDP.initialDP.String() }
+func (dDP *DynamicDP) String() string { return dDP.initialDP.String() }
 
-func (dDP *dynamicDP) FieldAsString(fldPath []string) (string, error) {
+func (dDP *DynamicDP) FieldAsString(fldPath []string) (string, error) {
 	val, err := dDP.FieldAsInterface(fldPath)
 	if err != nil {
 		return "", err
@@ -72,7 +72,7 @@ var initialDPPrefixes = utils.NewStringSet([]string{
 	utils.MetaHdr, utils.MetaTrl, utils.MetaCfg,
 	utils.MetaTenant, utils.MetaTmp})
 
-func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val any, err error) {
+func (dDP *DynamicDP) FieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
@@ -87,7 +87,7 @@ func (dDP *dynamicDP) FieldAsInterface(fldPath []string) (val any, err error) {
 	return
 }
 
-func (dDP *dynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
+func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 	if len(fldPath) < 2 {
 		return nil, fmt.Errorf("invalid fieldname <%s>", fldPath)
 	}

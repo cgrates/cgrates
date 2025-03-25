@@ -560,7 +560,7 @@ func TestAttributeProcessEventBlockerFromDynamicsErr(t *testing.T) {
 	}
 
 	expErr := "NOT_IMPLEMENTED:*stirng"
-	_, err := attrS.processEvent(context.TODO(), attrEvs.Tenant, attrEvs, eNM, newDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	_, err := attrS.processEvent(context.TODO(), attrEvs.Tenant, attrEvs, eNM, NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
 	}
@@ -625,7 +625,7 @@ func TestAttributeSProcessEventPassErr(t *testing.T) {
 	}
 
 	expErr := `invalid converter value in string: <*>, err: unsupported converter definition: <*>`
-	_, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	_, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
@@ -687,7 +687,7 @@ func TestAttributeSProcessAttrBlockerFromDynamicsErr(t *testing.T) {
 	}
 
 	expErr := "NOT_IMPLEMENTED:*stirng"
-	_, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	_, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err == nil || err.Error() != expErr {
 		t.Errorf("Expected error %s received: %v", expErr, err)
 	}
@@ -761,7 +761,7 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 		CGREvent: ev,
 	}
 
-	rcv, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, newDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
+	rcv, err := attrS.processEvent(context.TODO(), attrPrf.Tenant, ev, eNM, NewDynamicDP(context.TODO(), nil, nil, nil, nil, nil, "cgrates.org", eNM), utils.EmptyString, make(map[string]int), 0)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(rcv)) {
