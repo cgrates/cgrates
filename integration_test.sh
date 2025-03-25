@@ -8,7 +8,7 @@
 # Example:
 # ./integration_test.sh -dbtype=*mysql -rpc=*gob
 
-packages=("agents" "apis" "cmd/cgr-console" "cmd/cgr-loader" "efs" "engine" "ers" "general_tests" "loaders" "registrarc" "sessions")
+packages=("agents" "apis" "chargers" "cmd/cgr-console" "cmd/cgr-loader" "efs" "engine" "ers" "general_tests" "loaders" "rankings" "registrarc" "sessions" "trends")
 dbtypes=("*internal" "*mysql" "*mongo" "*postgres")
 
 # Tests that are independent of the dbtype flag and run only once
@@ -22,7 +22,7 @@ execute_test() {
    results+=($?)
 }
 
-go clean --cache 
+go clean --cache
 
 # Execute tests based on passed arguments
 if [ "$#" -ne 0 ]; then
