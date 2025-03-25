@@ -1001,7 +1001,7 @@ func testChargersBlockerGetChargersForEvent(t *testing.T) {
 			RunID: "run2",
 		},
 	}
-	var reply utils.ChargerProfile
+	var reply []*utils.ChargerProfile
 	if err := chargersRPC.Call(context.Background(), utils.ChargerSv1GetChargersForEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
