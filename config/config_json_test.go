@@ -1878,7 +1878,6 @@ func TestDfHttpJsonCfg(t *testing.T) {
 	eCfg := &HTTPJsonCfg{
 		Json_rpc_url:        utils.StringPointer("/jsonrpc"),
 		Registrars_url:      utils.StringPointer("/registrar"),
-		PrometheusURL:       utils.StringPointer("/prometheus"),
 		Ws_url:              utils.StringPointer("/ws"),
 		Freeswitch_cdrs_url: utils.StringPointer("/freeswitch_json"),
 		Http_Cdrs:           utils.StringPointer("/cdr_http"),

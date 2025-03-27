@@ -38,7 +38,6 @@ import (
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"golang.org/x/net/websocket"
 )
 
@@ -188,7 +187,7 @@ func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, res)
 }
 
-func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string, useBasicAuth bool,
+func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, pprofPath string, useBasicAuth bool,
 	userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -218,18 +217,6 @@ func (s *Server) ServeHTTP(addr, jsonRPCURL, wsRPCURL, promURL, pprofPath string
 			s.httpMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpMux.Handle(wsRPCURL, wsHandler)
-		}
-	}
-	if promURL != "" {
-		s.Lock()
-		s.httpEnabled = true
-		s.Unlock()
-		utils.Logger.Info(fmt.Sprintf("<HTTP> prometheus metrics endpoint registered at %q", promURL))
-		promHandler := promhttp.Handler()
-		if useBasicAuth {
-			s.httpMux.HandleFunc(promURL, use(promHandler.ServeHTTP, basicAuth(userList)))
-		} else {
-			s.httpMux.Handle(promURL, promHandler)
 		}
 	}
 	if pprofPath != "" {
@@ -452,7 +439,7 @@ func (s *Server) handleWebSocket(ws *websocket.Conn) {
 }
 
 func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverPolicy int,
-	serverName, jsonRPCURL, wsRPCURL, promURL, pprofPath string,
+	serverName, jsonRPCURL, wsRPCURL, pprofPath string,
 	useBasicAuth bool, userList map[string]string, shdChan *utils.SyncedChan) {
 	s.RLock()
 	enabled := s.rpcEnabled
@@ -481,18 +468,6 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 			s.httpsMux.HandleFunc(wsRPCURL, use(wsHandler.ServeHTTP, basicAuth(userList)))
 		} else {
 			s.httpsMux.Handle(wsRPCURL, wsHandler)
-		}
-	}
-	if promURL != "" {
-		s.Lock()
-		s.httpEnabled = true
-		s.Unlock()
-		utils.Logger.Info(fmt.Sprintf("<HTTPS> prometheus metrics endpoint registered at %q", promURL))
-		promHandler := promhttp.Handler()
-		if useBasicAuth {
-			s.httpsMux.HandleFunc(promURL, use(promHandler.ServeHTTP, basicAuth(userList)))
-		} else {
-			s.httpsMux.Handle(promURL, promHandler)
 		}
 	}
 	if pprofPath != "" {
