@@ -624,6 +624,7 @@ func main() {
 		services.NewRadiusAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),   // partial reload
 		services.NewDiameterAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep), // partial reload
 		services.NewHTTPAgent(cfg, filterSChan, server, connManager, srvDep),            // no reload
+		services.NewPrometheusAgent(cfg, connManager, server, srvDep),
 		ldrs, anz, dspS, dspH, dmService, storDBService,
 		services.NewEventExporterService(cfg, filterSChan,
 			connManager, server, internalEEsChan, anz, srvDep),
