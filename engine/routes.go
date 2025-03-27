@@ -298,7 +298,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 		if err := rpS.connMgr.Call(ctx, rpS.cfg.RouteSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args = rplyEv.CGREvent
-			args.APIOpts = rplyEv.APIOpts
+			args.APIOpts = rplyEv.CGREvent.APIOpts
 		} else if err = utils.CastRPCErr(err); err != utils.ErrNotFound {
 			return utils.NewErrRouteS(err)
 		}
