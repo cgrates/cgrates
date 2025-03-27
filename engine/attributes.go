@@ -125,8 +125,8 @@ func (flds *AttrSProcessEventReply) UniqueAlteredFields() (unFlds utils.StringSe
 // AttrSProcessEventReply reply used for proccess event
 type AttrSProcessEventReply struct {
 	AlteredFields []*FieldsAltered
-	*utils.CGREvent
-	blocker bool // internally used to stop further processRuns
+	CGREvent      *utils.CGREvent
+	blocker       bool // internally used to stop further processRuns
 }
 
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
@@ -177,7 +177,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 		CGREvent: args,
 		blocker:  blocker,
 	}
-	rply.Tenant = tnt
+	rply.CGREvent.Tenant = tnt
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {

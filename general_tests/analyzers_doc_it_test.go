@@ -121,7 +121,7 @@ func TestAnzDocIT(t *testing.T) {
 
 	anzStringQuery(t, client, 7, "", "*lte:~*hdr.RequestID:2")
 	anzStringQuery(t, client, -1, "", "*gt:~*hdr.RequestDuration:1ms")
-	anzStringQuery(t, client, 1, `+RequestMethod:"AttributeSv1.ProcessEvent"`, "*notstring:~*rep.Event.Cost:0")
+	anzStringQuery(t, client, 1, `+RequestMethod:"AttributeSv1.ProcessEvent"`, "*notstring:~*rep.CGREvent.Event.Cost:0")
 	anzStringQuery(t, client, 1, `+RequestMethod:"CoreSv1.Status"`, "*gt:~*rep.goroutines:47")
 }
 
@@ -432,7 +432,7 @@ func attrProcessEvents(t *testing.T, client *birpc.Client) {
 			utils.Cost:         2.01,
 		},
 	}
-	expectedReply := `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_1001","Fields":["*req.RequestType"]}],"Tenant":"cgrates.org","ID":"call1001to1002","Event":{"Account":"1001","AnswerTime":"2013-11-07T08:42:28Z","Category":"call","Cost":1.01,"Destination":"1002","OriginHost":"192.168.1.1","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":10000000000},"APIOpts":{}}`
+	expectedReply := `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_1001","Fields":["*req.RequestType"]}],"CGREvent":{"Tenant":"cgrates.org","ID":"call1001to1002","Event":{"Account":"1001","AnswerTime":"2013-11-07T08:42:28Z","Category":"call","Cost":1.01,"Destination":"1002","OriginHost":"192.168.1.1","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":10000000000},"APIOpts":{}}}`
 	var rplyEv engine.AttrSProcessEventReply
 	if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		eventCall1001to1002, &rplyEv); err != nil {
@@ -441,7 +441,7 @@ func attrProcessEvents(t *testing.T, client *birpc.Client) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			expectedReply, jsonReply)
 	}
-	expectedReply = `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_PRF_11","Fields":["*req.Cost"]},{"MatchedProfileID":"cgrates.org:ATTR_1101","Fields":["*req.RequestType"]}],"Tenant":"cgrates.org","ID":"call1011to1002","Event":{"Account":"1101","AnswerTime":"2013-11-07T08:42:35Z","Category":"call","Cost":"0","Destination":"1002","OriginHost":"192.168.1.1","OriginID":"ghijkl","RequestType":"*prepaid","RunID":"*default","SetupTime":"2013-11-07T08:42:28Z","Subject":"1101","Tenant":"cgrates.org","ToR":"*voice","Usage":15000000000},"APIOpts":{}}`
+	expectedReply = `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_PRF_11","Fields":["*req.Cost"]},{"MatchedProfileID":"cgrates.org:ATTR_1101","Fields":["*req.RequestType"]}],"CGREvent":{"Tenant":"cgrates.org","ID":"call1011to1002","Event":{"Account":"1101","AnswerTime":"2013-11-07T08:42:35Z","Category":"call","Cost":"0","Destination":"1002","OriginHost":"192.168.1.1","OriginID":"ghijkl","RequestType":"*prepaid","RunID":"*default","SetupTime":"2013-11-07T08:42:28Z","Subject":"1101","Tenant":"cgrates.org","ToR":"*voice","Usage":15000000000},"APIOpts":{}}}`
 	if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		eventCall1101to1002, &rplyEv); err != nil {
 		t.Error(err)
@@ -449,7 +449,7 @@ func attrProcessEvents(t *testing.T, client *birpc.Client) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			expectedReply, jsonReply)
 	}
-	expectedReply = `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_PRF_11","Fields":["*req.Cost"]},{"MatchedProfileID":"cgrates.org:ATTR_1102","Fields":["*req.RequestType"]}],"Tenant":"cgrates.org","ID":"call1102to1001","Event":{"Account":"1102","AnswerTime":"2013-11-07T08:42:42Z","Category":"call","Cost":"0","Destination":"1001","OriginHost":"192.168.1.1","OriginID":"uvwxyz","RequestType":"*pseudoprepaid","RunID":"*default","SetupTime":"2013-11-07T08:42:35Z","Subject":"1102","Tenant":"cgrates.org","ToR":"*voice","Usage":20000000000},"APIOpts":{}}`
+	expectedReply = `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_PRF_11","Fields":["*req.Cost"]},{"MatchedProfileID":"cgrates.org:ATTR_1102","Fields":["*req.RequestType"]}],"CGREvent":{"Tenant":"cgrates.org","ID":"call1102to1001","Event":{"Account":"1102","AnswerTime":"2013-11-07T08:42:42Z","Category":"call","Cost":"0","Destination":"1001","OriginHost":"192.168.1.1","OriginID":"uvwxyz","RequestType":"*pseudoprepaid","RunID":"*default","SetupTime":"2013-11-07T08:42:35Z","Subject":"1102","Tenant":"cgrates.org","ToR":"*voice","Usage":20000000000},"APIOpts":{}}}`
 	if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		eventCall1102to1001, &rplyEv); err != nil {
 		t.Error(err)

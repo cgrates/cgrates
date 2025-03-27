@@ -5461,11 +5461,11 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 		t.Fatalf("expected: <%+v>,\nreceived: <%+v>",
 			utils.ToJSON(exp.AlteredFields), utils.ToJSON(reply.AlteredFields))
 	} else {
-		hashedPw = utils.IfaceAsString(reply.Event["Password"])
+		hashedPw = utils.IfaceAsString(reply.CGREvent.Event["Password"])
 		if !utils.VerifyHash(hashedPw, "abcd123") {
 			t.Fatalf("expected: <%+v>, \nreceived: <%+v>", "abcd123", hashedPw)
 		}
-		exp.Event["Password"] = hashedPw
+		exp.CGREvent.Event["Password"] = hashedPw
 		if !reflect.DeepEqual(reply.CGREvent, exp.CGREvent) {
 			t.Fatalf("expected: <%+v>, \nreceived: <%+v>",
 				utils.ToJSON(exp.CGREvent), utils.ToJSON(reply.CGREvent))
