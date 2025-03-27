@@ -152,6 +152,7 @@
 // 	"opts": {
 // 		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
 // 		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
+// 		"sqlLogLevel": 3,	        // sql logger verbosity: 1=Silent, 2=Error, 3=Warn, 4=Info
 // 		"sqlConnMaxLifetime": "0", 	// maximum amount of time a connection may be reused (0 for unlimited), not applying for mongo
 // 		"mysqlDSNParams": {},           // DSN extra paramss
 // 		"mongoQueryTimeout": "10s",	// timeout for query when mongo is used
@@ -276,7 +277,7 @@
 // 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control trend profiles caching
 // 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control trends caching
 // 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// ranking profiles
-// 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	 // controle rankings caching
+// 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	 // control rankings caching
 // 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
 // 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// statqueues with metrics
 // 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
@@ -355,6 +356,7 @@
 // 	"enabled": false,		// start the CDR Server:  <true|false>
 // 	"extra_fields": [],		// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
 // 	"store_cdrs": true,		// store cdrs in StorDB
+// 	"compress_stored_cost": false,	// compress CostDetails before storing
 // 	"session_cost_retries": 5,	// number of queries to session_costs before recalculating CDR
 // 	"chargers_conns": [],		// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
 // 	"rals_conns": [],		// connections to RALs for cost calculation: <""|*internal|$rpc_conns_id>
@@ -377,7 +379,7 @@
 // 		{
 // 			"id": "*default",					// identifier of the EventReader profile
 // 			"type": "*none",					// reader type <*file_csv>
-// 			"run_delay": "0",					// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+// 			"run_delay": "0",					// sleep interval between consecutive runs; "-1" to use automation via inotify; "0" to disable running all together; <""|$dur>
 // 			"start_delay": "0",                 // time to wait before an reader starts to run 	
 // 			"concurrent_requests": 1024,				// maximum simultaneous requests/files to process, 0 for unlimited
 // 			"source_path": "/var/spool/cgrates/ers/in",		// read data from this path
@@ -387,8 +389,9 @@
 // 			"filters": [],						// limit parsing based on the filters
 // 			"flags": [],						// flags to influence the event processing
 // 			"reconnects": -1,					// number of retries in case of connection lost
-// 			"ees_success_ids": [],					// ids of exporters used for moving the successfully processed event
-// 			"ees_failed_ids": [],					// ids of exporters used for moving the unprocessed event
+// 			"ees_ids": [], 						// ids of exporters used for moving the processed event to EEs
+// 			"ees_success_ids": [],					// ids of exporters used for moving the raw event to EEs
+// 			"ees_failed_ids": [],					// ids of exporters used for moving the failed raw event to EEs
 // 			"max_reconnect_interval": "5m", 			// time to wait in between reconnect attempts
 // 			"opts": {
 // 				// Partial
@@ -428,6 +431,8 @@
 // 				// SQL
 // 				// "sqlDBName": "cgrates", 			// the name of the database from were the events are read
 // 				// "sqlTableName": "cdrs",			// the name of the table from were the events are read
+// 				// "sqlBatchSize: 0, 				// number of SQL rows that can be selected at a time. 0 or lower for unlimited
+// 				// "sqlDeleteIndexedFields": [],   		// list of fields to DELETE from the table
 // 				// "pgSSLMode": "disable",			// the ssl mode for postgres db
 
 // 				// SQS and S3
@@ -479,6 +484,14 @@
 // 	"attributes_conns":[],				// RPC Connections IDs
 // 	"cache": {
 // 		"*file_csv": {"limit": -1, "ttl": "5s", "static_ttl": false},
+// 		"*nats_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
+// 		"*amqp_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
+// 		"*amqpv1_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
+// 		"*kafka_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
+// 		"*s3_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
+// 		"*sqs_json_map": {"limit": -1, "ttl": "", "static_ttl": false},
+// 		"*sql": {"limit": -1, "ttl": "", "static_ttl": false},
+// 		"*els": {"limit": -1, "ttl": "", "static_ttl": false},
 // 	},
 // 	"exporters": [
 // 		{
@@ -494,6 +507,7 @@
 // 			"attribute_context": "",				// context used to discover matching Attribute profiles
 // 			"synchronous": false,					// block processing until export has a result
 // 			"attempts": 1,						// export attempts
+// 			"metrics_reset_schedule": "", 				// cron schedule for resetting exporter metrics (empty disables automatic reset)
 // 			"opts": {
 
 // 				// CSV
@@ -531,6 +545,7 @@
 // 				// "sqlMaxIdleConns": 0,	// SQLMaxIdleConns
 // 				// "sqlMaxOpenConns": 0,	// SQLMaxOpenConns
 // 				// "sqlConnMaxLifetime": "0",	// SQLConnMaxLifetime
+// 				// "sqlUpdateIndexedFields": [], // list of field names used for indexing UPDATE queries from the table
 // 				// "mysqlDSNParams": {},        // DSN params
 
 
@@ -703,6 +718,7 @@
 // 	"listen": "127.0.0.1:3868",					// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
 // 	"listen_net": "tcp",						// transport type for diameter <tcp|sctp>
 // 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
+// 	// "ce_applications": [],					// list of applications in dictionaries wanted to be included in Capability-Exchange. Needed either "app name", "app ID", or "vendor name.app name/ID"
 // 	"sessions_conns": ["*birpc_internal"],
 // 	"origin_host": "CGR-DA",					// diameter Origin-Host AVP used in replies
 // 	"origin_realm": "cgrates.org",					// diameter Origin-Realm AVP used in replies
@@ -764,6 +780,17 @@
 // 	"sessions_conns": ["*internal"],
 // 	"timezone": "",					// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 // 	"request_processors": []			// request processors to be applied to DNS messages
+// },
+
+
+// "prometheus_agent": {
+// 	"enabled": false,			// enables the prometheus agent: <true|false>
+// 	"path": "/prometheus",			// endpoint for prometheus metrics
+// 	"collect_go_metrics": false, 		// include Go runtime metrics (memory, GC, goroutines)
+// 	"collect_process_metrics": false, 	// include process metrics (CPU, file descriptors)
+// 	// "cores_conns": [], 			// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>
+// 	// "stats_conns": [],			// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+// 	// "stat_queue_ids": []			// StatQueue IDs to collect metrics from <[tenant]:ID>
 // },
 
 
