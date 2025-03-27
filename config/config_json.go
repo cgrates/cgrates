@@ -23,58 +23,59 @@ import (
 )
 
 const (
-	GENERAL_JSN        = "general"
-	CACHE_JSN          = "caches"
-	LISTEN_JSN         = "listen"
-	HTTP_JSN           = "http"
-	DATADB_JSN         = "data_db"
-	STORDB_JSN         = "stor_db"
-	FilterSjsn         = "filters"
-	RALS_JSN           = "rals"
-	SCHEDULER_JSN      = "schedulers"
-	CDRS_JSN           = "cdrs"
-	SessionSJson       = "sessions"
-	FreeSWITCHAgentJSN = "freeswitch_agent"
-	KamailioAgentJSN   = "kamailio_agent"
-	AsteriskAgentJSN   = "asterisk_agent"
-	DA_JSN             = "diameter_agent"
-	RA_JSN             = "radius_agent"
-	HttpAgentJson      = "http_agent"
-	ATTRIBUTE_JSN      = "attributes"
-	RESOURCES_JSON     = "resources"
-	STATS_JSON         = "stats"
-	THRESHOLDS_JSON    = "thresholds"
-	TRENDS_JSON        = "trends"
-	RANKINGS_JSON      = "rankings"
-	RouteSJson         = "routes"
-	LoaderJson         = "loaders"
-	MAILER_JSN         = "mailer"
-	SURETAX_JSON       = "suretax"
-	DispatcherSJson    = "dispatchers"
-	RegistrarCJson     = "registrarc"
-	CgrLoaderCfgJson   = "loader"
-	CgrMigratorCfgJson = "migrator"
-	ChargerSCfgJson    = "chargers"
-	TlsCfgJson         = "tls"
-	AnalyzerCfgJson    = "analyzers"
-	ApierS             = "apiers"
-	DNSAgentJson       = "dns_agent"
-	ERsJson            = "ers"
-	EEsJson            = "ees"
-	RPCConnsJsonName   = "rpc_conns"
-	SIPAgentJson       = "sip_agent"
-	JanusAgentJson     = "janus_agent"
-	TemplatesJson      = "templates"
-	ConfigSJson        = "configs"
-	APIBanCfgJson      = "apiban"
-	SentryPeerCfgJson  = "sentrypeer"
-	CoreSCfgJson       = "cores"
+	GENERAL_JSN         = "general"
+	CACHE_JSN           = "caches"
+	LISTEN_JSN          = "listen"
+	HTTP_JSN            = "http"
+	DATADB_JSN          = "data_db"
+	STORDB_JSN          = "stor_db"
+	FilterSjsn          = "filters"
+	RALS_JSN            = "rals"
+	SCHEDULER_JSN       = "schedulers"
+	CDRS_JSN            = "cdrs"
+	SessionSJson        = "sessions"
+	FreeSWITCHAgentJSN  = "freeswitch_agent"
+	KamailioAgentJSN    = "kamailio_agent"
+	AsteriskAgentJSN    = "asterisk_agent"
+	DA_JSN              = "diameter_agent"
+	RA_JSN              = "radius_agent"
+	HttpAgentJson       = "http_agent"
+	PrometheusAgentJSON = "prometheus_agent"
+	ATTRIBUTE_JSN       = "attributes"
+	RESOURCES_JSON      = "resources"
+	STATS_JSON          = "stats"
+	THRESHOLDS_JSON     = "thresholds"
+	TRENDS_JSON         = "trends"
+	RANKINGS_JSON       = "rankings"
+	RouteSJson          = "routes"
+	LoaderJson          = "loaders"
+	MAILER_JSN          = "mailer"
+	SURETAX_JSON        = "suretax"
+	DispatcherSJson     = "dispatchers"
+	RegistrarCJson      = "registrarc"
+	CgrLoaderCfgJson    = "loader"
+	CgrMigratorCfgJson  = "migrator"
+	ChargerSCfgJson     = "chargers"
+	TlsCfgJson          = "tls"
+	AnalyzerCfgJson     = "analyzers"
+	ApierS              = "apiers"
+	DNSAgentJson        = "dns_agent"
+	ERsJson             = "ers"
+	EEsJson             = "ees"
+	RPCConnsJsonName    = "rpc_conns"
+	SIPAgentJson        = "sip_agent"
+	JanusAgentJson      = "janus_agent"
+	TemplatesJson       = "templates"
+	ConfigSJson         = "configs"
+	APIBanCfgJson       = "apiban"
+	SentryPeerCfgJson   = "sentrypeer"
+	CoreSCfgJson        = "cores"
 )
 
 var (
 	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN,
 		CACHE_JSN, FilterSjsn, RALS_JSN, CDRS_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
-		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, TRENDS_JSON, RANKINGS_JSON,
+		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, PrometheusAgentJSON, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, TRENDS_JSON, RANKINGS_JSON,
 		THRESHOLDS_JSON, RouteSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, JanusAgentJson,
 		AnalyzerCfgJson, ApierS, EEsJson, SIPAgentJson, RegistrarCJson, TemplatesJson, ConfigSJson, APIBanCfgJson, SentryPeerCfgJson, CoreSCfgJson}
 )
@@ -321,6 +322,18 @@ func (jsnCfg CgrJsonCfg) DNSAgentJsonCfg() (da *DNSAgentJsonCfg, err error) {
 	da = new(DNSAgentJsonCfg)
 	err = json.Unmarshal(*rawCfg, da)
 	return
+}
+
+func (jc CgrJsonCfg) PrometheusAgentJsonCfg() (*PrometheusAgentJsonCfg, error) {
+	rawCfg, hasKey := jc[PrometheusAgentJSON]
+	if !hasKey {
+		return nil, nil
+	}
+	var pa *PrometheusAgentJsonCfg
+	if err := json.Unmarshal(*rawCfg, &pa); err != nil {
+		return nil, err
+	}
+	return pa, nil
 }
 
 func (cgrJsn CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {

@@ -2103,6 +2103,7 @@ const (
 	HTTPAgent       = "HTTPAgent"
 	SIPAgent        = "SIPAgent"
 	JanusAgent      = "JanusAgent"
+	PrometheusAgent = "PrometheusAgent"
 )
 
 // Google_API
@@ -2414,6 +2415,12 @@ const (
 	CoATemplateCfg        = "coa_template"
 	HostCfg               = "host"
 	PortCfg               = "port"
+
+	// PrometheusAgentCfg
+	CoreSConnsCfg            = "cores_conns"
+	CollectGoMetricsCfg      = "collect_go_metrics"
+	CollectProcessMetricsCfg = "collect_process_metrics"
+	StatQueueIDsCfg          = "stat_queue_ids"
 
 	// AttributeSCfg
 	IndexedSelectsCfg           = "indexed_selects"

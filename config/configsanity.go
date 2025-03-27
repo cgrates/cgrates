@@ -1226,6 +1226,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> the CleanupInterval needs to be bigger than 0", utils.AnalyzerS)
 		}
 	}
+	if cfg.prometheusAgentCfg.Enabled {
+		for _, connID := range cfg.prometheusAgentCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatService, utils.PrometheusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+			}
+		}
+		if len(cfg.prometheusAgentCfg.CoreSConns) > 0 {
+			if cfg.prometheusAgentCfg.CollectGoMetrics || cfg.prometheusAgentCfg.CollectProcessMetrics {
+				return fmt.Errorf("<%s> collect_go_metrics and collect_process_metrics cannot be enabled when using CoreSConns",
+					utils.PrometheusAgent)
+			}
+		}
+	}
 
 	return nil
 }
