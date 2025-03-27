@@ -150,6 +150,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
 	cfg.dnsAgentCfg = new(DNSAgentCfg)
+	cfg.prometheusAgentCfg = new(PrometheusAgentCfg)
 	cfg.attributeSCfg = &AttributeSCfg{Opts: &AttributesOpts{}}
 	cfg.chargerSCfg = new(ChargerSCfg)
 	cfg.resourceSCfg = &ResourceSConfig{Opts: &ResourcesOpts{}}
@@ -293,48 +294,49 @@ type CGRConfig struct {
 
 	templates FcTemplates
 
-	generalCfg       *GeneralCfg       // General config
-	dataDbCfg        *DataDbCfg        // Database config
-	storDbCfg        *StorDbCfg        // StroreDb config
-	tlsCfg           *TLSCfg           // TLS config
-	cacheCfg         *CacheCfg         // Cache config
-	listenCfg        *ListenCfg        // Listen config
-	httpCfg          *HTTPCfg          // HTTP config
-	filterSCfg       *FilterSCfg       // FilterS config
-	ralsCfg          *RalsCfg          // Rals config
-	schedulerCfg     *SchedulerCfg     // Scheduler config
-	cdrsCfg          *CdrsCfg          // Cdrs config
-	sessionSCfg      *SessionSCfg      // SessionS config
-	fsAgentCfg       *FsAgentCfg       // FreeSWITCHAgent config
-	kamAgentCfg      *KamAgentCfg      // KamailioAgent config
-	asteriskAgentCfg *AsteriskAgentCfg // AsteriskAgent config
-	diameterAgentCfg *DiameterAgentCfg // DiameterAgent config
-	radiusAgentCfg   *RadiusAgentCfg   // RadiusAgent config
-	dnsAgentCfg      *DNSAgentCfg      // DNSAgent config
-	attributeSCfg    *AttributeSCfg    // AttributeS config
-	chargerSCfg      *ChargerSCfg      // ChargerS config
-	resourceSCfg     *ResourceSConfig  // ResourceS config
-	statsCfg         *StatSCfg         // StatS config
-	trendsCfg        *TrendSCfg        // TrendS config
-	rankingsCfg      *RankingSCfg      // Rankings config
-	thresholdSCfg    *ThresholdSCfg    // ThresholdS config
-	routeSCfg        *RouteSCfg        // RouteS config
-	sureTaxCfg       *SureTaxCfg       // SureTax config
-	dispatcherSCfg   *DispatcherSCfg   // DispatcherS config
-	registrarCCfg    *RegistrarCCfgs   // RegistrarC config
-	loaderCgrCfg     *LoaderCgrCfg     // LoaderCgr config
-	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
-	mailerCfg        *MailerCfg        // Mailer config
-	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
-	apier            *ApierCfg         // APIer config
-	ersCfg           *ERsCfg           // EventReader config
-	eesCfg           *EEsCfg           // EventExporter config
-	sipAgentCfg      *SIPAgentCfg      // SIPAgent config
-	janusAgentCfg    *JanusAgentCfg    // JanusAgent config
-	configSCfg       *ConfigSCfg       // ConfigS config
-	apiBanCfg        *APIBanCfg        // APIBan config
-	sentryPeerCfg    *SentryPeerCfg    //SentryPeer config
-	coreSCfg         *CoreSCfg         // CoreS config
+	generalCfg         *GeneralCfg         // General config
+	dataDbCfg          *DataDbCfg          // Database config
+	storDbCfg          *StorDbCfg          // StroreDb config
+	tlsCfg             *TLSCfg             // TLS config
+	cacheCfg           *CacheCfg           // Cache config
+	listenCfg          *ListenCfg          // Listen config
+	httpCfg            *HTTPCfg            // HTTP config
+	filterSCfg         *FilterSCfg         // FilterS config
+	ralsCfg            *RalsCfg            // Rals config
+	schedulerCfg       *SchedulerCfg       // Scheduler config
+	cdrsCfg            *CdrsCfg            // Cdrs config
+	sessionSCfg        *SessionSCfg        // SessionS config
+	fsAgentCfg         *FsAgentCfg         // FreeSWITCHAgent config
+	kamAgentCfg        *KamAgentCfg        // KamailioAgent config
+	asteriskAgentCfg   *AsteriskAgentCfg   // AsteriskAgent config
+	diameterAgentCfg   *DiameterAgentCfg   // DiameterAgent config
+	radiusAgentCfg     *RadiusAgentCfg     // RadiusAgent config
+	dnsAgentCfg        *DNSAgentCfg        // DNSAgent config
+	prometheusAgentCfg *PrometheusAgentCfg // PrometheusAgent config
+	attributeSCfg      *AttributeSCfg      // AttributeS config
+	chargerSCfg        *ChargerSCfg        // ChargerS config
+	resourceSCfg       *ResourceSConfig    // ResourceS config
+	statsCfg           *StatSCfg           // StatS config
+	trendsCfg          *TrendSCfg          // TrendS config
+	rankingsCfg        *RankingSCfg        // Rankings config
+	thresholdSCfg      *ThresholdSCfg      // ThresholdS config
+	routeSCfg          *RouteSCfg          // RouteS config
+	sureTaxCfg         *SureTaxCfg         // SureTax config
+	dispatcherSCfg     *DispatcherSCfg     // DispatcherS config
+	registrarCCfg      *RegistrarCCfgs     // RegistrarC config
+	loaderCgrCfg       *LoaderCgrCfg       // LoaderCgr config
+	migratorCgrCfg     *MigratorCgrCfg     // MigratorCgr config
+	mailerCfg          *MailerCfg          // Mailer config
+	analyzerSCfg       *AnalyzerSCfg       // AnalyzerS config
+	apier              *ApierCfg           // APIer config
+	ersCfg             *ERsCfg             // EventReader config
+	eesCfg             *EEsCfg             // EventExporter config
+	sipAgentCfg        *SIPAgentCfg        // SIPAgent config
+	janusAgentCfg      *JanusAgentCfg      // JanusAgent config
+	configSCfg         *ConfigSCfg         // ConfigS config
+	apiBanCfg          *APIBanCfg          // APIBan config
+	sentryPeerCfg      *SentryPeerCfg      //SentryPeer config
+	coreSCfg           *CoreSCfg           // CoreS config
 
 	cacheDP    map[string]utils.MapStorage
 	cacheDPMux sync.RWMutex
@@ -366,7 +368,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadCdrsCfg, cfg.loadSessionSCfg,
 		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
-		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadAttributeSCfg,
+		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadPrometheusAgentCfg, cfg.loadAttributeSCfg,
 		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg, cfg.loadTrendSCfg,
 		cfg.loadRankingSCfg, cfg.loadThresholdSCfg, cfg.loadRouteSCfg, cfg.loadLoaderSCfg,
 		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
@@ -599,6 +601,15 @@ func (cfg *CGRConfig) loadHTTPAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	return cfg.httpAgentCfg.loadFromJSONCfg(jsnHTTPAgntCfg, cfg.generalCfg.RSRSep)
+}
+
+// loadPrometheusAgentCfg loads the PrometheusAgent section of the configuration.
+func (cfg *CGRConfig) loadPrometheusAgentCfg(jsnCfg *CgrJsonCfg) error {
+	jsnPACfg, err := jsnCfg.PrometheusAgentJsonCfg()
+	if err != nil {
+		return err
+	}
+	return cfg.prometheusAgentCfg.loadFromJSONCfg(jsnPACfg)
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
@@ -879,6 +890,13 @@ func (cfg *CGRConfig) DNSAgentCfg() *DNSAgentCfg {
 	cfg.lks[DNSAgentJson].Lock()
 	defer cfg.lks[DNSAgentJson].Unlock()
 	return cfg.dnsAgentCfg
+}
+
+// PrometheusAgentCfg returns the config for Prometheus Agent
+func (cfg *CGRConfig) PrometheusAgentCfg() *PrometheusAgentCfg {
+	cfg.lks[PrometheusAgentJSON].Lock()
+	defer cfg.lks[PrometheusAgentJSON].Unlock()
+	return cfg.prometheusAgentCfg
 }
 
 // AttributeSCfg returns the config for AttributeS
@@ -1241,52 +1259,53 @@ func (cfg *CGRConfig) UnlockSections(lkIDs ...string) {
 
 func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 	return map[string]func(*CgrJsonCfg) error{
-		GENERAL_JSN:        cfg.loadGeneralCfg,
-		DATADB_JSN:         cfg.loadDataDBCfg,
-		STORDB_JSN:         cfg.loadStorDBCfg,
-		LISTEN_JSN:         cfg.loadListenCfg,
-		TlsCfgJson:         cfg.loadTLSCgrCfg,
-		HTTP_JSN:           cfg.loadHTTPCfg,
-		SCHEDULER_JSN:      cfg.loadSchedulerCfg,
-		CACHE_JSN:          cfg.loadCacheCfg,
-		FilterSjsn:         cfg.loadFilterSCfg,
-		RALS_JSN:           cfg.loadRalSCfg,
-		CDRS_JSN:           cfg.loadCdrsCfg,
-		ERsJson:            cfg.loadErsCfg,
-		EEsJson:            cfg.loadEesCfg,
-		SessionSJson:       cfg.loadSessionSCfg,
-		AsteriskAgentJSN:   cfg.loadAsteriskAgentCfg,
-		FreeSWITCHAgentJSN: cfg.loadFreeswitchAgentCfg,
-		KamailioAgentJSN:   cfg.loadKamAgentCfg,
-		DA_JSN:             cfg.loadDiameterAgentCfg,
-		RA_JSN:             cfg.loadRadiusAgentCfg,
-		HttpAgentJson:      cfg.loadHTTPAgentCfg,
-		DNSAgentJson:       cfg.loadDNSAgentCfg,
-		ATTRIBUTE_JSN:      cfg.loadAttributeSCfg,
-		ChargerSCfgJson:    cfg.loadChargerSCfg,
-		RESOURCES_JSON:     cfg.loadResourceSCfg,
-		STATS_JSON:         cfg.loadStatSCfg,
-		TRENDS_JSON:        cfg.loadTrendSCfg,
-		RANKINGS_JSON:      cfg.loadRankingSCfg,
-		THRESHOLDS_JSON:    cfg.loadThresholdSCfg,
-		RouteSJson:         cfg.loadRouteSCfg,
-		LoaderJson:         cfg.loadLoaderSCfg,
-		MAILER_JSN:         cfg.loadMailerCfg,
-		SURETAX_JSON:       cfg.loadSureTaxCfg,
-		CgrLoaderCfgJson:   cfg.loadLoaderCgrCfg,
-		CgrMigratorCfgJson: cfg.loadMigratorCgrCfg,
-		DispatcherSJson:    cfg.loadDispatcherSCfg,
-		RegistrarCJson:     cfg.loadRegistrarCCfg,
-		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
-		ApierS:             cfg.loadApierCfg,
-		RPCConnsJsonName:   cfg.loadRPCConns,
-		SIPAgentJson:       cfg.loadSIPAgentCfg,
-		JanusAgentJson:     cfg.loadJanusAgentCfg,
-		TemplatesJson:      cfg.loadTemplateSCfg,
-		ConfigSJson:        cfg.loadConfigSCfg,
-		APIBanCfgJson:      cfg.loadAPIBanCgrCfg,
-		SentryPeerCfgJson:  cfg.loadSentryPeerCgrCfg,
-		CoreSCfgJson:       cfg.loadCoreSCfg,
+		GENERAL_JSN:         cfg.loadGeneralCfg,
+		DATADB_JSN:          cfg.loadDataDBCfg,
+		STORDB_JSN:          cfg.loadStorDBCfg,
+		LISTEN_JSN:          cfg.loadListenCfg,
+		TlsCfgJson:          cfg.loadTLSCgrCfg,
+		HTTP_JSN:            cfg.loadHTTPCfg,
+		SCHEDULER_JSN:       cfg.loadSchedulerCfg,
+		CACHE_JSN:           cfg.loadCacheCfg,
+		FilterSjsn:          cfg.loadFilterSCfg,
+		RALS_JSN:            cfg.loadRalSCfg,
+		CDRS_JSN:            cfg.loadCdrsCfg,
+		ERsJson:             cfg.loadErsCfg,
+		EEsJson:             cfg.loadEesCfg,
+		SessionSJson:        cfg.loadSessionSCfg,
+		AsteriskAgentJSN:    cfg.loadAsteriskAgentCfg,
+		FreeSWITCHAgentJSN:  cfg.loadFreeswitchAgentCfg,
+		KamailioAgentJSN:    cfg.loadKamAgentCfg,
+		DA_JSN:              cfg.loadDiameterAgentCfg,
+		RA_JSN:              cfg.loadRadiusAgentCfg,
+		HttpAgentJson:       cfg.loadHTTPAgentCfg,
+		DNSAgentJson:        cfg.loadDNSAgentCfg,
+		PrometheusAgentJSON: cfg.loadPrometheusAgentCfg,
+		ATTRIBUTE_JSN:       cfg.loadAttributeSCfg,
+		ChargerSCfgJson:     cfg.loadChargerSCfg,
+		RESOURCES_JSON:      cfg.loadResourceSCfg,
+		STATS_JSON:          cfg.loadStatSCfg,
+		TRENDS_JSON:         cfg.loadTrendSCfg,
+		RANKINGS_JSON:       cfg.loadRankingSCfg,
+		THRESHOLDS_JSON:     cfg.loadThresholdSCfg,
+		RouteSJson:          cfg.loadRouteSCfg,
+		LoaderJson:          cfg.loadLoaderSCfg,
+		MAILER_JSN:          cfg.loadMailerCfg,
+		SURETAX_JSON:        cfg.loadSureTaxCfg,
+		CgrLoaderCfgJson:    cfg.loadLoaderCgrCfg,
+		CgrMigratorCfgJson:  cfg.loadMigratorCgrCfg,
+		DispatcherSJson:     cfg.loadDispatcherSCfg,
+		RegistrarCJson:      cfg.loadRegistrarCCfg,
+		AnalyzerCfgJson:     cfg.loadAnalyzerCgrCfg,
+		ApierS:              cfg.loadApierCfg,
+		RPCConnsJsonName:    cfg.loadRPCConns,
+		SIPAgentJson:        cfg.loadSIPAgentCfg,
+		JanusAgentJson:      cfg.loadJanusAgentCfg,
+		TemplatesJson:       cfg.loadTemplateSCfg,
+		ConfigSJson:         cfg.loadConfigSCfg,
+		APIBanCfgJson:       cfg.loadAPIBanCgrCfg,
+		SentryPeerCfgJson:   cfg.loadSentryPeerCgrCfg,
+		CoreSCfgJson:        cfg.loadCoreSCfg,
 	}
 }
 
@@ -1510,6 +1529,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[HttpAgentJson] <- struct{}{}
 		case DNSAgentJson:
 			cfg.rldChans[DNSAgentJson] <- struct{}{}
+		case PrometheusAgentJSON:
+			cfg.rldChans[PrometheusAgentJSON] <- struct{}{}
 		case ATTRIBUTE_JSN:
 			cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
 		case ChargerSCfgJson:
@@ -1549,51 +1570,52 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 // AsMapInterface returns the config as a map[string]any
 func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
 	return map[string]any{
-		LoaderJson:         cfg.loaderCfg.AsMapInterface(separator),
-		HttpAgentJson:      cfg.httpAgentCfg.AsMapInterface(separator),
-		RPCConnsJsonName:   cfg.rpcConns.AsMapInterface(),
-		GENERAL_JSN:        cfg.generalCfg.AsMapInterface(),
-		DATADB_JSN:         cfg.dataDbCfg.AsMapInterface(),
-		STORDB_JSN:         cfg.storDbCfg.AsMapInterface(),
-		TlsCfgJson:         cfg.tlsCfg.AsMapInterface(),
-		CACHE_JSN:          cfg.cacheCfg.AsMapInterface(),
-		LISTEN_JSN:         cfg.listenCfg.AsMapInterface(),
-		HTTP_JSN:           cfg.httpCfg.AsMapInterface(),
-		FilterSjsn:         cfg.filterSCfg.AsMapInterface(),
-		RALS_JSN:           cfg.ralsCfg.AsMapInterface(),
-		SCHEDULER_JSN:      cfg.schedulerCfg.AsMapInterface(),
-		CDRS_JSN:           cfg.cdrsCfg.AsMapInterface(),
-		SessionSJson:       cfg.sessionSCfg.AsMapInterface(),
-		FreeSWITCHAgentJSN: cfg.fsAgentCfg.AsMapInterface(separator),
-		KamailioAgentJSN:   cfg.kamAgentCfg.AsMapInterface(),
-		AsteriskAgentJSN:   cfg.asteriskAgentCfg.AsMapInterface(),
-		DA_JSN:             cfg.diameterAgentCfg.AsMapInterface(separator),
-		RA_JSN:             cfg.radiusAgentCfg.AsMapInterface(separator),
-		DNSAgentJson:       cfg.dnsAgentCfg.AsMapInterface(separator),
-		ATTRIBUTE_JSN:      cfg.attributeSCfg.AsMapInterface(),
-		ChargerSCfgJson:    cfg.chargerSCfg.AsMapInterface(),
-		RESOURCES_JSON:     cfg.resourceSCfg.AsMapInterface(),
-		STATS_JSON:         cfg.statsCfg.AsMapInterface(),
-		TRENDS_JSON:        cfg.trendsCfg.AsMapInterface(),
-		RANKINGS_JSON:      cfg.rankingsCfg.AsMapInterface(),
-		THRESHOLDS_JSON:    cfg.thresholdSCfg.AsMapInterface(),
-		RouteSJson:         cfg.routeSCfg.AsMapInterface(),
-		SURETAX_JSON:       cfg.sureTaxCfg.AsMapInterface(separator),
-		DispatcherSJson:    cfg.dispatcherSCfg.AsMapInterface(),
-		RegistrarCJson:     cfg.registrarCCfg.AsMapInterface(),
-		CgrLoaderCfgJson:   cfg.loaderCgrCfg.AsMapInterface(),
-		CgrMigratorCfgJson: cfg.migratorCgrCfg.AsMapInterface(),
-		MAILER_JSN:         cfg.mailerCfg.AsMapInterface(),
-		AnalyzerCfgJson:    cfg.analyzerSCfg.AsMapInterface(),
-		ApierS:             cfg.apier.AsMapInterface(),
-		ERsJson:            cfg.ersCfg.AsMapInterface(separator),
-		APIBanCfgJson:      cfg.apiBanCfg.AsMapInterface(),
-		SentryPeerCfgJson:  cfg.sentryPeerCfg.AsMapInterface(),
-		EEsJson:            cfg.eesCfg.AsMapInterface(separator),
-		SIPAgentJson:       cfg.sipAgentCfg.AsMapInterface(separator),
-		TemplatesJson:      cfg.templates.AsMapInterface(separator),
-		ConfigSJson:        cfg.configSCfg.AsMapInterface(),
-		CoreSCfgJson:       cfg.coreSCfg.AsMapInterface(),
+		LoaderJson:          cfg.loaderCfg.AsMapInterface(separator),
+		HttpAgentJson:       cfg.httpAgentCfg.AsMapInterface(separator),
+		RPCConnsJsonName:    cfg.rpcConns.AsMapInterface(),
+		GENERAL_JSN:         cfg.generalCfg.AsMapInterface(),
+		DATADB_JSN:          cfg.dataDbCfg.AsMapInterface(),
+		STORDB_JSN:          cfg.storDbCfg.AsMapInterface(),
+		TlsCfgJson:          cfg.tlsCfg.AsMapInterface(),
+		CACHE_JSN:           cfg.cacheCfg.AsMapInterface(),
+		LISTEN_JSN:          cfg.listenCfg.AsMapInterface(),
+		HTTP_JSN:            cfg.httpCfg.AsMapInterface(),
+		FilterSjsn:          cfg.filterSCfg.AsMapInterface(),
+		RALS_JSN:            cfg.ralsCfg.AsMapInterface(),
+		SCHEDULER_JSN:       cfg.schedulerCfg.AsMapInterface(),
+		CDRS_JSN:            cfg.cdrsCfg.AsMapInterface(),
+		SessionSJson:        cfg.sessionSCfg.AsMapInterface(),
+		FreeSWITCHAgentJSN:  cfg.fsAgentCfg.AsMapInterface(separator),
+		KamailioAgentJSN:    cfg.kamAgentCfg.AsMapInterface(),
+		AsteriskAgentJSN:    cfg.asteriskAgentCfg.AsMapInterface(),
+		DA_JSN:              cfg.diameterAgentCfg.AsMapInterface(separator),
+		RA_JSN:              cfg.radiusAgentCfg.AsMapInterface(separator),
+		DNSAgentJson:        cfg.dnsAgentCfg.AsMapInterface(separator),
+		PrometheusAgentJSON: cfg.prometheusAgentCfg.AsMapInterface(),
+		ATTRIBUTE_JSN:       cfg.attributeSCfg.AsMapInterface(),
+		ChargerSCfgJson:     cfg.chargerSCfg.AsMapInterface(),
+		RESOURCES_JSON:      cfg.resourceSCfg.AsMapInterface(),
+		STATS_JSON:          cfg.statsCfg.AsMapInterface(),
+		TRENDS_JSON:         cfg.trendsCfg.AsMapInterface(),
+		RANKINGS_JSON:       cfg.rankingsCfg.AsMapInterface(),
+		THRESHOLDS_JSON:     cfg.thresholdSCfg.AsMapInterface(),
+		RouteSJson:          cfg.routeSCfg.AsMapInterface(),
+		SURETAX_JSON:        cfg.sureTaxCfg.AsMapInterface(separator),
+		DispatcherSJson:     cfg.dispatcherSCfg.AsMapInterface(),
+		RegistrarCJson:      cfg.registrarCCfg.AsMapInterface(),
+		CgrLoaderCfgJson:    cfg.loaderCgrCfg.AsMapInterface(),
+		CgrMigratorCfgJson:  cfg.migratorCgrCfg.AsMapInterface(),
+		MAILER_JSN:          cfg.mailerCfg.AsMapInterface(),
+		AnalyzerCfgJson:     cfg.analyzerSCfg.AsMapInterface(),
+		ApierS:              cfg.apier.AsMapInterface(),
+		ERsJson:             cfg.ersCfg.AsMapInterface(separator),
+		APIBanCfgJson:       cfg.apiBanCfg.AsMapInterface(),
+		SentryPeerCfgJson:   cfg.sentryPeerCfg.AsMapInterface(),
+		EEsJson:             cfg.eesCfg.AsMapInterface(separator),
+		SIPAgentJson:        cfg.sipAgentCfg.AsMapInterface(separator),
+		TemplatesJson:       cfg.templates.AsMapInterface(separator),
+		ConfigSJson:         cfg.configSCfg.AsMapInterface(),
+		CoreSCfgJson:        cfg.coreSCfg.AsMapInterface(),
 	}
 }
 
@@ -1706,6 +1728,8 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 		mp = cfg.RadiusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case DNSAgentJson:
 		mp = cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case PrometheusAgentJSON:
+		mp = cfg.PrometheusAgentCfg().AsMapInterface()
 	case ATTRIBUTE_JSN:
 		mp = cfg.AttributeSCfg().AsMapInterface()
 	case ChargerSCfgJson:
@@ -1878,6 +1902,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithA
 		mp = cfg.DNSAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case JanusAgentJson:
 		mp = cfg.JanusAgentCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
+	case PrometheusAgentJSON:
+		mp = cfg.PrometheusAgentCfg().AsMapInterface()
 	case ATTRIBUTE_JSN:
 		mp = cfg.AttributeSCfg().AsMapInterface()
 	case ChargerSCfgJson:
@@ -1984,54 +2010,55 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		DataFolderPath: cfg.DataFolderPath,
 		ConfigPath:     cfg.ConfigPath,
 
-		dfltEvRdr:        cfg.dfltEvRdr.Clone(),
-		dfltEvExp:        cfg.dfltEvExp.Clone(),
-		loaderCfg:        cfg.loaderCfg.Clone(),
-		httpAgentCfg:     cfg.httpAgentCfg.Clone(),
-		rpcConns:         cfg.rpcConns.Clone(),
-		templates:        cfg.templates.Clone(),
-		generalCfg:       cfg.generalCfg.Clone(),
-		dataDbCfg:        cfg.dataDbCfg.Clone(),
-		storDbCfg:        cfg.storDbCfg.Clone(),
-		tlsCfg:           cfg.tlsCfg.Clone(),
-		cacheCfg:         cfg.cacheCfg.Clone(),
-		listenCfg:        cfg.listenCfg.Clone(),
-		httpCfg:          cfg.httpCfg.Clone(),
-		filterSCfg:       cfg.filterSCfg.Clone(),
-		ralsCfg:          cfg.ralsCfg.Clone(),
-		schedulerCfg:     cfg.schedulerCfg.Clone(),
-		cdrsCfg:          cfg.cdrsCfg.Clone(),
-		sessionSCfg:      cfg.sessionSCfg.Clone(),
-		fsAgentCfg:       cfg.fsAgentCfg.Clone(),
-		janusAgentCfg:    cfg.janusAgentCfg.Clone(),
-		kamAgentCfg:      cfg.kamAgentCfg.Clone(),
-		asteriskAgentCfg: cfg.asteriskAgentCfg.Clone(),
-		diameterAgentCfg: cfg.diameterAgentCfg.Clone(),
-		radiusAgentCfg:   cfg.radiusAgentCfg.Clone(),
-		dnsAgentCfg:      cfg.dnsAgentCfg.Clone(),
-		attributeSCfg:    cfg.attributeSCfg.Clone(),
-		chargerSCfg:      cfg.chargerSCfg.Clone(),
-		resourceSCfg:     cfg.resourceSCfg.Clone(),
-		statsCfg:         cfg.statsCfg.Clone(),
-		trendsCfg:        cfg.trendsCfg.Clone(),
-		rankingsCfg:      cfg.rankingsCfg.Clone(),
-		thresholdSCfg:    cfg.thresholdSCfg.Clone(),
-		routeSCfg:        cfg.routeSCfg.Clone(),
-		sureTaxCfg:       cfg.sureTaxCfg.Clone(),
-		dispatcherSCfg:   cfg.dispatcherSCfg.Clone(),
-		registrarCCfg:    cfg.registrarCCfg.Clone(),
-		loaderCgrCfg:     cfg.loaderCgrCfg.Clone(),
-		migratorCgrCfg:   cfg.migratorCgrCfg.Clone(),
-		mailerCfg:        cfg.mailerCfg.Clone(),
-		analyzerSCfg:     cfg.analyzerSCfg.Clone(),
-		apier:            cfg.apier.Clone(),
-		ersCfg:           cfg.ersCfg.Clone(),
-		eesCfg:           cfg.eesCfg.Clone(),
-		sipAgentCfg:      cfg.sipAgentCfg.Clone(),
-		configSCfg:       cfg.configSCfg.Clone(),
-		apiBanCfg:        cfg.apiBanCfg.Clone(),
-		sentryPeerCfg:    cfg.sentryPeerCfg.Clone(),
-		coreSCfg:         cfg.coreSCfg.Clone(),
+		dfltEvRdr:          cfg.dfltEvRdr.Clone(),
+		dfltEvExp:          cfg.dfltEvExp.Clone(),
+		loaderCfg:          cfg.loaderCfg.Clone(),
+		httpAgentCfg:       cfg.httpAgentCfg.Clone(),
+		rpcConns:           cfg.rpcConns.Clone(),
+		templates:          cfg.templates.Clone(),
+		generalCfg:         cfg.generalCfg.Clone(),
+		dataDbCfg:          cfg.dataDbCfg.Clone(),
+		storDbCfg:          cfg.storDbCfg.Clone(),
+		tlsCfg:             cfg.tlsCfg.Clone(),
+		cacheCfg:           cfg.cacheCfg.Clone(),
+		listenCfg:          cfg.listenCfg.Clone(),
+		httpCfg:            cfg.httpCfg.Clone(),
+		filterSCfg:         cfg.filterSCfg.Clone(),
+		ralsCfg:            cfg.ralsCfg.Clone(),
+		schedulerCfg:       cfg.schedulerCfg.Clone(),
+		cdrsCfg:            cfg.cdrsCfg.Clone(),
+		sessionSCfg:        cfg.sessionSCfg.Clone(),
+		fsAgentCfg:         cfg.fsAgentCfg.Clone(),
+		janusAgentCfg:      cfg.janusAgentCfg.Clone(),
+		kamAgentCfg:        cfg.kamAgentCfg.Clone(),
+		asteriskAgentCfg:   cfg.asteriskAgentCfg.Clone(),
+		diameterAgentCfg:   cfg.diameterAgentCfg.Clone(),
+		radiusAgentCfg:     cfg.radiusAgentCfg.Clone(),
+		dnsAgentCfg:        cfg.dnsAgentCfg.Clone(),
+		prometheusAgentCfg: cfg.prometheusAgentCfg.Clone(),
+		attributeSCfg:      cfg.attributeSCfg.Clone(),
+		chargerSCfg:        cfg.chargerSCfg.Clone(),
+		resourceSCfg:       cfg.resourceSCfg.Clone(),
+		statsCfg:           cfg.statsCfg.Clone(),
+		trendsCfg:          cfg.trendsCfg.Clone(),
+		rankingsCfg:        cfg.rankingsCfg.Clone(),
+		thresholdSCfg:      cfg.thresholdSCfg.Clone(),
+		routeSCfg:          cfg.routeSCfg.Clone(),
+		sureTaxCfg:         cfg.sureTaxCfg.Clone(),
+		dispatcherSCfg:     cfg.dispatcherSCfg.Clone(),
+		registrarCCfg:      cfg.registrarCCfg.Clone(),
+		loaderCgrCfg:       cfg.loaderCgrCfg.Clone(),
+		migratorCgrCfg:     cfg.migratorCgrCfg.Clone(),
+		mailerCfg:          cfg.mailerCfg.Clone(),
+		analyzerSCfg:       cfg.analyzerSCfg.Clone(),
+		apier:              cfg.apier.Clone(),
+		ersCfg:             cfg.ersCfg.Clone(),
+		eesCfg:             cfg.eesCfg.Clone(),
+		sipAgentCfg:        cfg.sipAgentCfg.Clone(),
+		configSCfg:         cfg.configSCfg.Clone(),
+		apiBanCfg:          cfg.apiBanCfg.Clone(),
+		sentryPeerCfg:      cfg.sentryPeerCfg.Clone(),
+		coreSCfg:           cfg.coreSCfg.Clone(),
 
 		cacheDP: make(map[string]utils.MapStorage),
 	}

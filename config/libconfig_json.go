@@ -20,6 +20,9 @@ package config
 
 import (
 	"encoding/json"
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // General config section
@@ -959,4 +962,33 @@ type CoreSJsonCfg struct {
 	Caps_strategy       *string
 	Caps_stats_interval *string
 	Shutdown_timeout    *string
+}
+
+// tagInternalConns adds subsystem to internal connections.
+func tagInternalConns(conns []string, subsystem string) []string {
+	suffix := utils.ConcatenatedKeySep + subsystem
+	result := make([]string, len(conns))
+	for i, conn := range conns {
+		result[i] = conn
+		if conn == utils.MetaInternal {
+			result[i] += suffix
+		}
+	}
+	return result
+}
+
+// stripInternalConns resets all internal connection variants to base type (by
+// removing the subsystem suffix).
+func stripInternalConns(conns []string) []string {
+	if conns == nil {
+		return nil
+	}
+	result := make([]string, len(conns))
+	for i, conn := range conns {
+		result[i] = conn
+		if strings.HasPrefix(conn, utils.MetaInternal) {
+			result[i] = utils.MetaInternal
+		}
+	}
+	return result
 }
