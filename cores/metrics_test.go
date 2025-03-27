@@ -24,6 +24,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/cgrates/cgrates/utils"
 	"github.com/prometheus/procfs"
 )
 
@@ -34,7 +35,6 @@ func TestStatusMetricsToMap(t *testing.T) {
 		Sys:          1,
 		Mallocs:      1,
 		Frees:        1,
-		Lookups:      2012,
 		HeapAlloc:    1000,
 		HeapSys:      10,
 		HeapIdle:     500,
@@ -68,6 +68,9 @@ func TestStatusMetricsToMap(t *testing.T) {
 		GCDurationStats: gcDurationStats,
 		ProcStats:       procStats,
 		CapsStats:       capsStats,
+		GoMaxProcs:      3,
+		GoGCPercent:     100,
+		GoMemLimit:      5555,
 	}
 
 	result, err := sm.ToMap(true, "UTC")
@@ -85,10 +88,13 @@ func TestStatusMetricsToMap(t *testing.T) {
 		"gc_duration_stats": gcDurationStats.ToMap(),
 		"proc_stats":        procStats.ToMap(),
 		"caps_stats":        capsStats.ToMap(),
+		"go_maxprocs":       uint64(3),
+		"go_gc_percent":     uint64(100),
+		"go_mem_limit":      uint64(5555),
 	}
 
 	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("Expected %v, got %v", expected, result)
+		t.Errorf("Expected %v, got %v", utils.ToJSON(expected), utils.ToJSON(result))
 	}
 
 	condensedResult, err := sm.ToMap(false, "UTC")
