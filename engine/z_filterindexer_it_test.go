@@ -93,7 +93,7 @@ func TestFilterIndexerIT(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		dataManager = NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		dataManager = NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMySQL:
 		redisDB, err := NewRedisStorage(

@@ -32,7 +32,7 @@ import (
 func TestHealthAccountAction(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAccountActionPlans("1001", []string{"AP1", "AP2"}, true); err != nil {
@@ -60,7 +60,7 @@ func TestHealthAccountAction(t *testing.T) {
 func TestHealthAccountAction2(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAccountActionPlans("1001", []string{"AP1", "AP2"}, true); err != nil {
@@ -88,7 +88,7 @@ func TestHealthAccountAction2(t *testing.T) {
 func TestHealthAccountAction3(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAccountActionPlans("1002", []string{"AP1"}, true); err != nil {
@@ -123,7 +123,7 @@ func TestHealthAccountAction3(t *testing.T) {
 func TestHealthAccountAction4(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAccountActionPlans("1002", []string{"AP2", "AP1"}, true); err != nil {
@@ -161,7 +161,7 @@ func TestHealthAccountAction4(t *testing.T) {
 func TestHealthReverseDestination(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetReverseDestination("DST1", []string{"1001", "1002"}, utils.NonTransactional); err != nil {
@@ -191,7 +191,7 @@ func TestHealthReverseDestination(t *testing.T) {
 func TestHealthReverseDestination2(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetReverseDestination("DST1", []string{"1001"}, utils.NonTransactional); err != nil {
@@ -221,7 +221,7 @@ func TestHealthReverseDestination2(t *testing.T) {
 func TestHealthReverseDestination3(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetReverseDestination("DST1", []string{"1002"}, utils.NonTransactional); err != nil {
@@ -254,7 +254,7 @@ func TestHealthReverseDestination3(t *testing.T) {
 func TestHealthReverseDestination4(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetReverseDestination("DST1", []string{"1002"}, utils.NonTransactional); err != nil {
@@ -290,7 +290,7 @@ func TestHealthReverseDestination4(t *testing.T) {
 func TestHealthFilterAttributes(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAttributeProfile(&AttributeProfile{
@@ -324,9 +324,9 @@ func TestHealthFilterAttributes(t *testing.T) {
 	}
 
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
 		utils.CacheAttributeFilterIndexes); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -337,7 +337,7 @@ func TestHealthFilterAttributes(t *testing.T) {
 func TestHealthReverseFilter(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAttributeProfile(&AttributeProfile{
@@ -375,11 +375,11 @@ func TestHealthReverseFilter(t *testing.T) {
 
 	objCaches := make(map[string]*ltcache.Cache)
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, true, nil)
 	}
 	if rply, err := GetRevFltrIdxHealth(dm,
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -393,7 +393,7 @@ func TestHealthReverseFilter(t *testing.T) {
 func TestHealthIndexThreshold(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this threshold but without indexing
@@ -421,9 +421,9 @@ func TestHealthIndexThreshold(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -455,9 +455,9 @@ func TestHealthIndexThreshold(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -491,9 +491,9 @@ func TestHealthIndexThreshold(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -504,7 +504,7 @@ func TestHealthIndexThreshold(t *testing.T) {
 func TestHealthIndexCharger(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this charger but without indexing
@@ -535,9 +535,9 @@ func TestHealthIndexCharger(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -570,9 +570,9 @@ func TestHealthIndexCharger(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -610,9 +610,9 @@ func TestHealthIndexCharger(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -623,7 +623,7 @@ func TestHealthIndexCharger(t *testing.T) {
 func TestHealthIndexResources(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this resource but without indexing
@@ -658,9 +658,9 @@ func TestHealthIndexResources(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheResourceFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -693,9 +693,9 @@ func TestHealthIndexResources(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheResourceFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -737,9 +737,9 @@ func TestHealthIndexResources(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheResourceFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -750,7 +750,7 @@ func TestHealthIndexResources(t *testing.T) {
 func TestHealthIndexStats(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this statQueue but without indexing
@@ -796,9 +796,9 @@ func TestHealthIndexStats(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheStatFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -831,9 +831,9 @@ func TestHealthIndexStats(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheStatFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -886,9 +886,9 @@ func TestHealthIndexStats(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheStatFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -899,7 +899,7 @@ func TestHealthIndexStats(t *testing.T) {
 func TestHealthIndexRoutes(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this routes but without indexing
@@ -945,9 +945,9 @@ func TestHealthIndexRoutes(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheRouteFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -994,9 +994,9 @@ func TestHealthIndexRoutes(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheRouteFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1059,9 +1059,9 @@ func TestHealthIndexRoutes(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheRouteFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1076,7 +1076,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 func TestHealthIndexDispatchers(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this dispatcherProfile but without indexing
@@ -1118,9 +1118,9 @@ func TestHealthIndexDispatchers(t *testing.T) {
 	}
 
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheDispatcherFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -1170,9 +1170,9 @@ func TestHealthIndexDispatchers(t *testing.T) {
 	}
 
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheDispatcherFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1231,9 +1231,9 @@ func TestHealthIndexDispatchers(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheDispatcherFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1248,7 +1248,7 @@ func TestHealthIndexDispatchers(t *testing.T) {
 func TestIndexHealthMultipleProfiles(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
@@ -1317,9 +1317,9 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
@@ -1338,7 +1338,7 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 func TestIndexHealthReverseChecking(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
@@ -1360,7 +1360,7 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 	// get cachePrefix for every subsystem
 	objCaches := make(map[string]*ltcache.Cache)
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, true, nil)
 	}
 
 	// reverse indexes for charger
@@ -1375,8 +1375,8 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(dm,
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -1409,8 +1409,8 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(dm,
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1449,8 +1449,8 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(dm,
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1465,7 +1465,7 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	filter1 := &Filter{
@@ -1529,7 +1529,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	// get cachePrefix for every subsystem
 	objCaches := make(map[string]*ltcache.Cache)
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, true, nil)
 	}
 
 	exp := map[string]*ReverseFilterIHReply{
@@ -1542,8 +1542,8 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(dm,
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1565,7 +1565,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	// initialized cachePrefix for every subsystem again for a new case
 	objCaches = make(map[string]*ltcache.Cache)
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, true, nil)
 	}
 	chPrf1 = &ChargerProfile{
 		Tenant: "cgrates.org",
@@ -1594,8 +1594,8 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(dm,
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1629,8 +1629,8 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(dm,
-		ltcache.NewCache(-1, 0, false, nil),
-		ltcache.NewCache(-1, 0, false, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
+		ltcache.NewCache(-1, 0, false, true, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {

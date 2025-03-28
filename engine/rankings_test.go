@@ -110,7 +110,7 @@ func TestRankingProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RankingSCfg().StoreInterval = 1
 
-	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 
 	rankingProfile := &RankingProfile{
@@ -162,7 +162,7 @@ func TestProcessThresholdsEmptySortedStatIDs(t *testing.T) {
 func TestProcessEEsHandlesEmptySortedStatIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RankingSCfg().StoreInterval = 1
-	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 
 	rankingService := &RankingS{
@@ -194,7 +194,7 @@ func TestProcessEEsHandlesEmptyEEsConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RankingSCfg().StoreInterval = 1
 
-	data := NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 
 	rankingService := &RankingS{
@@ -259,7 +259,7 @@ func TestV1ScheduleQueriesInvalidRankingID(t *testing.T) {
 
 func TestStoreRanking(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, nil)
+	dataDB := NewInternalDB(nil, nil, true, false, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	rkg := NewRankingS(dm, nil, nil, cfg)
 
@@ -302,7 +302,7 @@ func TestRankingsStoreRankings(t *testing.T) {
 	cfg.RankingSCfg().Enabled = true
 	cfg.RankingSCfg().StoreInterval = time.Millisecond * 1300
 	cfg.RankingSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	conn := make(chan context.ClientConnector, 1)
 	conn <- &ccMock{
@@ -378,7 +378,7 @@ func TestV1GetRankingSummary(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RankingSCfg().Enabled = true
 
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	connMgr := NewConnManager(config.NewDefaultCGRConfig(), nil)
@@ -430,7 +430,7 @@ func TestV1GetRankingSummary(t *testing.T) {
 func TestV1GetSchedule(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	connMgr := NewConnManager(config.NewDefaultCGRConfig(), nil)
@@ -491,7 +491,7 @@ func TestV1GetSchedule(t *testing.T) {
 
 func TestV1GetRankingMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	connMgr := NewConnManager(config.NewDefaultCGRConfig(), nil)
@@ -556,7 +556,7 @@ func TestV1GetRankingSortedStatIDs(t *testing.T) {
 
 func TestV1ScheduleQueries(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	connMgr := NewConnManager(config.NewDefaultCGRConfig(), nil)

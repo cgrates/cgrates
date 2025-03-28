@@ -74,7 +74,9 @@ var (
 func TestReProcCDRs(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		rpcdrsConfDIR1 = "rerate_cdrs_internal"
+		rpcdrsConfDIR2 = "reprocess_cdrs_stats_ees_internal"
+		defer os.RemoveAll("/tmp/internal_db")
 	case utils.MetaMySQL:
 		rpcdrsConfDIR1 = "rerate_cdrs_mysql"
 		rpcdrsConfDIR2 = "reprocess_cdrs_stats_ees_mysql"
@@ -96,6 +98,14 @@ func testRpcdrsLoadConfig1(t *testing.T) {
 	rpcdrsCfgPath = path.Join(*utils.DataDir, "conf", "samples", rpcdrsConfDIR1)
 	if rpcdrsCfg, err = config.NewCGRConfigFromPath(rpcdrsCfgPath); err != nil {
 		t.Error(err)
+	}
+	if *utils.DBType == utils.MetaInternal {
+		if err = os.MkdirAll(rpcdrsCfg.DataDbCfg().Opts.InternalDBDumpPath, 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err = os.MkdirAll(rpcdrsCfg.StorDbCfg().Opts.InternalDBDumpPath, 0700); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
@@ -391,8 +401,24 @@ func testRpcdrsReprocessCDRs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	for _, cdr := range cdrsRerated {
+		for _, timing := range cdr.CostDetails.Timings {
+			if timing.Years == nil {
+				timing.Years = utils.Years{}
+			}
+			if timing.MonthDays == nil {
+				timing.MonthDays = utils.MonthDays{}
+			}
+			if timing.Months == nil {
+				timing.Months = utils.Months{}
+			}
+			if timing.WeekDays == nil {
+				timing.WeekDays = utils.WeekDays{}
+			}
+		}
 
-	if utils.ToJSON(cdrs) != utils.ToJSON(cdrsRerated) {
+	}
+	if !reflect.DeepEqual(cdrs, cdrsRerated) {
 		t.Errorf("expected <%v>, \nreceived\n<%v>", utils.ToJSON(cdrs), utils.ToJSON(cdrsRerated))
 	}
 }

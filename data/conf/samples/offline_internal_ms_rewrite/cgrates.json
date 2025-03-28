@@ -25,6 +25,7 @@
             "*charger_profiles": {"limit": -1, "ttl": "1s", "static_ttl": false, "remote":false, "replicate":false}
         },
         "opts":{
+            "internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "500ms",
             "internalDBRewriteInterval": "-1",
         }
@@ -34,6 +35,7 @@
     "stor_db": {
         "db_type": "*internal",
         "opts":{
+            "internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "500ms",
             "internalDBRewriteInterval": "-1",
         }

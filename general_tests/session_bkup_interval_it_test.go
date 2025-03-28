@@ -23,6 +23,7 @@ package general_tests
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"testing"
 	"time"
@@ -69,7 +70,7 @@ var (
 func TestSessionsBkupIntrvl(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		sBkupCfgDIR = "sessions_backup_interval_internal"
 	case utils.MetaMySQL:
 		sBkupCfgDIR = "sessions_backup_interval_mysql"
 	case utils.MetaMongo:
@@ -81,6 +82,11 @@ func TestSessionsBkupIntrvl(t *testing.T) {
 	}
 	for _, stest := range SessionsBkupIntrvlTests {
 		t.Run(*utils.DBType, stest)
+	}
+	if *utils.DBType == utils.MetaInternal {
+		if err := os.RemoveAll("/tmp/internal_db"); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -94,6 +100,20 @@ func testSessionSBkupIntrvlInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionSBkupIntrvlResetDB(t *testing.T) {
+	if *utils.DBType == utils.MetaInternal {
+		if err := engine.PreInitDataDb(sBkupCfg); err != nil {
+			t.Fatal(err)
+		}
+		if err := engine.PreInitStorDb(sBkupCfg); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll(sBkupCfg.DataDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+			t.Fatal("Error creating folder: ", sBkupCfg.DataDbCfg().Opts.InternalDBDumpPath, err)
+		}
+		if err := os.MkdirAll(sBkupCfg.StorDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+			t.Fatal("Error creating folder: ", sBkupCfg.StorDbCfg().Opts.InternalDBDumpPath, err)
+		}
+	}
 	if err := engine.InitDataDb(sBkupCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -222,6 +242,9 @@ func testSessionSBkupIntrvlConcurrentAPIWithInterval(t *testing.T) {
 }
 
 func testSessionSBkupIntrvlGetBackedupSessions1(t *testing.T) {
+	if *utils.DBType == utils.MetaInternal {
+		t.Skip() // skip this since there currently is no way of looking at StoredSession without having the actual internalDB
+	}
 	var err error
 	if *utils.DBType == utils.MetaMySQL || *utils.DBType == utils.MetaPostgres {
 		dDB, err = engine.NewRedisStorage(
@@ -326,6 +349,9 @@ func testSessionSBkupIntrvlGetActiveSessionsTerminate(t *testing.T) {
 	time.Sleep(1 * time.Second) // Wait for 2 500ms intervals so we are sure it removed all terminated sessions from dataDB
 }
 func testSessionSBkupIntrvlGetBackedupSessions2(t *testing.T) {
+	if *utils.DBType == utils.MetaInternal {
+		t.Skip() // skip this since there currently is no way of looking at StoredSession without having the actual internalDB
+	}
 	storedSessions, err := dDB.GetSessionsBackupDrv(sBkupCfg.GeneralCfg().NodeID,
 		sBkupCfg.GeneralCfg().DefaultTenant)
 	if err != utils.ErrNoBackupFound {
@@ -341,6 +367,9 @@ func testSessionSBkupIntrvlGetActiveSessions0(t *testing.T) {
 	if err := sBkupRPC.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+	if len(aSessions) != 0 {
+		t.Errorf("Expected 0 sessions active, received <%v>", len(aSessions))
 	}
 }
 

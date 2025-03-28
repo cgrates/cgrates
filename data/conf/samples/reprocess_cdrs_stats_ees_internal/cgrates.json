@@ -14,6 +14,7 @@
         "db_type": "*internal",
         "opts":{
             "internalDBDumpPath": "/tmp/internal_db/datadb",
+			"internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "-1",
         }
     },
@@ -22,7 +23,8 @@
         "db_type": "*internal",
         "opts":{
             "internalDBDumpPath": "/tmp/internal_db/stordb",
-            "internalDBDumpInterval": "-1",
+            "internalDBStartTimeout": "1m",
+			"internalDBDumpInterval": "-1",
         }
     },
 

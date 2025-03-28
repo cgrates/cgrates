@@ -30,7 +30,7 @@ import (
 
 func TestDebitUsageWithOptions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	engine.SetDataStorage(dm)
 	apierDebit := &APIerSv1{

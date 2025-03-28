@@ -1033,7 +1033,7 @@ func TestStatQueueaddStatEventPassErr(t *testing.T) {
 	filters := &FilterS{
 		cfg: config.CgrConfig(),
 		dm: &DataManager{
-			dataDB: NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
+			dataDB: NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items),
 		},
 		connMgr: &ConnManager{},
 	}

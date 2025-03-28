@@ -2969,7 +2969,7 @@ func TestAcountSetBalanceAction(t *testing.T) {
 			StaticTTL: true,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	SetDataStorage(dm)
 	acc := &Account{
@@ -3150,7 +3150,7 @@ func TestAccEnableAccountAction(t *testing.T) {
 	defer func() {
 		dm = tmpDm
 	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	acc := &Account{
 		ID: "cgrates.org:1001",

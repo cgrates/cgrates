@@ -257,7 +257,7 @@ func TestERSSQLFilters(t *testing.T) {
 	var dbcfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
@@ -418,7 +418,7 @@ func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
 	var dbcfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
@@ -589,7 +589,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 	var dbcfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
@@ -790,7 +790,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 	var dbcfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
@@ -987,7 +987,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
 	var dbcfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
@@ -1166,7 +1166,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
 	var dbcfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg

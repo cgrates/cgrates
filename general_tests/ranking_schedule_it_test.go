@@ -52,7 +52,7 @@ func TestRankingSchedule(t *testing.T) {
 		PreserveStorDB: true,
 		PreserveDataDB: true,
 		PreStartHook: func(t testing.TB, c *config.CGRConfig) {
-			engine.FlushDBs(t, c, true, true)
+			engine.FlushDBs(t, c, true, true, false)
 			engine.LoadCSVsWithCGRLoader(t, c.ConfigPath, path.Join(*utils.DataDir, "tariffplans", "tutrankings"), nil, nil, "-caches_address=")
 		},
 	}

@@ -19,6 +19,7 @@
 "data_db": {
 	"db_type": "*internal",
 	"opts":{
+		"internalDBStartTimeout": "1m",
 		"internalDBDumpInterval": "-1",
 		"internalDBRewriteInterval": "-2",
 		"internalDBWriteLimit": 10
@@ -29,6 +30,7 @@
 "stor_db": {
 	"db_type": "*internal",
 	"opts":{
+		"internalDBStartTimeout": "1m",
 		"internalDBDumpInterval": "-1",
 		"internalDBRewriteInterval": "-2",
 		"internalDBWriteLimit": 10

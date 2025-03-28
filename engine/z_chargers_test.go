@@ -232,7 +232,7 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -321,7 +321,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	cP := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -400,7 +400,7 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
@@ -471,7 +471,7 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
@@ -548,7 +548,7 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 func TestChargersV1ProcessEvent(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
@@ -636,7 +636,7 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 func TestChargersV1GetChargersForEventNilErr(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().AttributeSConns = []string{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}

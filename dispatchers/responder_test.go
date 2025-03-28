@@ -298,7 +298,7 @@ func TestDspResponderShutdownErrorNil(t *testing.T) {
 
 func TestDspResponderGetCostOnRatingPlans(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 	dsp := NewDispatcherService(dm, cfg, nil, nil)
 	args := &utils.GetCostOnRatingPlansArgs{
 		Account: "1002",
@@ -345,7 +345,7 @@ func TestDspResponderGetCostOnRatingPlans(t *testing.T) {
 
 // func TestDspResponderGetMaxSessionTimeOnAccounts(t *testing.T) {
 // 	cfg := config.NewDefaultCGRConfig()
-// 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+// 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 // 	dsp := NewDispatcherService(dm, cfg, nil, nil)
 // 	args := &utils.GetMaxSessionTimeOnAccountsArgs{
 // 		Subject:     "1002",
