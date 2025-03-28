@@ -1047,7 +1047,9 @@ func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value interface{}){
+					func(itmID string, value any) {
+					},
 				},
 			}},
 	)
@@ -1192,7 +1194,9 @@ func TestTpReaderLoadAccountActions(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value any){
+					func(itmID string, value any) {
+					},
 				},
 			}},
 	)
@@ -1393,7 +1397,9 @@ func TestTpReaderLoadTimingsErr(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value any){
+					func(itmID string, value any) {
+					},
 				},
 			}},
 	)
@@ -1425,7 +1431,9 @@ func TestLoadDestinationRatesErr(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value any){
+					func(itmID string, value any) {
+					},
 				},
 			},
 		},
@@ -1517,7 +1525,9 @@ func TestLoadRatingProfilesFiltered(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value any){
+					func(itmID string, value any) {
+					},
 				},
 			},
 		},

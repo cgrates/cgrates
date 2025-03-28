@@ -32,6 +32,44 @@ type RatingPlan struct {
 	DestinationRates map[string]RPRateList
 }
 
+// Clone returns a clone of RatingPlan
+func (rp *RatingPlan) Clone() *RatingPlan {
+	if rp == nil {
+		return nil
+	}
+	result := &RatingPlan{
+		Id: rp.Id,
+	}
+	if rp.Timings != nil {
+		result.Timings = make(map[string]*RITiming, len(rp.Timings))
+		for k, v := range rp.Timings {
+			if v != nil {
+				result.Timings[k] = v.Clone()
+			}
+		}
+	}
+	if rp.Ratings != nil {
+		result.Ratings = make(map[string]*RIRate, len(rp.Ratings))
+		for k, v := range rp.Ratings {
+			if v != nil {
+				result.Ratings[k] = v.Clone()
+			}
+		}
+	}
+	if rp.DestinationRates != nil {
+		result.DestinationRates = make(map[string]RPRateList, len(rp.DestinationRates))
+		for k, v := range rp.DestinationRates {
+			result.DestinationRates[k] = v.Clone()
+		}
+	}
+	return result
+}
+
+// CacheClone returns a clone of RatingPlan used by ltcache CacheCloner
+func (rp *RatingPlan) CacheClone() any {
+	return rp.Clone()
+}
+
 // RatingPlanWithOpts is used in replicatorV1 for dispatcher
 type RatingPlanWithAPIOpts struct {
 	*RatingPlan
@@ -45,11 +83,35 @@ type RPRate struct {
 	Weight float64
 }
 
+// Clone returns a clone of RPRate
+func (rpr *RPRate) Clone() *RPRate {
+	if rpr == nil {
+		return nil
+	}
+	return &RPRate{
+		Timing: rpr.Timing,
+		Rating: rpr.Rating,
+		Weight: rpr.Weight,
+	}
+}
+
 func (rpr *RPRate) Equal(orpr *RPRate) bool {
 	return rpr.Timing == orpr.Timing && rpr.Rating == orpr.Rating && rpr.Weight == orpr.Weight
 }
 
 type RPRateList []*RPRate
+
+// Clone returns a clone of RPRateList
+func (rprl RPRateList) Clone() RPRateList {
+	if rprl == nil {
+		return nil
+	}
+	result := make(RPRateList, len(rprl))
+	for i, rate := range rprl {
+		result[i] = rate.Clone()
+	}
+	return result
+}
 
 func (rp *RatingPlan) RateIntervalList(dId string) RateIntervalList {
 	ril := make(RateIntervalList, len(rp.DestinationRates[dId]))

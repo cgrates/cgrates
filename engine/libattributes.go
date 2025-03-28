@@ -36,6 +36,23 @@ type Attribute struct {
 	Value     config.RSRParsers
 }
 
+// Clone method for Attribute
+func (a *Attribute) Clone() *Attribute {
+	clone := &Attribute{
+		Path: a.Path,
+		Type: a.Type,
+	}
+	if a.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(a.FilterIDs))
+		copy(clone.FilterIDs, a.FilterIDs)
+	}
+	if a.Value != nil {
+		clone.Value = make(config.RSRParsers, len(a.Value))
+		copy(clone.Value, a.Value.Clone())
+	}
+	return clone
+}
+
 // AttributeProfile the profile definition for the attributes
 type AttributeProfile struct {
 	Tenant             string
@@ -46,6 +63,39 @@ type AttributeProfile struct {
 	Attributes         []*Attribute
 	Blocker            bool // blocker flag to stop processing on multiple runs
 	Weight             float64
+}
+
+// Clone method for AttributeProfile struct
+func (ap *AttributeProfile) Clone() *AttributeProfile {
+	clone := &AttributeProfile{
+		Tenant:  ap.Tenant,
+		ID:      ap.ID,
+		Blocker: ap.Blocker,
+		Weight:  ap.Weight,
+	}
+	if ap.Contexts != nil {
+		clone.Contexts = make([]string, len(ap.Contexts))
+		copy(clone.Contexts, ap.Contexts)
+	}
+	if ap.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(ap.FilterIDs))
+		copy(clone.FilterIDs, ap.FilterIDs)
+	}
+	if ap.Attributes != nil {
+		clone.Attributes = make([]*Attribute, len(ap.Attributes))
+		for i, attr := range ap.Attributes {
+			clone.Attributes[i] = attr.Clone()
+		}
+	}
+	if ap.ActivationInterval != nil {
+		clone.ActivationInterval = ap.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of AttributeProfile used by ltcache CacheCloner
+func (ap *AttributeProfile) CacheClone() any {
+	return ap.Clone()
 }
 
 // AttributeProfileWithAPIOpts is used in replicatorV1 for dispatcher

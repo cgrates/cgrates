@@ -313,6 +313,11 @@ func (cdr *CDR) Clone() *CDR {
 	return cln
 }
 
+// CacheClone returns a clone of CDR used by ltcache CacheCloner
+func (cdr *CDR) CacheClone() any {
+	return cdr.Clone()
+}
+
 func (cdr *CDR) AsMapStorage() (mp utils.MapStorage) {
 	mp = utils.MapStorage{
 		utils.MetaReq: cdr.AsMapStringIface(),

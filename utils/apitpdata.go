@@ -97,12 +97,46 @@ type TPDestination struct {
 	Prefixes []string // Prefixes attached to this destination
 }
 
+// Clone method for TPDestination
+func (tpd *TPDestination) Clone() *TPDestination {
+	clone := &TPDestination{
+		TPid: tpd.TPid,
+		ID:   tpd.ID,
+	}
+	clone.Prefixes = make([]string, len(tpd.Prefixes))
+	copy(clone.Prefixes, tpd.Prefixes)
+	return clone
+}
+
+// CacheClone returns a clone of TPDestination used by ltcache CacheCloner
+func (tpd *TPDestination) CacheClone() any {
+	return tpd.Clone()
+}
+
 // This file deals with tp_* data definition
 // TPRateRALs -> TPRateRALs
 type TPRateRALs struct {
 	TPid      string      // Tariff plan id
 	ID        string      // Rate id
 	RateSlots []*RateSlot // One or more RateSlots
+}
+
+// Clone method for TPRateRALs
+func (tpr *TPRateRALs) Clone() *TPRateRALs {
+	clone := &TPRateRALs{
+		TPid: tpr.TPid,
+		ID:   tpr.ID,
+	}
+	clone.RateSlots = make([]*RateSlot, len(tpr.RateSlots))
+	for i, slot := range tpr.RateSlots {
+		clone.RateSlots[i] = slot.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPRateRALs used by ltcache CacheCloner
+func (tpr *TPRateRALs) CacheClone() any {
+	return tpr.Clone()
 }
 
 // Needed so we make sure we always use SetDurations() on a newly created value
@@ -130,6 +164,21 @@ type RateSlot struct {
 	rateIncrementDur      time.Duration
 	groupIntervalStartDur time.Duration
 	tag                   string // load validation only
+}
+
+// Clone method for RateSlot
+func (rs *RateSlot) Clone() *RateSlot {
+	return &RateSlot{
+		ConnectFee:            rs.ConnectFee,
+		Rate:                  rs.Rate,
+		RateUnit:              rs.RateUnit,
+		RateIncrement:         rs.RateIncrement,
+		GroupIntervalStart:    rs.GroupIntervalStart,
+		rateUnitDur:           rs.rateUnitDur,
+		rateIncrementDur:      rs.rateIncrementDur,
+		groupIntervalStartDur: rs.groupIntervalStartDur,
+		tag:                   rs.tag,
+	}
 }
 
 // Used to set the durations we need out of strings
@@ -162,6 +211,24 @@ type TPDestinationRate struct {
 	DestinationRates []*DestinationRate // Set of destinationid-rateid bindings
 }
 
+// Clone method for TPDestinationRate
+func (tpdr *TPDestinationRate) Clone() *TPDestinationRate {
+	clone := &TPDestinationRate{
+		TPid: tpdr.TPid,
+		ID:   tpdr.ID,
+	}
+	clone.DestinationRates = make([]*DestinationRate, len(tpdr.DestinationRates))
+	for i, destRate := range tpdr.DestinationRates {
+		clone.DestinationRates[i] = destRate.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPDestinationRate used by ltcache CacheCloner
+func (tpdr *TPDestinationRate) CacheClone() any {
+	return tpdr.Clone()
+}
+
 type DestinationRate struct {
 	DestinationId    string // The destination identity
 	RateId           string // The rate identity
@@ -170,6 +237,22 @@ type DestinationRate struct {
 	RoundingDecimals int
 	MaxCost          float64
 	MaxCostStrategy  string
+}
+
+// Clone method for DestinationRate
+func (dr *DestinationRate) Clone() *DestinationRate {
+	clone := &DestinationRate{
+		DestinationId:    dr.DestinationId,
+		RateId:           dr.RateId,
+		RoundingMethod:   dr.RoundingMethod,
+		RoundingDecimals: dr.RoundingDecimals,
+		MaxCost:          dr.MaxCost,
+		MaxCostStrategy:  dr.MaxCostStrategy,
+	}
+	if dr.Rate != nil {
+		clone.Rate = dr.Rate.Clone()
+	}
+	return clone
 }
 
 type ApierTPTiming struct {
@@ -182,6 +265,24 @@ type ApierTPTiming struct {
 	Time      string // String representing the time this timing starts on
 }
 
+// Clone method for ApierTPTiming
+func (apt *ApierTPTiming) Clone() *ApierTPTiming {
+	return &ApierTPTiming{
+		TPid:      apt.TPid,
+		ID:        apt.ID,
+		Years:     apt.Years,
+		Months:    apt.Months,
+		MonthDays: apt.MonthDays,
+		WeekDays:  apt.WeekDays,
+		Time:      apt.Time,
+	}
+}
+
+// CacheClone returns a clone of ApierTPTiming used by ltcache CacheCloner
+func (apt *ApierTPTiming) CacheClone() any {
+	return apt.Clone()
+}
+
 type TPTiming struct {
 	ID        string
 	Years     Years
@@ -190,6 +291,27 @@ type TPTiming struct {
 	WeekDays  WeekDays
 	StartTime string
 	EndTime   string
+}
+
+// Clone clones *TPTiming
+func (tpt *TPTiming) Clone() *TPTiming {
+	if tpt == nil {
+		return nil
+	}
+	return &TPTiming{
+		ID:        tpt.ID,
+		StartTime: tpt.StartTime,
+		EndTime:   tpt.EndTime,
+		Years:     tpt.Years,
+		Months:    tpt.Months,
+		MonthDays: tpt.MonthDays,
+		WeekDays:  tpt.WeekDays,
+	}
+}
+
+// CacheClone returns a clone of TPTiming used by ltcache CacheCloner
+func (tpt *TPTiming) CacheClone() any {
+	return tpt.Clone()
 }
 
 // Returns wheter the Timing is active at the specified time
@@ -288,11 +410,42 @@ type TPRatingPlan struct {
 	RatingPlanBindings []*TPRatingPlanBinding // Set of destinationid-rateid bindings
 }
 
+// Clone method for TPRatingPlan
+func (tprp *TPRatingPlan) Clone() *TPRatingPlan {
+	clone := &TPRatingPlan{
+		TPid: tprp.TPid,
+		ID:   tprp.ID,
+	}
+	clone.RatingPlanBindings = make([]*TPRatingPlanBinding, len(tprp.RatingPlanBindings))
+	for i, binding := range tprp.RatingPlanBindings {
+		clone.RatingPlanBindings[i] = binding.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPRatingPlan used by ltcache CacheCloner
+func (tprp *TPRatingPlan) CacheClone() any {
+	return tprp.Clone()
+}
+
 type TPRatingPlanBinding struct {
 	DestinationRatesId string    // The DestinationRate identity
 	TimingId           string    // The timing identity
 	Weight             float64   // Binding priority taken into consideration when more DestinationRates are active on a time slot
 	timing             *TPTiming // Not exporting it via JSON
+}
+
+// Clone method for TPRatingPlanBinding
+func (tpb *TPRatingPlanBinding) Clone() *TPRatingPlanBinding {
+	clone := &TPRatingPlanBinding{
+		DestinationRatesId: tpb.DestinationRatesId,
+		TimingId:           tpb.TimingId,
+		Weight:             tpb.Weight,
+	}
+	if tpb.timing != nil {
+		clone.timing = tpb.timing.Clone()
+	}
+	return clone
 }
 
 func (self *TPRatingPlanBinding) SetTiming(tm *TPTiming) {
@@ -310,6 +463,27 @@ type TPRatingProfile struct {
 	Category              string                // TypeOfRecord
 	Subject               string                // Rating subject, usually the same as account
 	RatingPlanActivations []*TPRatingActivation // Activate rate profiles at specific time
+}
+
+// Clone method for TPRatingProfile
+func (rpf *TPRatingProfile) Clone() *TPRatingProfile {
+	clone := &TPRatingProfile{
+		TPid:     rpf.TPid,
+		LoadId:   rpf.LoadId,
+		Tenant:   rpf.Tenant,
+		Category: rpf.Category,
+		Subject:  rpf.Subject,
+	}
+	clone.RatingPlanActivations = make([]*TPRatingActivation, len(rpf.RatingPlanActivations))
+	for i, activation := range rpf.RatingPlanActivations {
+		clone.RatingPlanActivations[i] = activation.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPRatingProfile used by ltcache CacheCloner
+func (rpf *TPRatingProfile) CacheClone() any {
+	return rpf.Clone()
 }
 
 // Used as key in nosql db (eg: redis)
@@ -360,6 +534,15 @@ type TPRatingActivation struct {
 	FallbackSubjects string // So we follow the api
 }
 
+// Clone method for TPRatingActivation
+func (tpa *TPRatingActivation) Clone() *TPRatingActivation {
+	return &TPRatingActivation{
+		ActivationTime:   tpa.ActivationTime,
+		RatingPlanId:     tpa.RatingPlanId,
+		FallbackSubjects: tpa.FallbackSubjects,
+	}
+}
+
 // FallbackSubjKeys generates keys for dataDB lookup with the format "*out:tenant:tor:subject".
 func FallbackSubjKeys(tenant, tor, fallbackSubjects string) []string {
 	if fallbackSubjects == "" {
@@ -393,6 +576,24 @@ type TPActions struct {
 	Actions []*TPAction // Set of actions this Actions profile will perform
 }
 
+// Clone method for TPActions
+func (tpa *TPActions) Clone() *TPActions {
+	clone := &TPActions{
+		TPid: tpa.TPid,
+		ID:   tpa.ID,
+	}
+	clone.Actions = make([]*TPAction, len(tpa.Actions))
+	for i, action := range tpa.Actions {
+		clone.Actions[i] = action.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPActions used by ltcache CacheCloner
+func (tpa *TPActions) CacheClone() any {
+	return tpa.Clone()
+}
+
 type TPAction struct {
 	Identifier      string // Identifier mapped in the code
 	BalanceId       string // Balance identification string (account scope)
@@ -413,10 +614,51 @@ type TPAction struct {
 	Weight          float64 // Action's weight
 }
 
+// Clone method for TPAction
+func (tpa *TPAction) Clone() *TPAction {
+	return &TPAction{
+		Identifier:      tpa.Identifier,
+		BalanceId:       tpa.BalanceId,
+		BalanceUuid:     tpa.BalanceUuid,
+		BalanceType:     tpa.BalanceType,
+		Units:           tpa.Units,
+		ExpiryTime:      tpa.ExpiryTime,
+		Filters:         tpa.Filters,
+		TimingTags:      tpa.TimingTags,
+		DestinationIds:  tpa.DestinationIds,
+		RatingSubject:   tpa.RatingSubject,
+		Categories:      tpa.Categories,
+		SharedGroups:    tpa.SharedGroups,
+		BalanceWeight:   tpa.BalanceWeight,
+		ExtraParameters: tpa.ExtraParameters,
+		BalanceBlocker:  tpa.BalanceBlocker,
+		BalanceDisabled: tpa.BalanceDisabled,
+		Weight:          tpa.Weight,
+	}
+}
+
 type TPSharedGroups struct {
 	TPid         string
 	ID           string
 	SharedGroups []*TPSharedGroup
+}
+
+// Clone method for TPSharedGroups
+func (tpsg *TPSharedGroups) Clone() *TPSharedGroups {
+	clone := &TPSharedGroups{
+		TPid: tpsg.TPid,
+		ID:   tpsg.ID,
+	}
+	clone.SharedGroups = make([]*TPSharedGroup, len(tpsg.SharedGroups))
+	for i, sharedGroup := range tpsg.SharedGroups {
+		clone.SharedGroups[i] = sharedGroup.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPSharedGroups used by ltcache CacheCloner
+func (tpsg *TPSharedGroups) CacheClone() any {
+	return tpsg.Clone()
 }
 
 type TPSharedGroup struct {
@@ -425,10 +667,37 @@ type TPSharedGroup struct {
 	RatingSubject string
 }
 
+// Clone method for TPSharedGroup
+func (tpsg *TPSharedGroup) Clone() *TPSharedGroup {
+	return &TPSharedGroup{
+		Account:       tpsg.Account,
+		Strategy:      tpsg.Strategy,
+		RatingSubject: tpsg.RatingSubject,
+	}
+}
+
 type TPActionPlan struct {
 	TPid       string            // Tariff plan id
 	ID         string            // ActionPlan id
 	ActionPlan []*TPActionTiming // Set of ActionTiming bindings this profile will group
+}
+
+// Clone method for TPActionPlan
+func (tap *TPActionPlan) Clone() *TPActionPlan {
+	clone := &TPActionPlan{
+		TPid: tap.TPid,
+		ID:   tap.ID,
+	}
+	clone.ActionPlan = make([]*TPActionTiming, len(tap.ActionPlan))
+	for i, actionTiming := range tap.ActionPlan {
+		clone.ActionPlan[i] = actionTiming.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPActionPlan used by ltcache CacheCloner
+func (tap *TPActionPlan) CacheClone() any {
+	return tap.Clone()
 }
 
 type TPActionTiming struct {
@@ -437,10 +706,37 @@ type TPActionTiming struct {
 	Weight    float64 // Binding's weight
 }
 
+// Clone method for TPActionTiming
+func (tat *TPActionTiming) Clone() *TPActionTiming {
+	return &TPActionTiming{
+		ActionsId: tat.ActionsId,
+		TimingId:  tat.TimingId,
+		Weight:    tat.Weight,
+	}
+}
+
 type TPActionTriggers struct {
 	TPid           string             // Tariff plan id
 	ID             string             // action trigger id
 	ActionTriggers []*TPActionTrigger // Set of triggers grouped in this profile
+}
+
+// Clone method for TPActionTriggers
+func (tpat *TPActionTriggers) Clone() *TPActionTriggers {
+	clone := &TPActionTriggers{
+		TPid: tpat.TPid,
+		ID:   tpat.ID,
+	}
+	clone.ActionTriggers = make([]*TPActionTrigger, len(tpat.ActionTriggers))
+	for i, actionTrigger := range tpat.ActionTriggers {
+		clone.ActionTriggers[i] = actionTrigger.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPActionTriggers used by ltcache CacheCloner
+func (tpat *TPActionTriggers) CacheClone() any {
+	return tpat.Clone()
 }
 
 type TPActionTrigger struct {
@@ -467,6 +763,33 @@ type TPActionTrigger struct {
 	Weight                float64 // weight
 }
 
+// Clone method for TPActionTrigger
+func (tpat *TPActionTrigger) Clone() *TPActionTrigger {
+	return &TPActionTrigger{
+		Id:                    tpat.Id,
+		UniqueID:              tpat.UniqueID,
+		ThresholdType:         tpat.ThresholdType,
+		ThresholdValue:        tpat.ThresholdValue,
+		Recurrent:             tpat.Recurrent,
+		MinSleep:              tpat.MinSleep,
+		ExpirationDate:        tpat.ExpirationDate,
+		ActivationDate:        tpat.ActivationDate,
+		BalanceId:             tpat.BalanceId,
+		BalanceType:           tpat.BalanceType,
+		BalanceDestinationIds: tpat.BalanceDestinationIds,
+		BalanceWeight:         tpat.BalanceWeight,
+		BalanceExpirationDate: tpat.BalanceExpirationDate,
+		BalanceTimingTags:     tpat.BalanceTimingTags,
+		BalanceRatingSubject:  tpat.BalanceRatingSubject,
+		BalanceCategories:     tpat.BalanceCategories,
+		BalanceSharedGroups:   tpat.BalanceSharedGroups,
+		BalanceBlocker:        tpat.BalanceBlocker,
+		BalanceDisabled:       tpat.BalanceDisabled,
+		ActionsId:             tpat.ActionsId,
+		Weight:                tpat.Weight,
+	}
+}
+
 type TPAccountActions struct {
 	TPid             string // Tariff plan id
 	LoadId           string // LoadId, used to group actions on a load
@@ -476,6 +799,25 @@ type TPAccountActions struct {
 	ActionTriggersId string // Id of ActionTriggers profile to use
 	AllowNegative    bool
 	Disabled         bool
+}
+
+// Clone method for TPAccountActions
+func (aa *TPAccountActions) Clone() *TPAccountActions {
+	return &TPAccountActions{
+		TPid:             aa.TPid,
+		LoadId:           aa.LoadId,
+		Tenant:           aa.Tenant,
+		Account:          aa.Account,
+		ActionPlanId:     aa.ActionPlanId,
+		ActionTriggersId: aa.ActionTriggersId,
+		AllowNegative:    aa.AllowNegative,
+		Disabled:         aa.Disabled,
+	}
+}
+
+// CacheClone returns a clone of TPAccountActions used by ltcache CacheCloner
+func (aa *TPAccountActions) CacheClone() any {
+	return aa.Clone()
 }
 
 // Returns the id used in some nosql dbs (eg: redis)
@@ -964,10 +1306,46 @@ type TPResourceProfile struct {
 	ThresholdIDs       []string // Thresholds to check after changing Limit
 }
 
+// Clone method for TPResourceProfile
+func (trp *TPResourceProfile) Clone() *TPResourceProfile {
+	clone := &TPResourceProfile{
+		TPid:              trp.TPid,
+		Tenant:            trp.Tenant,
+		ID:                trp.ID,
+		UsageTTL:          trp.UsageTTL,
+		Limit:             trp.Limit,
+		AllocationMessage: trp.AllocationMessage,
+		Blocker:           trp.Blocker,
+		Stored:            trp.Stored,
+		Weight:            trp.Weight,
+	}
+	clone.FilterIDs = make([]string, len(trp.FilterIDs))
+	copy(clone.FilterIDs, trp.FilterIDs)
+	clone.ThresholdIDs = make([]string, len(trp.ThresholdIDs))
+	copy(clone.ThresholdIDs, trp.ThresholdIDs)
+	if trp.ActivationInterval != nil {
+		clone.ActivationInterval = trp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPResourceProfile used by ltcache CacheCloner
+func (trp *TPResourceProfile) CacheClone() any {
+	return trp.Clone()
+}
+
 // TPActivationInterval represents an activation interval for an item
 type TPActivationInterval struct {
 	ActivationTime string
 	ExpiryTime     string
+}
+
+// Clone method for TPActivationInterval
+func (tai *TPActivationInterval) Clone() *TPActivationInterval {
+	return &TPActivationInterval{
+		ActivationTime: tai.ActivationTime,
+		ExpiryTime:     tai.ExpiryTime,
+	}
 }
 
 type ArgsComputeFilterIndexIDs struct {
@@ -1016,6 +1394,17 @@ type ActivationInterval struct {
 	ExpiryTime     time.Time
 }
 
+// Clone clones ActivationInterval
+func (ai *ActivationInterval) Clone() *ActivationInterval {
+	if ai == nil {
+		return nil
+	}
+	return &ActivationInterval{
+		ActivationTime: ai.ActivationTime,
+		ExpiryTime:     ai.ExpiryTime,
+	}
+}
+
 func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
 	return (ai.ActivationTime.IsZero() || ai.ActivationTime.Before(atTime)) &&
 		(ai.ExpiryTime.IsZero() || ai.ExpiryTime.After(atTime))
@@ -1025,6 +1414,14 @@ func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
 type MetricWithFilters struct {
 	FilterIDs []string
 	MetricID  string
+}
+
+// Clone method for MetricWithFilters
+func (mwf *MetricWithFilters) Clone() *MetricWithFilters {
+	return &MetricWithFilters{
+		FilterIDs: slices.Clone(mwf.FilterIDs),
+		MetricID:  mwf.MetricID,
+	}
 }
 
 // TPStatProfile is used in APIs to manage remotely offline StatProfile
@@ -1044,6 +1441,38 @@ type TPStatProfile struct {
 	ThresholdIDs       []string
 }
 
+// Clone method for TPStatProfile
+func (tsp *TPStatProfile) Clone() *TPStatProfile {
+	clone := &TPStatProfile{
+		TPid:        tsp.TPid,
+		Tenant:      tsp.Tenant,
+		ID:          tsp.ID,
+		QueueLength: tsp.QueueLength,
+		TTL:         tsp.TTL,
+		Blocker:     tsp.Blocker,
+		Stored:      tsp.Stored,
+		Weight:      tsp.Weight,
+		MinItems:    tsp.MinItems,
+	}
+	clone.FilterIDs = make([]string, len(tsp.FilterIDs))
+	copy(clone.FilterIDs, tsp.FilterIDs)
+	clone.ThresholdIDs = make([]string, len(tsp.ThresholdIDs))
+	copy(clone.ThresholdIDs, tsp.ThresholdIDs)
+	clone.Metrics = make([]*MetricWithFilters, len(tsp.Metrics))
+	for i, metric := range tsp.Metrics {
+		clone.Metrics[i] = metric.Clone()
+	}
+	if tsp.ActivationInterval != nil {
+		clone.ActivationInterval = tsp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPStatProfile used by ltcache CacheCloner
+func (tsp *TPStatProfile) CacheClone() any {
+	return tsp.Clone()
+}
+
 // TPRankingProfile is used in APIs to manage remotely offline RankingProfile
 type TPRankingProfile struct {
 	TPid              string
@@ -1056,6 +1485,40 @@ type TPRankingProfile struct {
 	SortingParameters []string
 	Stored            bool
 	ThresholdIDs      []string
+}
+
+// Clone method for TPRankingProfile
+func (trp *TPRankingProfile) Clone() *TPRankingProfile {
+	clone := &TPRankingProfile{
+		TPid:     trp.TPid,
+		Tenant:   trp.Tenant,
+		ID:       trp.ID,
+		Schedule: trp.Schedule,
+		Sorting:  trp.Sorting,
+		Stored:   trp.Stored,
+	}
+	if trp.StatIDs != nil {
+		clone.StatIDs = make([]string, len(trp.StatIDs))
+		copy(clone.StatIDs, trp.StatIDs)
+	}
+	if trp.MetricIDs != nil {
+		clone.MetricIDs = make([]string, len(trp.MetricIDs))
+		copy(clone.MetricIDs, trp.MetricIDs)
+	}
+	if trp.SortingParameters != nil {
+		clone.SortingParameters = make([]string, len(trp.SortingParameters))
+		copy(clone.SortingParameters, trp.SortingParameters)
+	}
+	if trp.ThresholdIDs != nil {
+		clone.ThresholdIDs = make([]string, len(trp.ThresholdIDs))
+		copy(clone.ThresholdIDs, trp.ThresholdIDs)
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPRankingProfile used by ltcache CacheCloner
+func (trp *TPRankingProfile) CacheClone() any {
+	return trp.Clone()
 }
 
 // MetricWithSettings adds specific settings to the Metric
@@ -1081,6 +1544,37 @@ type TPTrendsProfile struct {
 	ThresholdIDs    []string
 }
 
+// Clone method for TPTrendsProfile
+func (ttp *TPTrendsProfile) Clone() *TPTrendsProfile {
+	clone := &TPTrendsProfile{
+		TPid:            ttp.TPid,
+		Tenant:          ttp.Tenant,
+		ID:              ttp.ID,
+		Schedule:        ttp.Schedule,
+		StatID:          ttp.StatID,
+		TTL:             ttp.TTL,
+		QueueLength:     ttp.QueueLength,
+		MinItems:        ttp.MinItems,
+		CorrelationType: ttp.CorrelationType,
+		Tolerance:       ttp.Tolerance,
+		Stored:          ttp.Stored,
+	}
+	if ttp.Metrics != nil {
+		clone.Metrics = make([]string, len(ttp.Metrics))
+		copy(clone.Metrics, ttp.Metrics)
+	}
+	if ttp.ThresholdIDs != nil {
+		clone.ThresholdIDs = make([]string, len(ttp.ThresholdIDs))
+		copy(clone.ThresholdIDs, ttp.ThresholdIDs)
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPTrendsProfile used by ltcache CacheCloner
+func (ttp *TPTrendsProfile) CacheClone() any {
+	return ttp.Clone()
+}
+
 // TPThresholdProfile is used in APIs to manage remotely offline ThresholdProfile
 type TPThresholdProfile struct {
 	TPid               string
@@ -1097,6 +1591,34 @@ type TPThresholdProfile struct {
 	Async              bool
 }
 
+// Clone method for TPThresholdProfile
+func (ttp *TPThresholdProfile) Clone() *TPThresholdProfile {
+	clone := &TPThresholdProfile{
+		TPid:     ttp.TPid,
+		Tenant:   ttp.Tenant,
+		ID:       ttp.ID,
+		MaxHits:  ttp.MaxHits,
+		MinHits:  ttp.MinHits,
+		MinSleep: ttp.MinSleep,
+		Blocker:  ttp.Blocker,
+		Weight:   ttp.Weight,
+		Async:    ttp.Async,
+	}
+	clone.FilterIDs = make([]string, len(ttp.FilterIDs))
+	copy(clone.FilterIDs, ttp.FilterIDs)
+	clone.ActionIDs = make([]string, len(ttp.ActionIDs))
+	copy(clone.ActionIDs, ttp.ActionIDs)
+	if ttp.ActivationInterval != nil {
+		clone.ActivationInterval = ttp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPThresholdProfile used by ltcache CacheCloner
+func (ttp *TPThresholdProfile) CacheClone() any {
+	return ttp.Clone()
+}
+
 // TPFilterProfile is used in APIs to manage remotely offline FilterProfile
 type TPFilterProfile struct {
 	TPid               string
@@ -1104,6 +1626,35 @@ type TPFilterProfile struct {
 	ID                 string
 	Filters            []*TPFilter
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
+}
+
+// Clone method for TPFilterProfile
+func (tfp *TPFilterProfile) Clone() *TPFilterProfile {
+	clone := &TPFilterProfile{
+		TPid:   tfp.TPid,
+		Tenant: tfp.Tenant,
+		ID:     tfp.ID,
+	}
+	if len(tfp.Filters) > 0 {
+		clone.Filters = make([]*TPFilter, len(tfp.Filters))
+		for i, filter := range tfp.Filters {
+			clone.Filters[i] = &TPFilter{
+				Type:    filter.Type,
+				Element: filter.Element,
+				Values:  make([]string, len(filter.Values)),
+			}
+			copy(clone.Filters[i].Values, filter.Values)
+		}
+	}
+	if tfp.ActivationInterval != nil {
+		clone.ActivationInterval = tfp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPFilterProfile used by ltcache CacheCloner
+func (tfp *TPFilterProfile) CacheClone() any {
+	return tfp.Clone()
 }
 
 // TPFilter is used in TPFilterProfile
@@ -1126,6 +1677,21 @@ type TPRoute struct {
 	RouteParameters string
 }
 
+// Clone method for TPRoute
+func (r *TPRoute) Clone() *TPRoute {
+	return &TPRoute{
+		ID:              r.ID,
+		Weight:          r.Weight,
+		Blocker:         r.Blocker,
+		RouteParameters: r.RouteParameters,
+		FilterIDs:       slices.Clone(r.FilterIDs),
+		AccountIDs:      slices.Clone(r.AccountIDs),
+		RatingPlanIDs:   slices.Clone(r.RatingPlanIDs),
+		ResourceIDs:     slices.Clone(r.ResourceIDs),
+		StatIDs:         slices.Clone(r.StatIDs),
+	}
+}
+
 // TPRouteProfile is used in APIs to manage remotely offline RouteProfile
 type TPRouteProfile struct {
 	TPid               string
@@ -1139,12 +1705,60 @@ type TPRouteProfile struct {
 	Weight             float64
 }
 
+// Clone method for TPRouteProfile
+func (tprp *TPRouteProfile) Clone() *TPRouteProfile {
+	clone := &TPRouteProfile{
+		TPid:    tprp.TPid,
+		Tenant:  tprp.Tenant,
+		ID:      tprp.ID,
+		Sorting: tprp.Sorting,
+		Weight:  tprp.Weight,
+	}
+	if tprp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(tprp.FilterIDs))
+		copy(clone.FilterIDs, tprp.FilterIDs)
+	}
+	if tprp.SortingParameters != nil {
+		clone.SortingParameters = make([]string, len(tprp.SortingParameters))
+		copy(clone.SortingParameters, tprp.SortingParameters)
+	}
+	if tprp.Routes != nil {
+		clone.Routes = make([]*TPRoute, len(tprp.Routes))
+		for i, route := range tprp.Routes {
+			clone.Routes[i] = route.Clone() // Use the Clone method of TPRoute
+		}
+	}
+	if tprp.ActivationInterval != nil {
+		clone.ActivationInterval = tprp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPRouteProfile used by ltcache CacheCloner
+func (tprp *TPRouteProfile) CacheClone() any {
+	return tprp.Clone()
+}
+
 // TPAttribute is used in TPAttributeProfile
 type TPAttribute struct {
 	FilterIDs []string
 	Path      string
 	Type      string
 	Value     string
+}
+
+// Clone clones TPAttribute
+func (tpa *TPAttribute) Clone() *TPAttribute {
+	clone := &TPAttribute{
+		Path:  tpa.Path,
+		Type:  tpa.Type,
+		Value: tpa.Value,
+	}
+	if tpa.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(tpa.FilterIDs))
+		copy(clone.FilterIDs, tpa.FilterIDs)
+	}
+	return clone
 }
 
 // TPAttributeProfile is used in APIs to manage remotely offline AttributeProfile
@@ -1160,6 +1774,40 @@ type TPAttributeProfile struct {
 	Weight             float64
 }
 
+// Clone clones TPAttributeProfile
+func (tpap *TPAttributeProfile) Clone() *TPAttributeProfile {
+	clone := &TPAttributeProfile{
+		TPid:    tpap.TPid,
+		Tenant:  tpap.Tenant,
+		ID:      tpap.ID,
+		Blocker: tpap.Blocker,
+		Weight:  tpap.Weight,
+	}
+	if tpap.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(tpap.FilterIDs))
+		copy(clone.FilterIDs, tpap.FilterIDs)
+	}
+	if tpap.Contexts != nil {
+		clone.Contexts = make([]string, len(tpap.Contexts))
+		copy(clone.Contexts, tpap.Contexts)
+	}
+	if tpap.Attributes != nil {
+		clone.Attributes = make([]*TPAttribute, len(tpap.Attributes))
+		for i, attribute := range tpap.Attributes {
+			clone.Attributes[i] = attribute.Clone() // Use the Clone method of TPAttribute
+		}
+	}
+	if tpap.ActivationInterval != nil {
+		clone.ActivationInterval = tpap.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPAttributeProfile used by ltcache CacheCloner
+func (tpap *TPAttributeProfile) CacheClone() any {
+	return tpap.Clone()
+}
+
 // TPChargerProfile is used in APIs to manage remotely offline ChargerProfile
 type TPChargerProfile struct {
 	TPid               string
@@ -1170,6 +1818,34 @@ type TPChargerProfile struct {
 	RunID              string
 	AttributeIDs       []string
 	Weight             float64
+}
+
+// Clone clones TPChargerProfile
+func (tpcp *TPChargerProfile) Clone() *TPChargerProfile {
+	clone := &TPChargerProfile{
+		TPid:   tpcp.TPid,
+		Tenant: tpcp.Tenant,
+		ID:     tpcp.ID,
+		RunID:  tpcp.RunID,
+		Weight: tpcp.Weight,
+	}
+	if tpcp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(tpcp.FilterIDs))
+		copy(clone.FilterIDs, tpcp.FilterIDs)
+	}
+	if tpcp.ActivationInterval != nil {
+		clone.ActivationInterval = tpcp.ActivationInterval.Clone()
+	}
+	if tpcp.AttributeIDs != nil {
+		clone.AttributeIDs = make([]string, len(tpcp.AttributeIDs))
+		copy(clone.AttributeIDs, tpcp.AttributeIDs)
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPChargerProfile used by ltcache CacheCloner
+func (tpcp *TPChargerProfile) CacheClone() any {
+	return tpcp.Clone()
 }
 
 type TPTntID struct {
@@ -1192,6 +1868,44 @@ type TPDispatcherProfile struct {
 	Hosts              []*TPDispatcherHostProfile
 }
 
+// Clone clones TPDispatcherProfile
+func (tpdp *TPDispatcherProfile) Clone() *TPDispatcherProfile {
+	clone := &TPDispatcherProfile{
+		TPid:     tpdp.TPid,
+		Tenant:   tpdp.Tenant,
+		ID:       tpdp.ID,
+		Strategy: tpdp.Strategy,
+		Weight:   tpdp.Weight,
+	}
+	if tpdp.Subsystems != nil {
+		clone.Subsystems = make([]string, len(tpdp.Subsystems))
+		copy(clone.Subsystems, tpdp.Subsystems)
+	}
+	if tpdp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(tpdp.FilterIDs))
+		copy(clone.FilterIDs, tpdp.FilterIDs)
+	}
+	if tpdp.StrategyParams != nil {
+		clone.StrategyParams = make([]any, len(tpdp.StrategyParams))
+		copy(clone.StrategyParams, tpdp.StrategyParams)
+	}
+	if tpdp.Hosts != nil {
+		clone.Hosts = make([]*TPDispatcherHostProfile, len(tpdp.Hosts))
+		for i, host := range tpdp.Hosts {
+			clone.Hosts[i] = host.Clone()
+		}
+	}
+	if tpdp.ActivationInterval != nil {
+		clone.ActivationInterval = tpdp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPDispatcherProfile used by ltcache CacheCloner
+func (tpdp *TPDispatcherProfile) CacheClone() any {
+	return tpdp.Clone()
+}
+
 // TPDispatcherHostProfile is used in TPDispatcherProfile
 type TPDispatcherHostProfile struct {
 	ID        string
@@ -1201,12 +1915,48 @@ type TPDispatcherHostProfile struct {
 	Blocker   bool    // no connection after this one
 }
 
+// Clone clones TPDispatcherHostProfile
+func (tpdhp *TPDispatcherHostProfile) Clone() *TPDispatcherHostProfile {
+	clone := &TPDispatcherHostProfile{
+		ID:      tpdhp.ID,
+		Weight:  tpdhp.Weight,
+		Blocker: tpdhp.Blocker,
+	}
+	if tpdhp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(tpdhp.FilterIDs))
+		copy(clone.FilterIDs, tpdhp.FilterIDs)
+	}
+	if tpdhp.Params != nil {
+		clone.Params = make([]any, len(tpdhp.Params))
+		copy(clone.Params, tpdhp.Params)
+	}
+	return clone
+}
+
 // TPDispatcherHost is used in APIs to manage remotely offline DispatcherHost
 type TPDispatcherHost struct {
 	TPid   string
 	Tenant string
 	ID     string
 	Conn   *TPDispatcherHostConn
+}
+
+// Clone clones TPDispatcherHost
+func (tpdh *TPDispatcherHost) Clone() *TPDispatcherHost {
+	clone := &TPDispatcherHost{
+		TPid:   tpdh.TPid,
+		Tenant: tpdh.Tenant,
+		ID:     tpdh.ID,
+	}
+	if tpdh.Conn != nil {
+		clone.Conn = tpdh.Conn.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of TPDispatcherHost used by ltcache CacheCloner
+func (tpdh *TPDispatcherHost) CacheClone() any {
+	return tpdh.Clone()
 }
 
 // TPDispatcherHostConn is used in TPDispatcherHost
@@ -1222,6 +1972,23 @@ type TPDispatcherHostConn struct {
 	ClientKey            string
 	ClientCertificate    string
 	CaCertificate        string
+}
+
+// Clone clones TPDispatcherHostConn
+func (tpdhc *TPDispatcherHostConn) Clone() *TPDispatcherHostConn {
+	return &TPDispatcherHostConn{
+		Address:              tpdhc.Address,
+		Transport:            tpdhc.Transport,
+		ConnectAttempts:      tpdhc.ConnectAttempts,
+		Reconnects:           tpdhc.Reconnects,
+		MaxReconnectInterval: tpdhc.MaxReconnectInterval,
+		ConnectTimeout:       tpdhc.ConnectTimeout,
+		ReplyTimeout:         tpdhc.ReplyTimeout,
+		TLS:                  tpdhc.TLS,
+		ClientKey:            tpdhc.ClientKey,
+		ClientCertificate:    tpdhc.ClientCertificate,
+		CaCertificate:        tpdhc.CaCertificate,
+	}
 }
 
 type UsageInterval struct {

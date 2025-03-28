@@ -2076,3 +2076,62 @@ func (apierSv1 *APIerSv1) TimingIsActiveAt(ctx *context.Context, params TimePara
 	}
 	return
 }
+
+// DumpDataDB will dump all of datadb from memory to a file
+func (apierSv1 *APIerSv1) DumpDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.DataManager.DataDB().DumpDataDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// Will rewrite every dump file of DataDB
+func (apierSv1 *APIerSv1) RewriteDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.DataManager.DataDB().RewriteDataDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// DumpStorDB will dump all of stordb from memory to a file
+func (apierSv1 *APIerSv1) DumpStorDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.StorDb.DumpStorDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// Will rewrite every dump file of StorDB
+func (apierSv1 *APIerSv1) RewriteStorDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = apierSv1.StorDb.RewriteStorDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+type DumpBackupParams struct {
+	BackupFolderPath string // The path to the folder where the backup will be created
+	Zip              bool   // creates a zip compressing the backup
+}
+
+// BackupDataDB will momentarely stop any dumping and rewriting in dataDB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead
+func (apierSv1 *APIerSv1) BackupDataDB(ctx *context.Context, params DumpBackupParams, reply *string) (err error) {
+	if err = apierSv1.DataManager.DataDB().BackupDataDB(params.BackupFolderPath, params.Zip); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// BackupStorDB will momentarely stop any dumping and rewriting in storDB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead
+func (apierSv1 *APIerSv1) BackupStorDB(ctx *context.Context, params DumpBackupParams, reply *string) (err error) {
+	if err = apierSv1.StorDb.BackupStorDB(params.BackupFolderPath, params.Zip); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}

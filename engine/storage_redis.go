@@ -143,7 +143,7 @@ func redisDial(network, addr string, attempts int, opts ...radix.DialOpt) (conn 
 	fib := utils.FibDuration(time.Millisecond, 0)
 	for i := 0; i < attempts; i++ {
 		if conn, err = radix.Dial(network, addr, opts...); err == nil ||
-			(err != nil && !strings.Contains(err.Error(), redisLoadError)) {
+			!strings.Contains(err.Error(), redisLoadError) {
 			break
 		}
 		time.Sleep(fib())
@@ -1404,4 +1404,19 @@ func (rs *RedisStorage) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error
 		return rs.Cmd(nil, redis_DEL, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt, nodeID))
 	}
 	return rs.Cmd(nil, redis_HDEL, utils.SessionsBackupPrefix+utils.ConcatenatedKey(tnt, nodeID), cgrid)
+}
+
+// DumpDataDB will dump all of datadb from memory to a file, only for InternalDB
+func (rs *RedisStorage) DumpDataDB() error {
+	return utils.ErrNotImplemented
+}
+
+// Will rewrite every dump file of DataDB,  only for InternalDB
+func (rs *RedisStorage) RewriteDataDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// BackupDataDB will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead, only for InternalDB
+func (rs *RedisStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
 }
