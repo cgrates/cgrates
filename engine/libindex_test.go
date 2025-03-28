@@ -48,7 +48,7 @@ func TestLibIndexIsDynamicDPPath(t *testing.T) {
 
 func TestLibIndexRemoveFilterIndexesForFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	tntCtx := "cgrates.org:*sessions"
 
@@ -183,7 +183,7 @@ func TestLibIndexSplitFilterIndexErrWrongIdxKeyFormat(t *testing.T) {
 
 func TestLibIndexNewFilterIndexGetFilterErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	tnt := "tenant"
 	ctx := "context"

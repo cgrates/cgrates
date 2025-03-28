@@ -64,7 +64,7 @@ var (
 )
 
 func TestReRateCDRsERs(t *testing.T) {
-	t.Skip()
+	t.Skip() // unfinished, should be able to rerate cdrs using ERs
 	for _, stest := range rrErsCdrsTests {
 		t.Run("ers_rerate", stest)
 	}

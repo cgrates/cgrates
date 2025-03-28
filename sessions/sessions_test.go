@@ -88,7 +88,7 @@ func TestIsIndexed(t *testing.T) {
 
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
@@ -118,7 +118,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 
@@ -1809,7 +1809,7 @@ func TestSessionSNewV1AuthorizeArgsWithOpts2(t *testing.T) {
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	mpStr := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	mpStr := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	sS := NewSessionS(cfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
@@ -2618,7 +2618,7 @@ func (mk *mockConnWarnDisconnect2) Call(ctx *context.Context, method string, arg
 func TestWarnSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	sessions := NewSessionS(cfg, dm, nil)
@@ -2714,7 +2714,7 @@ func TestInitSession(t *testing.T) {
 func TestBiJClntID(t *testing.T) {
 	client := &mockConnWarnDisconnect1{}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	sessions := NewSessionS(cfg, dm, nil)
 	sessions.biJClnts = map[birpc.ClientConnector]string{
@@ -2766,7 +2766,7 @@ func TestBiRPCv1AuthorizeEventNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2836,7 +2836,7 @@ func TestBiRPCv1AuthorizeEventWithDigestNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2904,7 +2904,7 @@ func TestBiRPCv1InitiateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -2971,7 +2971,7 @@ func TestBiRPCv1InitiateSessionWithDigestNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3036,7 +3036,7 @@ func TestBiRPCv1UpdateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3086,7 +3086,7 @@ func TestBiRPCv1TerminateSessionNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3152,7 +3152,7 @@ func TestBiRPCv1ProcessMessageNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 
@@ -3220,7 +3220,7 @@ func TestBiRPCv1ProcessEventNoTenant(t *testing.T) {
 	connMngr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.Attributes): chanClnt,
 	})
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), connMngr)
 	ss := NewSessionS(cfg, dm, connMngr)
 

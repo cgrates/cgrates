@@ -90,6 +90,10 @@ func TestDataDBReload(t *testing.T) {
 		Name: "10",
 		User: "cgrates",
 		Opts: &config.DataDBOpts{
+			InternalDBDumpPath:      "/var/lib/cgrates/internal_db/datadb",
+			InternalDBBackupPath:    "/var/lib/cgrates/internal_db/backup/datadb",
+			InternalDBStartTimeout:  5 * time.Minute,
+			InternalDBWriteLimit:    100,
 			MongoConnScheme:         "mongodb",
 			RedisMaxConns:           10,
 			RedisConnectAttempts:    20,
@@ -798,7 +802,7 @@ func TestDataDBReloadError(t *testing.T) {
 				Remote:    false},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	db.dm = engine.NewDataManager(data, nil, nil)
 	err := db.Reload()
 	if err != nil {

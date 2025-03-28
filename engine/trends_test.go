@@ -33,7 +33,7 @@ import (
 func TestStartTrendS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.TrendSCfg().Enabled = true
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	tS := NewTrendS(dm, nil, nil, cfg)
 	dm.SetTrendProfile(&TrendProfile{
@@ -57,7 +57,7 @@ func TestStartTrendS(t *testing.T) {
 
 func TestStoreTrend(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, nil)
+	dataDB := NewInternalDB(nil, nil, true, false, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	tS := &TrendS{
@@ -131,7 +131,7 @@ func TestStoreTrend(t *testing.T) {
 }
 func TestV1GetTrendSummary(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, nil)
+	dataDB := NewInternalDB(nil, nil, true, false, nil)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 
 	tS := &TrendS{
@@ -305,7 +305,7 @@ func TestTrendsStoreTrends(t *testing.T) {
 	cfg.TrendSCfg().Enabled = true
 	cfg.TrendSCfg().StoreInterval = time.Millisecond * 1500
 	cfg.TrendSCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	conn := make(chan context.ClientConnector, 1)
 	conn <- &ccMock{
@@ -362,7 +362,7 @@ func TestTrendReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.TrendSCfg().Enabled = true
 	cfg.TrendSCfg().StoreInterval = 0
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	conn := make(chan context.ClientConnector, 1)
 	conn <- &ccMock{
@@ -407,7 +407,7 @@ func TestV1GetTrendStoreIntervalZero(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.TrendSCfg().Enabled = true
 	cfg.TrendSCfg().StoreInterval = 0
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	conn := make(chan context.ClientConnector, 1)
 	conn <- &ccMock{
@@ -516,7 +516,7 @@ func TestTrendV1GetTrend(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dm := NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 	trnds := NewTrendS(dm, nil, nil, cfg)
 	dm.SetTrend(&Trend{
 		Tenant:   "cgrates.org",

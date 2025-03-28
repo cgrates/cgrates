@@ -51,7 +51,7 @@ func TestLibengineNewRPCPoolNoAddress(t *testing.T) {
 			Address: utils.EmptyString,
 		},
 	}
-	connCache := ltcache.NewCache(-1, 0, true, nil)
+	connCache := ltcache.NewCache(-1, 0, true, true, nil)
 
 	exp := &rpcclient.RPCPool{}
 	experr := rpcclient.ErrDisconnected
@@ -173,7 +173,7 @@ func TestLibengineNewRPCPoolUnsupportedTransport(t *testing.T) {
 			Transport: "invalid",
 		},
 	}
-	connCache := ltcache.NewCache(-1, 0, true, nil)
+	connCache := ltcache.NewCache(-1, 0, true, true, nil)
 
 	var exp *rpcclient.RPCPool
 	experr := fmt.Sprintf("Unsupported transport: <%s>",

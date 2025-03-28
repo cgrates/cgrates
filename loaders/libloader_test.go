@@ -315,7 +315,7 @@ func TestUpdateFromCsvWithFiltersError(t *testing.T) {
 	lData := make(LoaderData)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
@@ -349,7 +349,7 @@ func TestUpdateFromCsvWithFiltersContinue(t *testing.T) {
 	lData := make(LoaderData)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 

@@ -34,6 +34,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/ltcache"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -2560,9 +2561,8 @@ func TestClonedActions(t *testing.T) {
 			Weight: float64(20),
 		},
 	}
-	if clone, err := actions.Clone(); err != nil {
-		t.Error("error cloning actions: ", err)
-	} else if !reflect.DeepEqual(actions, clone) {
+	clone := actions.Clone()
+	if !reflect.DeepEqual(actions, clone) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToIJSON(actions), utils.ToIJSON(clone))
 	}
 
@@ -2603,11 +2603,11 @@ func TestCacheGetClonedActions(t *testing.T) {
 	if err := Cache.Set(utils.CacheActions, "MYTEST", actions, nil, true, ""); err != nil {
 		t.Errorf("Expecting: nil, received: %s", err)
 	}
-	clned, err := Cache.GetCloned(utils.CacheActions, "MYTEST")
-	if err != nil {
-		t.Error(err)
+	clned, ok := Cache.Get(utils.CacheActions, "MYTEST")
+	if !ok {
+		t.Error(ltcache.ErrNotFound)
 	}
-	aCloned := clned.(Actions)
+	aCloned := clned.(Actions).Clone()
 	if !reflect.DeepEqual(actions, aCloned) {
 		t.Errorf("Expecting: %+v, received: %+v", actions[1].Balance, aCloned[1].Balance)
 	}
@@ -2822,7 +2822,7 @@ func TestResetAccountCDR(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 		SetCdrStorage(cdrStorage)
 	}()
-	idb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	idb := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(idb, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 	SetCdrStorage(idb)
@@ -3331,7 +3331,7 @@ func TestEnableDisableAccountAction(t *testing.T) {
 
 func TestResetAccountCDRSuccesful(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	idb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	idb := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(idb, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 	cdr := &CDR{
@@ -3779,7 +3779,7 @@ func TestRemoveAccountActionErr(t *testing.T) {
 			}},
 		},
 	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(nil)
 	if err := removeAccountAction(ub, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrInvalidKey {
@@ -4004,7 +4004,7 @@ func TestSetDestinationsErr(t *testing.T) {
 			Replicate: false,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -4129,7 +4129,7 @@ func TestRemoveAccountActionLogg(t *testing.T) {
 	}
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -4880,22 +4880,16 @@ func TestActionsStringMethod(t *testing.T) {
 
 func TestActionsClone(t *testing.T) {
 	actions := Actions{}
-	cloned, err := actions.Clone()
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-	if len(cloned.(Actions)) != len(actions) {
-		t.Errorf("Expected cloned Actions length %d, got %d", len(actions), len(cloned.(Actions)))
+	cloned := actions.Clone()
+	if len(cloned) != len(actions) {
+		t.Errorf("Expected cloned Actions length %d, got %d", len(actions), len(cloned))
 	}
 	for i := range actions {
-		if !reflect.DeepEqual(actions[i], cloned.(Actions)[i]) {
-			t.Errorf("Expected cloned Action[%d] to match original, got %+v", i, cloned.(Actions)[i])
+		if !reflect.DeepEqual(actions[i], cloned[i]) {
+			t.Errorf("Expected cloned Action[%d] to match original, got %+v", i, cloned[i])
 		}
 	}
-	cloned, err = (Actions)(nil).Clone()
-	if err != nil {
-		t.Errorf("Expected no error when apl is nil, got %v", err)
-	}
+	cloned = (Actions)(nil).Clone()
 	if cloned != nil {
 		t.Errorf("Expected cloned result to be nil when apl is nil, got %+v", cloned)
 	}

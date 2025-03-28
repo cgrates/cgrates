@@ -88,7 +88,7 @@ func TestOnStorIT(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		onStor = NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		onStor = NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
 			config.CgrConfig().CacheCfg(), nil)
 	case utils.MetaMySQL:
 		rdsITdb, err = NewRedisStorage(
