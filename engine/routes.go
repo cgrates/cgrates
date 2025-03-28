@@ -26,6 +26,8 @@ import (
 	"strings"
 	"time"
 
+	"maps"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -47,6 +49,47 @@ type Route struct {
 	lazyCheckRules []*FilterRule
 }
 
+// Clone method for Route
+func (r *Route) Clone() *Route {
+	clone := &Route{
+		ID:              r.ID,
+		Weight:          r.Weight,
+		Blocker:         r.Blocker,
+		RouteParameters: r.RouteParameters,
+	}
+	if r.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(r.FilterIDs))
+		copy(clone.FilterIDs, r.FilterIDs)
+	}
+	if r.AccountIDs != nil {
+		clone.AccountIDs = make([]string, len(r.AccountIDs))
+		copy(clone.AccountIDs, r.AccountIDs)
+	}
+	if r.RatingPlanIDs != nil {
+		clone.RatingPlanIDs = make([]string, len(r.RatingPlanIDs))
+		copy(clone.RatingPlanIDs, r.RatingPlanIDs)
+	}
+	if r.ResourceIDs != nil {
+		clone.ResourceIDs = make([]string, len(r.ResourceIDs))
+		copy(clone.ResourceIDs, r.ResourceIDs)
+	}
+	if r.StatIDs != nil {
+		clone.StatIDs = make([]string, len(r.StatIDs))
+		copy(clone.StatIDs, r.StatIDs)
+	}
+	if r.cacheRoute != nil {
+		clone.cacheRoute = make(map[string]any)
+		maps.Copy(clone.cacheRoute, r.cacheRoute)
+	}
+	if r.lazyCheckRules != nil {
+		clone.lazyCheckRules = make([]*FilterRule, len(r.lazyCheckRules))
+		for i, rule := range r.lazyCheckRules {
+			clone.lazyCheckRules[i] = rule.Clone()
+		}
+	}
+	return clone
+}
+
 // RouteProfile represents the configuration of a Route profile
 type RouteProfile struct {
 	Tenant             string
@@ -57,6 +100,39 @@ type RouteProfile struct {
 	SortingParameters  []string
 	Routes             []*Route
 	Weight             float64
+}
+
+// Clone method for RouteProfile
+func (rp *RouteProfile) Clone() *RouteProfile {
+	clone := &RouteProfile{
+		Tenant:  rp.Tenant,
+		ID:      rp.ID,
+		Sorting: rp.Sorting,
+		Weight:  rp.Weight,
+	}
+	if rp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(rp.FilterIDs))
+		copy(clone.FilterIDs, rp.FilterIDs)
+	}
+	if rp.SortingParameters != nil {
+		clone.SortingParameters = make([]string, len(rp.SortingParameters))
+		copy(clone.SortingParameters, rp.SortingParameters)
+	}
+	if rp.Routes != nil {
+		clone.Routes = make([]*Route, len(rp.Routes))
+		for i, route := range rp.Routes {
+			clone.Routes[i] = route.Clone()
+		}
+	}
+	if rp.ActivationInterval != nil {
+		clone.ActivationInterval = rp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of RouteProfile used by ltcache CacheCloner
+func (rp *RouteProfile) CacheClone() any {
+	return rp.Clone()
 }
 
 // RouteProfileWithAPIOpts is used in replicatorV1 for dispatcher

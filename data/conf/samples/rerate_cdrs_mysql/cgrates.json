@@ -1,19 +1,20 @@
 {
+
     "general": {
         "log_level": 7
     },
-"rals": {
-    "enabled": true
-},
-
-"cdrs": {
-    "enabled": true,
-    "rals_conns": ["*internal"]
-},
-
-"apiers": {
-    "enabled": true
-}
+    
+    "rals": {
+        "enabled": true
+    },
+    
+    "cdrs": {
+        "enabled": true,
+        "rals_conns": ["*internal"]
+    },
+    
+    "apiers": {
+        "enabled": true
+    }
     
 }
-    

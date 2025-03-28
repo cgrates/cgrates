@@ -1,24 +1,36 @@
 {
 
-"data_db": {								
-    "db_type": "*internal"
-},
+    "general": {
+		"log_level": 7,
+	},
 
-"stor_db": {
-    "db_type": "*internal"
-},
+    "data_db": {								
+        "db_type": "*internal",
+        "opts":{
+            "internalDBDumpPath": "/tmp/internal_db/datadb",
+            "internalDBDumpInterval": "-1",
+        }
+    },
 
-"rals": {
-    "enabled": true
-},
+    "stor_db": {
+        "db_type": "*internal",
+        "opts":{
+            "internalDBDumpPath": "/tmp/internal_db/stordb",
+            "internalDBDumpInterval": "-1",
+        }
+    },
 
-"cdrs": {
-    "enabled": true,
-    "rals_conns": ["*internal"]
-},
+    "rals": {
+        "enabled": true
+    },
 
-"apiers": {
-    "enabled": true
-}
+    "cdrs": {
+        "enabled": true,
+        "rals_conns": ["*internal"]
+    },
+
+    "apiers": {
+        "enabled": true
+    }
 
 }

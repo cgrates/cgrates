@@ -45,7 +45,7 @@ type InternalDB struct {
 }
 
 // NewInternalDB constructs an InternalDB
-func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
+func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB, clone bool,
 	itmsCfg map[string]*config.ItemOpt) *InternalDB {
 	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
 	for k, cPcfg := range itmsCfg {
@@ -53,17 +53,44 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
+			Clone:     clone,
 		}
 	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
+	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
+		ltcache.NewTransCache(tcCfg))
+}
+
+// newInternalDB constructs an InternalDB struct with a recovered or new TransCache
+func newInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool, ms Marshaler, db *ltcache.TransCache) *InternalDB {
 	return &InternalDB{
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
 		ms:                  ms,
-		db:                  ltcache.NewTransCache(tcCfg),
+		db:                  db,
 		isDataDB:            isDataDB,
 	}
+}
+
+// Will recover a database from a dump file to memory
+func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
+	itmsCfg map[string]*config.ItemOpt, fldrPath, backupPath string, timeout time.Duration, dumpInterval, rewriteInterval time.Duration, writeLimit int) (*InternalDB, error) {
+	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
+	for k, cPcfg := range itmsCfg {
+		tcCfg[k] = &ltcache.CacheConfig{
+			MaxItems:  cPcfg.Limit,
+			TTL:       cPcfg.TTL,
+			StaticTTL: cPcfg.StaticTTL,
+			Clone:     true,
+		}
+	}
+	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
+	tc, err := ltcache.NewTransCacheWithOfflineCollector(fldrPath, backupPath, timeout, dumpInterval, rewriteInterval, writeLimit, tcCfg, utils.Logger)
+	if err != nil {
+		return nil, err
+	}
+	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms, tc), nil
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
@@ -81,7 +108,9 @@ func (iDB *InternalDB) SetPrefixIndexedFields(prefixIndexedFields []string) {
 }
 
 // Close only to implement Storage interface
-func (iDB *InternalDB) Close() {}
+func (iDB *InternalDB) Close() {
+	iDB.db.Shutdown()
+}
 
 // Flush clears the cache
 func (iDB *InternalDB) Flush(string) error {
@@ -963,4 +992,19 @@ func (iDB *InternalDB) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error 
 	}
 	iDB.db.Remove(utils.CacheSessionsBackup, cgrid, true, utils.NonTransactional)
 	return nil
+}
+
+// Will dump everything inside datadb to files
+func (iDB *InternalDB) DumpDataDB() (err error) {
+	return iDB.db.DumpAll()
+}
+
+// Will rewrite every dump file of DataDB
+func (iDB *InternalDB) RewriteDataDB() (err error) {
+	return iDB.db.RewriteAll()
+}
+
+// BackupDataDB will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead
+func (iDB *InternalDB) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+	return iDB.db.BackupDumpFolder(backupFolderPath, zip)
 }

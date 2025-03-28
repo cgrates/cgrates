@@ -469,24 +469,26 @@ func (rit *RITiming) Clone() (cln *RITiming) {
 		return
 	}
 	cln = &RITiming{
-		ID:        rit.ID,
-		StartTime: rit.StartTime,
-		EndTime:   rit.EndTime,
+		ID:         rit.ID,
+		StartTime:  rit.StartTime,
+		EndTime:    rit.EndTime,
+		cronString: rit.cronString,
+		tag:        rit.tag,
 	}
-	if len(rit.Years) != 0 {
+	if rit.Years != nil {
 		cln.Years = make(utils.Years, len(rit.Years))
 		copy(cln.Years, rit.Years)
 	}
-	if len(rit.Months) != 0 {
+	if rit.Months != nil {
 		cln.Months = make(utils.Months, len(rit.Months))
 		copy(cln.Months, rit.Months)
 	}
-	if len(rit.MonthDays) != 0 {
+	if rit.MonthDays != nil {
 		cln.MonthDays = make(utils.MonthDays, len(rit.MonthDays))
 		copy(cln.MonthDays, rit.MonthDays)
 
 	}
-	if len(rit.WeekDays) != 0 {
+	if rit.WeekDays != nil {
 		cln.WeekDays = make(utils.WeekDays, len(rit.WeekDays))
 		copy(cln.WeekDays, rit.WeekDays)
 	}

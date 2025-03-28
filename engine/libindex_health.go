@@ -64,8 +64,8 @@ func GetAccountActionPlansIndexHealth(dm *DataManager, objLimit, indexLimit int,
 	missingIndex := map[string][]string{} // the indexes are not present but the action plans points to that account // misingAccounts
 
 	// local cache
-	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, nil)
-	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, nil)
+	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, false, nil)
+	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, false, nil)
 
 	getCachedIndex := func(acntID string) (apIDs []string, err error) {
 		if x, ok := indexesCache.Get(acntID); ok {
@@ -181,8 +181,8 @@ func GetReverseDestinationsIndexHealth(dm *DataManager, objLimit, indexLimit int
 	missingIndex := map[string][]string{} // the indexes are not present but the action plans points to that account // misingAccounts
 
 	// local cache
-	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, nil)
-	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, nil)
+	indexesCache := ltcache.NewCache(objLimit, objTTL, objStaticTTL, false, nil)
+	objectsCache := ltcache.NewCache(indexLimit, indexTTL, indexStaticTTL, false, nil)
 
 	getCachedIndex := func(prefix string) (dstIDs []string, err error) {
 		if x, ok := indexesCache.Get(prefix); ok {

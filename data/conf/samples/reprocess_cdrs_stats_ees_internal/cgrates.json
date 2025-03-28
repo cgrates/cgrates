@@ -1,0 +1,93 @@
+{
+	"general": {
+		"log_level": 7,
+		"reply_timeout": "50s"
+	},
+
+	"listen": {
+		"rpc_json": ":2012",
+		"rpc_gob": ":2013",
+		"http": ":2080"
+	},
+
+    "data_db": {								
+        "db_type": "*internal",
+        "opts":{
+            "internalDBDumpPath": "/tmp/internal_db/datadb",
+            "internalDBDumpInterval": "-1",
+        }
+    },
+
+    "stor_db": {
+        "db_type": "*internal",
+        "opts":{
+            "internalDBDumpPath": "/tmp/internal_db/stordb",
+            "internalDBDumpInterval": "-1",
+        }
+    },
+
+	"rals": {
+		"enabled": true
+	},
+
+	"cdrs": {
+		"enabled": true,
+		"chargers_conns": ["*internal"],
+		"ees_conns": ["*localhost"],
+		"stats_conns": ["*localhost"],
+		"rals_conns": ["*localhost"]
+	},
+
+	"chargers": {
+		"enabled": true
+	},
+
+	"stats": {
+		"enabled": true,
+        "store_interval": "-1",
+		"ees_conns": ["*localhost"],
+		"ees_exporter_ids": ["exporter1"]
+	},
+
+	"sessions": {
+		"enabled": true,
+		"rals_conns": ["*internal"],
+		"cdrs_conns": ["*localhost"],
+		"chargers_conns": ["*internal"]
+	},
+
+	"ees": {
+		"enabled": true,
+		"exporters": [{
+			"id": "exporter1",
+			"type": "*file_csv",
+			"export_path": "/tmp/testCSV",
+			"filters": ["*gt:~*eventTimestamp:2024-09-19T14:00:58+02:00"],
+			"attempts": 1,
+			"synchronous": true,
+			"field_separator": ",",
+			"fields": [{
+					"tag": "StatID","path": "*exp.StatID",
+					"type": "*variable","value": "~*req.StatID"
+				},
+				{
+					"tag": "TotalCallDuration","path": "*exp.TotalCallDuration",
+					"type": "*variable","value": "~*req.Metrics.*tcd"
+				},
+				{
+					"tag": "TotalCallCost","path": "*exp.TotalCallCost",
+					"type": "*variable","value": "~*req.Metrics.*tcc"
+				},
+				{
+					"tag": "NumberOfCDRs","path": "*exp.NumberOfCDRs",
+					"type": "*variable","value": "~*req.Metrics.*sum#1"
+				}
+			]
+		}]
+	},
+
+	"apiers": {
+		"enabled": true
+	}
+
+}

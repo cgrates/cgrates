@@ -35,6 +35,33 @@ type ChargerProfile struct {
 	Weight             float64
 }
 
+// Clone method for ChargerProfile
+func (cp *ChargerProfile) Clone() *ChargerProfile {
+	clone := &ChargerProfile{
+		Tenant: cp.Tenant,
+		ID:     cp.ID,
+		RunID:  cp.RunID,
+		Weight: cp.Weight,
+	}
+	if cp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(cp.FilterIDs))
+		copy(clone.FilterIDs, cp.FilterIDs)
+	}
+	if cp.AttributeIDs != nil {
+		clone.AttributeIDs = make([]string, len(cp.AttributeIDs))
+		copy(clone.AttributeIDs, cp.AttributeIDs)
+	}
+	if cp.ActivationInterval != nil {
+		clone.ActivationInterval = cp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of ChargerProfile used by ltcache CacheCloner
+func (cp *ChargerProfile) CacheClone() any {
+	return cp.Clone()
+}
+
 // ChargerProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ChargerProfileWithAPIOpts struct {
 	*ChargerProfile
