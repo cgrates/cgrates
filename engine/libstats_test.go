@@ -1462,3 +1462,60 @@ func TestSortWeight(t *testing.T) {
 		t.Errorf("Expected sorted routes to be route2, route3, route1, but got %v", sortedRoutes.Routes)
 	}
 }
+
+func TestSortQOS(t *testing.T) {
+	routes := []*SortedRoute{
+		{
+			RouteID:         "route1",
+			RouteParameters: "param1",
+			sortingDataF64: map[string]float64{
+				utils.MetaPDD: 10,
+				utils.Weight:  5,
+			},
+		},
+		{
+			RouteID:         "route2",
+			RouteParameters: "param2",
+			sortingDataF64: map[string]float64{
+				utils.MetaPDD: 20,
+				utils.Weight:  5,
+			},
+		},
+		{
+			RouteID:         "route3",
+			RouteParameters: "param3",
+			sortingDataF64: map[string]float64{
+				utils.MetaPDD: 15,
+				utils.Weight:  3,
+			},
+		},
+	}
+
+	sortedRoutes := &SortedRoutes{
+		ProfileID: "testProfile",
+		Sorting:   "QOS",
+		Routes:    routes,
+	}
+
+	sortedRoutes.SortQOS([]string{utils.MetaPDD})
+	if sortedRoutes.Routes[0].RouteID != "route1" {
+		t.Errorf("Expected route1 at position 0, got %s", sortedRoutes.Routes[0].RouteID)
+	}
+	if sortedRoutes.Routes[1].RouteID != "route3" {
+		t.Errorf("Expected route3 at position 1, got %s", sortedRoutes.Routes[1].RouteID)
+	}
+	if sortedRoutes.Routes[2].RouteID != "route2" {
+		t.Errorf("Expected route2 at position 2, got %s", sortedRoutes.Routes[2].RouteID)
+	}
+
+	sortedRoutes.SortQOS([]string{utils.MetaPDD, utils.Weight})
+	if sortedRoutes.Routes[0].RouteID != "route1" {
+		t.Errorf("Expected route1 at position 0, got %s", sortedRoutes.Routes[0].RouteID)
+	}
+	if sortedRoutes.Routes[1].RouteID != "route3" {
+		t.Errorf("Expected route3 at position 1, got %s", sortedRoutes.Routes[1].RouteID)
+	}
+	if sortedRoutes.Routes[2].RouteID != "route2" {
+		t.Errorf("Expected route2 at position 2, got %s", sortedRoutes.Routes[2].RouteID)
+	}
+}

@@ -2822,3 +2822,47 @@ func TestCallDescriptorgetgetRatingPlansForPrefix(t *testing.T) {
 	}
 	Cache.Clear(nil)
 }
+
+func TestAddRatingInfos(t *testing.T) {
+	tests := []struct {
+		existingRating RatingInfos
+		newRating      RatingInfos
+		expected       RatingInfos
+	}{
+		{
+			existingRating: RatingInfos{
+				&RatingInfo{ActivationTime: time.Date(2025, 4, 3, 9, 0, 0, 0, time.UTC), RateIntervals: RateIntervalList{&RateInterval{}}},
+			},
+			newRating: RatingInfos{
+				&RatingInfo{ActivationTime: time.Date(2025, 4, 3, 8, 30, 0, 0, time.UTC), RateIntervals: RateIntervalList{&RateInterval{}}},
+			},
+			expected: RatingInfos{
+				&RatingInfo{ActivationTime: time.Date(2025, 4, 3, 8, 30, 0, 0, time.UTC), RateIntervals: RateIntervalList{&RateInterval{}}},
+				&RatingInfo{ActivationTime: time.Date(2025, 4, 3, 9, 0, 0, 0, time.UTC), RateIntervals: RateIntervalList{&RateInterval{}}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run("Add Rating Infos", func(t *testing.T) {
+			cd := &CallDescriptor{
+				RatingInfos: tt.existingRating,
+			}
+
+			cd.addRatingInfos(tt.newRating)
+
+			if len(cd.RatingInfos) != len(tt.expected) {
+				t.Errorf("Expected %d RatingInfos, got %d", len(tt.expected), len(cd.RatingInfos))
+			}
+
+			for i, ri := range cd.RatingInfos {
+				if !ri.ActivationTime.Equal(tt.expected[i].ActivationTime) {
+					t.Errorf("Expected activation time %v, got %v", tt.expected[i].ActivationTime, ri.ActivationTime)
+				}
+				if !reflect.DeepEqual(ri.RateIntervals, tt.expected[i].RateIntervals) {
+					t.Errorf("Expected RateIntervals %v, got %v", tt.expected[i].RateIntervals, ri.RateIntervals)
+				}
+			}
+		})
+	}
+}
