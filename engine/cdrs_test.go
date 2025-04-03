@@ -2604,3 +2604,80 @@ func TestNewMapEventFromReqForm_ParseForm(t *testing.T) {
 		t.Fatalf("Expected no error, got %v", err)
 	}
 }
+
+func TestArgV1ProcessEventsClone(t *testing.T) {
+	original := &ArgV1ProcessEvents{
+		Flags: []string{"flag1", "flag2"},
+		CGREvents: []*utils.CGREvent{
+			{
+				ID:      "event1",
+				Tenant:  "cgrates.org",
+				Time:    utils.TimePointer(time.Now()),
+				Event:   map[string]any{"key": "value"},
+				APIOpts: map[string]any{"opt1": "val1"},
+			},
+			{
+				ID:      "event2",
+				Tenant:  "cgrates.org2",
+				Time:    utils.TimePointer(time.Now().Add(1 * time.Hour)),
+				Event:   map[string]any{"key2": "value2"},
+				APIOpts: map[string]any{"opt2": "val2"},
+			},
+		},
+		APIOpts: map[string]any{"apiOpt1": "optValue"},
+	}
+
+	cloned := original.Clone()
+
+	if cloned == original {
+		t.Errorf("Expected a new cloned object, but the cloned object is the same as the original.")
+	}
+
+	if len(cloned.Flags) != len(original.Flags) {
+		t.Errorf("Expected Flags length to be %d, got %d", len(original.Flags), len(cloned.Flags))
+	} else {
+		for i := range original.Flags {
+			if original.Flags[i] != cloned.Flags[i] {
+				t.Errorf("Expected Flags[%d] to be '%s', got '%s'", i, original.Flags[i], cloned.Flags[i])
+			}
+		}
+	}
+
+	if len(cloned.CGREvents) != len(original.CGREvents) {
+		t.Errorf("Expected CGEvents length to be %d, got %d", len(original.CGREvents), len(cloned.CGREvents))
+	} else {
+		for i, originalEvent := range original.CGREvents {
+			clonedEvent := cloned.CGREvents[i]
+			if originalEvent == clonedEvent {
+				t.Errorf("Expected CGEvent[%d] to be a clone, but they are the same instance.", i)
+			}
+			if originalEvent.ID != clonedEvent.ID || originalEvent.Tenant != clonedEvent.Tenant {
+				t.Errorf("Expected CGEvent[%d] to have the same values, but got ID: %s and Tenant: %s in the clone", i, clonedEvent.ID, clonedEvent.Tenant)
+			}
+		}
+	}
+
+	if len(cloned.APIOpts) != len(original.APIOpts) {
+		t.Errorf("Expected APIOpts length to be %d, got %d", len(original.APIOpts), len(cloned.APIOpts))
+	} else {
+		for key, value := range original.APIOpts {
+			if cloned.APIOpts[key] != value {
+				t.Errorf("Expected APIOpts[%s] to be '%v', got '%v'", key, value, cloned.APIOpts[key])
+			}
+		}
+	}
+
+	original.Flags[0] = "modifiedFlag"
+	original.CGREvents[0].ID = "modifiedEvent"
+	original.APIOpts["apiOpt1"] = "modifiedValue"
+
+	if cloned.Flags[0] == "modifiedFlag" {
+		t.Errorf("Expected cloned Flags to be unaffected, but it was modified.")
+	}
+	if cloned.CGREvents[0].ID == "modifiedEvent" {
+		t.Errorf("Expected cloned CGEvents to be unaffected, but it was modified.")
+	}
+	if cloned.APIOpts["apiOpt1"] == "modifiedValue" {
+		t.Errorf("Expected cloned APIOpts to be unaffected, but it was modified.")
+	}
+}
