@@ -294,6 +294,8 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Replication_filtered: utils.BoolPointer(false),
 		Remote_conn_id:       utils.StringPointer(""),
 		Replication_cache:    utils.StringPointer(""),
+		RplFailedDir:         utils.StringPointer(""),
+		RplInterval:          utils.StringPointer(""),
 		Opts: &DBOptsJson{
 			RedisMaxConns:           utils.IntPointer(10),
 			RedisConnectAttempts:    utils.IntPointer(20),
