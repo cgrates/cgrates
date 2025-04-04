@@ -81,7 +81,7 @@ func TestAttributesV1GetAttributeForEventNilCGREvent(t *testing.T) {
 
 func TestAttributesV1GetAttributeForEventProfileNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, nil, nil)
 	alS := &AttributeService{
 		dm:      dm,
@@ -101,7 +101,7 @@ func TestAttributesV1GetAttributeForEventProfileNotFound(t *testing.T) {
 
 func TestAttributesV1GetAttributeForEvent2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, nil, nil)
 	alS := &AttributeService{
 		dm:      dm,
@@ -123,7 +123,7 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), nil, conMng)
+	dm := NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), nil, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 	if err := dm.SetAttributeProfile(&AttributeProfile{
 		Tenant:    "cgrates.org",
@@ -209,7 +209,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), nil, conMng)
+	dm := NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), nil, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 
 	if err := dm.SetAttributeProfile(&AttributeProfile{
@@ -252,7 +252,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
 	conMng := NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, nil, conMng)
 	filterS := NewFilterS(cfg, conMng, dm)
 
@@ -295,7 +295,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.FilterSCfg().ResourceSConns = []string{}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, nil, nil)
 	filterS := NewFilterS(cfg, nil, dm)
 
@@ -337,7 +337,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -418,7 +418,7 @@ func TestAttributesattributeProfileForEventAnyCtxFalseNotFound(t *testing.T) {
 
 func TestAttributesattributeProfileForEventAnyCtxFalseFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -490,7 +490,7 @@ func TestAttributesattributeProfileForEventAnyCtxFalseFound(t *testing.T) {
 
 func TestAttributesattributeProfileForEventAnyCtxTrueBothFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -574,7 +574,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueBothFound(t *testing.T) {
 
 func TestAttributesattributeProfileForEventAnyCtxTrueErrMatching(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -653,7 +653,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueErrMatching(t *testing.T) {
 
 func TestAttributesattributeProfileForEventAnyCtxTrueNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -724,7 +724,7 @@ func TestAttributesattributeProfileForEventAnyCtxTrueNotFound(t *testing.T) {
 
 func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -796,7 +796,7 @@ func TestAttributesattributeProfileForEventNoDBConn(t *testing.T) {
 
 func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -831,7 +831,7 @@ func TestAttributesattributeProfileForEventErrNotFound(t *testing.T) {
 
 func TestAttributesattributeProfileForEventNotActive(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -887,7 +887,7 @@ func TestAttributesattributeProfileForEventNotActive(t *testing.T) {
 
 func TestAttributesattributeProfileForEventErrPass(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	alS := &AttributeService{
@@ -1150,7 +1150,7 @@ func TestAttributesParseAttributeSIPCIDInvalidArguments(t *testing.T) {
 func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	Cache.Clear(nil)
@@ -1244,7 +1244,7 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AttributeSCfg().IndexedSelects = false
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	Cache.Clear(nil)
@@ -1410,7 +1410,7 @@ func TestArgeesRPCClone(t *testing.T) {
 
 func TestAttrSV1GetAttributeForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
 	Cache.Clear(nil)
@@ -1513,7 +1513,7 @@ func TestAttributesV1ProcessEventSentryPeer(t *testing.T) {
 	cfg.SentryPeerCfg().IpsUrl = testServer.URL + "/api/ip-addresses"
 	cfg.SentryPeerCfg().NumbersUrl = testServer.URL + "/api/phone-numbers"
 	cfg.AttributeSCfg().IndexedSelects = false
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), nil, nil)
+	dm := NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), nil, nil)
 	if err := dm.SetAttributeProfile(&AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_CHECK_DESTINATION",

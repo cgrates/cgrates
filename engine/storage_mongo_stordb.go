@@ -1745,3 +1745,18 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) error {
 func (ms *MongoStorage) GetStorageType() string {
 	return utils.MetaMongo
 }
+
+// RewriteStorDB used only for InternalDB
+func (ms *MongoStorage) DumpStorDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// RewriteStorDB used only for InternalDB
+func (ms *MongoStorage) RewriteStorDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// BackupStorDB used only for InternalDB
+func (ms *MongoStorage) BackupStorDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

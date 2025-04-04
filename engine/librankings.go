@@ -24,6 +24,8 @@ import (
 	"sync"
 	"time"
 
+	"maps"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -77,6 +79,11 @@ func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 	return
 }
 
+// CacheClone returns a clone of RankingProfile used by ltcache CacheCloner
+func (rkP *RankingProfile) CacheClone() any {
+	return rkP.Clone()
+}
+
 // NewRankingFromProfile is a constructor for an empty ranking out of it's profile
 func NewRankingFromProfile(rkP *RankingProfile) (rk *Ranking) {
 	rk = &Ranking{
@@ -116,6 +123,37 @@ type Ranking struct {
 	rkPrfl    *RankingProfile // store here the ranking profile so we can have it at hands further
 	metricIDs utils.StringSet // convert the metricIDs here for faster matching
 
+}
+
+// Clone clones *Ranking
+func (r *Ranking) Clone() *Ranking {
+	r.rMux.RLock()
+	defer r.rMux.RUnlock()
+	cln := &Ranking{
+		Tenant:            r.Tenant,
+		ID:                r.ID,
+		LastUpdate:        r.LastUpdate,
+		Sorting:           r.Sorting,
+		SortingParameters: make([]string, len(r.SortingParameters)),
+		SortedStatIDs:     make([]string, len(r.SortedStatIDs)),
+	}
+	copy(cln.SortingParameters, r.SortingParameters)
+	copy(cln.SortedStatIDs, r.SortedStatIDs)
+	cln.Metrics = make(map[string]map[string]float64)
+	for statID, metricMap := range r.Metrics {
+		cln.Metrics[statID] = make(map[string]float64)
+		maps.Copy(cln.Metrics[statID], metricMap)
+	}
+	if r.rkPrfl != nil {
+		cln.rkPrfl = r.rkPrfl.Clone()
+	}
+	cln.metricIDs = r.metricIDs.Clone()
+	return cln
+}
+
+// CacheClone returns a clone of Ranking used by ltcache CacheCloner
+func (r *Ranking) CacheClone() any {
+	return r.Clone()
 }
 
 func (r *Ranking) TenantID() string {

@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func TestActionTimingTasks(t *testing.T) {
@@ -104,13 +105,9 @@ func TestActionPlanClone(t *testing.T) {
 			},
 		},
 	}
-	clned, err := at1.Clone()
-	if err != nil {
-		t.Error(err)
-	}
-	at1Cloned := clned.(*ActionPlan)
-	if !reflect.DeepEqual(at1, at1Cloned) {
-		t.Errorf("Expecting: %+v,\n received: %+v", at1, at1Cloned)
+	clned := at1.Clone()
+	if !reflect.DeepEqual(at1, clned) {
+		t.Errorf("Expecting: %+v,\n received: %+v", at1, clned)
 	}
 }
 
@@ -259,9 +256,9 @@ func TestCacheGetCloned(t *testing.T) {
 	if err := Cache.Set(utils.CacheActionPlans, "MYTESTAPL", at1, nil, true, ""); err != nil {
 		t.Errorf("Expecting nil, received: %s", err)
 	}
-	clned, err := Cache.GetCloned(utils.CacheActionPlans, "MYTESTAPL")
-	if err != nil {
-		t.Error(err)
+	clned, ok := Cache.Get(utils.CacheActionPlans, "MYTESTAPL")
+	if !ok {
+		t.Error(ltcache.ErrNotFound)
 	}
 	at1Cloned := clned.(*ActionPlan)
 	if !reflect.DeepEqual(at1, at1Cloned) {
@@ -278,7 +275,7 @@ func TestActionTimingExErr(t *testing.T) {
 		Cache = tmp
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	at := &ActionTiming{
 		Timing: &RateInterval{},

@@ -317,7 +317,7 @@ func testServeBiJSON(t *testing.T) {
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = birpc.NewBirpcServer()
 
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	ss := sessions.NewSessionS(cfg, dm, nil)
@@ -337,7 +337,7 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = birpc.NewBirpcServer()
 
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	ss := sessions.NewSessionS(cfg, dm, nil)
@@ -358,7 +358,7 @@ func testServeBiGoB(t *testing.T) {
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = birpc.NewBirpcServer()
 
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	ss := sessions.NewSessionS(cfg, dm, nil)
@@ -378,7 +378,7 @@ func testServeBiGoBInvalidPort(t *testing.T) {
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = birpc.NewBirpcServer()
 
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 
 	ss := sessions.NewSessionS(cfg, dm, nil)

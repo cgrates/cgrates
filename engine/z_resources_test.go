@@ -919,7 +919,7 @@ func TestRSCacheSetGet(t *testing.T) {
 func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	var dmRES *DataManager
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -957,7 +957,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 func TestResourceAddResourceProfile(t *testing.T) {
 	var dmRES *DataManager
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -1112,7 +1112,7 @@ func TestResourceAddResourceProfile(t *testing.T) {
 func TestResourceMatchingResourcesForEvent(t *testing.T) {
 	var dmRES *DataManager
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -1378,7 +1378,7 @@ func TestResourceUsageTTLCase1(t *testing.T) {
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	resService := NewResourceService(dmRES, cfg,
 		&FilterS{dm: dmRES, cfg: cfg}, nil)
@@ -1541,7 +1541,7 @@ func TestResourceUsageTTLCase2(t *testing.T) {
 
 	var dmRES *DataManager
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -1680,7 +1680,7 @@ func TestResourceUsageTTLCase3(t *testing.T) {
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
 	cfg.ResourceSCfg().PrefixIndexedFields = nil
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	resService := NewResourceService(dmRES, cfg,
 		&FilterS{dm: dmRES, cfg: cfg}, nil)
@@ -1773,7 +1773,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 
 	var dmRES *DataManager
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -1913,7 +1913,7 @@ func TestResourceResIDsMp(t *testing.T) {
 func TestResourceMatchWithIndexFalse(t *testing.T) {
 	var dmRES *DataManager
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -2147,7 +2147,7 @@ func TestResourceCaching(t *testing.T) {
 
 	// start fresh with new dataManager
 	cfg := config.NewDefaultCGRConfig()
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
+	dm := NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), nil)
 
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -2627,7 +2627,7 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dm := NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 	fltS := NewFilterS(cfg, nil, dm)
 	rs := NewResourceService(dm, cfg, fltS, nil)
 	if err := dm.SetResourceProfile(rProf, true); err != nil {
@@ -2779,7 +2779,7 @@ func TestResourcesStoreResourceNotDirty(t *testing.T) {
 func TestResourcesStoreResourceOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	rS := &ResourceService{
-		dm: NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil),
+		dm: NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil),
 	}
 	r := &Resource{
 		dirty: utils.BoolPointer(true),
@@ -2818,7 +2818,7 @@ func TestResourcesStoreResourceErrCache(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheResources].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	config.SetCgrConfig(cfg)
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
+	dm := NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 	rS := NewResourceService(dm, cfg, nil, nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	r := &Resource{
@@ -3040,7 +3040,7 @@ func TestResourcesProcessThresholdsThdConnMetaNone(t *testing.T) {
 
 func TestResourcesUpdateResource(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dm := NewDataManager(NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	dm := NewDataManager(NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	res := &ResourceProfile{
 		Tenant:   "cgrates.org",
@@ -3165,7 +3165,7 @@ func TestResourcesUpdateResource(t *testing.T) {
 func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	rsPrf := &ResourceProfile{
@@ -3246,7 +3246,7 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	rsPrf := &ResourceProfile{
 		Tenant:       "cgrates.org",
@@ -3302,7 +3302,7 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	rsPrf := &ResourceProfile{
 		Tenant:       "cgrates.org",
@@ -3397,7 +3397,7 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
@@ -3492,7 +3492,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
@@ -3584,7 +3584,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 func TestResourcesV1GetResourceOK(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -3656,7 +3656,7 @@ func TestResourcesV1GetResourceOK(t *testing.T) {
 func TestResourcesV1GetResourceNotFound(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -3710,7 +3710,7 @@ func TestResourcesV1GetResourceNotFound(t *testing.T) {
 func TestResourcesV1GetResourceMissingParameters(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -3763,7 +3763,7 @@ func TestResourcesV1GetResourceMissingParameters(t *testing.T) {
 func TestResourcesV1GetResourceWithConfigOK(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -3838,7 +3838,7 @@ func TestResourcesV1GetResourceWithConfigOK(t *testing.T) {
 func TestResourcesV1GetResourceWithConfigNilrPrfOK(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -3916,7 +3916,7 @@ func TestResourcesV1GetResourceWithConfigNilrPrfOK(t *testing.T) {
 func TestResourcesV1GetResourceWithConfigNilrPrfProfileNotFound(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -3972,7 +3972,7 @@ func TestResourcesV1GetResourceWithConfigNilrPrfProfileNotFound(t *testing.T) {
 func TestResourcesV1GetResourceWithConfigResourceNotFound(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4024,7 +4024,7 @@ func TestResourcesV1GetResourceWithConfigResourceNotFound(t *testing.T) {
 func TestResourcesV1GetResourceWithConfigMissingParameters(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4075,7 +4075,7 @@ func TestResourcesV1GetResourceWithConfigMissingParameters(t *testing.T) {
 func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4121,7 +4121,7 @@ func TestResourcesV1AuthorizeResourcesOK(t *testing.T) {
 func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4167,7 +4167,7 @@ func TestResourcesV1AuthorizeResourcesNotAuthorized(t *testing.T) {
 func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4213,7 +4213,7 @@ func TestResourcesV1AuthorizeResourcesNoMatch(t *testing.T) {
 func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4251,7 +4251,7 @@ func TestResourcesV1AuthorizeResourcesNilCGREvent(t *testing.T) {
 func TestResourcesV1AuthorizeResourcesMissingUsageID(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4303,7 +4303,7 @@ func TestResourcesV1AuthorizeResourcesCacheReplyExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1AuthorizeResources,
@@ -4384,7 +4384,7 @@ func TestResourcesV1AuthorizeResourcesCacheReplySet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1AuthorizeResources,
@@ -4462,7 +4462,7 @@ func TestResourcesV1AuthorizeResourcesCacheReplySet(t *testing.T) {
 func TestResourcesV1AllocateResourcesOK(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4508,7 +4508,7 @@ func TestResourcesV1AllocateResourcesOK(t *testing.T) {
 func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4553,7 +4553,7 @@ func TestResourcesV1AllocateResourcesNoMatch(t *testing.T) {
 func TestResourcesV1AllocateResourcesMissingParameters(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4637,7 +4637,7 @@ func TestResourcesV1AllocateResourcesCacheReplyExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1AllocateResources,
@@ -4718,7 +4718,7 @@ func TestResourcesV1AllocateResourcesCacheReplySet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1AllocateResources,
@@ -4796,7 +4796,7 @@ func TestResourcesV1AllocateResourcesCacheReplySet(t *testing.T) {
 func TestResourcesV1AllocateResourcesResAllocErr(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4842,7 +4842,7 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = 2
 	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 
 	rsPrf := &ResourceProfile{
@@ -4919,7 +4919,7 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -4970,7 +4970,7 @@ func TestResourcesV1ReleaseResourcesOK(t *testing.T) {
 func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -5033,7 +5033,7 @@ func TestResourcesV1ReleaseResourcesUsageNotFound(t *testing.T) {
 func TestResourcesV1ReleaseResourcesNoMatch(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -5078,7 +5078,7 @@ func TestResourcesV1ReleaseResourcesNoMatch(t *testing.T) {
 func TestResourcesV1ReleaseResourcesMissingParameters(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 
@@ -5162,7 +5162,7 @@ func TestResourcesV1ReleaseResourcesCacheReplyExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1ReleaseResources,
@@ -5243,7 +5243,7 @@ func TestResourcesV1ReleaseResourcesCacheReplySet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1ReleaseResources,
@@ -5323,7 +5323,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = 2
 	cfg.ResourceSCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -5418,7 +5418,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	defer config.SetCgrConfig(dft)
 
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), NewConnManager(cfg, make(map[string]chan birpc.ClientConnector)))
 
 	rS := NewResourceService(dm, cfg, NewFilterS(cfg, nil, dm), nil)
@@ -5472,7 +5472,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 
 func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -5490,7 +5490,7 @@ func TestResourceMatchingResourcesForEventNotFoundInCache(t *testing.T) {
 
 func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dmRES := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -5508,7 +5508,7 @@ func TestResourceMatchingResourcesForEventNotFoundInDB(t *testing.T) {
 
 func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -5557,7 +5557,7 @@ func TestResourceMatchingResourcesForEventLocks(t *testing.T) {
 
 func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -5621,7 +5621,7 @@ func TestResourceMatchingResourcesForEventLocks2(t *testing.T) {
 
 func TestResourceMatchingResourcesForEventLocksBlocker(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -5680,7 +5680,7 @@ func TestResourceMatchingResourcesForEventLocksBlocker(t *testing.T) {
 
 func TestResourceMatchingResourcesForEventLocksActivationInterval(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -5933,7 +5933,7 @@ func TestResourcesRunBackupStoreIntervalLessThanZero(t *testing.T) {
 func TestResourcesRunBackupStop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = 5 * time.Millisecond
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	tnt := "cgrates.org"
 	resID := "Res1"
@@ -6027,7 +6027,7 @@ func TestResourcesMatchingResourcesForEventCacheSetErr(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
@@ -6067,7 +6067,7 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheEventResources].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	config.SetCgrConfig(cfg)
-	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)

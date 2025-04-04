@@ -290,7 +290,7 @@ func TestATExecute22(t *testing.T) {
 			Limit: 2,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	at := &ActionTrigger{
 		ID:             "STANDARD_TRIGGER",

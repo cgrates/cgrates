@@ -36,12 +36,12 @@ import (
 var failedPostCache *ltcache.Cache
 
 func init() {
-	failedPostCache = ltcache.NewCache(-1, 5*time.Second, false, writeFailedPosts) // configurable  general
+	failedPostCache = ltcache.NewCache(-1, 5*time.Second, false, false, []func(itmID string, value any){writeFailedPosts}) // configurable  general
 }
 
 // SetFailedPostCacheTTL recreates the failed cache
 func SetFailedPostCacheTTL(ttl time.Duration) {
-	failedPostCache = ltcache.NewCache(-1, ttl, false, writeFailedPosts)
+	failedPostCache = ltcache.NewCache(-1, ttl, false, false, []func(itmID string, value any){writeFailedPosts})
 }
 
 func writeFailedPosts(_ string, value any) {

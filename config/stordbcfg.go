@@ -28,21 +28,27 @@ import (
 )
 
 type StorDBOpts struct {
-	SQLMaxOpenConns    int
-	SQLMaxIdleConns    int
-	SQLConnMaxLifetime time.Duration
-	SQLLogLevel        int
-	MongoQueryTimeout  time.Duration
-	MongoConnScheme    string
-	PgSSLMode          string
-	PgSSLCert          string
-	PgSSLKey           string
-	PgSSLPassword      string
-	PgSSLCertMode      string
-	PgSSLRootCert      string
-	PgSchema           string
-	MySQLLocation      string
-	MySQLDSNParams     map[string]string
+	InternalDBDumpPath        string        // Path to the dump file
+	InternalDBBackupPath      string        // Path where db dump will backup
+	InternalDBStartTimeout    time.Duration // Transcache recover from dump files timeout duration
+	InternalDBDumpInterval    time.Duration // Regurarly dump database to file
+	InternalDBRewriteInterval time.Duration // Regurarly rewrite dump files
+	InternalDBWriteLimit      int           // maximum size in MiB that can be written in a singular dump file
+	SQLMaxOpenConns           int
+	SQLMaxIdleConns           int
+	SQLConnMaxLifetime        time.Duration
+	SQLLogLevel               int
+	MongoQueryTimeout         time.Duration
+	MongoConnScheme           string
+	PgSSLMode                 string
+	PgSSLCert                 string
+	PgSSLKey                  string
+	PgSSLPassword             string
+	PgSSLCertMode             string
+	PgSSLRootCert             string
+	PgSchema                  string
+	MySQLLocation             string
+	MySQLDSNParams            map[string]string
 }
 
 // StorDbCfg StroreDb config
@@ -64,6 +70,30 @@ type StorDbCfg struct {
 func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
+	}
+	if jsnCfg.InternalDBDumpPath != nil {
+		dbOpts.InternalDBDumpPath = *jsnCfg.InternalDBDumpPath
+	}
+	if jsnCfg.InternalDBBackupPath != nil {
+		dbOpts.InternalDBBackupPath = *jsnCfg.InternalDBBackupPath
+	}
+	if jsnCfg.InternalDBStartTimeout != nil {
+		if dbOpts.InternalDBStartTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.InternalDBStartTimeout); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.InternalDBDumpInterval != nil {
+		if dbOpts.InternalDBDumpInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.InternalDBDumpInterval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.InternalDBRewriteInterval != nil {
+		if dbOpts.InternalDBRewriteInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.InternalDBRewriteInterval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.InternalDBWriteLimit != nil {
+		dbOpts.InternalDBWriteLimit = *jsnCfg.InternalDBWriteLimit
 	}
 	if jsnCfg.SQLMaxOpenConns != nil {
 		dbOpts.SQLMaxOpenConns = *jsnCfg.SQLMaxOpenConns
@@ -190,21 +220,27 @@ func (dbcfg *StorDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 
 func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 	return &StorDBOpts{
-		SQLMaxOpenConns:    dbOpts.SQLMaxOpenConns,
-		SQLMaxIdleConns:    dbOpts.SQLMaxIdleConns,
-		SQLConnMaxLifetime: dbOpts.SQLConnMaxLifetime,
-		SQLLogLevel:        dbOpts.SQLLogLevel,
-		MySQLDSNParams:     dbOpts.MySQLDSNParams,
-		MongoQueryTimeout:  dbOpts.MongoQueryTimeout,
-		MongoConnScheme:    dbOpts.MongoConnScheme,
-		PgSSLMode:          dbOpts.PgSSLMode,
-		PgSSLCert:          dbOpts.PgSSLCert,
-		PgSSLKey:           dbOpts.PgSSLKey,
-		PgSSLPassword:      dbOpts.PgSSLPassword,
-		PgSSLCertMode:      dbOpts.PgSSLCertMode,
-		PgSSLRootCert:      dbOpts.PgSSLRootCert,
-		PgSchema:           dbOpts.PgSchema,
-		MySQLLocation:      dbOpts.MySQLLocation,
+		InternalDBDumpPath:        dbOpts.InternalDBDumpPath,
+		InternalDBBackupPath:      dbOpts.InternalDBBackupPath,
+		InternalDBStartTimeout:    dbOpts.InternalDBStartTimeout,
+		InternalDBDumpInterval:    dbOpts.InternalDBDumpInterval,
+		InternalDBRewriteInterval: dbOpts.InternalDBRewriteInterval,
+		InternalDBWriteLimit:      dbOpts.InternalDBWriteLimit,
+		SQLMaxOpenConns:           dbOpts.SQLMaxOpenConns,
+		SQLMaxIdleConns:           dbOpts.SQLMaxIdleConns,
+		SQLConnMaxLifetime:        dbOpts.SQLConnMaxLifetime,
+		SQLLogLevel:               dbOpts.SQLLogLevel,
+		MySQLDSNParams:            dbOpts.MySQLDSNParams,
+		MongoQueryTimeout:         dbOpts.MongoQueryTimeout,
+		MongoConnScheme:           dbOpts.MongoConnScheme,
+		PgSSLMode:                 dbOpts.PgSSLMode,
+		PgSSLCert:                 dbOpts.PgSSLCert,
+		PgSSLKey:                  dbOpts.PgSSLKey,
+		PgSSLPassword:             dbOpts.PgSSLPassword,
+		PgSSLCertMode:             dbOpts.PgSSLCertMode,
+		PgSSLRootCert:             dbOpts.PgSSLRootCert,
+		PgSchema:                  dbOpts.PgSchema,
+		MySQLLocation:             dbOpts.MySQLLocation,
 	}
 }
 
@@ -246,16 +282,22 @@ func (dbcfg *StorDbCfg) Clone() (cln *StorDbCfg) {
 // AsMapInterface returns the config as a map[string]any
 func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 	opts := map[string]any{
-		utils.SQLMaxOpenConnsCfg:   dbcfg.Opts.SQLMaxOpenConns,
-		utils.SQLMaxIdleConnsCfg:   dbcfg.Opts.SQLMaxIdleConns,
-		utils.SQLConnMaxLifetime:   dbcfg.Opts.SQLConnMaxLifetime.String(),
-		utils.SQLLogLevel:          dbcfg.Opts.SQLLogLevel,
-		utils.MYSQLDSNParams:       dbcfg.Opts.MySQLDSNParams,
-		utils.MongoQueryTimeoutCfg: dbcfg.Opts.MongoQueryTimeout.String(),
-		utils.MongoConnSchemeCfg:   dbcfg.Opts.MongoConnScheme,
-		utils.PgSSLModeCfg:         dbcfg.Opts.PgSSLMode,
-		utils.PgSchema:             dbcfg.Opts.PgSchema,
-		utils.MysqlLocation:        dbcfg.Opts.MySQLLocation,
+		utils.InternalDBDumpPathCfg:        dbcfg.Opts.InternalDBDumpPath,
+		utils.InternalDBBackupPathCfg:      dbcfg.Opts.InternalDBBackupPath,
+		utils.InternalDBStartTimeoutCfg:    dbcfg.Opts.InternalDBStartTimeout,
+		utils.InternalDBDumpIntervalCfg:    dbcfg.Opts.InternalDBDumpInterval,
+		utils.InternalDBRewriteIntervalCfg: dbcfg.Opts.InternalDBRewriteInterval,
+		utils.InternalDBWriteLimitCfg:      dbcfg.Opts.InternalDBWriteLimit,
+		utils.SQLMaxOpenConnsCfg:           dbcfg.Opts.SQLMaxOpenConns,
+		utils.SQLMaxIdleConnsCfg:           dbcfg.Opts.SQLMaxIdleConns,
+		utils.SQLConnMaxLifetime:           dbcfg.Opts.SQLConnMaxLifetime.String(),
+		utils.SQLLogLevel:                  dbcfg.Opts.SQLLogLevel,
+		utils.MYSQLDSNParams:               dbcfg.Opts.MySQLDSNParams,
+		utils.MongoQueryTimeoutCfg:         dbcfg.Opts.MongoQueryTimeout.String(),
+		utils.MongoConnSchemeCfg:           dbcfg.Opts.MongoConnScheme,
+		utils.PgSSLModeCfg:                 dbcfg.Opts.PgSSLMode,
+		utils.PgSchema:                     dbcfg.Opts.PgSchema,
+		utils.MysqlLocation:                dbcfg.Opts.MySQLLocation,
 	}
 	if dbcfg.Opts.PgSSLCert != "" {
 		opts[utils.PgSSLCertCfg] = dbcfg.Opts.PgSSLCert

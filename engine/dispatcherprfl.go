@@ -22,6 +22,8 @@ import (
 	"math/rand"
 	"sort"
 
+	"maps"
+
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -110,6 +112,43 @@ type DispatcherProfile struct {
 	Hosts              DispatcherHostProfiles // dispatch to these connections
 }
 
+// Clone method for DispatcherProfile
+func (dp *DispatcherProfile) Clone() *DispatcherProfile {
+	clone := &DispatcherProfile{
+		Tenant:   dp.Tenant,
+		ID:       dp.ID,
+		Strategy: dp.Strategy,
+		Weight:   dp.Weight,
+	}
+	if dp.Subsystems != nil {
+		clone.Subsystems = make([]string, len(dp.Subsystems))
+		copy(clone.Subsystems, dp.Subsystems)
+	}
+	if dp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(dp.FilterIDs))
+		copy(clone.FilterIDs, dp.FilterIDs)
+	}
+	if dp.StrategyParams != nil {
+		clone.StrategyParams = make(map[string]any)
+		maps.Copy(clone.StrategyParams, dp.StrategyParams)
+	}
+	if dp.Hosts != nil {
+		clone.Hosts = make(DispatcherHostProfiles, len(dp.Hosts))
+		for i, hostProfile := range dp.Hosts {
+			clone.Hosts[i] = hostProfile.Clone()
+		}
+	}
+	if dp.ActivationInterval != nil {
+		clone.ActivationInterval = dp.ActivationInterval.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of DispatcherProfile used by ltcache CacheCloner
+func (dp *DispatcherProfile) CacheClone() any {
+	return dp.Clone()
+}
+
 // DispatcherProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type DispatcherProfileWithAPIOpts struct {
 	*DispatcherProfile
@@ -194,4 +233,9 @@ func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
 	cln = make(DispatcherHostIDs, len(dHPrflIDs))
 	copy(cln, dHPrflIDs)
 	return
+}
+
+// CacheClone returns a clone of DispatcherHostIDs used by ltcache CacheCloner
+func (dHPrflIDs *DispatcherHostIDs) CacheClone() any {
+	return dHPrflIDs.Clone()
 }

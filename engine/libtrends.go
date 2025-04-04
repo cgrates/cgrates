@@ -73,6 +73,11 @@ func (tP *TrendProfile) Clone() (clnTp *TrendProfile) {
 	return
 }
 
+// CacheClone returns a clone of TrendProfile used by ltcache CacheCloner
+func (tP *TrendProfile) CacheClone() any {
+	return tP.Clone()
+}
+
 type TrendProfileWithAPIOpts struct {
 	*TrendProfile
 	APIOpts map[string]any
@@ -139,6 +144,11 @@ func (t *Trend) Clone() (tC *Trend) {
 	}
 
 	return
+}
+
+// CacheClone returns a clone of Trend used by ltcache CacheCloner
+func (t *Trend) CacheClone() any {
+	return t.Clone()
 }
 
 // AsTrendSummary transforms the trend into TrendSummary

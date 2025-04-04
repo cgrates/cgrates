@@ -2229,3 +2229,18 @@ func (ms *MongoStorage) RemoveSessionsBackupDrv(nodeID, tnt, cgrid string) error
 		return err
 	})
 }
+
+// DumpDataDB will dump all of datadb from memory to a file, only for InternalDB
+func (ms *MongoStorage) DumpDataDB() error {
+	return utils.ErrNotImplemented
+}
+
+// Will rewrite every dump file of DataDB, only for InternalDB
+func (ms *MongoStorage) RewriteDataDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// BackupDataDB only for InternalDB
+func (ms *MongoStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

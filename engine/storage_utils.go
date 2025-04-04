@@ -55,7 +55,17 @@ func NewDataDBConn(dbType, host, port, name, user,
 	case utils.MetaMongo:
 		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
 	case utils.MetaInternal:
-		d = NewInternalDB(nil, nil, true, itmsCfg)
+		if config.CgrConfig().DataDbCfg().Opts.InternalDBDumpInterval != 0 {
+			d, err = RecoverDB(nil, nil, true, itmsCfg,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBDumpPath,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBBackupPath,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBStartTimeout,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBDumpInterval,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBRewriteInterval,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBWriteLimit)
+			return
+		}
+		d = NewInternalDB(nil, nil, true, true, itmsCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
 	}
@@ -77,7 +87,17 @@ func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
 		db, err = NewMySQLStorage(host, port, name, user, pass, marshaler, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLLogLevel,
 			opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.MySQLDSNParams)
 	case utils.MetaInternal:
-		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itmsCfg)
+		if config.CgrConfig().StorDbCfg().Opts.InternalDBDumpInterval != 0 {
+			db, err = RecoverDB(stringIndexedFields, prefixIndexedFields, false, itmsCfg,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBDumpPath,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBBackupPath,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBStartTimeout,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBDumpInterval,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBRewriteInterval,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBWriteLimit)
+			return
+		}
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, true, itmsCfg)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
 			dbType, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
@@ -116,6 +136,27 @@ type SMCost struct {
 	CostSource  string
 	Usage       time.Duration
 	CostDetails *EventCost
+}
+
+// Clone clones SMCost
+func (s *SMCost) Clone() *SMCost {
+	clone := &SMCost{
+		CGRID:      s.CGRID,
+		RunID:      s.RunID,
+		OriginHost: s.OriginHost,
+		OriginID:   s.OriginID,
+		CostSource: s.CostSource,
+		Usage:      s.Usage,
+	}
+	if s.CostDetails != nil {
+		clone.CostDetails = s.CostDetails.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of SMCost used by ltcache CacheCloner
+func (s *SMCost) CacheClone() any {
+	return s.Clone()
 }
 
 type AttrCDRSStoreSMCost struct {

@@ -29,7 +29,7 @@ import (
 
 func TestAccountsSetGet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	apierSv1 := &APIerSv1{
 		DataManager: engine.NewDataManager(db, config.CgrConfig().CacheCfg(), nil),
 		Config:      cfg,

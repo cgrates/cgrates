@@ -1029,7 +1029,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		rgProfiles: map[utils.TenantID]*utils.TPRankingProfile{
 			{Tenant: "cgrates.org", ID: "rankingProfilesID"}: {},
 		},
-		dm: NewDataManager(NewInternalDB(nil, nil, false, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), connMgr),
+		dm: NewDataManager(NewInternalDB(nil, nil, false, false, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), connMgr),
 	}
 	tpr.dm.SetLoadIDs(make(map[string]int64))
 	tpr.cacheConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
@@ -1040,14 +1040,16 @@ func TestTPReaderReloadCache(t *testing.T) {
 
 func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tscache := ltcache.NewTransCache(
 		map[string]*ltcache.CacheConfig{
 			utils.CacheTBLTPDestinations: {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value interface{}){
+					func(itmID string, value any) {
+					},
 				},
 			}},
 	)
@@ -1079,7 +1081,7 @@ func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
 func TestTPReaderLoadAll(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(nil, db, "", "local", nil, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -1147,7 +1149,7 @@ func TestTpReaderReloadScheduler(t *testing.T) {
 			{Tenant: "cgrates.org", ID: "dispatcherHostsID"}: {},
 		},
 
-		dm: NewDataManager(NewInternalDB(nil, nil, false, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), connMgr),
+		dm: NewDataManager(NewInternalDB(nil, nil, false, false, cfg.DataDbCfg().Items), config.CgrConfig().CacheCfg(), connMgr),
 	}
 	tpr.dm.SetLoadIDs(make(map[string]int64))
 	tpr.schedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.SchedulerConnsCfg)}
@@ -1160,7 +1162,7 @@ func TestTpReaderReloadScheduler(t *testing.T) {
 
 func TestTpReaderIsValid(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(nil, db, "", "local", nil, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -1192,7 +1194,9 @@ func TestTpReaderLoadAccountActions(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value any){
+					func(itmID string, value any) {
+					},
 				},
 			}},
 	)
@@ -1207,7 +1211,7 @@ func TestTpReaderLoadAccountActions(t *testing.T) {
 		Tenant:       "tn2",
 		ActionPlanId: "actionplans",
 	}, []string{"groupId"}, true, "tId")
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	db.db = tscache
 	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
 	if err != nil {
@@ -1224,7 +1228,7 @@ func TestTpReaderLoadAccountActions(t *testing.T) {
 }
 
 func TestTPCSVImporterChargerProfiles(t *testing.T) {
-	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+	db := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheTBLTPChargers: {
 			Limit: 2,
 		},
@@ -1253,7 +1257,7 @@ func TestTPCSVImporterChargerProfiles(t *testing.T) {
 
 func TestTPCSVImporterDispatcherProfiles(t *testing.T) {
 
-	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+	db := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheTBLTPDispatchers: {
 			Limit: 3,
 		},
@@ -1282,7 +1286,7 @@ func TestTPCSVImporterDispatcherProfiles(t *testing.T) {
 }
 
 func TestTPCSVImporterDispatcherHosts(t *testing.T) {
-	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+	db := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheTBLTPDispatcherHosts: {
 			Limit: 3,
 		},
@@ -1311,7 +1315,7 @@ func TestTPCSVImporterDispatcherHosts(t *testing.T) {
 }
 
 func TestTPCSVImporterErrs(t *testing.T) {
-	db := NewInternalDB(nil, nil, true, map[string]*config.ItemOpt{
+	db := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheTBLTPDispatcherHosts: {
 			Limit: 3,
 		},
@@ -1393,7 +1397,9 @@ func TestTpReaderLoadTimingsErr(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value any){
+					func(itmID string, value any) {
+					},
 				},
 			}},
 	)
@@ -1406,7 +1412,7 @@ func TestTpReaderLoadTimingsErr(t *testing.T) {
 		TPid: "TpId3",
 		ID:   duplicateId,
 	}, []string{"groupId"}, true, "tId")
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	db.db = tscache
 	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
 	if err != nil {
@@ -1425,7 +1431,9 @@ func TestLoadDestinationRatesErr(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value any){
+					func(itmID string, value any) {
+					},
 				},
 			},
 		},
@@ -1439,7 +1447,7 @@ func TestLoadDestinationRatesErr(t *testing.T) {
 		TPid: "TpId3",
 		ID:   duplicateId,
 	}, []string{"groupId"}, true, "tId")
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	db.db = tscache
 	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
 	if err != nil {
@@ -1494,7 +1502,7 @@ func TestTpReaderLoadRatingPlansFilteredErr(t *testing.T) {
 			StaticTTL: false,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 
 	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
 	if err != nil {
@@ -1517,12 +1525,14 @@ func TestLoadRatingProfilesFiltered(t *testing.T) {
 				MaxItems:  3,
 				TTL:       time.Minute * 30,
 				StaticTTL: false,
-				OnEvicted: func(itmID string, value any) {
+				OnEvicted: []func(itmID string, value any){
+					func(itmID string, value any) {
+					},
 				},
 			},
 		},
 	)
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	db.db = tscache
 	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil, true)
 	if err != nil {
@@ -1579,7 +1589,7 @@ func TestTpReaderLoadActionTriggers(t *testing.T) {
 			},
 		},
 	)
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	db.db = tscache
 	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
 	if err != nil {
@@ -1664,7 +1674,7 @@ func TestTpReaderSetDestination(t *testing.T) {
 			},
 		},
 	)
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	db.db = tscache
 	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
 	if err != nil {
@@ -1698,7 +1708,7 @@ func TestTPReaderLoadAccountActionsFilteredErr(t *testing.T) {
 			Remote: true,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
 	if err != nil {
 		t.Error(err)
@@ -1744,7 +1754,7 @@ func TestTprRemoveFromDatabase(t *testing.T) {
 			Limit: 2,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
 	if err != nil {
 		t.Error(err)
@@ -1803,7 +1813,7 @@ func TestLoadActionPlansErrs(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
 	Cache.Clear(nil)
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "tpr", "UTC", nil, nil, true)
 	if err != nil {
 		t.Error(err)
@@ -1851,7 +1861,7 @@ func TestLoadRatingPlansFiltered(t *testing.T) {
 			Limit: 2,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil, true)
 	if err != nil {
 		t.Error(err)
@@ -1980,7 +1990,7 @@ func TestTPRLoadRatingProfiles(t *testing.T) {
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "RP1", "", nil, nil, false)
 
 	if err != nil {
@@ -2043,7 +2053,7 @@ func TestTPRLoadAccountActions(t *testing.T) {
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "", "", nil, nil, false)
 
 	if err != nil {
@@ -2070,7 +2080,7 @@ func TestTpReaderRemoveFromDatabase(t *testing.T) {
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -2133,7 +2143,7 @@ func TestTpReaderRemoveFromDatabaseDspPrf(t *testing.T) {
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -2174,7 +2184,7 @@ func TestTpReaderRemoveFromDatabaseDspHst(t *testing.T) {
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, db, "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -2212,8 +2222,8 @@ func TestTprLoadAccountActionFiltered(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 		SetConnManager(tmpConn)
 	}()
-	dataDb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	storDb := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	dataDb := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	storDb := NewInternalDB(nil, nil, false, false, cfg.StorDbCfg().Items)
 	tpr, err := NewTpReader(dataDb, storDb, "TP1", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
 	if err != nil {
 		t.Error(err)
@@ -2317,8 +2327,8 @@ func TestTprLoadRatingPlansFiltered(t *testing.T) {
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	dataDb := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
-	storDb := NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	dataDb := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	storDb := NewInternalDB(nil, nil, false, false, cfg.StorDbCfg().Items)
 
 	storDb.SetTPDestinations([]*utils.TPDestination{{
 		TPid:     "TP1",

@@ -48,7 +48,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	expArgs := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: map[string]any{
@@ -239,7 +239,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ApierCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	dataDB := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dataDB := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	expArgs := &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]any{

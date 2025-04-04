@@ -33,6 +33,25 @@ type RatingProfile struct {
 	RatingPlanActivations RatingPlanActivations
 }
 
+// Clone returns a clone of RatingProfile
+func (rp *RatingProfile) Clone() *RatingProfile {
+	if rp == nil {
+		return nil
+	}
+
+	result := &RatingProfile{
+		Id:                    rp.Id,
+		RatingPlanActivations: rp.RatingPlanActivations.Clone(),
+	}
+
+	return result
+}
+
+// CacheClone returns a clone of RatingProfile used by ltcache CacheCloner
+func (rp *RatingProfile) CacheClone() any {
+	return rp.Clone()
+}
+
 // RatingProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type RatingProfileWithAPIOpts struct {
 	*RatingProfile
@@ -46,12 +65,45 @@ type RatingPlanActivation struct {
 	FallbackKeys   []string
 }
 
+// Clone returns a clone of RatingPlanActivation
+func (rpa *RatingPlanActivation) Clone() *RatingPlanActivation {
+	if rpa == nil {
+		return nil
+	}
+
+	result := &RatingPlanActivation{
+		ActivationTime: rpa.ActivationTime,
+		RatingPlanId:   rpa.RatingPlanId,
+	}
+
+	if rpa.FallbackKeys != nil {
+		result.FallbackKeys = make([]string, len(rpa.FallbackKeys))
+		copy(result.FallbackKeys, rpa.FallbackKeys)
+	}
+
+	return result
+}
+
 func (rpa *RatingPlanActivation) Equal(orpa *RatingPlanActivation) bool {
 	return rpa.ActivationTime == orpa.ActivationTime &&
 		rpa.RatingPlanId == orpa.RatingPlanId
 }
 
 type RatingPlanActivations []*RatingPlanActivation
+
+// Clone returns a clone of RatingPlanActivations
+func (rpas RatingPlanActivations) Clone() RatingPlanActivations {
+	if rpas == nil {
+		return nil
+	}
+
+	result := make(RatingPlanActivations, len(rpas))
+	for i, rpa := range rpas {
+		result[i] = rpa.Clone()
+	}
+
+	return result
+}
 
 func (rpas RatingPlanActivations) Len() int {
 	return len(rpas)

@@ -75,7 +75,7 @@ func TestProcessContentCallsRemoveItems(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -179,7 +179,7 @@ func TestProcessContentCallsClear(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -290,7 +290,7 @@ func TestRemoveContentCallsReload(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -396,7 +396,7 @@ func TestRemoveContentCallsLoad(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -502,7 +502,7 @@ func TestRemoveContentCallsRemove(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock
@@ -619,7 +619,7 @@ func TestRemoveContentCallsClear(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
 
 	internalCacheSChan := make(chan birpc.ClientConnector, 1)
 	internalCacheSChan <- sMock

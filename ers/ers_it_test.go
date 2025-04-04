@@ -772,7 +772,7 @@ func TestErsOnEvictedMetaDumpToFileOK(t *testing.T) {
 		field.ComputePath()
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -834,7 +834,7 @@ func TestErsOnEvictedMetaDumpToFileCSVWriteErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -890,7 +890,7 @@ func TestErsOnEvictedMetaDumpToFileCreateErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -951,7 +951,7 @@ func TestERsOnEvictedDumpToJSON(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -1035,7 +1035,7 @@ func TestErsOnEvictedDumpToJSONNoPath(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -1112,7 +1112,7 @@ func TestErsOnEvictedDumpToJSONMergeError(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -1192,7 +1192,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 	value.rdrCfg.CacheDumpFields[0].ComputePath()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -1267,7 +1267,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFields(t *testing.T) {
 	value.rdrCfg.CacheDumpFields[0].ComputePath()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -1352,7 +1352,7 @@ func TestErsOnEvictedDumpToJSONInvalidPath(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -1422,7 +1422,7 @@ func TestErsOnEvictedDumpToJSONEncodeErr(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{

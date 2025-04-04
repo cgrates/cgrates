@@ -62,6 +62,21 @@ type RSRFilter struct {
 	negative   bool // Rule should not match
 }
 
+// Clone method for RSRFilter struct
+func (rsrFltr *RSRFilter) Clone() *RSRFilter {
+	if rsrFltr == nil {
+		return nil
+	}
+	rsrf := &RSRFilter{
+		filterRule: rsrFltr.filterRule,
+		negative:   rsrFltr.negative,
+	}
+	if rsrFltr.fltrRgxp != nil {
+		rsrf.fltrRgxp = rsrFltr.fltrRgxp.Copy()
+	}
+	return rsrf
+}
+
 func (rsrFltr *RSRFilter) FilterRule() string {
 	return rsrFltr.filterRule
 }

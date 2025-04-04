@@ -41,37 +41,48 @@ func init() {
 	//AttributeS
 	gob.Register(new(AttributeProfile))
 	gob.Register(new(AttributeProfileWithAPIOpts))
+	gob.Register(new(utils.TPAttributeProfile))
 	// ThresholdS
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
 	gob.Register(new(ThresholdProfileWithAPIOpts))
 	gob.Register(new(ThresholdWithAPIOpts))
+	gob.Register(new(utils.TPThresholdProfile))
 	// ResourceS
 	gob.Register(new(Resource))
 	gob.Register(new(ResourceProfile))
 	gob.Register(new(ResourceProfileWithAPIOpts))
 	gob.Register(new(ResourceWithAPIOpts))
+	gob.Register(new(utils.TPResourceProfile))
 	// StatS
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
+	gob.Register(new(utils.TPStatProfile))
 	// RankingS
 	gob.Register(new(RankingProfile))
+	gob.Register(new(utils.TPRankingProfile))
 	// RouteS
 	gob.Register(new(RouteProfile))
 	gob.Register(new(RouteProfileWithAPIOpts))
+	gob.Register(new(utils.TPRouteProfile))
 	// FilterS
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithAPIOpts))
+	gob.Register(new(utils.TPFilterProfile))
 	// DispatcherS
 	gob.Register(new(DispatcherHost))
 	gob.Register(new(DispatcherHostProfile))
 	gob.Register(new(DispatcherHostWithAPIOpts))
+	gob.Register(new(DispatcherProfile))
+	gob.Register(new(utils.TPDispatcherHost))
+	gob.Register(new(utils.TPDispatcherProfile))
 
 	// CDRs
 	gob.Register(new(EventCost))
+	gob.Register(new(CDR))
 
 	// StatMetrics
 	gob.Register(new(StatASR))
@@ -91,11 +102,49 @@ func init() {
 	gob.Register(map[string]any{})
 	gob.Register(map[string][]map[string]any{})
 	gob.Register(map[string]string{})
+	gob.Register(map[string]int64{})
 	gob.Register(time.Duration(0))
 	gob.Register(time.Time{})
 	gob.Register(url.Values{})
 	gob.Register(json.RawMessage{})
 	gob.Register(BalanceSummaries{})
+
+	gob.Register(Actions{})
+	gob.Register(new(ActionPlan))
+	gob.Register(ActionTriggers{})
+	gob.Register(new(utils.TPActions))
+	gob.Register(new(utils.TPActionPlan))
+	gob.Register(new(utils.TPActionTriggers))
+
+	gob.Register(new(RatingPlan))
+	gob.Register(new(RatingProfile))
+	gob.Register(new(utils.TPRatingPlan))
+	gob.Register(new(utils.TPRatingProfile))
+	gob.Register(new(utils.TPRateRALs))
+
+	gob.Register(new(Account))
+	gob.Register(new(utils.TPAccountActions))
+
+	gob.Register(new(utils.TPTiming))
+	gob.Register(new(utils.ApierTPTiming))
+
+	gob.Register(new(Destination))
+	gob.Register(new(utils.TPDestination))
+	gob.Register(new(utils.TPDestinationRate))
+
+	gob.Register(new(Trend))
+	gob.Register(new(TrendProfile))
+	gob.Register(new(utils.TPTrendsProfile))
+
+	gob.Register(new(SharedGroup))
+	gob.Register(new(utils.TPSharedGroups))
+
+	gob.Register(new(ChargerProfile))
+	gob.Register(new(utils.TPChargerProfile))
+
+	gob.Register(Versions{})
+	gob.Register(new(StoredSession))
+	gob.Register(new(SMCost))
 
 	gob.Register(new(utils.ArgCacheReplicateSet))
 	gob.Register(new(utils.ArgCacheReplicateRemove))
@@ -114,20 +163,24 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, cpS *CapsStats) (c *Cache
 				k == utils.CacheCapsEvents {
 				continue
 			}
-			val.OnEvicted = func(itmID string, value any) {
-				if err := connMgr.Call(context.TODO(), cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
-					&utils.ArgCacheReplicateRemove{
-						CacheID: k,
-						ItemID:  itmID,
-					}, &reply); err != nil {
-					utils.Logger.Warning(fmt.Sprintf("error: %+v when autoexpired item: %+v from: %+v", err, itmID, k))
-				}
+			val.OnEvicted = []func(itmID string, value any){
+				func(itmID string, value any) {
+					if err := connMgr.Call(context.TODO(), cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
+						&utils.ArgCacheReplicateRemove{
+							CacheID: k,
+							ItemID:  itmID,
+						}, &reply); err != nil {
+						utils.Logger.Warning(fmt.Sprintf("error: %+v when autoexpired item: %+v from: %+v", err, itmID, k))
+					}
+				},
 			}
 		}
 	}
 
 	if _, has := tCache[utils.CacheCapsEvents]; has && cpS != nil {
-		tCache[utils.CacheCapsEvents].OnEvicted = cpS.OnEvict
+		tCache[utils.CacheCapsEvents].OnEvicted = []func(itmID string, value interface{}){
+			cpS.OnEvict,
+		}
 	}
 	c = &CacheS{
 		cfg:     cfg,
@@ -260,11 +313,6 @@ func (chS *CacheS) RollbackTransaction(transID string) {
 // CommitTransaction is an exported method from TransCache
 func (chS *CacheS) CommitTransaction(transID string) {
 	chS.tCache.CommitTransaction(transID)
-}
-
-// GetCloned is an exported method from TransCache
-func (chS *CacheS) GetCloned(chID, itmID string) (cln any, err error) {
-	return chS.tCache.GetCloned(chID, itmID)
 }
 
 // GetPrecacheChannel returns the channel used to signal precaching

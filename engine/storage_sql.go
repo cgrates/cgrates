@@ -1675,3 +1675,18 @@ func (sqls *SQLStorage) RemoveVersions(vrs Versions) (err error) {
 	tx.Commit()
 	return
 }
+
+// Will dump everything inside stordb to a file, only for InternalDB
+func (sqls *SQLStorage) DumpStorDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Will rewrite every dump file of StorDB, only for InternalDB
+func (sqls *SQLStorage) RewriteStorDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// BackupStorDB used only for InternalDB
+func (sqls *SQLStorage) BackupStorDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}
