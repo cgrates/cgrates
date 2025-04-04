@@ -27,7 +27,8 @@
 	"cdrs_conns": ["*internal"]
 },
 "chargers": {
-	"enabled": true
+	"enabled": true,
+	"string_indexed_fields": ["*req.Account"]
 },
 "rals": {
 	"enabled": true

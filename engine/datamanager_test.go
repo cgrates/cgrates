@@ -581,9 +581,9 @@ func TestDMSetAccount(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
+	config.SetCgrConfig(cfg)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	dm.ms = &JSONMarshaler{}
-	config.SetCgrConfig(cfg)
 	SetDataStorage(dm)
 	if err := dm.SetAccount(acc); err != nil {
 		t.Error(err)
@@ -650,8 +650,8 @@ func TestDMRemoveAccount(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if err = dm.RemoveAccount(acc.ID); err != nil {
 		t.Error(err)
