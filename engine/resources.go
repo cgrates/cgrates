@@ -73,10 +73,7 @@ func (rp *ResourceProfile) Clone() *ResourceProfile {
 		copy(clone.ThresholdIDs, rp.ThresholdIDs)
 	}
 	if rp.ActivationInterval != nil {
-		clone.ActivationInterval = &utils.ActivationInterval{
-			ActivationTime: rp.ActivationInterval.ActivationTime,
-			ExpiryTime:     rp.ActivationInterval.ExpiryTime,
-		}
+		clone.ActivationInterval = rp.ActivationInterval.Clone()
 	}
 	return clone
 }

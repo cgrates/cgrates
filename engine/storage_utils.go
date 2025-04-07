@@ -120,16 +120,17 @@ type SMCost struct {
 
 // Clone clones SMCost
 func (s *SMCost) Clone() *SMCost {
-	clone := &SMCost{
-		CGRID:      s.CGRID,
-		RunID:      s.RunID,
-		OriginHost: s.OriginHost,
-		OriginID:   s.OriginID,
-		CostSource: s.CostSource,
-		Usage:      s.Usage,
+	if s == nil {
+		return nil
 	}
-	if s.CostDetails != nil {
-		clone.CostDetails = s.CostDetails.Clone()
+	clone := &SMCost{
+		CGRID:       s.CGRID,
+		RunID:       s.RunID,
+		OriginHost:  s.OriginHost,
+		OriginID:    s.OriginID,
+		CostSource:  s.CostSource,
+		Usage:       s.Usage,
+		CostDetails: s.CostDetails.Clone(),
 	}
 	return clone
 }

@@ -53,6 +53,9 @@ func (rkp *RankingProfile) TenantID() string {
 
 // Clone will clone a RankingProfile
 func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
+	if rkP == nil {
+		return nil
+	}
 	cln = &RankingProfile{
 		Tenant:   rkP.Tenant,
 		ID:       rkP.ID,
@@ -127,27 +130,38 @@ type Ranking struct {
 
 // Clone clones *Ranking
 func (r *Ranking) Clone() *Ranking {
+	if r == nil {
+		return nil
+	}
 	r.rMux.RLock()
 	defer r.rMux.RUnlock()
 	cln := &Ranking{
-		Tenant:            r.Tenant,
-		ID:                r.ID,
-		LastUpdate:        r.LastUpdate,
-		Sorting:           r.Sorting,
-		SortingParameters: make([]string, len(r.SortingParameters)),
-		SortedStatIDs:     make([]string, len(r.SortedStatIDs)),
+		Tenant:     r.Tenant,
+		ID:         r.ID,
+		LastUpdate: r.LastUpdate,
+		Sorting:    r.Sorting,
 	}
-	copy(cln.SortingParameters, r.SortingParameters)
-	copy(cln.SortedStatIDs, r.SortedStatIDs)
-	cln.Metrics = make(map[string]map[string]float64)
-	for statID, metricMap := range r.Metrics {
-		cln.Metrics[statID] = make(map[string]float64)
-		maps.Copy(cln.Metrics[statID], metricMap)
+	if r.SortingParameters != nil {
+		cln.SortingParameters = make([]string, len(r.SortingParameters))
+		copy(cln.SortingParameters, r.SortingParameters)
+	}
+	if r.SortedStatIDs != nil {
+		cln.SortedStatIDs = make([]string, len(r.SortedStatIDs))
+		copy(cln.SortedStatIDs, r.SortedStatIDs)
+	}
+	if r.Metrics != nil {
+		cln.Metrics = make(map[string]map[string]float64)
+		for statID, metricMap := range r.Metrics {
+			cln.Metrics[statID] = make(map[string]float64)
+			maps.Copy(cln.Metrics[statID], metricMap)
+		}
 	}
 	if r.rkPrfl != nil {
 		cln.rkPrfl = r.rkPrfl.Clone()
 	}
-	cln.metricIDs = r.metricIDs.Clone()
+	if r.metricIDs != nil {
+		cln.metricIDs = r.metricIDs.Clone()
+	}
 	return cln
 }
 

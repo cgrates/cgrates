@@ -56,6 +56,9 @@ type ThresholdProfile struct {
 
 // Clone clones *ThresholdProfile
 func (tp *ThresholdProfile) Clone() *ThresholdProfile {
+	if tp == nil {
+		return nil
+	}
 	clone := &ThresholdProfile{
 		Tenant:   tp.Tenant,
 		ID:       tp.ID,
@@ -141,6 +144,9 @@ type Threshold struct {
 
 // Clone clones *Threshold
 func (t *Threshold) Clone() *Threshold {
+	if t == nil {
+		return nil
+	}
 	clone := &Threshold{
 		Tenant: t.Tenant,
 		ID:     t.ID,

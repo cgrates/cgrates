@@ -25,6 +25,8 @@ import (
 	"strings"
 	"time"
 
+	"maps"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -255,14 +257,22 @@ type StatQueue struct {
 
 // Clone clones *StatQueue
 func (sq *StatQueue) Clone() *StatQueue {
-	result := &StatQueue{
-		Tenant:    sq.Tenant,
-		ID:        sq.ID,
-		SQItems:   make([]SQItem, len(sq.SQItems)),
-		SQMetrics: sq.SQMetrics,
-		lkID:      sq.lkID,
+	if sq == nil {
+		return nil
 	}
-	copy(result.SQItems, sq.SQItems)
+	result := &StatQueue{
+		Tenant: sq.Tenant,
+		ID:     sq.ID,
+		lkID:   sq.lkID,
+	}
+	if sq.SQItems != nil {
+		result.SQItems = make([]SQItem, len(sq.SQItems))
+		copy(result.SQItems, sq.SQItems)
+	}
+	if sq.SQMetrics != nil {
+		result.SQMetrics = make(map[string]StatMetric)
+		maps.Copy(result.SQMetrics, sq.SQMetrics)
+	}
 	if sq.sqPrfl != nil {
 		result.sqPrfl = sq.sqPrfl.Clone()
 	}
