@@ -44,7 +44,10 @@ func TestFileFwvGetMetrics(t *testing.T) {
 
 func TestFileFwvComposeHeader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -106,7 +109,10 @@ func TestFileFwvComposeHeader(t *testing.T) {
 
 func TestFileFwvComposeTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -168,7 +174,10 @@ func TestFileFwvComposeTrailer(t *testing.T) {
 
 func TestFileFwvExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -205,7 +214,10 @@ func (nopCloserWrite) Write(s []byte) (n int, err error) {
 
 func TestFileFwvExportEventWriteError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -227,7 +239,10 @@ func TestFileFwvExportEventWriteError(t *testing.T) {
 
 func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -259,7 +274,10 @@ func TestFileFwvComposeHeaderWriteError(t *testing.T) {
 
 func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -290,7 +308,10 @@ func TestFileFwvComposeTrailerWriteError(t *testing.T) {
 }
 func TestFileFwvOnEvictedTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -328,7 +349,10 @@ func (nopCloserError) Write(s []byte) (n int, err error) {
 }
 func TestFileFwvOnEvictedClose(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	newIDb, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	newDM := engine.NewDataManager(newIDb, cfg.CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)

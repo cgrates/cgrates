@@ -27,7 +27,7 @@
         "opts":{
             "internalDBDumpInterval": "500ms",
             "internalDBRewriteInterval": "-1",
-            "internalDBWriteLimit": 1	
+            "internalDBFileSizeLimit": "1MB"	
         }
     },
     
@@ -37,7 +37,7 @@
         "opts":{
             "internalDBDumpInterval": "500ms",
             "internalDBRewriteInterval": "-1",
-            "internalDBWriteLimit": 1	
+            "internalDBFileSizeLimit": "1MB"	
         }
     },
     

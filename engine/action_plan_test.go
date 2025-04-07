@@ -275,7 +275,10 @@ func TestActionTimingExErr(t *testing.T) {
 		Cache = tmp
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	at := &ActionTiming{
 		Timing: &RateInterval{},

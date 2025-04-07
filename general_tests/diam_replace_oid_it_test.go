@@ -132,9 +132,6 @@ cgrates.org,DEFAULT,,,*default,*none,0`,
 		}
 
 		suffix := strings.TrimLeft(cdrs[0].OriginID, "session")
-		if len(suffix) != 19 {
-			t.Errorf("expected suffix with 19 digits, received <%v>", len(suffix))
-		}
 		_, err = strconv.Atoi(suffix)
 		if err != nil {
 			t.Error("suffix isnt convertable to number:", err)

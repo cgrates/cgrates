@@ -2614,7 +2614,10 @@ func TestCDRefundRounding(t *testing.T) {
 		},
 	}
 
-	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	dataDB, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 
@@ -2675,7 +2678,10 @@ func TestCallDescGetRatingPlansForPrefix(t *testing.T) {
 	defer func() {
 		dm = tmpDm
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cd := &CallDescriptor{
 		Category:      "call",

@@ -2822,7 +2822,10 @@ func TestResetAccountCDR(t *testing.T) {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 		SetCdrStorage(cdrStorage)
 	}()
-	idb := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	idb, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(idb, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 	SetCdrStorage(idb)
@@ -3331,7 +3334,10 @@ func TestEnableDisableAccountAction(t *testing.T) {
 
 func TestResetAccountCDRSuccesful(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	idb := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	idb, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(idb, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, nil, dm)
 	cdr := &CDR{
@@ -3779,7 +3785,10 @@ func TestRemoveAccountActionErr(t *testing.T) {
 			}},
 		},
 	}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(nil)
 	if err := removeAccountAction(ub, a, acs, nil, extraData, SharedActionsData{}, ActionConnCfg{}); err == nil || err != utils.ErrInvalidKey {
@@ -4004,7 +4013,10 @@ func TestSetDestinationsErr(t *testing.T) {
 			Replicate: false,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -4129,7 +4141,10 @@ func TestRemoveAccountActionLogg(t *testing.T) {
 	}
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{

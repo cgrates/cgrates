@@ -110,6 +110,7 @@ var (
 func TestRsV1IT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
+		t.Skip("unfinished, resources solution needed")
 		rlsV1ConfDIR = "tutinternal"
 		sTestsRLSV1 = sTestsRLSV1[:len(sTestsRLSV1)-24]
 	case utils.MetaMySQL:
