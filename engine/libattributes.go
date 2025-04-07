@@ -67,6 +67,9 @@ type AttributeProfile struct {
 
 // Clone method for AttributeProfile struct
 func (ap *AttributeProfile) Clone() *AttributeProfile {
+	if ap == nil {
+		return nil
+	}
 	clone := &AttributeProfile{
 		Tenant:  ap.Tenant,
 		ID:      ap.ID,

@@ -99,12 +99,17 @@ type TPDestination struct {
 
 // Clone method for TPDestination
 func (tpd *TPDestination) Clone() *TPDestination {
+	if tpd == nil {
+		return nil
+	}
 	clone := &TPDestination{
 		TPid: tpd.TPid,
 		ID:   tpd.ID,
 	}
-	clone.Prefixes = make([]string, len(tpd.Prefixes))
-	copy(clone.Prefixes, tpd.Prefixes)
+	if tpd.Prefixes != nil {
+		clone.Prefixes = make([]string, len(tpd.Prefixes))
+		copy(clone.Prefixes, tpd.Prefixes)
+	}
 	return clone
 }
 
@@ -123,13 +128,18 @@ type TPRateRALs struct {
 
 // Clone method for TPRateRALs
 func (tpr *TPRateRALs) Clone() *TPRateRALs {
+	if tpr == nil {
+		return nil
+	}
 	clone := &TPRateRALs{
 		TPid: tpr.TPid,
 		ID:   tpr.ID,
 	}
-	clone.RateSlots = make([]*RateSlot, len(tpr.RateSlots))
-	for i, slot := range tpr.RateSlots {
-		clone.RateSlots[i] = slot.Clone()
+	if tpr.RateSlots != nil {
+		clone.RateSlots = make([]*RateSlot, len(tpr.RateSlots))
+		for i, slot := range tpr.RateSlots {
+			clone.RateSlots[i] = slot.Clone()
+		}
 	}
 	return clone
 }
@@ -168,6 +178,9 @@ type RateSlot struct {
 
 // Clone method for RateSlot
 func (rs *RateSlot) Clone() *RateSlot {
+	if rs == nil {
+		return nil
+	}
 	return &RateSlot{
 		ConnectFee:            rs.ConnectFee,
 		Rate:                  rs.Rate,
@@ -213,13 +226,18 @@ type TPDestinationRate struct {
 
 // Clone method for TPDestinationRate
 func (tpdr *TPDestinationRate) Clone() *TPDestinationRate {
+	if tpdr == nil {
+		return nil
+	}
 	clone := &TPDestinationRate{
 		TPid: tpdr.TPid,
 		ID:   tpdr.ID,
 	}
-	clone.DestinationRates = make([]*DestinationRate, len(tpdr.DestinationRates))
-	for i, destRate := range tpdr.DestinationRates {
-		clone.DestinationRates[i] = destRate.Clone()
+	if tpdr.DestinationRates != nil {
+		clone.DestinationRates = make([]*DestinationRate, len(tpdr.DestinationRates))
+		for i, destRate := range tpdr.DestinationRates {
+			clone.DestinationRates[i] = destRate.Clone()
+		}
 	}
 	return clone
 }
@@ -241,6 +259,9 @@ type DestinationRate struct {
 
 // Clone method for DestinationRate
 func (dr *DestinationRate) Clone() *DestinationRate {
+	if dr == nil {
+		return nil
+	}
 	clone := &DestinationRate{
 		DestinationId:    dr.DestinationId,
 		RateId:           dr.RateId,
@@ -267,6 +288,9 @@ type ApierTPTiming struct {
 
 // Clone method for ApierTPTiming
 func (apt *ApierTPTiming) Clone() *ApierTPTiming {
+	if apt == nil {
+		return nil
+	}
 	return &ApierTPTiming{
 		TPid:      apt.TPid,
 		ID:        apt.ID,
@@ -412,13 +436,18 @@ type TPRatingPlan struct {
 
 // Clone method for TPRatingPlan
 func (tprp *TPRatingPlan) Clone() *TPRatingPlan {
+	if tprp == nil {
+		return nil
+	}
 	clone := &TPRatingPlan{
 		TPid: tprp.TPid,
 		ID:   tprp.ID,
 	}
-	clone.RatingPlanBindings = make([]*TPRatingPlanBinding, len(tprp.RatingPlanBindings))
-	for i, binding := range tprp.RatingPlanBindings {
-		clone.RatingPlanBindings[i] = binding.Clone()
+	if tprp.RatingPlanBindings != nil {
+		clone.RatingPlanBindings = make([]*TPRatingPlanBinding, len(tprp.RatingPlanBindings))
+		for i, binding := range tprp.RatingPlanBindings {
+			clone.RatingPlanBindings[i] = binding.Clone()
+		}
 	}
 	return clone
 }
@@ -437,6 +466,9 @@ type TPRatingPlanBinding struct {
 
 // Clone method for TPRatingPlanBinding
 func (tpb *TPRatingPlanBinding) Clone() *TPRatingPlanBinding {
+	if tpb == nil {
+		return nil
+	}
 	clone := &TPRatingPlanBinding{
 		DestinationRatesId: tpb.DestinationRatesId,
 		TimingId:           tpb.TimingId,
@@ -467,6 +499,9 @@ type TPRatingProfile struct {
 
 // Clone method for TPRatingProfile
 func (rpf *TPRatingProfile) Clone() *TPRatingProfile {
+	if rpf == nil {
+		return nil
+	}
 	clone := &TPRatingProfile{
 		TPid:     rpf.TPid,
 		LoadId:   rpf.LoadId,
@@ -474,9 +509,11 @@ func (rpf *TPRatingProfile) Clone() *TPRatingProfile {
 		Category: rpf.Category,
 		Subject:  rpf.Subject,
 	}
-	clone.RatingPlanActivations = make([]*TPRatingActivation, len(rpf.RatingPlanActivations))
-	for i, activation := range rpf.RatingPlanActivations {
-		clone.RatingPlanActivations[i] = activation.Clone()
+	if rpf.RatingPlanActivations != nil {
+		clone.RatingPlanActivations = make([]*TPRatingActivation, len(rpf.RatingPlanActivations))
+		for i, activation := range rpf.RatingPlanActivations {
+			clone.RatingPlanActivations[i] = activation.Clone()
+		}
 	}
 	return clone
 }
@@ -536,6 +573,9 @@ type TPRatingActivation struct {
 
 // Clone method for TPRatingActivation
 func (tpa *TPRatingActivation) Clone() *TPRatingActivation {
+	if tpa == nil {
+		return nil
+	}
 	return &TPRatingActivation{
 		ActivationTime:   tpa.ActivationTime,
 		RatingPlanId:     tpa.RatingPlanId,
@@ -578,13 +618,18 @@ type TPActions struct {
 
 // Clone method for TPActions
 func (tpa *TPActions) Clone() *TPActions {
+	if tpa == nil {
+		return nil
+	}
 	clone := &TPActions{
 		TPid: tpa.TPid,
 		ID:   tpa.ID,
 	}
-	clone.Actions = make([]*TPAction, len(tpa.Actions))
-	for i, action := range tpa.Actions {
-		clone.Actions[i] = action.Clone()
+	if tpa.Actions != nil {
+		clone.Actions = make([]*TPAction, len(tpa.Actions))
+		for i, action := range tpa.Actions {
+			clone.Actions[i] = action.Clone()
+		}
 	}
 	return clone
 }
@@ -616,6 +661,9 @@ type TPAction struct {
 
 // Clone method for TPAction
 func (tpa *TPAction) Clone() *TPAction {
+	if tpa == nil {
+		return nil
+	}
 	return &TPAction{
 		Identifier:      tpa.Identifier,
 		BalanceId:       tpa.BalanceId,
@@ -645,13 +693,18 @@ type TPSharedGroups struct {
 
 // Clone method for TPSharedGroups
 func (tpsg *TPSharedGroups) Clone() *TPSharedGroups {
+	if tpsg == nil {
+		return nil
+	}
 	clone := &TPSharedGroups{
 		TPid: tpsg.TPid,
 		ID:   tpsg.ID,
 	}
-	clone.SharedGroups = make([]*TPSharedGroup, len(tpsg.SharedGroups))
-	for i, sharedGroup := range tpsg.SharedGroups {
-		clone.SharedGroups[i] = sharedGroup.Clone()
+	if tpsg.SharedGroups != nil {
+		clone.SharedGroups = make([]*TPSharedGroup, len(tpsg.SharedGroups))
+		for i, sharedGroup := range tpsg.SharedGroups {
+			clone.SharedGroups[i] = sharedGroup.Clone()
+		}
 	}
 	return clone
 }
@@ -669,6 +722,9 @@ type TPSharedGroup struct {
 
 // Clone method for TPSharedGroup
 func (tpsg *TPSharedGroup) Clone() *TPSharedGroup {
+	if tpsg == nil {
+		return nil
+	}
 	return &TPSharedGroup{
 		Account:       tpsg.Account,
 		Strategy:      tpsg.Strategy,
@@ -684,13 +740,18 @@ type TPActionPlan struct {
 
 // Clone method for TPActionPlan
 func (tap *TPActionPlan) Clone() *TPActionPlan {
+	if tap == nil {
+		return nil
+	}
 	clone := &TPActionPlan{
 		TPid: tap.TPid,
 		ID:   tap.ID,
 	}
-	clone.ActionPlan = make([]*TPActionTiming, len(tap.ActionPlan))
-	for i, actionTiming := range tap.ActionPlan {
-		clone.ActionPlan[i] = actionTiming.Clone()
+	if tap.ActionPlan != nil {
+		clone.ActionPlan = make([]*TPActionTiming, len(tap.ActionPlan))
+		for i, actionTiming := range tap.ActionPlan {
+			clone.ActionPlan[i] = actionTiming.Clone()
+		}
 	}
 	return clone
 }
@@ -708,6 +769,9 @@ type TPActionTiming struct {
 
 // Clone method for TPActionTiming
 func (tat *TPActionTiming) Clone() *TPActionTiming {
+	if tat == nil {
+		return nil
+	}
 	return &TPActionTiming{
 		ActionsId: tat.ActionsId,
 		TimingId:  tat.TimingId,
@@ -723,13 +787,18 @@ type TPActionTriggers struct {
 
 // Clone method for TPActionTriggers
 func (tpat *TPActionTriggers) Clone() *TPActionTriggers {
+	if tpat == nil {
+		return nil
+	}
 	clone := &TPActionTriggers{
 		TPid: tpat.TPid,
 		ID:   tpat.ID,
 	}
-	clone.ActionTriggers = make([]*TPActionTrigger, len(tpat.ActionTriggers))
-	for i, actionTrigger := range tpat.ActionTriggers {
-		clone.ActionTriggers[i] = actionTrigger.Clone()
+	if tpat.ActionTriggers != nil {
+		clone.ActionTriggers = make([]*TPActionTrigger, len(tpat.ActionTriggers))
+		for i, actionTrigger := range tpat.ActionTriggers {
+			clone.ActionTriggers[i] = actionTrigger.Clone()
+		}
 	}
 	return clone
 }
@@ -765,6 +834,9 @@ type TPActionTrigger struct {
 
 // Clone method for TPActionTrigger
 func (tpat *TPActionTrigger) Clone() *TPActionTrigger {
+	if tpat == nil {
+		return nil
+	}
 	return &TPActionTrigger{
 		Id:                    tpat.Id,
 		UniqueID:              tpat.UniqueID,
@@ -803,6 +875,9 @@ type TPAccountActions struct {
 
 // Clone method for TPAccountActions
 func (aa *TPAccountActions) Clone() *TPAccountActions {
+	if aa == nil {
+		return nil
+	}
 	return &TPAccountActions{
 		TPid:             aa.TPid,
 		LoadId:           aa.LoadId,
@@ -1308,6 +1383,9 @@ type TPResourceProfile struct {
 
 // Clone method for TPResourceProfile
 func (trp *TPResourceProfile) Clone() *TPResourceProfile {
+	if trp == nil {
+		return nil
+	}
 	clone := &TPResourceProfile{
 		TPid:              trp.TPid,
 		Tenant:            trp.Tenant,
@@ -1319,10 +1397,14 @@ func (trp *TPResourceProfile) Clone() *TPResourceProfile {
 		Stored:            trp.Stored,
 		Weight:            trp.Weight,
 	}
-	clone.FilterIDs = make([]string, len(trp.FilterIDs))
-	copy(clone.FilterIDs, trp.FilterIDs)
-	clone.ThresholdIDs = make([]string, len(trp.ThresholdIDs))
-	copy(clone.ThresholdIDs, trp.ThresholdIDs)
+	if trp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(trp.FilterIDs))
+		copy(clone.FilterIDs, trp.FilterIDs)
+	}
+	if trp.ThresholdIDs != nil {
+		clone.ThresholdIDs = make([]string, len(trp.ThresholdIDs))
+		copy(clone.ThresholdIDs, trp.ThresholdIDs)
+	}
 	if trp.ActivationInterval != nil {
 		clone.ActivationInterval = trp.ActivationInterval.Clone()
 	}
@@ -1342,6 +1424,9 @@ type TPActivationInterval struct {
 
 // Clone method for TPActivationInterval
 func (tai *TPActivationInterval) Clone() *TPActivationInterval {
+	if tai == nil {
+		return nil
+	}
 	return &TPActivationInterval{
 		ActivationTime: tai.ActivationTime,
 		ExpiryTime:     tai.ExpiryTime,
@@ -1418,6 +1503,9 @@ type MetricWithFilters struct {
 
 // Clone method for MetricWithFilters
 func (mwf *MetricWithFilters) Clone() *MetricWithFilters {
+	if mwf == nil {
+		return nil
+	}
 	return &MetricWithFilters{
 		FilterIDs: slices.Clone(mwf.FilterIDs),
 		MetricID:  mwf.MetricID,
@@ -1443,6 +1531,9 @@ type TPStatProfile struct {
 
 // Clone method for TPStatProfile
 func (tsp *TPStatProfile) Clone() *TPStatProfile {
+	if tsp == nil {
+		return nil
+	}
 	clone := &TPStatProfile{
 		TPid:        tsp.TPid,
 		Tenant:      tsp.Tenant,
@@ -1454,13 +1545,19 @@ func (tsp *TPStatProfile) Clone() *TPStatProfile {
 		Weight:      tsp.Weight,
 		MinItems:    tsp.MinItems,
 	}
-	clone.FilterIDs = make([]string, len(tsp.FilterIDs))
-	copy(clone.FilterIDs, tsp.FilterIDs)
-	clone.ThresholdIDs = make([]string, len(tsp.ThresholdIDs))
-	copy(clone.ThresholdIDs, tsp.ThresholdIDs)
-	clone.Metrics = make([]*MetricWithFilters, len(tsp.Metrics))
-	for i, metric := range tsp.Metrics {
-		clone.Metrics[i] = metric.Clone()
+	if tsp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(tsp.FilterIDs))
+		copy(clone.FilterIDs, tsp.FilterIDs)
+	}
+	if tsp.ThresholdIDs != nil {
+		clone.ThresholdIDs = make([]string, len(tsp.ThresholdIDs))
+		copy(clone.ThresholdIDs, tsp.ThresholdIDs)
+	}
+	if tsp.Metrics != nil {
+		clone.Metrics = make([]*MetricWithFilters, len(tsp.Metrics))
+		for i, metric := range tsp.Metrics {
+			clone.Metrics[i] = metric.Clone()
+		}
 	}
 	if tsp.ActivationInterval != nil {
 		clone.ActivationInterval = tsp.ActivationInterval.Clone()
@@ -1489,6 +1586,9 @@ type TPRankingProfile struct {
 
 // Clone method for TPRankingProfile
 func (trp *TPRankingProfile) Clone() *TPRankingProfile {
+	if trp == nil {
+		return nil
+	}
 	clone := &TPRankingProfile{
 		TPid:     trp.TPid,
 		Tenant:   trp.Tenant,
@@ -1546,6 +1646,9 @@ type TPTrendsProfile struct {
 
 // Clone method for TPTrendsProfile
 func (ttp *TPTrendsProfile) Clone() *TPTrendsProfile {
+	if ttp == nil {
+		return nil
+	}
 	clone := &TPTrendsProfile{
 		TPid:            ttp.TPid,
 		Tenant:          ttp.Tenant,
@@ -1593,6 +1696,9 @@ type TPThresholdProfile struct {
 
 // Clone method for TPThresholdProfile
 func (ttp *TPThresholdProfile) Clone() *TPThresholdProfile {
+	if ttp == nil {
+		return nil
+	}
 	clone := &TPThresholdProfile{
 		TPid:     ttp.TPid,
 		Tenant:   ttp.Tenant,
@@ -1604,10 +1710,14 @@ func (ttp *TPThresholdProfile) Clone() *TPThresholdProfile {
 		Weight:   ttp.Weight,
 		Async:    ttp.Async,
 	}
-	clone.FilterIDs = make([]string, len(ttp.FilterIDs))
-	copy(clone.FilterIDs, ttp.FilterIDs)
-	clone.ActionIDs = make([]string, len(ttp.ActionIDs))
-	copy(clone.ActionIDs, ttp.ActionIDs)
+	if ttp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(ttp.FilterIDs))
+		copy(clone.FilterIDs, ttp.FilterIDs)
+	}
+	if ttp.ActionIDs != nil {
+		clone.ActionIDs = make([]string, len(ttp.ActionIDs))
+		copy(clone.ActionIDs, ttp.ActionIDs)
+	}
 	if ttp.ActivationInterval != nil {
 		clone.ActivationInterval = ttp.ActivationInterval.Clone()
 	}
@@ -1630,20 +1740,18 @@ type TPFilterProfile struct {
 
 // Clone method for TPFilterProfile
 func (tfp *TPFilterProfile) Clone() *TPFilterProfile {
+	if tfp == nil {
+		return nil
+	}
 	clone := &TPFilterProfile{
 		TPid:   tfp.TPid,
 		Tenant: tfp.Tenant,
 		ID:     tfp.ID,
 	}
-	if len(tfp.Filters) > 0 {
+	if tfp.Filters != nil {
 		clone.Filters = make([]*TPFilter, len(tfp.Filters))
 		for i, filter := range tfp.Filters {
-			clone.Filters[i] = &TPFilter{
-				Type:    filter.Type,
-				Element: filter.Element,
-				Values:  make([]string, len(filter.Values)),
-			}
-			copy(clone.Filters[i].Values, filter.Values)
+			clone.Filters[i] = filter.Clone()
 		}
 	}
 	if tfp.ActivationInterval != nil {
@@ -1664,6 +1772,22 @@ type TPFilter struct {
 	Values  []string // Filter definition
 }
 
+// Clone method for TPFilter
+func (f *TPFilter) Clone() *TPFilter {
+	if f == nil {
+		return nil
+	}
+	clone := &TPFilter{
+		Type:    f.Type,
+		Element: f.Element,
+	}
+	if f.Values != nil {
+		clone.Values = make([]string, len(f.Values))
+		copy(clone.Values, f.Values)
+	}
+	return clone
+}
+
 // TPRoute is used in TPRouteProfile
 type TPRoute struct {
 	ID              string // RouteID
@@ -1679,6 +1803,9 @@ type TPRoute struct {
 
 // Clone method for TPRoute
 func (r *TPRoute) Clone() *TPRoute {
+	if r == nil {
+		return nil
+	}
 	return &TPRoute{
 		ID:              r.ID,
 		Weight:          r.Weight,
@@ -1707,6 +1834,9 @@ type TPRouteProfile struct {
 
 // Clone method for TPRouteProfile
 func (tprp *TPRouteProfile) Clone() *TPRouteProfile {
+	if tprp == nil {
+		return nil
+	}
 	clone := &TPRouteProfile{
 		TPid:    tprp.TPid,
 		Tenant:  tprp.Tenant,
@@ -1749,6 +1879,9 @@ type TPAttribute struct {
 
 // Clone clones TPAttribute
 func (tpa *TPAttribute) Clone() *TPAttribute {
+	if tpa == nil {
+		return nil
+	}
 	clone := &TPAttribute{
 		Path:  tpa.Path,
 		Type:  tpa.Type,
@@ -1776,6 +1909,9 @@ type TPAttributeProfile struct {
 
 // Clone clones TPAttributeProfile
 func (tpap *TPAttributeProfile) Clone() *TPAttributeProfile {
+	if tpap == nil {
+		return nil
+	}
 	clone := &TPAttributeProfile{
 		TPid:    tpap.TPid,
 		Tenant:  tpap.Tenant,
@@ -1822,6 +1958,9 @@ type TPChargerProfile struct {
 
 // Clone clones TPChargerProfile
 func (tpcp *TPChargerProfile) Clone() *TPChargerProfile {
+	if tpcp == nil {
+		return nil
+	}
 	clone := &TPChargerProfile{
 		TPid:   tpcp.TPid,
 		Tenant: tpcp.Tenant,
@@ -1870,6 +2009,9 @@ type TPDispatcherProfile struct {
 
 // Clone clones TPDispatcherProfile
 func (tpdp *TPDispatcherProfile) Clone() *TPDispatcherProfile {
+	if tpdp == nil {
+		return nil
+	}
 	clone := &TPDispatcherProfile{
 		TPid:     tpdp.TPid,
 		Tenant:   tpdp.Tenant,
@@ -1917,6 +2059,9 @@ type TPDispatcherHostProfile struct {
 
 // Clone clones TPDispatcherHostProfile
 func (tpdhp *TPDispatcherHostProfile) Clone() *TPDispatcherHostProfile {
+	if tpdhp == nil {
+		return nil
+	}
 	clone := &TPDispatcherHostProfile{
 		ID:      tpdhp.ID,
 		Weight:  tpdhp.Weight,
@@ -1943,6 +2088,9 @@ type TPDispatcherHost struct {
 
 // Clone clones TPDispatcherHost
 func (tpdh *TPDispatcherHost) Clone() *TPDispatcherHost {
+	if tpdh == nil {
+		return nil
+	}
 	clone := &TPDispatcherHost{
 		TPid:   tpdh.TPid,
 		Tenant: tpdh.Tenant,
@@ -1976,6 +2124,9 @@ type TPDispatcherHostConn struct {
 
 // Clone clones TPDispatcherHostConn
 func (tpdhc *TPDispatcherHostConn) Clone() *TPDispatcherHostConn {
+	if tpdhc == nil {
+		return nil
+	}
 	return &TPDispatcherHostConn{
 		Address:              tpdhc.Address,
 		Transport:            tpdhc.Transport,

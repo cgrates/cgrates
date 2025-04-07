@@ -104,6 +104,9 @@ type RouteProfile struct {
 
 // Clone method for RouteProfile
 func (rp *RouteProfile) Clone() *RouteProfile {
+	if rp == nil {
+		return nil
+	}
 	clone := &RouteProfile{
 		Tenant:  rp.Tenant,
 		ID:      rp.ID,

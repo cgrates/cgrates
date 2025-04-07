@@ -46,6 +46,9 @@ type TrendProfile struct {
 
 // Clone will clone the TrendProfile so it can be used by scheduler safely
 func (tP *TrendProfile) Clone() (clnTp *TrendProfile) {
+	if tP == nil {
+		return nil
+	}
 	clnTp = &TrendProfile{
 		Tenant:          tP.Tenant,
 		ID:              tP.ID,
@@ -124,6 +127,9 @@ type Trend struct {
 }
 
 func (t *Trend) Clone() (tC *Trend) {
+	if t == nil {
+		return nil
+	}
 	tC = &Trend{
 		Tenant: t.Tenant,
 		ID:     t.ID,

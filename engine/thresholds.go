@@ -54,8 +54,11 @@ type ThresholdProfile struct {
 	lkID string // holds the reference towards guardian lock key
 }
 
-// Clone clones *ThresholdProfile
+// Clone clones *ThresholdProfile (lkID excluded)
 func (tp *ThresholdProfile) Clone() *ThresholdProfile {
+	if tp == nil {
+		return nil
+	}
 	clone := &ThresholdProfile{
 		Tenant:   tp.Tenant,
 		ID:       tp.ID,
@@ -65,7 +68,6 @@ func (tp *ThresholdProfile) Clone() *ThresholdProfile {
 		Blocker:  tp.Blocker,
 		Weight:   tp.Weight,
 		Async:    tp.Async,
-		lkID:     tp.lkID,
 	}
 	if tp.FilterIDs != nil {
 		clone.FilterIDs = make([]string, len(tp.FilterIDs))
@@ -139,14 +141,16 @@ type Threshold struct {
 	dirty *bool // needs save
 }
 
-// Clone clones *Threshold
+// Clone clones *Threshold (lkID excluded)
 func (t *Threshold) Clone() *Threshold {
+	if t == nil {
+		return nil
+	}
 	clone := &Threshold{
 		Tenant: t.Tenant,
 		ID:     t.ID,
 		Hits:   t.Hits,
 		Snooze: t.Snooze,
-		lkID:   t.lkID,
 	}
 	if t.tPrfl != nil {
 		clone.tPrfl = t.tPrfl.Clone()

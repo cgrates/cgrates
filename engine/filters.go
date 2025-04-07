@@ -205,6 +205,9 @@ type Filter struct {
 
 // Clone method for Filter
 func (fltr *Filter) Clone() *Filter {
+	if fltr == nil {
+		return nil
+	}
 	clone := &Filter{
 		Tenant: fltr.Tenant,
 		ID:     fltr.ID,
