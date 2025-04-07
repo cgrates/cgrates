@@ -1014,9 +1014,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.storDbCfg.Type == utils.MetaInternal &&
 		(cfg.storDbCfg.Opts.InternalDBDumpInterval != 0 ||
 			cfg.storDbCfg.Opts.InternalDBRewriteInterval != 0) &&
-		cfg.storDbCfg.Opts.InternalDBWriteLimit <= 0 {
-		return fmt.Errorf("<%s> internalDBWriteLimit field cannot be equal or smaller than 0: <%v>", utils.StorDB,
-			cfg.storDbCfg.Opts.InternalDBWriteLimit)
+		cfg.storDbCfg.Opts.InternalDBFileSizeLimit <= 0 {
+		return fmt.Errorf("<%s> internalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.StorDB,
+			cfg.storDbCfg.Opts.InternalDBFileSizeLimit)
 	}
 	if cfg.storDbCfg.Type == utils.MetaPostgres {
 		if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow,
@@ -1038,9 +1038,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		if (cfg.dataDbCfg.Opts.InternalDBDumpInterval != 0 ||
 			cfg.dataDbCfg.Opts.InternalDBRewriteInterval != 0) &&
-			cfg.dataDbCfg.Opts.InternalDBWriteLimit <= 0 {
-			return fmt.Errorf("<%s> internalDBWriteLimit field cannot be equal or smaller than 0: <%v>", utils.DataDB,
-				cfg.dataDbCfg.Opts.InternalDBWriteLimit)
+			cfg.dataDbCfg.Opts.InternalDBFileSizeLimit <= 0 {
+			return fmt.Errorf("<%s> internalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.DataDB,
+				cfg.dataDbCfg.Opts.InternalDBFileSizeLimit)
 		}
 	}
 	for item, val := range cfg.dataDbCfg.Items {

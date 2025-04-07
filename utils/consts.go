@@ -2191,7 +2191,7 @@ const (
 	InternalDBStartTimeoutCfg    = "internalDBStartTimeout"
 	InternalDBDumpIntervalCfg    = "internalDBDumpInterval"
 	InternalDBRewriteIntervalCfg = "internalDBRewriteInterval"
-	InternalDBWriteLimitCfg      = "internalDBWriteLimit"
+	InternalDBFileSizeLimitCfg   = "internalDBFileSizeLimit"
 	RedisMaxConnsCfg             = "redisMaxConns"
 	RedisConnectAttemptsCfg      = "redisConnectAttempts"
 	RedisSentinelNameCfg         = "redisSentinel"
