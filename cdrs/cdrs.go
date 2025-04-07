@@ -97,11 +97,14 @@ func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGRE
 		utils.MetaCDRs)
 	if err = cdrS.connMgr.Call(ctx, cdrS.cfg.CdrsCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
-		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+		cgrEv, &rplyEv); err != nil {
+		if err.Error() == utils.ErrNotFound.Error() {
+			err = nil
+		}
+		return
+	}
+	if len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
-	} else if err != nil &&
-		err.Error() == utils.ErrNotFound.Error() {
-		err = nil // cancel ErrNotFound
 	}
 	return
 }
