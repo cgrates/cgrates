@@ -390,7 +390,10 @@ func TestLibDispatcherNewDispatcherError(t *testing.T) {
 
 func TestLibDispatcherSingleResultDispatcherDispatch(t *testing.T) {
 	wgDsp := &singleResultDispatcher{sorter: new(noSort)}
-	dataDB := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	dataDB, dErr := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, nil, "", "", &DispatcherRoute{}, "", "", "")
 	expected := "DSP_HOST_NOT_FOUND"
@@ -401,7 +404,10 @@ func TestLibDispatcherSingleResultDispatcherDispatch(t *testing.T) {
 
 func TestLibDispatcherSingleResultDispatcherDispatchRouteID(t *testing.T) {
 	wgDsp := &singleResultDispatcher{sorter: new(roundRobinSort)}
-	dataDB := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	dataDB, dErr := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, nil, "", "routeID", &DispatcherRoute{}, "", "", "")
 	expected := "DSP_HOST_NOT_FOUND"
@@ -412,7 +418,10 @@ func TestLibDispatcherSingleResultDispatcherDispatchRouteID(t *testing.T) {
 
 func TestLibDispatcherBroadcastDispatcherDispatch(t *testing.T) {
 	wgDsp := &broadcastDispatcher{hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
-	dataDB := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	dataDB, dErr := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, nil, "", "", &DispatcherRoute{}, "", "", "")
 	expected := "DSP_HOST_NOT_FOUND"
@@ -423,7 +432,10 @@ func TestLibDispatcherBroadcastDispatcherDispatch(t *testing.T) {
 
 func TestLibDispatcherBroadcastDispatcherDispatchRouteID(t *testing.T) {
 	wgDsp := &broadcastDispatcher{hosts: engine.DispatcherHostProfiles{{ID: "testID"}}}
-	dataDB := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	dataDB, dErr := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, nil, "", "routeID", &DispatcherRoute{}, "", "", "")
 	expected := "DSP_HOST_NOT_FOUND"
@@ -434,7 +446,10 @@ func TestLibDispatcherBroadcastDispatcherDispatchRouteID(t *testing.T) {
 
 func TestLibDispatcherLoadDispatcherDispatch(t *testing.T) {
 	wgDsp := &loadDispatcher{sorter: new(randomSort)}
-	dataDB := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	dataDB, dErr := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, nil, "", "", &DispatcherRoute{}, "", "", "")
 	expected := "DSP_HOST_NOT_FOUND"
@@ -451,7 +466,10 @@ func TestLibDispatcherLoadDispatcherDispatchHostsID(t *testing.T) {
 		},
 		sorter: new(noSort),
 	}
-	dataDB := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	dataDB, dErr := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dM := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	err := wgDsp.Dispatch(dM, nil, nil, "", "routeID", &DispatcherRoute{}, "", "", "")
 	expected := "DSP_HOST_NOT_FOUND"
@@ -971,7 +989,10 @@ func TestLibDispatcherLoadStrategyDispatchCaseCallError(t *testing.T) {
 func TestLibDispatcherDispatchFilterError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	flts := engine.NewFilterS(cfg, nil, nil)
-	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, err := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	var dsp Dispatcher = &singleResultDispatcher{
 		sorter: new(noSort),

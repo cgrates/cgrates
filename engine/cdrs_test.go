@@ -83,12 +83,19 @@ func TestCDRSV1ProcessCDRNoTenant(t *testing.T) {
 	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): chanClnt,
 	})
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 	cdr := &CDRWithAPIOpts{ // no tenant, take the default
@@ -139,12 +146,19 @@ func TestCDRSV1ProcessEventNoTenant(t *testing.T) {
 	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 	args := &ArgV1ProcessEvent{
@@ -195,12 +209,19 @@ func TestCDRSV1V1ProcessExternalCDRNoTenant(t *testing.T) {
 	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 
@@ -256,12 +277,19 @@ func TestArgV1ProcessClone(t *testing.T) {
 func TestCDRV1CountCDRs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultTimezone = "UTC"
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: nil,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 	args := &utils.RPCCDRsFilterWithAPIOpts{
@@ -279,12 +307,19 @@ func TestCDRV1CountCDRs(t *testing.T) {
 func TestV1CountCDRsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultTimezone = "UTC"
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: nil,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 	args := &utils.RPCCDRsFilterWithAPIOpts{
@@ -306,12 +341,19 @@ func TestV1CountCDRsErr(t *testing.T) {
 func TestV1RateCDRs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultTimezone = "UTC"
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: nil,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 	arg := &ArgRateCDRs{
@@ -347,7 +389,10 @@ func TestCDRServerThdsProcessEvent(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ThresholdSConnsCfg): clientconn,
 	})
 	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
@@ -385,7 +430,10 @@ func TestCDRServerStatSProcessEvent(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg): clientconn,
 	})
 	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.StatSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	fltrs := NewFilterS(cfg, connMgr, dm)
 	cdrS := &CDRServer{
@@ -429,7 +477,10 @@ func TestCDRServerEesProcessEvent(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg): clientconn,
 	})
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.EEsConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
@@ -471,7 +522,10 @@ func TestCDRefundEventCost(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements): clientconn,
 	})
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ResponderRefundIncrements)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
@@ -487,7 +541,10 @@ func TestCDRefundEventCost(t *testing.T) {
 func TestGetCostFromRater(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	ccMock := &ccMock{
@@ -549,7 +606,10 @@ func TestRefundEventCost(t *testing.T) {
 	}
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- ccMock
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg): clientconn,
@@ -601,12 +661,19 @@ func TestCDRSV2ProcessEvent(t *testing.T) {
 	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 
@@ -651,12 +718,19 @@ func TestCDRSV2ProcessEventCacheSet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: nil,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 	config.SetCgrConfig(cfg)
@@ -710,12 +784,19 @@ func TestCDRSV1ProcessEvent(t *testing.T) {
 	connMngr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): chanClnt,
 	})
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: connMngr,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 
@@ -760,12 +841,19 @@ func TestCDRSV1ProcessEventCacheSet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrs := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: nil,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 	config.SetCgrConfig(cfg)
@@ -817,7 +905,10 @@ func TestV1ProcessEvent(t *testing.T) {
 	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.CdrsCfg().StoreCdrs = true
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
@@ -949,7 +1040,10 @@ func TestCdrprocessEventsErrLog(t *testing.T) {
 	}
 	Cache.Clear(nil)
 	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
@@ -1173,7 +1267,10 @@ func TestV1ProcessCDR(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg: cfg,
@@ -1216,7 +1313,10 @@ func TestV1ProcessCDRSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg: cfg,
@@ -1265,7 +1365,10 @@ func TestV1StoreSessionCost(t *testing.T) {
 	clientconn <- clMock
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	config.SetCgrConfig(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
@@ -1318,7 +1421,10 @@ func TestV1StoreSessionCostSet(t *testing.T) {
 	clientconn <- clMock
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	config.SetCgrConfig(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
@@ -1386,7 +1492,10 @@ func TestV2StoreSessionCost(t *testing.T) {
 	})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	config.SetCgrConfig(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
@@ -1461,7 +1570,10 @@ func TestV2StoreSessionCostSet(t *testing.T) {
 	})
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	config.SetCgrConfig(cfg)
 	Cache = NewCacheS(cfg, dm, nil)
@@ -1571,7 +1683,10 @@ func TestV1RateCDRSErr(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
@@ -1597,12 +1712,19 @@ func TestV1GetCDRsErr(t *testing.T) {
 	defer func() {
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	idb, err := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
 		connMgr: nil,
-		cdrDb:   NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items),
+		cdrDb:   idb,
 		dm:      dm,
 	}
 	args := utils.RPCCDRsFilterWithAPIOpts{
@@ -1630,7 +1752,10 @@ func TestGetCostFromRater2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
 	cfg.CdrsCfg().SchedulerConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.SchedulerConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMock := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -1680,7 +1805,10 @@ func TestGetCostFromRater2(t *testing.T) {
 func TestGetCostFromRater3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMock := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -1726,7 +1854,10 @@ func TestV2StoreSessionCost2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RateSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	ccMOck := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -1887,7 +2018,10 @@ func TestV1RateCDRSSuccesful(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
@@ -1933,7 +2067,7 @@ func TestV1RateCDRSSuccesful(t *testing.T) {
 func TestCdrServerStoreSMCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
-	db := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
+	db, err := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheSessionCostsTBL: {
 			Limit:     2,
 			TTL:       2 * time.Minute,
@@ -1942,6 +2076,9 @@ func TestCdrServerStoreSMCost(t *testing.T) {
 			Replicate: true,
 		},
 	})
+	if err != nil {
+		t.Error(err)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	smCost := &SMCost{
@@ -1989,7 +2126,7 @@ func TestCdrSRateCDR(t *testing.T) {
 	cfg.CdrsCfg().SMCostRetries = 1
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ChargerSConnsCfg)}
 	cfg.CdrsCfg().RaterConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
-	db := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
+	db, err := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheSessionCostsTBL: {
 			Limit:     2,
 			TTL:       2 * time.Minute,
@@ -1998,6 +2135,9 @@ func TestCdrSRateCDR(t *testing.T) {
 			Replicate: true,
 		},
 	})
+	if err != nil {
+		t.Error(err)
+	}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -2110,7 +2250,10 @@ func TestCdrSRateCDR(t *testing.T) {
 func TestChrgrSProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CdrsCfg().ChargerSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clienConn := make(chan birpc.ClientConnector, 1)
 	clienConn <- &ccMock{
@@ -2193,7 +2336,10 @@ func TestCDRServerListenAndServe(t *testing.T) {
 		connMgr = tmpConnMgr
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
@@ -2216,7 +2362,10 @@ func TestCDRServerListenAndServe2(t *testing.T) {
 		connMgr = tmpConnMgr
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,
@@ -2252,7 +2401,10 @@ func TestStoreSMCostErr(t *testing.T) {
 			Replicate: true,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	db.db.Set(utils.CacheSessionCostsTBL, "CGRID:CGRID", nil, []string{"GRP_1"}, true, utils.NonTransactional)
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
@@ -2349,7 +2501,10 @@ func TestCDRSGetCDRs(t *testing.T) {
 	cfg.CdrsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}
 	cfg.CdrsCfg().StatSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}
 	cfg.CdrsCfg().SMCostRetries = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- clMock(func(serviceMethod string, _, _ any) error {
@@ -2421,7 +2576,10 @@ func TestCDRSGetCDRs(t *testing.T) {
 
 func TestV1RateCDRsSuccesful(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	cdrS := &CDRServer{
 		cgrCfg:  cfg,

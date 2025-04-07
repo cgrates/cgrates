@@ -32,7 +32,10 @@ import (
 func TestHealthAccountAction(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAccountActionPlans("1001", []string{"AP1", "AP2"}, true); err != nil {
@@ -60,7 +63,10 @@ func TestHealthAccountAction(t *testing.T) {
 func TestHealthAccountAction2(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAccountActionPlans("1001", []string{"AP1", "AP2"}, true); err != nil {
@@ -88,7 +94,10 @@ func TestHealthAccountAction2(t *testing.T) {
 func TestHealthAccountAction3(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAccountActionPlans("1002", []string{"AP1"}, true); err != nil {
@@ -123,7 +132,10 @@ func TestHealthAccountAction3(t *testing.T) {
 func TestHealthAccountAction4(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAccountActionPlans("1002", []string{"AP2", "AP1"}, true); err != nil {
@@ -161,7 +173,10 @@ func TestHealthAccountAction4(t *testing.T) {
 func TestHealthReverseDestination(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetReverseDestination("DST1", []string{"1001", "1002"}, utils.NonTransactional); err != nil {
@@ -191,7 +206,10 @@ func TestHealthReverseDestination(t *testing.T) {
 func TestHealthReverseDestination2(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetReverseDestination("DST1", []string{"1001"}, utils.NonTransactional); err != nil {
@@ -221,7 +239,10 @@ func TestHealthReverseDestination2(t *testing.T) {
 func TestHealthReverseDestination3(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetReverseDestination("DST1", []string{"1002"}, utils.NonTransactional); err != nil {
@@ -254,7 +275,10 @@ func TestHealthReverseDestination3(t *testing.T) {
 func TestHealthReverseDestination4(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetReverseDestination("DST1", []string{"1002"}, utils.NonTransactional); err != nil {
@@ -290,7 +314,10 @@ func TestHealthReverseDestination4(t *testing.T) {
 func TestHealthFilterAttributes(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAttributeProfile(&AttributeProfile{
@@ -337,7 +364,10 @@ func TestHealthFilterAttributes(t *testing.T) {
 func TestHealthReverseFilter(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	if err := dm.SetAttributeProfile(&AttributeProfile{
@@ -393,7 +423,10 @@ func TestHealthReverseFilter(t *testing.T) {
 func TestHealthIndexThreshold(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this threshold but without indexing
@@ -504,7 +537,10 @@ func TestHealthIndexThreshold(t *testing.T) {
 func TestHealthIndexCharger(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this charger but without indexing
@@ -623,7 +659,10 @@ func TestHealthIndexCharger(t *testing.T) {
 func TestHealthIndexResources(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this resource but without indexing
@@ -750,7 +789,10 @@ func TestHealthIndexResources(t *testing.T) {
 func TestHealthIndexStats(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this statQueue but without indexing
@@ -899,7 +941,10 @@ func TestHealthIndexStats(t *testing.T) {
 func TestHealthIndexRoutes(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this routes but without indexing
@@ -1076,7 +1121,10 @@ func TestHealthIndexRoutes(t *testing.T) {
 func TestHealthIndexDispatchers(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this dispatcherProfile but without indexing
@@ -1248,7 +1296,10 @@ func TestHealthIndexDispatchers(t *testing.T) {
 func TestIndexHealthMultipleProfiles(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
@@ -1338,7 +1389,10 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 func TestIndexHealthReverseChecking(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	// we will set this multiple chargers but without indexing(same and different indexes)
@@ -1465,7 +1519,10 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	filter1 := &Filter{

@@ -38,7 +38,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var data = engine.NewInternalDB(nil, nil, false, false, config.CgrConfig().DataDbCfg().Items)
+var data, _ = engine.NewInternalDB(nil, nil, false, false, config.CgrConfig().DataDbCfg().Items)
 
 const (
 	ResourcesCSVContent = `

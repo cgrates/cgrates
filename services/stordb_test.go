@@ -36,7 +36,11 @@ func TestStorDBServiceCoverage(t *testing.T) {
 	if err == true {
 		t.Errorf("Expected service to be down")
 	}
-	srv.db = engine.NewInternalDB([]string{"test"}, []string{"test2"}, true, false, cfg.DataDbCfg().Items)
+	var dErr error
+	srv.db, dErr = engine.NewInternalDB([]string{"test"}, []string{"test2"}, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	err = srv.IsRunning()
 	if err == false {
 		t.Errorf("Expected service to be running")

@@ -69,7 +69,10 @@ func TestChargerSetChargerProfiles(t *testing.T) {
 			Weight:       20,
 		},
 	}
-	data := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	data, dErr := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 
 	fltrCP1 := &Filter{
@@ -215,7 +218,10 @@ func TestChargerMatchingChargerProfilesForEvent(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	chargerSrv = NewChargerService(dmCharger,
 		&FilterS{dm: dmCharger, cfg: cfg}, cfg, nil)
@@ -382,7 +388,10 @@ func TestChargerProcessEvent(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	chargerSrv = NewChargerService(dmCharger,
 		&FilterS{dm: dmCharger, cfg: cfg}, cfg, nil)
@@ -502,7 +511,10 @@ func TestChargersmatchingChargerProfilesForEventChargerProfileNotFound(t *testin
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().NestedFields = false
 
-	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	dataDB, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,
@@ -548,7 +560,10 @@ func TestChargersmatchingChargerProfilesForEventDoesNotPass(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 	cfg.ChargerSCfg().NestedFields = false
 
-	dataDB := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	dataDB, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dmCharger := NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	cS := &ChargerService{
 		dm: dmCharger,

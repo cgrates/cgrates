@@ -477,7 +477,10 @@ func TestResponderGetCost(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -533,7 +536,10 @@ func TestResponderGetCostSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -592,7 +598,10 @@ func TestResponderDebit(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -638,7 +647,10 @@ func TestResponderDebit(t *testing.T) {
 func TestGetCostOnRatingPlansErr(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	arg := &utils.GetCostOnRatingPlansArgs{
 		Account:       "account",
@@ -685,7 +697,10 @@ func TestResponderDebitSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -747,7 +762,10 @@ func TestResponderMaxDebit(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -806,7 +824,10 @@ func TestResponderMaxDebitSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -868,7 +889,10 @@ func TestResponderRefundIncrements(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -930,7 +954,10 @@ func TestResponderRefundIncrementsSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -998,7 +1025,10 @@ func TestResponderRefundRounding(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -1060,7 +1090,10 @@ func TestResponderRefundRoundingSet(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -1129,7 +1162,10 @@ func TestGetMaxSessionTimeOnAccountsErr(t *testing.T) {
 	buf := new(bytes.Buffer)
 	log.SetOutput(buf)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	defer func() {
 		utils.Logger.SetLogLevel(0)
@@ -1170,7 +1206,10 @@ func TestGetMaxSessionTime(t *testing.T) {
 		dm = tmpdm
 		config.SetCgrConfig(config.NewDefaultCGRConfig())
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	acc := &Account{
 		ID:            "cgrates.org:acc_id",
@@ -1220,7 +1259,10 @@ func TestResponderShutDown(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	Cache = NewCacheS(cfg, dm, nil)
 	config.SetCgrConfig(cfg)
@@ -1255,7 +1297,10 @@ func TestResponderDebitDebit(t *testing.T) {
 	defer func() {
 		dm = tmpdm
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	rsponder.MaxComputedUsage = map[string]time.Duration{
 		utils.MetaAny:   10 * time.Minute,
@@ -1348,7 +1393,10 @@ func TestResponderGetCostOnRatingPlans(t *testing.T) {
 	defer func() {
 		dm = tmpdm
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 
 	arg := &utils.GetCostOnRatingPlansArgs{

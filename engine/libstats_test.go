@@ -1030,10 +1030,14 @@ func TestStatQueueaddStatEventPassErr(t *testing.T) {
 		},
 	}
 	tnt, evID := "tenant", "eventID"
+	idb, err := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	filters := &FilterS{
 		cfg: config.CgrConfig(),
 		dm: &DataManager{
-			dataDB: NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items),
+			dataDB: idb,
 		},
 		connMgr: &ConnManager{},
 	}
@@ -1048,7 +1052,7 @@ func TestStatQueueaddStatEventPassErr(t *testing.T) {
 	}
 
 	experr := "NOT_FOUND:filter1"
-	err := sq.addStatEvent(tnt, evID, filters, evNm)
+	err = sq.addStatEvent(tnt, evID, filters, evNm)
 
 	if err == nil || err.Error() != experr {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)

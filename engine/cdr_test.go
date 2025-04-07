@@ -1043,7 +1043,10 @@ func TestCompressedCDR(t *testing.T) {
 		t.Errorf("expected %v,received %v\n", utils.ToJSON(cdr.CostDetails), utils.ToJSON(cdr3.CostDetails))
 	}
 
-	idb := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	idb, dErr := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	if err := idb.SetCDR(&cdr, true); err != nil {
 		t.Error(err)
 	}

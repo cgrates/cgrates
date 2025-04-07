@@ -405,7 +405,10 @@ func TestRatingProfileGetRatingPlansPrefixAny(t *testing.T) {
 	defer func() {
 		dm = tmpDm
 	}()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, cfg.CacheCfg(), nil)
 	rpf := &RatingProfile{
 		Id: "*out:cgrates.org:call:1001",

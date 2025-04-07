@@ -164,7 +164,10 @@ func TestErsOnEvictedMetaPostCDRMergeErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, err := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -218,7 +221,10 @@ func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, err := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -280,7 +286,10 @@ func TestErsOnEvictedMetaDumpToFileMergeErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, err := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{
@@ -321,7 +330,10 @@ func TestErsOnEvictedMetaDumpToFileEmptyPath(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, err := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	erS := &ERService{

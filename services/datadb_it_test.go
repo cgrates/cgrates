@@ -802,7 +802,10 @@ func TestDataDBReloadError(t *testing.T) {
 				Remote:    false},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, derr := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if derr != nil {
+		t.Error(derr)
+	}
 	db.dm = engine.NewDataManager(data, nil, nil)
 	err := db.Reload()
 	if err != nil {

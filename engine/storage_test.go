@@ -495,7 +495,7 @@ func BenchmarkMarshallerBincStoreRestore(b *testing.B) {
 }
 
 func TestIDBRemoveIndexesDrv(t *testing.T) {
-	idb := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
+	idb, err := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		"chID": {
 			Limit:     3,
 			TTL:       4 * time.Minute,
@@ -519,6 +519,9 @@ func TestIDBRemoveIndexesDrv(t *testing.T) {
 		},
 	},
 	)
+	if err != nil {
+		t.Fatal(err)
+	}
 	idb.db.Set("chID", "itmID", true, []string{utils.EmptyString}, true, "trID")
 	idb.db.Set("chID2", "itmIDv", true, []string{"grpID"}, true, "trID")
 
@@ -534,12 +537,15 @@ func TestIDBRemoveIndexesDrv(t *testing.T) {
 }
 
 func TestIDBGetDispatcherHostDrv(t *testing.T) {
-	idb := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
+	idb, err := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheDispatcherHosts: {
 			Limit:  2,
 			Remote: true,
 		},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	dsp := &DispatcherHost{
 		Tenant: "cgrates.org",
 	}
@@ -554,12 +560,15 @@ func TestIDBGetDispatcherHostDrv(t *testing.T) {
 }
 
 func TestIDBRemoveDispatcherHostDrv(t *testing.T) {
-	idb := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
+	idb, err := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheDispatcherHosts: {
 			Limit:  2,
 			Remote: true,
 		},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	dsp := &DispatcherHost{
 		Tenant: "cgrates.org",
 	}
@@ -575,12 +584,15 @@ func TestIDBRemoveDispatcherHostDrv(t *testing.T) {
 }
 
 func TestIDBSetStatQueueDrvNil(t *testing.T) {
-	idb := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
+	idb, err := NewInternalDB(nil, nil, true, false, map[string]*config.ItemOpt{
 		utils.CacheStatQueues: {
 			Limit:     4,
 			StaticTTL: true,
 		},
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	ssq := &StoredStatQueue{
 		Tenant: "cgrates",
 		ID:     "id",
@@ -610,7 +622,10 @@ func TestGetTpTableIds(t *testing.T) {
 			StaticTTL: true,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	tpid := "*prf"
 	paginator := &utils.PaginatorWithSearch{
 		Paginator: &utils.Paginator{},
@@ -639,7 +654,10 @@ func TestIDBGetTpIds(t *testing.T) {
 			StaticTTL: true,
 		},
 	}
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	db.db.Set(utils.CacheTBLTPRates, "item_ID1", "value", []string{"grpID"}, true, utils.NonTransactional)
 	db.db.Set(utils.CacheTBLTPRates, "item_ID2", "value", []string{"grpID"}, true, utils.NonTransactional)
 	exp := []string{"item_ID1", "item_ID2"}
@@ -657,7 +675,10 @@ func TestIDBGetTpIds(t *testing.T) {
 
 func TestIDBTpResources(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	storDB := NewInternalDB(nil, nil, false, false, cfg.StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, cfg.StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	// READ
 	if _, err := storDB.GetTPResources("TP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
@@ -726,7 +747,10 @@ func TestIDBTpResources(t *testing.T) {
 
 func TestIDBTpStats(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	storDB := NewInternalDB(nil, nil, false, false, cfg.StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, cfg.StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 
 	// READ
 	if _, err := storDB.GetTPStats("TP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
@@ -792,7 +816,10 @@ func TestIDBTpStats(t *testing.T) {
 
 func TestIDBTPThresholds(t *testing.T) {
 
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	//READ
 	if _, err := storDB.GetTPThresholds("TH1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
@@ -863,7 +890,10 @@ func TestIDBTPThresholds(t *testing.T) {
 }
 
 func TestIDBTPFilters(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	//READ
 	if _, err := storDB.GetTPFilters("TP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
@@ -933,7 +963,10 @@ func TestIDBTPFilters(t *testing.T) {
 }
 
 func TestIDTPRoutes(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	//READ
 	if _, err := storDB.GetTPRoutes("TP1", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
@@ -1019,7 +1052,10 @@ func TestIDTPRoutes(t *testing.T) {
 }
 
 func TestIDBTPAttributes(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	//READ
 	if _, err := storDB.GetTPAttributes("TP_ID", utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
@@ -1103,7 +1139,10 @@ func TestIDBTPAttributes(t *testing.T) {
 }
 
 func TestIDBRemTpData(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	tpAccActions := []*utils.TPAccountActions{
 		{
 			TPid:          "TP1",
@@ -1141,7 +1180,10 @@ func TestIDBRemTpData(t *testing.T) {
 }
 
 func TestIDBTpSharedGroups(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	// READ
 	if _, err := storDB.GetTPSharedGroups("TP1", ""); err != utils.ErrNotFound {
 		t.Error(err)
@@ -1207,7 +1249,10 @@ func TestIDBTpSharedGroups(t *testing.T) {
 }
 
 func TestIDBGetTpIdsEmptyCol(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	tpRoutes := []*utils.TPRouteProfile{
 		{
 			TPid:      "TP1",
@@ -1259,7 +1304,10 @@ func TestIDBGetTpIdsEmptyCol(t *testing.T) {
 }
 
 func TestIDBGetTpTableIds(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	tpAccActions := []*utils.TPAccountActions{
 		{
 			TPid:          "TP1",
@@ -1295,7 +1343,10 @@ func TestIDBGetTpTableIds(t *testing.T) {
 }
 
 func TestIDBGetTPDestinationRatesPaginator(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, true, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, true, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	destRates := []*utils.TPDestinationRate{
 		{
 			TPid: "TEST_TPID",
@@ -1345,7 +1396,10 @@ func TestIDBGetTPDestinationRatesPaginator(t *testing.T) {
 }
 
 func TestIDBGetTPRatingPlans(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, true, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, true, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	ratingPlans := []*utils.TPRatingPlan{
 		{
 			TPid: "TP1",
@@ -1393,7 +1447,10 @@ func TestIDBGetTPRatingPlans(t *testing.T) {
 }
 
 func TestIDBRemoveSMCost(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, true, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, true, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	// READ
 	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
 		t.Error(err)
@@ -1441,7 +1498,10 @@ func TestIDBRemoveSMCost(t *testing.T) {
 }
 
 func TestIDBRemoveSMC(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	// READ
 	if _, err := storDB.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
 		t.Error(err)
@@ -1507,7 +1567,10 @@ func TestIDBRemoveSMC(t *testing.T) {
 }
 
 func TestIDBVersions(t *testing.T) {
-	dataDB := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	dataDB, dErr := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	if _, err := dataDB.GetVersions(utils.Accounts); err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -1573,8 +1636,10 @@ func TestIDBVersions(t *testing.T) {
 }
 
 func TestIDBGetCDR(t *testing.T) {
-	storDB := NewInternalDB([]string{utils.AccountField, utils.CGRID, utils.OriginID, utils.RequestType, utils.Tenant, utils.Category, utils.RunID, utils.Source, utils.ToR, utils.Subject, utils.OriginHost, "ExtraHeader1", "ExtraHeader2"}, []string{"Destination", "Header2"}, false, false, config.CgrConfig().StorDbCfg().Items)
-
+	storDB, err := NewInternalDB([]string{utils.AccountField, utils.CGRID, utils.OriginID, utils.RequestType, utils.Tenant, utils.Category, utils.RunID, utils.Source, utils.ToR, utils.Subject, utils.OriginHost, "ExtraHeader1", "ExtraHeader2"}, []string{"Destination", "Header2"}, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cdr := &CDR{
 		CGRID:       "CGR1",
 		RunID:       utils.MetaRaw,
@@ -1606,7 +1671,10 @@ func TestIDBGetCDR(t *testing.T) {
 }
 
 func TestIDBGeTps(t *testing.T) {
-	storDB := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	storDB, err := NewInternalDB(nil, nil, false, false, config.CgrConfig().StorDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	resources := []*utils.TPResourceProfile{
 		{
 			TPid:              "TP1",
@@ -1794,7 +1862,10 @@ func TestIDBGeTps(t *testing.T) {
 }
 
 func TestIDBGetAllActionPlanDrv(t *testing.T) {
-	dataDB := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	dataDB, dErr := NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	acPln := []struct {
 		key string
 		apl *ActionPlan

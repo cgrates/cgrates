@@ -268,7 +268,10 @@ func TestFreeSwitchAgentReload6(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	shdChan := utils.NewSyncedChan()
-	db := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, err := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dm := engine.NewDataManager(db, cfg.CacheCfg(), nil)
 	chS := engine.NewCacheS(cfg, dm, nil)
 	cacheSrv, err := engine.NewService(chS)

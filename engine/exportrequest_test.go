@@ -563,7 +563,10 @@ func TestExportRequestSetFields(t *testing.T) {
 	}
 	onm.Append(fullPath, val)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), nil)
 	eeR := &ExportRequest{
 		inData: map[string]utils.DataStorage{

@@ -298,7 +298,11 @@ func TestDspResponderShutdownErrorNil(t *testing.T) {
 
 func TestDspResponderGetCostOnRatingPlans(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+	idb, err := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dm := engine.NewDataManager(idb, cfg.CacheCfg(), nil)
 	dsp := NewDispatcherService(dm, cfg, nil, nil)
 	args := &utils.GetCostOnRatingPlansArgs{
 		Account: "1002",
@@ -345,7 +349,9 @@ func TestDspResponderGetCostOnRatingPlans(t *testing.T) {
 
 // func TestDspResponderGetMaxSessionTimeOnAccounts(t *testing.T) {
 // 	cfg := config.NewDefaultCGRConfig()
-// 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items), cfg.CacheCfg(), nil)
+// 	idb, err := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+// 	if err != nil{t.Error(err)}
+// 	dm := engine.NewDataManager(idb, cfg.CacheCfg(), nil)
 // 	dsp := NewDispatcherService(dm, cfg, nil, nil)
 // 	args := &utils.GetMaxSessionTimeOnAccountsArgs{
 // 		Subject:     "1002",

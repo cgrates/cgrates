@@ -30,7 +30,10 @@ import (
 var dataDB3 *engine.DataManager
 
 func TestSetStorage3(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	data, err := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dataDB3 = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dataDB3)
 	engine.Cache.Clear(nil)
