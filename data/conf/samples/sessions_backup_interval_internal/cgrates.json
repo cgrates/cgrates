@@ -17,8 +17,8 @@
             "internalDBDumpPath": "/tmp/internal_db/datadb",
             "internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "500ms",
-            "internalDBWriteLimit": 100, // 100 Mb per file
-            "internalDBRewriteInterval": "1s", // rewriting needed so the files size doesnt multiply since we remove and store again the 500 sessions 1000 times in the test
+            "internalDBFileSizeLimit": "100MB", // 100 Mb per file
+            "internalDBRewriteInterval": "1s",
         }
     },
     
@@ -28,7 +28,7 @@
             "internalDBDumpPath": "/tmp/internal_db/stordb",
             "internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "-1",
-            "internalDBWriteLimit": 1024,
+            "internalDBFileSizeLimit": "1GB",
             "internalDBRewriteInterval": "-2", //rewrite on shutdown
         }
     },

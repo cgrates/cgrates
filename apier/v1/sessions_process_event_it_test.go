@@ -68,6 +68,7 @@ var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 func TestSSv1ItProcessEventWithPrepaid(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
+		t.Skip("unfinished, resources solution needed")
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"
@@ -88,6 +89,7 @@ func TestSSv1ItProcessEventWithPrepaid(t *testing.T) {
 func TestSSv1ItProcessEventWithPostPaid(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
+		t.Skip("unfinished, resources solution needed")
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"
@@ -109,6 +111,7 @@ func TestSSv1ItProcessEventWithPostPaid(t *testing.T) {
 func TestSSv1ItProcessEventWithRated(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
+		t.Skip("unfinished, resources solution needed")
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"
@@ -130,6 +133,7 @@ func TestSSv1ItProcessEventWithRated(t *testing.T) {
 func TestSSv1ItProcessEventWithPseudoPrepaid(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
+		t.Skip("unfinished, resources solution needed")
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"

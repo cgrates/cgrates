@@ -28,7 +28,7 @@
             "internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "-1",
             "internalDBRewriteInterval": "500ms",
-            "internalDBWriteLimit": 1	
+            "internalDBFileSizeLimit": "1MB"
         }
     },
     
@@ -39,7 +39,7 @@
             "internalDBStartTimeout": "1m",
             "internalDBDumpInterval": "-1",
             "internalDBRewriteInterval": "500ms",
-            "internalDBWriteLimit": 1	
+            "internalDBFileSizeLimit": "1MB"
         }
     },
     

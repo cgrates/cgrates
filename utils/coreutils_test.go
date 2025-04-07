@@ -26,9 +26,8 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/google/go-cmp/cmp"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func TestFirstNonEmpty(t *testing.T) {
@@ -2013,6 +2012,81 @@ func TestGetEndOfMonth(t *testing.T) {
 			result := GetEndOfMonth(tt.ref)
 			if !result.Equal(tt.expected) {
 				t.Errorf("GetEndOfMonth(%v) = %v, want %v", tt.ref, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestParseBinarySize(t *testing.T) {
+	type args struct {
+		size string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    int64
+		wantErr bool
+		expErr  error
+	}{
+		{
+			name:    "OK1GB",
+			args:    args{size: "1GB"},
+			want:    int64(1073741824),
+			wantErr: false,
+		},
+		{
+			name:    "OK1MB",
+			args:    args{size: "1MB"},
+			want:    int64(1048576),
+			wantErr: false,
+		},
+		{
+			name:    "OK1KB",
+			args:    args{size: "1KB"},
+			want:    int64(1024),
+			wantErr: false,
+		},
+		{
+			name:    "OK1B",
+			args:    args{size: "1B"},
+			want:    int64(1),
+			wantErr: false,
+		},
+		{
+			name:    "Empty",
+			args:    args{size: ""},
+			want:    int64(0),
+			wantErr: true,
+			expErr:  fmt.Errorf("invalid size format: "),
+		},
+		{
+			name:    "badSize",
+			args:    args{size: "badSize"},
+			want:    int64(0),
+			wantErr: true,
+			expErr:  fmt.Errorf("invalid size format: badSize"),
+		},
+		{
+			name:    "badUnit",
+			args:    args{size: "1badunit"},
+			want:    int64(0),
+			wantErr: true,
+			expErr:  fmt.Errorf("unknown unit: badunit"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ParseBinarySize(tt.args.size)
+			if (err != nil) != tt.wantErr {
+				t.Error(err)
+				return
+			}
+			if tt.expErr != nil && (err == nil || err.Error() != tt.expErr.Error()) {
+				t.Errorf("ParseBinarySize() error = <%v>, expErr <%v>", err, tt.expErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("ParseBinarySize() got <%v>, want <%v>", got, tt.want)
 			}
 		})
 	}

@@ -43,7 +43,10 @@ func TestFilterPassDestinations(t *testing.T) {
 	connMgr := engine.NewConnManager(config.CgrConfig(), map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
 	})
-	data := engine.NewInternalDB(nil, nil, true, false, config.CgrConfig().DataDbCfg().Items)
+	data, err := engine.NewInternalDB(nil, nil, true, nil, config.CgrConfig().DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), connMgr)
 	srv, err := engine.NewService(&v1.APIerSv1{DataManager: dm})
 	if err != nil {
@@ -98,7 +101,10 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier): internalAPIerSv1Chan,
 	})
-	data := engine.NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	data, err := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
 	dmFilterPass := engine.NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := engine.NewFilterS(cfg, connMgr, dmFilterPass)
 	if err := engine.Cache.Set(utils.CacheReverseDestinations, "+49",

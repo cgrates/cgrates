@@ -191,7 +191,10 @@ func TestDMSetDestinationSucces(t *testing.T) {
 	cfg.DataDbCfg().RplFiltered = true
 	cfg.DataDbCfg().RplCache = "cache"
 
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -240,7 +243,10 @@ func TestDMSetAccountSucces(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg): clientConn,
 	})
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 
 	acc := &Account{
 		ID: "id",
@@ -271,7 +277,10 @@ func TestDMSetReverseDestination(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 
-	db := NewInternalDB(nil, nil, true, false, cfg.DataDbCfg().Items)
+	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Error(dErr)
+	}
 	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{

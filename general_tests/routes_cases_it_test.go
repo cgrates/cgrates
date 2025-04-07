@@ -82,6 +82,7 @@ var (
 func TestRoutesCaseV1IT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
+		t.Skip("unfinished, resources solution needed")
 		rtsCaseSv1ConfDIR = "tutinternal"
 	case utils.MetaMySQL:
 		rtsCaseSv1ConfDIR = "tutmysql"

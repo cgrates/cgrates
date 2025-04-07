@@ -322,7 +322,8 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 				}
 			})
 
-			// start engine again
+			ng.PreserveDataDB = true
+			ng.PreserveStorDB = true
 			client, cfg = ng.Run(t)
 			time.Sleep(100 * time.Millisecond)
 			t.Run("ExportDataDB2", func(t *testing.T) {
