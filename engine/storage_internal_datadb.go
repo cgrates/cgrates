@@ -45,20 +45,57 @@ type InternalDB struct {
 }
 
 // NewInternalDB constructs an InternalDB
-func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB, clone bool,
-	itmsCfg map[string]*config.ItemOpt) *InternalDB {
+func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB, fromDBConn bool,
+	itmsCfg map[string]*config.ItemOpt) (iDB *InternalDB, err error) {
 	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
 	for k, cPcfg := range itmsCfg {
 		tcCfg[k] = &ltcache.CacheConfig{
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
-			Clone:     clone,
+			Clone:     fromDBConn, // cloning is mandatory for DataDB and StorDB
 		}
 	}
+	tc, err := internalDBTransCache(isDataDB, fromDBConn, tcCfg)
+	if err != nil {
+		return nil, err
+	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
-	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
-		ltcache.NewTransCache(tcCfg))
+	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms, tc), nil
+}
+
+// internalDBTransCache will create a NewTransCacheWithOfflineCollector for the db, if dump or rewriting is enabled. If not it will create a normal NewTransCache
+func internalDBTransCache(isDataDB, fromDBConn bool,
+	tcCfg map[string]*ltcache.CacheConfig) (tc *ltcache.TransCache, err error) {
+	if !fromDBConn { // if internalDB is not created for DataDB or StorDB
+		return ltcache.NewTransCache(tcCfg), nil
+	}
+	if isDataDB { // check if dumping or rewriting is enabled in configs for DataDB
+		if config.CgrConfig().DataDbCfg().Opts.InternalDBDumpInterval != 0 ||
+			config.CgrConfig().DataDbCfg().Opts.InternalDBRewriteInterval != 0 {
+			return ltcache.NewTransCacheWithOfflineCollector(
+				config.CgrConfig().DataDbCfg().Opts.InternalDBDumpPath,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBBackupPath,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBStartTimeout,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBDumpInterval,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBRewriteInterval,
+				config.CgrConfig().DataDbCfg().Opts.InternalDBWriteLimit, tcCfg,
+				utils.Logger)
+		}
+	} else { // check if dumping or rewriting is enabled in configs for StorDB
+		if config.CgrConfig().StorDbCfg().Opts.InternalDBDumpInterval != 0 ||
+			config.CgrConfig().StorDbCfg().Opts.InternalDBRewriteInterval != 0 {
+			return ltcache.NewTransCacheWithOfflineCollector(
+				config.CgrConfig().StorDbCfg().Opts.InternalDBDumpPath,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBBackupPath,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBStartTimeout,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBDumpInterval,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBRewriteInterval,
+				config.CgrConfig().StorDbCfg().Opts.InternalDBWriteLimit, tcCfg,
+				utils.Logger)
+		}
+	}
+	return ltcache.NewTransCache(tcCfg), nil // create normal TransCache if not
 }
 
 // newInternalDB constructs an InternalDB struct with a recovered or new TransCache
@@ -71,26 +108,6 @@ func newInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB b
 		db:                  db,
 		isDataDB:            isDataDB,
 	}
-}
-
-// Will recover a database from a dump file to memory
-func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
-	itmsCfg map[string]*config.ItemOpt, fldrPath, backupPath string, timeout time.Duration, dumpInterval, rewriteInterval time.Duration, writeLimit int) (*InternalDB, error) {
-	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
-	for k, cPcfg := range itmsCfg {
-		tcCfg[k] = &ltcache.CacheConfig{
-			MaxItems:  cPcfg.Limit,
-			TTL:       cPcfg.TTL,
-			StaticTTL: cPcfg.StaticTTL,
-			Clone:     true,
-		}
-	}
-	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
-	tc, err := ltcache.NewTransCacheWithOfflineCollector(fldrPath, backupPath, timeout, dumpInterval, rewriteInterval, writeLimit, tcCfg, utils.Logger)
-	if err != nil {
-		return nil, err
-	}
-	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms, tc), nil
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
