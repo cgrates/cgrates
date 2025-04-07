@@ -329,7 +329,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher
 	return
 }
 
-// attrSProcessEvent will send the event to StatS if the connection is configured
+// attrSProcessEvent will send the event to AttributeS if the connection is configured.
 func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) (err error) {
 	var rplyEv AttrSProcessEventReply
 	attrArgs := &AttrArgsProcessEvent{
@@ -342,10 +342,14 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 	}
 	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
-		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+		attrArgs, &rplyEv); err != nil {
+		if err.Error() == utils.ErrNotFound.Error() {
+			err = nil // ignore ErrNotFound
+		}
+		return
+	}
+	if len(rplyEv.AlteredFields) != 0 {
 		cgrEv.CGREvent = rplyEv.CGREvent
-	} else if err.Error() == utils.ErrNotFound.Error() {
-		err = nil // cancel ErrNotFound
 	}
 	return
 }
