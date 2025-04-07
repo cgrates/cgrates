@@ -86,6 +86,9 @@ func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 
 // Clone clones *ActionPlan
 func (apl *ActionPlan) Clone() *ActionPlan {
+	if apl == nil {
+		return nil
+	}
 	cln := &ActionPlan{
 		Id:         apl.Id,
 		AccountIDs: apl.AccountIDs.Clone(),

@@ -111,6 +111,9 @@ func (sm StringMap) Copy(o StringMap) {
 }
 
 func (sm StringMap) Clone() StringMap {
+	if sm == nil {
+		return nil
+	}
 	result := make(StringMap, len(sm))
 	result.Copy(sm)
 	return result

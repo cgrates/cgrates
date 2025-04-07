@@ -37,6 +37,9 @@ type ChargerProfile struct {
 
 // Clone method for ChargerProfile
 func (cp *ChargerProfile) Clone() *ChargerProfile {
+	if cp == nil {
+		return nil
+	}
 	clone := &ChargerProfile{
 		Tenant: cp.Tenant,
 		ID:     cp.ID,

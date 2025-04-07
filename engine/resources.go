@@ -48,7 +48,7 @@ type ResourceProfile struct {
 	lkID string // holds the reference towards guardian lock key
 }
 
-// Clone clones *ResourceProfile
+// Clone clones *ResourceProfile (lkID excluded)
 func (rp *ResourceProfile) Clone() *ResourceProfile {
 	if rp == nil {
 		return nil
@@ -62,7 +62,6 @@ func (rp *ResourceProfile) Clone() *ResourceProfile {
 		Blocker:           rp.Blocker,
 		Stored:            rp.Stored,
 		Weight:            rp.Weight,
-		lkID:              rp.lkID,
 	}
 	if rp.FilterIDs != nil {
 		clone.FilterIDs = make([]string, len(rp.FilterIDs))
@@ -73,10 +72,7 @@ func (rp *ResourceProfile) Clone() *ResourceProfile {
 		copy(clone.ThresholdIDs, rp.ThresholdIDs)
 	}
 	if rp.ActivationInterval != nil {
-		clone.ActivationInterval = &utils.ActivationInterval{
-			ActivationTime: rp.ActivationInterval.ActivationTime,
-			ExpiryTime:     rp.ActivationInterval.ExpiryTime,
-		}
+		clone.ActivationInterval = rp.ActivationInterval.Clone()
 	}
 	return clone
 }
@@ -169,7 +165,7 @@ type Resource struct {
 	rPrf   *ResourceProfile // for ordering purposes
 }
 
-// Clone clones *Resource
+// Clone clones *Resource (lkID excluded)
 func (r *Resource) Clone() *Resource {
 	if r == nil {
 		return nil
@@ -177,7 +173,6 @@ func (r *Resource) Clone() *Resource {
 	clone := &Resource{
 		Tenant: r.Tenant,
 		ID:     r.ID,
-		lkID:   r.lkID,
 	}
 	if r.Usages != nil {
 		clone.Usages = make(map[string]*ResourceUsage, len(r.Usages))
@@ -205,6 +200,11 @@ func (r *Resource) Clone() *Resource {
 		clone.rPrf = r.rPrf.Clone()
 	}
 	return clone
+}
+
+// CacheClone returns a clone of ActionPlan used by ltcache CacheCloner
+func (apl *Resource) CacheClone() any {
+	return apl.Clone()
 }
 
 // resourceLockKey returns the ID used to lock a resource with guardian

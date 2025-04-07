@@ -114,6 +114,9 @@ type DispatcherProfile struct {
 
 // Clone method for DispatcherProfile
 func (dp *DispatcherProfile) Clone() *DispatcherProfile {
+	if dp == nil {
+		return nil
+	}
 	clone := &DispatcherProfile{
 		Tenant:   dp.Tenant,
 		ID:       dp.ID,
@@ -230,6 +233,9 @@ func (dHPrflIDs DispatcherHostIDs) Shuffle() {
 }
 
 func (dHPrflIDs DispatcherHostIDs) Clone() (cln DispatcherHostIDs) {
+	if dHPrflIDs == nil {
+		return
+	}
 	cln = make(DispatcherHostIDs, len(dHPrflIDs))
 	copy(cln, dHPrflIDs)
 	return
