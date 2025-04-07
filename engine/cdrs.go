@@ -367,7 +367,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREvent) (cgrEvs []*util
 	return
 }
 
-// attrSProcessEvent will send the event to StatS if the connection is configured
+// attrSProcessEvent will send the event to AttributeS if the connection is configured.
 func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var rplyEv AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
@@ -380,14 +380,17 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 		utils.MetaCDRs)
 	if err = cdrS.connMgr.Call(context.TODO(), cdrS.cgrCfg.CdrsCfg().AttributeSConns,
 		utils.AttributeSv1ProcessEvent,
-		cgrEv, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+		cgrEv, &rplyEv); err != nil {
+		if err.Error() == utils.ErrNotFound.Error() {
+			err = nil // ignore ErrNotFound
+		}
+		return
+	}
+	if len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
 		if !has && utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]) == utils.MetaCDRs {
 			delete(cgrEv.APIOpts, utils.OptsContext)
 		}
-	} else if err != nil &&
-		err.Error() == utils.ErrNotFound.Error() {
-		err = nil // cancel ErrNotFound
 	}
 	return
 }
