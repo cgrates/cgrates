@@ -145,7 +145,7 @@ const CGRATES_CFG_JSON = `
 		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
 		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
 		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
-		"internalDBWriteLimit": 100,		// maximum size in MiB that can be written in a singular dump file
+		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",			// the name of sentinel when used
@@ -182,7 +182,7 @@ const CGRATES_CFG_JSON = `
 		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
 		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
 		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
-		"internalDBWriteLimit": 100,		// maximum size in MiB that can be written in a singular dump file
+		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
 		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
 		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
 		"sqlLogLevel": 3,	        // sql logger verbosity: 1=Silent, 2=Error, 3=Warn, 4=Info

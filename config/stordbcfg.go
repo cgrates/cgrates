@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 type StorDBOpts struct {
@@ -33,7 +34,7 @@ type StorDBOpts struct {
 	InternalDBStartTimeout    time.Duration // Transcache recover from dump files timeout duration
 	InternalDBDumpInterval    time.Duration // Regurarly dump database to file
 	InternalDBRewriteInterval time.Duration // Regurarly rewrite dump files
-	InternalDBWriteLimit      int           // maximum size in MiB that can be written in a singular dump file
+	InternalDBFileSizeLimit   int64         // maximum size that can be written in a singular dump file
 	SQLMaxOpenConns           int
 	SQLMaxIdleConns           int
 	SQLConnMaxLifetime        time.Duration
@@ -92,8 +93,10 @@ func (dbOpts *StorDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 			return err
 		}
 	}
-	if jsnCfg.InternalDBWriteLimit != nil {
-		dbOpts.InternalDBWriteLimit = *jsnCfg.InternalDBWriteLimit
+	if jsnCfg.InternalDBFileSizeLimit != nil {
+		if dbOpts.InternalDBFileSizeLimit, err = utils.ParseBinarySize(*jsnCfg.InternalDBFileSizeLimit); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.SQLMaxOpenConns != nil {
 		dbOpts.SQLMaxOpenConns = *jsnCfg.SQLMaxOpenConns
@@ -225,7 +228,7 @@ func (dbOpts *StorDBOpts) Clone() *StorDBOpts {
 		InternalDBStartTimeout:    dbOpts.InternalDBStartTimeout,
 		InternalDBDumpInterval:    dbOpts.InternalDBDumpInterval,
 		InternalDBRewriteInterval: dbOpts.InternalDBRewriteInterval,
-		InternalDBWriteLimit:      dbOpts.InternalDBWriteLimit,
+		InternalDBFileSizeLimit:   dbOpts.InternalDBFileSizeLimit,
 		SQLMaxOpenConns:           dbOpts.SQLMaxOpenConns,
 		SQLMaxIdleConns:           dbOpts.SQLMaxIdleConns,
 		SQLConnMaxLifetime:        dbOpts.SQLConnMaxLifetime,
@@ -287,7 +290,7 @@ func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.InternalDBStartTimeoutCfg:    dbcfg.Opts.InternalDBStartTimeout,
 		utils.InternalDBDumpIntervalCfg:    dbcfg.Opts.InternalDBDumpInterval,
 		utils.InternalDBRewriteIntervalCfg: dbcfg.Opts.InternalDBRewriteInterval,
-		utils.InternalDBWriteLimitCfg:      dbcfg.Opts.InternalDBWriteLimit,
+		utils.InternalDBFileSizeLimitCfg:   dbcfg.Opts.InternalDBFileSizeLimit,
 		utils.SQLMaxOpenConnsCfg:           dbcfg.Opts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:           dbcfg.Opts.SQLMaxIdleConns,
 		utils.SQLConnMaxLifetime:           dbcfg.Opts.SQLConnMaxLifetime.String(),
@@ -338,4 +341,19 @@ func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 		mp[utils.DataDbPortCfg] = dbPort
 	}
 	return
+}
+
+// ToTransCacheOpts returns to ltcache.TransCacheOpts from StorDBOpts
+func (s *StorDBOpts) ToTransCacheOpts() (tco *ltcache.TransCacheOpts) {
+	if s == nil {
+		return
+	}
+	return &ltcache.TransCacheOpts{
+		DumpPath:        s.InternalDBDumpPath,
+		BackupPath:      s.InternalDBBackupPath,
+		StartTimeout:    s.InternalDBStartTimeout,
+		DumpInterval:    s.InternalDBDumpInterval,
+		RewriteInterval: s.InternalDBRewriteInterval,
+		FileSizeLimit:   s.InternalDBFileSizeLimit,
+	}
 }

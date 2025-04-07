@@ -45,52 +45,35 @@ type InternalDB struct {
 }
 
 // NewInternalDB constructs an InternalDB
-func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB, clone bool,
-	itmsCfg map[string]*config.ItemOpt) *InternalDB {
+func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
+	transCacheOpts *ltcache.TransCacheOpts, itmsCfg map[string]*config.ItemOpt) (iDB *InternalDB,
+	err error) {
 	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
 	for k, cPcfg := range itmsCfg {
 		tcCfg[k] = &ltcache.CacheConfig{
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
-			Clone:     clone,
+			Clone:     true, // cloning is mandatory for databases
 		}
 	}
+	if transCacheOpts != nil && transCacheOpts.DumpInterval == 0 && transCacheOpts.RewriteInterval == 0 {
+		transCacheOpts = nil // create TransCache without offline collector if neither
+		// DumpInterval or RewriteInterval are provided
+	}
+	tc, err := ltcache.NewTransCacheWithOfflineCollector(transCacheOpts, tcCfg, utils.Logger)
+	if err != nil {
+		return nil, err
+	}
 	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
-	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms,
-		ltcache.NewTransCache(tcCfg))
-}
-
-// newInternalDB constructs an InternalDB struct with a recovered or new TransCache
-func newInternalDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool, ms Marshaler, db *ltcache.TransCache) *InternalDB {
 	return &InternalDB{
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
 		ms:                  ms,
-		db:                  db,
+		db:                  tc,
 		isDataDB:            isDataDB,
-	}
-}
-
-// Will recover a database from a dump file to memory
-func RecoverDB(stringIndexedFields, prefixIndexedFields []string, isDataDB bool,
-	itmsCfg map[string]*config.ItemOpt, fldrPath, backupPath string, timeout time.Duration, dumpInterval, rewriteInterval time.Duration, writeLimit int) (*InternalDB, error) {
-	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
-	for k, cPcfg := range itmsCfg {
-		tcCfg[k] = &ltcache.CacheConfig{
-			MaxItems:  cPcfg.Limit,
-			TTL:       cPcfg.TTL,
-			StaticTTL: cPcfg.StaticTTL,
-			Clone:     true,
-		}
-	}
-	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
-	tc, err := ltcache.NewTransCacheWithOfflineCollector(fldrPath, backupPath, timeout, dumpInterval, rewriteInterval, writeLimit, tcCfg, utils.Logger)
-	if err != nil {
-		return nil, err
-	}
-	return newInternalDB(stringIndexedFields, prefixIndexedFields, isDataDB, ms, tc), nil
+	}, nil
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
