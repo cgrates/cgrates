@@ -305,3 +305,175 @@ func TestDMSetTimingInvalidTime(t *testing.T) {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
 	}
 }
+
+func TestDestinationClone(t *testing.T) {
+	t.Run("nil destination", func(t *testing.T) {
+		var d *Destination
+		clone := d.Clone()
+		if clone != nil {
+			t.Errorf("Expected nil clone for nil destination, got %v", clone)
+		}
+	})
+
+	t.Run("empty destination", func(t *testing.T) {
+		d := &Destination{}
+		clone := d.Clone()
+
+		if clone == nil {
+			t.Fatal("Clone should not be nil")
+		}
+
+		if clone == d {
+			t.Error("Clone should be a different instance")
+		}
+
+		if clone.Id != d.Id {
+			t.Errorf("Expected empty Id, got %q", clone.Id)
+		}
+
+		if clone.Prefixes != nil {
+			t.Errorf("Expected nil Prefixes, got %v", clone.Prefixes)
+		}
+	})
+
+	t.Run("destination with data", func(t *testing.T) {
+		d := &Destination{
+			Id:       "ID1",
+			Prefixes: []string{"prefix1", "prefix2", "prefix3"},
+		}
+
+		clone := d.Clone()
+
+		if clone == nil {
+			t.Fatal("Clone should not be nil")
+		}
+
+		if clone == d {
+			t.Error("Clone should be a different instance")
+		}
+
+		if clone.Id != d.Id {
+			t.Errorf("Expected Id %q, got %q", d.Id, clone.Id)
+		}
+
+		if !reflect.DeepEqual(clone.Prefixes, d.Prefixes) {
+			t.Errorf("Expected Prefixes %v, got %v", d.Prefixes, clone.Prefixes)
+		}
+
+		d.Id = "changed-id"
+		d.Prefixes[0] = "changed-prefix"
+
+		if clone.Id == d.Id {
+			t.Error("Changing original Id should not affect clone")
+		}
+
+		if clone.Prefixes[0] == d.Prefixes[0] {
+			t.Error("Changing original Prefixes should not affect clone")
+		}
+	})
+
+	t.Run("destination with empty prefixes", func(t *testing.T) {
+		d := &Destination{
+			Id:       "dest-456",
+			Prefixes: []string{},
+		}
+
+		clone := d.Clone()
+
+		if clone == nil {
+			t.Fatal("Clone should not be nil")
+		}
+
+		if clone.Prefixes == nil {
+			t.Error("Clone should have an empty slice, not nil")
+		}
+
+		if len(clone.Prefixes) != 0 {
+			t.Errorf("Expected empty Prefixes slice, got %v", clone.Prefixes)
+		}
+	})
+}
+
+func TestDestinationCacheClone(t *testing.T) {
+	tests := []struct {
+		name  string
+		input *Destination
+	}{
+		{
+			name:  "nil destination",
+			input: nil,
+		},
+		{
+			name:  "empty destination",
+			input: &Destination{},
+		},
+		{
+			name: "destination with data",
+			input: &Destination{
+				Id:       "ID1",
+				Prefixes: []string{"prefix1", "prefix2", "prefix3"},
+			},
+		},
+		{
+			name: "destination with empty prefixes",
+			input: &Destination{
+				Id:       "dest-456",
+				Prefixes: []string{},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cloneAny := tt.input.CacheClone()
+
+			if tt.input == nil {
+				if cloneAny != nil {
+					clone, ok := cloneAny.(*Destination)
+					if !ok {
+						t.Fatalf("CacheClone returned %T, expected *Destination", cloneAny)
+					}
+					if clone != nil {
+						t.Errorf("Expected nil clone for nil destination, got %v", clone)
+					}
+				}
+				return
+			}
+
+			if cloneAny == nil {
+				t.Fatal("CacheClone returned nil for non-nil destination")
+			}
+
+			clone, ok := cloneAny.(*Destination)
+			if !ok {
+				t.Fatalf("CacheClone returned %T, expected *Destination", cloneAny)
+			}
+
+			if clone == tt.input {
+				t.Error("Clone should be a different instance")
+			}
+
+			if !reflect.DeepEqual(clone, tt.input) {
+				t.Errorf("Clone doesn't match original value.\nGot: %+v\nExpected: %+v", clone, tt.input)
+			}
+
+			if tt.input.Id != "" {
+				originalId := tt.input.Id
+				tt.input.Id = "modified-id"
+
+				if clone.Id != originalId {
+					t.Error("Modifying original Id should not affect clone")
+				}
+			}
+
+			if tt.input.Prefixes != nil && len(tt.input.Prefixes) > 0 {
+				originalPrefix := tt.input.Prefixes[0]
+				tt.input.Prefixes[0] = "modified-prefix"
+
+				if clone.Prefixes[0] != originalPrefix {
+					t.Error("Modifying original Prefixes should not affect clone")
+				}
+			}
+		})
+	}
+}
