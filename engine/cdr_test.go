@@ -1053,3 +1053,130 @@ func TestCompressedCDR(t *testing.T) {
 		t.Errorf("expected %v,\nreceived %v\n", utils.ToJSON(cdr), utils.ToJSON(cdrs[0]))
 	}
 }
+
+func TestCDRCacheClone(t *testing.T) {
+	cc := &CallCost{}
+
+	tests := []struct {
+		name  string
+		input *CDR
+	}{
+		{
+			name:  "nil CDR",
+			input: nil,
+		},
+		{
+			name:  "empty CDR",
+			input: &CDR{},
+		},
+		{
+			name: "fully populated CDR",
+			input: &CDR{
+				CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				OrderID:     123,
+				ToR:         utils.MetaVoice,
+				OriginID:    "dsafdsaf",
+				OriginHost:  "192.168.1.1",
+				Source:      utils.UnitTest,
+				RequestType: utils.MetaRated,
+				Tenant:      "cgrates.org",
+				Category:    "call",
+				Account:     "1002",
+				Subject:     "1001",
+				Destination: "+4986517174963",
+				SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+				AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				RunID:       utils.MetaDefault,
+				Usage:       10 * time.Second,
+				ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+				Cost:        1.01,
+				CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault),
+			},
+		},
+		{
+			name: "CDR with nil maps",
+			input: &CDR{
+				CGRID:       "cgrid1",
+				OrderID:     456,
+				ToR:         utils.MetaVoice,
+				OriginID:    "origin1",
+				ExtraFields: nil,
+				CostDetails: nil,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cloneAny := tt.input.CacheClone()
+
+			if tt.input == nil {
+				if cloneAny != nil {
+					clone, ok := cloneAny.(*CDR)
+					if !ok {
+						t.Fatalf("CacheClone returned %T, expected *CDR", cloneAny)
+					}
+					if clone != nil {
+						t.Errorf("Expected nil clone for nil CDR, got %v", clone)
+					}
+				}
+				return
+			}
+
+			if cloneAny == nil {
+				t.Fatal("CacheClone returned nil for non-nil CDR")
+			}
+
+			clone, ok := cloneAny.(*CDR)
+			if !ok {
+				t.Fatalf("CacheClone returned %T, expected *CDR", cloneAny)
+			}
+
+			if clone == tt.input {
+				t.Error("Clone should be a different instance")
+			}
+
+			if !reflect.DeepEqual(clone, tt.input) {
+				t.Errorf("Clone doesn't match original value.\nGot: %+v\nExpected: %+v", clone, tt.input)
+			}
+
+			if tt.input.ExtraFields != nil {
+				originalField := ""
+				var fieldKey string
+
+				for k, v := range tt.input.ExtraFields {
+					fieldKey = k
+					originalField = v
+					break
+				}
+
+				if fieldKey != "" {
+					tt.input.ExtraFields[fieldKey] = "modified value"
+
+					if clone.ExtraFields[fieldKey] != originalField {
+						t.Errorf("Modifying original ExtraFields should not affect clone. Expected %q, got %q",
+							originalField, clone.ExtraFields[fieldKey])
+					}
+				}
+			}
+
+			if tt.input.CGRID != "" {
+				originalCGRID := tt.input.CGRID
+				tt.input.CGRID = "modified cgrid"
+
+				if clone.CGRID != originalCGRID {
+					t.Error("Modifying original CGRID should not affect clone")
+				}
+			}
+
+			if tt.input.CostDetails != nil {
+				originalCostSource := tt.input.CostSource
+				tt.input.CostSource = "modified source"
+
+				if clone.CostSource != originalCostSource {
+					t.Error("Modifying original CostSource should not affect clone")
+				}
+			}
+		})
+	}
+}
