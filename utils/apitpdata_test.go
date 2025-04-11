@@ -1194,3 +1194,261 @@ func TestIsTimeFormatedFalse(t *testing.T) {
 		t.Error("expected invalid time format, but returned true")
 	}
 }
+
+func TestTPDestinationClone(t *testing.T) {
+	tests := []struct {
+		name string
+		tpd  *TPDestination
+		want *TPDestination
+	}{
+		{
+			name: "nil instance",
+			tpd:  nil,
+			want: nil,
+		},
+		{
+			name: "empty prefixes",
+			tpd: &TPDestination{
+				TPid:     "TP1",
+				ID:       "DEST1",
+				Prefixes: nil,
+			},
+			want: &TPDestination{
+				TPid:     "TP1",
+				ID:       "DEST1",
+				Prefixes: nil,
+			},
+		},
+		{
+			name: "with prefixes",
+			tpd: &TPDestination{
+				TPid:     "TP1",
+				ID:       "DEST1",
+				Prefixes: []string{"+49", "+1"},
+			},
+			want: &TPDestination{
+				TPid:     "TP1",
+				ID:       "DEST1",
+				Prefixes: []string{"+49", "+1"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clone := tt.tpd.Clone()
+			if !reflect.DeepEqual(clone, tt.want) {
+				t.Errorf("TPDestination.Clone() = %v, want %v", clone, tt.want)
+			}
+
+			if tt.tpd != nil && tt.tpd.Prefixes != nil {
+				if &tt.tpd.Prefixes[0] == &clone.Prefixes[0] {
+					t.Errorf("TPDestination.Clone() did not perform a deep copy of Prefixes")
+				}
+
+				originalPrefixes := make([]string, len(tt.tpd.Prefixes))
+				copy(originalPrefixes, tt.tpd.Prefixes)
+				tt.tpd.Prefixes[0] = "modified"
+
+				if !reflect.DeepEqual(clone.Prefixes, originalPrefixes) {
+					t.Errorf("Clone's Prefixes changed when original was modified; clone: %v, original: %v",
+						clone.Prefixes, originalPrefixes)
+				}
+			}
+		})
+	}
+}
+
+func TestTPRateRALsClone(t *testing.T) {
+	tests := []struct {
+		name string
+		tpr  *TPRateRALs
+		want *TPRateRALs
+	}{
+		{
+			name: "nil instance",
+			tpr:  nil,
+			want: nil,
+		},
+		{
+			name: "empty rate slots",
+			tpr: &TPRateRALs{
+				TPid:      "TP1",
+				ID:        "RATE1",
+				RateSlots: nil,
+			},
+			want: &TPRateRALs{
+				TPid:      "TP1",
+				ID:        "RATE1",
+				RateSlots: nil,
+			},
+		},
+		{
+			name: "with rate slots",
+			tpr: &TPRateRALs{
+				TPid: "TP1",
+				ID:   "RATE1",
+				RateSlots: []*RateSlot{
+					{
+						ConnectFee:            0.5,
+						Rate:                  0.01,
+						RateUnit:              "60s",
+						RateIncrement:         "1s",
+						GroupIntervalStart:    "0s",
+						rateUnitDur:           60 * time.Second,
+						rateIncrementDur:      time.Second,
+						groupIntervalStartDur: 0,
+						tag:                   "test",
+					},
+				},
+			},
+			want: &TPRateRALs{
+				TPid: "TP1",
+				ID:   "RATE1",
+				RateSlots: []*RateSlot{
+					{
+						ConnectFee:            0.5,
+						Rate:                  0.01,
+						RateUnit:              "60s",
+						RateIncrement:         "1s",
+						GroupIntervalStart:    "0s",
+						rateUnitDur:           60 * time.Second,
+						rateIncrementDur:      time.Second,
+						groupIntervalStartDur: 0,
+						tag:                   "test",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clone := tt.tpr.Clone()
+			if !reflect.DeepEqual(clone, tt.want) {
+				t.Errorf("TPRateRALs.Clone() = %v, want %v", clone, tt.want)
+			}
+
+			if tt.tpr != nil && tt.tpr.RateSlots != nil && len(tt.tpr.RateSlots) > 0 {
+				if &tt.tpr.RateSlots[0] == &clone.RateSlots[0] {
+					t.Errorf("TPRateRALs.Clone() did not perform a deep copy of RateSlots")
+				}
+
+				originalRate := tt.tpr.RateSlots[0].Rate
+				originalConnectFee := tt.tpr.RateSlots[0].ConnectFee
+
+				tt.tpr.RateSlots[0].Rate = 999.99
+				tt.tpr.RateSlots[0].ConnectFee = 888.88
+
+				if clone.RateSlots[0].Rate != originalRate || clone.RateSlots[0].ConnectFee != originalConnectFee {
+					t.Errorf("Clone's RateSlots changed when original was modified; clone: %+v, original rates: %v, %v",
+						clone.RateSlots[0], originalRate, originalConnectFee)
+				}
+			}
+		})
+	}
+}
+
+func TestTPRatingProfileClone(t *testing.T) {
+	tests := []struct {
+		name string
+		rpf  *TPRatingProfile
+		want *TPRatingProfile
+	}{
+		{
+			name: "nil instance",
+			rpf:  nil,
+			want: nil,
+		},
+		{
+			name: "empty rating plan activations",
+			rpf: &TPRatingProfile{
+				TPid:                  "TP1",
+				LoadId:                "LOAD1",
+				Tenant:                "cgrates.org",
+				Category:              "call",
+				Subject:               "1001",
+				RatingPlanActivations: nil,
+			},
+			want: &TPRatingProfile{
+				TPid:                  "TP1",
+				LoadId:                "LOAD1",
+				Tenant:                "cgrates.org",
+				Category:              "call",
+				Subject:               "1001",
+				RatingPlanActivations: nil,
+			},
+		},
+		{
+			name: "with rating plan activations",
+			rpf: &TPRatingProfile{
+				TPid:     "TP1",
+				LoadId:   "LOAD1",
+				Tenant:   "cgrates.org",
+				Category: "call",
+				Subject:  "1001",
+				RatingPlanActivations: []*TPRatingActivation{
+					{
+						ActivationTime:   "2022-01-01T00:00:00Z",
+						RatingPlanId:     "RP_1001",
+						FallbackSubjects: "1002;1003",
+					},
+					{
+						ActivationTime:   "2022-02-01T00:00:00Z",
+						RatingPlanId:     "RP_1002",
+						FallbackSubjects: "1004;1005",
+					},
+				},
+			},
+			want: &TPRatingProfile{
+				TPid:     "TP1",
+				LoadId:   "LOAD1",
+				Tenant:   "cgrates.org",
+				Category: "call",
+				Subject:  "1001",
+				RatingPlanActivations: []*TPRatingActivation{
+					{
+						ActivationTime:   "2022-01-01T00:00:00Z",
+						RatingPlanId:     "RP_1001",
+						FallbackSubjects: "1002;1003",
+					},
+					{
+						ActivationTime:   "2022-02-01T00:00:00Z",
+						RatingPlanId:     "RP_1002",
+						FallbackSubjects: "1004;1005",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clone := tt.rpf.Clone()
+			if !reflect.DeepEqual(clone, tt.want) {
+				t.Errorf("TPRatingProfile.Clone() = %v, want %v", clone, tt.want)
+			}
+
+			if tt.rpf != nil && tt.rpf.RatingPlanActivations != nil && len(tt.rpf.RatingPlanActivations) > 0 {
+				if &tt.rpf.RatingPlanActivations[0] == &clone.RatingPlanActivations[0] {
+					t.Errorf("TPRatingProfile.Clone() did not perform a deep copy of RatingPlanActivations")
+				}
+
+				originalActivationTime := tt.rpf.RatingPlanActivations[0].ActivationTime
+				originalRatingPlanId := tt.rpf.RatingPlanActivations[0].RatingPlanId
+				originalFallbackSubjects := tt.rpf.RatingPlanActivations[0].FallbackSubjects
+
+				tt.rpf.RatingPlanActivations[0].ActivationTime = "2030-01-01T00:00:00Z"
+				tt.rpf.RatingPlanActivations[0].RatingPlanId = "MODIFIED_RP"
+				tt.rpf.RatingPlanActivations[0].FallbackSubjects = "modified"
+
+				if clone.RatingPlanActivations[0].ActivationTime != originalActivationTime ||
+					clone.RatingPlanActivations[0].RatingPlanId != originalRatingPlanId ||
+					clone.RatingPlanActivations[0].FallbackSubjects != originalFallbackSubjects {
+					t.Errorf("Clone's RatingPlanActivations changed when original was modified; clone: %+v, original values: %v, %v, %v",
+						clone.RatingPlanActivations[0], originalActivationTime, originalRatingPlanId, originalFallbackSubjects)
+				}
+			}
+		})
+	}
+}
