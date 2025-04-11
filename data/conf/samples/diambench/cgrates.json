@@ -27,7 +27,9 @@
 	"cdrs_conns": ["*internal"]
 },
 "chargers": {
-	"enabled": true
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+	"string_indexed_fields": ["*req.Account"]
 },
 "rals": {
 	"enabled": true
@@ -36,7 +38,8 @@
 	"enabled": true,
 	"attributes_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
-	"rals_conns": ["*internal"]
+	"rals_conns": ["*internal"],
+	"store_cdrs": false
 },
 "diameter_agent": {
 	"enabled": true,

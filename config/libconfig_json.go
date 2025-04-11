@@ -158,6 +158,8 @@ type DbJsonCfg struct {
 	Replication_conns     *[]string
 	Replication_filtered  *bool
 	Replication_cache     *string
+	RplFailedDir          *string `json:"replication_failed_dir"`
+	RplInterval           *string `json:"replication_interval"`
 	Items                 *map[string]*ItemOptJson
 	Opts                  *DBOptsJson
 }

@@ -1494,6 +1494,62 @@ func (apierSv1 *APIerSv1) ReplayFailedPosts(ctx *context.Context, args ReplayFai
 	return nil
 }
 
+// ReplayFailedReplicationsArgs contains args for replaying failed replications.
+type ReplayFailedReplicationsArgs struct {
+	SourcePath string // path for events to be replayed
+	FailedPath string // path for events that failed to replay, *none to discard, defaults to SourcePath if empty
+}
+
+// ReplayFailedReplications will repost failed requests found in the SourcePath.
+func (a *APIerSv1) ReplayFailedReplications(ctx *context.Context, args ReplayFailedReplicationsArgs, reply *string) error {
+
+	// Set default directories if not provided.
+	if args.SourcePath == "" {
+		args.SourcePath = a.Config.DataDbCfg().RplFailedDir
+	}
+	if args.SourcePath == "" {
+		return utils.NewErrServerError(
+			errors.New("no source directory specified: both SourcePath and replication_failed_dir configuration are empty"),
+		)
+	}
+	if args.FailedPath == "" {
+		args.FailedPath = args.SourcePath
+	}
+
+	if err := filepath.WalkDir(args.SourcePath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<ReplayFailedReplications> failed to access path %s: %v", path, err))
+			return nil // skip paths that cause an error
+		}
+		if d.IsDir() {
+			return nil // skip directories
+		}
+
+		task, err := engine.NewReplicationTaskFromFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to init ExportEvents from %s: %v", path, err)
+		}
+
+		// Determine the failover path.
+		failoverPath := utils.MetaNone
+		if args.FailedPath != utils.MetaNone {
+			failoverPath = filepath.Join(args.FailedPath, d.Name())
+		}
+
+		if err := task.Execute(a.ConnMgr); err != nil && failoverPath != utils.MetaNone {
+			// Write the events that failed to be replayed to the failover directory
+			if err = task.WriteToFile(failoverPath); err != nil {
+				return fmt.Errorf("failed to write the events that failed to be replayed to %s: %v", path, err)
+			}
+		}
+		return nil
+	}); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
 func (apierSv1 *APIerSv1) GetLoadIDs(ctx *context.Context, args *string, reply *map[string]int64) (err error) {
 	var loadIDs map[string]int64
 	if loadIDs, err = apierSv1.DataManager.GetItemLoadIDs(*args, false); err != nil {

@@ -212,8 +212,8 @@ func TestDMSetDestinationSucces(t *testing.T) {
 		Id:       "dest21",
 		Prefixes: []string{},
 	}
-	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMngr)
 
 	if err := dm.SetDestination(dest, utils.NonTransactional); err != nil {
 		t.Error(err)

@@ -195,8 +195,8 @@ func TestDmGetFilterRemote(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	exp := &Filter{
 		Tenant: "cgrates.org",
@@ -611,9 +611,9 @@ func TestDMSetAccount(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
+	config.SetCgrConfig(cfg)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	dm.ms = &JSONMarshaler{}
-	config.SetCgrConfig(cfg)
 	SetDataStorage(dm)
 	if err := dm.SetAccount(acc); err != nil {
 		t.Error(err)
@@ -683,8 +683,8 @@ func TestDMRemoveAccount(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if err = dm.RemoveAccount(acc.ID); err != nil {
 		t.Error(err)
@@ -750,8 +750,8 @@ func TestDmSetFilter(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if err := dm.SetFilter(filter, false); err != nil {
 		t.Error(err)
@@ -808,8 +808,8 @@ func TestDMSetThreshold(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 
 	if err = dm.SetThreshold(thS); err != nil {
@@ -867,8 +867,8 @@ func TestDmRemoveThreshold(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if err := dm.RemoveThreshold(thS.Tenant, thS.ID); err != nil {
 		t.Error(err)
@@ -919,8 +919,8 @@ func TestDMReverseDestinationRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	dest := &Destination{
 		Id: "nat", Prefixes: []string{"0257", "0256", "0723"},
@@ -986,8 +986,8 @@ func TestDMStatQueueRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	sq := &StatQueue{
 		Tenant:  "cgrates.org",
@@ -1063,8 +1063,8 @@ func TestDmTimingR(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	tp := &utils.TPTiming{
 		ID:        "MIDNIGHT",
@@ -1136,8 +1136,8 @@ func TestDMSetActionTriggers(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	attrs := ActionTriggers{
 		&ActionTrigger{
@@ -1224,8 +1224,8 @@ func TestDMResourceProfileRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	rp := &ResourceProfile{
 		Tenant:    "cgrates.org",
@@ -1309,8 +1309,8 @@ func TestDmSharedGroup(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	sg := &SharedGroup{
 		Id: "SG2",
@@ -1399,8 +1399,8 @@ func TestDMThresholdProfile(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	th := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1536,8 +1536,8 @@ func TestDmDispatcherHost(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	dH := &DispatcherHost{
 		Tenant: "testTenant",
@@ -1603,8 +1603,8 @@ func TestGetDispatcherHostErr(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	dH := &DispatcherHost{
 		Tenant: "testTenant",
@@ -1675,8 +1675,8 @@ func TestChargerProfileRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	chrPrf := &ChargerProfile{
 		Tenant:    "cgrates.org",
@@ -1753,8 +1753,8 @@ func TestDispatcherProfileRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	dsp := &DispatcherProfile{
 		Tenant:     "cgrates.org",
@@ -1828,8 +1828,8 @@ func TestRouteProfileRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	rpp := &RouteProfile{
 		Tenant:    "cgrates.org",
@@ -1900,8 +1900,8 @@ func TestRatingPlanRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	rP := &RatingPlan{
 		Id: "RP1",
@@ -1991,8 +1991,8 @@ func TestGetResourceRemote(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):     clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 
 	if val, err := dm.GetResource(rS.Tenant, rS.ID, false, true, utils.NonTransactional); err != nil {
@@ -2059,8 +2059,8 @@ func TestGetResourceProfileRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if val, err := dm.GetResourceProfile(rsP.Tenant, rsP.ID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -2123,8 +2123,8 @@ func TestGetActionTriggers(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	Cache.Set(utils.CacheActionTriggers, "Test", ActionTriggers{}, []string{}, false, utils.NonTransactional)
 	if val, err := dm.GetActionTriggers(aT[0].ID, false, utils.NonTransactional); err != nil {
@@ -2187,8 +2187,8 @@ func TestGetActionTriggersErr(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr1)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr1)
 	SetDataStorage(dm)
 	if _, err := dm.GetActionTriggers(aT[0].ID, true, utils.NonTransactional); err == nil {
 		t.Error(err)
@@ -2266,8 +2266,8 @@ func TestGetSharedGroupRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if val, err := dm.GetSharedGroup(shG.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -2324,8 +2324,8 @@ func TestGetStatQueueProfileRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if val, err := dm.GetStatQueueProfile(sqP.Tenant, sqP.ID, true, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -2397,8 +2397,8 @@ func TestStatQueueProfileRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	Cache.Set(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(sqP.Tenant, sqP.ID), &StatQueueProfile{
 		QueueLength: 2,
@@ -2469,8 +2469,8 @@ func TestDMActionsRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if err := dm.SetActions("KeyActions", acs); err != nil {
 		t.Error(err)
@@ -2540,8 +2540,8 @@ func TestGetDispatcherHost(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 
 	if val, err := dm.GetDispatcherHost("cgrates.org", "HostID", false, true, utils.NonTransactional); err != nil {
@@ -2598,8 +2598,8 @@ func TestGetReverseDestinationRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if val, err := dm.GetReverseDestination("CRUDReverseDestination", false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -2686,8 +2686,8 @@ func TestDMRemoveDestination(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	dm.DataDB().SetDestinationDrv(dest, utils.NonTransactional)
 	if err := dm.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
@@ -2765,8 +2765,8 @@ func TestDMRemoveFilter(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -2859,8 +2859,8 @@ func TestRemoveStatQueueProfile(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	dm.DataDB().SetStatQueueProfileDrv(sQ)
 	if err = dm.RemoveStatQueueProfile(sQ.Tenant, sQ.ID, true); err == nil {
@@ -2935,8 +2935,8 @@ func TestDMGetTimingRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if _, err := dm.GetTiming(tp.ID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -3011,8 +3011,8 @@ func TestDmGetActions(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if _, err := dm.GetActions("MINI", true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -3061,8 +3061,8 @@ func TestDMSetLoadIDs(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	ld := map[string]int64{
 		"load1": 23,
@@ -3130,8 +3130,8 @@ func TestGetItemLoadIDsRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if val, err := dm.GetItemLoadIDs("load1", true); err != nil {
 		t.Error(err)
@@ -3206,10 +3206,9 @@ func TestDMItemLoadIDsRemoteErr(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
 
+	config.SetCgrConfig(cfg)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetConnManager(connMgr)
-
-	config.SetCgrConfig(cfg)
 
 	Cache = NewCacheS(cfg, dm, nil)
 	if _, err := dm.GetItemLoadIDs("load1", true); err == nil || err.Error() != "Can't replicate" {
@@ -3294,8 +3293,8 @@ func TestActionPlanRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 
 	if err := dm.SetActionPlan("act_key", actPln, true, utils.NonTransactional); err != nil {
@@ -3361,8 +3360,8 @@ func TestAccountActionPlansRemote(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 
 	if err := dm.SetAccountActionPlans("acc_ID", []string{"act_pln", "act_pln"}, true); err != nil {
@@ -3669,8 +3668,8 @@ func TestDMRatingProfile(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if err := dm.SetRatingProfile(rpf); err != nil {
 		t.Error(err)
@@ -3811,8 +3810,8 @@ func TestDMGetRatingPlan(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if _, err := dm.GetRatingPlan("id", true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -3877,8 +3876,8 @@ func TestDMChargerProfile(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if _, err := dm.GetChargerProfile(chP.Tenant, chP.ID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -3952,8 +3951,8 @@ func TestDMDispatcherProfile(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if _, err := dm.GetDispatcherProfile(dPP.Tenant, dPP.ID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -4386,8 +4385,8 @@ func TestDMGetRouteProfile(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if val, err := dm.GetRouteProfile(rpL.Tenant, rpL.ID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -4441,8 +4440,8 @@ func TestDMGetRouteProfileErr(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):    clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	Cache = NewCacheS(cfg, dm, nil)
 	SetConnManager(connMgr)
@@ -4628,8 +4627,8 @@ func TestDMAttributeProfile(t *testing.T) {
 	connMgr := NewConnManager(cfg, map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1): clientConn,
 	})
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	SetDataStorage(dm)
 	if err := dm.SetAttributeProfile(attrPrf, false); err != nil {
 		t.Error(err)
@@ -4813,6 +4812,7 @@ func TestDmIndexes(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
+	config.SetCgrConfig(cfg)
 	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	idxes := map[string]utils.StringSet{
 		"*string:Account:1001": {
@@ -4827,7 +4827,6 @@ func TestDmIndexes(t *testing.T) {
 			"RL5": struct{}{},
 		},
 	}
-	config.SetCgrConfig(cfg)
 	if err := dm.SetIndexes(utils.CacheResourceFilterIndexes,
 		"cgrates.org", idxes, false, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -4875,8 +4874,8 @@ func TestDmCheckFilters(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	config.SetCgrConfig(cfg)
+	dm := NewDataManager(db, cfg.CacheCfg(), connMgr)
 	if err := dm.checkFilters("cgrates.org", []string{"FLTR_1"}); err == nil || err.Error() != "broken reference to filter: <FLTR_1>" {
 		t.Error(err)
 	}
