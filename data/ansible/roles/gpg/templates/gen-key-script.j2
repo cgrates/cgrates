@@ -1,13 +1,13 @@
+{{ ansible_managed | comment }}
 %echo Generating a basic OpenPGP key
-Key-Type: default
+%no-protection
+Key-Type: RSA
 Key-Length: {{ gpg_keylength }}
-Subkey-Type: default
+Subkey-Type: RSA
 Subkey-Length: {{ gpg_subkeylength }}
 Name-Real: {{ gpg_realname }}
 Name-Email: {{ gpg_useremail }}
 Expire-Date: {{ gpg_expire }}
 %no-ask-passphrase
-%pubring {{ gpg_home }}/.gnupg/pubring.kbx
-%secring {{ gpg_home }}/.gnupg/private-keys-v1.d
 %commit
 %echo done
