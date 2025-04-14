@@ -35,6 +35,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
+		ExistsIndexedFields:   &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
 		Any_context:           utils.BoolPointer(true),
 		Opts: &AttributesOptsJson{
@@ -51,6 +52,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
+		ExistsIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		AnyContext:          true,
 		Opts: &AttributesOpts{
@@ -80,7 +82,8 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 	"stats_conns": ["*internal"],			
 	"resources_conns": ["*internal"],		
 	"apiers_conns": ["*internal"],			
-	"prefix_indexed_fields": ["*req.index1","*req.index2"],		
+	"prefix_indexed_fields": ["*req.index1","*req.index2"],
+	"exists_indexed_fields": ["*req.index1","*req.index2"],
     "string_indexed_fields": ["*req.index1"],
 	"opts": {
 		"*processRuns": 3,
@@ -95,6 +98,7 @@ func TestAttributeSCfgAsMapInterface(t *testing.T) {
 		utils.ApierSConnsCfg:         []string{utils.MetaInternal},
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
+		utils.ExistsIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.IndexedSelectsCfg:      true,
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
@@ -118,6 +122,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 	cfgJSONStr := `{
      "attributes": {
            "suffix_indexed_fields": ["*req.index1","*req.index2"],
+           "exists_indexed_fields": ["*req.index1","*req.index2"],
            "nested_fields": true,
            "enabled": true,
 		   "opts": {
@@ -133,6 +138,7 @@ func TestAttributeSCfgAsMapInterface2(t *testing.T) {
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
+		utils.ExistsIndexedFieldsCfg: []string{"*req.index1", "*req.index2"},
 		utils.NestedFieldsCfg:        true,
 		utils.AnyContextCfg:          true,
 		utils.OptsCfg: map[string]any{
@@ -163,6 +169,7 @@ func TestAttributeSCfgAsMapInterface3(t *testing.T) {
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.ExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.AnyContextCfg:          true,
 		utils.OptsCfg: map[string]any{

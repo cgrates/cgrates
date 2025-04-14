@@ -2163,6 +2163,7 @@ const (
 	StringIndexedFieldsCfg = "string_indexed_fields"
 	PrefixIndexedFieldsCfg = "prefix_indexed_fields"
 	SuffixIndexedFieldsCfg = "suffix_indexed_fields"
+	ExistsIndexedFieldsCfg = "exists_indexed_fields"
 	MongoQueryTimeoutCfg   = "mongoQueryTimeout"
 	MongoConnSchemeCfg     = "mongoConnScheme"
 	PgSSLModeCfg           = "pgSSLMode"

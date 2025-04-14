@@ -42,6 +42,7 @@ type AttributeSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
+	ExistsIndexedFields *[]string
 	NestedFields        bool
 	AnyContext          bool
 	Opts                *AttributesOpts
@@ -123,6 +124,10 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		alS.SuffixIndexedFields = &sif
 	}
+	if jsnCfg.ExistsIndexedFields != nil {
+		eif := slices.Clone(*jsnCfg.ExistsIndexedFields)
+		alS.ExistsIndexedFields = &eif
+	}
 	if jsnCfg.Nested_fields != nil {
 		alS.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -167,6 +172,10 @@ func (alS *AttributeSCfg) AsMapInterface() (initialMP map[string]any) {
 		suffixIndexedFields := make([]string, len(*alS.SuffixIndexedFields))
 		copy(suffixIndexedFields, *alS.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
+	}
+	if alS.ExistsIndexedFields != nil {
+		eif := slices.Clone(*alS.ExistsIndexedFields)
+		initialMP[utils.ExistsIndexedFieldsCfg] = eif
 	}
 	if alS.StatSConns != nil {
 		statSConns := make([]string, len(alS.StatSConns))
@@ -252,6 +261,10 @@ func (alS AttributeSCfg) Clone() (cln *AttributeSCfg) {
 		idx := make([]string, len(*alS.SuffixIndexedFields))
 		copy(idx, *alS.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
+	}
+	if alS.ExistsIndexedFields != nil {
+		idx := slices.Clone(*alS.ExistsIndexedFields)
+		cln.ExistsIndexedFields = &idx
 	}
 	return
 }

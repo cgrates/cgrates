@@ -34,6 +34,7 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		String_indexed_fields: &[]string{"*req.index1"},
 		Prefix_indexed_fields: &[]string{"*req.index1"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
+		ExistsIndexedFields:   &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
 	}
 	expected := &ResourceSConfig{
@@ -44,6 +45,7 @@ func TestResourceSConfigloadFromJsonCfgCase1(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.index1"},
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
+		ExistsIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		Opts: &ResourcesOpts{
 			Units: 1,
@@ -96,6 +98,7 @@ func TestResourceSConfigAsMapInterface(t *testing.T) {
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.ExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]any{
 			utils.MetaUnitsCfg:   1.,
@@ -119,6 +122,7 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
             "string_indexed_fields": ["*req.index1"],
 			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
             "suffix_indexed_fields": ["*req.prefix_indexed_fields1"],
+            "exists_indexed_fields": ["*req.exists_indexed_field"],
 			"nested_fields": true,	
 			"opts":{
 				"*usageTTL":"1"
@@ -134,6 +138,7 @@ func TestResourceSConfigAsMapInterface1(t *testing.T) {
 		utils.StringIndexedFieldsCfg: []string{"*req.index1"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.prefix_indexed_fields1"},
+		utils.ExistsIndexedFieldsCfg: []string{"*req.exists_indexed_field"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]any{
 			utils.MetaUnitsCfg:    1.,

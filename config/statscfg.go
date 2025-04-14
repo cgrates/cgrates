@@ -40,6 +40,7 @@ type StatSCfg struct {
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
 	SuffixIndexedFields    *[]string
+	ExistsIndexedFields    *[]string
 	NestedFields           bool
 	Opts                   *StatsOpts
 	EEsConns               []string
@@ -114,6 +115,10 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		st.SuffixIndexedFields = &sif
 	}
+	if jsnCfg.ExistsIndexedFields != nil {
+		eif := slices.Clone(*jsnCfg.ExistsIndexedFields)
+		st.ExistsIndexedFields = &eif
+	}
 	if jsnCfg.Nested_fields != nil {
 		st.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -163,6 +168,10 @@ func (st *StatSCfg) AsMapInterface() (initialMP map[string]any) {
 		copy(suffixIndexedFields, *st.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 
+	}
+	if st.ExistsIndexedFields != nil {
+		eif := slices.Clone(*st.ExistsIndexedFields)
+		initialMP[utils.ExistsIndexedFieldsCfg] = eif
 	}
 	if st.ThresholdSConns != nil {
 		thresholdSConns := make([]string, len(st.ThresholdSConns))
@@ -230,6 +239,10 @@ func (st StatSCfg) Clone() (cln *StatSCfg) {
 		idx := make([]string, len(*st.SuffixIndexedFields))
 		copy(idx, *st.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
+	}
+	if st.ExistsIndexedFields != nil {
+		idx := slices.Clone(*st.ExistsIndexedFields)
+		cln.ExistsIndexedFields = &idx
 	}
 	return
 }

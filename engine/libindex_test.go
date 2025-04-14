@@ -268,6 +268,14 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 	}
 
 	wantIndexes := map[string]utils.StringSet{
+		"*exists:*req.Field1": {
+			"ATTR_1": {},
+			"ATTR_3": {},
+		},
+		"*exists:*req.Field2": {
+			"ATTR_2": {},
+			"ATTR_3": {},
+		},
 		"*prefix:*req.Field1:val": {
 			"ATTR_1": {},
 			"ATTR_3": {},
@@ -347,7 +355,7 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 		{
 			name:       "unindexable filter",
 			idxItmType: utils.CacheAttributeFilterIndexes,
-			filterIDs:  []string{"*exists:~*req.Field1:"},
+			filterIDs:  []string{"*notstring:~*req.Field1:val2"},
 			want:       make(map[string]utils.StringSet),
 		},
 		{
@@ -454,6 +462,14 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 				"*suffix:~*req.Field1:1",
 			},
 			want: map[string]utils.StringSet{
+				"*exists:*req.Field1": {
+					"ATTR_1": {},
+					"ATTR_3": {},
+				},
+				"*exists:*req.Field2": {
+					"ATTR_2": {},
+					"ATTR_3": {},
+				},
 				"*prefix:*req.Field1:val": {
 					"ATTR_1": {},
 					"ATTR_3": {},
@@ -494,6 +510,14 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 				"*notstring:~*req.Field2:val1",
 			},
 			want: map[string]utils.StringSet{
+				"*exists:*req.Field1": {
+					"ATTR_1": {},
+					"ATTR_3": {},
+				},
+				"*exists:*req.Field2": {
+					"ATTR_2": {},
+					"ATTR_3": {},
+				},
 				"*prefix:*req.Field1:val": {
 					"ATTR_1": {},
 					"ATTR_3": {},
@@ -536,6 +560,14 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 				"*string:~*req.Field5:val5",
 			},
 			want: map[string]utils.StringSet{
+				"*exists:*req.Field1": {
+					"ATTR_1": {},
+					"ATTR_3": {},
+				},
+				"*exists:*req.Field2": {
+					"ATTR_2": {},
+					"ATTR_3": {},
+				},
 				"*prefix:*req.Field1:val": {
 					"ATTR_1": {},
 					"ATTR_3": {},
@@ -570,15 +602,15 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 			got, gotErr := newFilterIndex(dm, tt.idxItmType, tt.tnt, tt.ctx, tt.itemID, tt.filterIDs, tt.newFlt)
 			if gotErr != nil {
 				if !tt.wantErr {
-					t.Errorf("prepareFilterIndexMap() failed: %v", gotErr)
+					t.Errorf("newFilterIndex() failed: %v", gotErr)
 				}
 				return
 			}
 			if tt.wantErr {
-				t.Fatal("prepareFilterIndexMap() succeeded unexpectedly")
+				t.Fatal("newFilterIndex() succeeded unexpectedly")
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("prepareFilterIndexMap() = %s, want %s", utils.ToJSON(got), utils.ToJSON(tt.want))
+				t.Errorf("newFilterIndex() = %s, want %s", utils.ToJSON(got), utils.ToJSON(tt.want))
 			}
 		})
 	}

@@ -39,6 +39,7 @@ type ThresholdSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
+	ExistsIndexedFields *[]string
 	NestedFields        bool
 	Opts                *ThresholdsOpts
 }
@@ -95,6 +96,10 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		t.SuffixIndexedFields = &sif
 	}
+	if jsnCfg.ExistsIndexedFields != nil {
+		eif := slices.Clone(*jsnCfg.ExistsIndexedFields)
+		t.ExistsIndexedFields = &eif
+	}
 	if jsnCfg.Nested_fields != nil {
 		t.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -145,6 +150,10 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
 		copy(suffixIndexedFields, *t.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
+	if t.ExistsIndexedFields != nil {
+		eif := slices.Clone(*t.ExistsIndexedFields)
+		initialMP[utils.ExistsIndexedFieldsCfg] = eif
+	}
 	return
 }
 
@@ -182,6 +191,10 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 		idx := make([]string, len(*t.SuffixIndexedFields))
 		copy(idx, *t.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
+	}
+	if t.ExistsIndexedFields != nil {
+		idx := slices.Clone(*t.ExistsIndexedFields)
+		cln.ExistsIndexedFields = &idx
 	}
 	return
 }
