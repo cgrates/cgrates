@@ -1452,3 +1452,405 @@ func TestTPRatingProfileClone(t *testing.T) {
 		})
 	}
 }
+
+func TestTPRateRALsCacheClone(t *testing.T) {
+	tests := []struct {
+		name string
+		tpr  *TPRateRALs
+		want *TPRateRALs
+	}{
+		{
+			name: "Empty TPRateRALs",
+			tpr:  &TPRateRALs{},
+			want: &TPRateRALs{},
+		},
+		{
+			name: "TPRateRALs with ID only",
+			tpr:  &TPRateRALs{ID: "RT 1001"},
+			want: &TPRateRALs{ID: "RT 1001"},
+		},
+		{
+			name: "TPRateRALs with TPid only",
+			tpr:  &TPRateRALs{TPid: "TP1"},
+			want: &TPRateRALs{TPid: "TP1"},
+		},
+		{
+			name: "TPRateRALs with empty RateSlots",
+			tpr:  &TPRateRALs{TPid: "TP1", ID: "RT 1001", RateSlots: []*RateSlot{}},
+			want: &TPRateRALs{TPid: "TP1", ID: "RT 1001", RateSlots: []*RateSlot{}},
+		},
+		{
+			name: "TPRateRALs with single RateSlot",
+			tpr: &TPRateRALs{
+				TPid: "TP1",
+				ID:   "RT 1001",
+				RateSlots: []*RateSlot{
+					{
+						ConnectFee:         0.1,
+						Rate:               0.2,
+						RateUnit:           "60s",
+						RateIncrement:      "1s",
+						GroupIntervalStart: "0s",
+						rateUnitDur:        60 * time.Second,
+						rateIncrementDur:   time.Second,
+						tag:                "test",
+					},
+				},
+			},
+			want: &TPRateRALs{
+				TPid: "TP1",
+				ID:   "RT 1001",
+				RateSlots: []*RateSlot{
+					{
+						ConnectFee:         0.1,
+						Rate:               0.2,
+						RateUnit:           "60s",
+						RateIncrement:      "1s",
+						GroupIntervalStart: "0s",
+						rateUnitDur:        60 * time.Second,
+						rateIncrementDur:   time.Second,
+						tag:                "test",
+					},
+				},
+			},
+		},
+		{
+			name: "Complete TPRateRALs with multiple RateSlots",
+			tpr: &TPRateRALs{
+				TPid: "TP1",
+				ID:   "RT 1001",
+				RateSlots: []*RateSlot{
+					{
+						ConnectFee:            0.1,
+						Rate:                  0.2,
+						RateUnit:              "60s",
+						RateIncrement:         "1s",
+						GroupIntervalStart:    "0s",
+						rateUnitDur:           60 * time.Second,
+						rateIncrementDur:      time.Second,
+						groupIntervalStartDur: 0,
+						tag:                   "first",
+					},
+					{
+						ConnectFee:            0.0,
+						Rate:                  0.1,
+						RateUnit:              "60s",
+						RateIncrement:         "30s",
+						GroupIntervalStart:    "60s",
+						rateUnitDur:           60 * time.Second,
+						rateIncrementDur:      30 * time.Second,
+						groupIntervalStartDur: 60 * time.Second,
+						tag:                   "second",
+					},
+				},
+			},
+			want: &TPRateRALs{
+				TPid: "TP1",
+				ID:   "RT 1001",
+				RateSlots: []*RateSlot{
+					{
+						ConnectFee:            0.1,
+						Rate:                  0.2,
+						RateUnit:              "60s",
+						RateIncrement:         "1s",
+						GroupIntervalStart:    "0s",
+						rateUnitDur:           60 * time.Second,
+						rateIncrementDur:      time.Second,
+						groupIntervalStartDur: 0,
+						tag:                   "first",
+					},
+					{
+						ConnectFee:            0.0,
+						Rate:                  0.1,
+						RateUnit:              "60s",
+						RateIncrement:         "30s",
+						GroupIntervalStart:    "60s",
+						rateUnitDur:           60 * time.Second,
+						rateIncrementDur:      30 * time.Second,
+						groupIntervalStartDur: 60 * time.Second,
+						tag:                   "second",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.tpr.CacheClone()
+			gotTPR, ok := got.(*TPRateRALs)
+			if !ok {
+				t.Errorf("CacheClone() returned type %T, want *TPRateRALs", got)
+				return
+			}
+
+			if gotTPR.TPid != tt.want.TPid {
+				t.Errorf("CacheClone().TPid = %v, want %v", gotTPR.TPid, tt.want.TPid)
+			}
+
+			if gotTPR.ID != tt.want.ID {
+				t.Errorf("CacheClone().ID = %v, want %v", gotTPR.ID, tt.want.ID)
+			}
+
+			if len(gotTPR.RateSlots) != len(tt.want.RateSlots) {
+				t.Errorf("CacheClone().RateSlots length = %v, want %v", len(gotTPR.RateSlots), len(tt.want.RateSlots))
+				return
+			}
+
+			for i, rs := range tt.want.RateSlots {
+				gotRS := gotTPR.RateSlots[i]
+
+				if gotRS.ConnectFee != rs.ConnectFee {
+					t.Errorf("CacheClone().RateSlots[%d].ConnectFee = %v, want %v", i, gotRS.ConnectFee, rs.ConnectFee)
+				}
+
+				if gotRS.Rate != rs.Rate {
+					t.Errorf("CacheClone().RateSlots[%d].Rate = %v, want %v", i, gotRS.Rate, rs.Rate)
+				}
+
+				if gotRS.RateUnit != rs.RateUnit {
+					t.Errorf("CacheClone().RateSlots[%d].RateUnit = %v, want %v", i, gotRS.RateUnit, rs.RateUnit)
+				}
+
+				if gotRS.RateIncrement != rs.RateIncrement {
+					t.Errorf("CacheClone().RateSlots[%d].RateIncrement = %v, want %v", i, gotRS.RateIncrement, rs.RateIncrement)
+				}
+
+				if gotRS.GroupIntervalStart != rs.GroupIntervalStart {
+					t.Errorf("CacheClone().RateSlots[%d].GroupIntervalStart = %v, want %v", i, gotRS.GroupIntervalStart, rs.GroupIntervalStart)
+				}
+
+				if gotRS.rateUnitDur != rs.rateUnitDur {
+					t.Errorf("CacheClone().RateSlots[%d].rateUnitDur = %v, want %v", i, gotRS.rateUnitDur, rs.rateUnitDur)
+				}
+
+				if gotRS.rateIncrementDur != rs.rateIncrementDur {
+					t.Errorf("CacheClone().RateSlots[%d].rateIncrementDur = %v, want %v", i, gotRS.rateIncrementDur, rs.rateIncrementDur)
+				}
+
+				if gotRS.groupIntervalStartDur != rs.groupIntervalStartDur {
+					t.Errorf("CacheClone().RateSlots[%d].groupIntervalStartDur = %v, want %v", i, gotRS.groupIntervalStartDur, rs.groupIntervalStartDur)
+				}
+
+				if gotRS.tag != rs.tag {
+					t.Errorf("CacheClone().RateSlots[%d].tag = %v, want %v", i, gotRS.tag, rs.tag)
+				}
+			}
+
+			if tt.tpr.RateSlots != nil && len(tt.tpr.RateSlots) > 0 {
+				originalRate := tt.tpr.RateSlots[0].Rate
+				tt.tpr.RateSlots[0].Rate = 999.99
+
+				if gotTPR.RateSlots[0].Rate != originalRate {
+					t.Errorf("CacheClone() did not create a deep copy of RateSlots")
+				}
+
+				tt.tpr.RateSlots[0].Rate = originalRate
+			}
+		})
+	}
+}
+
+func TestTPRankingProfileClone(t *testing.T) {
+	tests := []struct {
+		name string
+		trp  TPRankingProfile
+		want *TPRankingProfile
+	}{
+		{
+			name: "Test with empty profile",
+			trp:  TPRankingProfile{},
+			want: &TPRankingProfile{},
+		},
+		{
+			name: "Test with fully populated profile",
+			trp: TPRankingProfile{
+				TPid:              "TPR1",
+				Tenant:            "cgrates.org",
+				ID:                "profile1",
+				Schedule:          "* * * * *",
+				StatIDs:           []string{"stat1", "stat2"},
+				MetricIDs:         []string{"metric1", "metric2"},
+				Sorting:           "asc",
+				SortingParameters: []string{"param1", "param2"},
+				Stored:            true,
+				ThresholdIDs:      []string{"threshold1", "threshold2"},
+			},
+			want: &TPRankingProfile{
+				TPid:              "TPR1",
+				Tenant:            "cgrates.org",
+				ID:                "profile1",
+				Schedule:          "* * * * *",
+				StatIDs:           []string{"stat1", "stat2"},
+				MetricIDs:         []string{"metric1", "metric2"},
+				Sorting:           "asc",
+				SortingParameters: []string{"param1", "param2"},
+				Stored:            true,
+				ThresholdIDs:      []string{"threshold1", "threshold2"},
+			},
+		},
+		{
+			name: "Test with some nil slices",
+			trp: TPRankingProfile{
+				TPid:              "TPR2",
+				Tenant:            "cgrates2.org",
+				ID:                "profile2",
+				Schedule:          "* * * * *",
+				StatIDs:           nil,
+				MetricIDs:         []string{"metric1"},
+				Sorting:           "desc",
+				SortingParameters: nil,
+				Stored:            false,
+				ThresholdIDs:      []string{"threshold1"},
+			},
+			want: &TPRankingProfile{
+				TPid:              "TPR2",
+				Tenant:            "cgrates2.org",
+				ID:                "profile2",
+				Schedule:          "* * * * *",
+				StatIDs:           nil,
+				MetricIDs:         []string{"metric1"},
+				Sorting:           "desc",
+				SortingParameters: nil,
+				Stored:            false,
+				ThresholdIDs:      []string{"threshold1"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.trp.Clone()
+
+			if reflect.TypeOf(got) != reflect.TypeOf(tt.want) {
+				t.Errorf("Clone() returned wrong type: got %T, want %T", got, tt.want)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Clone() = %v, want %v", got, tt.want)
+			}
+
+			if tt.trp.StatIDs != nil && len(tt.trp.StatIDs) > 0 {
+				originalSlice := tt.trp.StatIDs
+				clonedSlice := got.StatIDs
+				clonedSlice[0] = "modified"
+				if originalSlice[0] == clonedSlice[0] {
+					t.Errorf("Clone() did not create a deep copy of StatIDs")
+				}
+			}
+
+			if tt.trp.MetricIDs != nil && len(tt.trp.MetricIDs) > 0 {
+				originalSlice := tt.trp.MetricIDs
+				clonedSlice := got.MetricIDs
+				clonedSlice[0] = "modified"
+				if originalSlice[0] == clonedSlice[0] {
+					t.Errorf("Clone() did not create a deep copy of MetricIDs")
+				}
+			}
+
+			if tt.trp.SortingParameters != nil && len(tt.trp.SortingParameters) > 0 {
+				originalSlice := tt.trp.SortingParameters
+				clonedSlice := got.SortingParameters
+				clonedSlice[0] = "modified"
+				if originalSlice[0] == clonedSlice[0] {
+					t.Errorf("Clone() did not create a deep copy of SortingParameters")
+				}
+			}
+
+			if tt.trp.ThresholdIDs != nil && len(tt.trp.ThresholdIDs) > 0 {
+				originalSlice := tt.trp.ThresholdIDs
+				clonedSlice := got.ThresholdIDs
+				clonedSlice[0] = "modified"
+				if originalSlice[0] == clonedSlice[0] {
+					t.Errorf("Clone() did not create a deep copy of ThresholdIDs")
+				}
+			}
+		})
+	}
+	t.Run("Test with nil receiver", func(t *testing.T) {
+		var trp *TPRankingProfile = nil
+		got := trp.Clone()
+		if got != nil {
+			t.Errorf("Clone() with nil receiver = %v, want nil", got)
+		}
+	})
+}
+
+func TestTPDestinationCacheClone(t *testing.T) {
+	tests := []struct {
+		name string
+		tpd  *TPDestination
+		want *TPDestination
+	}{
+		{
+			name: "Empty TPDestination",
+			tpd:  &TPDestination{},
+			want: &TPDestination{},
+		},
+		{
+			name: "TPDestination with ID only",
+			tpd:  &TPDestination{ID: "DST 1001"},
+			want: &TPDestination{ID: "DST 1001"},
+		},
+		{
+			name: "TPDestination with TPid only",
+			tpd:  &TPDestination{TPid: "TP1"},
+			want: &TPDestination{TPid: "TP1"},
+		},
+		{
+			name: "TPDestination with empty Prefixes",
+			tpd:  &TPDestination{TPid: "TP1", ID: "DST 1001", Prefixes: []string{}},
+			want: &TPDestination{TPid: "TP1", ID: "DST 1001", Prefixes: []string{}},
+		},
+		{
+			name: "TPDestination with single Prefix",
+			tpd:  &TPDestination{TPid: "TP1", ID: "DST 1001", Prefixes: []string{"49"}},
+			want: &TPDestination{TPid: "TP1", ID: "DST 1001", Prefixes: []string{"49"}},
+		},
+		{
+			name: "Complete TPDestination with multiple Prefixes",
+			tpd:  &TPDestination{TPid: "TP1", ID: "DST 1001", Prefixes: []string{"49", "41", "43"}},
+			want: &TPDestination{TPid: "TP1", ID: "DST 1001", Prefixes: []string{"49", "41", "43"}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.tpd.CacheClone()
+
+			gotTPD, ok := got.(*TPDestination)
+			if !ok {
+				t.Errorf("CacheClone() returned type %T, want *TPDestination", got)
+				return
+			}
+
+			if gotTPD.TPid != tt.want.TPid {
+				t.Errorf("CacheClone().TPid = %v, want %v", gotTPD.TPid, tt.want.TPid)
+			}
+
+			if gotTPD.ID != tt.want.ID {
+				t.Errorf("CacheClone().ID = %v, want %v", gotTPD.ID, tt.want.ID)
+			}
+
+			if len(gotTPD.Prefixes) != len(tt.want.Prefixes) {
+				t.Errorf("CacheClone().Prefixes length = %v, want %v", len(gotTPD.Prefixes), len(tt.want.Prefixes))
+				return
+			}
+
+			for i, prefix := range tt.want.Prefixes {
+				if gotTPD.Prefixes[i] != prefix {
+					t.Errorf("CacheClone().Prefixes[%d] = %v, want %v", i, gotTPD.Prefixes[i], prefix)
+				}
+			}
+			if tt.tpd.Prefixes != nil && len(tt.tpd.Prefixes) > 0 {
+				originalPrefix := tt.tpd.Prefixes[0]
+				tt.tpd.Prefixes[0] = "modified"
+
+				if gotTPD.Prefixes[0] != originalPrefix {
+					t.Errorf("CacheClone() did not create a deep copy of Prefixes slice")
+				}
+				tt.tpd.Prefixes[0] = originalPrefix
+			}
+		})
+	}
+}
