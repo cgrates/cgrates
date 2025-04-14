@@ -630,15 +630,23 @@ func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, grace
 	t.Cleanup(func() {
 		if gracefulShutdown {
 			if err := engine.Process.Signal(syscall.SIGTERM); err != nil {
-				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+				t.Errorf("failed to terminate cgr-engine process (%d): %v",
+					engine.Process.Pid, err)
 			}
+
+			// TODO: check if it's a good idea to wait for the Kill signal
+			// also. Might prevent scenarios where engine from previous test is
+			// still running (even though kill should be almost instant)
 			if err := engine.Wait(); err != nil {
-				t.Errorf("cgr-engine process failed to exit cleanly: %v", err)
+				t.Errorf("could not wait for cgr-engine process (%d) to shut down: %v",
+					engine.Process.Pid, err)
 			}
-		} else {
-			if err := engine.Process.Kill(); err != nil {
-				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
-			}
+
+			return
+		}
+		if err := engine.Process.Kill(); err != nil {
+			t.Errorf("failed to kill cgr-engine process (%d): %v",
+				engine.Process.Pid, err)
 		}
 	})
 	backoff := utils.FibDuration(time.Millisecond, 0)
