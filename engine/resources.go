@@ -659,6 +659,7 @@ func (rS *ResourceService) matchingResourcesForEvent(tnt string, ev *utils.CGREv
 			rS.cgrcfg.ResourceSCfg().StringIndexedFields,
 			rS.cgrcfg.ResourceSCfg().PrefixIndexedFields,
 			rS.cgrcfg.ResourceSCfg().SuffixIndexedFields,
+			rS.cgrcfg.ResourceSCfg().ExistsIndexedFields,
 			rS.dm, utils.CacheResourceFilterIndexes, tnt,
 			rS.cgrcfg.ResourceSCfg().IndexedSelects,
 			rS.cgrcfg.ResourceSCfg().NestedFields,

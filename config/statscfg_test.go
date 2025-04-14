@@ -34,6 +34,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		String_indexed_fields:    &[]string{"*req.string"},
 		Prefix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
 		Suffix_indexed_fields:    &[]string{"*req.index1", "*req.index2"},
+		ExistsIndexedFields:      &[]string{"*req.index1", "*req.index2"},
 		Nested_fields:            utils.BoolPointer(true),
 		Ees_conns:                &[]string{utils.MetaInternal, "*conn1"},
 		Ees_exporter_ids:         &[]string{"exporterID"},
@@ -47,6 +48,7 @@ func TestStatSCfgloadFromJsonCfgCase1(t *testing.T) {
 		StringIndexedFields:    &[]string{"*req.string"},
 		PrefixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		SuffixIndexedFields:    &[]string{"*req.index1", "*req.index2"},
+		ExistsIndexedFields:    &[]string{"*req.index1", "*req.index2"},
 		NestedFields:           true,
 		Opts: &StatsOpts{
 			ProfileIDs: []string{},
@@ -90,6 +92,7 @@ func TestStatSCfgAsMapInterface(t *testing.T) {
 		utils.IndexedSelectsCfg:         true,
 		utils.PrefixIndexedFieldsCfg:    []string{},
 		utils.SuffixIndexedFieldsCfg:    []string{},
+		utils.ExistsIndexedFieldsCfg:    []string{},
 		utils.NestedFieldsCfg:           false,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:              []string{},
@@ -116,6 +119,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
             "string_indexed_fields": ["*req.string"],
 			"prefix_indexed_fields": ["*req.prefix_indexed_fields1","*req.prefix_indexed_fields2"],
             "suffix_indexed_fields":["*req.suffix_indexed_fields"],
+            "exists_indexed_fields":["*req.exists_indexed_field"],
 			"nested_fields": true,
 			"ees_conns": ["*internal:*ees", "*conn1"],
 			"ees_exporter_ids":["exporterID"],
@@ -130,6 +134,7 @@ func TestStatSCfgAsMapInterface1(t *testing.T) {
 		utils.StringIndexedFieldsCfg:    []string{"*req.string"},
 		utils.PrefixIndexedFieldsCfg:    []string{"*req.prefix_indexed_fields1", "*req.prefix_indexed_fields2"},
 		utils.SuffixIndexedFieldsCfg:    []string{"*req.suffix_indexed_fields"},
+		utils.ExistsIndexedFieldsCfg:    []string{"*req.exists_indexed_field"},
 		utils.NestedFieldsCfg:           true,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:              []string{},

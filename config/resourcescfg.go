@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -39,6 +40,7 @@ type ResourceSConfig struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
+	ExistsIndexedFields *[]string
 	NestedFields        bool
 	Opts                *ResourcesOpts
 }
@@ -103,6 +105,10 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		rlcfg.SuffixIndexedFields = &sif
 	}
+	if jsnCfg.ExistsIndexedFields != nil {
+		eif := slices.Clone(*jsnCfg.ExistsIndexedFields)
+		rlcfg.ExistsIndexedFields = &eif
+	}
 	if jsnCfg.Nested_fields != nil {
 		rlcfg.NestedFields = *jsnCfg.Nested_fields
 	}
@@ -153,6 +159,10 @@ func (rlcfg *ResourceSConfig) AsMapInterface() (initialMP map[string]any) {
 		copy(suffixIndexedFields, *rlcfg.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
+	if rlcfg.ExistsIndexedFields != nil {
+		eif := slices.Clone(*rlcfg.ExistsIndexedFields)
+		initialMP[utils.ExistsIndexedFieldsCfg] = eif
+	}
 	if rlcfg.StoreInterval != 0 {
 		initialMP[utils.StoreIntervalCfg] = rlcfg.StoreInterval.String()
 	}
@@ -199,6 +209,10 @@ func (rlcfg ResourceSConfig) Clone() (cln *ResourceSConfig) {
 		idx := make([]string, len(*rlcfg.SuffixIndexedFields))
 		copy(idx, *rlcfg.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
+	}
+	if rlcfg.ExistsIndexedFields != nil {
+		idx := slices.Clone(*rlcfg.ExistsIndexedFields)
+		cln.ExistsIndexedFields = &idx
 	}
 	return
 }

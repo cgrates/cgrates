@@ -411,6 +411,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.C
 			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
 			tS.cgrcfg.ThresholdSCfg().SuffixIndexedFields,
+			tS.cgrcfg.ThresholdSCfg().ExistsIndexedFields,
 			tS.dm, utils.CacheThresholdFilterIndexes, tnt,
 			tS.cgrcfg.ThresholdSCfg().IndexedSelects,
 			tS.cgrcfg.ThresholdSCfg().NestedFields,

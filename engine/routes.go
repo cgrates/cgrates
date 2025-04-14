@@ -230,6 +230,7 @@ func (rpS *RouteService) matchingRouteProfilesForEvent(tnt string, ev *utils.CGR
 		rpS.cgrcfg.RouteSCfg().StringIndexedFields,
 		rpS.cgrcfg.RouteSCfg().PrefixIndexedFields,
 		rpS.cgrcfg.RouteSCfg().SuffixIndexedFields,
+		rpS.cgrcfg.RouteSCfg().ExistsIndexedFields,
 		rpS.dm, utils.CacheRouteFilterIndexes, tnt,
 		rpS.cgrcfg.RouteSCfg().IndexedSelects,
 		rpS.cgrcfg.RouteSCfg().NestedFields,

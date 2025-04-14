@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -30,6 +32,7 @@ type ChargerSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
+	ExistsIndexedFields *[]string
 	NestedFields        bool
 }
 
@@ -67,6 +70,10 @@ func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
 		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		cS.SuffixIndexedFields = &sif
+	}
+	if jsnCfg.ExistsIndexedFields != nil {
+		eif := slices.Clone(*jsnCfg.ExistsIndexedFields)
+		cS.ExistsIndexedFields = &eif
 	}
 	if jsnCfg.Nested_fields != nil {
 		cS.NestedFields = *jsnCfg.Nested_fields
@@ -106,6 +113,10 @@ func (cS *ChargerSCfg) AsMapInterface() (initialMP map[string]any) {
 		copy(sufixIndexedFields, *cS.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = sufixIndexedFields
 	}
+	if cS.ExistsIndexedFields != nil {
+		eif := slices.Clone(*cS.ExistsIndexedFields)
+		initialMP[utils.ExistsIndexedFieldsCfg] = eif
+	}
 	return
 }
 
@@ -135,6 +146,10 @@ func (cS ChargerSCfg) Clone() (cln *ChargerSCfg) {
 		idx := make([]string, len(*cS.SuffixIndexedFields))
 		copy(idx, *cS.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
+	}
+	if cS.ExistsIndexedFields != nil {
+		idx := slices.Clone(*cS.ExistsIndexedFields)
+		cln.ExistsIndexedFields = &idx
 	}
 	return
 }

@@ -637,7 +637,8 @@ type AttributeSJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
+	ExistsIndexedFields   *[]string `json:"exists_indexed_fields"`
+	Nested_fields         *bool     // applies when indexed fields is not defined
 	Any_context           *bool
 	Opts                  *AttributesOptsJson
 }
@@ -650,7 +651,8 @@ type ChargerSJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
+	ExistsIndexedFields   *[]string `json:"exists_indexed_fields"`
+	Nested_fields         *bool     // applies when indexed fields is not defined
 }
 
 type ResourcesOptsJson struct {
@@ -668,7 +670,8 @@ type ResourceSJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
+	ExistsIndexedFields   *[]string `json:"exists_indexed_fields"`
+	Nested_fields         *bool     // applies when indexed fields is not defined
 	Opts                  *ResourcesOptsJson
 }
 
@@ -687,7 +690,8 @@ type StatServJsonCfg struct {
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
 	Suffix_indexed_fields    *[]string
-	Nested_fields            *bool // applies when indexed fields is not defined
+	ExistsIndexedFields      *[]string `json:"exists_indexed_fields"`
+	Nested_fields            *bool     // applies when indexed fields is not defined
 	Opts                     *StatsOptsJson
 	Ees_conns                *[]string
 	Ees_exporter_ids         *[]string
@@ -728,7 +732,8 @@ type ThresholdSJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
+	ExistsIndexedFields   *[]string `json:"exists_indexed_fields"`
+	Nested_fields         *bool     // applies when indexed fields is not defined
 	Opts                  *ThresholdsOptsJson
 }
 
@@ -748,7 +753,8 @@ type RouteSJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
+	ExistsIndexedFields   *[]string `json:"exists_indexed_fields"`
+	Nested_fields         *bool     // applies when indexed fields is not defined
 	Attributes_conns      *[]string
 	Resources_conns       *[]string
 	Stats_conns           *[]string
@@ -822,7 +828,8 @@ type DispatcherSJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string
-	Nested_fields         *bool // applies when indexed fields is not defined
+	ExistsIndexedFields   *[]string `json:"exists_indexed_fields"`
+	Nested_fields         *bool     // applies when indexed fields is not defined
 	Attributes_conns      *[]string
 	Any_subsystem         *bool
 	Prevent_loop          *bool

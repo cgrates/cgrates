@@ -32,6 +32,7 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		String_indexed_fields: &[]string{"*req.prefix"},
 		Prefix_indexed_fields: &[]string{"*req.index1"},
 		Suffix_indexed_fields: &[]string{"*req.index1"},
+		ExistsIndexedFields:   &[]string{"*req.index1"},
 		Nested_fields:         utils.BoolPointer(true),
 		Opts: &ThresholdsOptsJson{
 			ProfileIDs:           &[]string{},
@@ -45,6 +46,7 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.prefix"},
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
+		ExistsIndexedFields: &[]string{"*req.index1"},
 		NestedFields:        true,
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []string{},
@@ -86,6 +88,7 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.IndexedSelectsCfg:      true,
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.ExistsIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:              []string{},
@@ -108,6 +111,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
             "string_indexed_fields": ["*req.string"],
 			"prefix_indexed_fields": ["*req.prefix","*req.indexed","*req.fields"],	
             "suffix_indexed_fields": ["*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"],		
+            "exists_indexed_fields": ["*req.exists_indexed_field"],		
 			"nested_fields": true,					
 		},		
 }`
@@ -118,6 +122,7 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.StringIndexedFieldsCfg: []string{"*req.string"},
 		utils.PrefixIndexedFieldsCfg: []string{"*req.prefix", "*req.indexed", "*req.fields"},
 		utils.SuffixIndexedFieldsCfg: []string{"*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"},
+		utils.ExistsIndexedFieldsCfg: []string{"*req.exists_indexed_field"},
 		utils.NestedFieldsCfg:        true,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:              []string{},
