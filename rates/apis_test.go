@@ -174,3 +174,249 @@ func TestRatesCostForEvent(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected2, rpCost)
 	}
 }
+
+func TestV1RateProfilesForEvent(t *testing.T) {
+	jsonCfg := `{
+        "rates": {
+            "enabled": true,
+            "rate_indexed_selects": true,
+          },
+        }
+        `
+
+	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(jsonCfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	rS := NewRateS(cfg, fltrs, dm)
+
+	ratePrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP_MATCH",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT1": {
+				ID: "RT1",
+				FilterIDs: []string{
+					"*prefix:~*req.Destination:+33",
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Increment:     utils.NewDecimal(1, 1),
+						Unit:          utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRateProfile(context.Background(), ratePrf, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Destination:  "+33123456789",
+		},
+	}
+
+	var matched []string
+	if err := rS.V1RateProfilesForEvent(context.Background(), ev, &matched); err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+
+	expected := []string{"RP_MATCH"}
+	if !reflect.DeepEqual(matched, expected) {
+		t.Errorf("Expected matched profiles: %v, got: %v", expected, matched)
+	}
+}
+
+func TestV1RateProfileRatesForEvent(t *testing.T) {
+	jsonCfg := `{
+        "rates": {
+            "enabled": true,
+            "rate_indexed_selects": true
+        }
+    }`
+
+	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(jsonCfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	db := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(db, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	rS := NewRateS(cfg, fltrs, dm)
+
+	ratePrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RATE_TEST",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT_STANDARD": {
+				ID: "RT_STANDARD",
+				FilterIDs: []string{
+					"*string:~*req.ToR:*voice",
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Increment:     utils.NewDecimal(1, 1),
+						Unit:          utils.NewDecimal(2, 0),
+					},
+				},
+			},
+			"RT_PREMIUM": {
+				ID: "RT_PREMIUM",
+				FilterIDs: []string{
+					"*prefix:~*req.Destination:+44",
+					"*string:~*req.RequestType:*postpaid",
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Increment:     utils.NewDecimal(1, 1),
+						Unit:          utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRateProfile(context.Background(), ratePrf, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := []struct {
+		name     string
+		args     *utils.CGREventWithRateProfile
+		expected []string
+		err      error
+	}{
+		{
+			name: "NilArgs",
+			args: nil,
+			err:  utils.NewErrMandatoryIeMissing(utils.CGREventString),
+		},
+		{
+			name: "EmptyRateProfileID",
+			args: &utils.CGREventWithRateProfile{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+				},
+				RateProfileID: "",
+			},
+			err: utils.NewErrMandatoryIeMissing(utils.RateProfileID),
+		},
+		{
+			name: "RateProfileNotFound",
+			args: &utils.CGREventWithRateProfile{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+				},
+				RateProfileID: "NON_EXISTENT",
+			},
+			err: utils.ErrNotFound,
+		},
+		{
+			name: "NoMatchingRates",
+			args: &utils.CGREventWithRateProfile{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.ToR:          "*data",
+					},
+				},
+				RateProfileID: "RATE_TEST",
+			},
+			err: utils.ErrNotFound,
+		},
+		{
+			name: "OneMatchingRate",
+			args: &utils.CGREventWithRateProfile{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.ToR:          "*voice",
+					},
+				},
+				RateProfileID: "RATE_TEST",
+			},
+			expected: []string{"RT_STANDARD"},
+		},
+		{
+			name: "TwoMatchingRates",
+			args: &utils.CGREventWithRateProfile{
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.ToR:          "*voice",
+						utils.Destination:  "+44123456789",
+						utils.RequestType:  "*postpaid",
+					},
+				},
+				RateProfileID: "RATE_TEST",
+			},
+			expected: []string{"RT_STANDARD", "RT_PREMIUM"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var rateIDs []string
+			err := rS.V1RateProfileRatesForEvent(context.Background(), tc.args, &rateIDs)
+
+			if tc.err != nil {
+				if err == nil || err.Error() != tc.err.Error() {
+					t.Errorf("Expected error: %v, got: %v", tc.err, err)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Expected no error, got: %v", err)
+			}
+
+			if len(rateIDs) != len(tc.expected) {
+				t.Errorf("Expected %d matching rates, got %d", len(tc.expected), len(rateIDs))
+			} else {
+				expectedSet := make(map[string]bool)
+				for _, id := range tc.expected {
+					expectedSet[id] = true
+				}
+
+				resultSet := make(map[string]bool)
+				for _, id := range rateIDs {
+					resultSet[id] = true
+				}
+
+				if !reflect.DeepEqual(resultSet, expectedSet) {
+					t.Errorf("Expected rates: %v, got: %v", tc.expected, rateIDs)
+				}
+			}
+		})
+	}
+}
