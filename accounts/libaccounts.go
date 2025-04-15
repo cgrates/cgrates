@@ -28,8 +28,8 @@ import (
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 	"github.com/ericlagergren/decimal"
 )
 

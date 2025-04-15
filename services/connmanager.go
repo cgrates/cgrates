@@ -141,10 +141,6 @@ var serviceMethods = map[string]internalRoute{
 		receiver:     utils.ChargerSv1,
 		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers),
 	},
-	utils.GuardianS: {
-		receiver:     utils.GuardianSv1,
-		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian),
-	},
 	utils.LoaderS: {
 		receiver:     utils.LoaderSv1,
 		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders),
