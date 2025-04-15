@@ -95,7 +95,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 	case utils.MetaThresholds:
 		return dm.SetThresholdProfile(ctx, data.(*engine.ThresholdProfile), withIndex)
 	case utils.MetaRoutes:
-		return dm.SetRouteProfile(ctx, data.(*engine.RouteProfile), withIndex)
+		return dm.SetRouteProfile(ctx, data.(*utils.RouteProfile), withIndex)
 	case utils.MetaChargers:
 		return dm.SetChargerProfile(ctx, data.(*utils.ChargerProfile), withIndex)
 	case utils.MetaRateProfiles:

@@ -83,7 +83,7 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 		}
 		filterIDs = th.FilterIDs
 	case utils.CacheRouteFilterIndexes:
-		var rt *RouteProfile
+		var rt *utils.RouteProfile
 		if rt, err = dm.GetRouteProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
 			return
 		}

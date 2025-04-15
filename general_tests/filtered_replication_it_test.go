@@ -926,12 +926,12 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // func testFltrRplRouteProfile(t *testing.T) {
 // 	rpID := "RT1"
 // 	rpPrf := &v1.RouteWithAPIOpts{
-// 		RouteProfile: &engine.RouteProfile{
+// 		RouteProfile: &utils.RouteProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        rpID,
 // 			FilterIDs: []string{"*string:~*req.Account:dan"},
 // 			Sorting:   utils.MetaWeight,
-// 			Routes: []*engine.Route{
+// 			Routes: []*utils.Route{
 // 				{
 // 					ID:             "local",
 // 					RateProfileIDs: []string{"RP_LOCAL"},
@@ -947,7 +947,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		},
 // 	}
 // 	var result string
-// 	var replyPrfl *engine.RouteProfile
+// 	var replyPrfl *utils.RouteProfile
 // 	var rplyIDs []string
 // 	// empty
 // 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package routes
 
 import (
 	"fmt"
@@ -26,17 +26,18 @@ import (
 	"github.com/ericlagergren/decimal"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr *ConnManager,
-	fltrS *FilterS, routes map[string]*RouteWithWeight, ev *utils.CGREvent,
+func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr *engine.ConnManager,
+	fltrS *engine.FilterS, routes map[string]*RouteWithWeight, ev *utils.CGREvent,
 	extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
 	if len(cfg.RouteSCfg().RateSConns) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
 	}
 	var usage *decimal.Big
-	if usage, err = GetDecimalBigOpts(ctx, ev.Tenant, ev.AsDataProvider(), nil, fltrS, cfg.RouteSCfg().Opts.Usage,
+	if usage, err = engine.GetDecimalBigOpts(ctx, ev.Tenant, ev.AsDataProvider(), nil, fltrS, cfg.RouteSCfg().Opts.Usage,
 		utils.OptsRoutesUsage, utils.MetaUsage); err != nil {
 		return
 	}
@@ -131,15 +132,15 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 	return
 }
 
-func NewHighestCostSorter(cfg *config.CGRConfig, connMgr *ConnManager, fltrS *FilterS) *HightCostSorter {
+func NewHighestCostSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager, fltrS *engine.FilterS) *HightCostSorter {
 	return &HightCostSorter{cfg: cfg, connMgr: connMgr, fltrS: fltrS}
 }
 
 // HightCostSorter sorts routes based on their cost
 type HightCostSorter struct {
 	cfg     *config.CGRConfig
-	connMgr *ConnManager
-	fltrS   *FilterS
+	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 }
 
 func (hcs *HightCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
@@ -158,15 +159,15 @@ func (hcs *HightCostSorter) SortRoutes(ctx *context.Context, prflID string, rout
 	return
 }
 
-func NewLeastCostSorter(cfg *config.CGRConfig, connMgr *ConnManager, fltrS *FilterS) *LeastCostSorter {
+func NewLeastCostSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager, fltrS *engine.FilterS) *LeastCostSorter {
 	return &LeastCostSorter{cfg: cfg, connMgr: connMgr, fltrS: fltrS}
 }
 
 // LeastCostSorter sorts routes based on their cost
 type LeastCostSorter struct {
 	cfg     *config.CGRConfig
-	connMgr *ConnManager
-	fltrS   *FilterS
+	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 }
 
 func (lcs *LeastCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,

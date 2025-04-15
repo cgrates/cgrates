@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -921,11 +922,11 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 */
 
 func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
-	splrs := engine.SortedRoutesList{
+	splrs := routes.SortedRoutesList{
 		{
 			ProfileID: "SPL_ACNT_1001",
 			Sorting:   utils.MetaWeight,
-			Routes: []*engine.SortedRoute{
+			Routes: []*routes.SortedRoute{
 				{
 					RouteID: "supplier1",
 					SortingData: map[string]any{
@@ -1138,7 +1139,7 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 	//test with Routes, ThresholdIDs, StatQueueIDs != nil
 	tmpTresholdIDs := []string{"ID1", "ID2"}
 	tmpStatQueueIDs := []string{"Que1", "Que2"}
-	tmpRoutes := engine.SortedRoutesList{{
+	tmpRoutes := routes.SortedRoutesList{{
 		ProfileID: "Route1",
 	}}
 	v1PrcEvRpl.RouteProfiles = tmpRoutes
@@ -1181,11 +1182,11 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//routes check
-	tmpRoutes := engine.SortedRoutesList{{
+	tmpRoutes := routes.SortedRoutesList{{
 		ProfileID: "Route1",
 	}}
 	nm := tmpRoutes.AsNavigableMap()
-	v1per.RouteProfiles = make(map[string]engine.SortedRoutesList)
+	v1per.RouteProfiles = make(map[string]routes.SortedRoutesList)
 	v1per.RouteProfiles[utils.MetaRaw] = tmpRoutes
 	expected[utils.CapRouteProfiles] = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaRaw: nm}}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {

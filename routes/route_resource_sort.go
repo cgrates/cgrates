@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package routes
 
 import (
 	"fmt"
@@ -24,11 +24,12 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *ConnManager, routes map[string]*RouteWithWeight,
+	connMgr *engine.ConnManager, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
 	if len(cfg.RouteSCfg().ResourceSConns) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
@@ -56,7 +57,7 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 		}
 		var tUsage float64
 		for _, resID := range route.ResourceIDs {
-			var res Resource
+			var res engine.Resource
 			if err = connMgr.Call(ctx, cfg.RouteSCfg().ResourceSConns, utils.ResourceSv1GetResource,
 				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: ev.Tenant, ID: resID}},
 				&res); err != nil && err.Error() != utils.ErrNotFound.Error() {
@@ -84,14 +85,14 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 	return
 }
 
-func NewResourceAscendetSorter(cfg *config.CGRConfig, connMgr *ConnManager) *ResourceAscendentSorter {
+func NewResourceAscendetSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *ResourceAscendentSorter {
 	return &ResourceAscendentSorter{cfg: cfg, connMgr: connMgr}
 }
 
 // ResourceAscendentSorter orders ascendent routes based on their Resource Usage
 type ResourceAscendentSorter struct {
 	cfg     *config.CGRConfig
-	connMgr *ConnManager
+	connMgr *engine.ConnManager
 }
 
 func (ws *ResourceAscendentSorter) SortRoutes(ctx *context.Context, prflID string,
@@ -109,14 +110,14 @@ func (ws *ResourceAscendentSorter) SortRoutes(ctx *context.Context, prflID strin
 	return
 }
 
-func NewResourceDescendentSorter(cfg *config.CGRConfig, connMgr *ConnManager) *ResourceDescendentSorter {
+func NewResourceDescendentSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *ResourceDescendentSorter {
 	return &ResourceDescendentSorter{cfg: cfg, connMgr: connMgr}
 }
 
 // ResourceDescendentSorter orders suppliers based on their Resource Usage
 type ResourceDescendentSorter struct {
 	cfg     *config.CGRConfig
-	connMgr *ConnManager
+	connMgr *engine.ConnManager
 }
 
 func (ws *ResourceDescendentSorter) SortRoutes(ctx *context.Context, prflID string,

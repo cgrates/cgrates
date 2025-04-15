@@ -30,6 +30,7 @@ import (
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/routes"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -2060,7 +2061,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				config.SessionsRoutesDerivedReplyDftOpt, utils.OptsSesRouteSDerivedReply); err != nil {
 				return
 			}
-			rply.RouteProfiles = make(map[string]engine.SortedRoutesList)
+			rply.RouteProfiles = make(map[string]routes.SortedRoutesList)
 			// check in case we have options for suppliers
 			for runID, cgrEv := range getDerivedEvents(events, routesDerivedReply) {
 				routesReply, err := sS.getRoutes(ctx, cgrEv.Clone())
@@ -2583,7 +2584,7 @@ func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, cl
 }
 
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
-func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply engine.SortedRoutesList, err error) {
+func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply routes.SortedRoutesList, err error) {
 	if len(sS.cfg.SessionSCfg().RouteSConns) == 0 {
 		return routesReply, utils.NewErrNotConnected(utils.RouteS)
 	}

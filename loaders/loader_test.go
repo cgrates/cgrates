@@ -267,7 +267,7 @@ func TestSetToDB(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", utils.ToJSON(v8), utils.ToJSON(prf))
 	}
 
-	v9 := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
+	v9 := &utils.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
 	if err := setToDB(context.Background(), dm, utils.MetaRoutes, v9, true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -521,7 +521,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 
 	{
-		v := &engine.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.RouteProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaRoutes, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)

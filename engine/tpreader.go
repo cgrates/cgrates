@@ -485,7 +485,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("RouteProfiles:")
 	}
 	for _, tpTH := range tpr.routeProfiles {
-		var th *RouteProfile
+		var th *utils.RouteProfile
 		if th, err = APItoRouteProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}

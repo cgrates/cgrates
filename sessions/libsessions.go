@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -283,7 +284,7 @@ type V1ProcessEventReply struct {
 	Cost               map[string]float64                        `json:",omitempty"` // Cost is the cost received from Rater, ignoring accounting part
 	ResourceAllocation map[string]string                         `json:",omitempty"`
 	Attributes         map[string]*engine.AttrSProcessEventReply `json:",omitempty"`
-	RouteProfiles      map[string]engine.SortedRoutesList        `json:",omitempty"`
+	RouteProfiles      map[string]routes.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       map[string][]string                       `json:",omitempty"`
 	StatQueueIDs       map[string][]string                       `json:",omitempty"`
 	STIRIdentity       map[string]string                         `json:",omitempty"`
@@ -372,7 +373,7 @@ type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration                 `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
-	RouteProfiles      engine.SortedRoutesList        `json:",omitempty"`
+	RouteProfiles      routes.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
 
@@ -437,7 +438,7 @@ type V1AuthorizeReply struct {
 	Attributes         *engine.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                        `json:",omitempty"`
 	MaxUsage           *utils.Decimal                 `json:",omitempty"`
-	RouteProfiles      engine.SortedRoutesList        `json:",omitempty"`
+	RouteProfiles      routes.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                      `json:",omitempty"`
 	StatQueueIDs       *[]string                      `json:",omitempty"`
 

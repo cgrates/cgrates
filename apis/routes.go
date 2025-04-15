@@ -23,12 +23,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetRouteProfile returns a Route configuration
-func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
+func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RouteProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -73,7 +72,7 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 }
 
 // GetRouteProfiles returns a list of route profiles registered for a tenant
-func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*engine.RouteProfile) (err error) {
+func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*utils.RouteProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -82,9 +81,9 @@ func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsIte
 	if err = admS.GetRouteProfileIDs(ctx, args, &rouPrfIDs); err != nil {
 		return
 	}
-	*rouPrfs = make([]*engine.RouteProfile, 0, len(rouPrfIDs))
+	*rouPrfs = make([]*utils.RouteProfile, 0, len(rouPrfIDs))
 	for _, rouPrfID := range rouPrfIDs {
-		var rouPrf *engine.RouteProfile
+		var rouPrf *utils.RouteProfile
 		rouPrf, err = admS.dm.GetRouteProfile(ctx, tnt, rouPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -114,7 +113,7 @@ func (adms *AdminSv1) GetRouteProfilesCount(ctx *context.Context, args *utils.Ar
 }
 
 // SetRouteProfile add a new Route configuration
-func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *engine.RouteProfileWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *utils.RouteProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -173,29 +172,4 @@ func (adms *AdminSv1) RemoveRouteProfile(ctx *context.Context, args *utils.Tenan
 	}
 	*reply = utils.OK
 	return nil
-}
-
-func NewRouteSv1(rS *engine.RouteS) *RouteSv1 {
-	return &RouteSv1{rS: rS}
-}
-
-// RouteSv1 exports RPC from RouteS
-type RouteSv1 struct {
-	ping
-	rS *engine.RouteS
-}
-
-// GetRoutes returns sorted list of routes for Event
-func (rS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error {
-	return rS.rS.V1GetRoutes(ctx, args, reply)
-}
-
-// GetRouteProfilesForEvent returns a list of route profiles that match for Event
-func (rS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error {
-	return rS.rS.V1GetRouteProfilesForEvent(ctx, args, reply)
-}
-
-// GetRoutesList returns sorted list of routes for Event as a string slice
-func (rS *RouteSv1) GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
-	return rS.rS.V1GetRoutesList(ctx, args, reply)
 }

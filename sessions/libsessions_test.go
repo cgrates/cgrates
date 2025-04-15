@@ -47,7 +47,7 @@ func TestLibSessionSGetSetOptsOriginID(t *testing.T) {
 		utils.Usage:           "1m23s",
 		utils.LastUsed:        "21s",
 		utils.PDD:             "300ms",
-		utils.Route:           "supplier1",
+		utils.RouteStr:        "supplier1",
 		utils.DisconnectCause: "NORMAL_DISCONNECT",
 		utils.OriginHost:      "127.0.0.1",
 	})

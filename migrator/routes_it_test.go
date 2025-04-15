@@ -179,14 +179,14 @@ func testSupITFlush(t *testing.T) {
 }
 
 func testSupITMigrateAndMove(t *testing.T) {
-	supPrfl := &engine.RouteProfile{
+	supPrfl := &utils.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SUP1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 		// Weights:           10,
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{{
+		Routes: []*utils.Route{{
 			ID:             "Sup",
 			FilterIDs:      []string{},
 			AccountIDs:     []string{"1001"},

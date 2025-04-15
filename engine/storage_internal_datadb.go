@@ -420,15 +420,15 @@ func (iDB *InternalDB) RemoveFilterDrv(_ *context.Context, tenant, id string) (e
 	return
 }
 
-func (iDB *InternalDB) GetRouteProfileDrv(_ *context.Context, tenant, id string) (spp *RouteProfile, err error) {
+func (iDB *InternalDB) GetRouteProfileDrv(_ *context.Context, tenant, id string) (spp *utils.RouteProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheRouteProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*RouteProfile), nil
+	return x.(*utils.RouteProfile), nil
 }
 
-func (iDB *InternalDB) SetRouteProfileDrv(_ *context.Context, spp *RouteProfile) (err error) {
+func (iDB *InternalDB) SetRouteProfileDrv(_ *context.Context, spp *utils.RouteProfile) (err error) {
 	if err = spp.Compile(); err != nil {
 		return
 	}

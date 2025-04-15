@@ -3782,14 +3782,14 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set a RouteProfile with our filter and check the indexes
-	rtPrf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_1",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
@@ -3895,15 +3895,15 @@ func testV1FIdxSetRouteSMoreFltrsMoreIndexing(t *testing.T) {
 		t.Error("Unexpected reply result", reply)
 	}
 	// update our RoutesProfile with our filters
-	rtPrf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_1",
 			FilterIDs: []string{"fltr_for_attr",
 				"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
@@ -4019,14 +4019,14 @@ func testV1FIdxRouteSProfileComputeIndexes(t *testing.T) {
 
 func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 	// will add more routes with our filters for matching indexes
-	rtPrf1 := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf1 := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_2",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "route1",
 					RateProfileIDs: []string{"RP_LOCAL"},
@@ -4044,14 +4044,14 @@ func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 			},
 		},
 	}
-	rtPrf2 := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf2 := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_3",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "route2",
 					RateProfileIDs: []string{"RP_LOCAL"},

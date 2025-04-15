@@ -1672,14 +1672,14 @@ func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err 
 }
 
 func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (rpp *RouteProfile, err error) {
+	transactionID string) (rpp *utils.RouteProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheRouteProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*RouteProfile), nil
+			return x.(*utils.RouteProfile), nil
 		}
 	}
 	if dm == nil {
@@ -1724,7 +1724,7 @@ func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, 
 	return
 }
 
-func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *RouteProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *utils.RouteProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1757,7 +1757,7 @@ func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *RouteProfile, 
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.RouteProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRouteProfile,
-			&RouteProfileWithAPIOpts{
+			&utils.RouteProfileWithAPIOpts{
 				RouteProfile: rpp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)})

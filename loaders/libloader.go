@@ -283,7 +283,7 @@ func newProfileFunc(lType string) func() profile {
 		}
 	case utils.MetaRoutes:
 		return func() profile {
-			return new(engine.RouteProfile)
+			return new(utils.RouteProfile)
 		}
 	case utils.MetaChargers:
 		return func() profile {

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package routes
 
 import (
 	"fmt"
@@ -24,17 +24,18 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewQOSRouteSorter(cfg *config.CGRConfig, connMgr *ConnManager) *QOSRouteSorter {
+func NewQOSRouteSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *QOSRouteSorter {
 	return &QOSRouteSorter{cfg: cfg, connMgr: connMgr}
 }
 
 // QOSSorter sorts route based on stats
 type QOSRouteSorter struct {
 	cfg     *config.CGRConfig
-	connMgr *ConnManager
+	connMgr *engine.ConnManager
 }
 
 func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
@@ -110,7 +111,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 // populatStatsForQOSRoute will query a list of statIDs and return composed metric values
 // first metric found is always returned
 func populatStatsForQOSRoute(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *ConnManager, statIDs []string, tenant string) (stsMetric map[string]*utils.Decimal, err error) {
+	connMgr *engine.ConnManager, statIDs []string, tenant string) (stsMetric map[string]*utils.Decimal, err error) {
 	type metric struct {
 		sum *utils.Decimal
 		len int

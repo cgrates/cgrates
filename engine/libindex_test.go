@@ -1317,14 +1317,14 @@ func TestUpdateFilterIndexRouteIndex(t *testing.T) {
 	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
 		t.Error(err)
 	}
-	routeProf := &RouteProfile{
+	routeProf := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ID",
 		FilterIDs:         []string{"fltr_test"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},

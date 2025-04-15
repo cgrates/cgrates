@@ -974,7 +974,7 @@ func testLoadersGetResourceProfiles(t *testing.T) {
 }
 
 func testLoadersGetRouteProfiles(t *testing.T) {
-	expRouPrfs := []*engine.RouteProfile{
+	expRouPrfs := []*utils.RouteProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "RoutePrf1",
@@ -985,7 +985,7 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 					Blocker: true,
 				},
 			},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "route1",
 					FilterIDs:      []string{"fltr1", "fltr2"},
@@ -1037,7 +1037,7 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 			ID:        "RoutePrf2",
 			FilterIDs: []string{"*string:~*req.Account:1002"},
 			Sorting:   utils.MetaLC,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "route1",
 					FilterIDs:      []string{"fltr3"},
@@ -1065,7 +1065,7 @@ func testLoadersGetRouteProfiles(t *testing.T) {
 			},
 		},
 	}
-	var rouPrfs []*engine.RouteProfile
+	var rouPrfs []*utils.RouteProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -1413,7 +1413,7 @@ func testLoadersGetRouteProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplyRtPrf engine.RouteProfile
+	var rplyRtPrf utils.RouteProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

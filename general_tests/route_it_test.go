@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,7 @@ var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
 	splSv1Rpc     *birpc.Client
-	splPrf        *engine.RouteProfileWithAPIOpts
+	splPrf        *utils.RouteProfileWithAPIOpts
 	splSv1ConfDIR string //run tests for specific configuration
 
 	sTestsSupplierSV1 = []func(t *testing.T){
@@ -131,7 +132,7 @@ func testV1SplSLoadTarrifPlans(t *testing.T) {
 }
 
 func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
-	var reply *engine.RouteProfile
+	var reply *utils.RouteProfile
 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -141,12 +142,12 @@ func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	splPrf = &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "TEST_PROFILE2",
 			Sorting: utils.MetaLC,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:         "ROUTE1",
 					AccountIDs: []string{"accc"},
@@ -195,7 +196,7 @@ func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 		},
 	}
 	experr := `SERVER_ERROR: ACCOUNTS_ERROR:NOT_FOUND`
-	var suplsReply engine.SortedRoutesList
+	var suplsReply routes.SortedRoutesList
 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -211,20 +212,20 @@ func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 }
 
 func testV1SplSAddNewSplPrf(t *testing.T) {
-	var reply *engine.RouteProfile
+	var reply *utils.RouteProfile
 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	splPrf = &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ROUTE_ResourceTest",
 			Sorting:   utils.MetaReas,
 			FilterIDs: []string{"*string:~*req.CustomField:ResourceTest"},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				//route1 will have ResourceUsage = 11
 				{
 					ID:          "route1",
@@ -488,7 +489,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 		},
 	}
 	expSupplierIDs := []string{"route3", "route2", "route1"}
-	var suplsReply engine.SortedRoutesList
+	var suplsReply routes.SortedRoutesList
 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -509,20 +510,20 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 }
 
 func testV1SplSAddNewSplPrf2(t *testing.T) {
-	var reply *engine.RouteProfile
+	var reply *utils.RouteProfile
 	if err := splSv1Rpc.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ROUTE_ResourceDescendent"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	splPrf = &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ROUTE_ResourceDescendent",
 			Sorting:   utils.MetaReds,
 			FilterIDs: []string{"*string:~*req.CustomField:ResourceDescendent"},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				//route1 will have ResourceUsage = 11
 				{
 					ID:          "route1",
@@ -598,7 +599,7 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 		},
 	}
 	expSupplierIDs := []string{"route1", "route3", "route2"}
-	var suplsReply engine.SortedRoutesList
+	var suplsReply routes.SortedRoutesList
 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -769,7 +770,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 		},
 	}
 
-	expSuppliers := []*engine.SortedRoute{
+	expSuppliers := []*routes.SortedRoute{
 		{
 			RouteID:         "route2",
 			RouteParameters: "",
@@ -796,7 +797,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 		},
 	}
 
-	var suplsReply engine.SortedRoutesList
+	var suplsReply routes.SortedRoutesList
 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)

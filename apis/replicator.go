@@ -157,7 +157,7 @@ func (rplSv1 *ReplicatorSv1) GetResourceProfile(ctx *context.Context, tntID *uti
 }
 
 // GetRouteProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetRouteProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
+func (rplSv1 *ReplicatorSv1) GetRouteProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.RouteProfile) error {
 	engine.UpdateReplicationFilters(utils.RouteProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetRouteProfileDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -384,7 +384,7 @@ func (rplSv1 *ReplicatorSv1) SetResource(ctx *context.Context, rs *engine.Resour
 }
 
 // SetRouteProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetRouteProfile(ctx *context.Context, sp *engine.RouteProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetRouteProfile(ctx *context.Context, sp *utils.RouteProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetRouteProfileDrv(ctx, sp.RouteProfile); err != nil {
 		return
 	}
