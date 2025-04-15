@@ -20,10 +20,9 @@ package services
 
 import (
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 // NewGuardianService instantiates a new GuardianService.
@@ -42,23 +41,25 @@ type GuardianService struct {
 
 // Start handles the service start.
 func (s *GuardianService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) error {
-	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
+	_, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
-			utils.CommonListenerS,
-			utils.ConnManager,
+			utils.LoggerS,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return err
 	}
-	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
-	svcs, _ := engine.NewServiceWithName(guardian.Guardian, utils.GuardianS, true)
-	for _, svc := range svcs {
-		cl.RpcRegister(svc)
+	// TODO: Replace global guardian.Guardian with local instance that should
+	// be passed around where needed.
+	// Currently only logger option is used, but other options (e.g. for
+	// timeout) could be added later.
+	opts := make([]guardian.Option, 0, 1)
+	if s.cfg.LoggerCfg().Level >= 0 {
+		opts = append(opts, guardian.WithLogger(utils.Logger))
 	}
-	cms.AddInternalConn(utils.GuardianS, svcs)
+	guardian.Guardian = guardian.New(opts...)
+
 	return nil
 }
 
@@ -69,8 +70,6 @@ func (s *GuardianService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegi
 
 // Shutdown stops the service.
 func (s *GuardianService) Shutdown(registry *servmanager.ServiceRegistry) error {
-	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
-	cl.RpcUnregisterName(utils.GuardianSv1)
 	return nil
 }
 

@@ -25,8 +25,8 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific subsystems
