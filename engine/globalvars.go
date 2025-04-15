@@ -27,17 +27,13 @@ import (
 // this file will contain all the global variable that are used by other subsystems
 
 var (
-	httpPstrTransport *http.Transport
 	connMgr           *ConnManager
+	httpPstrTransport = config.CgrConfig().HTTPCfg().ClientOpts
 )
 
-func init() {
-	httpPstrTransport = config.CgrConfig().HTTPCfg().ClientOpts
-}
-
 // SetConnManager is the exported method to set the connectionManager used when operate on an account.
-func SetConnManager(conMgr *ConnManager) {
-	connMgr = conMgr
+func SetConnManager(cm *ConnManager) {
+	connMgr = cm
 }
 
 // SetHTTPPstrTransport sets the http transport to be used by the HTTP Poster
@@ -45,7 +41,7 @@ func SetHTTPPstrTransport(pstrTransport *http.Transport) {
 	httpPstrTransport = pstrTransport
 }
 
-// GetHTTPPstrTransport gets the http transport to be used by the HTTP Poster
-func GetHTTPPstrTransport() *http.Transport {
+// HTTPPstrTransport gets the http transport to be used by the HTTP Poster
+func HTTPPstrTransport() *http.Transport {
 	return httpPstrTransport
 }
