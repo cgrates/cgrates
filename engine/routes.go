@@ -30,6 +30,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// RoutesDefaultRatio is the fallback value for route ratios when none are
+// specified. Used to avoid circular dependencies with the config package.
+var RoutesDefaultRatio = 1
+
 // Route defines routes related information used within a RouteProfile
 type Route struct {
 	ID              string // RouteID
@@ -63,33 +67,40 @@ type RouteProfileWithAPIOpts struct {
 	APIOpts map[string]any
 }
 
+// compileCacheParameters prepares route ratios for MetaLoad sorting by parsing the
+// SortingParameters and applying appropriate ratio values to each route.
 func (rp *RouteProfile) compileCacheParameters() error {
-	if rp.Sorting == utils.MetaLoad {
-		// construct the map for ratio
-		ratioMap := make(map[string]int)
-		// []string{"routeID:Ratio"}
-		for _, splIDWithRatio := range rp.SortingParameters {
-			splitted := strings.Split(splIDWithRatio, utils.ConcatenatedKeySep)
-			ratioVal, err := strconv.Atoi(splitted[1])
-			if err != nil {
-				return err
-			}
-			ratioMap[splitted[0]] = ratioVal
-		}
-		// add the ratio for each route
-		for _, route := range rp.Routes {
-			route.cacheRoute = make(map[string]any)
-			if ratioRoute, has := ratioMap[route.ID]; !has { // in case that ratio isn't defined for specific routes check for default
-				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
-					route.cacheRoute[utils.MetaRatio] = config.CgrConfig().RouteSCfg().DefaultRatio
-				} else {
-					route.cacheRoute[utils.MetaRatio] = ratioDefault
-				}
-			} else {
-				route.cacheRoute[utils.MetaRatio] = ratioRoute
-			}
-		}
+	if rp.Sorting != utils.MetaLoad {
+		return nil
 	}
+
+	// Parse route ID to ratio mappings.
+	ratioMap := make(map[string]int)
+	for _, param := range rp.SortingParameters {
+		parts := strings.Split(param, utils.ConcatenatedKeySep)
+		ratio, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return err
+		}
+		ratioMap[parts[0]] = ratio
+	}
+
+	// Get default ratio (from map or config).
+	defaultRatio := RoutesDefaultRatio
+	if mapDefault, exists := ratioMap[utils.MetaDefault]; exists {
+		defaultRatio = mapDefault
+	}
+
+	// Apply appropriate ratio to each route.
+	for _, route := range rp.Routes {
+		route.cacheRoute = make(map[string]any)
+		ratio, exists := ratioMap[route.ID]
+		if !exists {
+			ratio = defaultRatio
+		}
+		route.cacheRoute[utils.MetaRatio] = ratio
+	}
+
 	return nil
 }
 
