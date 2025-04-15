@@ -247,20 +247,20 @@ func testdoubleRemoveThresholdProfile(t *testing.T) {
 
 func testdoubleRemoveRouteProfile(t *testing.T) {
 	// check
-	var reply *engine.RouteProfile
+	var reply *utils.RouteProfile
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "ROUTE_PROFILE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// set
-	routePrf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	routePrf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:    doubleRemoveTenant,
 			ID:        "ROUTE_PROFILE",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Sorting:   utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "ROUTE",
 				},

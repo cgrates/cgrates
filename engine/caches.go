@@ -57,8 +57,8 @@ func init() {
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
 	// RouteS
-	gob.Register(new(RouteProfile))
-	gob.Register(new(RouteProfileWithAPIOpts))
+	gob.Register(new(utils.RouteProfile))
+	gob.Register(new(utils.RouteProfileWithAPIOpts))
 	// Filters
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithAPIOpts))

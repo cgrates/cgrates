@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package routes
 
 import (
 	"reflect"
@@ -25,18 +25,20 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
-	testRoutesPrfs = []*RouteProfile{
+	testRoutesPrfs = []*utils.RouteProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "RouteProfile1",
 			FilterIDs: []string{"FLTR_RPP_1"},
 			Sorting:   utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route1",
 					Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -51,7 +53,7 @@ var (
 			ID:        "RouteProfile2",
 			FilterIDs: []string{"FLTR_SUPP_2"},
 			Sorting:   utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route2",
 					Weights:         utils.DynamicWeights{{Weight: 20}},
@@ -75,7 +77,7 @@ var (
 			ID:        "RouteProfilePrefix",
 			FilterIDs: []string{"FLTR_SUPP_3"},
 			Sorting:   utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route1",
 					Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -138,11 +140,11 @@ var (
 	}
 )
 
-func prepareRoutesData(t *testing.T, dm *DataManager) {
-	if err := dm.SetFilter(context.Background(), &Filter{
+func prepareRoutesData(t *testing.T, dm *engine.DataManager) {
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -162,10 +164,10 @@ func prepareRoutesData(t *testing.T, dm *DataManager) {
 	}, true); err != nil {
 		t.Fatal(err)
 	}
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_2",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -185,10 +187,10 @@ func prepareRoutesData(t *testing.T, dm *DataManager) {
 	}, true); err != nil {
 		t.Fatal(err)
 	}
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_SUPP_3",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaPrefix,
 				Element: "~*req.Route",
@@ -216,22 +218,22 @@ func prepareRoutesData(t *testing.T, dm *DataManager) {
 
 func TestRoutesCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	prepareRoutesData(t, dmSPP)
 }
 
 func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 
 	prepareRoutesData(t, dmSPP)
 
@@ -249,12 +251,12 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 func TestRoutesSortedForEvent(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	prepareRoutesData(t, dmSPP)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
@@ -354,12 +356,12 @@ func TestRoutesSortedForEvent(t *testing.T) {
 
 func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	prepareRoutesData(t, dmSPP)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
@@ -402,12 +404,12 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 func TestRoutesSortedForEventWithOffset(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 
 	prepareRoutesData(t, dmSPP)
 
@@ -441,12 +443,12 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	prepareRoutesData(t, dmSPP)
 
 	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
@@ -489,7 +491,7 @@ func TestRoutesNewOptsGetRoutes(t *testing.T) {
 		maxCost:      10.0,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
+	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -507,7 +509,7 @@ func TestRoutesNewOptsGetRoutesFromCfg(t *testing.T) {
 		ignoreErrors: true,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
+	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -526,7 +528,7 @@ func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 		ignoreErrors: true,
 		paginator:    &utils.Paginator{},
 	}
-	sprf, err := newOptsGetRoutes(context.Background(), ev, &FilterS{}, config.CgrConfig().RouteSCfg().Opts)
+	sprf, err := newOptsGetRoutes(context.Background(), ev, &engine.FilterS{}, config.CgrConfig().RouteSCfg().Opts)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -536,15 +538,15 @@ func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 }
 
 func TestRoutesMatchWithIndexFalse(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	cfg.RouteSCfg().IndexedSelects = false
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	prepareRoutesData(t, dmSPP)
 
 	for i, spp := range testRoutesPrfs {
@@ -559,13 +561,13 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 }
 
 func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
-	Cache.Clear(nil)
-	sppTest := []*RouteProfile{
+	engine.Cache.Clear(nil)
+	sppTest := []*utils.RouteProfile{
 		{
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfile1",
 			Sorting: utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route2",
 					Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -578,7 +580,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfile2",
 			Sorting: utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route2",
 					Weights:         utils.DynamicWeights{{Weight: 20}},
@@ -601,7 +603,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfilePrefix",
 			Sorting: utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route1",
 					Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -614,7 +616,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ID:      "RouteProfilePrefix4",
 			Sorting: utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route1",
 					Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -632,12 +634,12 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 
 	for _, spp := range sppTest {
 		if err := dmSPP.SetRouteProfile(context.Background(), spp, true); err != nil {
@@ -697,12 +699,12 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 }
 
 func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -715,12 +717,12 @@ func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
 }
 
 func TestRoutesV1GetRoutesMsnStructFieldEventError(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -733,12 +735,12 @@ func TestRoutesV1GetRoutesMsnStructFieldEventError(t *testing.T) {
 }
 
 func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -752,12 +754,12 @@ func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
 }
 
 func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dmSPP := NewDataManager(data, cfg, nil)
-	routeService := NewRouteService(dmSPP, &FilterS{
-		dm: dmSPP, cfg: cfg}, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dmSPP := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
 		ID:    "CGREvent1",
@@ -770,13 +772,13 @@ func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
 }
 
 func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RPCConns()["testConn"] = config.NewDfltRPCConn()
 	cfg.RouteSCfg().AttributeSConns = []string{"testConn"}
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, cfg, connMng)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := engine.NewConnManager(cfg)
+	dmSPP := engine.NewDataManager(data, cfg, connMng)
 	routeService := NewRouteService(dmSPP, nil, cfg, connMng)
 	var reply SortedRoutesList
 	args := &utils.CGREvent{
@@ -791,14 +793,14 @@ func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 }
 
 func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, cfg, connMng)
-	fltr := &FilterS{dm: dmSPP, cfg: cfg}
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := engine.NewConnManager(cfg)
+	dmSPP := engine.NewDataManager(data, cfg, connMng)
+	fltr := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
-	var reply []*RouteProfile
+	var reply []*utils.RouteProfile
 	args := &utils.CGREvent{
 		ID:    "CGREvent1",
 		Event: map[string]any{},
@@ -810,14 +812,14 @@ func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
 }
 
 func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, cfg, connMng)
-	fltr := &FilterS{dm: dmSPP, cfg: cfg}
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := engine.NewConnManager(cfg)
+	dmSPP := engine.NewDataManager(data, cfg, connMng)
+	fltr := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
-	var reply []*RouteProfile
+	var reply []*utils.RouteProfile
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event:  map[string]any{},
@@ -829,14 +831,14 @@ func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
 }
 
 func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, cfg, connMng)
-	fltr := &FilterS{dm: dmSPP, cfg: cfg}
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := engine.NewConnManager(cfg)
+	dmSPP := engine.NewDataManager(data, cfg, connMng)
+	fltr := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltr, cfg, connMng)
-	var reply []*RouteProfile
+	var reply []*utils.RouteProfile
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CGREvent1",
@@ -847,538 +849,14 @@ func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
 	}
 }
 
-func TestRouteProfileSet(t *testing.T) {
-	rp := RouteProfile{}
-	exp := RouteProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ID",
-		FilterIDs: []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:   utils.DynamicWeights{{}},
-		Blockers: utils.DynamicBlockers{
-			{Blocker: false},
-		},
-		Sorting:           utils.MetaQOS,
-		SortingParameters: []string{"param"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}
-	if err := rp.Set([]string{}, "", false); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{"", ""}, "", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{"NotAField"}, "", false); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{"NotAField", "1"}, ":", false); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-
-	if err := rp.Set([]string{utils.Tenant}, "cgrates.org", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.ID}, "ID", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.FilterIDs}, "fltr1;*string:~*req.Account:1001", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Weights}, ";0", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Blockers}, ";false", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Sorting}, utils.MetaQOS, false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.SortingParameters}, "param", false); err != nil {
-		t.Error(err)
-	}
-
-	if err := rp.Set([]string{utils.Routes, utils.ID}, "RT1", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.FilterIDs}, "fltr1", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.AccountIDs}, "acc1", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.RateProfileIDs}, "rp1", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.ResourceIDs}, "res1", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.StatIDs}, "stat1", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.Weights}, ";0", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.Blockers}, ";true", false); err != nil {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, utils.RouteParameters}, "params", false); err != nil {
-		t.Error(err)
-	}
-
-	if err := rp.Set([]string{utils.SortingParameters, "wrong"}, "param", false); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-	if err := rp.Set([]string{utils.Routes, "wrong"}, "param", false); err != utils.ErrWrongPath {
-		t.Error(err)
-	}
-
-	if !reflect.DeepEqual(exp, rp) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(rp))
-	}
-}
-
-func TestRouteProfileAsInterface(t *testing.T) {
-	rp := RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Blockers:          utils.DynamicBlockers{{Blocker: false}},
-		Sorting:           utils.MetaQOS,
-		SortingParameters: []string{"param"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}
-	if _, err := rp.FieldAsInterface(nil); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if _, err := rp.FieldAsInterface([]string{"field"}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if _, err := rp.FieldAsInterface([]string{"field", ""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Tenant}); err != nil {
-		t.Fatal(err)
-	} else if exp := "cgrates.org"; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.ID}); err != nil {
-		t.Fatal(err)
-	} else if exp := utils.ID; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Weights}); err != nil {
-		t.Fatal(err)
-	} else if exp := ";0"; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Blockers}); err != nil {
-		t.Fatal(err)
-	} else if exp := ";false"; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.FilterIDs}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.FilterIDs; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.FilterIDs + "[0]"}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.FilterIDs[0]; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.SortingParameters}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.SortingParameters; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.SortingParameters + "[0]"}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.SortingParameters[0]; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Sorting}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Sorting; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]"}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0]; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if _, err := rp.FieldAsInterface([]string{utils.Routes + "[4]", ""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if _, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", ""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if _, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", "", ""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.ID}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].ID; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.Weights}); err != nil {
-		t.Fatal(err)
-	} else if exp := ";0"; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.Blockers}); err != nil {
-		t.Fatal(err)
-	} else if exp := ";true"; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.RouteParameters}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].RouteParameters; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.FilterIDs}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].FilterIDs; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.FilterIDs + "[0]"}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].FilterIDs[0]; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.AccountIDs}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].AccountIDs; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.AccountIDs + "[0]"}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].AccountIDs[0]; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.RateProfileIDs}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].RateProfileIDs; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.RateProfileIDs + "[0]"}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].RateProfileIDs[0]; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.ResourceIDs}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].ResourceIDs; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.ResourceIDs + "[0]"}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].ResourceIDs[0]; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.StatIDs}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].StatIDs; !reflect.DeepEqual(exp, val) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, err := rp.FieldAsInterface([]string{utils.Routes + "[0]", utils.StatIDs + "[0]"}); err != nil {
-		t.Fatal(err)
-	} else if exp := rp.Routes[0].StatIDs[0]; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-
-	if _, err := rp.FieldAsString([]string{""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if val, err := rp.FieldAsString([]string{utils.ID}); err != nil {
-		t.Fatal(err)
-	} else if exp := "ID"; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, exp := rp.String(), utils.ToJSON(rp); exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-
-	if _, err := rp.Routes[0].FieldAsString([]string{""}); err != utils.ErrNotFound {
-		t.Fatal(err)
-	}
-	if val, err := rp.Routes[0].FieldAsString([]string{utils.ID}); err != nil {
-		t.Fatal(err)
-	} else if exp := "RT1"; exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-	if val, exp := rp.Routes[0].String(), utils.ToJSON(rp.Routes[0]); exp != val {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(val))
-	}
-}
-
-func TestRouteProfileMerge(t *testing.T) {
-	dp := &RouteProfile{}
-	exp := &RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Sorting:           utils.MetaQOS,
-		SortingParameters: []string{"param"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}
-	if dp.Merge(&RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Sorting:           utils.MetaQOS,
-		SortingParameters: []string{"param"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}); !reflect.DeepEqual(exp, dp) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
-	}
-}
-
-func TestRouteMerge(t *testing.T) {
-
-	route := &Route{}
-
-	routeV2 := &Route{
-		ID:              "RouteId",
-		RouteParameters: "RouteParam",
-		Weights:         utils.DynamicWeights{{Weight: 10}},
-		Blockers:        utils.DynamicBlockers{{Blocker: false}},
-		FilterIDs:       []string{"FltrId"},
-		AccountIDs:      []string{"AccId"},
-		RateProfileIDs:  []string{"RateProfileId"},
-		ResourceIDs:     []string{"ResourceId"},
-		StatIDs:         []string{"StatId"},
-	}
-	exp := routeV2
-
-	route.Merge(routeV2)
-	if !reflect.DeepEqual(route, exp) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(route))
-	}
-}
-
-func TestRouteProfileCompileCacheParametersErrParse(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
-	Cache.Clear(nil)
-
-	rp := &RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Sorting:           utils.MetaLoad,
-		SortingParameters: []string{"sort:param"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}
-
-	expErr := `strconv.Atoi: parsing "param": invalid syntax`
-	if err := rp.compileCacheParameters(); err.Error() != expErr || err == nil {
-		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
-	}
-}
-
-func TestRouteProfileCompileCacheParametersConfigRatio(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
-	Cache.Clear(nil)
-
-	rp := &RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Sorting:           utils.MetaLoad,
-		SortingParameters: []string{"param:1"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}
-
-	expErr := `strconv.Atoi: parsing "param": invalid syntax`
-	if err := rp.compileCacheParameters(); err != nil {
-		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
-	}
-}
-
-func TestRouteProfileCompileCacheParametersDefaultRatio(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
-	Cache.Clear(nil)
-
-	rp := &RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Sorting:           utils.MetaLoad,
-		SortingParameters: []string{"*default:1"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}
-
-	expErr := `strconv.Atoi: parsing "param": invalid syntax`
-	if err := rp.compileCacheParameters(); err != nil {
-		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
-	}
-}
-
-func TestRouteProfileCompileCacheParametersRouteRatio(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-
-	Cache.Clear(nil)
-
-	rp := &RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Sorting:           utils.MetaLoad,
-		SortingParameters: []string{"RT1:1"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}
-
-	expErr := `strconv.Atoi: parsing "param": invalid syntax`
-	if err := rp.compileCacheParameters(); err != nil {
-		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
-	}
-}
-
 func TestRouteSV1GetRoutesListErr(t *testing.T) {
-	Cache.Clear(nil)
+	engine.Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	connMng := NewConnManager(cfg)
-	dmSPP := NewDataManager(data, cfg, connMng)
-	fltr := &FilterS{dm: dmSPP, cfg: cfg}
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	connMng := engine.NewConnManager(cfg)
+	dmSPP := engine.NewDataManager(data, cfg, connMng)
+	fltr := engine.NewFilterS(cfg, nil, dmSPP)
 
 	var reply *[]string
 	rpS := NewRouteService(dmSPP, fltr, cfg, connMng)
@@ -1392,14 +870,14 @@ func TestRouteSV1GetRoutesListErr(t *testing.T) {
 func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg, cM)
-	fltrS := NewFilterS(cfg, cM, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(data, cfg, cM)
+	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
 	ev := []*utils.CGREvent{
@@ -1421,7 +899,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 
 	prepareRoutesData(t, dm)
 
-	if err := Cache.Set(context.Background(), utils.CacheRouteProfiles, "cgrates.org:RouteProfile1", nil, []string{}, true, utils.NonTransactional); err != nil {
+	if err := engine.Cache.Set(context.Background(), utils.CacheRouteProfiles, "cgrates.org:RouteProfile1", nil, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 
@@ -1431,11 +909,23 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 
 }
 
+type ccMock struct {
+	calls map[string]func(ctx *context.Context, args any, reply any) error
+}
+
+func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+	if call, has := ccM.calls[serviceMethod]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return call(ctx, args, reply)
+	}
+}
+
 func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 
 	cfgtmp := config.CgrConfig()
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 		config.SetCgrConfig(cfgtmp)
 	}()
 
@@ -1444,7 +934,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
 	config.SetCgrConfig(cfg)
 
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -1454,11 +944,11 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
-	dm := NewDataManager(data, cfg, cM)
-	fltrS := NewFilterS(cfg, cM, dm)
+	dm := engine.NewDataManager(data, cfg, cM)
+	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
 	ev := []*utils.CGREvent{
@@ -1478,12 +968,12 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 		},
 	}
 
-	Cache = NewCacheS(cfg, dm, cM, nil)
+	engine.Cache = engine.NewCacheS(cfg, dm, cM, nil)
 
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -1517,15 +1007,15 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg, cM)
-	fltrS := NewFilterS(cfg, cM, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(data, cfg, cM)
+	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
 	ev := []*utils.CGREvent{
@@ -1545,10 +1035,10 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    "bad input",
 				Element: "bad input",
@@ -1588,15 +1078,15 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg, cM)
-	fltrS := NewFilterS(cfg, cM, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(data, cfg, cM)
+	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
 	ev := []*utils.CGREvent{
@@ -1615,13 +1105,13 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 			},
 		},
 	}
-	rprof := []*RouteProfile{
+	rprof := []*utils.RouteProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "RouteProfile1",
 			FilterIDs: []string{"FLTR_RPP_1"},
 			Sorting:   utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route1",
 					Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -1635,10 +1125,10 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 				},
 			},
 		}}
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -1673,15 +1163,15 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
-	Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+	engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg, cM)
-	fltrS := NewFilterS(cfg, cM, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(data, cfg, cM)
+	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
 	ev := []*utils.CGREvent{
@@ -1700,13 +1190,13 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 			},
 		},
 	}
-	rprof := []*RouteProfile{
+	rprof := []*utils.RouteProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "RouteProfile1",
 			FilterIDs: []string{"FLTR_RPP_1"},
 			Sorting:   utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route1",
 					Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -1725,10 +1215,10 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 				},
 			},
 		}}
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -1767,9 +1257,9 @@ func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 		config.NewDynamicBoolOpt([]string{"*string.invalid:filter"}, "cgrates.org", false, nil),
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1796,9 +1286,9 @@ func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1825,9 +1315,9 @@ func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1854,9 +1344,9 @@ func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1887,9 +1377,9 @@ func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
 		},
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1916,9 +1406,9 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -1941,10 +1431,10 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -1965,12 +1455,12 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RouteProfile1",
 		FilterIDs: []string{"FLTR_RPP_1"},
 		Sorting:   utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2001,9 +1491,9 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2024,10 +1514,10 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -2048,12 +1538,12 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RouteProfile1",
 		FilterIDs: []string{"FLTR_RPP_1"},
 		Sorting:   utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2084,9 +1574,9 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 		config.NewDynamicBoolOpt([]string{"*string.invalid:filter"}, "cgrates.org", false, nil),
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2107,10 +1597,10 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -2131,12 +1621,12 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RouteProfile1",
 		FilterIDs: []string{"FLTR_RPP_1"},
 		Sorting:   utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2170,9 +1660,9 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(2), nil),
 	}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2193,10 +1683,10 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    utils.MetaString,
 				Element: "~*req.Route",
@@ -2217,12 +1707,12 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RouteProfile1",
 		FilterIDs: []string{"FLTR_RPP_1"},
 		Sorting:   utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2253,9 +1743,9 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 	}
 	cfg.RouteSCfg().AttributeSConns = []string{"testConn"}
 
-	dataDB := NewInternalDB(nil, nil, nil)
-	dm := NewDataManager(dataDB, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	dataDB := engine.NewInternalDB(nil, nil, nil)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2289,22 +1779,22 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RPCConns()["testConn"] = config.NewDfltRPCConn()
 	cfg.RouteSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 		utils.MetaAttributes)}
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				*reply.(*AttrSProcessEventReply) = AttrSProcessEventReply{
-					AlteredFields: []*FieldsAltered{{
+				*reply.(*engine.AttrSProcessEventReply) = engine.AttrSProcessEventReply{
+					AlteredFields: []*engine.FieldsAltered{{
 						Fields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{
@@ -2327,11 +1817,11 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), utils.AttributeSv1, cc)
 
-	dm := NewDataManager(data, cfg, cM)
-	fS := NewFilterS(cfg, cM, dm)
+	dm := engine.NewDataManager(data, cfg, cM)
+	fS := engine.NewFilterS(cfg, cM, dm)
 	routeService := NewRouteService(dm, fS, cfg, cM)
 
 	args := &utils.CGREvent{
@@ -2349,11 +1839,11 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2397,16 +1887,16 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(4), nil),
 	}
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2429,11 +1919,11 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2461,14 +1951,14 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	cM := NewConnManager(cfg)
-	dm := NewDataManager(data, cfg, cM)
-	fltrS := NewFilterS(cfg, cM, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	cM := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(data, cfg, cM)
+	fltrS := engine.NewFilterS(cfg, cM, dm)
 	rpS := NewRouteService(dm, fltrS, cfg, cM)
 
 	args := &utils.CGREvent{
@@ -2486,10 +1976,10 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 		},
 	}
 
-	if err := dm.SetFilter(context.Background(), &Filter{
+	if err := dm.SetFilter(context.Background(), &engine.Filter{
 		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:     "FLTR_RPP_1",
-		Rules: []*FilterRule{
+		Rules: []*engine.FilterRule{
 			{
 				Type:    "bad input",
 				Element: "bad input",
@@ -2519,7 +2009,7 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var reply []*RouteProfile
+	var reply []*utils.RouteProfile
 
 	expErr := "SERVER_ERROR: NOT_IMPLEMENTED:bad input"
 	err := rpS.V1GetRouteProfilesForEvent(context.Background(), args, &reply)
@@ -2533,14 +2023,14 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	rpS := NewRouteService(dm, &FilterS{
-		dm: dm, cfg: cfg}, cfg, nil)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	rpS := NewRouteService(dm, fltrs, cfg, nil)
 
 	prepareRoutesData(t, dm)
 
-	exp := []*RouteProfile{
+	exp := []*utils.RouteProfile{
 		{
 			Tenant:    "cgrates.org",
 			ID:        "RouteProfile1",
@@ -2556,7 +2046,7 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 				},
 			},
 			Sorting: utils.MetaWeight,
-			Routes: []*Route{
+			Routes: []*utils.Route{
 				{
 					ID:              "route1",
 					Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2566,7 +2056,7 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 		},
 	}
 
-	var reply []*RouteProfile
+	var reply []*utils.RouteProfile
 	err := rpS.V1GetRouteProfilesForEvent(context.Background(), testRoutesArgs[0], &reply)
 	if err != nil {
 		t.Error(err)
@@ -2581,13 +2071,13 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2610,12 +2100,12 @@ func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
 
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				FilterIDs:       []string{"bad fltr"},
@@ -2639,13 +2129,13 @@ func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2670,11 +2160,11 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				FilterIDs:       []string{"*string:~*req.Account:1010", "*string:~*vars.Field1:Val1"},
@@ -2703,13 +2193,13 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2732,12 +2222,12 @@ func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
 
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{
@@ -2765,13 +2255,13 @@ func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := &RouteS{
 		dm:      dm,
 		fltrS:   fS,
@@ -2794,12 +2284,12 @@ func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
 
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{
@@ -2832,13 +2322,13 @@ func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 
 	args := &utils.CGREvent{
@@ -2855,11 +2345,11 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2894,7 +2384,7 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -2902,9 +2392,9 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(10), nil),
 	}
 
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 
 	args := &utils.CGREvent{
@@ -2922,11 +2412,11 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2951,9 +2441,9 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 func TestRouteSV1GetRoutesListOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fS := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fS := engine.NewFilterS(cfg, nil, dm)
 	routeService := NewRouteService(dm, fS, cfg, nil)
 
 	args := &utils.CGREvent{
@@ -2971,11 +2461,11 @@ func TestRouteSV1GetRoutesListOK(t *testing.T) {
 		},
 	}
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 		Tenant:  "cgrates.org",
 		ID:      "RouteProfile1",
 		Sorting: utils.MetaWeight,
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "route1",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -2998,64 +2488,5 @@ func TestRouteSV1GetRoutesListOK(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(reply)) {
 		t.Errorf("Expecting: \n%+v,\n received: \n%+v", utils.ToJSON(exp), utils.ToJSON(reply))
-	}
-
-}
-
-func TestRouteProfileMergeWithRPRoutes(t *testing.T) {
-	dp := &RouteProfile{
-		Routes: []*Route{
-			{
-				ID: "RT1",
-			},
-		},
-	}
-	exp := &RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Sorting:           utils.MetaQOS,
-		SortingParameters: []string{"param"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}
-	if dp.Merge(&RouteProfile{
-		Tenant:            "cgrates.org",
-		ID:                "ID",
-		FilterIDs:         []string{"fltr1", "*string:~*req.Account:1001"},
-		Weights:           utils.DynamicWeights{{}},
-		Sorting:           utils.MetaQOS,
-		SortingParameters: []string{"param"},
-		Routes: []*Route{{
-			ID:             "RT1",
-			FilterIDs:      []string{"fltr1"},
-			AccountIDs:     []string{"acc1"},
-			RateProfileIDs: []string{"rp1"},
-			ResourceIDs:    []string{"res1"},
-			StatIDs:        []string{"stat1"},
-			Weights:        utils.DynamicWeights{{}},
-			Blockers: utils.DynamicBlockers{
-				{
-					Blocker: true,
-				},
-			},
-			RouteParameters: "params",
-		}},
-	}); !reflect.DeepEqual(exp, dp) {
-		t.Errorf("Expected %v \n but received \n %v", utils.ToJSON(exp), utils.ToJSON(dp))
 	}
 }

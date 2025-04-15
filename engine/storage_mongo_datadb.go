@@ -1053,8 +1053,8 @@ func (ms *MongoStorage) RemoveFilterDrv(ctx *context.Context, tenant, id string)
 	})
 }
 
-func (ms *MongoStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (*RouteProfile, error) {
-	routeProfile := new(RouteProfile)
+func (ms *MongoStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (*utils.RouteProfile, error) {
+	routeProfile := new(utils.RouteProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColRts).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(routeProfile)
@@ -1066,7 +1066,7 @@ func (ms *MongoStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id stri
 	return routeProfile, err
 }
 
-func (ms *MongoStorage) SetRouteProfileDrv(ctx *context.Context, r *RouteProfile) error {
+func (ms *MongoStorage) SetRouteProfileDrv(ctx *context.Context, r *utils.RouteProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColRts).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},

@@ -260,7 +260,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Routes
-	rte := &engine.RouteProfile{
+	rte := &utils.RouteProfile{
 		ID:     "ROUTE_2003",
 		Tenant: "cgrates.org",
 		Weights: utils.DynamicWeights{
@@ -270,7 +270,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{

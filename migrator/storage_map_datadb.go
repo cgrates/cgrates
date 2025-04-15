@@ -189,6 +189,6 @@ func (iDBMig *internalMigrator) getV1ChargerProfile() (v1chrPrf *utils.ChargerPr
 	return nil, utils.ErrNotImplemented
 }
 
-func (iDBMig *internalMigrator) getV1RouteProfile() (v1chrPrf *engine.RouteProfile, err error) {
+func (iDBMig *internalMigrator) getV1RouteProfile() (v1chrPrf *utils.RouteProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }

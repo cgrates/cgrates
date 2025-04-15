@@ -1308,12 +1308,12 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 	return
 }
 
-func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RouteProfile, err error) {
-	rp = &RouteProfile{
+func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *utils.RouteProfile, err error) {
+	rp = &utils.RouteProfile{
 		Tenant:            tpRp.Tenant,
 		ID:                tpRp.ID,
 		Sorting:           tpRp.Sorting,
-		Routes:            make([]*Route, len(tpRp.Routes)),
+		Routes:            make([]*utils.Route, len(tpRp.Routes)),
 		SortingParameters: make([]string, len(tpRp.SortingParameters)),
 		FilterIDs:         make([]string, len(tpRp.FilterIDs)),
 	}
@@ -1332,7 +1332,7 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 	copy(rp.SortingParameters, tpRp.SortingParameters)
 	copy(rp.FilterIDs, tpRp.FilterIDs)
 	for i, route := range tpRp.Routes {
-		rp.Routes[i] = &Route{
+		rp.Routes[i] = &utils.Route{
 			ID:              route.ID,
 			RateProfileIDs:  route.RateProfileIDs,
 			AccountIDs:      route.AccountIDs,
@@ -1357,7 +1357,7 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 	return rp, nil
 }
 
-func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
+func RouteProfileToAPI(rp *utils.RouteProfile) (tpRp *utils.TPRouteProfile) {
 	tpRp = &utils.TPRouteProfile{
 		Tenant:            rp.Tenant,
 		ID:                rp.ID,

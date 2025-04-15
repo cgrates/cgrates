@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package routes
 
 import (
 	"bytes"
@@ -28,16 +28,17 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // func TestPopulateCostForRoutesConnRefused(t *testing.T) {
 // 	cfg := config.NewDefaultCGRConfig()
-// 	connMgr := NewConnManager(cfg)
-// 	fltrS := NewFilterS(cfg, connMgr, nil)
+// 	connMgr := engine.NewConnManager(cfg)
+// 	fltrS := engine.NewFilterS(cfg, connMgr, nil)
 // 	routes := map[string]*RouteWithWeight{
 // 		"RW": {
-// 			Route: &Route{
+// 			Route: &utils.Route{
 // 				ID:             "local",
 // 				RateProfileIDs: []string{"RP_LOCAL"},
 // 			},
@@ -65,8 +66,8 @@ import (
 func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
-	fltrS := NewFilterS(cfg, cM, nil)
+	cM := engine.NewConnManager(cfg)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	lcs := NewLeastCostSorter(cfg, cM, fltrS)
 
 	expErr := "MANDATORY_IE_MISSING: [connIDs]"
@@ -92,15 +93,15 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
-	fltrS := NewFilterS(cfg, cM, nil)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	lcs := NewLeastCostSorter(cfg, cM, fltrS)
 
 	routeWW := map[string]*RouteWithWeight{
 		"RW1": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:              "RouteId",
 				RouteParameters: "RouteParam",
 				Weights:         utils.DynamicWeights{{Weight: 1}},
@@ -113,7 +114,7 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 			Weight: 1,
 		},
 		"RW2": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:              "RouteId2",
 				RouteParameters: "RouteParam2",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -167,8 +168,8 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 func TestHightCostSorterSortRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
-	fltrS := NewFilterS(cfg, cM, nil)
+	cM := engine.NewConnManager(cfg)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	hcs := NewHighestCostSorter(cfg, cM, fltrS)
 
 	expErr := "MANDATORY_IE_MISSING: [connIDs]"
@@ -194,15 +195,15 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
-	fltrS := NewFilterS(cfg, cM, nil)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	hcs := NewHighestCostSorter(cfg, cM, fltrS)
 
 	routeWW := map[string]*RouteWithWeight{
 		"RW1": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:              "RouteId",
 				RouteParameters: "RouteParam",
 				Weights:         utils.DynamicWeights{{Weight: 1}},
@@ -215,7 +216,7 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 			Weight: 10,
 		},
 		"RW2": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:              "RouteId2",
 				RouteParameters: "RouteParam2",
 				Weights:         utils.DynamicWeights{{Weight: 10}},
@@ -281,11 +282,11 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 	}
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 	cfg.RouteSCfg().Opts.Usage = dynOpts
-	cM := NewConnManager(cfg)
-	fltrS := NewFilterS(cfg, cM, nil)
+	cM := engine.NewConnManager(cfg)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:             "local",
 				RateProfileIDs: []string{"RP_LOCAL"},
 			},
@@ -313,17 +314,17 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().RateSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)}
 
-	cM := NewConnManager(cfg)
-	fltrS := NewFilterS(cfg, cM, nil)
+	cM := engine.NewConnManager(cfg)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:             "local",
 				RateProfileIDs: []string{},
 				AccountIDs:     []string{},
@@ -352,7 +353,7 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	var buf bytes.Buffer
@@ -372,13 +373,13 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
-	fltrS := NewFilterS(cfg, cM, nil)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:         "local",
 				AccountIDs: []string{"accID1"},
 			},
@@ -414,7 +415,7 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -431,13 +432,13 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
-	fltrS := NewFilterS(cfg, cM, nil)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:         "local",
 				AccountIDs: []string{"accID1"},
 			},
@@ -464,7 +465,7 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -490,13 +491,13 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 			},
 		},
 	}
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
-	fltrS := NewFilterS(cfg, cM, nil)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:         "local",
 				AccountIDs: []string{"accID1"},
 			},
@@ -527,7 +528,7 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -574,13 +575,13 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 			},
 		},
 	}
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
-	fltrS := NewFilterS(cfg, cM, nil)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:         "local",
 				AccountIDs: []string{"accID1"},
 			},
@@ -621,7 +622,7 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -636,13 +637,13 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 			},
 		},
 	}
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, cc)
 
-	fltrS := NewFilterS(cfg, cM, nil)
+	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:             "local",
 				RateProfileIDs: []string{"RPID1"},
 			},

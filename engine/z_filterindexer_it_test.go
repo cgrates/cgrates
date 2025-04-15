@@ -1760,12 +1760,12 @@ func testITTestIndexingWithEmptyFltrID(t *testing.T) {
 }
 
 func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
-	splProfile := &RouteProfile{
+	splProfile := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "SPL_Weight",
 		Sorting:           "*weight",
 		SortingParameters: []string{},
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "supplier1",
 				FilterIDs:       []string{""},
@@ -1779,12 +1779,12 @@ func testITTestIndexingWithEmptyFltrID2(t *testing.T) {
 		},
 		Weights: utils.DynamicWeights{{Weight: 20}},
 	}
-	splProfile2 := &RouteProfile{
+	splProfile2 := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "SPL_Weight2",
 		Sorting:           "*weight",
 		SortingParameters: []string{},
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "supplier1",
 				FilterIDs:       []string{""},

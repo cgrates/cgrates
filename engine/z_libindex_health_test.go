@@ -682,7 +682,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 	dm := NewDataManager(db, cfg, nil)
 
 	// we will set this routes but without indexing
-	rtPrf := &RouteProfile{
+	rtPrf := &utils.RouteProfile{
 		Tenant: "routes.com",
 		ID:     "ROUTE_ACNT_1001",
 		FilterIDs: []string{"*string:~*opts.*apikey:rts1234",
@@ -692,7 +692,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 			"*suffix:BrokenFilter:Invalid"},
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:      "route1",
 				Weights: utils.DynamicWeights{{Weight: 10}},
@@ -794,7 +794,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 	}
 
 	//we will use an inexisting Filter(not inline) for the same RouteProfile
-	rtPrf = &RouteProfile{
+	rtPrf = &utils.RouteProfile{
 		Tenant: "routes.com",
 		ID:     "ROUTE_ACNT_1001",
 		FilterIDs: []string{"*string:~*opts.*apikey:rts1234",
@@ -806,7 +806,7 @@ func TestHealthIndexRoutes(t *testing.T) {
 		},
 		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:      "route1",
 				Weights: utils.DynamicWeights{{Weight: 10}},

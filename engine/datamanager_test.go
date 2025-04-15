@@ -2410,7 +2410,7 @@ func TestDMCacheDataFromDBRouteProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	routeProf := &RouteProfile{
+	routeProf := &utils.RouteProfile{
 
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
@@ -2418,7 +2418,7 @@ func TestDMCacheDataFromDBRouteProfilePrefix(t *testing.T) {
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -5739,7 +5739,7 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
@@ -5747,7 +5747,7 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -5780,8 +5780,8 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) { return rp, utils.ErrNotFound },
-		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *RouteProfile) error { return utils.ErrNotImplemented },
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rp, utils.ErrNotFound },
+		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *utils.RouteProfile) error { return utils.ErrNotImplemented },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -5793,7 +5793,7 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 
 func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
@@ -5801,7 +5801,7 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -5846,7 +5846,7 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) { return rp, utils.ErrNotFound },
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rp, utils.ErrNotFound },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -5887,7 +5887,7 @@ func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg, cM)
 
-	rp := &RouteProfile{
+	rp := &utils.RouteProfile{
 
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
@@ -5895,7 +5895,7 @@ func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -5926,7 +5926,7 @@ func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 
 func TestDMSetRouteProfileNoDMErr(t *testing.T) {
 	var dm *DataManager
-	err := dm.SetRouteProfile(context.Background(), &RouteProfile{}, false)
+	err := dm.SetRouteProfile(context.Background(), &utils.RouteProfile{}, false)
 	if err != utils.ErrNoDatabaseConn {
 		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
 	}
@@ -5945,14 +5945,14 @@ func TestDMSetRouteProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{":::"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -5985,21 +5985,21 @@ func TestDMSetRouteProfileGetRouteProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) {
-			return &RouteProfile{}, utils.ErrNotImplemented
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+			return &utils.RouteProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"FilterID1"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6031,22 +6031,22 @@ func TestDMSetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) {
-			return &RouteProfile{}, nil
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+			return &utils.RouteProfile{}, nil
 		},
-		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *RouteProfile) error { return utils.ErrNotImplemented },
+		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *utils.RouteProfile) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"FilterID1"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6078,22 +6078,22 @@ func TestDMSetRouteProfileUpdatedIndexesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) {
-			return &RouteProfile{}, nil
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+			return &utils.RouteProfile{}, nil
 		},
-		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *RouteProfile) error { return nil },
+		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *utils.RouteProfile) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6125,14 +6125,14 @@ func TestDMSetRouteProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6165,8 +6165,8 @@ func TestDMSetRouteProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) { return rpp, nil },
-		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *RouteProfile) error { return nil },
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
+		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *utils.RouteProfile) error { return nil },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -6195,21 +6195,21 @@ func TestDMRemoveRouteProfileGetRouteProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) {
-			return &RouteProfile{}, utils.ErrNotImplemented
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+			return &utils.RouteProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"FilterID1"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6239,21 +6239,21 @@ func TestDMRemoveRouteProfileRemoveRouteProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*RouteProfile, error) {
-			return &RouteProfile{}, nil
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+			return &utils.RouteProfile{}, nil
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"FilterID1"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6301,20 +6301,22 @@ func TestDMRemoveRouteProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetRouteProfileDrvF:    func(ctx *context.Context, tnt, id string) (*RouteProfile, error) { return &RouteProfile{}, nil },
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+			return &utils.RouteProfile{}, nil
+		},
 		RemoveRouteProfileDrvF: func(ctx *context.Context, tnt, id string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"FilterID1"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6342,14 +6344,14 @@ func TestDMRemoveRouteProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	Cache.Clear(nil)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"fltrID"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6368,7 +6370,7 @@ func TestDMRemoveRouteProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetRouteProfileDrvF:    func(ctx *context.Context, tnt, id string) (*RouteProfile, error) { return rpp, nil },
+		GetRouteProfileDrvF:    func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
 		RemoveRouteProfileDrvF: func(ctx *context.Context, tnt, id string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
@@ -6389,14 +6391,14 @@ func TestDMRemoveRouteProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	rpp := &RouteProfile{
+	rpp := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RP_1",
 		FilterIDs:         []string{"fltrID"},
 		Weights:           utils.DynamicWeights{{}},
 		Sorting:           utils.MetaQOS,
 		SortingParameters: []string{"param"},
-		Routes: []*Route{{
+		Routes: []*utils.Route{{
 			ID:             "RT1",
 			FilterIDs:      []string{"fltr1"},
 			AccountIDs:     []string{"acc1"},
@@ -6429,7 +6431,7 @@ func TestDMRemoveRouteProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetRouteProfileDrvF:    func(ctx *context.Context, tnt, id string) (*RouteProfile, error) { return rpp, nil },
+		GetRouteProfileDrvF:    func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
 		RemoveRouteProfileDrvF: func(ctx *context.Context, tnt, id string) error { return nil },
 	}
 	dm := NewDataManager(data, cfg, cM)

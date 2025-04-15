@@ -137,10 +137,10 @@ package general_tests
 // 		t.Fatal(err)
 // 	}
 // 	expected := sessions.V1AuthorizeReply{
-// 		RouteProfiles: engine.SortedRoutesList{{
+// 		RouteProfiles: routes.SortedRoutesList{{
 // 			ProfileID: "ROUTE_LEASTCOST_1",
 // 			Sorting:   "*lc",
-// 			Routes: []*engine.SortedRoute{
+// 			Routes: []*routes.SortedRoute{
 // 				{
 // 					RouteID:         "route3",
 // 					RouteParameters: "",
@@ -187,10 +187,10 @@ package general_tests
 // 	}
 
 // 	expected = sessions.V1AuthorizeReply{
-// 		RouteProfiles: engine.SortedRoutesList{{
+// 		RouteProfiles: routes.SortedRoutesList{{
 // 			ProfileID: "ROUTE_LEASTCOST_1",
 // 			Sorting:   "*lc",
-// 			Routes: []*engine.SortedRoute{
+// 			Routes: []*routes.SortedRoute{
 // 				{
 // 					RouteID:         "route3",
 // 					RouteParameters: "",
@@ -269,10 +269,10 @@ package general_tests
 // 		t.Fatal(err)
 // 	}
 // 	expected := sessions.V1ProcessMessageReply{
-// 		RouteProfiles: engine.SortedRoutesList{{
+// 		RouteProfiles: routes.SortedRoutesList{{
 // 			ProfileID: "ROUTE_LEASTCOST_1",
 // 			Sorting:   "*lc",
-// 			Routes: []*engine.SortedRoute{
+// 			Routes: []*routes.SortedRoute{
 // 				{
 // 					RouteID:         "route3",
 // 					RouteParameters: "",
@@ -320,10 +320,10 @@ package general_tests
 // 	}
 
 // 	expected = sessions.V1ProcessMessageReply{
-// 		RouteProfiles: engine.SortedRoutesList{{
+// 		RouteProfiles: routes.SortedRoutesList{{
 // 			ProfileID: "ROUTE_LEASTCOST_1",
 // 			Sorting:   "*lc",
-// 			Routes: []*engine.SortedRoute{
+// 			Routes: []*routes.SortedRoute{
 // 				{
 // 					RouteID:         "route3",
 // 					RouteParameters: "",
@@ -403,11 +403,11 @@ package general_tests
 // 		t.Fatal(err)
 // 	}
 // 	expected := sessions.V1ProcessEventReply{
-// 		RouteProfiles: map[string]engine.SortedRoutesList{
+// 		RouteProfiles: map[string]routes.SortedRoutesList{
 // 			utils.MetaRaw: {{
 // 				ProfileID: "ROUTE_LEASTCOST_1",
 // 				Sorting:   "*lc",
-// 				Routes: []*engine.SortedRoute{
+// 				Routes: []*routes.SortedRoute{
 // 					{
 // 						RouteID:         "route3",
 // 						RouteParameters: "",
@@ -458,11 +458,11 @@ package general_tests
 // 	}
 
 // 	expected = sessions.V1ProcessEventReply{
-// 		RouteProfiles: map[string]engine.SortedRoutesList{
+// 		RouteProfiles: map[string]routes.SortedRoutesList{
 // 			utils.MetaRaw: {{
 // 				ProfileID: "ROUTE_LEASTCOST_1",
 // 				Sorting:   "*lc",
-// 				Routes: []*engine.SortedRoute{
+// 				Routes: []*routes.SortedRoute{
 // 					{
 // 						RouteID:         "route3",
 // 						RouteParameters: "",

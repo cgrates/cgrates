@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package routes
 
 import (
 	"reflect"
@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1563,7 +1564,7 @@ func TestSortedRoutesListAsNavigableMap(t *testing.T) {
 
 func TestRouteLazyPassErr(t *testing.T) {
 
-	filters := []*FilterRule{
+	filters := []*engine.FilterRule{
 		{
 			Type:    "nr1",
 			Element: "nr1",
@@ -1591,31 +1592,15 @@ func TestRouteLazyPassErr(t *testing.T) {
 }
 
 func TestRouteLazyPassTrue(t *testing.T) {
-
-	rsrParse := &utils.RSRParser{
-		Rules: "~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
-	}
-	if err := rsrParse.Compile(); err != nil {
-		t.Error(err)
-	}
-	valParse := utils.RSRParsers{
-		&utils.RSRParser{
-			Rules: "~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
-		},
-	}
-	if err := valParse.Compile(); err != nil {
-		t.Error(err)
+	filter, err := engine.NewFilterFromInline(
+		"cgrates.org",
+		"*string:~*opts.<~*opts.*originID;~*req.RunID;-Cost>:~*opts.<~*opts.*originID;~*req.RunID;-Cost>",
+	)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	filters := []*FilterRule{
-		{
-			Type:       utils.MetaString,
-			Element:    "~*req.Charger",
-			Values:     []string{"ChargerProfile1"},
-			rsrElement: rsrParse,
-			rsrValues:  valParse,
-		},
-	}
+	rules := filter.Rules
 
 	ev := &utils.CGREvent{
 		ID:     "cgrId",
@@ -1640,8 +1625,12 @@ func TestRouteLazyPassTrue(t *testing.T) {
 		},
 	}
 
-	if ok, err := routeLazyPass(context.Background(), filters, ev,
-		data, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}, []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}, nil, nil); err != nil {
+	if ok, err := routeLazyPass(context.Background(), rules, ev,
+		data,
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)},
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+		nil, nil); err != nil {
 		t.Error(err)
 	} else if !ok {
 		t.Error("Returned false, expecting true")

@@ -353,8 +353,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("ReplicatorSv1SetRouteProfile", func(t *testing.T) {
 
-		eRoutePrf := &engine.RouteProfileWithAPIOpts{
-			RouteProfile: &engine.RouteProfile{
+		eRoutePrf := &utils.RouteProfileWithAPIOpts{
+			RouteProfile: &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "ROUTE_2",
 			},

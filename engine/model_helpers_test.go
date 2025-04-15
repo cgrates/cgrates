@@ -2827,10 +2827,10 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 }
 
 func TestRouteProfileToAPICase1(t *testing.T) {
-	structTest := &RouteProfile{
+	structTest := &utils.RouteProfile{
 		FilterIDs:         []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2020-04-11T21:34:01Z|2020-04-12T21:34:01Z"},
 		SortingParameters: []string{"Param1", "Param2"},
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{ID: "ResGroup2"},
 		},
 	}
@@ -3545,10 +3545,10 @@ func TestModelHelpersTestAPItoRouteProfile(t *testing.T) {
 		SortingParameters: []string{"param1"},
 		Routes:            []*utils.TPRoute{},
 	}
-	expStruct := &RouteProfile{
+	expStruct := &utils.RouteProfile{
 		FilterIDs:         []string{},
 		SortingParameters: []string{"param1"},
-		Routes:            []*Route{},
+		Routes:            []*utils.Route{},
 	}
 	result, err := APItoRouteProfile(testStruct, "")
 	if err != nil {

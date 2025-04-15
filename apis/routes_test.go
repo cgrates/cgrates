@@ -45,11 +45,11 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 			ID: "routeID",
 		},
 	}
-	var result engine.RouteProfile
+	var result utils.RouteProfile
 	var reply string
 
-	rtPrf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "routeID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -58,7 +58,7 @@ func TestRoutesSetGetRemRouteProfile(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Routes: []*engine.Route{{}},
+			Routes: []*utils.Route{{}},
 		},
 	}
 
@@ -121,7 +121,7 @@ func TestRoutesGetRouteProfileCheckErrors(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	var rcv engine.RouteProfile
+	var rcv utils.RouteProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
 	if err := adms.GetRouteProfile(context.Background(), &utils.TenantIDWithAPIOpts{
@@ -155,8 +155,8 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	rtPrf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			ID: "ROUTE1",
 		},
 	}
@@ -169,9 +169,9 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	rtPrf = &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
-			Routes: []*engine.Route{{}},
+	rtPrf = &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
+			Routes: []*utils.Route{{}},
 		},
 	}
 
@@ -204,14 +204,14 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*engine.RouteProfile, error) {
-			rtPrf := &engine.RouteProfile{
+		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+			rtPrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rtPrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *engine.RouteProfile) error {
+		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
 			return nil
 		},
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
@@ -244,8 +244,8 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	rtPrf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			ID:     "TestRoutesRemoveRouteProfileCheckErrors",
 			Tenant: "cgrates.org",
 			Weights: utils.DynamicWeights{
@@ -253,7 +253,7 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Routes: []*engine.Route{{}},
+			Routes: []*utils.Route{{}},
 		},
 	}
 	var reply string
@@ -278,7 +278,7 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	var rcv engine.RouteProfile
+	var rcv utils.RouteProfile
 
 	if err := adms.GetRouteProfile(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -307,14 +307,14 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*engine.RouteProfile, error) {
-			rtPrf := &engine.RouteProfile{
+		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+			rtPrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rtPrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *engine.RouteProfile) error {
+		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
 			return nil
 		},
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
@@ -351,14 +351,14 @@ func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*engine.RouteProfile, error) {
-			rtPrf := &engine.RouteProfile{
+		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+			rtPrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rtPrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *engine.RouteProfile) error {
+		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
 			return nil
 		},
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
@@ -417,14 +417,14 @@ func TestRoutesGetRouteProfilesCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*engine.RouteProfile, error) {
-			rtPrf := &engine.RouteProfile{
+		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+			rtPrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rtPrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *engine.RouteProfile) error {
+		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
 			return nil
 		},
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
@@ -472,33 +472,6 @@ func TestRoutesGetRouteProfilesCountErrKeys(t *testing.T) {
 	}
 }
 
-func TestRoutesNewRouteSv1(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
-	rS := engine.NewRouteService(dm, nil, cfg, nil)
-
-	exp := &RouteSv1{
-		rS: rS,
-	}
-	rcv := NewRouteSv1(rS)
-
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-}
-
-func TestRoutesSv1Ping(t *testing.T) {
-	rS := new(RouteSv1)
-	var reply string
-	if err := rS.Ping(nil, nil, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Unexpected reply error")
-	}
-}
-
 func TestRoutesGetRouteProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -506,12 +479,12 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
-	args1 := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	args1 := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "test_ID1",
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "ROUTE1",
 				},
@@ -532,12 +505,12 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 		t.Error("Unexpected reply returned:", setReply)
 	}
 
-	args2 := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	args2 := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "test_ID2",
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "ROUTE2",
 				},
@@ -558,12 +531,12 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 	}
 
 	// this profile will not match
-	args3 := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	args3 := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "test2_ID1",
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "ROUTE1",
 				},
@@ -587,12 +560,12 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
 	}
-	exp := []*engine.RouteProfile{
+	exp := []*utils.RouteProfile{
 		{
 			Tenant:  "cgrates.org",
 			ID:      "test_ID1",
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "ROUTE1",
 				},
@@ -607,7 +580,7 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 			Tenant:  "cgrates.org",
 			ID:      "test_ID2",
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "ROUTE2",
 				},
@@ -620,7 +593,7 @@ func TestRoutesGetRouteProfilesOK(t *testing.T) {
 		},
 	}
 
-	var getReply []*engine.RouteProfile
+	var getReply []*utils.RouteProfile
 	if err := admS.GetRouteProfiles(context.Background(), argsGet, &getReply); err != nil {
 		t.Error(err)
 	} else {
@@ -641,12 +614,12 @@ func TestRoutesGetRouteProfilesGetIDsErr(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
-	args := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	args := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "test_ID1",
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "ROUTE1",
 				},
@@ -678,7 +651,7 @@ func TestRoutesGetRouteProfilesGetIDsErr(t *testing.T) {
 	}
 
 	experr := `SERVER_ERROR: maximum number of items exceeded`
-	var getReply []*engine.RouteProfile
+	var getReply []*utils.RouteProfile
 	if err := admS.GetRouteProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -689,7 +662,7 @@ func TestRoutesGetRouteProfilesGetProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		SetRouteProfileDrvF: func(*context.Context, *engine.RouteProfile) error {
+		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
 			return nil
 		},
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
@@ -706,7 +679,7 @@ func TestRoutesGetRouteProfilesGetProfileErr(t *testing.T) {
 		dm:  dm,
 	}
 
-	var reply []*engine.RouteProfile
+	var reply []*utils.RouteProfile
 	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.GetRouteProfiles(context.Background(),
@@ -724,14 +697,14 @@ func TestRoutesGetRouteProfileIDsGetOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*engine.RouteProfile, error) {
-			routePrf := &engine.RouteProfile{
+		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+			routePrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return routePrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *engine.RouteProfile) error {
+		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
 			return nil
 		},
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
@@ -769,14 +742,14 @@ func TestRoutesGetRouteProfileIDsPaginateErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*engine.RouteProfile, error) {
-			routePrf := &engine.RouteProfile{
+		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+			routePrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return routePrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *engine.RouteProfile) error {
+		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
 			return nil
 		},
 		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {

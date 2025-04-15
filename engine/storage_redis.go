@@ -700,7 +700,7 @@ func (rs *RedisStorage) RemoveFilterDrv(ctx *context.Context, tenant, id string)
 	return rs.Cmd(nil, redisDEL, utils.FilterPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (r *RouteProfile, err error) {
+func (rs *RedisStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (r *utils.RouteProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.RouteProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -712,7 +712,7 @@ func (rs *RedisStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (rs *RedisStorage) SetRouteProfileDrv(ctx *context.Context, r *RouteProfile) (err error) {
+func (rs *RedisStorage) SetRouteProfileDrv(ctx *context.Context, r *utils.RouteProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
