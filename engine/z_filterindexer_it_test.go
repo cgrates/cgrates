@@ -484,11 +484,11 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
 	}
-	attrProfile := &AttributeProfile{
+	attrProfile := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
 		FilterIDs: []string{"AttrFilter", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:con1|con2"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "FN1",
 				Value: utils.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
@@ -515,11 +515,11 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		},
 	}
 	//Set AttributeProfile with 1 new context (con3)
-	attrProfile = &AttributeProfile{ // recreate the profile because if we test on internal
+	attrProfile = &utils.AttributeProfile{ // recreate the profile because if we test on internal
 		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
 		ID:        "AttrPrf",
 		FilterIDs: []string{"AttrFilter", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:con3"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "FN1",
 				Value: utils.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
@@ -623,11 +623,11 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 	if err := dataManager.SetFilter(context.Background(), fp, true); err != nil {
 		t.Error(err)
 	}
-	attrProfile := &AttributeProfile{
+	attrProfile := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf",
 		FilterIDs: []string{"AttrFilter", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:con1|con2"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "FN1",
 				Value: utils.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
@@ -655,11 +655,11 @@ func testITTestAttributeProfileFilterIndexes2(t *testing.T) {
 		},
 	}
 	//Set AttributeProfile with 1 new context (con3)
-	attrProfile = &AttributeProfile{ // recreate the profile because if we test on internal
+	attrProfile = &utils.AttributeProfile{ // recreate the profile because if we test on internal
 		Tenant:    "cgrates.org", // each update on the original item will update the item from DB
 		ID:        "AttrPrf",
 		FilterIDs: []string{"AttrFilter", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:con3"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "FN1",
 				Value: utils.NewRSRParsersMustCompile("Val1", utils.InfieldSep),

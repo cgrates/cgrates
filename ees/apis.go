@@ -192,7 +192,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 		}
 	} else {
 		expNM := utils.NewOrderedNavigableMap()
-		err = engine.NewExportRequest(map[string]utils.DataStorage{
+		err = NewExportRequest(map[string]utils.DataStorage{
 			utils.MetaReq:  utils.MapStorage(ev.Event),
 			utils.MetaDC:   exp.GetMetrics(),
 			utils.MetaOpts: utils.MapStorage(ev.APIOpts),

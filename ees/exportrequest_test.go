@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package ees
 
 import (
 	"fmt"
@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -484,7 +485,7 @@ func TestExportRequestParseFieldMetaGroup(t *testing.T) {
 func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	inData := map[string]utils.DataStorage{
@@ -512,7 +513,7 @@ func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
 		t.Errorf("Expected error <%v> but received <%v>", nil, err)
 	}
 
-	if rcv, ok := Cache.Get(utils.CacheUCH, "Tenant"); !ok {
+	if rcv, ok := engine.Cache.Get(utils.CacheUCH, "Tenant"); !ok {
 		t.Error("Couldnt receive from cache")
 	} else if rcv != "cgrates.org" {
 		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
@@ -615,7 +616,7 @@ func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
 func TestExportRequestAppendMetaUCH(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	inData := map[string]utils.DataStorage{
@@ -643,7 +644,7 @@ func TestExportRequestAppendMetaUCH(t *testing.T) {
 		t.Errorf("Expected error <%v> but received <%v>", nil, err)
 	}
 
-	if rcv, ok := Cache.Get(utils.CacheUCH, "Tenant"); !ok {
+	if rcv, ok := engine.Cache.Get(utils.CacheUCH, "Tenant"); !ok {
 		t.Error("Couldnt receive from cache")
 	} else if rcv != "cgrates.org" {
 		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
@@ -746,7 +747,7 @@ func TestExportRequestAppendDefaultOK(t *testing.T) {
 func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	inData := map[string]utils.DataStorage{
@@ -774,7 +775,7 @@ func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
 		t.Errorf("Expected error <%v> but received <%v>", nil, err)
 	}
 
-	if rcv, ok := Cache.Get(utils.CacheUCH, "Tenant"); !ok {
+	if rcv, ok := engine.Cache.Get(utils.CacheUCH, "Tenant"); !ok {
 		t.Error("Couldnt receive from cache")
 	} else if rcv != "cgrates.org" {
 		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
@@ -785,7 +786,7 @@ func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
 func TestExportRequestComposeMetaUCHPathSet(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	inData := map[string]utils.DataStorage{
@@ -810,7 +811,7 @@ func TestExportRequestComposeMetaUCHPathSet(t *testing.T) {
 		Data: "cgrates.org",
 	}
 
-	if err := Cache.Set(context.Background(), utils.CacheUCH, "Tenant", "Extra", []string{}, true, utils.NonTransactional); err != nil {
+	if err := engine.Cache.Set(context.Background(), utils.CacheUCH, "Tenant", "Extra", []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 
@@ -818,7 +819,7 @@ func TestExportRequestComposeMetaUCHPathSet(t *testing.T) {
 		t.Errorf("Expected error <%v> but received <%v>", nil, err)
 	}
 
-	if rcv, ok := Cache.Get(utils.CacheUCH, "Tenant"); !ok {
+	if rcv, ok := engine.Cache.Get(utils.CacheUCH, "Tenant"); !ok {
 		t.Error("Couldnt receive from cache")
 	} else if rcv != "Extracgrates.org" {
 		t.Errorf("Expected \n<%v>,\n but received \n<%v>", "cgrates.org", rcv)
@@ -965,9 +966,9 @@ func TestExportRequestSetFieldsPassErr(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fltr := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
 
 	tplFlds := []*config.FCTemplate{
 		{
@@ -1001,9 +1002,9 @@ func TestExportRequestSetFieldsPassFalse(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
-	fltr := NewFilterS(cfg, nil, dm)
+	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
 
 	tplFlds := []*config.FCTemplate{
 		{

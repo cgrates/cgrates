@@ -65,12 +65,12 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	}
 
 	t.Run("SetAttributeProfile", func(t *testing.T) {
-		eAttrPrf := &engine.APIAttributeProfileWithAPIOpts{
-			APIAttributeProfile: &engine.APIAttributeProfile{
+		eAttrPrf := &utils.APIAttributeProfileWithAPIOpts{
+			APIAttributeProfile: &utils.APIAttributeProfile{
 				Tenant:    "cgrates.org",
 				ID:        "ATTR_1",
 				FilterIDs: []string{"*string:~*req.Account:acc"},
-				Attributes: []*engine.ExternalAttribute{
+				Attributes: []*utils.ExternalAttribute{
 					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 						Type:  utils.MetaConstant,
@@ -387,12 +387,12 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 				utils.OptsContext: utils.MetaCDRs,
 			},
 		}
-		eAttrPrf := &engine.AttributeProfileWithAPIOpts{
-			AttributeProfile: &engine.AttributeProfile{
+		eAttrPrf := &utils.AttributeProfileWithAPIOpts{
+			AttributeProfile: &utils.AttributeProfile{
 				Tenant:    ev.Tenant,
 				ID:        "ATTR_3",
 				FilterIDs: []string{"*string:~*req.Account:acc"},
-				Attributes: []*engine.Attribute{
+				Attributes: []*utils.Attribute{
 					{
 						Path:  utils.MetaReq + utils.NestingSep + utils.AccountField,
 						Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),

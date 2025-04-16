@@ -117,7 +117,7 @@ func (c *concReq) done() {
 // composeHeaderTrailer will return the orderNM for *hdr or *trl
 func composeHeaderTrailer(ctx *context.Context, prfx string, fields []*config.FCTemplate, dc utils.DataStorage, cfg *config.CGRConfig, fltS *engine.FilterS) (r *utils.OrderedNavigableMap, err error) {
 	r = utils.NewOrderedNavigableMap()
-	err = engine.NewExportRequest(map[string]utils.DataStorage{
+	err = NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaDC:  dc,
 		utils.MetaCfg: cfg.GetDataProvider(),
 	}, cfg.GeneralCfg().DefaultTenant, fltS,

@@ -1078,11 +1078,11 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Weights: ";20",
 	}
-	expected := &AttributeProfile{
+	expected := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -1114,11 +1114,11 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		},
 		Weights: ";20",
 	}
-	attr := &AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z", "*string:~*opts.*context:con1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -1152,11 +1152,11 @@ func TestAttributeProfileToAPI2(t *testing.T) {
 		},
 		Weights: ";20",
 	}
-	attr := &AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),

@@ -55,11 +55,11 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg, nil)
 
 	//Attributes
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -359,11 +359,11 @@ func TestV1ExportTariffPlan(t *testing.T) {
 	connMng := engine.NewConnManager(cfg)
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,

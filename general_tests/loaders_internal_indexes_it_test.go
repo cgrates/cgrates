@@ -124,11 +124,11 @@ func testLoadersIDBIdxItLoad(t *testing.T) {
 }
 
 func testLoadersIDBIdxCheckAttributes(t *testing.T) {
-	exp := &engine.APIAttributeProfile{
+	exp := &utils.APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1001_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*opts.*context:simpleauth", "*string:~*req.Account:1001"},
-		Attributes: []*engine.ExternalAttribute{{
+		Attributes: []*utils.ExternalAttribute{{
 			Path:  utils.MetaReq + utils.NestingSep + "Password",
 			Type:  utils.MetaConstant,
 			Value: "CGRateS.org",
@@ -145,7 +145,7 @@ func testLoadersIDBIdxCheckAttributes(t *testing.T) {
 		},
 	}
 
-	var reply *engine.APIAttributeProfile
+	var reply *utils.APIAttributeProfile
 	if err := loadersIDBIdxRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{

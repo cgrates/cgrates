@@ -36,7 +36,7 @@ func TestHealthFilterAttributes(t *testing.T) {
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
-	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "Fltr1"},
@@ -79,7 +79,7 @@ func TestHealthReverseFilter(t *testing.T) {
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
-	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "Fltr1", "Fltr3"},

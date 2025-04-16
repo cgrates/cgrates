@@ -443,15 +443,15 @@ func (iDB *InternalDB) RemoveRouteProfileDrv(_ *context.Context, tenant, id stri
 	return
 }
 
-func (iDB *InternalDB) GetAttributeProfileDrv(_ *context.Context, tenant, id string) (attr *AttributeProfile, err error) {
+func (iDB *InternalDB) GetAttributeProfileDrv(_ *context.Context, tenant, id string) (attr *utils.AttributeProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*AttributeProfile), nil
+	return x.(*utils.AttributeProfile), nil
 }
 
-func (iDB *InternalDB) SetAttributeProfileDrv(_ *context.Context, attr *AttributeProfile) (err error) {
+func (iDB *InternalDB) SetAttributeProfileDrv(_ *context.Context, attr *utils.AttributeProfile) (err error) {
 	if err = attr.Compile(); err != nil {
 		return
 	}

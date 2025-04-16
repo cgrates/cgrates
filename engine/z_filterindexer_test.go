@@ -33,11 +33,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 	dm := NewDataManager(db, cfg, nil)
 	//set 4 attr profiles with different filters to index them
 
-	attrPrf1 := &AttributeProfile{
+	attrPrf1 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*ai:~*req.AnswerTime:2014-07-29T15:00:00Z", "*string:~*opts.*context:con1|con2|con3"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
 				Path:      utils.MetaReq + utils.NestingSep + "Field1",
@@ -57,11 +57,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 		},
 	}
 
-	attrPrf2 := &AttributeProfile{
+	attrPrf2 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf2",
 		FilterIDs: []string{"*string:~*resources.RES_GRP1.Available:4"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Password",
 				Type:  utils.MetaVariable,
@@ -80,11 +80,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 		},
 	}
 
-	attrPrf3 := &AttributeProfile{
+	attrPrf3 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf3",
 		FilterIDs: []string{"*prefix:~*req.Destination:1007", "*string:~*req.Account:1001", "*string:~*opts.TotalCost:~*stats.STS_PRF1.*tcc"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "RequestType",
 				Type:  utils.MetaVariable,
@@ -103,11 +103,11 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 		},
 	}
 
-	attrPrf4 := &AttributeProfile{
+	attrPrf4 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf4",
 		FilterIDs: []string{"*prefix:~*req.Destination:1007", "*prefix:~*accounts.RES_GRP1.Available:10"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "TCC",
 				Type:  utils.MetaVariable,

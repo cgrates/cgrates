@@ -304,12 +304,12 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set an AttributeProfile with our filter and check the indexes
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -407,13 +407,13 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our Attribute with our filters
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant: utils.CGRateSorg,
 			ID:     "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
 				"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -515,12 +515,12 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 
 func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 	//we will add more attributes with different context for matching filters
-	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf2 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_new_fltr",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3", "*string:~*opts.*context:*chargers"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -529,12 +529,12 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 			},
 		},
 	}
-	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf3 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTE3",
 			FilterIDs: []string{"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.Destinations",
 					Type:  utils.MetaConstant,

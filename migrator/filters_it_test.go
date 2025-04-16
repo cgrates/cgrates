@@ -162,11 +162,11 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		}},
 	}
 	expFilters.Compile()
-	attrProf := &engine.AttributeProfile{
+	attrProf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:Account:1001", "FLTR_2"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
@@ -179,11 +179,11 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			},
 		},
 	}
-	expAttrProf := &engine.AttributeProfile{
+	expAttrProf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "FLTR_2"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
@@ -362,11 +362,11 @@ func testFltrITMigratev2(t *testing.T) {
 		},
 	}
 	expFilters.Compile()
-	attrProf := &engine.AttributeProfile{
+	attrProf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:~Account:1001", "FLTR_2"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:~Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",
@@ -379,11 +379,11 @@ func testFltrITMigratev2(t *testing.T) {
 			},
 		},
 	}
-	expAttrProf := &engine.AttributeProfile{
+	expAttrProf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "FLTR_2"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Path:      utils.MetaReq + utils.NestingSep + "Account",

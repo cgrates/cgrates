@@ -80,7 +80,7 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, wi
 func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data profile, withIndex, ratesPartial bool) (err error) {
 	switch lType {
 	case utils.MetaAttributes:
-		return dm.SetAttributeProfile(ctx, data.(*engine.AttributeProfile), withIndex)
+		return dm.SetAttributeProfile(ctx, data.(*utils.AttributeProfile), withIndex)
 	case utils.MetaResources:
 		return dm.SetResourceProfile(ctx, data.(*engine.ResourceProfile), withIndex)
 	case utils.MetaFilters:

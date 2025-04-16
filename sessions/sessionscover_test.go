@@ -2371,14 +2371,14 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				cgrEv := engine.AttrSProcessEventReply{
+				cgrEv := attributes.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						ID:     "TestID",
 						Tenant: "cgrates.org",
 						Event:  map[string]any{},
 					},
 				}
-				*reply.(*engine.AttrSProcessEventReply) = cgrEv
+				*reply.(*attributes.AttrSProcessEventReply) = cgrEv
 				return nil
 			},
 		},
@@ -2404,7 +2404,7 @@ func TestBiRPCv1AuthorizeEvent(t *testing.T) {
 		false, false, false, nil, utils.Paginator{}, false, "")
 
 	rply := &V1AuthorizeReply{
-		Attributes:    &engine.AttrSProcessEventReply{},
+		Attributes:    &attributes.AttrSProcessEventReply{},
 		RouteProfiles: routes.SortedRoutesList{},
 		StatQueueIDs:  &[]string{},
 		ThresholdIDs:  &[]string{},
@@ -2524,7 +2524,7 @@ func TestBiRPCv1AuthorizeEvent2(t *testing.T) {
 		false, false, false, cgrEvent, utils.Paginator{}, false, "")
 
 	rply := &V1AuthorizeReply{
-		Attributes:    &engine.AttrSProcessEventReply{},
+		Attributes:    &attributes.AttrSProcessEventReply{},
 		RouteProfiles: routes.SortedRoutesList{},
 		StatQueueIDs:  &[]string{},
 		ThresholdIDs:  &[]string{},
@@ -2599,14 +2599,14 @@ func TestBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				cgrEv := engine.AttrSProcessEventReply{
+				cgrEv := attributes.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						ID:     "TestID",
 						Tenant: "cgrates.org",
 						Event:  map[string]any{},
 					},
 				}
-				*reply.(*engine.AttrSProcessEventReply) = cgrEv
+				*reply.(*attributes.AttrSProcessEventReply) = cgrEv
 				return nil
 			},
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
@@ -2975,14 +2975,14 @@ func TestBiRPCv1InitiateSessionWithDigest(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				cgrEv := engine.AttrSProcessEventReply{
+				cgrEv := attributes.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						ID:     "TestID",
 						Tenant: "cgrates.org",
 						Event:  map[string]any{},
 					},
 				}
-				*reply.(*engine.AttrSProcessEventReply) = cgrEv
+				*reply.(*attributes.AttrSProcessEventReply) = cgrEv
 				return nil
 			},
 			utils.ChargerSv1ProcessEvent: func(args any, reply any) error {
@@ -3685,7 +3685,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 				return nil
 			},
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				attrs := engine.AttrSProcessEventReply{
+				attrs := attributes.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "TEST_ID",
@@ -3695,7 +3695,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 					},
 				}
 				if args.(*engine.AttrArgsProcessEvent).ID == "CHANGED_ID" {
-					*reply.(*engine.AttrSProcessEventReply) = attrs
+					*reply.(*attributes.AttrSProcessEventReply) = attrs
 					return nil
 				}
 				return utils.ErrNotImplemented
@@ -4356,7 +4356,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				attr := &engine.AttrSProcessEventReply{
+				attr := &attributes.AttrSProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "ATTRIBUTES",
@@ -4365,7 +4365,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*engine.AttrSProcessEventReply) = *attr
+				*reply.(*attributes.AttrSProcessEventReply) = *attr
 				return nil
 			},
 			utils.ResponderGetCost: func(args any, reply any) error {
@@ -4439,7 +4439,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 	sessions.cgrCfg.SessionSCfg().RALsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs)}
 
 	expectedVal := V1GetCostReply{
-		Attributes: &engine.AttrSProcessEventReply{
+		Attributes: &attributes.AttrSProcessEventReply{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "ATTRIBUTES",

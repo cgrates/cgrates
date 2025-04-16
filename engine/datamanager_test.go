@@ -6455,18 +6455,18 @@ func TestDMRemoveAttributeProfileGetAttributeProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
-			return &AttributeProfile{}, utils.ErrNotImplemented
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+			return &utils.AttributeProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"FLTR_ACNT_1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -6488,18 +6488,18 @@ func TestDMRemoveAttributeProfileRemoveAttributeProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
-			return &AttributeProfile{}, nil
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+			return &utils.AttributeProfile{}, nil
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"FLTR_ACNT_1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -6539,19 +6539,19 @@ func TestDMRemoveAttributeProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
-			return &AttributeProfile{}, nil
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+			return &utils.AttributeProfile{}, nil
 		},
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"FLTR_ACNT_1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -6571,11 +6571,11 @@ func TestDMRemoveAttributeProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	Cache.Clear(nil)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"FLTR_ACNT_1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -6586,7 +6586,7 @@ func TestDMRemoveAttributeProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, nil
 		},
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) error { return nil },
@@ -6609,11 +6609,11 @@ func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"FLTR_ACNT_1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -6638,7 +6638,7 @@ func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, nil
 		},
 		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) error { return nil },
@@ -7306,7 +7306,7 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 
 func TestDMSetAttributeProfileNoDMErr(t *testing.T) {
 	var dm *DataManager
-	err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{}, false)
+	err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{}, false)
 	if err != utils.ErrNoDatabaseConn {
 		t.Errorf("\nExpected error <%+v>, \nReceived error <%+v>", utils.ErrNoDatabaseConn, err)
 	}
@@ -7319,11 +7319,11 @@ func TestDMSetAttributeProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{":::"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -7342,18 +7342,18 @@ func TestDMSetAttributeProfileGetAttributeProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
-			return &AttributeProfile{}, utils.ErrNotImplemented
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+			return &utils.AttributeProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"filtrId1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -7371,19 +7371,19 @@ func TestDMSetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
-			return &AttributeProfile{}, nil
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+			return &utils.AttributeProfile{}, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *AttributeProfile) error { return utils.ErrNotImplemented },
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"filtrId1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -7402,19 +7402,19 @@ func TestDMSetAttributeProfileUpdatedIndexesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
-			return &AttributeProfile{}, nil
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+			return &utils.AttributeProfile{}, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *AttributeProfile) error { return nil },
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -7436,11 +7436,11 @@ func TestDMSetAttributeProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"filtrId1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -7465,10 +7465,10 @@ func TestDMSetAttributeProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *AttributeProfile) error { return nil },
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error { return nil },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -7497,11 +7497,11 @@ func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"filtrId1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -7526,10 +7526,10 @@ func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, utils.ErrNotFound
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *AttributeProfile) error { return utils.ErrNotImplemented },
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error { return utils.ErrNotImplemented },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -7543,18 +7543,18 @@ func TestDMSetAttributeProfileComputeHashErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
-			return &AttributeProfile{}, nil
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+			return &utils.AttributeProfile{}, nil
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 	value := utils.NewRSRParsersMustCompile("31 0a 0a 32 0a 0a 33 0a 0a 34 0a 0a 35 0a 0a 36 0a 0a 37 0a 0a 38 0a 0a 39 0a 0a 31 30 0a 0a 31", utils.RSRSep)
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"filtrId1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Type:  utils.MetaPassword,
 				Value: value,
@@ -8399,11 +8399,11 @@ func TestDMGetAttributeProfileCacheGetErr(t *testing.T) {
 
 func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"filtrId1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -8438,7 +8438,7 @@ func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, utils.ErrNotFound
 		},
 	}
@@ -8479,11 +8479,11 @@ func TestDMGetAttributeProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg, cM)
 
-	attrPrfl := &AttributeProfile{
+	attrPrfl := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ID",
 		FilterIDs: []string{"filtrId1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "Account",
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),

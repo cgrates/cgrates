@@ -82,8 +82,8 @@ type DataDB interface {
 	GetRouteProfileDrv(*context.Context, string, string) (*utils.RouteProfile, error)
 	SetRouteProfileDrv(*context.Context, *utils.RouteProfile) error
 	RemoveRouteProfileDrv(*context.Context, string, string) error
-	GetAttributeProfileDrv(ctx *context.Context, tnt string, id string) (*AttributeProfile, error)
-	SetAttributeProfileDrv(ctx *context.Context, attr *AttributeProfile) error
+	GetAttributeProfileDrv(ctx *context.Context, tnt string, id string) (*utils.AttributeProfile, error)
+	SetAttributeProfileDrv(ctx *context.Context, attr *utils.AttributeProfile) error
 	RemoveAttributeProfileDrv(*context.Context, string, string) error
 	GetChargerProfileDrv(*context.Context, string, string) (*utils.ChargerProfile, error)
 	SetChargerProfileDrv(*context.Context, *utils.ChargerProfile) error
