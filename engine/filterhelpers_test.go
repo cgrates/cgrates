@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -154,33 +153,32 @@ func TestSentrypeerGetTokenErrorResponse(t *testing.T) {
 	}
 }
 
-func TestExtractUrlFromType(t *testing.T) {
+func TestFilterHelpersExtractURLFromHTTPType(t *testing.T) {
 	tests := []struct {
 		name     string
 		httpType string
 		wantURL  string
-		wantErr  error
+		wantErr  string
 	}{
 		{
 			name:     "Valid input",
 			httpType: "http#cgrates.com",
 			wantURL:  "cgrates.com",
-			wantErr:  nil,
 		},
 		{
 			name:     "Incorrect format",
 			httpType: "http",
 			wantURL:  "",
-			wantErr:  errors.New("url is not specified"),
+			wantErr:  "invalid format: URL portion not found",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotURL, err := extractUrlFromType(tt.httpType)
+			gotURL, err := ExtractURLFromHTTPType(tt.httpType)
 
-			if tt.wantErr != nil {
-				if err == nil || err.Error() != tt.wantErr.Error() {
+			if tt.wantErr != "" {
+				if err == nil || err.Error() != tt.wantErr {
 					t.Errorf("Expected error %v, got %v", tt.wantErr, err)
 				}
 			} else {

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"slices"
@@ -557,7 +558,11 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value utils.RS
 		out = strings.Join(values, utils.InfieldSep)
 	default:
 		if strings.HasPrefix(attrType, utils.MetaHTTP) {
-			out, err = externalAttributeAPI(attrType, dp)
+			url, err := ExtractURLFromHTTPType(attrType)
+			if err != nil {
+				return "", err
+			}
+			out, err = MakeExternalAPIRequest(url, bytes.NewReader([]byte(dp.String())))
 			break
 		}
 		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", attrType)

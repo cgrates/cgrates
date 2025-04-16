@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 
@@ -184,13 +183,6 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		})
 	}
 	return
-}
-func externalAttributeAPI(httpType string, dDP utils.DataProvider) (string, error) {
-	urlS, err := extractUrlFromType(httpType)
-	if err != nil {
-		return "", err
-	}
-	return externalAPI(urlS, bytes.NewReader([]byte(dDP.String())))
 }
 
 func (ap *AttributeProfile) Set(path []string, val any, newBranch bool) (err error) {
