@@ -119,7 +119,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	}
 	fib := utils.FibDuration(time.Millisecond, 0)
 	var connected bool
-	for i := 0; i < 16; i++ {
+	for range 16 {
 		time.Sleep(fib())
 		if _, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
@@ -562,7 +562,6 @@ var serviceReceivers = map[string]string{
 	utils.CacheS:          utils.CacheSv1,
 	utils.ConfigS:         utils.ConfigSv1,
 	utils.CoreS:           utils.CoreSv1,
-	utils.GuardianS:       utils.GuardianSv1,
 	utils.AccountS:        utils.AccountSv1,
 	utils.ActionS:         utils.ActionSv1,
 	utils.AdminS:          utils.AdminSv1,

@@ -155,7 +155,6 @@ cgrates.org,Stats4,*string:~*req.Account:1004,,,,-1,,,,*acc;*acd;*pdd,,`}
 			lastUpdate = rnk.LastUpdate
 			sortedStatIDs := []string{"Stats3", "Stats2", "Stats1", "Stats4"}
 			if !slices.Equal(rnk.SortedStatIDs, sortedStatIDs) {
-				fmt.Println(utils.ToJSON(rnk))
 				t.Error("should have sorted statids")
 			}
 		case <-ctx.Done():

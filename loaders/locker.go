@@ -22,8 +22,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 type Locker interface {

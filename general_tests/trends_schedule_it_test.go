@@ -128,7 +128,6 @@ cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,tru
 			}, &replyTrendProfiles); err != nil {
 			t.Error(err)
 		}
-		fmt.Println(utils.ToJSON(replyTrendProfiles))
 		var scheduled int
 		if err := client.Call(context.Background(), utils.TrendSv1ScheduleQueries,
 			&utils.ArgScheduleTrendQueries{TrendIDs: []string{"TREND_1", "TREND_2"}, TenantIDWithAPIOpts: utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org"}}}, &scheduled); err != nil {

@@ -126,7 +126,7 @@ func TestServiceToggle(t *testing.T) {
 
 	// Toggle the state of all services via config reload.
 	fullCfgPath := filepath.Join(cfg.ConfigPath, "zzz_dynamic_cgrates.json") // path to the original json config file
-	if err := os.WriteFile(fullCfgPath, []byte(fmt.Sprintf(cfgJSON, "false")), 0644); err != nil {
+	if err := os.WriteFile(fullCfgPath, fmt.Appendf(nil, cfgJSON, "false"), 0644); err != nil {
 		t.Fatal(err)
 	}
 	var reply string
@@ -138,7 +138,7 @@ func TestServiceToggle(t *testing.T) {
 	checkServiceStates(t, client, utils.StateServiceDOWN)
 
 	// Toggle the state once again to make sure the actions are repeatable.
-	if err := os.WriteFile(fullCfgPath, []byte(fmt.Sprintf(cfgJSON, "true")), 0644); err != nil {
+	if err := os.WriteFile(fullCfgPath, fmt.Appendf(nil, cfgJSON, "true"), 0644); err != nil {
 		t.Fatal(err)
 	}
 	if err := client.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
