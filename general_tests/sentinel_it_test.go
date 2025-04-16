@@ -140,12 +140,12 @@ package general_tests
 // }
 
 // func testRedisSentinelSetGetAttribute(t *testing.T) {
-// 	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
-// 		APIAttributeProfile: &engine.APIAttributeProfile{
+// 	alsPrf := &utils.APIAttributeProfileWithAPIOpts{
+// 		APIAttributeProfile: &utils.APIAttributeProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        "ATTR_TEST",
 // 			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
-// 			Attributes: []*engine.ExternalAttribute{
+// 			Attributes: []*utils.ExternalAttribute{
 // 				{
 // 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 // 					Value: "1001",
@@ -164,7 +164,7 @@ package general_tests
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	var reply *engine.APIAttributeProfile
+// 	var reply *utils.APIAttributeProfile
 // 	if err := sentinelRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_TEST"}, &reply); err != nil {
 // 		t.Fatal(err)
@@ -176,12 +176,12 @@ package general_tests
 
 // func testRedisSentinelInsertion(t *testing.T) {
 // 	var nrFails1, nrFails2 int
-// 	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
-// 		APIAttributeProfile: &engine.APIAttributeProfile{
+// 	alsPrf := &utils.APIAttributeProfileWithAPIOpts{
+// 		APIAttributeProfile: &utils.APIAttributeProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        "ATTR_TEST",
 // 			FilterIDs: []string{"*string:~*reqAccount:1001", "*string:~*opts.*context:*sessions|*cdrs"},
-// 			Attributes: []*engine.ExternalAttribute{
+// 			Attributes: []*utils.ExternalAttribute{
 // 				{
 // 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 // 					Value: "1001",
@@ -274,12 +274,12 @@ package general_tests
 
 // // After we kill node1 check the data if was replicated in node2
 // func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
-// 	alsPrf := &engine.APIAttributeProfileWithAPIOpts{
-// 		APIAttributeProfile: &engine.APIAttributeProfile{
+// 	alsPrf := &utils.APIAttributeProfileWithAPIOpts{
+// 		APIAttributeProfile: &utils.APIAttributeProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        "ATTR_TEST",
 // 			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
-// 			Attributes: []*engine.ExternalAttribute{
+// 			Attributes: []*utils.ExternalAttribute{
 // 				{
 // 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 // 					Value: "1001",
@@ -292,7 +292,7 @@ package general_tests
 // 			},
 // 		},
 // 	}
-// 	var reply *engine.APIAttributeProfile
+// 	var reply *utils.APIAttributeProfile
 // 	if err := sentinelRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 // 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_TEST"}, &reply); err != nil {
 // 		t.Fatal(err)

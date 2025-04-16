@@ -177,8 +177,8 @@ func testFilterUpdateSetFilterE1(t *testing.T) {
 }
 
 func testFilterUpdateSetAttrProfileE1(t *testing.T) {
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			FilterIDs: []string{"FLTR_ID"},
 			ID:        "ATTR_ID",
 			Tenant:    "cgrates.org",
@@ -187,7 +187,7 @@ func testFilterUpdateSetAttrProfileE1(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.Account",
 					Value: "1003",
@@ -206,7 +206,7 @@ func testFilterUpdateSetAttrProfileE1(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	var result *engine.APIAttributeProfile
+	var result *utils.APIAttributeProfile
 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ID"}}, &result); err != nil {
 		t.Fatal(err)
@@ -217,7 +217,7 @@ func testFilterUpdateSetAttrProfileE1(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
-	eAttrPrf := &engine.APIAttributeProfile{
+	eAttrPrf := &utils.APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"FLTR_ID"},
 		ID:        "ATTR_ID",
@@ -226,7 +226,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*utils.ExternalAttribute{
 			{
 				Path:  "*req.Account",
 				Value: "1003",
@@ -235,7 +235,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
 		},
 	}
 
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev1, &attrReply); err != nil {
 		t.Fatal(err)
@@ -246,7 +246,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E1(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
-	eAttrPrf := &engine.APIAttributeProfile{
+	eAttrPrf := &utils.APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"FLTR_ID"},
 		ID:        "ATTR_ID",
@@ -255,7 +255,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*utils.ExternalAttribute{
 			{
 				Path:  "*req.Account",
 				Value: "1003",
@@ -264,7 +264,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
 		},
 	}
 
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev1, &attrReply); err != nil {
 		t.Fatal(err)
@@ -275,7 +275,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E2(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
-	eAttrPrf := &engine.APIAttributeProfile{
+	eAttrPrf := &utils.APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"FLTR_ID"},
 		ID:        "ATTR_ID",
@@ -284,7 +284,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*utils.ExternalAttribute{
 			{
 				Path:  "*req.Account",
 				Value: "1003",
@@ -293,7 +293,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
 		},
 	}
 
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev2, &attrReply); err != nil {
 		t.Fatal(err)
@@ -304,7 +304,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E1(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
-	eAttrPrf := &engine.APIAttributeProfile{
+	eAttrPrf := &utils.APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"FLTR_ID"},
 		ID:        "ATTR_ID",
@@ -313,7 +313,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*utils.ExternalAttribute{
 			{
 				Path:  "*req.Account",
 				Value: "1003",
@@ -322,7 +322,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E2(t *testing.T) {
 		},
 	}
 
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev2, &attrReply); err != nil {
 		t.Fatal(err)
@@ -367,7 +367,7 @@ func testFilterUpdateSetFilterAfterAttrE1(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev1, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -375,7 +375,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E1NotMatching(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev1, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -383,7 +383,7 @@ func testFilterUpdateGetAttrProfileForEventEv1E2NotMatching(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 	if err := fltrUpdateRPC1.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev2, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -391,7 +391,7 @@ func testFilterUpdateGetAttrProfileForEventEv2E1NotMatching(t *testing.T) {
 }
 
 func testFilterUpdateGetAttrProfileForEventEv2E2NotMatching(t *testing.T) {
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 	if err := fltrUpdateRPC2.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,
 		ev2, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)

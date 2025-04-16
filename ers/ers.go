@@ -32,6 +32,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -359,7 +360,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		var record []string
 		if len(eEvs.rdrCfg.CacheDumpFields) != 0 {
 			// convert the event to record
-			eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			eeReq := ees.NewExportRequest(map[string]utils.DataStorage{
 				utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 				utils.MetaCfg:  erS.cfg.GetDataProvider(),
@@ -427,7 +428,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 		var record map[string]any
 		if len(eEvs.rdrCfg.CacheDumpFields) != 0 {
 			// convert the event to record
-			eeReq := engine.NewExportRequest(map[string]utils.DataStorage{
+			eeReq := ees.NewExportRequest(map[string]utils.DataStorage{
 				utils.MetaReq:  utils.MapStorage(cgrEv.Event),
 				utils.MetaOpts: utils.MapStorage(cgrEv.APIOpts),
 				utils.MetaCfg:  erS.cfg.GetDataProvider(),

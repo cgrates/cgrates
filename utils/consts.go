@@ -200,7 +200,7 @@ const (
 	MetricID    = "MetricID"
 	LastUsed    = "LastUsed"
 	PDD         = "PDD"
-	Route       = "Route"
+	RouteStr    = "Route"
 	RunID       = "RunID"
 	MetaRunID   = "*runID"
 

@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -39,7 +40,7 @@ func NewRouteService(cfg *config.CGRConfig) *RouteService {
 type RouteService struct {
 	mu        sync.RWMutex
 	cfg       *config.CGRConfig
-	routeS    *engine.RouteS
+	routeS    *routes.RouteS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -70,7 +71,7 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 
 	routeS.mu.Lock()
 	defer routeS.mu.Unlock()
-	routeS.routeS = engine.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, cms.ConnManager())
+	routeS.routeS = routes.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, cms.ConnManager())
 	srv, _ := engine.NewService(routeS.routeS)
 	// srv, _ := birpc.NewService(apis.NewRouteSv1(routeS.routeS), "", false)
 	for _, s := range srv {

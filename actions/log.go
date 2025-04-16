@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -82,7 +83,7 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, _ stri
 		utils.MetaCDR: utils.NewOrderedNavigableMap(),
 	}
 	// construct an AgentRequest so we can build the reply and send it to CDRServer
-	cdrLogReq := engine.NewExportRequest(map[string]utils.DataStorage{
+	cdrLogReq := ees.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaReq:  reqNm,
 		utils.MetaOpts: optsMS,
 		utils.MetaCfg:  aL.config.GetDataProvider(),

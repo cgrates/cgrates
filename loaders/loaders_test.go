@@ -164,7 +164,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
-		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
@@ -362,7 +362,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
-		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}

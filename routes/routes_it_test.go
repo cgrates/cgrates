@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apis
+package routes
 
 import (
 	"path"
@@ -129,7 +129,7 @@ func testRoutesRPCConn(t *testing.T) {
 }
 
 func testRoutesGetRouteProfileBeforeSet(t *testing.T) {
-	var replyRouteProfile engine.RouteProfile
+	var replyRouteProfile utils.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -141,7 +141,7 @@ func testRoutesGetRouteProfileBeforeSet(t *testing.T) {
 }
 
 func testRoutesGetRouteProfilesBeforeSet(t *testing.T) {
-	var replyRouteProfiles *[]*engine.RouteProfile
+	var replyRouteProfiles *[]*utils.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -173,9 +173,9 @@ func testRoutesGetRouteProfileCountBeforeSet(t *testing.T) {
 }
 
 func testRoutesSetRouteProfiles(t *testing.T) {
-	routeProfiles := []*engine.RouteProfileWithAPIOpts{
+	routeProfiles := []*utils.RouteProfileWithAPIOpts{
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "TestA_ROUTE1",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -191,7 +191,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -199,7 +199,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 			},
 		},
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "TestA_ROUTE2",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -215,7 +215,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -223,7 +223,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 			},
 		},
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "TestA_ROUTE3",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -234,7 +234,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -242,7 +242,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 			},
 		},
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "TestB_ROUTE1",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -253,7 +253,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -261,7 +261,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 			},
 		},
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "TestB_ROUTE2",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -272,7 +272,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -293,7 +293,7 @@ func testRoutesSetRouteProfiles(t *testing.T) {
 }
 
 func testRoutesGetRouteProfileAfterSet(t *testing.T) {
-	expectedRouteProfile := engine.RouteProfile{
+	expectedRouteProfile := utils.RouteProfile{
 		ID:        "TestA_ROUTE1",
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.TestCase:AdminSAPIs"},
@@ -309,13 +309,13 @@ func testRoutesGetRouteProfileAfterSet(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "routeTest",
 			},
 		},
 	}
-	var replyRouteProfile engine.RouteProfile
+	var replyRouteProfile utils.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -406,7 +406,7 @@ func testRoutesGetRouteProfileCountAfterSet(t *testing.T) {
 }
 
 func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
-	expectedRouteProfiles := []*engine.RouteProfile{
+	expectedRouteProfiles := []*utils.RouteProfile{
 		{
 			ID:        "TestA_ROUTE1",
 			Tenant:    "cgrates.org",
@@ -423,7 +423,7 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -445,7 +445,7 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -462,7 +462,7 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -479,7 +479,7 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -496,14 +496,14 @@ func testRoutesGetRouteProfilesAfterSet(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
 			},
 		},
 	}
-	var replyRouteProfiles []*engine.RouteProfile
+	var replyRouteProfiles []*utils.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -535,7 +535,7 @@ func testRoutesRemoveRouteProfile(t *testing.T) {
 }
 
 func testRoutesGetRouteProfileAfterRemove(t *testing.T) {
-	var replyRouteProfile engine.RouteProfile
+	var replyRouteProfile utils.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -623,7 +623,7 @@ func testRoutesGetRouteProfileCountAfterRemove(t *testing.T) {
 }
 
 func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
-	expectedRouteProfiles := []*engine.RouteProfile{
+	expectedRouteProfiles := []*utils.RouteProfile{
 		{
 			ID:        "TestA_ROUTE1",
 			Tenant:    "cgrates.org",
@@ -640,7 +640,7 @@ func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -657,7 +657,7 @@ func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -674,7 +674,7 @@ func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -691,14 +691,14 @@ func testRoutesGetRouteProfilesAfterRemove(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
 			},
 		},
 	}
-	var replyRouteProfiles []*engine.RouteProfile
+	var replyRouteProfiles []*utils.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -748,9 +748,9 @@ func testRoutesBlockerRemoveRouteProfiles(t *testing.T) {
 }
 
 func testRoutesBlockerSetRouteProfiles(t *testing.T) {
-	routeProfiles := []*engine.RouteProfileWithAPIOpts{
+	routeProfiles := []*utils.RouteProfileWithAPIOpts{
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "ROUTE_TEST_1",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
@@ -766,7 +766,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -774,7 +774,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 			},
 		},
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "ROUTE_TEST_2",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
@@ -790,7 +790,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -798,7 +798,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 			},
 		},
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "ROUTE_TEST_3",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
@@ -809,7 +809,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -817,7 +817,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 			},
 		},
 		{
-			RouteProfile: &engine.RouteProfile{
+			RouteProfile: &utils.RouteProfile{
 				ID:        "ROUTE_TEST_4",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
@@ -828,7 +828,7 @@ func testRoutesBlockerSetRouteProfiles(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "routeTest",
 					},
@@ -857,7 +857,7 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	expected := []*engine.RouteProfile{
+	expected := []*utils.RouteProfile{
 		{
 			ID:        "ROUTE_TEST_1",
 			Tenant:    "cgrates.org",
@@ -874,7 +874,7 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -891,7 +891,7 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
@@ -913,14 +913,14 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "routeTest",
 				},
 			},
 		},
 	}
-	var reply []*engine.RouteProfile
+	var reply []*utils.RouteProfile
 	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRouteProfilesForEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -929,8 +929,8 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 }
 
 func testRoutesBlockerSetRouteProfile(t *testing.T) {
-	routeProfile := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	routeProfile := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			ID:        "ROUTE_BLOCKER_TEST",
 			Tenant:    "cgrates.org",
 			FilterIDs: []string{"*string:~*req.TestCase:RouteBlockerBehaviour"},
@@ -946,7 +946,7 @@ func testRoutesBlockerSetRouteProfile(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "route1",
 					Weights: utils.DynamicWeights{
@@ -1006,11 +1006,11 @@ func testRoutesBlockerGetRoutes(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	expected := engine.SortedRoutesList{
+	expected := SortedRoutesList{
 		{
 			ProfileID: "ROUTE_BLOCKER_TEST",
 			Sorting:   utils.MetaWeight,
-			Routes: []*engine.SortedRoute{
+			Routes: []*SortedRoute{
 				{
 					RouteID:         "route3",
 					RouteParameters: utils.EmptyString,
@@ -1037,7 +1037,7 @@ func testRoutesBlockerGetRoutes(t *testing.T) {
 		},
 	}
 
-	var reply engine.SortedRoutesList
+	var reply SortedRoutesList
 	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRoutes, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {

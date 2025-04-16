@@ -38,8 +38,8 @@ func init() {
 
 	// Register objects for cache replication/remotes
 	// AttributeS
-	gob.Register(new(AttributeProfile))
-	gob.Register(new(AttributeProfileWithAPIOpts))
+	gob.Register(new(utils.AttributeProfile))
+	gob.Register(new(utils.AttributeProfileWithAPIOpts))
 	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
@@ -57,8 +57,8 @@ func init() {
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
 	// RouteS
-	gob.Register(new(RouteProfile))
-	gob.Register(new(RouteProfileWithAPIOpts))
+	gob.Register(new(utils.RouteProfile))
+	gob.Register(new(utils.RouteProfileWithAPIOpts))
 	// Filters
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithAPIOpts))

@@ -23,6 +23,7 @@ import (
 	"slices"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -109,7 +110,7 @@ func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt st
 // ChrgSProcessEventReply is the reply to processEvent
 type ChrgSProcessEventReply struct {
 	ChargerSProfile string
-	AlteredFields   []*engine.FieldsAltered
+	AlteredFields   []*attributes.FieldsAltered
 	CGREvent        *utils.CGREvent
 }
 
@@ -129,7 +130,7 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
 			CGREvent:        clonedEv,
-			AlteredFields: []*engine.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -143,7 +144,7 @@ func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.
 			utils.IfaceAsString(clonedEv.APIOpts[utils.OptsContext]),
 			utils.MetaChargers)
 		clonedEv.APIOpts[utils.OptsAttributesProfileIDs] = cP.AttributeIDs
-		var evReply engine.AttrSProcessEventReply
+		var evReply attributes.AttrSProcessEventReply
 		if err = cS.connMgr.Call(ctx, cS.cfg.ChargerSCfg().AttributeSConns,
 			utils.AttributeSv1ProcessEvent, clonedEv, &evReply); err != nil {
 			if err.Error() != utils.ErrNotFound.Error() {

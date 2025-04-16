@@ -144,12 +144,12 @@ func testFltrRplRPCConn(t *testing.T) {
 
 func testFltrRplAttributeProfile(t *testing.T) {
 	attrID := "ATTR1"
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        attrID,
 			FilterIDs: []string{"*string:~*req.Account:dan"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.Category",
 					Type:  utils.MetaVoice,
@@ -164,7 +164,7 @@ func testFltrRplAttributeProfile(t *testing.T) {
 		},
 	}
 	var result string
-	var replyPrfl *engine.APIAttributeProfile
+	var replyPrfl *utils.APIAttributeProfile
 	var rplyIDs []string
 	// empty
 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetAttributeProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||
@@ -926,12 +926,12 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // func testFltrRplRouteProfile(t *testing.T) {
 // 	rpID := "RT1"
 // 	rpPrf := &v1.RouteWithAPIOpts{
-// 		RouteProfile: &engine.RouteProfile{
+// 		RouteProfile: &utils.RouteProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        rpID,
 // 			FilterIDs: []string{"*string:~*req.Account:dan"},
 // 			Sorting:   utils.MetaWeight,
-// 			Routes: []*engine.Route{
+// 			Routes: []*utils.Route{
 // 				{
 // 					ID:             "local",
 // 					RateProfileIDs: []string{"RP_LOCAL"},
@@ -947,7 +947,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		},
 // 	}
 // 	var result string
-// 	var replyPrfl *engine.RouteProfile
+// 	var replyPrfl *utils.RouteProfile
 // 	var rplyIDs []string
 // 	// empty
 // 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetRouteProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||

@@ -304,11 +304,11 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		Attributes: mapSubstitutes,
 		Weight:     20,
 	}
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:Accont:1001", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -322,11 +322,11 @@ func testAttrITMigrateAndMove(t *testing.T) {
 			},
 		},
 	}
-	attrPrf2 := &engine.AttributeProfile{
+	attrPrf2 := &utils.AttributeProfile{
 		Tenant:    "cgrates.com",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:Accont:1001", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -467,11 +467,11 @@ func testAttrITMigrateV2(t *testing.T) {
 		Weight: 20,
 	}
 
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:Accont:1001", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -548,11 +548,11 @@ func testAttrITMigrateV3(t *testing.T) {
 		Weight: 20,
 	}
 
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:Accont:1001", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -633,11 +633,11 @@ func testAttrITMigrateV4(t *testing.T) {
 		Weight: 20,
 	}
 
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1",
 		FilterIDs: []string{"*string:~*req.Accont:1001", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -741,11 +741,11 @@ func testAttrITV1ToV5(t *testing.T) {
 	if err != nil {
 		t.Error("Error converting Substitute from string to RSRParser: ", err)
 	}
-	eOut1 := &engine.AttributeProfile{
+	eOut1 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -758,11 +758,11 @@ func testAttrITV1ToV5(t *testing.T) {
 			},
 		},
 	}
-	eOut2 := &engine.AttributeProfile{
+	eOut2 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
 		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -878,11 +878,11 @@ func testAttrITV2ToV5(t *testing.T) {
 	}
 
 	// Construct the expected output
-	eOut1 := &engine.AttributeProfile{
+	eOut1 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -895,11 +895,11 @@ func testAttrITV2ToV5(t *testing.T) {
 			},
 		},
 	}
-	eOut2 := &engine.AttributeProfile{
+	eOut2 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
 		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -1004,11 +1004,11 @@ func testAttrITV3ToV5(t *testing.T) {
 	}
 
 	// Construct the expected output
-	eOut1 := &engine.AttributeProfile{
+	eOut1 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile1",
 		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",
@@ -1021,11 +1021,11 @@ func testAttrITV3ToV5(t *testing.T) {
 			},
 		},
 	}
-	eOut2 := &engine.AttributeProfile{
+	eOut2 := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "attributeprofile2",
 		FilterIDs: []string{"*string:test:test", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{"*string:FL1:In1"},
 				Path:      utils.MetaReq + utils.NestingSep + "FL1",

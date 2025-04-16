@@ -89,7 +89,7 @@ func (urlProvider) Open(dPath, fn string) (_ io.ReadCloser, err error) {
 	}
 	var req *http.Response
 	if req, err = (&http.Client{
-		Transport: engine.GetHTTPPstrTransport(),
+		Transport: engine.HTTPPstrTransport(),
 		Timeout:   config.CgrConfig().GeneralCfg().ReplyTimeout,
 	}).Get(path); err != nil {
 		err = utils.ErrPathNotReachable(path)

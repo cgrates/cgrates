@@ -80,7 +80,7 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, wi
 func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data profile, withIndex, ratesPartial bool) (err error) {
 	switch lType {
 	case utils.MetaAttributes:
-		return dm.SetAttributeProfile(ctx, data.(*engine.AttributeProfile), withIndex)
+		return dm.SetAttributeProfile(ctx, data.(*utils.AttributeProfile), withIndex)
 	case utils.MetaResources:
 		return dm.SetResourceProfile(ctx, data.(*engine.ResourceProfile), withIndex)
 	case utils.MetaFilters:
@@ -95,7 +95,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 	case utils.MetaThresholds:
 		return dm.SetThresholdProfile(ctx, data.(*engine.ThresholdProfile), withIndex)
 	case utils.MetaRoutes:
-		return dm.SetRouteProfile(ctx, data.(*engine.RouteProfile), withIndex)
+		return dm.SetRouteProfile(ctx, data.(*utils.RouteProfile), withIndex)
 	case utils.MetaChargers:
 		return dm.SetChargerProfile(ctx, data.(*utils.ChargerProfile), withIndex)
 	case utils.MetaRateProfiles:

@@ -338,7 +338,7 @@ func (fsev FSEvent) ParseEventValue(attrName string, rsrFld *utils.RSRParser, ti
 	case utils.PDD:
 		PDD, _ := fsev.GetPdd(utils.MetaDefault)
 		return rsrFld.ParseValue(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
-	case utils.Route:
+	case utils.RouteStr:
 		return rsrFld.ParseValue(fsev.GetRoute(""))
 	case utils.DisconnectCause:
 		return rsrFld.ParseValue(fsev.GetDisconnectCause(""))
@@ -386,7 +386,7 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]any {
 	mp[utils.PDD], _ = fsev.GetPdd(utils.MetaDefault)
 	mp[utils.ACD], _ = fsev.GetADC(utils.MetaDefault)
 	mp[utils.Cost] = -1.0
-	mp[utils.Route] = fsev.GetRoute(utils.MetaDefault)
+	mp[utils.RouteStr] = fsev.GetRoute(utils.MetaDefault)
 	mp[utils.DisconnectCause] = fsev.GetDisconnectCause(utils.MetaDefault)
 	return mp
 }

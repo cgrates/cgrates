@@ -23,12 +23,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetRouteProfile returns a Route configuration
-func (adms *AdminS) V1GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.RouteProfile) error {
+func (adms *AdminS) V1GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RouteProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -73,7 +72,7 @@ func (adms *AdminS) V1GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 }
 
 // GetRouteProfiles returns a list of route profiles registered for a tenant
-func (admS *AdminS) V1GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*engine.RouteProfile) (err error) {
+func (admS *AdminS) V1GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*utils.RouteProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -82,9 +81,9 @@ func (admS *AdminS) V1GetRouteProfiles(ctx *context.Context, args *utils.ArgsIte
 	if err = admS.V1GetRouteProfileIDs(ctx, args, &rouPrfIDs); err != nil {
 		return
 	}
-	*rouPrfs = make([]*engine.RouteProfile, 0, len(rouPrfIDs))
+	*rouPrfs = make([]*utils.RouteProfile, 0, len(rouPrfIDs))
 	for _, rouPrfID := range rouPrfIDs {
-		var rouPrf *engine.RouteProfile
+		var rouPrf *utils.RouteProfile
 		rouPrf, err = admS.dm.GetRouteProfile(ctx, tnt, rouPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -114,7 +113,7 @@ func (adms *AdminS) V1GetRouteProfilesCount(ctx *context.Context, args *utils.Ar
 }
 
 // SetRouteProfile add a new Route configuration
-func (adms *AdminS) V1SetRouteProfile(ctx *context.Context, args *engine.RouteProfileWithAPIOpts, reply *string) error {
+func (adms *AdminS) V1SetRouteProfile(ctx *context.Context, args *utils.RouteProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

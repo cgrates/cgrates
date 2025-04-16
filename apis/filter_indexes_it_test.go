@@ -304,12 +304,12 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set an AttributeProfile with our filter and check the indexes
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -407,13 +407,13 @@ func testV1FIdxSetAttributeSMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	// update our Attribute with our filters
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant: utils.CGRateSorg,
 			ID:     "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"fltr_for_attr", "fltr_for_attr2",
 				"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -515,12 +515,12 @@ func testV1FIdxAttributeComputeIndexes(t *testing.T) {
 
 func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 	//we will add more attributes with different context for matching filters
-	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf2 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_new_fltr",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3", "*string:~*opts.*context:*chargers"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -529,12 +529,12 @@ func testV1FIdxAttributeMoreProfilesForFilters(t *testing.T) {
 			},
 		},
 	}
-	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf3 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTE3",
 			FilterIDs: []string{"fltr_for_attr3", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.Destinations",
 					Type:  utils.MetaConstant,
@@ -3782,14 +3782,14 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will set a RouteProfile with our filter and check the indexes
-	rtPrf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_1",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
@@ -3895,15 +3895,15 @@ func testV1FIdxSetRouteSMoreFltrsMoreIndexing(t *testing.T) {
 		t.Error("Unexpected reply result", reply)
 	}
 	// update our RoutesProfile with our filters
-	rtPrf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_1",
 			FilterIDs: []string{"fltr_for_attr",
 				"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "local",
 					RateProfileIDs: []string{"RP_LOCAL"},
@@ -4019,14 +4019,14 @@ func testV1FIdxRouteSProfileComputeIndexes(t *testing.T) {
 
 func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 	// will add more routes with our filters for matching indexes
-	rtPrf1 := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf1 := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_2",
 			FilterIDs: []string{"fltr_for_attr2", "fltr_for_attr3",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "route1",
 					RateProfileIDs: []string{"RP_LOCAL"},
@@ -4044,14 +4044,14 @@ func testV1FIdxRouteSMoreProfilesForFltrs(t *testing.T) {
 			},
 		},
 	}
-	rtPrf2 := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtPrf2 := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			Tenant: "cgrates.org",
 			ID:     "ROUTE_3",
 			FilterIDs: []string{"fltr_for_attr",
 				"*string:~*req.Account:1001"},
 			Sorting: utils.MetaWeight,
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "route2",
 					RateProfileIDs: []string{"RP_LOCAL"},

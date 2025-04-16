@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdSetRouteProfile{
 		name:      "route_profile_set",
 		rpcMethod: utils.AdminSv1SetRouteProfile,
-		rpcParams: &engine.RouteProfileWithAPIOpts{},
+		rpcParams: &utils.RouteProfileWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +35,7 @@ func init() {
 type CmdSetRouteProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.RouteProfileWithAPIOpts
+	rpcParams *utils.RouteProfileWithAPIOpts
 	*CommandExecuter
 }
 
@@ -50,8 +49,8 @@ func (self *CmdSetRouteProfile) RpcMethod() string {
 
 func (self *CmdSetRouteProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.RouteProfileWithAPIOpts{
-			RouteProfile: new(engine.RouteProfile),
+		self.rpcParams = &utils.RouteProfileWithAPIOpts{
+			RouteProfile: new(utils.RouteProfile),
 			APIOpts:      map[string]any{},
 		}
 	}

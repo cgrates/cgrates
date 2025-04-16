@@ -431,7 +431,7 @@ func (v1ms *mongoMigrator) getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile
 	return
 }
 
-func (v1ms *mongoMigrator) getV1RouteProfile() (v1dppPrf *engine.RouteProfile, err error) {
+func (v1ms *mongoMigrator) getV1RouteProfile() (v1dppPrf *utils.RouteProfile, err error) {
 	if v1ms.cursor == nil {
 		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColRpp).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
@@ -443,7 +443,7 @@ func (v1ms *mongoMigrator) getV1RouteProfile() (v1dppPrf *engine.RouteProfile, e
 		v1ms.cursor = nil
 		return nil, utils.ErrNoMoreData
 	}
-	v1dppPrf = new(engine.RouteProfile)
+	v1dppPrf = new(utils.RouteProfile)
 	if err := (*v1ms.cursor).Decode(v1dppPrf); err != nil {
 		return nil, err
 	}

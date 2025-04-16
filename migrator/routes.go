@@ -154,7 +154,7 @@ func (m *Migrator) migrateRouteProfiles() (err error) {
 		}
 	}
 	migrated := true
-	var v2 *engine.RouteProfile
+	var v2 *utils.RouteProfile
 	for {
 		version := routeVersion
 		for {
@@ -199,8 +199,8 @@ func (m *Migrator) migrateRouteProfiles() (err error) {
 	return m.ensureIndexesDataDB(engine.ColRts)
 }
 
-func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
-	route = &engine.RouteProfile{
+func convertSupplierToRoute(spp *SupplierProfile) (route *utils.RouteProfile) {
+	route = &utils.RouteProfile{
 		Tenant:            spp.Tenant,
 		ID:                spp.ID,
 		FilterIDs:         spp.FilterIDs,
@@ -208,9 +208,9 @@ func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 		SortingParameters: spp.SortingParameters,
 		Weights:           utils.DynamicWeights{{Weight: spp.Weight}},
 	}
-	route.Routes = make([]*engine.Route, len(spp.Suppliers))
+	route.Routes = make([]*utils.Route, len(spp.Suppliers))
 	for i, supl := range spp.Suppliers {
-		route.Routes[i] = &engine.Route{
+		route.Routes[i] = &utils.Route{
 			ID:              supl.ID,
 			FilterIDs:       supl.FilterIDs,
 			AccountIDs:      supl.AccountIDs,
@@ -225,7 +225,7 @@ func convertSupplierToRoute(spp *SupplierProfile) (route *engine.RouteProfile) {
 	return
 }
 
-func (m *Migrator) migrateV1ToV2Routes() (v4Cpp *engine.RouteProfile, err error) {
+func (m *Migrator) migrateV1ToV2Routes() (v4Cpp *utils.RouteProfile, err error) {
 	v4Cpp, err = m.dmIN.getV1RouteProfile()
 	if err != nil {
 		return nil, err

@@ -849,8 +849,8 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			FilterIDs: []string{"FLTR_ID"},
 			ID:        "ATTR_ID",
 			Weights: utils.DynamicWeights{
@@ -858,7 +858,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.Account",
 					Value: "1003",
@@ -1021,8 +1021,8 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			FilterIDs: []string{"FLTR_ID"},
 			ID:        "ATTR_ID",
 			Weights: utils.DynamicWeights{
@@ -1030,7 +1030,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.Account",
 					Value: "1003",

@@ -414,14 +414,14 @@ func testConsoleItRoutesProfilesForEvent(t *testing.T) {
 	cmd := exec.Command("cgr-console", "routes_profiles_for_event", `ID="123"`, `Event={"Account":"1001"}`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := []engine.RouteProfile{
+	expected := []utils.RouteProfile{
 		{
 			Tenant:            "cgrates.org",
 			ID:                "ROUTE_ACNT_1001",
 			FilterIDs:         []string{"FLTR_ACNT_1001"},
 			Sorting:           "*weight",
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:             "route1",
 					FilterIDs:      nil,
@@ -461,7 +461,7 @@ func testConsoleItRoutesProfilesForEvent(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv []engine.RouteProfile
+	var rcv []utils.RouteProfile
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Error(err)
 	}
@@ -521,13 +521,13 @@ func testConsoleItRoutesProfile(t *testing.T) {
 	cmd := exec.Command("cgr-console", "routes_profile", `Tenant="cgrates.org"`, `ID="ROUTE_ACNT_1001"`)
 	output := bytes.NewBuffer(nil)
 	cmd.Stdout = output
-	expected := engine.RouteProfile{
+	expected := utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ROUTE_ACNT_1001",
 		FilterIDs:         []string{"FLTR_ACNT_1001"},
 		Sorting:           "*weight",
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID:             "route1",
 				FilterIDs:      nil,
@@ -566,7 +566,7 @@ func testConsoleItRoutesProfile(t *testing.T) {
 		t.Log(output.String())
 		t.Fatal(err)
 	}
-	var rcv engine.RouteProfile
+	var rcv utils.RouteProfile
 	if err := json.NewDecoder(output).Decode(&rcv); err != nil {
 		t.Log(output.String())
 		t.Error(err)

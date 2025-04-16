@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/rates"
@@ -1437,7 +1438,7 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 
 	// set the internal AttributeS within connMngr
 	attrSConn := make(chan birpc.ClientConnector, 1)
-	attrSrv, _ := birpc.NewServiceWithMethodsRename(engine.NewAttributeService(dm, fltrS, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
+	attrSrv, _ := birpc.NewServiceWithMethodsRename(attributes.NewAttributeService(dm, fltrS, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
 	attrSConn <- attrSrv
 	cfg.AccountSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	// Set the internal rateS within connMngr
@@ -1454,10 +1455,10 @@ func TestV1DebitAbstractsEventCharges(t *testing.T) {
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, rateSConn)
 
 	// provision the data
-	atrPrfl := &engine.AttributeProfile{
+	atrPrfl := &utils.AttributeProfile{
 		Tenant: utils.CGRateSorg,
 		ID:     "ATTR_ATTACH_RATES_PROFILE_RP_2",
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "*opts.RateSProfile",
 				Type:  utils.MetaConstant,
@@ -1953,7 +1954,7 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 
 	// set the internal AttributeS within connMngr
 	attrSConn := make(chan birpc.ClientConnector, 1)
-	attrSrv, _ := birpc.NewServiceWithMethodsRename(engine.NewAttributeService(dm, fltrS, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
+	attrSrv, _ := birpc.NewServiceWithMethodsRename(attributes.NewAttributeService(dm, fltrS, cfg), utils.AttributeSv1, true, func(key string) (newKey string) { return strings.TrimPrefix(key, utils.V1Prfx) }) // update the name of the functions
 	attrSConn <- attrSrv
 	cfg.AccountSCfg().AttributeSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}
 	// Set the internal rateS within connMngr
@@ -1970,10 +1971,10 @@ func TestV1DebitAbstractsEventChargesWithRefundCharges(t *testing.T) {
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, rateSConn)
 
 	// provision the data
-	atrPrfl := &engine.AttributeProfile{
+	atrPrfl := &utils.AttributeProfile{
 		Tenant: utils.CGRateSorg,
 		ID:     "ATTR_ATTACH_RATES_PROFILE_RP_2",
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "*opts.RateSProfile",
 				Type:  utils.MetaConstant,

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package routes
 
 import (
 	"fmt"
@@ -25,18 +25,19 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewLoadDistributionSorter .
-func NewLoadDistributionSorter(cfg *config.CGRConfig, connMgr *ConnManager) *LoadDistributionSorter {
+func NewLoadDistributionSorter(cfg *config.CGRConfig, connMgr *engine.ConnManager) *LoadDistributionSorter {
 	return &LoadDistributionSorter{cfg: cfg, connMgr: connMgr}
 }
 
 // LoadDistributionSorter orders suppliers based on their Resource Usage
 type LoadDistributionSorter struct {
 	cfg     *config.CGRConfig
-	connMgr *ConnManager
+	connMgr *engine.ConnManager
 }
 
 // SortRoutes .
@@ -93,11 +94,11 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 			return
 		} else if pass {
 			// Add the ratio in SortingData so we can used it later in SortLoadDistribution
-			floatRatio, err := utils.IfaceAsBig(route.cacheRoute[utils.MetaRatio])
+			floatRatio, err := utils.IfaceAsBig(route.Ratio())
 			if err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> cannot convert ratio <%+v> to float64 supplier: <%s>",
-						utils.RouteS, route.cacheRoute[utils.MetaRatio], route.ID))
+						utils.RouteS, route.Ratio(), route.ID))
 			}
 			srtRoute.SortingData[utils.Ratio] = floatRatio
 			srtRoute.sortingDataDecimal[utils.Ratio] = &utils.Decimal{Big: floatRatio}
@@ -111,7 +112,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 // populateStatsForLoadRoute will query a list of statIDs and return the sum of metrics
 // first metric found is always returned
 func populateStatsForLoadRoute(ctx *context.Context, cfg *config.CGRConfig,
-	connMgr *ConnManager, statIDs []string, tenant string) (result *utils.Decimal, err error) {
+	connMgr *engine.ConnManager, statIDs []string, tenant string) (result *utils.Decimal, err error) {
 	result = utils.NewDecimalFromFloat64(0)
 	for _, statID := range statIDs {
 		// check if we get an ID in the following form (StatID:MetricID)

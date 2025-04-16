@@ -34,12 +34,12 @@ func TestTPEnewTPAttributes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
-			attr := &engine.AttributeProfile{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+			attr := &utils.AttributeProfile{
 				Tenant:    utils.CGRateSorg,
 				ID:        "TEST_ATTRIBUTES_TEST",
 				FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-				Attributes: []*engine.Attribute{
+				Attributes: []*utils.Attribute{
 					{
 						Path:  utils.AccountField,
 						Type:  utils.MetaConstant,
@@ -77,11 +77,11 @@ func TestTPEExportItemsAttributes(t *testing.T) {
 	tpAttr := TPAttributes{
 		dm: dm,
 	}
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -112,11 +112,11 @@ func TestTPEExportItemsAttributesNoDbConn(t *testing.T) {
 	tpAttr := TPAttributes{
 		dm: nil,
 	}
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -149,11 +149,11 @@ func TestTPEExportItemsAttributesIDNotFound(t *testing.T) {
 	tpAct := TPAttributes{
 		dm: dm,
 	}
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,

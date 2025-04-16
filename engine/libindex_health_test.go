@@ -492,7 +492,7 @@ func TestGetFltrIdxHealthgetIHObjFromCacheErr(t *testing.T) {
 	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
-	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -517,7 +517,7 @@ func TestGetFltrIdxHealthIdxKeyFormatErr(t *testing.T) {
 	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
-	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -563,7 +563,7 @@ func TestGetRevFltrIdxHealthFromObjIHObjFromCacheErr(t *testing.T) {
 	dm := NewDataManager(data, cfg, nil)
 
 	useLtcache := ltcache.NewCache(0, 0, false, nil)
-	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -665,7 +665,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetRatesFromCacheErr(t *testing.T) {
 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
-	if err := dm.SetAttributeProfile(context.Background(), &AttributeProfile{
+	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "Fltr1", "Fltr3"},

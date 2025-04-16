@@ -264,7 +264,7 @@ func filterHTTP(httpType string, dDP utils.DataProvider, fieldname, value string
 		resp      string
 		err       error
 	)
-	urlS, err := extractUrlFromType(httpType)
+	urlS, err := ExtractURLFromHTTPType(httpType)
 	if err != nil {
 		return false, err
 	}
@@ -277,9 +277,9 @@ func filterHTTP(httpType string, dDP utils.DataProvider, fieldname, value string
 		queryParams := parsedURL.Query()
 		queryParams.Set(fieldname, value)
 		parsedURL.RawQuery = queryParams.Encode()
-		resp, err = externalAPI(parsedURL.String(), nil)
+		resp, err = MakeExternalAPIRequest(parsedURL.String(), nil)
 	} else {
-		resp, err = externalAPI(parsedURL.String(), bytes.NewReader([]byte(dDP.String())))
+		resp, err = MakeExternalAPIRequest(parsedURL.String(), bytes.NewReader([]byte(dDP.String())))
 	}
 	if err != nil {
 		return false, err
@@ -287,25 +287,27 @@ func filterHTTP(httpType string, dDP utils.DataProvider, fieldname, value string
 	return utils.IfaceAsBool(resp)
 }
 
-func externalAPI(url string, rdr io.Reader) (string, error) {
-	hdr := map[string]string{
+// MakeExternalAPIRequest makes an HTTP GET request to the specified URL with
+// the provided request body and returns the response body as a string.
+func MakeExternalAPIRequest(url string, reader io.Reader) (string, error) {
+	headers := map[string]string{
 		"Content-Type": "application/json",
 	}
-	resp, err := getHTTP(http.MethodGet, url, rdr, hdr)
+
+	resp, err := getHTTP(http.MethodGet, url, reader, headers)
 	if err != nil {
-		return "", fmt.Errorf("error processing the request: %w", err)
+		return "", fmt.Errorf("error making HTTP request: %w", err)
 	}
-
 	defer resp.Body.Close()
-
-	if resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusMultipleChoices {
-		body, err := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("http request returned non-OK status code: %d ,body: %v ,err: %w", resp.StatusCode, string(body), err)
-	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("error decoding response: %w", err)
+		return "", fmt.Errorf("error reading response body: %w", err)
+	}
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusMultipleChoices {
+		return "", fmt.Errorf("HTTP request failed with status code %d: %s",
+			resp.StatusCode, string(body))
 	}
 
 	return string(body), nil
@@ -323,12 +325,14 @@ func getHTTP(method, url string, payload io.Reader, headers map[string]string) (
 	return http.DefaultClient.Do(req)
 }
 
-func extractUrlFromType(httpType string) (string, error) {
-	parts := strings.Split(httpType, utils.HashtagSep)
+// ExtractURLFromHTTPType parses a type string in the format "prefix#[url]" and
+// returns the URL portion.
+func ExtractURLFromHTTPType(typeStr string) (string, error) {
+	parts := strings.Split(typeStr, utils.HashtagSep)
 	if len(parts) != 2 {
-		return "", errors.New("url is not specified")
+		return "", errors.New("invalid format: URL portion not found")
 	}
-	//extracting  the url from the type
+
 	url := strings.Trim(parts[1], utils.IdxStart+utils.IdxEnd)
 	return url, nil
 }

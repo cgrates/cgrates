@@ -116,12 +116,12 @@ func testCacheSRpcConn(t *testing.T) {
 
 // Set an attribute profile and rate profile to test cache's apis
 func testCacheSSetAttributeProfile(t *testing.T) {
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -230,11 +230,11 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
-	expectedAttr := &engine.APIAttributeProfile{
+	expectedAttr := &utils.APIAttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_IT_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*utils.ExternalAttribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -247,7 +247,7 @@ func testCacheSHasItemAttributeProfile(t *testing.T) {
 			},
 		},
 	}
-	var resultAtr *engine.APIAttributeProfile
+	var resultAtr *utils.APIAttributeProfile
 	if err := chcRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -433,12 +433,12 @@ func testCacheSRemoveItemsAndReloadCache(t *testing.T) {
 }
 
 func testCacheSSetMoreAttributeProfiles(t *testing.T) {
-	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf1 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_1",
 			FilterIDs: []string{"*string:~*req.InitialField:InitialValue", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field1",
 					Value: "Value1",
@@ -451,12 +451,12 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 			},
 		},
 	}
-	attrPrf2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf2 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_2",
 			FilterIDs: []string{"*string:~*req.Field1:Value1", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field2",
 					Value: "Value2",
@@ -469,12 +469,12 @@ func testCacheSSetMoreAttributeProfiles(t *testing.T) {
 			},
 		},
 	}
-	attrPrf3 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf3 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "ATTR_3",
 			FilterIDs: []string{"*string:~*req.Field2:Value2", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:*sessions"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  utils.MetaReq + utils.NestingSep + "Field3",
 					Value: "Value3",

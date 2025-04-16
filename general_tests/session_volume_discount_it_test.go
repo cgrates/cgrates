@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
+	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -127,11 +128,11 @@ func testSessVolDiscLoadersLoad(t *testing.T) {
 
 func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 	expected := &sessions.V1AuthorizeReply{
-		RouteProfiles: engine.SortedRoutesList{
+		RouteProfiles: routes.SortedRoutesList{
 			{
 				ProfileID: "LC1",
 				Sorting:   "*lc",
-				Routes: []*engine.SortedRoute{
+				Routes: []*routes.SortedRoute{
 					{
 						RouteID: "supplier1",
 						SortingData: map[string]any{
@@ -194,11 +195,11 @@ func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
 
 func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 	expected := &sessions.V1AuthorizeReply{
-		RouteProfiles: engine.SortedRoutesList{
+		RouteProfiles: routes.SortedRoutesList{
 			{
 				ProfileID: "LC1",
 				Sorting:   "*lc",
-				Routes: []*engine.SortedRoute{
+				Routes: []*routes.SortedRoute{
 					{
 						RouteID: "supplier1",
 						SortingData: map[string]any{
@@ -261,11 +262,11 @@ func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
 
 func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
 	expected := &sessions.V1AuthorizeReply{
-		RouteProfiles: engine.SortedRoutesList{
+		RouteProfiles: routes.SortedRoutesList{
 			{
 				ProfileID: "LC1",
 				Sorting:   "*lc",
-				Routes: []*engine.SortedRoute{
+				Routes: []*routes.SortedRoute{
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]any{
@@ -457,11 +458,11 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 
 func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T) {
 	expected := &sessions.V1AuthorizeReply{
-		RouteProfiles: engine.SortedRoutesList{
+		RouteProfiles: routes.SortedRoutesList{
 			{
 				ProfileID: "LC1",
 				Sorting:   "*lc",
-				Routes: []*engine.SortedRoute{
+				Routes: []*routes.SortedRoute{
 					{
 						RouteID: "supplier2",
 						SortingData: map[string]any{

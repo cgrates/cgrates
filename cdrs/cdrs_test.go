@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -363,8 +364,8 @@ func TestCDRsAttrSProcessEventMock(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				*reply.(*engine.AttrSProcessEventReply) = engine.AttrSProcessEventReply{
-					AlteredFields: []*engine.FieldsAltered{},
+				*reply.(*attributes.AttrSProcessEventReply) = attributes.AttrSProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{},
 				}
 				return nil
 			},
@@ -439,8 +440,8 @@ func TestCDRsAttrSProcessEventMockNotFoundErr(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				*reply.(*engine.AttrSProcessEventReply) = engine.AttrSProcessEventReply{
-					AlteredFields: []*engine.FieldsAltered{{
+				*reply.(*attributes.AttrSProcessEventReply) = attributes.AttrSProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{{
 						Fields: []string{},
 					}},
 				}
@@ -517,8 +518,8 @@ func TestCDRsAttrSProcessEventMockNotEmptyAF(t *testing.T) {
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				*reply.(*engine.AttrSProcessEventReply) = engine.AttrSProcessEventReply{
-					AlteredFields: []*engine.FieldsAltered{{
+				*reply.(*attributes.AttrSProcessEventReply) = attributes.AttrSProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{{
 						Fields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{

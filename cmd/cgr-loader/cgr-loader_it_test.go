@@ -263,11 +263,11 @@ func testLoadItConnectToDB(t *testing.T) {
 }
 
 func testLoadItCheckAttributes(t *testing.T) {
-	eAttrPrf := &engine.AttributeProfile{
+	eAttrPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_1001_SIMPLEAUTH",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:simpleauth"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				FilterIDs: []string{},
 				Path:      utils.MetaReq + utils.NestingSep + "Password",

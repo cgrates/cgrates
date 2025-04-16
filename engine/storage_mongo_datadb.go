@@ -1053,8 +1053,8 @@ func (ms *MongoStorage) RemoveFilterDrv(ctx *context.Context, tenant, id string)
 	})
 }
 
-func (ms *MongoStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (*RouteProfile, error) {
-	routeProfile := new(RouteProfile)
+func (ms *MongoStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (*utils.RouteProfile, error) {
+	routeProfile := new(utils.RouteProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColRts).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(routeProfile)
@@ -1066,7 +1066,7 @@ func (ms *MongoStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id stri
 	return routeProfile, err
 }
 
-func (ms *MongoStorage) SetRouteProfileDrv(ctx *context.Context, r *RouteProfile) error {
+func (ms *MongoStorage) SetRouteProfileDrv(ctx *context.Context, r *utils.RouteProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColRts).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},
@@ -1086,8 +1086,8 @@ func (ms *MongoStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id s
 	})
 }
 
-func (ms *MongoStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (*AttributeProfile, error) {
-	attrProfile := new(AttributeProfile)
+func (ms *MongoStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (*utils.AttributeProfile, error) {
+	attrProfile := new(utils.AttributeProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColAttr).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(attrProfile)
@@ -1099,7 +1099,7 @@ func (ms *MongoStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id 
 	return attrProfile, err
 }
 
-func (ms *MongoStorage) SetAttributeProfileDrv(ctx *context.Context, r *AttributeProfile) error {
+func (ms *MongoStorage) SetAttributeProfileDrv(ctx *context.Context, r *utils.AttributeProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColAttr).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},

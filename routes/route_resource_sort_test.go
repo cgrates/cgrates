@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package routes
 
 import (
 	"bytes"
@@ -26,12 +26,13 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestPopulateResourcesForRoutesNoResourceSConns(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	routes := map[string]*RouteWithWeight{}
 	ev := &utils.CGREvent{
 		Tenant:  "cgrates.org",
@@ -50,10 +51,10 @@ func TestPopulateResourcesForRoutesNoResourceSConns(t *testing.T) {
 func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{},
+			Route: &utils.Route{},
 		},
 	}
 	ev := &utils.CGREvent{
@@ -73,16 +74,16 @@ func TestPopulateResourcesForRoutesNoResourceIDs(t *testing.T) {
 func TestPopulateResourcesForRoutesOK(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
-	res := &Resource{
+	res := &engine.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RSC1",
-		Usages: make(map[string]*ResourceUsage),
+		Usages: make(map[string]*engine.ResourceUsage),
 	}
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -90,7 +91,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
-				rplCast, canCast := reply.(*Resource)
+				rplCast, canCast := reply.(*engine.Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil
@@ -100,12 +101,12 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 			},
 		},
 	}
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:              "Route1",
 				ResourceIDs:     []string{"RSC1"},
 				RouteParameters: "param1",
@@ -144,7 +145,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	var buf bytes.Buffer
@@ -162,12 +163,12 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 			},
 		},
 	}
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:              "Route1",
 				ResourceIDs:     []string{"RSC1"},
 				RouteParameters: "param1",
@@ -210,16 +211,16 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
-	res := &Resource{
+	res := &engine.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RSC1",
-		Usages: make(map[string]*ResourceUsage),
+		Usages: make(map[string]*engine.ResourceUsage),
 	}
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -227,7 +228,7 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
-				rplCast, canCast := reply.(*Resource)
+				rplCast, canCast := reply.(*engine.Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil
@@ -237,17 +238,17 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 			},
 		},
 	}
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources), utils.ResourceSv1, cc)
 
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:              "Route1",
 				ResourceIDs:     []string{"RSC1"},
 				RouteParameters: "param1",
 			},
-			lazyCheckRules: []*FilterRule{
+			lazyCheckRules: []*engine.FilterRule{
 				{
 					Type:    "inexistent",
 					Element: "inexistent",

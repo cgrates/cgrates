@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -534,7 +534,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed, _ := ev.ParseEventValue(utils.PDD, utils.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.PDD), ""); parsed != "0.028" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(utils.Route, utils.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.Route), ""); parsed != "supplier1" {
+	if parsed, _ := ev.ParseEventValue(utils.RouteStr, utils.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.RouteStr), ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed, _ := ev.ParseEventValue(utils.RunID, utils.NewRSRParserMustCompile(utils.MetaDynReq+utils.NestingSep+utils.RunID), ""); parsed != utils.MetaDefault {
@@ -587,7 +587,7 @@ func TestFsEvAsMapStringInterface(t *testing.T) {
 	expectedMap[utils.PDD] = 28 * time.Millisecond
 	expectedMap[utils.ACD] = 30 * time.Second
 	expectedMap[utils.DisconnectCause] = "NORMAL_CLEARING"
-	expectedMap[utils.Route] = "supplier1"
+	expectedMap[utils.RouteStr] = "supplier1"
 	if storedMap := ev.AsMapStringInterface(""); !reflect.DeepEqual(expectedMap, storedMap) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(expectedMap), utils.ToJSON(storedMap))
 	}
@@ -627,10 +627,10 @@ func TestSliceAsFsArray(t *testing.T) {
 }
 
 func TestSliceAsArraySortingParameter(t *testing.T) {
-	eSplrs := engine.SortedRoutesList{{
+	eSplrs := routes.SortedRoutesList{{
 		ProfileID: "ACNT_1003",
 		Sorting:   utils.MetaWeight,
-		Routes: []*engine.SortedRoute{
+		Routes: []*routes.SortedRoute{
 			{
 				RouteID: "rt1",
 				SortingData: map[string]any{
@@ -647,7 +647,7 @@ func TestSliceAsArraySortingParameter(t *testing.T) {
 	}, {
 		ProfileID: "ACNT_1004",
 		Sorting:   utils.MetaWeight,
-		Routes: []*engine.SortedRoute{
+		Routes: []*routes.SortedRoute{
 			{
 				RouteID: "RT1",
 				SortingData: map[string]any{

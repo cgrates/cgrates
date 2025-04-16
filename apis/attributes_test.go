@@ -41,15 +41,15 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			ID: "TestGetAttributeProfile",
 			Blockers: utils.DynamicBlockers{
 				{
 					Blocker: true,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -64,7 +64,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//get after set
-	var rcv engine.APIAttributeProfile
+	var rcv utils.APIAttributeProfile
 	if err := admS.GetAttributeProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -117,9 +117,9 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
-			Attributes: []*engine.ExternalAttribute{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -156,14 +156,14 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
-			attrPRf := &engine.AttributeProfile{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+			attrPRf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPRf, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *engine.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
 		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
@@ -194,7 +194,7 @@ func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	var rcv engine.APIAttributeProfile
+	var rcv utils.APIAttributeProfile
 	expected := "MANDATORY_IE_MISSING: [ID]"
 	if err := admS.GetAttributeProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
@@ -227,10 +227,10 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			ID: "TestGetAttributeProfile",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -262,7 +262,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	cancel()
 	admS.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 
-	var rcv engine.APIAttributeProfile
+	var rcv utils.APIAttributeProfile
 	if err := admS.GetAttributeProfile(context.Background(),
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -297,14 +297,14 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
-			attrPRf := &engine.AttributeProfile{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+			attrPRf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPRf, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *engine.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
 		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
@@ -347,14 +347,14 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
-			attrPRf := &engine.AttributeProfile{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+			attrPRf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPRf, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *engine.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
 		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
@@ -412,14 +412,14 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.AttributeProfile, error) {
-			attrPRf := &engine.AttributeProfile{
+		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+			attrPRf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPRf, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *engine.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
 		GetKeysForPrefixF: func(c *context.Context, s string) ([]string, error) {
@@ -461,104 +461,6 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestAttributesGetAttributeForEvent(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	attrS := engine.NewAttributeService(dm, fltrs, cfg)
-	admS := &AdminSv1{
-		dm:  dm,
-		cfg: cfg,
-	}
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
-			Tenant:    "cgrates.org",
-			ID:        "TestGetAttributeProfile",
-			FilterIDs: []string{"*string:~*req.Account:1002"},
-			Attributes: []*engine.ExternalAttribute{
-				{
-					Path:  "*req.RequestType",
-					Type:  utils.MetaConstant,
-					Value: utils.MetaPrepaid,
-				},
-			},
-		},
-	}
-	var result string
-
-	if err := admS.SetAttributeProfile(context.Background(), attrPrf, &result); err != nil {
-		t.Error(err)
-	}
-
-	attsv1 := NewAttributeSv1(attrS)
-	ev := &utils.CGREvent{
-		Event: map[string]any{
-			utils.AccountField: "1002",
-		},
-	}
-	var reply engine.APIAttributeProfile
-
-	expAttrPrf := &engine.APIAttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TestGetAttributeProfile",
-		FilterIDs: []string{"*string:~*req.Account:1002"},
-		Attributes: []*engine.ExternalAttribute{
-			{
-				Path:  "*req.RequestType",
-				Type:  utils.MetaConstant,
-				Value: utils.MetaPrepaid,
-			},
-		},
-	}
-
-	if err := attsv1.GetAttributeForEvent(context.Background(), ev, &reply); err != nil {
-		t.Error(err)
-	} else {
-		rplyPntr := &reply
-		if !reflect.DeepEqual(expAttrPrf, rplyPntr) {
-			t.Errorf("Expected %+v, received %+v", utils.ToJSON(expAttrPrf), utils.ToJSON(rplyPntr))
-		}
-	}
-
-	var rplyev engine.AttrSProcessEventReply
-	ev.Event[utils.RequestType] = utils.MetaPseudoPrepaid
-	//now we will process the event for our attr
-	expectedEv := engine.AttrSProcessEventReply{
-		AlteredFields: []*engine.FieldsAltered{
-			{
-				MatchedProfileID: "cgrates.org:TestGetAttributeProfile",
-				Fields:           []string{"*req.RequestType"},
-			},
-		},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]any{
-				utils.AccountField: "1002",
-				utils.RequestType:  utils.MetaPrepaid,
-			},
-			APIOpts: map[string]any{},
-		},
-	}
-	if err := attsv1.ProcessEvent(context.Background(), ev, &rplyev); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expectedEv, rplyev) {
-		t.Errorf("Expected %+v ,received %+v", utils.ToJSON(expectedEv), utils.ToJSON(rplyev))
-	}
-}
-
-func TestAttributesSv1Ping(t *testing.T) {
-	attrsv := new(AttributeSv1)
-	var reply string
-	if err := attrsv.Ping(nil, nil, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Unexpected reply error")
-	}
-}
-
 func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -566,11 +468,11 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
-	args1 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	args1 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -593,11 +495,11 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 		t.Error("Unexpected reply returned:", setReply)
 	}
 
-	args2 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	args2 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant: "cgrates.org",
 			ID:     "test_ID2",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -620,11 +522,11 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	}
 
 	// this profile will not match
-	args3 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	args3 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant: "cgrates.org",
 			ID:     "test2_ID1",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -650,11 +552,11 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
 	}
-	exp := []*engine.APIAttributeProfile{
+	exp := []*utils.APIAttributeProfile{
 		{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -670,7 +572,7 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "test_ID2",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -685,7 +587,7 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 		},
 	}
 
-	var getReply []*engine.APIAttributeProfile
+	var getReply []*utils.APIAttributeProfile
 	if err := admS.GetAttributeProfiles(context.Background(), argsGet, &getReply); err != nil {
 		t.Error(err)
 	} else {
@@ -706,11 +608,11 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
-	args := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	args := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.RequestType",
 					Type:  utils.MetaConstant,
@@ -744,7 +646,7 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	}
 
 	experr := `SERVER_ERROR: maximum number of items exceeded`
-	var getReply []*engine.APIAttributeProfile
+	var getReply []*utils.APIAttributeProfile
 	if err := admS.GetAttributeProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -755,7 +657,7 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		SetAttributeProfileDrvF: func(*context.Context, *engine.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(*context.Context, *utils.AttributeProfile) error {
 			return nil
 		},
 		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
@@ -772,7 +674,7 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 		dm:  dm,
 	}
 
-	var reply []*engine.APIAttributeProfile
+	var reply []*utils.APIAttributeProfile
 	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.GetAttributeProfiles(context.Background(),
@@ -790,14 +692,14 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(*context.Context, string, string) (*engine.AttributeProfile, error) {
-			attrPrf := &engine.AttributeProfile{
+		GetAttributeProfileDrvF: func(*context.Context, string, string) (*utils.AttributeProfile, error) {
+			attrPrf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPrf, nil
 		},
-		SetAttributeProfileDrvF: func(*context.Context, *engine.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(*context.Context, *utils.AttributeProfile) error {
 			return nil
 		},
 		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
@@ -835,14 +737,14 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(*context.Context, string, string) (*engine.AttributeProfile, error) {
-			attrPrf := &engine.AttributeProfile{
+		GetAttributeProfileDrvF: func(*context.Context, string, string) (*utils.AttributeProfile, error) {
+			attrPrf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPrf, nil
 		},
-		SetAttributeProfileDrvF: func(*context.Context, *engine.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(*context.Context, *utils.AttributeProfile) error {
 			return nil
 		},
 		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
@@ -887,10 +789,10 @@ func TestAttributesSetAttributeProfileAsAttrPrfErr(t *testing.T) {
 		dm:  dm,
 	}
 
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			ID:         "TestGetAttributeProfile",
-			Attributes: []*engine.ExternalAttribute{},
+			Attributes: []*utils.ExternalAttribute{},
 		},
 	}
 	var reply string

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package routes
 
 import (
 	"reflect"
@@ -25,13 +25,14 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestPopulatStatsForQOSRouteCallErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 
 	expErr := "MANDATORY_IE_MISSING: [connIDs]"
 	if _, err := populatStatsForQOSRoute(context.Background(), cfg, cM, []string{"stat1", "stat2"}, "cgrates.org"); err == nil || err.Error() != expErr {
@@ -43,7 +44,7 @@ func TestPopulatStatsForQOSRouteCallErr(t *testing.T) {
 func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -69,7 +70,7 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 
 	exp := map[string]*utils.Decimal{
@@ -87,7 +88,7 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 func TestQOSRouteSorterRoutesNoStatSConns(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	qos := NewQOSRouteSorter(cfg, cM)
 	ctx := context.Background()
 	prflID := "prfId"
@@ -112,7 +113,7 @@ func TestQOSRouteSorterRoutesNoStatSConns(t *testing.T) {
 func TestQOSRouteSorterRoutesOK(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -137,14 +138,14 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:      "local",
 				StatIDs: []string{"stat1"},
 			},
@@ -192,7 +193,7 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -217,19 +218,19 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:      "local",
 				StatIDs: []string{"stat1"},
 			},
 			Weight: 10,
-			lazyCheckRules: []*FilterRule{
+			lazyCheckRules: []*engine.FilterRule{
 				{
 					Type:    "inexistent",
 					Element: "inexistent",
@@ -258,7 +259,7 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -273,14 +274,14 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:      "local",
 				StatIDs: []string{"stat1"},
 			},
@@ -316,7 +317,7 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 
 	defer func() {
-		Cache = NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
+		engine.Cache = engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil)
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
@@ -331,14 +332,14 @@ func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 		},
 	}
 
-	cM := NewConnManager(cfg)
+	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM)
 	ctx := context.Background()
 	prflID := "prfId"
 	routes := map[string]*RouteWithWeight{
 		"RW": {
-			Route: &Route{
+			Route: &utils.Route{
 				ID:      "local",
 				StatIDs: []string{"stat1"},
 			},

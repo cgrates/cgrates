@@ -185,11 +185,11 @@ func testClsrRPCConection(t *testing.T) {
 }
 
 func testClsrSetGetAttribute(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
+	alsPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ClsrTest",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -208,7 +208,7 @@ func testClsrSetGetAttribute(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	var reply *engine.AttributeProfile
+	var reply *utils.AttributeProfile
 	if err := clsrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest"}, &reply); err != nil {
 		t.Fatal(err)
@@ -228,11 +228,11 @@ func testClsrStopMaster(t *testing.T) {
 }
 
 func testClsrSetGetAttribute2(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
+	alsPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ClsrTest",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -245,7 +245,7 @@ func testClsrSetGetAttribute2(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	var reply *engine.AttributeProfile
+	var reply *utils.AttributeProfile
 	if err := clsrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest"}, &reply); err != nil {
 		t.Fatal(err)
@@ -276,11 +276,11 @@ func testClsrReStartMaster(t *testing.T) {
 }
 
 func testClsrGetAttribute(t *testing.T) {
-	alsPrf := &engine.AttributeProfile{
+	alsPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ClsrTest2",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:*sessions|*cdrs"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 				Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -293,7 +293,7 @@ func testClsrGetAttribute(t *testing.T) {
 		},
 	}
 	alsPrf.Compile()
-	var reply *engine.AttributeProfile
+	var reply *utils.AttributeProfile
 	if err := clsrRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ClsrTest2"}, &reply); err != nil {
 		t.Fatal(err)

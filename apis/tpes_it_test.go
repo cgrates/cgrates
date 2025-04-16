@@ -135,12 +135,12 @@ func testTPeSPing(t *testing.T) {
 }
 
 func testTPeSSetAttributeProfile(t *testing.T) {
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Blockers: utils.DynamicBlockers{
 						{
@@ -181,12 +181,12 @@ func testTPeSSetAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	attrPrf1 := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf1 := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_IT_TEST_SECOND",
 			FilterIDs: []string{"*string:~*opts.*context:*sessions", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*tenant",
 					Type:  utils.MetaConstant,
@@ -548,8 +548,8 @@ func testTPeSetChargerProfiles(t *testing.T) {
 }
 
 func testTPeSetRouteProfiles(t *testing.T) {
-	prf := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	prf := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			ID:     "ROUTE_2003",
 			Tenant: "cgrates.org",
 			Weights: utils.DynamicWeights{
@@ -559,7 +559,7 @@ func testTPeSetRouteProfiles(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "route1",
 					Weights: utils.DynamicWeights{
@@ -578,13 +578,13 @@ func testTPeSetRouteProfiles(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
-	rt2 := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rt2 := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			ID:        "ROUTE_ACNT_1001",
 			Tenant:    "cgrates.org",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Sorting:   "*weight",
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID:        "vendor1",
 					FilterIDs: []string{"FLTR_DEST_1003"},

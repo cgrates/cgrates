@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -360,7 +361,7 @@ func (ar *AgentRequest) ParseField(
 	case utils.MetaGroup:
 		tmpType = utils.MetaVariable
 	}
-	out, err = engine.ParseAttribute(ar, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout)
+	out, err = attributes.ParseAttribute(ar, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout)
 
 	if err != nil &&
 		!strings.HasPrefix(err.Error(), "Could not find") {

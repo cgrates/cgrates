@@ -1308,12 +1308,12 @@ func APItoModelTPRoutes(st *utils.TPRouteProfile) (mdls RouteMdls) {
 	return
 }
 
-func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RouteProfile, err error) {
-	rp = &RouteProfile{
+func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *utils.RouteProfile, err error) {
+	rp = &utils.RouteProfile{
 		Tenant:            tpRp.Tenant,
 		ID:                tpRp.ID,
 		Sorting:           tpRp.Sorting,
-		Routes:            make([]*Route, len(tpRp.Routes)),
+		Routes:            make([]*utils.Route, len(tpRp.Routes)),
 		SortingParameters: make([]string, len(tpRp.SortingParameters)),
 		FilterIDs:         make([]string, len(tpRp.FilterIDs)),
 	}
@@ -1332,7 +1332,7 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 	copy(rp.SortingParameters, tpRp.SortingParameters)
 	copy(rp.FilterIDs, tpRp.FilterIDs)
 	for i, route := range tpRp.Routes {
-		rp.Routes[i] = &Route{
+		rp.Routes[i] = &utils.Route{
 			ID:              route.ID,
 			RateProfileIDs:  route.RateProfileIDs,
 			AccountIDs:      route.AccountIDs,
@@ -1357,7 +1357,7 @@ func APItoRouteProfile(tpRp *utils.TPRouteProfile, timezone string) (rp *RoutePr
 	return rp, nil
 }
 
-func RouteProfileToAPI(rp *RouteProfile) (tpRp *utils.TPRouteProfile) {
+func RouteProfileToAPI(rp *utils.RouteProfile) (tpRp *utils.TPRouteProfile) {
 	tpRp = &utils.TPRouteProfile{
 		Tenant:            rp.Tenant,
 		ID:                rp.ID,
@@ -1479,12 +1479,12 @@ func APItoModelTPAttribute(ap *utils.TPAttributeProfile) (mdls AttributeMdls) {
 	return
 }
 
-func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (attrPrf *AttributeProfile, err error) {
-	attrPrf = &AttributeProfile{
+func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (attrPrf *utils.AttributeProfile, err error) {
+	attrPrf = &utils.AttributeProfile{
 		Tenant:     tpAttr.Tenant,
 		ID:         tpAttr.ID,
 		FilterIDs:  make([]string, len(tpAttr.FilterIDs)),
-		Attributes: make([]*Attribute, len(tpAttr.Attributes)),
+		Attributes: make([]*utils.Attribute, len(tpAttr.Attributes)),
 	}
 	if tpAttr.Blockers != utils.EmptyString {
 		if attrPrf.Blockers, err = utils.NewDynamicBlockersFromString(tpAttr.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
@@ -1506,7 +1506,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		if err != nil {
 			return nil, err
 		}
-		attrPrf.Attributes[i] = &Attribute{
+		attrPrf.Attributes[i] = &utils.Attribute{
 			FilterIDs: reqAttr.FilterIDs,
 			Path:      reqAttr.Path,
 			Type:      reqAttr.Type,
@@ -1521,7 +1521,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 	return attrPrf, nil
 }
 
-func AttributeProfileToAPI(attrPrf *AttributeProfile) (tpAttr *utils.TPAttributeProfile) {
+func AttributeProfileToAPI(attrPrf *utils.AttributeProfile) (tpAttr *utils.TPAttributeProfile) {
 	tpAttr = &utils.TPAttributeProfile{
 		Tenant:     attrPrf.Tenant,
 		ID:         attrPrf.ID,

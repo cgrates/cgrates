@@ -172,7 +172,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	var v4Attr *v4AttributeProfile
 	var v5Attr *v6AttributeProfile
 	var v6Attr *v6AttributeProfile
-	var v7Attr *engine.AttributeProfile
+	var v7Attr *utils.AttributeProfile
 	for {
 		// One attribute profile at a time
 		version := vrs[utils.Attributes]
@@ -510,7 +510,7 @@ func (m *Migrator) migrateV5ToV6AttributeProfile(v5Attr *v6AttributeProfile) (_ 
 	return v5Attr, nil
 }
 
-func (m *Migrator) migrateV6ToV7AttributeProfile(v6Attr *v6AttributeProfile) (_ *engine.AttributeProfile, err error) {
+func (m *Migrator) migrateV6ToV7AttributeProfile(v6Attr *v6AttributeProfile) (_ *utils.AttributeProfile, err error) {
 
 	if v6Attr == nil {
 		// read data from DataDB
@@ -522,7 +522,7 @@ func (m *Migrator) migrateV6ToV7AttributeProfile(v6Attr *v6AttributeProfile) (_ 
 	return v6Attr.AsAttributeProfile(), nil
 }
 
-func (v6AttrPrf v6AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile) {
+func (v6AttrPrf v6AttributeProfile) AsAttributeProfile() (attrPrf *utils.AttributeProfile) {
 	fltr := "*string:~*opts.*context:"
 	for _, ctx := range v6AttrPrf.Contexts {
 		if ctx != utils.MetaAny {
@@ -530,11 +530,11 @@ func (v6AttrPrf v6AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		}
 	}
 
-	attrPrf = &engine.AttributeProfile{
+	attrPrf = &utils.AttributeProfile{
 		Tenant:     v6AttrPrf.Tenant,
 		ID:         v6AttrPrf.ID,
 		FilterIDs:  v6AttrPrf.FilterIDs,
-		Attributes: make([]*engine.Attribute, len(v6AttrPrf.Attributes)),
+		Attributes: make([]*utils.Attribute, len(v6AttrPrf.Attributes)),
 	}
 	attrPrf.Blockers = make(utils.DynamicBlockers, 1)
 	attrPrf.Blockers[0].Blocker = v6AttrPrf.Blocker
@@ -545,7 +545,7 @@ func (v6AttrPrf v6AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	}
 
 	for idx, attr := range v6AttrPrf.Attributes {
-		attrPrf.Attributes[idx] = &engine.Attribute{
+		attrPrf.Attributes[idx] = &utils.Attribute{
 			FilterIDs: attr.FilterIDs,
 			Path:      attr.Path,
 			Type:      attr.Type,

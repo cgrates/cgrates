@@ -34,8 +34,8 @@ func TestTPEnewTPRoutes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt string, id string) (*engine.RouteProfile, error) {
-			rte := &engine.RouteProfile{
+		GetRouteProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.RouteProfile, error) {
+			rte := &utils.RouteProfile{
 				ID:     "ROUTE_2003",
 				Tenant: "cgrates.org",
 				Weights: utils.DynamicWeights{
@@ -45,7 +45,7 @@ func TestTPEnewTPRoutes(t *testing.T) {
 				},
 				Sorting:           utils.MetaWeight,
 				SortingParameters: []string{},
-				Routes: []*engine.Route{
+				Routes: []*utils.Route{
 					{
 						ID: "route1",
 						Weights: utils.DynamicWeights{
@@ -76,7 +76,7 @@ func TestTPEExportRoutes(t *testing.T) {
 	tpRte := TPRoutes{
 		dm: dm,
 	}
-	rte := &engine.RouteProfile{
+	rte := &utils.RouteProfile{
 		ID:     "ROUTE_2003",
 		Tenant: "cgrates.org",
 		Weights: utils.DynamicWeights{
@@ -86,7 +86,7 @@ func TestTPEExportRoutes(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{
@@ -110,7 +110,7 @@ func TestTPEExportItemsRoutesNoDbConn(t *testing.T) {
 	tpRte := TPRoutes{
 		dm: nil,
 	}
-	rte := &engine.RouteProfile{
+	rte := &utils.RouteProfile{
 		ID:     "ROUTE_2003",
 		Tenant: "cgrates.org",
 		Weights: utils.DynamicWeights{
@@ -120,7 +120,7 @@ func TestTPEExportItemsRoutesNoDbConn(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{
@@ -146,7 +146,7 @@ func TestTPEExportItemsRoutesIDNotFound(t *testing.T) {
 	tpRte := TPRoutes{
 		dm: dm,
 	}
-	rte := &engine.RouteProfile{
+	rte := &utils.RouteProfile{
 		ID:     "ROUTE_2003",
 		Tenant: "cgrates.org",
 		Weights: utils.DynamicWeights{
@@ -156,7 +156,7 @@ func TestTPEExportItemsRoutesIDNotFound(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{

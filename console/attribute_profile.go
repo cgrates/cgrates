@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -61,6 +60,6 @@ func (self *CmdGetAttributeProfile) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetAttributeProfile) RpcResult() any {
-	var atr engine.APIAttributeProfile
+	var atr utils.APIAttributeProfile
 	return &atr
 }

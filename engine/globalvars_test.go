@@ -45,7 +45,7 @@ func TestGlobalvarsGetHTTPPstrTransport(t *testing.T) {
 		DisableKeepAlives: true,
 	}
 	SetHTTPPstrTransport(newTransport)
-	getTransport := GetHTTPPstrTransport()
+	getTransport := HTTPPstrTransport()
 	if getTransport != newTransport {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", newTransport, getTransport)
 	}

@@ -585,7 +585,7 @@ func (v1rs *redisMigrator) getV1ChargerProfile() (v1chrPrf *utils.ChargerProfile
 	return
 }
 
-func (v1rs *redisMigrator) getV1RouteProfile() (v1chrPrf *engine.RouteProfile, err error) {
+func (v1rs *redisMigrator) getV1RouteProfile() (v1chrPrf *utils.RouteProfile, err error) {
 	if v1rs.qryIdx == nil {
 		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(context.TODO(), utils.RouteProfilePrefix)
 		if err != nil {

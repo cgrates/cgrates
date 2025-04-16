@@ -24,6 +24,7 @@ import (
 	"net/http"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -87,7 +88,7 @@ func (cdrS *CDRServer) chrgrSProcessEvent(ctx *context.Context, cgrEv *utils.CGR
 
 // attrSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CDRServer) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (err error) {
-	var rplyEv engine.AttrSProcessEventReply
+	var rplyEv attributes.AttrSProcessEventReply
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]any)
 	}

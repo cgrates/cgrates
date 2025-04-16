@@ -50,7 +50,7 @@ func (tpAttr TPAttributes) exportItems(ctx *context.Context, wrtr io.Writer, tnt
 		return
 	}
 	for _, attrID := range itmIDs {
-		var attrPrf *engine.AttributeProfile
+		var attrPrf *utils.AttributeProfile
 		attrPrf, err = tpAttr.dm.GetAttributeProfile(ctx, tnt, attrID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

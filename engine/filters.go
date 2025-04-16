@@ -60,7 +60,7 @@ func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
-	dDP := newDynamicDP(ctx, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
+	dDP := NewDynamicDP(ctx, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
 		fS.cfg.FilterSCfg().AccountSConns, fS.cfg.FilterSCfg().TrendSConns, fS.cfg.FilterSCfg().RankingSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
 		f, err := fS.dm.GetFilter(ctx, tenant, fltrID,
@@ -121,7 +121,7 @@ func (fS *FilterS) LazyPass(ctx *context.Context, tenant string, filterIDs []str
 		return true, nil, nil
 	}
 	pass = true
-	dDP := newDynamicDP(ctx, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
+	dDP := NewDynamicDP(ctx, fS.cfg.FilterSCfg().ResourceSConns, fS.cfg.FilterSCfg().StatSConns,
 		fS.cfg.FilterSCfg().AccountSConns, fS.cfg.FilterSCfg().TrendSConns, fS.cfg.FilterSCfg().RankingSConns, tenant, ev)
 	for _, fltrID := range filterIDs {
 		var f *Filter

@@ -657,13 +657,13 @@ func testOnStorITFilter(t *testing.T) {
 }
 
 func testOnStorITRouteProfile(t *testing.T) {
-	splProfile := &RouteProfile{
+	splProfile := &utils.RouteProfile{
 		Tenant:            "cgrates.org",
 		ID:                "SPRF_1",
 		FilterIDs:         []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z"},
 		Sorting:           "*lowest_cost",
 		SortingParameters: []string{},
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{
 				ID:              "supplier1",
 				FilterIDs:       []string{"FLTR_DST_DE"},
@@ -705,7 +705,7 @@ func testOnStorITRouteProfile(t *testing.T) {
 		t.Errorf("Expected : %+v, but received %+v", expectedT, itm)
 	}
 	//update
-	splProfile.Routes = []*Route{
+	splProfile.Routes = []*utils.Route{
 		{
 			ID:              "supplier1",
 			FilterIDs:       []string{"FLTR_DST_DE"},
@@ -762,11 +762,11 @@ func testOnStorITRouteProfile(t *testing.T) {
 }
 
 func testOnStorITAttributeProfile(t *testing.T) {
-	attrProfile := &AttributeProfile{
+	attrProfile := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
 		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:con1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",
 				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -841,11 +841,11 @@ func testOnStorITAttributeProfile(t *testing.T) {
 }
 
 func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
-	attrProfile := &AttributeProfile{
+	attrProfile := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AttrPrf1",
 		FilterIDs: []string{"*string:~*reg.Accout:1002", "*string:~*reg.Destination:11", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z", "*string:~*opts.*context:con1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FN1",
 				Value: utils.NewRSRParsersMustCompile("Val1", utils.InfieldSep),
@@ -871,7 +871,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
-	attrProfile.Attributes = []*Attribute{
+	attrProfile.Attributes = []*utils.Attribute{
 		{
 			Path:  utils.MetaReq + utils.NestingSep + "FN1",
 			Value: utils.NewRSRParsersMustCompile("123.123", utils.InfieldSep),
@@ -887,7 +887,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	} else if !reflect.DeepEqual(attrProfile, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
-	attrProfile.Attributes = []*Attribute{
+	attrProfile.Attributes = []*utils.Attribute{
 		{
 			Path:  utils.MetaReq + utils.NestingSep + "FN1",
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep),

@@ -1078,11 +1078,11 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Weights: ";20",
 	}
-	expected := &AttributeProfile{
+	expected := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -1114,11 +1114,11 @@ func TestAttributeProfileToAPI(t *testing.T) {
 		},
 		Weights: ";20",
 	}
-	attr := &AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z|2014-07-15T14:36:00Z", "*string:~*opts.*context:con1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -1152,11 +1152,11 @@ func TestAttributeProfileToAPI2(t *testing.T) {
 		},
 		Weights: ";20",
 	}
-	attr := &AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"FLTR_ACNT_dan", "FLTR_DST_DE", "*ai:~*req.AnswerTime:2014-07-14T14:35:00Z", "*string:~*opts.*context:con1"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "FL1",
 				Value: utils.NewRSRParsersMustCompile("Al1", utils.InfieldSep),
@@ -2827,10 +2827,10 @@ func TestAPItoModelResourceCase3(t *testing.T) {
 }
 
 func TestRouteProfileToAPICase1(t *testing.T) {
-	structTest := &RouteProfile{
+	structTest := &utils.RouteProfile{
 		FilterIDs:         []string{"FilterID1", "FilterID2", "*ai:~*req.AnswerTime:2020-04-11T21:34:01Z|2020-04-12T21:34:01Z"},
 		SortingParameters: []string{"Param1", "Param2"},
-		Routes: []*Route{
+		Routes: []*utils.Route{
 			{ID: "ResGroup2"},
 		},
 	}
@@ -3545,10 +3545,10 @@ func TestModelHelpersTestAPItoRouteProfile(t *testing.T) {
 		SortingParameters: []string{"param1"},
 		Routes:            []*utils.TPRoute{},
 	}
-	expStruct := &RouteProfile{
+	expStruct := &utils.RouteProfile{
 		FilterIDs:         []string{},
 		SortingParameters: []string{"param1"},
-		Routes:            []*Route{},
+		Routes:            []*utils.Route{},
 	}
 	result, err := APItoRouteProfile(testStruct, "")
 	if err != nil {

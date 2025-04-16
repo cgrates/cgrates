@@ -30,6 +30,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -796,7 +797,7 @@ func testChargersProcessEvent(t *testing.T) {
 	expected := &[]*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "TEST_CHARGERS_IT_TEST",
-			AlteredFields: []*engine.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},

@@ -49,7 +49,7 @@ func (tpRoutes TPRoutes) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 		return
 	}
 	for _, routeID := range itmIDs {
-		var routePrf *engine.RouteProfile
+		var routePrf *utils.RouteProfile
 		routePrf, err = tpRoutes.dm.GetRouteProfile(ctx, tnt, routeID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

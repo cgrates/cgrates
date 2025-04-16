@@ -774,12 +774,12 @@ func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage pu
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply any) error {
-				rplCast, canCast := reply.(*engine.AttrSProcessEventReply)
+				rplCast, canCast := reply.(*attributes.AttrSProcessEventReply)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil
 				}
-				customEv := &engine.AttrSProcessEventReply{
+				customEv := &attributes.AttrSProcessEventReply{
 					MatchedProfiles: nil,
 					AlteredFields:   []string{"CustomField2"},
 					CGREvent: &utils.CGREvent{

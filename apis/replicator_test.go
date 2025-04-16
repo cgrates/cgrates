@@ -602,9 +602,9 @@ func TestReplicatorGetRouteProfile(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.RouteProfile
+	var reply utils.RouteProfile
 	rp := NewReplicatorSv1(dm, v1)
-	rte := &engine.RouteProfile{
+	rte := &utils.RouteProfile{
 		ID:     "ROUTE_2003",
 		Tenant: "cgrates.org",
 		Weights: utils.DynamicWeights{
@@ -614,7 +614,7 @@ func TestReplicatorGetRouteProfile(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{
@@ -649,9 +649,9 @@ func TestReplicatorGetRouteProfileError(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.RouteProfile
+	var reply utils.RouteProfile
 	rp := NewReplicatorSv1(dm, v1)
-	rte := &engine.RouteProfile{
+	rte := &utils.RouteProfile{
 		ID:     "ROUTE_2001",
 		Tenant: "cgrates.org",
 		Weights: utils.DynamicWeights{
@@ -661,7 +661,7 @@ func TestReplicatorGetRouteProfileError(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{
@@ -693,13 +693,13 @@ func TestReplicatorGetAttributeProfile(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.AttributeProfile
+	var reply utils.AttributeProfile
 	rp := NewReplicatorSv1(dm, v1)
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -741,13 +741,13 @@ func TestReplicatorGetAttributeProfileError(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.AttributeProfile
+	var reply utils.AttributeProfile
 	rp := NewReplicatorSv1(dm, v1)
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -1556,8 +1556,8 @@ func TestReplicatorSetRouteProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rtp := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtp := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			ID:     "ROUTE_2003",
 			Tenant: "cgrates.org",
 			Weights: utils.DynamicWeights{
@@ -1567,7 +1567,7 @@ func TestReplicatorSetRouteProfile(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "route1",
 					Weights: utils.DynamicWeights{
@@ -1607,8 +1607,8 @@ func TestReplicatorSetRouteProfileErr1(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rtp := &engine.RouteProfileWithAPIOpts{
-		RouteProfile: &engine.RouteProfile{
+	rtp := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
 			ID:     "ROUTE_2003",
 			Tenant: "cgrates.org",
 			Weights: utils.DynamicWeights{
@@ -1618,7 +1618,7 @@ func TestReplicatorSetRouteProfileErr1(t *testing.T) {
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
-			Routes: []*engine.Route{
+			Routes: []*utils.Route{
 				{
 					ID: "route1",
 					Weights: utils.DynamicWeights{
@@ -1652,12 +1652,12 @@ func TestReplicatorSetAttributeProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	attrPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfileWithAPIOpts{
+		AttributeProfile: &utils.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*utils.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -1704,12 +1704,12 @@ func TestReplicatorSetAttributeProfileErr1(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	attrPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfileWithAPIOpts{
+		AttributeProfile: &utils.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*utils.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -2492,7 +2492,7 @@ func TestReplicatorRemoveRouteProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rtPf := &engine.RouteProfile{
+	rtPf := &utils.RouteProfile{
 		ID:     "ROUTE_2003",
 		Tenant: "cgrates.org",
 		Weights: utils.DynamicWeights{
@@ -2502,7 +2502,7 @@ func TestReplicatorRemoveRouteProfile(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{
@@ -2544,7 +2544,7 @@ func TestReplicatorRemoveRouteProfileErr(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rtPf := &engine.RouteProfile{
+	rtPf := &utils.RouteProfile{
 		ID:     "ROUTE_2003",
 		Tenant: "cgrates.org",
 		Weights: utils.DynamicWeights{
@@ -2554,7 +2554,7 @@ func TestReplicatorRemoveRouteProfileErr(t *testing.T) {
 		},
 		Sorting:           utils.MetaWeight,
 		SortingParameters: []string{},
-		Routes: []*engine.Route{
+		Routes: []*utils.Route{
 			{
 				ID: "route1",
 				Weights: utils.DynamicWeights{
@@ -2594,11 +2594,11 @@ func TestReplicatorRemoveAttributeProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -2647,11 +2647,11 @@ func TestReplicatorRemoveAttributeProfileErr(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
