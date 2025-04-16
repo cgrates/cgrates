@@ -236,11 +236,11 @@ func testExpLoadTPFromExported(t *testing.T) {
 }
 
 func testExpVerifyAttributes(t *testing.T) {
-	exp := &engine.AttributeProfile{
+	exp := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACCOUNT_1001", "*string:~*opts.*context:*sessions"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:      utils.MetaReq + utils.NestingSep + "OfficeGroup",
 				FilterIDs: []string{},
@@ -259,7 +259,7 @@ func testExpVerifyAttributes(t *testing.T) {
 			},
 		},
 	}
-	var reply *engine.AttributeProfile
+	var reply *utils.AttributeProfile
 	if err := expRpc.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}}, &reply); err != nil {

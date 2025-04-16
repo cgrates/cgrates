@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -146,7 +147,7 @@ func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, fi
 			ar.RemoveAll(fld.GetPathSlice()[0])
 		default:
 			var out any
-			if out, err = engine.ParseAttribute(ar, fld.Type, fld.Path, fld.Value, rndDec,
+			if out, err = attributes.ParseAttribute(ar, fld.Type, fld.Path, fld.Value, rndDec,
 				utils.FirstNonEmpty(fld.Timezone, dftTmz), fld.Layout); err != nil {
 				if err == utils.ErrNotFound {
 					if !fld.Mandatory {
@@ -263,7 +264,7 @@ func newProfileFunc(lType string) func() profile {
 	switch lType {
 	case utils.MetaAttributes:
 		return func() profile {
-			return new(engine.AttributeProfile)
+			return new(utils.AttributeProfile)
 		}
 	case utils.MetaResources:
 		return func() profile {

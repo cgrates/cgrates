@@ -173,12 +173,12 @@ package general_tests
 // 		},
 // 	}
 // 	// var cdrs []*engine.CDR
-// 	alsPrf := &engine.AttributeProfileWithAPIOpts{
-// 		AttributeProfile: &engine.AttributeProfile{
+// 	alsPrf := &utils.AttributeProfileWithAPIOpts{
+// 		AttributeProfile: &utils.AttributeProfile{
 // 			Tenant:    "cgrates.org",
 // 			ID:        "APIsTest",
 // 			FilterIDs: []string{"*string:~*req.Account:1001"},
-// 			Attributes: []*engine.Attribute{
+// 			Attributes: []*utils.Attribute{
 // 				{
 // 					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
 // 					Value: utils.NewRSRParsersMustCompile("1001", utils.InfieldSep),
@@ -198,7 +198,7 @@ package general_tests
 // 	} else if result != utils.OK {
 // 		t.Error("Unexpected reply returned", result)
 // 	}
-// 	var replyAt *engine.AttributeProfile
+// 	var replyAt *utils.AttributeProfile
 // 	if err := pecdrsRpc.Call(context.Background(), utils.AdminSv1GetAttributeProfile, &utils.TenantIDWithAPIOpts{
 // 		TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "APIsTest"}}, &replyAt); err != nil {
 // 		t.Fatal(err)

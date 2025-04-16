@@ -207,11 +207,11 @@ func verifyOutput(outPath string) func(t *testing.T) {
 }
 
 func testLoaderCheckAttributes(t *testing.T) {
-	eAttrPrf := &engine.APIAttributeProfile{
+	eAttrPrf := &utils.APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*opts.*context:con1", "*string:~*opts.*context:con2|con3"},
-		Attributes: []*engine.ExternalAttribute{{
+		Attributes: []*utils.ExternalAttribute{{
 			FilterIDs: []string{"*string:~*req.Field1:Initial"},
 			Path:      utils.MetaReq + utils.NestingSep + "Field1",
 			Type:      utils.MetaVariable,
@@ -246,7 +246,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 	if *utils.Encoding == utils.MetaGOB { // gob threats empty slices as nil values
 		eAttrPrf.Attributes[1].FilterIDs = nil
 	}
-	var reply *engine.APIAttributeProfile
+	var reply *utils.APIAttributeProfile
 	if err := loaderRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"},
@@ -275,11 +275,11 @@ func testLoaderPopulateDataForCustomSep(t *testing.T) {
 }
 
 func testLoaderCheckForCustomSep(t *testing.T) {
-	eAttrPrf := &engine.APIAttributeProfile{
+	eAttrPrf := &utils.APIAttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_12012000001",
 		FilterIDs: []string{"*string:~*req.Destination:12012000001"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*utils.ExternalAttribute{
 			{
 				Path:  "*req.Destination",
 				Type:  utils.MetaConstant,
@@ -290,7 +290,7 @@ func testLoaderCheckForCustomSep(t *testing.T) {
 	if *utils.Encoding == utils.MetaGOB { // gob threats empty slices as nil values
 		eAttrPrf.Attributes[0].FilterIDs = nil
 	}
-	var reply *engine.APIAttributeProfile
+	var reply *utils.APIAttributeProfile
 	if err := loaderRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_12012000001"},

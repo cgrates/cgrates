@@ -131,7 +131,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	//attributesPrf
-	var replyAttr *engine.APIAttributeProfile
+	var replyAttr *utils.APIAttributeProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
 		&replyAttr); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -386,7 +386,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
-	extAttrPrf := &engine.APIAttributeProfile{
+	extAttrPrf := &utils.APIAttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "ATTR_ACNT_1001",
 		FilterIDs: []string{"*string:~*opts.*context:*sessions", "FLTR_ACCOUNT_1001"},
@@ -395,7 +395,7 @@ func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 				Weight: 10,
 			},
 		},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*utils.ExternalAttribute{
 			{
 				FilterIDs: []string{},
 				Path:      "*req.OfficeGroup",
@@ -409,7 +409,7 @@ func testCgrLdrGetAttributeProfileAfterLoad(t *testing.T) {
 			},
 		},
 	}
-	var replyAttr *engine.APIAttributeProfile
+	var replyAttr *utils.APIAttributeProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_ACNT_1001"}},
 		&replyAttr); err != nil {

@@ -503,7 +503,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("AttributeProfiles:")
 	}
 	for _, tpTH := range tpr.attributeProfiles {
-		var th *AttributeProfile
+		var th *utils.AttributeProfile
 		if th, err = APItoAttributeProfile(tpTH, tpr.timezone); err != nil {
 			return
 		}

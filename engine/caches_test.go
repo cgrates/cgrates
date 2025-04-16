@@ -598,10 +598,10 @@ func TestCacheSCacheDataFromDB(t *testing.T) {
 		Tenant:              utils.CGRateSorg,
 		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
 	}
-	atrPrfl := &AttributeProfile{
+	atrPrfl := &utils.AttributeProfile{
 		Tenant: utils.CGRateSorg,
 		ID:     "TEST_ATTRIBUTES_TEST",
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "*opts.RateSProfile",
 				Type:  utils.MetaConstant,
@@ -711,10 +711,10 @@ func TestCacheSV1LoadCache(t *testing.T) {
 		Tenant:              utils.CGRateSorg,
 		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
 	}
-	atrPrfl := &AttributeProfile{
+	atrPrfl := &utils.AttributeProfile{
 		Tenant: utils.CGRateSorg,
 		ID:     "TEST_ATTRIBUTES_TEST",
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "*opts.RateSProfile",
 				Type:  utils.MetaConstant,
@@ -764,10 +764,10 @@ func TestCacheSV1ReloadCache(t *testing.T) {
 		AttributeProfileIDs: []string{"cgrates.org:TEST_ATTRIBUTES_TEST"},
 	}
 
-	atrPrfl := &AttributeProfile{
+	atrPrfl := &utils.AttributeProfile{
 		Tenant: utils.CGRateSorg,
 		ID:     "TEST_ATTRIBUTES_TEST",
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "*opts.RateSProfile",
 				Type:  utils.MetaConstant,
@@ -1351,10 +1351,10 @@ func TestCacheSPrecachePartitions(t *testing.T) {
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
-	atrPrfl := &AttributeProfile{
+	atrPrfl := &utils.AttributeProfile{
 		Tenant: utils.CGRateSorg,
 		ID:     "TEST_ATTRIBUTES_TEST",
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  "*opts.RateSProfile",
 				Type:  utils.MetaConstant,

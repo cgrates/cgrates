@@ -31,8 +31,8 @@ type DataDBMock struct {
 	GetKeysForPrefixF          func(*context.Context, string) ([]string, error)
 	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
-	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*AttributeProfile, error)
-	SetAttributeProfileDrvF    func(ctx *context.Context, attr *AttributeProfile) error
+	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error)
+	SetAttributeProfileDrvF    func(ctx *context.Context, attr *utils.AttributeProfile) error
 	RemoveAttributeProfileDrvF func(ctx *context.Context, str1 string, str2 string) error
 	SetLoadIDsDrvF             func(ctx *context.Context, loadIDs map[string]int64) error
 	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
@@ -363,14 +363,14 @@ func (dbM *DataDBMock) RemoveRouteProfileDrv(ctx *context.Context, tnt, id strin
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAttributeProfileDrv(ctx *context.Context, str1 string, str2 string) (*AttributeProfile, error) {
+func (dbM *DataDBMock) GetAttributeProfileDrv(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 	if dbM.GetAttributeProfileDrvF != nil {
 		return dbM.GetAttributeProfileDrvF(ctx, str1, str2)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAttributeProfileDrv(ctx *context.Context, attr *AttributeProfile) error {
+func (dbM *DataDBMock) SetAttributeProfileDrv(ctx *context.Context, attr *utils.AttributeProfile) error {
 	if dbM.SetAttributeProfileDrvF != nil {
 		return dbM.SetAttributeProfileDrvF(ctx, attr)
 	}

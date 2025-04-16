@@ -30,6 +30,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -1035,7 +1036,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 	processedEv := []*chargers.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "IntraCharger",
-			AlteredFields: []*engine.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -1087,7 +1088,7 @@ func testV1FltrChargerSuffix(t *testing.T) {
 	processedEv = []*chargers.ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "InterCharger",
-			AlteredFields: []*engine.FieldsAltered{
+			AlteredFields: []*attributes.FieldsAltered{
 				{
 					MatchedProfileID: utils.MetaDefault,
 					Fields:           []string{utils.MetaOptsRunID, utils.MetaOpts + utils.NestingSep + utils.MetaChargeID, utils.MetaOpts + utils.NestingSep + utils.MetaSubsys},
@@ -1136,12 +1137,12 @@ func testV1FltrChargerSuffix(t *testing.T) {
 }
 
 func testV1FltrAttributesPrefix(t *testing.T) {
-	attributeProfile := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attributeProfile := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    "cgrates.new",
 			ID:        "ATTR_1001",
 			FilterIDs: []string{"*prefix:~*req.CustomField:2007|+2007", "*prefix:~*req.CustomField2:2007|+2007", "FLTR_1", "*string:~*opts.*context:prefix"},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					FilterIDs: []string{},
 					Path:      utils.MetaReq + utils.NestingSep + "CustomField",
@@ -1163,8 +1164,8 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	processedEv := &engine.AttrSProcessEventReply{
-		AlteredFields: []*engine.FieldsAltered{
+	processedEv := &attributes.AttrSProcessEventReply{
+		AlteredFields: []*attributes.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.new:ATTR_1001",
 				Fields:           []string{"*req.CustomField"},
@@ -1195,7 +1196,7 @@ func testV1FltrAttributesPrefix(t *testing.T) {
 			utils.OptsContext: "prefix",
 		},
 	}
-	var result2 *engine.AttrSProcessEventReply
+	var result2 *attributes.AttrSProcessEventReply
 	if err := fltrRpc.Call(context.Background(), utils.AttributeSv1ProcessEvent, cgrEv, &result2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result2, processedEv) {

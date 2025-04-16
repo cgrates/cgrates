@@ -162,11 +162,11 @@ func testFltrSepFilterSeparation(t *testing.T) {
 		},
 	}
 
-	eAttrPrf := &engine.APIAttributeProfile{
+	eAttrPrf := &utils.APIAttributeProfile{
 		Tenant:    ev.Tenant,
 		ID:        "ATTR_FLTR_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003|1101", "*prefix:~*req.Account:10"},
-		Attributes: []*engine.ExternalAttribute{
+		Attributes: []*utils.ExternalAttribute{
 			{
 				Path:  utils.MetaReq + utils.NestingSep + "TestField",
 				Value: "testValue",
@@ -185,7 +185,7 @@ func testFltrSepFilterSeparation(t *testing.T) {
 		},
 	}
 
-	var attrReply *engine.APIAttributeProfile
+	var attrReply *utils.APIAttributeProfile
 
 	// first option of the first filter and the second filter match
 	if err := fltrSepRPC.Call(context.Background(), utils.AttributeSv1GetAttributeForEvent,

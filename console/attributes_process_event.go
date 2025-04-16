@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -60,7 +60,7 @@ func (self *CmdAttributesProcessEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdAttributesProcessEvent) RpcResult() any {
-	var atr engine.AttrSProcessEventReply
+	var atr attributes.AttrSProcessEventReply
 	return &atr
 }
 

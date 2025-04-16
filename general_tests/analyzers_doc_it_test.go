@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -152,9 +153,9 @@ func anzStringQuery(t *testing.T, client *birpc.Client, wantRC int, filters ...s
 }
 
 func setAttrProfiles(t *testing.T, client *birpc.Client) {
-	attributeProfiles := []*engine.APIAttributeProfileWithAPIOpts{
+	attributeProfiles := []*utils.APIAttributeProfileWithAPIOpts{
 		{
-			APIAttributeProfile: &engine.APIAttributeProfile{
+			APIAttributeProfile: &utils.APIAttributeProfile{
 				ID:        "ATTR_1001",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -163,7 +164,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 						Weight: 30,
 					},
 				},
-				Attributes: []*engine.ExternalAttribute{
+				Attributes: []*utils.ExternalAttribute{
 					{
 						FilterIDs: []string{"*notexists:~*req.RequestType:"},
 						Path:      "*req.RequestType",
@@ -174,7 +175,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 			},
 		},
 		{
-			APIAttributeProfile: &engine.APIAttributeProfile{
+			APIAttributeProfile: &utils.APIAttributeProfile{
 				ID:        "ATTR_1002",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.Account:1002"},
@@ -183,7 +184,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 						Weight: 10,
 					},
 				},
-				Attributes: []*engine.ExternalAttribute{
+				Attributes: []*utils.ExternalAttribute{
 					{
 						FilterIDs: []string{"*notexists:~*req.RequestType:"},
 						Path:      "*req.RequestType",
@@ -194,7 +195,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 			},
 		},
 		{
-			APIAttributeProfile: &engine.APIAttributeProfile{
+			APIAttributeProfile: &utils.APIAttributeProfile{
 				ID:        "ATTR_1101",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.Account:1101"},
@@ -203,7 +204,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 						Weight: 20,
 					},
 				},
-				Attributes: []*engine.ExternalAttribute{
+				Attributes: []*utils.ExternalAttribute{
 					{
 						FilterIDs: []string{"*notexists:~*req.RequestType:"},
 						Path:      "*req.RequestType",
@@ -214,7 +215,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 			},
 		},
 		{
-			APIAttributeProfile: &engine.APIAttributeProfile{
+			APIAttributeProfile: &utils.APIAttributeProfile{
 				ID:        "ATTR_1102",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.Account:1102"},
@@ -223,7 +224,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 						Weight: 5,
 					},
 				},
-				Attributes: []*engine.ExternalAttribute{
+				Attributes: []*utils.ExternalAttribute{
 					{
 						FilterIDs: []string{"*notexists:~*req.RequestType:"},
 						Path:      "*req.RequestType",
@@ -234,7 +235,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 			},
 		},
 		{
-			APIAttributeProfile: &engine.APIAttributeProfile{
+			APIAttributeProfile: &utils.APIAttributeProfile{
 				ID:        "ATTR_PRF_11",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*prefix:~*req.Account:11"},
@@ -243,7 +244,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 						Weight: 25,
 					},
 				},
-				Attributes: []*engine.ExternalAttribute{
+				Attributes: []*utils.ExternalAttribute{
 					{
 						FilterIDs: []string{"*prefix:~*req.Destination:10"},
 						Path:      "*req.Cost",
@@ -264,7 +265,7 @@ func setAttrProfiles(t *testing.T, client *birpc.Client) {
 }
 
 func getAttrProfiles(t *testing.T, client *birpc.Client) {
-	expectedAttributeProfiles := []*engine.APIAttributeProfile{
+	expectedAttributeProfiles := []*utils.APIAttributeProfile{
 		{
 			ID:        "ATTR_1001",
 			Tenant:    "cgrates.org",
@@ -274,7 +275,7 @@ func getAttrProfiles(t *testing.T, client *birpc.Client) {
 					Weight: 30,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					FilterIDs: []string{"*notexists:~*req.RequestType:"},
 					Path:      "*req.RequestType",
@@ -292,7 +293,7 @@ func getAttrProfiles(t *testing.T, client *birpc.Client) {
 					Weight: 10,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					FilterIDs: []string{"*notexists:~*req.RequestType:"},
 					Path:      "*req.RequestType",
@@ -310,7 +311,7 @@ func getAttrProfiles(t *testing.T, client *birpc.Client) {
 					Weight: 20,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					FilterIDs: []string{"*notexists:~*req.RequestType:"},
 					Path:      "*req.RequestType",
@@ -328,7 +329,7 @@ func getAttrProfiles(t *testing.T, client *birpc.Client) {
 					Weight: 5,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					FilterIDs: []string{"*notexists:~*req.RequestType:"},
 					Path:      "*req.RequestType",
@@ -346,7 +347,7 @@ func getAttrProfiles(t *testing.T, client *birpc.Client) {
 					Weight: 25,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					FilterIDs: []string{"*prefix:~*req.Destination:10"},
 					Path:      "*req.Cost",
@@ -356,7 +357,7 @@ func getAttrProfiles(t *testing.T, client *birpc.Client) {
 			},
 		},
 	}
-	var replyAttributeProfiles []*engine.APIAttributeProfile
+	var replyAttributeProfiles []*utils.APIAttributeProfile
 	if err := client.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -433,7 +434,7 @@ func attrProcessEvents(t *testing.T, client *birpc.Client) {
 		},
 	}
 	expectedReply := `{"AlteredFields":[{"MatchedProfileID":"cgrates.org:ATTR_1001","Fields":["*req.RequestType"]}],"CGREvent":{"Tenant":"cgrates.org","ID":"call1001to1002","Event":{"Account":"1001","AnswerTime":"2013-11-07T08:42:28Z","Category":"call","Cost":1.01,"Destination":"1002","OriginHost":"192.168.1.1","OriginID":"abcdef","RequestType":"*rated","RunID":"*default","SetupTime":"2013-11-07T08:42:25Z","Subject":"1001","Tenant":"cgrates.org","ToR":"*voice","Usage":10000000000},"APIOpts":{}}}`
-	var rplyEv engine.AttrSProcessEventReply
+	var rplyEv attributes.AttrSProcessEventReply
 	if err := client.Call(context.Background(), utils.AttributeSv1ProcessEvent,
 		eventCall1001to1002, &rplyEv); err != nil {
 		t.Error(err)

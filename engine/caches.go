@@ -38,8 +38,8 @@ func init() {
 
 	// Register objects for cache replication/remotes
 	// AttributeS
-	gob.Register(new(AttributeProfile))
-	gob.Register(new(AttributeProfileWithAPIOpts))
+	gob.Register(new(utils.AttributeProfile))
+	gob.Register(new(utils.AttributeProfileWithAPIOpts))
 	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))

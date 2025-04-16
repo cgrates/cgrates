@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package attributes
 
 import (
 	"bytes"
@@ -30,11 +30,12 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewAttributeService returns a new AttributeService
-func NewAttributeService(dm *DataManager, filterS *FilterS,
+func NewAttributeService(dm *engine.DataManager, filterS *engine.FilterS,
 	cgrcfg *config.CGRConfig) *AttributeS {
 	return &AttributeS{
 		dm:    dm,
@@ -45,17 +46,17 @@ func NewAttributeService(dm *DataManager, filterS *FilterS,
 
 // AttributeS the service for the API
 type AttributeS struct {
-	dm    *DataManager
-	fltrS *FilterS
+	dm    *engine.DataManager
+	fltrS *engine.FilterS
 	cfg   *config.CGRConfig
 }
 
 // attributeProfileForEvent returns the matching attribute
 func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string, attrIDs []string,
-	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchedProfile *AttributeProfile, err error) {
+	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchedProfile *utils.AttributeProfile, err error) {
 	if len(attrIDs) == 0 {
 		ignoreFilters = false
-		aPrflIDs, err := MatchingItemIDsForEvent(ctx, evNm,
+		aPrflIDs, err := engine.MatchingItemIDsForEvent(ctx, evNm,
 			alS.cfg.AttributeSCfg().StringIndexedFields,
 			alS.cfg.AttributeSCfg().PrefixIndexedFields,
 			alS.cfg.AttributeSCfg().SuffixIndexedFields,
@@ -72,7 +73,7 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 	}
 	var maxWeight float64
 	for _, apID := range attrIDs {
-		var ap *AttributeProfile
+		var ap *utils.AttributeProfile
 		ap, err = alS.dm.GetAttributeProfile(ctx, tnt, apID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -91,7 +92,7 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 			}
 		}
 
-		weight, err := WeightFromDynamics(ctx, ap.Weights, alS.fltrS, tnt, evNm)
+		weight, err := engine.WeightFromDynamics(ctx, ap.Weights, alS.fltrS, tnt, evNm)
 		if err != nil {
 			return nil, err
 		}
@@ -153,21 +154,21 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *AttrSProcessEventReply, err error) {
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
+	if attrIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, evNm, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, tnt, evNm, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var attrPrf *AttributeProfile
+	var attrPrf *utils.AttributeProfile
 	if attrPrf, err = alS.attributeProfileForEvent(ctx, tnt, attrIDs, evNm, lastID, processedPrfNo, profileRuns, ignFilters); err != nil {
 		return
 	}
 	var blocker bool
-	if blocker, err = BlockerFromDynamics(ctx, attrPrf.Blockers, alS.fltrS, tnt, evNm); err != nil {
+	if blocker, err = engine.BlockerFromDynamics(ctx, attrPrf.Blockers, alS.fltrS, tnt, evNm); err != nil {
 		return
 	}
 	rply = &AttrSProcessEventReply{
@@ -226,7 +227,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 			return
 		}
 		var blocker bool
-		if blocker, err = BlockerFromDynamics(ctx, attribute.Blockers, alS.fltrS, tnt, evNm); err != nil {
+		if blocker, err = engine.BlockerFromDynamics(ctx, attribute.Blockers, alS.fltrS, tnt, evNm); err != nil {
 			rply = nil
 			return
 		}
@@ -239,7 +240,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
 func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
-	attrPrfl *APIAttributeProfile) (err error) {
+	attrPrfl *utils.APIAttributeProfile) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -255,12 +256,12 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 		},
 	}
 	var attrIDs []string
-	if attrIDs, err = GetStringSliceOpts(ctx, args.Tenant, evNM, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
+	if attrIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, evNM, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
 		return
 	}
 	var ignFilters bool
-	if ignFilters, err = GetBoolOpts(ctx, tnt, evNM, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
+	if ignFilters, err = engine.GetBoolOpts(ctx, tnt, evNM, nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIgnoreFilters,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
@@ -272,7 +273,7 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 		}
 		return err
 	}
-	*attrPrfl = *NewAPIAttributeProfile(attrPrf)
+	*attrPrfl = *utils.NewAPIAttributeProfile(attrPrf)
 	return
 }
 
@@ -285,13 +286,13 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	}
 
 	var processRuns int
-	if processRuns, err = GetIntOpts(ctx, tnt, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProcessRuns,
+	if processRuns, err = engine.GetIntOpts(ctx, tnt, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProcessRuns,
 		utils.OptsAttributesProcessRuns); err != nil {
 		return
 	}
 
 	var profileRuns int
-	if profileRuns, err = GetIntOpts(ctx, tnt, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileRuns,
+	if profileRuns, err = engine.GetIntOpts(ctx, tnt, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileRuns,
 		utils.OptsAttributesProfileRuns); err != nil {
 		return
 	}
@@ -314,7 +315,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 
 	var lastID string
 	matchedIDs := []*FieldsAltered{}
-	dynDP := NewDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
+	dynDP := engine.NewDynamicDP(ctx, alS.cfg.AttributeSCfg().ResourceSConns,
 		alS.cfg.AttributeSCfg().StatSConns, alS.cfg.AttributeSCfg().AccountSConns, nil, nil, args.Tenant, eNV)
 	for i := 0; i < processRuns; i++ {
 		eNV[utils.MetaVars].(utils.MapStorage)[utils.MetaProcessRunsCfg] = i + 1
@@ -558,11 +559,11 @@ func ParseAttribute(dp utils.DataProvider, attrType, path string, value utils.RS
 		out = strings.Join(values, utils.InfieldSep)
 	default:
 		if strings.HasPrefix(attrType, utils.MetaHTTP) {
-			url, err := ExtractURLFromHTTPType(attrType)
+			url, err := engine.ExtractURLFromHTTPType(attrType)
 			if err != nil {
 				return "", err
 			}
-			out, err = MakeExternalAPIRequest(url, bytes.NewReader([]byte(dp.String())))
+			out, err = engine.MakeExternalAPIRequest(url, bytes.NewReader([]byte(dp.String())))
 			break
 		}
 		return utils.EmptyString, fmt.Errorf("unsupported type: <%s>", attrType)

@@ -693,13 +693,13 @@ func TestReplicatorGetAttributeProfile(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.AttributeProfile
+	var reply utils.AttributeProfile
 	rp := NewReplicatorSv1(dm, v1)
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -741,13 +741,13 @@ func TestReplicatorGetAttributeProfileError(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.AttributeProfile
+	var reply utils.AttributeProfile
 	rp := NewReplicatorSv1(dm, v1)
-	attr := &engine.AttributeProfile{
+	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -1652,12 +1652,12 @@ func TestReplicatorSetAttributeProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	attrPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfileWithAPIOpts{
+		AttributeProfile: &utils.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*utils.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -1704,12 +1704,12 @@ func TestReplicatorSetAttributeProfileErr1(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	attrPrf := &engine.AttributeProfileWithAPIOpts{
-		AttributeProfile: &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfileWithAPIOpts{
+		AttributeProfile: &utils.AttributeProfile{
 			Tenant:    utils.CGRateSorg,
 			ID:        "TEST_ATTRIBUTES_TEST",
 			FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-			Attributes: []*engine.Attribute{
+			Attributes: []*utils.Attribute{
 				{
 					Path:  utils.AccountField,
 					Type:  utils.MetaConstant,
@@ -2594,11 +2594,11 @@ func TestReplicatorRemoveAttributeProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,
@@ -2647,11 +2647,11 @@ func TestReplicatorRemoveAttributeProfileErr(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	attrPrf := &engine.AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "TEST_ATTRIBUTES_TEST",
 		FilterIDs: []string{"*string:~*req.Account:1002", "*exists:~*opts.*usage:"},
-		Attributes: []*engine.Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Path:  utils.AccountField,
 				Type:  utils.MetaConstant,

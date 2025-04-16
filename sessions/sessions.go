@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -2029,7 +2030,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			return
 		}
 		if attrS {
-			rply.Attributes = make(map[string]*engine.AttrSProcessEventReply)
+			rply.Attributes = make(map[string]*attributes.AttrSProcessEventReply)
 			var attrsDerivedReply bool
 			if attrsDerivedReply, err = engine.GetBoolOpts(ctx, args.Tenant, dP, sS.fltrS, sS.cfg.SessionSCfg().Opts.AttributesDerivedReply,
 				config.SessionsAttributesDerivedReplyDftOpt, utils.OptsSesAttributeSDerivedReply); err != nil {
@@ -2599,7 +2600,7 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 }
 
 // processAttributes will receive the event and send it to AttributeS to be processed
-func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREvent) (rplyEv engine.AttrSProcessEventReply, err error) {
+func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREvent) (rplyEv attributes.AttrSProcessEventReply, err error) {
 	if len(sS.cfg.SessionSCfg().AttributeSConns) == 0 {
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}

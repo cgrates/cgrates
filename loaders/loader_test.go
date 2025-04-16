@@ -196,7 +196,7 @@ func TestSetToDBWithDBError(t *testing.T) {
 func TestSetToDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, nil)
-	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+	v1 := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 	if err := setToDB(context.Background(), dm, utils.MetaAttributes, v1, true, false); err != nil {
 		t.Fatal(err)
 	}
@@ -359,7 +359,7 @@ func TestLoaderProcess(t *testing.T) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	v1 := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+	v1 := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 	if err := ld.process(context.Background(), v1, utils.MetaAttributes, utils.MetaStore,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Error(err)
@@ -407,7 +407,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	}
 	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, []string{connID})
 	{
-		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaAttributes, utils.MetaStore,
 			map[string]any{utils.MetaCache: utils.MetaReload}, true, false); err != nil {
 			t.Error(err)
@@ -721,7 +721,7 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
-		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
@@ -729,7 +729,7 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID2", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
-		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID2"}
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID2"}
 		if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
@@ -820,7 +820,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
-		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
@@ -914,7 +914,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
-		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
@@ -1016,7 +1016,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
-		v := &engine.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
+		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if !reflect.DeepEqual(v, prf) {
 			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}

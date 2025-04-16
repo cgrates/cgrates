@@ -161,11 +161,11 @@ func testSharedClientLockSetProfiles(t *testing.T) {
 	}
 
 	err = clntLockRPC.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
-		&engine.APIAttributeProfileWithAPIOpts{
-			APIAttributeProfile: &engine.APIAttributeProfile{
+		&utils.APIAttributeProfileWithAPIOpts{
+			APIAttributeProfile: &utils.APIAttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "ATTR_TEST",
-				Attributes: []*engine.ExternalAttribute{
+				Attributes: []*utils.ExternalAttribute{
 					{
 						Path:  "*req.Test",
 						Type:  utils.MetaConstant,

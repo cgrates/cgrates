@@ -21,7 +21,7 @@ package services
 import (
 	"sync"
 
-	"github.com/cgrates/cgrates/apis"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -40,8 +40,6 @@ func NewAttributeService(cfg *config.CGRConfig) *AttributeService {
 type AttributeService struct {
 	mu        sync.Mutex
 	cfg       *config.CGRConfig
-	attrS     *engine.AttributeS
-	rpc       *apis.AttributeSv1 // useful on restart
 	stateDeps *StateDependencies
 }
 
@@ -72,9 +70,8 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 
 	attrS.mu.Lock()
 	defer attrS.mu.Unlock()
-	attrS.attrS = engine.NewAttributeService(dm, fs, attrS.cfg)
-	attrS.rpc = apis.NewAttributeSv1(attrS.attrS)
-	srv, _ := engine.NewService(attrS.rpc)
+	attrService := attributes.NewAttributeService(dm, fs, attrS.cfg)
+	srv, _ := engine.NewService(attrService)
 	// srv, _ := birpc.NewService(attrS.rpc, "", false)
 	for _, s := range srv {
 		cl.RpcRegister(s)

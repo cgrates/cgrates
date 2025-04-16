@@ -184,10 +184,10 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	// Set an AttributeProfile without filterIDs
-	attrPrf := &AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant: "cgrates.org",
 		ID:     "ATTR_TEST",
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
@@ -214,11 +214,11 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 	}
 
 	// Add a non-indexed filter type
-	attrPrf = &AttributeProfile{
+	attrPrf = &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_TEST",
 		FilterIDs: []string{"*gt:~*req.Element:10"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
@@ -240,11 +240,11 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 	// }
 
 	// Add an indexed filter type
-	attrPrf = &AttributeProfile{
+	attrPrf = &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_TEST",
 		FilterIDs: []string{"*gt:~*req.Element:10", "*prefix:~*req.Account:10"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
@@ -271,11 +271,11 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 	}
 
 	// Add another indexed filter type
-	attrPrf = &AttributeProfile{
+	attrPrf = &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_TEST",
 		FilterIDs: []string{"*gt:~*req.Element:10", "*prefix:~*req.Account:10", "*string:~*req.Category:call"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
@@ -305,11 +305,11 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 	}
 
 	// Remove an indexed filter type
-	attrPrf = &AttributeProfile{
+	attrPrf = &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_TEST",
 		FilterIDs: []string{"*gt:~*req.Element:10", "*prefix:~*req.Account:10"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",
@@ -370,11 +370,11 @@ func TestLibIndexModifyAttrPrfFilter(t *testing.T) {
 	}
 
 	// Create an AttributeProfile using the previously created filter
-	attrPrf := &AttributeProfile{
+	attrPrf := &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_TEST",
 		FilterIDs: []string{"fltr_test"},
-		Attributes: []*Attribute{
+		Attributes: []*utils.Attribute{
 			{
 				Type:  utils.MetaConstant,
 				Path:  "~*req.Account",

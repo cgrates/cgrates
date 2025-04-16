@@ -89,7 +89,7 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 		}
 		filterIDs = rt.FilterIDs
 	case utils.CacheAttributeFilterIndexes:
-		var at *AttributeProfile
+		var at *utils.AttributeProfile
 		if at, err = dm.GetAttributeProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
 			return
 		}

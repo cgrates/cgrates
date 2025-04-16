@@ -313,15 +313,15 @@ func testdoubleRemoveRouteProfile(t *testing.T) {
 
 func testdoubleRemoveAttributeProfile(t *testing.T) {
 	// check
-	var reply *engine.APIAttributeProfile
+	var reply *utils.APIAttributeProfile
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "ATTR_PROFILE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// set
-	attrPrf := &engine.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &engine.APIAttributeProfile{
+	attrPrf := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
 			Tenant:    doubleRemoveTenant,
 			ID:        "ATTR_PROFILE",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -330,7 +330,7 @@ func testdoubleRemoveAttributeProfile(t *testing.T) {
 					Blocker: false,
 				},
 			},
-			Attributes: []*engine.ExternalAttribute{
+			Attributes: []*utils.ExternalAttribute{
 				{
 					Path:  "*req.Destination",
 					Type:  utils.MetaConstant,

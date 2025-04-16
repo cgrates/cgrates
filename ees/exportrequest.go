@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package ees
 
 import (
 	"fmt"
@@ -24,14 +24,16 @@ import (
 	"strings"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewExportRequest returns a new EventRequest
 func NewExportRequest(inData map[string]utils.DataStorage,
 	tnt string,
-	filterS *FilterS, oNM map[string]*utils.OrderedNavigableMap) (eeR *ExportRequest) {
+	filterS *engine.FilterS, oNM map[string]*utils.OrderedNavigableMap) (eeR *ExportRequest) {
 	eeR = &ExportRequest{
 		inData:  inData,
 		filterS: filterS,
@@ -47,7 +49,7 @@ type ExportRequest struct {
 	inData  map[string]utils.DataStorage          // request
 	ExpData map[string]*utils.OrderedNavigableMap // *exp:OrderNavMp *trl:OrderNavMp *cdr:OrderNavMp
 	tnt     string
-	filterS *FilterS
+	filterS *engine.FilterS
 }
 
 // String implements utils.DataProvider
@@ -69,7 +71,7 @@ func (eeR *ExportRequest) FieldAsInterface(fldPath []string) (val any, err error
 		val, err = dp.FieldAsInterface(fldPath[1:])
 	case utils.MetaUCH:
 		var ok bool
-		if val, ok = Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
+		if val, ok = engine.Cache.Get(utils.CacheUCH, strings.Join(fldPath[1:], utils.NestingSep)); !ok {
 			return nil, utils.ErrNotFound
 		}
 	case utils.MetaTenant:
@@ -151,7 +153,7 @@ func (eeR *ExportRequest) SetFields(ctx *context.Context, tplFlds []*config.FCTe
 func (eeR *ExportRequest) SetAsSlice(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
-		return Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+		return engine.Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		return eeR.inData[utils.MetaOpts].Set(fullPath.PathSlice[1:], val.Data)
 	default:
@@ -177,7 +179,7 @@ func (eeR *ExportRequest) ParseField(
 	case utils.MetaGroup:
 		tmpType = utils.MetaVariable
 	}
-	out, err = ParseAttribute(eeR, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout)
+	out, err = attributes.ParseAttribute(eeR, tmpType, cfgFld.Path, cfgFld.Value, config.CgrConfig().GeneralCfg().RoundingDecimals, utils.FirstNonEmpty(cfgFld.Timezone, config.CgrConfig().GeneralCfg().DefaultTimezone), cfgFld.Layout)
 
 	if err != nil &&
 		!strings.HasPrefix(err.Error(), "Could not find") {
@@ -195,7 +197,7 @@ func (eeR *ExportRequest) ParseField(
 func (eeR *ExportRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {
 	switch prfx := fullPath.PathSlice[0]; prfx {
 	case utils.MetaUCH:
-		return Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
+		return engine.Cache.Set(context.TODO(), utils.CacheUCH, fullPath.Path[5:], val.Data, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		return eeR.inData[utils.MetaOpts].Set(fullPath.PathSlice[1:], val.Data)
 	default:
@@ -217,12 +219,12 @@ func (eeR *ExportRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf)
 	case utils.MetaUCH:
 		path := fullPath.Path[5:]
 		var prv any
-		if prvI, ok := Cache.Get(utils.CacheUCH, path); !ok {
+		if prvI, ok := engine.Cache.Get(utils.CacheUCH, path); !ok {
 			prv = val.Data
 		} else {
 			prv = utils.IfaceAsString(prvI) + utils.IfaceAsString(val.Data)
 		}
-		return Cache.Set(context.TODO(), utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
+		return engine.Cache.Set(context.TODO(), utils.CacheUCH, path, prv, nil, true, utils.NonTransactional)
 	case utils.MetaOpts:
 		var prv any
 		if prv, err = eeR.inData[utils.MetaOpts].FieldAsInterface(fullPath.PathSlice[1:]); err != nil {

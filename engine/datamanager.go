@@ -1803,18 +1803,18 @@ func (dm *DataManager) RemoveRouteProfile(ctx *context.Context, tenant, id strin
 
 // GetAttributeProfile returns the AttributeProfile with the given id
 func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (attrPrfl *AttributeProfile, err error) {
+	transactionID string) (attrPrfl *utils.AttributeProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheAttributeProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*AttributeProfile), nil
+			return x.(*utils.AttributeProfile), nil
 		}
 	}
 	if strings.HasPrefix(id, utils.Meta) {
-		attrPrfl, err = NewAttributeFromInline(tenant, id)
+		attrPrfl, err = utils.NewAttributeFromInline(tenant, id)
 		return // do not set inline attributes in cache it breaks the interanal db matching
 	} else if dm == nil {
 		err = utils.ErrNoDatabaseConn
@@ -1858,7 +1858,7 @@ func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *AttributeProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *utils.AttributeProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1903,7 +1903,7 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *AttributePr
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.AttributeProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAttributeProfile,
-			&AttributeProfileWithAPIOpts{
+			&utils.AttributeProfileWithAPIOpts{
 				AttributeProfile: ap,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)})
