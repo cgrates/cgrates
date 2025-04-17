@@ -1854,3 +1854,287 @@ func TestTPDestinationCacheClone(t *testing.T) {
 		})
 	}
 }
+
+func TestTPDestinationRateClone(t *testing.T) {
+	tests := []struct {
+		name string
+		tpdr *TPDestinationRate
+		want *TPDestinationRate
+	}{
+		{
+			name: "Nil TPDestinationRate",
+			tpdr: nil,
+			want: nil,
+		},
+		{
+			name: "Empty TPDestinationRate",
+			tpdr: &TPDestinationRate{},
+			want: &TPDestinationRate{},
+		},
+		{
+			name: "TPDestinationRate with ID only",
+			tpdr: &TPDestinationRate{ID: "DR1001"},
+			want: &TPDestinationRate{ID: "DR1001"},
+		},
+		{
+			name: "TPDestinationRate with TPid only",
+			tpdr: &TPDestinationRate{TPid: "TP1"},
+			want: &TPDestinationRate{TPid: "TP1"},
+		},
+		{
+			name: "TPDestinationRate with TPid and ID",
+			tpdr: &TPDestinationRate{TPid: "TP1", ID: "DR1001"},
+			want: &TPDestinationRate{TPid: "TP1", ID: "DR1001"},
+		},
+		{
+			name: "TPDestinationRate with empty DestinationRates",
+			tpdr: &TPDestinationRate{TPid: "TP1", ID: "DR1001", DestinationRates: []*DestinationRate{}},
+			want: &TPDestinationRate{TPid: "TP1", ID: "DR1001", DestinationRates: []*DestinationRate{}},
+		},
+		{
+			name: "TPDestinationRate with single DestinationRate",
+			tpdr: &TPDestinationRate{
+				TPid: "TP1",
+				ID:   "DR1001",
+				DestinationRates: []*DestinationRate{
+					{
+						DestinationId:    "DST1",
+						RateId:           "RT1",
+						RoundingMethod:   "*up",
+						RoundingDecimals: 4,
+						MaxCost:          0.60,
+						MaxCostStrategy:  "*disconnect",
+					},
+				},
+			},
+			want: &TPDestinationRate{
+				TPid: "TP1",
+				ID:   "DR1001",
+				DestinationRates: []*DestinationRate{
+					{
+						DestinationId:    "DST1",
+						RateId:           "RT1",
+						RoundingMethod:   "*up",
+						RoundingDecimals: 4,
+						MaxCost:          0.60,
+						MaxCostStrategy:  "*disconnect",
+					},
+				},
+			},
+		},
+		{
+			name: "TPDestinationRate with multiple DestinationRates",
+			tpdr: &TPDestinationRate{
+				TPid: "TP1",
+				ID:   "DR1001",
+				DestinationRates: []*DestinationRate{
+					{
+						DestinationId:    "DST1",
+						RateId:           "RT1",
+						RoundingMethod:   "*up",
+						RoundingDecimals: 4,
+						MaxCost:          0.60,
+						MaxCostStrategy:  "*disconnect",
+					},
+					{
+						DestinationId:    "DST2",
+						RateId:           "RT2",
+						RoundingMethod:   "*down",
+						RoundingDecimals: 2,
+						MaxCost:          1.00,
+						MaxCostStrategy:  "*disconnect",
+					},
+				},
+			},
+			want: &TPDestinationRate{
+				TPid: "TP1",
+				ID:   "DR1001",
+				DestinationRates: []*DestinationRate{
+					{
+						DestinationId:    "DST1",
+						RateId:           "RT1",
+						RoundingMethod:   "*up",
+						RoundingDecimals: 4,
+						MaxCost:          0.60,
+						MaxCostStrategy:  "*disconnect",
+					},
+					{
+						DestinationId:    "DST2",
+						RateId:           "RT2",
+						RoundingMethod:   "*down",
+						RoundingDecimals: 2,
+						MaxCost:          1.00,
+						MaxCostStrategy:  "*disconnect",
+					},
+				},
+			},
+		},
+		{
+			name: "TPDestinationRate with Rate field",
+			tpdr: &TPDestinationRate{
+				TPid: "TP1",
+				ID:   "DR1001",
+				DestinationRates: []*DestinationRate{
+					{
+						DestinationId:    "DST1",
+						RateId:           "RT1",
+						RoundingMethod:   "*up",
+						RoundingDecimals: 4,
+						MaxCost:          0.60,
+						MaxCostStrategy:  "*disconnect",
+						Rate: &TPRateRALs{
+							TPid: "TP1",
+							ID:   "RT1",
+							RateSlots: []*RateSlot{
+								{
+									ConnectFee:         0.10,
+									Rate:               0.05,
+									RateUnit:           "60s",
+									RateIncrement:      "1s",
+									GroupIntervalStart: "0s",
+								},
+							},
+						},
+					},
+				},
+			},
+			want: &TPDestinationRate{
+				TPid: "TP1",
+				ID:   "DR1001",
+				DestinationRates: []*DestinationRate{
+					{
+						DestinationId:    "DST1",
+						RateId:           "RT1",
+						RoundingMethod:   "*up",
+						RoundingDecimals: 4,
+						MaxCost:          0.60,
+						MaxCostStrategy:  "*disconnect",
+						Rate: &TPRateRALs{
+							TPid: "TP1",
+							ID:   "RT1",
+							RateSlots: []*RateSlot{
+								{
+									ConnectFee:         0.10,
+									Rate:               0.05,
+									RateUnit:           "60s",
+									RateIncrement:      "1s",
+									GroupIntervalStart: "0s",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.tpdr.Clone()
+
+			if got == nil && tt.want == nil {
+				return
+			}
+
+			if (got == nil && tt.want != nil) || (got != nil && tt.want == nil) {
+				t.Errorf("Clone() = %v, want %v", got, tt.want)
+				return
+			}
+
+			if got.TPid != tt.want.TPid {
+				t.Errorf("Clone().TPid = %v, want %v", got.TPid, tt.want.TPid)
+			}
+
+			if got.ID != tt.want.ID {
+				t.Errorf("Clone().ID = %v, want %v", got.ID, tt.want.ID)
+			}
+
+			if len(got.DestinationRates) != len(tt.want.DestinationRates) {
+				t.Errorf("Clone().DestinationRates length = %v, want %v",
+					len(got.DestinationRates), len(tt.want.DestinationRates))
+				return
+			}
+
+			for i, destRate := range tt.want.DestinationRates {
+				if got.DestinationRates[i].DestinationId != destRate.DestinationId {
+					t.Errorf("Clone().DestinationRates[%d].DestinationId = %v, want %v",
+						i, got.DestinationRates[i].DestinationId, destRate.DestinationId)
+				}
+				if got.DestinationRates[i].RateId != destRate.RateId {
+					t.Errorf("Clone().DestinationRates[%d].RateId = %v, want %v",
+						i, got.DestinationRates[i].RateId, destRate.RateId)
+				}
+				if got.DestinationRates[i].RoundingMethod != destRate.RoundingMethod {
+					t.Errorf("Clone().DestinationRates[%d].RoundingMethod = %v, want %v",
+						i, got.DestinationRates[i].RoundingMethod, destRate.RoundingMethod)
+				}
+				if got.DestinationRates[i].RoundingDecimals != destRate.RoundingDecimals {
+					t.Errorf("Clone().DestinationRates[%d].RoundingDecimals = %v, want %v",
+						i, got.DestinationRates[i].RoundingDecimals, destRate.RoundingDecimals)
+				}
+				if got.DestinationRates[i].MaxCost != destRate.MaxCost {
+					t.Errorf("Clone().DestinationRates[%d].MaxCost = %v, want %v",
+						i, got.DestinationRates[i].MaxCost, destRate.MaxCost)
+				}
+				if got.DestinationRates[i].MaxCostStrategy != destRate.MaxCostStrategy {
+					t.Errorf("Clone().DestinationRates[%d].MaxCostStrategy = %v, want %v",
+						i, got.DestinationRates[i].MaxCostStrategy, destRate.MaxCostStrategy)
+				}
+
+				if destRate.Rate != nil {
+					if got.DestinationRates[i].Rate == nil {
+						t.Errorf("Clone().DestinationRates[%d].Rate is nil, want non-nil", i)
+						continue
+					}
+
+					if got.DestinationRates[i].Rate.TPid != destRate.Rate.TPid {
+						t.Errorf("Clone().DestinationRates[%d].Rate.TPid = %v, want %v",
+							i, got.DestinationRates[i].Rate.TPid, destRate.Rate.TPid)
+					}
+
+					if got.DestinationRates[i].Rate.ID != destRate.Rate.ID {
+						t.Errorf("Clone().DestinationRates[%d].Rate.ID = %v, want %v",
+							i, got.DestinationRates[i].Rate.ID, destRate.Rate.ID)
+					}
+
+					if len(got.DestinationRates[i].Rate.RateSlots) != len(destRate.Rate.RateSlots) {
+						t.Errorf("Clone().DestinationRates[%d].Rate.RateSlots length = %v, want %v",
+							i, len(got.DestinationRates[i].Rate.RateSlots), len(destRate.Rate.RateSlots))
+						continue
+					}
+
+					for j, rateSlot := range destRate.Rate.RateSlots {
+						gotSlot := got.DestinationRates[i].Rate.RateSlots[j]
+						if !reflect.DeepEqual(gotSlot, rateSlot) {
+							t.Errorf("Clone().DestinationRates[%d].Rate.RateSlots[%d] = %v, want %v",
+								i, j, gotSlot, rateSlot)
+						}
+					}
+				}
+			}
+
+			if tt.tpdr != nil && len(tt.tpdr.DestinationRates) > 0 {
+				originalDestID := tt.tpdr.DestinationRates[0].DestinationId
+				tt.tpdr.DestinationRates[0].DestinationId = "modified"
+
+				if got.DestinationRates[0].DestinationId != originalDestID {
+					t.Errorf("Clone() did not create a deep copy of DestinationRates")
+				}
+
+				tt.tpdr.DestinationRates[0].DestinationId = originalDestID
+
+				if tt.tpdr.DestinationRates[0].Rate != nil &&
+					len(tt.tpdr.DestinationRates[0].Rate.RateSlots) > 0 {
+
+					originalRate := tt.tpdr.DestinationRates[0].Rate.RateSlots[0].Rate
+					tt.tpdr.DestinationRates[0].Rate.RateSlots[0].Rate = 999.99
+
+					if got.DestinationRates[0].Rate.RateSlots[0].Rate != originalRate {
+						t.Errorf("Clone() did not create a deep copy of Rate.RateSlots")
+					}
+					tt.tpdr.DestinationRates[0].Rate.RateSlots[0].Rate = originalRate
+				}
+			}
+		})
+	}
+}
