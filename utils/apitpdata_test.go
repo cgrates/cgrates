@@ -2138,3 +2138,454 @@ func TestTPDestinationRateClone(t *testing.T) {
 		})
 	}
 }
+
+func TestApierTPTimingClone(t *testing.T) {
+	tests := []struct {
+		name     string
+		timing   *ApierTPTiming
+		expected *ApierTPTiming
+	}{
+		{
+			name: "Complete TPTiming",
+			timing: &ApierTPTiming{
+				TPid:      "TP1",
+				ID:        "TIMING_1",
+				Years:     "2023;2024;2025",
+				Months:    "1;2;3",
+				MonthDays: "1;15;30",
+				WeekDays:  "1;2;3;4;5",
+				Time:      "08:00:00",
+			},
+			expected: &ApierTPTiming{
+				TPid:      "TP1",
+				ID:        "TIMING_1",
+				Years:     "2023;2024;2025",
+				Months:    "1;2;3",
+				MonthDays: "1;15;30",
+				WeekDays:  "1;2;3;4;5",
+				Time:      "08:00:00",
+			},
+		},
+		{
+			name: "TPTiming with *any values",
+			timing: &ApierTPTiming{
+				TPid:      "TP1",
+				ID:        "TIMING_ANY",
+				Years:     "*any",
+				Months:    "*any",
+				MonthDays: "*any",
+				WeekDays:  "*any",
+				Time:      "00:00:00",
+			},
+			expected: &ApierTPTiming{
+				TPid:      "TP1",
+				ID:        "TIMING_ANY",
+				Years:     "*any",
+				Months:    "*any",
+				MonthDays: "*any",
+				WeekDays:  "*any",
+				Time:      "00:00:00",
+			},
+		},
+		{
+			name: "TPTiming with empty values",
+			timing: &ApierTPTiming{
+				TPid:      "TP1",
+				ID:        "TIMING_EMPTY",
+				Years:     "",
+				Months:    "",
+				MonthDays: "",
+				WeekDays:  "",
+				Time:      "",
+			},
+			expected: &ApierTPTiming{
+				TPid:      "TP1",
+				ID:        "TIMING_EMPTY",
+				Years:     "",
+				Months:    "",
+				MonthDays: "",
+				WeekDays:  "",
+				Time:      "",
+			},
+		},
+		{
+			name:     "Nil timing",
+			timing:   nil,
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.timing.Clone()
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("Clone() = %v, want %v", result, tt.expected)
+			}
+
+			if tt.timing != nil && result != nil {
+				if result == tt.timing {
+					t.Error("Clone returned the same instance, expected a new instance")
+				}
+
+				originalTPid := tt.timing.TPid
+				tt.timing.TPid = "MODIFIED"
+				if result.TPid != originalTPid {
+					t.Errorf("Clone is affected by changes to original. Expected TPid: %s, Got: %s",
+						originalTPid, result.TPid)
+				}
+			}
+		})
+	}
+}
+
+func TestTPActionClone(t *testing.T) {
+	tests := []struct {
+		name     string
+		action   *TPAction
+		expected *TPAction
+	}{
+		{
+			name: "Full TPAction",
+			action: &TPAction{
+				Identifier:      "TOPUP",
+				BalanceId:       "balance123",
+				BalanceUuid:     "uuid-456",
+				BalanceType:     "monetary",
+				Units:           "10",
+				ExpiryTime:      "2025-12-31T23:59:59Z",
+				Filters:         "filter1;filter2",
+				TimingTags:      "weekdays;offpeak",
+				DestinationIds:  "DST_EU;DST_US",
+				RatingSubject:   "premium",
+				Categories:      "call;data",
+				SharedGroups:    "group1;group2",
+				BalanceWeight:   "10",
+				ExtraParameters: "param1=value1;param2=value2",
+				BalanceBlocker:  "false",
+				BalanceDisabled: "false",
+				Weight:          20.5,
+			},
+			expected: &TPAction{
+				Identifier:      "TOPUP",
+				BalanceId:       "balance123",
+				BalanceUuid:     "uuid-456",
+				BalanceType:     "monetary",
+				Units:           "10",
+				ExpiryTime:      "2025-12-31T23:59:59Z",
+				Filters:         "filter1;filter2",
+				TimingTags:      "weekdays;offpeak",
+				DestinationIds:  "DST_EU;DST_US",
+				RatingSubject:   "premium",
+				Categories:      "call;data",
+				SharedGroups:    "group1;group2",
+				BalanceWeight:   "10",
+				ExtraParameters: "param1=value1;param2=value2",
+				BalanceBlocker:  "false",
+				BalanceDisabled: "false",
+				Weight:          20.5,
+			},
+		},
+		{
+			name: "Minimal TPAction",
+			action: &TPAction{
+				Identifier:  "DEBIT",
+				BalanceType: "voice",
+				Units:       "60",
+				Weight:      10,
+			},
+			expected: &TPAction{
+				Identifier:  "DEBIT",
+				BalanceType: "voice",
+				Units:       "60",
+				Weight:      10,
+			},
+		},
+		{
+			name:     "Empty TPAction",
+			action:   &TPAction{},
+			expected: &TPAction{},
+		},
+		{
+			name:     "Nil TPAction",
+			action:   nil,
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.action.Clone()
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("Clone() = %v, want %v", result, tt.expected)
+			}
+
+			if tt.action != nil && result != nil {
+				if result == tt.action {
+					t.Error("Clone returned the same instance, expected a new instance")
+				}
+
+				originalIdentifier := tt.action.Identifier
+				originalWeight := tt.action.Weight
+
+				tt.action.Identifier = "MODIFIED_ID"
+				if result.Identifier != originalIdentifier {
+					t.Errorf("Clone affected by string field change to original. Expected: %s, Got: %s",
+						originalIdentifier, result.Identifier)
+				}
+
+				tt.action.Weight = 999.99
+				if result.Weight != originalWeight {
+					t.Errorf("Clone affected by float field change to original. Expected: %f, Got: %f",
+						originalWeight, result.Weight)
+				}
+			}
+		})
+	}
+}
+
+func TestMetricWithFiltersClone(t *testing.T) {
+	tests := []struct {
+		name     string
+		mwf      *MetricWithFilters
+		expected *MetricWithFilters
+	}{
+		{
+			name: "Standard MetricWithFilters",
+			mwf: &MetricWithFilters{
+				FilterIDs: []string{"filter1", "filter2", "filter3"},
+				MetricID:  "ACD",
+			},
+			expected: &MetricWithFilters{
+				FilterIDs: []string{"filter1", "filter2", "filter3"},
+				MetricID:  "ACD",
+			},
+		},
+		{
+			name: "Empty FilterIDs",
+			mwf: &MetricWithFilters{
+				FilterIDs: []string{},
+				MetricID:  "ACC",
+			},
+			expected: &MetricWithFilters{
+				FilterIDs: []string{},
+				MetricID:  "ACC",
+			},
+		},
+		{
+			name: "Nil FilterIDs",
+			mwf: &MetricWithFilters{
+				FilterIDs: nil,
+				MetricID:  "TCD",
+			},
+			expected: &MetricWithFilters{
+				FilterIDs: nil,
+				MetricID:  "TCD",
+			},
+		},
+		{
+			name: "Empty MetricID",
+			mwf: &MetricWithFilters{
+				FilterIDs: []string{"filter1"},
+				MetricID:  "",
+			},
+			expected: &MetricWithFilters{
+				FilterIDs: []string{"filter1"},
+				MetricID:  "",
+			},
+		},
+		{
+			name:     "Nil MetricWithFilters",
+			mwf:      nil,
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.mwf.Clone()
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("Clone() = %v, want %v", result, tt.expected)
+			}
+
+			if tt.mwf != nil && result != nil {
+				if result == tt.mwf {
+					t.Error("Clone returned the same instance, expected a new instance")
+				}
+
+				originalMetricID := tt.mwf.MetricID
+				tt.mwf.MetricID = "MODIFIED_METRIC_ID"
+				if result.MetricID != originalMetricID {
+					t.Errorf("Clone affected by change to original MetricID. Expected: %s, Got: %s",
+						originalMetricID, result.MetricID)
+				}
+
+				if tt.mwf.FilterIDs != nil && len(tt.mwf.FilterIDs) > 0 {
+					originalFilterIDs := make([]string, len(tt.mwf.FilterIDs))
+					copy(originalFilterIDs, tt.mwf.FilterIDs)
+
+					tt.mwf.FilterIDs[0] = "MODIFIED_FILTER_ID"
+
+					if !reflect.DeepEqual(result.FilterIDs, originalFilterIDs) {
+						t.Errorf("Clone's FilterIDs affected by change to original. Expected: %v, Got: %v",
+							originalFilterIDs, result.FilterIDs)
+					}
+
+					tt.mwf.FilterIDs = append(tt.mwf.FilterIDs, "ADDED_FILTER_ID")
+
+					if len(result.FilterIDs) != len(originalFilterIDs) {
+						t.Errorf("Clone's FilterIDs length changed after adding to original. Expected length: %d, Got: %d",
+							len(originalFilterIDs), len(result.FilterIDs))
+					}
+				}
+
+				if tt.mwf.FilterIDs == nil && result.FilterIDs != nil && len(result.FilterIDs) == 0 {
+					t.Error("Clone converted nil FilterIDs to empty slice, expected nil")
+				}
+			}
+		})
+	}
+}
+
+func TestTPAttributeClone(t *testing.T) {
+	tests := []struct {
+		name     string
+		attr     *TPAttribute
+		expected *TPAttribute
+	}{
+		{
+			name: "Standard TPAttribute with FilterIDs",
+			attr: &TPAttribute{
+				FilterIDs: []string{"filter1", "filter2", "filter3"},
+				Path:      "req.Account",
+				Type:      "variable",
+				Value:     "*req.Subject",
+			},
+			expected: &TPAttribute{
+				FilterIDs: []string{"filter1", "filter2", "filter3"},
+				Path:      "req.Account",
+				Type:      "variable",
+				Value:     "*req.Subject",
+			},
+		},
+		{
+			name: "TPAttribute with empty FilterIDs slice",
+			attr: &TPAttribute{
+				FilterIDs: []string{},
+				Path:      "req.Destination",
+				Type:      "constant",
+				Value:     "1001",
+			},
+			expected: &TPAttribute{
+				FilterIDs: []string{},
+				Path:      "req.Destination",
+				Type:      "constant",
+				Value:     "1001",
+			},
+		},
+		{
+			name: "TPAttribute with nil FilterIDs",
+			attr: &TPAttribute{
+				FilterIDs: nil,
+				Path:      "req.Category",
+				Type:      "constant",
+				Value:     "call",
+			},
+			expected: &TPAttribute{
+				FilterIDs: nil,
+				Path:      "req.Category",
+				Type:      "constant",
+				Value:     "call",
+			},
+		},
+		{
+			name: "TPAttribute with empty string fields",
+			attr: &TPAttribute{
+				FilterIDs: []string{"filter1"},
+				Path:      "",
+				Type:      "",
+				Value:     "",
+			},
+			expected: &TPAttribute{
+				FilterIDs: []string{"filter1"},
+				Path:      "",
+				Type:      "",
+				Value:     "",
+			},
+		},
+		{
+			name:     "Nil TPAttribute",
+			attr:     nil,
+			expected: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.attr.Clone()
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("Clone() = %v, want %v", result, tt.expected)
+			}
+
+			if tt.attr != nil && result != nil {
+				if result == tt.attr {
+					t.Error("Clone returned the same instance, expected a new instance")
+				}
+
+				originalPath := tt.attr.Path
+				tt.attr.Path = "MODIFIED_PATH"
+				if result.Path != originalPath {
+					t.Errorf("Clone affected by change to original Path. Expected: %s, Got: %s",
+						originalPath, result.Path)
+				}
+
+				originalType := tt.attr.Type
+				tt.attr.Type = "MODIFIED_TYPE"
+				if result.Type != originalType {
+					t.Errorf("Clone affected by change to original Type. Expected: %s, Got: %s",
+						originalType, result.Type)
+				}
+
+				originalValue := tt.attr.Value
+				tt.attr.Value = "MODIFIED_VALUE"
+				if result.Value != originalValue {
+					t.Errorf("Clone affected by change to original Value. Expected: %s, Got: %s",
+						originalValue, result.Value)
+				}
+
+				if tt.attr.FilterIDs != nil {
+					originalFilterIDs := make([]string, len(tt.attr.FilterIDs))
+					copy(originalFilterIDs, tt.attr.FilterIDs)
+
+					if len(tt.attr.FilterIDs) > 0 {
+						tt.attr.FilterIDs[0] = "MODIFIED_FILTER_ID"
+
+						if !reflect.DeepEqual(result.FilterIDs, originalFilterIDs) {
+							t.Errorf("Clone's FilterIDs affected by change to original. Expected: %v, Got: %v",
+								originalFilterIDs, result.FilterIDs)
+						}
+					}
+
+					tt.attr.FilterIDs = append(tt.attr.FilterIDs, "ADDED_FILTER_ID")
+
+					if len(result.FilterIDs) != len(originalFilterIDs) {
+						t.Errorf("Clone's FilterIDs length changed after adding to original. Expected length: %d, Got: %d",
+							len(originalFilterIDs), len(result.FilterIDs))
+					}
+				} else {
+					if result.FilterIDs != nil {
+						t.Error("Clone converted nil FilterIDs to non-nil slice, expected nil")
+					}
+
+					tt.attr.FilterIDs = []string{"new_filter"}
+					if result.FilterIDs != nil {
+						t.Error("Clone's nil FilterIDs changed after setting original to non-nil")
+					}
+				}
+			}
+		})
+	}
+}
