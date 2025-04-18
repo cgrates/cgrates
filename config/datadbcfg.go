@@ -56,19 +56,21 @@ type DataDBOpts struct {
 
 // DataDbCfg Database config
 type DataDbCfg struct {
-	Type        string
-	Host        string   // The host to connect to. Values that start with / are for UNIX domain sockets.
-	Port        string   // The port to bind to.
-	Name        string   // The name of the database to connect to.
-	User        string   // The user to sign in as.
-	Password    string   // The user's password.
-	RmtConns    []string // Remote DataDB  connIDs
-	RmtConnID   string
-	RplConns    []string // Replication connIDs
-	RplFiltered bool
-	RplCache    string
-	Items       map[string]*ItemOpt
-	Opts        *DataDBOpts
+	Type         string
+	Host         string   // The host to connect to. Values that start with / are for UNIX domain sockets.
+	Port         string   // The port to bind to.
+	Name         string   // The name of the database to connect to.
+	User         string   // The user to sign in as.
+	Password     string   // The user's password.
+	RmtConns     []string // Remote DataDB  connIDs
+	RmtConnID    string
+	RplConns     []string // Replication connIDs
+	RplFiltered  bool
+	RplCache     string
+	RplFailedDir string
+	RplInterval  time.Duration
+	Items        map[string]*ItemOpt
+	Opts         *DataDBOpts
 }
 
 func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
@@ -241,6 +243,15 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Replication_cache != nil {
 		dbcfg.RplCache = *jsnDbCfg.Replication_cache
 	}
+	if jsnDbCfg.RplFailedDir != nil {
+		dbcfg.RplFailedDir = *jsnDbCfg.RplFailedDir
+	}
+	if jsnDbCfg.RplInterval != nil {
+		dbcfg.RplInterval, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.RplInterval)
+		if err != nil {
+			return
+		}
+	}
 	if jsnDbCfg.Opts != nil {
 		err = dbcfg.Opts.loadFromJSONCfg(jsnDbCfg.Opts)
 	}
@@ -278,17 +289,19 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 // Clone returns the cloned object
 func (dbcfg *DataDbCfg) Clone() (cln *DataDbCfg) {
 	cln = &DataDbCfg{
-		Type:        dbcfg.Type,
-		Host:        dbcfg.Host,
-		Port:        dbcfg.Port,
-		Name:        dbcfg.Name,
-		User:        dbcfg.User,
-		Password:    dbcfg.Password,
-		RplFiltered: dbcfg.RplFiltered,
-		RplCache:    dbcfg.RplCache,
-		RmtConnID:   dbcfg.RmtConnID,
-		Items:       make(map[string]*ItemOpt),
-		Opts:        dbcfg.Opts.Clone(),
+		Type:         dbcfg.Type,
+		Host:         dbcfg.Host,
+		Port:         dbcfg.Port,
+		Name:         dbcfg.Name,
+		User:         dbcfg.User,
+		Password:     dbcfg.Password,
+		RplFiltered:  dbcfg.RplFiltered,
+		RplCache:     dbcfg.RplCache,
+		RmtConnID:    dbcfg.RmtConnID,
+		RplFailedDir: dbcfg.RplFailedDir,
+		RplInterval:  dbcfg.RplInterval,
+		Items:        make(map[string]*ItemOpt),
+		Opts:         dbcfg.Opts.Clone(),
 	}
 	for k, itm := range dbcfg.Items {
 		cln.Items[k] = itm.Clone()
@@ -332,17 +345,19 @@ func (dbcfg *DataDbCfg) AsMapInterface() (mp map[string]any) {
 		utils.MongoConnSchemeCfg:           dbcfg.Opts.MongoConnScheme,
 	}
 	mp = map[string]any{
-		utils.DataDbTypeCfg:          dbcfg.Type,
-		utils.DataDbHostCfg:          dbcfg.Host,
-		utils.DataDbNameCfg:          dbcfg.Name,
-		utils.DataDbUserCfg:          dbcfg.User,
-		utils.DataDbPassCfg:          dbcfg.Password,
-		utils.RemoteConnsCfg:         dbcfg.RmtConns,
-		utils.RemoteConnIDCfg:        dbcfg.RmtConnID,
-		utils.ReplicationConnsCfg:    dbcfg.RplConns,
-		utils.ReplicationFilteredCfg: dbcfg.RplFiltered,
-		utils.ReplicationCache:       dbcfg.RplCache,
-		utils.OptsCfg:                opts,
+		utils.DataDbTypeCfg:           dbcfg.Type,
+		utils.DataDbHostCfg:           dbcfg.Host,
+		utils.DataDbNameCfg:           dbcfg.Name,
+		utils.DataDbUserCfg:           dbcfg.User,
+		utils.DataDbPassCfg:           dbcfg.Password,
+		utils.RemoteConnsCfg:          dbcfg.RmtConns,
+		utils.RemoteConnIDCfg:         dbcfg.RmtConnID,
+		utils.ReplicationConnsCfg:     dbcfg.RplConns,
+		utils.ReplicationFilteredCfg:  dbcfg.RplFiltered,
+		utils.ReplicationCache:        dbcfg.RplCache,
+		utils.ReplicationFailedDirCfg: dbcfg.RplFailedDir,
+		utils.ReplicationIntervalCfg:  dbcfg.RplInterval.String(),
+		utils.OptsCfg:                 opts,
 	}
 	if dbcfg.Items != nil {
 		items := make(map[string]any)
