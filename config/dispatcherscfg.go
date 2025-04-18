@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -29,6 +31,7 @@ type DispatcherSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
+	ExistsIndexedFields *[]string
 	AttributeSConns     []string
 	NestedFields        bool
 	AnySubsystem        bool
@@ -59,6 +62,10 @@ func (dps *DispatcherSCfg) loadFromJSONCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
 		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		dps.SuffixIndexedFields = &sif
+	}
+	if jsnCfg.ExistsIndexedFields != nil {
+		eif := slices.Clone(*jsnCfg.ExistsIndexedFields)
+		dps.ExistsIndexedFields = &eif
 	}
 	if jsnCfg.Attributes_conns != nil {
 		dps.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
@@ -106,6 +113,10 @@ func (dps *DispatcherSCfg) AsMapInterface() (mp map[string]any) {
 		copy(suffixIndexedFields, *dps.SuffixIndexedFields)
 		mp[utils.SuffixIndexedFieldsCfg] = suffixIndexedFields
 	}
+	if dps.ExistsIndexedFields != nil {
+		eif := slices.Clone(*dps.ExistsIndexedFields)
+		mp[utils.ExistsIndexedFieldsCfg] = eif
+	}
 	if dps.AttributeSConns != nil {
 		attributeSConns := make([]string, len(dps.AttributeSConns))
 		for i, item := range dps.AttributeSConns {
@@ -147,6 +158,10 @@ func (dps DispatcherSCfg) Clone() (cln *DispatcherSCfg) {
 		idx := make([]string, len(*dps.SuffixIndexedFields))
 		copy(idx, *dps.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
+	}
+	if dps.ExistsIndexedFields != nil {
+		idx := slices.Clone(*dps.ExistsIndexedFields)
+		cln.ExistsIndexedFields = &idx
 	}
 	return
 }

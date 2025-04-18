@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,6 +40,7 @@ type RouteSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
+	ExistsIndexedFields *[]string
 	AttributeSConns     []string
 	ResourceSConns      []string
 	StatSConns          []string
@@ -95,6 +98,10 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 		sif := make([]string, len(*jsnCfg.Suffix_indexed_fields))
 		copy(sif, *jsnCfg.Suffix_indexed_fields)
 		rts.SuffixIndexedFields = &sif
+	}
+	if jsnCfg.ExistsIndexedFields != nil {
+		eif := slices.Clone(*jsnCfg.ExistsIndexedFields)
+		rts.ExistsIndexedFields = &eif
 	}
 	if jsnCfg.Attributes_conns != nil {
 		rts.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
@@ -187,6 +194,10 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]any) {
 		suffixIndexedFieldsCfg := make([]string, len(*rts.SuffixIndexedFields))
 		copy(suffixIndexedFieldsCfg, *rts.SuffixIndexedFields)
 		initialMP[utils.SuffixIndexedFieldsCfg] = suffixIndexedFieldsCfg
+	}
+	if rts.ExistsIndexedFields != nil {
+		eif := slices.Clone(*rts.ExistsIndexedFields)
+		initialMP[utils.ExistsIndexedFieldsCfg] = eif
 	}
 	if rts.AttributeSConns != nil {
 		attributeSConns := make([]string, len(rts.AttributeSConns))
@@ -291,6 +302,10 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		idx := make([]string, len(*rts.SuffixIndexedFields))
 		copy(idx, *rts.SuffixIndexedFields)
 		cln.SuffixIndexedFields = &idx
+	}
+	if rts.ExistsIndexedFields != nil {
+		idx := slices.Clone(*rts.ExistsIndexedFields)
+		cln.ExistsIndexedFields = &idx
 	}
 	return
 }

@@ -32,6 +32,7 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{"*req.Field1"},
 		Prefix_indexed_fields: &[]string{"*req.Field1", "*req.Field2"},
 		Suffix_indexed_fields: &[]string{"*req.Field1", "*req.Field2"},
+		ExistsIndexedFields:   &[]string{"*req.Field1", "*req.Field2"},
 		Nested_fields:         utils.BoolPointer(true),
 	}
 	expected := &ChargerSCfg{
@@ -41,6 +42,7 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.Field1"},
 		PrefixIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
 		SuffixIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
+		ExistsIndexedFields: &[]string{"*req.Field1", "*req.Field2"},
 		NestedFields:        true,
 	}
 	jsncfg := NewDefaultCGRConfig()
@@ -68,6 +70,7 @@ func TestChargerSCfgAsMapInterface(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{},
+		utils.ExistsIndexedFieldsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -83,8 +86,9 @@ func TestChargerSCfgAsMapInterface1(t *testing.T) {
 			"attributes_conns": ["*internal:*attributes", "*conn1"],					
 			"indexed_selects":true,			
             "string_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],
-			 "prefix_indexed_fields": ["*req.DestinationPrefix"],
-             "suffix_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],		
+			"prefix_indexed_fields": ["*req.DestinationPrefix"],
+            "suffix_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],		
+            "exists_indexed_fields": ["*req.Field1","*req.Field2","*req.Field3"],		
 			"nested_fields": false,					
 		},	
 	}`
@@ -96,6 +100,7 @@ func TestChargerSCfgAsMapInterface1(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{"*req.DestinationPrefix"},
 		utils.NestedFieldsCfg:        false,
 		utils.SuffixIndexedFieldsCfg: []string{"*req.Field1", "*req.Field2", "*req.Field3"},
+		utils.ExistsIndexedFieldsCfg: []string{"*req.Field1", "*req.Field2", "*req.Field3"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

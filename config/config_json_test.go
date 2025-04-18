@@ -1143,6 +1143,7 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
+		ExistsIndexedFields:   &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Any_context:           utils.BoolPointer(true),
 		Opts: &AttributesOptsJson{
@@ -1171,6 +1172,7 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
+		ExistsIndexedFields:   &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
@@ -1212,6 +1214,7 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
+		ExistsIndexedFields:   &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &ResourcesOptsJson{
 			UsageID: utils.StringPointer(utils.EmptyString),
@@ -1239,6 +1242,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		String_indexed_fields:    nil,
 		Prefix_indexed_fields:    &[]string{},
 		Suffix_indexed_fields:    &[]string{},
+		ExistsIndexedFields:      &[]string{},
 		Nested_fields:            utils.BoolPointer(false),
 		Ees_conns:                &[]string{},
 		Ees_exporter_ids:         &[]string{},
@@ -1267,6 +1271,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
+		ExistsIndexedFields:   &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &ThresholdsOptsJson{
 			ProfileIDs:           &[]string{},
@@ -1291,6 +1296,7 @@ func TestDfRouteSJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
+		ExistsIndexedFields:   &[]string{},
 		Attributes_conns:      &[]string{},
 		Resources_conns:       &[]string{},
 		Stats_conns:           &[]string{},
@@ -1932,6 +1938,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
+		ExistsIndexedFields:   &[]string{},
 		Attributes_conns:      &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Any_subsystem:         utils.BoolPointer(true),

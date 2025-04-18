@@ -717,6 +717,7 @@ func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 	}
 	if !reflect.DeepEqual(eChargerSCfg, cgrCfg.chargerSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eChargerSCfg, cgrCfg.chargerSCfg)
@@ -732,6 +733,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		Opts: &ResourcesOpts{
 			UsageID: utils.EmptyString,
 			Units:   1,
@@ -752,6 +754,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		Opts: &StatsOpts{
 			ProfileIDs: []string{},
 		},
@@ -770,6 +773,7 @@ func TestCgrCfgJSONDefaultThresholdSCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		Opts: &ThresholdsOpts{
 			ProfileIDs: []string{},
 		},
@@ -786,6 +790,7 @@ func TestCgrCfgJSONDefaultRouteSCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		AttributeSConns:     []string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
@@ -1832,6 +1837,7 @@ func TestAttributeSConfig(t *testing.T) {
 		IndexedSelects:      true,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		NestedFields:        false,
 		AnyContext:          true,
 		Opts: &AttributesOpts{
@@ -1853,6 +1859,7 @@ func TestChargersConfig(t *testing.T) {
 		AttributeSConns:     []string{},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		NestedFields:        false,
 	}
 	cgrConfig := NewDefaultCGRConfig()
@@ -1870,6 +1877,7 @@ func TestResourceSConfig(t *testing.T) {
 		ThresholdSConns:     []string{},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		NestedFields:        false,
 		Opts: &ResourcesOpts{
 			UsageID: "",
@@ -1892,6 +1900,7 @@ func TestStatSConfig(t *testing.T) {
 		ThresholdSConns:        []string{},
 		PrefixIndexedFields:    &[]string{},
 		SuffixIndexedFields:    &[]string{},
+		ExistsIndexedFields:    &[]string{},
 		NestedFields:           false,
 		Opts: &StatsOpts{
 			ProfileIDs: []string{},
@@ -1912,6 +1921,7 @@ func TestThresholdSConfig(t *testing.T) {
 		StoreInterval:       0,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		NestedFields:        false,
 		Opts: &ThresholdsOpts{
 			ProfileIDs: []string{},
@@ -1930,6 +1940,7 @@ func TestRouteSConfig(t *testing.T) {
 		IndexedSelects:      true,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		AttributeSConns:     []string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
@@ -2102,6 +2113,7 @@ func TestDispatcherSConfig(t *testing.T) {
 		IndexedSelects:      true,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		AttributeSConns:     []string{},
 		NestedFields:        false,
 		AnySubsystem:        true,
@@ -3123,6 +3135,7 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		AttributeSConns:     []string{},
 		AnySubsystem:        true,
 	}
@@ -3952,6 +3965,7 @@ func TestV1GetConfigAttribute(t *testing.T) {
 			utils.IndexedSelectsCfg:      true,
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
+			utils.ExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.AnyContextCfg:          true,
 			utils.OptsCfg: map[string]any{
@@ -3980,6 +3994,7 @@ func TestV1GetConfigChargers(t *testing.T) {
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.SuffixIndexedFieldsCfg: []string{},
+			utils.ExistsIndexedFieldsCfg: []string{},
 		},
 	}
 	cfgCgr := NewDefaultCGRConfig()
@@ -4000,6 +4015,7 @@ func TestV1GetConfigResourceS(t *testing.T) {
 			utils.IndexedSelectsCfg:      true,
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
+			utils.ExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.OptsCfg: map[string]any{
 				utils.MetaUnitsCfg:   1.,
@@ -4026,6 +4042,7 @@ func TestV1GetConfigStats(t *testing.T) {
 			utils.IndexedSelectsCfg:         true,
 			utils.PrefixIndexedFieldsCfg:    []string{},
 			utils.SuffixIndexedFieldsCfg:    []string{},
+			utils.ExistsIndexedFieldsCfg:    []string{},
 			utils.NestedFieldsCfg:           false,
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:              []string{},
@@ -4052,6 +4069,7 @@ func TestV1GetConfigThresholds(t *testing.T) {
 			utils.IndexedSelectsCfg:      true,
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
+			utils.ExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.OptsCfg: map[string]any{
 				utils.MetaProfileIDs:              []string{},
@@ -4075,6 +4093,7 @@ func TestV1GetConfigRoutes(t *testing.T) {
 			utils.IndexedSelectsCfg:      true,
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
+			utils.ExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.AttributeSConnsCfg:     []string{},
 			utils.ResourceSConnsCfg:      []string{},
@@ -4145,6 +4164,7 @@ func TestV1GetConfigDispatcherS(t *testing.T) {
 			utils.IndexedSelectsCfg:      true,
 			utils.PrefixIndexedFieldsCfg: []string{},
 			utils.SuffixIndexedFieldsCfg: []string{},
+			utils.ExistsIndexedFieldsCfg: []string{},
 			utils.NestedFieldsCfg:        false,
 			utils.AttributeSConnsCfg:     []string{},
 			utils.AnySubsystemCfg:        true,
@@ -4941,7 +4961,7 @@ func TestV1GetConfigAsJSONDNSAgent(t *testing.T) {
 
 func TestV1GetConfigAsJSONAttributes(t *testing.T) {
 	var reply string
-	expected := `{"attributes":{"any_context":true,"apiers_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*processRuns":1,"*profileIDs":[],"*profileIgnoreFilters":false,"*profileRuns":0},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expected := `{"attributes":{"any_context":true,"apiers_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"opts":{"*processRuns":1,"*profileIDs":[],"*profileIgnoreFilters":false,"*profileRuns":0},"prefix_indexed_fields":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: ATTRIBUTE_JSN}, &reply); err != nil {
 		t.Error(err)
@@ -4952,7 +4972,7 @@ func TestV1GetConfigAsJSONAttributes(t *testing.T) {
 
 func TestV1GetConfigAsJSONChargerS(t *testing.T) {
 	var reply string
-	expected := `{"chargers":{"attributes_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"suffix_indexed_fields":[]}}`
+	expected := `{"chargers":{"attributes_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: ChargerSCfgJson}, &reply); err != nil {
 		t.Error(err)
@@ -4963,7 +4983,7 @@ func TestV1GetConfigAsJSONChargerS(t *testing.T) {
 
 func TestV1GetConfigAsJSONResourceS(t *testing.T) {
 	var reply string
-	expected := `{"resources":{"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*units":1,"*usageID":""},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[],"thresholds_conns":[]}}`
+	expected := `{"resources":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"opts":{"*units":1,"*usageID":""},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[],"thresholds_conns":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: RESOURCES_JSON}, &reply); err != nil {
 		t.Error(err)
@@ -4974,7 +4994,7 @@ func TestV1GetConfigAsJSONResourceS(t *testing.T) {
 
 func TestV1GetConfigAsJSONStatS(t *testing.T) {
 	var reply string
-	expected := `{"stats":{"ees_conns":[],"ees_exporter_ids":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*profileIDs":[],"*profileIgnoreFilters":false},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]}}`
+	expected := `{"stats":{"ees_conns":[],"ees_exporter_ids":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"opts":{"*profileIDs":[],"*profileIgnoreFilters":false},"prefix_indexed_fields":[],"store_interval":"","store_uncompressed_limit":0,"suffix_indexed_fields":[],"thresholds_conns":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: STATS_JSON}, &reply); err != nil {
 		t.Error(err)
@@ -4985,7 +5005,7 @@ func TestV1GetConfigAsJSONStatS(t *testing.T) {
 
 func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 	var reply string
-	expected := `{"thresholds":{"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*profileIDs":[],"*profileIgnoreFilters":false},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]}}`
+	expected := `{"thresholds":{"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"opts":{"*profileIDs":[],"*profileIgnoreFilters":false},"prefix_indexed_fields":[],"store_interval":"","suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: THRESHOLDS_JSON}, &reply); err != nil {
 		t.Error(err)
@@ -4996,7 +5016,7 @@ func TestV1GetConfigAsJSONThresholdS(t *testing.T) {
 
 func TestV1GetConfigAsJSONRouteS(t *testing.T) {
 	var reply string
-	expected := `{"routes":{"attributes_conns":[],"default_ratio":1,"enabled":false,"indexed_selects":true,"nested_fields":false,"opts":{"*context":"*routes","*ignoreErrors":false,"*maxCost":""},"prefix_indexed_fields":[],"rals_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
+	expected := `{"routes":{"attributes_conns":[],"default_ratio":1,"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"opts":{"*context":"*routes","*ignoreErrors":false,"*maxCost":""},"prefix_indexed_fields":[],"rals_conns":[],"resources_conns":[],"stats_conns":[],"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: RouteSJson}, &reply); err != nil {
 		t.Error(err)
@@ -5020,7 +5040,7 @@ func TestV1GetConfigAsJSONSureTax(t *testing.T) {
 
 func TestV1GetConfigAsJSONDispatcherS(t *testing.T) {
 	var reply string
-	expected := `{"dispatchers":{"any_subsystem":true,"attributes_conns":[],"enabled":false,"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"prevent_loop":false,"suffix_indexed_fields":[]}}`
+	expected := `{"dispatchers":{"any_subsystem":true,"attributes_conns":[],"enabled":false,"exists_indexed_fields":[],"indexed_selects":true,"nested_fields":false,"prefix_indexed_fields":[],"prevent_loop":false,"suffix_indexed_fields":[]}}`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := cgrCfg.V1GetConfigAsJSON(context.Background(), &SectionWithAPIOpts{Section: DispatcherSJson}, &reply); err != nil {
 		t.Error(err)

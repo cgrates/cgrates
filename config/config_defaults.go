@@ -838,6 +838,7 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"any_context": true,			// if we match the *any context
 	"opts": {
@@ -856,6 +857,7 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 },
 
@@ -868,6 +870,7 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {
 		"*usageID": "",
@@ -888,6 +891,7 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {
 		"*profileIDs": [],
@@ -927,6 +931,7 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"opts": {
 		"*profileIDs": [],
@@ -941,6 +946,7 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],		// connections to AttributeS for altering events before route queries: <""|*internal|$rpc_conns_id>
 	"resources_conns": [],		// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|$rpc_conns_id>
@@ -1226,6 +1232,7 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
 	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"attributes_conns": [],		// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|$rpc_conns_id>
 	"any_subsystem": true,		// if we match the *any subsystem

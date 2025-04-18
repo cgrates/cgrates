@@ -28,7 +28,7 @@ import (
 )
 
 var (
-	FilterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix})
+	FilterIndexTypes = utils.NewStringSet([]string{utils.MetaPrefix, utils.MetaString, utils.MetaSuffix, utils.MetaExists})
 	// Element or values of a filter that starts with one of this should not be indexed
 	ToNotBeIndexed = []string{
 		utils.DynamicDataPrefix + utils.MetaAccounts,
@@ -86,6 +86,23 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 				continue
 			}
 			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
+			if isDyn && flt.Type == utils.MetaExists {
+				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
+				var rcvIndx map[string]utils.StringSet
+				// only read from cache in case if we do not find the index to not cache the negative response
+				if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
+					idxKey, true, false); err != nil {
+					if err != utils.ErrNotFound {
+						return
+					}
+					err = nil
+					indexes[idxKey] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
+					continue
+				}
+				for idxKey, idx := range rcvIndx { // parse the received indexes
+					indexes[idxKey] = idx
+				}
+			}
 			for _, fldVal := range flt.Values {
 				if IsDynamicDPPath(fldVal) {
 					continue

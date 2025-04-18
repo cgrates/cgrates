@@ -155,6 +155,7 @@ func testCGRConfigReloadAttributeS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		AnyContext:          true,
 		Opts: &AttributesOpts{
@@ -210,6 +211,7 @@ func testCGRConfigReloadChargerS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		AttributeSConns:     []string{"*localhost"},
 	}
@@ -238,6 +240,7 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		Opts: &ThresholdsOpts{
 			ProfileIDs: []string{},
@@ -268,6 +271,7 @@ func testCGRConfigReloadStatS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
 		Opts: &StatsOpts{
@@ -300,6 +304,7 @@ func testCGRConfigReloadResourceS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.AccountField},
 		PrefixIndexedFields: &[]string{},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns:     []string{utils.MetaLocalHost},
 		Opts: &ResourcesOpts{
@@ -332,6 +337,7 @@ func testCGRConfigReloadSupplierS(t *testing.T) {
 		StringIndexedFields: &[]string{"*req.LCRProfile"},
 		PrefixIndexedFields: &[]string{utils.MetaReq + utils.NestingSep + utils.Destination},
 		SuffixIndexedFields: &[]string{},
+		ExistsIndexedFields: &[]string{},
 		ResourceSConns:      []string{},
 		StatSConns:          []string{},
 		AttributeSConns:     []string{},
