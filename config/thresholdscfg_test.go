@@ -210,6 +210,53 @@ func TestThresholdSCfgLoadFromJSONCfgSessionsConns(t *testing.T) {
 	}
 }
 
+func TestThresholdSCfgLoadFromJSONCfgApiersConns(t *testing.T) {
+	tests := []struct {
+		name           string
+		input          *ThresholdSJsonCfg
+		expectedOutput []string
+	}{
+		{
+			name: "Empty Apiers_conns",
+			input: &ThresholdSJsonCfg{
+				Apiers_conns: []string{},
+			},
+			expectedOutput: []string{},
+		},
+		{
+			name: "Non-empty Apiers_conns without MetaInternal",
+			input: &ThresholdSJsonCfg{
+				Apiers_conns: []string{"conn1", "conn2"},
+			},
+			expectedOutput: []string{"conn1", "conn2"},
+		},
+		{
+			name: "Non-empty Apiers_conns with MetaInternal",
+			input: &ThresholdSJsonCfg{
+				Apiers_conns: []string{"conn1", utils.MetaInternal},
+			},
+			expectedOutput: []string{"conn1", utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var cfg ThresholdSCfg
+			err := cfg.loadFromJSONCfg(tt.input)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if len(cfg.ApierSConns) != len(tt.expectedOutput) {
+				t.Fatalf("Expected %v, got %v", tt.expectedOutput, cfg.ApierSConns)
+			}
+			for i, conn := range cfg.ApierSConns {
+				if conn != tt.expectedOutput[i] {
+					t.Errorf("Expected %s at index %d, got %s", tt.expectedOutput[i], i, conn)
+				}
+			}
+		})
+	}
+}
+
 func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -224,6 +271,7 @@ func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
 				StoreInterval:       0,
 				NestedFields:        true,
 				SessionSConns:       nil,
+				ApierSConns:         nil,
 				StringIndexedFields: nil,
 				PrefixIndexedFields: nil,
 				SuffixIndexedFields: nil,
@@ -248,6 +296,7 @@ func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
 				StoreInterval:       0,
 				NestedFields:        true,
 				SessionSConns:       []string{"conn1", "conn2", "MetaInternal"},
+				ApierSConns:         nil,
 				StringIndexedFields: nil,
 				PrefixIndexedFields: nil,
 				SuffixIndexedFields: nil,
@@ -263,6 +312,75 @@ func TestThresholdSCfgAsMapInterfaceSessionSConns(t *testing.T) {
 					"ProfileIgnoreFiltersCfg": nil,
 				},
 				"SessionSConnsCfg": []string{"conn1", "conn2", "MetaInternal"},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			output := tt.cfg.AsMapInterface()
+
+			if reflect.DeepEqual(output, tt.expectedOutput) {
+				t.Errorf("Expected %v, got %v", tt.expectedOutput, output)
+			}
+		})
+	}
+}
+
+func TestThresholdSCfgAsMapInterfaceApierSConns(t *testing.T) {
+	tests := []struct {
+		name           string
+		cfg            ThresholdSCfg
+		expectedOutput map[string]any
+	}{
+		{
+			name: "ApierSConns is nil",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				SessionSConns:       nil,
+				ApierSConns:         nil,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				"EnabledCfg":        true,
+				"IndexedSelectsCfg": 10,
+				"NestedFieldsCfg":   "nested",
+				"StoreIntervalCfg":  "EmptyString",
+				"OptsCfg": map[string]any{
+					"MetaProfileIDs":              nil,
+					"MetaProfileIgnoreFiltersCfg": nil,
+				},
+			},
+		},
+		{
+			name: "ApierSConns has values",
+			cfg: ThresholdSCfg{
+				Enabled:             true,
+				IndexedSelects:      true,
+				StoreInterval:       0,
+				NestedFields:        true,
+				ApierSConns:         []string{"conn1", "conn2", "MetaInternal"},
+				SessionSConns:       nil,
+				StringIndexedFields: nil,
+				PrefixIndexedFields: nil,
+				SuffixIndexedFields: nil,
+				Opts:                &ThresholdsOpts{},
+			},
+			expectedOutput: map[string]any{
+				"EnabledCfg":        true,
+				"IndexedSelectsCfg": 10,
+				"NestedFieldsCfg":   "nested",
+				"StoreIntervalCfg":  "EmptyString",
+				"OptsCfg": map[string]any{
+					"ProfileIDs":              nil,
+					"ProfileIgnoreFiltersCfg": nil,
+				},
+				"ApierSConnsCfg": []string{"conn1", "conn2", "MetaInternal"},
 			},
 		},
 	}
@@ -315,6 +433,51 @@ func TestThresholdSCfgCloneSessionSConns(t *testing.T) {
 				for i := range cloned.SessionSConns {
 					if cloned.SessionSConns[i] != tt.expectedCloned[i] {
 						t.Errorf("Expected %v, got %v", tt.expectedCloned, cloned.SessionSConns)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestThresholdSCfgCloneApierSConns(t *testing.T) {
+	tests := []struct {
+		name           string
+		original       *ThresholdSCfg
+		expectedCloned []string
+	}{
+		{
+			name: "ApierSConns is nil",
+			original: &ThresholdSCfg{
+				ApierSConns: nil,
+				Opts:        &ThresholdsOpts{},
+			},
+			expectedCloned: nil,
+		},
+		{
+			name: "ApierSConns has values",
+			original: &ThresholdSCfg{
+				ApierSConns: []string{"conn1", "conn2"},
+				Opts:        &ThresholdsOpts{},
+			},
+			expectedCloned: []string{"conn1", "conn2"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cloned := tt.original.Clone()
+
+			if tt.expectedCloned == nil {
+				if cloned.ApierSConns != nil {
+					t.Errorf("Expected nil, got %v", cloned.ApierSConns)
+				}
+			} else {
+				if len(cloned.ApierSConns) != len(tt.expectedCloned) {
+					t.Errorf("Expected %v, got %v", tt.expectedCloned, cloned.ApierSConns)
+				}
+				for i := range cloned.ApierSConns {
+					if cloned.ApierSConns[i] != tt.expectedCloned[i] {
+						t.Errorf("Expected %v, got %v", tt.expectedCloned, cloned.ApierSConns)
 					}
 				}
 			}

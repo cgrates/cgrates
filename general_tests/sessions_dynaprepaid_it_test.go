@@ -100,7 +100,7 @@ func TestSessDynaprepaidAuth(t *testing.T) {
 						Categories:     utils.StringMap{},
 						SharedGroups:   utils.StringMap{},
 						TimingIDs:      utils.StringMap{},
-						Value:          9.99966,
+						Value:          10,
 						Weight:         10,
 						DestinationIDs: utils.StringMap{},
 					},
@@ -119,8 +119,8 @@ func TestSessDynaprepaidAuth(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -212,8 +212,8 @@ func TestSessDynaprepaidInit(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -303,8 +303,8 @@ func TestSessDynaprepaidUpdate(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -396,8 +396,8 @@ func TestSessDynaprepaidTerminate(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -470,7 +470,7 @@ func TestSessDynaprepaidProcessEventAuth(t *testing.T) {
 						Categories:     utils.StringMap{},
 						SharedGroups:   utils.StringMap{},
 						TimingIDs:      utils.StringMap{},
-						Value:          9.99966,
+						Value:          10,
 						Weight:         10,
 						DestinationIDs: utils.StringMap{},
 					},
@@ -489,8 +489,8 @@ func TestSessDynaprepaidProcessEventAuth(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -582,8 +582,8 @@ func TestSessDynaprepaidProcessEventInit(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -675,8 +675,8 @@ func TestSessDynaprepaidProcessEventUpdate(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -768,8 +768,8 @@ func TestSessDynaprepaidProcessEventTerminate(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -861,8 +861,8 @@ func TestSessDynaprepaidProcessEventCDRs(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }
@@ -954,8 +954,8 @@ func TestSessDynaprepaidProcessMessage(t *testing.T) {
 			},
 			UpdateTime: acnt.UpdateTime,
 		}
-		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(expAcc)) {
-			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(expAcc.BalanceMap))
+		if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc.BalanceMap), utils.ToJSON(acnt.BalanceMap))
 		}
 	})
 }

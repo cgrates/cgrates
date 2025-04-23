@@ -1,0 +1,59 @@
+{
+
+    "general": {
+        "log_level": 7,
+    },
+    
+    "data_db": {
+        "db_type": "*internal",	
+    },
+
+
+    "stor_db": {
+        "db_type": "*internal",	
+    },
+
+    "rals": {
+        "enabled": true,
+    },
+    
+    "schedulers": {
+        "enabled": true,
+        "dynaprepaid_actionplans": ["DYNA_ACC"]
+    },
+    
+    "chargers": {
+        "enabled": true,
+	    "attributes_conns": ["*localhost"],
+    },
+    
+    "thresholds": {
+        "enabled": true,
+        "apiers_conns": ["*localhost"],
+        "exists_indexed_fields": ["*opts.*account"],
+    },
+
+    "stats": {
+        "enabled": true,
+        "thresholds_conns": ["*localhost"],
+    },
+
+    "attributes": {
+    	"enabled": true,
+    },
+    
+    "sessions": {
+        "enabled": true,
+        "rals_conns": ["*localhost"],
+        "chargers_conns": ["*localhost"],
+        "scheduler_conns": ["*localhost"],
+        "thresholds_conns": ["*localhost"],
+        "stats_conns": ["*localhost"],
+    },
+    
+    "apiers": {
+        "enabled": true,
+    },
+    
+    }
+    

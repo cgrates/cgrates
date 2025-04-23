@@ -1180,6 +1180,8 @@ const (
 	MetaResetThreshold          = "*reset_threshold"
 	MetaResetStatQueue          = "*reset_stat_queue"
 	MetaRemoteSetAccount        = "*remote_set_account"
+	MetaDynamicThreshold        = "*dynamic_threshold"
+	MetaDynamicStats            = "*dynamic_stats"
 	ActionID                    = "ActionID"
 	ActionType                  = "ActionType"
 	ActionValue                 = "ActionValue"
