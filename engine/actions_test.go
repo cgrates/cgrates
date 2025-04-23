@@ -4791,6 +4791,16 @@ func TestActionsTransferBalance(t *testing.T) {
 }
 
 func TestActionsAlterAndDisconnectSessions(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
 	var alterSessionsRequest string
 	var disconnectSessionsRequest string
 	ccMock := &ccMock{
@@ -4915,5 +4925,470 @@ func TestActionsNewActionConnCfgThresholdSNonSessionAction(t *testing.T) {
 	act := newActionConnCfg(utils.ThresholdS, "someOtherAction", Config)
 	if len(act.ConnIDs) != 0 {
 		t.Errorf("Expected ConnIDs length 0, got %d", len(act.ConnIDs))
+	}
+}
+
+func TestDynamicThreshold(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var tpwo *ThresholdProfileWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetThresholdProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if tpwo, canCast = args.(*ThresholdProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expTpwo     *ThresholdProfileWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expTpwo: &ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &ThresholdProfile{
+					Tenant:    "cgrates.org",
+					ID:        "THD_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					MaxHits:   1,
+					MinHits:   1,
+					MinSleep:  1 * time.Second,
+					Blocker:   true,
+					Weight:    10,
+					ActionIDs: []string{"ACT_LOG_WARNING"},
+					Async:     true,
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;THD_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1;1;1s;true;10;ACT_LOG_WARNING;true;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expTpwo: &ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &ThresholdProfile{
+					Tenant:    "cgrates.org",
+					ID:        "THD_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Now(),
+						ExpiryTime:     time.Date(3000, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					MaxHits:   1,
+					MinHits:   1,
+					MinSleep:  1 * time.Second,
+					Blocker:   true,
+					Weight:    10,
+					ActionIDs: []string{"ACT_LOG_WARNING"},
+					Async:     true,
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;THD_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;1;1;1s;true;10;ACT_LOG_WARNING;true;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expTpwo: &ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &ThresholdProfile{
+					Tenant:             "cgrates.org",
+					ID:                 "THD_ACNT_1001",
+					FilterIDs:          nil,
+					ActivationInterval: &utils.ActivationInterval{},
+					MaxHits:            0,
+					MinHits:            0,
+					MinSleep:           0,
+					Blocker:            false,
+					Weight:             0,
+					ActionIDs:          nil,
+					Async:              false,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;THD_ACNT_1001;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;true;",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;;1;",
+			expectedErr: "invalid number of parameters; expected 12",
+		},
+		{
+			name:        "ActivationIntervalLengthFail",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z&&;1;1;1s;false;10;ACT_LOG_WARNING;true;",
+			expectedErr: utils.ErrUnsupportedFormat.Error(),
+		},
+		{
+			name:        "ActivationIntervalBadStringFail",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;bad String;1;1;1s;false;10;ACT_LOG_WARNING;true;",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "ActivationIntervalBadStringFail2",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z&bad String;1;1;1s;false;10;ACT_LOG_WARNING;true;",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "MaxHitsFail",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;BadString;1;1s;false;10;ACT_LOG_WARNING;true;",
+			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "MinHitsFail",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;BadString;1s;false;10;ACT_LOG_WARNING;true;",
+			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "MinSleepFail",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;BadString;false;10;ACT_LOG_WARNING;true;",
+			expectedErr: `time: invalid duration "BadString"`,
+		},
+		{
+			name:        "BlockerFail",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;BadString;10;ACT_LOG_WARNING;true;",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;BadString;ACT_LOG_WARNING;true;",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "AsyncFail",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;BadString;",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;true;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				tpwo = nil
+			})
+			err := dynamicThreshold(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(tpwo, tc.expTpwo) {
+				if i != 1 {
+					t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expTpwo), utils.ToJSON(tpwo))
+				} else {
+					// Get the absolute difference between the times
+					diff := tpwo.ActivationInterval.ActivationTime.Sub(tc.expTpwo.ActivationInterval.ActivationTime)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff <= time.Second {
+						tc.expTpwo.ActivationInterval.ActivationTime = tpwo.ActivationInterval.ActivationTime
+						if !reflect.DeepEqual(tpwo, tc.expTpwo) {
+							t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expTpwo), utils.ToJSON(tpwo))
+						}
+					} else {
+						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expTpwo), utils.ToJSON(tpwo))
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestDynamicStats(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var sqpwo *StatQueueProfileWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetStatQueueProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if sqpwo, canCast = args.(*StatQueueProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expSqpwo    *StatQueueProfileWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expSqpwo: &StatQueueProfileWithAPIOpts{
+				StatQueueProfile: &StatQueueProfile{
+					Tenant:    "cgrates.org",
+					ID:        "Stat_1",
+					FilterIDs: []string{"FLTR_STAT_1"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					QueueLength: 100,
+					TTL:         10 * time.Second,
+					MinItems:    0,
+					Metrics: []*MetricWithFilters{
+						{
+							FilterIDs: []string{"Metric_FLTR"},
+							MetricID:  "*acd",
+						},
+						{
+							FilterIDs: []string{"Metric_FLTR"},
+							MetricID:  "*tcd",
+						},
+						{
+							FilterIDs: []string{"Metric_FLTR"},
+							MetricID:  "*asr",
+						},
+					},
+					Stored:       false,
+					Blocker:      true,
+					Weight:       30,
+					ThresholdIDs: []string{"*none"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expSqpwo: &StatQueueProfileWithAPIOpts{
+				StatQueueProfile: &StatQueueProfile{
+					Tenant:    "cgrates.org",
+					ID:        "Stat_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Now(),
+						ExpiryTime:     time.Date(3000, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					QueueLength: 100,
+					TTL:         10 * time.Second,
+					MinItems:    0,
+					Metrics: []*MetricWithFilters{
+						{
+							FilterIDs: []string{"Metric_FLTR"},
+							MetricID:  "*acd",
+						},
+						{
+							FilterIDs: []string{"Metric_FLTR"},
+							MetricID:  "*tcd",
+						},
+						{
+							FilterIDs: []string{"Metric_FLTR"},
+							MetricID:  "*asr",
+						},
+					},
+					Stored:       false,
+					Blocker:      true,
+					Weight:       30,
+					ThresholdIDs: []string{"*none"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;Stat_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expSqpwo: &StatQueueProfileWithAPIOpts{
+				StatQueueProfile: &StatQueueProfile{
+					Tenant:             "cgrates.org",
+					ID:                 "Stat_1",
+					FilterIDs:          nil,
+					ActivationInterval: &utils.ActivationInterval{},
+					QueueLength:        0,
+					TTL:                0,
+					MinItems:           0,
+					Metrics:            nil,
+					Stored:             false,
+					Blocker:            false,
+					Weight:             0,
+					ThresholdIDs:       nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;Stat_1;;;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;;1;",
+			expectedErr: "invalid number of parameters; expected 12",
+		},
+		{
+			name:        "ActivationIntervalLengthFail",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z&&;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+			expectedErr: utils.ErrUnsupportedFormat.Error(),
+		},
+		{
+			name:        "ActivationIntervalBadStringFail",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;bad String;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "ActivationIntervalBadStringFail2",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z&bad String;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "QueueLengthFail",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;BadString;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "TTLFail",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;100;BadString;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+			expectedErr: `time: invalid duration "BadString"`,
+		},
+		{
+			name:        "MinItemsFail",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;100;10s;BadString;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
+			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "StoredFail",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;BadString;true;30;*none;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "BlockerFail",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;BadString;30;*none;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;BadString;*none;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				sqpwo = nil
+			})
+			err := dynamicStats(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(sqpwo, tc.expSqpwo) {
+				if i != 1 {
+					t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expSqpwo), utils.ToJSON(sqpwo))
+				} else {
+					// Get the absolute difference between the times
+					diff := sqpwo.ActivationInterval.ActivationTime.Sub(tc.expSqpwo.ActivationInterval.ActivationTime)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff <= time.Second {
+						tc.expSqpwo.ActivationInterval.ActivationTime = sqpwo.ActivationInterval.ActivationTime
+						if !reflect.DeepEqual(sqpwo, tc.expSqpwo) {
+							t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expSqpwo), utils.ToJSON(sqpwo))
+						}
+					} else {
+						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expSqpwo), utils.ToJSON(sqpwo))
+					}
+				}
+			}
+		})
 	}
 }

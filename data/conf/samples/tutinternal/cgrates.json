@@ -75,7 +75,9 @@
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1"
+	"store_interval": "-1",
+	"sessions_conns": ["*internal"],
+	"apiers_conns": ["*internal"]
 },
 
 

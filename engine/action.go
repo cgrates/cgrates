@@ -131,6 +131,8 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		switch {
 		case slices.Contains(sessionActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().SessionSConns
+		case utils.MetaDynamicThreshold == action || utils.MetaDynamicStats == action:
+			act.ConnIDs = cfg.ThresholdSCfg().ApierSConns
 		}
 	case utils.RALs:
 		switch {
@@ -181,6 +183,8 @@ func init() {
 	actionFuncMap[utils.MetaResetThreshold] = resetThreshold
 	actionFuncMap[utils.MetaResetStatQueue] = resetStatQueue
 	actionFuncMap[utils.MetaRemoteSetAccount] = remoteSetAccount
+	actionFuncMap[utils.MetaDynamicThreshold] = dynamicThreshold
+	actionFuncMap[utils.MetaDynamicStats] = dynamicStats
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -1432,4 +1436,275 @@ func remoteSetAccount(ub *Account, a *Action, _ Actions, _ *FilterS, _ any, _ Sh
 		*ub = *acc
 	}
 	return
+}
+
+// dynamicThreshold processes the `ExtraParameters` field from the action to construct a Threshold profile
+//
+// The ExtraParameters field format is expected as follows:
+//
+//	 0 Tenant: string
+//	 1 ID: string
+//	 2 FilterIDs: strings separated by "&".
+//	 3 ActivationInterval: strings separated by "&".
+//	 4 MaxHits: integer
+//	 5 MinHits: integer
+//	 6 MinSleep: duration
+//	 7 Blocker: bool, should always be true
+//	 8 Weight: float, should be higher than the threshold weight that triggers this action
+//	 9 ActionIDs: strings separated by "&".
+//	10 Async: bool
+//	11 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 12 {
+		return errors.New("invalid number of parameters; expected 12")
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	thProf := &ThresholdProfileWithAPIOpts{
+		ThresholdProfile: &ThresholdProfile{
+			Tenant:             params[0],
+			ID:                 params[1],
+			ActivationInterval: &utils.ActivationInterval{}, // avoid reaching inside a nil pointer
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Threshold's FilterIDs
+	if params[2] != utils.EmptyString {
+		thProf.FilterIDs = strings.Split(params[2], utils.ANDSep)
+	}
+	// populate Threshold's ActivationInterval
+	aISplit := strings.Split(params[3], utils.ANDSep)
+	if len(aISplit) > 2 {
+		return utils.ErrUnsupportedFormat
+	}
+	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
+		if err := thProf.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
+			return err
+		}
+		if len(aISplit) == 2 {
+			if err := thProf.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+				return err
+			}
+		}
+	}
+	// populate Threshold's MaxHits
+	if params[4] != utils.EmptyString {
+		thProf.MaxHits, err = strconv.Atoi(params[4])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Threshold's MinHits
+	if params[5] != utils.EmptyString {
+		thProf.MinHits, err = strconv.Atoi(params[5])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Threshold's MinSleep
+	if params[6] != utils.EmptyString {
+		thProf.MinSleep, err = time.ParseDuration(params[6])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Threshold's Blocker
+	if params[7] != utils.EmptyString {
+		thProf.Blocker, err = strconv.ParseBool(params[7])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Threshold's Weight
+	if params[8] != utils.EmptyString {
+		thProf.Weight, err = strconv.ParseFloat(params[8], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Threshold's ActionIDs
+	if params[9] != utils.EmptyString {
+		thProf.ActionIDs = strings.Split(params[9], utils.ANDSep)
+	}
+	// populate Threshold's Async bool
+	if params[10] != utils.EmptyString {
+		thProf.Async, err = strconv.ParseBool(params[10])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Threshold's APIOpts
+	if params[11] != utils.EmptyString {
+		if err := parseParamStringToMap(params[11], thProf.APIOpts); err != nil {
+			return err
+		}
+	}
+
+	// create the ThresholdProfile based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetThresholdProfile, thProf, &reply)
+}
+
+// dynamicStats processes the `ExtraParameters` field from the action to construct a StatQueueProfile
+//
+// The ExtraParameters field format is expected as follows:
+//
+//	 0 Tenant: string
+//	 1 ID: string
+//	 2 FilterIDs: strings separated by "&".
+//	 3 ActivationInterval: strings separated by "&".
+//	 4 QueueLength: integer
+//	 5 TTL: duration
+//	 6 MinItems: integer
+//	 7 Metrics: strings separated by "&".
+//	 8 MetricFilterIDs: strings separated by "&".
+//	 9 Stored: bool
+//	10 Blocker: bool
+//	11 Weight: float
+//	12 ThresholdIDs: strings separated by "&".
+//	13 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 14 {
+		return errors.New("invalid number of parameters; expected 12")
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	stQProf := &StatQueueProfileWithAPIOpts{
+		StatQueueProfile: &StatQueueProfile{
+			Tenant:             params[0],
+			ID:                 params[1],
+			ActivationInterval: &utils.ActivationInterval{}, // avoid reaching inside a nil pointer
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Stat's FilterIDs
+	if params[2] != utils.EmptyString {
+		stQProf.FilterIDs = strings.Split(params[2], utils.ANDSep)
+	}
+	// populate Stat's ActivationInterval
+	aISplit := strings.Split(params[3], utils.ANDSep)
+	if len(aISplit) > 2 {
+		return utils.ErrUnsupportedFormat
+	}
+	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
+		if err := stQProf.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
+			return err
+		}
+		if len(aISplit) == 2 {
+			if err := stQProf.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+				return err
+			}
+		}
+	}
+	// populate Stat's QueueLengh
+	if params[4] != utils.EmptyString {
+		stQProf.QueueLength, err = strconv.Atoi(params[4])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Stat's QueueLeTTLngh
+	if params[5] != utils.EmptyString {
+		stQProf.TTL, err = time.ParseDuration(params[5])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Stat's MinItems
+	if params[6] != utils.EmptyString {
+		stQProf.MinItems, err = strconv.Atoi(params[6])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Stat's MetricID
+	if params[7] != utils.EmptyString {
+		metrics := strings.Split(params[7], utils.ANDSep)
+		stQProf.Metrics = make([]*MetricWithFilters, len(metrics))
+		for i, strM := range metrics {
+			stQProf.Metrics[i] = &MetricWithFilters{MetricID: strM}
+		}
+	}
+	// populate Stat's metricFliters
+	if params[8] != utils.EmptyString {
+		metricFliters := strings.Split(params[8], utils.ANDSep)
+		for i := range stQProf.Metrics {
+			stQProf.Metrics[i].FilterIDs = metricFliters
+		}
+	}
+	// populate Stat's Stored bool
+	if params[9] != utils.EmptyString {
+		stQProf.Stored, err = strconv.ParseBool(params[9])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Stat's Blocker
+	if params[10] != utils.EmptyString {
+		stQProf.Blocker, err = strconv.ParseBool(params[10])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Stat's Weight
+	if params[11] != utils.EmptyString {
+		stQProf.Weight, err = strconv.ParseFloat(params[11], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Stat's ThresholdIDs
+	if params[12] != utils.EmptyString {
+		stQProf.ThresholdIDs = strings.Split(params[12], utils.ANDSep)
+	}
+	// populate Stat's APIOpts
+	if params[13] != utils.EmptyString {
+		if err := parseParamStringToMap(params[13], stQProf.APIOpts); err != nil {
+			return err
+		}
+	}
+
+	// create the StatQueueProfile based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetStatQueueProfile, stQProf, &reply)
 }

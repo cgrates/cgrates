@@ -1,0 +1,63 @@
+{
+
+    "general": {
+        "log_level": 7,
+    },
+    
+    
+    "stor_db": {
+        "db_password": "CGRateS.org",
+    },
+    
+    
+    "rals": {
+        "enabled": true,
+    },
+    
+    "schedulers": {
+        "enabled": true,
+        "dynaprepaid_actionplans": ["DYNA_ACC"]
+    },
+    
+    "chargers": {
+        "enabled": true,
+	    "attributes_conns": ["*localhost"],
+    },
+
+    "filters": {			
+	    "stats_conns": ["*localhost"],
+    },
+    
+    "thresholds": {
+        "enabled": true,
+        "sessions_conns": ["*localhost"],
+        "apiers_conns": ["*localhost"],
+    },
+
+    "stats": {
+        "enabled": true,
+        "thresholds_conns": ["*localhost"],
+        "sessions_conns": ["*localhost"],
+    },
+
+    "attributes": {
+    	"enabled": true,
+    },
+    
+    "sessions": {
+        "enabled": true,
+        "attributes_conns": ["*localhost"],
+        "rals_conns": ["*localhost"],
+        "chargers_conns": ["*localhost"],
+        "scheduler_conns": ["*localhost"],
+        "thresholds_conns": ["*localhost"],
+        "stats_conns": ["*localhost"],
+    },
+    
+    "apiers": {
+        "enabled": true,
+        "scheduler_conns": ["*localhost"],
+    },
+    
+    }
+    
