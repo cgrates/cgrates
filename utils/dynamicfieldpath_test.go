@@ -38,10 +38,13 @@ func TestDynamicDataProviderProccesFieldPath(t *testing.T) {
 					{"ID": "ROUTE4"},
 				},
 			},
-			"BestRoute": 0,
+			"AccountField": "Account",
+			"Account":      "1001",
+			"HalfAccount":  "01",
+			"BestRoute":    0,
 		},
 	}
-	newpath, err := processFieldPath("~*cgrep.Stir.<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID;_END>", dp)
+	newpath, err := ProcessFieldPath("~*cgrep.Stir.<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID;_END>", InfieldSep, dp)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,26 +52,50 @@ func TestDynamicDataProviderProccesFieldPath(t *testing.T) {
 	if newpath != expectedPath {
 		t.Errorf("Expected: %q,received %q", expectedPath, newpath)
 	}
-	_, err = processFieldPath("~*cgrep.Stir.<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID;_END", dp)
+	_, err = ProcessFieldPath("~*cgrep.Stir.<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID;_END", InfieldSep, dp)
 	if err != ErrWrongPath {
 		t.Errorf("Expected error %s received %v", ErrWrongPath, err)
 	}
 
-	_, err = processFieldPath("~*cgrep.Stir<CHRG_", dp)
+	_, err = ProcessFieldPath("~*cgrep.Stir<CHRG_", InfieldSep, dp)
 	if err != ErrWrongPath {
 		t.Errorf("Expected error %s received %v", ErrWrongPath, err)
 	}
 
-	_, err = processFieldPath("~*cgrep.Stir<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID2;_END>", dp)
+	_, err = ProcessFieldPath("~*cgrep.Stir<CHRG_;~*cgrep.Routes.SortedRoutes[1].ID2;_END>", InfieldSep, dp)
 	if err != ErrNotFound {
 		t.Errorf("Expected error %s received %v", ErrNotFound, err)
 	}
-	newpath, err = processFieldPath("~*cgrep.Stir[1]", dp)
+	newpath, err = ProcessFieldPath("~*cgrep.Stir[1]", InfieldSep, dp)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if newpath != EmptyString {
 		t.Errorf("Expected: %q,received %q", EmptyString, newpath)
+	}
+	newpath, err = ProcessFieldPath("<*string:~*req.+~*cgrep.AccountField+:10+~*cgrep.HalfAccount+>", "+", dp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedPath = "*string:~*req.Account:1001"
+	if newpath != expectedPath {
+		t.Errorf("Expected: %q,received %q", expectedPath, newpath)
+	}
+	newpath, err = ProcessFieldPath("<*exists:~*req.+~*cgrep.AccountField+>:", "+", dp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedPath = "*exists:~*req.Account:"
+	if newpath != expectedPath {
+		t.Errorf("Expected: %q,received %q", expectedPath, newpath)
+	}
+	newpath, err = ProcessFieldPath("*exists:~*req.Account:", "+", dp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedPath = ""
+	if newpath != expectedPath {
+		t.Errorf("Expected: %q,received %q", expectedPath, newpath)
 	}
 }
 

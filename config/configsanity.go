@@ -629,6 +629,17 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// ThresholdS checks
+	if cfg.thresholdSCfg.Enabled {
+		for _, connID := range cfg.thresholdSCfg.ApierSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.apier.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ApierS, utils.ThresholdS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.ThresholdS, connID)
+			}
+		}
+	}
 	//TrendS checks
 	if cfg.trendsCfg.Enabled {
 		for _, connID := range cfg.trendsCfg.StatSConns {

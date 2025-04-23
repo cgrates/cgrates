@@ -36,6 +36,7 @@ type ThresholdSCfg struct {
 	IndexedSelects      bool
 	StoreInterval       time.Duration // Dump regularly from cache into dataDB
 	SessionSConns       []string
+	ApierSConns         []string
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
@@ -78,6 +79,16 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 			t.SessionSConns[idx] = conn
 			if conn == utils.MetaInternal {
 				t.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			}
+		}
+	}
+	if len(jsnCfg.Apiers_conns) != 0 {
+		t.ApierSConns = make([]string, len(jsnCfg.Apiers_conns))
+		for idx, conn := range jsnCfg.Apiers_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			t.ApierSConns[idx] = conn
+			if conn == utils.MetaInternal {
+				t.ApierSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
 			}
 		}
 	}
@@ -135,6 +146,16 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionConns
 	}
+	if t.ApierSConns != nil {
+		apiersConns := make([]string, len(t.ApierSConns))
+		for i, item := range t.ApierSConns {
+			apiersConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier) {
+				apiersConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.ApierSConnsCfg] = apiersConns
+	}
 	if t.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*t.StringIndexedFields))
 		copy(stringIndexedFields, *t.StringIndexedFields)
@@ -176,6 +197,10 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	if t.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(t.SessionSConns))
 		copy(cln.SessionSConns, t.SessionSConns)
+	}
+	if t.ApierSConns != nil {
+		cln.ApierSConns = make([]string, len(t.ApierSConns))
+		copy(cln.ApierSConns, t.ApierSConns)
 	}
 	if t.StringIndexedFields != nil {
 		idx := make([]string, len(*t.StringIndexedFields))

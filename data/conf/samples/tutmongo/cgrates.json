@@ -82,6 +82,8 @@
 "thresholds": {
 	"enabled": true,
 	"store_interval": "1s",
+	"sessions_conns": ["*localhost"],
+	"apiers_conns": ["*internal"]
 },
 
 
