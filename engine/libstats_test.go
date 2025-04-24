@@ -1523,3 +1523,193 @@ func TestSortQOS(t *testing.T) {
 		t.Errorf("Expected route2 at position 2, got %s", sortedRoutes.Routes[2].RouteID)
 	}
 }
+
+func TestSortLeastCosts(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		ProfileID: "TestProfile",
+		Sorting:   "LeastCost",
+		Routes: []*SortedRoute{
+			{
+				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				SortingData: map[string]any{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param1",
+			},
+			{
+				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 20.0,
+				},
+				SortingData: map[string]any{
+					utils.Cost:   0.1,
+					utils.Weight: 20.0,
+				},
+				RouteParameters: "param2",
+			},
+			{
+				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
+				SortingData: map[string]any{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param3",
+			},
+		},
+	}
+
+	sRoutes.SortLeastCost()
+
+	expectedRoutes := &SortedRoutes{
+		ProfileID: "TestProfile",
+		Sorting:   "LeastCost",
+		Routes: []*SortedRoute{
+			{
+				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
+				SortingData: map[string]any{
+					utils.Cost:   0.05,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param3",
+			},
+			{
+				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 20.0,
+				},
+				SortingData: map[string]any{
+					utils.Cost:   0.1,
+					utils.Weight: 20.0,
+				},
+				RouteParameters: "param2",
+			},
+			{
+				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				SortingData: map[string]any{
+					utils.Cost:   0.1,
+					utils.Weight: 10.0,
+				},
+				RouteParameters: "param1",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(expectedRoutes, sRoutes) {
+		t.Errorf("Expected: %+v, received: %+v", expectedRoutes, sRoutes)
+	}
+
+}
+
+func TestSortResourceDescendent(t *testing.T) {
+	sRoutes := &SortedRoutes{
+		ProfileID: "TestProfile",
+		Sorting:   "ResourceDescendent",
+		Routes: []*SortedRoute{
+			{
+				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.ResourceUsage: 0.5,
+					utils.Weight:        10.0,
+				},
+				SortingData: map[string]any{
+					utils.ResourceUsage: 0.5,
+					utils.Weight:        10.0,
+				},
+				RouteParameters: "param1",
+			},
+			{
+				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.ResourceUsage: 0.5,
+					utils.Weight:        20.0,
+				},
+				SortingData: map[string]any{
+					utils.ResourceUsage: 0.5,
+					utils.Weight:        20.0,
+				},
+				RouteParameters: "param2",
+			},
+			{
+				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.ResourceUsage: 0.8,
+					utils.Weight:        10.0,
+				},
+				SortingData: map[string]any{
+					utils.ResourceUsage: 0.8,
+					utils.Weight:        10.0,
+				},
+				RouteParameters: "param3",
+			},
+		},
+	}
+
+	sRoutes.SortResourceDescendent()
+
+	expectedRoutes := &SortedRoutes{
+		ProfileID: "TestProfile",
+		Sorting:   "ResourceDescendent",
+		Routes: []*SortedRoute{
+			{
+				RouteID: "route3",
+				sortingDataF64: map[string]float64{
+					utils.ResourceUsage: 0.8,
+					utils.Weight:        10.0,
+				},
+				SortingData: map[string]any{
+					utils.ResourceUsage: 0.8,
+					utils.Weight:        10.0,
+				},
+				RouteParameters: "param3",
+			},
+			{
+				RouteID: "route2",
+				sortingDataF64: map[string]float64{
+					utils.ResourceUsage: 0.5,
+					utils.Weight:        20.0,
+				},
+				SortingData: map[string]any{
+					utils.ResourceUsage: 0.5,
+					utils.Weight:        20.0,
+				},
+				RouteParameters: "param2",
+			},
+			{
+				RouteID: "route1",
+				sortingDataF64: map[string]float64{
+					utils.ResourceUsage: 0.5,
+					utils.Weight:        10.0,
+				},
+				SortingData: map[string]any{
+					utils.ResourceUsage: 0.5,
+					utils.Weight:        10.0,
+				},
+				RouteParameters: "param1",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(expectedRoutes, sRoutes) {
+		t.Errorf("Expected: %+v, received: %+v", expectedRoutes, sRoutes)
+	}
+
+}

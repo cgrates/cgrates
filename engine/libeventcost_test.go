@@ -1709,3 +1709,63 @@ func TestFieldsAsInterfaces(t *testing.T) {
 		})
 	}
 }
+
+func TestChargingIntervalTotalUsages(t *testing.T) {
+	cIl := &ChargingInterval{
+		RatingID: "RtID1",
+		Increments: []*ChargingIncrement{
+			{
+				Usage:          2 * time.Second,
+				Cost:           0.2,
+				AccountingID:   "AccID1",
+				CompressFactor: 1,
+			},
+			{
+				Usage:          3 * time.Second,
+				Cost:           0.3,
+				AccountingID:   "AccID2",
+				CompressFactor: 1,
+			},
+		},
+		CompressFactor: 2,
+		usage:          nil,
+	}
+
+	expected := 10 * time.Second
+
+	result := cIl.TotalUsage()
+
+	if result == nil {
+		t.Errorf("Expected %v, but got nil", expected)
+	} else if *result != expected {
+		t.Errorf("Expected %v, but got %v", expected, *result)
+	}
+
+	manualUsage := 7 * time.Second
+	cIl.usage = &manualUsage
+
+	expected2 := 14 * time.Second
+	result2 := cIl.TotalUsage()
+
+	if result2 == nil {
+		t.Errorf("Expected %v, but got nil", expected2)
+	} else if *result2 != expected2 {
+		t.Errorf("Expected %v, but got %v", expected2, *result2)
+	}
+
+	zeroUsage := time.Duration(0)
+	cIl4 := &ChargingInterval{
+		RatingID:       "RtID3",
+		CompressFactor: 5,
+		usage:          &zeroUsage,
+	}
+
+	expected4 := time.Duration(0)
+	result3 := cIl4.TotalUsage()
+
+	if result3 == nil {
+		t.Errorf("Expected %v, but got nil", expected4)
+	} else if *result3 != expected4 {
+		t.Errorf("Expected %v, but got %v", expected4, *result3)
+	}
+}
