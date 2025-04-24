@@ -22,6 +22,7 @@ import (
 	"math"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -1810,6 +1811,85 @@ func TestStripConverterConvert(t *testing.T) {
 			}
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("Convert() error = %v, want %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+func TestGigaWordsConverter(t *testing.T) {
+	converter := GigawordsConverter{}
+	multiplier := int64(4294967296)
+	testCases := []struct {
+		name          string
+		input         any
+		expectedValue int64
+		expectError   bool
+		errorContains string
+	}{
+		{
+			name:          "Input Zero (int)",
+			input:         int(0),
+			expectedValue: 0,
+			expectError:   false,
+		},
+		{
+			name:          "Input Zero (int32)",
+			input:         int32(0),
+			expectedValue: 0,
+			expectError:   false,
+		},
+		{
+			name:          "Input One (int)",
+			input:         int(1),
+			expectedValue: multiplier,
+			expectError:   false,
+		},
+		{
+			name:          "Input Two (int64)",
+			input:         int64(2),
+			expectedValue: 2 * multiplier,
+			expectError:   false,
+		},
+		{
+			name:          "Input Three (string)",
+			input:         "3",
+			expectedValue: 3 * multiplier,
+			expectError:   false,
+		},
+		{
+			name:          "Input Nil",
+			input:         nil,
+			expectedValue: 0,
+			expectError:   true,
+			errorContains: "cannot convert",
+		},
+		{
+			name:          "Input Invalid String",
+			input:         "abc",
+			expectedValue: 0,
+			expectError:   true,
+			errorContains: "strconv.ParseInt: parsing \"abc\": invalid syntax",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			output, err := converter.Convert(tc.input)
+			if tc.expectError {
+				if err == nil || !strings.Contains(err.Error(), tc.errorContains) {
+					t.Errorf("Expected error '%s', but got '%v'", tc.errorContains, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Expected no error, but got: %v", err)
+			}
+
+			outputInt64, ok := output.(int64)
+			if !ok {
+				t.Fatalf("Expected output type int64, but got %T (%v)", output, output)
+			}
+			if outputInt64 != tc.expectedValue {
+				t.Errorf("Expected output %d, but got %d", tc.expectedValue, outputInt64)
 			}
 		})
 	}
