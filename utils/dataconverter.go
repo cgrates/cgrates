@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"math/rand"
 	"net"
 	"net/url"
@@ -129,6 +130,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return NewRandomConverter(params[len(MetaRandom)+1:])
 	case strings.HasPrefix(params, MetaStrip):
 		return NewStripConverter(params)
+	case strings.HasPrefix(params, MetaGigawords):
+		return new(GigawordsConverter), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -786,4 +789,16 @@ func (URLEncodeConverter) Convert(in any) (any, error) {
 		parsedURL.RawQuery = parsedURL.Query().Encode()
 	}
 	return parsedURL.String(), nil
+}
+
+// GigawordsConverter converts a value in Gigawords to octects
+type GigawordsConverter struct{}
+
+func (GigawordsConverter) Convert(in any) (any, error) {
+	gigawordsValue, err := IfaceAsInt64(in)
+	if err != nil {
+		return nil, err
+	}
+	totalOctects := (gigawordsValue * int64(math.Pow(2, 32))) // 2^32
+	return totalOctects, nil
 }
