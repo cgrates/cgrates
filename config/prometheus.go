@@ -63,7 +63,7 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 		c.CollectProcessMetrics = *jc.CollectProcessMetrics
 	}
 	if jc.CoreSConns != nil {
-		c.CoreSConns = tagInternalConns(*jc.CoreSConns, utils.MetaStats)
+		c.CoreSConns = tagInternalConns(*jc.CoreSConns, utils.MetaCore)
 	}
 	if jc.StatSConns != nil {
 		c.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
