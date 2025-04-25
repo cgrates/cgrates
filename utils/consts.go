@@ -845,7 +845,6 @@ const (
 	MetaDynaprepaid         = "*dynaprepaid"
 	MetaFD                  = "*fd"
 	SortingData             = "SortingData"
-	Count                   = "Count"
 	ProfileID               = "ProfileID"
 	SortedRoutes            = "SortedRoutes"
 	MetaMonthly             = "*monthly"
@@ -972,22 +971,72 @@ const (
 	DNSData               = "Data"
 )
 
-// CoreSv1.Status metrics
+// CoreS metric constants
 const (
+
+	// condensed result fields
 	PID            = "pid"
 	NodeID         = "node_id"
 	GoVersion      = "go_version"
-	VersionLower   = "version"
-	Goroutines     = "goroutines"
 	OSThreadsInUse = "os_threads_in_use"
-	CAPSAllocated  = "caps_allocated"
-	CAPSPeak       = "caps_peak"
 	RunningSince   = "running_since"
 	OpenFiles      = "open_files"
-	CPUTime        = "cpu_time"
 	ActiveMemory   = "active_memory"
 	SystemMemory   = "system_memory"
-	ResidentMemory = "resident_memory"
+
+	FieldVersion         = "version"
+	FieldMemStats        = "mem_stats"
+	FieldGCDurationStats = "gc_duration_stats"
+	FieldProcStats       = "proc_stats"
+	FieldCapsStats       = "caps_stats"
+
+	MetricRuntimeGoroutines = "goroutines"
+	MetricRuntimeThreads    = "threads"
+	MetricRuntimeMaxProcs   = "maxprocs"
+
+	MetricMemAlloc        = "alloc"
+	MetricMemTotalAlloc   = "total_alloc"
+	MetricMemSys          = "sys"
+	MetricMemMallocs      = "mallocs"
+	MetricMemFrees        = "frees"
+	MetricMemHeapAlloc    = "heap_alloc"
+	MetricMemHeapSys      = "heap_sys"
+	MetricMemHeapIdle     = "heap_idle"
+	MetricMemHeapInuse    = "heap_inuse"
+	MetricMemHeapReleased = "heap_released"
+	MetricMemHeapObjects  = "heap_objects"
+	MetricMemStackInuse   = "stack_inuse"
+	MetricMemStackSys     = "stack_sys"
+	MetricMemMSpanSys     = "mspan_sys"
+	MetricMemMSpanInuse   = "mspan_inuse"
+	MetricMemMCacheInuse  = "mcache_inuse"
+	MetricMemMCacheSys    = "mcache_sys"
+	MetricMemBuckHashSys  = "buckhash_sys"
+	MetricMemGCSys        = "gc_sys"
+	MetricMemOtherSys     = "other_sys"
+	MetricMemNextGC       = "next_gc"
+	MetricMemLastGC       = "last_gc"
+	MetricMemLimit        = "mem_limit"
+
+	MetricProcCPUTime              = "cpu_time"
+	MetricProcMaxFDs               = "max_fds"
+	MetricProcOpenFDs              = "open_fds"
+	MetricProcResidentMemory       = "resident_memory"
+	MetricProcStartTime            = "start_time"
+	MetricProcVirtualMemory        = "virtual_memory"
+	MetricProcMaxVirtualMemory     = "max_virtual_memory"
+	MetricProcNetworkReceiveTotal  = "network_receive_total"
+	MetricProcNetworkTransmitTotal = "network_transmit_total"
+
+	MetricGCQuantiles = "quantiles"
+	MetricGCQuantile  = "quantile"
+	MetricGCValue     = "value"
+	MetricGCSum       = "sum"
+	MetricGCCount     = "count"
+	MetricGCPercent   = "gc_percent"
+
+	MetricCapsAllocated = "caps_allocated"
+	MetricCapsPeak      = "caps_peak"
 )
 
 // Migrator Action

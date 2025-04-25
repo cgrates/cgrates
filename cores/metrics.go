@@ -31,6 +31,7 @@ import (
 	"github.com/prometheus/procfs"
 )
 
+// Runtime metrics paths
 const (
 	metricPathGoMaxProcs  = "/sched/gomaxprocs:threads"
 	metricPathGoGCPercent = "/gc/gogc:percent"
@@ -45,19 +46,21 @@ const (
 // different connection types (direct *internal calls vs serialized RPC
 // connections) while aligning with Prometheus' float64-based metric system.
 type StatusMetrics struct {
-	PID             float64         `json:"pid"`
-	GoVersion       string          `json:"go_version"`
-	NodeID          string          `json:"node_id"`
-	Version         string          `json:"version"`
-	Goroutines      float64         `json:"goroutines"`
-	Threads         float64         `json:"threads"`
+	PID        float64 `json:"pid"`
+	GoVersion  string  `json:"go_version"`
+	NodeID     string  `json:"node_id"`
+	Version    string  `json:"version"`
+	Goroutines float64 `json:"goroutines"`
+	Threads    float64 `json:"threads"`
+
 	MemStats        GoMemStats      `json:"mem_stats"`
 	GCDurationStats GCDurationStats `json:"gc_duration_stats"`
 	ProcStats       ProcStats       `json:"proc_stats"`
 	CapsStats       *CapsStats      `json:"caps_stats"`
-	GoMaxProcs      float64         `json:"go_maxprocs"`
-	GoGCPercent     float64         `json:"go_gc_percent"`
-	GoMemLimit      float64         `json:"go_mem_limit"`
+
+	MaxProcs  float64 `json:"maxprocs"`
+	GCPercent float64 `json:"gc_percent"`
+	MemLimit  float64 `json:"mem_limit"`
 }
 
 // toMap converts the StatusMetrics to a map[string]any with all fields.
@@ -67,19 +70,19 @@ func (sm StatusMetrics) toMap(debug bool, timezone string) (map[string]any, erro
 		return sm.toMapCondensed(timezone)
 	}
 	m := map[string]any{
-		"pid":               sm.PID,
-		"go_version":        sm.GoVersion,
-		"node_id":           sm.NodeID,
-		"version":           sm.Version,
-		"goroutines":        sm.Goroutines,
-		"threads":           sm.Threads,
-		"mem_stats":         sm.MemStats.toMap(),
-		"gc_duration_stats": sm.GCDurationStats.toMap(),
-		"proc_stats":        sm.ProcStats.toMap(),
-		"go_maxprocs":       sm.GoMaxProcs,
-		"go_gc_percent":     sm.GoGCPercent,
-		"go_mem_limit":      sm.GoMemLimit,
-		"caps_stats":        sm.CapsStats.toMap(),
+		utils.PID:                     sm.PID,
+		utils.GoVersion:               sm.GoVersion,
+		utils.NodeID:                  sm.NodeID,
+		utils.FieldVersion:            sm.Version,
+		utils.MetricRuntimeGoroutines: sm.Goroutines,
+		utils.MetricRuntimeThreads:    sm.Threads,
+		utils.FieldMemStats:           sm.MemStats.toMap(),
+		utils.FieldGCDurationStats:    sm.GCDurationStats.toMap(),
+		utils.FieldProcStats:          sm.ProcStats.toMap(),
+		utils.MetricRuntimeMaxProcs:   sm.MaxProcs,
+		utils.MetricGCPercent:         sm.GCPercent,
+		utils.MetricMemLimit:          sm.MemLimit,
+		utils.FieldCapsStats:          sm.CapsStats.toMap(),
 	}
 	return m, nil
 }
@@ -88,16 +91,16 @@ func (sm StatusMetrics) toMap(debug bool, timezone string) (map[string]any, erro
 // human-readable values.
 func (sm StatusMetrics) toMapCondensed(timezone string) (map[string]any, error) {
 	m := map[string]any{
-		utils.PID:            sm.PID,
-		utils.GoVersion:      sm.GoVersion,
-		utils.NodeID:         sm.NodeID,
-		utils.VersionLower:   sm.Version,
-		utils.Goroutines:     sm.Goroutines,
-		utils.OpenFiles:      sm.ProcStats.OpenFDs,
-		utils.ResidentMemory: utils.SizeFmt(sm.ProcStats.ResidentMemory, ""),
-		utils.ActiveMemory:   utils.SizeFmt(sm.MemStats.HeapAlloc, ""),
-		utils.SystemMemory:   utils.SizeFmt(sm.MemStats.Sys, ""),
-		utils.OSThreadsInUse: sm.Threads,
+		utils.PID:                      sm.PID,
+		utils.GoVersion:                sm.GoVersion,
+		utils.NodeID:                   sm.NodeID,
+		utils.FieldVersion:             sm.Version,
+		utils.MetricRuntimeGoroutines:  sm.Goroutines,
+		utils.OpenFiles:                sm.ProcStats.OpenFDs,
+		utils.MetricProcResidentMemory: utils.SizeFmt(sm.ProcStats.ResidentMemory, ""),
+		utils.ActiveMemory:             utils.SizeFmt(sm.MemStats.HeapAlloc, ""),
+		utils.SystemMemory:             utils.SizeFmt(sm.MemStats.Sys, ""),
+		utils.OSThreadsInUse:           sm.Threads,
 	}
 
 	startTime, err := utils.ParseTimeDetectLayout(strconv.Itoa(int(sm.ProcStats.StartTime)), timezone)
@@ -111,12 +114,12 @@ func (sm StatusMetrics) toMapCondensed(timezone string) (map[string]any, error) 
 	if err != nil {
 		return nil, err
 	}
-	m[utils.CPUTime] = dur.String()
+	m[utils.MetricProcCPUTime] = dur.String()
 
 	if sm.CapsStats != nil {
-		m[utils.CAPSAllocated] = sm.CapsStats.Allocated
+		m[utils.MetricCapsAllocated] = sm.CapsStats.Allocated
 		if sm.CapsStats.Peak != nil {
-			m[utils.CAPSPeak] = *sm.CapsStats.Peak
+			m[utils.MetricCapsPeak] = *sm.CapsStats.Peak
 		}
 	}
 	return m, nil
@@ -149,28 +152,28 @@ type GoMemStats struct {
 
 func (ms GoMemStats) toMap() map[string]any {
 	return map[string]any{
-		"alloc":         ms.Alloc,
-		"total_alloc":   ms.TotalAlloc,
-		"sys":           ms.Sys,
-		"mallocs":       ms.Mallocs,
-		"frees":         ms.Frees,
-		"heap_alloc":    ms.HeapAlloc,
-		"heap_sys":      ms.HeapSys,
-		"heap_idle":     ms.HeapIdle,
-		"heap_inuse":    ms.HeapInuse,
-		"heap_released": ms.HeapReleased,
-		"heap_objects":  ms.HeapObjects,
-		"stack_inuse":   ms.StackInuse,
-		"stack_sys":     ms.StackSys,
-		"mspan_sys":     ms.MSpanSys,
-		"mspan_inuse":   ms.MSpanInuse,
-		"mcache_inuse":  ms.MCacheInuse,
-		"mcache_sys":    ms.MCacheSys,
-		"buckhash_sys":  ms.BuckHashSys,
-		"gc_sys":        ms.GCSys,
-		"other_sys":     ms.OtherSys,
-		"next_gc":       ms.NextGC,
-		"last_gc":       ms.LastGC,
+		utils.MetricMemAlloc:        ms.Alloc,
+		utils.MetricMemTotalAlloc:   ms.TotalAlloc,
+		utils.MetricMemSys:          ms.Sys,
+		utils.MetricMemMallocs:      ms.Mallocs,
+		utils.MetricMemFrees:        ms.Frees,
+		utils.MetricMemHeapAlloc:    ms.HeapAlloc,
+		utils.MetricMemHeapSys:      ms.HeapSys,
+		utils.MetricMemHeapIdle:     ms.HeapIdle,
+		utils.MetricMemHeapInuse:    ms.HeapInuse,
+		utils.MetricMemHeapReleased: ms.HeapReleased,
+		utils.MetricMemHeapObjects:  ms.HeapObjects,
+		utils.MetricMemStackInuse:   ms.StackInuse,
+		utils.MetricMemStackSys:     ms.StackSys,
+		utils.MetricMemMSpanSys:     ms.MSpanSys,
+		utils.MetricMemMSpanInuse:   ms.MSpanInuse,
+		utils.MetricMemMCacheInuse:  ms.MCacheInuse,
+		utils.MetricMemMCacheSys:    ms.MCacheSys,
+		utils.MetricMemBuckHashSys:  ms.BuckHashSys,
+		utils.MetricMemGCSys:        ms.GCSys,
+		utils.MetricMemOtherSys:     ms.OtherSys,
+		utils.MetricMemNextGC:       ms.NextGC,
+		utils.MetricMemLastGC:       ms.LastGC,
 	}
 }
 
@@ -182,9 +185,9 @@ type GCDurationStats struct {
 
 func (s GCDurationStats) toMap() map[string]any {
 	return map[string]any{
-		"quantiles": s.Quantiles,
-		"sum":       s.Sum,
-		"count":     s.Count,
+		utils.MetricGCQuantiles: s.Quantiles,
+		utils.MetricGCSum:       s.Sum,
+		utils.MetricGCCount:     s.Count,
 	}
 }
 
@@ -207,15 +210,15 @@ type ProcStats struct {
 
 func (ps ProcStats) toMap() map[string]any {
 	return map[string]any{
-		"cpu_time":               ps.CPUTime,
-		"max_fds":                ps.MaxFDs,
-		"open_fds":               ps.OpenFDs,
-		"resident_memory":        ps.ResidentMemory,
-		"start_time":             ps.StartTime,
-		"virtual_memory":         ps.VirtualMemory,
-		"max_virtual_memory":     ps.MaxVirtualMemory,
-		"network_receive_total":  ps.NetworkReceiveTotal,
-		"network_transmit_total": ps.NetworkTransmitTotal,
+		utils.MetricProcCPUTime:              ps.CPUTime,
+		utils.MetricProcMaxFDs:               ps.MaxFDs,
+		utils.MetricProcOpenFDs:              ps.OpenFDs,
+		utils.MetricProcResidentMemory:       ps.ResidentMemory,
+		utils.MetricProcStartTime:            ps.StartTime,
+		utils.MetricProcVirtualMemory:        ps.VirtualMemory,
+		utils.MetricProcMaxVirtualMemory:     ps.MaxVirtualMemory,
+		utils.MetricProcNetworkReceiveTotal:  ps.NetworkReceiveTotal,
+		utils.MetricProcNetworkTransmitTotal: ps.NetworkTransmitTotal,
 	}
 }
 
@@ -229,11 +232,13 @@ func (cs *CapsStats) toMap() map[string]any {
 		return nil
 	}
 	return map[string]any{
-		"allocated": cs.Allocated,
-		"peak":      cs.Peak,
+		utils.MetricCapsAllocated: cs.Allocated,
+		utils.MetricCapsPeak:      cs.Peak,
 	}
 }
 
+// computeAppMetrics gathers runtime metrics including memory usage, goroutines,
+// GC stats, and process information for monitoring and diagnostics.
 func computeAppMetrics() (StatusMetrics, error) {
 	vers, err := utils.GetCGRVersion()
 	if err != nil {
@@ -364,9 +369,9 @@ func computeAppMetrics() (StatusMetrics, error) {
 		MemStats:        memStats,
 		GCDurationStats: gcDur,
 		ProcStats:       procStats,
-		GoMaxProcs:      float64(goMaxProcs),
-		GoGCPercent:     float64(goGCPercent),
-		GoMemLimit:      float64(goMemLimit),
+		MaxProcs:        float64(goMaxProcs),
+		GCPercent:       float64(goGCPercent),
+		MemLimit:        float64(goMemLimit),
 	}, nil
 }
 

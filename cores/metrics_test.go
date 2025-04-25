@@ -68,9 +68,9 @@ func TestStatusMetricsToMap(t *testing.T) {
 		GCDurationStats: gcDurationStats,
 		ProcStats:       procStats,
 		CapsStats:       capsStats,
-		GoMaxProcs:      3,
-		GoGCPercent:     100,
-		GoMemLimit:      5555,
+		MaxProcs:        3,
+		GCPercent:       100,
+		MemLimit:        5555,
 	}
 
 	result, err := sm.toMap(true, "UTC")
@@ -78,19 +78,19 @@ func TestStatusMetricsToMap(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 	expected := map[string]any{
-		"pid":               1234.,
-		"go_version":        "go1.16",
-		"node_id":           "node123",
-		"version":           "v1.0.0",
-		"goroutines":        10.,
-		"threads":           5.,
-		"mem_stats":         memStats.toMap(),
-		"gc_duration_stats": gcDurationStats.toMap(),
-		"proc_stats":        procStats.toMap(),
-		"caps_stats":        capsStats.toMap(),
-		"go_maxprocs":       3.,
-		"go_gc_percent":     100.,
-		"go_mem_limit":      5555.,
+		utils.PID:                     1234.,
+		utils.GoVersion:               "go1.16",
+		utils.NodeID:                  "node123",
+		utils.FieldVersion:            "v1.0.0",
+		utils.MetricRuntimeGoroutines: 10.,
+		utils.MetricRuntimeThreads:    5.,
+		utils.FieldMemStats:           memStats.toMap(),
+		utils.FieldGCDurationStats:    gcDurationStats.toMap(),
+		utils.FieldProcStats:          procStats.toMap(),
+		utils.FieldCapsStats:          capsStats.toMap(),
+		utils.MetricRuntimeMaxProcs:   3.,
+		utils.MetricGCPercent:         100.,
+		utils.MetricMemLimit:          5555.,
 	}
 
 	if !reflect.DeepEqual(result, expected) {
