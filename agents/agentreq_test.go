@@ -2764,3 +2764,203 @@ func TestAgentRequestParseFieldDateTimeError2(t *testing.T) {
 		t.Errorf("Expected <%+v> but received <%+v>", expected, err)
 	}
 }
+
+func TestGigawordsCalculateTotalOctets(t *testing.T) {
+	var gigawordMultiplier int64 = 4294967296
+	configTemplate := `
+{
+    "diameter_agent": {
+        "request_processors": [
+            {
+                "id": "test_proc",
+                "filters": [],
+                "flags": [],
+                "request_fields": [
+                    %s
+                ]
+            }
+        ]
+    }
+}`
+
+	inputFieldConfig := `{
+        "tag": "TotalUsageInput",
+        "path": "*cgreq.TotalUsageInput",
+        "type": "*sum",
+        "value": "~*req.Acct-Input-Gigawords{*gigawords};~*req.Acct-Input-Octets"
+    }`
+	outputFieldConfig := `{
+        "tag": "TotalUsageOutput",
+        "path": "*cgreq.TotalUsageOutput",
+        "type": "*sum",
+        "value": "~*req.Acct-Output-Gigawords{*gigawords};~*req.Acct-Output-Octets"
+    }`
+
+	testCases := []struct {
+		name          string
+		fieldConfig   string
+		inputDP       utils.MapStorage
+		expectedValue int64
+		expectErr     bool
+		err           error
+	}{
+
+		{
+			name:        "Input: Zero GW, Zero Octets",
+			fieldConfig: inputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Input-Gigawords": 0,
+				"Acct-Input-Octets":    0,
+			},
+			expectedValue: 0,
+		},
+		{
+			name:        "Input: Zero GW, Some Octets",
+			fieldConfig: inputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Input-Gigawords": 0,
+				"Acct-Input-Octets":    12345,
+			},
+			expectedValue: 12345,
+		},
+		{
+			name:        "Input: Some GW (2), Zero Octets",
+			fieldConfig: inputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Input-Gigawords": 2,
+				"Acct-Input-Octets":    0,
+			},
+			expectedValue: 2 * gigawordMultiplier,
+		},
+		{
+			name:        "Input: Some GW (3), Some Octets (1000)",
+			fieldConfig: inputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Input-Gigawords": 3,
+				"Acct-Input-Octets":    1000,
+			},
+			expectedValue: (3 * gigawordMultiplier) + 1000,
+		},
+		{
+			name:        "Input: Missing GW, Some Octets",
+			fieldConfig: inputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Input-Octets": 50000,
+			},
+			expectedValue: 0,
+			expectErr:     true,
+			err:           utils.ErrNotFound,
+		},
+		{
+			name:        "Input: Some GW, Missing Octets",
+			fieldConfig: inputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Input-Gigawords": 1,
+			},
+			expectErr: true,
+			err:       utils.ErrNotFound,
+		},
+		{
+			name:          "Input: Both GW and Octets Missing",
+			fieldConfig:   inputFieldConfig,
+			inputDP:       utils.MapStorage{},
+			expectedValue: 0,
+			expectErr:     true,
+			err:           utils.ErrNotFound,
+		},
+		{
+			name:        "Input: GW as String '2', Octets as String '333'",
+			fieldConfig: inputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Input-Gigawords": "2",
+				"Acct-Input-Octets":    "333",
+			},
+			expectedValue: (2 * gigawordMultiplier) + 333,
+		},
+
+		{
+			name:        "Output: Zero GW, Zero Octets",
+			fieldConfig: outputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Output-Gigawords": 0,
+				"Acct-Output-Octets":    0,
+			},
+			expectedValue: 0,
+		},
+		{
+			name:        "Output: Zero GW, Some Octets",
+			fieldConfig: outputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Output-Gigawords": 0,
+				"Acct-Output-Octets":    98765,
+			},
+			expectedValue: 98765,
+		},
+		{
+			name:        "Output: Some GW (1), Zero Octets",
+			fieldConfig: outputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Output-Gigawords": 1,
+				"Acct-Output-Octets":    0,
+			},
+			expectedValue: 1 * gigawordMultiplier,
+		},
+		{
+			name:        "Output: Some GW (4), Some Octets (20000)",
+			fieldConfig: outputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Output-Gigawords": 4,
+				"Acct-Output-Octets":    20000,
+			},
+			expectedValue: (4 * gigawordMultiplier) + 20000,
+		},
+		{
+			name:        "Output: Missing GW, Some Octets",
+			fieldConfig: outputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Output-Octets": 777,
+			},
+			expectedValue: 0,
+			expectErr:     true,
+			err:           utils.ErrNotFound,
+		},
+		{
+			name:        "Output: Some GW, Missing Octets",
+			fieldConfig: outputFieldConfig,
+			inputDP: utils.MapStorage{
+				"Acct-Output-Gigawords": 2,
+			},
+			expectErr: true,
+			err:       utils.ErrNotFound,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fullConf := fmt.Sprintf(configTemplate, tc.fieldConfig)
+			cgrconf, err := config.NewCGRConfigFromJSONStringWithDefaults(fullConf)
+			if err != nil {
+				t.Fatalf("Config parsing failed: %v", err)
+			}
+			agReq := NewAgentRequest(tc.inputDP, nil, nil, nil, nil, nil, "cgrates.org", "", nil, nil)
+			fieldDef := cgrconf.DiameterAgentCfg().RequestProcessors[0].RequestFields[0]
+			out, err := agReq.ParseField(fieldDef)
+			if tc.expectErr {
+				if err == nil || err.Error() != tc.err.Error() {
+					t.Fatalf("Expected error <%v>, but got <%v>", tc.err, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("ParseField failed unexpectedly: %v", err)
+			}
+			resultInt64, ok := out.(int64)
+			if !ok {
+				t.Fatal("ParseField result type is not int64")
+			} else {
+				if resultInt64 != tc.expectedValue {
+					t.Errorf("Expected result %d, but got %d", tc.expectedValue, resultInt64)
+				}
+			}
+		})
+	}
+}

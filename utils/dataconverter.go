@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"math/rand"
 	"net"
 	"reflect"
@@ -141,6 +142,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return splitConverter(params[len(MetaSplit)+1:]), nil
 	case strings.HasPrefix(params, MetaStrip):
 		return NewStripConverter(params)
+	case strings.HasPrefix(params, MetaGigawords):
+		return new(GigawordsConverter), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -822,4 +825,16 @@ func (sc StripConverter) Convert(in any) (any, error) {
 	default:
 		return EmptyString, errors.New("strip converter: invalid side parameter")
 	}
+}
+
+// GigawordsConverter converts a value in Gigawords to octects
+type GigawordsConverter struct{}
+
+func (GigawordsConverter) Convert(in any) (any, error) {
+	gigawordsValue, err := IfaceAsInt64(in)
+	if err != nil {
+		return nil, err
+	}
+	totalOctects := (gigawordsValue * int64(math.Pow(2, 32))) // 2^32
+	return totalOctects, nil
 }
