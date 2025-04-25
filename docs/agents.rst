@@ -21,3 +21,4 @@ Following *Agents* are implemented within CGRateS:
    kamagent
    ers
    janusagent
+   prometheus
