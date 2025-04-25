@@ -320,7 +320,12 @@ func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			if s, ok := gcStats["sum"].(float64); ok {
 				sum = s
 			}
-			if quantiles, ok := gcStats["quantiles"].([]any); ok {
+
+			// Handle different types that may be returned based on connection type:
+			// - []any: from serialized RPC connections where type information is lost
+			// - []cores.Quantile: from direct (*internal) calls where type is preserved
+			switch quantiles := gcStats["quantiles"].(type) {
+			case []any:
 				for _, q := range quantiles {
 					if qMap, ok := q.(map[string]any); ok {
 						if quantile, ok := qMap["quantile"].(float64); ok {
@@ -330,7 +335,12 @@ func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 						}
 					}
 				}
+			case []cores.Quantile:
+				for _, q := range quantiles {
+					quantileValues[q.Quantile] = q.Value
+				}
 			}
+
 			ch <- prometheus.MustNewConstSummary(
 				c.descs["go_gc_duration_seconds"],
 				count,
