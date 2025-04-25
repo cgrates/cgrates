@@ -31,64 +31,80 @@ import (
 	"github.com/prometheus/procfs"
 )
 
+const (
+	metricPathGoMaxProcs  = "/sched/gomaxprocs:threads"
+	metricPathGoGCPercent = "/gc/gogc:percent"
+	metricPathGoMemLimit  = "/gc/gomemlimit:bytes"
+)
+
+// StatusMetrics contains runtime metrics, including process information,
+// memory usage, garbage collection stats, and other operational metrics. It's
+// used for monitoring and diagnostics via APIs and Prometheus.
+//
+// NOTE: All numeric values use float64 for consistent representation across
+// different connection types (direct *internal calls vs serialized RPC
+// connections) while aligning with Prometheus' float64-based metric system.
 type StatusMetrics struct {
-	PID             int             `json:"pid"`
+	PID             float64         `json:"pid"`
 	GoVersion       string          `json:"go_version"`
 	NodeID          string          `json:"node_id"`
 	Version         string          `json:"version"`
-	Goroutines      int             `json:"goroutines"`
-	Threads         int             `json:"threads"`
+	Goroutines      float64         `json:"goroutines"`
+	Threads         float64         `json:"threads"`
 	MemStats        GoMemStats      `json:"mem_stats"`
 	GCDurationStats GCDurationStats `json:"gc_duration_stats"`
 	ProcStats       ProcStats       `json:"proc_stats"`
 	CapsStats       *CapsStats      `json:"caps_stats"`
-	GoMaxProcs      uint64          `json:"go_maxprocs"`
-	GoGCPercent     uint64          `json:"go_gc_percent"`
-	GoMemLimit      uint64          `json:"go_mem_limit"`
+	GoMaxProcs      float64         `json:"go_maxprocs"`
+	GoGCPercent     float64         `json:"go_gc_percent"`
+	GoMemLimit      float64         `json:"go_mem_limit"`
 }
 
-func (sm StatusMetrics) ToMap(debug bool, timezone string) (map[string]any, error) {
+// toMap converts the StatusMetrics to a map[string]any with all fields.
+// When debug is false, it calls toMapCondensed to return a simplified view.
+func (sm StatusMetrics) toMap(debug bool, timezone string) (map[string]any, error) {
 	if !debug {
-		return sm.ToMapCondensed(timezone)
+		return sm.toMapCondensed(timezone)
 	}
-	m := make(map[string]any)
-	m["pid"] = sm.PID
-	m["go_version"] = sm.GoVersion
-	m["node_id"] = sm.NodeID
-	m["version"] = sm.Version
-	m["goroutines"] = sm.Goroutines
-	m["threads"] = sm.Threads
-	m["mem_stats"] = sm.MemStats.ToMap()
-	m["gc_duration_stats"] = sm.GCDurationStats.ToMap()
-	m["proc_stats"] = sm.ProcStats.ToMap()
-	if sm.CapsStats != nil {
-		m["caps_stats"] = sm.CapsStats.ToMap()
+	m := map[string]any{
+		"pid":               sm.PID,
+		"go_version":        sm.GoVersion,
+		"node_id":           sm.NodeID,
+		"version":           sm.Version,
+		"goroutines":        sm.Goroutines,
+		"threads":           sm.Threads,
+		"mem_stats":         sm.MemStats.toMap(),
+		"gc_duration_stats": sm.GCDurationStats.toMap(),
+		"proc_stats":        sm.ProcStats.toMap(),
+		"go_maxprocs":       sm.GoMaxProcs,
+		"go_gc_percent":     sm.GoGCPercent,
+		"go_mem_limit":      sm.GoMemLimit,
+		"caps_stats":        sm.CapsStats.toMap(),
 	}
-	m["go_maxprocs"] = sm.GoMaxProcs
-	m["go_gc_percent"] = sm.GoGCPercent
-	m["go_mem_limit"] = sm.GoMemLimit
 	return m, nil
 }
 
-func (sm StatusMetrics) ToMapCondensed(timezone string) (map[string]any, error) {
-	m := make(map[string]any)
-	m[utils.PID] = sm.PID
-	m[utils.GoVersion] = sm.GoVersion
-	m[utils.NodeID] = sm.NodeID
-	m[utils.VersionLower] = sm.Version
+// toMapCondensed provides a simplified map view of StatusMetrics with formatted
+// human-readable values.
+func (sm StatusMetrics) toMapCondensed(timezone string) (map[string]any, error) {
+	m := map[string]any{
+		utils.PID:            sm.PID,
+		utils.GoVersion:      sm.GoVersion,
+		utils.NodeID:         sm.NodeID,
+		utils.VersionLower:   sm.Version,
+		utils.Goroutines:     sm.Goroutines,
+		utils.OpenFiles:      sm.ProcStats.OpenFDs,
+		utils.ResidentMemory: utils.SizeFmt(sm.ProcStats.ResidentMemory, ""),
+		utils.ActiveMemory:   utils.SizeFmt(sm.MemStats.HeapAlloc, ""),
+		utils.SystemMemory:   utils.SizeFmt(sm.MemStats.Sys, ""),
+		utils.OSThreadsInUse: sm.Threads,
+	}
 
 	startTime, err := utils.ParseTimeDetectLayout(strconv.Itoa(int(sm.ProcStats.StartTime)), timezone)
 	if err != nil {
 		return nil, err
 	}
 	m[utils.RunningSince] = startTime.Format(time.UnixDate)
-
-	m[utils.Goroutines] = sm.Goroutines
-	m[utils.OpenFiles] = sm.ProcStats.OpenFDs
-	m[utils.ResidentMemory] = utils.SizeFmt(float64(sm.ProcStats.ResidentMemory), "")
-	m[utils.ActiveMemory] = utils.SizeFmt(float64(sm.MemStats.HeapAlloc), "")
-	m[utils.SystemMemory] = utils.SizeFmt(float64(sm.MemStats.Sys), "")
-	m[utils.OSThreadsInUse] = sm.Threads
 
 	durStr := strconv.FormatFloat(sm.ProcStats.CPUTime, 'f', -1, 64)
 	dur, err := utils.ParseDurationWithSecs(durStr)
@@ -107,69 +123,69 @@ func (sm StatusMetrics) ToMapCondensed(timezone string) (map[string]any, error) 
 }
 
 type GoMemStats struct {
-	Alloc        uint64  `json:"alloc"`
-	TotalAlloc   uint64  `json:"total_alloc"`
-	Sys          uint64  `json:"sys"`
-	Mallocs      uint64  `json:"mallocs"`
-	Frees        uint64  `json:"frees"`
-	HeapAlloc    uint64  `json:"heap_alloc"`
-	HeapSys      uint64  `json:"heap_sys"`
-	HeapIdle     uint64  `json:"heap_idle"`
-	HeapInuse    uint64  `json:"heap_inuse"`
-	HeapReleased uint64  `json:"heap_released"`
-	HeapObjects  uint64  `json:"heap_objects"`
-	StackInuse   uint64  `json:"stack_inuse"`
-	StackSys     uint64  `json:"stack_sys"`
-	MSpanSys     uint64  `json:"mspan_sys"`
-	MSpanInuse   uint64  `json:"mspan_inuse"`
-	MCacheInuse  uint64  `json:"mcache_inuse"`
-	MCacheSys    uint64  `json:"mcache_sys"`
-	BuckHashSys  uint64  `json:"buckhash_sys"`
-	GCSys        uint64  `json:"gc_sys"`
-	OtherSys     uint64  `json:"other_sys"`
-	NextGC       uint64  `json:"next_gc"`
+	Alloc        float64 `json:"alloc"`
+	TotalAlloc   float64 `json:"total_alloc"`
+	Sys          float64 `json:"sys"`
+	Mallocs      float64 `json:"mallocs"`
+	Frees        float64 `json:"frees"`
+	HeapAlloc    float64 `json:"heap_alloc"`
+	HeapSys      float64 `json:"heap_sys"`
+	HeapIdle     float64 `json:"heap_idle"`
+	HeapInuse    float64 `json:"heap_inuse"`
+	HeapReleased float64 `json:"heap_released"`
+	HeapObjects  float64 `json:"heap_objects"`
+	StackInuse   float64 `json:"stack_inuse"`
+	StackSys     float64 `json:"stack_sys"`
+	MSpanSys     float64 `json:"mspan_sys"`
+	MSpanInuse   float64 `json:"mspan_inuse"`
+	MCacheInuse  float64 `json:"mcache_inuse"`
+	MCacheSys    float64 `json:"mcache_sys"`
+	BuckHashSys  float64 `json:"buckhash_sys"`
+	GCSys        float64 `json:"gc_sys"`
+	OtherSys     float64 `json:"other_sys"`
+	NextGC       float64 `json:"next_gc"`
 	LastGC       float64 `json:"last_gc"`
 }
 
-func (ms GoMemStats) ToMap() map[string]any {
-	m := make(map[string]any, 23)
-	m["alloc"] = ms.Alloc
-	m["total_alloc"] = ms.TotalAlloc
-	m["sys"] = ms.Sys
-	m["mallocs"] = ms.Mallocs
-	m["frees"] = ms.Frees
-	m["heap_alloc"] = ms.HeapAlloc
-	m["heap_sys"] = ms.HeapSys
-	m["heap_idle"] = ms.HeapIdle
-	m["heap_inuse"] = ms.HeapInuse
-	m["heap_released"] = ms.HeapReleased
-	m["heap_objects"] = ms.HeapObjects
-	m["stack_inuse"] = ms.StackInuse
-	m["stack_sys"] = ms.StackSys
-	m["mspan_sys"] = ms.MSpanSys
-	m["mspan_inuse"] = ms.MSpanInuse
-	m["mcache_inuse"] = ms.MCacheInuse
-	m["mcache_sys"] = ms.MCacheSys
-	m["buckhash_sys"] = ms.BuckHashSys
-	m["gc_sys"] = ms.GCSys
-	m["other_sys"] = ms.OtherSys
-	m["next_gc"] = ms.NextGC
-	m["last_gc"] = ms.LastGC
-	return m
+func (ms GoMemStats) toMap() map[string]any {
+	return map[string]any{
+		"alloc":         ms.Alloc,
+		"total_alloc":   ms.TotalAlloc,
+		"sys":           ms.Sys,
+		"mallocs":       ms.Mallocs,
+		"frees":         ms.Frees,
+		"heap_alloc":    ms.HeapAlloc,
+		"heap_sys":      ms.HeapSys,
+		"heap_idle":     ms.HeapIdle,
+		"heap_inuse":    ms.HeapInuse,
+		"heap_released": ms.HeapReleased,
+		"heap_objects":  ms.HeapObjects,
+		"stack_inuse":   ms.StackInuse,
+		"stack_sys":     ms.StackSys,
+		"mspan_sys":     ms.MSpanSys,
+		"mspan_inuse":   ms.MSpanInuse,
+		"mcache_inuse":  ms.MCacheInuse,
+		"mcache_sys":    ms.MCacheSys,
+		"buckhash_sys":  ms.BuckHashSys,
+		"gc_sys":        ms.GCSys,
+		"other_sys":     ms.OtherSys,
+		"next_gc":       ms.NextGC,
+		"last_gc":       ms.LastGC,
+	}
 }
 
 type GCDurationStats struct {
 	Quantiles []Quantile `json:"quantiles"`
 	Sum       float64    `json:"sum"`
-	Count     uint64     `json:"count"`
+	Count     float64    `json:"count"`
 }
 
-func (s GCDurationStats) ToMap() map[string]any {
-	m := make(map[string]any, 3)
-	m["quantiles"] = s.Quantiles
-	m["sum"] = s.Sum
-	m["count"] = s.Count
-	return m
+func (s GCDurationStats) toMap() map[string]any {
+	return map[string]any{
+		"quantiles": s.Quantiles,
+		"sum":       s.Sum,
+		"count":     s.Count,
+	}
 }
 
 type Quantile struct {
@@ -179,28 +195,28 @@ type Quantile struct {
 
 type ProcStats struct {
 	CPUTime              float64 `json:"cpu_time"`
-	MaxFDs               uint64  `json:"max_fds"`
-	OpenFDs              int     `json:"open_fds"`
-	ResidentMemory       int     `json:"resident_memory"`
+	MaxFDs               float64 `json:"max_fds"`
+	OpenFDs              float64 `json:"open_fds"`
+	ResidentMemory       float64 `json:"resident_memory"`
 	StartTime            float64 `json:"start_time"`
-	VirtualMemory        uint    `json:"virtual_memory"`
-	MaxVirtualMemory     uint64  `json:"max_virtual_memory"`
+	VirtualMemory        float64 `json:"virtual_memory"`
+	MaxVirtualMemory     float64 `json:"max_virtual_memory"`
 	NetworkReceiveTotal  float64 `json:"network_receive_total"`
 	NetworkTransmitTotal float64 `json:"network_transmit_total"`
 }
 
-func (ps ProcStats) ToMap() map[string]any {
-	m := make(map[string]any, 9)
-	m["cpu_time"] = ps.CPUTime
-	m["max_fds"] = ps.MaxFDs
-	m["open_fds"] = ps.OpenFDs
-	m["resident_memory"] = ps.ResidentMemory
-	m["start_time"] = ps.StartTime
-	m["virtual_memory"] = ps.VirtualMemory
-	m["max_virtual_memory"] = ps.MaxVirtualMemory
-	m["network_receive_total"] = ps.NetworkReceiveTotal
-	m["network_transmit_total"] = ps.NetworkTransmitTotal
-	return m
+func (ps ProcStats) toMap() map[string]any {
+	return map[string]any{
+		"cpu_time":               ps.CPUTime,
+		"max_fds":                ps.MaxFDs,
+		"open_fds":               ps.OpenFDs,
+		"resident_memory":        ps.ResidentMemory,
+		"start_time":             ps.StartTime,
+		"virtual_memory":         ps.VirtualMemory,
+		"max_virtual_memory":     ps.MaxVirtualMemory,
+		"network_receive_total":  ps.NetworkReceiveTotal,
+		"network_transmit_total": ps.NetworkTransmitTotal,
+	}
 }
 
 type CapsStats struct {
@@ -208,11 +224,14 @@ type CapsStats struct {
 	Peak      *int `json:"peak"`
 }
 
-func (cs *CapsStats) ToMap() map[string]any {
-	m := make(map[string]any, 2)
-	m["allocated"] = cs.Allocated
-	m["peak"] = cs.Peak
-	return m
+func (cs *CapsStats) toMap() map[string]any {
+	if cs == nil {
+		return nil
+	}
+	return map[string]any{
+		"allocated": cs.Allocated,
+		"peak":      cs.Peak,
+	}
 }
 
 func computeAppMetrics() (StatusMetrics, error) {
@@ -225,27 +244,27 @@ func computeAppMetrics() (StatusMetrics, error) {
 	runtime.ReadMemStats(&m)
 
 	memStats := GoMemStats{
-		Alloc:        m.Alloc,
-		TotalAlloc:   m.TotalAlloc,
-		Sys:          m.Sys,
-		Mallocs:      m.Mallocs,
-		Frees:        m.Frees,
-		HeapAlloc:    m.HeapAlloc,
-		HeapSys:      m.HeapSys,
-		HeapIdle:     m.HeapIdle,
-		HeapInuse:    m.HeapInuse,
-		HeapReleased: m.HeapReleased,
-		HeapObjects:  m.HeapObjects,
-		StackInuse:   m.StackInuse,
-		StackSys:     m.StackSys,
-		MSpanInuse:   m.MSpanInuse,
-		MSpanSys:     m.MSpanSys,
-		MCacheInuse:  m.MCacheInuse,
-		MCacheSys:    m.MCacheSys,
-		BuckHashSys:  m.BuckHashSys,
-		GCSys:        m.GCSys,
-		OtherSys:     m.OtherSys,
-		NextGC:       m.NextGC,
+		Alloc:        float64(m.Alloc),
+		TotalAlloc:   float64(m.TotalAlloc),
+		Sys:          float64(m.Sys),
+		Mallocs:      float64(m.Mallocs),
+		Frees:        float64(m.Frees),
+		HeapAlloc:    float64(m.HeapAlloc),
+		HeapSys:      float64(m.HeapSys),
+		HeapIdle:     float64(m.HeapIdle),
+		HeapInuse:    float64(m.HeapInuse),
+		HeapReleased: float64(m.HeapReleased),
+		HeapObjects:  float64(m.HeapObjects),
+		StackInuse:   float64(m.StackInuse),
+		StackSys:     float64(m.StackSys),
+		MSpanInuse:   float64(m.MSpanInuse),
+		MSpanSys:     float64(m.MSpanSys),
+		MCacheInuse:  float64(m.MCacheInuse),
+		MCacheSys:    float64(m.MCacheSys),
+		BuckHashSys:  float64(m.BuckHashSys),
+		GCSys:        float64(m.GCSys),
+		OtherSys:     float64(m.OtherSys),
+		NextGC:       float64(m.NextGC),
 	}
 
 	threads, _ := runtime.ThreadCreateProfile(nil)
@@ -270,7 +289,7 @@ func computeAppMetrics() (StatusMetrics, error) {
 	}
 	gcDur := GCDurationStats{
 		Quantiles: quantiles,
-		Count:     uint64(stats.NumGC),
+		Count:     float64(stats.NumGC),
 		Sum:       stats.PauseTotal.Seconds(),
 	}
 	memStats.LastGC = float64(stats.LastGC.UnixNano()) / 1e9
@@ -285,8 +304,8 @@ func computeAppMetrics() (StatusMetrics, error) {
 	procStats := ProcStats{}
 	if stat, err := p.Stat(); err == nil {
 		procStats.CPUTime = stat.CPUTime()
-		procStats.VirtualMemory = stat.VirtualMemory()
-		procStats.ResidentMemory = stat.ResidentMemory()
+		procStats.VirtualMemory = float64(stat.VirtualMemory())
+		procStats.ResidentMemory = float64(stat.ResidentMemory())
 		if startTime, err := stat.StartTime(); err == nil {
 			procStats.StartTime = startTime
 		} else {
@@ -296,14 +315,14 @@ func computeAppMetrics() (StatusMetrics, error) {
 		return StatusMetrics{}, err
 	}
 	if fds, err := p.FileDescriptorsLen(); err == nil {
-		procStats.OpenFDs = fds
+		procStats.OpenFDs = float64(fds)
 	} else {
 		return StatusMetrics{}, err
 	}
 
 	if limits, err := p.Limits(); err == nil {
-		procStats.MaxFDs = limits.OpenFiles
-		procStats.MaxVirtualMemory = limits.AddressSpace
+		procStats.MaxFDs = float64(limits.OpenFiles)
+		procStats.MaxVirtualMemory = float64(limits.AddressSpace)
 	} else {
 		return StatusMetrics{}, err
 	}
@@ -323,44 +342,43 @@ func computeAppMetrics() (StatusMetrics, error) {
 	}
 
 	metricNames := []string{
-		"/sched/gomaxprocs:threads",
-		"/gc/gogc:percent",
-		"/memory/limit:bytes",
-		"/gc/gomemlimit:bytes",
+		metricPathGoMaxProcs,
+		metricPathGoGCPercent,
+		metricPathGoMemLimit,
 	}
 	samples := make([]metrics.Sample, len(metricNames))
 	for i, name := range metricNames {
 		samples[i].Name = name
 	}
 	metrics.Read(samples)
-	goMaxProcs := getUint64Metric(samples, "/sched/gomaxprocs:threads")
-	goGCPercent := getUint64Metric(samples, "/gc/gogc:percent")
-	goMemLimit := getUint64Metric(samples, "/gc/gomemlimit:bytes")
+	goMaxProcs := getFloat64Metric(samples, metricPathGoMaxProcs)
+	goGCPercent := getFloat64Metric(samples, metricPathGoGCPercent)
+	goMemLimit := getFloat64Metric(samples, metricPathGoMemLimit)
 
 	return StatusMetrics{
-		PID:             pid,
+		PID:             float64(pid),
 		GoVersion:       runtime.Version(),
 		Version:         vers,
-		Goroutines:      runtime.NumGoroutine(),
-		Threads:         threads,
+		Goroutines:      float64(runtime.NumGoroutine()),
+		Threads:         float64(threads),
 		MemStats:        memStats,
 		GCDurationStats: gcDur,
 		ProcStats:       procStats,
-		GoMaxProcs:      goMaxProcs,
-		GoGCPercent:     goGCPercent,
-		GoMemLimit:      goMemLimit,
+		GoMaxProcs:      float64(goMaxProcs),
+		GoGCPercent:     float64(goGCPercent),
+		GoMemLimit:      float64(goMemLimit),
 	}, nil
 }
 
-// getUint64Metric retrieves a uint64 metric by name
-func getUint64Metric(samples []metrics.Sample, name string) uint64 {
+// getFloat64Metric retrieves a float64 metric by name.
+func getFloat64Metric(samples []metrics.Sample, name string) float64 {
 	for _, sample := range samples {
 		if sample.Name == name {
 			switch sample.Value.Kind() {
 			case metrics.KindUint64:
-				return sample.Value.Uint64()
+				return float64(sample.Value.Uint64())
 			case metrics.KindFloat64:
-				return uint64(sample.Value.Float64())
+				return sample.Value.Float64()
 			case metrics.KindBad:
 				panic(fmt.Sprintf("metric %s has bad kind", name))
 			default:
