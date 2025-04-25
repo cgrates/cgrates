@@ -604,7 +604,7 @@ func testConfigSStartEngineCAPSAllocated(t *testing.T) {
 		t.Errorf("Expected %+v , received: %+v ", "CAPSPeakEngine", rply)
 	}
 
-	if _, has := rply[utils.CAPSAllocated]; !has {
+	if _, has := rply[utils.MetricCapsAllocated]; !has {
 		t.Errorf("Expected reply to contain CAPSAllocated , received <%+v>", rply)
 	}
 }
@@ -637,7 +637,7 @@ func testConfigSCAPSPeak(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, has := rply[utils.CAPSPeak]; !has {
+	if _, has := rply[utils.MetricCapsPeak]; !has {
 		t.Errorf("Expected reply to contain CAPSPeak , received <%+v>", rply)
 	}
 }

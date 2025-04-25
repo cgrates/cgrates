@@ -32,6 +32,51 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// Prometheus metric names
+const (
+	// Gauge metrics
+	promGoGoroutines                 = "go_goroutines"
+	promGoThreads                    = "go_threads"
+	promProcessOpenFds               = "process_open_fds"
+	promProcessMaxFds                = "process_max_fds"
+	promProcessResidentMemoryBytes   = "process_resident_memory_bytes"
+	promProcessVirtualMemoryBytes    = "process_virtual_memory_bytes"
+	promProcessVirtualMemoryMaxBytes = "process_virtual_memory_max_bytes"
+	promProcessStartTimeSeconds      = "process_start_time_seconds"
+	promGoMemstatsAllocBytes         = "go_memstats_alloc_bytes"
+	promGoMemstatsHeapAllocBytes     = "go_memstats_heap_alloc_bytes"
+	promGoMemstatsHeapIdleBytes      = "go_memstats_heap_idle_bytes"
+	promGoMemstatsHeapInuseBytes     = "go_memstats_heap_inuse_bytes"
+	promGoMemstatsHeapObjects        = "go_memstats_heap_objects"
+	promGoMemstatsHeapReleasedBytes  = "go_memstats_heap_released_bytes"
+	promGoMemstatsHeapSysBytes       = "go_memstats_heap_sys_bytes"
+	promGoMemstatsBuckHashSysBytes   = "go_memstats_buck_hash_sys_bytes"
+	promGoMemstatsGCSysBytes         = "go_memstats_gc_sys_bytes"
+	promGoMemstatsMCacheInuseBytes   = "go_memstats_mcache_inuse_bytes"
+	promGoMemstatsMCacheSysBytes     = "go_memstats_mcache_sys_bytes"
+	promGoMemstatsMSpanInuseBytes    = "go_memstats_mspan_inuse_bytes"
+	promGoMemstatsMSpanSysBytes      = "go_memstats_mspan_sys_bytes"
+	promGoMemstatsNextGCBytes        = "go_memstats_next_gc_bytes"
+	promGoMemstatsOtherSysBytes      = "go_memstats_other_sys_bytes"
+	promGoMemstatsStackInuseBytes    = "go_memstats_stack_inuse_bytes"
+	promGoMemstatsStackSysBytes      = "go_memstats_stack_sys_bytes"
+	promGoMemstatsSysBytes           = "go_memstats_sys_bytes"
+	promGoMemstatsLastGCTimeSeconds  = "go_memstats_last_gc_time_seconds"
+	promGoGCGogcPercent              = "go_gc_gogc_percent"
+	promGoGCGomemlimitBytes          = "go_gc_gomemlimit_bytes"
+	promGoSchedGomaxprocsThreads     = "go_sched_gomaxprocs_threads"
+	promGoInfo                       = "go_info"
+	promGoGCDurationSeconds          = "go_gc_duration_seconds"
+
+	// Counter metrics
+	promProcessCPUSecondsTotal          = "process_cpu_seconds_total"
+	promProcessNetworkReceiveByteTotal  = "process_network_receive_bytes_total"
+	promProcessNetworkTransmitByteTotal = "process_network_transmit_bytes_total"
+	promGoMemstatsAllocBytesTotal       = "go_memstats_alloc_bytes_total"
+	promGoMemstatsMallocsTotal          = "go_memstats_mallocs_total"
+	promGoMemstatsFreesTotal            = "go_memstats_frees_total"
+)
+
 // PrometheusAgent handles metrics collection for Prometheus.
 // It collects stats from StatQueues and exposes them alongside
 // optional Go runtime and process metrics.
@@ -140,61 +185,61 @@ func newCoreMetricsCollector(cfg *config.CGRConfig, cm *engine.ConnManager) *cor
 	}
 
 	gaugeMetrics := map[string]string{
-		"go_goroutines":                    "Number of goroutines that currently exist.",
-		"go_threads":                       "Number of OS threads created.",
-		"process_open_fds":                 "Number of open file descriptors.",
-		"process_max_fds":                  "Maximum number of open file descriptors.",
-		"process_resident_memory_bytes":    "Resident memory size in bytes.",
-		"process_virtual_memory_bytes":     "Virtual memory size in bytes.",
-		"process_virtual_memory_max_bytes": "Maximum amount of virtual memory available in bytes.",
-		"process_start_time_seconds":       "Start time of the process since unix epoch in seconds.",
-		"go_memstats_alloc_bytes":          "Number of bytes allocated in heap and currently in use. Equals to /memory/classes/heap/objects:bytes.",
-		"go_memstats_heap_alloc_bytes":     "Number of heap bytes allocated and currently in use, same as go_memstats_alloc_bytes. Equals to /memory/classes/heap/objects:bytes.",
-		"go_memstats_heap_idle_bytes":      "Number of heap bytes waiting to be used. Equals to /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.",
-		"go_memstats_heap_inuse_bytes":     "Number of heap bytes that are in use. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes",
-		"go_memstats_heap_objects":         "Number of currently allocated objects. Equals to /gc/heap/objects:objects.",
-		"go_memstats_heap_released_bytes":  "Number of heap bytes released to OS. Equals to /memory/classes/heap/released:bytes.",
-		"go_memstats_heap_sys_bytes":       "Number of heap bytes obtained from system. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes + /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.",
-		"go_memstats_buck_hash_sys_bytes":  "Number of bytes used by the profiling bucket hash table. Equals to /memory/classes/profiling/buckets:bytes.",
-		"go_memstats_gc_sys_bytes":         "Number of bytes used for garbage collection system metadata. Equals to /memory/classes/metadata/other:bytes.",
-		"go_memstats_mcache_inuse_bytes":   "Number of bytes in use by mcache structures. Equals to /memory/classes/metadata/mcache/inuse:bytes.",
-		"go_memstats_mcache_sys_bytes":     "Number of bytes used for mcache structures obtained from system. Equals to /memory/classes/metadata/mcache/inuse:bytes + /memory/classes/metadata/mcache/free:bytes.",
-		"go_memstats_mspan_inuse_bytes":    "Number of bytes in use by mspan structures. Equals to /memory/classes/metadata/mspan/inuse:bytes.",
-		"go_memstats_mspan_sys_bytes":      "Number of bytes used for mspan structures obtained from system. Equals to /memory/classes/metadata/mspan/inuse:bytes + /memory/classes/metadata/mspan/free:bytes.",
-		"go_memstats_next_gc_bytes":        "Number of heap bytes when next garbage collection will take place. Equals to /gc/heap/goal:bytes.",
-		"go_memstats_other_sys_bytes":      "Number of bytes used for other system allocations. Equals to /memory/classes/other:bytes.",
-		"go_memstats_stack_inuse_bytes":    "Number of bytes obtained from system for stack allocator in non-CGO environments. Equals to /memory/classes/heap/stacks:bytes.",
-		"go_memstats_stack_sys_bytes":      "Number of bytes obtained from system for stack allocator. Equals to /memory/classes/heap/stacks:bytes + /memory/classes/os-stacks:bytes.",
-		"go_memstats_sys_bytes":            "Number of bytes obtained from system. Equals to /memory/classes/total:byte.",
-		"go_memstats_last_gc_time_seconds": "Number of seconds since 1970 of last garbage collection.",
-		"go_gc_gogc_percent":               "Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.",
-		"go_gc_gomemlimit_bytes":           "Go runtime memory limit configured by the user, otherwise math.MaxInt64. This value is set by the GOMEMLIMIT environment variable, and the runtime/debug.SetMemoryLimit function. Sourced from /gc/gomemlimit:bytes.",
-		"go_sched_gomaxprocs_threads":      "The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously. Sourced from /sched/gomaxprocs:threads.",
+		promGoGoroutines:                 "Number of goroutines that currently exist.",
+		promGoThreads:                    "Number of OS threads created.",
+		promProcessOpenFds:               "Number of open file descriptors.",
+		promProcessMaxFds:                "Maximum number of open file descriptors.",
+		promProcessResidentMemoryBytes:   "Resident memory size in bytes.",
+		promProcessVirtualMemoryBytes:    "Virtual memory size in bytes.",
+		promProcessVirtualMemoryMaxBytes: "Maximum amount of virtual memory available in bytes.",
+		promProcessStartTimeSeconds:      "Start time of the process since unix epoch in seconds.",
+		promGoMemstatsAllocBytes:         "Number of bytes allocated in heap and currently in use. Equals to /memory/classes/heap/objects:bytes.",
+		promGoMemstatsHeapAllocBytes:     "Number of heap bytes allocated and currently in use, same as go_memstats_alloc_bytes. Equals to /memory/classes/heap/objects:bytes.",
+		promGoMemstatsHeapIdleBytes:      "Number of heap bytes waiting to be used. Equals to /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.",
+		promGoMemstatsHeapInuseBytes:     "Number of heap bytes that are in use. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes",
+		promGoMemstatsHeapObjects:        "Number of currently allocated objects. Equals to /gc/heap/objects:objects.",
+		promGoMemstatsHeapReleasedBytes:  "Number of heap bytes released to OS. Equals to /memory/classes/heap/released:bytes.",
+		promGoMemstatsHeapSysBytes:       "Number of heap bytes obtained from system. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes + /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.",
+		promGoMemstatsBuckHashSysBytes:   "Number of bytes used by the profiling bucket hash table. Equals to /memory/classes/profiling/buckets:bytes.",
+		promGoMemstatsGCSysBytes:         "Number of bytes used for garbage collection system metadata. Equals to /memory/classes/metadata/other:bytes.",
+		promGoMemstatsMCacheInuseBytes:   "Number of bytes in use by mcache structures. Equals to /memory/classes/metadata/mcache/inuse:bytes.",
+		promGoMemstatsMCacheSysBytes:     "Number of bytes used for mcache structures obtained from system. Equals to /memory/classes/metadata/mcache/inuse:bytes + /memory/classes/metadata/mcache/free:bytes.",
+		promGoMemstatsMSpanInuseBytes:    "Number of bytes in use by mspan structures. Equals to /memory/classes/metadata/mspan/inuse:bytes.",
+		promGoMemstatsMSpanSysBytes:      "Number of bytes used for mspan structures obtained from system. Equals to /memory/classes/metadata/mspan/inuse:bytes + /memory/classes/metadata/mspan/free:bytes.",
+		promGoMemstatsNextGCBytes:        "Number of heap bytes when next garbage collection will take place. Equals to /gc/heap/goal:bytes.",
+		promGoMemstatsOtherSysBytes:      "Number of bytes used for other system allocations. Equals to /memory/classes/other:bytes.",
+		promGoMemstatsStackInuseBytes:    "Number of bytes obtained from system for stack allocator in non-CGO environments. Equals to /memory/classes/heap/stacks:bytes.",
+		promGoMemstatsStackSysBytes:      "Number of bytes obtained from system for stack allocator. Equals to /memory/classes/heap/stacks:bytes + /memory/classes/os-stacks:bytes.",
+		promGoMemstatsSysBytes:           "Number of bytes obtained from system. Equals to /memory/classes/total:byte.",
+		promGoMemstatsLastGCTimeSeconds:  "Number of seconds since 1970 of last garbage collection.",
+		promGoGCGogcPercent:              "Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.",
+		promGoGCGomemlimitBytes:          "Go runtime memory limit configured by the user, otherwise math.MaxInt64. This value is set by the GOMEMLIMIT environment variable, and the runtime/debug.SetMemoryLimit function. Sourced from /gc/gomemlimit:bytes.",
+		promGoSchedGomaxprocsThreads:     "The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously. Sourced from /sched/gomaxprocs:threads.",
 	}
 	for name, help := range gaugeMetrics {
 		c.descs[name] = prometheus.NewDesc(name, help, []string{"node_id"}, nil)
 	}
 
 	counterMetrics := map[string]string{
-		"process_cpu_seconds_total":            "Total user and system CPU time spent in seconds.",
-		"process_network_receive_bytes_total":  "Number of bytes received by the process over the network.",
-		"process_network_transmit_bytes_total": "Number of bytes sent by the process over the network.",
-		"go_memstats_alloc_bytes_total":        "Total number of bytes allocated in heap until now, even if released already. Equals to /gc/heap/allocs:bytes.",
-		"go_memstats_mallocs_total":            "Total number of heap objects allocated, both live and gc-ed. Semantically a counter version for go_memstats_heap_objects gauge. Equals to /gc/heap/allocs:objects + /gc/heap/tiny/allocs:objects.",
-		"go_memstats_frees_total":              "Total number of heap objects frees. Equals to /gc/heap/frees:objects + /gc/heap/tiny/allocs:objects.",
+		promProcessCPUSecondsTotal:          "Total user and system CPU time spent in seconds.",
+		promProcessNetworkReceiveByteTotal:  "Number of bytes received by the process over the network.",
+		promProcessNetworkTransmitByteTotal: "Number of bytes sent by the process over the network.",
+		promGoMemstatsAllocBytesTotal:       "Total number of bytes allocated in heap until now, even if released already. Equals to /gc/heap/allocs:bytes.",
+		promGoMemstatsMallocsTotal:          "Total number of heap objects allocated, both live and gc-ed. Semantically a counter version for go_memstats_heap_objects gauge. Equals to /gc/heap/allocs:objects + /gc/heap/tiny/allocs:objects.",
+		promGoMemstatsFreesTotal:            "Total number of heap objects frees. Equals to /gc/heap/frees:objects + /gc/heap/tiny/allocs:objects.",
 	}
 	for name, help := range counterMetrics {
 		c.descs[name] = prometheus.NewDesc(name, help, []string{"node_id"}, nil)
 	}
 
-	c.descs["go_info"] = prometheus.NewDesc(
-		"go_info",
+	c.descs[promGoInfo] = prometheus.NewDesc(
+		promGoInfo,
 		"Information about the Go environment.",
 		[]string{"node_id", "version"},
 		nil)
 
-	c.descs["go_gc_duration_seconds"] = prometheus.NewDesc(
-		"go_gc_duration_seconds",
+	c.descs[promGoGCDurationSeconds] = prometheus.NewDesc(
+		promGoGCDurationSeconds,
 		"A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.",
 		[]string{"node_id"},
 		nil,
@@ -224,112 +269,112 @@ func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 				utils.PrometheusAgent, connID, err))
 			continue
 		}
-		nodeID, ok := reply["node_id"].(string)
+		nodeID, ok := reply[utils.NodeID].(string)
 		if !ok {
 			panic("missing node_id in CoreSv1.Status reply")
 		}
 
-		if val, ok := reply["goroutines"].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs["go_goroutines"], prometheus.GaugeValue, val, nodeID)
+		if val, ok := reply[utils.MetricRuntimeGoroutines].(float64); ok {
+			ch <- prometheus.MustNewConstMetric(c.descs[promGoGoroutines], prometheus.GaugeValue, val, nodeID)
 		}
-		if val, ok := reply["threads"].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs["go_threads"], prometheus.GaugeValue, val, nodeID)
+		if val, ok := reply[utils.MetricRuntimeThreads].(float64); ok {
+			ch <- prometheus.MustNewConstMetric(c.descs[promGoThreads], prometheus.GaugeValue, val, nodeID)
 		}
-		if version, ok := reply["go_version"].(string); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs["go_info"], prometheus.GaugeValue, 1, nodeID, version)
-		}
-
-		if procStats, ok := reply["proc_stats"].(map[string]any); ok {
-			if val, ok := procStats["cpu_time"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_cpu_seconds_total"], prometheus.CounterValue, val, nodeID)
-			}
-			if val, ok := procStats["open_fds"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_open_fds"], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats["max_fds"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_max_fds"], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats["resident_memory"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_resident_memory_bytes"], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats["virtual_memory"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_virtual_memory_bytes"], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats["max_virtual_memory"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_virtual_memory_max_bytes"], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats["start_time"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_start_time_seconds"], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats["network_receive_total"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_network_receive_bytes_total"], prometheus.CounterValue, val, nodeID)
-			}
-			if val, ok := procStats["network_transmit_total"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["process_network_transmit_bytes_total"], prometheus.CounterValue, val, nodeID)
-			}
+		if version, ok := reply[utils.GoVersion].(string); ok {
+			ch <- prometheus.MustNewConstMetric(c.descs[promGoInfo], prometheus.GaugeValue, 1, nodeID, version)
 		}
 
-		if memStats, ok := reply["mem_stats"].(map[string]any); ok {
-			memGaugeMap := map[string]string{
-				"go_memstats_alloc_bytes":         "alloc",
-				"go_memstats_heap_alloc_bytes":    "heap_alloc",
-				"go_memstats_heap_idle_bytes":     "heap_idle",
-				"go_memstats_heap_inuse_bytes":    "heap_inuse",
-				"go_memstats_heap_objects":        "heap_objects",
-				"go_memstats_heap_released_bytes": "heap_released",
-				"go_memstats_heap_sys_bytes":      "heap_sys",
-				"go_memstats_buck_hash_sys_bytes": "buckhash_sys",
-				"go_memstats_gc_sys_bytes":        "gc_sys",
-				"go_memstats_mcache_inuse_bytes":  "mcache_inuse",
-				"go_memstats_mcache_sys_bytes":    "mcache_sys",
-				"go_memstats_mspan_inuse_bytes":   "mspan_inuse",
-				"go_memstats_mspan_sys_bytes":     "mspan_sys",
-				"go_memstats_next_gc_bytes":       "next_gc",
-				"go_memstats_other_sys_bytes":     "other_sys",
-				"go_memstats_stack_inuse_bytes":   "stack_inuse",
-				"go_memstats_stack_sys_bytes":     "stack_sys",
-				"go_memstats_sys_bytes":           "sys",
+		if procStats, ok := reply[utils.FieldProcStats].(map[string]any); ok {
+			if val, ok := procStats[utils.MetricProcCPUTime].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessCPUSecondsTotal], prometheus.CounterValue, val, nodeID)
+			}
+			if val, ok := procStats[utils.MetricProcOpenFDs].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessOpenFds], prometheus.GaugeValue, val, nodeID)
+			}
+			if val, ok := procStats[utils.MetricProcMaxFDs].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessMaxFds], prometheus.GaugeValue, val, nodeID)
+			}
+			if val, ok := procStats[utils.MetricProcResidentMemory].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessResidentMemoryBytes], prometheus.GaugeValue, val, nodeID)
+			}
+			if val, ok := procStats[utils.MetricProcVirtualMemory].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessVirtualMemoryBytes], prometheus.GaugeValue, val, nodeID)
+			}
+			if val, ok := procStats[utils.MetricProcMaxVirtualMemory].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessVirtualMemoryMaxBytes], prometheus.GaugeValue, val, nodeID)
+			}
+			if val, ok := procStats[utils.MetricProcStartTime].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessStartTimeSeconds], prometheus.GaugeValue, val, nodeID)
+			}
+			if val, ok := procStats[utils.MetricProcNetworkReceiveTotal].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessNetworkReceiveByteTotal], prometheus.CounterValue, val, nodeID)
+			}
+			if val, ok := procStats[utils.MetricProcNetworkTransmitTotal].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promProcessNetworkTransmitByteTotal], prometheus.CounterValue, val, nodeID)
+			}
+		}
+
+		if memStats, ok := reply[utils.FieldMemStats].(map[string]any); ok {
+			var memGaugeMap = map[string]string{
+				promGoMemstatsAllocBytes:        utils.MetricMemAlloc,
+				promGoMemstatsHeapAllocBytes:    utils.MetricMemHeapAlloc,
+				promGoMemstatsHeapIdleBytes:     utils.MetricMemHeapIdle,
+				promGoMemstatsHeapInuseBytes:    utils.MetricMemHeapInuse,
+				promGoMemstatsHeapObjects:       utils.MetricMemHeapObjects,
+				promGoMemstatsHeapReleasedBytes: utils.MetricMemHeapReleased,
+				promGoMemstatsHeapSysBytes:      utils.MetricMemHeapSys,
+				promGoMemstatsBuckHashSysBytes:  utils.MetricMemBuckHashSys,
+				promGoMemstatsGCSysBytes:        utils.MetricMemGCSys,
+				promGoMemstatsMCacheInuseBytes:  utils.MetricMemMCacheInuse,
+				promGoMemstatsMCacheSysBytes:    utils.MetricMemMCacheSys,
+				promGoMemstatsMSpanInuseBytes:   utils.MetricMemMSpanInuse,
+				promGoMemstatsMSpanSysBytes:     utils.MetricMemMSpanSys,
+				promGoMemstatsNextGCBytes:       utils.MetricMemNextGC,
+				promGoMemstatsOtherSysBytes:     utils.MetricMemOtherSys,
+				promGoMemstatsStackInuseBytes:   utils.MetricMemStackInuse,
+				promGoMemstatsStackSysBytes:     utils.MetricMemStackSys,
+				promGoMemstatsSysBytes:          utils.MetricMemSys,
 			}
 			for metricName, key := range memGaugeMap {
 				if val, ok := memStats[key].(float64); ok {
 					ch <- prometheus.MustNewConstMetric(c.descs[metricName], prometheus.GaugeValue, val, nodeID)
 				}
 			}
-			memCounterMap := map[string]string{
-				"go_memstats_alloc_bytes_total": "total_alloc",
-				"go_memstats_mallocs_total":     "mallocs",
-				"go_memstats_frees_total":       "frees",
+			var memCounterMap = map[string]string{
+				promGoMemstatsAllocBytesTotal: utils.MetricMemTotalAlloc,
+				promGoMemstatsMallocsTotal:    utils.MetricMemMallocs,
+				promGoMemstatsFreesTotal:      utils.MetricMemFrees,
 			}
 			for metricName, key := range memCounterMap {
 				if val, ok := memStats[key].(float64); ok {
 					ch <- prometheus.MustNewConstMetric(c.descs[metricName], prometheus.CounterValue, val, nodeID)
 				}
 			}
-			if val, ok := memStats["last_gc"].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs["go_memstats_last_gc_time_seconds"], prometheus.GaugeValue, val, nodeID)
+			if val, ok := memStats[utils.MetricMemLastGC].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[promGoMemstatsLastGCTimeSeconds], prometheus.GaugeValue, val, nodeID)
 			}
 		}
 
-		if gcStats, ok := reply["gc_duration_stats"].(map[string]any); ok {
+		if gcStats, ok := reply[utils.FieldGCDurationStats].(map[string]any); ok {
 			var count uint64
 			var sum float64
 			quantileValues := make(map[float64]float64)
-			if c, ok := gcStats["count"].(float64); ok {
+			if c, ok := gcStats[utils.MetricGCCount].(float64); ok {
 				count = uint64(c)
 			}
-			if s, ok := gcStats["sum"].(float64); ok {
+			if s, ok := gcStats[utils.MetricGCSum].(float64); ok {
 				sum = s
 			}
 
 			// Handle different types that may be returned based on connection type:
 			// - []any: from serialized RPC connections where type information is lost
 			// - []cores.Quantile: from direct (*internal) calls where type is preserved
-			switch quantiles := gcStats["quantiles"].(type) {
+			switch quantiles := gcStats[utils.MetricGCQuantiles].(type) {
 			case []any:
 				for _, q := range quantiles {
 					if qMap, ok := q.(map[string]any); ok {
-						if quantile, ok := qMap["quantile"].(float64); ok {
-							if val, ok := qMap["value"].(float64); ok {
+						if quantile, ok := qMap[utils.MetricGCQuantile].(float64); ok {
+							if val, ok := qMap[utils.MetricGCValue].(float64); ok {
 								quantileValues[quantile] = val
 							}
 						}
@@ -342,7 +387,7 @@ func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			}
 
 			ch <- prometheus.MustNewConstSummary(
-				c.descs["go_gc_duration_seconds"],
+				c.descs[promGoGCDurationSeconds],
 				count,
 				sum,
 				quantileValues,
@@ -350,14 +395,14 @@ func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			)
 		}
 
-		if val, ok := reply["go_maxprocs"].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs["go_sched_gomaxprocs_threads"], prometheus.GaugeValue, val, nodeID)
+		if val, ok := reply[utils.MetricRuntimeMaxProcs].(float64); ok {
+			ch <- prometheus.MustNewConstMetric(c.descs[promGoSchedGomaxprocsThreads], prometheus.GaugeValue, val, nodeID)
 		}
-		if val, ok := reply["go_gc_percent"].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs["go_gc_gogc_percent"], prometheus.GaugeValue, val, nodeID)
+		if val, ok := reply[utils.MetricGCPercent].(float64); ok {
+			ch <- prometheus.MustNewConstMetric(c.descs[promGoGCGogcPercent], prometheus.GaugeValue, val, nodeID)
 		}
-		if val, ok := reply["go_mem_limit"].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs["go_gc_gomemlimit_bytes"], prometheus.GaugeValue, val, nodeID)
+		if val, ok := reply[utils.MetricMemLimit].(float64); ok {
+			ch <- prometheus.MustNewConstMetric(c.descs[promGoGCGomemlimitBytes], prometheus.GaugeValue, val, nodeID)
 		}
 	}
 }
