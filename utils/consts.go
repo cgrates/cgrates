@@ -689,6 +689,7 @@ const (
 	MetaParse               = "*parse"
 	MetaClear               = "*clear"
 	MetaExport              = "*export"
+	MetaGigawords           = "*gigawords"
 	MetaExportID            = "*export_id"
 	LoadIDs                 = "load_ids"
 	DNSAgent                = "DNSAgent"
