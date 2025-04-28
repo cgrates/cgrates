@@ -108,7 +108,7 @@ func (dDP *DynamicDP) fieldAsInterface(fldPath []string) (val any, err error) {
 		return dp.FieldAsInterface(fldPath[2:])
 	case utils.MetaResources:
 		// sample of fieldName : ~*resources.ResourceID.Field
-		var reply ResourceWithConfig
+		var reply utils.ResourceWithConfig
 		if err := connMgr.Call(dDP.ctx, dDP.resConns, utils.ResourceSv1GetResourceWithConfig,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: dDP.tenant, ID: fldPath[1]}}, &reply); err != nil {
 			return nil, err

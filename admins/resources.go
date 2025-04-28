@@ -23,12 +23,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetResourceProfile returns a resource configuration
-func (adms *AdminS) V1GetResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
+func (adms *AdminS) V1GetResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -73,7 +72,7 @@ func (adms *AdminS) V1GetResourceProfileIDs(ctx *context.Context, args *utils.Ar
 }
 
 // GetResourceProfiles returns a list of resource profiles registered for a tenant
-func (admS *AdminS) V1GetResourceProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfs *[]*engine.ResourceProfile) (err error) {
+func (admS *AdminS) V1GetResourceProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfs *[]*utils.ResourceProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -82,9 +81,9 @@ func (admS *AdminS) V1GetResourceProfiles(ctx *context.Context, args *utils.Args
 	if err = admS.V1GetResourceProfileIDs(ctx, args, &rsPrfIDs); err != nil {
 		return
 	}
-	*rsPrfs = make([]*engine.ResourceProfile, 0, len(rsPrfIDs))
+	*rsPrfs = make([]*utils.ResourceProfile, 0, len(rsPrfIDs))
 	for _, rsPrfID := range rsPrfIDs {
-		var rsPrf *engine.ResourceProfile
+		var rsPrf *utils.ResourceProfile
 		rsPrf, err = admS.dm.GetResourceProfile(ctx, tnt, rsPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -114,7 +113,7 @@ func (admS *AdminS) V1GetResourceProfilesCount(ctx *context.Context, args *utils
 }
 
 // SetResourceProfile adds a new resource configuration
-func (adms *AdminS) V1SetResourceProfile(ctx *context.Context, arg *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminS) V1SetResourceProfile(ctx *context.Context, arg *utils.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

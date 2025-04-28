@@ -132,7 +132,7 @@ func CurrentDataDBVersions() Versions {
 		utils.Routes:         2,
 		utils.Attributes:     7,
 		utils.RQF:            5,
-		utils.Resource:       1,
+		utils.ResourceStr:    1,
 		utils.Subscribers:    1,
 		utils.Chargers:       2,
 		utils.LoadIDsVrs:     1,

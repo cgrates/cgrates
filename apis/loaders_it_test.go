@@ -927,7 +927,7 @@ func testLoadersGetRateProfiles(t *testing.T) {
 }
 
 func testLoadersGetResourceProfiles(t *testing.T) {
-	expRsPrfs := []*engine.ResourceProfile{
+	expRsPrfs := []*utils.ResourceProfile{
 		{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup21",
@@ -957,7 +957,7 @@ func testLoadersGetResourceProfiles(t *testing.T) {
 			Limit: 2,
 		},
 	}
-	var rsPrfs []*engine.ResourceProfile
+	var rsPrfs []*utils.ResourceProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -1394,7 +1394,7 @@ func testLoadersGetResourceProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplyRsPrf engine.ResourceProfile
+	var rplyRsPrf utils.ResourceProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

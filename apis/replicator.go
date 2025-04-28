@@ -135,7 +135,7 @@ func (rplSv1 *ReplicatorSv1) GetTrendProfile(ctx *context.Context, tntID *utils.
 }
 
 // GetResource is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetResource(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
+func (rplSv1 *ReplicatorSv1) GetResource(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
 	engine.UpdateReplicationFilters(utils.ResourcesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetResourceDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -146,7 +146,7 @@ func (rplSv1 *ReplicatorSv1) GetResource(ctx *context.Context, tntID *utils.Tena
 }
 
 // GetResourceProfile is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetResourceProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
+func (rplSv1 *ReplicatorSv1) GetResourceProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.ResourceProfile) error {
 	engine.UpdateReplicationFilters(utils.ResourceProfilesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetResourceProfileDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -348,7 +348,7 @@ func (rplSv1 *ReplicatorSv1) SetFilter(ctx *context.Context, fltr *engine.Filter
 }
 
 // SetResourceProfile is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetResourceProfile(ctx *context.Context, rs *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetResourceProfile(ctx *context.Context, rs *utils.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetResourceProfileDrv(ctx, rs.ResourceProfile); err != nil {
 		return
 	}
@@ -366,7 +366,7 @@ func (rplSv1 *ReplicatorSv1) SetResourceProfile(ctx *context.Context, rs *engine
 }
 
 // SetResource is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetResource(ctx *context.Context, rs *engine.ResourceWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetResource(ctx *context.Context, rs *utils.ResourceWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetResourceDrv(ctx, rs.Resource); err != nil {
 		return
 	}

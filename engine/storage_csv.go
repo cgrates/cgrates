@@ -146,7 +146,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 		return []string{}
 	}
 	c := NewCSVStorage(sep,
-		getIfExist(utils.Resources),
+		getIfExist(utils.ResourcesStr),
 		getIfExist(utils.Stats),
 		getIfExist(utils.Rankings),
 		getIfExist(utils.Trends),

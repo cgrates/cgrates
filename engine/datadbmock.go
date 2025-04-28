@@ -43,11 +43,12 @@ type DataDBMock struct {
 	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
 	GetThresholdDrvF           func(ctx *context.Context, tenant, id string) (*Threshold, error)
 	RemoveThresholdDrvF        func(ctx *context.Context, tnt, id string) error
-	GetResourceProfileDrvF     func(ctx *context.Context, tnt, id string) (*ResourceProfile, error)
-	SetResourceProfileDrvF     func(ctx *context.Context, rp *ResourceProfile) error
+	GetResourceProfileDrvF     func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error)
+	SetResourceProfileDrvF     func(ctx *context.Context, rp *utils.ResourceProfile) error
 	RemoveResourceProfileDrvF  func(ctx *context.Context, tnt, id string) error
 	RemoveResourceDrvF         func(ctx *context.Context, tnt, id string) error
-	SetResourceDrvF            func(ctx *context.Context, r *Resource) error
+	SetResourceDrvF            func(ctx *context.Context, r *utils.Resource) error
+	GetResourceDrvF            func(ctx *context.Context, tenant, id string) (*utils.Resource, error)
 	SetTrendProfileDrvF        func(ctx *context.Context, tr *utils.TrendProfile) (err error)
 	GetTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (sq *utils.TrendProfile, err error)
 	RemTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (err error)
@@ -76,7 +77,6 @@ type DataDBMock struct {
 	HasDataDrvF                func(ctx *context.Context, category, subject, tenant string) (bool, error)
 	RemoveIndexesDrvF          func(ctx *context.Context, idxItmType, tntCtx, idxKey string) error
 	GetStatQueueDrvF           func(ctx *context.Context, tenant, id string) (sq *StatQueue, err error)
-	GetResourceDrvF            func(ctx *context.Context, tenant, id string) (*Resource, error)
 }
 
 // Storage methods
@@ -121,14 +121,14 @@ func (dbM *DataDBMock) HasDataDrv(ctx *context.Context, category, subject, tenan
 	return false, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceProfileDrv(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
+func (dbM *DataDBMock) GetResourceProfileDrv(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 	if dbM.GetResourceProfileDrvF != nil {
 		return dbM.GetResourceProfileDrvF(ctx, tnt, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetResourceProfileDrv(ctx *context.Context, resPrf *ResourceProfile) error {
+func (dbM *DataDBMock) SetResourceProfileDrv(ctx *context.Context, resPrf *utils.ResourceProfile) error {
 	if dbM.SetResourceProfileDrvF != nil {
 		return dbM.SetResourceProfileDrvF(ctx, resPrf)
 	}
@@ -142,14 +142,14 @@ func (dbM *DataDBMock) RemoveResourceProfileDrv(ctx *context.Context, tnt string
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceDrv(ctx *context.Context, tenant, id string) (*Resource, error) {
+func (dbM *DataDBMock) GetResourceDrv(ctx *context.Context, tenant, id string) (*utils.Resource, error) {
 	if dbM.GetResourceDrvF != nil {
 		return dbM.GetResourceDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetResourceDrv(ctx *context.Context, r *Resource) error {
+func (dbM *DataDBMock) SetResourceDrv(ctx *context.Context, r *utils.Resource) error {
 	if dbM.SetResourceDrvF != nil {
 		return dbM.SetResourceDrvF(ctx, r)
 	}

@@ -1353,15 +1353,15 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]any{
-						utils.ResourceUsage: 6.0,
-						utils.Weight:        0.,
+						utils.ResourceUsageStr: 6.0,
+						utils.Weight:           0.,
 					},
 				},
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]any{
-						utils.ResourceUsage: 7.0,
-						utils.Weight:        0.,
+						utils.ResourceUsageStr: 7.0,
+						utils.Weight:           0.,
 					},
 				},
 			},
@@ -1412,22 +1412,22 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
-						utils.ResourceUsage: 7.0,
-						utils.Weight:        10.,
+						utils.ResourceUsageStr: 7.0,
+						utils.Weight:           10.,
 					},
 				},
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]any{
-						utils.ResourceUsage: 7.0,
-						utils.Weight:        0.,
+						utils.ResourceUsageStr: 7.0,
+						utils.Weight:           0.,
 					},
 				},
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]any{
-						utils.ResourceUsage: 9.0,
-						utils.Weight:        0.,
+						utils.ResourceUsageStr: 9.0,
+						utils.Weight:           0.,
 					},
 				},
 			},

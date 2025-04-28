@@ -372,7 +372,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize 
 	return
 }
 
-func (rs *RedisStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *ResourceProfile, err error) {
+func (rs *RedisStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -384,7 +384,7 @@ func (rs *RedisStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id s
 	return
 }
 
-func (rs *RedisStorage) SetResourceProfileDrv(ctx *context.Context, rsp *ResourceProfile) (err error) {
+func (rs *RedisStorage) SetResourceProfileDrv(ctx *context.Context, rsp *utils.ResourceProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(rsp); err != nil {
 		return
@@ -396,7 +396,7 @@ func (rs *RedisStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, i
 	return rs.Cmd(nil, redisDEL, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (r *Resource, err error) {
+func (rs *RedisStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (r *utils.Resource, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -408,7 +408,7 @@ func (rs *RedisStorage) GetResourceDrv(ctx *context.Context, tenant, id string) 
 	return
 }
 
-func (rs *RedisStorage) SetResourceDrv(ctx *context.Context, r *Resource) (err error) {
+func (rs *RedisStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return

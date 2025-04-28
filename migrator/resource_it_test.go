@@ -180,7 +180,7 @@ func testResITFlush(t *testing.T) {
 }
 
 func testResITMigrateAndMove(t *testing.T) {
-	resPrfl := &engine.ResourceProfile{
+	resPrfl := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RES1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -223,8 +223,8 @@ func testResITMigrateAndMove(t *testing.T) {
 		result, err = resMigrator.dmIN.DataManager().GetResourceProfile(context.TODO(), "cgrates.org", "RES1", false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
-		} else if resMigrator.stats[utils.Resource] != 1 {
-			t.Errorf("Expected 1, received: %v", resMigrator.stats[utils.Resource])
+		} else if resMigrator.stats[utils.ResourceStr] != 1 {
+			t.Errorf("Expected 1, received: %v", resMigrator.stats[utils.ResourceStr])
 		}
 	}
 }

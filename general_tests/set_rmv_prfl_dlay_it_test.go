@@ -123,8 +123,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("SetResourceProfile", func(t *testing.T) {
 
-		eRscPrf := &engine.ResourceProfileWithAPIOpts{
-			ResourceProfile: &engine.ResourceProfile{
+		eRscPrf := &utils.ResourceProfileWithAPIOpts{
+			ResourceProfile: &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "RSC_1",
 			},
@@ -307,8 +307,8 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 
 	t.Run("ReplicatorSv1SetResourceProfile", func(t *testing.T) {
 
-		eRscPrf := &engine.ResourceProfileWithAPIOpts{
-			ResourceProfile: &engine.ResourceProfile{
+		eRscPrf := &utils.ResourceProfileWithAPIOpts{
+			ResourceProfile: &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "RSC_2",
 			},

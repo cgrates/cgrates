@@ -640,20 +640,19 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	}
 	cfg := config.NewDefaultCGRConfig()
 
-	customRply := &ResourceWithConfig{
-		Resource: &Resource{
+	customRply := &utils.ResourceWithConfig{
+		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "ResGroup2",
-			Usages: map[string]*ResourceUsage{
+			Usages: map[string]*utils.ResourceUsage{
 				"RU1": {
 					Tenant: "cgrates.org",
 					ID:     "RU1",
 					Units:  9,
 				},
 			},
-			tUsage: utils.Float64Pointer(9),
 		},
-		Config: &ResourceProfile{
+		Config: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup2",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -670,7 +669,7 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	cc := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply any) error {
-				rplCast, canCast := reply.(*ResourceWithConfig)
+				rplCast, canCast := reply.(*utils.ResourceWithConfig)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil

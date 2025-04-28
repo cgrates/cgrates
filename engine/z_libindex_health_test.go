@@ -394,7 +394,7 @@ func TestHealthIndexResources(t *testing.T) {
 	dm := NewDataManager(db, cfg, nil)
 
 	// we will set this resource but without indexing
-	rsPrf := &ResourceProfile{
+	rsPrf := &utils.ResourceProfile{
 		Tenant: "tenant.custom",
 		ID:     "RES_GRP1",
 		FilterIDs: []string{
@@ -472,7 +472,7 @@ func TestHealthIndexResources(t *testing.T) {
 	}
 
 	//we will use an inexisting Filter(not inline) for the same ResourceProfile
-	rsPrf = &ResourceProfile{
+	rsPrf = &utils.ResourceProfile{
 		Tenant: "tenant.custom",
 		ID:     "RES_GRP1",
 		FilterIDs: []string{

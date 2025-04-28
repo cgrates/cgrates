@@ -259,8 +259,8 @@ func APItoModelResource(rl *utils.TPResourceProfile) (mdls ResourceMdls) {
 	return
 }
 
-func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *ResourceProfile, err error) {
-	rp = &ResourceProfile{
+func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *utils.ResourceProfile, err error) {
+	rp = &utils.ResourceProfile{
 		Tenant:            tpRL.Tenant,
 		ID:                tpRL.ID,
 		Blocker:           tpRL.Blocker,
@@ -290,7 +290,7 @@ func APItoResource(tpRL *utils.TPResourceProfile, timezone string) (rp *Resource
 	return rp, nil
 }
 
-func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
+func ResourceProfileToAPI(rp *utils.ResourceProfile) (tpRL *utils.TPResourceProfile) {
 	tpRL = &utils.TPResourceProfile{
 		Tenant:            rp.Tenant,
 		ID:                rp.ID,

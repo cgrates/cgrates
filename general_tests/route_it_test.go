@@ -295,8 +295,8 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 func testV1SplSAddNewResPrf(t *testing.T) {
 	var result string
 	//add ResourceSupplier1
-	rPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rPrf := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier1",
 			FilterIDs: []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:ResourceSupplier1"},
@@ -318,8 +318,8 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add Resource2Supplier1
-	rPrf2 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rPrf2 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Resource2Supplier1",
 			FilterIDs: []string{"*string:~*req.Supplier:route1", "*string:~*req.ResID:Resource2Supplier1"},
@@ -341,8 +341,8 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add ResourceSupplier2
-	rPrf3 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rPrf3 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier2",
 			FilterIDs: []string{"*string:~*req.Supplier:route2", "*string:~*req.ResID:ResourceSupplier2"},
@@ -364,8 +364,8 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add ResourceSupplier2
-	rPrf4 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rPrf4 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ResourceSupplier3",
 			FilterIDs: []string{"*string:~*req.Supplier:route3", "*string:~*req.ResID:ResourceSupplier3"},

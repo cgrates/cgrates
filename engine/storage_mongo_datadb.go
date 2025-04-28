@@ -673,8 +673,8 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
 	return err
 }
 
-func (ms *MongoStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (*ResourceProfile, error) {
-	rsProfile := new(ResourceProfile)
+func (ms *MongoStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (*utils.ResourceProfile, error) {
+	rsProfile := new(utils.ResourceProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColRsP).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(rsProfile)
@@ -686,7 +686,7 @@ func (ms *MongoStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id s
 	return rsProfile, err
 }
 
-func (ms *MongoStorage) SetResourceProfileDrv(ctx *context.Context, rp *ResourceProfile) error {
+func (ms *MongoStorage) SetResourceProfileDrv(ctx *context.Context, rp *utils.ResourceProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColRsP).UpdateOne(sctx, bson.M{"tenant": rp.Tenant, "id": rp.ID},
 			bson.M{"$set": rp},
@@ -706,8 +706,8 @@ func (ms *MongoStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, i
 	})
 }
 
-func (ms *MongoStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (*Resource, error) {
-	resource := new(Resource)
+func (ms *MongoStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (*utils.Resource, error) {
+	resource := new(utils.Resource)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColRes).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(resource)
@@ -719,7 +719,7 @@ func (ms *MongoStorage) GetResourceDrv(ctx *context.Context, tenant, id string) 
 	return resource, err
 }
 
-func (ms *MongoStorage) SetResourceDrv(ctx *context.Context, r *Resource) error {
+func (ms *MongoStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColRes).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
 			bson.M{"$set": r},

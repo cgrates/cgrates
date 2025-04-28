@@ -2093,7 +2093,7 @@ func TestDMCacheDataFromDBResourceProfilesPrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rp := &ResourceProfile{
+	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RL2",
 		FilterIDs: []string{"fltr_test"},
@@ -2140,17 +2140,16 @@ func TestDMCacheDataFromDBResourcesPrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rs := &Resource{
+	rs := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup2",
-		Usages: map[string]*ResourceUsage{
+		Usages: map[string]*utils.ResourceUsage{
 			"RU1": {
 				Tenant: "cgrates.org",
 				ID:     "RU1",
 				Units:  9,
 			},
 		},
-		tUsage: utils.Float64Pointer(9),
 	}
 
 	if err := dm.SetResource(context.Background(), rs); err != nil {
@@ -4772,10 +4771,10 @@ func TestDMGetResourceSetResourceDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetResourceDrvF: func(ctx *context.Context, tenant, id string) (*Resource, error) {
-			return &Resource{}, utils.ErrNotFound
+		GetResourceDrvF: func(ctx *context.Context, tenant, id string) (*utils.Resource, error) {
+			return &utils.Resource{}, utils.ErrNotFound
 		},
-		SetResourceDrvF: func(ctx *context.Context, r *Resource) error { return utils.ErrNotImplemented },
+		SetResourceDrvF: func(ctx *context.Context, r *utils.Resource) error { return utils.ErrNotImplemented },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -4851,17 +4850,16 @@ func TestDMGetResourceCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg, cM)
 
-	rs := &Resource{
+	rs := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup2",
-		Usages: map[string]*ResourceUsage{
+		Usages: map[string]*utils.ResourceUsage{
 			"RU1": {
 				Tenant: "cgrates.org",
 				ID:     "RU1",
 				Units:  9,
 			},
 		},
-		tUsage: utils.Float64Pointer(9),
 	}
 
 	if err := dm.dataDB.SetResourceDrv(context.Background(), rs); err != nil {
@@ -4886,22 +4884,21 @@ func TestDMSetResourceSetResourceDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		SetResourceDrvF: func(ctx *context.Context, r *Resource) error { return utils.ErrNotImplemented },
+		SetResourceDrvF: func(ctx *context.Context, r *utils.Resource) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rs := &Resource{
+	rs := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup2",
-		Usages: map[string]*ResourceUsage{
+		Usages: map[string]*utils.ResourceUsage{
 			"RU1": {
 				Tenant: "cgrates.org",
 				ID:     "RU1",
 				Units:  9,
 			},
 		},
-		tUsage: utils.Float64Pointer(9),
 	}
 
 	if err := dm.SetResource(context.Background(), rs); err != utils.ErrNotImplemented {
@@ -5040,10 +5037,10 @@ func TestDMGetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
-			return &ResourceProfile{}, utils.ErrNotFound
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+			return &utils.ResourceProfile{}, utils.ErrNotFound
 		},
-		SetResourceProfileDrvF: func(ctx *context.Context, rp *ResourceProfile) error { return utils.ErrNotImplemented },
+		SetResourceProfileDrvF: func(ctx *context.Context, rp *utils.ResourceProfile) error { return utils.ErrNotImplemented },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -5119,7 +5116,7 @@ func TestDMGetResourceProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg, cM)
 
-	rp := &ResourceProfile{
+	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RL2",
 		FilterIDs: []string{"fltr_test"},
@@ -5317,7 +5314,7 @@ func TestDMSetResourceProfileNilDm(t *testing.T) {
 
 	var dm *DataManager
 
-	if err := dm.SetResourceProfile(context.Background(), &ResourceProfile{}, false); err != utils.ErrNoDatabaseConn {
+	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
 	}
 
@@ -5333,14 +5330,14 @@ func TestDMSetResourceProfileGetResourceProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
-			return &ResourceProfile{}, utils.ErrNotImplemented
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+			return &utils.ResourceProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	if err := dm.SetResourceProfile(context.Background(), &ResourceProfile{}, false); err != utils.ErrNotImplemented {
+	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 
@@ -5355,15 +5352,15 @@ func TestDMSetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
-			return &ResourceProfile{}, nil
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+			return &utils.ResourceProfile{}, nil
 		},
-		SetResourceProfileDrvF: func(ctx *context.Context, rp *ResourceProfile) error { return utils.ErrNotImplemented },
+		SetResourceProfileDrvF: func(ctx *context.Context, rp *utils.ResourceProfile) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	if err := dm.SetResourceProfile(context.Background(), &ResourceProfile{}, false); err != utils.ErrNotImplemented {
+	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 
@@ -5379,15 +5376,15 @@ func TestDMSetResourceProfileUpdatedIndexesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
-			return &ResourceProfile{}, nil
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+			return &utils.ResourceProfile{}, nil
 		},
-		SetResourceProfileDrvF: func(ctx *context.Context, rp *ResourceProfile) error { return nil },
+		SetResourceProfileDrvF: func(ctx *context.Context, rp *utils.ResourceProfile) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	rp := &ResourceProfile{
+	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RL1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -5437,7 +5434,7 @@ func TestDMSetResourceProfileErr(t *testing.T) {
 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, cM)
 
-	if err := dm.SetResourceProfile(context.Background(), &ResourceProfile{}, false); err != utils.ErrNotImplemented {
+	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
 	}
 
@@ -5463,8 +5460,8 @@ func TestDMRemoveResourceProfileGetResourceProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
-			return &ResourceProfile{}, utils.ErrNotImplemented
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+			return &utils.ResourceProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
@@ -5486,8 +5483,8 @@ func TestDMRemoveResourceProfileRemoveResourceProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) {
-			return &ResourceProfile{}, nil
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+			return &utils.ResourceProfile{}, nil
 		},
 		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error { return utils.ErrNotImplemented },
 	}
@@ -5527,7 +5524,7 @@ func TestDMRemoveResourceProfileRemoveItemFromFilterIndexErr(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	rp := &ResourceProfile{
+	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RSP1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -5544,7 +5541,7 @@ func TestDMRemoveResourceProfileRemoveItemFromFilterIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) { return rp, nil },
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
 		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
 			return nil
 		},
@@ -5565,7 +5562,7 @@ func TestDMRemoveResourceProfileRemoveIndexFiltersItemErr(t *testing.T) {
 		Cache = tmp
 	}()
 	Cache.Clear(nil)
-	rp := &ResourceProfile{
+	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RSP1",
 		FilterIDs: []string{"fltrID"},
@@ -5582,7 +5579,7 @@ func TestDMRemoveResourceProfileRemoveIndexFiltersItemErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) { return rp, nil },
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
 		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
 			return nil
 		},
@@ -5605,7 +5602,7 @@ func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	rp := &ResourceProfile{
+	rp := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RSP1",
 		FilterIDs: []string{"fltrID"},
@@ -5636,7 +5633,7 @@ func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*ResourceProfile, error) { return rp, nil },
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
 		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
 			return nil
 		},
@@ -9382,4 +9379,128 @@ func TestDMGetRateProfileNildm(t *testing.T) {
 	if err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNoDatabaseConn, err)
 	}
+}
+
+func TestDMResourcesUpdateResource(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, nil)
+	Cache.Clear(nil)
+	res := &utils.ResourceProfile{
+		Tenant:   "cgrates.org",
+		ID:       "RES1",
+		UsageTTL: 0,
+		Limit:    10,
+		Stored:   true,
+	}
+	r := &utils.Resource{
+		Tenant: res.Tenant,
+		ID:     res.ID,
+		Usages: map[string]*utils.ResourceUsage{
+			"jkbdfgs": {
+				Tenant:     res.Tenant,
+				ID:         "jkbdfgs",
+				ExpiryTime: time.Now(),
+				Units:      5,
+			},
+		},
+		TTLIdx: []string{"jkbdfgs"},
+	}
+	expR := &utils.Resource{
+		Tenant: res.Tenant,
+		ID:     res.ID,
+		Usages: make(map[string]*utils.ResourceUsage),
+	}
+	if err := dm.SetResourceProfile(context.Background(), res, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if r, err := dm.GetResource(context.Background(), res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.RemoveResource(context.Background(), r.Tenant, r.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := dm.SetResourceProfile(context.Background(), res, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if r, err := dm.GetResource(context.Background(), res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.SetResource(context.Background(), r); err != nil {
+		t.Fatal(err)
+	}
+
+	res = &utils.ResourceProfile{
+		Tenant:   "cgrates.org",
+		ID:       "RES1",
+		UsageTTL: 0,
+		Limit:    5,
+		Stored:   true,
+	}
+	if err := dm.SetResourceProfile(context.Background(), res, true); err != nil {
+		t.Fatal(err)
+	}
+	if r, err := dm.GetResource(context.Background(), res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.SetResource(context.Background(), r); err != nil {
+		t.Fatal(err)
+	}
+
+	res = &utils.ResourceProfile{
+		Tenant:   "cgrates.org",
+		ID:       "RES1",
+		UsageTTL: 10,
+		Limit:    5,
+		Stored:   true,
+	}
+	if err := dm.SetResourceProfile(context.Background(), res, true); err != nil {
+		t.Fatal(err)
+	}
+	if r, err := dm.GetResource(context.Background(), res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.SetResource(context.Background(), r); err != nil {
+		t.Fatal(err)
+	}
+
+	res = &utils.ResourceProfile{
+		Tenant:   "cgrates.org",
+		ID:       "RES1",
+		UsageTTL: 10,
+		Limit:    5,
+		Stored:   false,
+	}
+	if err := dm.SetResourceProfile(context.Background(), res, true); err != nil {
+		t.Fatal(err)
+	}
+	if r, err := dm.GetResource(context.Background(), res.Tenant, res.ID, false, false, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(r, expR) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expR), utils.ToJSON(r))
+	}
+
+	if err := dm.RemoveResourceProfile(context.Background(), res.Tenant, res.ID, true); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := dm.GetResource(context.Background(), res.Tenant, res.ID, false, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Fatal(err)
+	}
+
+	dm.DataDB().Flush(utils.EmptyString)
 }

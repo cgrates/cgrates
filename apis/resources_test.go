@@ -45,11 +45,11 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 			ID: "RES_1",
 		},
 	}
-	var result engine.ResourceProfile
+	var result utils.ResourceProfile
 	var reply string
 
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	resPrf := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RES_1",
 			AllocationMessage: "Approved",
@@ -121,7 +121,7 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	var rcv engine.ResourceProfile
+	var rcv utils.ResourceProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
 	if err := adms.GetResourceProfile(context.Background(), &utils.TenantIDWithAPIOpts{}, &rcv); err == nil ||
@@ -156,8 +156,8 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{},
+	resPrf := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{},
 	}
 
 	var reply string
@@ -190,14 +190,14 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			resPrf := &engine.ResourceProfile{
+		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+			resPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return resPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
 		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
@@ -230,8 +230,8 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	resPrf := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			ID:     "TestResourcesRemoveResourceProfileCheckErrors",
 			Tenant: "cgrates.org",
 			Limit:  5,
@@ -264,7 +264,7 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	var rcv engine.ResourceProfile
+	var rcv utils.ResourceProfile
 
 	arg := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -295,14 +295,14 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			resPrf := &engine.ResourceProfile{
+		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+			resPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return resPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
 		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
@@ -341,14 +341,14 @@ func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			resPrf := &engine.ResourceProfile{
+		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+			resPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return resPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
 		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
@@ -407,14 +407,14 @@ func TestResourcesGetResourceProfilesCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			resPrf := &engine.ResourceProfile{
+		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+			resPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return resPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
 		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
@@ -462,204 +462,6 @@ func TestResourcesGetResourceProfilesCountErrKeys(t *testing.T) {
 	}
 }
 
-func TestResourcesNewResourceSv1(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
-	rls := engine.NewResourceService(dm, cfg, nil, nil)
-
-	exp := &ResourceSv1{
-		rls: rls,
-	}
-	rcv := NewResourceSv1(rls)
-
-	if !reflect.DeepEqual(rcv, exp) {
-		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv)
-	}
-}
-
-func TestResourcesSv1Ping(t *testing.T) {
-	resSv1 := new(ResourceSv1)
-	var reply string
-	if err := resSv1.Ping(nil, nil, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Unexpected reply error")
-	}
-}
-
-func TestResourcesGetResource(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rls := engine.NewResourceService(dm, cfg, fltrs, nil)
-	adms := &AdminSv1{
-		dm:  dm,
-		cfg: cfg,
-	}
-
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "rsID",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			Limit:             5,
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				}},
-		},
-	}
-
-	var reply string
-	if err := adms.SetResourceProfile(context.Background(), resPrf,
-		&reply); err != nil {
-		t.Error(err)
-	}
-
-	rsv1 := NewResourceSv1(rls)
-	args := &utils.CGREvent{
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		ID: "EventTest",
-		APIOpts: map[string]any{
-			utils.OptsResourcesUsageID: "RU_Test",
-		},
-	}
-
-	expResources := engine.Resources{
-		{
-			Tenant: "cgrates.org",
-			ID:     "rsID",
-			Usages: make(map[string]*engine.ResourceUsage),
-		},
-	}
-
-	var rplyResources engine.Resources
-	if err := rsv1.GetResourcesForEvent(context.Background(), args, &rplyResources); err != nil {
-		t.Error(err)
-	} else {
-		// We compare JSONs because the received Resources have unexported fields
-		if utils.ToJSON(expResources) != utils.ToJSON(rplyResources) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expResources), utils.ToJSON(rplyResources))
-		}
-	}
-
-	expResource := engine.Resource{
-		Tenant: "cgrates.org",
-		ID:     "rsID",
-		Usages: make(map[string]*engine.ResourceUsage),
-	}
-
-	var rplyResource engine.Resource
-	if err := rsv1.GetResource(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
-		Tenant: "cgrates.org",
-		ID:     "rsID",
-	}}, &rplyResource); err != nil {
-		t.Error(err)
-	} else {
-		// We compare JSONs because the received Resource has unexported fields
-		if utils.ToJSON(rplyResource) != utils.ToJSON(expResource) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expResource), utils.ToJSON(rplyResource))
-		}
-	}
-
-	expResourceWithCfg := engine.ResourceWithConfig{
-		Resource: &engine.Resource{
-			Tenant: "cgrates.org",
-			ID:     "rsID",
-			Usages: make(map[string]*engine.ResourceUsage),
-		},
-		Config: resPrf.ResourceProfile,
-	}
-
-	var rplyResourceWithCfg engine.ResourceWithConfig
-	if err := rsv1.GetResourceWithConfig(context.Background(), &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
-		Tenant: "cgrates.org",
-		ID:     "rsID",
-	}}, &rplyResourceWithCfg); err != nil {
-		t.Error(err)
-	} else {
-		// We compare JSONs because the received Resource has unexported fields
-		if utils.ToJSON(expResourceWithCfg) != utils.ToJSON(rplyResourceWithCfg) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>",
-				utils.ToJSON(expResourceWithCfg), utils.ToJSON(rplyResourceWithCfg))
-		}
-	}
-	dm.DataDB().Flush(utils.EmptyString)
-}
-
-func TestResourcesAuthorizeAllocateReleaseResource(t *testing.T) {
-	engine.Cache.Clear(nil)
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
-	fltrs := engine.NewFilterS(cfg, nil, dm)
-	rls := engine.NewResourceService(dm, cfg, fltrs, nil)
-	adms := &AdminSv1{
-		dm:  dm,
-		cfg: cfg,
-	}
-
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
-			Tenant:            "cgrates.org",
-			ID:                "rsID",
-			FilterIDs:         []string{"*string:~*req.Account:1001"},
-			Limit:             5,
-			AllocationMessage: "Approved",
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				}},
-		},
-	}
-
-	var reply string
-	if err := adms.SetResourceProfile(context.Background(), resPrf,
-		&reply); err != nil {
-		t.Error(err)
-	}
-
-	rsv1 := NewResourceSv1(rls)
-	args := &utils.CGREvent{
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		ID: "EventTest",
-		APIOpts: map[string]any{
-			utils.OptsResourcesUsageID: "RU_Test",
-		},
-	}
-
-	if err := rsv1.AuthorizeResources(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != "Approved" {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", "Approved", reply)
-	}
-
-	if err := rsv1.AllocateResources(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != "Approved" {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", "Approved", reply)
-	}
-
-	if err := rsv1.ReleaseResources(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.OK, reply)
-	}
-}
-
 func TestResourcesGetResourceProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -667,8 +469,8 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
-	args1 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	args1 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "test_ID1",
 			Limit:             10,
@@ -690,8 +492,8 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 		t.Error("Unexpected reply returned:", setReply)
 	}
 
-	args2 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	args2 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "test_ID2",
 			Limit:             15,
@@ -713,8 +515,8 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 	}
 
 	// this profile will not match
-	args3 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	args3 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "test2_ID1",
 			Limit:             10,
@@ -739,7 +541,7 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
 	}
-	exp := []*engine.ResourceProfile{
+	exp := []*utils.ResourceProfile{
 		{
 			Tenant:            "cgrates.org",
 			ID:                "test_ID1",
@@ -766,7 +568,7 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 		},
 	}
 
-	var getReply []*engine.ResourceProfile
+	var getReply []*utils.ResourceProfile
 	if err := admS.GetResourceProfiles(context.Background(), argsGet, &getReply); err != nil {
 		t.Error(err)
 	} else {
@@ -787,8 +589,8 @@ func TestResourcesGetResourceProfilesGetIDsErr(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
-	args := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	args := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "test_ID1",
 			Limit:             10,
@@ -821,7 +623,7 @@ func TestResourcesGetResourceProfilesGetIDsErr(t *testing.T) {
 	}
 
 	experr := `SERVER_ERROR: maximum number of items exceeded`
-	var getReply []*engine.ResourceProfile
+	var getReply []*utils.ResourceProfile
 	if err := admS.GetResourceProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -832,7 +634,7 @@ func TestResourcesGetResourceProfilesGetProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
 		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
@@ -849,7 +651,7 @@ func TestResourcesGetResourceProfilesGetProfileErr(t *testing.T) {
 		dm:  dm,
 	}
 
-	var reply []*engine.ResourceProfile
+	var reply []*utils.ResourceProfile
 	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.GetResourceProfiles(context.Background(),
@@ -867,14 +669,14 @@ func TestResourcesGetResourceProfileIDsGetOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			rsPrf := &engine.ResourceProfile{
+		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+			rsPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rsPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
 		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
@@ -912,14 +714,14 @@ func TestResourcesGetResourceProfileIDsPaginateErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*engine.ResourceProfile, error) {
-			rsPrf := &engine.ResourceProfile{
+		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+			rsPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rsPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *engine.ResourceProfile) error {
+		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
 		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {

@@ -895,8 +895,8 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	rsPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsPrf := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			ID:        "RES_ID",
 			FilterIDs: []string{"FLTR_ID"},
 			Weights: utils.DynamicWeights{
@@ -1067,8 +1067,8 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	rsPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsPrf := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			ID:        "RES_ID",
 			FilterIDs: []string{"FLTR_ID"},
 			Weights: utils.DynamicWeights{

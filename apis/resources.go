@@ -23,12 +23,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetResourceProfile returns a resource configuration
-func (adms *AdminSv1) GetResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error {
+func (adms *AdminSv1) GetResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -73,7 +72,7 @@ func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.Ar
 }
 
 // GetResourceProfiles returns a list of resource profiles registered for a tenant
-func (admS *AdminSv1) GetResourceProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfs *[]*engine.ResourceProfile) (err error) {
+func (admS *AdminSv1) GetResourceProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfs *[]*utils.ResourceProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -82,9 +81,9 @@ func (admS *AdminSv1) GetResourceProfiles(ctx *context.Context, args *utils.Args
 	if err = admS.GetResourceProfileIDs(ctx, args, &rsPrfIDs); err != nil {
 		return
 	}
-	*rsPrfs = make([]*engine.ResourceProfile, 0, len(rsPrfIDs))
+	*rsPrfs = make([]*utils.ResourceProfile, 0, len(rsPrfIDs))
 	for _, rsPrfID := range rsPrfIDs {
-		var rsPrf *engine.ResourceProfile
+		var rsPrf *utils.ResourceProfile
 		rsPrf, err = admS.dm.GetResourceProfile(ctx, tnt, rsPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -114,7 +113,7 @@ func (admS *AdminSv1) GetResourceProfilesCount(ctx *context.Context, args *utils
 }
 
 // SetResourceProfile adds a new resource configuration
-func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *engine.ResourceProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *utils.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -176,43 +175,4 @@ func (adms *AdminSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.Ten
 	}
 	*reply = utils.OK
 	return nil
-}
-
-func NewResourceSv1(rls *engine.ResourceS) *ResourceSv1 {
-	return &ResourceSv1{rls: rls}
-}
-
-// Exports RPC from RLs
-type ResourceSv1 struct {
-	ping
-	rls *engine.ResourceS
-}
-
-// GetResourcesForEvent returns Resources matching a specific event
-func (rsv1 *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.Resources) error {
-	return rsv1.rls.V1GetResourcesForEvent(ctx, args, reply)
-}
-
-// AuthorizeResources checks if there are limits imposed for event
-func (rsv1 *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
-	return rsv1.rls.V1AuthorizeResources(ctx, args, reply)
-}
-
-// AllocateResources records usage for an event
-func (rsv1 *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
-	return rsv1.rls.V1AllocateResources(ctx, args, reply)
-}
-
-// ReleaseResources releases usage for an event
-func (rsv1 *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
-	return rsv1.rls.V1ReleaseResources(ctx, args, reply)
-}
-
-// GetResource returns a resource configuration
-func (rsv1 *ResourceSv1) GetResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Resource) error {
-	return rsv1.rls.V1GetResource(ctx, args, reply)
-}
-
-func (rsv1 *ResourceSv1) GetResourceWithConfig(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error {
-	return rsv1.rls.V1GetResourceWithConfig(ctx, args, reply)
 }

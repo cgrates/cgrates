@@ -1143,14 +1143,14 @@ func testITResourceProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	resPref1 := &ResourceProfile{
+	resPref1 := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RES_PRF1",
 		FilterIDs: []string{"FIRST", "RES_FLTR1", "*string:~*req.Account:DAN"},
 		Limit:     23,
 		Stored:    true,
 	}
-	resPref2 := &ResourceProfile{
+	resPref2 := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RES_PRF2",
 		FilterIDs: []string{"RES_FLTR1"},

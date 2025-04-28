@@ -115,7 +115,7 @@ func testOnStorITIsDBEmpty(t *testing.T) {
 }
 
 func testOnStorITResourceProfile(t *testing.T) {
-	rL := &ResourceProfile{
+	rL := &utils.ResourceProfile{
 		Tenant: "cgrates.org",
 		ID:     "RL_TEST2",
 		Weights: utils.DynamicWeights{
@@ -173,10 +173,10 @@ func testOnStorITResourceProfile(t *testing.T) {
 }
 
 func testOnStorITResource(t *testing.T) {
-	res := &Resource{
+	res := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RL1",
-		Usages: map[string]*ResourceUsage{
+		Usages: map[string]*utils.ResourceUsage{
 			"RU1": {
 				ID:         "RU1",
 				ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),

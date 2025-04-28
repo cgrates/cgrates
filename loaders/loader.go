@@ -82,7 +82,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 	case utils.MetaAttributes:
 		return dm.SetAttributeProfile(ctx, data.(*utils.AttributeProfile), withIndex)
 	case utils.MetaResources:
-		return dm.SetResourceProfile(ctx, data.(*engine.ResourceProfile), withIndex)
+		return dm.SetResourceProfile(ctx, data.(*utils.ResourceProfile), withIndex)
 	case utils.MetaFilters:
 		fltr := data.(*engine.Filter)
 		fltr.Compress()

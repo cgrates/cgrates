@@ -49,7 +49,7 @@ func (tpRes TPResources) exportItems(ctx *context.Context, wrtr io.Writer, tnt s
 		return
 	}
 	for _, resID := range itmIDs {
-		var resPrf *engine.ResourceProfile
+		var resPrf *utils.ResourceProfile
 		resPrf, err = tpRes.dm.GetResourceProfile(ctx, tnt, resID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

@@ -390,7 +390,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("ResourceProfiles:")
 	}
 	for _, tpRsp := range tpr.resProfiles {
-		var rsp *ResourceProfile
+		var rsp *utils.ResourceProfile
 		if rsp, err = APItoResource(tpRsp, tpr.timezone); err != nil {
 			return
 		}

@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apis
+package resources
 
 import (
 	"io"
@@ -150,7 +150,7 @@ func testResourceSKillEngine(t *testing.T) {
 }
 
 func testResourceSGetResourceBeforeSet(t *testing.T) { // cache it with not found
-	var rplyRes *engine.Resource
+	var rplyRes *utils.Resource
 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1GetResource,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -162,7 +162,7 @@ func testResourceSGetResourceBeforeSet(t *testing.T) { // cache it with not foun
 }
 
 func testResourceSGetResourceProfileBeforeSet(t *testing.T) { // cache it with not found
-	var rplyRes *[]*engine.ResourceProfile
+	var rplyRes *[]*utils.ResourceProfile
 	var args *utils.ArgsItemIDs
 	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
 		args, &rplyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -171,8 +171,8 @@ func testResourceSGetResourceProfileBeforeSet(t *testing.T) { // cache it with n
 }
 
 func testResourceSSetResourceProfiles(t *testing.T) {
-	rsPrf1 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsPrf1 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup1",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -194,8 +194,8 @@ func testResourceSSetResourceProfiles(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	rsPrf2 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsPrf2 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup2",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -218,14 +218,14 @@ func testResourceSSetResourceProfiles(t *testing.T) {
 }
 
 func testResourceSGetResourceAfterSet(t *testing.T) {
-	var rplyRes engine.Resource
-	var rplyResPrf engine.ResourceProfile
-	expRes := engine.Resource{
+	var rplyRes utils.Resource
+	var rplyResPrf utils.ResourceProfile
+	expRes := utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup1",
-		Usages: make(map[string]*engine.ResourceUsage),
+		Usages: make(map[string]*utils.ResourceUsage),
 	}
-	expResPrf := engine.ResourceProfile{
+	expResPrf := utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -260,12 +260,12 @@ func testResourceSGetResourceAfterSet(t *testing.T) {
 			utils.ToJSON(expResPrf), utils.ToJSON(rplyResPrf))
 	}
 
-	expRes = engine.Resource{
+	expRes = utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup2",
-		Usages: make(map[string]*engine.ResourceUsage),
+		Usages: make(map[string]*utils.ResourceUsage),
 	}
-	expResPrf = engine.ResourceProfile{
+	expResPrf = utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup2",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -302,14 +302,14 @@ func testResourceSGetResourceAfterSet(t *testing.T) {
 }
 
 func testResourceSGetResourceWithConfigAfterSet(t *testing.T) {
-	var rplyRes engine.ResourceWithConfig
-	expRes := engine.ResourceWithConfig{
-		Resource: &engine.Resource{
+	var rplyRes utils.ResourceWithConfig
+	expRes := utils.ResourceWithConfig{
+		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "ResGroup2",
-			Usages: make(map[string]*engine.ResourceUsage),
+			Usages: make(map[string]*utils.ResourceUsage),
 		},
-		Config: &engine.ResourceProfile{
+		Config: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup2",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -351,9 +351,9 @@ func testResourceSGetResourceProfileIDs(t *testing.T) {
 }
 
 func testResourceSGetResourceProfiles(t *testing.T) {
-	var rplyRes []*engine.ResourceProfile
+	var rplyRes []*utils.ResourceProfile
 	var args *utils.ArgsItemIDs
-	exp := []*engine.ResourceProfile{
+	exp := []*utils.ResourceProfile{
 		{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup1",
@@ -413,19 +413,23 @@ func testResourceSGetResourcesForEvent(t *testing.T) {
 		},
 	}
 
-	exp := engine.Resources{
+	exp := Resources{
 		{
-			Tenant: "cgrates.org",
-			ID:     "ResGroup1",
-			Usages: make(map[string]*engine.ResourceUsage),
+			Resource: &utils.Resource{
+				Tenant: "cgrates.org",
+				ID:     "ResGroup1",
+				Usages: make(map[string]*utils.ResourceUsage),
+			},
 		},
 		{
-			Tenant: "cgrates.org",
-			ID:     "ResGroup2",
-			Usages: make(map[string]*engine.ResourceUsage),
+			Resource: &utils.Resource{
+				Tenant: "cgrates.org",
+				ID:     "ResGroup2",
+				Usages: make(map[string]*utils.ResourceUsage),
+			},
 		},
 	}
-	var reply engine.Resources
+	var reply Resources
 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1GetResourcesForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
@@ -546,7 +550,7 @@ func testResourceSRemoveResourceProfiles(t *testing.T) {
 }
 
 func testResourceSGetResourceProfilesAfterRemove(t *testing.T) {
-	var rplyResPrf engine.ResourceProfile
+	var rplyResPrf utils.ResourceProfile
 	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",
@@ -650,7 +654,7 @@ func testResourceSSetThresholdProfile(t *testing.T) {
 }
 
 func testResourceSSetResourceProfile(t *testing.T) {
-	rsPrf := &engine.ResourceProfile{
+	rsPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RES_1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -666,7 +670,7 @@ func testResourceSSetResourceProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	var result *engine.ResourceProfile
+	var result *utils.ResourceProfile
 	if err := rsRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rsPrf.ID}, &result); err != nil {
 		t.Error(err)
@@ -747,8 +751,8 @@ func testResourceSCheckThresholdAfterResourceRelease(t *testing.T) {
 }
 
 func testResourceSGetResourceProfilesWithPrefix(t *testing.T) {
-	rsPrf1 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsPrf1 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "PrefixResGroup1",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -770,8 +774,8 @@ func testResourceSGetResourceProfilesWithPrefix(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	rsPrf2 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsPrf2 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup2",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -792,11 +796,11 @@ func testResourceSGetResourceProfilesWithPrefix(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	var rplyRes []*engine.ResourceProfile
+	var rplyRes []*utils.ResourceProfile
 	args := &utils.ArgsItemIDs{
 		ItemsPrefix: "PrefixRes",
 	}
-	exp := []*engine.ResourceProfile{
+	exp := []*utils.ResourceProfile{
 		{
 			Tenant:            "cgrates.org",
 			ID:                "PrefixResGroup1",

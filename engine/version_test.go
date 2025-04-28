@@ -52,7 +52,7 @@ func TestCurrentDBVersions(t *testing.T) {
 	expVersDataDB := Versions{
 		utils.Stats: 4, utils.AccountsStr: 3, utils.Actions: 2,
 		utils.Thresholds: 4, utils.Routes: 2, utils.Attributes: 7,
-		utils.RQF: 5, utils.Resource: 1,
+		utils.RQF: 5, utils.ResourceStr: 1,
 		utils.Subscribers: 1,
 		utils.Chargers:    2,
 		utils.LoadIDsVrs:  1, utils.RateProfiles: 1,
@@ -114,7 +114,7 @@ func TestCurrentAllDBVersions(t *testing.T) {
 		utils.Routes:         2,
 		utils.Attributes:     7,
 		utils.RQF:            5,
-		utils.Resource:       1,
+		utils.ResourceStr:    1,
 		utils.Subscribers:    1,
 		utils.Chargers:       2,
 		utils.LoadIDsVrs:     1,

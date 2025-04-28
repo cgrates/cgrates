@@ -740,8 +740,8 @@ func testFltrRplThresholdProfile(t *testing.T) {
 
 // func testFltrRplResourceProfile(t *testing.T) {
 // 	resID := "RES1"
-// 	resPrf := &engine.ResourceProfileWithAPIOpts{
-// 		ResourceProfile: &engine.ResourceProfile{
+// 	resPrf := &utils.ResourceProfileWithAPIOpts{
+// 		ResourceProfile: &utils.ResourceProfile{
 // 			Tenant:            "cgrates.org",
 // 			ID:                resID,
 // 			FilterIDs:         []string{"*string:~*req.Account:dan"},
@@ -759,7 +759,7 @@ func testFltrRplThresholdProfile(t *testing.T) {
 // 		Usages: make(map[string]*engine.ResourceUsage),
 // 	}
 // 	var result string
-// 	var replyPrfl *engine.ResourceProfile
+// 	var replyPrfl *utils.ResourceProfile
 // 	var rplyIDs []string
 // 	var replyRs engine.Resource
 
