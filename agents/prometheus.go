@@ -77,6 +77,64 @@ const (
 	promGoMemstatsFreesTotal            = "go_memstats_frees_total"
 )
 
+// Prometheus metrics mappings
+var (
+	processMetricsMapping = map[string]string{
+		promProcessCPUSecondsTotal:          utils.MetricProcCPUTime,
+		promProcessOpenFds:                  utils.MetricProcOpenFDs,
+		promProcessMaxFds:                   utils.MetricProcMaxFDs,
+		promProcessResidentMemoryBytes:      utils.MetricProcResidentMemory,
+		promProcessVirtualMemoryBytes:       utils.MetricProcVirtualMemory,
+		promProcessVirtualMemoryMaxBytes:    utils.MetricProcMaxVirtualMemory,
+		promProcessStartTimeSeconds:         utils.MetricProcStartTime,
+		promProcessNetworkReceiveByteTotal:  utils.MetricProcNetworkReceiveTotal,
+		promProcessNetworkTransmitByteTotal: utils.MetricProcNetworkTransmitTotal,
+	}
+
+	runtimeMetricsMapping = map[string]string{
+		promGoGoroutines:             utils.MetricRuntimeGoroutines,
+		promGoThreads:                utils.MetricRuntimeThreads,
+		promGoSchedGomaxprocsThreads: utils.MetricRuntimeMaxProcs,
+		promGoGCGogcPercent:          utils.MetricGCPercent,
+		promGoGCGomemlimitBytes:      utils.MetricMemLimit,
+	}
+
+	memStatsMetricsMapping = map[string]string{
+		promGoMemstatsAllocBytes:        utils.MetricMemAlloc,
+		promGoMemstatsHeapAllocBytes:    utils.MetricMemHeapAlloc,
+		promGoMemstatsHeapIdleBytes:     utils.MetricMemHeapIdle,
+		promGoMemstatsHeapInuseBytes:    utils.MetricMemHeapInuse,
+		promGoMemstatsHeapObjects:       utils.MetricMemHeapObjects,
+		promGoMemstatsHeapReleasedBytes: utils.MetricMemHeapReleased,
+		promGoMemstatsHeapSysBytes:      utils.MetricMemHeapSys,
+		promGoMemstatsBuckHashSysBytes:  utils.MetricMemBuckHashSys,
+		promGoMemstatsGCSysBytes:        utils.MetricMemGCSys,
+		promGoMemstatsMCacheInuseBytes:  utils.MetricMemMCacheInuse,
+		promGoMemstatsMCacheSysBytes:    utils.MetricMemMCacheSys,
+		promGoMemstatsMSpanInuseBytes:   utils.MetricMemMSpanInuse,
+		promGoMemstatsMSpanSysBytes:     utils.MetricMemMSpanSys,
+		promGoMemstatsNextGCBytes:       utils.MetricMemNextGC,
+		promGoMemstatsOtherSysBytes:     utils.MetricMemOtherSys,
+		promGoMemstatsStackInuseBytes:   utils.MetricMemStackInuse,
+		promGoMemstatsStackSysBytes:     utils.MetricMemStackSys,
+		promGoMemstatsSysBytes:          utils.MetricMemSys,
+		promGoMemstatsLastGCTimeSeconds: utils.MetricMemLastGC,
+		promGoMemstatsAllocBytesTotal:   utils.MetricMemTotalAlloc,
+		promGoMemstatsMallocsTotal:      utils.MetricMemMallocs,
+		promGoMemstatsFreesTotal:        utils.MetricMemFrees,
+	}
+
+	counterMetricsSet = map[string]struct{}{
+		promProcessCPUSecondsTotal:          {},
+		promProcessNetworkReceiveByteTotal:  {},
+		promProcessNetworkTransmitByteTotal: {},
+
+		promGoMemstatsAllocBytesTotal: {},
+		promGoMemstatsMallocsTotal:    {},
+		promGoMemstatsFreesTotal:      {},
+	}
+)
+
 // PrometheusAgent handles metrics collection for Prometheus.
 // It collects stats from StatQueues and exposes them alongside
 // optional Go runtime and process metrics.
@@ -274,87 +332,36 @@ func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			panic("missing node_id in CoreSv1.Status reply")
 		}
 
-		if val, ok := reply[utils.MetricRuntimeGoroutines].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs[promGoGoroutines], prometheus.GaugeValue, val, nodeID)
-		}
-		if val, ok := reply[utils.MetricRuntimeThreads].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs[promGoThreads], prometheus.GaugeValue, val, nodeID)
-		}
 		if version, ok := reply[utils.GoVersion].(string); ok {
 			ch <- prometheus.MustNewConstMetric(c.descs[promGoInfo], prometheus.GaugeValue, 1, nodeID, version)
 		}
-
+		for metricName, key := range runtimeMetricsMapping {
+			if val, ok := reply[key].(float64); ok {
+				ch <- prometheus.MustNewConstMetric(c.descs[metricName], prometheus.GaugeValue, val, nodeID)
+			}
+		}
 		if procStats, ok := reply[utils.FieldProcStats].(map[string]any); ok {
-			if val, ok := procStats[utils.MetricProcCPUTime].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessCPUSecondsTotal], prometheus.CounterValue, val, nodeID)
-			}
-			if val, ok := procStats[utils.MetricProcOpenFDs].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessOpenFds], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats[utils.MetricProcMaxFDs].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessMaxFds], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats[utils.MetricProcResidentMemory].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessResidentMemoryBytes], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats[utils.MetricProcVirtualMemory].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessVirtualMemoryBytes], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats[utils.MetricProcMaxVirtualMemory].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessVirtualMemoryMaxBytes], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats[utils.MetricProcStartTime].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessStartTimeSeconds], prometheus.GaugeValue, val, nodeID)
-			}
-			if val, ok := procStats[utils.MetricProcNetworkReceiveTotal].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessNetworkReceiveByteTotal], prometheus.CounterValue, val, nodeID)
-			}
-			if val, ok := procStats[utils.MetricProcNetworkTransmitTotal].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promProcessNetworkTransmitByteTotal], prometheus.CounterValue, val, nodeID)
+			for metricName, key := range processMetricsMapping {
+				if val, ok := procStats[key].(float64); ok {
+					metricType := prometheus.GaugeValue
+					if _, isCounter := counterMetricsSet[metricName]; isCounter {
+						metricType = prometheus.CounterValue
+					}
+					ch <- prometheus.MustNewConstMetric(c.descs[metricName], metricType, val, nodeID)
+				}
 			}
 		}
-
 		if memStats, ok := reply[utils.FieldMemStats].(map[string]any); ok {
-			var memGaugeMap = map[string]string{
-				promGoMemstatsAllocBytes:        utils.MetricMemAlloc,
-				promGoMemstatsHeapAllocBytes:    utils.MetricMemHeapAlloc,
-				promGoMemstatsHeapIdleBytes:     utils.MetricMemHeapIdle,
-				promGoMemstatsHeapInuseBytes:    utils.MetricMemHeapInuse,
-				promGoMemstatsHeapObjects:       utils.MetricMemHeapObjects,
-				promGoMemstatsHeapReleasedBytes: utils.MetricMemHeapReleased,
-				promGoMemstatsHeapSysBytes:      utils.MetricMemHeapSys,
-				promGoMemstatsBuckHashSysBytes:  utils.MetricMemBuckHashSys,
-				promGoMemstatsGCSysBytes:        utils.MetricMemGCSys,
-				promGoMemstatsMCacheInuseBytes:  utils.MetricMemMCacheInuse,
-				promGoMemstatsMCacheSysBytes:    utils.MetricMemMCacheSys,
-				promGoMemstatsMSpanInuseBytes:   utils.MetricMemMSpanInuse,
-				promGoMemstatsMSpanSysBytes:     utils.MetricMemMSpanSys,
-				promGoMemstatsNextGCBytes:       utils.MetricMemNextGC,
-				promGoMemstatsOtherSysBytes:     utils.MetricMemOtherSys,
-				promGoMemstatsStackInuseBytes:   utils.MetricMemStackInuse,
-				promGoMemstatsStackSysBytes:     utils.MetricMemStackSys,
-				promGoMemstatsSysBytes:          utils.MetricMemSys,
-			}
-			for metricName, key := range memGaugeMap {
+			for metricName, key := range memStatsMetricsMapping {
 				if val, ok := memStats[key].(float64); ok {
-					ch <- prometheus.MustNewConstMetric(c.descs[metricName], prometheus.GaugeValue, val, nodeID)
+					metricType := prometheus.GaugeValue
+					if _, isCounter := counterMetricsSet[metricName]; isCounter {
+						metricType = prometheus.CounterValue
+					}
+					ch <- prometheus.MustNewConstMetric(c.descs[metricName], metricType, val, nodeID)
 				}
-			}
-			var memCounterMap = map[string]string{
-				promGoMemstatsAllocBytesTotal: utils.MetricMemTotalAlloc,
-				promGoMemstatsMallocsTotal:    utils.MetricMemMallocs,
-				promGoMemstatsFreesTotal:      utils.MetricMemFrees,
-			}
-			for metricName, key := range memCounterMap {
-				if val, ok := memStats[key].(float64); ok {
-					ch <- prometheus.MustNewConstMetric(c.descs[metricName], prometheus.CounterValue, val, nodeID)
-				}
-			}
-			if val, ok := memStats[utils.MetricMemLastGC].(float64); ok {
-				ch <- prometheus.MustNewConstMetric(c.descs[promGoMemstatsLastGCTimeSeconds], prometheus.GaugeValue, val, nodeID)
 			}
 		}
-
 		if gcStats, ok := reply[utils.FieldGCDurationStats].(map[string]any); ok {
 			var count uint64
 			var sum float64
@@ -393,16 +400,6 @@ func (c *coreMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 				quantileValues,
 				nodeID,
 			)
-		}
-
-		if val, ok := reply[utils.MetricRuntimeMaxProcs].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs[promGoSchedGomaxprocsThreads], prometheus.GaugeValue, val, nodeID)
-		}
-		if val, ok := reply[utils.MetricGCPercent].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs[promGoGCGogcPercent], prometheus.GaugeValue, val, nodeID)
-		}
-		if val, ok := reply[utils.MetricMemLimit].(float64); ok {
-			ch <- prometheus.MustNewConstMetric(c.descs[promGoGCGomemlimitBytes], prometheus.GaugeValue, val, nodeID)
 		}
 	}
 }
