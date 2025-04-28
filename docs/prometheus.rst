@@ -19,7 +19,7 @@ Example configuration in the JSON file:
 
     "prometheus_agent": {
         "enabled": true,
-        "path": "/metrics",
+        "path": "/prometheus",
         "cores_conns": ["*internal", "external"],
         "stats_conns": ["*internal", "external"],
         "stat_queue_ids": ["cgrates.org:SQ_1", "SQ_2"]
@@ -94,7 +94,7 @@ How It Works
 
 The PrometheusAgent operates differently than other CGRateS components that use connection failover:
 
-- When multiple connections are configured in stats_conns, the agent sends metrics collection requests to **all** connections, not just the first available one
+- When multiple connections are configured in stats_conns, the agent collects metrics from **all** connections, not just the first available one
 - When multiple connections are configured in cores_conns, the agent attempts to collect metrics from **all** connections, labeling them with their respective node_id
 - The agent processes metrics requests only when Prometheus sends a scrape request to the configured HTTP endpoint
 
@@ -102,4 +102,4 @@ You can view all exported metrics and see what Prometheus would scrape by making
 
 .. code-block:: bash
 
-    curl http://localhost:2080/metrics
+    curl http://localhost:2080/prometheus
