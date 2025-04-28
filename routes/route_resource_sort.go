@@ -57,7 +57,7 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 		}
 		var tUsage float64
 		for _, resID := range route.ResourceIDs {
-			var res engine.Resource
+			var res utils.Resource
 			if err = connMgr.Call(ctx, cfg.RouteSCfg().ResourceSConns, utils.ResourceSv1GetResource,
 				&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: ev.Tenant, ID: resID}},
 				&res); err != nil && err.Error() != utils.ErrNotFound.Error() {
@@ -68,8 +68,8 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			}
 			tUsage += res.TotalUsage()
 		}
-		srtRoute.SortingData[utils.ResourceUsage] = tUsage
-		srtRoute.sortingDataDecimal[utils.ResourceUsage] = utils.NewDecimalFromFloat64(tUsage)
+		srtRoute.SortingData[utils.ResourceUsageStr] = tUsage
+		srtRoute.sortingDataDecimal[utils.ResourceUsageStr] = utils.NewDecimalFromFloat64(tUsage)
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			cfg.FilterSCfg().ResourceSConns,

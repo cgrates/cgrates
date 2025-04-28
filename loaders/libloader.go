@@ -268,7 +268,7 @@ func newProfileFunc(lType string) func() profile {
 		}
 	case utils.MetaResources:
 		return func() profile {
-			return new(engine.ResourceProfile)
+			return new(utils.ResourceProfile)
 		}
 	case utils.MetaFilters:
 		return func() profile {

@@ -134,7 +134,7 @@ func (sRoutes *SortedRoutes) SortQOS(params []string) {
 // sort ascendent based on ResourceUsage with fallback on Weight
 func (sRoutes *SortedRoutes) SortResourceAscendent() {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
-		cmp := sRoutes.Routes[i].getSortedData(utils.ResourceUsage).Compare(sRoutes.Routes[j].getSortedData(utils.ResourceUsage))
+		cmp := sRoutes.Routes[i].getSortedData(utils.ResourceUsageStr).Compare(sRoutes.Routes[j].getSortedData(utils.ResourceUsageStr))
 		if cmp == 0 {
 			return sRoutes.compareWeight(i, j)
 		}
@@ -146,7 +146,7 @@ func (sRoutes *SortedRoutes) SortResourceAscendent() {
 // sort descendent based on ResourceUsage with fallback on Weight
 func (sRoutes *SortedRoutes) SortResourceDescendent() {
 	sort.Slice(sRoutes.Routes, func(i, j int) bool {
-		cmp := sRoutes.Routes[i].getSortedData(utils.ResourceUsage).Compare(sRoutes.Routes[j].getSortedData(utils.ResourceUsage))
+		cmp := sRoutes.Routes[i].getSortedData(utils.ResourceUsageStr).Compare(sRoutes.Routes[j].getSortedData(utils.ResourceUsageStr))
 		if cmp == 0 {
 			return sRoutes.compareWeight(i, j)
 		}

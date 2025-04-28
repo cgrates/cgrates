@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/resources"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -97,8 +98,8 @@ func testV1RsRpcConn(t *testing.T) {
 }
 
 func testV1RsSetProfile(t *testing.T) {
-	rls := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rls := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RES_GR_TEST",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -163,7 +164,7 @@ func testV1RsAllocate(t *testing.T) {
 }
 
 func testV1RsAuthorize(t *testing.T) {
-	var reply *engine.Resources
+	var reply *resources.Resources
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.UUIDSha1Prefix(),
@@ -189,11 +190,11 @@ func testV1RsAuthorize(t *testing.T) {
 	if len(*reply) != 1 {
 		t.Errorf("Expecting: %+v, received: %+v", 1, len(*reply))
 	}
-	if (*reply)[0].ID != "RES_GR_TEST" {
-		t.Errorf("Expecting: %+v, received: %+v", "RES_GR_TEST", (*reply)[0].ID)
+	if (*reply)[0].Resource.ID != "RES_GR_TEST" {
+		t.Errorf("Expecting: %+v, received: %+v", "RES_GR_TEST", (*reply)[0].Resource.ID)
 	}
-	if len((*reply)[0].Usages) != 2 {
-		t.Errorf("Expecting: %+v, received: %+v", 2, len((*reply)[0].Usages))
+	if len((*reply)[0].Resource.Usages) != 2 {
+		t.Errorf("Expecting: %+v, received: %+v", 2, len((*reply)[0].Resource.Usages))
 	}
 
 	var reply2 string

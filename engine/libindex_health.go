@@ -65,7 +65,7 @@ type ReverseFilterIHReply struct {
 func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string) (filterIDs []string, err error) { // add contexts
 	switch indxType {
 	case utils.CacheResourceFilterIndexes:
-		var rs *ResourceProfile
+		var rs *utils.ResourceProfile
 		if rs, err = dm.GetResourceProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
 			return
 		}

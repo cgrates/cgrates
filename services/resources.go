@@ -24,6 +24,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/resources"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -40,7 +41,7 @@ func NewResourceService(cfg *config.CGRConfig) *ResourceService {
 type ResourceService struct {
 	mu        sync.RWMutex
 	cfg       *config.CGRConfig
-	reS       *engine.ResourceS
+	reS       *resources.ResourceS
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -72,7 +73,7 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 
 	reS.mu.Lock()
 	defer reS.mu.Unlock()
-	reS.reS = engine.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), cms.ConnManager())
+	reS.reS = resources.NewResourceService(dbs.DataManager(), reS.cfg, fs.FilterS(), cms.ConnManager())
 	reS.reS.StartLoop(context.TODO())
 	srv, _ := engine.NewService(reS.reS)
 	// srv, _ := birpc.NewService(apis.NewResourceSv1(reS.reS), "", false)

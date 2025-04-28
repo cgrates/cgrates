@@ -34,8 +34,8 @@ func TestTPEnewTPResources(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt string, id string) (*engine.ResourceProfile, error) {
-			rsc := &engine.ResourceProfile{
+		GetResourceProfileDrvF: func(ctx *context.Context, tnt string, id string) (*utils.ResourceProfile, error) {
+			rsc := &utils.ResourceProfile{
 				Tenant:            "cgrates.org",
 				ID:                "ResGroup1",
 				FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -67,7 +67,7 @@ func TestTPEExportItemsResources(t *testing.T) {
 	tpRsc := TPResources{
 		dm: dm,
 	}
-	rsc := &engine.ResourceProfile{
+	rsc := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -92,7 +92,7 @@ func TestTPEExportItemsResourcesNoDbConn(t *testing.T) {
 	tpRsc := TPResources{
 		dm: nil,
 	}
-	rsc := &engine.ResourceProfile{
+	rsc := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -119,7 +119,7 @@ func TestTPEExportItemsResourcesIDNotFound(t *testing.T) {
 	tpRsc := TPResources{
 		dm: dm,
 	}
-	rsc := &engine.ResourceProfile{
+	rsc := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},

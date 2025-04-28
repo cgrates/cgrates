@@ -304,7 +304,7 @@ func testUpdateVersionsRQF(t *testing.T) {
 
 func testUpdateVersionsResource(t *testing.T) {
 	newVersions := CurrentDataDBVersions()
-	newVersions[utils.Resource] = 0
+	newVersions[utils.ResourceStr] = 0
 	if err := dm3.DataDB().SetVersions(newVersions, true); err != nil {
 		t.Fatal(err)
 	}

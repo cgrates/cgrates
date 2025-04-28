@@ -80,10 +80,10 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
-	res := &engine.Resource{
+	res := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RSC1",
-		Usages: make(map[string]*engine.ResourceUsage),
+		Usages: make(map[string]*utils.ResourceUsage),
 	}
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -91,7 +91,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
-				rplCast, canCast := reply.(*engine.Resource)
+				rplCast, canCast := reply.(*utils.Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil
@@ -127,9 +127,9 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 			RouteID:         "Route1",
 			RouteParameters: "param1",
 			SortingData: map[string]any{
-				utils.Blocker:       true,
-				utils.ResourceUsage: 0,
-				utils.Weight:        10,
+				utils.Blocker:          true,
+				utils.ResourceUsageStr: 0,
+				utils.Weight:           10,
 			},
 		},
 	}
@@ -189,9 +189,9 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 			RouteID:         "Route1",
 			RouteParameters: "param1",
 			SortingData: map[string]any{
-				utils.Blocker:       true,
-				utils.ResourceUsage: 0,
-				utils.Weight:        10,
+				utils.Blocker:          true,
+				utils.ResourceUsageStr: 0,
+				utils.Weight:           10,
 			},
 		},
 	}
@@ -217,10 +217,10 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.RouteSCfg().ResourceSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)}
 
-	res := &engine.Resource{
+	res := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RSC1",
-		Usages: make(map[string]*engine.ResourceUsage),
+		Usages: make(map[string]*utils.ResourceUsage),
 	}
 
 	cc := make(chan birpc.ClientConnector, 1)
@@ -228,7 +228,7 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
-				rplCast, canCast := reply.(*engine.Resource)
+				rplCast, canCast := reply.(*utils.Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil

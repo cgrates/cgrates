@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/resources"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -61,6 +61,6 @@ func (self *CmdGetResourceForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetResourceForEvent) RpcResult() any {
-	var atr engine.Resources
+	var atr resources.Resources
 	return &atr
 }

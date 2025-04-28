@@ -470,12 +470,12 @@ func TestReplicatorGetResource(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.Resource
+	var reply utils.Resource
 	rp := NewReplicatorSv1(dm, v1)
-	rsc := &engine.Resource{
+	rsc := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup2",
-		Usages: make(map[string]*engine.ResourceUsage),
+		Usages: make(map[string]*utils.ResourceUsage),
 	}
 	rp.dm.SetResource(context.Background(), rsc)
 	tntID := &utils.TenantIDWithAPIOpts{
@@ -501,12 +501,12 @@ func TestReplicatorGetResourceError(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.Resource
+	var reply utils.Resource
 	rp := NewReplicatorSv1(dm, v1)
-	rsc := &engine.Resource{
+	rsc := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup3",
-		Usages: make(map[string]*engine.ResourceUsage),
+		Usages: make(map[string]*utils.ResourceUsage),
 	}
 	rp.dm.SetResource(context.Background(), rsc)
 	tntID := &utils.TenantIDWithAPIOpts{
@@ -529,9 +529,9 @@ func TestReplicatorGetResourceProfile(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.ResourceProfile
+	var reply utils.ResourceProfile
 	rp := NewReplicatorSv1(dm, v1)
-	rsc := &engine.ResourceProfile{
+	rsc := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -567,9 +567,9 @@ func TestReplicatorGetResourceProfileError(t *testing.T) {
 		ping:    struct{}{},
 	}
 
-	var reply engine.ResourceProfile
+	var reply utils.ResourceProfile
 	rp := NewReplicatorSv1(dm, v1)
-	rsc := &engine.ResourceProfile{
+	rsc := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup10",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -1415,8 +1415,8 @@ func TestReplicatorSetResourceProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rsp := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsp := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup1",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -1457,8 +1457,8 @@ func TestReplicatorSetResourceProfileErr1(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rsp := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsp := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup1",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -1493,11 +1493,11 @@ func TestReplicatorSetResource(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rs := &engine.ResourceWithAPIOpts{
-		Resource: &engine.Resource{
+	rs := &utils.ResourceWithAPIOpts{
+		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "ResGroup2",
-			Usages: make(map[string]*engine.ResourceUsage),
+			Usages: make(map[string]*utils.ResourceUsage),
 		},
 		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaNone,
@@ -1528,11 +1528,11 @@ func TestReplicatorSetResourceErr1(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rs := &engine.ResourceWithAPIOpts{
-		Resource: &engine.Resource{
+	rs := &utils.ResourceWithAPIOpts{
+		Resource: &utils.Resource{
 			Tenant: "cgrates.org",
 			ID:     "ResGroup2",
-			Usages: make(map[string]*engine.ResourceUsage),
+			Usages: make(map[string]*utils.ResourceUsage),
 		},
 		APIOpts: map[string]any{
 			utils.MetaCache: utils.OK,
@@ -2338,10 +2338,10 @@ func TestReplicatorRemoveResource(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rsc := &engine.Resource{
+	rsc := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup2",
-		Usages: make(map[string]*engine.ResourceUsage),
+		Usages: make(map[string]*utils.ResourceUsage),
 	}
 	if err := rp.dm.SetResource(context.Background(), rsc); err != nil {
 		t.Error(err)
@@ -2374,10 +2374,10 @@ func TestReplicatorRemoveResourceErr(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rsc := &engine.Resource{
+	rsc := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup2",
-		Usages: make(map[string]*engine.ResourceUsage),
+		Usages: make(map[string]*utils.ResourceUsage),
 	}
 	if err := rp.dm.SetResource(context.Background(), rsc); err != nil {
 		t.Error(err)
@@ -2408,7 +2408,7 @@ func TestReplicatorRemoveResourceProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rscPrf := &engine.ResourceProfile{
+	rscPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -2451,7 +2451,7 @@ func TestReplicatorRemoveResourceProfileErr(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	rscPrf := &engine.ResourceProfile{
+	rscPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},

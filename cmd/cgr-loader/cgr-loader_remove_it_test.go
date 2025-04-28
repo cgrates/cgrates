@@ -155,13 +155,13 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	// resourcesPrf
-	var replyResPrf *engine.ResourceProfile
+	var replyResPrf *utils.ResourceProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyResPrf); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+q, received %v", utils.ErrNotFound.Error(), err)
 	}
-	var replyRes *engine.Resource
+	var replyRes *utils.Resource
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.ResourceSv1GetResource,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyRes); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -500,7 +500,7 @@ func testCgrLdrGetRateProfileAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
-	expREsPrf := &engine.ResourceProfile{
+	expREsPrf := &utils.ResourceProfile{
 		Tenant:    utils.CGRateSorg,
 		ID:        "RES_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
@@ -513,7 +513,7 @@ func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 		Limit:        1,
 		ThresholdIDs: []string{},
 	}
-	var replyRes *engine.ResourceProfile
+	var replyRes *utils.ResourceProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyRes); err != nil {
@@ -524,12 +524,12 @@ func testCgrLdrGetResourceProfileAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetResourceAfterLoad(t *testing.T) {
-	expREsPrf := &engine.Resource{
+	expREsPrf := &utils.Resource{
 		Tenant: "cgrates.org",
 		ID:     "RES_ACNT_1001",
-		Usages: map[string]*engine.ResourceUsage{},
+		Usages: map[string]*utils.ResourceUsage{},
 	}
-	var replyRes *engine.Resource
+	var replyRes *utils.Resource
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.ResourceSv1GetResource,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}},
 		&replyRes); err != nil {

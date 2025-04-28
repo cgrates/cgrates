@@ -98,7 +98,7 @@ func TestAPItoResource(t *testing.T) {
 		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: "asd",
 	}
-	eRL := &ResourceProfile{
+	eRL := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                tpRL.ID,
 		Stored:            tpRL.Stored,
@@ -133,7 +133,7 @@ func TestResourceProfileToAPI(t *testing.T) {
 		ThresholdIDs:      []string{"TRes1"},
 		AllocationMessage: "asd",
 	}
-	rp := &ResourceProfile{
+	rp := &utils.ResourceProfile{
 		Tenant: "cgrates.org",
 		ID:     "ResGroup1",
 		Weights: utils.DynamicWeights{
@@ -3899,7 +3899,7 @@ func TestStatMdlsCSVHeader(t *testing.T) {
 }
 
 func TestModelHelpersResourceProfileToAPICase2(t *testing.T) {
-	testStruct := &ResourceProfile{
+	testStruct := &utils.ResourceProfile{
 		Tenant:            "",
 		ID:                "",
 		FilterIDs:         []string{"test_filter_id", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},

@@ -972,12 +972,12 @@ func TestLibRoutesResAscSameWeight(t *testing.T) {
 		route := &SortedRoute{
 			RouteID: strconv.Itoa(i),
 			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.ResourceUsage: utils.NewDecimalFromFloat64(5.0),
-				utils.Weight:        utils.NewDecimalFromFloat64(10.0),
+				utils.ResourceUsageStr: utils.NewDecimalFromFloat64(5.0),
+				utils.Weight:           utils.NewDecimalFromFloat64(10.0),
 			},
 			SortingData: map[string]any{
-				utils.ResourceUsage: 5.0,
-				utils.Weight:        10.0,
+				utils.ResourceUsageStr: 5.0,
+				utils.Weight:           10.0,
 			},
 		}
 		sSpls.Routes = append(sSpls.Routes, route)
@@ -1001,12 +1001,12 @@ func TestLibRoutesResDescSameWeight(t *testing.T) {
 		route := &SortedRoute{
 			RouteID: strconv.Itoa(i),
 			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.ResourceUsage: utils.NewDecimalFromFloat64(5.0),
-				utils.Weight:        utils.NewDecimalFromFloat64(10.0),
+				utils.ResourceUsageStr: utils.NewDecimalFromFloat64(5.0),
+				utils.Weight:           utils.NewDecimalFromFloat64(10.0),
 			},
 			SortingData: map[string]any{
-				utils.ResourceUsage: 5.0,
-				utils.Weight:        10.0,
+				utils.ResourceUsageStr: 5.0,
+				utils.Weight:           10.0,
 			},
 		}
 		sSpls.Routes = append(sSpls.Routes, route)
@@ -1235,23 +1235,23 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 			{
 				RouteID: "route2",
 				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.ResourceUsage: utils.NewDecimalFromFloat64(10.0),
-					utils.Weight:        utils.NewDecimalFromFloat64(10.0),
+					utils.ResourceUsageStr: utils.NewDecimalFromFloat64(10.0),
+					utils.Weight:           utils.NewDecimalFromFloat64(10.0),
 				},
 				SortingData: map[string]any{
-					utils.ResourceUsage: 10.0,
-					utils.Weight:        10.0,
+					utils.ResourceUsageStr: 10.0,
+					utils.Weight:           10.0,
 				},
 			},
 			{
 				RouteID: "route1",
 				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.ResourceUsage: utils.NewDecimalFromFloat64(10.0),
-					utils.Weight:        utils.NewDecimalFromFloat64(11.0),
+					utils.ResourceUsageStr: utils.NewDecimalFromFloat64(10.0),
+					utils.Weight:           utils.NewDecimalFromFloat64(11.0),
 				},
 				SortingData: map[string]any{
-					utils.ResourceUsage: 10.0,
-					utils.Weight:        11.0,
+					utils.ResourceUsageStr: 10.0,
+					utils.Weight:           11.0,
 				},
 			},
 		},
@@ -1270,8 +1270,8 @@ func TestSortResourceAscendentDescendent(t *testing.T) {
 	}
 
 	//SortingResourceAscendent/Descendent while ResourceUsages are not equal
-	sSpls.Routes[0].SortingData[utils.ResourceUsage] = 11.0
-	sSpls.Routes[0].sortingDataDecimal[utils.ResourceUsage] = utils.NewDecimalFromFloat64(11.0)
+	sSpls.Routes[0].SortingData[utils.ResourceUsageStr] = 11.0
+	sSpls.Routes[0].sortingDataDecimal[utils.ResourceUsageStr] = utils.NewDecimalFromFloat64(11.0)
 	expSRts = sSpls
 	sSpls.SortResourceAscendent()
 	if !reflect.DeepEqual(expSRts, sSpls) {

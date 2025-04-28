@@ -1115,7 +1115,7 @@ func TestUpdateFilterIndexResourceIndex(t *testing.T) {
 	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
 		t.Error(err)
 	}
-	resProf := &ResourceProfile{
+	resProf := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RL1",
 		FilterIDs: []string{"fltr_test"},

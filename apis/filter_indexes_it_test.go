@@ -3340,8 +3340,8 @@ func testV1FIdxSetResourceSProfileWithFltr(t *testing.T) {
 	}
 
 	//we will a ResourceProfile with our filter and check the indexes
-	resPrfl := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	resPrfl := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant: "cgrates.org",
 			ID:     "RESOURCE1",
 			FilterIDs: []string{"*string:~*req.Account:1001",
@@ -3436,8 +3436,8 @@ func testV1FIdxSetResourceSMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	//update our resourceProfile with our filter
-	resPrfl := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	resPrfl := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant: "cgrates.org",
 			ID:     "RESOURCE1",
 			FilterIDs: []string{"*string:~*req.Account:1001",
@@ -3542,8 +3542,8 @@ func testV1FIdxResourceSProfileComputeIndexes(t *testing.T) {
 
 func testV1FIdxResourceSMoreProfilesForFltrs(t *testing.T) {
 	// we will add more resources with our filters for matching indexes
-	resPrfl1 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	resPrfl1 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant: "cgrates.org",
 			ID:     "RESOURCE2",
 			FilterIDs: []string{"*string:~*req.Account:1001",
@@ -3556,8 +3556,8 @@ func testV1FIdxResourceSMoreProfilesForFltrs(t *testing.T) {
 				}},
 		},
 	}
-	resPrfl2 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	resPrfl2 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant: "cgrates.org",
 			ID:     "RESOURCE3",
 			FilterIDs: []string{"*string:~*req.Account:1001",

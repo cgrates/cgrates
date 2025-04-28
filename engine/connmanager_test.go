@@ -478,6 +478,18 @@ func TestCMCallWithConnIDsInternallyDCed(t *testing.T) {
 	}
 }
 
+type ccMock struct {
+	calls map[string]func(ctx *context.Context, args any, reply any) error
+}
+
+func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+	if call, has := ccM.calls[serviceMethod]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return call(ctx, args, reply)
+	}
+}
+
 func TestCMCallWithConnIDsErrNotNetwork(t *testing.T) {
 	tmp := Cache
 	defer func() {

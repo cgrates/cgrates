@@ -445,15 +445,15 @@ func testdoubleRemoveChargerProfile(t *testing.T) {
 
 func testdoubleRemoveResourceProfile(t *testing.T) {
 	// check
-	var reply *engine.ResourceProfile
+	var reply *utils.ResourceProfile
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "RESOURCE_PROFILE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// set
-	resPrf := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	resPrf := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:    doubleRemoveTenant,
 			ID:        "RESOURCE_PROFILE",
 			FilterIDs: []string{"*string:~*req.Account:1001"},

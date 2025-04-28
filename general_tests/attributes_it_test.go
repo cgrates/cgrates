@@ -533,7 +533,7 @@ func testAttributeSProcessEventWithStatFull(t *testing.T) {
 
 func testAttributeSProcessEventWithResource(t *testing.T) {
 	//create a resourceProfile
-	rlsConfig := &engine.ResourceProfile{
+	rlsConfig := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResTest",
 		UsageTTL:          time.Minute,
@@ -548,13 +548,13 @@ func testAttributeSProcessEventWithResource(t *testing.T) {
 	}
 
 	var result string
-	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := attrRPC.Call(context.Background(), utils.AdminSv1SetResourceProfile, &utils.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	var reply *engine.ResourceProfile
+	var reply *utils.ResourceProfile
 	if err := attrRPC.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)

@@ -190,14 +190,14 @@ func (iDB *InternalDB) HasDataDrv(_ *context.Context, category, subject, tenant 
 	return false, errors.New("Unsupported HasData category")
 }
 
-func (iDB *InternalDB) GetResourceProfileDrv(_ *context.Context, tenant, id string) (rp *ResourceProfile, err error) {
+func (iDB *InternalDB) GetResourceProfileDrv(_ *context.Context, tenant, id string) (rp *utils.ResourceProfile, err error) {
 	if x, ok := iDB.db.Get(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
-		return x.(*ResourceProfile), nil
+		return x.(*utils.ResourceProfile), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetResourceProfileDrv(_ *context.Context, rp *ResourceProfile) (err error) {
+func (iDB *InternalDB) SetResourceProfileDrv(_ *context.Context, rp *utils.ResourceProfile) (err error) {
 	iDB.db.Set(utils.CacheResourceProfiles, rp.TenantID(), rp, nil,
 		true, utils.NonTransactional)
 	return
@@ -209,14 +209,14 @@ func (iDB *InternalDB) RemoveResourceProfileDrv(_ *context.Context, tenant, id s
 	return
 }
 
-func (iDB *InternalDB) GetResourceDrv(_ *context.Context, tenant, id string) (r *Resource, err error) {
+func (iDB *InternalDB) GetResourceDrv(_ *context.Context, tenant, id string) (r *utils.Resource, err error) {
 	if x, ok := iDB.db.Get(utils.CacheResources, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
-		return x.(*Resource), nil
+		return x.(*utils.Resource), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetResourceDrv(_ *context.Context, r *Resource) (err error) {
+func (iDB *InternalDB) SetResourceDrv(_ *context.Context, r *utils.Resource) (err error) {
 	iDB.db.Set(utils.CacheResources, r.TenantID(), r, nil,
 		true, utils.NonTransactional)
 	return

@@ -46,10 +46,10 @@ func init() {
 	gob.Register(new(ThresholdProfileWithAPIOpts))
 	gob.Register(new(ThresholdWithAPIOpts))
 	// Resource
-	gob.Register(new(Resource))
-	gob.Register(new(ResourceProfile))
-	gob.Register(new(ResourceProfileWithAPIOpts))
-	gob.Register(new(ResourceWithAPIOpts))
+	gob.Register(new(utils.Resource))
+	gob.Register(new(utils.ResourceProfile))
+	gob.Register(new(utils.ResourceProfileWithAPIOpts))
+	gob.Register(new(utils.ResourceWithAPIOpts))
 	// Stats
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))
@@ -222,7 +222,10 @@ func (chS *CacheS) GetItemIDs(chID, prfx string) (itmIDs []string) {
 // Remove is an exported method from TransCache
 func (chS *CacheS) Remove(ctx *context.Context, chID, itmID string, commit bool, transID string) (err error) {
 	chS.tCache.Remove(chID, itmID, commit, transID)
-	return chS.ReplicateRemove(ctx, chID, itmID)
+	if err := chS.ReplicateRemove(ctx, chID, itmID); err != nil {
+		return err
+	}
+	return nil
 }
 
 // RemoveWithoutReplicate is an exported method from TransCache

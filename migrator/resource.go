@@ -51,7 +51,7 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 		if err := m.dmIN.DataManager().RemoveResourceProfile(context.TODO(), tntID[0], tntID[1], false); err != nil {
 			return err
 		}
-		m.stats[utils.Resource]++
+		m.stats[utils.ResourceStr]++
 	}
 	return
 }
@@ -59,18 +59,18 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 func (m *Migrator) migrateResources() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
-	if vrs, err = m.getVersions(utils.Resource); err != nil {
+	if vrs, err = m.getVersions(utils.ResourceStr); err != nil {
 		return
 	}
 
 	migrated := true
 	for {
-		version := vrs[utils.Resource]
+		version := vrs[utils.ResourceStr]
 		for {
 			switch version {
 			default:
 				return fmt.Errorf("Unsupported version %v", version)
-			case current[utils.Resource]:
+			case current[utils.ResourceStr]:
 				migrated = false
 				if m.sameDataDB {
 					break
@@ -79,7 +79,7 @@ func (m *Migrator) migrateResources() (err error) {
 					return
 				}
 			}
-			if version == current[utils.Resource] || err == utils.ErrNoMoreData {
+			if version == current[utils.ResourceStr] || err == utils.ErrNoMoreData {
 				break
 			}
 		}
@@ -91,10 +91,10 @@ func (m *Migrator) migrateResources() (err error) {
 		// return
 		// }
 		// }
-		m.stats[utils.Resource]++
+		m.stats[utils.ResourceStr]++
 	}
 	// All done, update version wtih current one
-	if err = m.setVersions(utils.Resource); err != nil {
+	if err = m.setVersions(utils.ResourceStr); err != nil {
 		return
 	}
 	return m.ensureIndexesDataDB(engine.ColRsP)

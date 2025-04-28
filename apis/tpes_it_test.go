@@ -205,8 +205,8 @@ func testTPeSSetAttributeProfile(t *testing.T) {
 }
 
 func testTPeSSetResourceProfile(t *testing.T) {
-	rsPrf1 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsPrf1 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup1",
 			FilterIDs:         []string{"*string:~*req.Account:1001"},
@@ -228,8 +228,8 @@ func testTPeSSetResourceProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", replystr)
 	}
 
-	rsPrf2 := &engine.ResourceProfileWithAPIOpts{
-		ResourceProfile: &engine.ResourceProfile{
+	rsPrf2 := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "ResGroup2",
 			FilterIDs:         []string{"*string:~*req.Account:1002"},

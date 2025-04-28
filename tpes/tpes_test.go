@@ -240,7 +240,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	// Resources
-	rsc := &engine.ResourceProfile{
+	rsc := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResGroup1",
 		FilterIDs:         []string{"*string:~*req.Account:1001"},

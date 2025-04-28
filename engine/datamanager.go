@@ -150,12 +150,12 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		switch prfx {
 		case utils.ResourceProfilesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, resourceProfileLockKey(tntID.Tenant, tntID.ID))
+			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.ResourceProfileLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetResourceProfile(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.ResourcesPrefix:
 			tntID := utils.NewTenantID(dataID)
-			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, resourceLockKey(tntID.Tenant, tntID.ID))
+			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.ResourceLockKey(tntID.Tenant, tntID.ID))
 			_, err = dm.GetResource(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueueProfilePrefix:
@@ -1428,14 +1428,14 @@ func (dm *DataManager) RemoveRanking(ctx *context.Context, tenant, id string) (e
 }
 
 func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (rs *Resource, err error) {
+	transactionID string) (rs *utils.Resource, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheResources, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*Resource), nil
+			return x.(*utils.Resource), nil
 		}
 	}
 	if dm == nil {
@@ -1477,7 +1477,7 @@ func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cach
 	return
 }
 
-func (dm *DataManager) SetResource(ctx *context.Context, rs *Resource) (err error) {
+func (dm *DataManager) SetResource(ctx *context.Context, rs *utils.Resource) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1489,7 +1489,7 @@ func (dm *DataManager) SetResource(ctx *context.Context, rs *Resource) (err erro
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.ResourcesPrefix, rs.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResource,
-			&ResourceWithAPIOpts{
+			&utils.ResourceWithAPIOpts{
 				Resource: rs,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)})
@@ -1518,14 +1518,14 @@ func (dm *DataManager) RemoveResource(ctx *context.Context, tenant, id string) (
 }
 
 func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (rp *ResourceProfile, err error) {
+	transactionID string) (rp *utils.ResourceProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheResourceProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ResourceProfile), nil
+			return x.(*utils.ResourceProfile), nil
 		}
 	}
 	if dm == nil {
@@ -1566,7 +1566,7 @@ func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id strin
 	return
 }
 
-func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *ResourceProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *utils.ResourceProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1600,7 +1600,7 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *ResourceProf
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.ResourceProfilesPrefix, rp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResourceProfile,
-			&ResourceProfileWithAPIOpts{
+			&utils.ResourceProfileWithAPIOpts{
 				ResourceProfile: rp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)}); err != nil {
@@ -1611,17 +1611,17 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *ResourceProf
 		oldRes.UsageTTL != rp.UsageTTL ||
 		oldRes.Limit != rp.Limit ||
 		oldRes.Stored != rp.Stored && oldRes.Stored { // reset the resource if the profile changed this fields
-		err = dm.SetResource(ctx, &Resource{
+		err = dm.SetResource(ctx, &utils.Resource{
 			Tenant: rp.Tenant,
 			ID:     rp.ID,
-			Usages: make(map[string]*ResourceUsage),
+			Usages: make(map[string]*utils.ResourceUsage),
 		})
 	} else if _, errRs := dm.GetResource(ctx, rp.Tenant, rp.ID, // do not try to get the resource if the configuration changed
 		true, false, utils.NonTransactional); errRs == utils.ErrNotFound { // the resource does not exist
-		err = dm.SetResource(ctx, &Resource{
+		err = dm.SetResource(ctx, &utils.Resource{
 			Tenant: rp.Tenant,
 			ID:     rp.ID,
-			Usages: make(map[string]*ResourceUsage),
+			Usages: make(map[string]*utils.ResourceUsage),
 		})
 	}
 	return

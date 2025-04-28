@@ -327,7 +327,7 @@ func testExpVerifyThresholds(t *testing.T) {
 }
 
 func testExpVerifyResources(t *testing.T) {
-	rPrf := &engine.ResourceProfile{
+	rPrf := &utils.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RES_ACNT_1001",
 		FilterIDs: []string{"FLTR_ACCOUNT_1001"},
@@ -344,7 +344,7 @@ func testExpVerifyResources(t *testing.T) {
 	if *utils.Encoding == utils.MetaGOB {
 		rPrf.ThresholdIDs = nil
 	}
-	var reply *engine.ResourceProfile
+	var reply *utils.ResourceProfile
 	if err := expRpc.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "RES_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)

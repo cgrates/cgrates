@@ -432,7 +432,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 
 func testV1FltrPopulateResources(t *testing.T) {
 	//create a resourceProfile
-	rlsConfig := &engine.ResourceProfile{
+	rlsConfig := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "ResTest",
 		UsageTTL:          time.Minute,
@@ -448,13 +448,13 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(context.Background(), utils.AdminSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := fltrRpc.Call(context.Background(), utils.AdminSv1SetResourceProfile, &utils.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	var reply *engine.ResourceProfile
+	var reply *utils.ResourceProfile
 	if err := fltrRpc.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -593,7 +593,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	//create a resourceProfile
-	rlsConfig := &engine.ResourceProfile{
+	rlsConfig := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RES_TEST",
 		UsageTTL:          time.Minute,
@@ -609,13 +609,13 @@ func testV1FltrPopulateResourcesAvailableUnits(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(context.Background(), utils.AdminSv1SetResourceProfile, &engine.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
+	if err := fltrRpc.Call(context.Background(), utils.AdminSv1SetResourceProfile, &utils.ResourceProfileWithAPIOpts{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	var reply *engine.ResourceProfile
+	var reply *utils.ResourceProfile
 	if err := fltrRpc.Call(context.Background(), utils.AdminSv1GetResourceProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{

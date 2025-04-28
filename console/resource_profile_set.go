@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdSetResourceProfile{
 		name:      "resource_profile_set",
 		rpcMethod: utils.AdminSv1SetResourceProfile,
-		rpcParams: &engine.ResourceProfileWithAPIOpts{},
+		rpcParams: &utils.ResourceProfileWithAPIOpts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +36,7 @@ func init() {
 type CmdSetResourceProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ResourceProfileWithAPIOpts
+	rpcParams *utils.ResourceProfileWithAPIOpts
 	*CommandExecuter
 }
 
@@ -51,8 +50,8 @@ func (self *CmdSetResourceProfile) RpcMethod() string {
 
 func (self *CmdSetResourceProfile) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ResourceProfileWithAPIOpts{
-			ResourceProfile: new(engine.ResourceProfile),
+		self.rpcParams = &utils.ResourceProfileWithAPIOpts{
+			ResourceProfile: new(utils.ResourceProfile),
 			APIOpts:         make(map[string]any),
 		}
 	}

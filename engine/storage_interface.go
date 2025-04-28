@@ -40,11 +40,11 @@ type Storage interface {
 type DataDB interface {
 	Storage
 	HasDataDrv(*context.Context, string, string, string) (bool, error)
-	GetResourceProfileDrv(*context.Context, string, string) (*ResourceProfile, error)
-	SetResourceProfileDrv(*context.Context, *ResourceProfile) error
+	GetResourceProfileDrv(*context.Context, string, string) (*utils.ResourceProfile, error)
+	SetResourceProfileDrv(*context.Context, *utils.ResourceProfile) error
 	RemoveResourceProfileDrv(*context.Context, string, string) error
-	GetResourceDrv(*context.Context, string, string) (*Resource, error)
-	SetResourceDrv(*context.Context, *Resource) error
+	GetResourceDrv(*context.Context, string, string) (*utils.Resource, error)
+	SetResourceDrv(*context.Context, *utils.Resource) error
 	RemoveResourceDrv(*context.Context, string, string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
