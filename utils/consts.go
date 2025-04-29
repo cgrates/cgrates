@@ -1214,6 +1214,7 @@ const (
 	MetaTpDispatchers       = "*tp_dispatchers"
 	MetaDurationSeconds     = "*duration_seconds"
 	MetaDurationNanoseconds = "*duration_nanoseconds"
+	MetaDurationMinutes     = "*duration_minutes"
 	MetaGigawords           = "*gigawords"
 	CapAttributes           = "Attributes"
 	CapResourceAllocation   = "ResourceAllocation"

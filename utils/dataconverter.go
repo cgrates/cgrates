@@ -62,6 +62,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return NewDurationSecondsConverter(EmptyString)
 	case params == MetaDurationNanoseconds:
 		return NewDurationNanosecondsConverter(EmptyString)
+	case params == MetaDurationMinutes:
+		return new(DurationMinutesConverter), nil
 	case strings.HasPrefix(params, MetaRound):
 		if len(params) == len(MetaRound) { // no extra params, defaults implied
 			return NewRoundConverter(EmptyString)
@@ -801,4 +803,16 @@ func (GigawordsConverter) Convert(in any) (any, error) {
 	}
 	totalOctects := (gigawordsValue * int64(math.Pow(2, 32))) // 2^32
 	return totalOctects, nil
+}
+
+type DurationMinutesConverter struct{}
+
+func (mS *DurationMinutesConverter) Convert(in any) (
+	out any, err error) {
+	var inDur time.Duration
+	if inDur, err = IfaceAsDuration(in); err != nil {
+		return nil, err
+	}
+	out = inDur.Minutes()
+	return
 }
