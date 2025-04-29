@@ -1504,12 +1504,12 @@ func testITActionProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	actPrf1 := &ActionProfile{
+	actPrf1 := &utils.ActionProfile{
 		Tenant:    "itsyscom",
 		ID:        "ACTPRF1",
 		FilterIDs: []string{"ACTPRF_FLTR1", "*prefix:~*req.Destination:123"},
 	}
-	actPrf2 := &ActionProfile{
+	actPrf2 := &utils.ActionProfile{
 		Tenant:    "itsyscom",
 		ID:        "ACTPRF2",
 		FilterIDs: []string{"ACTPRF_FLTR2"},
@@ -1576,12 +1576,12 @@ func testITActionProfileIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	actPrf1 = &ActionProfile{
+	actPrf1 = &utils.ActionProfile{
 		Tenant:    "itsyscom",
 		ID:        "CHANGED_ACTPRF1",
 		FilterIDs: []string{"ACTPRF_FLTR1", "*prefix:~*req.Destination:123"},
 	}
-	actPrf2 = &ActionProfile{
+	actPrf2 = &utils.ActionProfile{
 		Tenant:    "itsyscom",
 		ID:        "CHANGED_ACTPRF2",
 		FilterIDs: []string{"ACTPRF_FLTR2"},

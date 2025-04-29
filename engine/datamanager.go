@@ -2377,14 +2377,14 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 }
 
 func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (ap *ActionProfile, err error) {
+	transactionID string) (ap *utils.ActionProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheActionProfiles, tntID); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*ActionProfile), nil
+			return x.(*utils.ActionProfile), nil
 		}
 	}
 	if dm == nil {
@@ -2426,7 +2426,7 @@ func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string,
 	return
 }
 
-func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *ActionProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *utils.ActionProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2459,7 +2459,7 @@ func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *ActionProfile,
 			dm.cfg.DataDbCfg().RplFiltered,
 			utils.ActionProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActionProfile,
-			&ActionProfileWithAPIOpts{
+			&utils.ActionProfileWithAPIOpts{
 				ActionProfile: ap,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dm.cfg.DataDbCfg().RplCache, utils.EmptyString)})

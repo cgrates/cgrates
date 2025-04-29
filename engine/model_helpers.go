@@ -2128,14 +2128,14 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 	return
 }
 
-func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *ActionProfile, err error) {
-	ap = &ActionProfile{
+func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *utils.ActionProfile, err error) {
+	ap = &utils.ActionProfile{
 		Tenant:    tpAp.Tenant,
 		ID:        tpAp.ID,
 		FilterIDs: make([]string, len(tpAp.FilterIDs)),
 		Schedule:  tpAp.Schedule,
 		Targets:   make(map[string]utils.StringSet),
-		Actions:   make([]*APAction, len(tpAp.Actions)),
+		Actions:   make([]*utils.APAction, len(tpAp.Actions)),
 	}
 	if tpAp.Weights != utils.EmptyString {
 		if ap.Weights, err = utils.NewDynamicWeightsFromString(tpAp.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
@@ -2152,14 +2152,14 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 		ap.Targets[target.TargetType] = utils.NewStringSet(target.TargetIDs)
 	}
 	for i, act := range tpAp.Actions {
-		actDs := make([]*APDiktat, len(act.Diktats))
+		actDs := make([]*utils.APDiktat, len(act.Diktats))
 		for j, actD := range act.Diktats {
-			actDs[j] = &APDiktat{
+			actDs[j] = &utils.APDiktat{
 				Path:  actD.Path,
 				Value: actD.Value,
 			}
 		}
-		ap.Actions[i] = &APAction{
+		ap.Actions[i] = &utils.APAction{
 			ID:        act.ID,
 			FilterIDs: act.FilterIDs,
 			Type:      act.Type,
@@ -2184,7 +2184,7 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *Actio
 	return
 }
 
-func ActionProfileToAPI(ap *ActionProfile) (tpAp *utils.TPActionProfile) {
+func ActionProfileToAPI(ap *utils.ActionProfile) (tpAp *utils.TPActionProfile) {
 	tpAp = &utils.TPActionProfile{
 		Tenant:    ap.Tenant,
 		ID:        ap.ID,

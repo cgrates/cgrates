@@ -34,8 +34,8 @@ func TestTPEnewTPActions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant string, ID string) (*engine.ActionProfile, error) {
-			act := &engine.ActionProfile{
+		GetActionProfileDrvF: func(ctx *context.Context, tenant string, ID string) (*utils.ActionProfile, error) {
+			act := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "SET_BAL",
 				FilterIDs: []string{
@@ -47,11 +47,11 @@ func TestTPEnewTPActions(t *testing.T) {
 				},
 				Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 				Schedule: utils.MetaASAP,
-				Actions: []*engine.APAction{
+				Actions: []*utils.APAction{
 					{
 						ID:   "SET_BAL",
 						Type: utils.MetaSetBalance,
-						Diktats: []*engine.APDiktat{
+						Diktats: []*utils.APDiktat{
 							{
 								Path:  "MONETARY",
 								Value: "10",
@@ -79,7 +79,7 @@ func TestTPEExportItemsActions(t *testing.T) {
 	tpAct := TPActions{
 		dm: dm,
 	}
-	act := &engine.ActionProfile{
+	act := &utils.ActionProfile{
 		Tenant: "cgrates.org",
 		ID:     "SET_BAL",
 		FilterIDs: []string{
@@ -91,11 +91,11 @@ func TestTPEExportItemsActions(t *testing.T) {
 		},
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 		Schedule: utils.MetaASAP,
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:   "SET_BAL",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "MONETARY",
 						Value: "10",
@@ -118,7 +118,7 @@ func TestTPEExportItemsActionsEmpty(t *testing.T) {
 	tpAct := TPActions{
 		dm: dm,
 	}
-	act := &engine.ActionProfile{}
+	act := &utils.ActionProfile{}
 	tpAct.dm.SetActionProfile(context.Background(), act, false)
 	err := tpAct.exportItems(context.Background(), wrtr, "cgrates.org", []string{})
 	if err != nil {
@@ -132,7 +132,7 @@ func TestTPEExportItemsActionsNoDbConn(t *testing.T) {
 	tpAct := TPActions{
 		dm: nil,
 	}
-	act := &engine.ActionProfile{
+	act := &utils.ActionProfile{
 		Tenant: "cgrates.org",
 		ID:     "SET_BAL",
 		FilterIDs: []string{
@@ -144,11 +144,11 @@ func TestTPEExportItemsActionsNoDbConn(t *testing.T) {
 		},
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 		Schedule: utils.MetaASAP,
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:   "SET_BAL",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "MONETARY",
 						Value: "10",
@@ -171,7 +171,7 @@ func TestTPEExportItemsActionsIDNotFound(t *testing.T) {
 	tpAct := TPActions{
 		dm: dm,
 	}
-	act := &engine.ActionProfile{
+	act := &utils.ActionProfile{
 		Tenant: "cgrates.org",
 		ID:     "SET_BAL",
 		FilterIDs: []string{
@@ -183,11 +183,11 @@ func TestTPEExportItemsActionsIDNotFound(t *testing.T) {
 		},
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 		Schedule: utils.MetaASAP,
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:   "SET_BAL",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "MONETARY",
 						Value: "10",

@@ -570,15 +570,15 @@ func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id strin
 	return
 }
 
-func (iDB *InternalDB) GetActionProfileDrv(_ *context.Context, tenant, id string) (ap *ActionProfile, err error) {
+func (iDB *InternalDB) GetActionProfileDrv(_ *context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheActionProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*ActionProfile), nil
+	return x.(*utils.ActionProfile), nil
 }
 
-func (iDB *InternalDB) SetActionProfileDrv(_ *context.Context, ap *ActionProfile) (err error) {
+func (iDB *InternalDB) SetActionProfileDrv(_ *context.Context, ap *utils.ActionProfile) (err error) {
 	iDB.db.Set(utils.CacheActionProfiles, ap.TenantID(), ap, nil,
 		true, utils.NonTransactional)
 	return

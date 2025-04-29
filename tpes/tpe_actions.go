@@ -49,7 +49,7 @@ func (tpActs TPActions) exportItems(ctx *context.Context, wrtr io.Writer, tnt st
 		return
 	}
 	for _, actsID := range itmIDs {
-		var actsPrf *engine.ActionProfile
+		var actsPrf *utils.ActionProfile
 		actsPrf, err = tpActs.dm.GetActionProfile(ctx, tnt, actsID, true, true, utils.NonTransactional)
 		if err != nil {
 			if err.Error() == utils.ErrNotFound.Error() {

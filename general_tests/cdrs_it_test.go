@@ -345,11 +345,11 @@ func testCDRsSetStats(t *testing.T) {
 func testCDRsSetThresholdProfile(t *testing.T) {
 	// Set Action
 	var reply1 string
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "ACT_THD_ProcessCDR",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					Type: utils.MetaLog,
 				},

@@ -555,7 +555,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
 		log.Print("ActionProfiles:")
 	}
 	for _, tpAP := range tpr.actionProfiles {
-		var ap *ActionProfile
+		var ap *utils.ActionProfile
 		if ap, err = APItoActionProfile(tpAP, tpr.timezone); err != nil {
 			return
 		}

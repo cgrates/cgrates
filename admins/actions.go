@@ -23,12 +23,11 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetActionProfile returns an Action Profile
-func (admS *AdminS) V1GetActionProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error {
+func (admS *AdminS) V1GetActionProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ActionProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -76,7 +75,7 @@ func (admS *AdminS) V1GetActionProfileIDs(ctx *context.Context, args *utils.Args
 }
 
 // GetActionProfiles returns a list of action profiles registered for a tenant
-func (admS *AdminS) V1GetActionProfiles(ctx *context.Context, args *utils.ArgsItemIDs, actPrfs *[]*engine.ActionProfile) (err error) {
+func (admS *AdminS) V1GetActionProfiles(ctx *context.Context, args *utils.ArgsItemIDs, actPrfs *[]*utils.ActionProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,9 +84,9 @@ func (admS *AdminS) V1GetActionProfiles(ctx *context.Context, args *utils.ArgsIt
 	if err = admS.V1GetActionProfileIDs(ctx, args, &actPrfIDs); err != nil {
 		return
 	}
-	*actPrfs = make([]*engine.ActionProfile, 0, len(actPrfIDs))
+	*actPrfs = make([]*utils.ActionProfile, 0, len(actPrfIDs))
 	for _, actPrfID := range actPrfIDs {
-		var ap *engine.ActionProfile
+		var ap *utils.ActionProfile
 		ap, err = admS.dm.GetActionProfile(ctx, tnt, actPrfID, true, true, utils.NonTransactional)
 		if err != nil {
 			return utils.APIErrorHandler(err)
@@ -117,7 +116,7 @@ func (admS *AdminS) V1GetActionProfilesCount(ctx *context.Context, args *utils.A
 }
 
 // SetActionProfile add/update a new Action Profile
-func (admS *AdminS) V1SetActionProfile(ctx *context.Context, ap *engine.ActionProfileWithAPIOpts, reply *string) error {
+func (admS *AdminS) V1SetActionProfile(ctx *context.Context, ap *utils.ActionProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(ap.ActionProfile, []string{utils.ID, utils.Actions}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

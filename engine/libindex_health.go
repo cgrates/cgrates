@@ -107,7 +107,7 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 		}
 		filterIDs = rp.FilterIDs
 	case utils.CacheActionProfilesFilterIndexes:
-		var ap *ActionProfile
+		var ap *utils.ActionProfile
 		if ap, err = dm.GetActionProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
 			return
 		}

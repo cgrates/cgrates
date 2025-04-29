@@ -100,7 +100,7 @@ func (s *scheduledActs) postExec() (err error) {
 
 // newActionersFromActions constructs multiple actioners out of APAction configurations
 func newActionersFromActions(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,
-	connMgr *engine.ConnManager, aCfgs []*engine.APAction, tnt string) (acts []actioner, err error) {
+	connMgr *engine.ConnManager, aCfgs []*utils.APAction, tnt string) (acts []actioner, err error) {
 	acts = make([]actioner, len(aCfgs))
 	for i, aCfg := range aCfgs {
 		if acts[i], err = newActioner(ctx, cgrEv, cfg, fltrS, dm, connMgr, aCfg, tnt); err != nil {
@@ -112,7 +112,7 @@ func newActionersFromActions(ctx *context.Context, cgrEv *utils.CGREvent, cfg *c
 
 // newAction is the constructor to create actioner
 func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, fltrS *engine.FilterS, dm *engine.DataManager,
-	connMgr *engine.ConnManager, aCfg *engine.APAction, tnt string) (act actioner, err error) {
+	connMgr *engine.ConnManager, aCfg *utils.APAction, tnt string) (act actioner, err error) {
 	switch aCfg.Type {
 	case utils.MetaLog:
 		return &actLog{aCfg}, nil
@@ -141,6 +141,6 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 // actioner is implemented by each action type
 type actioner interface {
 	id() string
-	cfg() *engine.APAction
+	cfg() *utils.APAction
 	execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error)
 }

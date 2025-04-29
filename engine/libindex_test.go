@@ -2050,7 +2050,7 @@ func TestUpdateFilterIndexActionProfilesIndex(t *testing.T) {
 	if err := dm.SetFilter(context.Background(), oldFlt, true); err != nil {
 		t.Error(err)
 	}
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ID",
 		FilterIDs: []string{"fltr_test"},
@@ -2062,7 +2062,7 @@ func TestUpdateFilterIndexActionProfilesIndex(t *testing.T) {
 		},
 		Schedule: "* * * * 1-5",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1002": {}}},
-		Actions: []*APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "APAct1",
 				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
@@ -2072,7 +2072,7 @@ func TestUpdateFilterIndexActionProfilesIndex(t *testing.T) {
 					"key1": "value1",
 					"key2": "value2",
 				},
-				Diktats: []*APDiktat{},
+				Diktats: []*utils.APDiktat{},
 			},
 		},
 	}

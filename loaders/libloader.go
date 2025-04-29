@@ -300,7 +300,7 @@ func newProfileFunc(lType string) func() profile {
 		}
 	case utils.MetaActionProfiles:
 		return func() profile {
-			return &engine.ActionProfile{
+			return &utils.ActionProfile{
 				Targets: make(map[string]utils.StringSet),
 			}
 		}

@@ -595,15 +595,15 @@ func testResourceSStopServer(t *testing.T) {
 }
 
 func testResourceSSetActionProfile(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaHTTPPost,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path: rsSrv.URL,
 						},

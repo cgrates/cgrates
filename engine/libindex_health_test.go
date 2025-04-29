@@ -91,7 +91,7 @@ func TestGetFiltersActionProfilesOK(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "fltrID",
 		FilterIDs: []string{"fltr_test"},
@@ -102,7 +102,7 @@ func TestGetFiltersActionProfilesOK(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 	newFlt := &Filter{
 		Tenant: "cgrates.org",

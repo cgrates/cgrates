@@ -724,7 +724,7 @@ func (rplSv1 *ReplicatorSv1) GetRateProfile(ctx *context.Context, tntID *utils.T
 	*reply = *rcv
 	return nil
 }
-func (rplSv1 *ReplicatorSv1) GetActionProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ActionProfile) error {
+func (rplSv1 *ReplicatorSv1) GetActionProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.ActionProfile) error {
 	engine.UpdateReplicationFilters(utils.ActionProfilePrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
 	rcv, err := rplSv1.dm.DataDB().GetActionProfileDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
@@ -758,7 +758,7 @@ func (rplSv1 *ReplicatorSv1) SetRateProfile(ctx *context.Context, sp *utils.Rate
 	*reply = utils.OK
 	return
 }
-func (rplSv1 *ReplicatorSv1) SetActionProfile(ctx *context.Context, sp *engine.ActionProfileWithAPIOpts, reply *string) (err error) {
+func (rplSv1 *ReplicatorSv1) SetActionProfile(ctx *context.Context, sp *utils.ActionProfileWithAPIOpts, reply *string) (err error) {
 	if err = rplSv1.dm.DataDB().SetActionProfileDrv(ctx, sp.ActionProfile); err != nil {
 		return
 	}

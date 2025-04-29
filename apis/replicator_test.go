@@ -2907,18 +2907,18 @@ func TestReplicatorGetActionProfile(t *testing.T) {
 		ping:    struct{}{},
 	}
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
-	var reply engine.ActionProfile
+	var reply utils.ActionProfile
 	rp := NewReplicatorSv1(dm, v1)
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -2949,18 +2949,18 @@ func TestReplicatorGetActionProfileErr(t *testing.T) {
 		ping:    struct{}{},
 	}
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
-	var reply engine.ActionProfile
+	var reply utils.ActionProfile
 	rp := NewReplicatorSv1(dm, v1)
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -3125,17 +3125,17 @@ func TestReplicatorSetActionProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "AP1",
 			FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:        "TOPUP",
 					FilterIDs: []string{},
 					Type:      "*topup",
-					Diktats: []*engine.APDiktat{{
+					Diktats: []*utils.APDiktat{{
 						Path:  "~*balance.TestBalance.Value",
 						Value: "10",
 					}},
@@ -3171,17 +3171,17 @@ func TestReplicatorSetActionProfileErr(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "AP1",
 			FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:        "TOPUP",
 					FilterIDs: []string{},
 					Type:      "*topup",
-					Diktats: []*engine.APDiktat{{
+					Diktats: []*utils.APDiktat{{
 						Path:  "~*balance.TestBalance.Value",
 						Value: "10",
 					}},
@@ -3351,16 +3351,16 @@ func TestReplicatorRemoveActionProfile(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -3398,16 +3398,16 @@ func TestReplicatorRemoveActionProfileErr(t *testing.T) {
 	cfg.AdminSCfg().CachesConns = []string{"*internal"}
 	var reply string
 	rp := NewReplicatorSv1(dm, v1)
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},

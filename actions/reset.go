@@ -29,14 +29,14 @@ type actResetStat struct {
 	tnt     string
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
-	aCfg    *engine.APAction
+	aCfg    *utils.APAction
 }
 
 func (aL *actResetStat) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actResetStat) cfg() *engine.APAction {
+func (aL *actResetStat) cfg() *utils.APAction {
 	return aL.aCfg
 }
 
@@ -58,14 +58,14 @@ type actResetThreshold struct {
 	tnt     string
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
-	aCfg    *engine.APAction
+	aCfg    *utils.APAction
 }
 
 func (aL *actResetThreshold) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actResetThreshold) cfg() *engine.APAction {
+func (aL *actResetThreshold) cfg() *utils.APAction {
 	return aL.aCfg
 }
 

@@ -35,7 +35,7 @@ func TestACExecuteActCDRLog(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID:   "TEST_ACTION",
 		Type: utils.CDRLog,
 	}
@@ -63,7 +63,7 @@ func TestACExecuteActCDRLog(t *testing.T) {
 
 func TestACActLogger(t *testing.T) {
 	actLog := &actLog{
-		aCfg: &engine.APAction{
+		aCfg: &utils.APAction{
 			ID:   "TEST_ACTION",
 			Type: utils.CDRLog,
 		},
@@ -78,7 +78,7 @@ func TestACActLogger(t *testing.T) {
 
 func TestACResetStatsAndThresholds(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID:   "TEST_ACTION",
 		Type: utils.CDRLog,
 	}

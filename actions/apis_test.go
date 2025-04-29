@@ -51,12 +51,12 @@ func TestActionsAPIs(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 	aS := NewActionS(cfg, fltrs, dm, nil)
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "actPrfID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "actID",
 				},
@@ -134,11 +134,11 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaResetThreshold,
@@ -226,11 +226,11 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaResetStatQueue,
@@ -316,11 +316,11 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaSetBalance,
@@ -405,11 +405,11 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaAddBalance,
@@ -477,11 +477,11 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	aS := NewActionS(cfg, fltrs, dm, nil)
 
 	// Set ActionProfile
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaLog,
@@ -562,11 +562,11 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.CDRLog,
@@ -650,11 +650,11 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaRemBalance,

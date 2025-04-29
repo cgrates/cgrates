@@ -143,7 +143,7 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
 func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt string,
-	evNm utils.MapStorage, aPrflIDs []string, ignoreFilters bool) (aPfs []*engine.ActionProfile, err error) {
+	evNm utils.MapStorage, aPrflIDs []string, ignoreFilters bool) (aPfs []*utils.ActionProfile, err error) {
 	if len(aPrflIDs) == 0 {
 		ignoreFilters = false
 		var aPfIDMp utils.StringSet
@@ -167,7 +167,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 	}
 	weights := make(map[string]float64) // stores sorting weights by profile ID
 	for _, aPfID := range aPrflIDs {
-		var aPf *engine.ActionProfile
+		var aPf *utils.ActionProfile
 		if aPf, err = aS.dm.GetActionProfile(ctx, tnt, aPfID,
 			true, true, utils.NonTransactional); err != nil {
 			if err == utils.ErrNotFound {
@@ -196,7 +196,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 	}
 
 	// Sort by weight (higher values first).
-	slices.SortFunc(aPfs, func(a, b *engine.ActionProfile) int {
+	slices.SortFunc(aPfs, func(a, b *utils.ActionProfile) int {
 		return cmp.Compare(weights[b.ID], weights[a.ID])
 	})
 
@@ -260,7 +260,7 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 // uses locks to avoid concurrent access
 func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs) error {
 	return guardian.Guardian.Guard(ctx, func(ctx *context.Context) (err error) {
-		var ap *engine.ActionProfile
+		var ap *utils.ActionProfile
 		if ap, err = aS.dm.GetActionProfile(ctx, sActs.tenant, sActs.apID, true, true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(

@@ -123,7 +123,7 @@ func testCgrLdrGetSubsystemsNotLoadedLoad(t *testing.T) {
 	}
 
 	//actionsPrf
-	var replyAct *engine.ActionProfile
+	var replyAct *utils.ActionProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}},
 		&replyAct); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -287,7 +287,7 @@ func testCgrLdrGetAccountAfterLoad(t *testing.T) {
 }
 
 func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
-	expActPrf := &engine.ActionProfile{
+	expActPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ONE_TIME_ACT",
 		FilterIDs: []string{},
@@ -303,11 +303,11 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 				"1002": {},
 			},
 		},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:   "TOPUP",
 				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestBalance.Units",
 						Value: "10",
@@ -317,7 +317,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 			{
 				ID:   "SET_BALANCE_TEST_DATA",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestDataBalance.Type",
 						Value: utils.MetaData,
@@ -327,7 +327,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 			{
 				ID:   "TOPUP_TEST_DATA",
 				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestDataBalance.Units",
 						Value: "1024",
@@ -337,7 +337,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 			{
 				ID:   "SET_BALANCE_TEST_VOICE",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Type",
 						Value: utils.MetaVoice,
@@ -347,7 +347,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 			{
 				ID:   "TOPUP_TEST_VOICE",
 				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Units",
 						Value: "15m15s",
@@ -357,7 +357,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 			{
 				ID:   "SET_BALANCE_TEST_FILTERS",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Filters",
 						Value: "*string:~*req.CustomField:500",
@@ -367,7 +367,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 			{
 				ID:   "TOPUP_REM_VOICE",
 				Type: utils.MetaRemBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path: "TestVoiceBalance2",
 					},
@@ -375,7 +375,7 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 			},
 		},
 	}
-	var replyAct *engine.ActionProfile
+	var replyAct *utils.ActionProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ONE_TIME_ACT"}},
 		&replyAct); err != nil {

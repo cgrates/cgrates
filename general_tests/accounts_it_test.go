@@ -276,10 +276,10 @@ func testV1AccSendToThreshold(t *testing.T) {
 	var reply string
 
 	// Add a disable and log action
-	args := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	args := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			ID: "DISABLE_LOG",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{ID: utils.MetaDisableAccount},
 				{ID: utils.MetaLog},
 			},

@@ -633,12 +633,12 @@ func TestStatsAPIs(t *testing.T) {
 	stV1 := NewStatSv1(sS)
 	var reply string
 
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "actPrfID",
 			FilterIDs: []string{"*string:~*req.Account:1002"},
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "actID",
 				},

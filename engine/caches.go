@@ -66,8 +66,8 @@ func init() {
 	gob.Register(new(utils.RateProfile))
 	gob.Register(new(utils.RateProfileWithAPIOpts))
 	// ActionProfiles
-	gob.Register(new(ActionProfile))
-	gob.Register(new(ActionProfileWithAPIOpts))
+	gob.Register(new(utils.ActionProfile))
+	gob.Register(new(utils.ActionProfileWithAPIOpts))
 	// StatMetrics
 	gob.Register(new(StatASR))
 	gob.Register(new(StatACD))

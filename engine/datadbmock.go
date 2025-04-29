@@ -60,8 +60,8 @@ type DataDBMock struct {
 	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
 	RemStatQueueDrvF           func(ctx *context.Context, tenant, id string) (err error)
 	SetFilterDrvF              func(ctx *context.Context, fltr *Filter) error
-	GetActionProfileDrvF       func(ctx *context.Context, tenant string, ID string) (*ActionProfile, error)
-	SetActionProfileDrvF       func(ctx *context.Context, ap *ActionProfile) error
+	GetActionProfileDrvF       func(ctx *context.Context, tenant string, ID string) (*utils.ActionProfile, error)
+	SetActionProfileDrvF       func(ctx *context.Context, ap *utils.ActionProfile) error
 	RemoveActionProfileDrvF    func(ctx *context.Context, tenant string, ID string) error
 	RemoveFilterDrvF           func(ctx *context.Context, str1 string, str2 string) error
 	SetAccountDrvF             func(ctx *context.Context, profile *utils.Account) error
@@ -463,14 +463,14 @@ func (dbM *DataDBMock) RemoveTrendDrv(ctx *context.Context, _ string, _ string) 
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetActionProfileDrv(ctx *context.Context, tenant string, ID string) (*ActionProfile, error) {
+func (dbM *DataDBMock) GetActionProfileDrv(ctx *context.Context, tenant string, ID string) (*utils.ActionProfile, error) {
 	if dbM.GetActionProfileDrvF != nil {
 		return dbM.GetActionProfileDrvF(ctx, tenant, ID)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetActionProfileDrv(ctx *context.Context, ap *ActionProfile) error {
+func (dbM *DataDBMock) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) error {
 	if dbM.SetActionProfileDrvF != nil {
 		return dbM.SetActionProfileDrvF(ctx, ap)
 	}
