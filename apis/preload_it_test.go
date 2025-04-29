@@ -312,8 +312,8 @@ func testPreloadITVerifyAccounts(t *testing.T) {
 }
 
 func testPreloadITVerifyActionProfiles(t *testing.T) {
-	var reply *engine.ActionProfile
-	expected := &engine.ActionProfile{
+	var reply *utils.ActionProfile
+	expected := &utils.ActionProfile{
 		Tenant: "cgrates.org",
 		ID:     "ONE_TIME_ACT",
 		Weights: utils.DynamicWeights{
@@ -328,13 +328,13 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				"1002": {},
 			},
 		},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:   "TOPUP",
 				TTL:  0,
 				Type: utils.MetaAddBalance,
 				Opts: map[string]any{},
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestBalance.Value",
 						Value: "10",
@@ -346,7 +346,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaSetBalance,
 				Opts: map[string]any{},
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestDataBalance.Type",
 						Value: utils.MetaData,
@@ -358,7 +358,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaAddBalance,
 				Opts: map[string]any{},
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestDataBalance.Value",
 						Value: "1024",
@@ -370,7 +370,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaSetBalance,
 				Opts: map[string]any{},
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Type",
 						Value: utils.MetaVoice,
@@ -382,7 +382,7 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				TTL:  0,
 				Type: utils.MetaAddBalance,
 				Opts: map[string]any{},
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "*balance.TestVoiceBalance.Value",
 						Value: "15m15s",

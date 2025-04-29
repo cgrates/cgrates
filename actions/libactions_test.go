@@ -37,7 +37,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, nil)
 
-	actCfg := []*engine.APAction{
+	actCfg := []*utils.APAction{
 		{Type: "not_a_type"},
 	}
 
@@ -47,7 +47,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
-	actCfg = []*engine.APAction{
+	actCfg = []*utils.APAction{
 		{Type: utils.CDRLog},
 		{Type: utils.MetaHTTPPost},
 		{Type: utils.MetaExport},
@@ -59,20 +59,20 @@ func TestACExecuteCDRLog(t *testing.T) {
 	}
 
 	actHttp, err := newActHTTPPost(context.Background(), cfg.GeneralCfg().DefaultTenant, new(utils.CGREvent), new(engine.FilterS),
-		cfg, &engine.APAction{Type: utils.MetaHTTPPost})
+		cfg, &utils.APAction{Type: utils.MetaHTTPPost})
 	if err != nil {
 		t.Error(err)
 	}
 
 	expectedActs := []actioner{
-		&actCDRLog{cfg, fltr, nil, &engine.APAction{Type: utils.CDRLog}},
+		&actCDRLog{cfg, fltr, nil, &utils.APAction{Type: utils.CDRLog}},
 		actHttp,
-		&actExport{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaExport}},
-		&actResetStat{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaResetStatQueue}},
-		&actResetThreshold{"cgrates.org", cfg, nil, &engine.APAction{Type: utils.MetaResetThreshold}},
-		&actSetBalance{cfg, nil, &engine.APAction{Type: utils.MetaAddBalance}, "cgrates.org", false},
-		&actSetBalance{cfg, nil, &engine.APAction{Type: utils.MetaSetBalance}, "cgrates.org", true},
-		&actRemBalance{cfg, nil, &engine.APAction{Type: utils.MetaRemBalance}, "cgrates.org"},
+		&actExport{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaExport}},
+		&actResetStat{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaResetStatQueue}},
+		&actResetThreshold{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaResetThreshold}},
+		&actSetBalance{cfg, nil, &utils.APAction{Type: utils.MetaAddBalance}, "cgrates.org", false},
+		&actSetBalance{cfg, nil, &utils.APAction{Type: utils.MetaSetBalance}, "cgrates.org", true},
+		&actRemBalance{cfg, nil, &utils.APAction{Type: utils.MetaRemBalance}, "cgrates.org"},
 	}
 
 	acts, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, fltr, dm, nil, actCfg, "cgrates.org")
@@ -89,7 +89,7 @@ func TestACExecuteScheduledAction(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	acts := []actioner{
-		&actCDRLog{cfg, fltr, nil, &engine.APAction{
+		&actCDRLog{cfg, fltr, nil, &utils.APAction{
 			ID:   "TEST_ACTION",
 			Type: utils.CDRLog,
 		}},

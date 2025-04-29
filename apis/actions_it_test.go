@@ -166,7 +166,7 @@ func testActionsPing(t *testing.T) {
 }
 
 func testActionsGetActionProfileBeforeSet(t *testing.T) {
-	var rplyAct engine.ActionProfile
+	var rplyAct utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -178,7 +178,7 @@ func testActionsGetActionProfileBeforeSet(t *testing.T) {
 }
 
 func testActionsGetActionProfilesBeforeSet(t *testing.T) {
-	var rplyAct *[]*engine.ActionProfile
+	var rplyAct *[]*utils.ActionProfile
 	var args *utils.ArgsItemIDs
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
 		args, &rplyAct); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -211,11 +211,11 @@ func testActionsGetActionProfilesCountBeforeSet(t *testing.T) {
 }
 
 func testActionsSetActionProfile(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "actID",
 				},
@@ -231,7 +231,7 @@ func testActionsSetActionProfile(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	var rplyActPrf engine.ActionProfile
+	var rplyActPrf utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -245,17 +245,17 @@ func testActionsSetActionProfile(t *testing.T) {
 }
 
 func testActionsGetActionProfileAfterSet(t *testing.T) {
-	expAct := engine.ActionProfile{
+	expAct := utils.ActionProfile{
 		Tenant: "cgrates.org",
 		ID:     "actPrfID",
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID: "actID",
 			},
 		},
 	}
 
-	var rplyAct engine.ActionProfile
+	var rplyAct utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -284,11 +284,11 @@ func testActionsGetActionProfileIDsAfterSet(t *testing.T) {
 }
 
 func testActionsGetActionProfilesAfterSet(t *testing.T) {
-	expActs := []*engine.ActionProfile{
+	expActs := []*utils.ActionProfile{
 		{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "actID",
 				},
@@ -296,7 +296,7 @@ func testActionsGetActionProfilesAfterSet(t *testing.T) {
 		},
 	}
 	var args *utils.ArgsItemIDs
-	var rplyActs []*engine.ActionProfile
+	var rplyActs []*utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
 		args, &rplyActs); err != nil {
 		t.Error(err)
@@ -334,7 +334,7 @@ func testActionsRemoveActionProfile(t *testing.T) {
 }
 
 func testActionsGetActionProfileAfterRemove(t *testing.T) {
-	var rplyAct engine.ActionProfile
+	var rplyAct utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -347,7 +347,7 @@ func testActionsGetActionProfileAfterRemove(t *testing.T) {
 
 func testActionsGetActionProfilesAfterRemove(t *testing.T) {
 	var args *utils.ArgsItemIDs
-	var rplyActs []*engine.ActionProfile
+	var rplyActs []*utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
 		args, &rplyActs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
@@ -355,11 +355,11 @@ func testActionsGetActionProfilesAfterRemove(t *testing.T) {
 }
 
 func testActionsSetActionProfilesWithPrefix(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "aactPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "aactID",
 				},
@@ -375,7 +375,7 @@ func testActionsSetActionProfilesWithPrefix(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	var rplyActPrf engine.ActionProfile
+	var rplyActPrf utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -387,11 +387,11 @@ func testActionsSetActionProfilesWithPrefix(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", actPrf.ActionProfile, rplyActPrf)
 	}
 
-	expActs := []*engine.ActionProfile{
+	expActs := []*utils.ActionProfile{
 		{
 			Tenant: "cgrates.org",
 			ID:     "aactPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "aactID",
 				},
@@ -401,7 +401,7 @@ func testActionsSetActionProfilesWithPrefix(t *testing.T) {
 	args := &utils.ArgsItemIDs{
 		ItemsPrefix: "aa",
 	}
-	var rplyActs []*engine.ActionProfile
+	var rplyActs []*utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
 		args, &rplyActs); err != nil {
 		t.Error(err)
@@ -427,15 +427,15 @@ func testActionsStopServer(t *testing.T) {
 }
 
 func testActionsSetActionProfileBeforeExecuteHTTPPost(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaHTTPPost,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path: actSrv.URL,
 						},
@@ -454,7 +454,7 @@ func testActionsSetActionProfileBeforeExecuteHTTPPost(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	var rplyActPrf engine.ActionProfile
+	var rplyActPrf utils.ActionProfile
 	if err := actRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
@@ -576,11 +576,11 @@ func testActionsStatProcessEvent(t *testing.T) {
 }
 
 func testActionsSetActionProfileBeforeExecuteResetSQ(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaResetStatQueue,
@@ -698,9 +698,9 @@ func testActionsRemoveActionProfiles(t *testing.T) {
 }
 
 func testActionsSetActionProfiles(t *testing.T) {
-	actionProfiles := []*engine.ActionProfileWithAPIOpts{
+	actionProfiles := []*utils.ActionProfileWithAPIOpts{
 		{
-			ActionProfile: &engine.ActionProfile{
+			ActionProfile: &utils.ActionProfile{
 				ID:        "ACTION_TEST_1",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:ActionProfileBlockerBehaviour"},
@@ -715,7 +715,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 					},
 				},
 				Schedule: utils.MetaASAP,
-				Actions: []*engine.APAction{
+				Actions: []*utils.APAction{
 					{
 						ID:   "action1",
 						Type: utils.MetaLog,
@@ -724,7 +724,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 			},
 		},
 		{
-			ActionProfile: &engine.ActionProfile{
+			ActionProfile: &utils.ActionProfile{
 				ID:        "ACTION_TEST_2",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:ActionProfileBlockerBehaviour"},
@@ -734,7 +734,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 					},
 				},
 				Schedule: utils.MetaASAP,
-				Actions: []*engine.APAction{
+				Actions: []*utils.APAction{
 					{
 						ID:   "action2",
 						Type: utils.MetaLog,
@@ -743,7 +743,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 			},
 		},
 		{
-			ActionProfile: &engine.ActionProfile{
+			ActionProfile: &utils.ActionProfile{
 				ID:        "ACTION_TEST_3",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:ActionProfileBlockerBehaviour"},
@@ -758,7 +758,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 					},
 				},
 				Schedule: utils.MetaASAP,
-				Actions: []*engine.APAction{
+				Actions: []*utils.APAction{
 					{
 						ID:   "action3",
 						Type: utils.MetaLog,
@@ -767,7 +767,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 			},
 		},
 		{
-			ActionProfile: &engine.ActionProfile{
+			ActionProfile: &utils.ActionProfile{
 				ID:        "ACTION_TEST_4",
 				Tenant:    "cgrates.org",
 				FilterIDs: []string{"*string:~*req.TestCase:ActionProfileBlockerBehaviour"},
@@ -777,7 +777,7 @@ func testActionsSetActionProfiles(t *testing.T) {
 					},
 				},
 				Schedule: utils.MetaASAP,
-				Actions: []*engine.APAction{
+				Actions: []*utils.APAction{
 					{
 						ID:   "action4",
 						Type: utils.MetaLog,

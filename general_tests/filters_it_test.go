@@ -301,10 +301,10 @@ func testV1FltrPopulateThreshold(t *testing.T) {
 	}
 
 	// Add a disable and log action
-	argsAP := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	argsAP := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			ID: "LOG",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "LogAction",
 					Type: utils.MetaLog,
@@ -795,10 +795,10 @@ func testV1FltrAccounts(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	// Add a log action
-	argsAP := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	argsAP := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			ID: "LOG",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "LogAction",
 					Type: utils.MetaLog,
@@ -899,10 +899,10 @@ func testV1FltrAccountsExistsDynamicaly(t *testing.T) {
 
 	var result string
 	// Add a log action
-	argsAP := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	argsAP := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			ID: "LOG",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "LogAction",
 					Type: utils.MetaLog,

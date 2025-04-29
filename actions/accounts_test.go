@@ -34,10 +34,10 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID:   "TestACExecuteAccounts",
 		Type: utils.MetaSetBalance,
-		Diktats: []*engine.APDiktat{
+		Diktats: []*utils.APDiktat{
 			{
 				Path:  "~*balance.TestBalance.Value",
 				Value: "\"constant;`>;q=0.7;expires=3600constant\"",
@@ -86,10 +86,10 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID:   "TestACExecuteAccountsRemBalance",
 		Type: utils.MetaSetBalance,
-		Diktats: []*engine.APDiktat{
+		Diktats: []*utils.APDiktat{
 			{
 				Path:  "~*balance.TestBalance.Value",
 				Value: "10",
@@ -124,10 +124,10 @@ func TestACExecuteAccountsParseError(t *testing.T) {
 	internalChan := make(chan birpc.ClientConnector, 1)
 	connMngr := engine.NewConnManager(cfg)
 	connMngr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, internalChan)
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID:   "TestACExecuteAccountsRemBalance",
 		Type: utils.MetaSetBalance,
-		Diktats: []*engine.APDiktat{
+		Diktats: []*utils.APDiktat{
 			{
 				Path:  "~*balance.TestBalance.Value",
 				Value: "~10",
@@ -149,7 +149,7 @@ func TestACExecuteAccountsParseError(t *testing.T) {
 }
 
 func TestACAccountsGetIDs(t *testing.T) {
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID: "TestACExecuteAccountsRemBalance",
 	}
 

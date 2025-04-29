@@ -558,8 +558,8 @@ func testExpVerifyRateProfiles(t *testing.T) {
 }
 
 func testExpVerifyActionProfiles(t *testing.T) {
-	var reply *engine.ActionProfile
-	actPrf := &engine.ActionProfile{
+	var reply *utils.ActionProfile
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ONE_TIME_ACT",
 		FilterIDs: []string{},
@@ -572,11 +572,11 @@ func testExpVerifyActionProfiles(t *testing.T) {
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts: {"1001": {}, "1002": {}},
 		},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:   "TOPUP",
 				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  utils.MetaBalance + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Units,
 					Value: "10",
 				}},
@@ -585,7 +585,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			{
 				ID:   "SET_BALANCE_TEST_DATA",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  utils.MetaBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
 					Value: utils.MetaData,
 				}},
@@ -593,7 +593,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			{
 				ID:   "TOPUP_TEST_DATA",
 				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  utils.MetaBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Units,
 					Value: "1024",
 				}},
@@ -601,7 +601,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			{
 				ID:   "SET_BALANCE_TEST_VOICE",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
 					Value: utils.MetaVoice,
 				}},
@@ -609,7 +609,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			{
 				ID:   "TOPUP_TEST_VOICE",
 				Type: utils.MetaAddBalance,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Units,
 					Value: "15m15s",
 				}},
@@ -617,7 +617,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			{
 				ID:   "SET_BALANCE_TEST_FILTERS",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Filters,
 					Value: "*string:~*req.CustomField:500",
 				}},
@@ -625,7 +625,7 @@ func testExpVerifyActionProfiles(t *testing.T) {
 			{
 				ID:   "TOPUP_REM_VOICE",
 				Type: utils.MetaRemBalance,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path: "TestVoiceBalance2",
 				}},
 			},

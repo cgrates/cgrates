@@ -85,7 +85,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 	}
 
 	//Actions
-	act := &engine.ActionProfile{
+	act := &utils.ActionProfile{
 		Tenant: "cgrates.org",
 		ID:     "SET_BAL",
 		FilterIDs: []string{
@@ -97,11 +97,11 @@ func TestGetTariffPlansKeys(t *testing.T) {
 		},
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 		Schedule: utils.MetaASAP,
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:   "SET_BAL",
 				Type: utils.MetaSetBalance,
-				Diktats: []*engine.APDiktat{
+				Diktats: []*utils.APDiktat{
 					{
 						Path:  "MONETARY",
 						Value: "10",

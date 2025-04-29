@@ -142,11 +142,11 @@ func testRPCMethodsAddData(t *testing.T) {
 	}
 	var reply string
 	// Add a disable and log action
-	attrsAA := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	attrsAA := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "DISABLE_LOG",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					Type: utils.MetaDisableAccount,
 				},
@@ -162,11 +162,11 @@ func testRPCMethodsAddData(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
 	// Add an enable and log action
-	attrsAA2 := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	attrsAA2 := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "ENABLE_LOG",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					Type: utils.MetaEnableAccount,
 				},

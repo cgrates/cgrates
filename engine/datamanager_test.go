@@ -2562,7 +2562,7 @@ func TestDMCacheDataFromDBActionProfilePrefix(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "ID",
@@ -2574,7 +2574,7 @@ func TestDMCacheDataFromDBActionProfilePrefix(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	if err := dm.SetActionProfile(context.Background(), ap, false); err != nil {
@@ -3921,7 +3921,7 @@ func TestDMRemoveActionProfileErrGetActionProf(t *testing.T) {
 	dm := NewDataManager(data, cfg, cM)
 
 	dm.dataDB = &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -3945,7 +3945,7 @@ func TestDMRemoveActionProfileErrRemvProfDrv(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -3957,11 +3957,11 @@ func TestDMRemoveActionProfileErrRemvProfDrv(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	dm.dataDB = &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return ap, nil
 		},
 		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error {
@@ -7189,13 +7189,15 @@ func TestDMRemoveActionProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) { return &ActionProfile{}, nil },
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+			return &utils.ActionProfile{}, nil
+		},
 		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -7207,7 +7209,7 @@ func TestDMRemoveActionProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	err := dm.RemoveActionProfile(context.Background(), ap.Tenant, ap.ID, true)
@@ -7221,7 +7223,7 @@ func TestDMRemoveActionProfileRmvIndexFiltersItemErr(t *testing.T) {
 
 	Cache.Clear(nil)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -7233,12 +7235,12 @@ func TestDMRemoveActionProfileRmvIndexFiltersItemErr(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) { return ap, nil },
+		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) { return ap, nil },
 		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
 	}
 
@@ -7260,7 +7262,7 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -7272,7 +7274,7 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -7291,7 +7293,7 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) { return ap, nil },
+		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) { return ap, nil },
 		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
 	}
 	dm := NewDataManager(data, cfg, cM)
@@ -7747,7 +7749,7 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 
 func TestDMSetActionProfileNoDMErr(t *testing.T) {
 	var dm *DataManager
-	err := dm.SetActionProfile(context.Background(), &ActionProfile{}, false)
+	err := dm.SetActionProfile(context.Background(), &utils.ActionProfile{}, false)
 	if err != utils.ErrNoDatabaseConn {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNoDatabaseConn, err)
 	}
@@ -7762,7 +7764,7 @@ func TestDMSetActionProfileCheckFiltersErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -7774,7 +7776,7 @@ func TestDMSetActionProfileCheckFiltersErr(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	expErr := "broken reference to filter: <*string*req.Account1001> for item with ID: cgrates.org:AP1"
@@ -7788,14 +7790,14 @@ func TestDMSetActionProfileGetActionProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) {
-			return &ActionProfile{}, utils.ErrNotImplemented
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+			return &utils.ActionProfile{}, utils.ErrNotImplemented
 		},
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -7807,7 +7809,7 @@ func TestDMSetActionProfileGetActionProfileErr(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	if err := dm.SetActionProfile(context.Background(), ap, false); err != utils.ErrNotImplemented {
@@ -7819,15 +7821,15 @@ func TestDMSetActionProfileSetActionProfileDrvErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) {
-			return &ActionProfile{}, nil
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+			return &utils.ActionProfile{}, nil
 		},
-		SetActionProfileDrvF: func(ctx *context.Context, ap *ActionProfile) error { return utils.ErrNotImplemented },
+		SetActionProfileDrvF: func(ctx *context.Context, ap *utils.ActionProfile) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -7839,7 +7841,7 @@ func TestDMSetActionProfileSetActionProfileDrvErr(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 	if err := dm.SetActionProfile(context.Background(), ap, false); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
@@ -7852,15 +7854,15 @@ func TestDMSetActionProfileUpdatedIndexesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) {
-			return &ActionProfile{}, nil
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+			return &utils.ActionProfile{}, nil
 		},
-		SetActionProfileDrvF: func(ctx *context.Context, ap *ActionProfile) error { return nil },
+		SetActionProfileDrvF: func(ctx *context.Context, ap *utils.ActionProfile) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -7872,7 +7874,7 @@ func TestDMSetActionProfileUpdatedIndexesErr(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	if err := dm.SetActionProfile(context.Background(), ap, true); err != utils.ErrNotImplemented {
@@ -7888,7 +7890,7 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -7900,7 +7902,7 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -7919,10 +7921,10 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return ap, nil
 		},
-		SetActionProfileDrvF: func(ctx *context.Context, ap *ActionProfile) error { return nil },
+		SetActionProfileDrvF: func(ctx *context.Context, ap *utils.ActionProfile) error { return nil },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -8182,7 +8184,7 @@ func TestDMGetActionProfileCacheGet(t *testing.T) {
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
-	val := &ActionProfile{
+	val := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
 		FilterIDs: []string{"*string*req.Account1001"},
@@ -8193,7 +8195,7 @@ func TestDMGetActionProfileCacheGet(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}}}
+		Actions:  []*utils.APAction{{}}}
 
 	if err := Cache.Set(context.Background(), utils.CacheActionProfiles, utils.ConcatenatedKey(utils.CGRateSorg, "ap1"), val, []string{}, true, utils.NonTransactional); err != nil {
 		t.Error(err)
@@ -8224,7 +8226,7 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 		config.SetCgrConfig(cfgtmp)
 	}()
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -8236,7 +8238,7 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	cfg := config.NewDefaultCGRConfig()
@@ -8255,8 +8257,10 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) { return ap, utils.ErrNotFound },
-		SetActionProfileDrvF: func(ctx *context.Context, ap *ActionProfile) error { return utils.ErrNotImplemented },
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+			return ap, utils.ErrNotFound
+		},
+		SetActionProfileDrvF: func(ctx *context.Context, ap *utils.ActionProfile) error { return utils.ErrNotImplemented },
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -8268,7 +8272,7 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 
 func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -8280,7 +8284,7 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	cfgtmp := config.CgrConfig()
@@ -8309,7 +8313,9 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*ActionProfile, error) { return ap, utils.ErrNotFound },
+		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+			return ap, utils.ErrNotFound
+		},
 	}
 	dm := NewDataManager(data, cfg, cM)
 
@@ -8348,7 +8354,7 @@ func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 	dm := NewDataManager(data, cfg, cM)
 
-	ap := &ActionProfile{
+	ap := &utils.ActionProfile{
 
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
@@ -8360,7 +8366,7 @@ func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 		},
 		Schedule: "* * * * *",
 		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
-		Actions:  []*APAction{{}},
+		Actions:  []*utils.APAction{{}},
 	}
 
 	if err := dm.dataDB.SetActionProfileDrv(context.Background(), ap); err != nil {

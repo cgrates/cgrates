@@ -1044,7 +1044,7 @@ func testOnStorITRateProfile(t *testing.T) {
 }
 
 func testOnStorITActionProfile(t *testing.T) {
-	actPrf := &ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TEST_ID1",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -1057,12 +1057,12 @@ func testOnStorITActionProfile(t *testing.T) {
 		Targets: map[string]utils.StringSet{
 			utils.MetaAccounts: utils.NewStringSet([]string{"acc1", "acc2", "acc3"}),
 		},
-		Actions: []*APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Diktats: []*APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path: "~*balance.TestBalance.Value",
 				}},
 			},
@@ -1070,7 +1070,7 @@ func testOnStorITActionProfile(t *testing.T) {
 				ID:        "TOPUP_TEST_VOICE",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Diktats: []*APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path: "~*balance.TestVoiceBalance.Value",
 				}},
 			},

@@ -620,12 +620,12 @@ func TestThresholdsAPIs(t *testing.T) {
 		cfg: cfg,
 	}
 
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "actPrfID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "actID",
 				},

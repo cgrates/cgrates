@@ -1302,8 +1302,8 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 	}
 
 	// we will set anActionProfile with our filter and check the indexes
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "REM_ACC",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*req.Account:1001"},
@@ -1314,11 +1314,11 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "REM_BAL",
 					Type: utils.MetaRemBalance,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path: "MONETARY",
 						},
@@ -1412,8 +1412,8 @@ func testV1FIdxSetActionProfileMoreFltrsMoreIndexing(t *testing.T) {
 	}
 
 	//update our ActionProfile with our filters
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "REM_ACC",
 			FilterIDs: []string{"fltr_for_attr", "*string:~*req.Account:1001",
@@ -1425,11 +1425,11 @@ func testV1FIdxSetActionProfileMoreFltrsMoreIndexing(t *testing.T) {
 			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "REM_BAL",
 					Type: utils.MetaRemBalance,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path: "MONETARY",
 						},
@@ -1530,8 +1530,8 @@ func testV1FIdxActionProfileComputeIndexes(t *testing.T) {
 }
 func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 	//we will add more attributes with different context for matching filters
-	actPrf2 := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf2 := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "TOPUP_ACC",
 			FilterIDs: []string{"fltr_for_attr3", "fltr_for_attr2",
@@ -1543,11 +1543,11 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "ADD_BAL",
 					Type: utils.MetaAddBalance,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "MONETARY",
 							Value: "10",
@@ -1557,8 +1557,8 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	actPrf3 := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf3 := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "SET_BAL",
 			FilterIDs: []string{"fltr_for_attr",
@@ -1570,11 +1570,11 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "SET_BAL",
 					Type: utils.MetaSetBalance,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "MONETARY",
 							Value: "10",

@@ -1482,21 +1482,21 @@ func testFltrRplThresholdProfile(t *testing.T) {
 
 // func testFltrRplActionProfile(t *testing.T) {
 // 	acID := "ATTR1"
-// 	acPrf := &engine.ActionProfileWithAPIOpts{
-// 		ActionProfile: &engine.ActionProfile{
+// 	acPrf := &utils.ActionProfileWithAPIOpts{
+// 		ActionProfile: &utils.ActionProfile{
 // 			Tenant: "cgrates.org",
 // 			ID:     acID,
-// 			Actions: []*engine.APAction{
+// 			Actions: []*utils.APAction{
 // 				{
 // 					ID:      "test_action_id",
-// 					Diktats: []*engine.APDiktat{{}},
+// 					Diktats: []*utils.APDiktat{{}},
 // 				},
 // 			},
 // 			Weight: 10,
 // 		},
 // 	}
 // 	var result string
-// 	var replyPrfl *engine.ActionProfile
+// 	var replyPrfl *utils.ActionProfile
 // 	var rplyIDs []string
 // 	// empty
 // 	if err := fltrRplEngine1RPC.Call(context.Background(), utils.AdminSv1GetActionProfileIDs, &utils.ArgsItemIDs{}, &rplyIDs); err == nil ||

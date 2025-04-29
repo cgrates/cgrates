@@ -51,16 +51,16 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		utils.MetaOpts: map[string]any{},
 	}
 
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP1",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "*topup",
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -72,7 +72,7 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	expActionPrf := []*engine.ActionProfile{actPrf}
+	expActionPrf := []*utils.ActionProfile{actPrf}
 
 	if rcv, err := acts.matchingActionProfilesForEvent(context.Background(), "cgrates.org",
 		evNM, []string{}, false); err != nil {
@@ -164,16 +164,16 @@ func TestScheduledActions(t *testing.T) {
 		utils.MetaOpts: map[string]any{},
 	}
 
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP2",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -226,17 +226,17 @@ func TestScheduleAction(t *testing.T) {
 		},
 	}
 
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP3",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  "* * * * *",
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -332,17 +332,17 @@ func TestV1ScheduleActions(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP4",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  utils.MetaASAP,
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -388,17 +388,17 @@ func TestV1ExecuteActions(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP5",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
 		Schedule:  utils.MetaASAP,
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -437,17 +437,17 @@ type dataDBMockError struct {
 	engine.DataDBMock
 }
 
-func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string) (*engine.ActionProfile, error) {
-	return &engine.ActionProfile{
+func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string) (*utils.ActionProfile, error) {
+	return &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP6",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10"},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -456,7 +456,7 @@ func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string
 	}, nil
 }
 
-func (dbM *dataDBMockError) SetActionProfileDrv(*context.Context, *engine.ActionProfile) error {
+func (dbM *dataDBMockError) SetActionProfileDrv(*context.Context, *utils.ActionProfile) error {
 	return utils.ErrNoDatabaseConn
 }
 
@@ -546,7 +546,7 @@ func TestCDRLogActionExecute(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
-	apA := &engine.APAction{
+	apA := &utils.APAction{
 		ID:   "ACT_CDRLOG",
 		Type: utils.MetaCdrLog,
 	}
@@ -651,7 +651,7 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
-	apA := &engine.APAction{
+	apA := &utils.APAction{
 		ID:   "ACT_CDRLOG2",
 		Type: utils.MetaCdrLog,
 		Opts: map[string]any{
@@ -705,7 +705,7 @@ func TestExportAction(t *testing.T) {
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
-	apA := &engine.APAction{
+	apA := &utils.APAction{
 		ID:   "ACT_CDRLOG2",
 		Type: utils.MetaExport,
 	}
@@ -759,7 +759,7 @@ func TestExportActionWithEeIDs(t *testing.T) {
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalCDRsChann)
-	apA := &engine.APAction{
+	apA := &utils.APAction{
 		ID:   "ACT_CDRLOG2",
 		Type: utils.MetaExport,
 		Opts: map[string]any{
@@ -816,10 +816,10 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
-	apA := &engine.APAction{
+	apA := &utils.APAction{
 		ID:      "ACT_RESET_TH",
 		Type:    utils.MetaResetThreshold,
-		Diktats: []*engine.APDiktat{{}},
+		Diktats: []*utils.APDiktat{{}},
 	}
 	exportAction := &actResetThreshold{
 		tnt:     "cgrates.org",
@@ -862,10 +862,10 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, internalChann)
-	apA := &engine.APAction{
+	apA := &utils.APAction{
 		ID:      "ACT_RESET_TH",
 		Type:    utils.MetaResetThreshold,
-		Diktats: []*engine.APDiktat{{}},
+		Diktats: []*utils.APDiktat{{}},
 	}
 	exportAction := &actResetThreshold{
 		tnt:     "cgrates.org",
@@ -908,10 +908,10 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)
-	apA := &engine.APAction{
+	apA := &utils.APAction{
 		ID:      "ACT_RESET_ST",
 		Type:    utils.MetaResetStatQueue,
-		Diktats: []*engine.APDiktat{{}},
+		Diktats: []*utils.APDiktat{{}},
 	}
 	exportAction := &actResetStat{
 		tnt:     "cgrates.org",
@@ -954,10 +954,10 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, internalChann)
-	apA := &engine.APAction{
+	apA := &utils.APAction{
 		ID:   "ACT_RESET_ST",
 		Type: utils.MetaResetStatQueue,
-		Diktats: []*engine.APDiktat{{
+		Diktats: []*utils.APDiktat{{
 			Value: "ST1",
 		}},
 	}
@@ -980,16 +980,16 @@ func TestACScheduledActions(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TestACScheduledActions",
 		FilterIDs: []string{"*string:~*req.Destination:1005"},
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      "inexistent_type",
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -1094,17 +1094,17 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 		},
 	}
 
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP7",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10", "*prefix:~*opts.testFieldIgnore:testValue1"},
 		Schedule:  utils.MetaASAP,
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},
@@ -1147,17 +1147,17 @@ func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 		},
 	}
 
-	actPrf := &engine.ActionProfile{
+	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP8",
 		FilterIDs: []string{"*string:~*req.Account:1001|1002|1003", "*prefix:~*req.Destination:10", "*prefix:~*opts.testFieldIgnore:testValue1"},
 		Schedule:  utils.MetaASAP,
-		Actions: []*engine.APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "TOPUP",
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
-				Diktats: []*engine.APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path:  "~*balance.TestBalance.Value",
 					Value: "10",
 				}},

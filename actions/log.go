@@ -30,14 +30,14 @@ import (
 
 // actLogger will log data to CGRateS logger
 type actLog struct {
-	aCfg *engine.APAction
+	aCfg *utils.APAction
 }
 
 func (aL *actLog) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actLog) cfg() *engine.APAction {
+func (aL *actLog) cfg() *utils.APAction {
 	return aL.aCfg
 }
 
@@ -52,14 +52,14 @@ type actCDRLog struct {
 	config  *config.CGRConfig
 	filterS *engine.FilterS
 	connMgr *engine.ConnManager
-	aCfg    *engine.APAction
+	aCfg    *utils.APAction
 }
 
 func (aL *actCDRLog) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actCDRLog) cfg() *engine.APAction {
+func (aL *actCDRLog) cfg() *utils.APAction {
 	return aL.aCfg
 }
 

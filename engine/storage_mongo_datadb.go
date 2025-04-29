@@ -1316,8 +1316,8 @@ func (ms *MongoStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id st
 	})
 }
 
-func (ms *MongoStorage) GetActionProfileDrv(ctx *context.Context, tenant, id string) (*ActionProfile, error) {
-	ap := new(ActionProfile)
+func (ms *MongoStorage) GetActionProfileDrv(ctx *context.Context, tenant, id string) (*utils.ActionProfile, error) {
+	ap := new(utils.ActionProfile)
 	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
 		sr := ms.getCol(ColApp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
 		decodeErr := sr.Decode(ap)
@@ -1332,7 +1332,7 @@ func (ms *MongoStorage) GetActionProfileDrv(ctx *context.Context, tenant, id str
 	return ap, nil
 }
 
-func (ms *MongoStorage) SetActionProfileDrv(ctx *context.Context, ap *ActionProfile) error {
+func (ms *MongoStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColApp).UpdateOne(sctx, bson.M{"tenant": ap.Tenant, "id": ap.ID},
 			bson.M{"$set": ap},

@@ -466,11 +466,11 @@ package general_tests
 // 	// 			DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
 // 	// 	},
 // 	// }
-// 	argsAP := &engine.ActionProfileWithAPIOpts{
-// 		ActionProfile: &engine.ActionProfile{
+// 	argsAP := &utils.ActionProfileWithAPIOpts{
+// 		ActionProfile: &utils.ActionProfile{
 // 			Tenant: "cgrates.org",
 // 			ID:     "ACT_LOG",
-// 			Actions: []*engine.APAction{
+// 			Actions: []*utils.APAction{
 // 				{
 // 					Type: utils.MetaLog,
 // 				},

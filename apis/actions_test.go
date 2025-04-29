@@ -45,11 +45,11 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 			ID: "actID",
 		},
 	}
-	var result engine.ActionProfile
+	var result utils.ActionProfile
 	var reply string
 
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actID",
 			Weights: utils.DynamicWeights{
@@ -57,7 +57,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Actions: make([]*engine.APAction, 1),
+			Actions: make([]*utils.APAction, 1),
 		},
 	}
 
@@ -97,7 +97,7 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 		t.Error(err)
 	}
 	engine.Cache.Clear(nil)
-	result = engine.ActionProfile{}
+	result = utils.ActionProfile{}
 	if err := adms.GetActionProfile(context.Background(), arg, &result); err == nil ||
 		err != utils.ErrNotFound {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.ErrNotFound, err)
@@ -116,7 +116,7 @@ func TestActionsGetActionProfileCheckErrors(t *testing.T) {
 		cfg: cfg,
 		dm:  dm,
 	}
-	var rcv engine.ActionProfile
+	var rcv utils.ActionProfile
 	experr := "MANDATORY_IE_MISSING: [ID]"
 
 	if err := adms.GetActionProfile(context.Background(), &utils.TenantIDWithAPIOpts{
@@ -151,8 +151,8 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{},
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{},
 	}
 
 	var reply string
@@ -164,7 +164,7 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 	}
 
 	actPrf.ID = "TestActionsSetActionProfileCheckErrors"
-	actPrf.Actions = make([]*engine.APAction, 1)
+	actPrf.Actions = make([]*utils.APAction, 1)
 	actPrf.FilterIDs = []string{"invalid_filter_format"}
 	experr = "SERVER_ERROR: broken reference to filter: <invalid_filter_format> for item with ID: cgrates.org:TestActionsSetActionProfileCheckErrors"
 
@@ -186,14 +186,14 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*engine.ActionProfile, error) {
-			actPrf := &engine.ActionProfile{
+		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+			actPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *engine.ActionProfile) error {
+		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
 			return nil
 		},
 		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
@@ -226,8 +226,8 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 		dm:  dm,
 	}
 
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			ID:     "TestActionsRemoveActionProfileCheckErrors",
 			Tenant: "cgrates.org",
 			Weights: utils.DynamicWeights{
@@ -235,7 +235,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Actions: make([]*engine.APAction, 1),
+			Actions: make([]*utils.APAction, 1),
 		},
 	}
 	var reply string
@@ -260,7 +260,7 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	adms.cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	var rcv engine.ActionProfile
+	var rcv utils.ActionProfile
 
 	if err := adms.GetActionProfile(context.Background(), &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -289,14 +289,14 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*engine.ActionProfile, error) {
-			actPrf := &engine.ActionProfile{
+		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+			actPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *engine.ActionProfile) error {
+		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
 			return nil
 		},
 		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
@@ -333,14 +333,14 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*engine.ActionProfile, error) {
-			actPrf := &engine.ActionProfile{
+		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+			actPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *engine.ActionProfile) error {
+		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
 			return nil
 		},
 		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
@@ -399,14 +399,14 @@ func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*engine.ActionProfile, error) {
-			actPrf := &engine.ActionProfile{
+		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+			actPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *engine.ActionProfile) error {
+		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
 			return nil
 		},
 		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
@@ -461,11 +461,11 @@ func TestActionsGetActionProfilesOK(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
-	args1 := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	args1 := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "Action1",
 				},
@@ -486,11 +486,11 @@ func TestActionsGetActionProfilesOK(t *testing.T) {
 		t.Error("Unexpected reply returned:", setReply)
 	}
 
-	args2 := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	args2 := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "test_ID2",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "Action2",
 				},
@@ -511,11 +511,11 @@ func TestActionsGetActionProfilesOK(t *testing.T) {
 	}
 
 	// this profile will not match
-	args3 := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	args3 := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "test2_ID1",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "Action1",
 				},
@@ -539,11 +539,11 @@ func TestActionsGetActionProfilesOK(t *testing.T) {
 		Tenant:      "cgrates.org",
 		ItemsPrefix: "test_ID",
 	}
-	exp := []*engine.ActionProfile{
+	exp := []*utils.ActionProfile{
 		{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "Action1",
 				},
@@ -557,7 +557,7 @@ func TestActionsGetActionProfilesOK(t *testing.T) {
 		{
 			Tenant: "cgrates.org",
 			ID:     "test_ID2",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "Action2",
 				},
@@ -570,7 +570,7 @@ func TestActionsGetActionProfilesOK(t *testing.T) {
 		},
 	}
 
-	var getReply []*engine.ActionProfile
+	var getReply []*utils.ActionProfile
 	if err := admS.GetActionProfiles(context.Background(), argsGet, &getReply); err != nil {
 		t.Error(err)
 	} else {
@@ -591,11 +591,11 @@ func TestActionsGetActionProfilesGetIDsErr(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
-	args := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	args := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "Action1",
 				},
@@ -627,7 +627,7 @@ func TestActionsGetActionProfilesGetIDsErr(t *testing.T) {
 	}
 
 	experr := `SERVER_ERROR: maximum number of items exceeded`
-	var getReply []*engine.ActionProfile
+	var getReply []*utils.ActionProfile
 	if err := admS.GetActionProfiles(context.Background(), argsGet, &getReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
@@ -638,7 +638,7 @@ func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		SetActionProfileDrvF: func(*context.Context, *engine.ActionProfile) error {
+		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
 			return nil
 		},
 		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
@@ -655,7 +655,7 @@ func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
 		dm:  dm,
 	}
 
-	var reply []*engine.ActionProfile
+	var reply []*utils.ActionProfile
 	experr := "SERVER_ERROR: NOT_IMPLEMENTED"
 
 	if err := adms.GetActionProfiles(context.Background(),
@@ -673,14 +673,14 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*engine.ActionProfile, error) {
-			actionPrf := &engine.ActionProfile{
+		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+			actionPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actionPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *engine.ActionProfile) error {
+		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
 			return nil
 		},
 		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
@@ -718,14 +718,14 @@ func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*engine.ActionProfile, error) {
-			actionPrf := &engine.ActionProfile{
+		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+			actionPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actionPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *engine.ActionProfile) error {
+		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
 			return nil
 		},
 		RemoveActionProfileDrvF: func(*context.Context, string, string) error {

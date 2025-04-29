@@ -150,11 +150,11 @@ func testThresholdsGetThresholdBeforeSet(t *testing.T) {
 	}
 }
 func testThresholdsSetActionProfile(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "actID",
 				},
@@ -508,11 +508,11 @@ func testThresholdsGetThresholdsAfterRemove(t *testing.T) {
 }
 
 func testThresholdsSetActionProfileBeforeProcessEv(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaResetThreshold,

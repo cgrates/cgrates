@@ -107,8 +107,8 @@ func testAccActionsRPCConn(t *testing.T) {
 }
 
 func testAccActionsSetActionProfile(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CREATE_ACC",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -119,12 +119,12 @@ func testAccActionsSetActionProfile(t *testing.T) {
 			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:        "SET_NEW_BAL",
 					FilterIDs: []string{"*exists:*opts.BAL_NEW:"},
 					Type:      utils.MetaSetBalance,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "*account.ThresholdIDs",
 							Value: utils.MetaNone,
@@ -151,7 +151,7 @@ func testAccActionsSetActionProfile(t *testing.T) {
 					ID:        "SET_ADD_BAL",
 					FilterIDs: []string{"*exists:*opts.BAL_ADD:"},
 					Type:      utils.MetaAddBalance,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "*balance.VOICE.Type",
 							Value: utils.MetaAbstract,
@@ -184,7 +184,7 @@ func testAccActionsSetActionProfile(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	var result *engine.ActionProfile
+	var result *utils.ActionProfile
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetActionProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: actPrf.Tenant, ID: actPrf.ID}}, &result); err != nil {
 		t.Error(err)
@@ -273,8 +273,8 @@ func testAccActionsGetAccountAfterActions(t *testing.T) {
 }
 
 func testAccActionsSetActionProfile2(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "REM_ACC",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -285,11 +285,11 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "REM_BAL",
 					Type: utils.MetaRemBalance,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path: "MONETARY",
 						},
@@ -308,7 +308,7 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	var result *engine.ActionProfile
+	var result *utils.ActionProfile
 	if err := accSRPC.Call(context.Background(), utils.AdminSv1GetActionProfile, &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{Tenant: actPrf.Tenant, ID: actPrf.ID}}, &result); err != nil {
 		t.Error(err)

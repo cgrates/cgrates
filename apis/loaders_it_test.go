@@ -499,7 +499,7 @@ func testLoadersGetAccounts(t *testing.T) {
 }
 
 func testLoadersGetActionProfiles(t *testing.T) {
-	expActs := []*engine.ActionProfile{
+	expActs := []*utils.ActionProfile{
 		{
 			Tenant: "cgrates.org",
 			ID:     "ONE_TIME_ACT",
@@ -520,13 +520,13 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					"1002": {},
 				},
 			},
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "TOPUP",
 					TTL:  0,
 					Type: utils.MetaAddBalance,
 					Opts: map[string]any{},
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "*balance.TestBalance.Value",
 							Value: "10",
@@ -538,7 +538,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					TTL:  0,
 					Type: utils.MetaSetBalance,
 					Opts: map[string]any{},
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "*balance.TestDataBalance.Type",
 							Value: utils.MetaData,
@@ -550,7 +550,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					TTL:  0,
 					Type: utils.MetaAddBalance,
 					Opts: map[string]any{},
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "*balance.TestDataBalance.Value",
 							Value: "1024",
@@ -562,7 +562,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					TTL:  0,
 					Type: utils.MetaSetBalance,
 					Opts: map[string]any{},
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "*balance.TestVoiceBalance.Type",
 							Value: utils.MetaVoice,
@@ -574,7 +574,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 					TTL:  0,
 					Type: utils.MetaAddBalance,
 					Opts: map[string]any{},
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "*balance.TestVoiceBalance.Value",
 							Value: "15m15s",
@@ -588,7 +588,7 @@ func testLoadersGetActionProfiles(t *testing.T) {
 			},
 		},
 	}
-	var acts []*engine.ActionProfile
+	var acts []*utils.ActionProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfiles,
 		&utils.ArgsItemIDs{
 			Tenant: "cgrates.org",
@@ -1299,7 +1299,7 @@ func testLoadersGetActionProfileAfterRemove(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrNotFound, err)
 	}
 
-	var rplyActPrf engine.ActionProfile
+	var rplyActPrf utils.ActionProfile
 	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		utils.TenantID{
 			Tenant: "cgrates.org",

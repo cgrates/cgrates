@@ -1187,15 +1187,15 @@ func testStatsStopServer(t *testing.T) {
 }
 
 func testStatsSetActionProfileBeforeProcessEv(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "actPrfID",
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaHTTPPost,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path: sqSrv.URL,
 						},
@@ -1214,7 +1214,7 @@ func testStatsSetActionProfileBeforeProcessEv(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 
-	var rplyActPrf engine.ActionProfile
+	var rplyActPrf utils.ActionProfile
 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{

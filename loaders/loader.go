@@ -106,7 +106,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 			err = dm.SetRateProfile(ctx, rpl, true, true)
 		}
 	case utils.MetaActionProfiles:
-		return dm.SetActionProfile(ctx, data.(*engine.ActionProfile), withIndex)
+		return dm.SetActionProfile(ctx, data.(*utils.ActionProfile), withIndex)
 	case utils.MetaAccounts:
 		return dm.SetAccount(ctx, data.(*utils.Account), withIndex)
 	case utils.MetaTrends:

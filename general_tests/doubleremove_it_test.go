@@ -583,15 +583,15 @@ func testdoubleRemoveRateProfile(t *testing.T) {
 
 func testdoubleRemoveActionProfile(t *testing.T) {
 	// check
-	var reply *engine.ActionProfile
+	var reply *utils.ActionProfile
 	if err := doubleRemoveRPC.Call(context.Background(), utils.AdminSv1GetActionProfile,
 		&utils.TenantID{Tenant: doubleRemoveTenant, ID: "ACTION_PROFILE"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// set
-	thPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	thPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant:    doubleRemoveTenant,
 			ID:        "ACTION_PROFILE",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -600,7 +600,7 @@ func testdoubleRemoveActionProfile(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID: "ACTION",
 				},

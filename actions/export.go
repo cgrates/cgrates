@@ -31,7 +31,7 @@ import (
 )
 
 func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
-	fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *engine.APAction) (aL *actHTTPPost, err error) {
+	fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTPPost, err error) {
 	aL = &actHTTPPost{
 		config: cfg,
 		aCfg:   aCfg,
@@ -52,7 +52,7 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 
 type actHTTPPost struct {
 	config *config.CGRConfig
-	aCfg   *engine.APAction
+	aCfg   *utils.APAction
 
 	pstrs []*ees.HTTPjsonMapEE
 }
@@ -61,7 +61,7 @@ func (aL *actHTTPPost) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actHTTPPost) cfg() *engine.APAction {
+func (aL *actHTTPPost) cfg() *utils.APAction {
 	return aL.aCfg
 }
 
@@ -95,14 +95,14 @@ type actExport struct {
 	tnt     string
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
-	aCfg    *engine.APAction
+	aCfg    *utils.APAction
 }
 
 func (aL *actExport) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actExport) cfg() *engine.APAction {
+func (aL *actExport) cfg() *utils.APAction {
 	return aL.aCfg
 }
 

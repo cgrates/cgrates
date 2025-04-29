@@ -866,8 +866,8 @@ func testTPeSetStatQueueProfile(t *testing.T) {
 }
 
 func testTPeSetActions(t *testing.T) {
-	actPrf := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "SET_BAL",
 			FilterIDs: []string{
@@ -879,11 +879,11 @@ func testTPeSetActions(t *testing.T) {
 			},
 			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"1001": {}}},
 			Schedule: utils.MetaASAP,
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "SET_BAL",
 					Type: utils.MetaSetBalance,
-					Diktats: []*engine.APDiktat{
+					Diktats: []*utils.APDiktat{
 						{
 							Path:  "MONETARY",
 							Value: "10",
@@ -900,8 +900,8 @@ func testTPeSetActions(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error(err)
 	}
-	actPrf2 := &engine.ActionProfileWithAPIOpts{
-		ActionProfile: &engine.ActionProfile{
+	actPrf2 := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
 			Tenant: "cgrates.org",
 			ID:     "Execute_thd",
 			Weights: utils.DynamicWeights{
@@ -909,7 +909,7 @@ func testTPeSetActions(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			Actions: []*engine.APAction{
+			Actions: []*utils.APAction{
 				{
 					ID:   "actID",
 					Type: utils.MetaResetThreshold,

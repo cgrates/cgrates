@@ -3318,7 +3318,7 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 		},
 	}
 
-	expStruct := &ActionProfile{
+	expStruct := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z", "*string:~*req.Subject:1001", "*string:~*req.Subject:1002"},
@@ -3332,11 +3332,11 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 			utils.MetaAccounts:  utils.NewStringSet([]string{"test_account_id1", "test_account_id2"}),
 			utils.MetaResources: utils.NewStringSet([]string{"test_ID1", "test_ID2"}),
 		},
-		Actions: []*APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
-				Diktats: []*APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path: "test_path",
 				}},
 				Opts: map[string]any{
@@ -3405,7 +3405,7 @@ func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
 }
 
 func TestModelHelpersActionProfileToAPI(t *testing.T) {
-	testStruct := &ActionProfile{
+	testStruct := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "RP1",
 		FilterIDs: []string{"*string:~*req.Subject:1001", "*string:~*req.Subject:1002", "*ai:~*req.AnswerTime:2014-07-14T14:25:00Z|2014-07-15T14:25:00Z"},
@@ -3415,12 +3415,12 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 			},
 		},
 		Schedule: "test_schedule",
-		Actions: []*APAction{
+		Actions: []*utils.APAction{
 			{
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				TTL:       time.Second,
-				Diktats: []*APDiktat{{
+				Diktats: []*utils.APDiktat{{
 					Path: "test_path",
 				}},
 				Opts: map[string]any{

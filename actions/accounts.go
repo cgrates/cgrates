@@ -31,7 +31,7 @@ import (
 type actSetBalance struct {
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
-	aCfg    *engine.APAction
+	aCfg    *utils.APAction
 	tnt     string
 	reset   bool
 }
@@ -40,7 +40,7 @@ func (aL *actSetBalance) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actSetBalance) cfg() *engine.APAction {
+func (aL *actSetBalance) cfg() *utils.APAction {
 	return aL.aCfg
 }
 
@@ -81,7 +81,7 @@ func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 type actRemBalance struct {
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
-	aCfg    *engine.APAction
+	aCfg    *utils.APAction
 	tnt     string
 }
 
@@ -89,7 +89,7 @@ func (aL *actRemBalance) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actRemBalance) cfg() *engine.APAction {
+func (aL *actRemBalance) cfg() *utils.APAction {
 	return aL.aCfg
 }
 

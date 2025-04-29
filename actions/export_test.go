@@ -33,10 +33,10 @@ import (
 func TestACHTTPPostExecute(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.EFsCfg().PosterAttempts = 1
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID:   "TEST_ACTION_HTTPPOST",
 		Type: utils.CDRLog,
-		Diktats: []*engine.APDiktat{
+		Diktats: []*utils.APDiktat{
 			{
 				Path:  "~*balance.TestBalance.Value",
 				Value: "10",
@@ -96,10 +96,10 @@ func TestACHTTPPostValues(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).Attempts = 1
 	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir = utils.MetaNone
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID:   "TEST_ACTION_HTTPPostValues",
 		Type: utils.MetaHTTPPost,
-		Diktats: []*engine.APDiktat{
+		Diktats: []*utils.APDiktat{
 			{
 				Path:  "~*balance.TestBalance.Value",
 				Value: "80",
@@ -124,7 +124,7 @@ func TestACHTTPPostValues(t *testing.T) {
 }
 
 func TestACHTTPPostID(t *testing.T) {
-	apAction := &engine.APAction{
+	apAction := &utils.APAction{
 		ID:   "TestACHTTPPostID",
 		Type: utils.MetaHTTPPost,
 	}
