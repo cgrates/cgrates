@@ -442,6 +442,28 @@ func TestConvertDurNanoseconds(t *testing.T) {
 	}
 }
 
+func TestConvertDurMinutes(t *testing.T) {
+	d, err := NewDataConverter(MetaDurationMinutes)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	expVal := 2.5
+	dur := 150 * time.Second
+	if i, err := d.Convert(dur); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %f, received: %f", expVal, i)
+	}
+
+	expVal = 3
+	if i, err := d.Convert("180s"); err != nil {
+		t.Error(err.Error())
+	} else if expVal != i {
+		t.Errorf("expecting: %f, received: %f", expVal, i)
+	}
+
+}
+
 func TestRoundConverterFloat64(t *testing.T) {
 	b, err := NewDataConverter("*round:2")
 	if err != nil {
@@ -1890,6 +1912,91 @@ func TestGigaWordsConverter(t *testing.T) {
 			}
 			if outputInt64 != tc.expectedValue {
 				t.Errorf("Expected output %d, but got %d", tc.expectedValue, outputInt64)
+			}
+		})
+	}
+}
+
+func TestDurationMinutesConverter(t *testing.T) {
+	converter := DurationMinutesConverter{}
+	testCases := []struct {
+		name          string
+		input         any
+		expectedValue float64
+		expectError   bool
+		errorContains string
+	}{
+		{
+			name:          "Input Zero Duration",
+			input:         time.Duration(0),
+			expectedValue: 0.0,
+			expectError:   false,
+		},
+		{
+			name:          "Input 90 Seconds",
+			input:         90 * time.Second,
+			expectedValue: 1.5,
+			expectError:   false,
+		},
+		{
+			name:          "Input 2 Hour",
+			input:         2 * time.Hour,
+			expectedValue: 120,
+			expectError:   false,
+		},
+		{
+			name:          "Input Zero Duration",
+			input:         "0s",
+			expectedValue: 0.0,
+			expectError:   false,
+		},
+		{
+			name:          "Input 90 Seconds",
+			input:         "90s",
+			expectedValue: 1.5,
+			expectError:   false,
+		},
+		{
+			name:          "Input 1 Minute 30 Seconds",
+			input:         "1m30s",
+			expectedValue: 1.5,
+			expectError:   false,
+		},
+		{
+			name:          "Input 2 Hours",
+			input:         "2h",
+			expectedValue: 120,
+			expectError:   false,
+		},
+		{
+			name:          "Input Invalid String",
+			input:         "abc",
+			expectError:   true,
+			errorContains: "invalid duration",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			output, err := converter.Convert(tc.input)
+			if tc.expectError {
+				if err == nil {
+					t.Fatalf("Expected an error containing '%s', but got nil", tc.errorContains)
+				}
+				if !strings.Contains(err.Error(), tc.errorContains) {
+					t.Errorf("Expected error message to contain '%s', but got: %v", tc.errorContains, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Expected no error, but got: %v", err)
+			}
+			outputFloat64, ok := output.(float64)
+			if !ok {
+				t.Fatalf("Expected output type float64, but got %T (%v)", output, output)
+			}
+			if outputFloat64 != tc.expectedValue {
+				t.Errorf("Expected output %.2f, but got %.2f", tc.expectedValue, outputFloat64)
 			}
 		})
 	}
