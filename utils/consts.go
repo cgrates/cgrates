@@ -348,6 +348,8 @@ const (
 	MetaDynamic               = "*dynamic"
 	MetaCounterEvent          = "*event"
 	MetaBalance               = "*balance"
+	MetaLimit                 = "*limit"
+	MetaEventConnect          = "*event_connect"
 	MetaAccount               = "*account"
 	EventName                 = "EventName"
 	// action trigger threshold types

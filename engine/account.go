@@ -608,7 +608,7 @@ func (acc *Account) ExecuteActionTriggers(a *Action, fltrS *FilterS) {
 		}
 
 		// sanity check
-		if !strings.Contains(at.ThresholdType, "counter") && !strings.Contains(at.ThresholdType, "balance") {
+		if !strings.Contains(at.ThresholdType, "counter") && !strings.Contains(at.ThresholdType, "balance") && !strings.Contains(at.ThresholdType, "connect") {
 			continue
 		}
 		if at.Executed {
@@ -619,7 +619,7 @@ func (acc *Account) ExecuteActionTriggers(a *Action, fltrS *FilterS) {
 		if !at.Match(a) {
 			continue
 		}
-		if strings.Contains(at.ThresholdType, "counter") {
+		if strings.Contains(at.ThresholdType, "counter") || strings.Contains(at.ThresholdType, "connect") {
 			if (at.Balance.ID == nil || *at.Balance.ID != "") && at.UniqueID != "" {
 				at.Balance.ID = utils.StringPointer(at.UniqueID)
 			}
@@ -627,10 +627,8 @@ func (acc *Account) ExecuteActionTriggers(a *Action, fltrS *FilterS) {
 				for _, uc := range counters {
 					if strings.Contains(at.ThresholdType, uc.CounterType[1:]) {
 						for _, c := range uc.Counters {
-							//log.Print("C: ", utils.ToJSON(c))
 							if strings.HasPrefix(at.ThresholdType, "*max") {
 								if c.Filter.Equal(at.Balance) && c.Value >= at.ThresholdValue {
-									//log.Print("HERE")
 									at.Execute(acc, fltrS)
 								}
 							} else { //MIN
@@ -702,7 +700,7 @@ func (acc *Account) InitCounters() {
 	ucTempMap := make(map[string]*UnitCounter)
 	for _, at := range acc.ActionTriggers {
 		//log.Print("AT: ", utils.ToJSON(at))
-		if !strings.Contains(at.ThresholdType, "counter") {
+		if !strings.Contains(at.ThresholdType, "counter") && !strings.Contains(at.ThresholdType, "connect") {
 			continue
 		}
 		ct := utils.MetaCounterEvent //default
@@ -710,7 +708,6 @@ func (acc *Account) InitCounters() {
 			ct = utils.MetaBalance
 		}
 		uc, exists := ucTempMap[at.Balance.GetType()+ct]
-		//log.Print("CT: ", at.Balance.GetType()+ct)
 		if !exists {
 			uc = &UnitCounter{
 				CounterType: ct,
@@ -724,7 +721,6 @@ func (acc *Account) InitCounters() {
 		if (c.Filter.ID == nil || *c.Filter.ID == "") && at.UniqueID != "" {
 			c.Filter.ID = utils.StringPointer(at.UniqueID)
 		}
-		//log.Print("C: ", utils.ToJSON(c))
 		if !uc.Counters.HasCounter(c) {
 			uc.Counters = append(uc.Counters, c)
 		}
@@ -848,7 +844,6 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 		return true, debitedBalance
 	}
 	connectFee := cc.GetConnectFee()
-	//log.Print("CONNECT FEE: %f", connectFee)
 	var connectFeePaid bool
 	for _, b := range ufMoneyBalances {
 		if !b.IsActiveAt(cc.GetStartTime()) {
@@ -856,6 +851,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 		}
 		if b.GetValue() >= connectFee {
 			b.SubtractValue(connectFee)
+			acc.countUnits(1, utils.MetaEventConnect, cc, b, fltrS)
 			// the conect fee is not refundable!
 			if count {
 				acc.countUnits(connectFee, utils.MetaMonetary, cc, b, fltrS)
@@ -877,6 +873,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 		debitedBalance = *b
 		// the conect fee is not refundable!
 		if count {
+			acc.countUnits(1, utils.MetaEventConnect, cc, b, fltrS)
 			acc.countUnits(connectFee, utils.MetaMonetary, cc, b, fltrS)
 		}
 	}
