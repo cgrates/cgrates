@@ -72,7 +72,7 @@ func TestCAPsStatusAllocated(t *testing.T) {
 		t.Fatal(err)
 	} else if reply[utils.NodeID] != "ConcurrentQueueEngine" {
 		t.Errorf("Expected %+v , received: %+v ", "ConcurrentQueueEngine", reply)
-	} else if _, has := reply[utils.CAPSAllocated]; !has {
+	} else if _, has := reply[utils.MetricCapsAllocated]; !has {
 		t.Errorf("Expected reply to contain CAPSAllocated , received <%+v>", reply)
 	}
 
@@ -113,7 +113,7 @@ func TestCAPsStatusPeak(t *testing.T) {
 		t.Fatal(err)
 	} else if reply[utils.NodeID] != "CAPSPeakEngine" {
 		t.Errorf("Expected %+v , received: %+v ", "CAPSPeakEngine", reply)
-	} else if _, has := reply[utils.CAPSPeak]; !has {
+	} else if _, has := reply[utils.MetricCapsPeak]; !has {
 		t.Errorf("Expected reply to contain CAPSPeak , received <%+v>", reply)
 	}
 
