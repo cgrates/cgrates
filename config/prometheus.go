@@ -75,7 +75,7 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 		c.CollectProcessMetrics = *jc.CollectProcessMetrics
 	}
 	if jc.CoreSConns != nil {
-		c.CoreSConns = updateBiRPCInternalConns(*jc.CoreSConns, utils.MetaStats)
+		c.CoreSConns = updateBiRPCInternalConns(*jc.CoreSConns, utils.MetaCore)
 	}
 	if jc.StatSConns != nil {
 		c.StatSConns = updateBiRPCInternalConns(*jc.StatSConns, utils.MetaStats)
