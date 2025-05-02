@@ -308,7 +308,7 @@ func (cS *CoreS) V1Status(_ *context.Context, params *V1StatusParams, reply *map
 		debug = params.Debug
 		timezone = params.Timezone
 	}
-	metricsMap, err := metrics.ToMap(debug, timezone)
+	metricsMap, err := metrics.toMap(debug, timezone)
 	if err != nil {
 		return fmt.Errorf("could not convert StatusMetrics to map[string]any: %v", err)
 	}
