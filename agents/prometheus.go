@@ -167,7 +167,7 @@ func newCoreMetricsCollector(cfg *config.CGRConfig, cm *engine.ConnManager) *cor
 		"go_memstats_stack_sys_bytes":      "Number of bytes obtained from system for stack allocator. Equals to /memory/classes/heap/stacks:bytes + /memory/classes/os-stacks:bytes.",
 		"go_memstats_sys_bytes":            "Number of bytes obtained from system. Equals to /memory/classes/total:byte.",
 		"go_memstats_last_gc_time_seconds": "Number of seconds since 1970 of last garbage collection.",
-		"go_gc_gogc_percent":               "The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously. Sourced from /sched/gomaxprocs:threads.",
+		"go_gc_gogc_percent":               "Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.",
 		"go_gc_gomemlimit_bytes":           "Go runtime memory limit configured by the user, otherwise math.MaxInt64. This value is set by the GOMEMLIMIT environment variable, and the runtime/debug.SetMemoryLimit function. Sourced from /gc/gomemlimit:bytes.",
 		"go_sched_gomaxprocs_threads":      "The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously. Sourced from /sched/gomaxprocs:threads.",
 	}
