@@ -1685,6 +1685,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 		updtEv[utils.Usage] = reqMaxUsage
 	}
 	lastUsed := updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)
+
 	var totalUsage time.Duration
 	if totalUsage, err = updtEv.GetDuration(utils.TotalUsage); err != nil && err != utils.ErrNotFound {
 		return
