@@ -1681,10 +1681,18 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 		if err != utils.ErrNotFound {
 			return
 		}
-		err = nil
 		reqMaxUsage = sS.cgrCfg.SessionSCfg().GetDefaultUsage(updtEv.GetStringIgnoreErrors(utils.ToR))
 		updtEv[utils.Usage] = reqMaxUsage
 	}
+	lastUsed := updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)
+	var totalUsage time.Duration
+	if totalUsage, err = updtEv.GetDuration(utils.TotalUsage); err != nil && err != utils.ErrNotFound {
+		return
+	} else {
+		reqMaxUsage, lastUsed = s.midSessionUsage(totalUsage)
+	}
+	err = nil
+
 	maxUsage = make(map[string]time.Duration)
 	for i, sr := range s.SRuns {
 		reqType := sr.Event.GetStringIgnoreErrors(utils.RequestType)
@@ -1692,8 +1700,8 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 		switch reqType {
 		case utils.MetaPrepaid, utils.MetaDynaprepaid:
 			if s.debitStop == nil {
-				if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
-					updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
+				if rplyMaxUsage, err = sS.debitSession(s, i,
+					reqMaxUsage, lastUsed); err != nil {
 					return
 				}
 				break

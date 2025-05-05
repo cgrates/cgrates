@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"math"
 	"runtime"
 	"sync"
 	"time"
@@ -279,6 +280,19 @@ func (s *Session) totalUsage() (tDur time.Duration) {
 	return
 }
 
+// lastUsage returns the first session run last usage
+// not thread save
+func (s *Session) lastUsage() (lUsage time.Duration) {
+	if len(s.SRuns) == 0 {
+		return
+	}
+	for _, sr := range s.SRuns {
+		lUsage = sr.LastUsage
+		break // only first
+	}
+	return
+}
+
 // AsCGREvents is a  method to return the Session as CGREvents
 // AsCGREvents is not thread safe since it is supposed to run by the time Session is closed
 func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent) {
@@ -391,4 +405,19 @@ func (s *Session) UpdateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 	s.Lock()
 	s.updateSRuns(updEv, alterableFields)
 	s.Unlock()
+}
+
+// midSessionUsage computes the midSessionUsage out of totalUsage, considering what it has been debitted so far
+// lastUsage is returned for the case when too much was debitted so it can be passed to the debit function as reserve
+func (s *Session) midSessionUsage(totalUsage time.Duration) (usage time.Duration, lastUsage *time.Duration) {
+	sTUsage := s.totalUsage()
+	if sTUsage == 0 {
+		return totalUsage, nil
+	}
+	if midUsage := totalUsage - sTUsage; midUsage >= 0 {
+		return midUsage, nil
+	} else {
+		tLastUsage := time.Duration(int(math.Abs(float64(midUsage)))) + s.lastUsage()
+		return 0, &tLastUsage
+	}
 }
