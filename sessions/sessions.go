@@ -1681,18 +1681,21 @@ func (sS *SessionS) updateSession(s *Session, updtEv, opts engine.MapEvent, isMs
 		if err != utils.ErrNotFound {
 			return
 		}
+
 		reqMaxUsage = sS.cgrCfg.SessionSCfg().GetDefaultUsage(updtEv.GetStringIgnoreErrors(utils.ToR))
 		updtEv[utils.Usage] = reqMaxUsage
 	}
 	lastUsed := updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)
 
 	var totalUsage time.Duration
-	if totalUsage, err = updtEv.GetDuration(utils.TotalUsage); err != nil && err != utils.ErrNotFound {
-		return
+	if totalUsage, err = updtEv.GetDuration(utils.TotalUsage); err != nil {
+		if err != utils.ErrNotFound {
+			return
+		}
+		err = nil
 	} else {
 		reqMaxUsage, lastUsed = s.midSessionUsage(totalUsage)
 	}
-	err = nil
 
 	maxUsage = make(map[string]time.Duration)
 	for i, sr := range s.SRuns {
