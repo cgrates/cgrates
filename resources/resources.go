@@ -343,7 +343,14 @@ func (rS *ResourceS) storeResources(ctx *context.Context) {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache resource with ID: %s", utils.ResourceS, rID))
 			continue
 		}
-		r := rIf.(*resource)
+		r := &resource{
+			Resource: rIf.(*utils.Resource),
+
+			// NOTE: dirty is hardcoded to true, otherwise resources would
+			// never be stored.
+			// Previously, dirty was part of the cached resource.
+			dirty: utils.BoolPointer(true),
+		}
 		r.lock(utils.EmptyString)
 		if err := rS.storeResource(ctx, r); err != nil {
 			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
