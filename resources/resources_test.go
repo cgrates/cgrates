@@ -2866,19 +2866,16 @@ func TestResourcesStoreResources(t *testing.T) {
 		},
 	}
 
-	value := &resource{
-		Resource: &utils.Resource{
-			Tenant: "cgrates.org",
-			ID:     "testResource",
-		},
-		dirty: utils.BoolPointer(true),
+	value := &utils.Resource{
+		Tenant: "cgrates.org",
+		ID:     "testResource",
 	}
 
 	engine.Cache.SetWithoutReplicate(utils.CacheResources, "Res1", value, nil, true,
 		utils.NonTransactional)
 
 	explog := fmt.Sprintf("CGRateS <> [WARNING] <%s> failed saving Resource with ID: %s, error: %s\n",
-		utils.ResourceS, value.Resource.ID, utils.ErrNoDatabaseConn.Error())
+		utils.ResourceS, value.ID, utils.ErrNoDatabaseConn.Error())
 	exp := &ResourceS{
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
@@ -5883,12 +5880,9 @@ func TestResourcesRunBackupStop(t *testing.T) {
 		loopStopped: make(chan struct{}, 1),
 		stopBackup:  make(chan struct{}),
 	}
-	value := &resource{
-		Resource: &utils.Resource{
-			Tenant: tnt,
-			ID:     resID,
-		},
-		dirty: utils.BoolPointer(true),
+	value := &utils.Resource{
+		Tenant: tnt,
+		ID:     resID,
 	}
 	engine.Cache.SetWithoutReplicate(utils.CacheResources, resID, value, nil, true, "")
 
