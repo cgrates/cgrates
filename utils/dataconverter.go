@@ -125,6 +125,13 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			layout = params[len(MetaTimeString)+1:]
 		}
 		return NewTimeStringConverter(layout), nil
+
+	case strings.HasPrefix(params, MetaLocalTime):
+		timezone := "Local"
+		if len(params) > len(MetaLocalTime) {
+			timezone = params[len(MetaLocalTime)+1:]
+		}
+		return NewLocalTimeConverter(timezone)
 	case strings.HasPrefix(params, MetaRandom):
 		if len(params) == len(MetaRandom) { // no extra params, defaults implied
 			return NewRandomConverter(EmptyString)
@@ -815,4 +822,33 @@ func (mS *DurationMinutesConverter) Convert(in any) (
 	}
 	out = inDur.Minutes()
 	return
+}
+
+type LocalTimeConverter struct {
+	loc *time.Location
+}
+
+func NewLocalTimeConverter(locStr string) (DataConverter, error) {
+	loc, err := time.LoadLocation(locStr)
+	if err != nil {
+		return nil, err
+	}
+	return LocalTimeConverter{loc: loc}, nil
+}
+func (lt LocalTimeConverter) Convert(in any) (out any, err error) {
+	var tm time.Time
+	switch val := in.(type) {
+	case string:
+		tm, err = ParseTimeDetectLayout(val, EmptyString)
+		if err != nil {
+			return nil, err
+		}
+	case time.Time:
+		tm = val
+	default:
+		return nil, fmt.Errorf("*localtime converter: unsupported input")
+	}
+	tm = tm.In(lt.loc)
+	return tm.Format(time.DateTime), nil
+
 }
