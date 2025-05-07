@@ -2001,3 +2001,43 @@ func TestDurationMinutesConverter(t *testing.T) {
 		})
 	}
 }
+
+func TestLocalTimeDurationConverter(t *testing.T) {
+	testCases := []struct {
+		name        string
+		input       any
+		params      string
+		expectValue string
+		expectedErr error
+	}{
+		{name: "Convert to CEST timezone", input: "2025-05-07T14:25:08Z", params: "*localtime:Europe/Berlin", expectValue: "2025-05-07 16:25:08"},
+		{name: "Convert to UTC timezone", input: "2025-05-07T16:25:08+02:00", params: "*localtime:UTC", expectValue: "2025-05-07 14:25:08"},
+		{name: "Convert to UTC+01:00 timezone", input: "2025-05-07T14:25:08Z", params: "*localtime:Europe/Dublin", expectValue: "2025-05-07 15:25:08"},
+		{name: "Convert to UTC+03:00 timezone", input: time.Date(2025, 5, 5, 15, 5, 0, 0, time.UTC), params: "*localtime:Europe/Istanbul", expectValue: "2025-05-05 18:05:00"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			converter, err := NewDataConverter(tc.params)
+			if err != nil {
+				t.Fatal(err)
+			}
+			val, err := converter.Convert(tc.input)
+			if tc.expectedErr != nil {
+				if err == nil {
+					t.Fatalf("Expected an error containing '%s', but got nil", tc.expectedErr.Error())
+				}
+				if !strings.Contains(err.Error(), tc.expectedErr.Error()) {
+					t.Errorf("Expected error message to contain '%s', but got: %v", tc.expectedErr.Error(), err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Expected no error, but got: %v", err)
+			}
+			if tc.expectValue != val {
+				t.Errorf("Expected output %s, but got %s", tc.expectValue, val)
+			}
+		})
+	}
+}

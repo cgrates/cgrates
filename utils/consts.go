@@ -742,6 +742,7 @@ const (
 	MetaDurationFormat      = "*durfmt"
 	MetaLibPhoneNumber      = "*libphonenumber"
 	MetaTimeString          = "*time_string"
+	MetaLocalTime           = "*localtime"
 	MetaIP2Hex              = "*ip2hex"
 	MetaString2Hex          = "*string2hex"
 	MetaUnixTime            = "*unixtime"
