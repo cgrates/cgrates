@@ -52,4 +52,18 @@ SignWith: yes
 DebOverride: override.testing
 DscOverride: override.testing
 
+Origin: apt.cgrates.org
+Label: apt.cgrates.org
+Suite: nightly-{{ distribution['codename'] }}
+Codename: 1.0-{{ distribution['codename'] }}
+Architectures: amd64 source
+Components: main
+Description: CGRateS nightly APT repository for {{ distribution['codename'] }}
+DebIndices: Packages Release . .gz
+Contents: . .gz
+ContentsArchitectures: amd64 source
+ContentsComponents: main
+SignWith: yes
+DebOverride: override.testing
+DscOverride: override.testing
 {% endfor %}
