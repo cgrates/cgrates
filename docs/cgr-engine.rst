@@ -12,8 +12,10 @@ Able to read the configuration from either a local directory  of *.json* files w
 
 ::
 
- $ cgr-engine -help
- Usage of cgr-engine:
+$ cgr-engine -help
+Usage of cgr-engine:
+  -check_config
+        Verify the config without starting the engine
   -config_path string
         Configuration directory path (default "/etc/cgrates/")
   -cpuprof_dir string
@@ -21,7 +23,7 @@ Able to read the configuration from either a local directory  of *.json* files w
   -log_level int
         Log level (0=emergency to 7=debug) (default -1)
   -logger string
-        Logger type <*syslog|*stdout>
+        Logger type <*syslog|*stdout|*kafkaLog>
   -memprof_dir string
         Directory for memory profiles
   -memprof_interval duration
@@ -34,15 +36,13 @@ Able to read the configuration from either a local directory  of *.json* files w
         Node ID of the engine
   -pid string
         Path to write the PID file
-  -preload string
+  -preload value
         Loader IDs used to load data before engine starts
-  -print_config
-        Print configuration object in JSON format
   -scheduled_shutdown duration
         Shutdown the engine after the specified duration
   -set_versions
-        Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)
-  -singlecpu
+        Overwrite database versions
+  -single_cpu
         Run on a single CPU core
   -version
         Print application version and exit
@@ -66,7 +66,7 @@ The components from the diagram can be found documented in the links bellow:
 
    agents
    sessions
-   rals
+   rates
    cdrs
    ees
    attributes
@@ -77,9 +77,7 @@ The components from the diagram can be found documented in the links bellow:
    trends
    thresholds
    filters
-   dispatchers
-   schedulers
-   apiers
+   admins
    loaders
    caches
    guardian

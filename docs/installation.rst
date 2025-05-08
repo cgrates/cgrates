@@ -9,6 +9,17 @@
 Installation
 ============
 
+.. warning::
+
+   **Installation Note**
+
+   For version 1.0, only these installation methods currently work:
+
+   - Debian package installation
+   - Source installation on Debian systems
+
+   Other methods (RedHat packages, Docker) are under development and will be available in future updates.
+
 .. contents::
    :local:
    :depth: 2
@@ -22,8 +33,8 @@ Package Installation
 
 Package installation method varies according to the Linux distribution:
 
-Debian or Debian-based Distributions 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Debian or Debian-based Distributions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can add the CGRateS repository to your system's sources list, depending of the Debian version you are running, as follows:
 
@@ -41,7 +52,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
          sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
          # Add the repository to the apt sources list
-         echo "deb http://apt.cgrates.org/debian/ master-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         echo "deb http://apt.cgrates.org/debian/ 1.0-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
          # Update the system repository and install CGRateS
          sudo apt-get update -y
@@ -51,7 +62,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
 
       .. code-block:: bash
 
-         wget http://pkg.cgrates.org/deb/master/bookworm/cgrates_current_amd64.deb
+         wget http://pkg.cgrates.org/deb/1.0/bookworm/cgrates_current_amd64.deb
          sudo dpkg -i ./cgrates_current_amd64.deb
 
    .. group-tab:: Bullseye
@@ -66,7 +77,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
          sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
          # Add the repository to the apt sources list
-         echo "deb http://apt.cgrates.org/debian/ master-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         echo "deb http://apt.cgrates.org/debian/ 1.0-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
          # Update the system repository and install CGRateS
          sudo apt-get update -y
@@ -76,7 +87,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
 
       .. code-block:: bash
 
-         wget http://pkg.cgrates.org/deb/master/bullseye/cgrates_current_amd64.deb
+         wget http://pkg.cgrates.org/deb/1.0/bullseye/cgrates_current_amd64.deb
          sudo dpkg -i ./cgrates_current_amd64.deb
 
 
@@ -94,16 +105,16 @@ For .rpm distros, we are using copr to manage the CGRateS packages:
    .. code-block:: bash
 
       # sudo yum install -y dnf-plugins-core on RHEL 8 or CentOS Stream
-      sudo dnf install -y dnf-plugins-core 
-      sudo dnf copr -y enable cgrates/master 
+      sudo dnf install -y dnf-plugins-core
+      sudo dnf copr -y enable cgrates/1.0
       sudo dnf install -y cgrates
 
--  For older distributions: 
+-  For older distributions:
 
    .. code-block:: bash
 
       sudo yum install -y yum-plugin-copr
-      sudo yum copr -y enable cgrates/master
+      sudo yum copr -y enable cgrates/1.0
       sudo yum install -y cgrates
 
 To install a specific version of the package, run:
@@ -121,7 +132,7 @@ Alternatively, you can manually install a specific .rpm package as follows:
 
 
 .. note::
-   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/master/packages/ or http://pkg.cgrates.org/rpm/nightly/.
+   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/1.0/packages/ or http://pkg.cgrates.org/rpm/nightly/.
 
 Installing from Source
 ----------------------
@@ -156,7 +167,7 @@ Installation:
 .. code-block:: bash
 
    mkdir -p $HOME/go/src/github.com/cgrates/cgrates
-   git clone https://github.com/cgrates/cgrates.git $HOME/go/src/github.com/cgrates/cgrates
+   git clone --branch=1.0 https://github.com/cgrates/cgrates.git $HOME/go/src/github.com/cgrates/cgrates
    cd $HOME/go/src/github.com/cgrates/cgrates
 
    # Compile the binaries and move them to $GOPATH/bin
@@ -191,21 +202,21 @@ The following commands will pull the CGRateS components:
 
 ::
 
-    sudo docker pull dkr.cgrates.org/master/cgr-engine
-    sudo docker pull dkr.cgrates.org/master/cgr-loader
-    sudo docker pull dkr.cgrates.org/master/cgr-migrator
-    sudo docker pull dkr.cgrates.org/master/cgr-console
-    sudo docker pull dkr.cgrates.org/master/cgr-tester
+    sudo docker pull dkr.cgrates.org/1.0/cgr-engine
+    sudo docker pull dkr.cgrates.org/1.0/cgr-loader
+    sudo docker pull dkr.cgrates.org/1.0/cgr-migrator
+    sudo docker pull dkr.cgrates.org/1.0/cgr-console
+    sudo docker pull dkr.cgrates.org/1.0/cgr-tester
 
 Verify the images were pulled successfully:
 
 ::
 
-    sudo docker images dkr.cgrates.org/master/cgr-*
+    sudo docker images dkr.cgrates.org/1.0/cgr-*
     REPOSITORY                           TAG       IMAGE ID       CREATED       SIZE
-    dkr.cgrates.org/master/cgr-loader    latest    5b667e92a475   6 weeks ago   46.5MB
-    dkr.cgrates.org/master/cgr-console   latest    464bd1992ab2   6 weeks ago   103MB
-    dkr.cgrates.org/master/cgr-engine    latest    e20f43491aa8   6 weeks ago   111MB
+    dkr.cgrates.org/1.0/cgr-loader    latest    5b667e92a475   6 weeks ago   46.5MB
+    dkr.cgrates.org/1.0/cgr-console   latest    464bd1992ab2   6 weeks ago   103MB
+    dkr.cgrates.org/1.0/cgr-engine    latest    e20f43491aa8   6 weeks ago   111MB
     ...
 
 .. note::
@@ -214,7 +225,7 @@ Verify the images were pulled successfully:
 
     ::
 
-        curl -X GET https://dkr.cgrates.org/v2/master/cgr-engine/tags/list
+        curl -X GET https://dkr.cgrates.org/v2/1.0/cgr-engine/tags/list
 
 
 cgr-engine Container
@@ -234,7 +245,7 @@ The current cgr-engine container entrypoint is:
 
     ::
 
-        sudo docker inspect --format='{{json .Config.Entrypoint}}' dkr.cgrates.org/master/cgr-engine:latest
+        sudo docker inspect --format='{{json .Config.Entrypoint}}' dkr.cgrates.org/1.0/cgr-engine:latest
 
 Running cgr-engine
 ^^^^^^^^^^^^^^^^^^
@@ -250,7 +261,7 @@ Here's a basic example of running cgr-engine with common Docker parameters:
       -e REDIS_HOST=192.168.122.91 \
       --network bridge \
       --name cgr-engine \
-      dkr.cgrates.org/master/cgr-engine:latest \
+      dkr.cgrates.org/1.0/cgr-engine:latest \
       -config_path=/etc/cgrates \
       -logger=*stdout
 
@@ -261,7 +272,7 @@ Verify cgr-engine is responding:
     sudo docker run --rm \
       --name cgr-console \
       --network host \
-      dkr.cgrates.org/master/cgr-console:latest \
+      dkr.cgrates.org/1.0/cgr-console:latest \
       status
 
 Key parameters:
@@ -275,62 +286,6 @@ Key parameters:
 
 .. note::
     The ``-config_path`` and ``-logger`` flags above are cgr-engine specific flags and optional, as those values are already the defaults.
-
-Creating Your Own Packages
---------------------------
-
-After compiling the source code, you may choose to create your own packages.
-
-For Debian-based distros:
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: bash
-
-   # Install dependencies
-   sudo apt-get install build-essential fakeroot dh-systemd -y
-
-   cd $HOME/go/src/github.com/cgrates/cgrates/packages
-
-   # Delete old ones, if any
-   rm -rf $HOME/go/src/github.com/cgrates/*.deb
-
-   make deb
-
-.. note::
-   You might see some console warnings, which can be safely ignored.
-
-To install the generated package, run:
-
-.. code-block:: bash
-
-   cd $HOME/go/src/github.com/cgrates
-   sudo dpkg -i cgrates_*.deb
-
-For Redhat-based distros:
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code-block:: bash
-
-   sudo dnf install -y rpm-build wget curl tar
-
-   # Create build directories
-   mkdir -p $HOME/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-
-   # Fetch source code
-   cd $HOME/go/src/github.com/cgrates/cgrates
-   export gitLastCommit=$(git rev-parse HEAD)
-   export rpmTag=$(git log -1 --format=%ci | date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD)
-
-   #Create the tarball from the source code
-   cd ..
-   tar -czvf  $HOME/rpmbuild/SOURCES/$gitLastCommit.tar.gz cgrates
-
-   # Copy RPM spec file
-   cp $HOME/go/src/github.com/cgrates/cgrates/packages/redhat_fedora/cgrates.spec $HOME/rpmbuild/SPECS
-
-   # Build RPM package
-   cd $HOME/rpmbuild
-   rpmbuild -bb  SPECS/cgrates.spec
 
 .. _post_install:
 

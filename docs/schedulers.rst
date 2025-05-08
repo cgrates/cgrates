@@ -1,7 +1,0 @@
-.. _schedulers:
-
-SchedulerS
-==========
-
-
-TBD
