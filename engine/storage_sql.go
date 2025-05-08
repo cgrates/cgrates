@@ -218,8 +218,12 @@ func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 	if maxItems < limit+offset {
 		return nil, fmt.Errorf("sum of limit and offset exceeds maxItems")
 	}
-	q = q.Limit(limit)
-	q = q.Offset(offset)
+	if limit > 0 {
+		q = q.Limit(limit)
+	}
+	if offset > 0 {
+		q = q.Offset(offset)
+	}
 
 	// Execute query
 	results := make([]*utils.CDRSQLTable, 0)
