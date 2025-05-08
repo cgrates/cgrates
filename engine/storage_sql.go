@@ -181,7 +181,7 @@ func (sqls *SQLStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpd
 
 // GetCDRs has ability to get the filtered CDRs, count them or simply return them
 // qryFltr.Unscoped will ignore soft deletes or delete records permanently
-func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) (cdrs []*utils.CDR, err error) {
+func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) ([]*utils.CDR, error) {
 	q := sqls.db.Table(utils.CDRsTBL)
 	var excludedCdrQueryFilterTypes []*FilterRule
 	for _, fltr := range qryFltr {
@@ -228,23 +228,24 @@ func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 	// Execute query
 	results := make([]*utils.CDRSQLTable, 0)
 	if err = q.Find(&results).Error; err != nil {
-		return
+		return nil, err
 	}
-	if len(results) == 0 {
-		return nil, utils.ErrNotFound
-	}
+
 	//convert into CDR
-	resultCdr := make([]*utils.CDR, 0, len(results))
+	cdrs := make([]*utils.CDR, 0, len(results))
 	for _, val := range results {
+		cdr := &utils.CDR{
+			Tenant:    val.Tenant,
+			Opts:      val.Opts,
+			Event:     val.Event,
+			CreatedAt: val.CreatedAt,
+			UpdatedAt: val.UpdatedAt,
+			DeletedAt: val.DeletedAt,
+		}
 		// here we wil do our filtration, meaning that we will filter those cdrs who cannot be filtered in the databes eg: *ai, *rsr..
 		if len(excludedCdrQueryFilterTypes) != 0 {
-			newCdr := &utils.CDR{
-				Tenant: val.Tenant,
-				Opts:   val.Opts,
-				Event:  val.Event,
-			}
 			var pass bool
-			dP := newCdr.CGREvent().AsDataProvider()
+			dP := cdr.CGREvent().AsDataProvider()
 			for _, fltr := range excludedCdrQueryFilterTypes {
 				if pass, err = fltr.Pass(ctx, dP); err != nil {
 					return nil, err
@@ -257,23 +258,12 @@ func (sqls *SQLStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 				continue
 			}
 		}
-		resultCdr = append(resultCdr, &utils.CDR{
-			Tenant:    val.Tenant,
-			Opts:      val.Opts,
-			Event:     val.Event,
-			CreatedAt: val.CreatedAt,
-			UpdatedAt: val.UpdatedAt,
-			DeletedAt: val.DeletedAt,
-		})
+		cdrs = append(cdrs, cdr)
 	}
-	if len(resultCdr) == 0 {
+	if len(cdrs) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	if maxItems != 0 && len(resultCdr) > maxItems {
-		return nil, fmt.Errorf("maximum number of items exceeded")
-	}
-	cdrs, err = utils.Paginate(resultCdr, 0, 0, maxItems)
-	return
+	return cdrs, nil
 }
 
 func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err error) {
