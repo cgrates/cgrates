@@ -1,6 +1,12 @@
 Tutorial
 ========
 
+.. warning::
+
+   **Tutorial Not Available for Version 1.0**
+
+   This tutorial was created for a previous version of CGRateS and is not compatible with version 1.0.
+
 .. contents::
    :local:
    :depth: 3
