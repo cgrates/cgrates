@@ -4,7 +4,7 @@ RALs
 ====
 
 
-**RALs** is a standalone subsystem within **CGRateS** designed to handle two major tasks: :ref:`Rating` and :ref:`Accounting`. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
+**RALs** is a standalone subsystem within **CGRateS** designed to handle two major tasks: :ref:`Rating` and :ref:`Accounting`. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 
 
@@ -51,7 +51,7 @@ FallbackSubjects
 RatingPlan
 ^^^^^^^^^^
 
-Groups together rates per destination. Configured via the following parameters:
+Groups together rates per destination and relates them to event timing. Configured via the following parameters:
 
 ID
 	The tag uniquely idenfying each RatingPlan. There can be multiple entries grouped by the same ID.
@@ -59,8 +59,11 @@ ID
 DestinationRatesID
 	The identifier of the :ref:`DestinationRate` set.
 
+TimingID
+	The itentifier of the :ref:`Timing` profile.
+
 Weight
-	Priority of matching rule (*DestinationRatesID*). Higher value equals higher priority.
+	Priority of matching rule (*DestinationRatesID*+*TimingID*). Higher value equals higher priority.
 
 
 .. _DestinationRate:
@@ -147,6 +150,36 @@ GroupIntervalStart
 	Activates the rate at specific usage within the event.
 
 
+.. _Timing:
+
+Timing
+^^^^^^
+
+A *Timing* profile is giving time awarness to an event. Configured via the following parameters:
+
+ID
+	The tag uniquely idenfying each *Timing* profile.
+
+Years
+	List of years to match within the event. Defaults to the catch-all meta: *\*any*.
+
+Months
+	List of months to match within the event. Defaults to the catch-all meta: *\*any*.
+
+MonthDays
+	List of month days to match within the event. Defaults to the catch-all meta: *\*any*.
+
+WeekDays
+	List of week days to match within the event as integer values. Special case for *Sunday* which matches for both 0 and 7.
+
+Time
+	The exact time to match (mostly as time start). Defined in the format: *hh:mm:ss*
+
+
+
+.. Note:: Due to optimization, CGRateS encapsulates and stores the rating information into just three objects: *Destinations*, *RatingProfiles* and *RatingPlan* (composed out of *RatingPlan*, *DestinationRate*, *Rate* and *Timing* objects).
+
+
 
 .. _Accounting:
 
@@ -210,10 +243,10 @@ The following *BalanceTypes* are supported:
 	Coupled with MMS events, represents number of MMS units.
 
 \*generic
-	Matching all types of events after specific ones, represents generic units (ie: for each x *voice minutes, y *sms units, z *data units will have )
+	Matching all types of events after specific ones, representing generic units (i.e., for each x \*voice minutes, y \*sms units, and z \*data units will have their respective usage)
 
 \*monetary
-	Matching all types of events after specific ones, represents monetary units (can be interpreted as virtual currency).
+	Matching all types of events after specific ones, representing monetary units (can be interpreted as virtual currency).
 
 
 
@@ -254,10 +287,13 @@ Categories
 SharedGroup
 	Pointing towards a shared balance ID.
 
+TimingIDs
+	List of :ref:`Timing` profiles this *Balance* will match for, considering event's *AnswerTime* field.
+
 Disabled
 	Makes the *Balance* invisible to charging.
 
-Factor
+Factors
 	Used in case of of *\*generic* *BalanceType* to specify the conversion factors for different type of events.
 
 Blocker
@@ -345,7 +381,7 @@ Action
 
 Actions are routines executed on demand (ie. by one of the three subsystems: :ref:`SchedulerS`, :ref:`ThresholdS` or :ref:`ActionTriggers <ActionTrigger>`) or called by API by external scripts.
 
-An *Action has the following parameters:
+An \*Action has the following parameters:
 
 ID
 	*ActionSet* identifier.
@@ -398,7 +434,7 @@ ActionType
 	**\*disable_account**
 		Set the :ref:`Account` *Disabled* flag.
 
-	**\*httpPost**
+	**\*http_post**
 		Post data over HTTP protocol to configured HTTP URL.
 
 	**\*http_post_async**
@@ -443,7 +479,7 @@ ActionType
 	**\*remove_expired**
 		Removes expired balances of type matching the filter.
 
-	**\*cdr_account**
+	**\*reset_account_cdr**
 		Creates the account out of last *CDR* saved in :ref:`StorDB` matching the account details in the filter. The *CDR* should contain *AccountSummary* within it's *CostDetails*.
 
 

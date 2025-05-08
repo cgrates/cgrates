@@ -21,6 +21,7 @@ Definition::
 	Tenant             string
 	ID                 string
 	Rules              []*FilterRule
+	ActivationInterval *utils.ActivationInterval
  }
 
 A Filter profile can be shared between multiple subsystem profile definitions.
@@ -76,6 +77,12 @@ The following types are implemented:
 
 \*notexists
 	Is the negation of *\*exists*.
+
+\*timings
+	Will compare the time contained in *Element* with one of the TimingIDs defined in Values.
+
+\*nottimings
+	Is the negation of *\*timings*.
 
 \*destinations
 	Will make sure that the *Element* is a prefix contained inside one of the destination IDs as *Values*.

@@ -4,7 +4,7 @@ ThresholdS
 ==========
 
 
-**ThresholdS** is a standalone subsystem within **CGRateS** responsible to execute a list of *Actions* for a specific event received to process. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
+**ThresholdS** is a standalone subsystem within **CGRateS** responsible to execute a list of *Actions* for a specific event received to process. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 As most of the other subsystems, it is performance oriented, stored inside *DataDB* but cached inside the *cgr-engine* process. 
 Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within *cache* section in the :ref:`JSON configuration <configuration>`.
@@ -93,6 +93,9 @@ ID
 FilterIDs
 	List of *FilterProfileIDs* which should match in order to consider the profile matching the event.
 
+ActivationInterval
+	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
+
 MaxHits
 	Limit number of hits for this threshold. Once this is reached, the threshold is considered disabled.
 
@@ -108,8 +111,8 @@ Blocker
 Weight
 	Sorts the execution of multiple thresholds matching the event. The higher the *Weight* is, the higher the priority to be executed.
 
-ActionProfileIDs
-	List of *ActionProfiles* to execute for this threshold.
+ActionIDs
+	List of *Actions* to execute for this threshold.
 
 Async
 	If true, do not wait for actions to complete.

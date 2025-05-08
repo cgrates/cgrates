@@ -6,7 +6,7 @@ ResourceS
 
 **ResourceS** is a standalone subsystem part of the **CGRateS** infrastructure, designed to allocate virtual resources for the generic *Events* (hashmaps) it receives.
 
-Both receiving of *Events* as well as operational commands on the virtual resources is performed via a complete set of `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
+Both receiving of *Events* as well as operational commands on the virtual resources is performed via a complete set of `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 Due it's real-time nature, **ResourceS** are designed towards high throughput being able to process thousands of *Events* per second. This is doable since each *Resource* is a very light object, held in memory and eventually backed up in *DataDB*.
 
@@ -46,7 +46,7 @@ nested_fields
 ResourceProfile
 ^^^^^^^^^^^^^^^
 
-The **ResourceProfile** is the configuration of a *Resource*. This will be performed over `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ or *.csv* files. A profile is comprised out of the following parameters:
+The **ResourceProfile** is the configuration of a *Resource*. This will be performed over `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ or *.csv* files. A profile is comprised out of the following parameters:
 
 Tenant
 	The tenant on the platform (one can see the tenant as partition ID).
@@ -56,6 +56,9 @@ ID
 
 FilterIDs
 	List of *FilterProfiles* which should match in order to consider the *ResourceProfile* matching the event.
+
+ActivationInterval
+	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
 
 UsageTTL
 	Autoexpire resource allocation after this time duration.

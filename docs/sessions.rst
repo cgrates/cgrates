@@ -4,7 +4,7 @@ SessionS
 ========
 
 
-**SessionS** is a standalone subsystem within **CGRateS** responsible to manage virtual sessions based on events received. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
+**SessionS** is a standalone subsystem within **CGRateS** responsible to manage virtual sessions based on events received. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 
 Parameters
@@ -341,7 +341,7 @@ Instead of arguments, the options for enabling various functionaity will come in
 \*routes
 	Process the event with :ref:`Routes`. Auxiliary flags available:
 
-	**\*ignoreErrors**
+	**\*ignore_errors**
 		Ignore the routes with errors instead of failing the request completely.
 
 	**\*event_cost**

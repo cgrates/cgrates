@@ -3,7 +3,7 @@
 AttributeS
 ==========
 
-**AttributeS** is a standalone subsystem within **CGRateS** and it is the equivalent of a key-value store. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
+**AttributeS** is a standalone subsystem within **CGRateS** and it is the equivalent of a key-value store. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 As most of the other subsystems, it is performance oriented, stored inside *DataDB* but cached inside the *cgr-engine* process. 
 Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within *cache* section in the :ref:`JSON configuration <configuration>`.
@@ -58,8 +58,14 @@ Tenant
 ID
  	Identifier for the *AttributeProfile*, unique within a *Tenant*
  
+Context
+	A list of *contexts* applying to this profile. A *context* is usually associated with a logical phase during event processing (ie: *\*sessions* or *\*cdrs* for events parsed by :ref:`SessionS` or :ref:`CDRs`)
+
 FilterIDs
 	List of *FilterProfiles* which should match in order to consider the *AttributeProfile* matching the event.
+
+ActivationInterval
+	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
 
 Blocker
 	In case of multiple *process runs* are allowed, this flag will break further processing.
@@ -94,13 +100,13 @@ Type
   	**\*composed** 
   		Same as *\*variable* but instead of overwriting *Path*, it will append to it.
 
-  	**\*usageDifference**
+  	**\*usage_difference**
   		Will calculate the duration difference between two field names defined in the *Value*. If the number of fields in the *Value* are different than 2, it will error.
 
   	**\*sum** 
   		Will sum up the values in the *Value*.
 
-  	**\*valueExponent**
+  	**\*value_exponent**
   		Will compute the exponent of the first field in the *Value*.
 
 Value

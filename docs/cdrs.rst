@@ -4,7 +4,7 @@ CDRs
 ====
 
 
-**CDRs** is a standalone subsystem within **CGRateS** responsible to process *CDR* events. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ or separate *HTTP handlers* configured within *http* section inside :ref:`JSON configuration <configuration>`.
+**CDRs** is a standalone subsystem within **CGRateS** responsible to process *CDR* events. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ or separate *HTTP handlers* configured within *http* section inside :ref:`JSON configuration <configuration>`.
 
 Due to multiple interfaces exposed, the **CDRs** is designed to function as centralized server for *CDRs* received from various sources. Examples of such sources are:
 	*\*real-time events* from interfaces like *Diameter*, *Radius*, *Asterisk*, *FreeSWITCH*, *Kamailio*, *OpenSIPS*
@@ -48,8 +48,29 @@ stats_conns
 	Connections towards :ref:`StatS` component to compute stat metrics for CDR events. Empty to disable the functionality.
 
 online_cdr_exports
-	List of :ref:`CDRe` profiles which will be processed for each CDR event. Empty to disable online CDR exports.
+	List of :ref:`EEs` profiles which will be processed for each CDR event. Empty to disable online CDR exports.
 
+
+Export types
+------------
+
+There are two types of exports with common configuration but different data sources:
+
+
+Online exports
+^^^^^^^^^^^^^^
+
+Are real-time exports, triggered by the CDR event processed by :ref:`CDRs`, and take these events as data source. 
+
+The *online exports* are enabled via *online_cdr_exports* :ref:`JSON configuration <configuration>` option within *cdrs*. 
+
+You can control the templates which are to be executed via the filters which are applied for each export template individually.
+
+
+Offline exports
+^^^^^^^^^^^^^^^
+
+Are exports which are triggered via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ and they have as data source the CDRs stored within *StorDB*.
 
 
 APIs logic
@@ -79,7 +100,7 @@ Receives the CDR in the form of *CGRateS Event* together with processing flags a
 	Will store the *CDR* to *StorDB*. Defaults to *store_cdrs* parameter within :ref:`JSON configuration <configuration>`. If store process fails for one of the CDRs, an automated refund is performed for all derived.
 
 \*export
-	Will export the event matching export profiles. These profiles are defined within *cdre* section inside :ref:`JSON configuration <configuration>`. Defaults to *true* if there is at least one *online_cdr_exports* profile configured within :ref:`JSON configuration <configuration>`.
+	Will export the event matching export profiles. These profiles are defined within *ees* section inside :ref:`JSON configuration <configuration>`. Defaults to *true* if there is at least one *online_cdr_exports* profile configured within :ref:`JSON configuration <configuration>`.
 
 \*thresholds
 	Will process the event with the :ref:`ThresholdS`, allowing us to execute actions based on filters set for matching profiles. Defaults to *true* if there are connections towards :ref:`ThresholdS` within :ref:`JSON configuration <configuration>`.
