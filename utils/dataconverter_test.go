@@ -2003,6 +2003,10 @@ func TestDurationMinutesConverter(t *testing.T) {
 }
 
 func TestLocalTimeDurationConverter(t *testing.T) {
+	loadTimelocation := func(tzName string, year int, month time.Month, day, hour, min, sec, nsec int) time.Time {
+		loc, _ := time.LoadLocation(tzName)
+		return time.Date(year, month, day, hour, min, sec, nsec, loc)
+	}
 	testCases := []struct {
 		name        string
 		input       any
@@ -2014,6 +2018,9 @@ func TestLocalTimeDurationConverter(t *testing.T) {
 		{name: "Convert to UTC timezone", input: "2025-05-07T16:25:08+02:00", params: "*localtime:UTC", expectValue: "2025-05-07 14:25:08"},
 		{name: "Convert to UTC+01:00 timezone", input: "2025-05-07T14:25:08Z", params: "*localtime:Europe/Dublin", expectValue: "2025-05-07 15:25:08"},
 		{name: "Convert to UTC+03:00 timezone", input: time.Date(2025, 5, 5, 15, 5, 0, 0, time.UTC), params: "*localtime:Europe/Istanbul", expectValue: "2025-05-05 18:05:00"},
+		{name: "Convert to UTC+03:00 timezone", input: "2025-05-08T10:07:08Z", params: "*localtime:Europe/Dublin:02/01/2006 15:04:05", expectValue: "08/05/2025 11:07:08"},
+		{name: "Convert string UTC-07:00", input: "2025-03-08T23:50:00-07:00", params: "*localtime:Europe/Paris:15:04:05 02/01/2006", expectValue: "07:50:00 09/03/2025"},
+		{name: "Convert time.Time from Asia/Dubai", input: loadTimelocation("Asia/Dubai", 2025, time.November, 20, 22, 15, 0, 0), params: "*localtime:Australia/Sydney:Jan 2, 2006 at 3:04pm (MST)", expectValue: "Nov 21, 2025 at 5:15am (AEDT)"},
 	}
 
 	for _, tc := range testCases {
