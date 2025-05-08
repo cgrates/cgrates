@@ -10,7 +10,7 @@ RouteS
 =========
 
 
-**RouteS** is a standalone subsystem within **CGRateS** responsible to compute a list of routes which can be used for a specific event received to process. It is accessed via `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
+**RouteS** is a standalone subsystem within **CGRateS** responsible to compute a list of routes which can be used for a specific event received to process. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 As most of the other subsystems, it is performance oriented, stored inside *DataDB* but cached inside the *cgr-engine* process. 
 Caching can be done dynamically/on-demand or at start-time/precached and it is configurable within *cache* section in the :ref:`JSON configuration <configuration>`.
@@ -73,13 +73,13 @@ attributes_conns
 	Connections to AttributeS for altering events before supplier queries. If undefined, fields modifications are disabled.
 
 resources_conns
-	Connections to ResourceS for *res sorting, empty to disable functionality.
+	Connections to ResourceS for \*res sorting, empty to disable functionality.
 
 stats_conns
-	Connections to StatS for *stats sorting, empty to disable stats functionality.
+	Connections to StatS for \*stats sorting, empty to disable stats functionality.
 
 default_ratio
-	Default ratio used in case of *load strategy
+	Default ratio used in case of \*load strategy
 
 
 .. _SupplierProfile:
@@ -97,6 +97,9 @@ ID
 
 FilterIDs
 	List of *FilterProfileIDs* which should match in order to consider the profile matching the event.
+
+ActivationInterval
+	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
 
 Sorting
 	Sorting strategy applied when ordering the individual *Routes* defined bellow. Possible values are:
@@ -156,19 +159,19 @@ FilterIDs
 	List of *FilterProfileIDs* which should match in order to consider the *Supplier* in use/active.
 	
 AccountIDs
-	List of account IDs which should be checked in case of some strategies (ie: *lc, *hc).
+	List of account IDs which should be checked in case of some strategies (ie: \*lc, \*hc).
 	
 RatingPlanIDs
-	List of RatingPlanIDs which should be checked in case of some strategies (ie: *lc, *hc).
+	List of RatingPlanIDs which should be checked in case of some strategies (ie: \*lc, \*hc).
 
 ResourceIDs
-	List of ResourceIDs which should be checked in case of some strategies (ie: *reas or *reds).
+	List of ResourceIDs which should be checked in case of some strategies (ie: \*reas or \*reds).
 
 StatIDs
-	List of StatIDs which should be checked in case of some strategies (ie: *qos or *load). Can also be defined as *StatID:MetricID*.
+	List of StatIDs which should be checked in case of some strategies (ie: \*qos or \*load). Can also be defined as *StatID:MetricID*.
 
 Weight
-	Used for sorting in some strategies (ie: *weight, *lc or *hc).
+	Used for sorting in some strategies (ie: \*weight, \*lc or \*hc).
 
 Blocker
 	No more routes are provided after this one.

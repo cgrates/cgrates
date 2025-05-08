@@ -10,14 +10,15 @@ Welcome to `CGRateS`_'s documentation!
 
 .. toctree::
    :maxdepth: 4
-   
+
    overview
    architecture
    installation
    configuration
    administration
    advanced
-   tutorials
+   tutorial
+   troubleshooting
    miscellaneous
 
 

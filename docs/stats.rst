@@ -6,7 +6,7 @@ StatS
 
 **StatS** is a standalone subsystem part of the **CGRateS** infrastructure, designed to aggregate and calculate statistical metrics for the generic *Events* (hashmaps) it receives.
 
-Both receiving of *Events* as well as *Metrics* displaying is performed via a complete set of `CGRateS RPC APIs <https://godoc.org/github.com/cgrates/cgrates/apier/>`_.
+Both receiving of *Events* as well as *Metrics* displaying is performed via a complete set of `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
 
 Due it's real-time nature, **StatS** are designed towards high throughput being able to process thousands of *Events* per second. This is doable since each *StatQueue* is a very light object, held in memory and eventually backed up in *DataDB*.
 
@@ -73,6 +73,9 @@ ID
 FilterIDs
 	List of *FilterProfileIDs* which should match in order to consider the profile matching the event.
 
+ActivationInterval
+	The time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
+
 QueueLength
 	Maximum number of items stored in the queue. Once the *QueueLength* is reached, new items entering will cause oldest one to be dropped (FIFO mode).
 
@@ -137,7 +140,7 @@ Use cases
 
 * Aggregate various traffic metrics for traffic transparency.
 * Revenue assurance applications.
-* Fraud detection by aggregating specific billing metrics during sensitive time intervals (*acc, *tcc, *tcd).
+* Fraud detection by aggregating specific billing metrics during sensitive time intervals (\*acc, \*tcc, \*tcd).
 * Building call patterns.
 * Building statistical information to train systems capable of artificial intelligence.
 * Building quality metrics used in traffic routing.

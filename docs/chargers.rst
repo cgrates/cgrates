@@ -5,7 +5,7 @@ ChargerS
 
 **ChargerS** is a **CGRateS** subsystem designed to produce billing runs via *DerivedCharging* mechanism. 
 
-It works as standalone component of **CGRateS**, accessible via `CGRateS RPC <https://godoc.org/github.com/cgrates/cgrates/apier/>`_ via a rich set of *APIs*. As input **ChargerS** is capable of receiving generic events (hashmaps) with dynamic types for fields.
+It works as standalone component of **CGRateS**, accessible via `CGRateS RPC <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ via a rich set of *APIs*. As input **ChargerS** is capable of receiving generic events (hashmaps) with dynamic types for fields.
 
 **ChargerS** is an **important** part of the charging process within **CGRateS** since with no *ChargingProfile* matching, there will be no billing run performed.
 
@@ -19,7 +19,7 @@ Is a process of receiving an event as input and *deriving* that into multiples (
 Processing logic
 ----------------
 
-For the received *Event* we will retrieve the list of matching *ChargingProfiles' via :ref:`FilterS`. These profiles will be then ordered based on their *Weight* - higher *Weight* will have more priority. If no profile will match due to *Filter*, *NOT_FOUND* will be returned back to the RPC client.
+For the received *Event* we will retrieve the list of matching *ChargingProfiles' via :ref:`FilterS`. These profiles will be then ordered based on their *Weight* - higher *Weight* will have more priority. If no profile will match due to *Filter* or *ActivationInterval*, *NOT_FOUND* will be returned back to the RPC client.
 
 Each *ChargingProfile* matching the *Event*  will produce a standalone event based on configured *RunID*. These events will each have a special field added (or overwritten), the *RunID*, which is taken from the applied *ChargingProfile*. 
 
@@ -42,6 +42,9 @@ ID
 
 FilterIDs
 	List of *FilterProfiles* which should match in order to consider the ChargerProfile matching the event.
+
+ActivationInterval
+	Is the time interval when this profile becomes active. If undefined, the profile is always active. Other options are start time, end time or both.
 
 RunID
 	The identifier for a single bill run / charged output *Event*.

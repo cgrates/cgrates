@@ -13,10 +13,18 @@ Configurable via command line arguments.
  Usage of cgr-console:
   -ca_path string
     	path to CA for tls connection(only for self sign certificate)
+  -connect_attempts int
+    	Connect attempts (default 3)
+  -connect_timeout int
+    	Connect timeout in seconds  (default 1)
   -crt_path string
     	path to certificate for tls connection
   -key_path string
     	path to key for tls connection
+  -max_reconnect_interval int
+    	Maximum reconnect interval
+  -reconnects int
+    	Reconnect attempts (default 3)
   -reply_timeout int
     	Reply timeout in seconds  (default 300)
   -rpc_encoding string
@@ -29,6 +37,7 @@ Configurable via command line arguments.
     	Show extra info about command execution.
   -version
     	Prints the application version.
+
 
 
 .. hint:: # cgr-console status

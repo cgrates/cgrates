@@ -9,36 +9,43 @@ Customisable through the use of *json* :ref:`JSON configuration <configuration>`
 
 Able to read the configuration from either a local directory  of *.json* files with an unlimited number of subfolders (ordered alphabetically) or a list of http paths (separated by ";").
 
+
 ::
 
  $ cgr-engine -help
  Usage of cgr-engine:
   -config_path string
-      Configuration directory path. (default "/etc/cgrates/")
+        Configuration directory path (default "/etc/cgrates/")
   -cpuprof_dir string
-      write cpu profile to files
-  -httprof_path string
-      http address used for program profiling
+        Directory for CPU profiles
   -log_level int
-      Log level (0-emergency to 7-debug) (default -1)
+        Log level (0=emergency to 7=debug) (default -1)
   -logger string
-      logger <*syslog|*stdout>
+        Logger type <*syslog|*stdout>
   -memprof_dir string
-      write memory profile to file
+        Directory for memory profiles
   -memprof_interval duration
-      Time betwen memory profile saves (default 5s)
-  -memprof_nrfiles int
-      Number of memory profile to write (default 1)
+        Interval between memory profile saves (default 15s)
+  -memprof_maxfiles int
+        Number of memory profiles to keep (most recent) (default 1)
+  -memprof_timestamp
+        Add timestamp to memory profile files
   -node_id string
-      The node ID of the engine
+        Node ID of the engine
   -pid string
-      Write pid file
-  -scheduled_shutdown string
-      shutdown the engine after this duration
+        Path to write the PID file
+  -preload string
+        Loader IDs used to load data before engine starts
+  -print_config
+        Print configuration object in JSON format
+  -scheduled_shutdown duration
+        Shutdown the engine after the specified duration
+  -set_versions
+        Overwrite database versions (equivalent to cgr-migrator -exec=*set_versions)
   -singlecpu
-      Run on single CPU core
+        Run on a single CPU core
   -version
-      Prints the application version.
+        Print application version and exit
 
 
 .. hint:: $ cgr-engine -config_path=/etc/cgrates
@@ -61,12 +68,13 @@ The components from the diagram can be found documented in the links bellow:
    sessions
    rals
    cdrs
-   cdre
+   ees
    attributes
    chargers
    resources
    routes
    stats
+   trends
    thresholds
    filters
    dispatchers
@@ -74,6 +82,8 @@ The components from the diagram can be found documented in the links bellow:
    apiers
    loaders
    caches
+   guardian
    datadb
    stordb
-   
+   rpcconns
+

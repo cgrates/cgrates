@@ -38,7 +38,7 @@ With explanations in the comments:
 			"id": "file_reader2",		// file_reader2 reader
 			"run_delay":  "-1",			// reading of events it is triggered outside of ERs
 			"field_separator": ";",		// field separator definition
-			"type": "*fileCSV",		// type of reader, *fileCSV can read .csv files
+			"type": "*file_csv",		// type of reader, *file_csv can read .csv files
 			"row_length" : 0,			// Number of fields from csv file
 			"flags": [					// influence processing logic within CGRateS workflow
 				"*cdrs",				//   *cdrs will create CDRs
@@ -46,7 +46,7 @@ With explanations in the comments:
 			],
 			"source_path": "/tmp/ers2/in",		// location of the files
 			"processed_path": "/tmp/ers2/out",	// move the files here once processed
-			"content_fields":[					// mapping definition between line index in the file and CGRateS field 
+			"fields":[					// mapping definition between line index in the file and CGRateS field 
 				{
 					"tag": "OriginID",			// OriginID together with OriginHost will 
 					"path": "*cgreq.OriginID",	//   uniquely identify the session on CGRateS side
@@ -131,16 +131,16 @@ id
 type
 	Reader type. Following types are implemented:
 
-	**\*fileCSV**
+	**\*file_csv**
 		Reader for *comma separated* files.
 
-	**\*fileXML**
+	**\*file_xml**
 		Reader for *.xml* formatted files.
 
-	**\*fileFWV**
+	**\*file_fwv**
 		Reader for *fixed width value* formatted files.
 
-	**\*kafkaJSONMap**
+	**\*kafka_json_map**
 		Reader for hashmaps within Kafka_ database.
 
 	**\*sql**
@@ -158,7 +158,7 @@ source_path
 processed_path
 	Optional path for moving the events source to after processing.
 
-xmlRootPath
+xml_root_path
 	Used in case of XML content and will specify the prefix path applied to each xml element read.
 
 tenant
@@ -180,10 +180,10 @@ filters
 		Request read from the source. In case of file content without field name, the index will be passed instead of field source path.
 
 	**\*hdr**
-		Header values (available only in case of *\*fileFWV*). In case of file content without field name, the index will be passed instead of field source path.
+		Header values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
 	**\*trl**
-		Trailer values (available only in case of *\*fileFWV*). In case of file content without field name, the index will be passed instead of field source path.
+		Trailer values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
 flags
 	Special tags enforcing the actions/verbs done on an event. There are two types of flags: **main** and **auxiliary**. 
@@ -202,13 +202,13 @@ flags
 	**\*none**
 		Disable transfering the Event from *Reader* to *CGRateS* side.
 
-	**\*dryRun**
+	**\*dryrun**
 		Together with not transfering the Event on CGRateS side will also log it, useful for troubleshooting.
 
 	**\*auth**
 		Sends the Event for authorization on CGRateS.
 
-		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*routes**, **\*rouIgnoreErrors**, **\*routesEventCost**, **\*rouMaxCost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component's API behavior.
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*routes**, **\*routes_ignore_errors**, **\*routes_event_cost**, **\*routes_maxcost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component's API behavior.
 
 	**\*initiate**
 		Initiates a session out of Event on CGRateS side.
@@ -228,7 +228,7 @@ flags
 	**\*message**
 		Process the Event as individual message charging on CGRateS side.
 
-		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*routes**, **\*rouIgnoreErrors**, **\*routesEventCost**, **\*rouMaxCost** which are used to influence the behavior on CGRateS side.
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*routes**, **\*routes_ignore_errors**, **\*routes_event_cost**, **\*routes_maxcost** which are used to influence the behavior on CGRateS side.
 
 	**\*event**
 		Process the Event as generic event on CGRateS side.
@@ -236,7 +236,7 @@ flags
 		Auxiliary flags available: all flags supported by the "SessionSv1.ProcessEvent" generic API
 
 	**\*cdrs**
-		Build a CDR out of the Event on CGRateS side. Can be used simultaneously with other flags (except *\*dry_run)
+		Build a CDR out of the Event on CGRateS side. Can be used simultaneously with other flags (except **\*dryrun**)
 
 path
 	Defined within field, specifies the path where the value will be written. Possible values:
@@ -248,10 +248,10 @@ path
 		Write the value in the request object which will be sent to CGRateS side.
 
 	**\*hdr**
-		Header values (available only in case of *\*fileFWV*). In case of file content without field name, the index will be passed instead of field source path.
+		Header values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
 	**\*trl**
-		Trailer values (available only in case of *\*fileFWV*). In case of file content without field name, the index will be passed instead of field source path.
+		Trailer values (available only in case of *\*file_fwv*). In case of file content without field name, the index will be passed instead of field source path.
 
 
 type
@@ -272,7 +272,7 @@ type
 	**\*composed**
 		Writes out the variable value, postpending to previous value set
 
-	**\*usageDifference**
+	**\*usage_difference**
 		Calculates the usage difference between two arguments passed in the *value*. Requires 2 arguments: *$stopTime;$startTime*
 
 	**\*sum**
@@ -281,7 +281,7 @@ type
 	**\*difference**
 		Calculates the difference between all arguments passed within *value*. Possible value types are (in this order): duration, time, float, int.
 
-	**\*valueExponent**
+	**\*value_exponent**
 		Calculates the exponent of a value. It requires two values: *$val;$exp*
 
 	**\*template**
