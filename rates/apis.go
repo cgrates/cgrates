@@ -128,9 +128,10 @@ func (rS *RateS) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CG
 	return
 }
 
-// V1CostForEvent will be called to calculate the cost for an event
-//
-//	it will loop through all matching profiles for the event in the eventuality the ones with higher priority are erroring
+// V1CostForEvent calculates the cost for an event using matching rate
+// profiles. If a higher priority profile fails, it tries the next matching
+// profile. This continues until a valid cost is found or all profiles are
+// exhausted.
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	var rPfIDs []string
 	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIDs,
@@ -144,7 +145,7 @@ func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCo
 	}
 	ignoredRPfIDs := utils.NewStringSet([]string{})
 	var firstError error
-	for i := 0; i < rS.cfg.RateSCfg().Verbosity; i++ {
+	for i := range rS.cfg.RateSCfg().Verbosity {
 		var rtPrl *utils.RateProfile
 		if rtPrl, err = rS.matchingRateProfileForEvent(ctx, args.Tenant, rPfIDs, args, ignFilters, ignoredRPfIDs); err != nil {
 			if err != utils.ErrNotFound {
@@ -167,6 +168,7 @@ func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCo
 			return
 		}
 		*rpCost = *rcvCost
+		return
 	}
 	return
 }
