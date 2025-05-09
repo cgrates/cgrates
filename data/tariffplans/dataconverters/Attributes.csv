@@ -1,5 +1,5 @@
 #Tenant,ID,Context,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
 cgrates.org,ATTR_VARIABLE,*any,*string:~*req.EventName:CallTest,,,*req.Category,*variable,~*req.EventName{*strip:*suffix:*char:Test},false,20
-cgrates.org,ATTR_VARIABLE,,,,,*req.AnswerTime,*variable,~*req.AnswerTime{*time_string:2006-01-02 15:04:05.999999999 -0700 MST},,
+cgrates.org,ATTR_VARIABLE,,,,,*req.AnswerTime,*variable,~*req.AnswerTime{*timestring::2006-01-02 15:04:05.999999999 -0700 MST},,
 cgrates.org,ATTR_SEC,*any,,,,*req.Cost,*variable,~*req.Cost{*round:2:*up},false,10
 cgrates.org,ATTR_STAT,*any,*string:~*req.EventName:StatsTest,,,*req.AcdMetric,*variable,~*stats.Stat_1.*acd{*duration_seconds&*round:0:*up},false,20

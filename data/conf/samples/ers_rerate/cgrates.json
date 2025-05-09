@@ -97,8 +97,8 @@
                     {"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
                     {"tag": "Subject", "path": "*exp.Subject", "type": "*variable", "value": "~*req.Subject"},
                     {"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
-                    {"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime{*time_string}" },
-                    {"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime{*time_string}"},
+                    {"tag": "SetupTime", "path": "*exp.SetupTime", "type": "*variable", "value": "~*req.SetupTime{*timestring}" },
+                    {"tag": "AnswerTime", "path": "*exp.AnswerTime", "type": "*variable", "value": "~*req.AnswerTime{*timestring}"},
                     {"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
                     {"tag": "RunID", "path": "*exp.RunID", "type": "*variable", "value": "~*req.RunID"},
                     {"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*req.Cost{*round:4}"}
