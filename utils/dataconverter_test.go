@@ -190,26 +190,26 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", exp, hex)
 	}
 
-	// tm, err := NewDataConverter(MetaTimeString)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// expTime, err := NewTimeStringConverter(":" + time.RFC3339)
-	// if !reflect.DeepEqual(tm, expTime) {
-	// 	t.Errorf("Expected %+v received: %+v", expTime, tm)
-	// }
+	tm, err := NewDataConverter(MetaTimeString)
+	if err != nil {
+		t.Error(err)
+	}
+	expTime, err := NewTimeStringConverter(":" + time.DateTime)
+	if !reflect.DeepEqual(tm, expTime) {
+		t.Errorf("Expected %+v received: %+v", expTime, tm)
+	}
 
-	// tm, err = NewDataConverter("*timestring::020106150400")
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// expTime, err = NewTimeStringConverter(":020106150400")
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// if !reflect.DeepEqual(tm, expTime) {
-	// 	t.Errorf("Expected %+v received: %+v", expTime, tm)
-	// }
+	tm, err = NewDataConverter("*timestring::020106150400")
+	if err != nil {
+		t.Error(err)
+	}
+	expTime, err = NewTimeStringConverter(":020106150400")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(tm, expTime) {
+		t.Errorf("Expected %+v received: %+v", expTime, tm)
+	}
 	expected := &DurationFormatConverter{Layout: "15:04:05"}
 	if durFmt, err := NewDataConverter(MetaDurationFormat + ":15:04:05"); err != nil {
 		t.Error(err)
@@ -815,81 +815,6 @@ func TestNewDataConverterMustCompile2(t *testing.T) {
 	}()
 	NewDataConverterMustCompile(MetaMultiply)
 }
-
-// func TestNewTimeStringConverter(t *testing.T) {
-// 	//empty
-// 	// eOut := &TimeStringConverter{layout: EmptyString}
-// 	// if rcv, err := NewTimeStringConverter(EmptyString); err != nil {
-// 	// 	t.Error(err)
-// 	// } else if !reflect.DeepEqual(eOut, rcv) {
-// 	// 	t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-// 	// }
-
-// 	//default
-// 	// eOut = &TimeStringConverter{layout: time.RFC3339}
-// 	// var rcv DataConverter
-// 	// if rcv, err := NewTimeStringConverter(":" + time.RFC3339); err != nil {
-// 	// 	t.Error(err)
-// 	// } else if !reflect.DeepEqual(eOut, rcv) {
-// 	// 	t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-// 	// }
-// 	exp := "2015-07-07T14:52:08Z"
-// 	if rcv, err := rcv.Convert("1436280728"); err != nil {
-// 		t.Error(err)
-// 	} else if rcv.(string) != exp {
-// 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
-// 	}
-// 	exp = "2013-07-30T19:33:10Z"
-// 	if rcv, err := rcv.Convert("1375212790"); err != nil {
-// 		t.Error(err)
-// 	} else if rcv.(string) != exp {
-// 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
-// 	}
-
-// 	//other
-// 	eOut = &TimeStringConverter{layout: "020106150400"}
-// 	var err error
-// 	rcv, err = NewTimeStringConverter(":020106150400")
-// 	if err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(eOut, rcv) {
-// 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-// 	}
-// 	exp = "070715145200"
-// 	if rcv, err := rcv.Convert("1436280728"); err != nil {
-// 		t.Error(err)
-// 	} else if rcv.(string) != exp {
-// 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
-// 	}
-// 	exp = "290720175900"
-// 	if rcv, err := rcv.Convert("2020-07-29T17:59:59Z"); err != nil {
-// 		t.Error(err)
-// 	} else if rcv.(string) != exp {
-// 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
-// 	}
-
-// 	//wrong cases
-// 	eOut = &TimeStringConverter{layout: "not really a good time"}
-// 	if rcv, err := NewTimeStringConverter(":not really a good time"); err != nil {
-// 		t.Error(err)
-// 	} else if !reflect.DeepEqual(eOut, rcv) {
-// 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
-// 	}
-// 	exp = "not really a good time"
-// 	if rcv, err := rcv.Convert(EmptyString); err != nil {
-// 		t.Error(err)
-// 	} else if rcv.(string) != exp {
-// 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
-// 	}
-// 	if rcv, err := rcv.Convert("1375212790"); err != nil {
-// 		t.Error(err)
-// 	} else if rcv.(string) != exp {
-// 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
-// 	}
-// 	if _, err := rcv.Convert("137521s2790"); err == nil {
-// 		t.Errorf("Expected error received: %v:", err)
-// 	}
-// }
 
 func TestStringHexConvertor(t *testing.T) {
 	hx := new(String2HexConverter)
@@ -2015,7 +1940,7 @@ func TestDurationMinutesConverter(t *testing.T) {
 	}
 }
 
-func TestLocalTimeDurationConverter(t *testing.T) {
+func TestTimeStringConverter(t *testing.T) {
 	loadTimelocation := func(tzName string, year int, month time.Month, day, hour, min, sec, nsec int) time.Time {
 		loc, _ := time.LoadLocation(tzName)
 		return time.Date(year, month, day, hour, min, sec, nsec, loc)
