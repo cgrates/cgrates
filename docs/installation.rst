@@ -9,17 +9,6 @@
 Installation
 ============
 
-.. warning::
-
-   **Installation Note**
-
-   For version 1.0, only these installation methods currently work:
-
-   - Debian package installation
-   - Source installation on Debian systems
-
-   Other methods (RedHat packages, Docker) are under development and will be available in future updates.
-
 .. contents::
    :local:
    :depth: 2
@@ -94,46 +83,6 @@ You can add the CGRateS repository to your system's sources list, depending of t
 .. note::
    A complete archive of CGRateS packages is available at http://pkg.cgrates.org/deb/.
 
-
-Redhat-based Distributions
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For .rpm distros, we are using copr to manage the CGRateS packages:
-
--  If using a version of Linux with dnf:
-
-   .. code-block:: bash
-
-      # sudo yum install -y dnf-plugins-core on RHEL 8 or CentOS Stream
-      sudo dnf install -y dnf-plugins-core
-      sudo dnf copr -y enable cgrates/1.0
-      sudo dnf install -y cgrates
-
--  For older distributions:
-
-   .. code-block:: bash
-
-      sudo yum install -y yum-plugin-copr
-      sudo yum copr -y enable cgrates/1.0
-      sudo yum install -y cgrates
-
-To install a specific version of the package, run:
-
-.. code-block:: bash
-
-   sudo dnf install -y cgrates-<version>.x86_64
-
-Alternatively, you can manually install a specific .rpm package as follows:
-
-.. code-block:: bash
-
-   wget http://pkg.cgrates.org/rpm/nightly/epel-9-x86_64/cgrates-current.rpm
-   sudo dnf install ./cgrates_current.rpm
-
-
-.. note::
-   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/1.0/packages/ or http://pkg.cgrates.org/rpm/nightly/.
-
 Installing from Source
 ----------------------
 
@@ -184,108 +133,6 @@ Installation:
    sudo ln -s $HOME/go/bin/cgr-migrator /usr/bin/cgr-migrator
    sudo ln -s $HOME/go/bin/cgr-console /usr/bin/cgr-console
    sudo ln -s $HOME/go/bin/cgr-tester /usr/bin/cgr-tester
-
-Installing Using Docker
------------------------
-
-CGRateS is also available as Docker images.
-
-Prerequisites
-^^^^^^^^^^^^^
-
-- `Docker`_
-
-Pull Docker Images
-^^^^^^^^^^^^^^^^^^
-
-The following commands will pull the CGRateS components:
-
-::
-
-    sudo docker pull dkr.cgrates.org/1.0/cgr-engine
-    sudo docker pull dkr.cgrates.org/1.0/cgr-loader
-    sudo docker pull dkr.cgrates.org/1.0/cgr-migrator
-    sudo docker pull dkr.cgrates.org/1.0/cgr-console
-    sudo docker pull dkr.cgrates.org/1.0/cgr-tester
-
-Verify the images were pulled successfully:
-
-::
-
-    sudo docker images dkr.cgrates.org/1.0/cgr-*
-    REPOSITORY                           TAG       IMAGE ID       CREATED       SIZE
-    dkr.cgrates.org/1.0/cgr-loader    latest    5b667e92a475   6 weeks ago   46.5MB
-    dkr.cgrates.org/1.0/cgr-console   latest    464bd1992ab2   6 weeks ago   103MB
-    dkr.cgrates.org/1.0/cgr-engine    latest    e20f43491aa8   6 weeks ago   111MB
-    ...
-
-.. note::
-    While other version-specific tags are available, we recommend using the default **latest** tag for most use cases.
-    You can check available versions with:
-
-    ::
-
-        curl -X GET https://dkr.cgrates.org/v2/1.0/cgr-engine/tags/list
-
-
-cgr-engine Container
-^^^^^^^^^^^^^^^^^^^^
-
-The current cgr-engine container entrypoint is:
-
-::
-
-    [
-      "/usr/bin/cgr-engine",
-      "-logger=*stdout"
-    ]
-
-.. note::
-    Verify the entrypoint configuration with:
-
-    ::
-
-        sudo docker inspect --format='{{json .Config.Entrypoint}}' dkr.cgrates.org/1.0/cgr-engine:latest
-
-Running cgr-engine
-^^^^^^^^^^^^^^^^^^
-
-Here's a basic example of running cgr-engine with common Docker parameters:
-
-::
-
-    sudo docker run --rm \
-      -v /path/on/host:/etc/cgrates \
-      -p 2012:2012 \
-      -e DOCKER_IP=127.0.0.1 \
-      -e REDIS_HOST=192.168.122.91 \
-      --network bridge \
-      --name cgr-engine \
-      dkr.cgrates.org/1.0/cgr-engine:latest \
-      -config_path=/etc/cgrates \
-      -logger=*stdout
-
-Verify cgr-engine is responding:
-
-::
-
-    sudo docker run --rm \
-      --name cgr-console \
-      --network host \
-      dkr.cgrates.org/1.0/cgr-console:latest \
-      status
-
-Key parameters:
-
-- ``--rm``: automatically remove container when it exits
-- ``-v``: mount host directory into container (format: host_path:container_path)
-- ``-p``: publish container port to host (format: host_port:container_port)
-- ``-e``: set environment variables (optional, only needed if referenced in configuration files)
-- ``--network``: specify container networking mode (bridge for isolation, host for direct host network access)
-- ``--name``: assign name to container
-
-.. note::
-    The ``-config_path`` and ``-logger`` flags above are cgr-engine specific flags and optional, as those values are already the defaults.
 
 .. _post_install:
 
