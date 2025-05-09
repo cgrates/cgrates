@@ -1,4 +1,4 @@
-//go:build localonly
+//go:build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -20,386 +20,397 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"bytes"
+	"fmt"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	sBscsItCfgPath string
-	sBscsItCfg     *config.CGRConfig
-	sBscsItRPC     *birpc.Client
-
-	sBscsITtests = []func(t *testing.T){
-		testSBscsItInitCfg,
-		testSBscsItFlushDBs,
-		testSBscsItStartEngine,
-		testSBscsItApierRpcConn,
-		testSBscsItAuthorizeEvent,
-		testSBscsItAuthorizeEventWithDigest,
-		testSBscsItProcessCDR,
-		testSBscsItStopCgrEngine,
-	}
-)
-
-func TestSBasicsIt(t *testing.T) {
-	sBscsItCfgPath = "/home/dan/sshfs/sesdev/etc/cgrates/"
-	for _, stest := range sBscsITtests {
-		t.Run("TestSBasicsIt", stest)
-	}
+func TestSessionBasics(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"logger": {
+	"type": "*stdout"
+},
+"sessions": {
+    "enabled": true,
+    "accounts_conns": ["*internal"],
+	"rates_conns": ["*internal"],
+    "cdrs_conns": ["*internal"]
+},
+"cdrs": {
+    "enabled": true,
+    "chargers_conns": ["*internal"],
+    "accounts_conns": ["*internal"],
+	"rates_conns": ["*internal"]
+},
+"accounts": {
+    "enabled": true,
+	"rates_conns": ["*internal"]
+},
+"admins": {
+    "enabled": true
+},
+"rates": {
+	"enabled": true
 }
-
-// Init config firs
-func testSBscsItInitCfg(t *testing.T) {
-	var err error
-	sBscsItCfg, err = config.NewCGRConfigFromPath(context.Background(), sBscsItCfgPath)
-	if err != nil {
-		t.Error(err)
-	}
-}
-
-// Remove data in both rating and accounting db
-func testSBscsItFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(sBscsItCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(sBscsItCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Start CGR Engine
-func testSBscsItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sBscsItCfgPath, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Connect rpc client to rater
-func testSBscsItApierRpcConn(t *testing.T) {
-	sBscsItRPC = engine.NewRPCClient(t, sBscsItCfg.ListenCfg(), *utils.Encoding)
-}
-
-// tests related to AuthorizeEvent API
-func testSBscsItAuthorizeEvent(t *testing.T) {
-	// Account requested not found, should fail here with error
-	var rplyAuth V1AuthorizeReply
-	if err := sBscsItRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSBscsItAuthorizeEvent1",
-			APIOpts: map[string]any{
-				utils.MetaAccounts: true,
-			},
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.OriginID:     "testSBscsItAuthorizeEvent1",
-				utils.SetupTime:    "2018-01-07T17:00:00Z",
-			},
-		}, &rplyAuth); err == nil || err.Error() != "ACCOUNTS_ERROR:NOT_FOUND" {
-		t.Error(err)
-	}
-	// Available less than requested(1m)
-	argSet := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
-			Tenant:    "cgrates.org",
-			ID:        "1001",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Balances: map[string]*utils.Balance{
-				"ABSTRACT1": {
-					ID:      "ABSTRACT1",
-					Type:    utils.MetaAbstract,
-					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 20.0}},
-					CostIncrements: []*utils.CostIncrement{
-						{
-							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
-							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
-						},
-					},
-					Units: utils.NewDecimalFromUsageIgnoreErr("1m"),
-				},
-				"CONCRETE1": {
-					ID:      "CONCRETE1",
-					Type:    utils.MetaConcrete,
-					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
-					CostIncrements: []*utils.CostIncrement{
-						{
-							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
-							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
-						},
-					},
-					Units: utils.NewDecimalFromFloat64(0.5),
-				},
-			},
+}`,
+		TpFiles: map[string]string{
+			utils.RatesCsv: `
+#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
+cgrates.org,RP_STANDARD,,;10,,,,RT_STANDARD,*string:~*req.Destination:1002,"* * * * *",;10,false,0s,1,1,1m,1m
+cgrates.org,RP_STANDARD,,,,,,RT_STANDARD,,,,,1m,0,0.6,1m,1s
+cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * * * *",;0,false,0s,0,0.01,1s,1s`,
 		},
+		Encoding:  *utils.Encoding,
+		LogBuffer: new(bytes.Buffer),
 	}
-	var rplySet string
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		argSet, &rplySet); err != nil {
-		t.Error(err)
-	} else if rplySet != utils.OK {
-		t.Errorf("Received: %s", rplySet)
-	}
-	argGet := &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}
-	var acntRply utils.Account
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		argGet, &acntRply); err != nil {
-		t.Error(err)
-	} else if acntRply.Balances["ABSTRACT1"].Units.Compare(utils.NewDecimalFromUsageIgnoreErr("1m")) != 0 ||
-		acntRply.Balances["CONCRETE1"].Units.Compare(utils.NewDecimalFromFloat64(0.5)) != 0 {
-		t.Errorf("Received: %s", utils.ToJSON(acntRply))
-	}
-	if err := sBscsItRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSBscsItAuthorizeEvent1",
-			APIOpts: map[string]any{
-				utils.MetaAccounts: true,
-			},
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.OriginID:     "testSBscsItAuthorizeEvent1",
-				utils.SetupTime:    "2018-01-07T17:00:00Z",
-			},
-		}, &rplyAuth); err != nil {
-		t.Error(err)
-	} else if rplyAuth.MaxUsage.Compare(utils.NewDecimalFromUsageIgnoreErr("50s")) != 0 {
-		t.Errorf("Received: %s", utils.ToJSON(rplyAuth))
-	}
+	t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	client, _ := ng.Run(t)
 
-	// Balances should not be modified
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		argGet, &acntRply); err != nil {
-		t.Error(err)
-	} else if acntRply.Balances["ABSTRACT1"].Units.Compare(utils.NewDecimalFromUsageIgnoreErr("1m")) != 0 ||
-		acntRply.Balances["CONCRETE1"].Units.Compare(utils.NewDecimalFromFloat64(0.5)) != 0 {
-		t.Errorf("Received: %s", utils.ToJSON(acntRply))
-	}
-
-	// Available more than requested (1m)
-	argSet = &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
-			Tenant:    "cgrates.org",
-			ID:        "1001",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Balances: map[string]*utils.Balance{
-				"CONCRETE1": {
-					ID:      "CONCRETE1",
-					Type:    utils.MetaConcrete,
-					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
-					CostIncrements: []*utils.CostIncrement{
-						{
-							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
-							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
-						},
-					},
-					Units: utils.NewDecimalFromFloat64(10),
+	// account helpers
+	setAccount := func(t *testing.T, id string, balances []*utils.Balance) {
+		t.Helper()
+		acnt := &utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     id,
+				FilterIDs: []string{
+					fmt.Sprintf("*string:~*req.Account:%s", id),
 				},
 			},
-		},
-	}
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		argSet, &rplySet); err != nil {
-		t.Error(err)
-	} else if rplySet != utils.OK {
-		t.Errorf("Received: %s", rplySet)
-	}
-	argGet = &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		argGet, &acntRply); err != nil {
-		t.Error(err)
-	} else if acntRply.Balances["CONCRETE1"].Units.Compare(utils.NewDecimalFromFloat64(10.0)) != 0 {
-		t.Errorf("Received: %s", utils.ToJSON(acntRply))
-	}
-	if err := sBscsItRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSBscsItAuthorizeEvent1",
-			APIOpts: map[string]any{
-				utils.MetaAccounts: true,
-			},
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.OriginID:     "testSBscsItAuthorizeEvent1",
-				utils.SetupTime:    "2018-01-07T17:00:00Z",
-			},
-		}, &rplyAuth); err != nil {
-		t.Error(err)
-	} else if rplyAuth.MaxUsage.Compare(utils.NewDecimalFromUsageIgnoreErr("1m")) != 0 {
-		t.Errorf("Received: %s", utils.ToJSON(rplyAuth))
+		}
+		acnt.Balances = make(map[string]*utils.Balance)
+		for _, bal := range balances {
+			acnt.Balances[bal.ID] = bal
+		}
+
+		var replySet string
+		if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+			acnt, &replySet); err != nil {
+			t.Error(err)
+		}
 	}
 
-}
-
-// tests related to AuthorizeEventWithDigest API
-func testSBscsItAuthorizeEventWithDigest(t *testing.T) {
-	// Available more than requested (1m)
-	argSet := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
-			Tenant:    "cgrates.org",
-			ID:        "1001",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Balances: map[string]*utils.Balance{
-				"CONCRETE1": {
-					ID:      "CONCRETE1",
-					Type:    utils.MetaConcrete,
-					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
-					CostIncrements: []*utils.CostIncrement{
-						{
-							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
-							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
-						},
-					},
-					Units: utils.NewDecimalFromFloat64(10),
+	checkAccountBalances := func(t *testing.T, acntID string, wantBalances map[string]float64) {
+		t.Helper()
+		var acnt utils.Account
+		if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{
+					Tenant: "cgrates.org",
+					ID:     "1001",
 				},
-			},
-		},
-	}
-	var rplySet string
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		argSet, &rplySet); err != nil {
-		t.Error(err)
-	} else if rplySet != utils.OK {
-		t.Errorf("Received: %s", rplySet)
-	}
-	argGet := &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}
-	var acntRply utils.Account
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		argGet, &acntRply); err != nil {
-		t.Error(err)
-	} else if acntRply.Balances["CONCRETE1"].Units.Compare(utils.NewDecimalFromFloat64(10.0)) != 0 {
-		t.Errorf("Received: %s", utils.ToJSON(acntRply))
-	}
-	var rplyAuth V1AuthorizeReplyWithDigest
-	if err := sBscsItRPC.Call(context.Background(), utils.SessionSv1AuthorizeEventWithDigest,
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSBscsItAuthorizeEventWithDigest1",
-			APIOpts: map[string]any{
-				utils.MetaAccounts: true,
-			},
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.OriginID:     "testSBscsItAuthorizeEventWithDigest1",
-				utils.SetupTime:    "2018-01-07T17:00:00Z",
-			},
-		}, &rplyAuth); err != nil {
-		t.Error(err)
-	} else if rplyAuth.MaxUsage != time.Duration(time.Minute).Nanoseconds() {
-		t.Errorf("Received: %s", utils.ToJSON(rplyAuth))
-	}
-}
-
-// tests related to AuthorizeEventWithDigest API
-func testSBscsItProcessCDR(t *testing.T) {
-	// Set the account for CDR
-	argSet := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
-			Tenant:    "cgrates.org",
-			ID:        "1001",
-			FilterIDs: []string{"*string:~*req.Account:1001"},
-			Balances: map[string]*utils.Balance{
-				"CONCRETE1": {
-					ID:      "CONCRETE1",
-					Type:    utils.MetaConcrete,
-					Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
-					CostIncrements: []*utils.CostIncrement{
-						{
-							Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
-							RecurrentFee: utils.NewDecimalFromFloat64(0.01),
-						},
-					},
-					Units: utils.NewDecimalFromFloat64(10),
-				},
-			},
-		},
-	}
-	var rplySet string
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1SetAccount,
-		argSet, &rplySet); err != nil {
-		t.Error(err)
-	} else if rplySet != utils.OK {
-		t.Errorf("Received: %s", rplySet)
-	}
-	argGet := &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}}
-	var acntRply utils.Account
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		argGet, &acntRply); err != nil {
-		t.Error(err)
-	} else if acntRply.Balances["CONCRETE1"].Units.Compare(utils.NewDecimalFromFloat64(10.0)) != 0 {
-		t.Errorf("Received: %s", utils.ToJSON(acntRply))
-	}
-	var rplyAuth V1AuthorizeReplyWithDigest
-	if err := sBscsItRPC.Call(context.Background(), utils.SessionSv1AuthorizeEventWithDigest,
-		&utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testSBscsItAuthorizeEventWithDigest1",
-			APIOpts: map[string]any{
-				utils.MetaAccounts: true,
-			},
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.OriginID:     "testSBscsItAuthorizeEventWithDigest1",
-				utils.SetupTime:    "2018-01-07T17:00:00Z",
-			},
-		}, &rplyAuth); err != nil {
-		t.Error(err)
-	} else if rplyAuth.MaxUsage != time.Duration(time.Minute).Nanoseconds() {
-		t.Errorf("Received: %s", utils.ToJSON(rplyAuth))
+			}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		for blncID, val := range wantBalances {
+			gotUnits := acnt.Balances[blncID].Units
+			wantUnits := utils.NewDecimalFromFloat64(val)
+			if gotUnits.Compare(wantUnits) != 0 {
+				t.Errorf("acnt %q balance %q units=%s, want %s",
+					acntID, blncID, gotUnits.String(), wantUnits.String())
+			}
+		}
 	}
 
-	var rplyProcCDR string
-	if err := sBscsItRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
-		&utils.CGREvent{
+	// cdr helpers
+	cdrNo := 0
+	processCDR := func(t *testing.T, acnt, dest, usage string, flags ...string) *utils.CDR {
+		t.Helper()
+		cdrNo++
+		originID := fmt.Sprintf("processCDR%d", cdrNo)
+		cgrEv := &utils.CGREvent{
 			Tenant: "cgrates.org",
-			ID:     "testSBscsItAuthorizeEventWithDigest1",
-			APIOpts: map[string]any{
-				utils.MetaAccounts: true,
-				utils.MetaUsage:    "1m30s",
-			},
 			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.OriginID:     "testSBscsItAuthorizeEventWithDigest1",
+				utils.AccountField: acnt,
+				utils.Destination:  dest,
 				utils.AnswerTime:   "2018-01-07T17:00:00Z",
-				utils.Usage:        "1m30s",
 			},
-		}, &rplyProcCDR); err != nil {
-		t.Error(err)
-	} else if rplyProcCDR != utils.OK {
-		t.Errorf("Received: %s", rplyProcCDR)
+			APIOpts: map[string]any{
+				utils.MetaOriginID: originID,
+				utils.MetaUsage:    usage,
+			},
+		}
+		for _, flag := range flags {
+			cgrEv.APIOpts[flag] = true
+		}
+		var rplyProcCDR string
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessCDR,
+			cgrEv, &rplyProcCDR); err != nil {
+			t.Error(err)
+		}
+
+		var cdrs []*utils.CDR
+		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
+			&utils.CDRFilters{
+				FilterIDs: []string{
+					fmt.Sprintf("*string:~*opts.*originID:%s", originID),
+				},
+			}, &cdrs); err != nil {
+			t.Fatal(err)
+		}
+		if len(cdrs) != 1 {
+			t.Fatalf("%s received %d cdrs, want exactly one", utils.AdminSv1GetCDRs, len(cdrs))
+		}
+		return cdrs[0]
 	}
 
-	var rplyGetCDRs []*utils.CDR
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1GetCDRs,
-		&utils.CDRFilters{}, &rplyGetCDRs); err != nil {
-		t.Error(err)
-	} else if len(rplyGetCDRs) == 0 ||
-		rplyGetCDRs[0].Opts[utils.MetaAccountSCost].(map[string]any)[utils.Abstracts] != 90000000000.0 ||
-		rplyGetCDRs[0].Opts[utils.MetaAccountSCost].(map[string]any)[utils.Concretes] != 0.9 {
-		t.Errorf("Received: %s", utils.ToJSON(rplyGetCDRs))
+	getCostDetails := func(t *testing.T, cdr *utils.CDR, field string) map[string]any {
+		t.Helper()
+		v, has := cdr.Opts[field]
+		if !has {
+			t.Fatalf("missing %q field in CDR opts", field)
+		}
+		costDetails, ok := v.(map[string]any)
+		if !ok {
+			t.Fatalf("cdr field %q of wrong type %T, want map[string]any", field, v)
+		}
+		return costDetails
 	}
 
-	if err := sBscsItRPC.Call(context.Background(), utils.AdminSv1GetAccount,
-		argGet, &acntRply); err != nil {
-		t.Error(err)
-	} else if acntRply.Balances["CONCRETE1"].Units.Compare(utils.NewDecimalFromFloat64(9.1)) != 0 {
-		t.Errorf("Received: %s", utils.ToJSON(acntRply))
+	checkCDR := func(t *testing.T, cdr *utils.CDR, wantCosts map[string]float64) {
+		t.Helper()
+		var got float64
+		for costKey, want := range wantCosts {
+			switch costKey {
+			case utils.Abstracts, utils.Concretes:
+				cd := getCostDetails(t, cdr, utils.MetaAccountSCost)
+				got = cd[costKey].(float64)
+			case utils.Cost:
+				cd := getCostDetails(t, cdr, utils.MetaRateSCost)
+				got = cd[costKey].(float64)
+			case utils.MetaCost:
+				got = cdr.Opts[utils.MetaCost].(float64)
+			default:
+				t.Fatalf("invalid cdr cost key: %q", costKey)
+			}
+			if got != want {
+				t.Errorf("cdr %s = %g, want %g", costKey, got, want)
+			}
+		}
 	}
+
+	// session helpers
+	authEvent := func(t *testing.T, wantUsage, wantErr string) {
+		t.Helper()
+		var reply V1AuthorizeReply
+		err := client.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				APIOpts: map[string]any{
+					utils.MetaAccounts: true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+				},
+			}, &reply)
+		assertError(t, utils.SessionSv1AuthorizeEvent, err, wantErr)
+		if err == nil {
+			wantDecimal := utils.NewDecimalFromUsageIgnoreErr(wantUsage)
+			if reply.MaxUsage.Compare(wantDecimal) != 0 {
+				t.Errorf("%s reply.MaxUsage=%s, want %s",
+					utils.SessionSv1AuthorizeEvent, reply.MaxUsage, wantDecimal)
+				t.Logf("%s reply: %s", utils.SessionSv1AuthorizeEvent, utils.ToJSON(reply))
+			}
+		}
+	}
+
+	authEventWithDigest := func(t *testing.T, wantUsage time.Duration, wantErr string) {
+		t.Helper()
+		var reply V1AuthorizeReplyWithDigest
+		err := client.Call(context.Background(), utils.SessionSv1AuthorizeEventWithDigest,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				APIOpts: map[string]any{
+					utils.MetaAccounts: true,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+				},
+			}, &reply)
+		assertError(t, utils.SessionSv1AuthorizeEventWithDigest, err, wantErr)
+		if err == nil {
+			if got := time.Duration(wantUsage).Nanoseconds(); got != reply.MaxUsage {
+				t.Errorf("%s reply.MaxUsage=%d, want %d", utils.SessionSv1AuthorizeEventWithDigest, reply.MaxUsage, got)
+				t.Logf("%s reply: %s", utils.SessionSv1AuthorizeEvent, utils.ToJSON(reply))
+			}
+		}
+	}
+
+	t.Run("auth and cdr", func(t *testing.T) {
+		// Account requested not found, should fail here with error
+		authEvent(t, "", "ACCOUNTS_ERROR:NOT_FOUND")
+
+		// Available less than requested(1m)
+		setAccount(t, "1001", []*utils.Balance{
+			{
+				ID:      "ABSTRACT1",
+				Type:    utils.MetaAbstract,
+				Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 20.0}},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
+						RecurrentFee: utils.NewDecimalFromFloat64(0.01),
+					},
+				},
+				Units: utils.NewDecimalFromUsageIgnoreErr("1m"),
+			},
+			{
+				ID:      "CONCRETE1",
+				Type:    utils.MetaConcrete,
+				Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
+						RecurrentFee: utils.NewDecimalFromFloat64(0.01),
+					},
+				},
+				Units: utils.NewDecimalFromFloat64(0.5),
+			},
+		})
+
+		authEvent(t, "50s", "")
+		authEventWithDigest(t, 50*time.Second, "")
+
+		setAccount(t, "1001", []*utils.Balance{
+			{
+				ID:      "CONCRETE1",
+				Type:    utils.MetaConcrete,
+				Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
+						RecurrentFee: utils.NewDecimalFromFloat64(0.01),
+					},
+				},
+				Units: utils.NewDecimalFromFloat64(10),
+			},
+		})
+		authEvent(t, "1m", "")
+		authEventWithDigest(t, time.Minute, "")
+
+		// accounting via CostIncrements
+		cdr := processCDR(t, "1001", "1002", "1m30s", utils.MetaAccounts)
+		checkCDR(t, cdr,
+			map[string]float64{
+				utils.Abstracts: 90000000000.0,
+				utils.Concretes: 0.9,
+				utils.MetaCost:  0.9,
+			})
+		checkAccountBalances(t, "1001", map[string]float64{
+			"CONCRETE1": 9.1,
+		})
+	})
+
+	t.Run("rates accounting", func(t *testing.T) {
+		setAccount(t, "1001", []*utils.Balance{
+			{
+				ID:      "CONCRETE1",
+				Type:    utils.MetaConcrete,
+				Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
+				Units:   utils.NewDecimalFromFloat64(10),
+			},
+		})
+		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaAccounts)
+		checkCDR(t, cdr,
+			map[string]float64{
+				utils.Abstracts: float64(150 * time.Second),
+				utils.Concretes: 2.9,
+				utils.MetaCost:  2.9,
+			})
+		checkAccountBalances(t, "1001", map[string]float64{
+			"CONCRETE1": 7.1,
+		})
+	})
+
+	t.Run("rating", func(t *testing.T) {
+		setAccount(t, "1001", []*utils.Balance{
+			{
+				ID:      "CONCRETE1",
+				Type:    utils.MetaConcrete,
+				Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
+				Units:   utils.NewDecimalFromFloat64(10),
+			},
+		})
+		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaRates)
+		checkCDR(t, cdr,
+			map[string]float64{
+				utils.Cost:     2.9,
+				utils.MetaCost: 2.9,
+			})
+	})
+
+	t.Run("rates accounting with fallback", func(t *testing.T) {
+		t.Skip("looping through all max_increments inside maxDebitAbstractsFromConcretes")
+		setAccount(t, "1001", []*utils.Balance{
+			{
+				ID:      "CONCRETE1",
+				Type:    utils.MetaConcrete,
+				Weights: utils.DynamicWeights{&utils.DynamicWeight{Weight: 10.0}},
+				Units:   utils.NewDecimalFromFloat64(2.9), // balance only enough for 2m30s usage
+			},
+		})
+		cdr := processCDR(t, "1001", "1002", "3m15s", utils.MetaAccounts)
+		checkCDR(t, cdr,
+			map[string]float64{
+				utils.Abstracts: float64(150 * time.Second),
+				utils.Concretes: 2.9,
+				utils.MetaCost:  2.9,
+			})
+		checkAccountBalances(t, "1001", map[string]float64{
+			"CONCRETE1": 7.1,
+		})
+	})
+
+	t.Run("rating and accounting", func(t *testing.T) {
+		setAccount(t, "1001", []*utils.Balance{
+			{
+				ID:   "CONCRETE1",
+				Type: utils.MetaConcrete,
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimalFromUsageIgnoreErr("1s"),
+						RecurrentFee: utils.NewDecimalFromFloat64(0.01),
+					},
+				},
+				Units: utils.NewDecimalFromFloat64(10),
+			},
+		})
+		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaAccounts, utils.MetaRates)
+		checkCDR(t, cdr,
+			map[string]float64{
+				utils.Abstracts: float64(150 * time.Second),
+				utils.Concretes: 1.5,
+				utils.MetaCost:  1.5,
+				utils.Cost:      2.9,
+			})
+		checkAccountBalances(t, "1001", map[string]float64{
+			"CONCRETE1": 8.5,
+		})
+	})
 }
 
-func testSBscsItStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(*utils.WaitRater); err != nil {
-		t.Error(err)
+func assertError(t *testing.T, method string, err error, wantErr string) {
+	t.Helper()
+	if wantErr == "" {
+		if err != nil {
+			t.Fatalf("%s: unexpected error: got %v, want none", method, err)
+		}
+	} else {
+		if err == nil {
+			t.Fatalf("%s: expected error %q, got none", method, wantErr)
+		}
+		if err.Error() != wantErr {
+			t.Fatalf("%s: error mismatch: got %q, want %q", method, err.Error(), wantErr)
+		}
 	}
 }
