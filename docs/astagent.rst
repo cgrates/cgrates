@@ -1,5 +1,0 @@
-AsteriskAgent
-=============
-
-
-TBD

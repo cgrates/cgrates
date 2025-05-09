@@ -1,5 +1,0 @@
-KamailioAgent
-=============
-
-
-TBD

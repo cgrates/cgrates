@@ -1,7 +1,0 @@
-.. _stordb:
-
-StorDB
-======
-
-
-TBD
