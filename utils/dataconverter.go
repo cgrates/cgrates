@@ -120,18 +120,11 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		}
 		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
 	case strings.HasPrefix(params, MetaTimeString):
-		layout := time.RFC3339
-		if len(params) > len(MetaTimeString) { // no extra params, defaults implied
-			layout = params[len(MetaTimeString)+1:]
-		}
-		return NewTimeStringConverter(layout), nil
-
-	case strings.HasPrefix(params, MetaLocalTime):
 		var paramsStr string
-		if len(params) > len(MetaLocalTime) {
-			paramsStr = params[len(MetaLocalTime)+1:]
+		if len(params) > len(MetaTimeString) {
+			paramsStr = params[len(MetaTimeString)+1:]
 		}
-		return NewLocalTimeConverter(paramsStr)
+		return NewTimeStringConverter(paramsStr)
 	case strings.HasPrefix(params, MetaRandom):
 		if len(params) == len(MetaRandom) { // no extra params, defaults implied
 			return NewRandomConverter(EmptyString)
@@ -408,24 +401,6 @@ type SIPURIMethodConverter struct{}
 // Convert implements DataConverter interface
 func (*SIPURIMethodConverter) Convert(in any) (out any, err error) {
 	return sipingo.MethodFrom(IfaceAsString(in)), nil
-}
-
-func NewTimeStringConverter(params string) (hdlr DataConverter) {
-	return &TimeStringConverter{Layout: params}
-}
-
-type TimeStringConverter struct {
-	Layout string
-}
-
-// Convert implements DataConverter interface
-func (tS *TimeStringConverter) Convert(in any) (
-	out any, err error) {
-	tm, err := ParseTimeDetectLayout(in.(string), EmptyString)
-	if err != nil {
-		return nil, err
-	}
-	return tm.Format(tS.Layout), nil
 }
 
 // String2HexConverter will transform the string to hex
@@ -824,12 +799,12 @@ func (mS *DurationMinutesConverter) Convert(in any) (
 	return
 }
 
-type LocalTimeConverter struct {
+type TimeStringConverter struct {
 	loc    *time.Location
 	layout string
 }
 
-func NewLocalTimeConverter(params string) (DataConverter, error) {
+func NewTimeStringConverter(params string) (DataConverter, error) {
 	locStr := "Local"
 	layout := time.DateTime
 	if len(params) != 0 {
@@ -847,9 +822,10 @@ func NewLocalTimeConverter(params string) (DataConverter, error) {
 	if err != nil {
 		return nil, err
 	}
-	return LocalTimeConverter{loc: loc, layout: layout}, nil
+	return TimeStringConverter{loc: loc, layout: layout}, nil
 }
-func (lt LocalTimeConverter) Convert(in any) (out any, err error) {
+
+func (ts TimeStringConverter) Convert(in any) (out any, err error) {
 	var tm time.Time
 	switch val := in.(type) {
 	case string:
@@ -862,6 +838,6 @@ func (lt LocalTimeConverter) Convert(in any) (out any, err error) {
 	default:
 		return nil, fmt.Errorf("*localtime converter: unsupported input")
 	}
-	tm = tm.In(lt.loc)
-	return tm.Format(lt.layout), nil
+	tm = tm.In(ts.loc)
+	return tm.Format(ts.layout), nil
 }
