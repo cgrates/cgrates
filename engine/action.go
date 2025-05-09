@@ -1366,19 +1366,14 @@ func export(ub *Account, a *Action, _ Actions, _ *FilterS, extraData any, _ Shar
 			Tenant: utils.NewTenantID(ub.ID).Tenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]any{
-				utils.AccountField:   ub.ID,
-				utils.EventType:      utils.AccountUpdate,
-				utils.EventSource:    utils.AccountService,
-				utils.AllowNegative:  ub.AllowNegative,
-				utils.Disabled:       ub.Disabled,
-				utils.BalanceMap:     ub.BalanceMap,
-				utils.UnitCounters:   ub.UnitCounters,
-				utils.ActionTriggers: ub.ActionTriggers,
-				utils.UpdateTime:     ub.UpdateTime,
+				utils.AccountField: ub,
+				utils.EventType:    utils.AccountUpdate,
+				utils.EventSource:  utils.AccountService,
 			},
 
 			APIOpts: map[string]any{
 				utils.MetaEventType: utils.AccountUpdate,
+				utils.MetaEventTime: time.Now(),
 			},
 		}
 	case extraData != nil:
