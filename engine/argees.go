@@ -107,7 +107,18 @@ func (cgr *CGREventWithEeIDs) UnmarshalJSON(data []byte) error {
 		// ensuring the type of CostDetails is *EventCost.
 		temp.Event[utils.CostDetails] = &ec
 	}
-
+	isAccountUpdate := temp.Event[utils.EventType] == utils.AccountUpdate
+	if accEv, has := temp.Event[utils.AccountField]; has && isAccountUpdate {
+		accBytes, err := json.Marshal(accEv)
+		if err != nil {
+			return err
+		}
+		var as Account
+		if err = json.Unmarshal(accBytes, &as); err != nil {
+			return err
+		}
+		temp.Event[utils.AccountField] = &as
+	}
 	// Assign the extracted EeIDs and CGREvent
 	// to the main struct fields.
 	cgr.EeIDs = temp.EeIDs

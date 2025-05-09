@@ -2830,6 +2830,7 @@ const (
 	OptsAttributesProfileRuns          = "*attrProfileRuns"
 	OptsAttributesProfileIgnoreFilters = "*attrProfileIgnoreFilters"
 	MetaEventType                      = "*eventType"
+	MetaEventTime                      = "*eventTime"
 	EventType                          = "EventType"
 	SchedulerInit                      = "SchedulerInit"
 
