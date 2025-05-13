@@ -312,3 +312,106 @@ func TestExportRequestTenant(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(body), utils.IfaceAsString(rcv))
 	}
 }
+
+func TestExportRequestAccount(t *testing.T) {
+	acc := &engine.Account{
+		ID: "1001",
+		BalanceMap: map[string]engine.Balances{
+			"*monetary": {
+				&engine.Balance{
+					ID:    "Balance1",
+					Value: 40,
+				},
+			}},
+		UnitCounters: engine.UnitCounters{
+			"*event_connect": []*engine.UnitCounter{
+				{
+					CounterType: "*balance",
+					Counters: engine.CounterFilters{
+						{
+							Value:  5,
+							Filter: &engine.BalanceFilter{},
+						},
+					},
+				}},
+			"*monetary": []*engine.UnitCounter{
+				{
+					CounterType: "*balance",
+					Counters: engine.CounterFilters{
+						{
+							Value:  11,
+							Filter: &engine.BalanceFilter{},
+						},
+					},
+				},
+			},
+		},
+		ActionTriggers: engine.ActionTriggers{
+			{
+				ThresholdType:  "*max_event_connect_counter",
+				ThresholdValue: 5,
+				ID:             "TRIGGER1",
+				Executed:       true,
+			},
+			{
+
+				ThresholdType:  "*max_balance_counter",
+				ThresholdValue: 20,
+				Recurrent:      true,
+				ID:             "TRIGGER2",
+			},
+		},
+	}
+	cgrEv := &utils.CGREvent{
+		Event: map[string]any{
+			utils.AccountField: acc,
+			utils.EventType:    utils.AccountUpdate,
+			utils.EventSource:  utils.AccountService,
+		},
+	}
+
+	dsMap := map[string]utils.DataStorage{
+		utils.MetaReq: utils.MapStorage(cgrEv.Event),
+	}
+	expNM := utils.NewOrderedNavigableMap()
+
+	templates := []*config.FCTemplate{
+		{
+			Tag:     "limit",
+			Path:    "*exp.limit",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~*req.Account.ActionTriggers.TRIGGER1.ThresholdValue", ";"),
+			Filters: []string{"*string:~*req.Account.ActionTriggers.TRIGGER1.Executed:true"},
+		},
+		{
+			Tag:   "usage",
+			Path:  "*exp.usage",
+			Type:  "*variable",
+			Value: config.NewRSRParsersMustCompile("~*req.Account.UnitCounters.*event_connect.0.Counters[0].Value", ";"),
+		},
+	}
+	templates[0].ComputePath()
+	templates[1].ComputePath()
+	cfg := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil)
+	if err := engine.NewExportRequest(dsMap,
+		config.CgrConfig().GeneralCfg().DefaultTenant,
+		filterS, map[string]*utils.OrderedNavigableMap{
+			utils.MetaExp: expNM,
+		}).SetFields(templates); err != nil {
+		t.Error(err)
+	}
+	var bP bytePreparing
+	rcv, err := bP.PrepareOrderMap(expNM)
+	if err != nil {
+		t.Error(err)
+	}
+	valMp := map[string]any{
+		"limit": "5",
+		"usage": "5",
+	}
+	body, _ := json.Marshal(valMp)
+	if !reflect.DeepEqual(rcv, body) {
+		t.Errorf("Expected %v \n but received \n %v", utils.IfaceAsString(body), utils.IfaceAsString(rcv))
+	}
+}
