@@ -773,7 +773,7 @@ func testV1RouteGetQOSRoutesFiltred(t *testing.T) {
 		}
 		if !reflect.DeepEqual(rcvSupl, expRouteIDs) {
 			t.Errorf("Expecting: %+v, \n received: %+v",
-				expRouteIDs, utils.ToJSON(suplsReply))
+				expRouteIDs, utils.ToJSON(rcvSupl))
 		}
 	}
 }

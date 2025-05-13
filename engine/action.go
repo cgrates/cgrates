@@ -131,7 +131,8 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		switch {
 		case slices.Contains(sessionActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().SessionSConns
-		case utils.MetaDynamicThreshold == action || utils.MetaDynamicStats == action:
+		case utils.MetaDynamicThreshold == action || utils.MetaDynamicStats == action ||
+			utils.MetaDynamicAttribute == action:
 			act.ConnIDs = cfg.ThresholdSCfg().ApierSConns
 		}
 	case utils.RALs:
@@ -185,6 +186,7 @@ func init() {
 	actionFuncMap[utils.MetaRemoteSetAccount] = remoteSetAccount
 	actionFuncMap[utils.MetaDynamicThreshold] = dynamicThreshold
 	actionFuncMap[utils.MetaDynamicStats] = dynamicStats
+	actionFuncMap[utils.MetaDynamicAttribute] = dynamicAttribute
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -1595,7 +1597,7 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 14 {
-		return errors.New("invalid number of parameters; expected 12")
+		return errors.New("invalid number of parameters; expected 14")
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1702,4 +1704,116 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the StatQueueProfile based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetStatQueueProfile, stQProf, &reply)
+}
+
+// dynamicAttribute processes the `ExtraParameters` field from the action to construct a AttributeProfile
+//
+// The ExtraParameters field format is expected as follows:
+//
+//		 0 Tenant: string
+//		 1 ID: string
+//		 2 Context: strings separated by "&".
+//		 3 FilterIDs: strings separated by "&".
+//		 4 ActivationInterval: strings separated by "&".
+//	 	 5 AttributeFilterIDs: strings separated by "&".
+//	 	 6 Path: string
+//	 	 7 Type: string
+//	 	 8 Value: strings separated by "&".
+//		 9 Blocker: bool
+//		10 Weight: float
+//		11 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 12 {
+		return errors.New("invalid number of parameters; expected 12")
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	attrP := &AttributeProfileWithAPIOpts{
+		AttributeProfile: &AttributeProfile{
+			Tenant:             params[0],
+			ID:                 params[1],
+			ActivationInterval: &utils.ActivationInterval{}, // avoid reaching inside a nil pointer
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Attribute's Context
+	if params[2] != utils.EmptyString {
+		attrP.Contexts = strings.Split(params[2], utils.ANDSep)
+	}
+	// populate Attribute's FilterIDs
+	if params[3] != utils.EmptyString {
+		attrP.FilterIDs = strings.Split(params[3], utils.ANDSep)
+	}
+	// populate Attribute's ActivationInterval
+	aISplit := strings.Split(params[4], utils.ANDSep)
+	if len(aISplit) > 2 {
+		return utils.ErrUnsupportedFormat
+	}
+	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
+		if err := attrP.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
+			return err
+		}
+		if len(aISplit) == 2 {
+			if err := attrP.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+				return err
+			}
+		}
+	}
+	// populate Attribute's Attributes
+	if params[6] != utils.EmptyString {
+		value, err := config.NewRSRParsers(params[8], "&")
+		if err != nil {
+			return err
+		}
+		attrP.Attributes = append(attrP.Attributes, &Attribute{
+			FilterIDs: strings.Split(params[5], utils.ANDSep),
+			Path:      params[6],
+			Type:      params[7],
+			Value:     value,
+		})
+	}
+	// populate Attribute's Blocker
+	if params[9] != utils.EmptyString {
+		attrP.Blocker, err = strconv.ParseBool(params[9])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Attribute's Weight
+	if params[10] != utils.EmptyString {
+		attrP.Weight, err = strconv.ParseFloat(params[10], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Attribute's APIOpts
+	if params[11] != utils.EmptyString {
+		if err := parseParamStringToMap(params[11], attrP.APIOpts); err != nil {
+			return err
+		}
+	}
+
+	// create the AttributeProfile based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetAttributeProfile, attrP, &reply)
 }

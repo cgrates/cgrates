@@ -369,7 +369,7 @@ func testRpcdrsNewEngineSameDB(t *testing.T) {
 
 	tpFiles := map[string]string{
 		utils.StatsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
-cgrates.org,STAT_AGG,,2014-07-29T15:00:00Z,0,-1,0,*tcd;*tcc;*sum#1,,false,false,30,*none`,
+cgrates.org,STAT_AGG,,2014-07-29T15:00:00Z,0,-1,0,*tcd;*tcc;*sum#1,,true,false,30,*none`,
 	}
 
 	if _, err := engine.StopStartEngine(rpcdrsCfgPath, *utils.WaitRater); err != nil {
