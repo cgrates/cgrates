@@ -113,6 +113,9 @@ func (blckrs DynamicBlockers) Clone() (clBlkrs DynamicBlockers) {
 
 // Clone will clone the a DynamicBlocker
 func (blckr *DynamicBlocker) Clone() (cln *DynamicBlocker) {
+	if blckr == nil {
+		return
+	}
 	cln = &DynamicBlocker{
 		Blocker: blckr.Blocker,
 	}

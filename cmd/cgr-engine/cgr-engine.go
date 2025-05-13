@@ -314,7 +314,8 @@ func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logL
 		err = fmt.Errorf("could not parse config: <%s>", err)
 		return
 	}
-	if cfg.ConfigDBCfg().Type != utils.MetaInternal {
+	if !(cfg.ConfigDBCfg().Type == utils.MetaInternal &&
+		cfg.ConfigDBCfg().Opts.InternalDBDumpInterval == 0) { // ignore if offline internal is disabled
 		var d config.ConfigDB
 		if d, err = engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
 			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,

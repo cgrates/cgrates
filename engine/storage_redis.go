@@ -1058,3 +1058,18 @@ func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID str
 	}
 	return
 }
+
+// DumpDataDB will dump all of datadb from memory to a file, only for InternalDB
+func (rs *RedisStorage) DumpDataDB() error {
+	return utils.ErrNotImplemented
+}
+
+// Will rewrite every dump file of DataDB,  only for InternalDB
+func (rs *RedisStorage) RewriteDataDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// BackupDataDB will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead, only for InternalDB
+func (rs *RedisStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

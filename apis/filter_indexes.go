@@ -636,14 +636,14 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 }
 
 func (adms *AdminSv1) GetReverseFilterHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *map[string]*engine.ReverseFilterIHReply) (err error) {
-	objCaches := map[string]*ltcache.Cache{utils.CacheRateFilterIndexes: ltcache.NewCache(-1, 0, false, nil)}
+	objCaches := map[string]*ltcache.Cache{utils.CacheRateFilterIndexes: ltcache.NewCache(-1, 0, false, false, nil)}
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, false, nil)
 	}
 
 	*reply, err = engine.GetRevFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
 		objCaches,
 	)
 	return
@@ -651,9 +651,9 @@ func (adms *AdminSv1) GetReverseFilterHealth(ctx *context.Context, args *engine.
 
 func (adms *AdminSv1) GetThresholdsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheThresholdFilterIndexes,
 	)
 	if err != nil {
@@ -665,9 +665,9 @@ func (adms *AdminSv1) GetThresholdsIndexesHealth(ctx *context.Context, args *eng
 
 func (adms *AdminSv1) GetResourcesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheResourceFilterIndexes,
 	)
 	if err != nil {
@@ -679,9 +679,9 @@ func (adms *AdminSv1) GetResourcesIndexesHealth(ctx *context.Context, args *engi
 
 func (adms *AdminSv1) GetStatsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheStatFilterIndexes,
 	)
 	if err != nil {
@@ -693,9 +693,9 @@ func (adms *AdminSv1) GetStatsIndexesHealth(ctx *context.Context, args *engine.I
 
 func (adms *AdminSv1) GetRoutesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheRouteFilterIndexes,
 	)
 	if err != nil {
@@ -707,9 +707,9 @@ func (adms *AdminSv1) GetRoutesIndexesHealth(ctx *context.Context, args *engine.
 
 func (adms *AdminSv1) GetAttributesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheAttributeFilterIndexes,
 	)
 	if err != nil {
@@ -721,9 +721,9 @@ func (adms *AdminSv1) GetAttributesIndexesHealth(ctx *context.Context, args *eng
 
 func (adms *AdminSv1) GetChargersIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheChargerFilterIndexes,
 	)
 	if err != nil {
@@ -735,9 +735,9 @@ func (adms *AdminSv1) GetChargersIndexesHealth(ctx *context.Context, args *engin
 
 func (adms *AdminSv1) GetRateProfilesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheRateProfilesFilterIndexes,
 	)
 	if err != nil {
@@ -749,9 +749,9 @@ func (adms *AdminSv1) GetRateProfilesIndexesHealth(ctx *context.Context, args *e
 
 func (adms *AdminSv1) GetActionsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheActionProfilesFilterIndexes,
 	)
 	if err != nil {
@@ -763,9 +763,9 @@ func (adms *AdminSv1) GetActionsIndexesHealth(ctx *context.Context, args *engine
 
 func (adms *AdminSv1) GetAccountsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 		utils.CacheAccountsFilterIndexes,
 	)
 	if err != nil {
@@ -777,9 +777,9 @@ func (adms *AdminSv1) GetAccountsIndexesHealth(ctx *context.Context, args *engin
 
 func (adms *AdminSv1) GetRateRatesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealthForRateRates(ctx, adms.dm,
-		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil),
-		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil),
-		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, nil),
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
 	)
 	if err != nil {
 		return err

@@ -524,3 +524,19 @@ func (dbM *DataDBMock) SetConfigSectionsDrv(ctx *context.Context, nodeID string,
 func (dbM *DataDBMock) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) error {
 	return utils.ErrNotImplemented
 }
+
+func (dbM *DataDBMock) DumpDataDB() error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RewriteDataDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) BackupStorDBDump(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

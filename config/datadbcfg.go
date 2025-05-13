@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 func defaultDBPort(dbType, port string) string {
@@ -48,23 +49,29 @@ func defaultDBPort(dbType, port string) string {
 }
 
 type DataDBOpts struct {
-	RedisMaxConns           int
-	RedisConnectAttempts    int
-	RedisSentinel           string
-	RedisCluster            bool
-	RedisClusterSync        time.Duration
-	RedisClusterOndownDelay time.Duration
-	RedisConnectTimeout     time.Duration
-	RedisReadTimeout        time.Duration
-	RedisWriteTimeout       time.Duration
-	RedisPoolPipelineWindow time.Duration
-	RedisPoolPipelineLimit  int
-	RedisTLS                bool
-	RedisClientCertificate  string
-	RedisClientKey          string
-	RedisCACertificate      string
-	MongoQueryTimeout       time.Duration
-	MongoConnScheme         string
+	InternalDBDumpPath        string        // Path to the dump file
+	InternalDBBackupPath      string        // Path where db dump will backup
+	InternalDBStartTimeout    time.Duration // Transcache recover from dump files timeout duration
+	InternalDBDumpInterval    time.Duration // Regurarly dump database to file
+	InternalDBRewriteInterval time.Duration // Regurarly rewrite dump files
+	InternalDBFileSizeLimit   int64         // maximum size that can be written in a singular dump file
+	RedisMaxConns             int
+	RedisConnectAttempts      int
+	RedisSentinel             string
+	RedisCluster              bool
+	RedisClusterSync          time.Duration
+	RedisClusterOndownDelay   time.Duration
+	RedisConnectTimeout       time.Duration
+	RedisReadTimeout          time.Duration
+	RedisWriteTimeout         time.Duration
+	RedisPoolPipelineWindow   time.Duration
+	RedisPoolPipelineLimit    int
+	RedisTLS                  bool
+	RedisClientCertificate    string
+	RedisClientKey            string
+	RedisCACertificate        string
+	MongoQueryTimeout         time.Duration
+	MongoConnScheme           string
 }
 
 // DataDbCfg Database config
@@ -109,6 +116,32 @@ func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConf
 func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
+	}
+	if jsnCfg.InternalDBDumpPath != nil {
+		dbOpts.InternalDBDumpPath = *jsnCfg.InternalDBDumpPath
+	}
+	if jsnCfg.InternalDBBackupPath != nil {
+		dbOpts.InternalDBBackupPath = *jsnCfg.InternalDBBackupPath
+	}
+	if jsnCfg.InternalDBStartTimeout != nil {
+		if dbOpts.InternalDBStartTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.InternalDBStartTimeout); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.InternalDBDumpInterval != nil {
+		if dbOpts.InternalDBDumpInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.InternalDBDumpInterval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.InternalDBRewriteInterval != nil {
+		if dbOpts.InternalDBRewriteInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.InternalDBRewriteInterval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.InternalDBFileSizeLimit != nil {
+		if dbOpts.InternalDBFileSizeLimit, err = utils.ParseBinarySize(*jsnCfg.InternalDBFileSizeLimit); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.RedisMaxConns != nil {
 		dbOpts.RedisMaxConns = *jsnCfg.RedisMaxConns
@@ -259,23 +292,29 @@ func (dbcfg DataDbCfg) CloneSection() Section { return dbcfg.Clone() }
 
 func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 	return &DataDBOpts{
-		RedisMaxConns:           dbOpts.RedisMaxConns,
-		RedisConnectAttempts:    dbOpts.RedisConnectAttempts,
-		RedisSentinel:           dbOpts.RedisSentinel,
-		RedisCluster:            dbOpts.RedisCluster,
-		RedisClusterSync:        dbOpts.RedisClusterSync,
-		RedisClusterOndownDelay: dbOpts.RedisClusterOndownDelay,
-		RedisConnectTimeout:     dbOpts.RedisConnectTimeout,
-		RedisReadTimeout:        dbOpts.RedisReadTimeout,
-		RedisWriteTimeout:       dbOpts.RedisWriteTimeout,
-		RedisPoolPipelineWindow: dbOpts.RedisPoolPipelineWindow,
-		RedisPoolPipelineLimit:  dbOpts.RedisPoolPipelineLimit,
-		RedisTLS:                dbOpts.RedisTLS,
-		RedisClientCertificate:  dbOpts.RedisClientCertificate,
-		RedisClientKey:          dbOpts.RedisClientKey,
-		RedisCACertificate:      dbOpts.RedisCACertificate,
-		MongoQueryTimeout:       dbOpts.MongoQueryTimeout,
-		MongoConnScheme:         dbOpts.MongoConnScheme,
+		InternalDBDumpPath:        dbOpts.InternalDBDumpPath,
+		InternalDBBackupPath:      dbOpts.InternalDBBackupPath,
+		InternalDBStartTimeout:    dbOpts.InternalDBStartTimeout,
+		InternalDBDumpInterval:    dbOpts.InternalDBDumpInterval,
+		InternalDBRewriteInterval: dbOpts.InternalDBRewriteInterval,
+		InternalDBFileSizeLimit:   dbOpts.InternalDBFileSizeLimit,
+		RedisMaxConns:             dbOpts.RedisMaxConns,
+		RedisConnectAttempts:      dbOpts.RedisConnectAttempts,
+		RedisSentinel:             dbOpts.RedisSentinel,
+		RedisCluster:              dbOpts.RedisCluster,
+		RedisClusterSync:          dbOpts.RedisClusterSync,
+		RedisClusterOndownDelay:   dbOpts.RedisClusterOndownDelay,
+		RedisConnectTimeout:       dbOpts.RedisConnectTimeout,
+		RedisReadTimeout:          dbOpts.RedisReadTimeout,
+		RedisWriteTimeout:         dbOpts.RedisWriteTimeout,
+		RedisPoolPipelineWindow:   dbOpts.RedisPoolPipelineWindow,
+		RedisPoolPipelineLimit:    dbOpts.RedisPoolPipelineLimit,
+		RedisTLS:                  dbOpts.RedisTLS,
+		RedisClientCertificate:    dbOpts.RedisClientCertificate,
+		RedisClientKey:            dbOpts.RedisClientKey,
+		RedisCACertificate:        dbOpts.RedisCACertificate,
+		MongoQueryTimeout:         dbOpts.MongoQueryTimeout,
+		MongoConnScheme:           dbOpts.MongoConnScheme,
 	}
 }
 
@@ -309,23 +348,29 @@ func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
 // AsMapInterface returns the config as a map[string]any
 func (dbcfg DataDbCfg) AsMapInterface() any {
 	opts := map[string]any{
-		utils.RedisMaxConnsCfg:           dbcfg.Opts.RedisMaxConns,
-		utils.RedisConnectAttemptsCfg:    dbcfg.Opts.RedisConnectAttempts,
-		utils.RedisSentinelNameCfg:       dbcfg.Opts.RedisSentinel,
-		utils.RedisClusterCfg:            dbcfg.Opts.RedisCluster,
-		utils.RedisClusterSyncCfg:        dbcfg.Opts.RedisClusterSync.String(),
-		utils.RedisClusterOnDownDelayCfg: dbcfg.Opts.RedisClusterOndownDelay.String(),
-		utils.RedisConnectTimeoutCfg:     dbcfg.Opts.RedisConnectTimeout.String(),
-		utils.RedisReadTimeoutCfg:        dbcfg.Opts.RedisReadTimeout.String(),
-		utils.RedisWriteTimeoutCfg:       dbcfg.Opts.RedisWriteTimeout.String(),
-		utils.RedisPoolPipelineWindowCfg: dbcfg.Opts.RedisPoolPipelineWindow.String(),
-		utils.RedisPoolPipelineLimitCfg:  dbcfg.Opts.RedisPoolPipelineLimit,
-		utils.RedisTLSCfg:                dbcfg.Opts.RedisTLS,
-		utils.RedisClientCertificateCfg:  dbcfg.Opts.RedisClientCertificate,
-		utils.RedisClientKeyCfg:          dbcfg.Opts.RedisClientKey,
-		utils.RedisCACertificateCfg:      dbcfg.Opts.RedisCACertificate,
-		utils.MongoQueryTimeoutCfg:       dbcfg.Opts.MongoQueryTimeout.String(),
-		utils.MongoConnSchemeCfg:         dbcfg.Opts.MongoConnScheme,
+		utils.InternalDBDumpPathCfg:        dbcfg.Opts.InternalDBDumpPath,
+		utils.InternalDBBackupPathCfg:      dbcfg.Opts.InternalDBBackupPath,
+		utils.InternalDBStartTimeoutCfg:    dbcfg.Opts.InternalDBStartTimeout.String(),
+		utils.InternalDBDumpIntervalCfg:    dbcfg.Opts.InternalDBDumpInterval.String(),
+		utils.InternalDBRewriteIntervalCfg: dbcfg.Opts.InternalDBRewriteInterval.String(),
+		utils.InternalDBFileSizeLimitCfg:   dbcfg.Opts.InternalDBFileSizeLimit,
+		utils.RedisMaxConnsCfg:             dbcfg.Opts.RedisMaxConns,
+		utils.RedisConnectAttemptsCfg:      dbcfg.Opts.RedisConnectAttempts,
+		utils.RedisSentinelNameCfg:         dbcfg.Opts.RedisSentinel,
+		utils.RedisClusterCfg:              dbcfg.Opts.RedisCluster,
+		utils.RedisClusterSyncCfg:          dbcfg.Opts.RedisClusterSync.String(),
+		utils.RedisClusterOnDownDelayCfg:   dbcfg.Opts.RedisClusterOndownDelay.String(),
+		utils.RedisConnectTimeoutCfg:       dbcfg.Opts.RedisConnectTimeout.String(),
+		utils.RedisReadTimeoutCfg:          dbcfg.Opts.RedisReadTimeout.String(),
+		utils.RedisWriteTimeoutCfg:         dbcfg.Opts.RedisWriteTimeout.String(),
+		utils.RedisPoolPipelineWindowCfg:   dbcfg.Opts.RedisPoolPipelineWindow.String(),
+		utils.RedisPoolPipelineLimitCfg:    dbcfg.Opts.RedisPoolPipelineLimit,
+		utils.RedisTLSCfg:                  dbcfg.Opts.RedisTLS,
+		utils.RedisClientCertificateCfg:    dbcfg.Opts.RedisClientCertificate,
+		utils.RedisClientKeyCfg:            dbcfg.Opts.RedisClientKey,
+		utils.RedisCACertificateCfg:        dbcfg.Opts.RedisCACertificate,
+		utils.MongoQueryTimeoutCfg:         dbcfg.Opts.MongoQueryTimeout.String(),
+		utils.MongoConnSchemeCfg:           dbcfg.Opts.MongoConnScheme,
 	}
 	mp := map[string]any{
 		utils.DataDbTypeCfg:          dbcfg.Type,
@@ -492,35 +537,41 @@ func diffMapItemOptJson(d map[string]*ItemOptsJson, v1, v2 map[string]*ItemOpts)
 }
 
 type DBOptsJson struct {
-	RedisMaxConns           *int              `json:"redisMaxConns"`
-	RedisConnectAttempts    *int              `json:"redisConnectAttempts"`
-	RedisSentinel           *string           `json:"redisSentinel"`
-	RedisCluster            *bool             `json:"redisCluster"`
-	RedisClusterSync        *string           `json:"redisClusterSync"`
-	RedisClusterOndownDelay *string           `json:"redisClusterOndownDelay"`
-	RedisConnectTimeout     *string           `json:"redisConnectTimeout"`
-	RedisReadTimeout        *string           `json:"redisReadTimeout"`
-	RedisWriteTimeout       *string           `json:"redisWriteTimeout"`
-	RedisPoolPipelineWindow *string           `json:"redisPoolPipelineWindow"`
-	RedisPoolPipelineLimit  *int              `json:"redisPoolPipelineLimit"`
-	RedisTLS                *bool             `json:"redisTLS"`
-	RedisClientCertificate  *string           `json:"redisClientCertificate"`
-	RedisClientKey          *string           `json:"redisClientKey"`
-	RedisCACertificate      *string           `json:"redisCACertificate"`
-	MongoQueryTimeout       *string           `json:"mongoQueryTimeout"`
-	MongoConnScheme         *string           `json:"mongoConnScheme"`
-	SQLMaxOpenConns         *int              `json:"sqlMaxOpenConns"`
-	SQLMaxIdleConns         *int              `json:"sqlMaxIdleConns"`
-	SQLLogLevel             *int              `json:"sqlLogLevel"`
-	SQLConnMaxLifetime      *string           `json:"sqlConnMaxLifetime"`
-	MYSQLDSNParams          map[string]string `json:"mysqlDSNParams"`
-	PgSSLMode               *string           `json:"pgSSLMode"`
-	PgSSLCert               *string           `json:"pgSSLCert"`
-	PgSSLKey                *string           `json:"pgSSLKey"`
-	PgSSLPassword           *string           `json:"pgSSLPassword"`
-	PgSSLCertMode           *string           `json:"pgSSLCertMode"`
-	PgSSLRootCert           *string           `json:"pgSSLRootCert"`
-	MySQLLocation           *string           `json:"mysqlLocation"`
+	InternalDBDumpPath        *string           `json:"internalDBDumpPath"`
+	InternalDBBackupPath      *string           `json:"internalDBBackupPath"`
+	InternalDBStartTimeout    *string           `json:"internalDBStartTimeout"`
+	InternalDBDumpInterval    *string           `json:"internalDBDumpInterval"`
+	InternalDBRewriteInterval *string           `json:"internalDBRewriteInterval"`
+	InternalDBFileSizeLimit   *string           `json:"internalDBFileSizeLimit"`
+	RedisMaxConns             *int              `json:"redisMaxConns"`
+	RedisConnectAttempts      *int              `json:"redisConnectAttempts"`
+	RedisSentinel             *string           `json:"redisSentinel"`
+	RedisCluster              *bool             `json:"redisCluster"`
+	RedisClusterSync          *string           `json:"redisClusterSync"`
+	RedisClusterOndownDelay   *string           `json:"redisClusterOndownDelay"`
+	RedisConnectTimeout       *string           `json:"redisConnectTimeout"`
+	RedisReadTimeout          *string           `json:"redisReadTimeout"`
+	RedisWriteTimeout         *string           `json:"redisWriteTimeout"`
+	RedisPoolPipelineWindow   *string           `json:"redisPoolPipelineWindow"`
+	RedisPoolPipelineLimit    *int              `json:"redisPoolPipelineLimit"`
+	RedisTLS                  *bool             `json:"redisTLS"`
+	RedisClientCertificate    *string           `json:"redisClientCertificate"`
+	RedisClientKey            *string           `json:"redisClientKey"`
+	RedisCACertificate        *string           `json:"redisCACertificate"`
+	MongoQueryTimeout         *string           `json:"mongoQueryTimeout"`
+	MongoConnScheme           *string           `json:"mongoConnScheme"`
+	SQLMaxOpenConns           *int              `json:"sqlMaxOpenConns"`
+	SQLMaxIdleConns           *int              `json:"sqlMaxIdleConns"`
+	SQLLogLevel               *int              `json:"sqlLogLevel"`
+	SQLConnMaxLifetime        *string           `json:"sqlConnMaxLifetime"`
+	MYSQLDSNParams            map[string]string `json:"mysqlDSNParams"`
+	PgSSLMode                 *string           `json:"pgSSLMode"`
+	PgSSLCert                 *string           `json:"pgSSLCert"`
+	PgSSLKey                  *string           `json:"pgSSLKey"`
+	PgSSLPassword             *string           `json:"pgSSLPassword"`
+	PgSSLCertMode             *string           `json:"pgSSLCertMode"`
+	PgSSLRootCert             *string           `json:"pgSSLRootCert"`
+	MySQLLocation             *string           `json:"mysqlLocation"`
 }
 
 // Database config
@@ -545,6 +596,24 @@ type DbJsonCfg struct {
 func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	if d == nil {
 		d = new(DBOptsJson)
+	}
+	if v1.InternalDBDumpPath != v2.InternalDBDumpPath {
+		d.InternalDBDumpPath = utils.StringPointer(v2.InternalDBDumpPath)
+	}
+	if v1.InternalDBBackupPath != v2.InternalDBBackupPath {
+		d.InternalDBBackupPath = utils.StringPointer(v2.InternalDBBackupPath)
+	}
+	if v1.InternalDBStartTimeout != v2.InternalDBStartTimeout {
+		d.InternalDBStartTimeout = utils.StringPointer(v2.InternalDBStartTimeout.String())
+	}
+	if v1.InternalDBDumpInterval != v2.InternalDBDumpInterval {
+		d.InternalDBDumpInterval = utils.StringPointer(v2.InternalDBDumpInterval.String())
+	}
+	if v1.InternalDBRewriteInterval != v2.InternalDBRewriteInterval {
+		d.InternalDBRewriteInterval = utils.StringPointer(v2.InternalDBRewriteInterval.String())
+	}
+	if v1.InternalDBFileSizeLimit != v2.InternalDBFileSizeLimit {
+		d.InternalDBFileSizeLimit = utils.StringPointer(fmt.Sprint(v2.InternalDBFileSizeLimit))
 	}
 	if v1.RedisMaxConns != v2.RedisMaxConns {
 		d.RedisMaxConns = utils.IntPointer(v2.RedisMaxConns)
@@ -641,4 +710,19 @@ func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
 	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
 	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
+}
+
+// ToTransCacheOpts returns to ltcache.TransCacheOpts from DataDBOpts
+func (d *DataDBOpts) ToTransCacheOpts() *ltcache.TransCacheOpts {
+	if d == nil {
+		return nil
+	}
+	return &ltcache.TransCacheOpts{
+		DumpPath:        d.InternalDBDumpPath,
+		BackupPath:      d.InternalDBBackupPath,
+		StartTimeout:    d.InternalDBStartTimeout,
+		DumpInterval:    d.InternalDBDumpInterval,
+		RewriteInterval: d.InternalDBRewriteInterval,
+		FileSizeLimit:   d.InternalDBFileSizeLimit,
+	}
 }

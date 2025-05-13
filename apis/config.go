@@ -21,6 +21,7 @@ package apis
 import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // NewConfigSv1 returns a new ConfigSv1
@@ -68,4 +69,31 @@ func (cSv1 *ConfigSv1) GetConfigAsJSON(ctx *context.Context, args *config.Sectio
 // if the section is empty or *all all config is stored in DB
 func (cSv1 *ConfigSv1) StoreCfgInDB(ctx *context.Context, args *config.SectionWithAPIOpts, reply *string) (err error) {
 	return cSv1.cfg.V1StoreCfgInDB(ctx, args, reply)
+}
+
+// DumpConfigDB will dump all of configdb from memory to a file
+func (cSv1 *ConfigSv1) DumpConfigDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = cSv1.cfg.ConfigDB().DumpConfigDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// Will rewrite every dump file of ConfigDB
+func (cSv1 *ConfigSv1) RewriteConfigDB(ctx *context.Context, ignr *string, reply *string) (err error) {
+	if err = cSv1.cfg.ConfigDB().RewriteConfigDB(); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// BackupConfigDB will momentarely stop any dumping and rewriting in configDB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead
+func (cSv1 *ConfigSv1) BackupConfigDB(ctx *context.Context, params DumpBackupParams, reply *string) (err error) {
+	if err = cSv1.cfg.ConfigDB().BackupConfigDB(params.BackupFolderPath, params.Zip); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
 }

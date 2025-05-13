@@ -33,6 +33,39 @@ type AttributeProfile struct {
 	Attributes []*Attribute
 }
 
+// Clone method for AttributeProfile struct
+func (ap *AttributeProfile) Clone() *AttributeProfile {
+	if ap == nil {
+		return nil
+	}
+	clone := &AttributeProfile{
+		Tenant: ap.Tenant,
+		ID:     ap.ID,
+	}
+	if ap.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(ap.FilterIDs))
+		copy(clone.FilterIDs, ap.FilterIDs)
+	}
+	if ap.Attributes != nil {
+		clone.Attributes = make([]*Attribute, len(ap.Attributes))
+		for i, attr := range ap.Attributes {
+			clone.Attributes[i] = attr.Clone()
+		}
+	}
+	if ap.Weights != nil {
+		clone.Weights = ap.Weights.Clone()
+	}
+	if ap.Blockers != nil {
+		clone.Blockers = ap.Blockers.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of AttributeProfile used by ltcache CacheCloner
+func (ap *AttributeProfile) CacheClone() any {
+	return ap.Clone()
+}
+
 // AttributeProfileWithAPIOpts wraps AttributeProfile with APIOpts.
 type AttributeProfileWithAPIOpts struct {
 	*AttributeProfile
@@ -240,6 +273,29 @@ type Attribute struct {
 	Path      string
 	Type      string
 	Value     RSRParsers
+}
+
+// Clone method for Attribute
+func (a *Attribute) Clone() *Attribute {
+	if a == nil {
+		return nil
+	}
+	clone := &Attribute{
+		Path: a.Path,
+		Type: a.Type,
+	}
+	if a.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(a.FilterIDs))
+		copy(clone.FilterIDs, a.FilterIDs)
+	}
+	if a.Value != nil {
+		clone.Value = make(RSRParsers, len(a.Value))
+		copy(clone.Value, a.Value.Clone())
+	}
+	if a.Blockers != nil {
+		clone.Blockers = a.Blockers.Clone()
+	}
+	return clone
 }
 
 // String returns the Attribute in JSON format.

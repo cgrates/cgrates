@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"maps"
 	"strconv"
 	"strings"
 )
@@ -38,6 +39,44 @@ type RouteProfile struct {
 	Sorting           string // Sorting strategy
 	SortingParameters []string
 	Routes            []*Route
+}
+
+// Clone method for RouteProfile
+func (rp *RouteProfile) Clone() *RouteProfile {
+	if rp == nil {
+		return nil
+	}
+	clone := &RouteProfile{
+		Tenant:  rp.Tenant,
+		ID:      rp.ID,
+		Sorting: rp.Sorting,
+	}
+	if rp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(rp.FilterIDs))
+		copy(clone.FilterIDs, rp.FilterIDs)
+	}
+	if rp.SortingParameters != nil {
+		clone.SortingParameters = make([]string, len(rp.SortingParameters))
+		copy(clone.SortingParameters, rp.SortingParameters)
+	}
+	if rp.Routes != nil {
+		clone.Routes = make([]*Route, len(rp.Routes))
+		for i, route := range rp.Routes {
+			clone.Routes[i] = route.Clone()
+		}
+	}
+	if rp.Weights != nil {
+		clone.Weights = rp.Weights.Clone()
+	}
+	if rp.Blockers != nil {
+		clone.Blockers = rp.Blockers.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of RouteProfile used by ltcache CacheCloner
+func (rp *RouteProfile) CacheClone() any {
+	return rp.Clone()
 }
 
 // RouteProfileWithAPIOpts wraps RouteProfile with APIOpts.
@@ -292,6 +331,48 @@ type Route struct {
 	// Internal cache for route properties
 	// Example: cacheRoute["*ratio"] contains the route's ratio value
 	cacheRoute map[string]any
+}
+
+// Clone method for Route
+func (r *Route) Clone() *Route {
+	if r == nil {
+		return nil
+	}
+	clone := &Route{
+		ID:              r.ID,
+		RouteParameters: r.RouteParameters,
+	}
+	if r.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(r.FilterIDs))
+		copy(clone.FilterIDs, r.FilterIDs)
+	}
+	if r.Weights != nil {
+		clone.Weights = r.Weights.Clone()
+	}
+	if r.Blockers != nil {
+		clone.Blockers = r.Blockers.Clone()
+	}
+	if r.AccountIDs != nil {
+		clone.AccountIDs = make([]string, len(r.AccountIDs))
+		copy(clone.AccountIDs, r.AccountIDs)
+	}
+	if r.RateProfileIDs != nil {
+		clone.RateProfileIDs = make([]string, len(r.RateProfileIDs))
+		copy(clone.RateProfileIDs, r.RateProfileIDs)
+	}
+	if r.ResourceIDs != nil {
+		clone.ResourceIDs = make([]string, len(r.ResourceIDs))
+		copy(clone.ResourceIDs, r.ResourceIDs)
+	}
+	if r.StatIDs != nil {
+		clone.StatIDs = make([]string, len(r.StatIDs))
+		copy(clone.StatIDs, r.StatIDs)
+	}
+	if r.cacheRoute != nil {
+		clone.cacheRoute = make(map[string]any)
+		maps.Copy(clone.cacheRoute, r.cacheRoute)
+	}
+	return clone
 }
 
 // Ratio returns the cached ratio value for this route.

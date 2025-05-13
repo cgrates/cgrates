@@ -102,6 +102,11 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	return
 }
 
+// CacheClone returns a clone of CGREvent used by ltcache CacheCloner
+func (ev *CGREvent) CacheClone() any {
+	return ev.Clone()
+}
+
 // AsDataProvider returns the CGREvent as MapStorage with *opts and *req paths set
 func (cgrEv *CGREvent) AsDataProvider() (ev MapStorage) {
 	return MapStorage{

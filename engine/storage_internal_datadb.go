@@ -44,14 +44,24 @@ type InternalDB struct {
 
 // NewInternalDB constructs an InternalDB
 func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
-	itmsCfg map[string]*config.ItemOpts) *InternalDB {
+	transCacheOpts *ltcache.TransCacheOpts, itmsCfg map[string]*config.ItemOpts) (iDB *InternalDB,
+	err error) {
 	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
 	for k, cPcfg := range itmsCfg {
 		tcCfg[k] = &ltcache.CacheConfig{
 			MaxItems:  cPcfg.Limit,
 			TTL:       cPcfg.TTL,
 			StaticTTL: cPcfg.StaticTTL,
+			Clone:     true,
 		}
+	}
+	if transCacheOpts != nil && transCacheOpts.DumpInterval == 0 && transCacheOpts.RewriteInterval == 0 {
+		transCacheOpts = nil // create TransCache without offline collector if neither
+		// DumpInterval or RewriteInterval are provided
+	}
+	tc, err := ltcache.NewTransCacheWithOfflineCollector(transCacheOpts, tcCfg, utils.Logger)
+	if err != nil {
+		return nil, err
 	}
 	ms, _ := utils.NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	return &InternalDB{
@@ -59,8 +69,8 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
 		ms:                  ms,
-		db:                  ltcache.NewTransCache(tcCfg),
-	}
+		db:                  tc,
+	}, nil
 }
 
 // SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
@@ -77,8 +87,11 @@ func (iDB *InternalDB) SetPrefixIndexedFields(prefixIndexedFields []string) {
 	iDB.indexedFieldsMutex.Unlock()
 }
 
-// Close only to implement Storage interface
-func (iDB *InternalDB) Close() {}
+// Close depending on dump and rewrite intervals, will dump all thats left in
+// cache collector to file and/or rewrite files, and close all files
+func (iDB *InternalDB) Close() {
+	iDB.db.Shutdown()
+}
 
 // Flush clears the cache
 func (iDB *InternalDB) Flush(string) error {
@@ -563,6 +576,8 @@ func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id strin
 		for _, rateID := range *rateIDs {
 			delete(rpfl.Rates, rateID)
 		}
+		iDB.db.Set(utils.CacheRateProfiles, rpfl.TenantID(), &rpfl, nil,
+			true, utils.NonTransactional)
 		return
 	}
 	iDB.db.Remove(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id),
@@ -721,4 +736,19 @@ func (iDB *InternalDB) RemoveConfigSectionsDrv(ctx *context.Context, nodeID stri
 		iDB.db.Remove(utils.CacheConfig, utils.ConcatenatedKey(nodeID, sectionID), true, utils.NonTransactional)
 	}
 	return
+}
+
+// Will dump everything inside datadb to files
+func (iDB *InternalDB) DumpDataDB() (err error) {
+	return iDB.db.DumpAll()
+}
+
+// Will rewrite every dump file of DataDB
+func (iDB *InternalDB) RewriteDataDB() (err error) {
+	return iDB.db.RewriteAll()
+}
+
+// BackupDataDB will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead
+func (iDB *InternalDB) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+	return iDB.db.BackupDumpFolder(backupFolderPath, zip)
 }
