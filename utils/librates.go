@@ -41,6 +41,45 @@ type RateProfile struct {
 	Rates           map[string]*Rate
 }
 
+// Clone clones *RateProfile
+func (rp *RateProfile) Clone() *RateProfile {
+	if rp == nil {
+		return nil
+	}
+	cloned := &RateProfile{
+		Tenant:          rp.Tenant,
+		ID:              rp.ID,
+		MaxCostStrategy: rp.MaxCostStrategy,
+	}
+	if rp.FilterIDs != nil {
+		cloned.FilterIDs = make([]string, len(rp.FilterIDs))
+		copy(cloned.FilterIDs, rp.FilterIDs)
+	}
+	if rp.MinCost != nil {
+		cloned.MinCost = rp.MinCost.Clone()
+	}
+	if rp.MaxCost != nil {
+		cloned.MaxCost = rp.MaxCost.Clone()
+	}
+	if rp.Weights != nil {
+		cloned.Weights = rp.Weights.Clone()
+	}
+	if rp.Rates != nil {
+		cloned.Rates = make(map[string]*Rate)
+		for k, v := range rp.Rates {
+			if v != nil {
+				cloned.Rates[k] = v.Clone()
+			}
+		}
+	}
+	return cloned
+}
+
+// CacheClone returns a clone of RateProfile used by ltcache CacheCloner
+func (rp *RateProfile) CacheClone() any {
+	return rp.Clone()
+}
+
 func (rp *RateProfile) TenantID() string {
 	return ConcatenatedKey(rp.Tenant, rp.ID)
 }
@@ -70,6 +109,9 @@ type Rate struct {
 
 // Clone returns a copy of rt
 func (rt *Rate) Clone() *Rate {
+	if rt == nil {
+		return nil
+	}
 	cln := &Rate{
 		ID:              rt.ID,
 		ActivationTimes: rt.ActivationTimes,

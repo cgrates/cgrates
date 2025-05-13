@@ -122,6 +122,9 @@ var (
 type ConfigDB interface {
 	GetSection(ctx *context.Context, section string, val any) error // in this case value must be a not nil pointer
 	SetSection(ctx *context.Context, section string, val any) error
+	DumpConfigDB() error
+	RewriteConfigDB() error
+	BackupConfigDB(string, bool) error
 }
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -148,6 +151,21 @@ func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn any)
 	}
 	jsnCfg[section] = json.RawMessage(data)
 	return
+}
+
+// Only intended for InternalDB
+func (jsnCfg CgrJsonCfg) BackupConfigDB(string, bool) error {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (jsnCfg CgrJsonCfg) DumpConfigDB() error {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (jsnCfg CgrJsonCfg) RewriteConfigDB() error {
+	return utils.ErrNotImplemented
 }
 
 type Section interface {

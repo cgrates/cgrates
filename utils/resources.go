@@ -36,6 +36,40 @@ type ResourceProfile struct {
 	ThresholdIDs      []string       // Thresholds to check after changing Limit
 }
 
+// Clone clones *ResourceProfile (lkID excluded)
+func (rp *ResourceProfile) Clone() *ResourceProfile {
+	if rp == nil {
+		return nil
+	}
+	clone := &ResourceProfile{
+
+		Tenant:            rp.Tenant,
+		ID:                rp.ID,
+		UsageTTL:          rp.UsageTTL,
+		Limit:             rp.Limit,
+		AllocationMessage: rp.AllocationMessage,
+		Blocker:           rp.Blocker,
+		Stored:            rp.Stored,
+	}
+	if rp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(rp.FilterIDs))
+		copy(clone.FilterIDs, rp.FilterIDs)
+	}
+	if rp.ThresholdIDs != nil {
+		clone.ThresholdIDs = make([]string, len(rp.ThresholdIDs))
+		copy(clone.ThresholdIDs, rp.ThresholdIDs)
+	}
+	if rp.Weights != nil {
+		clone.Weights = rp.Weights.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of ResourceProfile used by ltcache CacheCloner
+func (rp *ResourceProfile) CacheClone() any {
+	return rp.Clone()
+}
+
 // ResourceProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type ResourceProfileWithAPIOpts struct {
 	*ResourceProfile
@@ -79,6 +113,33 @@ type Resource struct {
 	ID     string
 	Usages map[string]*ResourceUsage
 	TTLIdx []string // holds ordered list of ResourceIDs based on their TTL, empty if feature is disableda
+}
+
+// Clone clones *Resource (lkID excluded)
+func (r *Resource) Clone() *Resource {
+	if r == nil {
+		return nil
+	}
+	clone := &Resource{
+		Tenant: r.Tenant,
+		ID:     r.ID,
+	}
+	if r.Usages != nil {
+		clone.Usages = make(map[string]*ResourceUsage, len(r.Usages))
+		for key, usage := range r.Usages {
+			clone.Usages[key] = usage.Clone()
+		}
+	}
+	if r.TTLIdx != nil {
+		clone.TTLIdx = make([]string, len(r.TTLIdx))
+		copy(clone.TTLIdx, r.TTLIdx)
+	}
+	return clone
+}
+
+// CacheClone returns a clone of Resource used by ltcache CacheCloner
+func (r *Resource) CacheClone() any {
+	return r.Clone()
 }
 
 // ResourceWithAPIOpts is used in replicatorV1 for dispatcher

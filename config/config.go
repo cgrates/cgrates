@@ -385,6 +385,14 @@ type CGRConfig struct {
 	cacheDPMux sync.RWMutex
 }
 
+// ConfigDB exports access to ConfigDB
+func (cfg *CGRConfig) ConfigDB() ConfigDB {
+	if cfg != nil {
+		return cfg.db
+	}
+	return nil
+}
+
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 	utils.MetaResources, utils.MetaFilters, utils.MetaStats, utils.MetaTrends,
 	utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers, utils.MetaRankings,

@@ -991,3 +991,31 @@ func StructChanTimeout(chn chan struct{}, timeout time.Duration) bool {
 		return true
 	}
 }
+
+// ParseBinarySize converts string byte sizes (b, kb, mb, gb) to byte int64
+func ParseBinarySize(size string) (int64, error) {
+	var num float64
+	var unit string
+
+	_, err := fmt.Sscanf(size, "%f%s", &num, &unit)
+	if err != nil {
+		return 0, fmt.Errorf("invalid size format: %s", size)
+	}
+
+	multipliers := map[string]int64{
+		"":   1,
+		"B":  1,
+		"KB": 1 << 10,
+		"K":  1 << 10,
+		"MB": 1 << 20,
+		"M":  1 << 20,
+		"GB": 1 << 30,
+		"G":  1 << 30,
+	}
+
+	if mult, ok := multipliers[strings.ToUpper(unit)]; ok {
+		return int64(num * float64(mult)), nil
+	}
+
+	return 0, fmt.Errorf("unknown unit: %s", unit)
+}

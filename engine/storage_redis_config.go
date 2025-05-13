@@ -39,3 +39,18 @@ func (rs *RedisStorage) SetSection(_ *context.Context, section string, jsn any) 
 	}
 	return rs.Cmd(nil, redisSET, utils.ConfigPrefix+section, string(result))
 }
+
+// Only intended for InternalDB
+func (rs *RedisStorage) DumpConfigDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (rs *RedisStorage) RewriteConfigDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (rs *RedisStorage) BackupConfigDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}

@@ -40,34 +40,59 @@ func init() {
 	// AttributeS
 	gob.Register(new(utils.AttributeProfile))
 	gob.Register(new(utils.AttributeProfileWithAPIOpts))
+	gob.Register(new(utils.TPAttributeProfile))
 	// Threshold
 	gob.Register(new(Threshold))
 	gob.Register(new(ThresholdProfile))
 	gob.Register(new(ThresholdProfileWithAPIOpts))
 	gob.Register(new(ThresholdWithAPIOpts))
+	gob.Register(new(utils.TPThresholdProfile))
 	// Resource
 	gob.Register(new(utils.Resource))
 	gob.Register(new(utils.ResourceProfile))
 	gob.Register(new(utils.ResourceProfileWithAPIOpts))
 	gob.Register(new(utils.ResourceWithAPIOpts))
+	gob.Register(new(utils.TPResourceProfile))
 	// Stats
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
+	gob.Register(new(utils.TPStatProfile))
+	// RankingS
+	gob.Register(new(utils.Ranking))
+	gob.Register(new(utils.RankingProfile))
+	gob.Register(new(utils.TPRankingProfile))
 	// RouteS
 	gob.Register(new(utils.RouteProfile))
 	gob.Register(new(utils.RouteProfileWithAPIOpts))
+	gob.Register(new(utils.TPRouteProfile))
+	// TrendS
+	gob.Register(new(utils.Trend))
+	gob.Register(new(utils.TrendProfile))
+	gob.Register(new(utils.TPTrendsProfile))
 	// Filters
 	gob.Register(new(Filter))
 	gob.Register(new(FilterWithAPIOpts))
+	gob.Register(new(utils.TPFilterProfile))
+	// DispatcherS
+	gob.Register(new(DispatcherHost))
+	gob.Register(new(DispatcherHostProfile))
+	gob.Register(new(DispatcherHostWithAPIOpts))
 	// RateProfiles
 	gob.Register(new(utils.RateProfile))
 	gob.Register(new(utils.RateProfileWithAPIOpts))
 	// ActionProfiles
 	gob.Register(new(utils.ActionProfile))
 	gob.Register(new(utils.ActionProfileWithAPIOpts))
+	// Account
+	gob.Register(new(utils.Account))
+	// CDR
+	gob.Register(new(utils.CGREvent))
+	// ChargerS
+	gob.Register(new(utils.ChargerProfile))
+	gob.Register(new(utils.TPChargerProfile))
 	// StatMetrics
 	gob.Register(new(StatASR))
 	gob.Register(new(StatACD))
@@ -81,7 +106,10 @@ func init() {
 	gob.Register(new(StatDistinct))
 	// others
 	gob.Register([]any{})
+	gob.Register([]byte{})
 	gob.Register([]map[string]any{})
+	gob.Register(map[string]int64{})
+	gob.Register(Versions{})
 	gob.Register(map[string]any{})
 	gob.Register(map[string][]map[string]any{})
 	gob.Register(map[string]string{})
@@ -106,20 +134,22 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager, connMgr *ConnManager, cpS
 				k == utils.CacheCapsEvents {
 				continue
 			}
-			val.OnEvicted = func(itmID string, value any) {
-				if err := connMgr.Call(context.TODO(), cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
-					&utils.ArgCacheReplicateRemove{
-						CacheID: k,
-						ItemID:  itmID,
-					}, &reply); err != nil {
-					utils.Logger.Warning(fmt.Sprintf("error: %+v when autoexpired item: %+v from: %+v", err, itmID, k))
-				}
+			val.OnEvicted = []func(itmID string, value interface{}){
+				func(itmID string, value any) {
+					if err := connMgr.Call(context.TODO(), cfg.CacheCfg().ReplicationConns, utils.CacheSv1ReplicateRemove,
+						&utils.ArgCacheReplicateRemove{
+							CacheID: k,
+							ItemID:  itmID,
+						}, &reply); err != nil {
+						utils.Logger.Warning(fmt.Sprintf("error: %+v when autoexpired item: %+v from: %+v", err, itmID, k))
+					}
+				},
 			}
 		}
 	}
 
 	if _, has := tCache[utils.CacheCapsEvents]; has && cpS != nil {
-		tCache[utils.CacheCapsEvents].OnEvicted = cpS.OnEvict
+		tCache[utils.CacheCapsEvents].OnEvicted = []func(itmID string, value interface{}){cpS.OnEvict}
 	}
 	c = &CacheS{
 		cfg:     cfg,
@@ -251,11 +281,6 @@ func (chS *CacheS) RollbackTransaction(transID string) {
 // CommitTransaction is an exported method from TransCache
 func (chS *CacheS) CommitTransaction(transID string) {
 	chS.tCache.CommitTransaction(transID)
-}
-
-// GetCloned is an exported method from TransCache
-func (chS *CacheS) GetCloned(chID, itmID string) (cln any, err error) {
-	return chS.tCache.GetCloned(chID, itmID)
 }
 
 // GetPrecacheChannel returns the channel used to signal precaching

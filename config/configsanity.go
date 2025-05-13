@@ -904,6 +904,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 
 	// StorDB sanity checks
+	if cfg.storDbCfg.Type == utils.MetaInternal &&
+		(cfg.storDbCfg.Opts.InternalDBDumpInterval != 0 ||
+			cfg.storDbCfg.Opts.InternalDBRewriteInterval != 0) &&
+		cfg.storDbCfg.Opts.InternalDBFileSizeLimit <= 0 {
+		return fmt.Errorf("<%s> InternalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.StorDB,
+			cfg.storDbCfg.Opts.InternalDBFileSizeLimit)
+	}
 	if cfg.storDbCfg.Type == utils.MetaPostgres {
 		if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow,
 			utils.PgSSLModePrefer, utils.PgSSLModeRequire, utils.PgSSLModeVerifyCA,
@@ -918,19 +925,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 
 	// DataDB sanity checks
 	if cfg.dataDbCfg.Type == utils.MetaInternal {
+		if (cfg.dataDbCfg.Opts.InternalDBDumpInterval != 0 ||
+			cfg.dataDbCfg.Opts.InternalDBRewriteInterval != 0) &&
+			cfg.dataDbCfg.Opts.InternalDBFileSizeLimit <= 0 {
+			return fmt.Errorf("<%s> InternalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.DataDB,
+				cfg.dataDbCfg.Opts.InternalDBFileSizeLimit)
+		}
 		for key, config := range cfg.cacheCfg.Partitions {
 			if utils.DataDBPartitions.Has(key) && config.Limit != 0 {
 				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
 			}
-		}
-		if cfg.resourceSCfg.Enabled && cfg.resourceSCfg.StoreInterval != -1 {
-			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ResourceS, cfg.resourceSCfg.StoreInterval)
-		}
-		if cfg.statsCfg.Enabled && cfg.statsCfg.StoreInterval != -1 {
-			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.StatS, cfg.statsCfg.StoreInterval)
-		}
-		if cfg.thresholdSCfg.Enabled && cfg.thresholdSCfg.StoreInterval != -1 {
-			return fmt.Errorf("<%s> the StoreInterval field needs to be -1 when DataBD is *internal, received : %d", utils.ThresholdS, cfg.thresholdSCfg.StoreInterval)
 		}
 	}
 	for item, val := range cfg.dataDbCfg.Items {

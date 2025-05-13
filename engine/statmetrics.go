@@ -24,6 +24,8 @@ import (
 	"strconv"
 	"strings"
 
+	"maps"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -559,6 +561,9 @@ func (ddc *StatDDC) GetCompressFactor(events map[string]uint64) map[string]uint6
 }
 
 func (ddc *StatDDC) Clone() StatMetric {
+	if ddc == nil {
+		return nil
+	}
 	cln := &StatDDC{
 		FieldValues: make(map[string]utils.StringSet),
 		Count:       ddc.Count,
@@ -721,15 +726,23 @@ func (sum *Metric) GetCompressFactor(events map[string]uint64) map[string]uint64
 }
 
 func (sum *Metric) Clone() (cln *Metric) {
-	cln = &Metric{
-		Value:     sum.Value.Clone(),
-		Count:     sum.Count,
-		Events:    make(map[string]*DecimalWithCompress),
-		MinItems:  sum.MinItems,
-		FilterIDs: slices.Clone(sum.FilterIDs),
+	if sum == nil {
+		return nil
 	}
-	for k, v := range sum.Events {
-		cln.Events[k] = v
+	cln = &Metric{
+		Count:    sum.Count,
+		MinItems: sum.MinItems,
+	}
+	if sum.Value != nil {
+		cln.Value = sum.Value.Clone()
+	}
+	if sum.Events != nil {
+		cln.Events = make(map[string]*DecimalWithCompress, len(sum.Events))
+		maps.Copy(cln.Events, sum.Events)
+	}
+	if sum.FilterIDs != nil {
+		cln.FilterIDs = make([]string, len(sum.FilterIDs))
+		cln.FilterIDs = slices.Clone(sum.FilterIDs)
 	}
 	return
 }
@@ -994,6 +1007,9 @@ func (dst *StatDistinct) GetCompressFactor(events map[string]uint64) map[string]
 }
 
 func (dst *StatDistinct) Clone() StatMetric {
+	if dst == nil {
+		return nil
+	}
 	cln := &StatDistinct{
 		Count:       dst.Count,
 		Events:      make(map[string]map[string]uint64),

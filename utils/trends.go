@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"maps"
 	"math"
 	"slices"
 	"sync"
@@ -49,6 +50,9 @@ type TrendProfileWithAPIOpts struct {
 
 // Clone creates a deep copy of TrendProfile for thread-safe use.
 func (tp *TrendProfile) Clone() (clnTp *TrendProfile) {
+	if tp == nil {
+		return nil
+	}
 	clnTp = &TrendProfile{
 		Tenant:          tp.Tenant,
 		ID:              tp.ID,
@@ -74,6 +78,11 @@ func (tp *TrendProfile) Clone() (clnTp *TrendProfile) {
 		}
 	}
 	return
+}
+
+// CacheClone returns a clone of TrendProfile used by ltcache CacheCloner
+func (tP *TrendProfile) CacheClone() any {
+	return tP.Clone()
 }
 
 // TenantID returns the concatenated tenant and ID.
@@ -233,6 +242,60 @@ type Trend struct {
 	tPrfl *TrendProfile // store here the trend profile so we can have it at hands further
 }
 
+func (t *Trend) Clone() *Trend {
+	if t == nil {
+		return nil
+	}
+	t.tMux.RLock()
+	defer t.tMux.RUnlock()
+	clone := &Trend{
+		Tenant: t.Tenant,
+		ID:     t.ID,
+	}
+	if t.RunTimes != nil {
+		clone.RunTimes = make([]time.Time, len(t.RunTimes))
+		copy(clone.RunTimes, t.RunTimes)
+	}
+	if t.Metrics != nil {
+		clone.Metrics = make(map[time.Time]map[string]*MetricWithTrend)
+		for timeKey, metricsMap := range t.Metrics {
+			if metricsMap != nil {
+				clone.Metrics[timeKey] = make(map[string]*MetricWithTrend)
+				for metricID, metric := range metricsMap {
+					if metric != nil {
+						clone.Metrics[timeKey][metricID] = metric.Clone()
+					}
+				}
+			}
+		}
+	}
+	if t.CompressedMetrics != nil {
+		clone.CompressedMetrics = make([]byte, len(t.CompressedMetrics))
+		copy(clone.CompressedMetrics, t.CompressedMetrics)
+	}
+	if t.mLast != nil {
+		clone.mLast = make(map[string]time.Time)
+		maps.Copy(clone.mLast, t.mLast)
+	}
+	if t.mCounts != nil {
+		clone.mCounts = make(map[string]int)
+		maps.Copy(clone.mCounts, t.mCounts)
+	}
+	if t.mTotals != nil {
+		clone.mTotals = make(map[string]float64)
+		maps.Copy(clone.mTotals, t.mTotals)
+	}
+	if t.tPrfl != nil {
+		clone.tPrfl = t.tPrfl.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of Trend used by ltcache CacheCloner
+func (t *Trend) CacheClone() any {
+	return t.Clone()
+}
+
 // TrendWithAPIOpts wraps Trend with APIOpts.
 type TrendWithAPIOpts struct {
 	*Trend
@@ -253,6 +316,19 @@ type MetricWithTrend struct {
 	Value       float64 // Metric Value
 	TrendGrowth float64 // Difference between last and previous
 	TrendLabel  string  // *positive, *negative, *constant, N/A
+}
+
+func (m *MetricWithTrend) Clone() *MetricWithTrend {
+	if m == nil {
+		return nil
+	}
+
+	return &MetricWithTrend{
+		ID:          m.ID,
+		Value:       m.Value,
+		TrendGrowth: m.TrendGrowth,
+		TrendLabel:  m.TrendLabel,
+	}
 }
 
 // NewTrendFromProfile creates an empty trend based on profile configuration.

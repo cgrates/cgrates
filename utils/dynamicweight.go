@@ -90,6 +90,9 @@ type DynamicWeight struct {
 }
 
 func (dW *DynamicWeight) Clone() (cln *DynamicWeight) {
+	if dW == nil {
+		return nil
+	}
 	cln = &DynamicWeight{
 		Weight: dW.Weight,
 	}

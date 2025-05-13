@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"maps"
 	"sort"
 	"strings"
 	"sync"
@@ -50,11 +51,15 @@ func (sgp *RankingProfile) TenantID() string {
 
 // Clone creates a deep copy of RankingProfile for thread-safe use.
 func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
+	if rkP == nil {
+		return nil
+	}
 	cln = &RankingProfile{
 		Tenant:   rkP.Tenant,
 		ID:       rkP.ID,
 		Schedule: rkP.Schedule,
 		Sorting:  rkP.Sorting,
+		Stored:   rkP.Stored,
 	}
 	if rkP.StatIDs != nil {
 		cln.StatIDs = make([]string, len(rkP.StatIDs))
@@ -74,6 +79,11 @@ func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 		copy(cln.ThresholdIDs, rkP.ThresholdIDs)
 	}
 	return
+}
+
+// CacheClone returns a clone of RankingProfile used by ltcache CacheCloner
+func (rkP *RankingProfile) CacheClone() any {
+	return rkP.Clone()
 }
 
 // Set implements the profile interface, setting values in RankingProfile based on path.
@@ -232,6 +242,48 @@ type Ranking struct {
 	rkPrfl    *RankingProfile // store here the ranking profile so we can have it at hands further
 	metricIDs StringSet       // convert the metricIDs here for faster matching
 
+}
+
+// Clone clones *Ranking
+func (r *Ranking) Clone() *Ranking {
+	if r == nil {
+		return nil
+	}
+	r.rMux.RLock()
+	defer r.rMux.RUnlock()
+	cln := &Ranking{
+		Tenant:     r.Tenant,
+		ID:         r.ID,
+		LastUpdate: r.LastUpdate,
+		Sorting:    r.Sorting,
+	}
+	if r.SortingParameters != nil {
+		cln.SortingParameters = make([]string, len(r.SortingParameters))
+		copy(cln.SortingParameters, r.SortingParameters)
+	}
+	if r.SortedStatIDs != nil {
+		cln.SortedStatIDs = make([]string, len(r.SortedStatIDs))
+		copy(cln.SortedStatIDs, r.SortedStatIDs)
+	}
+	if r.Metrics != nil {
+		cln.Metrics = make(map[string]map[string]float64)
+		for statID, metricMap := range r.Metrics {
+			cln.Metrics[statID] = make(map[string]float64)
+			maps.Copy(cln.Metrics[statID], metricMap)
+		}
+	}
+	if r.rkPrfl != nil {
+		cln.rkPrfl = r.rkPrfl.Clone()
+	}
+	if r.metricIDs != nil {
+		cln.metricIDs = r.metricIDs.Clone()
+	}
+	return cln
+}
+
+// CacheClone returns a clone of Ranking used by ltcache CacheCloner
+func (r *Ranking) CacheClone() any {
+	return r.Clone()
 }
 
 // RankingWithAPIOpts wraps Ranking with APIOpts.

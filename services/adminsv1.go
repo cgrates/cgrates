@@ -28,7 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NewAPIerSv1Service returns the APIerSv1 Service
+// NewAdminSv1Service returns the AdminSv1 Service
 func NewAdminSv1Service(cfg *config.CGRConfig) *AdminSv1Service {
 	return &AdminSv1Service{
 		cfg:       cfg,

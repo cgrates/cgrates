@@ -50,6 +50,47 @@ type StatQueueProfile struct {
 	lkID string // holds the reference towards guardian lock key
 }
 
+// Clone clones *StatQueueProfile (lkID excluded)
+func (sqp *StatQueueProfile) Clone() *StatQueueProfile {
+	if sqp == nil {
+		return nil
+	}
+	result := &StatQueueProfile{
+		Tenant:      sqp.Tenant,
+		ID:          sqp.ID,
+		QueueLength: sqp.QueueLength,
+		TTL:         sqp.TTL,
+		MinItems:    sqp.MinItems,
+		Stored:      sqp.Stored,
+	}
+	if sqp.FilterIDs != nil {
+		result.FilterIDs = make([]string, len(sqp.FilterIDs))
+		copy(result.FilterIDs, sqp.FilterIDs)
+	}
+	if sqp.ThresholdIDs != nil {
+		result.ThresholdIDs = make([]string, len(sqp.ThresholdIDs))
+		copy(result.ThresholdIDs, sqp.ThresholdIDs)
+	}
+	if sqp.Weights != nil {
+		result.Weights = sqp.Weights.Clone()
+	}
+	if sqp.Blockers != nil {
+		result.Blockers = sqp.Blockers.Clone()
+	}
+	if sqp.Metrics != nil {
+		result.Metrics = make([]*MetricWithFilters, len(sqp.Metrics))
+		for i, metric := range sqp.Metrics {
+			result.Metrics[i] = metric.Clone()
+		}
+	}
+	return result
+}
+
+// CacheClone returns a clone of StatQueueProfile used by ltcache CacheCloner
+func (sqp *StatQueueProfile) CacheClone() any {
+	return sqp.Clone()
+}
+
 // StatQueueProfileWithAPIOpts is used in replicatorV1 for dispatcher
 type StatQueueProfileWithAPIOpts struct {
 	*StatQueueProfile
@@ -94,6 +135,24 @@ type MetricWithFilters struct {
 	MetricID  string
 	FilterIDs []string
 	Blockers  utils.DynamicBlockers // blocker flag to stop processing for next metric on filters matched
+}
+
+// Clone clones *MetricWithFilters
+func (mwf *MetricWithFilters) Clone() *MetricWithFilters {
+	if mwf == nil {
+		return nil
+	}
+	result := &MetricWithFilters{
+		MetricID: mwf.MetricID,
+	}
+	if mwf.FilterIDs != nil {
+		result.FilterIDs = make([]string, len(mwf.FilterIDs))
+		copy(result.FilterIDs, mwf.FilterIDs)
+	}
+	if mwf.Blockers != nil {
+		result.Blockers = mwf.Blockers.Clone()
+	}
+	return result
 }
 
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
@@ -506,25 +565,51 @@ func (sq *StatQueue) GobDecode(rply []byte) (err error) {
 	*sq = StatQueue(eSq)
 	return err
 }
+
 func (sq *StatQueue) Clone() (cln *StatQueue) {
+	if sq == nil {
+		return nil
+	}
 	cln = &StatQueue{
-		Tenant:    sq.Tenant,
-		ID:        sq.ID,
-		SQItems:   make([]SQItem, len(sq.SQItems)),
-		SQMetrics: make(map[string]StatMetric),
+		Tenant: sq.Tenant,
+		ID:     sq.ID,
 	}
-	for i, itm := range sq.SQItems {
-		var exp *time.Time
-		if itm.ExpiryTime != nil {
-			exp = new(time.Time)
-			*exp = *itm.ExpiryTime
+	if sq.SQItems != nil {
+		cln.SQItems = make([]SQItem, len(sq.SQItems))
+		for i, itm := range sq.SQItems {
+			var exp *time.Time
+			if itm.ExpiryTime != nil {
+				exp = new(time.Time)
+				*exp = *itm.ExpiryTime
+			}
+			cln.SQItems[i] = SQItem{EventID: itm.EventID, ExpiryTime: exp}
 		}
-		cln.SQItems[i] = SQItem{EventID: itm.EventID, ExpiryTime: exp}
 	}
-	for k, m := range sq.SQMetrics {
-		cln.SQMetrics[k] = m.Clone()
+	if sq.SQMetrics != nil {
+		cln.SQMetrics = make(map[string]StatMetric, len(sq.SQMetrics))
+		for k, m := range sq.SQMetrics {
+			if m != nil {
+				cln.SQMetrics[k] = m.Clone()
+			}
+		}
+	}
+	if sq.sqPrfl != nil {
+		cln.sqPrfl = sq.sqPrfl.Clone()
+	}
+	if sq.dirty != nil {
+		dirtyVal := *sq.dirty
+		cln.dirty = &dirtyVal
+	}
+	if sq.ttl != nil {
+		ttlVal := *sq.ttl
+		cln.ttl = &ttlVal
 	}
 	return
+}
+
+// CacheClone returns a clone of StatQueue used by ltcache CacheCloner
+func (sq *StatQueue) CacheClone() any {
+	return sq.Clone()
 }
 
 // unlockStatQueues unlocks all locked StatQueues in the given slice.

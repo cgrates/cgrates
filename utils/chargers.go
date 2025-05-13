@@ -29,6 +29,38 @@ type ChargerProfile struct {
 	AttributeIDs []string // perform data aliasing based on these Attributes
 }
 
+// Clone method for ChargerProfile
+func (cp *ChargerProfile) Clone() *ChargerProfile {
+	if cp == nil {
+		return nil
+	}
+	clone := &ChargerProfile{
+		Tenant: cp.Tenant,
+		ID:     cp.ID,
+		RunID:  cp.RunID,
+	}
+	if cp.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(cp.FilterIDs))
+		copy(clone.FilterIDs, cp.FilterIDs)
+	}
+	if cp.AttributeIDs != nil {
+		clone.AttributeIDs = make([]string, len(cp.AttributeIDs))
+		copy(clone.AttributeIDs, cp.AttributeIDs)
+	}
+	if cp.Weights != nil {
+		clone.Weights = cp.Weights.Clone()
+	}
+	if cp.Blockers != nil {
+		clone.Blockers = cp.Blockers.Clone()
+	}
+	return clone
+}
+
+// CacheClone returns a clone of ChargerProfile used by ltcache CacheCloner
+func (cp *ChargerProfile) CacheClone() any {
+	return cp.Clone()
+}
+
 // TenantID returns the concatenated tenant and ID.
 func (cp *ChargerProfile) TenantID() string {
 	return ConcatenatedKey(cp.Tenant, cp.ID)

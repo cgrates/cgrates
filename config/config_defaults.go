@@ -152,6 +152,12 @@ const CGRATES_CFG_JSON = `
 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}
 	},
 	"opts":{
+		"internalDBDumpPath": "/var/lib/cgrates/internal_db/datadb",		// the path where datadb will be dumped
+		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/datadb", // default path taken by AdminSv1.BackupDataDB when "BackupFolderPath" is not provided
+		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
+		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
+		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",			// the name of sentinel when used
@@ -182,6 +188,12 @@ const CGRATES_CFG_JSON = `
 	"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 	"prefix_indexed_fields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	"opts": {
+		"internalDBDumpPath": "/var/lib/cgrates/internal_db/stordb",		// the path where stordb will be dumped
+		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/stordb", // default path taken by AdminSv1.BackupStorDB when "BackupFolderPath" is not provided
+		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
+		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
+		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
 		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
 		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
 		"sqlLogLevel": 3,	        // sql logger verbosity: 1=Silent, 2=Error, 3=Warn, 4=Info
@@ -1984,10 +1996,16 @@ const CGRATES_CFG_JSON = `
 	"db_user": "",		 		// username to use when connecting to data_db
 	"db_password": "", 			// password to use when connecting to data_db
 	"opts":{
+		"internalDBDumpPath": "/var/lib/cgrates/internal_db/configdb",		// the path where configdb will be dumped
+		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/configdb", // default path taken by ConfigSv1.BackupConfigDB when "BackupFolderPath" is not provided
+		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
+		"internalDBDumpInterval": "0s",		// dump configdb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
+		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",			// the name of sentinel when used
-		"redisCluster": false,			// if enabled the datadb will try to connect to the redis cluster
+		"redisCluster": false,			// if enabled the configdb will try to connect to the redis cluster
 		"redisClusterSync": "5s",		// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
 		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt

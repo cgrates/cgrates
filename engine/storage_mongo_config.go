@@ -74,3 +74,18 @@ func (ms *MongoStorage) SetSection(ctx *context.Context, section string, jsn any
 		return err
 	})
 }
+
+// Only intended for InternalDB
+func (ms *MongoStorage) DumpConfigDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (ms *MongoStorage) RewriteConfigDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (ms *MongoStorage) BackupConfigDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}
