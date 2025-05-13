@@ -275,21 +275,27 @@ func TestGetSectionAsMap(t *testing.T) {
 		"db_user":     "",
 		"db_password": "",
 		"opts": map[string]any{
-			"redisMaxConns":            10,
-			"redisConnectAttempts":     20,
-			"redisSentinel":            "",
-			"redisCluster":             false,
-			"redisClusterSync":         "5s",
-			"redisClusterOndownDelay":  "0s",
-			"redisConnectTimeout":      "0s",
-			"redisReadTimeout":         "0s",
-			"redisWriteTimeout":        "0s",
-			utils.MongoQueryTimeoutCfg: "10s",
-			utils.MongoConnSchemeCfg:   "mongodb",
-			"redisTLS":                 false,
-			"redisClientCertificate":   "",
-			"redisClientKey":           "",
-			"redisCACertificate":       "",
+			utils.InternalDBBackupPathCfg:      "/var/lib/cgrates/internal_db/backup/configdb",
+			utils.InternalDBDumpIntervalCfg:    "0s",
+			utils.InternalDBDumpPathCfg:        "/var/lib/cgrates/internal_db/configdb",
+			utils.InternalDBFileSizeLimitCfg:   int64(1073741824),
+			utils.InternalDBRewriteIntervalCfg: "0s",
+			utils.InternalDBStartTimeoutCfg:    "5m0s",
+			"redisMaxConns":                    10,
+			"redisConnectAttempts":             20,
+			"redisSentinel":                    "",
+			"redisCluster":                     false,
+			"redisClusterSync":                 "5s",
+			"redisClusterOndownDelay":          "0s",
+			"redisConnectTimeout":              "0s",
+			"redisReadTimeout":                 "0s",
+			"redisWriteTimeout":                "0s",
+			utils.MongoQueryTimeoutCfg:         "10s",
+			utils.MongoConnSchemeCfg:           "mongodb",
+			"redisTLS":                         false,
+			"redisClientCertificate":           "",
+			"redisClientKey":                   "",
+			"redisCACertificate":               "",
 		},
 	}
 
@@ -302,8 +308,11 @@ func TestGetSectionAsMap(t *testing.T) {
 }
 
 type mockDb struct {
-	GetSectionF func(*context.Context, string, any) error
-	SetSectionF func(*context.Context, string, any) error
+	GetSectionF      func(*context.Context, string, any) error
+	SetSectionF      func(*context.Context, string, any) error
+	DumpConfigDBF    func() error
+	RewriteConfigDBF func() error
+	BackupConfigDBF  func(string, bool) error
 }
 
 func (m *mockDb) GetSection(ctx *context.Context, sec string, val any) error {
@@ -316,6 +325,27 @@ func (m *mockDb) GetSection(ctx *context.Context, sec string, val any) error {
 func (m *mockDb) SetSection(ctx *context.Context, sec string, val any) error {
 	if m.SetSectionF != nil {
 		return m.SetSectionF(ctx, sec, val)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (m *mockDb) DumpConfigDB() error {
+	if m.DumpConfigDBF != nil {
+		return m.DumpConfigDBF()
+	}
+	return utils.ErrNotImplemented
+}
+
+func (m *mockDb) RewriteConfigDB() error {
+	if m.RewriteConfigDBF != nil {
+		return m.RewriteConfigDBF()
+	}
+	return utils.ErrNotImplemented
+}
+
+func (m *mockDb) BackupConfigDB(path string, zip bool) error {
+	if m.BackupConfigDBF != nil {
+		return m.BackupConfigDBF(path, zip)
 	}
 	return utils.ErrNotImplemented
 }

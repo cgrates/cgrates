@@ -272,7 +272,7 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 }
 
 func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
-	db := NewInternalDB(nil, nil, nil)
+	db, _ := NewInternalDB(nil, nil, nil, nil)
 
 	defer db.Close()
 	sectionIDs := []string{"thresholds", "resources"}

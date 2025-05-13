@@ -33,7 +33,7 @@ func TestAccountsSetGetAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
@@ -123,7 +123,7 @@ func TestAccountsGetAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
@@ -182,7 +182,7 @@ func TestAccountsGetAccountErrorNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
@@ -231,7 +231,7 @@ func TestAccountsSetGetAccountNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
@@ -320,7 +320,7 @@ func TestAccountsSetGetAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
@@ -365,7 +365,7 @@ func TestAccountsSetGetAccountErrorBadFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
@@ -546,7 +546,7 @@ func TestAccountsSetGetAccountIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{
@@ -797,7 +797,7 @@ func TestAccountsRemoveAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	var getRplyRmv string
@@ -917,7 +917,7 @@ func TestAccountsGetAccountsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args1 := &utils.AccountWithAPIOpts{
@@ -1052,7 +1052,7 @@ func TestAccountsGetAccountsGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.AccountWithAPIOpts{

@@ -34,7 +34,7 @@ func TestResourcesSetGetRemResourceProfile(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -115,7 +115,7 @@ func TestResourcesGetResourceProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -149,7 +149,7 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -223,7 +223,7 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
@@ -466,7 +466,7 @@ func TestResourcesGetResourceProfilesOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args1 := &utils.ResourceProfileWithAPIOpts{
@@ -586,7 +586,7 @@ func TestResourcesGetResourceProfilesGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	args := &utils.ResourceProfileWithAPIOpts{

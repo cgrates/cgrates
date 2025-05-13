@@ -1200,10 +1200,14 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	sq.lock(utils.EmptyString)
 
 	tnt, evID := "cgrates.org", "eventID"
+	idb, err := NewInternalDB(nil, nil, nil, config.CgrConfig().DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	filters := &FilterS{
 		cfg: config.CgrConfig(),
 		dm: &DataManager{
-			dataDB: NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items),
+			dataDB: idb,
 		},
 		connMgr: &ConnManager{},
 	}
@@ -1967,7 +1971,7 @@ func TestStatQueueCompressTTLTrue(t *testing.T) {
 func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
@@ -2010,7 +2014,7 @@ func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 
@@ -2058,7 +2062,7 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
 

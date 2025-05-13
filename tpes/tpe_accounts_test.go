@@ -87,7 +87,7 @@ func TestTPEExportItemsAccount(t *testing.T) {
 	// }
 	// defer dataDB.Close()
 	// dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpAcc := TPAccounts{
 		dm: dm,
@@ -217,7 +217,7 @@ func TestTPEExportItemsAccountNoDbConn(t *testing.T) {
 func TestTPEExportItemsAccountIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpAcc := TPAccounts{
 		dm: dm,

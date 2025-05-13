@@ -32,7 +32,7 @@ import (
 
 func TestLibFiltersGetFloat64OptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -62,7 +62,7 @@ func TestLibFiltersGetFloat64OptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetFloat64OptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -89,7 +89,7 @@ func TestLibFiltersGetFloat64OptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetFloat64OptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -116,7 +116,7 @@ func TestLibFiltersGetFloat64OptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetFloat64OptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -146,7 +146,7 @@ func TestLibFiltersGetFloat64OptsReturnOptFromAPIOpts(t *testing.T) {
 
 func TestLibFiltersGetStringOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -177,7 +177,7 @@ func TestLibFiltersGetStringOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetStringOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -203,7 +203,7 @@ func TestLibFiltersGetStringOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetStringOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -229,7 +229,7 @@ func TestLibFiltersGetStringOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetStringOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -259,7 +259,7 @@ func TestLibFiltersGetStringOptsReturnOptFromAPIOpts(t *testing.T) {
 
 func TestLibFiltersGetDurationOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -289,7 +289,7 @@ func TestLibFiltersGetDurationOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetDurationOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -315,7 +315,7 @@ func TestLibFiltersGetDurationOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetDurationOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -342,7 +342,7 @@ func TestLibFiltersGetDurationOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetDurationPointerOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -371,7 +371,7 @@ func TestLibFiltersGetDurationPointerOptsReturnOptFromAPIOpts(t *testing.T) {
 }
 func TestLibFiltersGetDurationPointerOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -401,7 +401,7 @@ func TestLibFiltersGetDurationPointerOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetDurationPointerOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -427,7 +427,7 @@ func TestLibFiltersGetDurationPointerOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetDurationPointerOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -454,7 +454,7 @@ func TestLibFiltersGetDurationPointerOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetDurationOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -484,7 +484,7 @@ func TestLibFiltersGetDurationOptsReturnOptFromAPIOpts(t *testing.T) {
 
 func TestLibFiltersGetIntOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -514,7 +514,7 @@ func TestLibFiltersGetIntOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetIntOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -540,7 +540,7 @@ func TestLibFiltersGetIntOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetIntOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -567,7 +567,7 @@ func TestLibFiltersGetIntOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetIntOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -597,7 +597,7 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOptsOK(t *testing.T) {
 
 func TestLibFiltersGetIntOptsReturnOptFromAPIOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -625,7 +625,7 @@ func TestLibFiltersGetIntOptsReturnOptFromAPIOptsErr(t *testing.T) {
 
 func TestLibFiltersGetTimeOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -655,7 +655,7 @@ func TestLibFiltersGetTimeOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetTimeOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -681,7 +681,7 @@ func TestLibFiltersGetTimeOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetTimeOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -712,7 +712,7 @@ func TestLibFiltersGetTimeOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetTimeOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -748,7 +748,7 @@ func dateEqual(date1, date2 time.Time) bool {
 
 func TestLibFiltersGetBoolOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -778,7 +778,7 @@ func TestLibFiltersGetBoolOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetBoolOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -804,7 +804,7 @@ func TestLibFiltersGetBoolOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetBoolOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -830,7 +830,7 @@ func TestLibFiltersGetBoolOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetBoolOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -860,7 +860,7 @@ func TestLibFiltersGetBoolOptsReturnOptFromAPIOpts(t *testing.T) {
 
 func TestLibFiltersGetInterfaceOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -902,7 +902,7 @@ func TestLibFiltersGetInterfaceOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetInterfaceOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -932,7 +932,7 @@ func TestLibFiltersGetInterfaceOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetInterfaceOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -965,7 +965,7 @@ func TestLibFiltersGetInterfaceOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetInterfaceOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -999,7 +999,7 @@ func TestLibFiltersGetInterfaceOptsReturnOptFromAPIOpts(t *testing.T) {
 
 func TestLibFiltersGetStringSliceOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -1041,7 +1041,7 @@ func TestLibFiltersGetStringSliceOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetStringSliceOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -1071,7 +1071,7 @@ func TestLibFiltersGetStringSliceOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetStringSliceOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -1101,7 +1101,7 @@ func TestLibFiltersGetStringSliceOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetStringSliceOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -1135,7 +1135,7 @@ func TestLibFiltersGetStringSliceOptsReturnOptFromAPIOpts(t *testing.T) {
 
 func TestLibFiltersGetDecimalBigOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2260,7 +2260,7 @@ func TestRoutesDynamicOptsFromJson(t *testing.T) {
 
 func TestLibFiltersGetDecimalBigOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2290,7 +2290,7 @@ func TestLibFiltersGetDecimalBigOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetDecimalBigOptsReturnDefaultOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2323,7 +2323,7 @@ func TestLibFiltersGetDecimalBigOptsReturnDefaultOpt(t *testing.T) {
 
 func TestLibFiltersGetDecimalBigOptsReturnOptFromAPIOpts(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2359,7 +2359,7 @@ func TestLibFiltersGetDecimalBigOptsReturnOptFromAPIOpts(t *testing.T) {
 
 func TestLibFiltersGetIntPointerOptsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2389,7 +2389,7 @@ func TestLibFiltersGetIntPointerOptsReturnConfigOpt(t *testing.T) {
 
 func TestLibFiltersGetIntPointerOptsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2415,7 +2415,7 @@ func TestLibFiltersGetIntPointerOptsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetIntPointerOptsReturnDft(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2441,7 +2441,7 @@ func TestLibFiltersGetIntPointerOptsReturnDft(t *testing.T) {
 
 func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2471,7 +2471,7 @@ func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsOK(t *testing.T) {
 
 func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	ev := &utils.CGREvent{
@@ -2499,7 +2499,7 @@ func TestLibFiltersGetIntPointerOptsReturnOptFromAPIOptsErr(t *testing.T) {
 
 func TestLibFiltersGetDurationOptsFromMultipleMapsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2526,7 +2526,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnConfigOpt(t *testing.T) 
 
 func TestLibFiltersGetDurationOptsFromMultipleMapsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2549,7 +2549,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsFilterCheckErr(t *testing.T) {
 
 func TestLibFiltersGetDurationOptsFromMultipleMapsErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2572,7 +2572,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsErrNotFound(t *testing.T) {
 
 func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2599,7 +2599,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsOK(t *test
 
 func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2624,7 +2624,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromAPIOptsErr(t *tes
 
 func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2651,7 +2651,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsOK(t *te
 
 func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2676,7 +2676,7 @@ func TestLibFiltersGetDurationOptsFromMultipleMapsReturnOptFromStartOptsErr(t *t
 
 func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnConfigOpt(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2703,7 +2703,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnConfigOpt(t *test
 
 func TestLibFiltersGetDurationPointerOptsFromMultipleMapsFilterCheckErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2726,7 +2726,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsFilterCheckErr(t *testi
 
 func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnDft(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2747,7 +2747,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnDft(t *testing.T)
 
 func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2774,7 +2774,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsOK(
 
 func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2799,7 +2799,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromAPIOptsErr
 
 func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2826,7 +2826,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsO
 
 func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	eventStart := map[string]any{
@@ -2852,7 +2852,7 @@ func TestLibFiltersGetDurationPointerOptsFromMultipleMapsReturnOptFromStartOptsE
 func TestGetBoolOptsFieldAsInterfaceErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	dynOpts := []*config.DynamicBoolOpt{
@@ -2868,7 +2868,7 @@ func TestGetBoolOptsFieldAsInterfaceErr(t *testing.T) {
 
 func TestGetBoolOptsCantCastErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
 	dm := NewDataManager(dataDB, cfg, nil)
 	fS := NewFilterS(cfg, nil, dm)
 	dynOpts := []*config.DynamicBoolOpt{

@@ -30,7 +30,11 @@ import (
 
 func TestCallCacheForFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items), cfg, nil)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dm := engine.NewDataManager(idb, cfg, nil)
 	tnt := "cgrates.org"
 	flt := &engine.Filter{
 		Tenant: tnt,
@@ -97,7 +101,7 @@ func TestCallCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, nil)
@@ -137,7 +141,7 @@ func TestCallCacheForRemoveIndexes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, nil)
@@ -171,7 +175,7 @@ func TestCallCacheForComputeIndexes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, nil)
@@ -205,7 +209,7 @@ func TestCallCacheMultiple(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
 	admS := NewAdminSv1(cfg, dm, connMgr, fltrs, nil)

@@ -1,0 +1,98 @@
+{
+	"general": {
+		"node_id": "offlineWithBackup"
+	},
+	"logger": {
+		"type": "*stdout",
+		"level": 7
+	},
+    "data_db": {
+        "db_type": "*internal",
+        "items":{
+            "*charger_profiles": {"limit": -1, "ttl": "1s", "static_ttl": false, "remote":false, "replicate":false}
+        },
+        "opts":{
+            "internalDBStartTimeout": "1m",
+            "internalDBDumpInterval": "500ms",
+            "internalDBRewriteInterval": "500ms"
+        }
+    },
+    "stor_db": {
+        "db_type": "*internal",
+        "opts":{
+            "internalDBStartTimeout": "1m",
+            "internalDBDumpInterval": "500ms",
+            "internalDBRewriteInterval": "500ms"
+        }
+    },
+	"config_db": {
+        "db_type": "*internal",
+		"opts": {
+			"internalDBStartTimeout": "1m",
+            "internalDBDumpInterval": "500ms",
+            "internalDBRewriteInterval": "500ms"
+		}
+	},
+	"cdrs": {
+		"enabled": true,
+		"chargers_conns": ["*localhost"]
+	},
+	"attributes": {
+		"enabled": true,
+		"stats_conns": ["*localhost"],
+		"resources_conns": ["*localhost"],
+		"accounts_conns": ["*localhost"]
+	},
+	"chargers": {
+		"enabled": true,
+		"attributes_conns": ["*localhost"]
+	},
+	"resources": {
+		"enabled": true,
+		"store_interval": "-1",
+		"thresholds_conns": ["*localhost"]
+	},
+	"stats": {
+		"enabled": true,
+		"store_interval": "-1",
+		"thresholds_conns": ["*localhost"]
+	},
+	"thresholds": {
+		"enabled": true,
+		"store_interval": "-1"
+	},
+	"routes": {
+		"enabled": true,
+		"prefix_indexed_fields": ["*req.Destination"],
+		"stats_conns": ["*localhost"],
+		"resources_conns": ["*localhost"],
+		"rates_conns": ["*localhost"]
+	},
+	"admins": {
+		"enabled": true
+	},
+	"rates": {
+		"enabled": true
+	},
+	"actions": {
+		"enabled": true,
+		"accounts_conns": ["*localhost"]
+	},
+	"accounts": {
+		"enabled": true
+	},
+	"filters": {
+		"stats_conns": ["*localhost"],
+		"resources_conns": ["*localhost"],
+		"accounts_conns": ["*localhost"]
+	},
+	"loaders": [
+		{
+			"enabled":true,
+			"id": "*default",
+			"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+			"tp_out_dir": "",
+			"lockfile_path": ".cgr.lck"
+		}
+	]
+}

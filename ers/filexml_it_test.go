@@ -486,7 +486,7 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 func TestFileXMLProcessEVentError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	filePath := "/tmp/TestFileXMLProcessEvent/"

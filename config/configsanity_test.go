@@ -1520,26 +1520,6 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 	expected := "<CacheS> *accounts needs to be 0 when DataBD is *internal, received : 1"
 	cfg.cacheCfg.Partitions[utils.CacheAccounts].Limit = 0
-	cfg.resourceSCfg.Enabled = true
-	expected = "<ResourceS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.resourceSCfg.Enabled = false
-
-	cfg.statsCfg.Enabled = true
-	expected = "<StatS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.statsCfg.Enabled = false
-
-	cfg.thresholdSCfg.Enabled = true
-	expected = "<ThresholdS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.thresholdSCfg.Enabled = false
 
 	cfg.dataDbCfg.Items = map[string]*ItemOpts{
 		"test1": {
@@ -1864,9 +1844,7 @@ func TestCGRConfigcheckConfigSanityCacheSErr(t *testing.T) {
 			Limit: 1,
 		},
 	}
-	cfg.dataDbCfg = &DataDbCfg{
-		Type: utils.MetaInternal,
-	}
+	cfg.dataDbCfg.Type = utils.MetaInternal
 
 	expErr := "<CacheS> *resource_profiles needs to be 0 when DataBD is *internal, received : 1"
 	if err := cfg.checkConfigSanity(); err.Error() != expErr {

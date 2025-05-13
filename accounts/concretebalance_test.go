@@ -346,7 +346,7 @@ func TestCBDebitWithUnitFactorWithUnlimited(t *testing.T) {
 
 func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
@@ -385,7 +385,7 @@ func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 
 func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor match)
@@ -423,7 +423,7 @@ func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 
 func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
@@ -462,7 +462,7 @@ func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 
 func TestCBDebitWithBalanceFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 3 units from a balance (the filter match)
@@ -492,7 +492,7 @@ func TestCBDebitWithBalanceFilter(t *testing.T) {
 
 func TestCBDebitWithBalanceFilterNotPassing(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// filter doesn't match )
@@ -518,7 +518,7 @@ func TestCBDebitWithBalanceFilterNotPassing(t *testing.T) {
 
 func TestCBDebitWithBalanceInvalidFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
@@ -544,7 +544,7 @@ func TestCBDebitWithBalanceInvalidFilter(t *testing.T) {
 
 func TestCBDebitWithInvalidUnitFactorFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
@@ -575,7 +575,7 @@ func TestCBDebitWithInvalidUnitFactorFilter(t *testing.T) {
 
 func TestCBDebitWithInvalidLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 100 units from a balance ( the unit factor doesn't match )
@@ -630,7 +630,7 @@ func TestCBSDebitAbstracts(t *testing.T) {
 
 func TestCBSDebitAbstractsInvalidFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 10 units from a concrete balance with 500 units
@@ -658,7 +658,7 @@ func TestCBSDebitAbstractsInvalidFilter(t *testing.T) {
 
 func TestCBSDebitAbstractsNoMatchFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 10 units from a concrete balance with 500 units
@@ -693,7 +693,7 @@ func TestCBSDebitAbstractsNoMatchFilter(t *testing.T) {
 
 func TestCBSDebitAbstractsInvalidCostIncrementFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	// debit 10 units from a concrete balance with 500 units
@@ -721,7 +721,7 @@ func TestCBSDebitAbstractsInvalidCostIncrementFilter(t *testing.T) {
 
 func TestCBSDebitAbstractsCoverProcessAttributes(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
@@ -765,7 +765,7 @@ func TestCBSDebitAbstractsCoverProcessAttributes(t *testing.T) { // coverage pur
 
 func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, nil, nil, true)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 

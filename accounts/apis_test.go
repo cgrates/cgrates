@@ -33,7 +33,7 @@ func TestAccountsRefundCharges(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	acc := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	var reply string
@@ -56,7 +56,7 @@ func TestAccountsRefundCharges(t *testing.T) {
 func TestAccountsActionRemoveBalance(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
@@ -103,7 +103,7 @@ func TestAccountsGetAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	acc := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	fltrs := engine.NewFilterS(cfg, connMgr, dm)
@@ -168,7 +168,7 @@ func TestAccountsDebitConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
@@ -259,7 +259,7 @@ func TestAccountsMaxConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
@@ -512,7 +512,7 @@ func TestAccountsActionSetBalance(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.AccountSCfg().RateSConns = []string{"*internal"}
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
@@ -698,7 +698,7 @@ func TestAccountsDebitAbstracts(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.AccountSCfg().RateSConns = []string{"*internal"}
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
@@ -884,7 +884,7 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.AccountSCfg().RateSConns = []string{"*internal"}
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
@@ -1070,7 +1070,7 @@ func TestAccountsAccountsForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
 	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
