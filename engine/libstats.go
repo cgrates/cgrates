@@ -25,8 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"maps"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
@@ -265,11 +263,22 @@ func (sq *StatQueue) Clone() *StatQueue {
 	}
 	if sq.SQItems != nil {
 		result.SQItems = make([]SQItem, len(sq.SQItems))
-		copy(result.SQItems, sq.SQItems)
+		for i, itm := range sq.SQItems {
+			var exp *time.Time
+			if itm.ExpiryTime != nil {
+				exp = new(time.Time)
+				*exp = *itm.ExpiryTime
+			}
+			result.SQItems[i] = SQItem{EventID: itm.EventID, ExpiryTime: exp}
+		}
 	}
 	if sq.SQMetrics != nil {
 		result.SQMetrics = make(map[string]StatMetric)
-		maps.Copy(result.SQMetrics, sq.SQMetrics)
+		for k, m := range sq.SQMetrics {
+			if m != nil {
+				result.SQMetrics[k] = m.Clone()
+			}
+		}
 	}
 	if sq.sqPrfl != nil {
 		result.sqPrfl = sq.sqPrfl.Clone()

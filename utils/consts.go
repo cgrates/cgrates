@@ -1182,6 +1182,7 @@ const (
 	MetaRemoteSetAccount        = "*remote_set_account"
 	MetaDynamicThreshold        = "*dynamic_threshold"
 	MetaDynamicStats            = "*dynamic_stats"
+	MetaDynamicAttribute        = "*dynamic_attribute"
 	ActionID                    = "ActionID"
 	ActionType                  = "ActionType"
 	ActionValue                 = "ActionValue"

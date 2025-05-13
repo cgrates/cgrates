@@ -279,7 +279,6 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					t.Error(err)
 				}
 			})
-
 			t.Run("CountDataDBFiles", func(t *testing.T) {
 				var dirs, files int
 				if err := filepath.Walk(cfg.DataDbCfg().Opts.InternalDBDumpPath, func(_ string, info os.FileInfo, err error) error {
@@ -296,7 +295,9 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					t.Error(err)
 				} else if dirs != 40 {
 					t.Errorf("expected <%d> directories, received <%d>", 40, dirs)
-				} else if files != 28 {
+				} else if i > 6 && (files != 29 && files != 30) { // depends if rewriting is scheduled or not by the time we shutdown
+					t.Errorf("expected 29 or 30 files, received <%d>", files)
+				} else if i < 6 && files != 28 {
 					t.Errorf("expected <%d> files, received <%d>", 28, files)
 				}
 			})

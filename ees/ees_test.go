@@ -415,6 +415,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 }
 
 func TestV1ProcessEvent6(t *testing.T) {
+	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
@@ -444,6 +445,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 	if err := eeS.V1ProcessEvent(context.Background(), cgrEv, &rply); err != nil {
 		t.Error(err)
 	}
+	engine.Cache.Clear(nil)
 }
 
 func TestOnCacheEvicted(t *testing.T) {
