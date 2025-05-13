@@ -78,7 +78,7 @@ func TestTPEnewTPStats(t *testing.T) {
 func TestTPEExportStats(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpStq := TPStats{
 		dm: dm,
@@ -162,7 +162,7 @@ func TestTPEExportItemsStatsNoDbConn(t *testing.T) {
 func TestTPEExportItemsStatsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpStq := TPStats{
 		dm: dm,

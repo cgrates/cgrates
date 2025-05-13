@@ -72,8 +72,11 @@ func TestOnStorIT(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		onStor = NewDataManager(NewInternalDB(nil, nil, cfg.DataDbCfg().Items),
-			cfg, nil)
+		idb, err := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+		if err != nil {
+			t.Fatal(err)
+		}
+		onStor = NewDataManager(idb, cfg, nil)
 	case utils.MetaMySQL:
 		cfg := config.NewDefaultCGRConfig()
 		var err error

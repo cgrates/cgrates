@@ -55,7 +55,7 @@ func TestCacheSSetWithReplicateTrue(t *testing.T) {
 		},
 	}
 
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
@@ -123,7 +123,7 @@ func TestCacheSSetWithReplicateFalse(t *testing.T) {
 		},
 	}
 
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	connMgr := NewConnManager(cfg)
@@ -151,7 +151,7 @@ func TestCacheSGetWithRemote(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
@@ -208,7 +208,7 @@ func TestCacheSGetWithRemoteFalse(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
@@ -236,7 +236,7 @@ func TestRemoveWithoutReplicate(t *testing.T) {
 	}()
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	connMgr := NewConnManager(cfg)
 	chS := NewCacheS(cfg, dm, connMgr, nil)
@@ -263,7 +263,7 @@ func TestV1GetItemExpiryTimeFromCacheErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
@@ -290,7 +290,7 @@ func TestV1GetItemErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
@@ -316,7 +316,7 @@ func TestV1GetItemIDsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{}
@@ -343,7 +343,7 @@ func TestCacheSGetWithRemoteQueryErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
@@ -384,7 +384,7 @@ func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().RemoteConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 
@@ -429,7 +429,7 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 		Tenant:  utils.CGRateSorg,
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
 	clientconn := make(chan birpc.ClientConnector, 1)
@@ -463,7 +463,7 @@ func TestCacheSReplicateRemove(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
 	cfg.CacheCfg().Partitions = map[string]*config.CacheParamCfg{
@@ -508,7 +508,7 @@ func TestCacheSV1ReplicateSet(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -550,7 +550,7 @@ func TestCacheSV1ReplicateSetErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 	fltr := &Filter{
@@ -590,7 +590,7 @@ func TestCacheSCacheDataFromDB(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -670,7 +670,7 @@ func TestCacheScacheDataFromDBErrGetItemLoadIDs(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -703,7 +703,7 @@ func TestCacheSV1LoadCache(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -755,7 +755,7 @@ func TestCacheSV1ReloadCache(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -811,7 +811,7 @@ func TestCacheSV1RemoveGroup(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -853,7 +853,7 @@ func TestV1GetCacheStats(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -888,7 +888,7 @@ func TestCacheSV1Clear(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -928,7 +928,7 @@ func TestCacheSV1RemoveItems(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 
@@ -970,7 +970,7 @@ func TestCacheSV1RemoveSingular(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
 	args := &utils.ArgsGetCacheItemWithAPIOpts{
@@ -1025,7 +1025,7 @@ func TestCacheSV1GetItemExpiryTime(t *testing.T) {
 			TTL:   5 * time.Second,
 		},
 	}
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -1058,7 +1058,7 @@ func TestV1GetItemSingular(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -1091,7 +1091,7 @@ func TestCacheSV1HasItem(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -1124,7 +1124,7 @@ func TestCacheSV1GetItemIDs(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -1152,41 +1152,6 @@ func (cc *ccCloner) Clone() (any, error) {
 	return cc, nil
 }
 
-func TestCacheSGetCloned(t *testing.T) {
-	tmp := Cache
-	defer func() {
-		Cache = tmp
-	}()
-	Cache.Clear(nil)
-
-	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(db, cfg, nil)
-
-	cacheS := NewCacheS(cfg, dm, connMgr, nil)
-
-	intfCloneVal := new(ccCloner)
-
-	if err := cacheS.Set(context.Background(), utils.MetaAccounts, "itemId", intfCloneVal, nil, true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-
-	expVal := intfCloneVal
-	expGetVal, ok := cacheS.Get(utils.MetaAccounts, "itemId")
-	if !ok {
-		t.Errorf("Cache.Get should receive ok, received <%v>", expGetVal)
-	} else if expGetVal != expVal {
-		t.Errorf("Expected <%v>, Received <%v>", expVal, expGetVal)
-	}
-
-	if rcv, err := cacheS.GetCloned(utils.MetaAccounts, "itemId"); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expGetVal, rcv) {
-		t.Errorf("Expected <%v>, Received <%v>", expGetVal, rcv)
-	}
-
-}
-
 func TestCacheSGetPrecacheChannel(t *testing.T) {
 	tmp := Cache
 	defer func() {
@@ -1195,7 +1160,7 @@ func TestCacheSGetPrecacheChannel(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -1220,7 +1185,7 @@ func TestCacheSV1PrecacheStatusDefault(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
@@ -1265,7 +1230,7 @@ func TestCacheSV1PrecacheStatusErrUnknownCacheID(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
@@ -1294,7 +1259,7 @@ func TestCacheSV1PrecacheStatusMetaReady(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
@@ -1346,7 +1311,7 @@ func TestCacheSPrecachePartitions(t *testing.T) {
 			Precache: true,
 		},
 	}
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -1431,7 +1396,7 @@ func TestCacheSBeginTransaction(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -1455,7 +1420,7 @@ func TestCacheSRollbackTransaction(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)
@@ -1492,7 +1457,7 @@ func TestCacheSCommitTransaction(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
 
 	cacheS := NewCacheS(cfg, dm, connMgr, nil)

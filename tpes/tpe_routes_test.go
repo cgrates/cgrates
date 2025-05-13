@@ -71,7 +71,7 @@ func TestTPEnewTPRoutes(t *testing.T) {
 func TestTPEExportRoutes(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpRte := TPRoutes{
 		dm: dm,
@@ -141,7 +141,7 @@ func TestTPEExportItemsRoutesNoDbConn(t *testing.T) {
 func TestTPEExportItemsRoutesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpRte := TPRoutes{
 		dm: dm,

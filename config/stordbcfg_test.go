@@ -54,14 +54,20 @@ func TestStoreDbCfgloadFromJsonCfgCase1(t *testing.T) {
 		RmtConns: []string{"*conn1"},
 		RplConns: []string{"*conn1"},
 		Opts: &StorDBOpts{
-			SQLMaxOpenConns:   100,
-			SQLMaxIdleConns:   10,
-			SQLLogLevel:       3,
-			SQLDSNParams:      make(map[string]string),
-			MongoQueryTimeout: 10 * time.Second,
-			MongoConnScheme:   "mongodb+srv",
-			PgSSLMode:         "disable",
-			MySQLLocation:     "UTC",
+			InternalDBDumpPath:        "/var/lib/cgrates/internal_db/stordb",
+			InternalDBBackupPath:      "/var/lib/cgrates/internal_db/backup/stordb",
+			InternalDBStartTimeout:    300000000000,
+			InternalDBDumpInterval:    0,
+			InternalDBRewriteInterval: 0,
+			InternalDBFileSizeLimit:   1073741824,
+			SQLMaxOpenConns:           100,
+			SQLMaxIdleConns:           10,
+			SQLLogLevel:               3,
+			SQLDSNParams:              make(map[string]string),
+			MongoQueryTimeout:         10 * time.Second,
+			MongoConnScheme:           "mongodb+srv",
+			PgSSLMode:                 "disable",
+			MySQLLocation:             "UTC",
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -245,15 +251,21 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 		utils.RemoteConnsCfg:         []string{"*conn1"},
 		utils.ReplicationConnsCfg:    []string{"*conn1"},
 		utils.OptsCfg: map[string]any{
-			utils.SQLMaxOpenConnsCfg:    100,
-			utils.SQLMaxIdleConnsCfg:    10,
-			utils.SQLLogLevelCfg:        3,
-			utils.SQLConnMaxLifetimeCfg: "0s",
-			utils.MYSQLDSNParams:        make(map[string]string),
-			utils.MongoQueryTimeoutCfg:  "10s",
-			utils.MongoConnSchemeCfg:    "mongodb+srv",
-			utils.PgSSLModeCfg:          "disable",
-			utils.MysqlLocation:         "UTC",
+			utils.InternalDBBackupPathCfg:      "/var/lib/cgrates/internal_db/backup/stordb",
+			utils.InternalDBDumpIntervalCfg:    "0s",
+			utils.InternalDBDumpPathCfg:        "/var/lib/cgrates/internal_db/stordb",
+			utils.InternalDBFileSizeLimitCfg:   int64(1073741824),
+			utils.InternalDBRewriteIntervalCfg: "0s",
+			utils.InternalDBStartTimeoutCfg:    "5m0s",
+			utils.SQLMaxOpenConnsCfg:           100,
+			utils.SQLMaxIdleConnsCfg:           10,
+			utils.SQLLogLevelCfg:               3,
+			utils.SQLConnMaxLifetimeCfg:        "0s",
+			utils.MYSQLDSNParams:               make(map[string]string),
+			utils.MongoQueryTimeoutCfg:         "10s",
+			utils.MongoConnSchemeCfg:           "mongodb+srv",
+			utils.PgSSLModeCfg:                 "disable",
+			utils.MysqlLocation:                "UTC",
 		},
 		utils.ItemsCfg: map[string]any{
 			utils.SessionCostsTBL: map[string]any{utils.RemoteCfg: false, utils.ReplicateCfg: false},
@@ -269,7 +281,7 @@ func TestStorDbCfgAsMapInterface(t *testing.T) {
 			t.Errorf("Expected %+v, received %+v", utils.ToJSON(eMap[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg]),
 				utils.ToJSON(rcv[utils.ItemsCfg].(map[string]any)[utils.SessionSConnsCfg]))
 		} else if !reflect.DeepEqual(eMap[utils.OptsCfg], rcv[utils.OptsCfg]) {
-			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.OptsCfg]), utils.ToJSON(rcv[utils.OptsCfg]))
+			t.Errorf("Expected %#v \n, received %#v", eMap[utils.OptsCfg], rcv[utils.OptsCfg])
 		} else if !reflect.DeepEqual(eMap[utils.PrefixIndexedFieldsCfg], rcv[utils.PrefixIndexedFieldsCfg]) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap[utils.PrefixIndexedFieldsCfg]), utils.ToJSON(rcv[utils.PrefixIndexedFieldsCfg]))
 		} else if !reflect.DeepEqual(eMap[utils.RemoteConnsCfg], rcv[utils.RemoteConnsCfg]) {

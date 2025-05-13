@@ -576,7 +576,7 @@ func TestTPReaderGetLoadedIdsError(t *testing.T) {
 
 func TestTPReaderReloadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	data.SetLoadIDsDrv(nil, make(map[string]int64))
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:              map[string]any{},
@@ -645,7 +645,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 func TestTpReaderLoadAll(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	storeCSV := &CSVStorage{}
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	tpr, err := NewTpReader(db, storeCSV, "", "", nil, nil, true)
 	if err != nil {
 		t.Error(err)

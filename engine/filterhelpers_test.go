@@ -58,7 +58,7 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 
 	cM := NewConnManager(cfg)
@@ -84,7 +84,7 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 	cM := NewConnManager(cfg)
 	fltrs := NewFilterS(cfg, cM, dm)
@@ -125,7 +125,7 @@ func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
 		"Fiel..d":        "profile",
 	}}
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dmMatch := NewDataManager(data, cfg, nil)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)

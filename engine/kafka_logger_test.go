@@ -115,7 +115,7 @@ func TestExportLoggerCallErrWriter(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.connCache.Set(connID, nil, nil)
 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, cM)
 	Cache = NewCacheS(cfg, dm, cM, nil)
 
@@ -178,7 +178,7 @@ func TestLoggerExportEmergNil(t *testing.T) {
 // 	cM := NewConnManager(cfg)
 // 	cM.connCache.Set(connID, nil, nil)
 // 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
-// 	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	db , _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 // 	dm := NewDataManager(db, cfg.CacheCfg(), cM)
 // 	Cache = NewCacheS(cfg, dm, cM, nil)
 
@@ -209,7 +209,7 @@ func TestLoggerExportEmergNil(t *testing.T) {
 		cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 			utils.MetaEEs)}
 
-		data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+		data , _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 		cM := NewConnManager(cfg)
 		dm := NewDataManager(data, cfg.CacheCfg(), nil)
 		fltrs := NewFilterS(cfg, nil, dm)

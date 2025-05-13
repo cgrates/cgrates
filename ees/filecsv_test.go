@@ -54,7 +54,7 @@ func (nopCloser) Close() error { return nil }
 
 func TestFileCsvComposeHeader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -117,7 +117,7 @@ func TestFileCsvComposeHeader(t *testing.T) {
 
 func TestFileCsvComposeTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -180,7 +180,7 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 
 func TestFileCsvExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -213,7 +213,7 @@ func TestFileCsvExportEvent(t *testing.T) {
 
 func TestFileCsvOnEvictedTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
@@ -247,7 +247,7 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 
 func TestFileCsvOnEvictedClose(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	newDM := engine.NewDataManager(newIDb, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)

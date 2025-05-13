@@ -77,7 +77,7 @@ func TestTPEnewTPRates(t *testing.T) {
 func TestTPEExportItemsRates(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpRt := TPRates{
 		dm: dm,
@@ -159,7 +159,7 @@ func TestTPEExportItemsRatesNoDbConn(t *testing.T) {
 func TestTPEExportItemsRatesIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpRt := TPRates{
 		dm: dm,

@@ -34,7 +34,7 @@ import (
 func TestActSetAccountBalance(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 
 	acntID := "TestActSetAccount"
 	diktats := []*utils.BalDiktat{
@@ -110,7 +110,7 @@ func TestActSetAccountBalance(t *testing.T) {
 func TestActSetAccount(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 
 	acntID := "TestActSetAccount"

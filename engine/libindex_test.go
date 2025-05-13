@@ -57,7 +57,7 @@ func TestSplitFilterIndexesWrongFormat(t *testing.T) {
 
 func TestComputeIndexes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -95,7 +95,7 @@ func TestComputeIndexes(t *testing.T) {
 
 func TestComputeIndexesIDsNotNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -128,7 +128,7 @@ func TestComputeIndexesIDsNotNil(t *testing.T) {
 
 func TestRemoveIndexFiltersItem(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -153,7 +153,7 @@ func TestRemoveIndexFiltersItem(t *testing.T) {
 
 func TestRemoveFilterIndexesForFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -180,7 +180,7 @@ func TestRemoveFilterIndexesForFilter(t *testing.T) {
 
 func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	// Set an AttributeProfile without filterIDs
@@ -349,7 +349,7 @@ func TestLibIndexSetUpdateRemAttributeProfile(t *testing.T) {
 
 func TestLibIndexModifyAttrPrfFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	// Set a non-indexed type filter
@@ -440,7 +440,7 @@ func TestUpdateFilterIndexThreshold(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -606,7 +606,7 @@ func TestUpdateFilterIndexGetIndexErr(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -685,7 +685,7 @@ func TestUpdateFilterIndexGetIndexErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -765,7 +765,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -823,7 +823,7 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -881,7 +881,7 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -985,7 +985,7 @@ func TestUpdateFilterIndexStatErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1039,7 +1039,7 @@ func TestUpdateFilterIndexStatErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1093,7 +1093,7 @@ func TestUpdateFilterIndexResourceIndex(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -1187,7 +1187,7 @@ func TestUpdateFilterIndexResourcetErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1241,7 +1241,7 @@ func TestUpdateFilterIndexResourceErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1295,7 +1295,7 @@ func TestUpdateFilterIndexRouteIndex(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -1398,7 +1398,7 @@ func TestUpdateFilterIndexRouteErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1452,7 +1452,7 @@ func TestUpdateFilterIndexRouteErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1506,7 +1506,7 @@ func TestUpdateFilterIndexChargerIndex(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -1599,7 +1599,7 @@ func TestUpdateFilterIndexChargerErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1653,7 +1653,7 @@ func TestUpdateFilterIndexChargerErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1707,7 +1707,7 @@ func TestUpdateFilterIndexAccountsIndex(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -1812,7 +1812,7 @@ func TestUpdateFilterIndexAccountsErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1866,7 +1866,7 @@ func TestUpdateFilterIndexAccountsErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1920,7 +1920,7 @@ func TestUpdateFilterIndexAttributeErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -1974,7 +1974,7 @@ func TestUpdateFilterIndexAttributeErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -2028,7 +2028,7 @@ func TestUpdateFilterIndexActionProfilesIndex(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -2134,7 +2134,7 @@ func TestUpdateFilterActionProfilesIndexErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -2188,7 +2188,7 @@ func TestUpdateFilterIndexActionProfilesErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -2242,7 +2242,7 @@ func TestUpdateFilterIndexRateProfilesIndex(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -2348,7 +2348,7 @@ func TestUpdateFilterRateProfilesIndexErr1(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -2402,7 +2402,7 @@ func TestUpdateFilterIndexRateProfilesErr2(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -2450,7 +2450,7 @@ func TestUpdateFilterIndexRateProfilesErr2(t *testing.T) {
 
 func TestRemoveFilterIndexesForFilterErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 
 	dm.dataDB = &DataDBMock{
@@ -2468,7 +2468,7 @@ func TestRemoveFilterIndexesForFilterErr(t *testing.T) {
 func TestRemoveItemFromFilterIndexErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 
 	expErr := `broken reference to filter: stringFilter for itemType: *attribute_filter_indexes and ID: stringFilterID`
@@ -2489,7 +2489,7 @@ func TestRemoveIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = true
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -2562,7 +2562,7 @@ func TestAddIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = true
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -2676,7 +2676,7 @@ func TestAddItemToFilterIndexCacheRemoveErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheRateFilterIndexes].Replicate = true
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -2724,7 +2724,7 @@ func TestRemoveItemFromFilterIndexCacheRemoveErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheRateFilterIndexes].Replicate = true
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
@@ -2787,7 +2787,7 @@ func TestComputeIndexesGetKeysForPrefixErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 
 	cM := NewConnManager(cfg)
 	dm := NewDataManager(data, cfg, cM)
@@ -2805,7 +2805,7 @@ func TestComputeIndexesNilFilterIDs(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(data, cfg, nil)
 	thd := &ThresholdProfile{
 		Tenant:           "cgrates.org",
@@ -2899,7 +2899,7 @@ func TestUpdateFilterIndexRatedSplitErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -2948,7 +2948,7 @@ func TestUpdateFilterIndexRatedGetRateProfileErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -3046,7 +3046,7 @@ func TestUpdateFilterIndexRatedNoRatesErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 
 	oldFlt := &Filter{
@@ -3120,7 +3120,7 @@ func TestUpdateFilterIndexRatedNoRatesErr(t *testing.T) {
 
 func TestLibIndexRemoveFilterIndexesForFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	dataDB := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	dataDB, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(dataDB, cfg, nil)
 	tntCtx := "cgrates.org:*sessions"
 

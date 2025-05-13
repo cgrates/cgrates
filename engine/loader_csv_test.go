@@ -165,7 +165,11 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 `
 
 	testTPID := "LoaderCSVTests"
-	csvr, err := NewTpReader(NewInternalDB(nil, nil, config.CgrConfig().DataDbCfg().Items), NewStringCSVStorage(utils.CSVSep,
+	idb, err := NewInternalDB(nil, nil, nil, config.CgrConfig().DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	csvr, err := NewTpReader(idb, NewStringCSVStorage(utils.CSVSep,
 		ResourcesCSVContent, StatsCSVContent, RankingsCSVContent, TrendsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
 		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
 		DispatcherHostCSVContent, RateProfileCSVContent, ActionProfileCSVContent, AccountCSVContent), testTPID, "", nil, nil, false)

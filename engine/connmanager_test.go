@@ -45,7 +45,7 @@ func TestCMgetConnNotFound(t *testing.T) {
 		cfg: cfg,
 	}
 
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, cM)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
@@ -80,7 +80,7 @@ func TestCMgetConnUnsupportedBiRPC(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 
 	experr := rpcclient.ErrUnsupportedBiRPC
@@ -124,7 +124,7 @@ func TestCMgetConnNotInternalRPC(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			"testString": cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 
 	cM.connCache.Set(connID, nil, nil)
@@ -172,7 +172,7 @@ func TestCMgetConnWithConfigUnsupportedTransport(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 
 	experr := fmt.Sprintf("Unsupported transport: <%+s>", "invalid")
@@ -211,7 +211,7 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 
 	experr := rpcclient.ErrUnsupportedCodec
@@ -251,7 +251,7 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 
 	cM.connCache.Set(connID, nil, nil)
@@ -290,7 +290,7 @@ func TestCMgetConnWithConfigInternalRPCCodec(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 
 	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
@@ -327,7 +327,7 @@ func TestCMgetConnWithConfigInternalBiRPCCodecUnsupported(t *testing.T) {
 		rpcInternal: map[string]chan birpc.ClientConnector{
 			connID: cc,
 		},
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 
 	experr := rpcclient.ErrUnsupportedCodec
@@ -356,7 +356,7 @@ func TestCMCallErrgetConn(t *testing.T) {
 		cfg: cfg,
 	}
 
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, cM)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, connID, nil, nil, true, utils.NonTransactional)
@@ -464,7 +464,7 @@ func TestCMCallWithConnIDsInternallyDCed(t *testing.T) {
 
 	cM := &ConnManager{
 		cfg:       cfg,
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 	subsHostIDs := utils.StringSet{
 		connID: struct{}{},
@@ -517,7 +517,7 @@ func TestCMCallWithConnIDsErrNotNetwork(t *testing.T) {
 
 	cM := &ConnManager{
 		cfg:       cfg,
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 
 	cM.connCache.Set(poolID+utils.ConcatenatedKeySep+connID, ccM, nil)
@@ -544,11 +544,11 @@ func TestCMReload(t *testing.T) {
 
 	cM := &ConnManager{
 		cfg:       cfg,
-		connCache: ltcache.NewCache(-1, 0, true, nil),
+		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 	}
 	cM.connCache.Set("itmID1", "value of first item", nil)
 
-	db := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, cM)
 	Cache = NewCacheS(cfg, dm, nil, nil)
 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, "itmID2",
@@ -642,7 +642,7 @@ func TestCMGetDispInternalChan(t *testing.T) {
 // 	Cache.Clear(nil)
 // 	cfg := config.NewDefaultCGRConfig()
 // 	cM := NewConnManager(cfg)
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	data , _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 // 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 // 	fltrs := NewFilterS(cfg, nil, dm)
 // 	Cache = NewCacheS(cfg, dm, nil, nil)
@@ -679,10 +679,10 @@ func TestCMGetDispInternalChan(t *testing.T) {
 
 // 	cM := &ConnManager{
 // 		cfg:       cfg,
-// 		connCache: ltcache.NewCache(-1, 0, true, nil),
+// 		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 // 	}
 // 	cM.connCache.Set("itmID1", "value of first item", nil)
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	data , _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 // 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 // 	fltrs := NewFilterS(cfg, nil, dm)
 // 	var storDB StorDB
@@ -725,10 +725,10 @@ func TestCMGetDispInternalChan(t *testing.T) {
 
 // 	cM := &ConnManager{
 // 		cfg:       cfg,
-// 		connCache: ltcache.NewCache(-1, 0, true, nil),
+// 		connCache: ltcache.NewCache(-1, 0, true, false, nil),
 // 	}
 // 	cM.connCache.Set("itmID1", "value of first item", nil)
-// 	data := NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+// 	data , _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 // 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 // 	fltrs := NewFilterS(cfg, nil, dm)
 // 	var storDB StorDB

@@ -64,7 +64,7 @@ func TestTPEnewTPThresholds(t *testing.T) {
 func TestTPEExportThresholds(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpThd := TPThresholds{
 		dm: dm,
@@ -120,7 +120,7 @@ func TestTPEExportItemsThresholdsNoDbConn(t *testing.T) {
 func TestTPEExportItemsThresholdsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpThd := TPThresholds{
 		dm: dm,

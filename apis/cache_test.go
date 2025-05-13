@@ -32,7 +32,7 @@ import (
 
 func TestCacheHasItemAndGetItem(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -69,7 +69,7 @@ func TestCacheHasItemAndGetItem(t *testing.T) {
 
 func TestCacheSetAndRemoveItem(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -128,7 +128,7 @@ func TestCacheSetAndRemoveItem(t *testing.T) {
 
 func TestCacheSetAndRemoveItems(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -187,7 +187,7 @@ func TestCacheSetAndRemoveItems(t *testing.T) {
 
 func TestCacheClear(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -228,7 +228,7 @@ func TestCacheClear(t *testing.T) {
 
 func TestCacheLoadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -257,7 +257,7 @@ func TestCacheLoadCache(t *testing.T) {
 
 func TestCacheReloadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -286,7 +286,7 @@ func TestCacheReloadCache(t *testing.T) {
 
 func TestGetCacheStats(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -310,7 +310,7 @@ func TestGetCacheStats(t *testing.T) {
 
 func TestPrecacheStatus(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -337,7 +337,7 @@ func TestPrecacheStatus(t *testing.T) {
 
 func TestHasGroup(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -364,7 +364,7 @@ func TestHasGroup(t *testing.T) {
 
 func TestGetGroupItemIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -395,7 +395,7 @@ func TestGetGroupItemIDs(t *testing.T) {
 
 func TestRemoveGroup(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -423,7 +423,7 @@ func TestRemoveGroup(t *testing.T) {
 
 func TestReplicateSet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -447,7 +447,7 @@ func TestReplicateSet(t *testing.T) {
 
 func TestReplicateRemove(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)
@@ -471,7 +471,7 @@ func TestReplicateRemove(t *testing.T) {
 
 func TestGetItemExpiryTime(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
 	dm := engine.NewDataManager(data, cfg, nil)
 	connMgr := engine.NewConnManager(cfg)

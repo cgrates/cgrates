@@ -215,7 +215,7 @@ func TestKafkaERProcessMessageError1(t *testing.T) {
 
 func TestKafkaERProcessMessageError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rdr := &KafkaER{

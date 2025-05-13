@@ -54,7 +54,7 @@ func TestTPEnewTPTrends(t *testing.T) {
 func TestTPEExportTrends(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpTrd := TPTrends{
 		dm: dm,
@@ -90,7 +90,7 @@ func TestTPEExportItemsTrendsNoDbConn(t *testing.T) {
 func TestTPEExportItemsTrendsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpTrd := TPTrends{
 		dm: dm,

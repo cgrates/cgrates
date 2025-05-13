@@ -201,7 +201,7 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	cb1 := &concreteBalance{
@@ -283,7 +283,7 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
@@ -403,7 +403,7 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -440,7 +440,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	cfg.AccountSCfg().MaxIterations = 100
 	config.SetCgrConfig(cfg)
@@ -498,7 +498,7 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 	engine.Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
@@ -584,7 +584,7 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 	engine.Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	acntPrf := &utils.Account{
 		Tenant: "cgrates.org",
@@ -617,7 +617,7 @@ func TestRestoreAccount3(t *testing.T) { //coverage purpose
 cfg := config.NewDefaultCGRConfig()
 func TestDebitFromBothBalances(t *testing.T) {
 	engine.Cache.Clear(nil)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	rates := rates2.NewRateS(cfg, fltr, dm)
@@ -750,7 +750,7 @@ func TestDebitFromBothBalances(t *testing.T) {
 func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	cncrtBlncs := []*concreteBalance{

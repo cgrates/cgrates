@@ -31,6 +31,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
@@ -65,6 +66,29 @@ func InitDataDB(cfg *config.CGRConfig) error {
 	return nil
 }
 
+// Initiates DataDB, flushes it, and closes the connection after
+func PreInitDataDb(cfg *config.CGRConfig) error {
+	d, err := NewDataDBConn(cfg.DataDbCfg().Type,
+		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
+		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
+		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	if err != nil {
+		return err
+	}
+	dm := NewDataManager(d, cfg, connMgr)
+
+	if err := dm.DataDB().Flush(""); err != nil {
+		return err
+	}
+	//	Write version before starting
+	if err := OverwriteDBVersions(dm.dataDB); err != nil {
+		return err
+	}
+	d.Close()
+	return nil
+}
+
 func InitStorDB(cfg *config.CGRConfig) error {
 	storDB, err := NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
@@ -88,6 +112,32 @@ func InitStorDB(cfg *config.CGRConfig) error {
 			return err
 		}
 	}
+	return nil
+}
+
+// Initiates StorDB, flushes it, and closed the connection after
+func PreInitStorDb(cfg *config.CGRConfig) error {
+	storDb, err := NewStorDBConn(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
+		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
+	if err != nil {
+		return err
+	}
+	dbPath := strings.Trim(cfg.StorDbCfg().Type, "*")
+	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage",
+		dbPath)); err != nil {
+		return err
+	}
+	if slices.Contains([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
+		cfg.StorDbCfg().Type) {
+		if err := SetDBVersions(storDb); err != nil {
+			return err
+		}
+	}
+	storDb.Close()
 	return nil
 }
 
@@ -334,15 +384,17 @@ func NewRPCClient(t testing.TB, cfg *config.ListenCfg, encoding string) *birpc.C
 // TestEngine holds the setup parameters and configurations
 // required for running integration tests.
 type TestEngine struct {
-	ConfigPath     string            // path to the main configuration file
-	ConfigJSON     string            // JSON cfg content (standalone/overwrites static configs)
-	DBCfg          DBCfg             // custom db settings for dynamic setup (overrides static config)
-	Encoding       string            // data encoding type (e.g. JSON, GOB)
-	LogBuffer      io.Writer         // captures log output of the test environment
-	PreserveDataDB bool              // prevents automatic data_db flush when set
-	PreserveStorDB bool              // prevents automatic stor_db flush when set
-	TpPath         string            // path to the tariff plans
-	TpFiles        map[string]string // CSV data for tariff plans: filename -> content
+	ConfigPath       string            // path to the main configuration file
+	ConfigJSON       string            // JSON cfg content (standalone/overwrites static configs)
+	DBCfg            DBCfg             // custom db settings for dynamic setup (overrides static config)
+	Encoding         string            // data encoding type (e.g. JSON, GOB)
+	LogBuffer        io.Writer         // captures log output of the test environment
+	PreserveDataDB   bool              // prevents automatic data_db flush when set
+	PreserveStorDB   bool              // prevents automatic stor_db flush when set
+	TpPath           string            // path to the tariff plans
+	TpFiles          map[string]string // CSV data for tariff plans: filename -> content
+	GracefulShutdown bool              // shutdown the engine gracefuly, otherwise use process.Kill
+	PreInitDB        bool              // close db connections after initiating and flushing db
 
 	// PreStartHook executes custom logic relying on CGRConfig
 	// before starting cgr-engine.
@@ -355,7 +407,7 @@ type TestEngine struct {
 func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
 	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
-	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
+	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB, ng.PreInitDB)
 	if ng.TpPath != "" || len(ng.TpFiles) != 0 {
 		if ng.TpPath == "" {
 			ng.TpPath = t.TempDir()
@@ -365,7 +417,7 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	if ng.PreStartHook != nil {
 		ng.PreStartHook(t, cfg)
 	}
-	startEngine(t, cfg, ng.LogBuffer, extraFlags...)
+	startEngine(t, cfg, ng.LogBuffer, ng.GracefulShutdown, extraFlags...)
 	client := NewRPCClient(t, cfg.ListenCfg(), ng.Encoding)
 	if ng.TpPath == "" {
 		ng.TpPath = cfg.LoaderCfg()[0].TpInDir
@@ -501,23 +553,35 @@ func loadCSVs(t testing.TB, tpPath string, csvFiles map[string]string) {
 
 // FlushDBs resets the databases specified in the configuration if the
 // corresponding flags are true.
-func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
+func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool, preInitDB bool) {
 	t.Helper()
 	if flushDataDB {
-		if err := InitDataDB(cfg); err != nil {
-			t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
+		if preInitDB {
+			if err := PreInitDataDb(cfg); err != nil {
+				t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
+			}
+		} else {
+			if err := InitDataDB(cfg); err != nil {
+				t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
+			}
 		}
 	}
 	if flushStorDB {
-		if err := InitStorDB(cfg); err != nil {
-			t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
+		if preInitDB {
+			if err := PreInitStorDb(cfg); err != nil {
+				t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
+			}
+		} else {
+			if err := InitStorDB(cfg); err != nil {
+				t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
+			}
 		}
 	}
 }
 
 // startEngine starts the CGR engine process with the provided configuration
 // and flags. It writes engine logs to the provided logBuffer (if any).
-func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, extraFlags ...string) {
+func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, gracefulShutdown bool, extraFlags ...string) {
 	t.Helper()
 	binPath, err := exec.LookPath("cgr-engine")
 	if err != nil {
@@ -539,12 +603,21 @@ func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, extra
 		t.Fatalf("cgr-engine command failed: %v", err)
 	}
 	t.Cleanup(func() {
-		if err := engine.Process.Kill(); err != nil {
-			t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+		if gracefulShutdown {
+			if err := engine.Process.Signal(syscall.SIGTERM); err != nil {
+				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+			}
+			if err := engine.Wait(); err != nil {
+				t.Errorf("cgr-engine process failed to exit cleanly: %v", err)
+			}
+		} else {
+			if err := engine.Process.Kill(); err != nil {
+				t.Errorf("failed to kill cgr-engine process (%d): %v", engine.Process.Pid, err)
+			}
 		}
 	})
 	backoff := utils.FibDuration(time.Millisecond, 0)
-	for i := 0; i < 16; i++ {
+	for range 16 {
 		time.Sleep(backoff())
 		if _, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err == nil {
 			break

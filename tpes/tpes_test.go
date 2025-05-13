@@ -31,7 +31,7 @@ import (
 func TestNewTPeS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpExporterTypes.Add("not_valid")
 	// utils.Logger, err = utils.NewLogger(utils.MetaStdLog, utils.EmptyString, 6)
@@ -51,7 +51,7 @@ func TestNewTPeS(t *testing.T) {
 
 func TestGetTariffPlansKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 
 	//Attributes
@@ -357,7 +357,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 func TestV1ExportTariffPlan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	attr := &utils.AttributeProfile{
 		Tenant:    utils.CGRateSorg,
@@ -399,7 +399,7 @@ func TestV1ExportTariffPlan(t *testing.T) {
 func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
@@ -416,7 +416,7 @@ func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
@@ -435,7 +435,7 @@ func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 func TestV1ExportTariffPlanInvalidExpType(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	data := engine.NewInternalDB(nil, nil, cfg.DataDbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	tpE := NewTPeS(cfg, dm, connMng)
 	var reply []byte
