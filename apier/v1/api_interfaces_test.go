@@ -39,6 +39,11 @@ func TestResourceSv1Interface(t *testing.T) {
 	_ = ResourceSv1Interface(NewResourceSv1(nil))
 }
 
+func TestIPsV1Interface(t *testing.T) {
+	_ = IPsV1Interface(NewDispatcherIPsV1(nil))
+	_ = IPsV1Interface(NewIPsV1(nil))
+}
+
 func TestRouteSv1Interface(t *testing.T) {
 	_ = RouteSv1Interface(NewDispatcherRouteSv1(nil))
 	_ = RouteSv1Interface(NewRouteSv1(nil))

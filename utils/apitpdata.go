@@ -1422,6 +1422,43 @@ func (trp *TPResourceProfile) CacheClone() any {
 	return trp.Clone()
 }
 
+// TPIPProfile is used in APIs to manage remotely offline IPProfile
+type TPIPProfile struct {
+	TPid               string
+	Tenant             string
+	ID                 string
+	FilterIDs          []string
+	ActivationInterval *TPActivationInterval
+	TTL                string
+	Type               string
+	AddressPool        string
+	Allocation         string
+	Stored             bool
+	Weight             float64
+}
+
+// Clone method for TPIPProfile
+func (tp *TPIPProfile) Clone() *TPIPProfile {
+	if tp == nil {
+		return nil
+	}
+	return &TPIPProfile{
+		TPid:               tp.TPid,
+		Tenant:             tp.Tenant,
+		ID:                 tp.ID,
+		FilterIDs:          slices.Clone(tp.FilterIDs),
+		ActivationInterval: tp.ActivationInterval.Clone(),
+		TTL:                tp.TTL,
+		Stored:             tp.Stored,
+		Weight:             tp.Weight,
+	}
+}
+
+// CacheClone returns a clone of TPIPProfile used by ltcache CacheCloner
+func (tp *TPIPProfile) CacheClone() any {
+	return tp.Clone()
+}
+
 // TPActivationInterval represents an activation interval for an item
 type TPActivationInterval struct {
 	ActivationTime string
@@ -2312,6 +2349,8 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		SharedGroupIDs:           []string{MetaAny},
 		ResourceProfileIDs:       []string{MetaAny},
 		ResourceIDs:              []string{MetaAny},
+		IPProfileIDs:             []string{MetaAny},
+		IPIDs:                    []string{MetaAny},
 		StatsQueueIDs:            []string{MetaAny},
 		StatsQueueProfileIDs:     []string{MetaAny},
 		RankingIDs:               []string{MetaAny},
@@ -2329,6 +2368,7 @@ func NewAttrReloadCacheWithOpts() *AttrReloadCacheWithAPIOpts {
 		TimingIDs:                []string{MetaAny},
 		AttributeFilterIndexIDs:  []string{MetaAny},
 		ResourceFilterIndexIDs:   []string{MetaAny},
+		IPFilterIndexIDs:         []string{MetaAny},
 		StatFilterIndexIDs:       []string{MetaAny},
 		ThresholdFilterIndexIDs:  []string{MetaAny},
 		RouteFilterIndexIDs:      []string{MetaAny},
@@ -2355,6 +2395,8 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		SharedGroupIDs:           arg[CacheSharedGroups],
 		ResourceProfileIDs:       arg[CacheResourceProfiles],
 		ResourceIDs:              arg[CacheResources],
+		IPProfileIDs:             arg[CacheIPProfiles],
+		IPIDs:                    arg[CacheIPs],
 		StatsQueueIDs:            arg[CacheStatQueues],
 		StatsQueueProfileIDs:     arg[CacheStatQueueProfiles],
 		RankingIDs:               arg[CacheRankings],
@@ -2373,6 +2415,7 @@ func NewAttrReloadCacheWithOptsFromMap(arg map[string][]string, tnt string, opts
 		TimingIDs:                arg[CacheTimings],
 		AttributeFilterIndexIDs:  arg[CacheAttributeFilterIndexes],
 		ResourceFilterIndexIDs:   arg[CacheResourceFilterIndexes],
+		IPFilterIndexIDs:         arg[CacheIPFilterIndexes],
 		StatFilterIndexIDs:       arg[CacheStatFilterIndexes],
 		ThresholdFilterIndexIDs:  arg[CacheThresholdFilterIndexes],
 		RouteFilterIndexIDs:      arg[CacheRouteFilterIndexes],
@@ -2396,6 +2439,8 @@ type AttrReloadCacheWithAPIOpts struct {
 	SharedGroupIDs           []string       `json:",omitempty"`
 	ResourceProfileIDs       []string       `json:",omitempty"`
 	ResourceIDs              []string       `json:",omitempty"`
+	IPProfileIDs             []string       `json:",omitempty"`
+	IPIDs                    []string       `json:",omitempty"`
 	StatsQueueIDs            []string       `json:",omitempty"`
 	StatsQueueProfileIDs     []string       `json:",omitempty"`
 	RankingIDs               []string       `json:",omitempty"`
@@ -2414,6 +2459,7 @@ type AttrReloadCacheWithAPIOpts struct {
 	TimingIDs                []string       `json:",omitempty"`
 	AttributeFilterIndexIDs  []string       `json:",omitempty"`
 	ResourceFilterIndexIDs   []string       `json:",omitempty"`
+	IPFilterIndexIDs         []string       `json:",omitempty"`
 	StatFilterIndexIDs       []string       `json:",omitempty"`
 	ThresholdFilterIndexIDs  []string       `json:",omitempty"`
 	RouteFilterIndexIDs      []string       `json:",omitempty"`
@@ -2435,6 +2481,8 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheSharedGroups:            a.SharedGroupIDs,
 		CacheResourceProfiles:        a.ResourceProfileIDs,
 		CacheResources:               a.ResourceIDs,
+		CacheIPProfiles:              a.IPProfileIDs,
+		CacheIPs:                     a.IPIDs,
 		CacheStatQueues:              a.StatsQueueIDs,
 		CacheStatQueueProfiles:       a.StatsQueueProfileIDs,
 		CacheThresholds:              a.ThresholdIDs,
@@ -2453,6 +2501,7 @@ func (a *AttrReloadCacheWithAPIOpts) Map() map[string][]string {
 		CacheTimings:                 a.TimingIDs,
 		CacheAttributeFilterIndexes:  a.AttributeFilterIndexIDs,
 		CacheResourceFilterIndexes:   a.ResourceFilterIndexIDs,
+		CacheIPFilterIndexes:         a.IPFilterIndexIDs,
 		CacheStatFilterIndexes:       a.StatFilterIndexIDs,
 		CacheThresholdFilterIndexes:  a.ThresholdFilterIndexIDs,
 		CacheRouteFilterIndexes:      a.RouteFilterIndexIDs,

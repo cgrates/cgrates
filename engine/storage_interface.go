@@ -86,6 +86,12 @@ type DataDB interface {
 	GetResourceDrv(string, string) (*Resource, error)
 	SetResourceDrv(*Resource) error
 	RemoveResourceDrv(string, string) error
+	GetIPProfileDrv(string, string) (*IPProfile, error)
+	SetIPProfileDrv(*IPProfile) error
+	RemoveIPProfileDrv(string, string) error
+	GetIPDrv(string, string) (*IP, error)
+	SetIPDrv(*IP) error
+	RemoveIPDrv(string, string) error
 	GetTimingDrv(string) (*utils.TPTiming, error)
 	SetTimingDrv(*utils.TPTiming) error
 	RemoveTimingDrv(string) error
@@ -187,6 +193,7 @@ type LoadReader interface {
 	GetTPActionTriggers(string, string) ([]*utils.TPActionTriggers, error)
 	GetTPAccountActions(*utils.TPAccountActions) ([]*utils.TPAccountActions, error)
 	GetTPResources(string, string, string) ([]*utils.TPResourceProfile, error)
+	GetTPIPs(string, string, string) ([]*utils.TPIPProfile, error)
 	GetTPStats(string, string, string) ([]*utils.TPStatProfile, error)
 	GetTPTrends(string, string, string) ([]*utils.TPTrendsProfile, error)
 	GetTPRankings(string, string, string) ([]*utils.TPRankingProfile, error)
@@ -213,6 +220,7 @@ type LoadWriter interface {
 	SetTPActionTriggers([]*utils.TPActionTriggers) error
 	SetTPAccountActions([]*utils.TPAccountActions) error
 	SetTPResources([]*utils.TPResourceProfile) error
+	SetTPIPs([]*utils.TPIPProfile) error
 	SetTPStats([]*utils.TPStatProfile) error
 	SetTPTrends([]*utils.TPTrendsProfile) error
 	SetTPRankings([]*utils.TPRankingProfile) error

@@ -52,6 +52,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,1,TOPUP10_AT,,,`
 	resLimits := ``
+	ips := ``
 	stats := ``
 	trends := ``
 	rankings := ``
@@ -63,7 +64,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	csvr, err := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(utils.CSVSep, destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups,
 		actions, actionPlans, actionTriggers, accountActions,
-		resLimits, stats, trends, rankings, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil, false)
+		resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)
 	}

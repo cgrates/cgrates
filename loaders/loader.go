@@ -349,6 +349,37 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				cacheArgs[utils.CacheResources] = ids
 			}
 		}
+	case utils.MetaIPs:
+		cacheIDs = []string{utils.CacheIPFilterIndexes}
+		for _, lDataSet := range lds {
+			ipMdls := make(engine.IPMdls, len(lDataSet))
+			for i, ld := range lDataSet {
+				ipMdls[i] = new(engine.IPMdl)
+				if err = utils.UpdateStructWithIfaceMap(ipMdls[i], ld); err != nil {
+					return
+				}
+			}
+
+			for _, tpIP := range ipMdls.AsTPIPs() {
+				res, err := engine.APItoIP(tpIP, ldr.timezone)
+				if err != nil {
+					return err
+				}
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: IPProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(res)))
+					continue
+				}
+				// get IDs so we can reload in cache
+				ids = append(ids, res.TenantID())
+				if err := ldr.dm.SetIPProfile(res, true); err != nil {
+					return err
+				}
+				cacheArgs[utils.CacheIPProfiles] = ids
+				cacheArgs[utils.CacheIPs] = ids
+			}
+		}
 	case utils.MetaFilters:
 		for _, lDataSet := range lds {
 			fltrModels := make(engine.FilterMdls, len(lDataSet))

@@ -981,6 +981,26 @@ type CoreSJsonCfg struct {
 	Shutdown_timeout    *string
 }
 
+type IPsOptsJson struct {
+	UsageID *string  `json:"*usageID"`
+	TTL     *string  `json:"*ttl"`
+	Units   *float64 `json:"*units"`
+}
+
+// IPsJsonCfg holds the unparsed ips section configuration as found in the
+// config file.
+type IPsJsonCfg struct {
+	Enabled             *bool        `json:"enabled"`
+	IndexedSelects      *bool        `json:"indexed_selects"`
+	StoreInterval       *string      `json:"store_interval"`
+	StringIndexedFields *[]string    `json:"string_indexed_fields"`
+	PrefixIndexedFields *[]string    `json:"prefix_indexed_fields"`
+	SuffixIndexedFields *[]string    `json:"suffix_indexed_fields"`
+	ExistsIndexedFields *[]string    `json:"exists_indexed_fields"`
+	NestedFields        *bool        `json:"nested_fields"`
+	Opts                *IPsOptsJson `json:"opts"`
+}
+
 // tagInternalConns adds subsystem to internal connections.
 func tagInternalConns(conns []string, subsystem string) []string {
 	suffix := utils.ConcatenatedKeySep + subsystem

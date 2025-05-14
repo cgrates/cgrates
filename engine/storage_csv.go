@@ -57,6 +57,7 @@ type CSVStorage struct {
 	actiontriggersFn         []string
 	accountactionsFn         []string
 	resProfilesFn            []string
+	ipProfilesFn             []string
 	statsFn                  []string
 	trendsFn                 []string
 	rankingsFn               []string
@@ -74,7 +75,7 @@ func NewCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
-	resProfilesFn, statsFn, trendsFn, rankingsFn, thresholdsFn, filterFn, routeProfilesFn,
+	resProfilesFn, ipProfilesFn, statsFn, trendsFn, rankingsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn []string) *CSVStorage {
 	return &CSVStorage{
 		sep:                      sep,
@@ -91,6 +92,7 @@ func NewCSVStorage(sep rune,
 		actiontriggersFn:         actiontriggersFn,
 		accountactionsFn:         accountactionsFn,
 		resProfilesFn:            resProfilesFn,
+		ipProfilesFn:             ipProfilesFn,
 		statsFn:                  statsFn,
 		trendsFn:                 trendsFn,
 		rankingsFn:               rankingsFn,
@@ -122,6 +124,7 @@ func NewFileCSVStorage(sep rune, dataPath string) (*CSVStorage, error) {
 	actionTriggersPaths := appendName(allFoldersPath, utils.ActionTriggersCsv)
 	accountActionsPaths := appendName(allFoldersPath, utils.AccountActionsCsv)
 	resourcesPaths := appendName(allFoldersPath, utils.ResourcesCsv)
+	ipsPaths := appendName(allFoldersPath, utils.IPsCsv)
 	statsPaths := appendName(allFoldersPath, utils.StatsCsv)
 	trendsPaths := appendName(allFoldersPath, utils.TrendsCsv)
 	rankingsPaths := appendName(allFoldersPath, utils.RankingsCsv)
@@ -145,6 +148,7 @@ func NewFileCSVStorage(sep rune, dataPath string) (*CSVStorage, error) {
 		actionTriggersPaths,
 		accountActionsPaths,
 		resourcesPaths,
+		ipsPaths,
 		statsPaths,
 		trendsPaths,
 		rankingsPaths,
@@ -163,13 +167,13 @@ func NewStringCSVStorage(sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn,
 	destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
-	resProfilesFn, statsFn, trendsFn, rankingsFn, thresholdsFn, filterFn, routeProfilesFn,
+	resProfilesFn, ipProfilesFn, statsFn, trendsFn, rankingsFn, thresholdsFn, filterFn, routeProfilesFn,
 	attributeProfilesFn, chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn string) *CSVStorage {
 	c := NewCSVStorage(sep, []string{destinationsFn}, []string{timingsFn},
 		[]string{ratesFn}, []string{destinationratesFn}, []string{destinationratetimingsFn},
 		[]string{ratingprofilesFn}, []string{sharedgroupsFn}, []string{actionsFn},
 		[]string{actiontimingsFn}, []string{actiontriggersFn}, []string{accountactionsFn},
-		[]string{resProfilesFn}, []string{statsFn}, []string{trendsFn}, []string{rankingsFn}, []string{thresholdsFn}, []string{filterFn},
+		[]string{resProfilesFn}, []string{ipProfilesFn}, []string{statsFn}, []string{trendsFn}, []string{rankingsFn}, []string{thresholdsFn}, []string{filterFn},
 		[]string{routeProfilesFn}, []string{attributeProfilesFn}, []string{chargerProfilesFn},
 		[]string{dispatcherProfilesFn}, []string{dispatcherHostsFn})
 	c.generator = NewCsvString
@@ -205,6 +209,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetID string) (*CSVStorage, error) {
 		getIfExist(utils.ActionTriggers),
 		getIfExist(utils.AccountActions),
 		getIfExist(utils.Resources),
+		getIfExist(utils.IPs),
 		getIfExist(utils.Stats),
 		getIfExist(utils.Trends),
 		getIfExist(utils.Trends),
@@ -239,6 +244,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 	var actionTriggersPaths []string
 	var accountActionsPaths []string
 	var resourcesPaths []string
+	var ipsPaths []string
 	var statsPaths []string
 	var trendsPaths []string
 	var rankingsPaths []string
@@ -264,6 +270,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			actionTriggersPaths = append(actionTriggersPaths, joinURL(baseURL, utils.ActionTriggersCsv))
 			accountActionsPaths = append(accountActionsPaths, joinURL(baseURL, utils.AccountActionsCsv))
 			resourcesPaths = append(resourcesPaths, joinURL(baseURL, utils.ResourcesCsv))
+			ipsPaths = append(ipsPaths, joinURL(baseURL, utils.IPsCsv))
 			statsPaths = append(statsPaths, joinURL(baseURL, utils.StatsCsv))
 			trendsPaths = append(trendsPaths, joinURL(baseURL, utils.TrendsCsv))
 			rankingsPaths = append(rankingsPaths, joinURL(baseURL, utils.RankingsCsv))
@@ -301,6 +308,8 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 			accountActionsPaths = append(accountActionsPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.ResourcesCsv):
 			resourcesPaths = append(resourcesPaths, baseURL)
+		case strings.HasSuffix(baseURL, utils.IPsCsv):
+			ipsPaths = append(ipsPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.StatsCsv):
 			statsPaths = append(statsPaths, baseURL)
 		case strings.HasSuffix(baseURL, utils.TrendsCsv):
@@ -337,6 +346,7 @@ func NewURLCSVStorage(sep rune, dataPath string) *CSVStorage {
 		actionTriggersPaths,
 		accountActionsPaths,
 		resourcesPaths,
+		ipsPaths,
 		statsPaths,
 		trendsPaths,
 		rankingsPaths,
@@ -563,6 +573,18 @@ func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 		return nil, err
 	}
 	return tpResLimits.AsTPResources(), nil
+}
+
+func (csvs *CSVStorage) GetTPIPs(tpid, tenant, id string) ([]*utils.TPIPProfile, error) {
+	var mdls IPMdls
+	if err := csvs.proccesData(IPMdl{}, csvs.ipProfilesFn, func(tp any) {
+		mdl := tp.(IPMdl)
+		mdl.Tpid = tpid
+		mdls = append(mdls, &mdl)
+	}); err != nil {
+		return nil, err
+	}
+	return mdls.AsTPIPs(), nil
 }
 
 func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {

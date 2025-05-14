@@ -937,6 +937,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		RatingProfileIDs:      []string{"RatingProfilesID"},
 		SharedGroupIDs:        []string{"SharedGroupsID"},
 		ResourceProfileIDs:    []string{"cgrates.org:resourceProfilesID"},
+		IPProfileIDs:          []string{"cgrates.org:ipProfilesID"},
 		StatsQueueProfileIDs:  []string{"cgrates.org:statProfilesID"},
 		ThresholdProfileIDs:   []string{"cgrates.org:thresholdProfilesID"},
 		FilterIDs:             []string{"cgrates.org:filtersID"},
@@ -946,6 +947,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		DispatcherProfileIDs:  []string{"cgrates.org:dispatcherProfilesID"},
 		DispatcherHostIDs:     []string{"cgrates.org:dispatcherHostsID"},
 		ResourceIDs:           []string{"cgrates.org:resourceProfilesID"},
+		IPIDs:                 []string{"cgrates.org:ipProfilesID"},
 		StatsQueueIDs:         []string{"cgrates.org:statProfilesID"},
 		ThresholdIDs:          []string{"cgrates.org:thresholdProfilesID"},
 		AccountActionPlanIDs:  []string{"AccountActionPlansID"},
@@ -1002,6 +1004,9 @@ func TestTPReaderReloadCache(t *testing.T) {
 		},
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},
+		},
+		ipProfiles: map[utils.TenantID]*utils.TPIPProfile{
+			{Tenant: "cgrates.org", ID: "ipProfilesID"}: {},
 		},
 		sqProfiles: map[utils.TenantID]*utils.TPStatProfile{
 			{Tenant: "cgrates.org", ID: "statProfilesID"}: {},
@@ -1137,6 +1142,9 @@ func TestTpReaderReloadScheduler(t *testing.T) {
 
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},
+		},
+		ipProfiles: map[utils.TenantID]*utils.TPIPProfile{
+			{Tenant: "cgrates.org", ID: "ipProfilesID"}: {},
 		},
 		sqProfiles: map[utils.TenantID]*utils.TPStatProfile{
 			{Tenant: "cgrates.org", ID: "statProfilesID"}: {},
@@ -1393,6 +1401,9 @@ func TestTPCSVImporterErrs(t *testing.T) {
 		t.Error(err)
 	}
 	if err := tpImp.importResources(fn); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	if err := tpImp.importIPs(fn); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := tpImp.importStats(fn); err == nil || err != utils.ErrNotFound {

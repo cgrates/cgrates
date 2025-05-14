@@ -36,20 +36,31 @@ var (
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheRatingProfilesTmp, CacheCapsEvents, CacheReplicationHosts})
 
-	DataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
-		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts, CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups, CacheTimings,
-		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles, CacheRankingProfiles, CacheRankings, CacheStatQueues,
-		CacheThresholdProfiles, CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles, CacheTrendProfiles, CacheTrends,
-		CacheResourceFilterIndexes, CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
-		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
-		CacheReverseFilterIndexes, CacheActionPlans, CacheAccountActionPlans, CacheAccounts, CacheVersions})
+	DataDBPartitions = NewStringSet([]string{
+		CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
+		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
+		CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups,
+		CacheTimings, CacheResourceProfiles, CacheResources, CacheEventResources,
+		CacheIPProfiles, CacheIPs, CacheEventIPs, CacheStatQueueProfiles,
+		CacheRankingProfiles, CacheRankings, CacheStatQueues, CacheThresholdProfiles,
+		CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
+		CacheTrendProfiles, CacheTrends, CacheResourceFilterIndexes, CacheIPFilterIndexes,
+		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheRouteFilterIndexes,
+		CacheAttributeFilterIndexes, CacheChargerFilterIndexes,
+		CacheDispatcherFilterIndexes, CacheLoadIDs, CacheReverseFilterIndexes,
+		CacheActionPlans, CacheAccountActionPlans, CacheAccounts, CacheVersions,
+	})
 
-	StorDBPartitions = NewStringSet([]string{CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates, CacheTBLTPDestinationRates,
-		CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles, CacheTBLTPSharedGroups, CacheTBLTPActions,
-		CacheTBLTPActionPlans, CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
-		CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPRankings, CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL,
-		CacheTBLTPRoutes, CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
-		CacheTBLTPDispatcherHosts, CacheVersions})
+	StorDBPartitions = NewStringSet([]string{
+		CacheTBLTPTimings, CacheTBLTPDestinations, CacheTBLTPRates,
+		CacheTBLTPDestinationRates, CacheTBLTPRatingPlans, CacheTBLTPRatingProfiles,
+		CacheTBLTPSharedGroups, CacheTBLTPActions, CacheTBLTPActionPlans,
+		CacheTBLTPActionTriggers, CacheTBLTPAccountActions, CacheTBLTPResources,
+		CacheTBLTPIPs, CacheTBLTPStats, CacheTBLTPThresholds, CacheTBLTPRankings,
+		CacheTBLTPFilters, CacheSessionCostsTBL, CacheCDRsTBL, CacheTBLTPRoutes,
+		CacheTBLTPAttributes, CacheTBLTPChargers, CacheTBLTPDispatchers,
+		CacheTBLTPDispatcherHosts, CacheVersions,
+	})
 
 	// CachePartitions enables creation of cache partitions
 	CachePartitions = JoinStringSet(extraDBPartition, DataDBPartitions)
@@ -66,6 +77,8 @@ var (
 		CacheSharedGroups:            SharedGroupPrefix,
 		CacheResourceProfiles:        ResourceProfilesPrefix,
 		CacheResources:               ResourcesPrefix,
+		CacheIPProfiles:              IPProfilesPrefix,
+		CacheIPs:                     IPsPrefix,
 		CacheTimings:                 TimingsPrefix,
 		CacheStatQueueProfiles:       StatQueueProfilePrefix,
 		CacheStatQueues:              StatQueuePrefix,
@@ -82,6 +95,7 @@ var (
 		CacheDispatcherProfiles:      DispatcherProfilePrefix,
 		CacheDispatcherHosts:         DispatcherHostPrefix,
 		CacheResourceFilterIndexes:   ResourceFilterIndexes,
+		CacheIPFilterIndexes:         IPFilterIndexes,
 		CacheStatFilterIndexes:       StatFilterIndexes,
 		CacheThresholdFilterIndexes:  ThresholdFilterIndexes,
 		CacheRouteFilterIndexes:      RouteFilterIndexes,
@@ -100,6 +114,7 @@ var (
 	CacheIndexesToPrefix  = map[string]string{ // used by match index to get all the ids when index selects is disabled and for compute indexes
 		CacheThresholdFilterIndexes:  ThresholdProfilePrefix,
 		CacheResourceFilterIndexes:   ResourceProfilesPrefix,
+		CacheIPFilterIndexes:         IPProfilesPrefix,
 		CacheStatFilterIndexes:       StatQueueProfilePrefix,
 		CacheRouteFilterIndexes:      RouteProfilePrefix,
 		CacheAttributeFilterIndexes:  AttributeProfilePrefix,
@@ -111,6 +126,7 @@ var (
 	CacheInstanceToCacheIndex = map[string]string{
 		CacheThresholdProfiles:  CacheThresholdFilterIndexes,
 		CacheResourceProfiles:   CacheResourceFilterIndexes,
+		CacheIPProfiles:         CacheIPFilterIndexes,
 		CacheStatQueueProfiles:  CacheStatFilterIndexes,
 		CacheRouteProfiles:      CacheRouteFilterIndexes,
 		CacheAttributeProfiles:  CacheAttributeFilterIndexes,
@@ -138,6 +154,7 @@ var (
 		TBLTPActionTriggers:   CacheTBLTPActionTriggers,
 		TBLTPAccountActions:   CacheTBLTPAccountActions,
 		TBLTPResources:        CacheTBLTPResources,
+		TBLTPIPs:              CacheTBLTPIPs,
 		TBLTPStats:            CacheTBLTPStats,
 		TBLTPTrends:           CacheTBLTPTrends,
 		TBLTPRankings:         CacheTBLTPRankings,
@@ -295,6 +312,8 @@ const (
 	UsersPrefix               = "usr_"
 	ResourcesPrefix           = "res_"
 	ResourceProfilesPrefix    = "rsp_"
+	IPsPrefix                 = "ips_"
+	IPProfilesPrefix          = "ipp_"
 	ThresholdPrefix           = "thd_"
 	TrendPrefix               = "trd_"
 	RankingPrefix             = "rnk_"
@@ -481,7 +500,6 @@ const (
 	ID                       = "ID"
 	UniqueID                 = "UniqueID"
 	Address                  = "Address"
-	Addresses                = "Addresses"
 	Transport                = "Transport"
 	TLS                      = "TLS"
 	Subsystems               = "Subsystems"
@@ -552,6 +570,7 @@ const (
 	Timing                   = "Timing"
 	RQF                      = "RQF"
 	Resource                 = "Resource"
+	IP                       = "IP"
 	User                     = "User"
 	Subscribers              = "Subscribers"
 	DerivedChargersV         = "DerivedChargers"
@@ -577,6 +596,8 @@ const (
 	UsageTTL                 = "UsageTTL"
 	AllocationMessage        = "AllocationMessage"
 	Stored                   = "Stored"
+	AddressPool              = "AddressPool"
+	Allocation               = "Allocation"
 	RatingSubject            = "RatingSubject"
 	Categories               = "Categories"
 	Blocker                  = "Blocker"
@@ -1057,6 +1078,7 @@ const (
 	MetaActionTriggers      = "*action_triggers"
 	MetaActions             = "*actions"
 	MetaResourceProfile     = "*resource_profiles"
+	MetaIPProfiles          = "*ip_profiles"
 	MetaStatQueueProfiles   = "*statqueue_profiles"
 	MetaStatQueues          = "*statqueues"
 	MetaRankingProfiles     = "*ranking_profiles"
@@ -1070,6 +1092,8 @@ const (
 	MetaThresholds          = "*thresholds"
 	MetaRoutes              = "*routes"
 	MetaAttributes          = "*attributes"
+	MetaResources           = "*resources"
+	MetaIPs                 = "*ips"
 	MetaSessionsBackup      = "*sessions_backup"
 	MetaLoadIDs             = "*load_ids"
 	MetaNodeID              = "*node_id"
@@ -1122,6 +1146,7 @@ const (
 	TrendS      = "TrendS"
 	RankingS    = "RankingS"
 	ThresholdS  = "ThresholdS"
+	IPs         = "IPs"
 )
 
 // Lower service names
@@ -1217,6 +1242,7 @@ const (
 	MetaTpSharedGroups      = "*tp_shared_groups"
 	MetaTpRatingProfiles    = "*tp_rating_profiles"
 	MetaTpResources         = "*tp_resources"
+	MetaTpIPs               = "*tp_ips"
 	MetaTpRates             = "*tp_rates"
 	MetaTpTimings           = "*tp_timings"
 	MetaTpDestinations      = "*tp_destinations"
@@ -1257,9 +1283,11 @@ const (
 	TpSharedGroups       = "TpSharedGroups"
 	TpRatingProfiles     = "TpRatingProfiles"
 	TpResources          = "TpResources"
+	TpIPs                = "TpIPs"
 	TpRates              = "TpRates"
 	TpTiming             = "TpTiming"
 	TpResource           = "TpResource"
+	TpIP                 = "TpIP"
 	TpDestinations       = "TpDestinations"
 	TpRatingPlan         = "TpRatingPlan"
 	TpRatingProfile      = "TpRatingProfile"
@@ -1285,6 +1313,7 @@ const (
 	AttributeSv1       = "AttributeSv1"
 	SessionSv1         = "SessionSv1"
 	ChargerSv1         = "ChargerSv1"
+	IPsV1              = "IPsV1"
 	MetaAuth           = "*auth"
 	APIMethods         = "APIMethods"
 	NestingSep         = "."
@@ -1307,7 +1336,6 @@ const (
 	MetaLessOrEqual        = "*lte"
 	MetaGreaterThan        = "*gt"
 	MetaGreaterOrEqual     = "*gte"
-	MetaResources          = "*resources"
 	MetaEqual              = "*eq"
 	MetaIPNet              = "*ipnet"
 	MetaAPIBan             = "*apiban"
@@ -1360,6 +1388,8 @@ const (
 	ReplicatorSv1GetTiming               = "ReplicatorSv1.GetTiming"
 	ReplicatorSv1GetResource             = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile      = "ReplicatorSv1.GetResourceProfile"
+	ReplicatorSv1GetIP                   = "ReplicatorSv1.GetIP"
+	ReplicatorSv1GetIPProfile            = "ReplicatorSv1.GetIPProfile"
 	ReplicatorSv1GetActionTriggers       = "ReplicatorSv1.GetActionTriggers"
 	ReplicatorSv1GetSharedGroup          = "ReplicatorSv1.GetSharedGroup"
 	ReplicatorSv1GetActions              = "ReplicatorSv1.GetActions"
@@ -1389,6 +1419,8 @@ const (
 	ReplicatorSv1SetTiming               = "ReplicatorSv1.SetTiming"
 	ReplicatorSv1SetResource             = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile      = "ReplicatorSv1.SetResourceProfile"
+	ReplicatorSv1SetIP                   = "ReplicatorSv1.SetIP"
+	ReplicatorSv1SetIPProfile            = "ReplicatorSv1.SetIPProfile"
 	ReplicatorSv1SetActionTriggers       = "ReplicatorSv1.SetActionTriggers"
 	ReplicatorSv1SetSharedGroup          = "ReplicatorSv1.SetSharedGroup"
 	ReplicatorSv1SetActions              = "ReplicatorSv1.SetActions"
@@ -1418,6 +1450,8 @@ const (
 	ReplicatorSv1RemoveTiming            = "ReplicatorSv1.RemoveTiming"
 	ReplicatorSv1RemoveResource          = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile   = "ReplicatorSv1.RemoveResourceProfile"
+	ReplicatorSv1RemoveIP                = "ReplicatorSv1.RemoveIP"
+	ReplicatorSv1RemoveIPProfile         = "ReplicatorSv1.RemoveIPProfile"
 	ReplicatorSv1RemoveActionTriggers    = "ReplicatorSv1.RemoveActionTriggers"
 	ReplicatorSv1RemoveSharedGroup       = "ReplicatorSv1.RemoveSharedGroup"
 	ReplicatorSv1RemoveActions           = "ReplicatorSv1.RemoveActions"
@@ -1447,6 +1481,7 @@ const (
 	APIerSv1GetReverseFilterHealth            = "APIerSv1.GetReverseFilterHealth"
 	APIerSv1GetThresholdsIndexesHealth        = "APIerSv1.GetThresholdsIndexesHealth"
 	APIerSv1GetResourcesIndexesHealth         = "APIerSv1.GetResourcesIndexesHealth"
+	APIerSv1GetIPsIndexesHealth               = "APIerSv1.GetIPsIndexesHealth"
 	APIerSv1GetStatsIndexesHealth             = "APIerSv1.GetStatsIndexesHealth"
 	APIerSv1GetRoutesIndexesHealth            = "APIerSv1.GetRoutesIndexesHealth"
 	APIerSv1GetChargersIndexesHealth          = "APIerSv1.GetChargersIndexesHealth"
@@ -1533,6 +1568,9 @@ const (
 	APIerSv1GetTPResource                     = "APIerSv1.GetTPResource"
 	APIerSv1SetTPResource                     = "APIerSv1.SetTPResource"
 	APIerSv1RemoveTPResource                  = "APIerSv1.RemoveTPResource"
+	APIerSv1GetTPIP                           = "APIerSv1.GetTPIP"
+	APIerSv1SetTPIP                           = "APIerSv1.SetTPIP"
+	APIerSv1RemoveTPIP                        = "APIerSv1.RemoveTPIP"
 	APIerSv1SetTPRate                         = "APIerSv1.SetTPRate"
 	APIerSv1GetTPRate                         = "APIerSv1.GetTPRate"
 	APIerSv1RemoveTPRate                      = "APIerSv1.RemoveTPRate"
@@ -1813,6 +1851,20 @@ const (
 	APIerSv1GetResourceProfileIDs    = "APIerSv1.GetResourceProfileIDs"
 )
 
+// IPs APIs
+const (
+	IPsV1AuthorizeIPs       = "IPsV1.AuthorizeIPs"
+	IPsV1GetIPsForEvent     = "IPsV1.GetIPsForEvent"
+	IPsV1AllocateIPs        = "IPsV1.AllocateIPs"
+	IPsV1ReleaseIPs         = "IPsV1.ReleaseIPs"
+	IPsV1Ping               = "IPsV1.Ping"
+	IPsV1GetIP              = "IPsV1.GetIP"
+	APIerSv1SetIPProfile    = "APIerSv1.SetIPProfile"
+	APIerSv1RemoveIPProfile = "APIerSv1.RemoveIPProfile"
+	APIerSv1GetIPProfile    = "APIerSv1.GetIPProfile"
+	APIerSv1GetIPProfileIDs = "APIerSv1.GetIPProfileIDs"
+)
+
 // SessionS APIs
 const (
 	SessionSv1AuthorizeEvent             = "SessionSv1.AuthorizeEvent"
@@ -2012,6 +2064,7 @@ const (
 	ActionTriggersCsv     = "ActionTriggers.csv"
 	AccountActionsCsv     = "AccountActions.csv"
 	ResourcesCsv          = "Resources.csv"
+	IPsCsv                = "IPs.csv"
 	StatsCsv              = "Stats.csv"
 	TrendsCsv             = "Trends.csv"
 	RankingsCsv           = "Rankings.csv"
@@ -2038,6 +2091,7 @@ const (
 	TBLTPActionTriggers   = "tp_action_triggers"
 	TBLTPAccountActions   = "tp_account_actions"
 	TBLTPResources        = "tp_resources"
+	TBLTPIPs              = "tp_ips"
 	TBLTPStats            = "tp_stats"
 	TBLTPRankings         = "tp_rankings"
 	TBLTPTrends           = "tp_trends"
@@ -2067,8 +2121,11 @@ const (
 	CacheSharedGroups            = "*shared_groups"
 	CacheResources               = "*resources"
 	CacheResourceProfiles        = "*resource_profiles"
+	CacheIPs                     = "*ips"
+	CacheIPProfiles              = "*ip_profiles"
 	CacheTimings                 = "*timings"
 	CacheEventResources          = "*event_resources"
+	CacheEventIPs                = "*event_ips"
 	CacheStatQueueProfiles       = "*statqueue_profiles"
 	CacheStatQueues              = "*statqueues"
 	CacheRankingProfiles         = "*ranking_profiles"
@@ -2087,6 +2144,7 @@ const (
 	CacheDispatcherRoutes        = "*dispatcher_routes"
 	CacheDispatcherLoads         = "*dispatcher_loads"
 	CacheResourceFilterIndexes   = "*resource_filter_indexes"
+	CacheIPFilterIndexes         = "*ip_filter_indexes"
 	CacheStatFilterIndexes       = "*stat_filter_indexes"
 	CacheThresholdFilterIndexes  = "*threshold_filter_indexes"
 	CacheRankingFilterIndexes    = "ranking_filter_indexes"
@@ -2127,6 +2185,7 @@ const (
 	CacheTBLTPActionTriggers   = "*tp_action_triggers"
 	CacheTBLTPAccountActions   = "*tp_account_actions"
 	CacheTBLTPResources        = "*tp_resources"
+	CacheTBLTPIPs              = "*tp_ips"
 	CacheTBLTPStats            = "*tp_stats"
 	CacheTBLTPTrends           = "*tp_trends"
 	CacheTBLTPRankings         = "*tp_rankings"
@@ -2144,6 +2203,7 @@ const (
 // Prefix for indexing
 const (
 	ResourceFilterIndexes   = "rfi_"
+	IPFilterIndexes         = "ifi_"
 	StatFilterIndexes       = "sfi_"
 	ThresholdFilterIndexes  = "tfi_"
 	AttributeFilterIndexes  = "afi_"
@@ -2553,6 +2613,9 @@ const (
 	MetaUsageTTLCfg = "*usageTTL"
 	MetaUnitsCfg    = "*units"
 
+	// IPsCfg
+	MetaTTLCfg = "*ttl"
+
 	// RoutesCfg
 	MetaProfileCountCfg = "*profileCount"
 	MetaIgnoreErrorsCfg = "*ignoreErrors"
@@ -2756,8 +2819,8 @@ var CGROptionsSet = NewStringSet([]string{OptsSessionsTTL,
 	OptsRoutesProfileCount, OptsDispatchersProfilesCount, OptsAttributesProfileRuns,
 	OptsAttributesProfileIgnoreFilters, OptsStatsProfileIDs, OptsStatsProfileIgnoreFilters,
 	OptsThresholdsProfileIDs, OptsThresholdsProfileIgnoreFilters, OptsResourcesUsageID, OptsResourcesUsageTTL,
-	OptsResourcesUnits, OptsAttributeS, OptsThresholdS, OptsChargerS, OptsStatS, OptsRALs, OptsRerate,
-	OptsRefund, MetaAccountID})
+	OptsResourcesUnits, OptsIPsUsageID, OptsIPsTTL, OptsIPsUnits, OptsAttributeS, OptsThresholdS, OptsChargerS,
+	OptsStatS, OptsRALs, OptsRerate, OptsRefund, MetaAccountID})
 
 // EventExporter metrics
 const (
@@ -2806,6 +2869,10 @@ const (
 	OptsResourcesUsageID  = "*rsUsageID"
 	OptsResourcesUsageTTL = "*rsUsageTTL"
 	OptsResourcesUnits    = "*rsUnits"
+	// IPs
+	OptsIPsUsageID = "*ipUsageID"
+	OptsIPsTTL     = "*ipTTL"
+	OptsIPsUnits   = "*ipUnits"
 	// Routes
 	OptsRoutesProfileCount = "*rouProfileCount"
 	OptsRoutesLimit        = "*rouLimit"

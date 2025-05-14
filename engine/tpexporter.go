@@ -264,6 +264,21 @@ func (tpExp *TPExporter) Run() error {
 		}
 	}
 
+	storDataIPs, err := tpExp.storDb.GetTPIPs(tpExp.tpID, "", "")
+	if err != nil && err.Error() != utils.ErrNotFound.Error() {
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpIPs))
+		withError = true
+	}
+	if len(storDataIPs) != 0 {
+		toExportMap[utils.IPsCsv] = make([]any, 0, len(storDataIPs))
+		for _, sd := range storDataIPs {
+			sdModels := APItoModelIP(sd)
+			for _, sdModel := range sdModels {
+				toExportMap[utils.IPsCsv] = append(toExportMap[utils.IPsCsv], sdModel)
+			}
+		}
+	}
+
 	storDataStats, err := tpExp.storDb.GetTPStats(tpExp.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(fmt.Sprintf("<%s> error: %s, when getting %s from stordb for export", utils.ApierS, err, utils.TpStats))

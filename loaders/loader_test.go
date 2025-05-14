@@ -1506,6 +1506,7 @@ func TestNewLoaderWithMultiFiles(t *testing.T) {
 		"File1.csv":                 {},
 		"File2.csv":                 {},
 		utils.FiltersCsv:            {},
+		utils.IPsCsv:                {},
 		utils.ResourcesCsv:          {},
 		utils.RoutesCsv:             {},
 		utils.StatsCsv:              {},
