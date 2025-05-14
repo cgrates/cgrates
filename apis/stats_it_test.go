@@ -209,6 +209,7 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
+			Stored:       true,
 		},
 	}
 
@@ -247,6 +248,7 @@ func testStatsSetStatQueueProfiles(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
+			Stored:       true,
 		},
 	}
 
@@ -303,6 +305,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
+		Stored:       true,
 	}
 
 	rplyStrMetrics := make(map[string]string)
@@ -382,6 +385,7 @@ func testStatsGetStatQueueAfterSet(t *testing.T) {
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
+		Stored:       true,
 	}
 
 	rplyStrMetrics = map[string]string{}
@@ -489,6 +493,7 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
+			Stored:       true,
 		},
 		{
 			Tenant: "cgrates.org",
@@ -516,6 +521,7 @@ func testStatsGetStatQueueProfiles1(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
+			Stored:       true,
 		},
 	}
 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
@@ -562,6 +568,7 @@ func testStatsGetStatQueueProfilesWithPrefix(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
+			Stored:       true,
 		},
 	}
 	if err := sqRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfiles,
@@ -1317,6 +1324,7 @@ func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{"THD_ID"},
+			Stored:       true,
 		},
 	}
 
@@ -1345,6 +1353,7 @@ func testStatsSetStatQueueProfileBeforeProcessEv(t *testing.T) {
 			},
 		},
 		ThresholdIDs: []string{"THD_ID"},
+		Stored:       true,
 	}
 
 	var rplySqPrf engine.StatQueueProfile

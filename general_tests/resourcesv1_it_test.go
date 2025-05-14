@@ -112,6 +112,7 @@ func testV1RsSetProfile(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
+			Stored:       true,
 		},
 	}
 	var result string
