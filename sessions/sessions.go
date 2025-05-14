@@ -1423,7 +1423,7 @@ func (sS *SessionS) accounSMaxAbstracts(ctx *context.Context, cgrEvs map[string]
 	}
 	maxAbstracts = make(map[string]*utils.Decimal)
 	for runID, cgrEv := range cgrEvs {
-		acntCost := new(utils.EventCharges)
+		var acntCost utils.EventCharges
 		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().AccountSConns,
 			utils.AccountSv1MaxAbstracts, cgrEv, &acntCost); err != nil {
 			return
