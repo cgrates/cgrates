@@ -510,6 +510,7 @@ func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 				},
 			},
 			ThresholdIDs: []string{utils.MetaNone},
+			Stored:       true,
 		},
 	}
 
@@ -538,6 +539,7 @@ func testActionsSetStatQueueProfileBeforeExecuteResetSQ(t *testing.T) {
 			},
 		},
 		ThresholdIDs: []string{utils.MetaNone},
+		Stored:       true,
 	}
 
 	var rplySqPrf engine.StatQueueProfile
