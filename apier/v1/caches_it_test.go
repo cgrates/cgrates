@@ -163,7 +163,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 35
+	expStats[utils.CacheLoadIDs].Items = 38
 	expStats[utils.CacheTimings].Items = 12
 	expStats[utils.CacheThresholdFilterIndexes].Items = 5
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
@@ -235,7 +235,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
-	expStats[utils.CacheLoadIDs].Items = 35
+	expStats[utils.CacheLoadIDs].Items = 38
 	expStats[utils.CacheTimings].Items = 12
 	expStats[utils.CacheThresholdFilterIndexes].Items = 5
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1

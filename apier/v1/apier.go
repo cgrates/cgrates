@@ -1717,6 +1717,44 @@ func (apierSv1 *APIerSv1) ExportToFolder(ctx *context.Context, arg *utils.ArgExp
 				}
 			}
 			csvWriter.Flush()
+		case utils.MetaIPs:
+			prfx := utils.IPProfilesPrefix
+			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)
+			if err != nil {
+				return err
+			}
+			if len(keys) == 0 { // if we don't find items we skip
+				continue
+			}
+			f, err := os.Create(path.Join(arg.Path, utils.IPsCsv))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			csvWriter := csv.NewWriter(f)
+			csvWriter.Comma = utils.CSVSep
+			//write the header of the file
+			if err := csvWriter.Write(engine.IPMdls{}.CSVHeader()); err != nil {
+				return err
+			}
+			for _, key := range keys {
+				tntID := strings.SplitN(key[len(prfx):], utils.InInFieldSep, 2)
+				ipPrf, err := apierSv1.DataManager.GetIPProfile(tntID[0], tntID[1],
+					true, false, utils.NonTransactional)
+				if err != nil {
+					return err
+				}
+				for _, model := range engine.APItoModelIP(
+					engine.IPProfileToAPI(ipPrf)) {
+					if record, err := engine.CsvDump(model); err != nil {
+						return err
+					} else if err := csvWriter.Write(record); err != nil {
+						return err
+					}
+				}
+			}
+			csvWriter.Flush()
 		case utils.MetaStats:
 			prfx := utils.StatQueueProfilePrefix
 			keys, err := apierSv1.DataManager.DataDB().GetKeysForPrefix(prfx)

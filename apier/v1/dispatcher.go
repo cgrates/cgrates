@@ -415,6 +415,45 @@ func (dRs *DispatcherResourceSv1) ReleaseResources(ctx *context.Context, args *u
 	return dRs.dRs.ResourceSv1ReleaseResources(ctx, args, reply)
 }
 
+func NewDispatcherIPsV1(dps *dispatchers.DispatcherService) *DispatcherIPsV1 {
+	return &DispatcherIPsV1{dRs: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherIPsV1 struct {
+	dRs *dispatchers.DispatcherService
+}
+
+// Ping implements IPsV1Ping
+func (dRs *DispatcherIPsV1) Ping(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+	return dRs.dRs.IPsV1Ping(ctx, args, reply)
+}
+
+// GetIPsForEvent implements IPsV1GetIPsForEvent
+func (dRs *DispatcherIPsV1) GetIPsForEvent(ctx *context.Context, args *utils.CGREvent,
+	reply *engine.IPs) error {
+	return dRs.dRs.IPsV1GetIPsForEvent(ctx, args, reply)
+}
+
+func (dRs *DispatcherIPsV1) GetIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IP) error {
+	return dRs.dRs.IPsV1GetIP(ctx, args, reply)
+}
+
+func (dRs *DispatcherIPsV1) AuthorizeIPs(ctx *context.Context, args *utils.CGREvent,
+	reply *string) error {
+	return dRs.dRs.IPsV1AuthorizeIPs(ctx, args, reply)
+}
+
+func (dRs *DispatcherIPsV1) AllocateIPs(ctx *context.Context, args *utils.CGREvent,
+	reply *string) error {
+	return dRs.dRs.IPsV1AllocateIPs(ctx, args, reply)
+}
+
+func (dRs *DispatcherIPsV1) ReleaseIPs(ctx *context.Context, args *utils.CGREvent,
+	reply *string) error {
+	return dRs.dRs.IPsV1ReleaseIPs(ctx, args, reply)
+}
+
 func NewDispatcherRouteSv1(dps *dispatchers.DispatcherService) *DispatcherRouteSv1 {
 	return &DispatcherRouteSv1{dRoute: dps}
 }
@@ -1132,6 +1171,16 @@ func (dS *DispatcherReplicatorSv1) GetResourceProfile(ctx *context.Context, tntI
 	return dS.dS.ReplicatorSv1GetResourceProfile(ctx, tntID, reply)
 }
 
+// GetIP
+func (dS *DispatcherReplicatorSv1) GetIP(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IP) error {
+	return dS.dS.ReplicatorSv1GetIP(ctx, tntID, reply)
+}
+
+// GetIPProfile
+func (dS *DispatcherReplicatorSv1) GetIPProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IPProfile) error {
+	return dS.dS.ReplicatorSv1GetIPProfile(ctx, tntID, reply)
+}
+
 // GetActionTriggers
 func (dS *DispatcherReplicatorSv1) GetActionTriggers(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
 	return dS.dS.ReplicatorSv1GetActionTriggers(ctx, id, reply)
@@ -1259,6 +1308,16 @@ func (dS *DispatcherReplicatorSv1) SetResourceProfile(ctx *context.Context, args
 	return dS.dS.ReplicatorSv1SetResourceProfile(ctx, args, reply)
 }
 
+// SetIP
+func (dS *DispatcherReplicatorSv1) SetIP(ctx *context.Context, args *engine.IPWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetIP(ctx, args, reply)
+}
+
+// SetIPProfile
+func (dS *DispatcherReplicatorSv1) SetIPProfile(ctx *context.Context, args *engine.IPProfileWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1SetIPProfile(ctx, args, reply)
+}
+
 // SetActionTriggers
 func (dS *DispatcherReplicatorSv1) SetActionTriggers(ctx *context.Context, args *engine.SetActionTriggersArgWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1SetActionTriggers(ctx, args, reply)
@@ -1372,6 +1431,16 @@ func (dS *DispatcherReplicatorSv1) RemoveResource(ctx *context.Context, args *ut
 // RemoveResourceProfile
 func (dS *DispatcherReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return dS.dS.ReplicatorSv1RemoveResourceProfile(ctx, args, reply)
+}
+
+// RemoveIP
+func (dS *DispatcherReplicatorSv1) RemoveIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveIP(ctx, args, reply)
+}
+
+// RemoveIPProfile
+func (dS *DispatcherReplicatorSv1) RemoveIPProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return dS.dS.ReplicatorSv1RemoveIPProfile(ctx, args, reply)
 }
 
 // RemoveActionTriggers

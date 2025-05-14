@@ -115,6 +115,8 @@ const CGRATES_CFG_JSON = `
 		"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*ips": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -132,6 +134,7 @@ const CGRATES_CFG_JSON = `
 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -216,6 +219,7 @@ const CGRATES_CFG_JSON = `
 		"*tp_action_triggers": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*tp_account_actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*tp_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*tp_ips": {"limit": -1, "ttl": "", "static_ttl": false, "remote": false, "replicate": false},
 		"*tp_stats": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*tp_rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*tp_trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -309,6 +313,9 @@ const CGRATES_CFG_JSON = `
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control resource profiles caching
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control resources caching
 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching resources to events
+		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control ip profiles caching
+		"*ips": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control ips caching
+		"*event_ips": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching ips to events
 		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control trend profiles caching
 		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control trends caching
 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// ranking profiles
@@ -324,6 +331,7 @@ const CGRATES_CFG_JSON = `
 		"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control dispatcher profile caching
 		"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control dispatcher hosts caching
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control resource filter indexes caching
+		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control ip filter indexes caching
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control stat filter indexes caching
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control threshold filter indexes caching
 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control route filter indexes caching
@@ -1027,6 +1035,22 @@ const CGRATES_CFG_JSON = `
 				],
 			},
 			{
+				"type": "*ips",		// data source type
+				"file_name": "IPs.csv",	// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~*req.3"},
+					{"tag": "TTL", "path": "TTL", "type": "*variable", "value": "~*req.4"},
+					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.5"},
+					{"tag": "AddressPool", "path": "AddressPool", "type": "*variable", "value": "~*req.6"},
+					{"tag": "Allocation", "path": "Allocation", "type": "*variable", "value": "~*req.7"},
+					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.8"},
+					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~*req.9"}
+				]
+			},
+			{
 				"type": "*stats",		// data source type
 				"file_name": "Stats.csv",	// file name in the tp_in_dir
 				"fields": [
@@ -1423,6 +1447,7 @@ const CGRATES_CFG_JSON = `
 	"keys": []
 },
 
+
 "sentrypeer":{
 	 "client_id":"",
 	 "client_secret":"",
@@ -1431,6 +1456,23 @@ const CGRATES_CFG_JSON = `
 	 "numbers_url":"https://sentrypeer.com/api/phone-numbers",
 	 "audience":"https://sentrypeer.com/api",
 	 "grant_type":"client_credentials"
+},
+
+
+"ips": {
+	"enabled": false,		// enables the IPs service: <true|false>
+	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"indexed_selects": true,	// enable profile matching exclusively on indexes
+	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"exists_indexed_fields": [],	// query indexes based on these fields for faster processing
+	"nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+	"opts": {
+	    "*usageID": "",
+	    // "*ttl": "72h",
+	    "*units": 1
+	}
 }
 
 }`

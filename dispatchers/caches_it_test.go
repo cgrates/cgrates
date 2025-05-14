@@ -141,7 +141,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheRouteProfiles].Items = 3
 	expStats[utils.CacheThresholdProfiles].Items = 2
 	expStats[utils.CacheThresholds].Items = 2
-	expStats[utils.CacheLoadIDs].Items = 35
+	expStats[utils.CacheLoadIDs].Items = 38
 	expStats[utils.CacheTimings].Items = 10
 	expStats[utils.CacheThresholdFilterIndexes].Items = 2
 	expStats[utils.CacheThresholdFilterIndexes].Groups = 1
@@ -179,6 +179,8 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheSharedGroups:            utils.MetaReady,
 		utils.CacheResourceProfiles:        utils.MetaReady,
 		utils.CacheResources:               utils.MetaReady,
+		utils.CacheIPProfiles:              utils.MetaReady,
+		utils.CacheIPs:                     utils.MetaReady,
 		utils.CacheTimings:                 utils.MetaReady,
 		utils.CacheStatQueueProfiles:       utils.MetaReady,
 		utils.CacheStatQueues:              utils.MetaReady,
@@ -193,6 +195,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheDiameterMessages:        utils.MetaReady,
 		utils.CacheAttributeFilterIndexes:  utils.MetaReady,
 		utils.CacheResourceFilterIndexes:   utils.MetaReady,
+		utils.CacheIPFilterIndexes:         utils.MetaReady,
 		utils.CacheStatFilterIndexes:       utils.MetaReady,
 		utils.CacheThresholdFilterIndexes:  utils.MetaReady,
 		utils.CacheRouteFilterIndexes:      utils.MetaReady,
@@ -203,6 +206,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheClosedSessions:          utils.MetaReady,
 		utils.CacheDispatcherRoutes:        utils.MetaReady,
 		utils.CacheEventResources:          utils.MetaReady,
+		utils.CacheEventIPs:                utils.MetaReady,
 		utils.CacheRPCConnections:          utils.MetaReady,
 		utils.CacheRPCResponses:            utils.MetaReady,
 		utils.CacheRatingProfilesTmp:       utils.MetaReady,

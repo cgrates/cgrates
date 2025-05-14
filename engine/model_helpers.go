@@ -1228,6 +1228,193 @@ func ResourceProfileToAPI(rp *ResourceProfile) (tpRL *utils.TPResourceProfile) {
 	return
 }
 
+type IPMdls []*IPMdl
+
+// CSVHeader return the header for csv fields as a slice of string
+func (tps IPMdls) CSVHeader() []string {
+	return []string{
+		"#" + utils.Tenant,
+		utils.ID,
+		utils.FilterIDs,
+		utils.ActivationIntervalString,
+		utils.TTL,
+		utils.Limit,
+		utils.AllocationMessage,
+		utils.Type,
+		utils.AddressPool,
+		utils.Allocation,
+		utils.Blocker,
+		utils.Stored,
+		utils.Weight,
+	}
+}
+
+func (tps IPMdls) AsTPIPs() []*utils.TPIPProfile {
+	mrl := make(map[string]*utils.TPIPProfile)
+	filterMap := make(map[string]utils.StringSet)
+	for _, tp := range tps {
+		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
+		rl, found := mrl[tenID]
+		if !found {
+			rl = &utils.TPIPProfile{
+				TPid:        tp.Tpid,
+				Tenant:      tp.Tenant,
+				ID:          tp.ID,
+				Stored:      tp.Stored,
+				Type:        tp.Type,
+				AddressPool: tp.AddressPool,
+				Allocation:  tp.Allocation,
+			}
+		}
+		if tp.TTL != utils.EmptyString {
+			rl.TTL = tp.TTL
+		}
+		if tp.Weight != 0 {
+			rl.Weight = tp.Weight
+		}
+		rl.Stored = tp.Stored
+		if len(tp.ActivationInterval) != 0 {
+			rl.ActivationInterval = new(utils.TPActivationInterval)
+			aiSplt := strings.Split(tp.ActivationInterval, utils.InfieldSep)
+			if len(aiSplt) == 2 {
+				rl.ActivationInterval.ActivationTime = aiSplt[0]
+				rl.ActivationInterval.ExpiryTime = aiSplt[1]
+			} else if len(aiSplt) == 1 {
+				rl.ActivationInterval.ActivationTime = aiSplt[0]
+			}
+		}
+		if tp.FilterIDs != utils.EmptyString {
+			if _, has := filterMap[tenID]; !has {
+				filterMap[tenID] = make(utils.StringSet)
+			}
+			filterMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
+		}
+		mrl[tenID] = rl
+	}
+	result := make([]*utils.TPIPProfile, len(mrl))
+	i := 0
+	for tntID, rl := range mrl {
+		result[i] = rl
+		result[i].FilterIDs = filterMap[tntID].AsSlice()
+		i++
+	}
+	return result
+}
+
+func APItoModelIP(tp *utils.TPIPProfile) IPMdls {
+	if tp == nil {
+		return nil
+	}
+	var mdls IPMdls
+	// In case that TPIPProfile don't have filter
+	if len(tp.FilterIDs) == 0 {
+		mdl := &IPMdl{
+			Tpid:        tp.TPid,
+			Tenant:      tp.Tenant,
+			ID:          tp.ID,
+			Type:        tp.Type,
+			AddressPool: tp.AddressPool,
+			Allocation:  tp.Allocation,
+			Stored:      tp.Stored,
+			TTL:         tp.TTL,
+			Weight:      tp.Weight,
+		}
+		if tp.ActivationInterval != nil {
+			if tp.ActivationInterval.ActivationTime != utils.EmptyString {
+				mdl.ActivationInterval = tp.ActivationInterval.ActivationTime
+			}
+			if tp.ActivationInterval.ExpiryTime != utils.EmptyString {
+				mdl.ActivationInterval += utils.InfieldSep + tp.ActivationInterval.ExpiryTime
+			}
+		}
+		mdls = append(mdls, mdl)
+	}
+	for i, fltr := range tp.FilterIDs {
+		mdl := &IPMdl{
+			Tpid:   tp.TPid,
+			Tenant: tp.Tenant,
+			ID:     tp.ID,
+			Stored: tp.Stored,
+		}
+		if i == 0 {
+			mdl.Type = tp.Type
+			mdl.AddressPool = tp.AddressPool
+			mdl.Allocation = tp.Allocation
+			mdl.TTL = tp.TTL
+			mdl.Weight = tp.Weight
+			if tp.ActivationInterval != nil {
+				if tp.ActivationInterval.ActivationTime != utils.EmptyString {
+					mdl.ActivationInterval = tp.ActivationInterval.ActivationTime
+				}
+				if tp.ActivationInterval.ExpiryTime != utils.EmptyString {
+					mdl.ActivationInterval += utils.InfieldSep + tp.ActivationInterval.ExpiryTime
+				}
+			}
+		}
+		mdl.FilterIDs = fltr
+		mdls = append(mdls, mdl)
+	}
+	return mdls
+}
+
+func APItoIP(tp *utils.TPIPProfile, timezone string) (*IPProfile, error) {
+	ipp := &IPProfile{
+		Tenant:      tp.Tenant,
+		ID:          tp.ID,
+		Type:        tp.Type,
+		AddressPool: tp.AddressPool,
+		Allocation:  tp.Allocation,
+		Weight:      tp.Weight,
+		Stored:      tp.Stored,
+		FilterIDs:   make([]string, len(tp.FilterIDs)),
+	}
+	if tp.TTL != utils.EmptyString {
+		var err error
+		if ipp.TTL, err = utils.ParseDurationWithNanosecs(tp.TTL); err != nil {
+			return nil, err
+		}
+	}
+
+	copy(ipp.FilterIDs, tp.FilterIDs)
+
+	if tp.ActivationInterval != nil {
+		var err error
+		if ipp.ActivationInterval, err = tp.ActivationInterval.AsActivationInterval(timezone); err != nil {
+			return nil, err
+		}
+	}
+	return ipp, nil
+}
+
+func IPProfileToAPI(ipp *IPProfile) *utils.TPIPProfile {
+	tp := &utils.TPIPProfile{
+		Tenant:             ipp.Tenant,
+		ID:                 ipp.ID,
+		FilterIDs:          make([]string, len(ipp.FilterIDs)),
+		ActivationInterval: new(utils.TPActivationInterval),
+		Type:               ipp.Type,
+		AddressPool:        ipp.AddressPool,
+		Allocation:         ipp.Allocation,
+		Stored:             ipp.Stored,
+		Weight:             ipp.Weight,
+	}
+	if ipp.TTL != time.Duration(0) {
+		tp.TTL = ipp.TTL.String()
+	}
+
+	copy(tp.FilterIDs, ipp.FilterIDs)
+
+	if ipp.ActivationInterval != nil {
+		if !ipp.ActivationInterval.ActivationTime.IsZero() {
+			tp.ActivationInterval.ActivationTime = ipp.ActivationInterval.ActivationTime.Format(time.RFC3339)
+		}
+		if !ipp.ActivationInterval.ExpiryTime.IsZero() {
+			tp.ActivationInterval.ExpiryTime = ipp.ActivationInterval.ExpiryTime.Format(time.RFC3339)
+		}
+	}
+	return tp
+}
+
 type StatMdls []*StatMdl
 
 // CSVHeader return the header for csv fields as a slice of string
