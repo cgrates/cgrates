@@ -58,12 +58,11 @@ cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,
 cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
 	csvr, err := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(utils.CSVSep, dests, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, utils.EmptyString,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString,
-		utils.EmptyString, utils.EmptyString, utils.EmptyString),
-		utils.EmptyString, utils.EmptyString, nil, nil, false)
+		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
+		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
+	), utils.EmptyString, utils.EmptyString, nil, nil, false)
 	if err != nil {
 		t.Error(err)
 	}

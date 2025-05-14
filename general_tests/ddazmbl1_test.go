@@ -60,6 +60,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,12344,TOPUP10_AT,,,`
 	resLimits := ``
+	ips := ``
 	stats := ``
 	trends := ``
 	rankings := ``
@@ -72,7 +73,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates,
 			destinationRates, ratingPlans, ratingProfiles,
 			sharedGroups, actions, actionPlans, actionTriggers, accountActions,
-			resLimits, stats, trends, rankings, thresholds, filters, suppliers,
+			resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers,
 			attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil, false)
 	if err != nil {
 		t.Error(err)

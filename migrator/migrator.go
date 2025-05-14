@@ -180,6 +180,8 @@ func (m *Migrator) Migrate(taskIDs []string) (stats map[string]int, err error) {
 			err = m.migrateTPratingprofiles()
 		case utils.MetaTpResources:
 			err = m.migrateTPresources()
+		case utils.MetaTpIPs:
+			err = m.migrateTPips()
 		case utils.MetaTpRates:
 			err = m.migrateTPrates()
 		case utils.MetaTpTimings:

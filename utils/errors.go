@@ -48,6 +48,8 @@ var (
 	ErrNotConvertible                   = errors.New("NOT_CONVERTIBLE")
 	ErrResourceUnavailable              = errors.New("RESOURCE_UNAVAILABLE")
 	ErrResourceUnauthorized             = errors.New("RESOURCE_UNAUTHORIZED")
+	ErrIPUnavailable                    = errors.New("IP_UNAVAILABLE")
+	ErrIPUnauthorized                   = errors.New("IP_UNAUTHORIZED")
 	ErrNoActiveSession                  = errors.New("NO_ACTIVE_SESSION")
 	ErrPartiallyExecuted                = errors.New("PARTIALLY_EXECUTED")
 	ErrMaxUsageExceeded                 = errors.New("MAX_USAGE_EXCEEDED")
@@ -105,6 +107,8 @@ var (
 		ErrNotConvertible.Error():                   ErrNotConvertible,
 		ErrResourceUnavailable.Error():              ErrResourceUnavailable,
 		ErrResourceUnauthorized.Error():             ErrResourceUnauthorized,
+		ErrIPUnavailable.Error():                    ErrIPUnavailable,
+		ErrIPUnauthorized.Error():                   ErrIPUnauthorized,
 		ErrNoActiveSession.Error():                  ErrNoActiveSession,
 		ErrPartiallyExecuted.Error():                ErrPartiallyExecuted,
 		ErrMaxUsageExceeded.Error():                 ErrMaxUsageExceeded,

@@ -556,6 +556,28 @@ func (sqls *SQLStorage) SetTPResources(rls []*utils.TPResourceProfile) error {
 	return nil
 }
 
+func (sqls *SQLStorage) SetTPIPs(tps []*utils.TPIPProfile) error {
+	if len(tps) == 0 {
+		return nil
+	}
+	tx := sqls.db.Begin()
+	for _, tp := range tps {
+		// Remove previous
+		if err := tx.Where(&IPMdl{Tpid: tp.TPid, ID: tp.ID}).Delete(IPMdl{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, mrl := range APItoModelIP(tp) {
+			if err := tx.Create(&mrl).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (sqls *SQLStorage) SetTPStats(sts []*utils.TPStatProfile) error {
 	if len(sts) == 0 {
 		return nil
@@ -1440,6 +1462,25 @@ func (sqls *SQLStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 		return nil, err
 	}
 	arls := rls.AsTPResources()
+	if len(arls) == 0 {
+		return arls, utils.ErrNotFound
+	}
+	return arls, nil
+}
+
+func (sqls *SQLStorage) GetTPIPs(tpid, tenant, id string) ([]*utils.TPIPProfile, error) {
+	var rls IPMdls
+	q := sqls.db.Where("tpid = ?", tpid)
+	if len(id) != 0 {
+		q = q.Where("id = ?", id)
+	}
+	if len(tenant) != 0 {
+		q = q.Where("tenant = ?", tenant)
+	}
+	if err := q.Find(&rls).Error; err != nil {
+		return nil, err
+	}
+	arls := rls.AsTPIPs()
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}
