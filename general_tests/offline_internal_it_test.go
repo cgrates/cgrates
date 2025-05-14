@@ -38,6 +38,10 @@ import (
 )
 
 func TestOfflineInternal(t *testing.T) { // run with sudo
+	switch *utils.DBType {
+	case utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres:
+		t.SkipNow()
+	}
 	paths := []string{
 		path.Join(*utils.DataDir, "conf", "samples", "offline_internal"),                     // dump -1
 		path.Join(*utils.DataDir, "conf", "samples", "offline_internal_ms"),                  // dump ms
