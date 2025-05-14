@@ -310,6 +310,12 @@ func getFiltersAndContexts(dm *DataManager, indxType, tnt, id string) (filterIDs
 			return
 		}
 		filterIDs = rs.FilterIDs
+	case utils.CacheIPFilterIndexes:
+		var rs *IPProfile
+		if rs, err = dm.GetIPProfile(tnt, id, true, false, utils.NonTransactional); err != nil {
+			return
+		}
+		filterIDs = rs.FilterIDs
 	case utils.CacheStatFilterIndexes:
 		var st *StatQueueProfile
 		if st, err = dm.GetStatQueueProfile(tnt, id, true, false, utils.NonTransactional); err != nil {

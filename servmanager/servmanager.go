@@ -228,6 +228,8 @@ func (srvMngr *ServiceManager) handleReload() {
 			go srvMngr.reloadService(utils.CoreS)
 		case <-srvMngr.GetConfig().GetReloadChan(config.JanusAgentJson):
 			go srvMngr.reloadService(utils.JanusAgent)
+		case <-srvMngr.GetConfig().GetReloadChan(config.IPsJSON):
+			// go srvMngr.reloadService(utils.IPs)
 		}
 		// handle RPC server
 	}

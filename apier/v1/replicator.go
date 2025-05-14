@@ -218,6 +218,28 @@ func (rplSv1 *ReplicatorSv1) GetResourceProfile(ctx *context.Context, tntID *uti
 	return nil
 }
 
+// GetIP is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetIP(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IP) error {
+	engine.UpdateReplicationFilters(utils.IPsPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetIPDrv(tntID.Tenant, tntID.ID)
+	if err != nil {
+		return err
+	}
+	*reply = *rcv
+	return nil
+}
+
+// GetIPProfile is the remote method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) GetIPProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IPProfile) error {
+	engine.UpdateReplicationFilters(utils.IPProfilesPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetIPProfileDrv(tntID.Tenant, tntID.ID)
+	if err != nil {
+		return err
+	}
+	*reply = *rcv
+	return nil
+}
+
 // GetActionTriggers is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetActionTriggers(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error {
 	engine.UpdateReplicationFilters(utils.ActionTriggerPrefix, id.Arg, utils.IfaceAsString(id.APIOpts[utils.RemoteHostOpt]))
@@ -582,6 +604,37 @@ func (rplSv1 *ReplicatorSv1) SetResource(ctx *context.Context, rs *engine.Resour
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(rs.APIOpts[utils.CacheOpt]),
 		rs.Tenant, utils.CacheResources, rs.TenantID(), utils.EmptyString, nil, nil, rs.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// SetIPProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetIPProfile(ctx *context.Context, ipp *engine.IPProfileWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetIPProfileDrv(ipp.IPProfile); err != nil {
+		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1SetIPProfile> Delaying cache call for %v", rplSv1.v1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.Config.GeneralCfg().CachingDelay)
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(ipp.APIOpts[utils.CacheOpt]),
+		ipp.Tenant, utils.CacheIPProfiles, ipp.TenantID(), utils.EmptyString, &ipp.FilterIDs, nil, ipp.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// SetIP is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) SetIP(ctx *context.Context, ip *engine.IPWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetIPDrv(ip.IP); err != nil {
+		return
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(ip.APIOpts[utils.CacheOpt]),
+		ip.Tenant, utils.CacheIPs, ip.TenantID(), utils.EmptyString, nil, nil, ip.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -1007,6 +1060,37 @@ func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *u
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
 		args.Tenant, utils.CacheResourceProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveIP is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemoveIPDrv(args.Tenant, args.ID); err != nil {
+		return
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheIPs, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+// RemoveIPProfile is the replication method coresponding to the dataDb driver method
+func (rplSv1 *ReplicatorSv1) RemoveIPProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().RemoveIPProfileDrv(args.Tenant, args.ID); err != nil {
+		return
+	}
+	// delay if needed before cache call
+	if rplSv1.v1.Config.GeneralCfg().CachingDelay != 0 {
+		utils.Logger.Info(fmt.Sprintf("<ReplicatorSv1RemoveIPProfile> Delaying cache call for %v", rplSv1.v1.Config.GeneralCfg().CachingDelay))
+		time.Sleep(rplSv1.v1.Config.GeneralCfg().CachingDelay)
+	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheIPProfiles, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

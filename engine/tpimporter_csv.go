@@ -276,6 +276,17 @@ func (tpImp *TPCSVImporter) importResources(fn string) error {
 	return tpImp.StorDb.SetTPResources(rls)
 }
 
+func (tpImp *TPCSVImporter) importIPs(fn string) error {
+	if tpImp.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	ips, err := tpImp.csvr.GetTPIPs(tpImp.TPid, "", "")
+	if err != nil {
+		return err
+	}
+	return tpImp.StorDb.SetTPIPs(ips)
+}
+
 func (tpImp *TPCSVImporter) importStats(fn string) error {
 	if tpImp.Verbose {
 		log.Printf("Processing file: <%s> ", fn)

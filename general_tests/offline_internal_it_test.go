@@ -293,8 +293,8 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					return nil
 				}); err != nil {
 					t.Error(err)
-				} else if dirs != 40 {
-					t.Errorf("expected <%d> directories, received <%d>", 40, dirs)
+				} else if dirs != 43 {
+					t.Errorf("expected <%d> directories, received <%d>", 43, dirs)
 				} else if i > 6 && (files != 29 && files != 30) { // depends if rewriting is scheduled or not by the time we shutdown
 					t.Errorf("expected 29 or 30 files, received <%d>", files)
 				} else if i < 6 && files != 28 {
@@ -316,8 +316,8 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					return nil
 				}); err != nil {
 					t.Error(err)
-				} else if dirs != 27 {
-					t.Errorf("expected <%d> directories, received <%d>", 27, dirs)
+				} else if dirs != 28 {
+					t.Errorf("expected <%d> directories, received <%d>", 28, dirs)
 				} else if files != 1 {
 					t.Errorf("expected <%d> files, received <%d>", 1, files)
 				}

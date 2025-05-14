@@ -142,7 +142,7 @@ func initConfigSv1(internalConfigChan chan birpc.ClientConnector,
 }
 
 func startRPC(server *cores.Server, internalRaterChan,
-	internalCdrSChan, internalRsChan, internalStatSChan,
+	internalCdrSChan, internalRsChan, internalIPsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalTrendSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
 	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan,
@@ -158,6 +158,8 @@ func startRPC(server *cores.Server, internalRaterChan,
 			internalSMGChan <- smg
 		case rls := <-internalRsChan:
 			internalRsChan <- rls
+		case ips := <-internalIPsChan:
+			internalIPsChan <- ips
 		case statS := <-internalStatSChan:
 			internalStatSChan <- statS
 		case attrS := <-internalAttrSChan:
@@ -434,6 +436,7 @@ func main() {
 	internalTrendSChan := make(chan birpc.ClientConnector, 1)
 	internalRankingSChan := make(chan birpc.ClientConnector, 1)
 	internalResourceSChan := make(chan birpc.ClientConnector, 1)
+	internalIPsChan := make(chan birpc.ClientConnector, 1)
 	internalRouteSChan := make(chan birpc.ClientConnector, 1)
 	internalSchedulerSChan := make(chan birpc.ClientConnector, 1)
 	internalRALsChan := make(chan birpc.ClientConnector, 1)
@@ -456,6 +459,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       internalGuardianSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        internalLoaderSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaIPs):            internalIPsChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler):      internalSchedulerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
@@ -498,6 +502,7 @@ func main() {
 		utils.RadiusAgent:     new(sync.WaitGroup),
 		utils.RALService:      new(sync.WaitGroup),
 		utils.ResourceS:       new(sync.WaitGroup),
+		utils.IPs:             new(sync.WaitGroup),
 		utils.ResponderS:      new(sync.WaitGroup),
 		utils.RouteS:          new(sync.WaitGroup),
 		utils.SchedulerS:      new(sync.WaitGroup),
@@ -590,6 +595,8 @@ func main() {
 		internalRankingSChan, connManager, anz, srvDep)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		internalResourceSChan, connManager, anz, srvDep)
+	ips := services.NewIPService(cfg, dmService, cacheS, filterSChan, server,
+		internalResourceSChan, connManager, anz, srvDep)
 	routeS := services.NewRouteService(cfg, dmService, cacheS, filterSChan, server,
 		internalRouteSChan, connManager, anz, srvDep)
 
@@ -613,7 +620,7 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server,
 		internalLoaderSChan, connManager, anz, srvDep)
 
-	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, rnS, reS, routeS, schS, rals,
+	srvManager.AddServices(gvService, attrS, chrS, tS, stS, trS, rnS, reS, ips, routeS, schS, rals,
 		apiSv1, apiSv2, cdrS, smg, coreS,
 		services.NewDNSAgent(cfg, filterSChan, shdChan, connManager, caps, srvDep),
 		services.NewFreeswitchAgent(cfg, shdChan, connManager, srvDep),
@@ -654,6 +661,7 @@ func main() {
 	engine.IntRPC.AddInternalRPCClient(utils.GuardianSv1, internalGuardianSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.LoaderSv1, internalLoaderSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.ResourceSv1, internalResourceSChan)
+	engine.IntRPC.AddInternalRPCClient(utils.IPsV1, internalIPsChan)
 	engine.IntRPC.AddInternalRPCClient(utils.Responder, internalResponderChan)
 	engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, internalSchedulerSChan)
 	engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSessionSChan)
@@ -681,7 +689,7 @@ func main() {
 
 	// Serve rpc connections
 	go startRPC(server, internalResponderChan, internalCDRServerChan,
-		internalResourceSChan, internalStatSChan,
+		internalResourceSChan, internalIPsChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalTrendSChan, internalRouteSChan, internalSessionSChan, internalAnalyzerSChan,
 		internalDispatcherSChan, internalLoaderSChan, internalRALsChan,

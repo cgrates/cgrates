@@ -123,8 +123,10 @@ func TestDataDBReload(t *testing.T) {
 			utils.MetaSharedGroups:        {Limit: -1},
 			utils.MetaTimings:             {Limit: -1},
 			utils.MetaResourceProfile:     {Limit: -1},
+			utils.MetaIPProfiles:          {Limit: -1},
 			utils.MetaStatQueues:          {Limit: -1},
 			utils.MetaResources:           {Limit: -1},
+			utils.MetaIPs:                 {Limit: -1},
 			utils.MetaStatQueueProfiles:   {Limit: -1},
 			utils.MetaRankings:            {Limit: -1},
 			utils.MetaRankingProfiles:     {Limit: -1},
@@ -143,6 +145,7 @@ func TestDataDBReload(t *testing.T) {
 			utils.CacheVersions:           {Limit: -1},
 
 			utils.CacheResourceFilterIndexes:   {Limit: -1},
+			utils.CacheIPFilterIndexes:         {Limit: -1},
 			utils.CacheStatFilterIndexes:       {Limit: -1},
 			utils.CacheThresholdFilterIndexes:  {Limit: -1},
 			utils.CacheRouteFilterIndexes:      {Limit: -1},

@@ -13,7 +13,7 @@
 },
 
 "filters": {			
-	"apiers_conns": ["*localhost"],	
+	"apiers_conns": ["*localhost"]
 },
 
 "rals": {
@@ -62,12 +62,12 @@
 "radius_agent": {
 	"enabled": true,
 	"sessions_conns": ["*bijson_localhost"],
-	"client_da_addresses": { 		
-		"127.0.0.1": { 		
-			"transport": "udp", 	
-			"host": "", 			
-			"port": 3799, 			
-			"flags": ["*log"] 			
+	"client_da_addresses": {
+		"127.0.0.1": {
+			"transport": "udp",
+			"host": "",
+			"port": 3799,
+			"flags": ["*log"]
 		}
 	},
 	"listeners":[
