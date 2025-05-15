@@ -851,9 +851,9 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, ufMoneyBalances Balances, c
 		}
 		if b.GetValue() >= connectFee {
 			b.SubtractValue(connectFee)
-			acc.countUnits(1, utils.MetaEventConnect, cc, b, fltrS)
 			// the conect fee is not refundable!
 			if count {
+				acc.countUnits(1, utils.MetaEventConnect, cc, b, fltrS)
 				acc.countUnits(connectFee, utils.MetaMonetary, cc, b, fltrS)
 			}
 			connectFeePaid = true
