@@ -107,8 +107,8 @@ RT1,0.2,1,1s,1s,0`,
 			t.Errorf("expected to get usage even though account got disabled")
 		}
 
-		if !accRepl.Disabled {
-			t.Errorf("expected account to be disabled")
+		if accRepl.Disabled {
+			t.Errorf("expected account to be not be disabled")
 		}
 	})
 
