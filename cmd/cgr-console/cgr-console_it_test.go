@@ -1200,6 +1200,10 @@ func testConsoleItCacheStats(t *testing.T) {
 			"Items":  0.,
 			"Groups": 0.,
 		},
+		"*tp_ips": map[string]any{
+			"Items":  0.,
+			"Groups": 0.,
+		},
 		"*tp_routes": map[string]any{
 			"Items":  0.,
 			"Groups": 0.,
@@ -2263,6 +2267,7 @@ func testConsoleItCachePrecacheStatus(t *testing.T) {
 		"*tp_rating_plans":           "*ready",
 		"*tp_rating_profiles":        "*ready",
 		"*tp_resources":              "*ready",
+		"*tp_ips":                    "*ready",
 		"*tp_routes":                 "*ready",
 		"*tp_shared_groups":          "*ready",
 		"*tp_stats":                  "*ready",

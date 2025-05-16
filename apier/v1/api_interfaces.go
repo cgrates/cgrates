@@ -55,6 +55,14 @@ type ResourceSv1Interface interface {
 	GetResourceWithConfig(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.ResourceWithConfig) error
 }
 
+type IPsV1Interface interface {
+	GetIPsForEvent(ctx *context.Context, args *utils.CGREvent, reply *engine.IPs) error
+	AuthorizeIPs(ctx *context.Context, args *utils.CGREvent, reply *string) error
+	AllocateIPs(ctx *context.Context, args *utils.CGREvent, reply *string) error
+	ReleaseIPs(ctx *context.Context, args *utils.CGREvent, reply *string) error
+	GetIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.IP) error
+}
+
 type RouteSv1Interface interface {
 	GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *engine.SortedRoutesList) error
 	GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*engine.RouteProfile) error
@@ -189,6 +197,8 @@ type ReplicatorSv1Interface interface {
 	GetTiming(ctx *context.Context, id *utils.StringWithAPIOpts, reply *utils.TPTiming) error
 	GetResource(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.Resource) error
 	GetResourceProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.ResourceProfile) error
+	GetIP(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IP) error
+	GetIPProfile(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *engine.IPProfile) error
 	GetActionTriggers(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.ActionTriggers) error
 	GetSharedGroup(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.SharedGroup) error
 	GetActions(ctx *context.Context, id *utils.StringWithAPIOpts, reply *engine.Actions) error
@@ -214,6 +224,8 @@ type ReplicatorSv1Interface interface {
 	SetTiming(ctx *context.Context, tm *utils.TPTimingWithAPIOpts, reply *string) error
 	SetResource(ctx *context.Context, rs *engine.ResourceWithAPIOpts, reply *string) error
 	SetResourceProfile(ctx *context.Context, rs *engine.ResourceProfileWithAPIOpts, reply *string) error
+	SetIP(ctx *context.Context, rs *engine.IPWithAPIOpts, reply *string) error
+	SetIPProfile(ctx *context.Context, rs *engine.IPProfileWithAPIOpts, reply *string) error
 	SetActionTriggers(ctx *context.Context, args *engine.SetActionTriggersArgWithAPIOpts, reply *string) error
 	SetSharedGroup(ctx *context.Context, shg *engine.SharedGroupWithAPIOpts, reply *string) error
 	SetActions(ctx *context.Context, args *engine.SetActionsArgsWithAPIOpts, reply *string) error
@@ -237,6 +249,8 @@ type ReplicatorSv1Interface interface {
 	RemoveTiming(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) error
 	RemoveResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error
+	RemoveIPProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error
 	RemoveActionTriggers(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) error
 	RemoveSharedGroup(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) error
 	RemoveActions(ctx *context.Context, id *utils.StringWithAPIOpts, reply *string) error

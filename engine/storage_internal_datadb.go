@@ -216,10 +216,11 @@ func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error
 	case utils.DestinationPrefix, utils.RatingPlanPrefix, utils.RatingProfilePrefix,
 		utils.ActionPrefix, utils.ActionPlanPrefix, utils.AccountPrefix:
 		return iDB.db.HasItem(utils.CachePrefixToInstance[category], subject), nil
-	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
-		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
-		utils.FilterPrefix, utils.RouteProfilePrefix, utils.AttributeProfilePrefix,
-		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
+	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.IPsPrefix,
+		utils.IPProfilesPrefix, utils.StatQueuePrefix, utils.StatQueueProfilePrefix,
+		utils.ThresholdPrefix, utils.ThresholdProfilePrefix, utils.FilterPrefix,
+		utils.RouteProfilePrefix, utils.AttributeProfilePrefix, utils.ChargerProfilePrefix,
+		utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
 		return iDB.db.HasItem(utils.CachePrefixToInstance[category], utils.ConcatenatedKey(tenant, subject)), nil
 	}
 	return false, errors.New("Unsupported HasData category")
@@ -531,6 +532,44 @@ func (iDB *InternalDB) RemoveResourceDrv(tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheResources, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
+}
+
+func (iDB *InternalDB) GetIPProfileDrv(tenant, id string) (*IPProfile, error) {
+	if x, ok := iDB.db.Get(utils.CacheIPProfiles, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
+		return x.(*IPProfile), nil
+	}
+	return nil, utils.ErrNotFound
+}
+
+func (iDB *InternalDB) SetIPProfileDrv(ipp *IPProfile) error {
+	iDB.db.Set(utils.CacheIPProfiles, ipp.TenantID(), ipp, nil,
+		true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) RemoveIPProfileDrv(tenant, id string) error {
+	iDB.db.Remove(utils.CacheIPProfiles, utils.ConcatenatedKey(tenant, id),
+		true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) GetIPDrv(tenant, id string) (*IP, error) {
+	if x, ok := iDB.db.Get(utils.CacheIPs, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
+		return x.(*IP), nil
+	}
+	return nil, utils.ErrNotFound
+}
+
+func (iDB *InternalDB) SetIPDrv(ip *IP) error {
+	iDB.db.Set(utils.CacheIPs, ip.TenantID(), ip, nil,
+		true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) RemoveIPDrv(tenant, id string) error {
+	iDB.db.Remove(utils.CacheIPs, utils.ConcatenatedKey(tenant, id),
+		true, utils.NonTransactional)
+	return nil
 }
 
 func (iDB *InternalDB) GetTimingDrv(id string) (tmg *utils.TPTiming, err error) {
