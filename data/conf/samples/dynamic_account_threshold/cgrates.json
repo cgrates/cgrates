@@ -31,11 +31,13 @@
         "enabled": true,
         "apiers_conns": ["*localhost"],
         "exists_indexed_fields": ["*opts.*account"],
+        "store_interval": "-1",
     },
 
     "stats": {
         "enabled": true,
         "thresholds_conns": ["*localhost"],
+        "store_interval": "-1",
     },
 
     "attributes": {

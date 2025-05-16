@@ -38,6 +38,9 @@ type Attribute struct {
 
 // Clone method for Attribute
 func (a *Attribute) Clone() *Attribute {
+	if a == nil {
+		return nil
+	}
 	clone := &Attribute{
 		Path: a.Path,
 		Type: a.Type,

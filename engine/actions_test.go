@@ -5291,7 +5291,7 @@ func TestDynamicStats(t *testing.T) {
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "tenant;;1;",
-			expectedErr: "invalid number of parameters; expected 12",
+			expectedErr: "invalid number of parameters; expected 14",
 		},
 		{
 			name:        "ActivationIntervalLengthFail",
@@ -5386,6 +5386,214 @@ func TestDynamicStats(t *testing.T) {
 						}
 					} else {
 						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expSqpwo), utils.ToJSON(sqpwo))
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestDynamicAttribute(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var apwo *AttributeProfileWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetAttributeProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if apwo, canCast = args.(*AttributeProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expApwo     *AttributeProfileWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expApwo: &AttributeProfileWithAPIOpts{
+				AttributeProfile: &AttributeProfile{
+					Tenant:    "cgrates.org",
+					ID:        "Attr_1",
+					Contexts:  []string{"*sessions", "*chargers"},
+					FilterIDs: []string{"FLTR_ATTR_1", "FLTR_ATTR_2"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					Attributes: []*Attribute{
+						{
+							FilterIDs: []string{"AttrFltr_1", "AttrFltr2"},
+							Path:      "*req.Subject",
+							Type:      "*constant",
+							Value:     config.NewRSRParsersMustCompile("SUPPLIER1&SUPPLIER2", "&"),
+						},
+					},
+					Blocker: true,
+					Weight:  10,
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1&SUPPLIER2;true;10;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expApwo: &AttributeProfileWithAPIOpts{
+				AttributeProfile: &AttributeProfile{
+					Tenant:    "cgrates.org",
+					ID:        "Attr_1001",
+					Contexts:  []string{"*any"},
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Now(),
+						ExpiryTime:     time.Date(3000, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					Attributes: []*Attribute{
+						{
+							FilterIDs: []string{"AttrFltr_1", "AttrFltr2"},
+							Path:      "*req.Subject",
+							Type:      "*constant",
+							Value:     config.NewRSRParsersMustCompile("SUPPLIER1", "&"),
+						},
+					},
+					Blocker: true,
+					Weight:  10,
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;Attr_<~*req.Account>;*any;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expApwo: &AttributeProfileWithAPIOpts{
+				AttributeProfile: &AttributeProfile{
+					Tenant:             "cgrates.org",
+					ID:                 "Attr_1",
+					Contexts:           nil,
+					FilterIDs:          nil,
+					ActivationInterval: &utils.ActivationInterval{},
+					Attributes:         nil,
+					Blocker:            false,
+					Weight:             0,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;Attr_1;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;;1;",
+			expectedErr: "invalid number of parameters; expected 12",
+		},
+		{
+			name:        "ActivationIntervalLengthFail",
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z&&;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;key:value",
+			expectedErr: utils.ErrUnsupportedFormat.Error(),
+		},
+		{
+			name:        "ActivationIntervalBadStringFail",
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;bad String;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "ActivationIntervalBadStringFail2",
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z&bad String;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "AttributesValueFail",
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;&&&&;true;10;key:value",
+			expectedErr: `emtpy RSRParser in rule: <>`,
+		},
+		{
+			name:        "BlockerFail",
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;BadString;10;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;BadString;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				apwo = nil
+			})
+			err := dynamicAttribute(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(apwo, tc.expApwo) {
+				if i != 1 {
+					t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expApwo), utils.ToJSON(apwo))
+				} else {
+					// Get the absolute difference between the times
+					diff := apwo.ActivationInterval.ActivationTime.Sub(tc.expApwo.ActivationInterval.ActivationTime)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff <= time.Second {
+						tc.expApwo.ActivationInterval.ActivationTime = apwo.ActivationInterval.ActivationTime
+						if !reflect.DeepEqual(apwo, tc.expApwo) {
+							t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expApwo), utils.ToJSON(apwo))
+						}
+					} else {
+						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expApwo), utils.ToJSON(apwo))
 					}
 				}
 			}

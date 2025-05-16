@@ -714,6 +714,10 @@ type statMetricMock struct {
 	testcase string
 }
 
+func (sMM *statMetricMock) Clone() StatMetric {
+	return nil
+}
+
 func (sMM *statMetricMock) GetValue(roundingDecimal int) any {
 	return nil
 }

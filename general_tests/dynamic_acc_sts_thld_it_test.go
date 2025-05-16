@@ -107,7 +107,7 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 				{
 					Identifier: utils.MetaDynamicStats,
 					// get tenant and accountID from event, stat triggers when an event contains account with dynamicaly created accountID and also has a *account field in APIOpts, each encounter that matches the filters will raise the *sum number and call the thresholdIDs specified. when the ttl is reached, *sum will go down also
-					ExtraParameters: "*tenant;Stat_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*exists:~*opts.*account:;*now;;5s;;*sum#1;;false;false;10;THD_ACNT_<~*req.Account>&THD_BLOCKER_ACNT_<~*req.Account>;",
+					ExtraParameters: "*tenant;Stat_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*exists:~*opts.*account:;*now;;5s;;*sum#1;;true;false;10;THD_ACNT_<~*req.Account>&THD_BLOCKER_ACNT_<~*req.Account>;",
 				},
 			},
 		}

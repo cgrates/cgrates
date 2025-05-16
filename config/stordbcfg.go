@@ -287,9 +287,9 @@ func (dbcfg *StorDbCfg) AsMapInterface() (mp map[string]any) {
 	opts := map[string]any{
 		utils.InternalDBDumpPathCfg:        dbcfg.Opts.InternalDBDumpPath,
 		utils.InternalDBBackupPathCfg:      dbcfg.Opts.InternalDBBackupPath,
-		utils.InternalDBStartTimeoutCfg:    dbcfg.Opts.InternalDBStartTimeout,
-		utils.InternalDBDumpIntervalCfg:    dbcfg.Opts.InternalDBDumpInterval,
-		utils.InternalDBRewriteIntervalCfg: dbcfg.Opts.InternalDBRewriteInterval,
+		utils.InternalDBStartTimeoutCfg:    dbcfg.Opts.InternalDBStartTimeout.String(),
+		utils.InternalDBDumpIntervalCfg:    dbcfg.Opts.InternalDBDumpInterval.String(),
+		utils.InternalDBRewriteIntervalCfg: dbcfg.Opts.InternalDBRewriteInterval.String(),
 		utils.InternalDBFileSizeLimitCfg:   dbcfg.Opts.InternalDBFileSizeLimit,
 		utils.SQLMaxOpenConnsCfg:           dbcfg.Opts.SQLMaxOpenConns,
 		utils.SQLMaxIdleConnsCfg:           dbcfg.Opts.SQLMaxIdleConns,

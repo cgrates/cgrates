@@ -317,6 +317,9 @@ type FilterRule struct {
 
 // Clone method for FilterRule
 func (fltr *FilterRule) Clone() *FilterRule {
+	if fltr == nil {
+		return nil
+	}
 	clone := &FilterRule{
 		Type:    fltr.Type,
 		Element: fltr.Element,

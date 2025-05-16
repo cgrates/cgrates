@@ -24,6 +24,8 @@ import (
 	"strings"
 	"time"
 
+	"maps"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,10 +36,32 @@ type DurationWithCompress struct {
 	CompressFactor int
 }
 
+// Clone creates a deep copy of DurationWithCompress
+func (dwc *DurationWithCompress) Clone() *DurationWithCompress {
+	if dwc == nil {
+		return nil
+	}
+	return &DurationWithCompress{
+		Duration:       dwc.Duration,
+		CompressFactor: dwc.CompressFactor,
+	}
+}
+
 // ACDHelper structure
 type StatWithCompress struct {
 	Stat           float64
 	CompressFactor int
+}
+
+// Clone creates a deep copy of StatWithCompress
+func (swc *StatWithCompress) Clone() *StatWithCompress {
+	if swc == nil {
+		return nil
+	}
+	return &StatWithCompress{
+		Stat:           swc.Stat,
+		CompressFactor: swc.CompressFactor,
+	}
 }
 
 // NewStatMetric instantiates the StatMetric
@@ -82,6 +106,7 @@ type StatMetric interface {
 	GetMinItems() (minIts int)
 	Compress(queueLen int64, defaultID string, roundingDec int) (eventIDs []string)
 	GetCompressFactor(events map[string]int) map[string]int
+	Clone() StatMetric
 }
 
 func NewASR(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -97,6 +122,35 @@ type StatASR struct {
 	Events    map[string]*StatWithCompress // map[EventTenantID]Answered
 	MinItems  int
 	val       *float64 // cached ASR value
+}
+
+// Clone creates a deep copy of StatASR
+func (s *StatASR) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatASR{
+		Answered: s.Answered,
+		Count:    s.Count,
+		MinItems: s.MinItems,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]*StatWithCompress, len(s.Events))
+		for k, v := range s.Events {
+			if v != nil {
+				clone.Events[k] = &StatWithCompress{Stat: v.Stat, CompressFactor: v.CompressFactor}
+			}
+		}
+	}
+	if s.val != nil {
+		val := *s.val
+		clone.val = &val
+	}
+	return clone
 }
 
 // getValue returns asr.val
@@ -263,6 +317,38 @@ type StatACD struct {
 	val       *time.Duration // cached ACD value
 }
 
+// Clone creates a deep copy of StatACD
+func (s *StatACD) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatACD{
+		Sum:      s.Sum,
+		Count:    s.Count,
+		MinItems: s.MinItems,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]*DurationWithCompress, len(s.Events))
+		for k, v := range s.Events {
+			if v != nil {
+				clone.Events[k] = &DurationWithCompress{
+					Duration:       v.Duration,
+					CompressFactor: v.CompressFactor,
+				}
+			}
+		}
+	}
+	if s.val != nil {
+		val := *s.val
+		clone.val = &val
+	}
+	return clone
+}
+
 // getValue returns acd.val
 func (acd *StatACD) getValue(roundingDecimal int) time.Duration {
 	if acd.val == nil {
@@ -414,6 +500,38 @@ type StatTCD struct {
 	Events    map[string]*DurationWithCompress // map[EventTenantID]Duration
 	MinItems  int
 	val       *time.Duration // cached TCD value
+}
+
+// Clone creates a deep copy of StatTCD
+func (s *StatTCD) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatTCD{
+		Sum:      s.Sum,
+		Count:    s.Count,
+		MinItems: s.MinItems,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]*DurationWithCompress, len(s.Events))
+		for k, v := range s.Events {
+			if v != nil {
+				clone.Events[k] = &DurationWithCompress{
+					Duration:       v.Duration,
+					CompressFactor: v.CompressFactor,
+				}
+			}
+		}
+	}
+	if s.val != nil {
+		val := *s.val
+		clone.val = &val
+	}
+	return clone
 }
 
 // getValue returns tcd.val
@@ -571,6 +689,35 @@ type StatACC struct {
 	val       *float64 // cached ACC value
 }
 
+// Clone creates a deep copy of StatACC
+func (s *StatACC) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatACC{
+		Sum:      s.Sum,
+		Count:    s.Count,
+		MinItems: s.MinItems,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]*StatWithCompress, len(s.Events))
+		for k, v := range s.Events {
+			if v != nil {
+				clone.Events[k] = &StatWithCompress{Stat: v.Stat, CompressFactor: v.CompressFactor}
+			}
+		}
+	}
+	if s.val != nil {
+		val := *s.val
+		clone.val = &val
+	}
+	return clone
+}
+
 // getValue returns tcd.val
 func (acc *StatACC) getValue(roundingDecimal int) float64 {
 	if acc.val == nil {
@@ -719,6 +866,35 @@ type StatTCC struct {
 	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
 	MinItems  int
 	val       *float64 // cached TCC value
+}
+
+// Clone creates a deep copy of StatTCC
+func (s *StatTCC) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatTCC{
+		Sum:      s.Sum,
+		Count:    s.Count,
+		MinItems: s.MinItems,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]*StatWithCompress, len(s.Events))
+		for k, v := range s.Events {
+			if v != nil {
+				clone.Events[k] = &StatWithCompress{Stat: v.Stat, CompressFactor: v.CompressFactor}
+			}
+		}
+	}
+	if s.val != nil {
+		val := *s.val
+		clone.val = &val
+	}
+	return clone
 }
 
 // getValue returns tcd.val
@@ -873,6 +1049,38 @@ type StatPDD struct {
 	val       *time.Duration // cached PDD value
 }
 
+// Clone creates a deep copy of StatPDD
+func (s *StatPDD) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatPDD{
+		Sum:      s.Sum,
+		Count:    s.Count,
+		MinItems: s.MinItems,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]*DurationWithCompress, len(s.Events))
+		for k, v := range s.Events {
+			if v != nil {
+				clone.Events[k] = &DurationWithCompress{
+					Duration:       v.Duration,
+					CompressFactor: v.CompressFactor,
+				}
+			}
+		}
+	}
+	if s.val != nil {
+		val := *s.val
+		clone.val = &val
+	}
+	return clone
+}
+
 // getValue returns pdd.val
 func (pdd *StatPDD) getValue(roundingDecimal int) time.Duration {
 	if pdd.val == nil {
@@ -1022,6 +1230,42 @@ type StatDDC struct {
 	Events      map[string]map[string]int64 // map[EventTenantID]map[fieldValue]compressfactor
 	MinItems    int
 	Count       int64
+}
+
+// Clone creates a deep copy of StatDDC
+func (s *StatDDC) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatDDC{
+		MinItems: s.MinItems,
+		Count:    s.Count,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.FieldValues != nil {
+		clone.FieldValues = make(map[string]utils.StringSet, len(s.FieldValues))
+		for k, v := range s.FieldValues {
+			if v != nil {
+				clone.FieldValues[k] = utils.NewStringSet(v.AsSlice())
+			}
+		}
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]map[string]int64, len(s.Events))
+		for eventID, valueMap := range s.Events {
+			if valueMap != nil {
+				newValueMap := make(map[string]int64, len(valueMap))
+				for fieldValue, compressFactor := range valueMap {
+					newValueMap[fieldValue] = compressFactor
+				}
+				clone.Events[eventID] = newValueMap
+			}
+		}
+	}
+	return clone
 }
 
 // getValue returns tcd.val
@@ -1184,6 +1428,36 @@ type StatSum struct {
 	val       *float64 // cached sum value
 }
 
+// Clone creates a deep copy of StatSum
+func (s *StatSum) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatSum{
+		Sum:       s.Sum,
+		Count:     s.Count,
+		MinItems:  s.MinItems,
+		FieldName: s.FieldName,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]*StatWithCompress, len(s.Events))
+		for k, v := range s.Events {
+			if v != nil {
+				clone.Events[k] = &StatWithCompress{Stat: v.Stat, CompressFactor: v.CompressFactor}
+			}
+		}
+	}
+	if s.val != nil {
+		val := *s.val
+		clone.val = &val
+	}
+	return clone
+}
+
 // getValue returns tcd.val
 func (sum *StatSum) getValue(roundingDecimal int) float64 {
 	if sum.val == nil {
@@ -1337,6 +1611,36 @@ type StatAverage struct {
 	val       *float64 // cached avg value
 }
 
+// Clone creates a deep copy of StatAverage
+func (s *StatAverage) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatAverage{
+		Sum:       s.Sum,
+		Count:     s.Count,
+		MinItems:  s.MinItems,
+		FieldName: s.FieldName,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]*StatWithCompress, len(s.Events))
+		for k, v := range s.Events {
+			if v != nil {
+				clone.Events[k] = &StatWithCompress{Stat: v.Stat, CompressFactor: v.CompressFactor}
+			}
+		}
+	}
+	if s.val != nil {
+		val := *s.val
+		clone.val = &val
+	}
+	return clone
+}
+
 // getValue returns tcd.val
 func (avg *StatAverage) getValue(roundingDecimal int) float64 {
 	if avg.val == nil {
@@ -1486,6 +1790,42 @@ type StatDistinct struct {
 	MinItems    int
 	FieldName   string
 	Count       int64
+}
+
+// Clone creates a deep copy of StatDistinct
+func (s *StatDistinct) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatDistinct{
+		MinItems:  s.MinItems,
+		Count:     s.Count,
+		FieldName: s.FieldName,
+	}
+	if s.FilterIDs != nil {
+		clone.FilterIDs = make([]string, len(s.FilterIDs))
+		copy(clone.FilterIDs, s.FilterIDs)
+	}
+	if s.FieldValues != nil {
+		clone.FieldValues = make(map[string]utils.StringSet, len(s.FieldValues))
+		for k, v := range s.FieldValues {
+			if v != nil {
+				clone.FieldValues[k] = utils.NewStringSet(v.AsSlice())
+			}
+		}
+	}
+	if s.Events != nil {
+		clone.Events = make(map[string]map[string]int64, len(s.Events))
+		for eventID, valueMap := range s.Events {
+			if valueMap != nil {
+				newValueMap := make(map[string]int64, len(valueMap))
+				maps.Copy(newValueMap, valueMap)
+				clone.Events[eventID] = newValueMap
+			}
+		}
+	}
+
+	return clone
 }
 
 // getValue returns tcd.val
