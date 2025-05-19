@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 	"time"
@@ -31,6 +30,14 @@ import (
 )
 
 func TestSessionBasics(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	ng := engine.TestEngine{
 		ConfigJSON: `{
 "logger": {
@@ -44,7 +51,6 @@ func TestSessionBasics(t *testing.T) {
 },
 "cdrs": {
     "enabled": true,
-    "chargers_conns": ["*internal"],
     "accounts_conns": ["*internal"],
 	"rates_conns": ["*internal"]
 },
@@ -66,10 +72,11 @@ cgrates.org,RP_STANDARD,,;10,,,,RT_STANDARD,*string:~*req.Destination:1002,"* * 
 cgrates.org,RP_STANDARD,,,,,,RT_STANDARD,,,,,1m,0,0.6,1m,1s
 cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * * * *",;0,false,0s,0,0.01,1s,1s`,
 		},
-		Encoding:  *utils.Encoding,
-		LogBuffer: new(bytes.Buffer),
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+		// LogBuffer: new(bytes.Buffer),
 	}
-	t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, _ := ng.Run(t)
 
 	// account helpers
