@@ -268,6 +268,30 @@ CREATE TABLE tp_resources (
 );
 
 --
+-- Table structure for table `tp_ips`
+--
+
+DROP TABLE IF EXISTS tp_ips;
+CREATE TABLE tp_ips (
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `filter_ids` varchar(64) NOT NULL,
+  `activation_interval` varchar(64) NOT NULL,
+  `ttl` varchar(32) NOT NULL,
+  `type` varchar(64) NOT NULL,
+  `address_pool` varchar(64) NOT NULL,
+  `allocation` varchar(64) NOT NULL,
+  `stored` BOOLEAN NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_ip` (`tpid`,`tenant`, `id`,`filter_ids` )
+);
+
+--
 -- Table structure for table `tp_stats`
 --
 

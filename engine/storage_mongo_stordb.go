@@ -409,6 +409,36 @@ func (ms *MongoStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 	return results, err
 }
 
+func (ms *MongoStorage) GetTPIPs(tpid, tenant, id string) ([]*utils.TPIPProfile, error) {
+	filter := bson.M{"tpid": tpid}
+	if id != "" {
+		filter["id"] = id
+	}
+	if tenant != "" {
+		filter["tenant"] = tenant
+	}
+	var results []*utils.TPIPProfile
+	err := ms.query(func(sctx mongo.SessionContext) (err error) {
+		cur, err := ms.getCol(utils.TBLTPIPs).Find(sctx, filter)
+		if err != nil {
+			return err
+		}
+		for cur.Next(sctx) {
+			var el utils.TPIPProfile
+			err := cur.Decode(&el)
+			if err != nil {
+				return err
+			}
+			results = append(results, &el)
+		}
+		if len(results) == 0 {
+			return utils.ErrNotFound
+		}
+		return cur.Close(sctx)
+	})
+	return results, err
+}
+
 func (ms *MongoStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {
 	filter := bson.M{
 		"tpid": tpid,
@@ -903,6 +933,22 @@ func (ms *MongoStorage) SetTPResources(tpRLs []*utils.TPResourceProfile) (err er
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for _, tp := range tpRLs {
 			_, err = ms.getCol(utils.TBLTPResources).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
+				bson.M{"$set": tp}, options.Update().SetUpsert(true))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (ms *MongoStorage) SetTPIPs(tps []*utils.TPIPProfile) (err error) {
+	if len(tps) == 0 {
+		return
+	}
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		for _, tp := range tps {
+			_, err = ms.getCol(utils.TBLTPIPs).UpdateOne(sctx, bson.M{"tpid": tp.TPid, "id": tp.ID},
 				bson.M{"$set": tp}, options.Update().SetUpsert(true))
 			if err != nil {
 				return err

@@ -381,6 +381,30 @@ func (iDB *InternalDB) GetTPResources(tpid, tenant, id string) (resources []*uti
 	return
 }
 
+func (iDB *InternalDB) GetTPIPs(tpid, tenant, id string) ([]*utils.TPIPProfile, error) {
+	key := tpid
+	if tenant != utils.EmptyString {
+		key += utils.ConcatenatedKeySep + tenant
+	}
+	if id != utils.EmptyString {
+		key += utils.ConcatenatedKeySep + id
+	}
+	ids := iDB.db.GetItemIDs(utils.CacheTBLTPIPs, key)
+	ips := make([]*utils.TPIPProfile, 0, len(ids))
+	for _, id := range ids {
+		x, ok := iDB.db.Get(utils.CacheTBLTPIPs, id)
+		if !ok || x == nil {
+			return nil, utils.ErrNotFound
+		}
+		ips = append(ips, x.(*utils.TPIPProfile))
+
+	}
+	if len(ips) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return ips, nil
+}
+
 func (iDB *InternalDB) GetTPStats(tpid, tenant, id string) (stats []*utils.TPStatProfile, err error) {
 	key := tpid
 	if tenant != utils.EmptyString {
@@ -772,6 +796,18 @@ func (iDB *InternalDB) SetTPResources(resources []*utils.TPResourceProfile) (err
 	}
 	return
 }
+
+func (iDB *InternalDB) SetTPIPs(ips []*utils.TPIPProfile) (err error) {
+	if len(ips) == 0 {
+		return nil
+	}
+	for _, ip := range ips {
+		iDB.db.Set(utils.CacheTBLTPIPs, utils.ConcatenatedKey(ip.TPid, ip.Tenant, ip.ID), ip, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
+	return
+}
+
 func (iDB *InternalDB) SetTPStats(stats []*utils.TPStatProfile) (err error) {
 	if len(stats) == 0 {
 		return nil

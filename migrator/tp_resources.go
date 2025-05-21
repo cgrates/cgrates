@@ -76,3 +76,21 @@ func (m *Migrator) migrateTPresources() (err error) {
 	}
 	return m.ensureIndexesStorDB(utils.TBLTPResources)
 }
+
+func (m *Migrator) migrateTPips() (err error) {
+	var vrs engine.Versions
+	current := engine.CurrentStorDBVersions()
+	if vrs, err = m.getVersions(utils.TpIPs); err != nil {
+		return
+	}
+	switch vrs[utils.TpIPs] {
+	case current[utils.TpIPs]:
+		if m.sameStorDB {
+			break
+		}
+		if err := m.migrateCurrentTPresources(); err != nil {
+			return err
+		}
+	}
+	return m.ensureIndexesStorDB(utils.TBLTPIPs)
+}

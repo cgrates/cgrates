@@ -229,6 +229,10 @@ cgrates.org,round,TOPUP10_AT,,false,false
 cgrates.org,ResGroup21,*string:~*req.Account:1001,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
 cgrates.org,ResGroup22,*string:~*req.Account:dan,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
+	IPsCSVContent = `
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Type[5],AddressPool[6],Allocation[7],Stored[8],Weight[9]
+cgrates.org,IPs1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,-1,ipv4,127.0.0.1/24,*ascending,true,10
+`
 	StatsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
 cgrates.org,TestStats,*string:~*req.Account:1001,2014-07-29T15:00:00Z,100,1s,2,*sum#~*req.Value;*average#~*req.Value,,true,true,20,Th1;Th2
@@ -294,9 +298,9 @@ func init() {
 		DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
 		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
-		ResourcesCSVContent, StatsCSVContent, TrendsCSVContent, RankingsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
-		RoutesCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
-		DispatcherHostCSVContent), testTPID, "", nil, nil, false)
+		ResourcesCSVContent, IPsCSVContent, StatsCSVContent, TrendsCSVContent, RankingsCSVContent,
+		ThresholdsCSVContent, FiltersCSVContent, RoutesCSVContent, AttributesCSVContent,
+		ChargersCSVContent, DispatcherCSVContent, DispatcherHostCSVContent), testTPID, "", nil, nil, false)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
@@ -338,6 +342,9 @@ func init() {
 	}
 	if err := csvr.LoadResourceProfiles(); err != nil {
 		log.Print("error in LoadResourceProfiles:", err)
+	}
+	if err := csvr.LoadIPProfiles(); err != nil {
+		log.Print("error in LoadIPProfiles:", err)
 	}
 	if err := csvr.LoadStats(); err != nil {
 		log.Print("error in LoadStats:", err)

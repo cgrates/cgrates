@@ -260,6 +260,26 @@ func (ResourceMdl) TableName() string {
 	return utils.TBLTPResources
 }
 
+type IPMdl struct {
+	PK                 uint `gorm:"primary_key"`
+	Tpid               string
+	Tenant             string  `index:"0" re:".*"`
+	ID                 string  `index:"1" re:".*"`
+	FilterIDs          string  `index:"2" re:".*"`
+	ActivationInterval string  `index:"3" re:".*"`
+	TTL                string  `index:"4" re:".*"`
+	Type               string  `index:"5" re:".*"`
+	AddressPool        string  `index:"6" re:".*"`
+	Allocation         string  `index:"7" re:".*"`
+	Stored             bool    `index:"8" re:".*"`
+	Weight             float64 `index:"9" re:".*"`
+	CreatedAt          time.Time
+}
+
+func (IPMdl) TableName() string {
+	return utils.TBLTPIPs
+}
+
 type StatMdl struct {
 	PK                 uint `gorm:"primary_key"`
 	Tpid               string

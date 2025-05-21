@@ -182,6 +182,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.apiBanCfg = new(APIBanCfg)
 	cfg.sentryPeerCfg = new(SentryPeerCfg)
 	cfg.coreSCfg = new(CoreSCfg)
+	cfg.ipsCfg = &IPsCfg{Opts: &IPsOpts{}}
 	cfg.dfltEvExp = &EventExporterCfg{Opts: &EventExporterOpts{
 		Els:   new(ElsOpts),
 		SQL:   new(SQLOpts),
@@ -337,13 +338,14 @@ type CGRConfig struct {
 	apiBanCfg          *APIBanCfg          // APIBan config
 	sentryPeerCfg      *SentryPeerCfg      //SentryPeer config
 	coreSCfg           *CoreSCfg           // CoreS config
+	ipsCfg             *IPsCfg             // IPs config
 
 	cacheDP    map[string]utils.MapStorage
 	cacheDPMux sync.RWMutex
 }
 
-var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
-	utils.MetaResources, utils.MetaFilters, utils.MetaStats,
+var possibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
+	utils.MetaResources, utils.MetaIPs, utils.MetaFilters, utils.MetaStats,
 	utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers,
 	utils.MetaDispatchers, utils.MetaDispatcherHosts})
 
@@ -375,7 +377,9 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg, cfg.loadJanusAgentCfg,
-		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadSentryPeerCgrCfg, cfg.loadCoreSCfg} {
+		cfg.loadConfigSCfg, cfg.loadAPIBanCgrCfg, cfg.loadSentryPeerCgrCfg,
+		cfg.loadCoreSCfg, cfg.loadIPsCfg,
+	} {
 		if err = loadFunc(jsnCfg); err != nil {
 			return
 		}
@@ -864,6 +868,15 @@ func (cfg *CGRConfig) loadConfigSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.configSCfg.loadFromJSONCfg(jsnConfigSCfg)
 }
 
+// loadIPsCfg loads the IPs section of the configuration.
+func (cfg *CGRConfig) loadIPsCfg(jsnCfg *CgrJsonCfg) error {
+	jsnIPsCfg, err := jsnCfg.IPsJsonCfg()
+	if err != nil {
+		return err
+	}
+	return cfg.ipsCfg.loadFromJSONCfg(jsnIPsCfg)
+}
+
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
 func (cfg *CGRConfig) SureTaxCfg() *SureTaxCfg {
 	cfg.lks[SURETAX_JSON].Lock()
@@ -1196,6 +1209,13 @@ func (cfg *CGRConfig) CoreSCfg() *CoreSCfg {
 	return cfg.coreSCfg
 }
 
+// IPsCfg returns the IPs configuration.
+func (cfg *CGRConfig) IPsCfg() *IPsCfg {
+	cfg.lks[IPsJSON].Lock()
+	defer cfg.lks[IPsJSON].Unlock()
+	return cfg.ipsCfg
+}
+
 // GetReloadChan returns the reload chanel for the given section
 func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
@@ -1306,6 +1326,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		APIBanCfgJson:       cfg.loadAPIBanCgrCfg,
 		SentryPeerCfgJson:   cfg.loadSentryPeerCgrCfg,
 		CoreSCfgJson:        cfg.loadCoreSCfg,
+		IPsJSON:             cfg.loadIPsCfg,
 	}
 }
 
@@ -1464,7 +1485,7 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
 		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
 		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		RouteSJson, LoaderJson, DispatcherSJson, ApierS,
+		RouteSJson, LoaderJson, DispatcherSJson, ApierS, IPsJSON,
 	})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, ApierS})
 	needsDataDB := false
@@ -1563,6 +1584,8 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 			cfg.rldChans[SIPAgentJson] <- struct{}{}
 		case RegistrarCJson:
 			cfg.rldChans[RegistrarCJson] <- struct{}{}
+		case IPsJSON:
+			cfg.rldChans[IPsJSON] <- struct{}{}
 		}
 	}
 }
@@ -1616,6 +1639,7 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
 		TemplatesJson:       cfg.templates.AsMapInterface(separator),
 		ConfigSJson:         cfg.configSCfg.AsMapInterface(),
 		CoreSCfgJson:        cfg.coreSCfg.AsMapInterface(),
+		IPsJSON:             cfg.ipsCfg.AsMapInterface(),
 	}
 }
 
@@ -1784,6 +1808,8 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 		mp = cfg.AnalyzerSCfg().AsMapInterface()
 	case CoreSCfgJson:
 		mp = cfg.CoreSCfg().AsMapInterface()
+	case IPsJSON:
+		mp = cfg.IPsCfg().AsMapInterface()
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1958,6 +1984,8 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithA
 		mp = cfg.AnalyzerSCfg().AsMapInterface()
 	case CoreSCfgJson:
 		mp = cfg.CoreSCfg().AsMapInterface()
+	case IPsJSON:
+		mp = cfg.IPsCfg().AsMapInterface()
 	default:
 		return errors.New("Invalid section")
 	}
@@ -2059,6 +2087,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		apiBanCfg:          cfg.apiBanCfg.Clone(),
 		sentryPeerCfg:      cfg.sentryPeerCfg.Clone(),
 		coreSCfg:           cfg.coreSCfg.Clone(),
+		ipsCfg:             cfg.ipsCfg.Clone(),
 
 		cacheDP: make(map[string]utils.MapStorage),
 	}
