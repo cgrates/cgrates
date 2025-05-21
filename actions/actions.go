@@ -268,7 +268,7 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 					utils.ActionS, sActs.tenant, sActs.apID, err))
 			return
 		}
-		if err = sActs.Execute(); err != nil { // cannot remove due to errors on execution
+		if err = sActs.Execute(ctx); err != nil { // cannot remove due to errors on execution
 			return
 		}
 		delete(ap.Targets[sActs.trgTyp], sActs.trgID)
