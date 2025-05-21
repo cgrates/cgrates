@@ -170,7 +170,7 @@ ACT_TOPUP_RST_10,*topup_reset,,,test,*monetary,,*any,,,*unlimited,,10,10,false,f
 	// Create and populate Attributes.csv
 	if err := writeFile(utils.AttributesCsv, `
 #Tenant,ID,Context,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
-cgrates.org,ATTR_FRD,*cdrs,,,,*opts.*account,*variable,~*req.Account,false,0
+cgrates.org,ATTR_FRD,*cdrs,,,,*opts.*accountID,*variable,~*req.Account,false,0
 `); err != nil {
 		t.Fatal(err)
 	}

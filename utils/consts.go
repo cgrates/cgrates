@@ -350,7 +350,7 @@ const (
 	MetaBalance               = "*balance"
 	MetaLimit                 = "*limit"
 	MetaEventConnect          = "*event_connect"
-	MetaAccount               = "*account"
+	MetaAccount               = "*accountID"
 	EventName                 = "EventName"
 	// action trigger threshold types
 	TriggerMinEventCounter   = "*min_event_counter"
