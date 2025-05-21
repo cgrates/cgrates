@@ -56,7 +56,7 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 			ThresholdProfile: &engine.ThresholdProfile{
 				Tenant:    "cgrates.org",
 				ID:        "THD_DYNAMIC_STATS_AND_THRESHOLD_INIT",
-				FilterIDs: []string{"*exists:~*opts.*account:"},
+				FilterIDs: []string{"*exists:~*opts.*accountID:"},
 				ActionIDs: []string{"ACT_DYN_THRESHOLD_AND_STATS_CREATION"},
 				MinHits:   1,
 				MaxHits:   -1,
@@ -97,7 +97,7 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 					// dynamic threshold for already created dynamic accounts, needed so we can ignore matching thresholds the events (which dont come from stats) where an account has already been dynamicaly created by  the initial threhold THD_DYNAMIC_STATS_AND_THRESHOLD_INIT. The threshold itself is only used for blocking
 					Identifier: utils.MetaDynamicThreshold,
 					// get tenant and accountID from event, threshold triggers when the event account matches the already dynamicaly created account. If it matches the filter, it will block other thresholds from matching with the event. Make sure dynamic thresholds weight is higher than the initiative threshold THD_DYNAMIC_STATS_AND_THRESHOLD_INIT
-					ExtraParameters: "*tenant;THD_BLOCKER_ACNT_<~*req.Account>;*string:~*opts.*account:<~*req.Account>;*now;-1;1;;true;3;;true;",
+					ExtraParameters: "*tenant;THD_BLOCKER_ACNT_<~*req.Account>;*string:~*opts.*accountID:<~*req.Account>;*now;-1;1;;true;3;;true;",
 				},
 				{
 					Identifier: utils.MetaDynamicThreshold,
@@ -106,8 +106,8 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 				},
 				{
 					Identifier: utils.MetaDynamicStats,
-					// get tenant and accountID from event, stat triggers when an event contains account with dynamicaly created accountID and also has a *account field in APIOpts, each encounter that matches the filters will raise the *sum number and call the thresholdIDs specified. when the ttl is reached, *sum will go down also
-					ExtraParameters: "*tenant;Stat_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*exists:~*opts.*account:;*now;;5s;;*sum#1;;true;false;10;THD_ACNT_<~*req.Account>&THD_BLOCKER_ACNT_<~*req.Account>;",
+					// get tenant and accountID from event, stat triggers when an event contains account with dynamicaly created accountID and also has a *accountID field in APIOpts, each encounter that matches the filters will raise the *sum number and call the thresholdIDs specified. when the ttl is reached, *sum will go down also
+					ExtraParameters: "*tenant;Stat_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*exists:~*opts.*accountID:;*now;;5s;;*sum#1;;true;false;10;THD_ACNT_<~*req.Account>&THD_BLOCKER_ACNT_<~*req.Account>;",
 				},
 			},
 		}
@@ -157,7 +157,7 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 					utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 					utils.Usage:        1024,
 				},
-				APIOpts: map[string]any{"*account": "CreatedAccount"}, // account has to be in apiopts for stats to push it to threhsoldsv1ProcessEvent so that it knows which account to disable
+				APIOpts: map[string]any{"*accountID": "CreatedAccount"}, // account has to be in apiopts for stats to push it to threhsoldsv1ProcessEvent so that it knows which account to disable
 			},
 		}
 		var rply1 sessions.V1AuthorizeReply
@@ -186,7 +186,7 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 						utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
 						utils.Usage:        1024,
 					},
-					APIOpts: map[string]any{"*account": "CreatedAccount"}, // account has to be in apiopts for stats to push it to threhsoldsv1ProcessEvent so that it knows which account to disable
+					APIOpts: map[string]any{"*accountID": "CreatedAccount"}, // account has to be in apiopts for stats to push it to threhsoldsv1ProcessEvent so that it knows which account to disable
 				},
 			}
 			var rply1 sessions.V1AuthorizeReply

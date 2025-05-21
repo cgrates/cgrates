@@ -30,7 +30,7 @@
     "thresholds": {
         "enabled": true,
         "apiers_conns": ["*localhost"],
-        "exists_indexed_fields": ["*opts.*account"],
+        "exists_indexed_fields": ["*opts.*accountID"],
         "store_interval": "-1",
     },
 

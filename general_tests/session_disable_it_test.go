@@ -150,7 +150,7 @@ DST_1002,1002`,
 			utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
 RT1,0.2,0.1,1s,1s,0`,
 			utils.AttributesCsv: `#Tenant,ID,Context,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
-cgrates.org,ATTR_ACNT,*any,,,,*opts.*account,*variable,~*req.Account,false,10`,
+cgrates.org,ATTR_ACNT,*any,,,,*opts.*accountID,*variable,~*req.Account,false,10`,
 			utils.StatsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
 cgrates.org,STATS_1001,*string:~*req.Account:1001,,,-1,,*sum#1,,true,,,THD_1001`,
 			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
@@ -161,7 +161,7 @@ cgrates.org,THD_1001,*string:~*req.StatID:STATS_1001,,-1,5,0,false,,DISABLE_ACC,
 	}
 	//defer t.Log(ng.LogBuffer)
 	client, _ := ng.Run(t)
-	t.Run("TestAuthorizeEvent", func(t *testing.T) {
+	t.Run("AuthorizeEvent", func(t *testing.T) {
 		var accRepl engine.Account
 		if err := client.Call(context.Background(), utils.APIerSv2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &accRepl); err != nil {
 			t.Error(err)
@@ -195,7 +195,7 @@ cgrates.org,THD_1001,*string:~*req.StatID:STATS_1001,,-1,5,0,false,,DISABLE_ACC,
 		}
 
 	})
-	t.Run("TestDisableAccountFromThresholds", func(t *testing.T) {
+	t.Run("DisableAccountFromThresholds", func(t *testing.T) {
 		var replyStr string
 		rmReq := v1.AttrRemoveAccountActionTriggers{Tenant: "cgrates.org", Account: "1001", GroupID: "DISABLE_TRIGGER"}
 		if err := client.Call(context.Background(), utils.APIerSv1RemoveAccountActionTriggers, rmReq, &replyStr); err != nil {
@@ -240,6 +240,23 @@ cgrates.org,THD_1001,*string:~*req.StatID:STATS_1001,,-1,5,0,false,,DISABLE_ACC,
 		if !accRepl.Disabled {
 			t.Errorf("expected account to be disabled")
 		}
+		t.Run("AuthorizeEventWithAccountDisabled", func(t *testing.T) {
+			var reply string
+			if err := client.Call(context.Background(), utils.SessionSv1AuthorizeEvent, &sessions.V1AuthorizeArgs{GetAttributes: true,
+				GetMaxUsage: true,
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     utils.GenUUID(),
+					Time:   utils.TimePointer(time.Now()),
+					Event: map[string]any{"Account": "1001",
+						"Destination": "1002",
+						"OriginHost":  "127.0.0.1:8448",
+						"RequestType": "*prepaid",
+						"SetupTime":   "1747212851",
+						"Source":      "KamailioAgent"}}}, &reply); err == nil || err.Error() != utils.NewErrRALs(utils.ErrAccountDisabled).Error() {
+				t.Errorf("expected: ACCOUNT_DISABLED error, got: %v", err)
+			}
+		})
 
 	})
 }
