@@ -50,7 +50,6 @@ func newScheduledActs(ctx *context.Context, tenant, apID, trgTyp, trgID, schedul
 		trgTyp:   trgTyp,
 		trgID:    trgID,
 		schedule: schedule,
-		ctx:      ctx,
 		data:     data,
 		acts:     acts,
 		cch:      ltcache.NewTransCache(map[string]*ltcache.CacheConfig{}),
@@ -64,7 +63,6 @@ type scheduledActs struct {
 	trgTyp   string
 	trgID    string
 	schedule string
-	ctx      *context.Context
 	data     utils.MapStorage
 	acts     []actioner
 
@@ -73,15 +71,18 @@ type scheduledActs struct {
 
 // Execute is called when we want the ActionProfile to be executed
 func (s *scheduledActs) ScheduledExecute() {
-	s.Execute()
+	// Create a fresh root context when cron triggers execution.
+	// TODO: decide whether a timeout should be configured.
+	ctx := context.Background()
+	s.Execute(ctx)
 }
 
 // Execute notifies possible errors on execution
-func (s *scheduledActs) Execute() (err error) {
+func (s *scheduledActs) Execute(ctx *context.Context) (err error) {
 	var partExec bool
 	for _, act := range s.acts {
 		//ctx, cancel := context.WithTimeout(s.ctx, act.cfg().TTL)
-		if err := act.execute(s.ctx, s.data, s.trgID); err != nil {
+		if err := act.execute(ctx, s.data, s.trgID); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("executing action: <%s>, error: <%s>", act.id(), err))
 			partExec = true
 		}
