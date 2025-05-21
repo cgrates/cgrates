@@ -555,8 +555,8 @@ func TestExportRequestSetFields(t *testing.T) {
 	Cache.Clear(nil)
 	onm := utils.NewOrderedNavigableMap()
 	fullPath := &utils.FullPath{
-		PathSlice: []string{utils.MetaReq, utils.MetaAccount},
-		Path:      utils.MetaReq + utils.MetaAccount,
+		PathSlice: []string{utils.MetaReq, utils.MetaAccountID},
+		Path:      utils.MetaReq + utils.MetaAccountID,
 	}
 	val := &utils.DataLeaf{
 		Data: "value1",

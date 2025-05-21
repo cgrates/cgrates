@@ -350,7 +350,7 @@ const (
 	MetaBalance               = "*balance"
 	MetaLimit                 = "*limit"
 	MetaEventConnect          = "*event_connect"
-	MetaAccount               = "*accountID"
+	MetaAccountID             = "*accountID"
 	EventName                 = "EventName"
 	// action trigger threshold types
 	TriggerMinEventCounter   = "*min_event_counter"
@@ -2752,7 +2752,7 @@ var CGROptionsSet = NewStringSet([]string{OptsSessionsTTL,
 	OptsAttributesProfileIgnoreFilters, OptsStatsProfileIDs, OptsStatsProfileIgnoreFilters,
 	OptsThresholdsProfileIDs, OptsThresholdsProfileIgnoreFilters, OptsResourcesUsageID, OptsResourcesUsageTTL,
 	OptsResourcesUnits, OptsAttributeS, OptsThresholdS, OptsChargerS, OptsStatS, OptsRALs, OptsRerate,
-	OptsRefund})
+	OptsRefund, MetaAccountID})
 
 // EventExporter metrics
 const (
