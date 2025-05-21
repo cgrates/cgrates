@@ -1051,7 +1051,6 @@ func TestACScheduledActions(t *testing.T) {
 			trgTyp:   utils.MetaStats,
 			trgID:    "ID_TEST",
 			schedule: utils.EmptyString,
-			ctx:      context.Background(),
 			data:     mapStorage,
 		},
 	}
