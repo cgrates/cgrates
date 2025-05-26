@@ -364,6 +364,7 @@ CREATE TABLE tp_thresholds (
   `weight` decimal(8,2) NOT NULL,
   `action_ids` varchar(64) NOT NULL,
   `async` BOOLEAN NOT NULL,
+  `ees_ids` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),

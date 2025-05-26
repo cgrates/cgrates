@@ -732,6 +732,8 @@ type ThresholdSJsonCfg struct {
 	Store_interval        *string
 	Sessions_conns        []string
 	Apiers_conns          []string
+	Ees_conns             *[]string
+	Ees_exporter_ids      *[]string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Suffix_indexed_fields *[]string

@@ -338,7 +338,9 @@ type ThresholdMdl struct {
 	Weight             float64 `index:"8" re:".*"`
 	ActionIDs          string  `index:"9" re:".*"`
 	Async              bool    `index:"10" re:".*"`
-	CreatedAt          time.Time
+	EeIDs              string  `index:"11"  re:".*"`
+
+	CreatedAt time.Time
 }
 
 func (ThresholdMdl) TableName() string {

@@ -37,6 +37,8 @@ type ThresholdSCfg struct {
 	StoreInterval       time.Duration // Dump regularly from cache into dataDB
 	SessionSConns       []string
 	ApierSConns         []string
+	EEsExporterIDs      []string
+	EEsConns            []string
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	SuffixIndexedFields *[]string
@@ -92,6 +94,19 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 			}
 		}
 	}
+	if jsnCfg.Ees_conns != nil {
+		t.EEsConns = make([]string, len(*jsnCfg.Ees_conns))
+		for idx, connID := range *jsnCfg.Ees_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			t.EEsConns[idx] = connID
+			if connID == utils.MetaInternal {
+				t.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+			}
+		}
+	}
+	if jsnCfg.Ees_exporter_ids != nil {
+		t.EEsExporterIDs = append(t.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
+	}
 	if jsnCfg.String_indexed_fields != nil {
 		sif := make([]string, len(*jsnCfg.String_indexed_fields))
 		copy(sif, *jsnCfg.String_indexed_fields)
@@ -146,6 +161,9 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
 		}
 		initialMP[utils.SessionSConnsCfg] = sessionConns
 	}
+	eesExporterIDs := make([]string, len(t.EEsExporterIDs))
+	copy(eesExporterIDs, t.EEsExporterIDs)
+	initialMP[utils.EEsExporterIDsCfg] = eesExporterIDs
 	if t.ApierSConns != nil {
 		apiersConns := make([]string, len(t.ApierSConns))
 		for i, item := range t.ApierSConns {
@@ -155,6 +173,16 @@ func (t *ThresholdSCfg) AsMapInterface() (initialMP map[string]any) {
 			}
 		}
 		initialMP[utils.ApierSConnsCfg] = apiersConns
+	}
+	if t.EEsConns != nil {
+		eesConns := make([]string, len(t.EEsConns))
+		for i, item := range t.EEsConns {
+			eesConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
+				eesConns[i] = utils.MetaInternal
+			}
+		}
+		initialMP[utils.EEsConnsCfg] = eesConns
 	}
 	if t.StringIndexedFields != nil {
 		stringIndexedFields := make([]string, len(*t.StringIndexedFields))
@@ -201,6 +229,14 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	if t.ApierSConns != nil {
 		cln.ApierSConns = make([]string, len(t.ApierSConns))
 		copy(cln.ApierSConns, t.ApierSConns)
+	}
+	if t.EEsConns != nil {
+		cln.EEsConns = make([]string, len(t.EEsConns))
+		copy(cln.EEsConns, t.EEsConns)
+	}
+	if t.EEsExporterIDs != nil {
+		cln.EEsExporterIDs = make([]string, len(t.EEsExporterIDs))
+		copy(cln.EEsExporterIDs, t.EEsExporterIDs)
 	}
 	if t.StringIndexedFields != nil {
 		idx := make([]string, len(*t.StringIndexedFields))

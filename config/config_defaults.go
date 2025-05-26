@@ -929,6 +929,8 @@ const CGRATES_CFG_JSON = `
 	"indexed_selects": true,		// enable profile matching exclusively on indexes
 	"sessions_conns":[],			// connections to SessionS <*internal|$rpc_conns_id>
 	"apiers_conns":[],				// connections to ApierS <*internal|$rpc_conns_id>
+	"ees_conns": [],				// connections to EEs <*internal|$rpc_conns_id>
+	"ees_exporter_ids": [],		    // list of EventExporter profiles to be used for ThresholdHit events
 	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"suffix_indexed_fields": [],		// query indexes based on these fields for faster processing

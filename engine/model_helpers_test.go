@@ -2290,6 +2290,7 @@ func TestAPItoModelTPThreshold(t *testing.T) {
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{"WARN3"},
+		EeIDs:     []string{"EE1"},
 	}
 	models := ThresholdMdls{
 		{
@@ -2304,6 +2305,7 @@ func TestAPItoModelTPThreshold(t *testing.T) {
 			Blocker:            false,
 			Weight:             20.0,
 			ActionIDs:          "WARN3",
+			EeIDs:              "EE1",
 		},
 	}
 	rcv := APItoModelTPThreshold(th)
@@ -2328,6 +2330,7 @@ func TestAPItoModelTPThreshold2(t *testing.T) {
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{"WARN3"},
+		EeIDs:     []string{"EE1"},
 	}
 	models := ThresholdMdls{
 		{
@@ -2342,6 +2345,7 @@ func TestAPItoModelTPThreshold2(t *testing.T) {
 			Blocker:            false,
 			Weight:             20.0,
 			ActionIDs:          "WARN3",
+			EeIDs:              "EE1",
 		},
 		{
 			Tpid:      "TP1",
@@ -2372,6 +2376,7 @@ func TestAPItoModelTPThreshold3(t *testing.T) {
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{"WARN3", "LOG"},
+		EeIDs:     []string{"EE1"},
 	}
 	models := ThresholdMdls{
 		{
@@ -2386,6 +2391,7 @@ func TestAPItoModelTPThreshold3(t *testing.T) {
 			Blocker:            false,
 			Weight:             20.0,
 			ActionIDs:          "WARN3",
+			EeIDs:              "EE1",
 		},
 		{
 			Tpid:      "TP1",
@@ -2415,9 +2421,16 @@ func TestAPItoModelTPThreshold4(t *testing.T) {
 		MinSleep:  "1s",
 		Blocker:   false,
 		Weight:    20.0,
-		ActionIDs: []string{"WARN3", "LOG"},
+		ActionIDs: []string{"WARN3"},
+		EeIDs:     []string{"EE1"},
 	}
 	models := ThresholdMdls{
+		{
+			Tpid:   "TP1",
+			Tenant: "cgrates.org",
+			ID:     "TH_1",
+			EeIDs:  "EE1",
+		},
 		{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
@@ -2429,12 +2442,6 @@ func TestAPItoModelTPThreshold4(t *testing.T) {
 			Blocker:            false,
 			Weight:             20.0,
 			ActionIDs:          "WARN3",
-		},
-		{
-			Tpid:      "TP1",
-			Tenant:    "cgrates.org",
-			ID:        "TH_1",
-			ActionIDs: "LOG",
 		},
 	}
 	rcv := APItoModelTPThreshold(th)
@@ -2459,6 +2466,7 @@ func TestAPItoModelTPThreshold5(t *testing.T) {
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{},
+		EeIDs:     []string{},
 	}
 	rcv := APItoModelTPThreshold(th)
 	if rcv != nil {
@@ -2478,6 +2486,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 		Blocker:            false,
 		Weight:             20.0,
 		ActionIDs:          []string{"WARN3"},
+		EeIDs:              []string{"EE1"},
 	}
 
 	eTPs := &ThresholdProfile{
@@ -2488,6 +2497,7 @@ func TestAPItoTPThreshold(t *testing.T) {
 		Weight:    tps.Weight,
 		FilterIDs: tps.FilterIDs,
 		ActionIDs: []string{"WARN3"},
+		EeIDs:     tps.EeIDs,
 	}
 	if eTPs.MinSleep, err = utils.ParseDurationWithNanosecs(tps.MinSleep); err != nil {
 		t.Errorf("Got error: %+v", err)
@@ -2512,6 +2522,7 @@ func TestThresholdProfileToAPI(t *testing.T) {
 		MinSleep:           "1s",
 		Weight:             20.0,
 		ActionIDs:          []string{"WARN3"},
+		EeIDs:              []string{"EE1"},
 	}
 
 	thPrf := &ThresholdProfile{
@@ -2527,6 +2538,7 @@ func TestThresholdProfileToAPI(t *testing.T) {
 		MinSleep:  time.Second,
 		Weight:    20.0,
 		ActionIDs: []string{"WARN3"},
+		EeIDs:     []string{"EE1"},
 	}
 
 	if rcv := ThresholdProfileToAPI(thPrf); !reflect.DeepEqual(expected, rcv) {
@@ -5033,7 +5045,7 @@ func TestThresholdMdlsCSVHeader(t *testing.T) {
 	}
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.ActivationIntervalString,
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
-		utils.Blocker, utils.Weight, utils.ActionIDs, utils.Async}
+		utils.Blocker, utils.Weight, utils.ActionIDs, utils.Async, utils.EeIDs}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -5250,6 +5262,7 @@ func TestModelHelpersThresholdProfileToAPIExpTime(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 15, 14, 25, 0, 0, time.UTC),
 		},
 		ActionIDs: []string{"test_action_id"},
+		EeIDs:     []string{"test_ee_id"},
 	}
 	expStruct := &utils.TPThresholdProfile{
 		FilterIDs: []string{"test_filter_id"},
@@ -5258,6 +5271,7 @@ func TestModelHelpersThresholdProfileToAPIExpTime(t *testing.T) {
 			ExpiryTime:     "2014-07-15T14:25:00Z",
 		},
 		ActionIDs: []string{"test_action_id"},
+		EeIDs:     []string{"test_ee_id"},
 	}
 	result := ThresholdProfileToAPI(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {
@@ -5369,6 +5383,7 @@ func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{"WARN3"},
+		EeIDs:     []string{"EE1"},
 	}
 	expStruct := ThresholdMdls{
 		{
@@ -5383,6 +5398,7 @@ func TestModelHelpersAPItoModelTPThresholdExpTime2(t *testing.T) {
 			Blocker:            false,
 			Weight:             20.0,
 			ActionIDs:          "WARN3",
+			EeIDs:              "EE1",
 		},
 	}
 

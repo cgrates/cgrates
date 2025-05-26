@@ -246,7 +246,7 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 0
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ := NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg})
+	thServ := NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg}, nil)
 	prepareThresholdData(t, dmTH)
 
 	thMatched, err := thServ.matchingThresholdsForEvent(testThresholdArgs[0].Tenant, testThresholdArgs[0])
@@ -297,7 +297,7 @@ func TestThresholdsProcessEvent(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 0
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ := NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg})
+	thServ := NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg}, nil)
 	prepareThresholdData(t, dmTH)
 
 	thIDs := []string{"TH_1"}
@@ -333,7 +333,7 @@ func TestThresholdsVerifyIfExecuted(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 0
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ := NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg})
+	thServ := NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg}, nil)
 	prepareThresholdData(t, dmTH)
 
 	thIDs := []string{"TH_1"}
@@ -406,7 +406,7 @@ func TestThresholdsProcessEvent2(t *testing.T) {
 	cfg.ThresholdSCfg().StoreInterval = 0
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
-	thServ := NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg})
+	thServ := NewThresholdService(dmTH, cfg, &FilterS{dm: dmTH, cfg: cfg}, nil)
 	prepareThresholdData(t, dmTH)
 
 	thPrf := &ThresholdProfile{
@@ -677,39 +677,6 @@ func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
 	utils.Logger.SetLogLevel(0)
 }
 
-func TestThresholdsProcessEvent3(t *testing.T) {
-	thPrf := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		MinHits:   3,
-		MaxHits:   5,
-		Weight:    10,
-		ActionIDs: []string{"actPrf"},
-	}
-	th := &Threshold{
-		Tenant: "cgrates.org",
-		ID:     "TH1",
-		Hits:   2,
-		tPrfl:  thPrf,
-	}
-
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ThresholdProcessEvent",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.MetaEventType:            utils.AccountUpdate,
-			utils.OptsThresholdsProfileIDs: []string{"TH1"},
-		},
-	}
-	if err := th.ProcessEvent(args, dm, nil); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestThresholdsShutdown(t *testing.T) {
 	utils.Logger.SetLogLevel(6)
 	utils.Logger.SetSyslog(nil)
@@ -726,7 +693,7 @@ func TestThresholdsShutdown(t *testing.T) {
 		t.Error(dErr)
 	}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	tS := NewThresholdService(dm, cfg, nil)
+	tS := NewThresholdService(dm, cfg, nil, nil)
 
 	expLog1 := `[INFO] <ThresholdS> shutdown initialized`
 	expLog2 := `[INFO] <ThresholdS> shutdown complete`
@@ -748,7 +715,7 @@ func TestThresholdsStoreThresholdsOK(t *testing.T) {
 		t.Error(dErr)
 	}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	tS := NewThresholdService(dm, cfg, nil)
+	tS := NewThresholdService(dm, cfg, nil, nil)
 
 	exp := &Threshold{
 		dirty:  utils.BoolPointer(false),
@@ -784,7 +751,7 @@ func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	tS := NewThresholdService(nil, cfg, nil)
+	tS := NewThresholdService(nil, cfg, nil, nil)
 
 	value := &Threshold{
 		dirty:  utils.BoolPointer(true),
@@ -830,7 +797,7 @@ func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 		t.Error(dErr)
 	}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	tS := NewThresholdService(dm, cfg, nil)
+	tS := NewThresholdService(dm, cfg, nil, nil)
 
 	value := &Threshold{
 		dirty:  utils.BoolPointer(true),
@@ -860,7 +827,7 @@ func TestThresholdsStoreThresholdNilDirtyField(t *testing.T) {
 		t.Error(dErr)
 	}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
-	tS := NewThresholdService(dm, cfg, nil)
+	tS := NewThresholdService(dm, cfg, nil, nil)
 
 	th := &Threshold{
 		Tenant: "cgrates.org",
@@ -881,7 +848,7 @@ func TestThresholdsProcessEventOK(t *testing.T) {
 	}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -943,7 +910,7 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 	}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1016,7 +983,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	dm := NewDataManager(data, cfg.CacheCfg(), connMgr)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(nil, cfg, filterS)
+	tS := NewThresholdService(nil, cfg, filterS, nil)
 	Cache = NewCacheS(cfg, dm, nil)
 
 	defer func() {
@@ -1090,7 +1057,7 @@ func TestThresholdsProcessEventNotFound(t *testing.T) {
 	}
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1146,7 +1113,7 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf1 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1209,7 +1176,7 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf1 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1269,7 +1236,7 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf1 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1341,7 +1308,7 @@ func TestThresholdsV1GetThresholdOK(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1387,7 +1354,7 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1423,7 +1390,7 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
 	rS := NewThresholdService(dm, cfg,
-		&FilterS{dm: dm, cfg: cfg})
+		&FilterS{dm: dm, cfg: cfg}, nil)
 
 	prfs := make([]*ThresholdProfile, 0)
 	ids := utils.StringSet{}
@@ -1487,7 +1454,7 @@ func TestThresholdMatchingThresholdForEventLocksActivationInterval(t *testing.T)
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
 	rS := NewThresholdService(dm, cfg,
-		&FilterS{dm: dm, cfg: cfg})
+		&FilterS{dm: dm, cfg: cfg}, nil)
 
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
@@ -1559,7 +1526,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	cfg.ThresholdSCfg().StringIndexedFields = nil
 	cfg.ThresholdSCfg().PrefixIndexedFields = nil
 	rS := NewThresholdService(dm, cfg,
-		&FilterS{dm: dm, cfg: cfg})
+		&FilterS{dm: dm, cfg: cfg}, nil)
 
 	ids := utils.StringSet{}
 	for i := 0; i < 10; i++ {
@@ -1601,7 +1568,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	cfg.DataDbCfg().Items[utils.CacheThresholds].Remote = true
 	config.SetCgrConfig(cfg)
 	rS := NewThresholdService(dm, cfg,
-		&FilterS{dm: dm, cfg: cfg})
+		&FilterS{dm: dm, cfg: cfg}, nil)
 
 	prfs := make([]*ThresholdProfile, 0)
 	ids := utils.StringSet{}
@@ -1754,7 +1721,7 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1808,7 +1775,7 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1875,7 +1842,7 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf1 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -1925,7 +1892,7 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	var reply []string
 	if err := tS.V1GetThresholdIDs(context.Background(), "", &reply); err == nil ||
@@ -1949,7 +1916,7 @@ func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 	Cache.Clear(nil)
 	defer Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -2007,7 +1974,7 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -2054,7 +2021,7 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalOK(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -2109,7 +2076,7 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(nil, cfg, filterS)
+	tS := NewThresholdService(nil, cfg, filterS, nil)
 
 	thPrf := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -2226,7 +2193,7 @@ func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
 	dm := NewDataManager(data, cfg.CacheCfg(), nil)
 	Cache.Clear(nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	thPrf1 := &ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -2285,7 +2252,7 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	connMgr = NewConnManager(cfg, make(map[string]chan birpc.ClientConnector))
 	Cache = NewCacheS(cfg, dm, nil)
 	filterS := NewFilterS(cfg, nil, dm)
-	tS := NewThresholdService(dm, cfg, filterS)
+	tS := NewThresholdService(dm, cfg, filterS, nil)
 
 	th := &Threshold{
 		Tenant: "cgrates.org",
@@ -2331,8 +2298,8 @@ func TestThresholdSnoozeSleep(t *testing.T) {
 	for i, arg := range testThresholdArgs {
 		th.ProcessEvent(arg, dm, fs)
 		if i > 0 {
-			if !th.Snooze.Equal(snoozeTime) {
-				t.Error("expecte snooze to not change during sleep time")
+			if th.Snooze.Equal(snoozeTime) {
+				t.Error("expecte snooze change time")
 			}
 		} else {
 			snoozeTime = th.Snooze
