@@ -85,7 +85,7 @@ func testAMQPv1LoadConfig(t *testing.T) {
 }
 
 func testAMQPv1ResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(amqpv1Cfg); err != nil {
+	if err := engine.InitDataDB(amqpv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

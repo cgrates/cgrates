@@ -104,7 +104,7 @@ func testDNSitInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testDNSitResetDB(t *testing.T) {
-	if err := engine.InitDataDb(dnsCfg); err != nil {
+	if err := engine.InitDataDB(dnsCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(dnsCfg); err != nil {

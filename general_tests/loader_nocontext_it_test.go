@@ -94,7 +94,7 @@ func testLoaderNoContextLoadConfig(t *testing.T) {
 }
 
 func testLoaderNoContextInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(ldrCtxCfg); err != nil {
+	if err := engine.InitDataDB(ldrCtxCfg); err != nil {
 		t.Fatal(err)
 	}
 }

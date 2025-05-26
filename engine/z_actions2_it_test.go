@@ -116,7 +116,7 @@ func testActionsInitCdrsStore(t *testing.T) {
 }
 
 func testActionsInitDataDb(t *testing.T) {
-	if err := InitDataDb(actsCfg); err != nil {
+	if err := InitDataDB(actsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

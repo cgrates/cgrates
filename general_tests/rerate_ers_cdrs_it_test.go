@@ -103,7 +103,7 @@ func testRerateCDRsERsLoadConfig(t *testing.T) {
 }
 
 func testRerateCDRsERsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rrErsCdrsCfg); err != nil {
+	if err := engine.InitDataDB(rrErsCdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

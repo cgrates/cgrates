@@ -110,7 +110,7 @@ func testJSONInitCdrDb(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testJSONResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(jsonCfg); err != nil {
+	if err := engine.InitDataDB(jsonCfg); err != nil {
 		t.Fatal(err)
 	}
 }

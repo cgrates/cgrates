@@ -109,7 +109,7 @@ func testAPIerInitCfg(t *testing.T) {
 }
 
 func testAPIerInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(apierCfg); err != nil {
+	if err := engine.InitDataDB(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }

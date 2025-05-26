@@ -86,7 +86,7 @@ func testS3LoadConfig(t *testing.T) {
 }
 
 func testS3ResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(s3Cfg); err != nil {
+	if err := engine.InitDataDB(s3Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -107,7 +107,7 @@ func testV1RtsCaseLoadConfig(t *testing.T) {
 }
 
 func testV1RtsCaseInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rtsCaseSv1Cfg); err != nil {
+	if err := engine.InitDataDB(rtsCaseSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

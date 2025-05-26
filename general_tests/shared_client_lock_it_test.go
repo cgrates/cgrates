@@ -122,7 +122,7 @@ func testSharedClientLockLoadConfig(t *testing.T) {
 }
 
 func testSharedClientLockInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(clntLockCfg); err != nil {
+	if err := engine.InitDataDB(clntLockCfg); err != nil {
 		t.Fatal(err)
 	}
 }

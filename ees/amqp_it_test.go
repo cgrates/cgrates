@@ -80,7 +80,7 @@ func testAMQPLoadConfig(t *testing.T) {
 }
 
 func testAMQPResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(amqpCfg); err != nil {
+	if err := engine.InitDataDB(amqpCfg); err != nil {
 		t.Fatal(err)
 	}
 }

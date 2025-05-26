@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/blevesearch/goleveldb/leveldb/filter"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -110,10 +111,10 @@ func testInternalReplicateITInitCfg(t *testing.T) {
 }
 
 func testInternalReplicateITDataFlush(t *testing.T) {
-	if err := engine.InitDataDb(engineOneCfg); err != nil {
+	if err := engine.InitDataDB(engineOneCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(engineTwoCfg); err != nil {
+	if err := engine.InitDataDB(engineTwoCfg); err != nil {
 		t.Fatal(err)
 	}
 }

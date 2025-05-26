@@ -75,10 +75,10 @@ func testCacheSReplicateLoadConfig(t *testing.T) {
 }
 
 func testCacheSReplicateInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(engine1Cfg); err != nil {
+	if err := engine.InitDataDB(engine1Cfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(engine2Cfg); err != nil {
+	if err := engine.InitDataDB(engine2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

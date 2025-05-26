@@ -82,7 +82,7 @@ func testSesNoneReqTypeItLoadConfig(t *testing.T) {
 }
 
 func testSesNoneReqTypeItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesNoneReqTypeCfg); err != nil {
+	if err := engine.InitDataDB(sesNoneReqTypeCfg); err != nil {
 		t.Fatal(err)
 	}
 }

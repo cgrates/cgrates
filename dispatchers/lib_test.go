@@ -103,7 +103,7 @@ func (d *testDispatcher) stopEngine(t *testing.T) {
 }
 
 func (d *testDispatcher) initDataDb(t *testing.T) {
-	if err := engine.InitDataDb(d.Cfg); err != nil {
+	if err := engine.InitDataDB(d.Cfg); err != nil {
 		t.Fatalf("Error at DataDB init:%v\n", err)
 	}
 }

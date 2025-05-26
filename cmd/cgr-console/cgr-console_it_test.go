@@ -290,7 +290,7 @@ func testConsoleItLoadersLoadConfig(t *testing.T) {
 }
 
 func testConsoleItInitDataDB(t *testing.T) {
-	if err := engine.InitDataDb(cnslItCfg); err != nil {
+	if err := engine.InitDataDB(cnslItCfg); err != nil {
 		t.Fatal(err)
 	}
 }

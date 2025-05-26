@@ -80,7 +80,7 @@ func testCostInitCfg(t *testing.T) {
 }
 
 func testCostInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(costCfg); err != nil {
+	if err := engine.InitDataDB(costCfg); err != nil {
 		t.Fatal(err)
 	}
 }

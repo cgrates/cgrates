@@ -92,7 +92,7 @@ func testSAitInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSAitResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(saCfg); err != nil {
+	if err := engine.InitDataDB(saCfg); err != nil {
 		t.Fatal(err)
 	}
 }

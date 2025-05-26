@@ -99,7 +99,7 @@ func testRPCMethodsLoadConfig(t *testing.T) {
 }
 
 func testRPCMethodsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rpcCfg); err != nil {
+	if err := engine.InitDataDB(rpcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

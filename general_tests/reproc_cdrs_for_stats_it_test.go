@@ -110,7 +110,7 @@ func testRpcdrsLoadConfig1(t *testing.T) {
 }
 
 func testRpcdrsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rpcdrsCfg); err != nil {
+	if err := engine.InitDataDB(rpcdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

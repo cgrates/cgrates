@@ -73,7 +73,7 @@ func testFwvLoadConfig(t *testing.T) {
 }
 
 func testFwvResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(fwvCfg); err != nil {
+	if err := engine.InitDataDB(fwvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

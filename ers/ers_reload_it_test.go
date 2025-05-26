@@ -90,7 +90,7 @@ func testReloadITInitCdrDb(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testReloadITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(reloadCfg); err != nil {
+	if err := engine.InitDataDB(reloadCfg); err != nil {
 		t.Fatal(err)
 	}
 }

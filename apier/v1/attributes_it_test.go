@@ -137,7 +137,7 @@ func testAttributeSInitCfg(t *testing.T) {
 }
 
 func testAttributeSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(alsPrfCfg); err != nil {
+	if err := engine.InitDataDB(alsPrfCfg); err != nil {
 		t.Fatal(err)
 	}
 }

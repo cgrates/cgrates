@@ -55,7 +55,7 @@ func TestGuardianSIT(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = engine.InitDataDb(guardianCfg); err != nil {
+	if err = engine.InitDataDB(guardianCfg); err != nil {
 		t.Fatal(err)
 	}
 

@@ -83,7 +83,7 @@ func testAttributeFltrSInitCfg(t *testing.T) {
 }
 
 func testAttributeFltrSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(attrFltrCfg); err != nil {
+	if err := engine.InitDataDB(attrFltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

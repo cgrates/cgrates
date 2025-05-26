@@ -84,7 +84,7 @@ func testFltrSepLoadConfig(t *testing.T) {
 }
 
 func testFltrSepInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(fltrSepCfg); err != nil {
+	if err := engine.InitDataDB(fltrSepCfg); err != nil {
 		t.Fatal(err)
 	}
 }

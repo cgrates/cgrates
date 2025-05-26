@@ -105,7 +105,7 @@ func testSesExpItLoadConfig(t *testing.T) {
 }
 
 func testSesExpItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesExpCfg); err != nil {
+	if err := engine.InitDataDB(sesExpCfg); err != nil {
 		t.Fatal(err)
 	}
 }

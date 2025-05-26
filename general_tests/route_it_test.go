@@ -93,7 +93,7 @@ func testV1SplSLoadConfig(t *testing.T) {
 }
 
 func testV1SplSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(splSv1Cfg); err != nil {
+	if err := engine.InitDataDB(splSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

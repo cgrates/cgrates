@@ -94,7 +94,7 @@ func testFWVITInitCdrDb(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testFWVITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(fwvCfg); err != nil {
+	if err := engine.InitDataDB(fwvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

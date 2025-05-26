@@ -97,7 +97,7 @@ func testActionsitInitCfg(t *testing.T) {
 }
 
 func testActionsitInitCdrDb(t *testing.T) {
-	if err := InitDataDb(actsLclCfg); err != nil { // need it for versions
+	if err := InitDataDB(actsLclCfg); err != nil { // need it for versions
 		t.Fatal(err)
 	}
 	if err := InitStorDb(actsLclCfg); err != nil {

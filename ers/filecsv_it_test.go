@@ -121,7 +121,7 @@ func testCsvITInitCdrDb(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testCsvITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(csvCfg); err != nil {
+	if err := engine.InitDataDB(csvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

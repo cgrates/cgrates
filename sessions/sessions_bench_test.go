@@ -63,7 +63,7 @@ func loadTP() {
 	for i := 0; i < *cps; i++ { // init CPS limitation
 		maxCps <- struct{}{}
 	}
-	if err := engine.InitDataDb(sBenchCfg); err != nil {
+	if err := engine.InitDataDB(sBenchCfg); err != nil {
 		log.Fatal(err)
 	}
 	attrs := &utils.AttrLoadTpFromFolder{

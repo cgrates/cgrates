@@ -95,7 +95,7 @@ func testRankingSInitCfg(t *testing.T) {
 }
 
 func testRankingSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rankingCfg); err != nil {
+	if err := engine.InitDataDB(rankingCfg); err != nil {
 		t.Fatal(err)
 	}
 }

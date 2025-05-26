@@ -89,7 +89,7 @@ func testAccWThdLoadConfig(t *testing.T) {
 }
 
 func testAccWThdInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(accWThdCfg); err != nil {
+	if err := engine.InitDataDB(accWThdCfg); err != nil {
 		t.Fatal(err)
 	}
 }

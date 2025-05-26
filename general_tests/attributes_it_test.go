@@ -90,7 +90,7 @@ func testAttributeSInitCfg(t *testing.T) {
 }
 
 func testAttributeSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(attrCfg); err != nil {
+	if err := engine.InitDataDB(attrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

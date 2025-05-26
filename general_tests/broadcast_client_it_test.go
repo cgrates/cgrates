@@ -90,7 +90,7 @@ func testbrodcastItLoadConfig(t *testing.T) {
 }
 
 func testbrodcastItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(brodcastInternalCfg); err != nil {
+	if err := engine.InitDataDB(brodcastInternalCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -102,7 +102,7 @@ func testSesMRSItLoadConfig(t *testing.T) {
 }
 
 func testSesMRSItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesMRSCfg); err != nil {
+	if err := engine.InitDataDB(sesMRSCfg); err != nil {
 		t.Fatal(err)
 	}
 }

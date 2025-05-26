@@ -92,7 +92,7 @@ func testCacheSLoadConfig(t *testing.T) {
 }
 
 func testCacheSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(chcCfg); err != nil {
+	if err := engine.InitDataDB(chcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

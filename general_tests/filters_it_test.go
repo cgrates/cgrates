@@ -107,7 +107,7 @@ func testV1FltrInitDataDb(t *testing.T) {
 		return
 	}
 	fltrInternalRestart = true
-	if err := engine.InitDataDb(fltrCfg); err != nil {
+	if err := engine.InitDataDB(fltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }

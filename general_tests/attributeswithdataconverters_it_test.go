@@ -84,7 +84,7 @@ func testAttrWDcInitCfg(t *testing.T) {
 }
 
 func testAttrWDcInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(attrWDcCfg); err != nil {
+	if err := engine.InitDataDB(attrWDcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

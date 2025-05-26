@@ -73,7 +73,7 @@ func TestRadiusCoADisconnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(raDiscCfg); err != nil {
+	if err := engine.InitDataDB(raDiscCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(raDiscCfg); err != nil {

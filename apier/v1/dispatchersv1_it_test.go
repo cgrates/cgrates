@@ -85,7 +85,7 @@ func testDspITLoadConfig(t *testing.T) {
 }
 
 func testDspITResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(dspCfg); err != nil {
+	if err := engine.InitDataDB(dspCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -90,7 +90,7 @@ func testCDRsPostFailoverInitConfig(t *testing.T) {
 }
 
 func testCDRsPostFailoverInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(cdrsPostFailCfg); err != nil {
+	if err := engine.InitDataDB(cdrsPostFailCfg); err != nil {
 		t.Fatal(err)
 	}
 }

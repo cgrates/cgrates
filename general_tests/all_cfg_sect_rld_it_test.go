@@ -128,7 +128,7 @@ func testSectLoadConfig(t *testing.T) {
 }
 
 func testSectResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(testSectCfg); err != nil {
+	if err := engine.InitDataDB(testSectCfg); err != nil {
 		t.Fatal(err)
 	}
 }

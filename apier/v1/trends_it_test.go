@@ -83,7 +83,7 @@ func testTrendSInitCfg(t *testing.T) {
 }
 
 func testTrendSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(trendCfg); err != nil {
+	if err := engine.InitDataDB(trendCfg); err != nil {
 		t.Fatal(err)
 	}
 }

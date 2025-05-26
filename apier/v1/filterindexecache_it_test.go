@@ -108,7 +108,7 @@ func testV1FIdxCaLoadConfig(t *testing.T) {
 }
 
 func testV1FIdxCaInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tSv1Cfg); err != nil {
+	if err := engine.InitDataDB(tSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -86,7 +86,7 @@ func testSQSLoadConfig(t *testing.T) {
 }
 
 func testSQSResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sqsCfg); err != nil {
+	if err := engine.InitDataDB(sqsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

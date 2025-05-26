@@ -104,7 +104,7 @@ func testSessionSv1ItInitCfg(t *testing.T) {
 }
 
 func testSessionSv1ItResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(sSv1Cfg2); err != nil {
+	if err := engine.InitDataDB(sSv1Cfg2); err != nil {
 		t.Fatal(err)
 	}
 }

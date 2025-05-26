@@ -84,7 +84,7 @@ func testV2CDRsOfflineInitConfig(t *testing.T) {
 }
 
 func testV2CDRsOfflineInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(cdrsOfflineCfg); err != nil {
+	if err := engine.InitDataDB(cdrsOfflineCfg); err != nil {
 		t.Fatal(err)
 	}
 }
