@@ -292,6 +292,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
+	defer d.Close()
 	dm := NewDataManager(d, cfg.CacheCfg(), connMgr)
 
 	if err := dm.DataDB().Flush(""); err != nil {
@@ -315,6 +316,7 @@ func InitStorDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
+	defer storDb.Close()
 	db_Path := strings.Trim(cfg.StorDbCfg().Type, "*")
 	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage",
 		db_Path)); err != nil {
