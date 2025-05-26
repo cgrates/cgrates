@@ -193,6 +193,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicStats] = dynamicStats
 	actionFuncMap[utils.MetaDynamicAttribute] = dynamicAttribute
 	actionFuncMap[utils.MetaDynamicActionPlan] = dynamicActionPlan
+	actionFuncMap[utils.MetaDynamicAccountAction] = dynamicAccountAction
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -1909,4 +1910,75 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the ActionPlan based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetActionPlan, ap, &reply)
+}
+
+// dynamicAccountAction processes the `ExtraParameters` field from the action to
+// populate action plans and action triggers for account
+//
+// The ExtraParameters field format is expected as follows:
+//
+//	0 Tenant: string
+//	1 Account: string
+//	2 ActionPlanIds: strings separated by "&".
+//	3 ActionTriggersIds: strings separated by "&".
+//	4 AllowNegative: bool
+//	5 Disabled: bool
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicAccountAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse Account parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 6 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 6", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+			return err
+		}
+	}
+	// populate Account's parameters
+	acc := &AttrSetAccount{
+		Tenant:          params[0],
+		Account:         params[1],
+		ReloadScheduler: true,
+		ExtraOptions:    make(map[string]bool),
+	}
+	// populate Account's ActionPlanIDs
+	if params[2] != utils.EmptyString {
+		acc.ActionPlanIDs = strings.Split(params[2], utils.ANDSep)
+	}
+	// populate Account's ActionTriggerIDs
+	if params[3] != utils.EmptyString {
+		acc.ActionTriggerIDs = strings.Split(params[3], utils.ANDSep)
+	}
+	// populate Account's AllowNegative ExtraParams
+	if params[4] != utils.EmptyString {
+		allNeg, err := strconv.ParseBool(params[4])
+		if err != nil {
+			return err
+		}
+		acc.ExtraOptions[utils.AllowNegative] = allNeg
+	}
+	// populate Account's Disabled ExtraParams
+	if params[5] != utils.EmptyString {
+		disable, err := strconv.ParseBool(params[5])
+		if err != nil {
+			return err
+		}
+		acc.ExtraOptions[utils.Disabled] = disable
+	}
+	// create the Account based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv2SetAccount, acc, &reply)
 }

@@ -33,6 +33,17 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type AttrSetAccount struct {
+	Tenant                 string
+	Account                string
+	ActionPlanIDs          []string
+	ActionPlansOverwrite   bool
+	ActionTriggerIDs       []string
+	ActionTriggerOverwrite bool
+	ExtraOptions           map[string]bool
+	ReloadScheduler        bool
+}
+
 // Account structure containing information about user's credit (minutes, cents, sms...).'
 // This can represent a user or a shared group.
 type Account struct {

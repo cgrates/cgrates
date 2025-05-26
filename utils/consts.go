@@ -1185,6 +1185,7 @@ const (
 	MetaDynamicStats            = "*dynamic_stats"
 	MetaDynamicAttribute        = "*dynamic_attribute"
 	MetaDynamicActionPlan       = "*dynamic_action_plan"
+	MetaDynamicAccountAction    = "*dynamic_account_action"
 	ActionID                    = "ActionID"
 	ActionType                  = "ActionType"
 	ActionValue                 = "ActionValue"

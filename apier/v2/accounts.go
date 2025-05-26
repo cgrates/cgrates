@@ -117,18 +117,7 @@ func (apiv2 *APIerSv2) GetAccount(ctx *context.Context, attr *utils.AttrGetAccou
 	return nil
 }
 
-type AttrSetAccount struct {
-	Tenant                 string
-	Account                string
-	ActionPlanIDs          []string
-	ActionPlansOverwrite   bool
-	ActionTriggerIDs       []string
-	ActionTriggerOverwrite bool
-	ExtraOptions           map[string]bool
-	ReloadScheduler        bool
-}
-
-func (apiv2 *APIerSv2) SetAccount(ctx *context.Context, attr *AttrSetAccount, reply *string) error {
+func (apiv2 *APIerSv2) SetAccount(ctx *context.Context, attr *engine.AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{utils.AccountField}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
