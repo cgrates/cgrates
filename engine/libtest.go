@@ -284,7 +284,7 @@ cgrates.org,ALL1,127.0.0.1:3012,*json,false
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	d, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
@@ -292,21 +292,19 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
-	defer d.Close()
-	dm := NewDataManager(d, cfg.CacheCfg(), connMgr)
-
-	if err := dm.DataDB().Flush(""); err != nil {
+	defer dataDB.Close()
+	if err := dataDB.Flush(""); err != nil {
 		return err
 	}
 	//	Write version before starting
-	if err := OverwriteDBVersions(dm.dataDB); err != nil {
+	if err := OverwriteDBVersions(dataDB); err != nil {
 		return err
 	}
 	return nil
 }
 
 func InitStorDb(cfg *config.CGRConfig) error {
-	storDb, err := NewStorDBConn(cfg.StorDbCfg().Type,
+	storDB, err := NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding, cfg.StorDbCfg().SSLMode,
@@ -316,15 +314,15 @@ func InitStorDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
-	defer storDb.Close()
-	db_Path := strings.Trim(cfg.StorDbCfg().Type, "*")
-	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage",
-		db_Path)); err != nil {
+	defer storDB.Close()
+	dbPath := strings.Trim(cfg.StorDbCfg().Type, "*")
+	if err := storDB.Flush(path.Join(cfg.DataFolderPath, "storage",
+		dbPath)); err != nil {
 		return err
 	}
 	if utils.IsSliceMember([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
 		cfg.StorDbCfg().Type) {
-		if err := SetDBVersions(storDb); err != nil {
+		if err := SetDBVersions(storDB); err != nil {
 			return err
 		}
 	}
