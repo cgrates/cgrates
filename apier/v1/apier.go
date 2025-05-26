@@ -734,60 +734,7 @@ func (apierSv1 *APIerSv1) GetActions(ctx *context.Context, actsId *string, reply
 	return nil
 }
 
-type AttrSetActionPlan struct {
-	Id              string            // Profile id
-	ActionPlan      []*AttrActionPlan // Set of actions this Actions profile will perform
-	Overwrite       bool              // If previously defined, will be overwritten
-	ReloadScheduler bool              // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
-}
-
-type AttrActionPlan struct {
-	ActionsId string  // Actions id
-	TimingID  string  // timingID is used to specify the ID of the timing for a corner case ( e.g. *monthly_estimated )
-	Years     string  // semicolon separated list of years this timing is valid on, *any or empty supported
-	Months    string  // semicolon separated list of months this timing is valid on, *any or empty supported
-	MonthDays string  // semicolon separated list of month's days this timing is valid on, *any or empty supported
-	WeekDays  string  // semicolon separated list of week day names this timing is valid on *any or empty supported
-	Time      string  // String representing the time this timing starts on, *asap supported
-	Weight    float64 // Binding's weight
-}
-
-func (attr *AttrActionPlan) getRITiming(dm *engine.DataManager) (timing *engine.RITiming, err error) {
-	if dfltTiming, isDefault := checkDefaultTiming(attr.Time); isDefault {
-		return dfltTiming, nil
-	}
-	timing = new(engine.RITiming)
-
-	if attr.TimingID != utils.EmptyString &&
-		!strings.HasPrefix(attr.TimingID, utils.Meta) { // in case of dynamic timing
-		if dbTiming, err := dm.GetTiming(attr.TimingID, false, utils.NonTransactional); err != nil {
-			if err != utils.ErrNotFound { // if not found let the user to populate all the timings values
-				return nil, err
-			}
-		} else {
-			timing.ID = dbTiming.ID
-			timing.Years = dbTiming.Years
-			timing.Months = dbTiming.Months
-			timing.MonthDays = dbTiming.MonthDays
-			timing.WeekDays = dbTiming.WeekDays
-			timing.StartTime = dbTiming.StartTime
-			timing.EndTime = dbTiming.EndTime
-		}
-	}
-	timing.ID = attr.TimingID
-	timing.Years.Parse(attr.Years, ";")
-	timing.Months.Parse(attr.Months, ";")
-	timing.MonthDays.Parse(attr.MonthDays, ";")
-	timing.WeekDays.Parse(attr.WeekDays, ";")
-	if !verifyFormat(attr.Time) {
-		err = fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), attr.Time)
-		return
-	}
-	timing.StartTime = attr.Time
-	return
-}
-
-func (apierSv1 *APIerSv1) SetActionPlan(ctx *context.Context, attrs *AttrSetActionPlan, reply *string) (err error) {
+func (apierSv1 *APIerSv1) SetActionPlan(ctx *context.Context, attrs *engine.AttrSetActionPlan, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -815,7 +762,7 @@ func (apierSv1 *APIerSv1) SetActionPlan(ctx *context.Context, attrs *AttrSetActi
 			} else if !exists {
 				return fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
 			}
-			timing, err := apiAtm.getRITiming(apierSv1.DataManager)
+			timing, err := apiAtm.GetRITiming(apierSv1.DataManager)
 			if err != nil {
 				return err
 			}
@@ -866,119 +813,6 @@ func (apierSv1 *APIerSv1) SetActionPlan(ctx *context.Context, attrs *AttrSetActi
 	}
 	*reply = utils.OK
 	return nil
-}
-
-func verifyFormat(tStr string) bool {
-	if tStr == utils.EmptyString ||
-		tStr == utils.MetaASAP {
-		return true
-	}
-
-	if len(tStr) > 8 { // hh:mm:ss
-		return false
-	}
-	if a := strings.Split(tStr, utils.InInFieldSep); len(a) != 3 {
-		return false
-	} else {
-		if _, err := strconv.Atoi(a[0]); err != nil {
-			return false
-		} else if _, err := strconv.Atoi(a[1]); err != nil {
-			return false
-		} else if _, err := strconv.Atoi(a[2]); err != nil {
-			return false
-		}
-	}
-	return true
-}
-
-// checkDefaultTiming will check the tStr if it's of the the default timings ( the same as in TPReader )
-// and will compute it properly
-func checkDefaultTiming(tStr string) (rTm *engine.RITiming, isDefault bool) {
-	currentTime := time.Now()
-	fmtTime := currentTime.Format("15:04:05")
-	switch tStr {
-	case utils.MetaEveryMinute:
-		return &engine.RITiming{
-			ID:        utils.MetaEveryMinute,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{},
-			WeekDays:  utils.WeekDays{},
-			StartTime: utils.ConcatenatedKey(utils.Meta, utils.Meta, strconv.Itoa(currentTime.Second())),
-			EndTime:   "",
-		}, true
-	case utils.MetaHourly:
-		return &engine.RITiming{
-			ID:        utils.MetaHourly,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{},
-			WeekDays:  utils.WeekDays{},
-			StartTime: utils.ConcatenatedKey(utils.Meta, strconv.Itoa(currentTime.Minute()), strconv.Itoa(currentTime.Second())),
-			EndTime:   "",
-		}, true
-	case utils.MetaDaily:
-		return &engine.RITiming{
-			ID:        utils.MetaDaily,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{},
-			WeekDays:  utils.WeekDays{},
-			StartTime: fmtTime,
-			EndTime:   ""}, true
-	case utils.MetaWeekly:
-		return &engine.RITiming{
-			ID:        utils.MetaWeekly,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{},
-			WeekDays:  utils.WeekDays{currentTime.Weekday()},
-			StartTime: fmtTime,
-			EndTime:   "",
-		}, true
-	case utils.MetaMonthly:
-		return &engine.RITiming{
-			ID:        utils.MetaMonthly,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{currentTime.Day()},
-			WeekDays:  utils.WeekDays{},
-			StartTime: fmtTime,
-			EndTime:   "",
-		}, true
-	case utils.MetaMonthlyEstimated:
-		return &engine.RITiming{
-			ID:        utils.MetaMonthlyEstimated,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{currentTime.Day()},
-			WeekDays:  utils.WeekDays{},
-			StartTime: fmtTime,
-			EndTime:   "",
-		}, true
-	case utils.MetaMonthEnd:
-		return &engine.RITiming{
-			ID:        utils.MetaMonthEnd,
-			Years:     utils.Years{},
-			Months:    utils.Months{},
-			MonthDays: utils.MonthDays{-1},
-			WeekDays:  utils.WeekDays{},
-			StartTime: fmtTime,
-			EndTime:   "",
-		}, true
-	case utils.MetaYearly:
-		return &engine.RITiming{
-			ID:        utils.MetaYearly,
-			Years:     utils.Years{},
-			Months:    utils.Months{currentTime.Month()},
-			MonthDays: utils.MonthDays{currentTime.Day()},
-			WeekDays:  utils.WeekDays{},
-			StartTime: fmtTime,
-			EndTime:   "",
-		}, true
-	default:
-		return nil, false
-	}
 }
 
 type AttrGetActionPlan struct {

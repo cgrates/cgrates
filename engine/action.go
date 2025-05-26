@@ -125,14 +125,19 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaAlterSessions,
 		utils.MetaForceDisconnectSessions,
 	}
+	dynamicActions := []string{
+		utils.MetaDynamicThreshold, utils.MetaDynamicStats,
+		utils.MetaDynamicAttribute, utils.MetaDynamicActionPlan,
+		utils.MetaDynamicAction, utils.MetaDynamicDestination,
+		utils.MetaDynamicAccountAction,
+	}
 	act := ActionConnCfg{}
 	switch source {
 	case utils.ThresholdS:
 		switch {
 		case slices.Contains(sessionActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().SessionSConns
-		case utils.MetaDynamicThreshold == action || utils.MetaDynamicStats == action ||
-			utils.MetaDynamicAttribute == action:
+		case slices.Contains(dynamicActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().ApierSConns
 		}
 	case utils.RALs:
@@ -187,6 +192,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicThreshold] = dynamicThreshold
 	actionFuncMap[utils.MetaDynamicStats] = dynamicStats
 	actionFuncMap[utils.MetaDynamicAttribute] = dynamicAttribute
+	actionFuncMap[utils.MetaDynamicActionPlan] = dynamicActionPlan
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -990,7 +996,7 @@ func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, ";")
 	if len(params) != 5 {
-		return errors.New("invalid number of parameters; expected 5")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 5", len(params)))
 	}
 
 	// If conversion fails, limit will default to 0.
@@ -1035,7 +1041,7 @@ func forceDisconnectSessionsAction(_ *Account, act *Action, _ Actions, _ *Filter
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, ";")
 	if len(params) != 5 {
-		return errors.New("invalid number of parameters; expected 5")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 5", len(params)))
 	}
 
 	// If conversion fails, limit will default to 0.
@@ -1468,7 +1474,7 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 12 {
-		return errors.New("invalid number of parameters; expected 12")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 12", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1597,7 +1603,7 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 14 {
-		return errors.New("invalid number of parameters; expected 14")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 14", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1816,4 +1822,91 @@ func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the AttributeProfile based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetAttributeProfile, attrP, &reply)
+}
+
+// dynamicActionPlan processes the `ExtraParameters` field from the action to construct an ActionPlan
+//
+// The ExtraParameters field format is expected as follows:
+//
+// 0 Id: string
+// 1 ActionsId: string
+// 2 TimingId: string
+// 3 Weight: float
+// 4 Overwrite: bool
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 5 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 5", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	ap := &AttrSetActionPlan{
+		Id:              params[0],
+		ReloadScheduler: true,
+	}
+	// populate ActionPlan's ActionsId
+	if params[1] == utils.EmptyString {
+		return fmt.Errorf("empty ActionsId for <%s> dynamic_action_plan", params[0])
+	}
+	// Make sure ActionsId exists in DataDB
+	var actsRply []*utils.TPAction
+	if err := connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1GetActions, params[1], &actsRply); err != nil {
+		return err
+	}
+	ap.ActionPlan = append(ap.ActionPlan, &AttrActionPlan{})
+	ap.ActionPlan[0].ActionsId = params[1]
+	if params[2] != utils.EmptyString {
+		// Make sure TimingID exists in DataDB and use it for the action plan
+		var tpTiming utils.TPTiming
+		if err := connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: params[2]}, &tpTiming); err != nil {
+			return err
+		}
+		ap.ActionPlan[0].TimingID = tpTiming.ID
+		ap.ActionPlan[0].Years = tpTiming.Years.Serialize(";")
+		ap.ActionPlan[0].Months = tpTiming.Months.Serialize(";")
+		ap.ActionPlan[0].MonthDays = tpTiming.MonthDays.Serialize(";")
+		ap.ActionPlan[0].WeekDays = tpTiming.WeekDays.Serialize(";")
+		if tpTiming.EndTime != utils.EmptyString {
+			ap.ActionPlan[0].Time = utils.InfieldJoin(tpTiming.StartTime, tpTiming.EndTime)
+		} else {
+			ap.ActionPlan[0].Time = tpTiming.StartTime
+		}
+	}
+	// populate ActionPlan's Weight
+	if params[3] != utils.EmptyString {
+		ap.ActionPlan[0].Weight, err = strconv.ParseFloat(params[3], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionPlan's Overwrite
+	if params[4] != utils.EmptyString {
+		ap.Overwrite, err = strconv.ParseBool(params[4])
+		if err != nil {
+			return err
+		}
+	}
+
+	// create the ActionPlan based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetActionPlan, ap, &reply)
 }
