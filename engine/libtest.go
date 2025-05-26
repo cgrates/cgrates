@@ -46,7 +46,7 @@ import (
 )
 
 func InitDataDB(cfg *config.CGRConfig) error {
-	d, err := NewDataDBConn(cfg.DataDbCfg().Type,
+	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
 		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
@@ -54,14 +54,12 @@ func InitDataDB(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
-	defer d.Close()
-	dm := NewDataManager(d, cfg, connMgr)
-
-	if err := dm.DataDB().Flush(""); err != nil {
+	defer dataDB.Close()
+	if err := dataDB.Flush(""); err != nil {
 		return err
 	}
-	//	Write version before starting
-	if err := OverwriteDBVersions(dm.dataDB); err != nil {
+	// Set versions before starting.
+	if err := OverwriteDBVersions(dataDB); err != nil {
 		return err
 	}
 	return nil
