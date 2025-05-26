@@ -260,22 +260,21 @@ func (t *Threshold) ProcessEvent(args *utils.CGREvent, dm *DataManager, fltrS *F
 
 // processEEs processes to the EEs for this threshold
 func (t *Threshold) processEEs(opts map[string]any, thScfg *config.ThresholdSCfg, connMgr *ConnManager) (err error) {
-	if len(thScfg.EEsConns) == 0 {
-		return nil
-	}
 	var targetEeIDs []string
 	if len(t.tPrfl.EeIDs) > 0 {
 		targetEeIDs = t.tPrfl.EeIDs
-	} else {
-		isNone := slices.Contains(thScfg.EEsExporterIDs, utils.MetaNone)
-		if isNone {
+		if isNone := slices.Contains(t.tPrfl.EeIDs, utils.MetaNone); isNone {
 			targetEeIDs = []string{}
-		} else if len(thScfg.EEsExporterIDs) > 0 {
-			targetEeIDs = thScfg.EEsExporterIDs
 		}
+	} else {
+		targetEeIDs = thScfg.EEsExporterIDs
 	}
-	if targetEeIDs == nil {
-		return nil // Nothing to do.
+	if len(targetEeIDs) > 0 {
+		if len(thScfg.EEsConns) == 0 {
+			return utils.NewErrNotConnected(utils.EEs)
+		}
+	} else {
+		return nil // no EEs to process
 	}
 	if opts == nil {
 		opts = make(map[string]any)
@@ -325,7 +324,7 @@ func (t *Threshold) processEEs(opts map[string]any, thScfg *config.ThresholdSCfg
 		cgrEventWithID, &reply); errExec != nil &&
 		errExec.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
-			fmt.Sprintf("<ThresholdS> error: %s processing event %+v with EEs.", err.Error(), cgrEv))
+			fmt.Sprintf("<ThresholdS> error: %s processing event %+v with EEs.", errExec.Error(), cgrEv))
 		err = utils.ErrPartiallyExecuted
 	}
 	return
@@ -599,7 +598,7 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 		}
 		if err = t.processEEs(args.APIOpts, tS.cgrcfg.ThresholdSCfg(), connMgr); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<ThresholdService> threshold: %s processing with EEs.", err.Error()))
+				fmt.Sprintf("<ThresholdService> received error: %s when processing with EEs.", err.Error()))
 			withErrors = true
 		}
 		if t.dirty == nil || t.Hits == t.tPrfl.MaxHits { // one time threshold

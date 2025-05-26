@@ -153,8 +153,8 @@ RT1,0.2,0.1,1s,1s,0`,
 cgrates.org,ATTR_ACNT,*any,,,,*opts.*accountID,*variable,~*req.Account,false,10`,
 			utils.StatsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
 cgrates.org,STATS_1001,*string:~*req.Account:1001,,,-1,,*sum#1,,true,,,THD_1001`,
-			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,THD_1001,*string:~*req.StatID:STATS_1001,,-1,5,0,false,,DISABLE_ACC,false`,
+			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10],EeIDs[11]
+cgrates.org,THD_1001,*string:~*req.StatID:STATS_1001,,-1,5,0,false,,DISABLE_ACC,false,`,
 		},
 
 		LogBuffer: bytes.NewBuffer(nil),

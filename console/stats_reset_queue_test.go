@@ -27,8 +27,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCmdStatResetQueue(t *testing.T) {
-	command := commands["stat_reset_queue"]
+func TestCmdStatsResetQueue(t *testing.T) {
+	command := commands["stats_reset_queue"]
 	// verify if StatSv1 object has method on it
 	m, ok := reflect.TypeOf(new(v1.StatSv1)).MethodByName(strings.Split(command.RpcMethod(), utils.NestingSep)[1])
 	if !ok {

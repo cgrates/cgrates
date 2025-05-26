@@ -1891,9 +1891,6 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 		if min > len(th.ActionIDs) {
 			min = len(th.ActionIDs)
 		}
-		if min > len(th.EeIDs) {
-			min = len(th.EeIDs)
-		}
 		for i := range min {
 			mdl := &ThresholdMdl{
 				Tpid:   th.TPid,
@@ -1915,10 +1912,16 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 						mdl.ActivationInterval += utils.InfieldSep + th.ActivationInterval.ExpiryTime
 					}
 				}
+				for i, val := range th.EeIDs {
+					if i != 0 {
+						mdl.EeIDs += utils.InfieldSep
+					}
+					mdl.EeIDs += val
+				}
 			}
 			mdl.FilterIDs = th.FilterIDs[i]
 			mdl.ActionIDs = th.ActionIDs[i]
-			mdl.EeIDs = th.EeIDs[i]
+
 			mdls = append(mdls, mdl)
 		}
 
@@ -1930,17 +1933,6 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 					ID:     th.ID,
 				}
 				mdl.FilterIDs = th.FilterIDs[i]
-				mdls = append(mdls, mdl)
-			}
-		}
-		if len(th.EeIDs)-min > 0 {
-			for i := min; i < len(th.EeIDs); i++ {
-				mdl := &ThresholdMdl{
-					Tpid:   th.TPid,
-					Tenant: th.Tenant,
-					ID:     th.ID,
-				}
-				mdl.EeIDs = th.EeIDs[i]
 				mdls = append(mdls, mdl)
 			}
 		}
@@ -1986,17 +1978,18 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 		Async:     tpTH.Async,
 		ActionIDs: make([]string, len(tpTH.ActionIDs)),
 		FilterIDs: make([]string, len(tpTH.FilterIDs)),
-		EeIDs:     make([]string, len(tpTH.EeIDs)),
 	}
 	if tpTH.MinSleep != utils.EmptyString {
 		if th.MinSleep, err = utils.ParseDurationWithNanosecs(tpTH.MinSleep); err != nil {
 			return nil, err
 		}
 	}
-
+	if len(tpTH.EeIDs) > 0 {
+		th.EeIDs = make([]string, len(tpTH.EeIDs))
+		copy(th.EeIDs, tpTH.EeIDs)
+	}
 	copy(th.ActionIDs, tpTH.ActionIDs)
 	copy(th.FilterIDs, tpTH.FilterIDs)
-	copy(th.EeIDs, tpTH.EeIDs)
 
 	if tpTH.ActivationInterval != nil {
 		if th.ActivationInterval, err = tpTH.ActivationInterval.AsActivationInterval(timezone); err != nil {

@@ -239,8 +239,8 @@ cgrates.org,STATS_FRD,,,-1,24h,0,*tcc,,true,false,0,THD_FRD
 
 	// Create and populate Thresholds.csv
 	if err := writeFile(utils.ThresholdsCsv, `
-#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,THD_FRD,*gte:~*req.*tcc:2,,-1,1,0,false,0,ACT_FRD_STOP;ACT_FRD_LOG,true
+#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10],EeIDs[11]
+cgrates.org,THD_FRD,*gte:~*req.*tcc:2,,-1,1,0,false,0,ACT_FRD_STOP;ACT_FRD_LOG,true,
 `); err != nil {
 		t.Fatal(err)
 	}

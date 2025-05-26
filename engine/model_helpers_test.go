@@ -2422,15 +2422,8 @@ func TestAPItoModelTPThreshold4(t *testing.T) {
 		Blocker:   false,
 		Weight:    20.0,
 		ActionIDs: []string{"WARN3"},
-		EeIDs:     []string{"EE1"},
 	}
 	models := ThresholdMdls{
-		{
-			Tpid:   "TP1",
-			Tenant: "cgrates.org",
-			ID:     "TH_1",
-			EeIDs:  "EE1",
-		},
 		{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
