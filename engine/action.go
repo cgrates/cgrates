@@ -195,6 +195,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicActionPlan] = dynamicActionPlan
 	actionFuncMap[utils.MetaDynamicAction] = dynamicAction
 	actionFuncMap[utils.MetaDynamicAccountAction] = dynamicAccountAction
+	actionFuncMap[utils.MetaDynamicDestination] = dynamicDestination
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -2026,6 +2027,50 @@ func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv2SetActions, ap, &reply)
 }
+
+// dynamicDestination processes the `ExtraParameters` field from the action to construct a new Destination
+//
+// The ExtraParameters field format is expected as follows:
+//
+//	0 Id: string
+//	1 Prefix: strings separated by "&".
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicDestination(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaOpts: cgrEv.APIOpts,
+	}
+	// Parse Destination parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 2 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 2", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+			return err
+		}
+	}
+	// populate Destination's parameters
+	dest := &utils.AttrSetDestination{
+		Id: params[0],
+	}
+	// populate Destination's Prefixes
+	if params[1] != utils.EmptyString {
+		dest.Prefixes = strings.Split(params[1], utils.ANDSep)
+	}
+
+	// create the Destination based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetDestination, dest, &reply)
+}
+
 // dynamicAccountAction processes the `ExtraParameters` field from the action to
 // populate action plans and action triggers for account
 //

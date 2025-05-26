@@ -1187,6 +1187,7 @@ const (
 	MetaDynamicActionPlan       = "*dynamic_action_plan"
 	MetaDynamicAccountAction    = "*dynamic_account_action"
 	MetaDynamicAction           = "*dynamic_action"
+	MetaDynamicDestination      = "*dynamic_destination"
 	ActionID                    = "ActionID"
 	ActionType                  = "ActionType"
 	ActionValue                 = "ActionValue"
