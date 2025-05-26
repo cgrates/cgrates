@@ -1273,6 +1273,8 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Prefix_indexed_fields: &[]string{},
 		Suffix_indexed_fields: &[]string{},
 		ExistsIndexedFields:   &[]string{},
+		Ees_conns:             &[]string{},
+		Ees_exporter_ids:      &[]string{},
 		Nested_fields:         utils.BoolPointer(false),
 		Opts: &ThresholdsOptsJson{
 			ProfileIDs:           &[]string{},

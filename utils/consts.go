@@ -2811,6 +2811,10 @@ const (
 	OptsStatsProfileIDs           = "*stsProfileIDs"
 	OptsStatsProfileIgnoreFilters = "*stsProfileIgnoreFilters"
 	// Thresholds
+	ThresholdHit                       = "ThresholdHit"
+	Hits                               = "Hits"
+	Snooze                             = "Snooze"
+	ThresholdConfig                    = "Config"
 	OptsThresholdsProfileIDs           = "*thdProfileIDs"
 	OptsThresholdsProfileIgnoreFilters = "*thdProfileIgnoreFilters"
 	//CDRs and Sessions

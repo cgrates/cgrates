@@ -47,6 +47,7 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 		PrefixIndexedFields: &[]string{"*req.index1"},
 		SuffixIndexedFields: &[]string{"*req.index1"},
 		ExistsIndexedFields: &[]string{"*req.index1"},
+		EEsConns:            []string{},
 		NestedFields:        true,
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []string{},
@@ -89,6 +90,8 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.PrefixIndexedFieldsCfg: []string{},
 		utils.SuffixIndexedFieldsCfg: []string{},
 		utils.ExistsIndexedFieldsCfg: []string{},
+		utils.EEsExporterIDsCfg:      []string{},
+		utils.EEsConnsCfg:            []string{},
 		utils.NestedFieldsCfg:        false,
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:              []string{},
@@ -124,6 +127,8 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.SuffixIndexedFieldsCfg: []string{"*req.suffix_indexed_fields1", "*req.suffix_indexed_fields2"},
 		utils.ExistsIndexedFieldsCfg: []string{"*req.exists_indexed_field"},
 		utils.NestedFieldsCfg:        true,
+		utils.EEsExporterIDsCfg:      []string{},
+		utils.EEsConnsCfg:            []string{},
 		utils.OptsCfg: map[string]any{
 			utils.MetaProfileIDs:              []string{},
 			utils.MetaProfileIgnoreFiltersCfg: false,

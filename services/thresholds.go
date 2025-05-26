@@ -34,7 +34,7 @@ import (
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *cores.Server, internalThresholdSChan chan birpc.ClientConnector,
+	server *cores.Server, internalThresholdSChan chan birpc.ClientConnector, connMgr *engine.ConnManager,
 	anz *AnalyzerService, srvDep map[string]*sync.WaitGroup) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
@@ -43,6 +43,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		server:      server,
+		connMgr:     connMgr,
 		anz:         anz,
 		srvDep:      srvDep,
 	}
@@ -56,6 +57,7 @@ type ThresholdService struct {
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
 	server      *cores.Server
+	connMgr     *engine.ConnManager
 
 	thrs     *engine.ThresholdService
 	connChan chan birpc.ClientConnector
@@ -82,7 +84,7 @@ func (thrs *ThresholdService) Start() error {
 
 	thrs.Lock()
 	defer thrs.Unlock()
-	thrs.thrs = engine.NewThresholdService(datadb, thrs.cfg, filterS)
+	thrs.thrs = engine.NewThresholdService(datadb, thrs.cfg, filterS, thrs.connMgr)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	thrs.thrs.StartLoop()
