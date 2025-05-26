@@ -96,8 +96,8 @@ func TestAccountSummaryThresholds(t *testing.T) {
 		TpFiles: map[string]string{
 			utils.ActionsCsv: fmt.Sprintf(`#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 ACT_HTTP,*http_post_async,%s/balance_exhausted,,,,,,,,,,,,false,false,10`, server.URL),
-			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,THD_1,*lt:~*asm.BalanceSummaries.test.Value:1,2024-07-29T15:00:00Z,1,1,,false,10,ACT_HTTP,true`,
+			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10],EeIDs[11]
+cgrates.org,THD_1,*lt:~*asm.BalanceSummaries.test.Value:1,2024-07-29T15:00:00Z,1,1,,false,10,ACT_HTTP,true,`,
 		},
 	}
 	client, _ := ng.Run(t)

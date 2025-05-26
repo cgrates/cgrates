@@ -24,7 +24,7 @@ import (
 
 func init() {
 	c := &CmdResetStatQueue{
-		name:      "stat_reset_queue",
+		name:      "stats_reset_queue",
 		rpcMethod: utils.StatSv1ResetStatQueue,
 		rpcParams: &utils.TenantIDWithAPIOpts{},
 	}

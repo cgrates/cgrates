@@ -78,7 +78,6 @@ func TestStressThresholdsProcessEvent(t *testing.T) {
 		DBCfg:      dbConfig,
 		LogBuffer:  bytes.NewBuffer(nil),
 	}
-	defer fmt.Println(ng.LogBuffer)
 	client, _ := ng.Run(t)
 	t.Run("SetThresholdProfile", func(t *testing.T) {
 		var reply string

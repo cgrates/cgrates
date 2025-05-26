@@ -118,8 +118,8 @@ RP_VOICE,DR_VOICE,*any,10`,
 cgrates.org,call,1001,2014-01-14T00:00:00Z,RP_VOICE,`,
 		utils.StatsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
 cgrates.org,Stat1,*string:~*req.Account:1001,,,,,*tcc;*acd;*tcd,,,,,`,
-		utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,TH1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,-1,0,0,false,10,,false`,
+		utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10],EeIDs[11]
+cgrates.org,TH1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,-1,0,0,false,10,,false,`,
 	}
 	ng := engine.TestEngine{
 		ConfigJSON: content,

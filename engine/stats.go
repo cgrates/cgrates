@@ -306,7 +306,7 @@ func (sS *StatService) processThresholds(sQs StatQueues, opts map[string]any) (e
 		var tIDs []string
 		if err := sS.connMgr.Call(context.TODO(), sS.cgrcfg.StatSCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
-			(len(thIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
+			(len(tIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
 			withErrs = true

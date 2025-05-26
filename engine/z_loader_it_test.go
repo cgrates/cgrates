@@ -469,7 +469,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 			t.Error(err)
 		}
 		if !reflect.DeepEqual(sts, rcv) {
-			t.Errorf("Expecting: %v, received: %v", sts, rcv)
+			t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sts), utils.ToJSON(rcv))
 		}
 	}
 
