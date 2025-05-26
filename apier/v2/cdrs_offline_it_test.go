@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/birpc"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -232,8 +231,8 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 
-	atm1 := &v1.AttrActionPlan{ActionsId: "ACT_TOPUP_TEST2", Time: "*asap", Weight: 20.0}
-	atms1 := &v1.AttrSetActionPlan{Id: "AP_TEST2", ActionPlan: []*v1.AttrActionPlan{atm1}}
+	atm1 := &engine.AttrActionPlan{ActionsId: "ACT_TOPUP_TEST2", Time: "*asap", Weight: 20.0}
+	atms1 := &engine.AttrSetActionPlan{Id: "AP_TEST2", ActionPlan: []*engine.AttrActionPlan{atm1}}
 	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv1SetActionPlan, &atms1, &reply); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())
 	} else if reply != utils.OK {
@@ -241,7 +240,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	}
 
 	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetAccount,
-		&AttrSetAccount{Tenant: "cgrates.org", Account: "test2",
+		&engine.AttrSetAccount{Tenant: "cgrates.org", Account: "test2",
 			ActionPlanIDs: []string{"AP_TEST2"}, ReloadScheduler: true},
 		&reply); err != nil {
 		t.Error(err)

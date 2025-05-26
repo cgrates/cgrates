@@ -750,7 +750,7 @@ func testV2CDRsSetThreshold(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	attrSetAcnt := AttrSetAccount{
+	attrSetAcnt := engine.AttrSetAccount{
 		Tenant:  "cgrates.org",
 		Account: "1005",
 		ExtraOptions: map[string]bool{
@@ -883,7 +883,7 @@ func testV2CDRsRerate(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	attrSetAcnt := AttrSetAccount{
+	attrSetAcnt := engine.AttrSetAccount{
 		Tenant:  "cgrates.org",
 		Account: "voiceAccount",
 	}
@@ -1049,7 +1049,7 @@ func testV2CDRsDuplicateCDRs(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	attrSetAcnt := AttrSetAccount{
+	attrSetAcnt := engine.AttrSetAccount{
 		Tenant:  "cgrates.org",
 		Account: "testV2CDRsDuplicateCDRs",
 	}

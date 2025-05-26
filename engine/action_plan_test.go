@@ -702,3 +702,69 @@ func TestActionTimingGetNextStartTimesMonthlyEstimated(t *testing.T) {
 		})
 	}
 }
+
+func TestVerifyFormat(t *testing.T) {
+	tests := []struct {
+		tStr         string
+		expectedBool bool
+	}{
+
+		{"12:34:56", true},
+		{"23:59:59", true},
+		{"12:34", false},
+		{"12:34:56:78", false},
+		{"12:abc:56", false},
+		{"123:456:789", false},
+		{"00:00:00", true},
+		{"12:34:56", true},
+		{"t:01:t", false},
+		{"1,1,1", false},
+		{"0:0:0", true},
+		{"119911", false},
+		{"00/01/03", false},
+		{"t1:t2:t3", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.tStr, func(t *testing.T) {
+			result := verifyFormat(tt.tStr)
+			if result != tt.expectedBool {
+				t.Errorf("verifyFormat(%q) = %v; want %v", tt.tStr, result, tt.expectedBool)
+			}
+		})
+	}
+}
+
+func TestCheckDefaultTiming(t *testing.T) {
+	tests := []struct {
+		name      string
+		tStr      string
+		wantID    string
+		wantIsDef bool
+	}{
+		{"Every Minute", utils.MetaEveryMinute, utils.MetaEveryMinute, true},
+		{"Hourly", utils.MetaHourly, utils.MetaHourly, true},
+		{"Daily", utils.MetaDaily, utils.MetaDaily, true},
+		{"Weekly", utils.MetaWeekly, utils.MetaWeekly, true},
+		{"Monthly", utils.MetaMonthly, utils.MetaMonthly, true},
+		{"Monthly Estimated", utils.MetaMonthlyEstimated, utils.MetaMonthlyEstimated, true},
+		{"Month End", utils.MetaMonthEnd, utils.MetaMonthEnd, true},
+		{"Yearly", utils.MetaYearly, utils.MetaYearly, true},
+		{"Unknown", "unknown", "", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, isDef := checkDefaultTiming(tt.tStr)
+			if isDef != tt.wantIsDef {
+				t.Errorf("checkDefaultTiming(%q) isDefault = %v, want %v", tt.tStr, isDef, tt.wantIsDef)
+			}
+			if isDef && got.ID != tt.wantID {
+				t.Errorf("checkDefaultTiming(%q) got.ID = %v, want %v", tt.tStr, got.ID, tt.wantID)
+			}
+			if !isDef && got != nil {
+				t.Errorf("checkDefaultTiming(%q) expected nil, got non-nil", tt.tStr)
+			}
+		})
+	}
+}

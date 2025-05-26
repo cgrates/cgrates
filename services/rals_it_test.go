@@ -69,7 +69,7 @@ func TestRalsReload(t *testing.T) {
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	stordb := NewStorDBService(cfg, false, srvDep)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	ralS := NewRalService(cfg, chS, server,
 		make(chan birpc.ClientConnector, 1),
 		make(chan birpc.ClientConnector, 1),

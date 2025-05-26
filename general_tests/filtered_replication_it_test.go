@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -1330,7 +1329,7 @@ func testFltrRplDispatcherHost(t *testing.T) {
 
 func testFltrRplAccount(t *testing.T) {
 	acID := "ATTR1"
-	attrPrf := &v2.AttrSetAccount{Tenant: "cgrates.org", Account: acID, ExtraOptions: map[string]bool{utils.Disabled: true}}
+	attrPrf := &engine.AttrSetAccount{Tenant: "cgrates.org", Account: acID, ExtraOptions: map[string]bool{utils.Disabled: true}}
 	attrAC := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: acID}
 	expPrf := &engine.Account{
 		ID:       "cgrates.org:" + acID,

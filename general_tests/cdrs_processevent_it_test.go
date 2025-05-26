@@ -32,7 +32,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -475,7 +474,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
-	attrSetAcnt := v2.AttrSetAccount{
+	attrSetAcnt := engine.AttrSetAccount{
 		Tenant:  "cgrates.org",
 		Account: "1005",
 		ExtraOptions: map[string]bool{

@@ -1295,8 +1295,8 @@ func testApierGetActions(t *testing.T) {
 }
 
 func testApierSetActionPlan(t *testing.T) {
-	atm1 := &AttrActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
-	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*AttrActionPlan{atm1}}
+	atm1 := &engine.AttrActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
+	atms1 := &engine.AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*engine.AttrActionPlan{atm1}}
 	reply1 := utils.EmptyString
 	if err := rater.Call(context.Background(), utils.APIerSv1SetActionPlan, &atms1, &reply1); err != nil {
 		t.Error("Got error on APIerSv1.SetActionPlan: ", err.Error())

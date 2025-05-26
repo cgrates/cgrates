@@ -141,9 +141,9 @@ func testApierSetActions(t *testing.T) {
 
 func testAccountsSetActPlans(t *testing.T) {
 	var reply string
-	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
+	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &engine.AttrSetActionPlan{
 		Id: "TestAccountAP1",
-		ActionPlan: []*v1.AttrActionPlan{{
+		ActionPlan: []*engine.AttrActionPlan{{
 			ActionsId: "TestAccountAction",
 			MonthDays: "1",
 			Time:      "00:00:00",
@@ -154,9 +154,9 @@ func testAccountsSetActPlans(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)
 	}
-	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
+	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &engine.AttrSetActionPlan{
 		Id: "TestAccountAP2",
-		ActionPlan: []*v1.AttrActionPlan{{
+		ActionPlan: []*engine.AttrActionPlan{{
 			ActionsId: "TestAccountAction",
 			MonthDays: "2",
 			Time:      "00:00:00",
@@ -167,9 +167,9 @@ func testAccountsSetActPlans(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply)
 	}
-	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &v1.AttrSetActionPlan{
+	if err := accRPC.Call(context.Background(), utils.APIerSv1SetActionPlan, &engine.AttrSetActionPlan{
 		Id: "TestAccountAP3",
-		ActionPlan: []*v1.AttrActionPlan{{
+		ActionPlan: []*engine.AttrActionPlan{{
 			ActionsId: "TestAccountAction",
 			MonthDays: "2",
 			Time:      "00:00:00",
@@ -184,7 +184,7 @@ func testAccountsSetActPlans(t *testing.T) {
 
 func testAccountsSet1(t *testing.T) {
 	var reply string
-	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, AttrSetAccount{
+	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, engine.AttrSetAccount{
 		Tenant:               "cgrates.org",
 		Account:              "dan",
 		ReloadScheduler:      true,
@@ -195,7 +195,7 @@ func testAccountsSet1(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
 	}
-	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, AttrSetAccount{
+	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, engine.AttrSetAccount{
 		Tenant:               "cgrates.org",
 		Account:              "dan2",
 		ReloadScheduler:      true,
@@ -228,7 +228,7 @@ func testAccountsGetActionPlan1(t *testing.T) {
 
 func testAccountsSet2(t *testing.T) {
 	var reply string
-	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, AttrSetAccount{
+	if err := accRPC.Call(context.Background(), utils.APIerSv2SetAccount, engine.AttrSetAccount{
 		Tenant:               "cgrates.org",
 		Account:              "dan",
 		ReloadScheduler:      true,

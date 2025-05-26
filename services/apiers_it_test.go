@@ -63,7 +63,7 @@ func TestApiersReload(t *testing.T) {
 	stordb := NewStorDBService(cfg, false, srvDep)
 	anz := NewAnalyzerService(cfg, server, filterSChan, shdChan, make(chan birpc.ClientConnector, 1), srvDep)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), anz, srvDep)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan birpc.ClientConnector, 1), nil, anz, srvDep)
 	rspd := NewResponderService(cfg, server, make(chan birpc.ClientConnector, 1), shdChan, anz, srvDep, filterSChan)
 	apiSv1 := NewAPIerSv1Service(cfg, db, stordb, filterSChan, server, schS, rspd,
 		make(chan birpc.ClientConnector, 1), nil, anz, srvDep)

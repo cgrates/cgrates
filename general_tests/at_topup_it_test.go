@@ -296,9 +296,9 @@ Alternative setup by API:
 	}
 
 	if err := client.Call(context.Background(), utils.APIerSv1SetActionPlan,
-		&v1.AttrSetActionPlan{
+		&engine.AttrSetActionPlan{
 			Id: "PACKAGE_1001",
-			ActionPlan: []*v1.AttrActionPlan{{
+			ActionPlan: []*engine.AttrActionPlan{{
 				ActionsId: "ACT_TOPUP_INITIAL",
 				TimingID:  "*asap",
 				Time:      "*asap",

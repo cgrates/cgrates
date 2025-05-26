@@ -26,40 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCheckDefaultTiming(t *testing.T) {
-	tests := []struct {
-		name      string
-		tStr      string
-		wantID    string
-		wantIsDef bool
-	}{
-		{"Every Minute", utils.MetaEveryMinute, utils.MetaEveryMinute, true},
-		{"Hourly", utils.MetaHourly, utils.MetaHourly, true},
-		{"Daily", utils.MetaDaily, utils.MetaDaily, true},
-		{"Weekly", utils.MetaWeekly, utils.MetaWeekly, true},
-		{"Monthly", utils.MetaMonthly, utils.MetaMonthly, true},
-		{"Monthly Estimated", utils.MetaMonthlyEstimated, utils.MetaMonthlyEstimated, true},
-		{"Month End", utils.MetaMonthEnd, utils.MetaMonthEnd, true},
-		{"Yearly", utils.MetaYearly, utils.MetaYearly, true},
-		{"Unknown", "unknown", "", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, isDef := checkDefaultTiming(tt.tStr)
-			if isDef != tt.wantIsDef {
-				t.Errorf("checkDefaultTiming(%q) isDefault = %v, want %v", tt.tStr, isDef, tt.wantIsDef)
-			}
-			if isDef && got.ID != tt.wantID {
-				t.Errorf("checkDefaultTiming(%q) got.ID = %v, want %v", tt.tStr, got.ID, tt.wantID)
-			}
-			if !isDef && got != nil {
-				t.Errorf("checkDefaultTiming(%q) expected nil, got non-nil", tt.tStr)
-			}
-		})
-	}
-}
-
 func TestGetId(t *testing.T) {
 	tests := []struct {
 		name       string

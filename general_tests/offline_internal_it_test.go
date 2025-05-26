@@ -253,9 +253,9 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 			var aps []*engine.ActionPlan
 			t.Run("GetActionPlan", func(t *testing.T) {
 				var reply string
-				atms1 := &v1.AttrSetActionPlan{
+				atms1 := &engine.AttrSetActionPlan{
 					Id: "ATMS_1",
-					ActionPlan: []*v1.AttrActionPlan{
+					ActionPlan: []*engine.AttrActionPlan{
 						{
 							ActionsId: "ACTION_TOPUP_RESET_SMS",
 							MonthDays: "1",

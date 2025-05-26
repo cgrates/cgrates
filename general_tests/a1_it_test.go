@@ -31,7 +31,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -338,7 +337,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 	for _, acnt := range acnts {
 		wg.Add(1)
 		go func(acnt string) {
-			attrSetAcnt := v2.AttrSetAccount{
+			attrSetAcnt := engine.AttrSetAccount{
 				Tenant:        "cgrates.org",
 				Account:       acnt,
 				ActionPlanIDs: []string{"PACKAGE_1"},
@@ -380,7 +379,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 			wg.Done()
 		}(acnt)
 		go func(acnt string) {
-			attrSetAcnt := v2.AttrSetAccount{
+			attrSetAcnt := engine.AttrSetAccount{
 				Tenant:        "cgrates.org",
 				Account:       acnt,
 				ActionPlanIDs: []string{"PACKAGE_2"},

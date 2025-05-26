@@ -276,9 +276,9 @@ func testdoubleRemoveActionPlan(t *testing.T) {
 		}
 	*/
 	// set ActionPlan
-	atms1 := &v1.AttrSetActionPlan{
+	atms1 := &engine.AttrSetActionPlan{
 		Id: "ATMS_1",
-		ActionPlan: []*v1.AttrActionPlan{
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "ACTS_2",
 				Time:      utils.MetaASAP,
