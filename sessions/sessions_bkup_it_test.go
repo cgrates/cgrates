@@ -118,21 +118,7 @@ func testSessionSBkupInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionSBkupResetDB(t *testing.T) {
-	if *utils.DBType == utils.MetaInternal {
-		if err := engine.PreInitDataDb(sBkupCfg); err != nil {
-			t.Fatal(err)
-		}
-		if err := engine.PreInitStorDb(sBkupCfg); err != nil {
-			t.Fatal(err)
-		}
-	} else {
-		if err := engine.InitDataDb(sBkupCfg); err != nil {
-			t.Fatal(err)
-		}
-		if err := engine.InitStorDb(sBkupCfg); err != nil {
-			t.Fatal(err)
-		}
-	}
+	engine.FlushDBs(t, sBkupCfg, true, true)
 }
 
 // Start CGR Engine
