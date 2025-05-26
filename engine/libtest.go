@@ -54,6 +54,7 @@ func InitDataDB(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
+	defer d.Close()
 	dm := NewDataManager(d, cfg, connMgr)
 
 	if err := dm.DataDB().Flush(""); err != nil {
@@ -63,29 +64,6 @@ func InitDataDB(cfg *config.CGRConfig) error {
 	if err := OverwriteDBVersions(dm.dataDB); err != nil {
 		return err
 	}
-	return nil
-}
-
-// Initiates DataDB, flushes it, and closes the connection after
-func PreInitDataDb(cfg *config.CGRConfig) error {
-	d, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		return err
-	}
-	dm := NewDataManager(d, cfg, connMgr)
-
-	if err := dm.DataDB().Flush(""); err != nil {
-		return err
-	}
-	//	Write version before starting
-	if err := OverwriteDBVersions(dm.dataDB); err != nil {
-		return err
-	}
-	d.Close()
 	return nil
 }
 
@@ -99,6 +77,7 @@ func InitStorDB(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
+	defer storDB.Close()
 
 	dbPath := strings.Trim(cfg.StorDbCfg().Type, "*")
 	if err := storDB.Flush(path.Join(cfg.DataFolderPath, "storage",
@@ -112,32 +91,6 @@ func InitStorDB(cfg *config.CGRConfig) error {
 			return err
 		}
 	}
-	return nil
-}
-
-// Initiates StorDB, flushes it, and closed the connection after
-func PreInitStorDb(cfg *config.CGRConfig) error {
-	storDb, err := NewStorDBConn(cfg.StorDbCfg().Type,
-		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
-	if err != nil {
-		return err
-	}
-	dbPath := strings.Trim(cfg.StorDbCfg().Type, "*")
-	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage",
-		dbPath)); err != nil {
-		return err
-	}
-	if slices.Contains([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
-		cfg.StorDbCfg().Type) {
-		if err := SetDBVersions(storDb); err != nil {
-			return err
-		}
-	}
-	storDb.Close()
 	return nil
 }
 
@@ -394,7 +347,6 @@ type TestEngine struct {
 	TpPath           string            // path to the tariff plans
 	TpFiles          map[string]string // CSV data for tariff plans: filename -> content
 	GracefulShutdown bool              // shutdown the engine gracefuly, otherwise use process.Kill
-	PreInitDB        bool              // close db connections after initiating and flushing db
 
 	// PreStartHook executes custom logic relying on CGRConfig
 	// before starting cgr-engine.
@@ -407,7 +359,7 @@ type TestEngine struct {
 func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
 	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
-	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB, ng.PreInitDB)
+	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
 	if ng.TpPath != "" || len(ng.TpFiles) != 0 {
 		if ng.TpPath == "" {
 			ng.TpPath = t.TempDir()
@@ -553,28 +505,16 @@ func loadCSVs(t testing.TB, tpPath string, csvFiles map[string]string) {
 
 // FlushDBs resets the databases specified in the configuration if the
 // corresponding flags are true.
-func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool, preInitDB bool) {
+func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
 	t.Helper()
 	if flushDataDB {
-		if preInitDB {
-			if err := PreInitDataDb(cfg); err != nil {
-				t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
-			}
-		} else {
-			if err := InitDataDB(cfg); err != nil {
-				t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
-			}
+		if err := InitDataDB(cfg); err != nil {
+			t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
 		}
 	}
 	if flushStorDB {
-		if preInitDB {
-			if err := PreInitStorDb(cfg); err != nil {
-				t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
-			}
-		} else {
-			if err := InitStorDB(cfg); err != nil {
-				t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
-			}
+		if err := InitStorDB(cfg); err != nil {
+			t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
 		}
 	}
 }
