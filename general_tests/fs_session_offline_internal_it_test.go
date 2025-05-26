@@ -64,12 +64,7 @@ func TestFsSessionOfflineInternal(t *testing.T) {
 
 	tutorialCallsCfg.DataFolderPath = *utils.DataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tutorialCallsCfg)
-	if err := engine.PreInitDataDb(tutorialCallsCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.PreInitStorDb(tutorialCallsCfg); err != nil {
-		t.Fatal(err)
-	}
+	engine.FlushDBs(t, tutorialCallsCfg, true, true)
 	engine.KillProcName(utils.Freeswitch, 5000)
 	if err := engine.CallScript(path.Join(*fsConfig, "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
 		t.Fatal(err)
