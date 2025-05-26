@@ -54,13 +54,12 @@ func InitDataDb(cfg *config.CGRConfig) error {
 		return err
 	}
 	defer dataDB.Close()
-	dm := NewDataManager(dataDB, cfg.CacheCfg(), connMgr)
 
-	if err := dm.DataDB().Flush(""); err != nil {
+	if err := dataDB.Flush(""); err != nil {
 		return err
 	}
 	//	Write version before starting
-	if err := OverwriteDBVersions(dm.dataDB); err != nil {
+	if err := OverwriteDBVersions(dataDB); err != nil {
 		return err
 	}
 	return nil
