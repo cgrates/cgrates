@@ -74,7 +74,6 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 		t.Run("OfflineInternal"+strconv.Itoa(i), func(t *testing.T) {
 			ng := engine.TestEngine{
 				ConfigPath:       pth,
-				PreInitDB:        true,
 				GracefulShutdown: true,
 				Encoding:         *utils.Encoding,
 				// LogBuffer:        buf,
