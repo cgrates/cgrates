@@ -92,7 +92,7 @@ func testDynThdLoadConfig(t *testing.T) {
 }
 
 func testDynThdInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(dynThdCfg); err != nil {
+	if err := engine.InitDataDB(dynThdCfg); err != nil {
 		t.Fatal(err)
 	}
 }

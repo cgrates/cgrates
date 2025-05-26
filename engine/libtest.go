@@ -44,7 +44,7 @@ import (
 	"github.com/creack/pty"
 )
 
-func InitDataDb(cfg *config.CGRConfig) error {
+func InitDataDB(cfg *config.CGRConfig) error {
 	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
 		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
 		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
@@ -536,7 +536,7 @@ func LoadCSVs(t testing.TB, client *birpc.Client, tpPath string, csvFiles map[st
 func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
 	t.Helper()
 	if flushDataDB {
-		if err := InitDataDb(cfg); err != nil {
+		if err := InitDataDB(cfg); err != nil {
 			t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
 		}
 	}

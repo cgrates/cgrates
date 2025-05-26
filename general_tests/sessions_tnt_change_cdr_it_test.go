@@ -82,7 +82,7 @@ func testSesTntChngCdrsLoadConfig(t *testing.T) {
 }
 
 func testSesTntChngCdrsResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesTntChngCfg); err != nil {
+	if err := engine.InitDataDB(sesTntChngCfg); err != nil {
 		t.Fatal(err)
 	}
 }

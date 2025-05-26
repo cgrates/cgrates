@@ -108,10 +108,10 @@ func testRerateExpLoadConfig(t *testing.T) {
 }
 
 func testRerateExpInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(ng1Cfg); err != nil {
+	if err := engine.InitDataDB(ng1Cfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(ng2Cfg); err != nil {
+	if err := engine.InitDataDB(ng2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

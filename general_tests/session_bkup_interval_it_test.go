@@ -111,7 +111,7 @@ func testSessionSBkupIntrvlResetDB(t *testing.T) {
 			t.Fatal("Error creating folder: ", sBkupCfg.StorDbCfg().Opts.InternalDBDumpPath, err)
 		}
 	} else {
-		if err := engine.InitDataDb(sBkupCfg); err != nil {
+		if err := engine.InitDataDB(sBkupCfg); err != nil {
 			t.Fatal(err)
 		}
 		if err := engine.InitStorDb(sBkupCfg); err != nil {

@@ -137,7 +137,7 @@ func testAccITLoadConfig(t *testing.T) {
 }
 
 func testAccITResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(accCfg); err != nil {
+	if err := engine.InitDataDB(accCfg); err != nil {
 		t.Fatal(err)
 	}
 }

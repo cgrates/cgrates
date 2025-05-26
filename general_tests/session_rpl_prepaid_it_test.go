@@ -76,7 +76,7 @@ func testSeSRplPrepaidInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSeSRplPrepaidResetDB(t *testing.T) {
-	if err := engine.InitDataDb(sesRplPrePaidCfg); err != nil {
+	if err := engine.InitDataDB(sesRplPrePaidCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(sesRplPrePaidCfg); err != nil {

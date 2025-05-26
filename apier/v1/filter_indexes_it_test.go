@@ -152,7 +152,7 @@ func testV1FIdxdxInitDataDb(t *testing.T) {
 		return
 	}
 	tSv1InternalRestart = true
-	if err := engine.InitDataDb(tSv1Cfg); err != nil {
+	if err := engine.InitDataDB(tSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

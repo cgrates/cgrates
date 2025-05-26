@@ -84,7 +84,7 @@ func testSessionsTUsageInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionsTUsageResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tUsageCfg); err != nil {
+	if err := engine.InitDataDB(tUsageCfg); err != nil {
 		t.Fatal(err)
 	}
 }

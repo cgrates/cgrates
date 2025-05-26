@@ -81,7 +81,7 @@ func testSesMFDItLoadConfig(t *testing.T) {
 }
 
 func testSesMFDItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesMFDCfg); err != nil {
+	if err := engine.InitDataDB(sesMFDCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -103,7 +103,7 @@ func testAnalyzerSInitCfg(t *testing.T) {
 }
 
 func testAnalyzerSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(anzCfg); err != nil {
+	if err := engine.InitDataDB(anzCfg); err != nil {
 		t.Fatal(err)
 	}
 }

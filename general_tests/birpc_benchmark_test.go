@@ -50,7 +50,7 @@ func BenchmarkRPCCalls(b *testing.B) {
 		b.Fatal(err)
 	}
 	benchDelay := 1000
-	if err := engine.InitDataDb(benchCfg); err != nil {
+	if err := engine.InitDataDB(benchCfg); err != nil {
 		b.Fatal(err)
 	}
 	if err := engine.InitStorDb(benchCfg); err != nil {

@@ -77,7 +77,7 @@ func testDestinationLoadConfig(t *testing.T) {
 }
 
 func testDestinationResetDB(t *testing.T) {
-	if err := engine.InitDataDb(tutorialCfg); err != nil {
+	if err := engine.InitDataDB(tutorialCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(tutorialCfg); err != nil {

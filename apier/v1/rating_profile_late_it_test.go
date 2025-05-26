@@ -81,7 +81,7 @@ func testRpLateInitCfg(t *testing.T) {
 }
 
 func testRpLateInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(rpLateCfg); err != nil {
+	if err := engine.InitDataDB(rpLateCfg); err != nil {
 		t.Fatal(err)
 	}
 }

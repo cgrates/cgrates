@@ -215,7 +215,7 @@ func testDiamItResetAllDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(allCfg); err != nil {
+	if err := engine.InitDataDB(allCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(allCfg); err != nil {
@@ -227,7 +227,7 @@ func testDiamItResetAllDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(allCfg2); err != nil {
+	if err := engine.InitDataDB(allCfg2); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(allCfg2); err != nil {
@@ -237,7 +237,7 @@ func testDiamItResetAllDB(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testDiamItResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(daCfg); err != nil {
+	if err := engine.InitDataDB(daCfg); err != nil {
 		t.Fatal(err)
 	}
 }

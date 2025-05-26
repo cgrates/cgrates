@@ -125,7 +125,7 @@ func testV1RouteLoadConfig(t *testing.T) {
 }
 
 func testV1RouteInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(routeSv1Cfg); err != nil {
+	if err := engine.InitDataDB(routeSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

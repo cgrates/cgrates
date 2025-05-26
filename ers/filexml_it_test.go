@@ -95,7 +95,7 @@ func testXMLITInitCdrDb(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testXMLITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(xmlCfg); err != nil {
+	if err := engine.InitDataDB(xmlCfg); err != nil {
 		t.Fatal(err)
 	}
 }

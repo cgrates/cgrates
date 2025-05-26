@@ -270,7 +270,7 @@ func testV1TSLoadConfig(t *testing.T) {
 }
 
 func testV1TSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tSv1Cfg); err != nil {
+	if err := engine.InitDataDB(tSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

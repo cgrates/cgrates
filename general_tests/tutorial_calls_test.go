@@ -148,7 +148,7 @@ func testCallInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testCallResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tutorialCallsCfg); err != nil {
+	if err := engine.InitDataDB(tutorialCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

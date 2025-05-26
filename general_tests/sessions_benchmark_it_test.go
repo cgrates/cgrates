@@ -83,7 +83,7 @@ func testSesPItLoadConfig(t *testing.T) {
 }
 
 func testSesPItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesPCfg); err != nil {
+	if err := engine.InitDataDB(sesPCfg); err != nil {
 		t.Fatal(err)
 	}
 }

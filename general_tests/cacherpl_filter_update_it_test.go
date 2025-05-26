@@ -116,7 +116,7 @@ func testFilterUpdateInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testFilterUpdateResetDB(t *testing.T) {
-	if err := engine.InitDataDb(fltrUpdateCfg1); err != nil {
+	if err := engine.InitDataDB(fltrUpdateCfg1); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(fltrUpdateCfg1); err != nil {

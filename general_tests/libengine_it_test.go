@@ -77,7 +77,7 @@ func testLibengITInitCfg(t *testing.T) {
 }
 
 func testLibengITInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(libengCfg); err != nil {
+	if err := engine.InitDataDB(libengCfg); err != nil {
 		t.Fatal(err)
 	}
 }

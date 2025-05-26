@@ -101,13 +101,13 @@ func testSessionSBkupRplcInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionSBkupRplcResetDB(t *testing.T) {
-	if err := engine.InitDataDb(sBRplcEng1Cfg); err != nil {
+	if err := engine.InitDataDB(sBRplcEng1Cfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(sBRplcEng1Cfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(sBRplcEng2Cfg); err != nil {
+	if err := engine.InitDataDB(sBRplcEng2Cfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(sBRplcEng2Cfg); err != nil {

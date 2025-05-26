@@ -99,7 +99,7 @@ func testEEsInitCfg(t *testing.T) {
 }
 
 func testEEsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(eeSCfg); err != nil {
+	if err := engine.InitDataDB(eeSCfg); err != nil {
 		t.Fatal(err)
 	}
 }

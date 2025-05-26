@@ -117,7 +117,7 @@ func testCoreSv1LoadCofig(t *testing.T) {
 }
 
 func testCoreSv1InitDataDB(t *testing.T) {
-	if err := engine.InitDataDb(coreV1Cfg); err != nil {
+	if err := engine.InitDataDB(coreV1Cfg); err != nil {
 		t.Error(err)
 	}
 }

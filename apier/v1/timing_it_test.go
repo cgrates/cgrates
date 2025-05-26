@@ -84,7 +84,7 @@ func testTimingInitCfg(t *testing.T) {
 }
 
 func testTimingInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(timCfg); err != nil {
+	if err := engine.InitDataDB(timCfg); err != nil {
 		t.Fatal(err)
 	}
 }

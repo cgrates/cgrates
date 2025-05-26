@@ -104,7 +104,7 @@ func testFraudLoadConfig(t *testing.T) {
 }
 
 func testFraudInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(fraudCfg); err != nil {
+	if err := engine.InitDataDB(fraudCfg); err != nil {
 		t.Fatal(err)
 	}
 }

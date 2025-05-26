@@ -84,7 +84,7 @@ func testSesRoutesItLoadConfig(t *testing.T) {
 }
 
 func testSesRoutesItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(sesRoutesCfg); err != nil {
+	if err := engine.InitDataDB(sesRoutesCfg); err != nil {
 		t.Fatal(err)
 	}
 }

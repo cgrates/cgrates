@@ -88,13 +88,13 @@ func testGOCSInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testGOCSResetDB(t *testing.T) {
-	if err := engine.InitDataDb(auCfg); err != nil {
+	if err := engine.InitDataDB(auCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(usCfg); err != nil {
+	if err := engine.InitDataDB(usCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(dspCfg); err != nil {
+	if err := engine.InitDataDB(dspCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(auCfg); err != nil {

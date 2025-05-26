@@ -101,10 +101,10 @@ func testCDRsOnExpInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func testCDRsOnExpInitCdrDb(t *testing.T) {
-	if err := engine.InitDataDb(cdrsMasterCfg); err != nil {
+	if err := engine.InitDataDB(cdrsMasterCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := engine.InitDataDb(cdrsSlaveCfg); err != nil {
+	if err := engine.InitDataDB(cdrsSlaveCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(cdrsMasterCfg); err != nil {

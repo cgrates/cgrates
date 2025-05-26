@@ -122,7 +122,7 @@ func testSchedLoadConfig(t *testing.T) {
 }
 
 func testSchedInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(schedCfg); err != nil {
+	if err := engine.InitDataDB(schedCfg); err != nil {
 		t.Fatal(err)
 	}
 }

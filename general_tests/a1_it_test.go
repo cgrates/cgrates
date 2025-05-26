@@ -85,7 +85,7 @@ func testA1itLoadConfig(t *testing.T) {
 }
 
 func testA1itResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(a1Cfg); err != nil {
+	if err := engine.InitDataDB(a1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }

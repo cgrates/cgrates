@@ -105,7 +105,7 @@ func testPartITInitCdrDb(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testPartITResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(partCfg); err != nil {
+	if err := engine.InitDataDB(partCfg); err != nil {
 		t.Fatal(err)
 	}
 }

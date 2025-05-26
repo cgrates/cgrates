@@ -123,7 +123,7 @@ func testSessionSRplInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionSRplResetDB(t *testing.T) {
-	if err := engine.InitDataDb(smgRplcMasterCfg); err != nil {
+	if err := engine.InitDataDB(smgRplcMasterCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(smgRplcMasterCfg); err != nil {

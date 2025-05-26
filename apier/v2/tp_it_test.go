@@ -94,7 +94,7 @@ func testTPitLoadConfig(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testTPitResetDataDb(t *testing.T) {
-	if err := engine.InitDataDb(tpCfg); err != nil {
+	if err := engine.InitDataDB(tpCfg); err != nil {
 		t.Fatal(err)
 	}
 }

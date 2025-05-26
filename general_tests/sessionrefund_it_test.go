@@ -85,7 +85,7 @@ func testSrItLoadConfig(t *testing.T) {
 }
 
 func testSrItResetDataDB(t *testing.T) {
-	if err := engine.InitDataDb(srCfg); err != nil {
+	if err := engine.InitDataDB(srCfg); err != nil {
 		t.Fatal(err)
 	}
 }

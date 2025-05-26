@@ -84,7 +84,7 @@ func testDsphNodeInitCfg(t *testing.T) {
 }
 
 func testDsphNodeInitDB(t *testing.T) {
-	if err := engine.InitDataDb(dspNodeCfg); err != nil {
+	if err := engine.InitDataDB(dspNodeCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(dspNodeCfg); err != nil {

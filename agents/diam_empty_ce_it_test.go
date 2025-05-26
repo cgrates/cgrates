@@ -77,7 +77,7 @@ func testDiamEmptyCEItInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testDiamEmptyCEItDataDb(t *testing.T) {
-	if err := engine.InitDataDb(daCfgND); err != nil {
+	if err := engine.InitDataDB(daCfgND); err != nil {
 		t.Fatal(err)
 	}
 }

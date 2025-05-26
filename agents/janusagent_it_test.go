@@ -92,7 +92,7 @@ func testJanitInitCfg(t *testing.T) {
 }
 
 func testJanitResetDB(t *testing.T) {
-	if err := engine.InitDataDb(janCfg); err != nil {
+	if err := engine.InitDataDB(janCfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(janCfg); err != nil {

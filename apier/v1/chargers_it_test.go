@@ -136,7 +136,7 @@ func testChargerSInitCfg(t *testing.T) {
 }
 
 func testChargerSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(chargerCfg); err != nil {
+	if err := engine.InitDataDB(chargerCfg); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -120,7 +120,7 @@ func testDispatcherSInitCfg(t *testing.T) {
 }
 
 func testDispatcherSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(dispatcherCfg); err != nil {
+	if err := engine.InitDataDB(dispatcherCfg); err != nil {
 		t.Fatal(err)
 	}
 }

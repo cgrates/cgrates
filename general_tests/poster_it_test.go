@@ -92,7 +92,7 @@ func testPosterITInitCfg(t *testing.T) {
 }
 
 func testPosterITInitCdrDb(t *testing.T) {
-	if err := engine.InitDataDb(pstrCfg); err != nil { // need it for versions
+	if err := engine.InitDataDB(pstrCfg); err != nil { // need it for versions
 		t.Fatal(err)
 	}
 	if err := engine.InitStorDb(pstrCfg); err != nil {

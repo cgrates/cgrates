@@ -96,7 +96,7 @@ func testConfigSInitCfg(t *testing.T) {
 }
 
 func testConfigSInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(configCfg); err != nil {
+	if err := engine.InitDataDB(configCfg); err != nil {
 		t.Fatal(err)
 	}
 }

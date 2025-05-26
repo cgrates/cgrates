@@ -110,7 +110,7 @@ func testV2CDRsInitConfig(t *testing.T) {
 }
 
 func testV2CDRsInitDataDb(t *testing.T) {
-	if err := engine.InitDataDb(cdrsCfg); err != nil {
+	if err := engine.InitDataDB(cdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
