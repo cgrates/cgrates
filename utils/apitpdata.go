@@ -367,8 +367,14 @@ func (t *TPTiming) IsActiveAt(tm time.Time) bool {
 	return true
 }
 
-// Returns true if string can be split in 3 sperated by ":" signs. "00:00:00"
+// Returns true if string can be split in 3 sperated by ":" signs. "00:00:00", or if
+// its parsable to a duration
 func IsTimeFormated(t string) bool {
+	if strings.HasPrefix(t, PlusChar) {
+		if _, err := time.ParseDuration(strings.TrimPrefix(t, PlusChar)); err != nil {
+			return false
+		}
+	}
 	return len(strings.Split(t, ":")) == 3
 }
 

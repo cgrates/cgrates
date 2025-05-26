@@ -21,6 +21,8 @@ package engine
 import (
 	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -129,6 +131,14 @@ func (at *ActionTiming) GetNextStartTime(refTime time.Time) time.Time {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
+	// Put action schedule time in stCache for 1 time actions
+	if at.Timing != nil && at.Timing.Timing != nil &&
+		strings.HasPrefix(at.Timing.Timing.StartTime, utils.PlusChar) {
+		tmStrTmp, _ := time.ParseDuration(strings.TrimPrefix(
+			at.Timing.Timing.StartTime, utils.PlusChar))
+		at.stCache = time.Now().Add(tmStrTmp)
+		return at.stCache
+	}
 	rateIvl := at.Timing
 	if rateIvl == nil || rateIvl.Timing == nil {
 		return time.Time{}
@@ -174,6 +184,10 @@ func (at *ActionTiming) GetNextStartTime(refTime time.Time) time.Time {
 }
 
 func (at *ActionTiming) ResetStartTimeCache() {
+	if at.Timing != nil && at.Timing.Timing != nil && strings.HasPrefix(at.Timing.Timing.StartTime,
+		utils.PlusChar) {
+		return // dont reset time for 1 time action plans starting with "+"
+	}
 	at.stCache = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
@@ -374,4 +388,170 @@ func (atpl ActionTimingWeightOnlyPriorityList) Less(i, j int) bool {
 
 func (atpl ActionTimingWeightOnlyPriorityList) Sort() {
 	sort.Sort(atpl)
+}
+
+type AttrSetActionPlan struct {
+	Id              string            // Profile id
+	ActionPlan      []*AttrActionPlan // Set of actions this Actions profile will perform
+	Overwrite       bool              // If previously defined, will be overwritten
+	ReloadScheduler bool              // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
+}
+
+type AttrActionPlan struct {
+	ActionsId string  // Actions id
+	TimingID  string  // timingID is used to specify the ID of the timing for a corner case ( e.g. *monthly_estimated )
+	Years     string  // semicolon separated list of years this timing is valid on, *any or empty supported
+	Months    string  // semicolon separated list of months this timing is valid on, *any or empty supported
+	MonthDays string  // semicolon separated list of month's days this timing is valid on, *any or empty supported
+	WeekDays  string  // semicolon separated list of week day names this timing is valid on *any or empty supported
+	Time      string  // String representing the time this timing starts on, *asap supported
+	Weight    float64 // Binding's weight
+}
+
+func (attr *AttrActionPlan) GetRITiming(dm *DataManager) (timing *RITiming, err error) {
+	if dfltTiming, isDefault := checkDefaultTiming(attr.Time); isDefault {
+		return dfltTiming, nil
+	}
+	timing = new(RITiming)
+
+	if attr.TimingID != utils.EmptyString &&
+		!strings.HasPrefix(attr.TimingID, utils.Meta) { // in case of dynamic timing
+		if dbTiming, err := dm.GetTiming(attr.TimingID, false, utils.NonTransactional); err != nil {
+			if err != utils.ErrNotFound { // if not found let the user to populate all the timings values
+				return nil, err
+			}
+		} else {
+			timing.ID = dbTiming.ID
+			timing.Years = dbTiming.Years
+			timing.Months = dbTiming.Months
+			timing.MonthDays = dbTiming.MonthDays
+			timing.WeekDays = dbTiming.WeekDays
+			timing.StartTime = dbTiming.StartTime
+			timing.EndTime = dbTiming.EndTime
+		}
+	}
+	timing.ID = attr.TimingID
+	timing.Years.Parse(attr.Years, ";")
+	timing.Months.Parse(attr.Months, ";")
+	timing.MonthDays.Parse(attr.MonthDays, ";")
+	timing.WeekDays.Parse(attr.WeekDays, ";")
+	if !verifyFormat(attr.Time) {
+		err = fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), attr.Time)
+		return
+	}
+	timing.StartTime = attr.Time
+	return
+}
+
+// checkDefaultTiming will check the tStr if it's of the the default timings ( the same as in TPReader )
+// and will compute it properly
+func checkDefaultTiming(tStr string) (rTm *RITiming, isDefault bool) {
+	currentTime := time.Now()
+	fmtTime := currentTime.Format("15:04:05")
+	switch tStr {
+	case utils.MetaEveryMinute:
+		return &RITiming{
+			ID:        utils.MetaEveryMinute,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+			StartTime: utils.ConcatenatedKey(utils.Meta, utils.Meta, strconv.Itoa(currentTime.Second())),
+			EndTime:   "",
+		}, true
+	case utils.MetaHourly:
+		return &RITiming{
+			ID:        utils.MetaHourly,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+			StartTime: utils.ConcatenatedKey(utils.Meta, strconv.Itoa(currentTime.Minute()), strconv.Itoa(currentTime.Second())),
+			EndTime:   "",
+		}, true
+	case utils.MetaDaily:
+		return &RITiming{
+			ID:        utils.MetaDaily,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+			StartTime: fmtTime,
+			EndTime:   ""}, true
+	case utils.MetaWeekly:
+		return &RITiming{
+			ID:        utils.MetaWeekly,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{currentTime.Weekday()},
+			StartTime: fmtTime,
+			EndTime:   "",
+		}, true
+	case utils.MetaMonthly:
+		return &RITiming{
+			ID:        utils.MetaMonthly,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{currentTime.Day()},
+			WeekDays:  utils.WeekDays{},
+			StartTime: fmtTime,
+			EndTime:   "",
+		}, true
+	case utils.MetaMonthlyEstimated:
+		return &RITiming{
+			ID:        utils.MetaMonthlyEstimated,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{currentTime.Day()},
+			WeekDays:  utils.WeekDays{},
+			StartTime: fmtTime,
+			EndTime:   "",
+		}, true
+	case utils.MetaMonthEnd:
+		return &RITiming{
+			ID:        utils.MetaMonthEnd,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{-1},
+			WeekDays:  utils.WeekDays{},
+			StartTime: fmtTime,
+			EndTime:   "",
+		}, true
+	case utils.MetaYearly:
+		return &RITiming{
+			ID:        utils.MetaYearly,
+			Years:     utils.Years{},
+			Months:    utils.Months{currentTime.Month()},
+			MonthDays: utils.MonthDays{currentTime.Day()},
+			WeekDays:  utils.WeekDays{},
+			StartTime: fmtTime,
+			EndTime:   "",
+		}, true
+	default:
+		return nil, false
+	}
+}
+
+func verifyFormat(tStr string) bool {
+	if tStr == utils.EmptyString || tStr == utils.MetaASAP ||
+		strings.HasPrefix(tStr, utils.PlusChar) {
+		return true
+	}
+
+	if len(tStr) > 8 { // hh:mm:ss
+		return false
+	}
+	if a := strings.Split(tStr, utils.InInFieldSep); len(a) != 3 {
+		return false
+	} else {
+		if _, err := strconv.Atoi(a[0]); err != nil {
+			return false
+		} else if _, err := strconv.Atoi(a[1]); err != nil {
+			return false
+		} else if _, err := strconv.Atoi(a[2]); err != nil {
+			return false
+		}
+	}
+	return true
 }

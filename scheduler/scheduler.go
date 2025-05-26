@@ -106,15 +106,19 @@ func (s *Scheduler) Loop() {
 			go a0.Execute(s.fltrS, utils.SchedulerS)
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
-			a0.ResetStartTimeCache()
-			now = time.Now().Add(time.Second)
-			start = a0.GetNextStartTime(now)
-			if start.Before(now) {
+			if strings.HasPrefix(a0.Timing.Timing.StartTime, utils.PlusChar) {
 				s.queue = s.queue[1:]
 			} else {
-				s.queue = append(s.queue, a0)
-				s.queue = s.queue[1:]
-				sort.Sort(s.queue)
+				a0.ResetStartTimeCache()
+				now = time.Now().Add(time.Second)
+				start = a0.GetNextStartTime(now)
+				if start.Before(now) {
+					s.queue = s.queue[1:]
+				} else {
+					s.queue = append(s.queue, a0)
+					s.queue = s.queue[1:]
+					sort.Sort(s.queue)
+				}
 			}
 			s.Unlock()
 		} else {
