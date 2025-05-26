@@ -34,35 +34,3 @@ func TestNewAnalyzerSv1(t *testing.T) {
 		t.Errorf("expected AnalyzerService to be %v, got %v", analyzerService, analyzerSv1.aS)
 	}
 }
-
-func TestVerifyFormat(t *testing.T) {
-	tests := []struct {
-		tStr         string
-		expectedBool bool
-	}{
-
-		{"12:34:56", true},
-		{"23:59:59", true},
-		{"12:34", false},
-		{"12:34:56:78", false},
-		{"12:abc:56", false},
-		{"123:456:789", false},
-		{"00:00:00", true},
-		{"12:34:56", true},
-		{"t:01:t", false},
-		{"1,1,1", false},
-		{"0:0:0", true},
-		{"119911", false},
-		{"00/01/03", false},
-		{"t1:t2:t3", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.tStr, func(t *testing.T) {
-			result := verifyFormat(tt.tStr)
-			if result != tt.expectedBool {
-				t.Errorf("verifyFormat(%q) = %v; want %v", tt.tStr, result, tt.expectedBool)
-			}
-		})
-	}
-}

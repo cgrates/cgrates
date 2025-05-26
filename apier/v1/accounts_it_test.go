@@ -1166,10 +1166,10 @@ func testAccITAccountMonthlyEstimated(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetActions received: %s", reply)
 	}
 
-	atms1 := &AttrSetActionPlan{
+	atms1 := &engine.AttrSetActionPlan{
 		Id:              "ATMS_1",
 		ReloadScheduler: true,
-		ActionPlan: []*AttrActionPlan{{
+		ActionPlan: []*engine.AttrActionPlan{{
 			ActionsId: "TOPUP_ACTION",
 			MonthDays: "31",
 			Time:      "23:59:59",

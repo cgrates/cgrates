@@ -21,9 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"bytes"
+	"fmt"
 	"path"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strconv"
 	"testing"
 	"time"
@@ -47,7 +50,9 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "dynamic_account_threshold"),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
+		LogBuffer:  &bytes.Buffer{},
 	}
+	t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, _ := ng.Run(t)
 
 	t.Run("SetInitiativeThresholdProfile", func(t *testing.T) {
@@ -89,6 +94,62 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 		}
 	})
 
+	t.Run("SetAccountEnableAction", func(t *testing.T) {
+		attrs1 := &utils.AttrSetActions{
+			ActionsId: "ACT_ENABLE_ACC",
+			Actions: []*utils.TPAction{
+				{
+					Identifier: utils.MetaEnableAccount,
+				},
+			},
+		}
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv2SetActions, &attrs1, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("Unexpected reply returned: %s", reply)
+		}
+	})
+
+	t.Run("SetAfter5sTiming", func(t *testing.T) {
+		timing := &utils.TPTimingWithAPIOpts{
+			TPTiming: &utils.TPTiming{
+				ID:        "TM_AFTER_5S",
+				StartTime: "+5s",
+			},
+		}
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv1SetTiming, timing, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply returned", reply)
+		}
+	})
+
+	t.Run("SetDynamicActionPlanAction", func(t *testing.T) {
+		attrs1 := &utils.AttrSetActions{
+			ActionsId: "ACT_DYN_ACT_PLAN_ACC_ENABLE",
+			Actions: []*utils.TPAction{
+				{
+					Identifier:      utils.MetaDynamicActionPlan,
+					ExtraParameters: "ACT_PLAN_5S_ACC_ENABLE;ACT_ENABLE_ACC;TM_AFTER_5S;10;true",
+					Weight:          5,
+				},
+				// {
+				// 	Identifier:      utils.MetaDynamicAccountAction,
+				// 	ExtraParameters: "cgrates.org;<~*opts.*accountID>;ACT_PLAN_5S_ACC_ENABLE;;;",
+				// 	Weight:          2,
+				// },
+			},
+		}
+		var reply string
+		if err := client.Call(context.Background(), utils.APIerSv2SetActions, &attrs1, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("Unexpected reply returned: %s", reply)
+		}
+	})
+
 	t.Run("SetDynamicThresholdAndStatsAction", func(t *testing.T) {
 		attrs1 := &utils.AttrSetActions{
 			ActionsId: "ACT_DYN_THRESHOLD_AND_STATS_CREATION",
@@ -101,8 +162,8 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 				},
 				{
 					Identifier: utils.MetaDynamicThreshold,
-					// get tenant and accountID from event, threshold triggers when sum of statID hits 100, after triggers the action, the threshold will be disabled for 24 hours, make sure dynamic thresholds weight is higher than the initiative threshold THD_DYNAMIC_STATS_AND_THRESHOLD_INIT and blocker threshold THD_BLOCKER_ACNT_<~*req.Account>
-					ExtraParameters: "*tenant;THD_ACNT_<~*req.Account>;*string:~*req.StatID:Stat_<~*req.Account>&*string:~*req.*sum#1:100;*now;-1;1;24h;true;4;ACT_BLOCK_ACC;true;",
+					// get tenant and accountID from event, threshold triggers when sum of statID hits 100, after triggers the action, the threshold will be disabled for 5 seconds, make sure dynamic thresholds weight is higher than the initiative threshold THD_DYNAMIC_STATS_AND_THRESHOLD_INIT and blocker threshold THD_BLOCKER_ACNT_<~*req.Account>
+					ExtraParameters: "*tenant;THD_ACNT_<~*req.Account>;*string:~*req.StatID:Stat_<~*req.Account>&*string:~*req.*sum#1:100;*now;-1;1;5s;true;4;ACT_BLOCK_ACC&ACT_DYN_ACT_PLAN_ACC_ENABLE;true;",
 				},
 				{
 					Identifier: utils.MetaDynamicStats,
@@ -121,12 +182,12 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 
 	t.Run("SetActionPlanOfDynaPrepaidAccounts", func(t *testing.T) {
 		var reply string
-		atms1 := &v1.AttrSetActionPlan{
+		atms1 := &engine.AttrSetActionPlan{
 			Id: "DYNA_ACC",
-			ActionPlan: []*v1.AttrActionPlan{
+			ActionPlan: []*engine.AttrActionPlan{
 				{
 					ActionsId: "TOPUP_RST_DATA_100",
-					Time:      "00:00:00",
+					Time:      utils.MetaMonthlyEstimated,
 					TimingID:  utils.MetaMonthlyEstimated,
 					Weight:    20,
 				},
@@ -232,5 +293,95 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 			t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc), utils.ToJSON(acnt))
 		}
 	})
+
+	t.Run("CheckCreatedDynamicActionPlan", func(t *testing.T) {
+		var reply []string
+		if err := client.Call(context.Background(), utils.APIerSv1GetActionPlanIDs,
+			&utils.PaginatorWithTenant{Tenant: "cgrates.org"},
+			&reply); err != nil {
+			t.Error(err)
+		} else if len(reply) != 4 {
+			t.Errorf("Expected: 4 , received: <%+v>", reply)
+		}
+		slices.Sort(reply)
+		if reply[0] != "ACT_PLAN_5S_ACC_ENABLE" {
+			t.Errorf("Expected: ACT_PLAN_5S_ACC_ENABLE , received: <%v>", reply[0])
+		} else if reply[1] != "DYNA_ACC" {
+			t.Errorf("Expected: DYNA_ACC , received: <%v>", reply[1])
+		} else if reply[2] != "PACKAGE_1001" {
+			t.Errorf("Expected: PACKAGE_1001 , received: <%v>", reply[2])
+		} else if reply[3] != "PACKAGE_1002" {
+			t.Errorf("Expected: PACKAGE_1002 , received: <%v>", reply[3])
+		}
+
+		var rcv []*engine.ActionPlan
+		if err := client.Call(context.Background(), utils.APIerSv1GetActionPlan,
+			&v1.AttrGetActionPlan{ID: "ACT_PLAN_5S_ACC_ENABLE"}, &rcv); err != nil {
+			t.Error(err)
+		}
+		exp := []*engine.ActionPlan{
+			{
+				Id: "ACT_PLAN_5S_ACC_ENABLE",
+				ActionTimings: []*engine.ActionTiming{
+					{
+						Uuid:      rcv[0].ActionTimings[0].Uuid,
+						ActionsID: "ACT_ENABLE_ACC",
+						ExtraData: nil,
+						Weight:    10,
+						Timing: &engine.RateInterval{
+							Timing: &engine.RITiming{
+								ID:        "TM_AFTER_5S",
+								Years:     utils.Years{},
+								Months:    utils.Months{},
+								MonthDays: utils.MonthDays{},
+								WeekDays:  utils.WeekDays{},
+								StartTime: "+5s",
+							},
+							Rating: nil,
+							Weight: 0,
+						},
+					},
+				},
+			},
+		}
+		if len(exp) != 1 || len(rcv) != 1 {
+			t.Fatalf("expected exp len 1, got <%v>, expected rcv len 1, got <%v>", len(exp), len(rcv))
+		}
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("expected <%v>, \nreceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
+
+	// t.Run("CheckAccountReEnabled", func(t *testing.T) {
+	// 	time.Sleep(6 * time.Second)
+	// 	var acnt engine.Account
+	// 	if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+	// 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "CreatedAccount"}, &acnt); err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	expAcc := &engine.Account{
+	// 		ID: "cgrates.org:CreatedAccount",
+	// 		BalanceMap: map[string]engine.Balances{
+	// 			utils.MetaData: {
+	// 				&engine.Balance{
+	// 					Uuid:           acnt.BalanceMap[utils.MetaData][0].Uuid,
+	// 					ID:             "",
+	// 					Categories:     utils.StringMap{},
+	// 					SharedGroups:   utils.StringMap{},
+	// 					TimingIDs:      utils.StringMap{},
+	// 					Value:          4096,
+	// 					ExpirationDate: acnt.BalanceMap[utils.MetaData][0].ExpirationDate,
+	// 					Weight:         10,
+	// 					DestinationIDs: utils.StringMap{},
+	// 				},
+	// 			},
+	// 		},
+	// 		UpdateTime: acnt.UpdateTime,
+	// 		Disabled:   false,
+	// 	}
+	// 	if !reflect.DeepEqual(utils.ToJSON(expAcc), utils.ToJSON(acnt)) {
+	// 		t.Errorf("Expected <%v>, \nreceived <%v>", utils.ToJSON(expAcc), utils.ToJSON(acnt))
+	// 	}
+	// })
 
 }

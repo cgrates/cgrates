@@ -340,9 +340,9 @@ func testAPIerGetRatingPlanIDs(t *testing.T) {
 
 func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	var reply1 string
-	hourlyAP := &AttrSetActionPlan{
+	hourlyAP := &engine.AttrSetActionPlan{
 		Id: "AP_HOURLY",
-		ActionPlan: []*AttrActionPlan{
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaHourly,
@@ -356,9 +356,9 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
 	}
-	dailyAP := &AttrSetActionPlan{
+	dailyAP := &engine.AttrSetActionPlan{
 		Id: "AP_DAILY",
-		ActionPlan: []*AttrActionPlan{
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaDaily,
@@ -372,9 +372,9 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
 	}
-	weeklyAP := &AttrSetActionPlan{
+	weeklyAP := &engine.AttrSetActionPlan{
 		Id: "AP_WEEKLY",
-		ActionPlan: []*AttrActionPlan{
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaWeekly,
@@ -388,9 +388,9 @@ func testAPIerSetActionPlanDfltTime(t *testing.T) {
 	} else if reply1 != utils.OK {
 		t.Errorf("Calling APIerSv1.SetActionPlan received: %s", reply1)
 	}
-	monthlyAP := &AttrSetActionPlan{
+	monthlyAP := &engine.AttrSetActionPlan{
 		Id: "AP_MONTHLY",
-		ActionPlan: []*AttrActionPlan{
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaMonthly,

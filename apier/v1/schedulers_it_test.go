@@ -280,9 +280,9 @@ func testSchedExecuteAction(t *testing.T) {
 	}
 	// set a new ActionPlan
 	var reply1 string
-	if err := schedRpc.Call(context.Background(), utils.APIerSv1SetActionPlan, &AttrSetActionPlan{
+	if err := schedRpc.Call(context.Background(), utils.APIerSv1SetActionPlan, &engine.AttrSetActionPlan{
 		Id: "CustomAP",
-		ActionPlan: []*AttrActionPlan{
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "ACT_TOPUP_RST_10",
 				Time:      utils.MetaHourly,

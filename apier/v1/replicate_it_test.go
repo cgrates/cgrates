@@ -911,9 +911,9 @@ func testInternalReplicateITActionPlan(t *testing.T) {
 		t.Errorf("Error at APIerSv1.GetActionPlan: %+v", err)
 	}
 	// set
-	atms1 := &AttrSetActionPlan{
+	atms1 := &engine.AttrSetActionPlan{
 		Id: "ATMS_1",
-		ActionPlan: []*AttrActionPlan{
+		ActionPlan: []*engine.AttrActionPlan{
 			{
 				ActionsId: "ACTS_1",
 				Time:      utils.MetaASAP,

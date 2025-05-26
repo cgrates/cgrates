@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -358,7 +357,7 @@ func testTutAccounts(t *testing.T) {
 	// enable the account again
 	var rplySetAcnt string
 	if err := tutRpc.Call(context.Background(), utils.APIerSv2SetAccount,
-		&v2.AttrSetAccount{
+		&engine.AttrSetAccount{
 			Tenant:  "cgrates.org",
 			Account: "1001",
 			ExtraOptions: map[string]bool{
