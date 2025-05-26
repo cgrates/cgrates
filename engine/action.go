@@ -193,6 +193,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicStats] = dynamicStats
 	actionFuncMap[utils.MetaDynamicAttribute] = dynamicAttribute
 	actionFuncMap[utils.MetaDynamicActionPlan] = dynamicActionPlan
+	actionFuncMap[utils.MetaDynamicAction] = dynamicAction
 	actionFuncMap[utils.MetaDynamicAccountAction] = dynamicAccountAction
 }
 
@@ -1746,7 +1747,7 @@ func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 12 {
-		return errors.New("invalid number of parameters; expected 12")
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 12", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1912,6 +1913,119 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetActionPlan, ap, &reply)
 }
 
+// dynamicAction processes the `ExtraParameters` field from the action to construct a new Action
+//
+// The ExtraParameters field format is expected as follows:
+//
+//		0 ActionsId: string
+//		1 Action: string
+//		2 ExtraParameters: string encapsulated by \f
+//		3 Filters: strings separated by "&".
+//		4 BalanceId: string
+//		5 BalanceType: string
+//		6 Categories: strings separated by "&".
+//		7 DestinationIds: strings separated by "&".
+//		8 RatingSubject: string
+//		9 SharedGroups: strings separated by "&".
+//	   10 ExpiryTime: string
+//	   11 TimingIds: strings separated by "&".
+//	   12 Units: string
+//	   13 BalanceWeight: string
+//	   14 BalanceBlocker: string
+//	   15 BalanceDisabled: string
+//	   16 Weight: float
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+
+	var params []string       // parameters split by ;
+	var bildr strings.Builder // used to build the params strings by looking at each character of act.ExtraParameters
+	inEncapsulation := false
+	for i := range len(act.ExtraParameters) {
+		// Check for \f (form feed character)
+		if act.ExtraParameters[i] == '\f' {
+			inEncapsulation = !inEncapsulation
+			// Don't add \f to the current string - just skip it
+		} else if act.ExtraParameters[i] == ';' && !inEncapsulation {
+			// Found separator ";" outside encapsulation
+			params = append(params, bildr.String())
+			bildr.Reset()
+		} else {
+			// Regular character or semicolon inside encapsulation
+			bildr.WriteByte(act.ExtraParameters[i])
+		}
+	}
+	params = append(params, bildr.String()) // append last param left even if empty
+	// Parse action parameters based on the predefined format.
+	if len(params) != 17 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 17", len(params)))
+	}
+	// replace '&' with ';' before parsing to comply with TPAction fields that need ";" seperators
+	params[3] = strings.ReplaceAll(params[3], utils.ANDSep, utils.InfieldSep)
+	params[6] = strings.ReplaceAll(params[6], utils.ANDSep, utils.InfieldSep)
+	params[7] = strings.ReplaceAll(params[7], utils.ANDSep, utils.InfieldSep)
+	params[9] = strings.ReplaceAll(params[9], utils.ANDSep, utils.InfieldSep)
+	params[11] = strings.ReplaceAll(params[11], utils.ANDSep, utils.InfieldSep)
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+			return err
+		}
+	}
+	if params[0] == utils.EmptyString {
+		return fmt.Errorf("empty ActionsId for dynamic_action")
+	}
+	if params[1] == utils.EmptyString {
+		return fmt.Errorf("empty Action for <%s> dynamic_action", params[0])
+	}
+	var weight float64
+	// populate Action's Weight
+	if params[16] != utils.EmptyString {
+		weight, err = strconv.ParseFloat(params[16], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate action parameters
+	ap := &utils.AttrSetActions{
+		ActionsId: params[0],
+		Actions: []*utils.TPAction{
+			{
+				Identifier:      params[1],
+				ExtraParameters: params[2],
+				Filters:         params[3],
+				BalanceId:       params[4],
+				BalanceType:     params[5],
+				Categories:      params[6],
+				DestinationIds:  params[7],
+				RatingSubject:   params[8],
+				SharedGroups:    params[9],
+				ExpiryTime:      params[10],
+				TimingTags:      params[11],
+				Units:           params[12],
+				BalanceWeight:   params[13],
+				BalanceBlocker:  params[14],
+				BalanceDisabled: params[15],
+				Weight:          weight,
+			},
+		},
+	}
+
+	// create the Action based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv2SetActions, ap, &reply)
+}
 // dynamicAccountAction processes the `ExtraParameters` field from the action to
 // populate action plans and action triggers for account
 //
