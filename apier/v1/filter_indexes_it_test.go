@@ -157,13 +157,6 @@ func testV1FIdxdxInitDataDb(t *testing.T) {
 	}
 }
 
-func testV1IndexClearCache(t *testing.T) {
-	var reply string
-	if err := tFIdxRpc.Call(context.Background(), utils.CacheSv1Clear, &utils.AttrCacheIDsWithAPIOpts{}, &reply); err != nil {
-		t.Fatal(err)
-	}
-}
-
 // Wipe out the cdr database
 func testV1FIdxResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(tSv1Cfg); err != nil {
@@ -188,7 +181,7 @@ func testV1FIdxRpcConn(t *testing.T) {
 // ThresholdProfile
 func testV1FIdxSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter",
@@ -334,7 +327,7 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter2",
@@ -500,7 +493,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 // StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -645,7 +638,7 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -791,7 +784,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 // ResourceProfile
 func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	var reply *engine.ResourceProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_RES_RCFG1",
@@ -921,7 +914,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	var reply *engine.ResourceProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -1043,7 +1036,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 // RouteProfile
 func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 	var reply *engine.RouteProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -1190,7 +1183,7 @@ func testV1FIdxComputeRouteProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 	var reply *engine.RouteProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -1333,7 +1326,7 @@ func testV1FIdxRemoveRouteProfile(t *testing.T) {
 // AttributeProfile Indexes
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -1483,7 +1476,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -2401,7 +2394,7 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 
 func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	var reply string
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -2529,11 +2522,6 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	//get new indexes for *attributes context
-	arg = &AttrGetFilterIndexes{
-		Tenant:   tenant,
-		Context:  utils.MetaAttributes,
-		ItemType: utils.MetaDispatchers,
-	}
 	expectedIndexes = []string{"*string:*req.Account:1001:DSP_Test1",
 		"*string:*req.Account:1234:DSP_Test1",
 		"*string:*req.Usage:15m:DSP_Test1",
@@ -2548,11 +2536,6 @@ func testV1FIdxSetDispatcherProfile(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedIndexes, idx)
 	}
 	//get new indexes for *sessions context
-	arg = &AttrGetFilterIndexes{
-		Tenant:   tenant,
-		Context:  utils.MetaAttributes,
-		ItemType: utils.MetaDispatchers,
-	}
 	expectedIndexes = []string{"*string:*req.Account:1001:DSP_Test1",
 		"*string:*req.Account:1234:DSP_Test1",
 		"*string:*req.Usage:15m:DSP_Test1",
@@ -2853,7 +2836,7 @@ func testV1FIdxClearCache(t *testing.T) {
 
 func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 	var reply string
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -3039,7 +3022,7 @@ func testV1FIdxSetDispatcherComputeIDs(t *testing.T) {
 }
 
 func testV1FIdxSetResourceComputeIDs(t *testing.T) {
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_RES_RCFG1",
