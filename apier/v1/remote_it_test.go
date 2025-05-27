@@ -188,19 +188,8 @@ func testInternalRemoteLoadDataInEngineTwo(t *testing.T) {
 }
 
 func testInternalRemoteITGetAccount(t *testing.T) {
+	expAcntID := "cgrates.org:1001"
 	var acnt *engine.Account
-	expAcc := &engine.Account{
-		ID: "cgrates.org:1001",
-		BalanceMap: map[string]engine.Balances{
-			utils.MetaMonetary: []*engine.Balance{
-				{
-					ID:     "testAccount",
-					Value:  10,
-					Weight: 10,
-				},
-			},
-		},
-	}
 	attrs := &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
 		Account: "1001",
@@ -208,16 +197,16 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 	// make sure account exist in engine2
 	if err := engineTwoRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.ID != expAcc.ID {
-		t.Errorf("expecting: %+v, received: %+v", expAcc.ID, acnt.ID)
+	} else if acnt.ID != expAcntID {
+		t.Errorf("expecting: %+v, received: %+v", expAcntID, acnt.ID)
 	} else if len(acnt.BalanceMap) != 1 {
 		t.Errorf("unexpected number of balances received: %+v", utils.ToJSON(acnt))
 	}
 	// check the account in internal
 	if err := internalRPC.Call(context.Background(), utils.APIerSv2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.ID != expAcc.ID {
-		t.Errorf("expecting: %+v, received: %+v", expAcc.ID, acnt.ID)
+	} else if acnt.ID != expAcntID {
+		t.Errorf("expecting: %+v, received: %+v", expAcntID, acnt.ID)
 	} else if len(acnt.BalanceMap) != 1 {
 		t.Errorf("unexpected number of balances received: %+v", utils.ToJSON(acnt))
 	}

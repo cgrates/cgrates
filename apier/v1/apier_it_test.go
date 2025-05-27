@@ -1803,10 +1803,10 @@ func testApierMaxDebitInexistentAcnt(t *testing.T) {
 		},
 	}
 	if err := rater.Call(context.Background(), utils.ResponderMaxDebit, cd, cc); err == nil {
-		t.Error(err.Error())
+		t.Error(err)
 	}
 	if err := rater.Call(context.Background(), utils.ResponderDebit, cd, cc); err == nil {
-		t.Error(err.Error())
+		t.Error(err)
 	}
 }
 

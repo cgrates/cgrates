@@ -865,7 +865,6 @@ func testV1TSGetThresholdsWithoutTenant(t *testing.T) {
 	expectedThreshold := &engine.Threshold{
 		Tenant: "cgrates.org",
 		ID:     "THD_ACNT_BALANCE_1",
-		Hits:   1,
 	}
 	var reply *engine.Threshold
 	if err := tSv1Rpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,

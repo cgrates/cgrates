@@ -26,7 +26,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blevesearch/goleveldb/leveldb/filter"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -701,7 +700,7 @@ func testInternalReplicateITFilter(t *testing.T) {
 		t.Error(err)
 	}
 	//set
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "Filter1",
@@ -879,7 +878,7 @@ func testInternalReplicateITActions(t *testing.T) {
 			ActionIDs: []string{"ACTS_1"}}, &reply); err != nil {
 		t.Error("Got error on APIerSv1.RemoveActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Error("Unexpected reply when calling APIerSv1.RemoveActions: ", err.Error())
+		t.Error("Unexpected reply when calling APIerSv1.RemoveActions: ", reply)
 	}
 	// check again
 	if err := engineOneRPC.Call(context.Background(), utils.APIerSv1GetActions, utils.StringPointer("ACTS_1"), &reply1); err == nil || err.Error() != "SERVER_ERROR: NOT_FOUND" {
@@ -984,7 +983,7 @@ func testInternalReplicateITThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	// set
-	filter = &engine.FilterWithAPIOpts{
+	filter := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter",
