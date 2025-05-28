@@ -2,6 +2,7 @@
 
     "general": {
         "log_level": 7,
+        "reply_timeout": "10s",	
     },
     
     "data_db": {

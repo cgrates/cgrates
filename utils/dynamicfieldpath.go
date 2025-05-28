@@ -57,14 +57,14 @@ func ProcessFieldPath(fldPath, sep string, dP DataProvider) (newPath string, err
 }
 
 // ParseParamForDataProvider will parse a param string with prefix "~*req.", "~*otps.", "*tenant" or "*now"; or strings containing dynamic paths between "<" ">" signs. If none match, it returns the original string
-func ParseParamForDataProvider(param string, dP DataProvider) (string, error) {
+func ParseParamForDataProvider(param string, dP DataProvider, onlyEncapsulatead bool) (string, error) {
 	// Check if the string contains any "&" characters
 	if strings.Contains(param, ANDSep) {
 		parts := strings.Split(param, ANDSep)
 		var results []string
 		// Process each part individually
 		for _, part := range parts {
-			result, err := ParseParamForDataProvider(part, dP)
+			result, err := ParseParamForDataProvider(part, dP, onlyEncapsulatead)
 			if err != nil {
 				return EmptyString, err
 			}
@@ -73,11 +73,13 @@ func ParseParamForDataProvider(param string, dP DataProvider) (string, error) {
 		// Join all processed parts with &
 		return strings.Join(results, ANDSep), nil
 	}
-	switch {
-	case strings.HasPrefix(param, MetaDynReq) || strings.HasPrefix(param, DynamicDataPrefix+MetaOpts):
-		return DPDynamicString(param, dP)
-	case strings.HasPrefix(param, MetaNow) || strings.HasPrefix(param, MetaTenant):
-		return dP.FieldAsString(SplitPath(param, NestingSep[0], -1))
+	if !onlyEncapsulatead {
+		switch {
+		case strings.HasPrefix(param, MetaDynReq) || strings.HasPrefix(param, DynamicDataPrefix+MetaOpts):
+			return DPDynamicString(param, dP)
+		case strings.HasPrefix(param, MetaNow) || strings.HasPrefix(param, MetaTenant):
+			return dP.FieldAsString(SplitPath(param, NestingSep[0], -1))
+		}
 	}
 
 	// look for dynamic paths in the param string, and parse it

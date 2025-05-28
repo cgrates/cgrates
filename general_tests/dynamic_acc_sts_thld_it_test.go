@@ -21,8 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"bytes"
-	"fmt"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -50,9 +48,9 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "dynamic_account_threshold"),
 		TpPath:     path.Join(*utils.DataDir, "tariffplans", "testit"),
-		LogBuffer:  &bytes.Buffer{},
+		// LogBuffer:  &bytes.Buffer{},
 	}
-	t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, _ := ng.Run(t)
 
 	t.Run("SetInitiativeThresholdProfile", func(t *testing.T) {
