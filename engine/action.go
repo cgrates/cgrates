@@ -129,7 +129,7 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaDynamicThreshold, utils.MetaDynamicStats,
 		utils.MetaDynamicAttribute, utils.MetaDynamicActionPlan,
 		utils.MetaDynamicAction, utils.MetaDynamicDestination,
-		utils.MetaDynamicAccountAction,
+		utils.MetaDynamicFilter,
 	}
 	act := ActionConnCfg{}
 	switch source {
@@ -194,8 +194,8 @@ func init() {
 	actionFuncMap[utils.MetaDynamicAttribute] = dynamicAttribute
 	actionFuncMap[utils.MetaDynamicActionPlan] = dynamicActionPlan
 	actionFuncMap[utils.MetaDynamicAction] = dynamicAction
-	actionFuncMap[utils.MetaDynamicAccountAction] = dynamicAccountAction
 	actionFuncMap[utils.MetaDynamicDestination] = dynamicDestination
+	actionFuncMap[utils.MetaDynamicFilter] = dynamicFilter
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -1481,7 +1481,7 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	// parse dynamic parameters
 	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
 			return err
 		}
 	}
@@ -1610,7 +1610,7 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	// parse dynamic parameters
 	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
 			return err
 		}
 	}
@@ -1752,7 +1752,7 @@ func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	// parse dynamic parameters
 	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
 			return err
 		}
 	}
@@ -1857,7 +1857,7 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	// parse dynamic parameters
 	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
 			return err
 		}
 	}
@@ -1980,7 +1980,7 @@ func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	params[11] = strings.ReplaceAll(params[11], utils.ANDSep, utils.InfieldSep)
 	// parse dynamic parameters
 	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
 			return err
 		}
 	}
@@ -2053,7 +2053,7 @@ func dynamicDestination(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	// parse dynamic parameters
 	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
 			return err
 		}
 	}
@@ -2071,20 +2071,21 @@ func dynamicDestination(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetDestination, dest, &reply)
 }
 
-// dynamicAccountAction processes the `ExtraParameters` field from the action to
-// populate action plans and action triggers for account
+// dynamicFilter processes the `ExtraParameters` field from the action to
+// construct a Filter
 //
 // The ExtraParameters field format is expected as follows:
 //
-//	0 Tenant: string
-//	1 Account: string
-//	2 ActionPlanIds: strings separated by "&".
-//	3 ActionTriggersIds: strings separated by "&".
-//	4 AllowNegative: bool
-//	5 Disabled: bool
+//		0 Tenant: string
+//		1 ID: string
+//		2 Type: string
+//		3 Path: string
+//		4 Values: strings separated by "&".
+//		5 ActivationInterval: strings separated by "&".
+//	 	6 APIOpts: set of key-value pairs (separated by "&").
 //
 // Parameters are separated by ";" and must be provided in the specified order.
-func dynamicAccountAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+func dynamicFilter(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
 	cgrEv, canCast := ev.(*utils.CGREvent)
 	if !canCast {
@@ -2093,51 +2094,64 @@ func dynamicAccountAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any
 	dP := utils.MapStorage{ // create DataProvider from event
 		utils.MetaReq:    cgrEv.Event,
 		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
 		utils.MetaOpts:   cgrEv.APIOpts,
 	}
-	// Parse Account parameters based on the predefined format.
+	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
-	if len(params) != 6 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 6", len(params)))
+	if len(params) != 7 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 7", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], dP); err != nil {
+		var onlyEncapsulatead bool
+		if i == 3 { // dont parse un-encapsulated "< >" string from Path
+			onlyEncapsulatead = true
+		}
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, onlyEncapsulatead); err != nil {
 			return err
 		}
 	}
-	// populate Account's parameters
-	acc := &AttrSetAccount{
-		Tenant:          params[0],
-		Account:         params[1],
-		ReloadScheduler: true,
-		ExtraOptions:    make(map[string]bool),
+	// Prepare request arguments based on provided parameters.
+	fltr := &FilterWithAPIOpts{
+		Filter: &Filter{
+			Tenant: params[0],
+			ID:     params[1],
+			Rules: []*FilterRule{{
+				Type:    params[2],
+				Element: params[3],
+			}},
+			ActivationInterval: &utils.ActivationInterval{}, // avoid reaching inside a nil pointer
+
+		},
+		APIOpts: make(map[string]any),
 	}
-	// populate Account's ActionPlanIDs
-	if params[2] != utils.EmptyString {
-		acc.ActionPlanIDs = strings.Split(params[2], utils.ANDSep)
-	}
-	// populate Account's ActionTriggerIDs
-	if params[3] != utils.EmptyString {
-		acc.ActionTriggerIDs = strings.Split(params[3], utils.ANDSep)
-	}
-	// populate Account's AllowNegative ExtraParams
+	// populate Filter's Values
 	if params[4] != utils.EmptyString {
-		allNeg, err := strconv.ParseBool(params[4])
-		if err != nil {
+		fltr.Filter.Rules[0].Values = strings.Split(params[4], utils.ANDSep)
+	}
+	// populate Filter's ActivationInterval
+	aISplit := strings.Split(params[5], utils.ANDSep)
+	if len(aISplit) > 2 {
+		return utils.ErrUnsupportedFormat
+	}
+	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
+		if err := fltr.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
 			return err
 		}
-		acc.ExtraOptions[utils.AllowNegative] = allNeg
+		if len(aISplit) == 2 {
+			if err := fltr.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+				return err
+			}
+		}
 	}
-	// populate Account's Disabled ExtraParams
-	if params[5] != utils.EmptyString {
-		disable, err := strconv.ParseBool(params[5])
-		if err != nil {
+	// populate Filter's APIOpts
+	if params[6] != utils.EmptyString {
+		if err := parseParamStringToMap(params[6], fltr.APIOpts); err != nil {
 			return err
 		}
-		acc.ExtraOptions[utils.Disabled] = disable
 	}
-	// create the Account based on the populated parameters
+	// create the Filter based on the populated parameters
 	var reply string
-	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv2SetAccount, acc, &reply)
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetFilter, fltr, &reply)
 }
