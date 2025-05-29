@@ -135,6 +135,13 @@ func TestFlags(t *testing.T) {
 			want:       true,
 		},
 		{
+			name:       "print_config",
+			flags:      []string{"-print_config", "true"},
+			flagVar:    &flags.config.print,
+			defaultVal: false,
+			want:       true,
+		},
+		{
 			name:       "set_versions",
 			flags:      []string{"-set_versions"},
 			flagVar:    &flags.data.setVersions,

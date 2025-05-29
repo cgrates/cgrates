@@ -56,6 +56,7 @@ type flags struct {
 	config struct {
 		path    string
 		check   bool
+		print   bool
 		version bool
 	}
 	process struct {
@@ -93,6 +94,7 @@ func newFlags() *flags {
 
 	f.StringVar(&f.config.path, utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path")
 	f.BoolVar(&f.config.check, utils.CheckCfgCgr, false, "Verify the config without starting the engine")
+	f.BoolVar(&f.config.print, utils.PrintCfgCgr, false, "Print configuration object in JSON format")
 	f.BoolVar(&f.config.version, utils.VersionCgr, false, "Print application version and exit")
 
 	f.StringVar(&f.process.pidFile, utils.PidCgr, "", "Path to write the PID file")
@@ -160,6 +162,12 @@ func runCGREngine(fs []string) (err error) {
 		default:
 			return fmt.Errorf("unsupported logger type: %q", cfg.LoggerCfg().Type)
 		}
+	}
+
+	if flags.config.print {
+		cfgJSON := utils.ToIJSON(cfg.AsMapInterface())
+		utils.Logger.Info(fmt.Sprintf(
+			"Configuration loaded from %q:\n%s", flags.config.path, cfgJSON))
 	}
 
 	var cpuPrfF *os.File
