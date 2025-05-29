@@ -111,6 +111,9 @@ func CloneDynamicStringSliceOpt(in []*DynamicStringSliceOpt) []*DynamicStringSli
 }
 
 func CloneDynamicStringOpt(in []*DynamicStringOpt) (cl []*DynamicStringOpt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicStringOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicStringOpt{
@@ -124,6 +127,9 @@ func CloneDynamicStringOpt(in []*DynamicStringOpt) (cl []*DynamicStringOpt) {
 }
 
 func CloneDynamicInterfaceOpt(in []*DynamicInterfaceOpt) (cl []*DynamicInterfaceOpt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicInterfaceOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicInterfaceOpt{
@@ -136,6 +142,9 @@ func CloneDynamicInterfaceOpt(in []*DynamicInterfaceOpt) (cl []*DynamicInterface
 }
 
 func CloneDynamicBoolOpt(in []*DynamicBoolOpt) (cl []*DynamicBoolOpt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicBoolOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicBoolOpt{
@@ -149,6 +158,9 @@ func CloneDynamicBoolOpt(in []*DynamicBoolOpt) (cl []*DynamicBoolOpt) {
 }
 
 func CloneDynamicIntOpt(in []*DynamicIntOpt) (cl []*DynamicIntOpt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicIntOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicIntOpt{
@@ -162,6 +174,9 @@ func CloneDynamicIntOpt(in []*DynamicIntOpt) (cl []*DynamicIntOpt) {
 }
 
 func CloneDynamicFloat64Opt(in []*DynamicFloat64Opt) (cl []*DynamicFloat64Opt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicFloat64Opt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicFloat64Opt{
@@ -175,6 +190,9 @@ func CloneDynamicFloat64Opt(in []*DynamicFloat64Opt) (cl []*DynamicFloat64Opt) {
 }
 
 func CloneDynamicDurationOpt(in []*DynamicDurationOpt) (cl []*DynamicDurationOpt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicDurationOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicDurationOpt{
@@ -188,6 +206,9 @@ func CloneDynamicDurationOpt(in []*DynamicDurationOpt) (cl []*DynamicDurationOpt
 }
 
 func CloneDynamicDecimalOpt(in []*DynamicDecimalOpt) (cl []*DynamicDecimalOpt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicDecimalOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicDecimalOpt{
@@ -201,6 +222,9 @@ func CloneDynamicDecimalOpt(in []*DynamicDecimalOpt) (cl []*DynamicDecimalOpt) {
 }
 
 func CloneDynamicIntPointerOpt(in []*DynamicIntPointerOpt) (cl []*DynamicIntPointerOpt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicIntPointerOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicIntPointerOpt{
@@ -214,6 +238,9 @@ func CloneDynamicIntPointerOpt(in []*DynamicIntPointerOpt) (cl []*DynamicIntPoin
 }
 
 func CloneDynamicDurationPointerOpt(in []*DynamicDurationPointerOpt) (cl []*DynamicDurationPointerOpt) {
+	if in == nil {
+		return nil
+	}
 	cl = make([]*DynamicDurationPointerOpt, len(in))
 	for i, val := range in {
 		cl[i] = &DynamicDurationPointerOpt{
