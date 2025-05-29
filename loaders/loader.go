@@ -45,6 +45,8 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, wi
 		return dm.RemoveAttributeProfile(ctx, tnt, id, withIndex)
 	case utils.MetaResources:
 		return dm.RemoveResourceProfile(ctx, tnt, id, withIndex)
+	case utils.MetaIPs:
+		return dm.RemoveIPProfile(ctx, tnt, id, withIndex)
 	case utils.MetaFilters:
 		return dm.RemoveFilter(ctx, tnt, id, withIndex)
 	case utils.MetaStats:
@@ -83,6 +85,8 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 		return dm.SetAttributeProfile(ctx, data.(*utils.AttributeProfile), withIndex)
 	case utils.MetaResources:
 		return dm.SetResourceProfile(ctx, data.(*utils.ResourceProfile), withIndex)
+	case utils.MetaIPs:
+		return dm.SetIPProfile(ctx, data.(*utils.IPProfile), withIndex)
 	case utils.MetaFilters:
 		fltr := data.(*engine.Filter)
 		fltr.Compress()
@@ -124,6 +128,8 @@ func dryRun(ctx *context.Context, lType, ldrID string, obj profile) (err error) 
 		msg = "<%s-%s> DRY_RUN: AttributeProfile: %s"
 	case utils.MetaResources:
 		msg = "<%s-%s> DRY_RUN: ResourceProfile: %s"
+	case utils.MetaIPs:
+		msg = "<%s-%s> DRY_RUN: IPProfile: %s"
 	case utils.MetaFilters:
 		fltr := obj.(*engine.Filter)
 		fltr.Compress()
@@ -208,6 +214,10 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 		cacheIDs = []string{utils.CacheResourceFilterIndexes}
 		cacheArgs[utils.CacheResourceProfiles] = []string{tntId}
 		cacheArgs[utils.CacheResources] = []string{tntId}
+	case utils.MetaIPs:
+		cacheIDs = []string{utils.CacheIPFilterIndexes}
+		cacheArgs[utils.CacheIPProfiles] = []string{tntId}
+		cacheArgs[utils.CacheIPs] = []string{tntId}
 	case utils.MetaFilters:
 		cacheArgs[utils.CacheFilters] = []string{tntId}
 	case utils.MetaStats:

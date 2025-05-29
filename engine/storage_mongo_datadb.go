@@ -57,8 +57,10 @@ const (
 	ColLht  = "load_history"
 	ColVer  = "versions"
 	ColRsP  = "resource_profiles"
+	ColIPp  = "ip_profiles"
 	ColIndx = "indexes"
 	ColRes  = "resources"
+	ColIPs  = "ips"
 	ColSqs  = "statqueues"
 	ColSqp  = "statqueue_profiles"
 	ColTps  = "threshold_profiles"
@@ -299,7 +301,7 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx:
 		err = ms.ensureIndex(col, true, "key")
-	case ColRsP, ColRes, ColSqs, ColRgp, ColTrs, ColTrd, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColRpp, ColApp, ColAnp:
+	case ColRsP, ColRes, ColIPp, ColIPs, ColSqs, ColRgp, ColTrs, ColTrd, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt, ColCpp, ColRpp, ColApp, ColAnp:
 		err = ms.ensureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.ensureIndex(col, true, "id")
@@ -323,8 +325,9 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 		if ms.IsDataDB() {
 			cols = []string{
 				ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
-				ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColRts, ColAttr, ColFlt,
-				ColCpp, ColRpp, ColApp, ColRpf, ColShg, ColAcc, ColAnp, ColTrd, ColTrs,
+				ColRsP, ColRes, ColIPp, ColIPs, ColSqs, ColSqp, ColTps, ColThs, ColRts,
+				ColAttr, ColFlt, ColCpp, ColRpp, ColApp, ColRpf, ColShg, ColAcc, ColAnp,
+				ColTrd, ColTrs,
 			}
 		} else {
 			cols = []string{utils.CDRsTBL}
@@ -460,6 +463,10 @@ func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRsP, utils.ResourceProfilesPrefix, tntID)
 		case utils.ResourcesPrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColRes, utils.ResourcesPrefix, tntID)
+		case utils.IPProfilesPrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColIPp, utils.IPProfilesPrefix, tntID)
+		case utils.IPsPrefix:
+			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColIPs, utils.IPsPrefix, tntID)
 		case utils.StatQueuePrefix:
 			keys, qryErr = ms.getAllKeysMatchingTenantID(sctx, ColSqs, utils.StatQueuePrefix, tntID)
 		case utils.StatQueueProfilePrefix:
@@ -494,6 +501,8 @@ func (ms *MongoStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (k
 			keys, qryErr = ms.getAllIndexKeys(sctx, utils.AttributeFilterIndexes)
 		case utils.ResourceFilterIndexes:
 			keys, qryErr = ms.getAllIndexKeys(sctx, utils.ResourceFilterIndexes)
+		case utils.IPFilterIndexes:
+			keys, qryErr = ms.getAllIndexKeys(sctx, utils.IPFilterIndexes)
 		case utils.StatFilterIndexes:
 			keys, qryErr = ms.getAllIndexKeys(sctx, utils.StatFilterIndexes)
 		case utils.ThresholdFilterIndexes:
@@ -530,6 +539,10 @@ func (ms *MongoStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 			count, err = ms.getCol(ColRes).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ResourceProfilesPrefix:
 			count, err = ms.getCol(ColRsP).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.IPsPrefix:
+			count, err = ms.getCol(ColIPs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.IPProfilesPrefix:
+			count, err = ms.getCol(ColIPp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.StatQueuePrefix:
 			count, err = ms.getCol(ColSqs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.StatQueueProfilePrefix:
@@ -732,6 +745,72 @@ func (ms *MongoStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) 
 func (ms *MongoStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) error {
 	return ms.query(ctx, func(sctx mongo.SessionContext) error {
 		dr, err := ms.getCol(ColRes).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetIPProfileDrv(ctx *context.Context, tenant, id string) (*utils.IPProfile, error) {
+	ipp := new(utils.IPProfile)
+	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColIPp).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(ipp)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return ipp, err
+}
+
+func (ms *MongoStorage) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfile) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColIPp).UpdateOne(sctx, bson.M{"tenant": ipp.Tenant, "id": ipp.ID},
+			bson.M{"$set": ipp},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveIPProfileDrv(ctx *context.Context, tenant, id string) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColIPp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetIPDrv(ctx *context.Context, tenant, id string) (*utils.IP, error) {
+	ip := new(utils.IP)
+	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
+		sr := ms.getCol(ColIPs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		decodeErr := sr.Decode(ip)
+		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
+			return utils.ErrNotFound
+		}
+		return decodeErr
+	})
+	return ip, err
+}
+
+func (ms *MongoStorage) SetIPDrv(ctx *context.Context, ip *utils.IP) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColIPs).UpdateOne(sctx, bson.M{"tenant": ip.Tenant, "id": ip.ID},
+			bson.M{"$set": ip},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveIPDrv(ctx *context.Context, tenant, id string) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		dr, err := ms.getCol(ColIPs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}

@@ -241,6 +241,44 @@ func (iDB *InternalDB) RemoveResourceDrv(_ *context.Context, tenant, id string) 
 	return
 }
 
+func (iDB *InternalDB) GetIPProfileDrv(_ *context.Context, tenant, id string) (*utils.IPProfile, error) {
+	if x, ok := iDB.db.Get(utils.CacheIPProfiles, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
+		return x.(*utils.IPProfile), nil
+	}
+	return nil, utils.ErrNotFound
+}
+
+func (iDB *InternalDB) SetIPProfileDrv(_ *context.Context, ipp *utils.IPProfile) error {
+	iDB.db.Set(utils.CacheIPProfiles, ipp.TenantID(), ipp, nil,
+		true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) RemoveIPProfileDrv(_ *context.Context, tenant, id string) error {
+	iDB.db.Remove(utils.CacheIPProfiles, utils.ConcatenatedKey(tenant, id),
+		true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) GetIPDrv(_ *context.Context, tenant, id string) (*utils.IP, error) {
+	if x, ok := iDB.db.Get(utils.CacheIPs, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
+		return x.(*utils.IP), nil
+	}
+	return nil, utils.ErrNotFound
+}
+
+func (iDB *InternalDB) SetIPDrv(_ *context.Context, ip *utils.IP) error {
+	iDB.db.Set(utils.CacheIPs, ip.TenantID(), ip, nil,
+		true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) RemoveIPDrv(_ *context.Context, tenant, id string) error {
+	iDB.db.Remove(utils.CacheIPs, utils.ConcatenatedKey(tenant, id),
+		true, utils.NonTransactional)
+	return nil
+}
+
 func (iDB *InternalDB) GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error) {
 	return nil, nil
 }

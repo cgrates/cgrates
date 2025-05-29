@@ -186,6 +186,7 @@ func checkServiceStates(t *testing.T, client *birpc.Client, want string) {
 		utils.ERs,
 		utils.RateS,
 		utils.ResourceS,
+		utils.IPs,
 		utils.RouteS,
 		utils.SessionS,
 		utils.StatS,

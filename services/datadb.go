@@ -112,6 +112,7 @@ func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegis
 func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
 	deps := []string{
 		utils.ResourceS,
+		utils.IPs,
 		utils.TrendS,
 		utils.RankingS,
 		utils.StatS,

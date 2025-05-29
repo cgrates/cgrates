@@ -201,6 +201,11 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			UsageTTL: []*DynamicDurationOpt{{value: ResourcesUsageTTLDftOpt}},
 			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
 		}},
+		ipsCfg: &IPsCfg{Opts: &IPsOpts{
+			UsageID: []*DynamicStringOpt{{value: IPsUsageIDDftOpt}},
+			TTL:     []*DynamicDurationOpt{{value: IPsTTLDftOpt}},
+			Units:   []*DynamicFloat64Opt{{value: IPsUnitsDftOpt}},
+		}},
 		trendSCfg:   new(TrendSCfg),
 		rankingSCfg: new(RankingSCfg),
 		statsCfg: &StatSCfg{Opts: &StatsOpts{
@@ -356,6 +361,7 @@ type CGRConfig struct {
 	attributeSCfg      *AttributeSCfg      // AttributeS config
 	chargerSCfg        *ChargerSCfg        // ChargerS config
 	resourceSCfg       *ResourceSConfig    // ResourceS config
+	ipsCfg             *IPsCfg             // IPs config
 	statsCfg           *StatSCfg           // StatS config
 	thresholdSCfg      *ThresholdSCfg      // ThresholdS config
 	routeSCfg          *RouteSCfg          // RouteS config
@@ -393,11 +399,11 @@ func (cfg *CGRConfig) ConfigDB() ConfigDB {
 	return nil
 }
 
-var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
-	utils.MetaResources, utils.MetaFilters, utils.MetaStats, utils.MetaTrends,
-	utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers, utils.MetaRankings,
-	utils.MetaRateProfiles,
-	utils.MetaAccounts, utils.MetaActionProfiles})
+var possibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
+	utils.MetaResources, utils.MetaIPs, utils.MetaFilters, utils.MetaStats,
+	utils.MetaTrends, utils.MetaRoutes, utils.MetaThresholds, utils.MetaChargers,
+	utils.MetaRankings, utils.MetaRateProfiles, utils.MetaAccounts,
+	utils.MetaActionProfiles})
 
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV,
@@ -485,6 +491,13 @@ func (cfg *CGRConfig) ResourceSCfg() *ResourceSConfig { // not done
 	cfg.lks[ResourceSJSON].Lock()
 	defer cfg.lks[ResourceSJSON].Unlock()
 	return cfg.resourceSCfg
+}
+
+// IPsCfg returns the config for IPs.
+func (cfg *CGRConfig) IPsCfg() *IPsCfg {
+	cfg.lks[IPsJSON].Lock()
+	defer cfg.lks[IPsJSON].Unlock()
+	return cfg.ipsCfg
 }
 
 // StatSCfg returns the config for StatS
@@ -1002,7 +1015,7 @@ func (cfg *CGRConfig) initChanels() {
 func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DataDBJSON,
 		CDRsJSON, SessionSJSON, AttributeSJSON,
-		ChargerSJSON, ResourceSJSON, StatSJSON, ThresholdSJSON,
+		ChargerSJSON, ResourceSJSON, IPsJSON, StatSJSON, ThresholdSJSON,
 		RouteSJSON, LoaderSJSON, RateSJSON, AdminSJSON, AccountSJSON,
 		ActionSJSON})
 	subsystemsThatNeedStorDB := utils.NewStringSet([]string{StorDBJSON, CDRsJSON})
@@ -1068,6 +1081,7 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		attributeSCfg:      cfg.attributeSCfg.Clone(),
 		chargerSCfg:        cfg.chargerSCfg.Clone(),
 		resourceSCfg:       cfg.resourceSCfg.Clone(),
+		ipsCfg:             cfg.ipsCfg.Clone(),
 		statsCfg:           cfg.statsCfg.Clone(),
 		thresholdSCfg:      cfg.thresholdSCfg.Clone(),
 		trendSCfg:          cfg.trendSCfg.Clone(),

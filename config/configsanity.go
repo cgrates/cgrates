@@ -112,7 +112,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, data := range ldrSCfg.Data {
-			if !posibleLoaderTypes.Has(data.Type) {
+			if !possibleLoaderTypes.Has(data.Type) {
 				return fmt.Errorf("<%s> unsupported data type %s", utils.LoaderS, data.Type)
 			}
 

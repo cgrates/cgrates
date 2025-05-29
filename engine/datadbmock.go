@@ -49,6 +49,12 @@ type DataDBMock struct {
 	RemoveResourceDrvF         func(ctx *context.Context, tnt, id string) error
 	SetResourceDrvF            func(ctx *context.Context, r *utils.Resource) error
 	GetResourceDrvF            func(ctx *context.Context, tenant, id string) (*utils.Resource, error)
+	GetIPProfileDrvF           func(ctx *context.Context, tnt, id string) (*utils.IPProfile, error)
+	SetIPProfileDrvF           func(ctx *context.Context, ipp *utils.IPProfile) error
+	RemoveIPProfileDrvF        func(ctx *context.Context, tnt, id string) error
+	RemoveIPDrvF               func(ctx *context.Context, tnt, id string) error
+	SetIPDrvF                  func(ctx *context.Context, ip *utils.IP) error
+	GetIPDrvF                  func(ctx *context.Context, tenant, id string) (*utils.IP, error)
 	SetTrendProfileDrvF        func(ctx *context.Context, tr *utils.TrendProfile) (err error)
 	GetTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (sq *utils.TrendProfile, err error)
 	RemTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (err error)
@@ -159,6 +165,48 @@ func (dbM *DataDBMock) SetResourceDrv(ctx *context.Context, r *utils.Resource) e
 func (dbM *DataDBMock) RemoveResourceDrv(ctx *context.Context, tnt, id string) error {
 	if dbM.RemoveResourceDrvF != nil {
 		return dbM.RemoveResourceDrvF(ctx, tnt, id)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetIPProfileDrv(ctx *context.Context, tnt, id string) (*utils.IPProfile, error) {
+	if dbM.GetIPProfileDrvF != nil {
+		return dbM.GetIPProfileDrvF(ctx, tnt, id)
+	}
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfile) error {
+	if dbM.SetIPProfileDrvF != nil {
+		return dbM.SetIPProfileDrvF(ctx, ipp)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveIPProfileDrv(ctx *context.Context, tnt string, id string) error {
+	if dbM.RemoveIPProfileDrvF != nil {
+		return dbM.RemoveIPProfileDrvF(ctx, tnt, id)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetIPDrv(ctx *context.Context, tenant, id string) (*utils.IP, error) {
+	if dbM.GetIPDrvF != nil {
+		return dbM.GetIPDrvF(ctx, tenant, id)
+	}
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetIPDrv(ctx *context.Context, ip *utils.IP) error {
+	if dbM.SetIPDrvF != nil {
+		return dbM.SetIPDrvF(ctx, ip)
+	}
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveIPDrv(ctx *context.Context, tnt, id string) error {
+	if dbM.RemoveIPDrvF != nil {
+		return dbM.RemoveIPDrvF(ctx, tnt, id)
 	}
 	return utils.ErrNotImplemented
 }

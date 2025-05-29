@@ -79,6 +79,8 @@ func (admS *AdminS) CallCache(ctx *context.Context, cacheopt string, tnt, cacheI
 			cacheIDs = append(cacheIDs, utils.CacheThresholds)
 		case utils.CacheResourceProfiles:
 			cacheIDs = append(cacheIDs, utils.CacheResources)
+		case utils.CacheIPProfiles:
+			cacheIDs = append(cacheIDs, utils.CacheIPs)
 		case utils.CacheStatQueueProfiles:
 			cacheIDs = append(cacheIDs, utils.CacheStatQueues)
 		}
@@ -103,6 +105,8 @@ func (admS *AdminS) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID
 		argCache[utils.CacheThresholds] = []string{itemID}
 	case utils.CacheResourceProfiles:
 		argCache[utils.CacheResources] = []string{itemID}
+	case utils.CacheIPProfiles:
+		argCache[utils.CacheIPs] = []string{itemID}
 	case utils.CacheStatQueueProfiles:
 		argCache[utils.CacheStatQueues] = []string{itemID}
 	}

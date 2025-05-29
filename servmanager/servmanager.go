@@ -264,6 +264,9 @@ func toggleService(id string, status bool, srvMngr *ServiceManager) (err error) 
 	case utils.ResourceS:
 		srvMngr.cfg.ResourceSCfg().Enabled = status
 		srvMngr.cfg.GetReloadChan() <- id
+	case utils.IPs:
+		srvMngr.cfg.IPsCfg().Enabled = status
+		srvMngr.cfg.GetReloadChan() <- id
 	case utils.RouteS:
 		srvMngr.cfg.RouteSCfg().Enabled = status
 		srvMngr.cfg.GetReloadChan() <- id
