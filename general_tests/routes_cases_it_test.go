@@ -30,7 +30,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -40,7 +39,7 @@ var (
 	rtsCaseSv1CfgPath string
 	rtsCaseSv1Cfg     *config.CGRConfig
 	rtsCaseSv1Rpc     *birpc.Client
-	rtsCasePrf        *v1.RouteWithAPIOpts
+	rtsCasePrf        *engine.RouteWithAPIOpts
 	rtsCaseSv1ConfDIR string //run tests for specific configuration
 
 	sTestsRtsCaseSV1 = []func(t *testing.T){

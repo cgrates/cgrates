@@ -501,7 +501,7 @@ func testV1FIdxGetStatsIndexesHealth(t *testing.T) {
 
 func testV1FIdxGetRoutesIndexesHealth(t *testing.T) {
 	// set another routes profile different than the one from tariffplan
-	rPrf := &RouteWithAPIOpts{
+	rPrf := &engine.RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE1",

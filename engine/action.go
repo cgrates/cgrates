@@ -129,7 +129,7 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaDynamicThreshold, utils.MetaDynamicStats,
 		utils.MetaDynamicAttribute, utils.MetaDynamicActionPlan,
 		utils.MetaDynamicAction, utils.MetaDynamicDestination,
-		utils.MetaDynamicFilter,
+		utils.MetaDynamicFilter, utils.MetaDynamicRoute,
 	}
 	act := ActionConnCfg{}
 	switch source {
@@ -196,6 +196,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicAction] = dynamicAction
 	actionFuncMap[utils.MetaDynamicDestination] = dynamicDestination
 	actionFuncMap[utils.MetaDynamicFilter] = dynamicFilter
+	actionFuncMap[utils.MetaDynamicRoute] = dynamicRoute
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -2154,4 +2155,142 @@ func dynamicFilter(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the Filter based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetFilter, fltr, &reply)
+}
+
+// dynamicRoute processes the `ExtraParameters` field from the action to
+// construct a RouteProfile
+//
+// The ExtraParameters field format is expected as follows:
+//
+//		0 Tenant: string
+//		1 ID: string
+//		2 FilterIDs: strings separated by "&".
+//		3 ActivationInterval: strings separated by "&".
+//		4 Sorting: string
+//		5 SortingParameters: strings separated by "&".
+//		6 RouteID: string
+//		7 RouteFilterIDs: strings separated by "&".
+//		8 RouteAccountIDs: strings separated by "&".
+//		9 RouteRatingPlanIDs: strings separated by "&".
+//	   10 RouteResourceIDs: strings separated by "&".
+//	   11 RouteStatIDs: strings separated by "&".
+//	   12 RouteWeight: string
+//	   13 RouteBlocker: string
+//	   14 RouteParameters: string
+//	   15 Weight: string
+//	   16 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicRoute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 17 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 17", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	route := &RouteWithAPIOpts{
+		RouteProfile: &RouteProfile{
+			Tenant:             params[0],
+			ID:                 params[1],
+			ActivationInterval: &utils.ActivationInterval{}, // avoid reaching inside a nil pointer
+			Sorting:            params[4],
+			Routes: []*Route{
+				{
+					ID:              params[6],
+					RouteParameters: params[14],
+				},
+			},
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Route's FilterIDs
+	if params[2] != utils.EmptyString {
+		route.FilterIDs = strings.Split(params[2], utils.ANDSep)
+	}
+	// populate Route's ActivationInterval
+	aISplit := strings.Split(params[3], utils.ANDSep)
+	if len(aISplit) > 2 {
+		return utils.ErrUnsupportedFormat
+	}
+	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
+		if err := route.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
+			return err
+		}
+		if len(aISplit) == 2 {
+			if err := route.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+				return err
+			}
+		}
+	}
+	// populate Route's SortingParameters
+	if params[5] != utils.EmptyString {
+		route.SortingParameters = strings.Split(params[5], utils.ANDSep)
+	}
+	// populate Route's RouteFilterIDs
+	if params[7] != utils.EmptyString {
+		route.Routes[0].FilterIDs = strings.Split(params[7], utils.ANDSep)
+	}
+	// populate Route's RouteAccountIDs
+	if params[8] != utils.EmptyString {
+		route.Routes[0].AccountIDs = strings.Split(params[8], utils.ANDSep)
+	}
+	// populate Route's RouteRatingPlanIDs
+	if params[9] != utils.EmptyString {
+		route.Routes[0].RatingPlanIDs = strings.Split(params[9], utils.ANDSep)
+	}
+	// populate Route's RouteResourceIDs
+	if params[10] != utils.EmptyString {
+		route.Routes[0].ResourceIDs = strings.Split(params[10], utils.ANDSep)
+	}
+	// populate Route's RouteStatIDs
+	if params[11] != utils.EmptyString {
+		route.Routes[0].StatIDs = strings.Split(params[11], utils.ANDSep)
+	}
+	// populate Route's RouteWeight
+	if params[12] != utils.EmptyString {
+		route.Routes[0].Weight, err = strconv.ParseFloat(params[12], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Route's RouteBlocker
+	if params[13] != utils.EmptyString {
+		route.Routes[0].Blocker, err = strconv.ParseBool(params[13])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Route's Weight
+	if params[15] != utils.EmptyString {
+		route.Weight, err = strconv.ParseFloat(params[15], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Route's APIOpts
+	if params[16] != utils.EmptyString {
+		if err := parseParamStringToMap(params[16], route.APIOpts); err != nil {
+			return err
+		}
+	}
+	// create the RouteProfile based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetRouteProfile, route, &reply)
 }

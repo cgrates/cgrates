@@ -6246,3 +6246,233 @@ func TestDynamicFilter(t *testing.T) {
 		})
 	}
 }
+
+func TestDynamicRoute(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var rwo *RouteWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetRouteProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rwo, canCast = args.(*RouteWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expRwo      *RouteWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expRwo: &RouteWithAPIOpts{
+				RouteProfile: &RouteProfile{
+					Tenant:    "cgrates.org",
+					ID:        "RTP_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					SortingParameters: []string{"*acd", "*tcc"},
+					Routes: []*Route{
+						{
+							ID:              "route1",
+							FilterIDs:       []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+							AccountIDs:      []string{"1001", "1002"},
+							RatingPlanIDs:   []string{"RP1", "RP2"},
+							ResourceIDs:     []string{"RS1", "RS2"},
+							StatIDs:         []string{"Stat_1", "Stat_1_1"},
+							Weight:          10,
+							Blocker:         true,
+							RouteParameters: "param",
+						},
+					},
+					Sorting: utils.MetaWeight,
+					Weight:  10,
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expRwo: &RouteWithAPIOpts{
+				RouteProfile: &RouteProfile{
+					Tenant:    "cgrates.org",
+					ID:        "RTP_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Now(),
+						ExpiryTime:     time.Date(3000, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					SortingParameters: []string{"*acd", "*tcc"},
+					Routes: []*Route{
+						{
+							ID:              "route1",
+							FilterIDs:       []string{"*string:~*req.Account:1001", "*string:~*req.Account:1002"},
+							AccountIDs:      []string{"1001", "1002"},
+							RatingPlanIDs:   []string{"RP1", "RP2"},
+							ResourceIDs:     []string{"RS1", "RS2"},
+							StatIDs:         []string{"Stat_1", "Stat_1_1"},
+							Weight:          10,
+							Blocker:         true,
+							RouteParameters: "param",
+						},
+					},
+					Sorting: utils.MetaWeight,
+					Weight:  10,
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;RTP_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;*now&3000-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;<~*req.Account>&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expRwo: &RouteWithAPIOpts{
+				RouteProfile: &RouteProfile{
+					Tenant:             "cgrates.org",
+					ID:                 "RTP_ACNT_1001",
+					FilterIDs:          nil,
+					ActivationInterval: &utils.ActivationInterval{},
+					SortingParameters:  nil,
+					Routes: []*Route{
+						{
+							ID:              "route1",
+							FilterIDs:       nil,
+							AccountIDs:      nil,
+							RatingPlanIDs:   nil,
+							ResourceIDs:     nil,
+							StatIDs:         nil,
+							Weight:          0,
+							Blocker:         false,
+							RouteParameters: "",
+						},
+					},
+					Sorting: "",
+					Weight:  0,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;RTP_ACNT_1001;;;;;route1;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;RTP1;;",
+			expectedErr: "invalid number of parameters <4> expected 17",
+		},
+		{
+			name:        "ActivationIntervalLengthFail",
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z&&;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			expectedErr: utils.ErrUnsupportedFormat.Error(),
+		},
+		{
+			name:        "ActivationIntervalBadStringFail",
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;bad String;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "ActivationIntervalBadStringFail2",
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z&bad String;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "RouteWeightFail",
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;BadString;true;param;10;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "RouteBlockerFail",
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;BadString;param;10;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;BadString;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				rwo = nil
+			})
+			err := dynamicRoute(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(rwo, tc.expRwo) {
+				if i != 1 {
+					t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRwo), utils.ToJSON(rwo))
+				} else {
+					// Get the absolute difference between the times
+					diff := rwo.ActivationInterval.ActivationTime.Sub(tc.expRwo.ActivationInterval.ActivationTime)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff <= time.Second {
+						tc.expRwo.ActivationInterval.ActivationTime = rwo.ActivationInterval.ActivationTime
+						if !reflect.DeepEqual(rwo, tc.expRwo) {
+							t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRwo), utils.ToJSON(rwo))
+						}
+					} else {
+						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRwo), utils.ToJSON(rwo))
+					}
+				}
+			}
+		})
+	}
+}
