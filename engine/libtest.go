@@ -630,18 +630,21 @@ func WaitForServiceStart(t testing.TB, client *birpc.Client, service string, tim
 	}
 	method := receiver + ".Ping"
 
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
 	backoff := utils.FibDuration(time.Millisecond, 0)
 	var reply string
 	for {
+		err := client.Call(context.Background(), method, nil, &reply)
+		if err == nil && reply == utils.Pong {
+			return
+		}
 		select {
-		case <-time.After(timeout):
+		case <-ctx.Done():
 			t.Fatalf("service %q did not become available within %s", service, timeout)
-		default:
-			err := client.Call(context.Background(), method, nil, &reply)
-			if err == nil && reply == utils.Pong {
-				return
-			}
-			time.Sleep(backoff())
+		case <-time.After(backoff()):
+			// continue to next iteration
 		}
 	}
 }
@@ -659,18 +662,21 @@ func WaitForServiceShutdown(t testing.TB, client *birpc.Client, service string, 
 	}
 	method := receiver + ".Ping"
 
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
 	backoff := utils.FibDuration(time.Millisecond, 0)
 	var reply string
 	for {
+		err := client.Call(context.Background(), method, nil, &reply)
+		if err != nil && strings.Contains(err.Error(), "can't find service") {
+			return
+		}
 		select {
-		case <-time.After(timeout):
+		case <-ctx.Done():
 			t.Fatalf("service %q did not shut down within %s", service, timeout)
-		default:
-			err := client.Call(context.Background(), method, nil, &reply)
-			if err != nil && strings.Contains(err.Error(), "can't find service") {
-				return
-			}
-			time.Sleep(backoff())
+		case <-time.After(backoff()):
+			// continue to next iteration
 		}
 	}
 }

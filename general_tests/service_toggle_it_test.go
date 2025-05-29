@@ -43,7 +43,11 @@ func TestServiceToggle(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 
+	anzDBPath := t.TempDir()
 	cfgJSON := `{
+"logger": {
+	"type": "*stdout"
+},
 "accounts": {
 	"enabled": %[1]v
 },
@@ -55,7 +59,7 @@ func TestServiceToggle(t *testing.T) {
 },
 "analyzers": {
 	"enabled": %[1]v,
- 	"db_path": "/tmp",
+ 	"db_path": "%[2]s",
 },
 "attributes": {
 	"enabled": %[1]v
@@ -89,6 +93,10 @@ func TestServiceToggle(t *testing.T) {
 	"enabled": %[1]v,
 	"store_interval": "-1"
 },
+"ips": {
+	"enabled": %[1]v,
+	"store_interval": "-1"
+},
 "routes": {
 	"enabled": %[1]v
 },
@@ -115,7 +123,7 @@ func TestServiceToggle(t *testing.T) {
 	// Start a cgr-engine instance that has all the services
 	// from the slice above enabled.
 	ng := engine.TestEngine{
-		ConfigJSON: fmt.Sprintf(cfgJSON, "true"),
+		ConfigJSON: fmt.Sprintf(cfgJSON, "true", anzDBPath),
 		DBCfg:      dbCfg,
 		Encoding:   *utils.Encoding,
 		// LogBuffer:  &bytes.Buffer{},
@@ -126,7 +134,7 @@ func TestServiceToggle(t *testing.T) {
 
 	// Toggle the state of all services via config reload.
 	fullCfgPath := filepath.Join(cfg.ConfigPath, "zzz_dynamic_cgrates.json") // path to the original json config file
-	if err := os.WriteFile(fullCfgPath, fmt.Appendf(nil, cfgJSON, "false"), 0644); err != nil {
+	if err := os.WriteFile(fullCfgPath, fmt.Appendf(nil, cfgJSON, "false", anzDBPath), 0644); err != nil {
 		t.Fatal(err)
 	}
 	var reply string
@@ -138,7 +146,7 @@ func TestServiceToggle(t *testing.T) {
 	checkServiceStates(t, client, utils.StateServiceDOWN)
 
 	// Toggle the state once again to make sure the actions are repeatable.
-	if err := os.WriteFile(fullCfgPath, fmt.Appendf(nil, cfgJSON, "true"), 0644); err != nil {
+	if err := os.WriteFile(fullCfgPath, fmt.Appendf(nil, cfgJSON, "true", anzDBPath), 0644); err != nil {
 		t.Fatal(err)
 	}
 	if err := client.Call(context.Background(), utils.ConfigSv1ReloadConfig, &config.ReloadArgs{
