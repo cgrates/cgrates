@@ -75,7 +75,6 @@ func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.Servic
 	if err != nil {
 		return err
 	}
-
 	return
 }
 

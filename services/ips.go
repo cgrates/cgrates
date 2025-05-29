@@ -75,7 +75,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Serv
 	defer s.mu.Unlock()
 	s.ips = ips.NewIPService(dbs.DataManager(), s.cfg, fs.FilterS(), cms.ConnManager())
 	s.ips.StartLoop(context.TODO())
-	srv, err := engine.NewService(s.ips)
+	srv, err := engine.NewServiceWithName(s.ips, utils.IPsV1, true)
 	if err != nil {
 		return err
 	}
