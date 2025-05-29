@@ -63,6 +63,7 @@ var (
 		testLoadersGetFilters,
 		testLoadersGetRateProfiles,
 		testLoadersGetResourceProfiles,
+		testLoadersGetIPProfiles,
 		testLoadersGetRouteProfiles,
 		testLoadersGetStatQueueProfiles,
 		testLoadersGetThresholdProfiles,
@@ -271,6 +272,17 @@ cgrates.org,ResGroup21,*string:~*req.Account:1001,;10,1s,2,call,true,true,
 cgrates.org,ResGroup21,,,,,,,,
 cgrates.org,ResGroup22,,,,,,,,
 cgrates.org,ResGroup22,*string:~*req.Account:dan,;10,3600s,2,premium_call,true,true,
+`); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create and populate IPs.csv
+	if err := writeFile(utils.IPsCsv, `
+#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Type[5],AddressPool[6],Allocation[7],Stored[8]
+cgrates.org,IPs1,*string:~*req.Account:1001,;10,1s,ipv4,172.16.1.1/24,alloc_success,true
+cgrates.org,IPs1,,,,,,,
+cgrates.org,IPs2,,,,,,,
+cgrates.org,IPs2,*string:~*req.Account:1002,;20,1h,ipv4,127.0.0.1/24,alloc_new,false
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -969,6 +981,55 @@ func testLoadersGetResourceProfiles(t *testing.T) {
 		})
 		if !reflect.DeepEqual(rsPrfs, expRsPrfs) {
 			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expRsPrfs), utils.ToJSON(rsPrfs))
+		}
+	}
+}
+
+func testLoadersGetIPProfiles(t *testing.T) {
+	expIPPs := []*utils.IPProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "IPs1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			TTL:         time.Second,
+			Type:        "ipv4",
+			AddressPool: "172.16.1.1/24",
+			Allocation:  "alloc_success",
+			Stored:      true,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "IPs2",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			TTL:         time.Hour,
+			Type:        "ipv4",
+			AddressPool: "127.0.0.1/24",
+			Allocation:  "alloc_new",
+			Stored:      false,
+		},
+	}
+	var ipps []*utils.IPProfile
+	if err := ldrRPC.Call(context.Background(), utils.AdminSv1GetIPProfiles,
+		&utils.ArgsItemIDs{
+			Tenant: "cgrates.org",
+		}, &ipps); err != nil {
+		t.Error(err)
+	} else {
+		sort.Slice(ipps, func(i, j int) bool {
+			return ipps[i].ID < ipps[j].ID
+		})
+		if !reflect.DeepEqual(ipps, expIPPs) {
+			t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expIPPs), utils.ToJSON(ipps))
 		}
 	}
 }

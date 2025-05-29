@@ -35,7 +35,7 @@ func NewPrometheusAgent(cfg *config.CGRConfig) *PrometheusAgent {
 	}
 }
 
-// PrometheusAgent implements Agent interface
+// PrometheusAgent implements the Service interface.
 type PrometheusAgent struct {
 	mu  sync.RWMutex
 	cfg *config.CGRConfig
@@ -43,7 +43,7 @@ type PrometheusAgent struct {
 	stateDeps *StateDependencies
 }
 
-// Start should handle the sercive start
+// Start handles the service start.
 func (s *PrometheusAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{

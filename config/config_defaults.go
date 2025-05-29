@@ -123,6 +123,8 @@ const CGRATES_CFG_JSON = `
 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*ips": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -136,6 +138,7 @@ const CGRATES_CFG_JSON = `
 		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
+		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
 		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -268,6 +271,9 @@ const CGRATES_CFG_JSON = `
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control resource profiles caching
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control resources caching
 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching resources to events
+		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control ip profiles caching
+		"*ips": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control ips caching
+		"*event_ips": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching ips to events
 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// statqueues with metrics
 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching
@@ -282,6 +288,7 @@ const CGRATES_CFG_JSON = `
 		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control action profile caching
 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control account profile caching
 		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control resource filter indexes caching
+		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control ip filter indexes caching
 		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control stat filter indexes caching
 		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 		// control threshold filter indexes caching
 		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control route filter indexes caching
@@ -1136,6 +1143,41 @@ const CGRATES_CFG_JSON = `
 	}
 },
 
+"ips": {
+    "enabled": false,			// enables the IPs service: <true|false>
+    "store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+    "indexed_selects": true,		// enable profile matching exclusively on indexes
+    //"string_indexed_fields": [],	// query indexes based on these fields for faster processing
+    "prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
+    "suffix_indexed_fields": [],	// query indexes based on these fields for faster processing
+    "exists_indexed_fields": [],	// query indexes based on these fields for faster processing
+    "notexists_indexed_fields": [],	// query indexes based on these fields for faster processing
+    "nested_fields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
+    "opts":{
+	// "*usageID": [
+	//     {
+	// 		"Tenant": "*any",
+	// 		"FilterIDs": [],
+	// 		"Value": ""
+	//     }
+	// ],
+	// "*ttl": [
+	//     {
+	// 		"Tenant": "*any",
+	// 		"FilterIDs": [],
+	// 		"Value": "72h"
+	//     }
+	// ],
+	// "*units": [
+	//     {
+	// 		"Tenant": "*any",
+	// 		"FilterIDs": [],
+	// 		"Value": 1
+	//     }
+	// ]
+    }
+},
+
 
 "stats": {
 	"enabled": false,		// starts Stat service: <true|false>
@@ -1328,6 +1370,7 @@ const CGRATES_CFG_JSON = `
 			"*filters":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*attributes":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*resources":{"limit": -1, "ttl": "5s", "static_ttl": false},
+			"*ips":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*stats":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*thresholds":{"limit": -1, "ttl": "5s", "static_ttl": false},
 			"*routes":{"limit": -1, "ttl": "5s", "static_ttl": false},
@@ -1380,6 +1423,21 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.7"},
 					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.8"},
 					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.9"}
+				]
+			},
+			{
+				"type": "*ips",		// data source type
+				"file_name": "IPs.csv",	// file name in the tp_in_dir
+				"fields": [
+					{"tag": "Tenant", "path": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+					{"tag": "ID", "path": "ID", "type": "*variable", "value": "~*req.1", "mandatory": true},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
+					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
+					{"tag": "TTL", "path": "TTL", "type": "*variable", "value": "~*req.4"},
+					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.5"},
+					{"tag": "AddressPool", "path": "AddressPool", "type": "*variable", "value": "~*req.6"},
+					{"tag": "Allocation", "path": "Allocation", "type": "*variable", "value": "~*req.7"},
+					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.8"},
 				]
 			},
 			{

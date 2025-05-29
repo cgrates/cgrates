@@ -270,6 +270,10 @@ func newProfileFunc(lType string) func() profile {
 		return func() profile {
 			return new(utils.ResourceProfile)
 		}
+	case utils.MetaIPs:
+		return func() profile {
+			return new(utils.IPProfile)
+		}
 	case utils.MetaFilters:
 		return func() profile {
 			return new(engine.Filter)

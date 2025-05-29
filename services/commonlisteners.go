@@ -92,6 +92,7 @@ func (s *CommonListenerService) Shutdown(registry *servmanager.ServiceRegistry) 
 		utils.RateS,
 		utils.RegistrarC,
 		utils.ResourceS,
+		utils.IPs,
 		utils.RouteS,
 		utils.SessionS,
 		utils.StatS,

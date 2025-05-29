@@ -114,6 +114,8 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 	newAttrReloadCache := &AttrReloadCacheWithAPIOpts{
 		ResourceProfileIDs:           []string{MetaAny},
 		ResourceIDs:                  []string{MetaAny},
+		IPProfileIDs:                 []string{MetaAny},
+		IPIDs:                        []string{MetaAny},
 		StatsQueueIDs:                []string{MetaAny},
 		StatsQueueProfileIDs:         []string{MetaAny},
 		ThresholdIDs:                 []string{MetaAny},
@@ -127,6 +129,7 @@ func TestNewAttrReloadCacheWithOpts(t *testing.T) {
 		RateProfileIDs:               []string{MetaAny},
 		AttributeFilterIndexIDs:      []string{MetaAny},
 		ResourceFilterIndexIDs:       []string{MetaAny},
+		IPFilterIndexIDs:             []string{MetaAny},
 		StatFilterIndexIDs:           []string{MetaAny},
 		ThresholdFilterIndexIDs:      []string{MetaAny},
 		RouteFilterIndexIDs:          []string{MetaAny},

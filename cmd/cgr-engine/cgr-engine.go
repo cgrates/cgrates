@@ -217,6 +217,7 @@ func runCGREngine(fs []string) (err error) {
 		services.NewChargerService(cfg),
 		services.NewRouteService(cfg),
 		services.NewResourceService(cfg),
+		services.NewIPService(cfg),
 		services.NewTrendService(cfg),
 		services.NewRankingService(cfg),
 		services.NewThresholdService(cfg),

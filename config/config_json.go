@@ -45,6 +45,7 @@ const (
 	PrometheusAgentJSON = "prometheus_agent"
 	AttributeSJSON      = "attributes"
 	ResourceSJSON       = "resources"
+	IPsJSON             = "ips"
 	JanusAgentJSON      = "janus_agent"
 	StatSJSON           = "stats"
 	ThresholdSJSON      = "thresholds"
@@ -88,6 +89,7 @@ var (
 		RankingSJSON:        utils.RankingS,
 		StatSJSON:           utils.StatS,
 		ResourceSJSON:       utils.ResourceS,
+		IPsJSON:             utils.IPs,
 		RouteSJSON:          utils.RouteS,
 		AdminSJSON:          utils.AdminS,
 		CDRsJSON:            utils.CDRServer,
@@ -193,6 +195,7 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.attributeSCfg,
 		cfg.chargerSCfg,
 		cfg.resourceSCfg,
+		cfg.ipsCfg,
 		cfg.statsCfg,
 		cfg.thresholdSCfg,
 		cfg.rankingSCfg,
