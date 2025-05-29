@@ -1060,7 +1060,7 @@ func testV1FIdxSetRouteProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rPrf := &RouteWithAPIOpts{
+	rPrf := &engine.RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE1",
@@ -1209,7 +1209,7 @@ func testV1FIdxSetSecondRouteProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rPrf := &RouteWithAPIOpts{
+	rPrf := &engine.RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE2",

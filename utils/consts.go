@@ -1213,6 +1213,7 @@ const (
 	MetaDynamicAction           = "*dynamic_action"
 	MetaDynamicDestination      = "*dynamic_destination"
 	MetaDynamicFilter           = "*dynamic_filter"
+	MetaDynamicRoute            = "*dynamic_route"
 	ActionID                    = "ActionID"
 	ActionType                  = "ActionType"
 	ActionValue                 = "ActionValue"

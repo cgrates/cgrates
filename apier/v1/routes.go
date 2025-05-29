@@ -66,13 +66,8 @@ func (apierSv1 *APIerSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.P
 	return nil
 }
 
-type RouteWithAPIOpts struct {
-	*engine.RouteProfile
-	APIOpts map[string]any
-}
-
 // SetRouteProfile add a new Route configuration
-func (apierSv1 *APIerSv1) SetRouteProfile(ctx *context.Context, args *RouteWithAPIOpts, reply *string) error {
+func (apierSv1 *APIerSv1) SetRouteProfile(ctx *context.Context, args *engine.RouteWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

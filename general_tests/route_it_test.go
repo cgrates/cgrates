@@ -29,7 +29,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -39,7 +38,7 @@ var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
 	splSv1Rpc     *birpc.Client
-	splPrf        *v1.RouteWithAPIOpts
+	splPrf        *engine.RouteWithAPIOpts
 	splSv1ConfDIR string //run tests for specific configuration
 
 	sTestsSupplierSV1 = []func(t *testing.T){
@@ -131,7 +130,7 @@ func testV1SplSSetRouteProfilesWithoutRatingPlanIDs(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &v1.RouteWithAPIOpts{
+	splPrf = &engine.RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:  "cgrates.org",
 			ID:      "TEST_PROFILE2",
@@ -193,7 +192,7 @@ func testV1SplSAddNewRoutePrf(t *testing.T) {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &v1.RouteWithAPIOpts{
+	splPrf = &engine.RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ROUTE_ResourceTest",
@@ -463,7 +462,7 @@ func testV1SplSAddNewRoutePrf2(t *testing.T) {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &v1.RouteWithAPIOpts{
+	splPrf = &engine.RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ROUTE_ResourceDescendent",

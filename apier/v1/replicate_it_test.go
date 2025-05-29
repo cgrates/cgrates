@@ -348,7 +348,7 @@ func testInternalReplicateITRouteProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rPrf := &RouteWithAPIOpts{
+	rPrf := &engine.RouteWithAPIOpts{
 		RouteProfile: &engine.RouteProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE1",

@@ -90,6 +90,11 @@ func (r *Route) Clone() *Route {
 	return clone
 }
 
+type RouteWithAPIOpts struct {
+	*RouteProfile
+	APIOpts map[string]any
+}
+
 // RouteProfile represents the configuration of a Route profile
 type RouteProfile struct {
 	Tenant             string
