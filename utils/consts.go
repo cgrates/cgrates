@@ -1598,14 +1598,13 @@ const (
 
 // ResourceS APIs
 const (
-	ResourceSv1AuthorizeResources    = "ResourceSv1.AuthorizeResources"
+	ResourceSv1Ping                  = "ResourceSv1.Ping"
+	ResourceSv1GetResource           = "ResourceSv1.GetResource"
+	ResourceSv1GetResourceWithConfig = "ResourceSv1.GetResourceWithConfig"
 	ResourceSv1GetResourcesForEvent  = "ResourceSv1.GetResourcesForEvent"
+	ResourceSv1AuthorizeResources    = "ResourceSv1.AuthorizeResources"
 	ResourceSv1AllocateResources     = "ResourceSv1.AllocateResources"
 	ResourceSv1ReleaseResources      = "ResourceSv1.ReleaseResources"
-	ResourceSv1Ping                  = "ResourceSv1.Ping"
-	ResourceSv1GetResourceWithConfig = "ResourceSv1.GetResourceWithConfig"
-	ResourceSv1GetResource           = "ResourceSv1.GetResource"
-	ResourceSv1GetResources          = "ResourceSv1.GetResources"
 	AdminSv1SetResourceProfile       = "AdminSv1.SetResourceProfile"
 	AdminSv1GetResourceProfiles      = "AdminSv1.GetResourceProfiles"
 	AdminSv1RemoveResourceProfile    = "AdminSv1.RemoveResourceProfile"
@@ -1616,14 +1615,12 @@ const (
 
 // IPs APIs
 const (
-	IPsV1AuthorizeIPs          = "IPsV1.AuthorizeIPs"
+	IPsV1Ping                  = "IPsV1.Ping"
+	IPsV1GetIP                 = "IPsV1.GetIP"
 	IPsV1GetIPsForEvent        = "IPsV1.GetIPsForEvent"
+	IPsV1AuthorizeIPs          = "IPsV1.AuthorizeIPs"
 	IPsV1AllocateIPs           = "IPsV1.AllocateIPs"
 	IPsV1ReleaseIPs            = "IPsV1.ReleaseIPs"
-	IPsV1Ping                  = "IPsV1.Ping"
-	IPsV1GetIPWithConfig       = "IPsV1.GetIPWithConfig"
-	IPsV1GetIP                 = "IPsV1.GetIP"
-	IPsV1GetIPs                = "IPsV1.GetIPs"
 	AdminSv1SetIPProfile       = "AdminSv1.SetIPProfile"
 	AdminSv1GetIPProfiles      = "AdminSv1.GetIPProfiles"
 	AdminSv1RemoveIPProfile    = "AdminSv1.RemoveIPProfile"
