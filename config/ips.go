@@ -184,26 +184,29 @@ func (o *IPsOpts) loadFromJSONCfg(jc *IPsOptsJson) error {
 	if jc == nil {
 		return nil
 	}
+
+	// NOTE: prepend to the existing slice to ensure that the default opts that
+	// always match are at the end.
 	if jc.UsageID != nil {
 		usageID, err := InterfaceToDynamicStringOpts(jc.UsageID)
 		if err != nil {
 			return err
 		}
-		o.UsageID = append(o.UsageID, usageID...)
+		o.UsageID = append(usageID, o.UsageID...)
 	}
 	if jc.TTL != nil {
 		ttl, err := IfaceToDurationDynamicOpts(jc.TTL)
 		if err != nil {
 			return err
 		}
-		o.TTL = append(o.TTL, ttl...)
+		o.TTL = append(ttl, o.TTL...)
 	}
 	if jc.Units != nil {
 		units, err := InterfaceToFloat64DynamicOpts(jc.Units)
 		if err != nil {
 			return err
 		}
-		o.Units = append(o.Units, units...)
+		o.Units = append(units, o.Units...)
 	}
 	return nil
 }
