@@ -438,6 +438,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() map[string]*utils.DataNode
 type V1AuthorizeReply struct {
 	Attributes         *attributes.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                            `json:",omitempty"`
+	IPAllocation       *string                            `json:",omitempty"`
 	MaxUsage           *utils.Decimal                     `json:",omitempty"`
 	RouteProfiles      routes.SortedRoutesList            `json:",omitempty"`
 	ThresholdIDs       *[]string                          `json:",omitempty"`
@@ -514,6 +515,7 @@ type V1AuthorizeReplyWithDigest struct {
 type V1InitSessionReply struct {
 	Attributes         *attributes.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                            `json:",omitempty"`
+	IPAllocation       *string                            `json:",omitempty"`
 	MaxUsage           *time.Duration                     `json:",omitempty"`
 	ThresholdIDs       *[]string                          `json:",omitempty"`
 	StatQueueIDs       *[]string                          `json:",omitempty"`
