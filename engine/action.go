@@ -197,6 +197,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicDestination] = dynamicDestination
 	actionFuncMap[utils.MetaDynamicFilter] = dynamicFilter
 	actionFuncMap[utils.MetaDynamicRoute] = dynamicRoute
+	actionFuncMap[utils.MetaDynamicRanking] = dynamicRanking
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -1460,6 +1461,7 @@ func remoteSetAccount(ub *Account, a *Action, _ Actions, _ *FilterS, _ any, _ Sh
 //	 8 Weight: float, should be higher than the threshold weight that triggers this action
 //	 9 ActionIDs: strings separated by "&".
 //	10 Async: bool
+//	11 EeIDs: strings separated by "&".
 //	11 APIOpts: set of key-value pairs (separated by "&").
 //
 // Parameters are separated by ";" and must be provided in the specified order.
@@ -1477,8 +1479,8 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
-	if len(params) != 12 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 12", len(params)))
+	if len(params) != 13 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 13", len(params)))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1560,9 +1562,13 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 			return err
 		}
 	}
-	// populate Threshold's APIOpts
+	// populate Threshold's EeIDs
 	if params[11] != utils.EmptyString {
-		if err := parseParamStringToMap(params[11], thProf.APIOpts); err != nil {
+		thProf.EeIDs = strings.Split(params[11], utils.ANDSep)
+	}
+	// populate Threshold's APIOpts
+	if params[12] != utils.EmptyString {
+		if err := parseParamStringToMap(params[12], thProf.APIOpts); err != nil {
 			return err
 		}
 	}
@@ -2174,10 +2180,10 @@ func dynamicFilter(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 //		9 RouteRatingPlanIDs: strings separated by "&".
 //	   10 RouteResourceIDs: strings separated by "&".
 //	   11 RouteStatIDs: strings separated by "&".
-//	   12 RouteWeight: string
-//	   13 RouteBlocker: string
+//	   12 RouteWeight: float
+//	   13 RouteBlocker: bool
 //	   14 RouteParameters: string
-//	   15 Weight: string
+//	   15 Weight: float
 //	   16 APIOpts: set of key-value pairs (separated by "&").
 //
 // Parameters are separated by ";" and must be provided in the specified order.
@@ -2293,4 +2299,88 @@ func dynamicRoute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the RouteProfile based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetRouteProfile, route, &reply)
+}
+
+// dynamicRanking processes the `ExtraParameters` field from the action to
+// construct a RankingProfile
+//
+// The ExtraParameters field format is expected as follows:
+//
+//		0 Tenant: string
+//		1 ID: string
+//		2 Schedule: string
+//		3 StatIDs: strings separated by "&".
+//		4 MetricIDs: strings separated by "&".
+//		5 Sorting: string
+//		6 SortingParameters: strings separated by "&".
+//		7 Stored: bool
+//		8 ThresholdIDs: strings separated by "&".
+//	    9 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicRanking(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 10 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 10", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	ranking := &RankingProfileWithAPIOpts{
+		RankingProfile: &RankingProfile{
+			Tenant:   params[0],
+			ID:       params[1],
+			Schedule: params[2],
+			Sorting:  params[5],
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Ranking's StatIDs
+	if params[3] != utils.EmptyString {
+		ranking.StatIDs = strings.Split(params[3], utils.ANDSep)
+	}
+	// populate Ranking's MetricIDs
+	if params[4] != utils.EmptyString {
+		ranking.MetricIDs = strings.Split(params[4], utils.ANDSep)
+	}
+	// populate Ranking's SortingParameters
+	if params[6] != utils.EmptyString {
+		ranking.SortingParameters = strings.Split(params[6], utils.ANDSep)
+	}
+	// populate Ranking's Stored
+	if params[7] != utils.EmptyString {
+		ranking.Stored, err = strconv.ParseBool(params[7])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Ranking's ThresholdIDs
+	if params[8] != utils.EmptyString {
+		ranking.ThresholdIDs = strings.Split(params[8], utils.ANDSep)
+	}
+	// populate Ranking's APIOpts
+	if params[9] != utils.EmptyString {
+		if err := parseParamStringToMap(params[9], ranking.APIOpts); err != nil {
+			return err
+		}
+	}
+	// create the RankingProfile based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetRankingProfile, ranking, &reply)
 }

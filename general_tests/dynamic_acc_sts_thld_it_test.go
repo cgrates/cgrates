@@ -156,12 +156,12 @@ func TestDynamicAccountWithStatsAndThreshold(t *testing.T) {
 					// dynamic threshold for already created dynamic accounts, needed so we can ignore matching thresholds the events (which dont come from stats) where an account has already been dynamicaly created by  the initial threhold THD_DYNAMIC_STATS_AND_THRESHOLD_INIT. The threshold itself is only used for blocking
 					Identifier: utils.MetaDynamicThreshold,
 					// get tenant and accountID from event, threshold triggers when the event account matches the already dynamicaly created account. If it matches the filter, it will block other thresholds from matching with the event. Make sure dynamic thresholds weight is higher than the initiative threshold THD_DYNAMIC_STATS_AND_THRESHOLD_INIT
-					ExtraParameters: "*tenant;THD_BLOCKER_ACNT_<~*req.Account>;*string:~*opts.*accountID:<~*req.Account>;*now;-1;1;;true;3;;true;",
+					ExtraParameters: "*tenant;THD_BLOCKER_ACNT_<~*req.Account>;*string:~*opts.*accountID:<~*req.Account>;*now;-1;1;;true;3;;true;;",
 				},
 				{
 					Identifier: utils.MetaDynamicThreshold,
 					// get tenant and accountID from event, threshold triggers when sum of statID hits 100, after triggers the action, the threshold will be disabled for 5 seconds, make sure dynamic thresholds weight is higher than the initiative threshold THD_DYNAMIC_STATS_AND_THRESHOLD_INIT and blocker threshold THD_BLOCKER_ACNT_<~*req.Account>
-					ExtraParameters: "*tenant;THD_ACNT_<~*req.Account>;*string:~*req.StatID:Stat_<~*req.Account>&*string:~*req.*sum#1:100;*now;-1;1;5s;true;4;ACT_BLOCK_ACC&ACT_DYN_ACT_PLAN_ACC_ENABLE;true;",
+					ExtraParameters: "*tenant;THD_ACNT_<~*req.Account>;*string:~*req.StatID:Stat_<~*req.Account>&*string:~*req.*sum#1:100;*now;-1;1;5s;true;4;ACT_BLOCK_ACC&ACT_DYN_ACT_PLAN_ACC_ENABLE;true;;",
 				},
 				{
 					Identifier: utils.MetaDynamicStats,
