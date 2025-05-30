@@ -661,6 +661,7 @@ const CGRATES_CFG_JSON = `
 	"chargers_conns": [],			// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 	"cdrs_conns": [],			// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
 	"resources_conns": [],			// connections to ResourceS for resources monitoring <""|*internal|$rpc_conns_id>
+	"ips_conns": [],			// connections to IPs for monitoring ip usage <""|*internal|$rpc_conns_id>
 	"thresholds_conns": [],			// connections to ThresholdS for reporting session events <""|*internal|$rpc_conns_id>
 	"stats_conns": [],			// connections to StatS for reporting session events <""|*internal|$rpc_conns_id>
 	"routes_conns": [],			// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
@@ -725,6 +726,13 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 		// "*resources": [
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false
+		// 	}
+		// ],
+		// "*ips": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],
@@ -823,6 +831,27 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 		// "*resourcesDerivedReply": [
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false
+		// 	}
+		// ],
+		// "*ipsAuthorize": [
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false
+		// 	}
+		// ],
+		// "*ipsAllocate": [
+		// 	{
+		// 		"Tenant": "*any",
+		// 		"FilterIDs": [],
+		// 		"Value": false
+		// 	}
+		// ],
+		// "*ipsRelease": [
 		// 	{
 		// 		"Tenant": "*any",
 		// 		"FilterIDs": [],

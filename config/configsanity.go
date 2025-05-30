@@ -155,6 +155,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
 			}
 		}
+		for _, connID := range cfg.sessionSCfg.IPsConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ipsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.IPs, utils.SessionS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SessionS, connID)
+			}
+		}
 		for _, connID := range cfg.sessionSCfg.ThresholdSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.SessionS)

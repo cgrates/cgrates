@@ -75,13 +75,11 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Serv
 	defer s.mu.Unlock()
 	s.ips = ips.NewIPService(dbs.DataManager(), s.cfg, fs.FilterS(), cms.ConnManager())
 	s.ips.StartLoop(context.TODO())
-	srv, err := engine.NewServiceWithName(s.ips, utils.IPsV1, true)
+	srv, err := engine.NewServiceWithPing(s.ips, utils.IPsV1, utils.V1Prfx)
 	if err != nil {
 		return err
 	}
-	for _, svc := range srv {
-		cl.RpcRegister(svc)
-	}
+	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.IPs, srv)
 	return nil
 }

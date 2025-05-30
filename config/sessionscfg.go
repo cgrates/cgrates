@@ -34,6 +34,7 @@ const (
 	SessionsCDRsDftOpt                   = false
 	SessionsChargersDftOpt               = false
 	SessionsResourcesDftOpt              = false
+	SessionsIPsDftOpt                    = false
 	SessionsRoutesDftOpt                 = false
 	SessionsStatsDftOpt                  = false
 	SessionsThresholdsDftOpt             = false
@@ -48,6 +49,9 @@ const (
 	SessionsResourcesAllocateDftOpt      = false
 	SessionsResourcesReleaseDftOpt       = false
 	SessionsResourcesDerivedReplyDftOpt  = false
+	SessionsIPsAuthorizeDftOpt           = false
+	SessionsIPsAllocateDftOpt            = false
+	SessionsIPsReleaseDftOpt             = false
 	SessionsRoutesDerivedReplyDftOpt     = false
 	SessionsStatsDerivedReplyDftOpt      = false
 	SessionsThresholdsDerivedReplyDftOpt = false
@@ -64,6 +68,7 @@ type SessionsOpts struct {
 	CDRs                   []*DynamicBoolOpt
 	Chargers               []*DynamicBoolOpt
 	Resources              []*DynamicBoolOpt
+	IPs                    []*DynamicBoolOpt
 	Routes                 []*DynamicBoolOpt
 	Stats                  []*DynamicBoolOpt
 	Thresholds             []*DynamicBoolOpt
@@ -78,6 +83,9 @@ type SessionsOpts struct {
 	ResourcesAllocate      []*DynamicBoolOpt
 	ResourcesRelease       []*DynamicBoolOpt
 	ResourcesDerivedReply  []*DynamicBoolOpt
+	IPsAuthorize           []*DynamicBoolOpt
+	IPsAllocate            []*DynamicBoolOpt
+	IPsRelease             []*DynamicBoolOpt
 	RoutesDerivedReply     []*DynamicBoolOpt
 	StatsDerivedReply      []*DynamicBoolOpt
 	ThresholdsDerivedReply []*DynamicBoolOpt
@@ -97,10 +105,11 @@ type SessionsOpts struct {
 // SessionSCfg is the config section for SessionS
 type SessionSCfg struct {
 	Enabled             bool
-	ListenBijson        string
-	ListenBigob         string
+	ListenBiJSON        string
+	ListenBiGob         string
 	ChargerSConns       []string
 	ResourceSConns      []string
+	IPsConns            []string
 	ThresholdSConns     []string
 	StatSConns          []string
 	RouteSConns         []string
@@ -131,192 +140,270 @@ func (scfg *SessionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfi
 	return scfg.loadFromJSONCfg(jsnSessionSCfg)
 }
 
-func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err error) {
+func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 	if jsnCfg == nil {
-		return
+		return nil
 	}
 	if jsnCfg.Accounts != nil {
-		var accounts []*DynamicBoolOpt
-		accounts, err = IfaceToBoolDynamicOpts(jsnCfg.Accounts)
-		sesOpts.Accounts = append(accounts, sesOpts.Accounts...)
+		opt, err := IfaceToBoolDynamicOpts(jsnCfg.Accounts)
+		if err != nil {
+			return err
+		}
+		sesOpts.Accounts = append(opt, sesOpts.Accounts...)
 	}
 	if jsnCfg.Attributes != nil {
-		var attributes []*DynamicBoolOpt
-		attributes, err = IfaceToBoolDynamicOpts(jsnCfg.Attributes)
-		sesOpts.Attributes = append(attributes, sesOpts.Attributes...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Attributes)
+		if err != nil {
+			return err
+		}
+		sesOpts.Attributes = append(opts, sesOpts.Attributes...)
 	}
 	if jsnCfg.CDRs != nil {
-		var cdrs []*DynamicBoolOpt
-		cdrs, err = IfaceToBoolDynamicOpts(jsnCfg.CDRs)
-		sesOpts.CDRs = append(cdrs, sesOpts.CDRs...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.CDRs)
+		if err != nil {
+			return err
+		}
+		sesOpts.CDRs = append(opts, sesOpts.CDRs...)
 	}
 	if jsnCfg.Chargers != nil {
-		var chargers []*DynamicBoolOpt
-		chargers, err = IfaceToBoolDynamicOpts(jsnCfg.Chargers)
-		sesOpts.Chargers = append(chargers, sesOpts.Chargers...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Chargers)
+		if err != nil {
+			return err
+		}
+		sesOpts.Chargers = append(opts, sesOpts.Chargers...)
 	}
 	if jsnCfg.Resources != nil {
-		var resources []*DynamicBoolOpt
-		resources, err = IfaceToBoolDynamicOpts(jsnCfg.Resources)
-		sesOpts.Resources = append(resources, sesOpts.Resources...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Resources)
+		if err != nil {
+			return err
+		}
+		sesOpts.Resources = append(opts, sesOpts.Resources...)
+	}
+	if jsnCfg.IPs != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPs)
+		if err != nil {
+			return err
+		}
+		sesOpts.IPs = append(opts, sesOpts.IPs...)
 	}
 	if jsnCfg.Routes != nil {
-		var routes []*DynamicBoolOpt
-		routes, err = IfaceToBoolDynamicOpts(jsnCfg.Chargers)
-		sesOpts.Routes = append(routes, sesOpts.Routes...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Chargers)
+		if err != nil {
+			return err
+		}
+		sesOpts.Routes = append(opts, sesOpts.Routes...)
 	}
 	if jsnCfg.Stats != nil {
-		var stats []*DynamicBoolOpt
-		stats, err = IfaceToBoolDynamicOpts(jsnCfg.Stats)
-		sesOpts.Stats = append(stats, sesOpts.Stats...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Stats)
+		if err != nil {
+			return err
+		}
+		sesOpts.Stats = append(opts, sesOpts.Stats...)
 	}
 	if jsnCfg.Thresholds != nil {
-		var thresholds []*DynamicBoolOpt
-		thresholds, err = IfaceToBoolDynamicOpts(jsnCfg.Thresholds)
-		sesOpts.Thresholds = append(thresholds, sesOpts.Thresholds...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Thresholds)
+		if err != nil {
+			return err
+		}
+		sesOpts.Thresholds = append(opts, sesOpts.Thresholds...)
 	}
 	if jsnCfg.Initiate != nil {
-		var initiate []*DynamicBoolOpt
-		initiate, err = IfaceToBoolDynamicOpts(jsnCfg.Initiate)
-		sesOpts.Initiate = append(initiate, sesOpts.Initiate...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Initiate)
+		if err != nil {
+			return err
+		}
+		sesOpts.Initiate = append(opts, sesOpts.Initiate...)
 	}
 	if jsnCfg.Update != nil {
-		var update []*DynamicBoolOpt
-		update, err = IfaceToBoolDynamicOpts(jsnCfg.Update)
-		sesOpts.Update = append(update, sesOpts.Update...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Update)
+		if err != nil {
+			return err
+		}
+		sesOpts.Update = append(opts, sesOpts.Update...)
 	}
 	if jsnCfg.Terminate != nil {
-		var terminate []*DynamicBoolOpt
-		terminate, err = IfaceToBoolDynamicOpts(jsnCfg.Terminate)
-		sesOpts.Terminate = append(terminate, sesOpts.Terminate...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Terminate)
+		if err != nil {
+			return err
+		}
+		sesOpts.Terminate = append(opts, sesOpts.Terminate...)
 	}
 	if jsnCfg.Message != nil {
-		var message []*DynamicBoolOpt
-		message, err = IfaceToBoolDynamicOpts(jsnCfg.Message)
-		sesOpts.Message = append(message, sesOpts.Message...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Message)
+		if err != nil {
+			return err
+		}
+		sesOpts.Message = append(opts, sesOpts.Message...)
 	}
 	if jsnCfg.AttributesDerivedReply != nil {
-		var attrDerivedRpl []*DynamicBoolOpt
-		attrDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.AttributesDerivedReply)
-		sesOpts.AttributesDerivedReply = append(attrDerivedRpl, sesOpts.AttributesDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AttributesDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.AttributesDerivedReply = append(opts, sesOpts.AttributesDerivedReply...)
 	}
 	if jsnCfg.BlockerError != nil {
-		var blockerErr []*DynamicBoolOpt
-		blockerErr, err = IfaceToBoolDynamicOpts(jsnCfg.BlockerError)
-		sesOpts.BlockerError = append(blockerErr, sesOpts.BlockerError...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.BlockerError)
+		if err != nil {
+			return err
+		}
+		sesOpts.BlockerError = append(opts, sesOpts.BlockerError...)
 	}
 	if jsnCfg.CDRsDerivedReply != nil {
-		var cdrsDerivedRpl []*DynamicBoolOpt
-		cdrsDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.CDRsDerivedReply)
-		sesOpts.CDRsDerivedReply = append(cdrsDerivedRpl, sesOpts.CDRsDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.CDRsDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.CDRsDerivedReply = append(opts, sesOpts.CDRsDerivedReply...)
 	}
 	if jsnCfg.ResourcesAuthorize != nil {
-		var resAuthorize []*DynamicBoolOpt
-		resAuthorize, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesAuthorize)
-		sesOpts.ResourcesAuthorize = append(resAuthorize, sesOpts.ResourcesAuthorize...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesAuthorize)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesAuthorize = append(opts, sesOpts.ResourcesAuthorize...)
 	}
 	if jsnCfg.ResourcesAllocate != nil {
-		var resAlloc []*DynamicBoolOpt
-		resAlloc, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
-		sesOpts.ResourcesAllocate = append(resAlloc, sesOpts.ResourcesAllocate...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesAllocate = append(opts, sesOpts.ResourcesAllocate...)
 	}
 	if jsnCfg.ResourcesRelease != nil {
-		var resRelease []*DynamicBoolOpt
-		resRelease, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
-		sesOpts.ResourcesRelease = append(resRelease, sesOpts.ResourcesRelease...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesRelease = append(opts, sesOpts.ResourcesRelease...)
 	}
 	if jsnCfg.ResourcesDerivedReply != nil {
-		var resDerivedRpl []*DynamicBoolOpt
-		resDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesDerivedReply)
-		sesOpts.ResourcesDerivedReply = append(resDerivedRpl, sesOpts.ResourcesDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesDerivedReply = append(opts, sesOpts.ResourcesDerivedReply...)
+	}
+	if jsnCfg.IPsAuthorize != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsAuthorize)
+		if err != nil {
+			return err
+		}
+		sesOpts.IPsAuthorize = append(opts, sesOpts.IPsAuthorize...)
+	}
+	if jsnCfg.IPsAllocate != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
+		if err != nil {
+			return err
+		}
+		sesOpts.IPsAllocate = append(opts, sesOpts.IPsAllocate...)
+	}
+	if jsnCfg.IPsRelease != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
+		if err != nil {
+			return err
+		}
+		sesOpts.IPsRelease = append(opts, sesOpts.IPsRelease...)
 	}
 	if jsnCfg.RoutesDerivedReply != nil {
-		var routesDerivedRpl []*DynamicBoolOpt
-		routesDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.RoutesDerivedReply)
-		sesOpts.RoutesDerivedReply = append(routesDerivedRpl, sesOpts.RoutesDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.RoutesDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.RoutesDerivedReply = append(opts, sesOpts.RoutesDerivedReply...)
 	}
 	if jsnCfg.StatsDerivedReply != nil {
-		var statsDerivedRpl []*DynamicBoolOpt
-		statsDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.StatsDerivedReply)
-		sesOpts.StatsDerivedReply = append(statsDerivedRpl, sesOpts.StatsDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.StatsDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.StatsDerivedReply = append(opts, sesOpts.StatsDerivedReply...)
 	}
 	if jsnCfg.ThresholdsDerivedReply != nil {
-		var threshDerivedRpl []*DynamicBoolOpt
-		threshDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.ThresholdsDerivedReply)
-		sesOpts.ThresholdsDerivedReply = append(threshDerivedRpl, sesOpts.ThresholdsDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ThresholdsDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.ThresholdsDerivedReply = append(opts, sesOpts.ThresholdsDerivedReply...)
 	}
 	if jsnCfg.MaxUsage != nil {
-		var maxUsage []*DynamicBoolOpt
-		maxUsage, err = IfaceToBoolDynamicOpts(jsnCfg.MaxUsage)
-		sesOpts.MaxUsage = append(maxUsage, sesOpts.MaxUsage...)
-
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.MaxUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.MaxUsage = append(opts, sesOpts.MaxUsage...)
 	}
 	if jsnCfg.ForceUsage != nil {
-		var forceUsage []*DynamicBoolOpt
-		forceUsage, err = IfaceToBoolDynamicOpts(jsnCfg.ForceUsage)
-		sesOpts.ForceUsage = append(forceUsage, sesOpts.ForceUsage...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ForceUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.ForceUsage = append(opts, sesOpts.ForceUsage...)
 	}
 	if jsnCfg.TTL != nil {
-		var ttl []*DynamicDurationOpt
-		if ttl, err = IfaceToDurationDynamicOpts(jsnCfg.TTL); err != nil {
-			return
+		ttl, err := IfaceToDurationDynamicOpts(jsnCfg.TTL)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTL = append(ttl, sesOpts.TTL...)
 	}
 	if jsnCfg.Chargeable != nil {
-		var chargeable []*DynamicBoolOpt
-		chargeable, err = IfaceToBoolDynamicOpts(jsnCfg.Chargeable)
-		sesOpts.Chargeable = append(chargeable, sesOpts.Chargeable...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Chargeable)
+		if err != nil {
+			return err
+		}
+		sesOpts.Chargeable = append(opts, sesOpts.Chargeable...)
 	}
 	if jsnCfg.TTLLastUsage != nil {
-		var lastUsage []*DynamicDurationPointerOpt
-		if lastUsage, err = IfaceToDurationPointerDynamicOpts(jsnCfg.TTLLastUsage); err != nil {
-			return
+		lastUsage, err := IfaceToDurationPointerDynamicOpts(jsnCfg.TTLLastUsage)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTLLastUsage = append(lastUsage, sesOpts.TTLLastUsage...)
 	}
 	if jsnCfg.TTLLastUsed != nil {
-		var lastUsed []*DynamicDurationPointerOpt
-		if lastUsed, err = IfaceToDurationPointerDynamicOpts(jsnCfg.TTLLastUsed); err != nil {
-			return
+		lastUsed, err := IfaceToDurationPointerDynamicOpts(jsnCfg.TTLLastUsed)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTLLastUsed = append(lastUsed, sesOpts.TTLLastUsed...)
 	}
 	if jsnCfg.DebitInterval != nil {
-		var debitInterval []*DynamicDurationOpt
-		if debitInterval, err = IfaceToDurationDynamicOpts(jsnCfg.DebitInterval); err != nil {
-			return
+		debitInterval, err := IfaceToDurationDynamicOpts(jsnCfg.DebitInterval)
+		if err != nil {
+			return err
 		}
 		sesOpts.DebitInterval = append(debitInterval, sesOpts.DebitInterval...)
 	}
 	if jsnCfg.TTLMaxDelay != nil {
-		var maxDelay []*DynamicDurationOpt
-		if maxDelay, err = IfaceToDurationDynamicOpts(jsnCfg.TTLMaxDelay); err != nil {
-			return
+		maxDelay, err := IfaceToDurationDynamicOpts(jsnCfg.TTLMaxDelay)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTLMaxDelay = append(maxDelay, sesOpts.TTLMaxDelay...)
 	}
 	if jsnCfg.TTLUsage != nil {
-		var usage []*DynamicDurationPointerOpt
-		if usage, err = IfaceToDurationPointerDynamicOpts(jsnCfg.TTLUsage); err != nil {
-			return
+		usage, err := IfaceToDurationPointerDynamicOpts(jsnCfg.TTLUsage)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTLUsage = append(usage, sesOpts.TTLUsage...)
 	}
 	if jsnCfg.OriginID != nil {
-		var originID []*DynamicStringOpt
-		originID, err = InterfaceToDynamicStringOpts(jsnCfg.OriginID)
+		originID, err := InterfaceToDynamicStringOpts(jsnCfg.OriginID)
 		if err != nil {
-			return
+			return err
 		}
 		sesOpts.OriginID = append(originID, sesOpts.OriginID...)
 	}
 	if jsnCfg.AccountsForceUsage != nil {
-		var accountsForceUsage []*DynamicBoolOpt
-		accountsForceUsage, err = IfaceToBoolDynamicOpts(jsnCfg.AccountsForceUsage)
-		sesOpts.AccountsForceUsage = append(accountsForceUsage, sesOpts.AccountsForceUsage...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AccountsForceUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.AccountsForceUsage = append(opts, sesOpts.AccountsForceUsage...)
 	}
-	return
+	return nil
 }
 
 func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -326,78 +413,81 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		scfg.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Listen_bijson != nil {
-		scfg.ListenBijson = *jsnCfg.Listen_bijson
+	if jsnCfg.ListenBiJSON != nil {
+		scfg.ListenBiJSON = *jsnCfg.ListenBiJSON
 	}
-	if jsnCfg.Listen_bigob != nil {
-		scfg.ListenBigob = *jsnCfg.Listen_bigob
+	if jsnCfg.ListenBiGob != nil {
+		scfg.ListenBiGob = *jsnCfg.ListenBiGob
 	}
-	if jsnCfg.Chargers_conns != nil {
-		scfg.ChargerSConns = updateInternalConns(*jsnCfg.Chargers_conns, utils.MetaChargers)
+	if jsnCfg.ChargerSConns != nil {
+		scfg.ChargerSConns = updateInternalConns(*jsnCfg.ChargerSConns, utils.MetaChargers)
 	}
-	if jsnCfg.Resources_conns != nil {
-		scfg.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
+	if jsnCfg.ResourceSConns != nil {
+		scfg.ResourceSConns = updateInternalConns(*jsnCfg.ResourceSConns, utils.MetaResources)
 	}
-	if jsnCfg.Thresholds_conns != nil {
-		scfg.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+	if jsnCfg.IPsConns != nil {
+		scfg.IPsConns = updateInternalConns(*jsnCfg.IPsConns, utils.MetaIPs)
 	}
-	if jsnCfg.Stats_conns != nil {
-		scfg.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+	if jsnCfg.ThresholdSConns != nil {
+		scfg.ThresholdSConns = updateInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
 	}
-	if jsnCfg.Routes_conns != nil {
-		scfg.RouteSConns = updateInternalConns(*jsnCfg.Routes_conns, utils.MetaRoutes)
+	if jsnCfg.StatSConns != nil {
+		scfg.StatSConns = updateInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
 	}
-	if jsnCfg.Attributes_conns != nil {
-		scfg.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
+	if jsnCfg.RouteSConns != nil {
+		scfg.RouteSConns = updateInternalConns(*jsnCfg.RouteSConns, utils.MetaRoutes)
 	}
-	if jsnCfg.Cdrs_conns != nil {
-		scfg.CDRsConns = updateInternalConns(*jsnCfg.Cdrs_conns, utils.MetaCDRs)
+	if jsnCfg.AttributeSConns != nil {
+		scfg.AttributeSConns = updateInternalConns(*jsnCfg.AttributeSConns, utils.MetaAttributes)
 	}
-	if jsnCfg.Actions_conns != nil {
-		scfg.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
+	if jsnCfg.CDRsConns != nil {
+		scfg.CDRsConns = updateInternalConns(*jsnCfg.CDRsConns, utils.MetaCDRs)
 	}
-	if jsnCfg.Replication_conns != nil {
-		scfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
-		for idx, connID := range *jsnCfg.Replication_conns {
+	if jsnCfg.ActionSConns != nil {
+		scfg.ActionSConns = updateInternalConns(*jsnCfg.ActionSConns, utils.MetaActions)
+	}
+	if jsnCfg.ReplicationConns != nil {
+		scfg.ReplicationConns = make([]string, len(*jsnCfg.ReplicationConns))
+		for idx, connID := range *jsnCfg.ReplicationConns {
 			if connID == utils.MetaInternal {
 				return fmt.Errorf("Replication connection ID needs to be different than *internal ")
 			}
 			scfg.ReplicationConns[idx] = connID
 		}
 	}
-	if jsnCfg.Rates_conns != nil {
-		scfg.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
+	if jsnCfg.RateSConns != nil {
+		scfg.RateSConns = updateInternalConns(*jsnCfg.RateSConns, utils.MetaRates)
 	}
-	if jsnCfg.Accounts_conns != nil {
-		scfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
+	if jsnCfg.AccountSConns != nil {
+		scfg.AccountSConns = updateInternalConns(*jsnCfg.AccountSConns, utils.MetaAccounts)
 	}
-	if jsnCfg.Store_session_costs != nil {
-		scfg.StoreSCosts = *jsnCfg.Store_session_costs
+	if jsnCfg.StoreSCosts != nil {
+		scfg.StoreSCosts = *jsnCfg.StoreSCosts
 	}
-	if jsnCfg.Session_indexes != nil {
-		scfg.SessionIndexes = utils.NewStringSet(*jsnCfg.Session_indexes)
+	if jsnCfg.SessionIndexes != nil {
+		scfg.SessionIndexes = utils.NewStringSet(*jsnCfg.SessionIndexes)
 	}
-	if jsnCfg.Client_protocol != nil {
-		scfg.ClientProtocol = *jsnCfg.Client_protocol
+	if jsnCfg.ClientProtocol != nil {
+		scfg.ClientProtocol = *jsnCfg.ClientProtocol
 	}
-	if jsnCfg.Channel_sync_interval != nil {
-		if scfg.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
+	if jsnCfg.ChannelSyncInterval != nil {
+		if scfg.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.ChannelSyncInterval); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Terminate_attempts != nil {
-		scfg.TerminateAttempts = *jsnCfg.Terminate_attempts
+	if jsnCfg.TerminateAttempts != nil {
+		scfg.TerminateAttempts = *jsnCfg.TerminateAttempts
 	}
-	if jsnCfg.Alterable_fields != nil {
-		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.Alterable_fields)
+	if jsnCfg.AlterableFields != nil {
+		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.AlterableFields)
 	}
-	if jsnCfg.Min_dur_low_balance != nil {
-		if scfg.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_dur_low_balance); err != nil {
+	if jsnCfg.MinDurLowBalance != nil {
+		if scfg.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.MinDurLowBalance); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Default_usage != nil {
-		for k, v := range jsnCfg.Default_usage {
+	if jsnCfg.DefaultUsage != nil {
+		for k, v := range jsnCfg.DefaultUsage {
 			if scfg.DefaultUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
 				return
 			}
@@ -439,6 +529,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaCDRs:                      scfg.Opts.CDRs,
 		utils.MetaChargers:                  scfg.Opts.Chargers,
 		utils.MetaResources:                 scfg.Opts.Resources,
+		utils.MetaIPs:                       scfg.Opts.IPs,
 		utils.MetaRoutes:                    scfg.Opts.Routes,
 		utils.MetaStats:                     scfg.Opts.Stats,
 		utils.MetaThresholds:                scfg.Opts.Thresholds,
@@ -453,6 +544,9 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaResourcesAllocateCfg:      scfg.Opts.ResourcesAllocate,
 		utils.MetaResourcesReleaseCfg:       scfg.Opts.ResourcesRelease,
 		utils.MetaResourcesDerivedReplyCfg:  scfg.Opts.ResourcesDerivedReply,
+		utils.MetaIPsAuthorizeCfg:           scfg.Opts.IPsAuthorize,
+		utils.MetaIPsAllocateCfg:            scfg.Opts.IPsAllocate,
+		utils.MetaIPsReleaseCfg:             scfg.Opts.IPsRelease,
 		utils.MetaRoutesDerivedReplyCfg:     scfg.Opts.RoutesDerivedReply,
 		utils.MetaStatsDerivedReplyCfg:      scfg.Opts.StatsDerivedReply,
 		utils.MetaThresholdsDerivedReplyCfg: scfg.Opts.ThresholdsDerivedReply,
@@ -470,8 +564,8 @@ func (scfg SessionSCfg) AsMapInterface() any {
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:             scfg.Enabled,
-		utils.ListenBijsonCfg:        scfg.ListenBijson,
-		utils.ListenBigobCfg:         scfg.ListenBigob,
+		utils.ListenBijsonCfg:        scfg.ListenBiJSON,
+		utils.ListenBigobCfg:         scfg.ListenBiGob,
 		utils.ReplicationConnsCfg:    scfg.ReplicationConns,
 		utils.StoreSCostsCfg:         scfg.StoreSCosts,
 		utils.SessionIndexesCfg:      scfg.SessionIndexes.AsSlice(),
@@ -495,6 +589,9 @@ func (scfg SessionSCfg) AsMapInterface() any {
 	}
 	if scfg.ResourceSConns != nil {
 		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(scfg.ResourceSConns)
+	}
+	if scfg.IPsConns != nil {
+		mp[utils.IPsConnsCfg] = getInternalJSONConns(scfg.IPsConns)
 	}
 	if scfg.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(scfg.ThresholdSConns)
@@ -526,173 +623,45 @@ func (scfg SessionSCfg) AsMapInterface() any {
 func (SessionSCfg) SName() string              { return SessionSJSON }
 func (scfg SessionSCfg) CloneSection() Section { return scfg.Clone() }
 
-func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
-	var acntS []*DynamicBoolOpt
-	if sesOpts.Accounts != nil {
-		acntS = CloneDynamicBoolOpt(sesOpts.Accounts)
-	}
-	var attrS []*DynamicBoolOpt
-	if sesOpts.Attributes != nil {
-		attrS = CloneDynamicBoolOpt(sesOpts.Attributes)
-	}
-	var cdrS []*DynamicBoolOpt
-	if sesOpts.CDRs != nil {
-		cdrS = CloneDynamicBoolOpt(sesOpts.CDRs)
-	}
-	var chrgS []*DynamicBoolOpt
-	if sesOpts.Chargers != nil {
-		chrgS = CloneDynamicBoolOpt(sesOpts.Chargers)
-	}
-	var reS []*DynamicBoolOpt
-	if sesOpts.Resources != nil {
-		reS = CloneDynamicBoolOpt(sesOpts.Resources)
-	}
-	var rouS []*DynamicBoolOpt
-	if sesOpts.Routes != nil {
-		rouS = CloneDynamicBoolOpt(sesOpts.Routes)
-	}
-	var stS []*DynamicBoolOpt
-	if sesOpts.Stats != nil {
-		stS = CloneDynamicBoolOpt(sesOpts.Stats)
-	}
-	var thdS []*DynamicBoolOpt
-	if sesOpts.Thresholds != nil {
-		thdS = CloneDynamicBoolOpt(sesOpts.Thresholds)
-	}
-	var initS []*DynamicBoolOpt
-	if sesOpts.Initiate != nil {
-		initS = CloneDynamicBoolOpt(sesOpts.Initiate)
-	}
-	var updS []*DynamicBoolOpt
-	if sesOpts.Update != nil {
-		updS = CloneDynamicBoolOpt(sesOpts.Update)
-	}
-	var termS []*DynamicBoolOpt
-	if sesOpts.Terminate != nil {
-		termS = CloneDynamicBoolOpt(sesOpts.Terminate)
-	}
-	var msg []*DynamicBoolOpt
-	if sesOpts.Message != nil {
-		msg = CloneDynamicBoolOpt(sesOpts.Message)
-	}
-	var attrDerivedReply []*DynamicBoolOpt
-	if sesOpts.AttributesDerivedReply != nil {
-		attrDerivedReply = CloneDynamicBoolOpt(sesOpts.AttributesDerivedReply)
-	}
-	var blockerErr []*DynamicBoolOpt
-	if sesOpts.BlockerError != nil {
-		blockerErr = CloneDynamicBoolOpt(sesOpts.BlockerError)
-	}
-	var cdrsDerivedReply []*DynamicBoolOpt
-	if sesOpts.CDRsDerivedReply != nil {
-		cdrsDerivedReply = CloneDynamicBoolOpt(sesOpts.CDRsDerivedReply)
-	}
-	var resAuthorize []*DynamicBoolOpt
-	if sesOpts.ResourcesAuthorize != nil {
-		resAuthorize = CloneDynamicBoolOpt(sesOpts.ResourcesAuthorize)
-	}
-	var resAllocate []*DynamicBoolOpt
-	if sesOpts.ResourcesAllocate != nil {
-		resAllocate = CloneDynamicBoolOpt(sesOpts.ResourcesAllocate)
-	}
-	var resRelease []*DynamicBoolOpt
-	if sesOpts.ResourcesRelease != nil {
-		resRelease = CloneDynamicBoolOpt(sesOpts.ResourcesRelease)
-	}
-	var resDerivedReply []*DynamicBoolOpt
-	if sesOpts.ResourcesDerivedReply != nil {
-		resDerivedReply = CloneDynamicBoolOpt(sesOpts.ResourcesDerivedReply)
-	}
-	var rouDerivedReply []*DynamicBoolOpt
-	if sesOpts.RoutesDerivedReply != nil {
-		rouDerivedReply = CloneDynamicBoolOpt(sesOpts.RoutesDerivedReply)
-	}
-	var stsDerivedReply []*DynamicBoolOpt
-	if sesOpts.StatsDerivedReply != nil {
-		stsDerivedReply = CloneDynamicBoolOpt(sesOpts.StatsDerivedReply)
-	}
-	var thdsDerivedReply []*DynamicBoolOpt
-	if sesOpts.ThresholdsDerivedReply != nil {
-		thdsDerivedReply = CloneDynamicBoolOpt(sesOpts.ThresholdsDerivedReply)
-	}
-	var maxUsage []*DynamicBoolOpt
-	if sesOpts.MaxUsage != nil {
-		maxUsage = CloneDynamicBoolOpt(sesOpts.MaxUsage)
-	}
-	var forceUsage []*DynamicBoolOpt
-	if sesOpts.ForceUsage != nil {
-		forceUsage = CloneDynamicBoolOpt(sesOpts.ForceUsage)
-	}
-	var ttl []*DynamicDurationOpt
-	if sesOpts.TTL != nil {
-		ttl = CloneDynamicDurationOpt(sesOpts.TTL)
-	}
-	var chargeable []*DynamicBoolOpt
-	if sesOpts.Chargeable != nil {
-		chargeable = CloneDynamicBoolOpt(sesOpts.Chargeable)
-	}
-	var debitIvl []*DynamicDurationOpt
-	if sesOpts.DebitInterval != nil {
-		debitIvl = CloneDynamicDurationOpt(sesOpts.DebitInterval)
-	}
-	var lastUsg []*DynamicDurationPointerOpt
-	if sesOpts.TTLLastUsage != nil {
-		lastUsg = CloneDynamicDurationPointerOpt(sesOpts.TTLLastUsage)
-	}
-	var lastUsed []*DynamicDurationPointerOpt
-	if sesOpts.TTLLastUsed != nil {
-		lastUsed = CloneDynamicDurationPointerOpt(sesOpts.TTLLastUsed)
-	}
-	var maxDelay []*DynamicDurationOpt
-	if sesOpts.TTLMaxDelay != nil {
-		maxDelay = CloneDynamicDurationOpt(sesOpts.TTLMaxDelay)
-	}
-	var usg []*DynamicDurationPointerOpt
-	if sesOpts.TTLUsage != nil {
-		usg = CloneDynamicDurationPointerOpt(sesOpts.TTLUsage)
-	}
-	var sID []*DynamicStringOpt
-	if sesOpts.OriginID != nil {
-		sID = CloneDynamicStringOpt(sesOpts.OriginID)
-	}
-	var accForceUsage []*DynamicBoolOpt
-	if sesOpts.AccountsForceUsage != nil {
-		accForceUsage = CloneDynamicBoolOpt(sesOpts.AccountsForceUsage)
-	}
+func (o *SessionsOpts) Clone() *SessionsOpts {
 	return &SessionsOpts{
-		Accounts:               acntS,
-		Attributes:             attrS,
-		CDRs:                   cdrS,
-		Chargers:               chrgS,
-		Resources:              reS,
-		Routes:                 rouS,
-		Stats:                  stS,
-		Thresholds:             thdS,
-		Initiate:               initS,
-		Update:                 updS,
-		Terminate:              termS,
-		Message:                msg,
-		AttributesDerivedReply: attrDerivedReply,
-		BlockerError:           blockerErr,
-		CDRsDerivedReply:       cdrsDerivedReply,
-		ResourcesAuthorize:     resAuthorize,
-		ResourcesAllocate:      resAllocate,
-		ResourcesRelease:       resRelease,
-		ResourcesDerivedReply:  resDerivedReply,
-		RoutesDerivedReply:     rouDerivedReply,
-		StatsDerivedReply:      stsDerivedReply,
-		ThresholdsDerivedReply: thdsDerivedReply,
-		MaxUsage:               maxUsage,
-		ForceUsage:             forceUsage,
-		TTL:                    ttl,
-		Chargeable:             chargeable,
-		DebitInterval:          debitIvl,
-		TTLLastUsage:           lastUsg,
-		TTLLastUsed:            lastUsed,
-		TTLMaxDelay:            maxDelay,
-		TTLUsage:               usg,
-		OriginID:               sID,
-		AccountsForceUsage:     accForceUsage,
+		Accounts:               CloneDynamicBoolOpt(o.Accounts),
+		Attributes:             CloneDynamicBoolOpt(o.Attributes),
+		CDRs:                   CloneDynamicBoolOpt(o.CDRs),
+		Chargers:               CloneDynamicBoolOpt(o.Chargers),
+		Resources:              CloneDynamicBoolOpt(o.Resources),
+		IPs:                    CloneDynamicBoolOpt(o.IPs),
+		Routes:                 CloneDynamicBoolOpt(o.Routes),
+		Stats:                  CloneDynamicBoolOpt(o.Stats),
+		Thresholds:             CloneDynamicBoolOpt(o.Thresholds),
+		Initiate:               CloneDynamicBoolOpt(o.Initiate),
+		Update:                 CloneDynamicBoolOpt(o.Update),
+		Terminate:              CloneDynamicBoolOpt(o.Terminate),
+		Message:                CloneDynamicBoolOpt(o.Message),
+		AttributesDerivedReply: CloneDynamicBoolOpt(o.AttributesDerivedReply),
+		BlockerError:           CloneDynamicBoolOpt(o.BlockerError),
+		CDRsDerivedReply:       CloneDynamicBoolOpt(o.CDRsDerivedReply),
+		ResourcesAuthorize:     CloneDynamicBoolOpt(o.ResourcesAuthorize),
+		ResourcesAllocate:      CloneDynamicBoolOpt(o.ResourcesAllocate),
+		ResourcesRelease:       CloneDynamicBoolOpt(o.ResourcesRelease),
+		ResourcesDerivedReply:  CloneDynamicBoolOpt(o.ResourcesDerivedReply),
+		IPsAuthorize:           CloneDynamicBoolOpt(o.IPsAuthorize),
+		IPsAllocate:            CloneDynamicBoolOpt(o.IPsAllocate),
+		IPsRelease:             CloneDynamicBoolOpt(o.IPsRelease),
+		RoutesDerivedReply:     CloneDynamicBoolOpt(o.RoutesDerivedReply),
+		StatsDerivedReply:      CloneDynamicBoolOpt(o.StatsDerivedReply),
+		ThresholdsDerivedReply: CloneDynamicBoolOpt(o.ThresholdsDerivedReply),
+		MaxUsage:               CloneDynamicBoolOpt(o.MaxUsage),
+		ForceUsage:             CloneDynamicBoolOpt(o.ForceUsage),
+		TTL:                    CloneDynamicDurationOpt(o.TTL),
+		Chargeable:             CloneDynamicBoolOpt(o.Chargeable),
+		DebitInterval:          CloneDynamicDurationOpt(o.DebitInterval),
+		TTLLastUsage:           CloneDynamicDurationPointerOpt(o.TTLLastUsage),
+		TTLLastUsed:            CloneDynamicDurationPointerOpt(o.TTLLastUsed),
+		TTLMaxDelay:            CloneDynamicDurationOpt(o.TTLMaxDelay),
+		TTLUsage:               CloneDynamicDurationPointerOpt(o.TTLUsage),
+		OriginID:               CloneDynamicStringOpt(o.OriginID),
+		AccountsForceUsage:     CloneDynamicBoolOpt(o.AccountsForceUsage),
 	}
 }
 
@@ -700,7 +669,7 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
 		Enabled:             scfg.Enabled,
-		ListenBijson:        scfg.ListenBijson,
+		ListenBiJSON:        scfg.ListenBiJSON,
 		StoreSCosts:         scfg.StoreSCosts,
 		ClientProtocol:      scfg.ClientProtocol,
 		ChannelSyncInterval: scfg.ChannelSyncInterval,
@@ -721,6 +690,9 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	}
 	if scfg.ResourceSConns != nil {
 		cln.ResourceSConns = slices.Clone(scfg.ResourceSConns)
+	}
+	if scfg.IPsConns != nil {
+		cln.IPsConns = slices.Clone(scfg.IPsConns)
 	}
 	if scfg.ThresholdSConns != nil {
 		cln.ThresholdSConns = slices.Clone(scfg.ThresholdSConns)
@@ -853,6 +825,7 @@ type SessionsOptsJson struct {
 	CDRs                   []*DynamicInterfaceOpt `json:"*cdrs"`
 	Chargers               []*DynamicInterfaceOpt `json:"*chargers"`
 	Resources              []*DynamicInterfaceOpt `json:"*resources"`
+	IPs                    []*DynamicInterfaceOpt `json:"*ips"`
 	Routes                 []*DynamicInterfaceOpt `json:"*routes"`
 	Stats                  []*DynamicInterfaceOpt `json:"*stats"`
 	Thresholds             []*DynamicInterfaceOpt `json:"*thresholds"`
@@ -867,6 +840,9 @@ type SessionsOptsJson struct {
 	ResourcesAllocate      []*DynamicInterfaceOpt `json:"*resourcesAllocate"`
 	ResourcesRelease       []*DynamicInterfaceOpt `json:"*resourcesRelease"`
 	ResourcesDerivedReply  []*DynamicInterfaceOpt `json:"*resourcesDerivedReply"`
+	IPsAuthorize           []*DynamicInterfaceOpt `json:"*ipsAuthorize"`
+	IPsAllocate            []*DynamicInterfaceOpt `json:"*ipsAllocate"`
+	IPsRelease             []*DynamicInterfaceOpt `json:"*ipsRelease"`
 	RoutesDerivedReply     []*DynamicInterfaceOpt `json:"*routesDerivedReply"`
 	StatsDerivedReply      []*DynamicInterfaceOpt `json:"*statsDerivedReply"`
 	ThresholdsDerivedReply []*DynamicInterfaceOpt `json:"*thresholdsDerivedReply"`
@@ -885,30 +861,31 @@ type SessionsOptsJson struct {
 
 // SessionSJsonCfg config section
 type SessionSJsonCfg struct {
-	Enabled               *bool
-	Listen_bijson         *string
-	Listen_bigob          *string
-	Chargers_conns        *[]string
-	Resources_conns       *[]string
-	Thresholds_conns      *[]string
-	Stats_conns           *[]string
-	Routes_conns          *[]string
-	Cdrs_conns            *[]string
-	Replication_conns     *[]string
-	Attributes_conns      *[]string
-	Actions_conns         *[]string
-	Rates_conns           *[]string
-	Accounts_conns        *[]string
-	Store_session_costs   *bool
-	Session_indexes       *[]string
-	Client_protocol       *float64
-	Channel_sync_interval *string
-	Terminate_attempts    *int
-	Alterable_fields      *[]string
-	Min_dur_low_balance   *string
-	Stir                  *STIRJsonCfg
-	Default_usage         map[string]string
-	Opts                  *SessionsOptsJson
+	Enabled             *bool             `json:"enabled"`
+	ListenBiJSON        *string           `json:"listen_bijson"`
+	ListenBiGob         *string           `json:"listen_bigob"`
+	ChargerSConns       *[]string         `json:"chargers_conns"`
+	ResourceSConns      *[]string         `json:"resources_conns"`
+	IPsConns            *[]string         `json:"ips_conns"`
+	ThresholdSConns     *[]string         `json:"thresholds_conns"`
+	StatSConns          *[]string         `json:"stats_conns"`
+	RouteSConns         *[]string         `json:"routes_conns"`
+	CDRsConns           *[]string         `json:"cdrs_conns"`
+	ReplicationConns    *[]string         `json:"replication_conns"`
+	AttributeSConns     *[]string         `json:"attributes_conns"`
+	ActionSConns        *[]string         `json:"actions_conns"`
+	RateSConns          *[]string         `json:"rates_conns"`
+	AccountSConns       *[]string         `json:"accounts_conns"`
+	StoreSCosts         *bool             `json:"store_session_costs"`
+	SessionIndexes      *[]string         `json:"session_indexes"`
+	ClientProtocol      *float64          `json:"client_protocol"`
+	ChannelSyncInterval *string           `json:"channel_sync_interval"`
+	TerminateAttempts   *int              `json:"terminate_attempts"`
+	AlterableFields     *[]string         `json:"alterable_fields"`
+	MinDurLowBalance    *string           `json:"min_dur_low_balance"`
+	Stir                *STIRJsonCfg      `json:"stir"`
+	DefaultUsage        map[string]string `json:"default_usage"`
+	Opts                *SessionsOptsJson `json:"opts"`
 }
 
 func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *SessionsOptsJson {
@@ -929,6 +906,9 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.Resources, v2.Resources) {
 		d.Resources = BoolToIfaceDynamicOpts(v2.Resources)
+	}
+	if !DynamicBoolOptEqual(v1.IPs, v2.IPs) {
+		d.IPs = BoolToIfaceDynamicOpts(v2.IPs)
 	}
 	if !DynamicBoolOptEqual(v1.Routes, v2.Routes) {
 		d.Routes = BoolToIfaceDynamicOpts(v2.Routes)
@@ -971,6 +951,15 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.ResourcesDerivedReply, v2.ResourcesDerivedReply) {
 		d.ResourcesDerivedReply = BoolToIfaceDynamicOpts(v2.ResourcesDerivedReply)
+	}
+	if !DynamicBoolOptEqual(v1.IPsAuthorize, v2.IPsAuthorize) {
+		d.IPsAuthorize = BoolToIfaceDynamicOpts(v2.IPsAuthorize)
+	}
+	if !DynamicBoolOptEqual(v1.IPsAllocate, v2.IPsAllocate) {
+		d.IPsAllocate = BoolToIfaceDynamicOpts(v2.IPsAllocate)
+	}
+	if !DynamicBoolOptEqual(v1.IPsRelease, v2.IPsRelease) {
+		d.IPsRelease = BoolToIfaceDynamicOpts(v2.IPsRelease)
 	}
 	if !DynamicBoolOptEqual(v1.RoutesDerivedReply, v2.RoutesDerivedReply) {
 		d.RoutesDerivedReply = BoolToIfaceDynamicOpts(v2.RoutesDerivedReply)
@@ -1024,73 +1013,76 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	if v1.Enabled != v2.Enabled {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
-	if v1.ListenBijson != v2.ListenBijson {
-		d.Listen_bijson = utils.StringPointer(v2.ListenBijson)
+	if v1.ListenBiJSON != v2.ListenBiJSON {
+		d.ListenBiJSON = utils.StringPointer(v2.ListenBiJSON)
 	}
-	if v1.ListenBigob != v2.ListenBigob {
-		d.Listen_bigob = utils.StringPointer(v2.ListenBigob)
+	if v1.ListenBiGob != v2.ListenBiGob {
+		d.ListenBiGob = utils.StringPointer(v2.ListenBiGob)
 	}
 	if !slices.Equal(v1.ChargerSConns, v2.ChargerSConns) {
-		d.Chargers_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ChargerSConns))
+		d.ChargerSConns = utils.SliceStringPointer(getInternalJSONConns(v2.ChargerSConns))
 	}
 	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
-		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
+		d.ResourceSConns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
+	}
+	if !slices.Equal(v1.IPsConns, v2.IPsConns) {
+		d.IPsConns = utils.SliceStringPointer(getInternalJSONConns(v2.IPsConns))
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+		d.ThresholdSConns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+		d.StatSConns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.RouteSConns, v2.RouteSConns) {
-		d.Routes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RouteSConns))
+		d.RouteSConns = utils.SliceStringPointer(getInternalJSONConns(v2.RouteSConns))
 	}
 	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Cdrs_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+		d.CDRsConns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
 	}
 	if !slices.Equal(v1.CDRsConns, v2.CDRsConns) {
-		d.Replication_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CDRsConns))
+		d.ReplicationConns = utils.SliceStringPointer(getInternalJSONConns(v2.CDRsConns))
 	}
 	if !slices.Equal(v1.ReplicationConns, v2.ReplicationConns) {
-		d.Attributes_conns = utils.SliceStringPointer(v2.ReplicationConns)
+		d.AttributeSConns = utils.SliceStringPointer(v2.ReplicationConns)
 	}
 	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
-		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
+		d.RateSConns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+		d.AccountSConns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
 	}
 	if v1.StoreSCosts != v2.StoreSCosts {
-		d.Store_session_costs = utils.BoolPointer(v2.StoreSCosts)
+		d.StoreSCosts = utils.BoolPointer(v2.StoreSCosts)
 	}
 	if !v1.SessionIndexes.Equals(v2.SessionIndexes) {
-		d.Session_indexes = utils.SliceStringPointer(v2.SessionIndexes.AsSlice())
+		d.SessionIndexes = utils.SliceStringPointer(v2.SessionIndexes.AsSlice())
 	}
 	if v1.ClientProtocol != v2.ClientProtocol {
-		d.Client_protocol = utils.Float64Pointer(v2.ClientProtocol)
+		d.ClientProtocol = utils.Float64Pointer(v2.ClientProtocol)
 	}
 	if v1.ChannelSyncInterval != v2.ChannelSyncInterval {
-		d.Channel_sync_interval = utils.StringPointer(v2.ChannelSyncInterval.String())
+		d.ChannelSyncInterval = utils.StringPointer(v2.ChannelSyncInterval.String())
 	}
 	if v1.TerminateAttempts != v2.TerminateAttempts {
-		d.Terminate_attempts = utils.IntPointer(v2.TerminateAttempts)
+		d.TerminateAttempts = utils.IntPointer(v2.TerminateAttempts)
 	}
 	if !v1.AlterableFields.Equals(v2.AlterableFields) {
-		d.Alterable_fields = utils.SliceStringPointer(v2.AlterableFields.AsSlice())
+		d.AlterableFields = utils.SliceStringPointer(v2.AlterableFields.AsSlice())
 	}
 	if v1.MinDurLowBalance != v2.MinDurLowBalance {
-		d.Min_dur_low_balance = utils.StringPointer(v2.MinDurLowBalance.String())
+		d.MinDurLowBalance = utils.StringPointer(v2.MinDurLowBalance.String())
 	}
 	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
-		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
+		d.ActionSConns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
 	}
 	d.Stir = diffSTIRJsonCfg(d.Stir, v1.STIRCfg, v2.STIRCfg)
-	if d.Default_usage == nil {
-		d.Default_usage = make(map[string]string)
+	if d.DefaultUsage == nil {
+		d.DefaultUsage = make(map[string]string)
 	}
 	for tor, usage2 := range v2.DefaultUsage {
 		if usage1, has := v1.DefaultUsage[tor]; !has || usage1 != usage2 {
-			d.Default_usage[tor] = usage2.String()
+			d.DefaultUsage[tor] = usage2.String()
 		}
 	}
 	d.Opts = diffSessionsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)

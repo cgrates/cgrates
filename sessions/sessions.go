@@ -368,6 +368,21 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 					utils.SessionS, err.Error(), s.ID))
 		}
 	}
+	// release the ips for the session
+	if len(sS.cfg.SessionSCfg().IPsConns) != 0 {
+		var reply string
+		args := s.OriginCGREvent.Clone()
+		args.ID = utils.UUIDSha1Prefix()
+		args.APIOpts[utils.OptsIPsUsageID] = s.ID
+		args.APIOpts[utils.OptsIPsUnits] = 1
+		if err := sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
+			utils.IPsV1ReleaseIPs,
+			args, &reply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s could not release IP %q",
+					utils.SessionS, err.Error(), s.ID))
+		}
+	}
 	sS.replicateSessions(ctx, s.ID, false, sS.cfg.SessionSCfg().ReplicationConns)
 	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
 		go func() {
