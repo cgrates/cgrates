@@ -83,7 +83,7 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 		cl.RpcRegister(s)
 	}
 	// Register BiRpc handlers
-	if smg.cfg.SessionSCfg().ListenBijson != utils.EmptyString {
+	if smg.cfg.SessionSCfg().ListenBiJSON != utils.EmptyString {
 		smg.bircpEnabled = true
 		for n, s := range srv {
 			cl.BiRPCRegisterName(n, s)
@@ -96,8 +96,8 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 }
 
 func (smg *SessionService) start(shutdown *utils.SyncedChan, cl *commonlisteners.CommonListenerS) (err error) {
-	if err := cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBijson,
-		smg.cfg.SessionSCfg().ListenBigob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
+	if err := cl.ServeBiRPC(smg.cfg.SessionSCfg().ListenBiJSON,
+		smg.cfg.SessionSCfg().ListenBiGob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
 		smg.mu.Lock()
 		smg.bircpEnabled = false

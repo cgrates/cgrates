@@ -361,7 +361,7 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
 		Enabled:             false,
-		ListenBijson:        "127.0.0.1:2014",
+		ListenBiJSON:        "127.0.0.1:2014",
 		ChargerSConns:       []string{},
 		CDRsConns:           []string{},
 		ResourceSConns:      []string{},
@@ -1698,7 +1698,7 @@ func TestRouteSConfig(t *testing.T) {
 func TestSessionSConfig(t *testing.T) {
 	expected := &SessionSCfg{
 		Enabled:             false,
-		ListenBijson:        "127.0.0.1:2014",
+		ListenBiJSON:        "127.0.0.1:2014",
 		ChargerSConns:       []string{},
 		ResourceSConns:      []string{},
 		IPsConns:            []string{},
