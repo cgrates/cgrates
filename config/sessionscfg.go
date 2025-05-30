@@ -34,6 +34,7 @@ const (
 	SessionsCDRsDftOpt                   = false
 	SessionsChargersDftOpt               = false
 	SessionsResourcesDftOpt              = false
+	SessionsIPsDftOpt                    = false
 	SessionsRoutesDftOpt                 = false
 	SessionsStatsDftOpt                  = false
 	SessionsThresholdsDftOpt             = false
@@ -48,6 +49,9 @@ const (
 	SessionsResourcesAllocateDftOpt      = false
 	SessionsResourcesReleaseDftOpt       = false
 	SessionsResourcesDerivedReplyDftOpt  = false
+	SessionsIPsAuthorizeDftOpt           = false
+	SessionsIPsAllocateDftOpt            = false
+	SessionsIPsReleaseDftOpt             = false
 	SessionsRoutesDerivedReplyDftOpt     = false
 	SessionsStatsDerivedReplyDftOpt      = false
 	SessionsThresholdsDerivedReplyDftOpt = false
@@ -64,6 +68,7 @@ type SessionsOpts struct {
 	CDRs                   []*DynamicBoolOpt
 	Chargers               []*DynamicBoolOpt
 	Resources              []*DynamicBoolOpt
+	IPs                    []*DynamicBoolOpt
 	Routes                 []*DynamicBoolOpt
 	Stats                  []*DynamicBoolOpt
 	Thresholds             []*DynamicBoolOpt
@@ -78,6 +83,9 @@ type SessionsOpts struct {
 	ResourcesAllocate      []*DynamicBoolOpt
 	ResourcesRelease       []*DynamicBoolOpt
 	ResourcesDerivedReply  []*DynamicBoolOpt
+	IPsAuthorize           []*DynamicBoolOpt
+	IPsAllocate            []*DynamicBoolOpt
+	IPsRelease             []*DynamicBoolOpt
 	RoutesDerivedReply     []*DynamicBoolOpt
 	StatsDerivedReply      []*DynamicBoolOpt
 	ThresholdsDerivedReply []*DynamicBoolOpt
@@ -101,6 +109,7 @@ type SessionSCfg struct {
 	ListenBigob         string
 	ChargerSConns       []string
 	ResourceSConns      []string
+	IPsConns            []string
 	ThresholdSConns     []string
 	StatSConns          []string
 	RouteSConns         []string
@@ -159,6 +168,11 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err erro
 		var resources []*DynamicBoolOpt
 		resources, err = IfaceToBoolDynamicOpts(jsnCfg.Resources)
 		sesOpts.Resources = append(resources, sesOpts.Resources...)
+	}
+	if jsnCfg.IPs != nil {
+		var opt []*DynamicBoolOpt
+		opt, err = IfaceToBoolDynamicOpts(jsnCfg.IPs)
+		sesOpts.IPs = append(opt, sesOpts.IPs...)
 	}
 	if jsnCfg.Routes != nil {
 		var routes []*DynamicBoolOpt
@@ -229,6 +243,21 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err erro
 		var resDerivedRpl []*DynamicBoolOpt
 		resDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesDerivedReply)
 		sesOpts.ResourcesDerivedReply = append(resDerivedRpl, sesOpts.ResourcesDerivedReply...)
+	}
+	if jsnCfg.IPsAuthorize != nil {
+		var opt []*DynamicBoolOpt
+		opt, err = IfaceToBoolDynamicOpts(jsnCfg.IPsAuthorize)
+		sesOpts.IPsAuthorize = append(opt, sesOpts.IPsAuthorize...)
+	}
+	if jsnCfg.IPsAllocate != nil {
+		var opt []*DynamicBoolOpt
+		opt, err = IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
+		sesOpts.IPsAllocate = append(opt, sesOpts.IPsAllocate...)
+	}
+	if jsnCfg.IPsRelease != nil {
+		var opt []*DynamicBoolOpt
+		opt, err = IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
+		sesOpts.IPsRelease = append(opt, sesOpts.IPsRelease...)
 	}
 	if jsnCfg.RoutesDerivedReply != nil {
 		var routesDerivedRpl []*DynamicBoolOpt
@@ -338,6 +367,9 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.Resources_conns != nil {
 		scfg.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
+	if jsnCfg.IPsConns != nil {
+		scfg.IPsConns = updateInternalConns(*jsnCfg.IPsConns, utils.MetaIPs)
+	}
 	if jsnCfg.Thresholds_conns != nil {
 		scfg.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
@@ -439,6 +471,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaCDRs:                      scfg.Opts.CDRs,
 		utils.MetaChargers:                  scfg.Opts.Chargers,
 		utils.MetaResources:                 scfg.Opts.Resources,
+		utils.MetaIPs:                       scfg.Opts.IPs,
 		utils.MetaRoutes:                    scfg.Opts.Routes,
 		utils.MetaStats:                     scfg.Opts.Stats,
 		utils.MetaThresholds:                scfg.Opts.Thresholds,
@@ -453,6 +486,9 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaResourcesAllocateCfg:      scfg.Opts.ResourcesAllocate,
 		utils.MetaResourcesReleaseCfg:       scfg.Opts.ResourcesRelease,
 		utils.MetaResourcesDerivedReplyCfg:  scfg.Opts.ResourcesDerivedReply,
+		utils.MetaIPsAuthorizeCfg:           scfg.Opts.IPsAuthorize,
+		utils.MetaIPsAllocateCfg:            scfg.Opts.IPsAllocate,
+		utils.MetaIPsReleaseCfg:             scfg.Opts.IPsRelease,
 		utils.MetaRoutesDerivedReplyCfg:     scfg.Opts.RoutesDerivedReply,
 		utils.MetaStatsDerivedReplyCfg:      scfg.Opts.StatsDerivedReply,
 		utils.MetaThresholdsDerivedReplyCfg: scfg.Opts.ThresholdsDerivedReply,
@@ -495,6 +531,9 @@ func (scfg SessionSCfg) AsMapInterface() any {
 	}
 	if scfg.ResourceSConns != nil {
 		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(scfg.ResourceSConns)
+	}
+	if scfg.IPsConns != nil {
+		mp[utils.IPsConnsCfg] = getInternalJSONConns(scfg.IPsConns)
 	}
 	if scfg.ThresholdSConns != nil {
 		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(scfg.ThresholdSConns)
@@ -546,6 +585,10 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 	var reS []*DynamicBoolOpt
 	if sesOpts.Resources != nil {
 		reS = CloneDynamicBoolOpt(sesOpts.Resources)
+	}
+	var ipS []*DynamicBoolOpt
+	if sesOpts.IPs != nil {
+		ipS = CloneDynamicBoolOpt(sesOpts.IPs)
 	}
 	var rouS []*DynamicBoolOpt
 	if sesOpts.Routes != nil {
@@ -602,6 +645,18 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 	var resDerivedReply []*DynamicBoolOpt
 	if sesOpts.ResourcesDerivedReply != nil {
 		resDerivedReply = CloneDynamicBoolOpt(sesOpts.ResourcesDerivedReply)
+	}
+	var ipAuthorize []*DynamicBoolOpt
+	if sesOpts.IPsAuthorize != nil {
+		ipAuthorize = CloneDynamicBoolOpt(sesOpts.IPsAuthorize)
+	}
+	var ipAllocate []*DynamicBoolOpt
+	if sesOpts.IPsAllocate != nil {
+		ipAllocate = CloneDynamicBoolOpt(sesOpts.IPsAllocate)
+	}
+	var ipRelease []*DynamicBoolOpt
+	if sesOpts.IPsRelease != nil {
+		ipRelease = CloneDynamicBoolOpt(sesOpts.IPsRelease)
 	}
 	var rouDerivedReply []*DynamicBoolOpt
 	if sesOpts.RoutesDerivedReply != nil {
@@ -665,6 +720,7 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 		CDRs:                   cdrS,
 		Chargers:               chrgS,
 		Resources:              reS,
+		IPs:                    ipS,
 		Routes:                 rouS,
 		Stats:                  stS,
 		Thresholds:             thdS,
@@ -679,6 +735,9 @@ func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
 		ResourcesAllocate:      resAllocate,
 		ResourcesRelease:       resRelease,
 		ResourcesDerivedReply:  resDerivedReply,
+		IPsAuthorize:           ipAuthorize,
+		IPsAllocate:            ipAllocate,
+		IPsRelease:             ipRelease,
 		RoutesDerivedReply:     rouDerivedReply,
 		StatsDerivedReply:      stsDerivedReply,
 		ThresholdsDerivedReply: thdsDerivedReply,
@@ -721,6 +780,9 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	}
 	if scfg.ResourceSConns != nil {
 		cln.ResourceSConns = slices.Clone(scfg.ResourceSConns)
+	}
+	if scfg.IPsConns != nil {
+		cln.IPsConns = slices.Clone(scfg.IPsConns)
 	}
 	if scfg.ThresholdSConns != nil {
 		cln.ThresholdSConns = slices.Clone(scfg.ThresholdSConns)
@@ -853,6 +915,7 @@ type SessionsOptsJson struct {
 	CDRs                   []*DynamicInterfaceOpt `json:"*cdrs"`
 	Chargers               []*DynamicInterfaceOpt `json:"*chargers"`
 	Resources              []*DynamicInterfaceOpt `json:"*resources"`
+	IPs                    []*DynamicInterfaceOpt `json:"*ips"`
 	Routes                 []*DynamicInterfaceOpt `json:"*routes"`
 	Stats                  []*DynamicInterfaceOpt `json:"*stats"`
 	Thresholds             []*DynamicInterfaceOpt `json:"*thresholds"`
@@ -867,6 +930,9 @@ type SessionsOptsJson struct {
 	ResourcesAllocate      []*DynamicInterfaceOpt `json:"*resourcesAllocate"`
 	ResourcesRelease       []*DynamicInterfaceOpt `json:"*resourcesRelease"`
 	ResourcesDerivedReply  []*DynamicInterfaceOpt `json:"*resourcesDerivedReply"`
+	IPsAuthorize           []*DynamicInterfaceOpt `json:"*ipsAuthorize"`
+	IPsAllocate            []*DynamicInterfaceOpt `json:"*ipsAllocate"`
+	IPsRelease             []*DynamicInterfaceOpt `json:"*ipsRelease"`
 	RoutesDerivedReply     []*DynamicInterfaceOpt `json:"*routesDerivedReply"`
 	StatsDerivedReply      []*DynamicInterfaceOpt `json:"*statsDerivedReply"`
 	ThresholdsDerivedReply []*DynamicInterfaceOpt `json:"*thresholdsDerivedReply"`
@@ -890,6 +956,7 @@ type SessionSJsonCfg struct {
 	Listen_bigob          *string
 	Chargers_conns        *[]string
 	Resources_conns       *[]string
+	IPsConns              *[]string `json:"ips_conns"`
 	Thresholds_conns      *[]string
 	Stats_conns           *[]string
 	Routes_conns          *[]string
@@ -929,6 +996,9 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.Resources, v2.Resources) {
 		d.Resources = BoolToIfaceDynamicOpts(v2.Resources)
+	}
+	if !DynamicBoolOptEqual(v1.IPs, v2.IPs) {
+		d.IPs = BoolToIfaceDynamicOpts(v2.IPs)
 	}
 	if !DynamicBoolOptEqual(v1.Routes, v2.Routes) {
 		d.Routes = BoolToIfaceDynamicOpts(v2.Routes)
@@ -971,6 +1041,15 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.ResourcesDerivedReply, v2.ResourcesDerivedReply) {
 		d.ResourcesDerivedReply = BoolToIfaceDynamicOpts(v2.ResourcesDerivedReply)
+	}
+	if !DynamicBoolOptEqual(v1.IPsAuthorize, v2.IPsAuthorize) {
+		d.IPsAuthorize = BoolToIfaceDynamicOpts(v2.IPsAuthorize)
+	}
+	if !DynamicBoolOptEqual(v1.IPsAllocate, v2.IPsAllocate) {
+		d.IPsAllocate = BoolToIfaceDynamicOpts(v2.IPsAllocate)
+	}
+	if !DynamicBoolOptEqual(v1.IPsRelease, v2.IPsRelease) {
+		d.IPsRelease = BoolToIfaceDynamicOpts(v2.IPsRelease)
 	}
 	if !DynamicBoolOptEqual(v1.RoutesDerivedReply, v2.RoutesDerivedReply) {
 		d.RoutesDerivedReply = BoolToIfaceDynamicOpts(v2.RoutesDerivedReply)
@@ -1035,6 +1114,9 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	}
 	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
 		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
+	}
+	if !slices.Equal(v1.IPsConns, v2.IPsConns) {
+		d.IPsConns = utils.SliceStringPointer(getInternalJSONConns(v2.IPsConns))
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
