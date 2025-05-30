@@ -797,7 +797,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	}
 	expAttr := &SessionSCfg{
 		Enabled:         true,
-		ListenBijson:    "127.0.0.1:2014",
+		ListenBiJSON:    "127.0.0.1:2014",
 		ChargerSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
 		ResourceSConns:  []string{utils.MetaLocalHost},
 		IPsConns:        []string{utils.MetaLocalHost},
@@ -895,7 +895,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	}
 	expAttr := &SessionSCfg{
 		Enabled:         true,
-		ListenBijson:    "127.0.0.1:2014",
+		ListenBiJSON:    "127.0.0.1:2014",
 		ChargerSConns:   []string{utils.MetaLocalHost},
 		ResourceSConns:  []string{utils.MetaLocalHost},
 		IPsConns:        []string{utils.MetaLocalHost},
@@ -993,7 +993,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 	}
 	expAttr := &SessionSCfg{
 		Enabled:         true,
-		ListenBijson:    "127.0.0.1:2014",
+		ListenBiJSON:    "127.0.0.1:2014",
 		ChargerSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
 		ResourceSConns:  []string{utils.MetaLocalHost},
 		IPsConns:        []string{},
