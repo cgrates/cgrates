@@ -140,212 +140,270 @@ func (scfg *SessionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfi
 	return scfg.loadFromJSONCfg(jsnSessionSCfg)
 }
 
-func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) (err error) {
+func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 	if jsnCfg == nil {
-		return
+		return nil
 	}
 	if jsnCfg.Accounts != nil {
-		var accounts []*DynamicBoolOpt
-		accounts, err = IfaceToBoolDynamicOpts(jsnCfg.Accounts)
-		sesOpts.Accounts = append(accounts, sesOpts.Accounts...)
+		opt, err := IfaceToBoolDynamicOpts(jsnCfg.Accounts)
+		if err != nil {
+			return err
+		}
+		sesOpts.Accounts = append(opt, sesOpts.Accounts...)
 	}
 	if jsnCfg.Attributes != nil {
-		var attributes []*DynamicBoolOpt
-		attributes, err = IfaceToBoolDynamicOpts(jsnCfg.Attributes)
-		sesOpts.Attributes = append(attributes, sesOpts.Attributes...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Attributes)
+		if err != nil {
+			return err
+		}
+		sesOpts.Attributes = append(opts, sesOpts.Attributes...)
 	}
 	if jsnCfg.CDRs != nil {
-		var cdrs []*DynamicBoolOpt
-		cdrs, err = IfaceToBoolDynamicOpts(jsnCfg.CDRs)
-		sesOpts.CDRs = append(cdrs, sesOpts.CDRs...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.CDRs)
+		if err != nil {
+			return err
+		}
+		sesOpts.CDRs = append(opts, sesOpts.CDRs...)
 	}
 	if jsnCfg.Chargers != nil {
-		var chargers []*DynamicBoolOpt
-		chargers, err = IfaceToBoolDynamicOpts(jsnCfg.Chargers)
-		sesOpts.Chargers = append(chargers, sesOpts.Chargers...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Chargers)
+		if err != nil {
+			return err
+		}
+		sesOpts.Chargers = append(opts, sesOpts.Chargers...)
 	}
 	if jsnCfg.Resources != nil {
-		var resources []*DynamicBoolOpt
-		resources, err = IfaceToBoolDynamicOpts(jsnCfg.Resources)
-		sesOpts.Resources = append(resources, sesOpts.Resources...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Resources)
+		if err != nil {
+			return err
+		}
+		sesOpts.Resources = append(opts, sesOpts.Resources...)
 	}
 	if jsnCfg.IPs != nil {
-		var opt []*DynamicBoolOpt
-		opt, err = IfaceToBoolDynamicOpts(jsnCfg.IPs)
-		sesOpts.IPs = append(opt, sesOpts.IPs...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPs)
+		if err != nil {
+			return err
+		}
+		sesOpts.IPs = append(opts, sesOpts.IPs...)
 	}
 	if jsnCfg.Routes != nil {
-		var routes []*DynamicBoolOpt
-		routes, err = IfaceToBoolDynamicOpts(jsnCfg.Chargers)
-		sesOpts.Routes = append(routes, sesOpts.Routes...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Chargers)
+		if err != nil {
+			return err
+		}
+		sesOpts.Routes = append(opts, sesOpts.Routes...)
 	}
 	if jsnCfg.Stats != nil {
-		var stats []*DynamicBoolOpt
-		stats, err = IfaceToBoolDynamicOpts(jsnCfg.Stats)
-		sesOpts.Stats = append(stats, sesOpts.Stats...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Stats)
+		if err != nil {
+			return err
+		}
+		sesOpts.Stats = append(opts, sesOpts.Stats...)
 	}
 	if jsnCfg.Thresholds != nil {
-		var thresholds []*DynamicBoolOpt
-		thresholds, err = IfaceToBoolDynamicOpts(jsnCfg.Thresholds)
-		sesOpts.Thresholds = append(thresholds, sesOpts.Thresholds...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Thresholds)
+		if err != nil {
+			return err
+		}
+		sesOpts.Thresholds = append(opts, sesOpts.Thresholds...)
 	}
 	if jsnCfg.Initiate != nil {
-		var initiate []*DynamicBoolOpt
-		initiate, err = IfaceToBoolDynamicOpts(jsnCfg.Initiate)
-		sesOpts.Initiate = append(initiate, sesOpts.Initiate...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Initiate)
+		if err != nil {
+			return err
+		}
+		sesOpts.Initiate = append(opts, sesOpts.Initiate...)
 	}
 	if jsnCfg.Update != nil {
-		var update []*DynamicBoolOpt
-		update, err = IfaceToBoolDynamicOpts(jsnCfg.Update)
-		sesOpts.Update = append(update, sesOpts.Update...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Update)
+		if err != nil {
+			return err
+		}
+		sesOpts.Update = append(opts, sesOpts.Update...)
 	}
 	if jsnCfg.Terminate != nil {
-		var terminate []*DynamicBoolOpt
-		terminate, err = IfaceToBoolDynamicOpts(jsnCfg.Terminate)
-		sesOpts.Terminate = append(terminate, sesOpts.Terminate...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Terminate)
+		if err != nil {
+			return err
+		}
+		sesOpts.Terminate = append(opts, sesOpts.Terminate...)
 	}
 	if jsnCfg.Message != nil {
-		var message []*DynamicBoolOpt
-		message, err = IfaceToBoolDynamicOpts(jsnCfg.Message)
-		sesOpts.Message = append(message, sesOpts.Message...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Message)
+		if err != nil {
+			return err
+		}
+		sesOpts.Message = append(opts, sesOpts.Message...)
 	}
 	if jsnCfg.AttributesDerivedReply != nil {
-		var attrDerivedRpl []*DynamicBoolOpt
-		attrDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.AttributesDerivedReply)
-		sesOpts.AttributesDerivedReply = append(attrDerivedRpl, sesOpts.AttributesDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AttributesDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.AttributesDerivedReply = append(opts, sesOpts.AttributesDerivedReply...)
 	}
 	if jsnCfg.BlockerError != nil {
-		var blockerErr []*DynamicBoolOpt
-		blockerErr, err = IfaceToBoolDynamicOpts(jsnCfg.BlockerError)
-		sesOpts.BlockerError = append(blockerErr, sesOpts.BlockerError...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.BlockerError)
+		if err != nil {
+			return err
+		}
+		sesOpts.BlockerError = append(opts, sesOpts.BlockerError...)
 	}
 	if jsnCfg.CDRsDerivedReply != nil {
-		var cdrsDerivedRpl []*DynamicBoolOpt
-		cdrsDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.CDRsDerivedReply)
-		sesOpts.CDRsDerivedReply = append(cdrsDerivedRpl, sesOpts.CDRsDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.CDRsDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.CDRsDerivedReply = append(opts, sesOpts.CDRsDerivedReply...)
 	}
 	if jsnCfg.ResourcesAuthorize != nil {
-		var resAuthorize []*DynamicBoolOpt
-		resAuthorize, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesAuthorize)
-		sesOpts.ResourcesAuthorize = append(resAuthorize, sesOpts.ResourcesAuthorize...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesAuthorize)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesAuthorize = append(opts, sesOpts.ResourcesAuthorize...)
 	}
 	if jsnCfg.ResourcesAllocate != nil {
-		var resAlloc []*DynamicBoolOpt
-		resAlloc, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
-		sesOpts.ResourcesAllocate = append(resAlloc, sesOpts.ResourcesAllocate...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesAllocate = append(opts, sesOpts.ResourcesAllocate...)
 	}
 	if jsnCfg.ResourcesRelease != nil {
-		var resRelease []*DynamicBoolOpt
-		resRelease, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
-		sesOpts.ResourcesRelease = append(resRelease, sesOpts.ResourcesRelease...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesAllocate)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesRelease = append(opts, sesOpts.ResourcesRelease...)
 	}
 	if jsnCfg.ResourcesDerivedReply != nil {
-		var resDerivedRpl []*DynamicBoolOpt
-		resDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.ResourcesDerivedReply)
-		sesOpts.ResourcesDerivedReply = append(resDerivedRpl, sesOpts.ResourcesDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesDerivedReply = append(opts, sesOpts.ResourcesDerivedReply...)
 	}
 	if jsnCfg.IPsAuthorize != nil {
-		var opt []*DynamicBoolOpt
-		opt, err = IfaceToBoolDynamicOpts(jsnCfg.IPsAuthorize)
-		sesOpts.IPsAuthorize = append(opt, sesOpts.IPsAuthorize...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsAuthorize)
+		if err != nil {
+			return err
+		}
+		sesOpts.IPsAuthorize = append(opts, sesOpts.IPsAuthorize...)
 	}
 	if jsnCfg.IPsAllocate != nil {
-		var opt []*DynamicBoolOpt
-		opt, err = IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
-		sesOpts.IPsAllocate = append(opt, sesOpts.IPsAllocate...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
+		if err != nil {
+			return err
+		}
+		sesOpts.IPsAllocate = append(opts, sesOpts.IPsAllocate...)
 	}
 	if jsnCfg.IPsRelease != nil {
-		var opt []*DynamicBoolOpt
-		opt, err = IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
-		sesOpts.IPsRelease = append(opt, sesOpts.IPsRelease...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsAllocate)
+		if err != nil {
+			return err
+		}
+		sesOpts.IPsRelease = append(opts, sesOpts.IPsRelease...)
 	}
 	if jsnCfg.RoutesDerivedReply != nil {
-		var routesDerivedRpl []*DynamicBoolOpt
-		routesDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.RoutesDerivedReply)
-		sesOpts.RoutesDerivedReply = append(routesDerivedRpl, sesOpts.RoutesDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.RoutesDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.RoutesDerivedReply = append(opts, sesOpts.RoutesDerivedReply...)
 	}
 	if jsnCfg.StatsDerivedReply != nil {
-		var statsDerivedRpl []*DynamicBoolOpt
-		statsDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.StatsDerivedReply)
-		sesOpts.StatsDerivedReply = append(statsDerivedRpl, sesOpts.StatsDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.StatsDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.StatsDerivedReply = append(opts, sesOpts.StatsDerivedReply...)
 	}
 	if jsnCfg.ThresholdsDerivedReply != nil {
-		var threshDerivedRpl []*DynamicBoolOpt
-		threshDerivedRpl, err = IfaceToBoolDynamicOpts(jsnCfg.ThresholdsDerivedReply)
-		sesOpts.ThresholdsDerivedReply = append(threshDerivedRpl, sesOpts.ThresholdsDerivedReply...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ThresholdsDerivedReply)
+		if err != nil {
+			return err
+		}
+		sesOpts.ThresholdsDerivedReply = append(opts, sesOpts.ThresholdsDerivedReply...)
 	}
 	if jsnCfg.MaxUsage != nil {
-		var maxUsage []*DynamicBoolOpt
-		maxUsage, err = IfaceToBoolDynamicOpts(jsnCfg.MaxUsage)
-		sesOpts.MaxUsage = append(maxUsage, sesOpts.MaxUsage...)
-
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.MaxUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.MaxUsage = append(opts, sesOpts.MaxUsage...)
 	}
 	if jsnCfg.ForceUsage != nil {
-		var forceUsage []*DynamicBoolOpt
-		forceUsage, err = IfaceToBoolDynamicOpts(jsnCfg.ForceUsage)
-		sesOpts.ForceUsage = append(forceUsage, sesOpts.ForceUsage...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ForceUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.ForceUsage = append(opts, sesOpts.ForceUsage...)
 	}
 	if jsnCfg.TTL != nil {
-		var ttl []*DynamicDurationOpt
-		if ttl, err = IfaceToDurationDynamicOpts(jsnCfg.TTL); err != nil {
-			return
+		ttl, err := IfaceToDurationDynamicOpts(jsnCfg.TTL)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTL = append(ttl, sesOpts.TTL...)
 	}
 	if jsnCfg.Chargeable != nil {
-		var chargeable []*DynamicBoolOpt
-		chargeable, err = IfaceToBoolDynamicOpts(jsnCfg.Chargeable)
-		sesOpts.Chargeable = append(chargeable, sesOpts.Chargeable...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Chargeable)
+		if err != nil {
+			return err
+		}
+		sesOpts.Chargeable = append(opts, sesOpts.Chargeable...)
 	}
 	if jsnCfg.TTLLastUsage != nil {
-		var lastUsage []*DynamicDurationPointerOpt
-		if lastUsage, err = IfaceToDurationPointerDynamicOpts(jsnCfg.TTLLastUsage); err != nil {
-			return
+		lastUsage, err := IfaceToDurationPointerDynamicOpts(jsnCfg.TTLLastUsage)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTLLastUsage = append(lastUsage, sesOpts.TTLLastUsage...)
 	}
 	if jsnCfg.TTLLastUsed != nil {
-		var lastUsed []*DynamicDurationPointerOpt
-		if lastUsed, err = IfaceToDurationPointerDynamicOpts(jsnCfg.TTLLastUsed); err != nil {
-			return
+		lastUsed, err := IfaceToDurationPointerDynamicOpts(jsnCfg.TTLLastUsed)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTLLastUsed = append(lastUsed, sesOpts.TTLLastUsed...)
 	}
 	if jsnCfg.DebitInterval != nil {
-		var debitInterval []*DynamicDurationOpt
-		if debitInterval, err = IfaceToDurationDynamicOpts(jsnCfg.DebitInterval); err != nil {
-			return
+		debitInterval, err := IfaceToDurationDynamicOpts(jsnCfg.DebitInterval)
+		if err != nil {
+			return err
 		}
 		sesOpts.DebitInterval = append(debitInterval, sesOpts.DebitInterval...)
 	}
 	if jsnCfg.TTLMaxDelay != nil {
-		var maxDelay []*DynamicDurationOpt
-		if maxDelay, err = IfaceToDurationDynamicOpts(jsnCfg.TTLMaxDelay); err != nil {
-			return
+		maxDelay, err := IfaceToDurationDynamicOpts(jsnCfg.TTLMaxDelay)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTLMaxDelay = append(maxDelay, sesOpts.TTLMaxDelay...)
 	}
 	if jsnCfg.TTLUsage != nil {
-		var usage []*DynamicDurationPointerOpt
-		if usage, err = IfaceToDurationPointerDynamicOpts(jsnCfg.TTLUsage); err != nil {
-			return
+		usage, err := IfaceToDurationPointerDynamicOpts(jsnCfg.TTLUsage)
+		if err != nil {
+			return err
 		}
 		sesOpts.TTLUsage = append(usage, sesOpts.TTLUsage...)
 	}
 	if jsnCfg.OriginID != nil {
-		var originID []*DynamicStringOpt
-		originID, err = InterfaceToDynamicStringOpts(jsnCfg.OriginID)
+		originID, err := InterfaceToDynamicStringOpts(jsnCfg.OriginID)
 		if err != nil {
-			return
+			return err
 		}
 		sesOpts.OriginID = append(originID, sesOpts.OriginID...)
 	}
 	if jsnCfg.AccountsForceUsage != nil {
-		var accountsForceUsage []*DynamicBoolOpt
-		accountsForceUsage, err = IfaceToBoolDynamicOpts(jsnCfg.AccountsForceUsage)
-		sesOpts.AccountsForceUsage = append(accountsForceUsage, sesOpts.AccountsForceUsage...)
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AccountsForceUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.AccountsForceUsage = append(opts, sesOpts.AccountsForceUsage...)
 	}
-	return
+	return nil
 }
 
 func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
