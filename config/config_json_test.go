@@ -597,6 +597,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Chargers_conns:        &[]string{},
 		Cdrs_conns:            &[]string{},
 		Resources_conns:       &[]string{},
+		IPsConns:              &[]string{},
 		Thresholds_conns:      &[]string{},
 		Stats_conns:           &[]string{},
 		Routes_conns:          &[]string{},
