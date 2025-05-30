@@ -127,7 +127,7 @@ func testDynThdSetAction(t *testing.T) {
 		ActionsId: "DYNAMIC_THRESHOLD_ACTION",
 		Actions: []*utils.TPAction{{
 			Identifier:      utils.MetaDynamicThreshold,
-			ExtraParameters: "cgrates.org;DYNAMICLY_THR_<~*req.ID>;*string:~*opts.*eventType:AccountUpdate;;1;;;true;10;;true;~*opts",
+			ExtraParameters: "cgrates.org;DYNAMICLY_THR_<~*req.ID>;*string:~*opts.*eventType:AccountUpdate;;1;;;true;10;;true;;~*opts",
 		}}}
 	if err := dynThdRpc.Call(context.Background(), utils.APIerSv2SetActions,
 		act, &reply); err != nil {

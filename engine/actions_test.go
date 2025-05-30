@@ -4982,12 +4982,13 @@ func TestDynamicThreshold(t *testing.T) {
 					Weight:    10,
 					ActionIDs: []string{"ACT_LOG_WARNING"},
 					Async:     true,
+					EeIDs:     []string{"eeID1", "eeID2"},
 				},
 				APIOpts: map[string]any{
 					"key": "value",
 				},
 			},
-			extraParams: "cgrates.org;THD_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1;1;1s;true;10;ACT_LOG_WARNING;true;key:value",
+			extraParams: "cgrates.org;THD_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1;1;1s;true;10;ACT_LOG_WARNING;true;eeID1&eeID2;key:value",
 		},
 		{
 			name:    "SuccessfulRequestWithDynamicPaths",
@@ -5008,12 +5009,13 @@ func TestDynamicThreshold(t *testing.T) {
 					Weight:    10,
 					ActionIDs: []string{"ACT_LOG_WARNING"},
 					Async:     true,
+					EeIDs:     []string{"eeID1", "eeID2"},
 				},
 				APIOpts: map[string]any{
 					"key": "value",
 				},
 			},
-			extraParams: "*tenant;THD_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;1;1;1s;true;10;ACT_LOG_WARNING;true;key:value",
+			extraParams: "*tenant;THD_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;1;1;1s;true;10;ACT_LOG_WARNING;true;eeID1&eeID2;key:value",
 		},
 		{
 			name:    "SuccessfulRequestEmptyFields",
@@ -5031,69 +5033,70 @@ func TestDynamicThreshold(t *testing.T) {
 					Weight:             0,
 					ActionIDs:          nil,
 					Async:              false,
+					EeIDs:              nil,
 				},
 				APIOpts: map[string]any{},
 			},
-			extraParams: "cgrates.org;THD_ACNT_1001;;;;;;;;;;",
+			extraParams: "cgrates.org;THD_ACNT_1001;;;;;;;;;;;",
 		},
 		{
 			name:        "MissingConns",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
 		},
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "tenant;;1;",
-			expectedErr: "invalid number of parameters <4> expected 12",
+			expectedErr: "invalid number of parameters <4> expected 13",
 		},
 		{
 			name:        "ActivationIntervalLengthFail",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z&&;1;1;1s;false;10;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z&&;1;1;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: utils.ErrUnsupportedFormat.Error(),
 		},
 		{
 			name:        "ActivationIntervalBadStringFail",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;bad String;1;1;1s;false;10;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;bad String;1;1;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
 		},
 		{
 			name:        "ActivationIntervalBadStringFail2",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z&bad String;1;1;1s;false;10;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z&bad String;1;1;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
 		},
 		{
 			name:        "MaxHitsFail",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;BadString;1;1s;false;10;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;BadString;1;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
 		},
 		{
 			name:        "MinHitsFail",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;BadString;1s;false;10;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;BadString;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
 		},
 		{
 			name:        "MinSleepFail",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;BadString;false;10;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;BadString;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: `time: invalid duration "BadString"`,
 		},
 		{
 			name:        "BlockerFail",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;BadString;10;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;BadString;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
 		},
 		{
 			name:        "WeightFail",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;BadString;ACT_LOG_WARNING;true;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;BadString;ACT_LOG_WARNING;true;eeID1&eeID2;",
 			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
 		},
 		{
 			name:        "AsyncFail",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;BadString;",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;BadString;eeID1&eeID2;",
 			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
 		},
 		{
 			name:        "InvalidOptsMap",
-			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;true;opt",
+			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z;1;1;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;opt",
 			expectedErr: "invalid key-value pair: opt",
 		},
 	}
@@ -6472,6 +6475,156 @@ func TestDynamicRoute(t *testing.T) {
 						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRwo), utils.ToJSON(rwo))
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestDynamicRanking(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var rpwo *RankingProfileWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetRankingProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rpwo, canCast = args.(*RankingProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expRpwo     *RankingProfileWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expRpwo: &RankingProfileWithAPIOpts{
+				RankingProfile: &RankingProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RKNG_ACNT_1001",
+					Schedule:          "@every 15m",
+					StatIDs:           []string{"Stats2", "Stats3", "Stats4"},
+					MetricIDs:         []string{"Metric1", "Metric3"},
+					Sorting:           "*asc",
+					SortingParameters: []string{"metricA:true", "metricB:false"},
+					Stored:            true,
+					ThresholdIDs:      []string{"THD1", "THD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;RKNG_ACNT_1001;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;true;THD1&THD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expRpwo: &RankingProfileWithAPIOpts{
+				RankingProfile: &RankingProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RKNG_ACNT_1001",
+					Schedule:          "@every 15m",
+					StatIDs:           []string{"Stats2", "Stats3", "Stats4"},
+					MetricIDs:         []string{"Metric1", "Metric3"},
+					Sorting:           "*asc",
+					SortingParameters: []string{"metricA:true", "metricB:false"},
+					Stored:            true,
+					ThresholdIDs:      []string{"THD1", "THD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;RKNG_ACNT_<~*req.Account>;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;true;THD1&THD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expRpwo: &RankingProfileWithAPIOpts{
+				RankingProfile: &RankingProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RKNG_ACNT_1001",
+					Schedule:          "@every 15m",
+					StatIDs:           nil,
+					MetricIDs:         nil,
+					Sorting:           "",
+					SortingParameters: nil,
+					Stored:            false,
+					ThresholdIDs:      nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;RKNG_ACNT_1001;@every 15m;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;RKNG_ACNT_1001;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;true;THD1&THD2;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;RKNG;;",
+			expectedErr: "invalid number of parameters <4> expected 10",
+		},
+		{
+			name:        "RankingStoredFail",
+			extraParams: "cgrates.org;RKNG_ACNT_1001;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;BadString;THD1&THD2;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;RKNG_ACNT_1001;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;true;THD1&THD2;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				rpwo = nil
+			})
+			err := dynamicRanking(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(rpwo, tc.expRpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
 			}
 		})
 	}
