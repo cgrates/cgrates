@@ -623,193 +623,45 @@ func (scfg SessionSCfg) AsMapInterface() any {
 func (SessionSCfg) SName() string              { return SessionSJSON }
 func (scfg SessionSCfg) CloneSection() Section { return scfg.Clone() }
 
-func (sesOpts *SessionsOpts) Clone() (cln *SessionsOpts) {
-	var acntS []*DynamicBoolOpt
-	if sesOpts.Accounts != nil {
-		acntS = CloneDynamicBoolOpt(sesOpts.Accounts)
-	}
-	var attrS []*DynamicBoolOpt
-	if sesOpts.Attributes != nil {
-		attrS = CloneDynamicBoolOpt(sesOpts.Attributes)
-	}
-	var cdrS []*DynamicBoolOpt
-	if sesOpts.CDRs != nil {
-		cdrS = CloneDynamicBoolOpt(sesOpts.CDRs)
-	}
-	var chrgS []*DynamicBoolOpt
-	if sesOpts.Chargers != nil {
-		chrgS = CloneDynamicBoolOpt(sesOpts.Chargers)
-	}
-	var reS []*DynamicBoolOpt
-	if sesOpts.Resources != nil {
-		reS = CloneDynamicBoolOpt(sesOpts.Resources)
-	}
-	var ipS []*DynamicBoolOpt
-	if sesOpts.IPs != nil {
-		ipS = CloneDynamicBoolOpt(sesOpts.IPs)
-	}
-	var rouS []*DynamicBoolOpt
-	if sesOpts.Routes != nil {
-		rouS = CloneDynamicBoolOpt(sesOpts.Routes)
-	}
-	var stS []*DynamicBoolOpt
-	if sesOpts.Stats != nil {
-		stS = CloneDynamicBoolOpt(sesOpts.Stats)
-	}
-	var thdS []*DynamicBoolOpt
-	if sesOpts.Thresholds != nil {
-		thdS = CloneDynamicBoolOpt(sesOpts.Thresholds)
-	}
-	var initS []*DynamicBoolOpt
-	if sesOpts.Initiate != nil {
-		initS = CloneDynamicBoolOpt(sesOpts.Initiate)
-	}
-	var updS []*DynamicBoolOpt
-	if sesOpts.Update != nil {
-		updS = CloneDynamicBoolOpt(sesOpts.Update)
-	}
-	var termS []*DynamicBoolOpt
-	if sesOpts.Terminate != nil {
-		termS = CloneDynamicBoolOpt(sesOpts.Terminate)
-	}
-	var msg []*DynamicBoolOpt
-	if sesOpts.Message != nil {
-		msg = CloneDynamicBoolOpt(sesOpts.Message)
-	}
-	var attrDerivedReply []*DynamicBoolOpt
-	if sesOpts.AttributesDerivedReply != nil {
-		attrDerivedReply = CloneDynamicBoolOpt(sesOpts.AttributesDerivedReply)
-	}
-	var blockerErr []*DynamicBoolOpt
-	if sesOpts.BlockerError != nil {
-		blockerErr = CloneDynamicBoolOpt(sesOpts.BlockerError)
-	}
-	var cdrsDerivedReply []*DynamicBoolOpt
-	if sesOpts.CDRsDerivedReply != nil {
-		cdrsDerivedReply = CloneDynamicBoolOpt(sesOpts.CDRsDerivedReply)
-	}
-	var resAuthorize []*DynamicBoolOpt
-	if sesOpts.ResourcesAuthorize != nil {
-		resAuthorize = CloneDynamicBoolOpt(sesOpts.ResourcesAuthorize)
-	}
-	var resAllocate []*DynamicBoolOpt
-	if sesOpts.ResourcesAllocate != nil {
-		resAllocate = CloneDynamicBoolOpt(sesOpts.ResourcesAllocate)
-	}
-	var resRelease []*DynamicBoolOpt
-	if sesOpts.ResourcesRelease != nil {
-		resRelease = CloneDynamicBoolOpt(sesOpts.ResourcesRelease)
-	}
-	var resDerivedReply []*DynamicBoolOpt
-	if sesOpts.ResourcesDerivedReply != nil {
-		resDerivedReply = CloneDynamicBoolOpt(sesOpts.ResourcesDerivedReply)
-	}
-	var ipAuthorize []*DynamicBoolOpt
-	if sesOpts.IPsAuthorize != nil {
-		ipAuthorize = CloneDynamicBoolOpt(sesOpts.IPsAuthorize)
-	}
-	var ipAllocate []*DynamicBoolOpt
-	if sesOpts.IPsAllocate != nil {
-		ipAllocate = CloneDynamicBoolOpt(sesOpts.IPsAllocate)
-	}
-	var ipRelease []*DynamicBoolOpt
-	if sesOpts.IPsRelease != nil {
-		ipRelease = CloneDynamicBoolOpt(sesOpts.IPsRelease)
-	}
-	var rouDerivedReply []*DynamicBoolOpt
-	if sesOpts.RoutesDerivedReply != nil {
-		rouDerivedReply = CloneDynamicBoolOpt(sesOpts.RoutesDerivedReply)
-	}
-	var stsDerivedReply []*DynamicBoolOpt
-	if sesOpts.StatsDerivedReply != nil {
-		stsDerivedReply = CloneDynamicBoolOpt(sesOpts.StatsDerivedReply)
-	}
-	var thdsDerivedReply []*DynamicBoolOpt
-	if sesOpts.ThresholdsDerivedReply != nil {
-		thdsDerivedReply = CloneDynamicBoolOpt(sesOpts.ThresholdsDerivedReply)
-	}
-	var maxUsage []*DynamicBoolOpt
-	if sesOpts.MaxUsage != nil {
-		maxUsage = CloneDynamicBoolOpt(sesOpts.MaxUsage)
-	}
-	var forceUsage []*DynamicBoolOpt
-	if sesOpts.ForceUsage != nil {
-		forceUsage = CloneDynamicBoolOpt(sesOpts.ForceUsage)
-	}
-	var ttl []*DynamicDurationOpt
-	if sesOpts.TTL != nil {
-		ttl = CloneDynamicDurationOpt(sesOpts.TTL)
-	}
-	var chargeable []*DynamicBoolOpt
-	if sesOpts.Chargeable != nil {
-		chargeable = CloneDynamicBoolOpt(sesOpts.Chargeable)
-	}
-	var debitIvl []*DynamicDurationOpt
-	if sesOpts.DebitInterval != nil {
-		debitIvl = CloneDynamicDurationOpt(sesOpts.DebitInterval)
-	}
-	var lastUsg []*DynamicDurationPointerOpt
-	if sesOpts.TTLLastUsage != nil {
-		lastUsg = CloneDynamicDurationPointerOpt(sesOpts.TTLLastUsage)
-	}
-	var lastUsed []*DynamicDurationPointerOpt
-	if sesOpts.TTLLastUsed != nil {
-		lastUsed = CloneDynamicDurationPointerOpt(sesOpts.TTLLastUsed)
-	}
-	var maxDelay []*DynamicDurationOpt
-	if sesOpts.TTLMaxDelay != nil {
-		maxDelay = CloneDynamicDurationOpt(sesOpts.TTLMaxDelay)
-	}
-	var usg []*DynamicDurationPointerOpt
-	if sesOpts.TTLUsage != nil {
-		usg = CloneDynamicDurationPointerOpt(sesOpts.TTLUsage)
-	}
-	var sID []*DynamicStringOpt
-	if sesOpts.OriginID != nil {
-		sID = CloneDynamicStringOpt(sesOpts.OriginID)
-	}
-	var accForceUsage []*DynamicBoolOpt
-	if sesOpts.AccountsForceUsage != nil {
-		accForceUsage = CloneDynamicBoolOpt(sesOpts.AccountsForceUsage)
-	}
+func (o *SessionsOpts) Clone() *SessionsOpts {
 	return &SessionsOpts{
-		Accounts:               acntS,
-		Attributes:             attrS,
-		CDRs:                   cdrS,
-		Chargers:               chrgS,
-		Resources:              reS,
-		IPs:                    ipS,
-		Routes:                 rouS,
-		Stats:                  stS,
-		Thresholds:             thdS,
-		Initiate:               initS,
-		Update:                 updS,
-		Terminate:              termS,
-		Message:                msg,
-		AttributesDerivedReply: attrDerivedReply,
-		BlockerError:           blockerErr,
-		CDRsDerivedReply:       cdrsDerivedReply,
-		ResourcesAuthorize:     resAuthorize,
-		ResourcesAllocate:      resAllocate,
-		ResourcesRelease:       resRelease,
-		ResourcesDerivedReply:  resDerivedReply,
-		IPsAuthorize:           ipAuthorize,
-		IPsAllocate:            ipAllocate,
-		IPsRelease:             ipRelease,
-		RoutesDerivedReply:     rouDerivedReply,
-		StatsDerivedReply:      stsDerivedReply,
-		ThresholdsDerivedReply: thdsDerivedReply,
-		MaxUsage:               maxUsage,
-		ForceUsage:             forceUsage,
-		TTL:                    ttl,
-		Chargeable:             chargeable,
-		DebitInterval:          debitIvl,
-		TTLLastUsage:           lastUsg,
-		TTLLastUsed:            lastUsed,
-		TTLMaxDelay:            maxDelay,
-		TTLUsage:               usg,
-		OriginID:               sID,
-		AccountsForceUsage:     accForceUsage,
+		Accounts:               CloneDynamicBoolOpt(o.Accounts),
+		Attributes:             CloneDynamicBoolOpt(o.Attributes),
+		CDRs:                   CloneDynamicBoolOpt(o.CDRs),
+		Chargers:               CloneDynamicBoolOpt(o.Chargers),
+		Resources:              CloneDynamicBoolOpt(o.Resources),
+		IPs:                    CloneDynamicBoolOpt(o.IPs),
+		Routes:                 CloneDynamicBoolOpt(o.Routes),
+		Stats:                  CloneDynamicBoolOpt(o.Stats),
+		Thresholds:             CloneDynamicBoolOpt(o.Thresholds),
+		Initiate:               CloneDynamicBoolOpt(o.Initiate),
+		Update:                 CloneDynamicBoolOpt(o.Update),
+		Terminate:              CloneDynamicBoolOpt(o.Terminate),
+		Message:                CloneDynamicBoolOpt(o.Message),
+		AttributesDerivedReply: CloneDynamicBoolOpt(o.AttributesDerivedReply),
+		BlockerError:           CloneDynamicBoolOpt(o.BlockerError),
+		CDRsDerivedReply:       CloneDynamicBoolOpt(o.CDRsDerivedReply),
+		ResourcesAuthorize:     CloneDynamicBoolOpt(o.ResourcesAuthorize),
+		ResourcesAllocate:      CloneDynamicBoolOpt(o.ResourcesAllocate),
+		ResourcesRelease:       CloneDynamicBoolOpt(o.ResourcesRelease),
+		ResourcesDerivedReply:  CloneDynamicBoolOpt(o.ResourcesDerivedReply),
+		IPsAuthorize:           CloneDynamicBoolOpt(o.IPsAuthorize),
+		IPsAllocate:            CloneDynamicBoolOpt(o.IPsAllocate),
+		IPsRelease:             CloneDynamicBoolOpt(o.IPsRelease),
+		RoutesDerivedReply:     CloneDynamicBoolOpt(o.RoutesDerivedReply),
+		StatsDerivedReply:      CloneDynamicBoolOpt(o.StatsDerivedReply),
+		ThresholdsDerivedReply: CloneDynamicBoolOpt(o.ThresholdsDerivedReply),
+		MaxUsage:               CloneDynamicBoolOpt(o.MaxUsage),
+		ForceUsage:             CloneDynamicBoolOpt(o.ForceUsage),
+		TTL:                    CloneDynamicDurationOpt(o.TTL),
+		Chargeable:             CloneDynamicBoolOpt(o.Chargeable),
+		DebitInterval:          CloneDynamicDurationOpt(o.DebitInterval),
+		TTLLastUsage:           CloneDynamicDurationPointerOpt(o.TTLLastUsage),
+		TTLLastUsed:            CloneDynamicDurationPointerOpt(o.TTLLastUsed),
+		TTLMaxDelay:            CloneDynamicDurationOpt(o.TTLMaxDelay),
+		TTLUsage:               CloneDynamicDurationPointerOpt(o.TTLUsage),
+		OriginID:               CloneDynamicStringOpt(o.OriginID),
+		AccountsForceUsage:     CloneDynamicBoolOpt(o.AccountsForceUsage),
 	}
 }
 
