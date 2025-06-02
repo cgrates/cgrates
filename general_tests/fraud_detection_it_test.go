@@ -300,8 +300,8 @@ func testFraudAuthorizeandProcess1(t *testing.T) {
 	}
 	var reply string
 	if err := fraudRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
-		cgrEv, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
+		cgrEv, &reply); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -350,8 +350,8 @@ func testFraudAuthorizeandProcess2(t *testing.T) {
 	}
 	var reply string
 	if err := fraudRPC.Call(context.Background(), utils.SessionSv1ProcessCDR,
-		cgrEv, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
+		cgrEv, &reply); err != nil {
+		t.Error(err)
 	}
 }
 

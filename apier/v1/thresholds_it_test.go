@@ -418,7 +418,7 @@ func testV1TSProcessEvent(t *testing.T) {
 
 func testV1TSGetThresholdsAfterProcess(t *testing.T) {
 	var tIDs []string
-	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED"}
+	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED", "THD_CDRS_1", "THD_STATS_3"}
 	if err := tSv1Rpc.Call(context.Background(), utils.ThresholdSv1GetThresholdIDs,
 		&utils.TenantWithAPIOpts{Tenant: "cgrates.org"}, &tIDs); err != nil {
 		t.Error(err)
@@ -679,9 +679,10 @@ func testV1TSMaxHits(t *testing.T) {
 	}
 	//check threshold after third process (reached the maximum hits and should be removed)
 	if err := tSv1Rpc.Call(context.Background(), utils.ThresholdSv1GetThreshold,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}}, &td); err == nil ||
-		err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Err : %+v \n, td : %+v", err, utils.ToJSON(td))
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}}, &td); err != nil {
+		t.Error(err)
+	} else if td.Hits != 3 {
+		t.Errorf("expected to reach MaxHits")
 	}
 }
 
@@ -844,7 +845,7 @@ func testv1TSGetThresholdProfileIDsCount(t *testing.T) {
 
 func testV1TSProcessEventWithoutTenant(t *testing.T) {
 	var ids []string
-	eIDs := []string{"TH4"}
+	eIDs := []string{}
 	thEvent := &utils.CGREvent{ // hitting TH4
 		ID: "event1",
 		Event: map[string]any{

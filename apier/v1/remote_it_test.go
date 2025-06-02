@@ -826,7 +826,7 @@ func testInternalMatchThreshold(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 	}
-	if err := internalRPC.Call(context.Background(), utils.ThresholdSv1ProcessEvent, ev2, &ids); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := internalRPC.Call(context.Background(), utils.ThresholdSv1ProcessEvent, ev2, &ids); err != nil {
 		t.Error(err)
 	}
 

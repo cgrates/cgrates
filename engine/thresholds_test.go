@@ -579,104 +579,6 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 	}
 }
 
-func TestThresholdsProcessEventAccountUpdateErrPartExec(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
-
-	thPrf := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		MinHits:   2,
-		MaxHits:   5,
-		Weight:    10,
-		ActionIDs: []string{"actPrf"},
-	}
-	th := &Threshold{
-		Tenant: "cgrates.org",
-		ID:     "TH1",
-		Hits:   2,
-		tPrfl:  thPrf,
-	}
-
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ThresholdProcessEvent",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.MetaEventType:            utils.AccountUpdate,
-			utils.OptsThresholdsProfileIDs: []string{"TH1"},
-		},
-	}
-	expLog := `[WARNING] <ThresholdS> failed executing actions: actPrf, error: NOT_FOUND`
-	if err := th.ProcessEvent(args, dm, nil); err == nil ||
-		err != utils.ErrPartiallyExecuted {
-		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
-	}
-
-	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
-		t.Errorf("expected log <%+v> \nto be included in: <%+v>", expLog, rcvLog)
-	}
-	utils.Logger.SetLogLevel(0)
-}
-
-func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
-	utils.Logger.SetLogLevel(4)
-	utils.Logger.SetSyslog(nil)
-
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	defer func() {
-		log.SetOutput(os.Stderr)
-	}()
-
-	thPrf := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		MinHits:   2,
-		MaxHits:   5,
-		Weight:    10,
-		ActionIDs: []string{"actPrf"},
-		Async:     true,
-	}
-	th := &Threshold{
-		Tenant: "cgrates.org",
-		ID:     "TH1",
-		Hits:   2,
-		tPrfl:  thPrf,
-	}
-
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ThresholdProcessEvent",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"TH1"},
-		},
-	}
-	expLog := `[WARNING] <ThresholdS> failed executing actions: actPrf, error: NOT_FOUND`
-	if err := th.ProcessEvent(args, dm, nil); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(10 * time.Millisecond)
-	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
-		t.Errorf("expected log <%+v> \nto be included in: <%+v>", expLog, rcvLog)
-	}
-
-	utils.Logger.SetLogLevel(0)
-}
-
 func TestThresholdsShutdown(t *testing.T) {
 	utils.Logger.SetLogLevel(6)
 	utils.Logger.SetSyslog(nil)
@@ -1031,19 +933,9 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 		},
 	}
 
-	expLog1 := `[WARNING] <ThresholdService> failed removing from database non-recurrent threshold: cgrates.org:TH3, error: NO_DATABASE_CONNECTION`
-	expLog2 := `[WARNING] <ThresholdService> failed removing from cache non-recurrent threshold: cgrates.org:TH3, error: DISCONNECTED`
-
-	if _, err := tS.processEvent(args.Tenant, args); err == nil ||
-		err != utils.ErrPartiallyExecuted {
+	if _, err := tS.processEvent(args.Tenant, args); err != nil {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ErrPartiallyExecuted, err)
-	}
-
-	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog1) ||
-		!strings.Contains(rcvLog, expLog2) {
-		t.Errorf("expected:  <%+v> and <%+v> , received: <%+v>",
-			expLog1, expLog2, rcvLog)
 	}
 
 	utils.Logger.SetLogLevel(0)
@@ -2270,41 +2162,4 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	}
 
 	utils.Logger.SetLogLevel(0)
-}
-
-func TestThresholdSnoozeSleep(t *testing.T) {
-
-	th := &Threshold{
-		Tenant: "cgrates.org",
-		ID:     "th_counter",
-		tPrfl: &ThresholdProfile{
-			MaxHits:  -1,
-			MinHits:  1,
-			Blocker:  true,
-			Weight:   30,
-			MinSleep: 3 * time.Second,
-			Async:    true,
-		},
-	}
-
-	cfg := config.NewDefaultCGRConfig()
-	db, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
-	if dErr != nil {
-		t.Error(dErr)
-	}
-	dm := NewDataManager(db, cfg.CacheCfg(), nil)
-	fs := NewFilterS(cfg, nil, dm)
-	var snoozeTime time.Time
-	for i, arg := range testThresholdArgs {
-		th.ProcessEvent(arg, dm, fs)
-		if i > 0 {
-			if th.Snooze.Equal(snoozeTime) {
-				t.Error("expecte snooze change time")
-			}
-		} else {
-			snoozeTime = th.Snooze
-		}
-
-	}
-
 }

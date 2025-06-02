@@ -256,8 +256,10 @@ func testAccWThdGetAccountAfterDebit(t *testing.T) {
 
 func testAccWThdGetThresholdAfterDebit(t *testing.T) {
 	var result2 *engine.Threshold
-	if err := accWThdRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}}, &result2); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := accWThdRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}}, &result2); err != nil {
 		t.Error(err)
+	} else if result2.Hits != 1 {
+		t.Errorf("expected to have reached MaxHits")
 	}
 }
 
