@@ -1463,10 +1463,15 @@ const CGRATES_CFG_JSON = `
 					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~*req.2"},
 					{"tag": "Weights", "path": "Weights", "type": "*variable", "value": "~*req.3"},
 					{"tag": "TTL", "path": "TTL", "type": "*variable", "value": "~*req.4"},
-					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~*req.5"},
-					{"tag": "AddressPool", "path": "AddressPool", "type": "*variable", "value": "~*req.6"},
-					{"tag": "Allocation", "path": "Allocation", "type": "*variable", "value": "~*req.7"},
-					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.8"},
+					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.5"},
+					{"tag": "PoolID", "path": "Pools.ID", "type": "*variable", "value": "~*req.6","new_branch":true},
+					{"tag": "PoolFilterIDs", "path": "Pools.FilterIDs", "type": "*variable", "value": "~*req.7"},
+					{"tag": "PoolType", "path": "Pools.Type", "type": "*variable", "value": "~*req.8"},
+					{"tag": "PoolRange", "path": "Pools.Range", "type": "*variable", "value": "~*req.9"},
+					{"tag": "PoolStrategy", "path": "Pools.Strategy", "type": "*variable", "value": "~*req.10"},
+					{"tag": "PoolMessage", "path": "Pools.Message", "type": "*variable", "value": "~*req.11"},
+					{"tag": "PoolWeights", "path": "Pools.Weights", "type": "*variable", "value": "~*req.12"},
+					{"tag": "PoolBlockers", "path": "Pools.Blockers", "type": "*variable", "value": "~*req.13"}
 				]
 			},
 			{

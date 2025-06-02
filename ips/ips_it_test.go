@@ -34,7 +34,7 @@ import (
 // TODO: move anything sessions related to sessions once ips implementation
 // is complete.
 func TestIPsIT(t *testing.T) {
-	t.Skip("ips test currently incomplete, skipping...")
+	// t.Skip("ips test currently incomplete, skipping...")
 	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -123,8 +123,11 @@ func TestIPsIT(t *testing.T) {
 		TpFiles: map[string]string{
 			utils.IPsCsv: `
 #Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Type[5],AddressPool[6],Allocation[7],Stored[8]
-cgrates.org,IPs1,*string:~*req.Account:1001,;10,1s,ipv4,172.16.1.1/24,alloc_success,true
-cgrates.org,IPs2,*string:~*req.Account:1001,;20,3s,ipv4,192.168.122.1/24,alloc_new,true`,
+cgrates.org,IPs1,*string:~*req.Account:1001,;10,1s,true,,,,,,,,
+cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/24,*ascending,alloc_success,;15,
+cgrates.org,IPs1,,,,,POOL1,,,,,,*exists:~*req.GimmeMoreWeight:;50,*exists:~*req.ShouldBlock:;true
+cgrates.org,IPs1,,,,,POOL2,*string:~*req.Destination:2002,*ipv4,192.168.122.1/24,*random,alloc_new,;25,;true
+cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Destination:3001,*ipv4,127.0.0.1/24,*descending,alloc_msg,;35,;true`,
 		},
 		DBCfg:            dbCfg,
 		Encoding:         *utils.Encoding,
@@ -139,17 +142,36 @@ cgrates.org,IPs2,*string:~*req.Account:1001,;20,3s,ipv4,192.168.122.1/24,alloc_n
 		if err := client.Call(context.Background(), utils.AdminSv1SetIPProfile,
 			&utils.IPProfileWithAPIOpts{
 				IPProfile: &utils.IPProfile{
-					Tenant:      "cgrates.org",
-					ID:          "IPsAPI",
-					FilterIDs:   []string{"*string:~*req.Account:1001"},
-					Allocation:  "Approved",
-					TTL:         -1,
-					Type:        "ipv4",
-					AddressPool: "192.168.122.1/24",
+					Tenant:    "cgrates.org",
+					ID:        "IPsAPI",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
 					Weights: utils.DynamicWeights{
 						{
 							Weight: 15,
-						}},
+						},
+					},
+					TTL:    -1,
+					Stored: false,
+					Pools: []*utils.Pool{
+						{
+							ID:        "FIRST_POOL",
+							FilterIDs: []string{},
+							Type:      "*ipv4",
+							Range:     "192.168.122.1/24",
+							Strategy:  "*ascending",
+							Message:   "Some message",
+							Weights: utils.DynamicWeights{
+								{
+									Weight: 15,
+								},
+							},
+							Blockers: utils.DynamicBlockers{
+								{
+									Blocker: false,
+								},
+							},
+						},
+					},
 				},
 			}, &reply); err != nil {
 			t.Error(err)
