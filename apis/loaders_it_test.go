@@ -278,11 +278,15 @@ cgrates.org,ResGroup22,*string:~*req.Account:dan,;10,3600s,2,premium_call,true,t
 
 	// Create and populate IPs.csv
 	if err := writeFile(utils.IPsCsv, `
-#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Type[5],AddressPool[6],Allocation[7],Stored[8]
-cgrates.org,IPs1,*string:~*req.Account:1001,;10,1s,ipv4,172.16.1.1/24,alloc_success,true
-cgrates.org,IPs1,,,,,,,
-cgrates.org,IPs2,,,,,,,
-cgrates.org,IPs2,*string:~*req.Account:1002,;20,1h,ipv4,127.0.0.1/24,alloc_new,false
+#Tenant[0],ID[1],FilterIDs[2],Weights[3],TTL[4],Stored[5],PoolID[6],PoolFilterIDs[7],PoolType[8],PoolRange[9],PoolStrategy[10],PoolMessage[11],PoolWeights[12],PoolBlockers[13]
+cgrates.org,IPs1,,,,,,,,,,,,
+cgrates.org,IPs1,*string:~*req.Account:1001,;10,1s,true,,,,,,,,
+cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/24,*ascending,alloc_msg,;15,;false
+cgrates.org,IPs1,,,,,,,,,,,,
+cgrates.org,IPs1,,,,,POOL1,,,,,alloc_success,*exists:~*req.GimmeMoreWeight:;50,*exists:~*req.ShouldBlock:;true
+cgrates.org,IPs1,,,,,POOL2,*string:~*req.Destination:2002,*ipv4,192.168.122.1/24,*random,alloc_new,;25,;true
+cgrates.org,IPs2,,,,,,,,,,,,
+cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Destination:3001,*ipv4,127.0.0.1/24,*descending,alloc_msg,;35,;true
 `); err != nil {
 		t.Fatal(err)
 	}
@@ -996,11 +1000,54 @@ func testLoadersGetIPProfiles(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			TTL:         time.Second,
-			Type:        "ipv4",
-			AddressPool: "172.16.1.1/24",
-			Allocation:  "alloc_success",
-			Stored:      true,
+			TTL:    time.Second,
+			Stored: true,
+			Pools: []*utils.Pool{
+				{
+					ID:        "POOL1",
+					FilterIDs: []string{"*string:~*req.Destination:2001"},
+					Type:      "*ipv4",
+					Range:     "172.16.1.1/24",
+					Strategy:  "*ascending",
+					Message:   "alloc_success",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 15,
+						},
+						{
+							FilterIDs: []string{"*exists:~*req.GimmeMoreWeight:"},
+							Weight:    50,
+						},
+					},
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: false,
+						},
+						{
+							Blocker:   true,
+							FilterIDs: []string{"*exists:~*req.ShouldBlock:"},
+						},
+					},
+				},
+				{
+					ID:        "POOL2",
+					FilterIDs: []string{"*string:~*req.Destination:2002"},
+					Type:      "*ipv4",
+					Range:     "192.168.122.1/24",
+					Strategy:  "*random",
+					Message:   "alloc_new",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 25,
+						},
+					},
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+			},
 		},
 		{
 			Tenant:    "cgrates.org",
@@ -1011,11 +1058,28 @@ func testLoadersGetIPProfiles(t *testing.T) {
 					Weight: 20,
 				},
 			},
-			TTL:         time.Hour,
-			Type:        "ipv4",
-			AddressPool: "127.0.0.1/24",
-			Allocation:  "alloc_new",
-			Stored:      false,
+			TTL:    2 * time.Second,
+			Stored: false,
+			Pools: []*utils.Pool{
+				{
+					ID:        "POOL1",
+					FilterIDs: []string{"*string:~*req.Destination:3001"},
+					Type:      "*ipv4",
+					Range:     "127.0.0.1/24",
+					Strategy:  "*descending",
+					Message:   "alloc_msg",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 35,
+						},
+					},
+					Blockers: utils.DynamicBlockers{
+						{
+							Blocker: true,
+						},
+					},
+				},
+			},
 		},
 	}
 	var ipps []*utils.IPProfile
