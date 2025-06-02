@@ -279,6 +279,9 @@ func (t *Threshold) processEEs(opts map[string]any, thScfg *config.ThresholdSCfg
 	if opts == nil {
 		opts = make(map[string]any)
 	}
+	sortedFilterIDs := make([]string, len(t.tPrfl.FilterIDs))
+	copy(sortedFilterIDs, t.tPrfl.FilterIDs)
+	slices.Sort(sortedFilterIDs)
 	opts[utils.MetaEventType] = utils.ThresholdHit
 	cgrEv := &utils.CGREvent{
 		Tenant: t.Tenant,
@@ -290,7 +293,7 @@ func (t *Threshold) processEEs(opts map[string]any, thScfg *config.ThresholdSCfg
 			utils.Hits:      t.Hits,
 			utils.Snooze:    t.Snooze,
 			utils.ThresholdConfig: ThresholdConfig{
-				FilterIDs:          t.tPrfl.FilterIDs,
+				FilterIDs:          sortedFilterIDs,
 				ActivationInterval: t.tPrfl.ActivationInterval,
 				MaxHits:            t.tPrfl.MaxHits,
 				MinHits:            t.tPrfl.MinHits,
