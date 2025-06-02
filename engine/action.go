@@ -1801,8 +1801,12 @@ func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		if err != nil {
 			return err
 		}
+		var attrFltrIDs []string
+		if params[5] != utils.EmptyString {
+			attrFltrIDs = strings.Split(params[5], utils.ANDSep)
+		}
 		attrP.Attributes = append(attrP.Attributes, &Attribute{
-			FilterIDs: strings.Split(params[5], utils.ANDSep),
+			FilterIDs: attrFltrIDs,
 			Path:      params[6],
 			Type:      params[7],
 			Value:     value,
@@ -1879,7 +1883,7 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	// Make sure ActionsId exists in DataDB
 	var actsRply []*utils.TPAction
-	if err := connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1GetActions, params[1], &actsRply); err != nil {
+	if err := connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1GetActions, utils.StringPointer(params[1]), &actsRply); err != nil {
 		return err
 	}
 	ap.ActionPlan = append(ap.ActionPlan, &AttrActionPlan{})
