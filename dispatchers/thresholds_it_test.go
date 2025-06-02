@@ -244,7 +244,7 @@ func testDspThTestAuthKey3(t *testing.T) {
 	}
 
 	var ids []string
-	eIDs := []string{"THD_ACNT_1002"}
+	eIDs := []string{"THD_ACNT_1001", "THD_ACNT_1002"}
 
 	if err := dispEngine.RPC.Call(context.Background(), utils.ThresholdSv1GetThresholdIDs, &utils.TenantWithAPIOpts{
 		Tenant: "cgrates.org",

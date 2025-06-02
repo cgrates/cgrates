@@ -218,59 +218,19 @@ func (t *Threshold) isLocked() bool {
 	return t.lkID != utils.EmptyString
 }
 
-// ProcessEvent processes an ThresholdEvent
-// concurrentActions limits the number of simultaneous action sets executed
-func (t *Threshold) ProcessEvent(args *utils.CGREvent, dm *DataManager, fltrS *FilterS) (err error) {
-	var tntAcnt string
-	var acnt string
-	if utils.IfaceAsString(args.APIOpts[utils.MetaEventType]) == utils.AccountUpdate {
-		acnt, _ = args.FieldAsString(utils.ID)
-	} else {
-		acnt, _ = args.FieldAsString(utils.AccountField)
-	}
-	if _, has := args.APIOpts[utils.MetaAccountID]; has {
-		acnt, _ = args.OptAsString(utils.MetaAccountID)
-	}
-	if acnt != utils.EmptyString {
-		tntAcnt = utils.ConcatenatedKey(args.Tenant, acnt)
-	}
-	for _, actionSetID := range t.tPrfl.ActionIDs {
-		at := &ActionTiming{
-			Uuid:      utils.GenUUID(),
-			ActionsID: actionSetID,
-			ExtraData: args,
-		}
-		if tntAcnt != utils.EmptyString {
-			at.accountIDs = utils.NewStringMap(tntAcnt)
-		}
-		if t.tPrfl.Async {
-			go func(setID string) {
-				if errExec := at.Execute(fltrS, utils.ThresholdS); errExec != nil {
-					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", setID, errExec.Error()))
-				}
-			}(actionSetID)
-		} else if errExec := at.Execute(fltrS, utils.ThresholdS); errExec != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
-			err = utils.ErrPartiallyExecuted
-		}
-	}
-	t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
-	return
-}
-
 // processEEs processes to the EEs for this threshold
-func (t *Threshold) processEEs(opts map[string]any, thScfg *config.ThresholdSCfg, connMgr *ConnManager) (err error) {
+func (t *ThresholdService) processEEs(opts map[string]any, th *Threshold) (err error) {
 	var targetEeIDs []string
-	if len(t.tPrfl.EeIDs) > 0 {
-		targetEeIDs = t.tPrfl.EeIDs
-		if isNone := slices.Contains(t.tPrfl.EeIDs, utils.MetaNone); isNone {
+	if len(th.tPrfl.EeIDs) > 0 {
+		targetEeIDs = th.tPrfl.EeIDs
+		if isNone := slices.Contains(th.tPrfl.EeIDs, utils.MetaNone); isNone {
 			targetEeIDs = []string{}
 		}
 	} else {
-		targetEeIDs = thScfg.EEsExporterIDs
+		targetEeIDs = t.cgrcfg.ThresholdSCfg().EEsExporterIDs
 	}
 	if len(targetEeIDs) > 0 {
-		if len(thScfg.EEsConns) == 0 {
+		if len(t.cgrcfg.ThresholdSCfg().EEsConns) == 0 {
 			return utils.NewErrNotConnected(utils.EEs)
 		}
 	} else {
@@ -279,30 +239,30 @@ func (t *Threshold) processEEs(opts map[string]any, thScfg *config.ThresholdSCfg
 	if opts == nil {
 		opts = make(map[string]any)
 	}
-	sortedFilterIDs := make([]string, len(t.tPrfl.FilterIDs))
-	copy(sortedFilterIDs, t.tPrfl.FilterIDs)
+	sortedFilterIDs := make([]string, len(th.tPrfl.FilterIDs))
+	copy(sortedFilterIDs, th.tPrfl.FilterIDs)
 	slices.Sort(sortedFilterIDs)
 	opts[utils.MetaEventType] = utils.ThresholdHit
 	cgrEv := &utils.CGREvent{
-		Tenant: t.Tenant,
+		Tenant: th.Tenant,
 		ID:     utils.GenUUID(),
 		Time:   utils.TimePointer(time.Now()),
 		Event: map[string]any{
 			utils.EventType: utils.ThresholdHit,
-			utils.ID:        t.ID,
-			utils.Hits:      t.Hits,
-			utils.Snooze:    t.Snooze,
+			utils.ID:        th.ID,
+			utils.Hits:      th.Hits,
+			utils.Snooze:    th.Snooze,
 			utils.ThresholdConfig: ThresholdConfig{
 				FilterIDs:          sortedFilterIDs,
-				ActivationInterval: t.tPrfl.ActivationInterval,
-				MaxHits:            t.tPrfl.MaxHits,
-				MinHits:            t.tPrfl.MinHits,
-				MinSleep:           t.tPrfl.MinSleep,
-				Blocker:            t.tPrfl.Blocker,
-				Weight:             t.tPrfl.Weight,
-				ActionIDs:          t.tPrfl.ActionIDs,
-				Async:              t.tPrfl.Async,
-				EeIDs:              t.tPrfl.EeIDs,
+				ActivationInterval: th.tPrfl.ActivationInterval,
+				MaxHits:            th.tPrfl.MaxHits,
+				MinHits:            th.tPrfl.MinHits,
+				MinSleep:           th.tPrfl.MinSleep,
+				Blocker:            th.tPrfl.Blocker,
+				Weight:             th.tPrfl.Weight,
+				ActionIDs:          th.tPrfl.ActionIDs,
+				Async:              th.tPrfl.Async,
+				EeIDs:              th.tPrfl.EeIDs,
 			},
 		},
 		APIOpts: opts,
@@ -312,9 +272,9 @@ func (t *Threshold) processEEs(opts map[string]any, thScfg *config.ThresholdSCfg
 		EeIDs:    targetEeIDs,
 	}
 	var reply map[string]map[string]any
-	if t.tPrfl.Async {
+	if th.tPrfl.Async {
 		go func() {
-			if err := connMgr.Call(context.TODO(), thScfg.EEsConns,
+			if err := t.connMgr.Call(context.TODO(), t.cgrcfg.ThresholdSCfg().EEsConns,
 				utils.EeSv1ProcessEvent,
 				cgrEventWithID, &reply); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
@@ -322,7 +282,7 @@ func (t *Threshold) processEEs(opts map[string]any, thScfg *config.ThresholdSCfg
 					fmt.Sprintf("<ThresholdS> error: %s processing event %+v with EEs.", err.Error(), cgrEv))
 			}
 		}()
-	} else if errExec := connMgr.Call(context.TODO(), thScfg.EEsConns,
+	} else if errExec := t.connMgr.Call(context.TODO(), t.cgrcfg.ThresholdSCfg().EEsConns,
 		utils.EeSv1ProcessEvent,
 		cgrEventWithID, &reply); errExec != nil &&
 		errExec.Error() != utils.ErrNotFound.Error() {
@@ -354,10 +314,10 @@ func (ts Thresholds) unlock() {
 // NewThresholdService the constructor for ThresoldS service
 func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS, conn *ConnManager) *ThresholdService {
 	return &ThresholdService{
-		dm:      dm,
-		cgrcfg:  cgrcfg,
-		filterS: filterS,
-
+		dm:          dm,
+		cgrcfg:      cgrcfg,
+		filterS:     filterS,
+		connMgr:     conn,
 		stopBackup:  make(chan struct{}),
 		loopStopped: make(chan struct{}),
 		storedTdIDs: make(utils.StringSet),
@@ -584,46 +544,55 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 	var withErrors bool
 	thresholdsIDs = make([]string, 0, len(matchTs))
 	for _, t := range matchTs {
+		if t.tPrfl.MaxHits != -1 && t.Hits >= t.tPrfl.MaxHits {
+			continue // MaxHits will disable the threshold
+		}
 		thresholdsIDs = append(thresholdsIDs, t.ID)
 		t.Hits++
-		if t.Snooze.After(time.Now()) || // snoozed, not executing actions
-			t.Hits < t.tPrfl.MinHits || // number of hits was not met, will not execute actions
-			(t.tPrfl.MaxHits != -1 &&
-				t.Hits > t.tPrfl.MaxHits) {
-			continue
-		}
-		if err = t.ProcessEvent(args, tS.dm, tS.filterS); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<ThresholdService> threshold: %s, ignoring event: %s, error: %s",
-					t.TenantID(), utils.ConcatenatedKey(tnt, args.ID), err.Error()))
-			withErrors = true
-			continue
-		}
-		if err = t.processEEs(args.APIOpts, tS.cgrcfg.ThresholdSCfg(), connMgr); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<ThresholdService> received error: %s when processing with EEs.", err.Error()))
-			withErrors = true
-		}
-		if t.dirty == nil || t.Hits == t.tPrfl.MaxHits { // one time threshold
-			if err = tS.dm.RemoveThreshold(t.Tenant, t.ID); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<ThresholdService> failed removing from database non-recurrent threshold: %s, error: %s",
-						t.TenantID(), err.Error()))
-				withErrors = true
+		if time.Now().After(t.Snooze) && // snoozed, not executing actions
+			t.Hits >= t.tPrfl.MinHits && // number of hits was not met, will not execute actions
+			(t.tPrfl.MaxHits == -1 ||
+				t.Hits <= t.tPrfl.MaxHits) {
+			var tntAcnt string
+			var acnt string
+			if utils.IfaceAsString(args.APIOpts[utils.MetaEventType]) == utils.AccountUpdate {
+				acnt, _ = args.FieldAsString(utils.ID)
+			} else {
+				acnt, _ = args.FieldAsString(utils.AccountField)
 			}
-			//since we don't handle in DataManager caching we do a manual remove here
-			if tntID := t.TenantID(); Cache.HasItem(utils.CacheThresholds, tntID) { // only cache if previously there
-				if err = Cache.Set(utils.CacheThresholds, tntID, nil, nil,
-					true, utils.NonTransactional); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<ThresholdService> failed removing from cache non-recurrent threshold: %s, error: %s",
-							t.TenantID(), err.Error()))
+			if _, has := args.APIOpts[utils.MetaAccountID]; has {
+				acnt, _ = args.OptAsString(utils.MetaAccountID)
+			}
+			if acnt != utils.EmptyString {
+				tntAcnt = utils.ConcatenatedKey(args.Tenant, acnt)
+			}
+			for _, actionSetID := range t.tPrfl.ActionIDs {
+				at := &ActionTiming{
+					Uuid:      utils.GenUUID(),
+					ActionsID: actionSetID,
+					ExtraData: args,
+				}
+				if tntAcnt != utils.EmptyString {
+					at.accountIDs = utils.NewStringMap(tntAcnt)
+				}
+				if t.tPrfl.Async {
+					go func(setID string) {
+						if errExec := at.Execute(tS.filterS, utils.ThresholdS); errExec != nil {
+							utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", setID, errExec.Error()))
+						}
+					}(actionSetID)
+				} else if errExec := at.Execute(tS.filterS, utils.ThresholdS); errExec != nil {
+					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
 					withErrors = true
 				}
 			}
-			continue
+			t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
+			if err = tS.processEEs(args.APIOpts, t); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<ThresholdService> received error: %s when processing with EEs.", err.Error()))
+				withErrors = true
+			}
 		}
-		// recurrent threshold
 		*t.dirty = true // mark it to be saved
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
 			tS.StoreThreshold(t)
@@ -722,6 +691,8 @@ func (tS *ThresholdService) V1GetThreshold(ctx *context.Context, tntID *utils.Te
 }
 
 // V1ResetThreshold resets the threshold hits
+// If the threshold does not exist (e.g., removed after MaxHits), it attempts to recreate it
+// based on its ThresholdProfile.
 func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantID, rply *string) (err error) {
 	var thd *Threshold
 	tnt := tntID.Tenant
@@ -734,7 +705,8 @@ func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.
 		thresholdLockKey(tnt, tntID.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 	if thd, err = tS.dm.GetThreshold(tnt, tntID.ID, true, true, ""); err != nil {
-		return
+		utils.Logger.Warning(fmt.Sprintf("threshold with ID %s not found", tntID.ID))
+		return err
 	}
 	if thd.Hits != 0 {
 		thd.Hits = 0
@@ -742,7 +714,7 @@ func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.
 		thd.dirty = utils.BoolPointer(true) // mark it to be saved
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
 			if err = tS.StoreThreshold(thd); err != nil {
-				return
+				return err
 			}
 		} else {
 			tS.stMux.Lock()
@@ -751,5 +723,5 @@ func (tS *ThresholdService) V1ResetThreshold(ctx *context.Context, tntID *utils.
 		}
 	}
 	*rply = utils.OK
-	return
+	return nil
 }
