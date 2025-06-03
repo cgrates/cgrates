@@ -37,9 +37,9 @@ func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	var usageID string
-	if usageID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.UsageID,
-		utils.OptsIPsUsageID); err != nil {
+	var allocID string
+	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.AllocationID,
+		utils.OptsIPsAllocationID); err != nil {
 		return
 	}
 
@@ -50,8 +50,8 @@ func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils
 	}
 	usageTTL := utils.DurationPointer(ttl)
 
-	if usageID == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing(utils.UsageID)
+	if allocID == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
 	}
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
@@ -78,7 +78,7 @@ func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils
 	// end of RPC caching
 
 	var mtcRLs IPAllocationsList
-	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, usageID, usageTTL); err != nil {
+	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID, usageTTL); err != nil {
 		return err
 	}
 	*reply = mtcRLs
@@ -95,14 +95,9 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	var usageID string
-	if usageID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.UsageID,
-		utils.OptsIPsUsageID); err != nil {
-		return
-	}
-
-	if _, err = engine.GetFloat64Opts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.Units,
-		utils.OptsIPsUnits); err != nil {
+	var allocID string
+	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.AllocationID,
+		utils.OptsIPsAllocationID); err != nil {
 		return
 	}
 
@@ -113,8 +108,8 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 	}
 	usageTTL := utils.DurationPointer(ttl)
 
-	if usageID == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing(utils.UsageID)
+	if allocID == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
 	}
 
 	tnt := args.Tenant
@@ -142,7 +137,7 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 	// end of RPC caching
 
 	var mtcRLs IPAllocationsList
-	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, usageID, usageTTL); err != nil {
+	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID, usageTTL); err != nil {
 		return err
 	}
 	defer mtcRLs.unlock()
@@ -165,14 +160,9 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	var usageID string
-	if usageID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.UsageID,
-		utils.OptsIPsUsageID); err != nil {
-		return
-	}
-
-	if _, err = engine.GetFloat64Opts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.Units,
-		utils.OptsIPsUnits); err != nil {
+	var allocID string
+	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.AllocationID,
+		utils.OptsIPsAllocationID); err != nil {
 		return
 	}
 
@@ -183,8 +173,8 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 	}
 	usageTTL := utils.DurationPointer(ttl)
 
-	if usageID == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing(utils.UsageID)
+	if allocID == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
 	}
 
 	tnt := args.Tenant
@@ -212,7 +202,7 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 	// end of RPC caching
 
 	var mtcRLs IPAllocationsList
-	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, usageID,
+	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID,
 		usageTTL); err != nil {
 		return err
 	}
@@ -240,9 +230,9 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	var usageID string
-	if usageID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.UsageID,
-		utils.OptsIPsUsageID); err != nil {
+	var allocID string
+	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.AllocationID,
+		utils.OptsIPsAllocationID); err != nil {
 		return
 	}
 
@@ -253,8 +243,8 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 	}
 	usageTTL := utils.DurationPointer(ttl)
 
-	if usageID == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing(utils.UsageID)
+	if allocID == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
 	}
 
 	tnt := args.Tenant
@@ -282,7 +272,7 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 	// end of RPC caching
 
 	var mtcRLs IPAllocationsList
-	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, usageID,
+	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID,
 		usageTTL); err != nil {
 		return
 	}

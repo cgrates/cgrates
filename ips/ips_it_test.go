@@ -226,7 +226,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 			t.Error(err)
 		}
 
-		usageID := "api_usage"
+		allocID := "api_usage"
 		var evIPs IPAllocationsList
 		if err := client.Call(context.Background(), utils.IPsV1GetIPAllocationsForEvent,
 			&utils.CGREvent{
@@ -236,7 +236,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 					utils.AccountField: "1001",
 				},
 				APIOpts: map[string]any{
-					utils.OptsIPsUsageID: usageID,
+					utils.OptsIPsAllocationID: allocID,
 				},
 			}, &evIPs); err != nil {
 			t.Error(err)
@@ -250,11 +250,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-				APIOpts: map[string]any{
-					// utils.OptsIPsUsageID: usageID,
-					// utils.OptsIPsTTL:   time.Second,
-					// utils.OptsIPsUnits: 2,
-				},
+				APIOpts: map[string]any{},
 			}, &reply); err != nil {
 			t.Error(err)
 		}
@@ -266,11 +262,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-				APIOpts: map[string]any{
-					// utils.OptsIPsUsageID: usageID,
-					// utils.OptsIPsTTL:   time.Second,
-					// utils.OptsIPsUnits: 2,
-				},
+				APIOpts: map[string]any{},
 			}, &reply); err != nil {
 			t.Error(err)
 		}
@@ -282,11 +274,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
-				APIOpts: map[string]any{
-					// utils.OptsIPsUsageID: usageID,
-					// utils.OptsIPsTTL:   time.Second,
-					// utils.OptsIPsUnits: 2,
-				},
+				APIOpts: map[string]any{},
 			}, &reply); err != nil {
 			t.Error(err)
 		}

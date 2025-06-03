@@ -708,6 +708,7 @@ const (
 	DNSAgent                = "DNSAgent"
 	TLSNoCaps               = "tls"
 	UsageID                 = "UsageID"
+	AllocationID            = "AllocationID"
 	Replacement             = "Replacement"
 	Regexp                  = "Regexp"
 	Order                   = "Order"
@@ -2586,9 +2587,9 @@ const (
 	OptsResourcesUsageTTL = "*rsUsageTTL"
 
 	// IPs
-	OptsIPsUnits   = "*ipUnits"
-	OptsIPsUsageID = "*ipUsageID"
-	OptsIPsTTL     = "*ipTTL"
+	OptsIPsAllocationID = "*ipAllocationID"
+	OptsIPsTTL          = "*ipTTL"
+	MetaAllocationID    = "*allocationID"
 
 	// Routes
 	OptsRoutesProfilesCount = "*rouProfilesCount"

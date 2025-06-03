@@ -27,9 +27,9 @@ import (
 )
 
 const (
-	IPsUsageIDDftOpt = utils.EmptyString
-	IPsTTLDftOpt     = 72 * time.Hour
-	IPsUnitsDftOpt   = 1
+	IPsAllocationIDDftOpt = utils.EmptyString
+	IPsTTLDftOpt          = 72 * time.Hour
+	IPsUnitsDftOpt        = 1
 )
 
 // IPsJsonCfg holds the unparsed ips section configuration as found in the
@@ -169,15 +169,13 @@ func (c IPsCfg) AsMapInterface() any {
 }
 
 type IPsOptsJson struct {
-	UsageID []*DynamicInterfaceOpt `json:"*usageID"`
-	TTL     []*DynamicInterfaceOpt `json:"*ttl"`
-	Units   []*DynamicInterfaceOpt `json:"*units"`
+	AllocationID []*DynamicInterfaceOpt `json:"*allocationID"`
+	TTL          []*DynamicInterfaceOpt `json:"*ttl"`
 }
 
 type IPsOpts struct {
-	UsageID []*DynamicStringOpt
-	TTL     []*DynamicDurationOpt
-	Units   []*DynamicFloat64Opt
+	AllocationID []*DynamicStringOpt
+	TTL          []*DynamicDurationOpt
 }
 
 func (o *IPsOpts) loadFromJSONCfg(jc *IPsOptsJson) error {
@@ -187,12 +185,12 @@ func (o *IPsOpts) loadFromJSONCfg(jc *IPsOptsJson) error {
 
 	// NOTE: prepend to the existing slice to ensure that the default opts that
 	// always match are at the end.
-	if jc.UsageID != nil {
-		usageID, err := InterfaceToDynamicStringOpts(jc.UsageID)
+	if jc.AllocationID != nil {
+		allocID, err := InterfaceToDynamicStringOpts(jc.AllocationID)
 		if err != nil {
 			return err
 		}
-		o.UsageID = append(usageID, o.UsageID...)
+		o.AllocationID = append(allocID, o.AllocationID...)
 	}
 	if jc.TTL != nil {
 		ttl, err := IfaceToDurationDynamicOpts(jc.TTL)
@@ -201,31 +199,22 @@ func (o *IPsOpts) loadFromJSONCfg(jc *IPsOptsJson) error {
 		}
 		o.TTL = append(ttl, o.TTL...)
 	}
-	if jc.Units != nil {
-		units, err := InterfaceToFloat64DynamicOpts(jc.Units)
-		if err != nil {
-			return err
-		}
-		o.Units = append(units, o.Units...)
-	}
 	return nil
 }
 
 // Clone returns a deep copy of IPsOpts.
 func (o *IPsOpts) Clone() *IPsOpts {
 	return &IPsOpts{
-		UsageID: CloneDynamicStringOpt(o.UsageID),
-		TTL:     CloneDynamicDurationOpt(o.TTL),
-		Units:   CloneDynamicFloat64Opt(o.Units),
+		AllocationID: CloneDynamicStringOpt(o.AllocationID),
+		TTL:          CloneDynamicDurationOpt(o.TTL),
 	}
 }
 
 // AsMapInterface returns the config as a map[string]any.
 func (o *IPsOpts) AsMapInterface() map[string]any {
 	return map[string]any{
-		utils.MetaUsageIDCfg: o.UsageID,
-		utils.MetaUnitsCfg:   o.Units,
-		utils.MetaTTLCfg:     o.TTL,
+		utils.MetaAllocationID: o.AllocationID,
+		utils.MetaTTLCfg:       o.TTL,
 	}
 }
 
@@ -233,14 +222,11 @@ func diffIPsOptsJsonCfg(d *IPsOptsJson, v1, v2 *IPsOpts) *IPsOptsJson {
 	if d == nil {
 		d = new(IPsOptsJson)
 	}
-	if !DynamicStringOptEqual(v1.UsageID, v2.UsageID) {
-		d.UsageID = DynamicStringToInterfaceOpts(v2.UsageID)
+	if !DynamicStringOptEqual(v1.AllocationID, v2.AllocationID) {
+		d.AllocationID = DynamicStringToInterfaceOpts(v2.AllocationID)
 	}
 	if !DynamicDurationOptEqual(v1.TTL, v2.TTL) {
 		d.TTL = DurationToIfaceDynamicOpts(v2.TTL)
-	}
-	if !DynamicFloat64OptEqual(v1.Units, v2.Units) {
-		d.Units = Float64ToInterfaceDynamicOpts(v2.Units)
 	}
 	return d
 }

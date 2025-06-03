@@ -206,9 +206,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			Units:    []*DynamicFloat64Opt{{value: ResourcesUnitsDftOpt}},
 		}},
 		ipsCfg: &IPsCfg{Opts: &IPsOpts{
-			UsageID: []*DynamicStringOpt{{value: IPsUsageIDDftOpt}},
-			TTL:     []*DynamicDurationOpt{{value: IPsTTLDftOpt}},
-			Units:   []*DynamicFloat64Opt{{value: IPsUnitsDftOpt}},
+			AllocationID: []*DynamicStringOpt{{value: IPsAllocationIDDftOpt}},
+			TTL:          []*DynamicDurationOpt{{value: IPsTTLDftOpt}},
 		}},
 		trendSCfg:   new(TrendSCfg),
 		rankingSCfg: new(RankingSCfg),
