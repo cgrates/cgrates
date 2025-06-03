@@ -3926,3 +3926,156 @@ func TestStatDistinctGetFilterIDs(t *testing.T) {
 	}
 
 }
+
+func TestMetricAddOneEvent(t *testing.T) {
+	tests := []struct {
+		name        string
+		initialVal  *utils.Decimal
+		initialCnt  uint64
+		input       any
+		expectErr   bool
+		expectVal   *decimal.Big
+		expectCount uint64
+	}{
+		{
+			name:        "Int input",
+			input:       42,
+			expectErr:   false,
+			expectVal:   utils.NewDecimal(42, 0).Big,
+			expectCount: 1,
+		},
+		{
+			name:        "Duration input",
+			input:       time.Duration(5),
+			expectErr:   false,
+			expectVal:   utils.NewDecimal(5, 0).Big,
+			expectCount: 1,
+		},
+		{
+			name:        "Add to existing value",
+			initialVal:  &utils.Decimal{Big: utils.NewDecimal(10, 0).Big},
+			initialCnt:  1,
+			input:       15,
+			expectErr:   false,
+			expectVal:   utils.NewDecimal(25, 0).Big,
+			expectCount: 2,
+		},
+		{
+			name:        "Invalid type input",
+			input:       struct{}{},
+			expectErr:   true,
+			expectVal:   nil,
+			expectCount: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Metric{
+				Value: tt.initialVal,
+				Count: tt.initialCnt,
+			}
+
+			err := m.addOneEvent(tt.input)
+
+			if tt.expectErr && err == nil {
+				t.Errorf("Expected error but got none")
+			}
+			if !tt.expectErr && err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+
+			if tt.expectVal == nil {
+				if m.Value != nil {
+					t.Errorf("Expected nil Value, got: %v", m.Value.Big)
+				}
+			} else {
+				if m.Value == nil || m.Value.Big.Cmp(tt.expectVal) != 0 {
+					t.Errorf("Expected Value: %v, got: %v", tt.expectVal, m.Value.Big)
+				}
+			}
+
+			if m.Count != tt.expectCount {
+				t.Errorf("Expected Count: %d, got: %d", tt.expectCount, m.Count)
+			}
+		})
+	}
+}
+
+func TestStatDDCClones(t *testing.T) {
+	original := &StatDDC{
+		FieldValues: map[string]utils.StringSet{
+			"field1": utils.NewStringSet([]string{"ID", "ID1"}),
+		},
+		Events: map[string]map[string]uint64{
+			"cgrates.org": {
+				"val1": 5,
+			},
+		},
+		MinItems:  2,
+		Count:     10,
+		FilterIDs: []string{"f1", "f2"},
+	}
+
+	cloned := original.Clone().(*StatDDC)
+
+	if !reflect.DeepEqual(original, cloned) {
+		t.Errorf("Cloned StatDDC is not equal to original\nOriginal: %+v\nCloned: %+v", original, cloned)
+	}
+
+	cloned.Count = 20
+	cloned.Events["cgrates.org"]["val1"] = 99
+	cloned.FieldValues["field1"].Add("c")
+	cloned.FilterIDs[0] = "modified"
+
+	if reflect.DeepEqual(original, cloned) {
+		t.Error("Original StatDDC changed after modifying clone")
+	}
+
+	t.Run("nil receiver returns nil", func(t *testing.T) {
+		var ddc *StatDDC
+		if ddc.Clone() != nil {
+			t.Error("Expected nil Clone result from nil receiver, got non-nil")
+		}
+	})
+}
+
+func TestStatDistinctClones(t *testing.T) {
+	original := &StatDistinct{
+		FieldValues: map[string]utils.StringSet{
+			"field1": utils.NewStringSet([]string{"ID", "ID1"}),
+		},
+		Events: map[string]map[string]uint64{
+			"cgrates.org": {
+				"val1": 5,
+			},
+		},
+		MinItems:  2,
+		Count:     10,
+		FieldName: "testField",
+		FilterIDs: []string{"f1", "f2"},
+	}
+
+	cloned := original.Clone().(*StatDistinct)
+
+	if !reflect.DeepEqual(original, cloned) {
+		t.Errorf("Cloned StatDistinct is not equal to original\nOriginal: %+v\nCloned: %+v", original, cloned)
+	}
+
+	cloned.Count = 20
+	cloned.Events["cgrates.org"]["val1"] = 99
+	cloned.FieldValues["field1"].Add("c")
+	cloned.FilterIDs[0] = "modified"
+	cloned.FieldName = "modifiedField"
+
+	if reflect.DeepEqual(original, cloned) {
+		t.Error("Original StatDistinct changed after modifying clone")
+	}
+
+	t.Run("nil receiver returns nil", func(t *testing.T) {
+		var dst *StatDistinct
+		if dst.Clone() != nil {
+			t.Error("Expected nil Clone result from nil receiver, got non-nil")
+		}
+	})
+}
