@@ -128,8 +128,9 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 	dynamicActions := []string{
 		utils.MetaDynamicThreshold, utils.MetaDynamicStats,
 		utils.MetaDynamicAttribute, utils.MetaDynamicActionPlan,
-		utils.MetaDynamicAction, utils.MetaDynamicDestination,
-		utils.MetaDynamicFilter, utils.MetaDynamicRoute,
+		utils.MetaDynamicActionPlanAccounts, utils.MetaDynamicAction,
+		utils.MetaDynamicDestination, utils.MetaDynamicFilter,
+		utils.MetaDynamicRoute,
 	}
 	act := ActionConnCfg{}
 	switch source {
@@ -193,6 +194,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicStats] = dynamicStats
 	actionFuncMap[utils.MetaDynamicAttribute] = dynamicAttribute
 	actionFuncMap[utils.MetaDynamicActionPlan] = dynamicActionPlan
+	actionFuncMap[utils.MetaDynamicActionPlanAccounts] = dynamicActionPlanAccount
 	actionFuncMap[utils.MetaDynamicAction] = dynamicAction
 	actionFuncMap[utils.MetaDynamicDestination] = dynamicDestination
 	actionFuncMap[utils.MetaDynamicFilter] = dynamicFilter
@@ -1462,7 +1464,7 @@ func remoteSetAccount(ub *Account, a *Action, _ Actions, _ *FilterS, _ any, _ Sh
 //	 9 ActionIDs: strings separated by "&".
 //	10 Async: bool
 //	11 EeIDs: strings separated by "&".
-//	11 APIOpts: set of key-value pairs (separated by "&").
+//	12 APIOpts: set of key-value pairs (separated by "&").
 //
 // Parameters are separated by ";" and must be provided in the specified order.
 func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
@@ -1923,6 +1925,98 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the ActionPlan based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetActionPlan, ap, &reply)
+}
+
+// dynamicActionPlanAccount processes the `ExtraParameters` field from the action to construct an ActionPlan with account ids
+//
+// The ExtraParameters field format is expected as follows:
+//
+// 0 Id: string
+// 1 ActionsId: string
+// 2 TimingId: string
+// 3 Weight: float
+// 4 Overwrite: bool
+// 5 Tenant:AccountIDs: strings separated by "&".
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicActionPlanAccount(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 6 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 6", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	ap := &AttrSetActionPlanAccounts{
+		Id:              params[0],
+		ReloadScheduler: true,
+	}
+	// populate ActionPlan's ActionsId
+	if params[1] == utils.EmptyString {
+		return fmt.Errorf("empty ActionsId for <%s> dynamic_action_plan", params[0])
+	}
+	// Make sure ActionsId exists in DataDB
+	var actsRply []*utils.TPAction
+	if err := connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1GetActions, utils.StringPointer(params[1]), &actsRply); err != nil {
+		return err
+	}
+	ap.ActionPlan = append(ap.ActionPlan, &AttrActionPlan{})
+	ap.ActionPlan[0].ActionsId = params[1]
+	if params[2] != utils.EmptyString {
+		// Make sure TimingID exists in DataDB and use it for the action plan
+		var tpTiming utils.TPTiming
+		if err := connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1GetTiming, &utils.ArgsGetTimingID{ID: params[2]}, &tpTiming); err != nil {
+			return err
+		}
+		ap.ActionPlan[0].TimingID = tpTiming.ID
+		ap.ActionPlan[0].Years = tpTiming.Years.Serialize(";")
+		ap.ActionPlan[0].Months = tpTiming.Months.Serialize(";")
+		ap.ActionPlan[0].MonthDays = tpTiming.MonthDays.Serialize(";")
+		ap.ActionPlan[0].WeekDays = tpTiming.WeekDays.Serialize(";")
+		if tpTiming.EndTime != utils.EmptyString {
+			ap.ActionPlan[0].Time = utils.InfieldJoin(tpTiming.StartTime, tpTiming.EndTime)
+		} else {
+			ap.ActionPlan[0].Time = tpTiming.StartTime
+		}
+	}
+	// populate ActionPlan's Weight
+	if params[3] != utils.EmptyString {
+		ap.ActionPlan[0].Weight, err = strconv.ParseFloat(params[3], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionPlan's Overwrite
+	if params[4] != utils.EmptyString {
+		ap.Overwrite, err = strconv.ParseBool(params[4])
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionPlan's AccountIDs
+	if params[5] != utils.EmptyString {
+		ap.AccountIDs = strings.Split(params[5], utils.ANDSep)
+	}
+
+	// create the ActionPlan based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetActionPlanAccounts, ap, &reply)
 }
 
 // dynamicAction processes the `ExtraParameters` field from the action to construct a new Action

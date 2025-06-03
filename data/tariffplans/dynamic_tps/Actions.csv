@@ -1,0 +1,17 @@
+#ActionsId[0];Action[1];ExtraParameters[2];Filter[3];BalanceId[4];BalanceType[5];Categories[6];DestinationIds[7];RatingSubject[8];SharedGroup[9];ExpiryTime[10];TimingIds[11];Units[12];BalanceWeight[13];BalanceBlocker[14];BalanceDisabled[15];Weight[16]
+TOPUP_RST_10;*topup_reset;;;;*monetary;;*any;;;*unlimited;;10;10;false;false;10
+
+TOPUP_RST_<~*req.Account>;*topup_reset;;;;*monetary;;*any;;;*unlimited;;5;20;false;false;10
+TOPUP_RST_<~*req.Account>;*topup_reset;;;;*voice;;DST_1002;SPECIAL_1002;;*unlimited;;90s;20;false;false;10
+
+LOG_WARNING;*log;;;;;;;;;;;;;false;false;10
+ENABLE_AND_LOG;*log;;;;;;;;;;;;;false;false;10
+ENABLE_AND_LOG;*enable_account;;;;;;;;;;;;;false;false;10
+
+
+ACT_RAD_COA_ACNT_<~*req.Account>;*cgr_rpc;\f"{""Address"":""localhost:2012"";""Transport"":""*json"";""Method"":""SessionSv1.AlterSessions"";""Attempts"":1;""Async"":false;""Params"":{""Filters"":[""*string:~*req.Account:<~*req.Account>""];""Tenant"":""cgrates.org"";""APIOpts"":{""*radCoATemplate"":""mycoa""};""Event"":{""CustomFilter"":""custom_filter""}}}"\f;;;;;;;;;;;;;;20
+
+
+Alter_Session_<~*req.Account>;*alter_sessions;\fcgrates.org;*string:~*req.Account:<~*req.Account>;1;*radCoATemplate:mycoa;CustomFilter:mycustomvalue\f;*string:~*req.Account:<~*req.Account>&filter2;balID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10
+
+CDR_Log_<~*req.Account>;*cdrlog;\f{\"Account\":\"<~*req.Account>\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}\f;*string:~*req.Account:<~*req.Account>&filter2;balID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10

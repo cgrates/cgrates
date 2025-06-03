@@ -1,0 +1,3 @@
+#Tenant[0];Id[1];Schedule[2];StatIDs[3];MetricIDs[4];Sorting[5];SortingParameters[6];Stored[7];ThresholdIDs[8];APIOpts[9]
+cgrates.org;RANK1;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;;true;THD1&THD2
+*tenant;RANK_ACNT_<~*req.Account>;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;true;THD1&THD2;*accountID:<~*req.Account>
