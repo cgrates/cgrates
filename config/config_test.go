@@ -1286,7 +1286,7 @@ func TestLoadDiameterAgentCfgError(t *testing.T) {
          ]
       }
 }`
-	expected := "json: cannot unmarshal number into Go struct field ReqProcessorJsnCfg.Request_processors.ID of type string"
+	expected := "json: cannot unmarshal number into Go struct field ReqProcessorJsnCfg.request_processors.ID of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
