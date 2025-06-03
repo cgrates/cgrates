@@ -56,19 +56,19 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	if jsnCfg.Listen != nil {
 		da.Listen = *jsnCfg.Listen
 	}
-	if jsnCfg.Listen_net != nil {
-		da.ListenNet = *jsnCfg.Listen_net
+	if jsnCfg.ListenNet != nil {
+		da.ListenNet = *jsnCfg.ListenNet
 	}
-	if jsnCfg.Dictionaries_path != nil {
-		da.DictionariesPath = *jsnCfg.Dictionaries_path
+	if jsnCfg.DictionariesPath != nil {
+		da.DictionariesPath = *jsnCfg.DictionariesPath
 	}
-	if jsnCfg.Ce_applications != nil {
-		da.CeApplications = make([]string, len(*jsnCfg.Ce_applications))
-		copy(da.CeApplications, *jsnCfg.Ce_applications)
+	if jsnCfg.CeApplications != nil {
+		da.CeApplications = make([]string, len(*jsnCfg.CeApplications))
+		copy(da.CeApplications, *jsnCfg.CeApplications)
 	}
-	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, attrConn := range *jsnCfg.Sessions_conns {
+	if jsnCfg.SessionSConns != nil {
+		da.SessionSConns = make([]string, len(*jsnCfg.SessionSConns))
+		for idx, attrConn := range *jsnCfg.SessionSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			da.SessionSConns[idx] = attrConn
 			if attrConn == utils.MetaInternal ||
@@ -83,32 +83,32 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	if jsnCfg.ThresholdSConns != nil {
 		da.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
 	}
-	if jsnCfg.Origin_host != nil {
-		da.OriginHost = *jsnCfg.Origin_host
+	if jsnCfg.OriginHost != nil {
+		da.OriginHost = *jsnCfg.OriginHost
 	}
-	if jsnCfg.Origin_realm != nil {
-		da.OriginRealm = *jsnCfg.Origin_realm
+	if jsnCfg.OriginRealm != nil {
+		da.OriginRealm = *jsnCfg.OriginRealm
 	}
-	if jsnCfg.Vendor_id != nil {
-		da.VendorID = *jsnCfg.Vendor_id
+	if jsnCfg.VendorID != nil {
+		da.VendorID = *jsnCfg.VendorID
 	}
-	if jsnCfg.Product_name != nil {
-		da.ProductName = *jsnCfg.Product_name
+	if jsnCfg.ProductName != nil {
+		da.ProductName = *jsnCfg.ProductName
 	}
-	if jsnCfg.Synced_conn_requests != nil {
-		da.SyncedConnReqs = *jsnCfg.Synced_conn_requests
+	if jsnCfg.SyncedConnRequests != nil {
+		da.SyncedConnReqs = *jsnCfg.SyncedConnRequests
 	}
-	if jsnCfg.Asr_template != nil {
-		da.ASRTemplate = *jsnCfg.Asr_template
+	if jsnCfg.ASRTemplate != nil {
+		da.ASRTemplate = *jsnCfg.ASRTemplate
 	}
-	if jsnCfg.Rar_template != nil {
-		da.RARTemplate = *jsnCfg.Rar_template
+	if jsnCfg.RARTemplate != nil {
+		da.RARTemplate = *jsnCfg.RARTemplate
 	}
-	if jsnCfg.Forced_disconnect != nil {
-		da.ForcedDisconnect = *jsnCfg.Forced_disconnect
+	if jsnCfg.ForcedDisconnect != nil {
+		da.ForcedDisconnect = *jsnCfg.ForcedDisconnect
 	}
-	if jsnCfg.Request_processors != nil {
-		for _, reqProcJsn := range *jsnCfg.Request_processors {
+	if jsnCfg.RequestProcessors != nil {
+		for _, reqProcJsn := range *jsnCfg.RequestProcessors {
 			rp := new(RequestProcessor)
 			var haveID bool
 			for _, rpSet := range da.RequestProcessors {

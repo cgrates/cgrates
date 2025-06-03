@@ -27,23 +27,23 @@ import (
 
 func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	jsonCFG := &DiameterAgentJsonCfg{
-		Enabled:              utils.BoolPointer(true),
-		Listen_net:           utils.StringPointer("tcp"),
-		Listen:               utils.StringPointer("127.0.0.1:3868"),
-		Ce_applications:      utils.SliceStringPointer([]string{"Base"}),
-		Dictionaries_path:    utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Sessions_conns:       &[]string{utils.MetaInternal, "*conn1"},
-		StatSConns:           &[]string{utils.MetaInternal, "*conn1"},
-		ThresholdSConns:      &[]string{utils.MetaInternal, "*conn1"},
-		Origin_host:          utils.StringPointer("CGR-DA"),
-		Origin_realm:         utils.StringPointer("cgrates.org"),
-		Vendor_id:            utils.IntPointer(0),
-		Product_name:         utils.StringPointer("randomName"),
-		Synced_conn_requests: utils.BoolPointer(true),
-		Asr_template:         utils.StringPointer("randomTemplate"),
-		Rar_template:         utils.StringPointer("randomTemplate"),
-		Forced_disconnect:    utils.StringPointer("forced"),
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		Enabled:            utils.BoolPointer(true),
+		ListenNet:          utils.StringPointer("tcp"),
+		Listen:             utils.StringPointer("127.0.0.1:3868"),
+		CeApplications:     utils.SliceStringPointer([]string{"Base"}),
+		DictionariesPath:   utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
+		SessionSConns:      &[]string{utils.MetaInternal, "*conn1"},
+		StatSConns:         &[]string{utils.MetaInternal, "*conn1"},
+		ThresholdSConns:    &[]string{utils.MetaInternal, "*conn1"},
+		OriginHost:         utils.StringPointer("CGR-DA"),
+		OriginRealm:        utils.StringPointer("cgrates.org"),
+		VendorID:           utils.IntPointer(0),
+		ProductName:        utils.StringPointer("randomName"),
+		SyncedConnRequests: utils.BoolPointer(true),
+		ASRTemplate:        utils.StringPointer("randomTemplate"),
+		RARTemplate:        utils.StringPointer("randomTemplate"),
+		ForcedDisconnect:   utils.StringPointer("forced"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:       utils.StringPointer(utils.CGRateSLwr),
 				Timezone: utils.StringPointer("Local"),
@@ -84,7 +84,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorloadFromJsonCfg1(t *testing.T) {
 	cfgJSON := &DiameterAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Tenant: utils.StringPointer("a{*"),
 			},
@@ -108,7 +108,7 @@ func TestRequestProcessorloadFromJsonCfg2(t *testing.T) {
        }
 }`
 	cfgJSON := &DiameterAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID: utils.StringPointer("random"),
 			},
