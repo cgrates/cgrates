@@ -127,7 +127,7 @@ func (s *AdminSv1) SetIPProfile(ctx *context.Context, arg *utils.IPProfileWithAP
 	loadID := time.Now().UnixNano()
 	if err := s.dm.SetLoadIDs(ctx,
 		map[string]int64{utils.CacheIPProfiles: loadID,
-			utils.CacheIPs: loadID}); err != nil {
+			utils.CacheIPAllocations: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	// delay if needed before cache call
@@ -169,7 +169,7 @@ func (s *AdminSv1) RemoveIPProfile(ctx *context.Context, arg *utils.TenantIDWith
 	//generate a loadID for CacheIPProfiles and CacheIPs and store it in database
 	//make 1 insert for both IPProfile and IPs instead of 2
 	loadID := time.Now().UnixNano()
-	if err := s.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheIPProfiles: loadID, utils.CacheIPs: loadID}); err != nil {
+	if err := s.dm.SetLoadIDs(ctx, map[string]int64{utils.CacheIPProfiles: loadID, utils.CacheIPAllocations: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

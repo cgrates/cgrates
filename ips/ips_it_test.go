@@ -215,8 +215,8 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 	})
 
 	t.Run("ips apis", func(t *testing.T) {
-		var ip utils.IP
-		if err := client.Call(context.Background(), utils.IPsV1GetIP,
+		var ip utils.IPAllocations
+		if err := client.Call(context.Background(), utils.IPsV1GetIPAllocations,
 			&utils.TenantIDWithAPIOpts{
 				TenantID: &utils.TenantID{
 					Tenant: "cgrates.org",
@@ -227,8 +227,8 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 		}
 
 		usageID := "api_usage"
-		var evIPs IPs
-		if err := client.Call(context.Background(), utils.IPsV1GetIPsForEvent,
+		var evIPs IPAllocationsList
+		if err := client.Call(context.Background(), utils.IPsV1GetIPAllocationsForEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "GetIPsForEvent1",

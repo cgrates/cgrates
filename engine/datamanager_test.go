@@ -5019,7 +5019,7 @@ func TestDMGetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.DataDbCfg().Items[utils.MetaResourceProfile].Remote = true
+	cfg.DataDbCfg().Items[utils.MetaResourceProfiles].Remote = true
 	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
 	config.SetCgrConfig(cfg)
 
@@ -5416,7 +5416,7 @@ func TestDMSetResourceProfileErr(t *testing.T) {
 	Cache.Clear(nil)
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.DataDbCfg().Items[utils.MetaResourceProfile].Replicate = true
+	cfg.DataDbCfg().Items[utils.MetaResourceProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	config.SetCgrConfig(cfg)
 
@@ -5618,7 +5618,7 @@ func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cfg.DataDbCfg().Items[utils.MetaResourceProfile].Replicate = true
+	cfg.DataDbCfg().Items[utils.MetaResourceProfiles].Replicate = true
 	cfg.DataDbCfg().RplConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	config.SetCgrConfig(cfg)
 

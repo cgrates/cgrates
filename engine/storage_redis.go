@@ -447,31 +447,31 @@ func (rs *RedisStorage) RemoveIPProfileDrv(ctx *context.Context, tenant, id stri
 	return rs.Cmd(nil, redisDEL, utils.IPProfilesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetIPDrv(ctx *context.Context, tenant, id string) (*utils.IP, error) {
+func (rs *RedisStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id string) (*utils.IPAllocations, error) {
 	var values []byte
-	if err := rs.Cmd(&values, redisGET, utils.IPsPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
+	if err := rs.Cmd(&values, redisGET, utils.IPAllocationsPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return nil, err
 	}
 	if len(values) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	var ip *utils.IP
+	var ip *utils.IPAllocations
 	if err := rs.ms.Unmarshal(values, &ip); err != nil {
 		return nil, err
 	}
 	return ip, nil
 }
 
-func (rs *RedisStorage) SetIPDrv(ctx *context.Context, ip *utils.IP) error {
+func (rs *RedisStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAllocations) error {
 	result, err := rs.ms.Marshal(ip)
 	if err != nil {
 		return err
 	}
-	return rs.Cmd(nil, redisSET, utils.IPsPrefix+ip.TenantID(), string(result))
+	return rs.Cmd(nil, redisSET, utils.IPAllocationsPrefix+ip.TenantID(), string(result))
 }
 
-func (rs *RedisStorage) RemoveIPDrv(ctx *context.Context, tenant, id string) error {
-	return rs.Cmd(nil, redisDEL, utils.IPsPrefix+utils.ConcatenatedKey(tenant, id))
+func (rs *RedisStorage) RemoveIPAllocationsDrv(ctx *context.Context, tenant, id string) error {
+	return rs.Cmd(nil, redisDEL, utils.IPAllocationsPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 func (rs *RedisStorage) GetVersions(itm string) (vrs Versions, err error) {

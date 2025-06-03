@@ -33,79 +33,78 @@ import (
 	"github.com/cgrates/guardian"
 )
 
-// ipProfile represents the user configuration for the ip
+// ipProfile wraps IPProfile with lkID.
 type ipProfile struct {
 	IPProfile *utils.IPProfile
 	lkID      string // holds the reference towards guardian lock key
-
 }
 
-// lock will lock the ipProfile using guardian and store the lock within r.lkID
+// lock will lock the ipProfile using guardian and store the lock within p.lkID
 // if lkID is passed as argument, the lock is considered as executed
-func (ip *ipProfile) lock(lkID string) {
+func (p *ipProfile) lock(lkID string) {
 	if lkID == utils.EmptyString {
 		lkID = guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.IPProfileLockKey(ip.IPProfile.Tenant, ip.IPProfile.ID))
+			utils.IPProfileLockKey(p.IPProfile.Tenant, p.IPProfile.ID))
 	}
-	ip.lkID = lkID
+	p.lkID = lkID
 }
 
-// unlock will unlock the ipProfile and clear rp.lkID
-func (ip *ipProfile) unlock() {
-	if ip.lkID == utils.EmptyString {
+// unlock will unlock the ipProfile and clear p.lkID.
+func (p *ipProfile) unlock() {
+	if p.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(ip.lkID)
-	ip.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(p.lkID)
+	p.lkID = utils.EmptyString
 }
 
 // isLocked returns the locks status of this ipProfile
-func (ip *ipProfile) isLocked() bool {
-	return ip.lkID != utils.EmptyString
+func (p *ipProfile) isLocked() bool {
+	return p.lkID != utils.EmptyString
 }
 
-// ip represents an ip in the system
+// ipAllocations represents ipAllocations in the system
 // not thread safe, needs locking at process level
-type ip struct {
-	IP     *utils.IP
-	lkID   string         // ID of the lock used when matching the ip
-	ttl    *time.Duration // time to leave for this ip, picked up on each IP initialization out of config
-	tUsage *float64       // sum of all usages
-	dirty  *bool          // the usages were modified, needs save, *bool so we only save if enabled in config
-	rPrf   *ipProfile     // for ordering purposes
+type ipAllocations struct {
+	IPAllocations *utils.IPAllocations
+	lkID          string         // ID of the lock used when matching the ipAllocations
+	ttl           *time.Duration // time to leave for these ip allocations, picked up on each IPAllocations initialization out of config
+	tUsage        *float64       // sum of all usages
+	dirty         *bool          // the usages were modified, needs save, *bool so we only save if enabled in config
+	cfg           *ipProfile     // for ordering purposes
 }
 
-// lock will lock the ip using guardian and store the lock within r.lkID
+// lock will lock the ipAllocations using guardian and store the lock within ipAllocations.lkID
 // if lkID is passed as argument, the lock is considered as executed
-func (ip *ip) lock(lkID string) {
+func (a *ipAllocations) lock(lkID string) {
 	if lkID == utils.EmptyString {
 		lkID = guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.IPLockKey(ip.IP.Tenant, ip.IP.ID))
+			utils.IPAllocationsLockKey(a.IPAllocations.Tenant, a.IPAllocations.ID))
 	}
-	ip.lkID = lkID
+	a.lkID = lkID
 }
 
-// unlock will unlock the ip and clear r.lkID
-func (ip *ip) unlock() {
-	if ip.lkID == utils.EmptyString {
+// unlock will unlock the ipAllocations and clear ipAllocations.lkID
+func (a *ipAllocations) unlock() {
+	if a.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(ip.lkID)
-	ip.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(a.lkID)
+	a.lkID = utils.EmptyString
 }
 
-// isLocked returns the locks status of this ip
-func (ip *ip) isLocked() bool {
-	return ip.lkID != utils.EmptyString
+// isLocked returns the locks status of this ipAllocations object.
+func (a *ipAllocations) isLocked() bool {
+	return a.lkID != utils.EmptyString
 }
 
-// removeExpiredUnits removes units which are expired from the ip
-func (ip *ip) removeExpiredUnits() {
+// removeExpiredUnits removes units which are expired from the ipAllocations object.
+func (a *ipAllocations) removeExpiredUnits() {
 	var firstActive int
-	for _, usageID := range ip.IP.TTLIdx {
-		if u, has := ip.IP.Usages[usageID]; has && u.IsActive(time.Now()) {
+	for _, usageID := range a.IPAllocations.TTLIdx {
+		if u, has := a.IPAllocations.Usages[usageID]; has && u.IsActive(time.Now()) {
 			break
 		}
 		firstActive++
@@ -113,88 +112,100 @@ func (ip *ip) removeExpiredUnits() {
 	if firstActive == 0 {
 		return
 	}
-	for _, uID := range ip.IP.TTLIdx[:firstActive] {
-		usage, has := ip.IP.Usages[uID]
+	for _, uID := range a.IPAllocations.TTLIdx[:firstActive] {
+		usage, has := a.IPAllocations.Usages[uID]
 		if !has {
 			continue
 		}
-		delete(ip.IP.Usages, uID)
-		if ip.tUsage != nil { //  total usage was not yet calculated so we do not need to update it
-			*ip.tUsage -= usage.Units
-			if *ip.tUsage < 0 { // something went wrong
+		delete(a.IPAllocations.Usages, uID)
+		if a.tUsage != nil { //  total usage was not yet calculated so we do not need to update it
+			*a.tUsage -= usage.Units
+			if *a.tUsage < 0 { // something went wrong
 				utils.Logger.Warning(
-					fmt.Sprintf("resetting total usage for ipID: %s, usage smaller than 0: %f", ip.IP.ID, *ip.tUsage))
-				ip.tUsage = nil
+					fmt.Sprintf("resetting total usage for IP allocations %q, usage smaller than 0: %f", a.IPAllocations.ID, *a.tUsage))
+				a.tUsage = nil
 			}
 		}
 	}
-	ip.IP.TTLIdx = ip.IP.TTLIdx[firstActive:]
-	ip.tUsage = nil
+	a.IPAllocations.TTLIdx = a.IPAllocations.TTLIdx[firstActive:]
+	a.tUsage = nil
 }
 
 // recordUsage records a new usage
-func (ip *ip) recordUsage(usage *utils.IPUsage) error {
-	if _, has := ip.IP.Usages[usage.ID]; has {
+func (a *ipAllocations) recordUsage(usage *utils.IPUsage) error {
+	if _, has := a.IPAllocations.Usages[usage.ID]; has {
 		return fmt.Errorf("duplicate ip usage with id: %s", usage.TenantID())
 	}
-	if ip.ttl != nil && *ip.ttl != -1 {
-		if *ip.ttl == 0 {
+	if a.ttl != nil && *a.ttl != -1 {
+		if *a.ttl == 0 {
 			return nil // no recording for ttl of 0
 		}
 		usage = usage.Clone() // don't influence the initial ru
-		usage.ExpiryTime = time.Now().Add(*ip.ttl)
+		usage.ExpiryTime = time.Now().Add(*a.ttl)
 	}
-	ip.IP.Usages[usage.ID] = usage
-	if ip.tUsage != nil {
-		*ip.tUsage += usage.Units
+	a.IPAllocations.Usages[usage.ID] = usage
+	if a.tUsage != nil {
+		*a.tUsage += usage.Units
 	}
 	if !usage.ExpiryTime.IsZero() {
-		ip.IP.TTLIdx = append(ip.IP.TTLIdx, usage.ID)
+		a.IPAllocations.TTLIdx = append(a.IPAllocations.TTLIdx, usage.ID)
 	}
 	return nil
 }
 
 // clearUsage clears the usage for an ID
-func (ip *ip) clearUsage(usageID string) error {
-	usage, has := ip.IP.Usages[usageID]
+func (a *ipAllocations) clearUsage(usageID string) error {
+	usage, has := a.IPAllocations.Usages[usageID]
 	if !has {
 		return fmt.Errorf("cannot find usage record with id: %s", usageID)
 	}
 	if !usage.ExpiryTime.IsZero() {
-		for i, uIDIdx := range ip.IP.TTLIdx {
+		for i, uIDIdx := range a.IPAllocations.TTLIdx {
 			if uIDIdx == usageID {
-				ip.IP.TTLIdx = slices.Delete(ip.IP.TTLIdx, i, i+1)
+				a.IPAllocations.TTLIdx = slices.Delete(a.IPAllocations.TTLIdx, i, i+1)
 				break
 			}
 		}
 	}
-	if ip.tUsage != nil {
-		*ip.tUsage -= usage.Units
+	if a.tUsage != nil {
+		*a.tUsage -= usage.Units
 	}
-	delete(ip.IP.Usages, usageID)
+	delete(a.IPAllocations.Usages, usageID)
 	return nil
 }
 
-// IPs is a collection of IP objects.
-type IPs []*ip
+// IPAllocationsList is a collection of ipAllocations objects.
+type IPAllocationsList []*ipAllocations
 
-// unlock will unlock ips part of this slice
-func (ips IPs) unlock() {
-	for _, ip := range ips {
-		ip.unlock()
-		if ip.rPrf != nil {
-			ip.rPrf.unlock()
+// unlock will unlock IP allocations in this slice
+func (al IPAllocationsList) unlock() {
+	for _, allocs := range al {
+		allocs.unlock()
+		if allocs.cfg != nil {
+			allocs.cfg.unlock()
 		}
 	}
 }
 
-// ids returns a map of ip IDs which is used for caching
-func (ips IPs) ids() utils.StringSet {
+// ids returns a map of IP allocation IDs which is used for caching
+func (al IPAllocationsList) ids() utils.StringSet {
 	ids := make(utils.StringSet)
-	for _, ip := range ips {
-		ids.Add(ip.IP.ID)
+	for _, allocs := range al {
+		ids.Add(allocs.IPAllocations.ID)
 	}
 	return ids
+}
+
+// IPService is the service handling IP allocations
+type IPService struct {
+	dm           *engine.DataManager // So we can load the data in cache and index it
+	fltrs        *engine.FilterS
+	storedIPsMux sync.RWMutex    // protects storedIPs
+	storedIPs    utils.StringSet // keep a record of IP allocations which need saving, map[allocsID]bool
+	cfg          *config.CGRConfig
+	stopBackup   chan struct{} // control storing process
+	loopStopped  chan struct{}
+	cm           *engine.ConnManager
 }
 
 // NewIPService  returns a new IPService
@@ -209,18 +220,6 @@ func NewIPService(dm *engine.DataManager, cfg *config.CGRConfig,
 		stopBackup:  make(chan struct{}),
 	}
 
-}
-
-// IPService is the service handling resources
-type IPService struct {
-	dm           *engine.DataManager // So we can load the data in cache and index it
-	fltrs        *engine.FilterS
-	storedIPsMux sync.RWMutex    // protects storedIPs
-	storedIPs    utils.StringSet // keep a record of resources which need saving, map[resID]bool
-	cfg          *config.CGRConfig
-	stopBackup   chan struct{} // control storing process
-	loopStopped  chan struct{}
-	cm           *engine.ConnManager
 }
 
 // Reload stops the backupLoop and restarts it
@@ -239,10 +238,10 @@ func (s *IPService) StartLoop(ctx *context.Context) {
 // Shutdown is called to shutdown the service
 func (s *IPService) Shutdown(ctx *context.Context) {
 	close(s.stopBackup)
-	s.storeIPs(ctx)
+	s.storeIPAllocationsList(ctx)
 }
 
-// backup will regularly store resources changed to dataDB
+// backup will regularly store IP allocations changed to dataDB
 func (s *IPService) runBackup(ctx *context.Context) {
 	storeInterval := s.cfg.IPsCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -250,7 +249,7 @@ func (s *IPService) runBackup(ctx *context.Context) {
 		return
 	}
 	for {
-		s.storeIPs(ctx)
+		s.storeIPAllocationsList(ctx)
 		select {
 		case <-s.stopBackup:
 			s.loopStopped <- struct{}{}
@@ -260,37 +259,38 @@ func (s *IPService) runBackup(ctx *context.Context) {
 	}
 }
 
-// storeIPs represents one task of complete backup
-func (s *IPService) storeIPs(ctx *context.Context) {
+// storeIPAllocationsList represents one task of complete backup
+func (s *IPService) storeIPAllocationsList(ctx *context.Context) {
 	var failedRIDs []string
-	for { // don't stop until we store all dirty resources
+	for { // don't stop until we store all dirty IP allocations
 		s.storedIPsMux.Lock()
-		rID := s.storedIPs.GetOne()
-		if rID != "" {
-			s.storedIPs.Remove(rID)
+		allocsID := s.storedIPs.GetOne()
+		if allocsID != "" {
+			s.storedIPs.Remove(allocsID)
 		}
 		s.storedIPsMux.Unlock()
-		if rID == "" {
+		if allocsID == "" {
 			break // no more keys, backup completed
 		}
-		rIf, ok := engine.Cache.Get(utils.CacheIPs, rID)
+		rIf, ok := engine.Cache.Get(utils.CacheIPAllocations, allocsID)
 		if !ok || rIf == nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> failed retrieving from cache resource with ID: %s", utils.IPs, rID))
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> failed retrieving from cache IP allocations with ID %q", utils.IPs, allocsID))
 			continue
 		}
-		r := &ip{
-			IP: rIf.(*utils.IP),
+		allocs := &ipAllocations{
+			IPAllocations: rIf.(*utils.IPAllocations),
 
-			// NOTE: dirty is hardcoded to true, otherwise resources would
+			// NOTE: dirty is hardcoded to true, otherwise IP allocations would
 			// never be stored.
 			// Previously, dirty was part of the cached resource.
 			dirty: utils.BoolPointer(true),
 		}
-		r.lock(utils.EmptyString)
-		if err := s.storeIP(ctx, r); err != nil {
-			failedRIDs = append(failedRIDs, rID) // record failure so we can schedule it for next backup
+		allocs.lock(utils.EmptyString)
+		if err := s.storeIPAllocations(ctx, allocs); err != nil {
+			failedRIDs = append(failedRIDs, allocsID) // record failure so we can schedule it for next backup
 		}
-		r.unlock()
+		allocs.unlock()
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -301,33 +301,32 @@ func (s *IPService) storeIPs(ctx *context.Context) {
 	}
 }
 
-// StoreIP stores the resource in DB and corrects dirty flag
-func (s *IPService) storeIP(ctx *context.Context, r *ip) (err error) {
-	if r.dirty == nil || !*r.dirty {
-		return
+// storeIPAllocations stores the IP allocations in DB and corrects dirty flag.
+func (s *IPService) storeIPAllocations(ctx *context.Context, allocs *ipAllocations) error {
+	if allocs.dirty == nil || !*allocs.dirty {
+		return nil
 	}
-	if err = s.dm.SetIP(ctx, r.IP); err != nil {
+	if err := s.dm.SetIPAllocations(ctx, allocs.IPAllocations); err != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<IPs> failed saving IP with ID: %s, error: %s",
-				r.IP.ID, err.Error()))
-		return
+			fmt.Sprintf("<IPs> failed saving IP allocations %q: %v",
+				allocs.IPAllocations.ID, err))
+		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if tntID := r.IP.TenantID(); engine.Cache.HasItem(utils.CacheIPs, tntID) { // only cache if previously there
-		if err = engine.Cache.Set(ctx, utils.CacheIPs, tntID, r.IP, nil,
+	if tntID := allocs.IPAllocations.TenantID(); engine.Cache.HasItem(utils.CacheIPAllocations, tntID) { // only cache if previously there
+		if err := engine.Cache.Set(ctx, utils.CacheIPAllocations, tntID, allocs.IPAllocations, nil,
 			true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<IPs> failed caching IP with ID: %s, error: %s",
-					tntID, err.Error()))
-			return
+				fmt.Sprintf("<IPs> failed caching IP allocations %q: %v", tntID, err))
+			return err
 		}
 	}
-	*r.dirty = false
-	return
+	*allocs.dirty = false
+	return nil
 }
 
-// storeMatchedIPs will store the list of resources based on the StoreInterval
-func (s *IPService) storeMatchedIPs(ctx *context.Context, mtcRLs IPs) (err error) {
+// storeMatchedIPAllocations will store the list of IP allocations based on the StoreInterval
+func (s *IPService) storeMatchedIPAllocations(ctx *context.Context, matched IPAllocationsList) (err error) {
 	if s.cfg.IPsCfg().StoreInterval == 0 {
 		return
 	}
@@ -335,14 +334,14 @@ func (s *IPService) storeMatchedIPs(ctx *context.Context, mtcRLs IPs) (err error
 		s.storedIPsMux.Lock()
 		defer s.storedIPsMux.Unlock()
 	}
-	for _, r := range mtcRLs {
-		if r.dirty != nil {
-			*r.dirty = true // mark it to be saved
+	for _, allocs := range matched {
+		if allocs.dirty != nil {
+			*allocs.dirty = true // mark it to be saved
 			if s.cfg.IPsCfg().StoreInterval > 0 {
-				s.storedIPs.Add(r.IP.TenantID())
+				s.storedIPs.Add(allocs.IPAllocations.TenantID())
 				continue
 			}
-			if err = s.storeIP(ctx, r); err != nil {
+			if err = s.storeIPAllocations(ctx, allocs); err != nil {
 				return
 			}
 		}
@@ -351,9 +350,9 @@ func (s *IPService) storeMatchedIPs(ctx *context.Context, mtcRLs IPs) (err error
 	return
 }
 
-// matchingIPsForEvent returns ordered list of matching resources which are active by the time of the call
-func (s *IPService) matchingIPsForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
-	evUUID string, ttl *time.Duration) (ips IPs, err error) {
+// matchingIPAllocationsForEvent returns ordered list of matching IP allocations which are active by the time of the call
+func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
+	evUUID string, ttl *time.Duration) (al IPAllocationsList, err error) {
 	var rIDs utils.StringSet
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -375,8 +374,7 @@ func (s *IPService) matchingIPsForEvent(ctx *context.Context, tnt string, ev *ut
 				}
 			}
 		}()
-
-	} else { // select the resourceIDs out of dataDB
+	} else { // select the IP allocation IDs out of dataDB
 		rIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
 			s.cfg.IPsCfg().StringIndexedFields,
 			s.cfg.IPsCfg().PrefixIndexedFields,
@@ -396,8 +394,8 @@ func (s *IPService) matchingIPsForEvent(ctx *context.Context, tnt string, ev *ut
 			return
 		}
 	}
-	ips = make(IPs, 0, len(rIDs))
-	weights := make(map[string]float64) // stores sorting weights by resource ID
+	al = make(IPAllocationsList, 0, len(rIDs))
+	weights := make(map[string]float64) // stores sorting weights by IP allocation ID
 	for resName := range rIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -409,7 +407,7 @@ func (s *IPService) matchingIPsForEvent(ctx *context.Context, tnt string, ev *ut
 			if err == utils.ErrNotFound {
 				continue
 			}
-			ips.unlock()
+			al.unlock()
 			return
 		}
 		rPrf := &ipProfile{
@@ -420,7 +418,7 @@ func (s *IPService) matchingIPsForEvent(ctx *context.Context, tnt string, ev *ut
 		if pass, err = s.fltrs.Pass(ctx, tnt, rPrf.IPProfile.FilterIDs,
 			evNm); err != nil {
 			rPrf.unlock()
-			ips.unlock()
+			al.unlock()
 			return nil, err
 		} else if !pass {
 			rPrf.unlock()
@@ -428,48 +426,48 @@ func (s *IPService) matchingIPsForEvent(ctx *context.Context, tnt string, ev *ut
 		}
 		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.IPLockKey(rPrf.IPProfile.Tenant, rPrf.IPProfile.ID))
-		var res *utils.IP
-		if res, err = s.dm.GetIP(ctx, rPrf.IPProfile.Tenant, rPrf.IPProfile.ID, true, true, ""); err != nil {
+			utils.IPAllocationsLockKey(rPrf.IPProfile.Tenant, rPrf.IPProfile.ID))
+		var res *utils.IPAllocations
+		if res, err = s.dm.GetIPAllocations(ctx, rPrf.IPProfile.Tenant, rPrf.IPProfile.ID, true, true, ""); err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
 			rPrf.unlock()
-			ips.unlock()
+			al.unlock()
 			return nil, err
 		}
-		r := &ip{
-			IP: res,
+		allocs := &ipAllocations{
+			IPAllocations: res,
 		}
-		r.lock(lkID) // pass the lock into resource so we have it as reference
-		if rPrf.IPProfile.Stored && r.dirty == nil {
-			r.dirty = utils.BoolPointer(false)
+		allocs.lock(lkID) // pass the lock into IP allocations so we have it as reference
+		if rPrf.IPProfile.Stored && allocs.dirty == nil {
+			allocs.dirty = utils.BoolPointer(false)
 		}
 		if ttl != nil {
 			if *ttl != 0 {
-				r.ttl = ttl
+				allocs.ttl = ttl
 			}
 		} else if rPrf.IPProfile.TTL >= 0 {
-			r.ttl = utils.DurationPointer(rPrf.IPProfile.TTL)
+			allocs.ttl = utils.DurationPointer(rPrf.IPProfile.TTL)
 		}
-		r.rPrf = rPrf
+		allocs.cfg = rPrf
 		weight, err := engine.WeightFromDynamics(ctx, rPrf.IPProfile.Weights, s.fltrs, tnt, evNm)
 		if err != nil {
 			return nil, err
 		}
-		weights[r.IP.ID] = weight
-		ips = append(ips, r)
+		weights[allocs.IPAllocations.ID] = weight
+		al = append(al, allocs)
 	}
 
-	if len(ips) == 0 {
+	if len(al) == 0 {
 		return nil, utils.ErrNotFound
 	}
 
 	// Sort by weight (higher values first).
-	slices.SortFunc(ips, func(a, b *ip) int {
-		return cmp.Compare(weights[b.IP.ID], weights[a.IP.ID])
+	slices.SortFunc(al, func(a, b *ipAllocations) int {
+		return cmp.Compare(weights[b.IPAllocations.ID], weights[a.IPAllocations.ID])
 	})
 
-	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID, ips.ids(), nil, true, ""); err != nil {
-		ips.unlock()
+	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID, al.ids(), nil, true, ""); err != nil {
+		al.unlock()
 	}
 	return
 }

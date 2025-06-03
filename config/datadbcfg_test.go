@@ -488,7 +488,7 @@ func TestDataDbCfgloadFromJsonCfgItems(t *testing.T) {
 		},
 		RmtConns: []string{"Conn1"},
 		Items: map[string]*ItemOpts{
-			utils.MetaResourceProfile:   {Limit: -1},
+			utils.MetaResourceProfiles:  {Limit: -1},
 			utils.MetaResources:         {Limit: -1},
 			utils.MetaStatQueueProfiles: {Limit: -1},
 		},

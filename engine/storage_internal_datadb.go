@@ -260,21 +260,21 @@ func (iDB *InternalDB) RemoveIPProfileDrv(_ *context.Context, tenant, id string)
 	return nil
 }
 
-func (iDB *InternalDB) GetIPDrv(_ *context.Context, tenant, id string) (*utils.IP, error) {
-	if x, ok := iDB.db.Get(utils.CacheIPs, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
-		return x.(*utils.IP), nil
+func (iDB *InternalDB) GetIPAllocationsDrv(_ *context.Context, tenant, id string) (*utils.IPAllocations, error) {
+	if x, ok := iDB.db.Get(utils.CacheIPAllocations, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
+		return x.(*utils.IPAllocations), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetIPDrv(_ *context.Context, ip *utils.IP) error {
-	iDB.db.Set(utils.CacheIPs, ip.TenantID(), ip, nil,
+func (iDB *InternalDB) SetIPAllocationsDrv(_ *context.Context, ip *utils.IPAllocations) error {
+	iDB.db.Set(utils.CacheIPAllocations, ip.TenantID(), ip, nil,
 		true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) RemoveIPDrv(_ *context.Context, tenant, id string) error {
-	iDB.db.Remove(utils.CacheIPs, utils.ConcatenatedKey(tenant, id),
+func (iDB *InternalDB) RemoveIPAllocationsDrv(_ *context.Context, tenant, id string) error {
+	iDB.db.Remove(utils.CacheIPAllocations, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return nil
 }

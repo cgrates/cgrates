@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-// IPProfile defines the configuration of the IP.
+// IPProfile defines the configuration of an IPAllocations object.
 type IPProfile struct {
 	Tenant    string
 	ID        string
@@ -34,37 +34,43 @@ type IPProfile struct {
 	Pools     []*Pool
 }
 
+// IPProfileWithAPIOpts wraps IPProfile with APIOpts.
+type IPProfileWithAPIOpts struct {
+	*IPProfile
+	APIOpts map[string]any
+}
+
 // TenantID returns the concatenated tenant and ID.
-func (ip *IPProfile) TenantID() string {
-	return ConcatenatedKey(ip.Tenant, ip.ID)
+func (p *IPProfile) TenantID() string {
+	return ConcatenatedKey(p.Tenant, p.ID)
 }
 
 // Clone creates a deep copy of IPProfile for thread-safe use.
-func (ip *IPProfile) Clone() *IPProfile {
-	if ip == nil {
+func (p *IPProfile) Clone() *IPProfile {
+	if p == nil {
 		return nil
 	}
-	pools := make([]*Pool, 0, len(ip.Pools))
-	for _, pool := range ip.Pools {
+	pools := make([]*Pool, 0, len(p.Pools))
+	for _, pool := range p.Pools {
 		pools = append(pools, pool.Clone())
 	}
 	return &IPProfile{
-		Tenant:    ip.Tenant,
-		ID:        ip.ID,
-		FilterIDs: slices.Clone(ip.FilterIDs),
-		Weights:   ip.Weights.Clone(),
-		TTL:       ip.TTL,
-		Stored:    ip.Stored,
+		Tenant:    p.Tenant,
+		ID:        p.ID,
+		FilterIDs: slices.Clone(p.FilterIDs),
+		Weights:   p.Weights.Clone(),
+		TTL:       p.TTL,
+		Stored:    p.Stored,
 		Pools:     pools,
 	}
 }
 
 // CacheClone returns a clone of IPProfile used by ltcache CacheCloner
-func (ip *IPProfile) CacheClone() any {
-	return ip.Clone()
+func (p *IPProfile) CacheClone() any {
+	return p.Clone()
 }
 
-func (ip *IPProfile) Set(path []string, val any, newBranch bool) error {
+func (p *IPProfile) Set(path []string, val any, newBranch bool) error {
 	if len(path) != 1 && len(path) != 2 {
 		return ErrWrongPath
 	}
@@ -73,21 +79,21 @@ func (ip *IPProfile) Set(path []string, val any, newBranch bool) error {
 	default:
 		return ErrWrongPath
 	case Tenant:
-		ip.Tenant = IfaceAsString(val)
+		p.Tenant = IfaceAsString(val)
 	case ID:
-		ip.ID = IfaceAsString(val)
+		p.ID = IfaceAsString(val)
 	case FilterIDs:
 		var valA []string
 		valA, err = IfaceAsStringSlice(val)
-		ip.FilterIDs = append(ip.FilterIDs, valA...)
+		p.FilterIDs = append(p.FilterIDs, valA...)
 	case Weights:
 		if val != "" {
-			ip.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			p.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
 		}
 	case TTL:
-		ip.TTL, err = IfaceAsDuration(val)
+		p.TTL, err = IfaceAsDuration(val)
 	case Stored:
-		ip.Stored, err = IfaceAsBool(val)
+		p.Stored, err = IfaceAsBool(val)
 	case Pools:
 		if len(path) != 2 {
 			return ErrWrongPath
@@ -95,53 +101,53 @@ func (ip *IPProfile) Set(path []string, val any, newBranch bool) error {
 		if val == EmptyString {
 			return nil
 		}
-		if len(ip.Pools) == 0 || newBranch {
-			ip.Pools = append(ip.Pools, new(Pool))
+		if len(p.Pools) == 0 || newBranch {
+			p.Pools = append(p.Pools, new(Pool))
 		}
-		pool := ip.Pools[len(ip.Pools)-1]
+		pool := p.Pools[len(p.Pools)-1]
 		return pool.Set(path[1:], val, newBranch)
 	}
 	return err
 }
 
-func (ip *IPProfile) Merge(other any) {
+func (p *IPProfile) Merge(other any) {
 	o := other.(*IPProfile)
 	if len(o.Tenant) != 0 {
-		ip.Tenant = o.Tenant
+		p.Tenant = o.Tenant
 	}
 	if len(o.ID) != 0 {
-		ip.ID = o.ID
+		p.ID = o.ID
 	}
-	ip.FilterIDs = append(ip.FilterIDs, o.FilterIDs...)
-	ip.Weights = append(ip.Weights, o.Weights...)
+	p.FilterIDs = append(p.FilterIDs, o.FilterIDs...)
+	p.Weights = append(p.Weights, o.Weights...)
 	if o.TTL != 0 {
-		ip.TTL = o.TTL
+		p.TTL = o.TTL
 	}
 	if o.Stored {
-		ip.Stored = o.Stored
+		p.Stored = o.Stored
 	}
 	for _, pool := range o.Pools {
-		if idx := slices.IndexFunc(ip.Pools, func(p *Pool) bool {
+		if idx := slices.IndexFunc(p.Pools, func(p *Pool) bool {
 			return p.ID == pool.ID
 		}); idx != -1 {
-			ip.Pools[idx].Merge(pool)
+			p.Pools[idx].Merge(pool)
 			continue
 		}
-		ip.Pools = append(ip.Pools, pool)
+		p.Pools = append(p.Pools, pool)
 	}
 }
 
-func (ip *IPProfile) String() string { return ToJSON(ip) }
+func (p *IPProfile) String() string { return ToJSON(p) }
 
-func (ip *IPProfile) FieldAsString(fldPath []string) (string, error) {
-	val, err := ip.FieldAsInterface(fldPath)
+func (p *IPProfile) FieldAsString(fldPath []string) (string, error) {
+	val, err := p.FieldAsInterface(fldPath)
 	if err != nil {
 		return "", err
 	}
 	return IfaceAsString(val), nil
 }
 
-func (ip *IPProfile) FieldAsInterface(fldPath []string) (any, error) {
+func (p *IPProfile) FieldAsInterface(fldPath []string) (any, error) {
 	if len(fldPath) != 1 {
 		return nil, ErrNotFound
 	}
@@ -151,42 +157,36 @@ func (ip *IPProfile) FieldAsInterface(fldPath []string) (any, error) {
 		if idx != nil {
 			switch fld {
 			case FilterIDs:
-				if *idx < len(ip.FilterIDs) {
-					return ip.FilterIDs[*idx], nil
+				if *idx < len(p.FilterIDs) {
+					return p.FilterIDs[*idx], nil
 				}
 			case Pools:
-				if *idx < len(ip.Pools) {
-					return ip.Pools[*idx].FieldAsInterface(fldPath[1:])
+				if *idx < len(p.Pools) {
+					return p.Pools[*idx].FieldAsInterface(fldPath[1:])
 				}
 			}
 		}
 		return nil, ErrNotFound
 	case Tenant:
-		return ip.Tenant, nil
+		return p.Tenant, nil
 	case ID:
-		return ip.ID, nil
+		return p.ID, nil
 	case FilterIDs:
-		return ip.FilterIDs, nil
+		return p.FilterIDs, nil
 	case Weights:
-		return ip.Weights, nil
+		return p.Weights, nil
 	case TTL:
-		return ip.TTL, nil
+		return p.TTL, nil
 	case Stored:
-		return ip.Stored, nil
+		return p.Stored, nil
 	case Pools:
-		return ip.Pools, nil
+		return p.Pools, nil
 	}
 }
 
-// IPProfileLockKey returns the ID used to lock a resourceProfile with guardian
+// IPProfileLockKey returns the ID used to lock an IPProfile with guardian
 func IPProfileLockKey(tnt, id string) string {
 	return ConcatenatedKey(CacheIPProfiles, tnt, id)
-}
-
-// IPProfileWithAPIOpts wraps IPProfile with APIOpts.
-type IPProfileWithAPIOpts struct {
-	*IPProfile
-	APIOpts map[string]any
 }
 
 type Pool struct {
@@ -200,7 +200,7 @@ type Pool struct {
 	Blockers  DynamicBlockers
 }
 
-// Clone creates a deep copy of IPProfile for thread-safe use.
+// Clone creates a deep copy of Pool for thread-safe use.
 func (p *Pool) Clone() *Pool {
 	if p == nil {
 		return nil
@@ -251,30 +251,30 @@ func (p *Pool) Set(path []string, val any, _ bool) error {
 	return err
 }
 
-func (p *Pool) Merge(v2 any) {
-	vi := v2.(*Pool)
+func (p *Pool) Merge(other any) {
+	o := other.(*Pool)
 
 	// NOTE: Merge gets called when the IDs are equal, so this is a no-op.
 	// Kept for consistency with other components.
-	if len(vi.ID) != 0 {
-		p.ID = vi.ID
+	if len(o.ID) != 0 {
+		p.ID = o.ID
 	}
 
-	p.FilterIDs = append(p.FilterIDs, vi.FilterIDs...)
-	if vi.Type != "" {
-		p.Type = vi.Type
+	p.FilterIDs = append(p.FilterIDs, o.FilterIDs...)
+	if o.Type != "" {
+		p.Type = o.Type
 	}
-	if vi.Range != "" {
-		p.Range = vi.Range
+	if o.Range != "" {
+		p.Range = o.Range
 	}
-	if vi.Strategy != "" {
-		p.Strategy = vi.Strategy
+	if o.Strategy != "" {
+		p.Strategy = o.Strategy
 	}
-	if vi.Message != "" {
-		p.Message = vi.Message
+	if o.Message != "" {
+		p.Message = o.Message
 	}
-	p.Weights = append(p.Weights, vi.Weights...)
-	p.Blockers = append(p.Blockers, vi.Blockers...)
+	p.Weights = append(p.Weights, o.Weights...)
+	p.Blockers = append(p.Blockers, o.Blockers...)
 }
 
 func (p *Pool) String() string { return ToJSON(p) }
@@ -325,7 +325,7 @@ func (p *Pool) FieldAsInterface(fldPath []string) (any, error) {
 	}
 }
 
-// IPUsage represents an usage counted.
+// IPUsage represents a usage count.
 type IPUsage struct {
 	Tenant     string
 	ID         string
@@ -338,12 +338,12 @@ func (u *IPUsage) TenantID() string {
 	return ConcatenatedKey(u.Tenant, u.ID)
 }
 
-// isActive checks ExpiryTime at some time
+// IsActive checks ExpiryTime at some time
 func (u *IPUsage) IsActive(atTime time.Time) bool {
 	return u.ExpiryTime.IsZero() || u.ExpiryTime.Sub(atTime) > 0
 }
 
-// Clone duplicates ru
+// Clone duplicates the IPUsage
 func (u *IPUsage) Clone() *IPUsage {
 	if u == nil {
 		return nil
@@ -352,60 +352,60 @@ func (u *IPUsage) Clone() *IPUsage {
 	return &clone
 }
 
-// IP represents ...
-type IP struct {
+// IPAllocations represents IP allocations with usage tracking and TTL management.
+type IPAllocations struct {
 	Tenant string
 	ID     string
 	Usages map[string]*IPUsage
 	TTLIdx []string
 }
 
-// Clone clones *IP (lkID excluded)
-func (ip *IP) Clone() *IP {
-	if ip == nil {
+// IPAllocationsWithAPIOpts wraps IPAllocations with APIOpts.
+type IPAllocationsWithAPIOpts struct {
+	*IPAllocations
+	APIOpts map[string]any
+}
+
+// Clone clones IPAllocations object (lkID excluded)
+func (a *IPAllocations) Clone() *IPAllocations {
+	if a == nil {
 		return nil
 	}
-	clone := &IP{
-		Tenant: ip.Tenant,
-		ID:     ip.ID,
-		TTLIdx: slices.Clone(ip.TTLIdx),
+	clone := &IPAllocations{
+		Tenant: a.Tenant,
+		ID:     a.ID,
+		TTLIdx: slices.Clone(a.TTLIdx),
 	}
-	if ip.Usages != nil {
-		clone.Usages = make(map[string]*IPUsage, len(ip.Usages))
-		for key, usage := range ip.Usages {
+	if a.Usages != nil {
+		clone.Usages = make(map[string]*IPUsage, len(a.Usages))
+		for key, usage := range a.Usages {
 			clone.Usages[key] = usage.Clone()
 		}
 	}
 	return clone
 }
 
-// CacheClone returns a clone of IP used by ltcache CacheCloner
-func (ip *IP) CacheClone() any {
-	return ip.Clone()
-}
-
-// IPWithAPIOpts wraps IP with APIOpts.
-type IPWithAPIOpts struct {
-	*IP
-	APIOpts map[string]any
+// CacheClone returns a clone of IPAllocations object used by ltcache CacheCloner.
+func (a *IPAllocations) CacheClone() any {
+	return a.Clone()
 }
 
 // TenantID returns the unique ID in a multi-tenant environment
-func (ip *IP) TenantID() string {
-	return ConcatenatedKey(ip.Tenant, ip.ID)
+func (a *IPAllocations) TenantID() string {
+	return ConcatenatedKey(a.Tenant, a.ID)
 }
 
 // TotalUsage returns the sum of all usage units
 // Exported to be used in FilterS
-func (ip *IP) TotalUsage() float64 {
+func (a *IPAllocations) TotalUsage() float64 {
 	var tu float64
-	for _, ru := range ip.Usages {
+	for _, ru := range a.Usages {
 		tu += ru.Units
 	}
 	return tu
 }
 
-// IPLockKey returns the ID used to lock a resource with guardian
-func IPLockKey(tnt, id string) string {
-	return ConcatenatedKey(CacheIPs, tnt, id)
+// IPAllocationsLockKey returns the ID used to lock IP allocations with guardian
+func IPAllocationsLockKey(tnt, id string) string {
+	return ConcatenatedKey(CacheIPAllocations, tnt, id)
 }

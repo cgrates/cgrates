@@ -37,7 +37,7 @@ var (
 		CacheCapsEvents, CacheReplicationHosts})
 
 	DataDBPartitions = NewStringSet([]string{
-		CacheResourceProfiles, CacheResources, CacheEventResources, CacheIPProfiles, CacheIPs,
+		CacheResourceProfiles, CacheResources, CacheEventResources, CacheIPProfiles, CacheIPAllocations,
 		CacheEventIPs, CacheStatQueueProfiles, CacheStatQueues, CacheThresholdProfiles,
 		CacheThresholds, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
 		CacheTrendProfiles, CacheChargerProfiles, CacheActionProfiles, CacheRankingProfiles,
@@ -55,7 +55,7 @@ var (
 		CacheResourceProfiles:            ResourceProfilesPrefix,
 		CacheResources:                   ResourcesPrefix,
 		CacheIPProfiles:                  IPProfilesPrefix,
-		CacheIPs:                         IPsPrefix,
+		CacheIPAllocations:               IPAllocationsPrefix,
 		CacheStatQueueProfiles:           StatQueueProfilePrefix,
 		CacheStatQueues:                  StatQueuePrefix,
 		CacheTrendProfiles:               TrendProfilePrefix,
@@ -251,8 +251,8 @@ const (
 	ConfigPrefix              = "cfg_"
 	ResourcesPrefix           = "res_"
 	ResourceProfilesPrefix    = "rsp_"
-	IPsPrefix                 = "ips_"
-	IPProfilesPrefix          = "ipp_"
+	IPAllocationsPrefix       = "ips_"
+	IPProfilesPrefix          = "ipa_"
 	ThresholdPrefix           = "thd_"
 	FilterPrefix              = "ftr_"
 	CDRsStatsPrefix           = "cst_"
@@ -416,7 +416,6 @@ const (
 	RatingProfiles       = "RatingProfiles"
 	AccountActions       = "AccountActions"
 	ResourcesStr         = "Resources"
-	IPsStr               = "IPs"
 	Stats                = "Stats"
 	Rankings             = "Rankings"
 	Trends               = "Trends"
@@ -465,7 +464,6 @@ const (
 	AccountID    = "AccountID"
 	AccountIDs   = "AccountIDs"
 	ResourceID   = "ResourceID"
-	IPID         = "IPID"
 	TotalUsage   = "TotalUsage"
 	StatID       = "StatID"
 	BalanceType  = "BalanceType"
@@ -496,7 +494,6 @@ const (
 	SessionSCosts = "SessionSCosts"
 	RQF           = "RQF"
 	ResourceStr   = "Resource"
-	IPStr         = "IP"
 	User          = "User"
 	Subscribers   = "Subscribers"
 	//Destinations             = "Destinations"
@@ -680,7 +677,6 @@ const (
 	VersionName             = "Version"
 	MetaTenant              = "*tenant"
 	ResourceUsageStr        = "ResourceUsage"
-	IPUsageStr              = "IPUsage"
 	MetaDuration            = "*duration"
 	MetaLibPhoneNumber      = "*libphonenumber"
 	MetaTimeString          = "*time_string"
@@ -991,7 +987,7 @@ const (
 const (
 	MetaAccounts          = "*accounts"
 	MetaActions           = "*actions"
-	MetaResourceProfile   = "*resource_profiles"
+	MetaResourceProfiles  = "*resource_profiles"
 	MetaIPProfiles        = "*ip_profiles"
 	MetaStatQueueProfiles = "*statqueue_profiles"
 	MetaStatQueues        = "*statqueues"
@@ -1003,6 +999,7 @@ const (
 	MetaRateProfiles      = "*rate_profiles"
 	MetaRateProfileRates  = "*rate_profile_rates"
 	MetaChargerProfiles   = "*charger_profiles"
+	MetaIPAllocations     = "*ip_allocations"
 	MetaThresholds        = "*thresholds"
 	MetaRoutes            = "*routes"
 	MetaAttributes        = "*attributes"
@@ -1060,7 +1057,6 @@ const (
 	ChargerSLow    = "chargers"
 	RoutesLow      = "routes"
 	ResourcesLow   = "resources"
-	IPsLow         = "ips"
 	StatServiceLow = "stats"
 	ThresholdsLow  = "thresholds"
 	AnalyzerSLow   = "analyzers"
@@ -1117,7 +1113,6 @@ const (
 	MetaTpActionProfiles    = "*tp_action_profiles"
 	MetaTpRateProfiles      = "*tp_rate_profiles"
 	MetaTpResources         = "*tp_resources"
-	MetaTpIPs               = "*tp_ips"
 	MetaTpChargers          = "*tp_chargers"
 	MetaDurationSeconds     = "*duration_seconds"
 	MetaDurationNanoseconds = "*duration_nanoseconds"
@@ -1138,8 +1133,6 @@ const (
 	TpStats          = "TpStats"
 	TpResources      = "TpResources"
 	TpResource       = "TpResource"
-	TpIPs            = "TpIPs"
-	TpIP             = "TpIP"
 	TpChargers       = "TpChargers"
 	TpRateProfiles   = "TpRateProfiles"
 	TpActionProfiles = "TpActionProfiles"
@@ -1192,7 +1185,7 @@ const (
 	MetaAPIBan             = "*apiban"
 	MetaSentryPeer         = "*sentrypeer"
 	MetaToken              = "*token"
-	MetaIp                 = "*ip"
+	MetaIP                 = "*ip"
 	MetaNumber             = "*number"
 	MetaActivationInterval = "*ai"
 	MetaRegex              = "*regex"
@@ -1235,7 +1228,7 @@ const (
 	ReplicatorSv1GetTrend             = "ReplicatorSv1.GetTrend"
 	ReplicatorSv1GetResource          = "ReplicatorSv1.GetResource"
 	ReplicatorSv1GetResourceProfile   = "ReplicatorSv1.GetResourceProfile"
-	ReplicatorSv1GetIP                = "ReplicatorSv1.GetIP"
+	ReplicatorSv1GetIPAllocations     = "ReplicatorSv1.GetIPAllocations"
 	ReplicatorSv1GetIPProfile         = "ReplicatorSv1.GetIPProfile"
 	ReplicatorSv1GetRouteProfile      = "ReplicatorSv1.GetRouteProfile"
 	ReplicatorSv1GetAttributeProfile  = "ReplicatorSv1.GetAttributeProfile"
@@ -1257,7 +1250,7 @@ const (
 	ReplicatorSv1SetTrend
 	ReplicatorSv1SetResource         = "ReplicatorSv1.SetResource"
 	ReplicatorSv1SetResourceProfile  = "ReplicatorSv1.SetResourceProfile"
-	ReplicatorSv1SetIP               = "ReplicatorSv1.SetIP"
+	ReplicatorSv1SetIPAllocations    = "ReplicatorSv1.SetIPAllocations"
 	ReplicatorSv1SetIPProfile        = "ReplicatorSv1.SetIPProfile"
 	ReplicatorSv1SetRouteProfile     = "ReplicatorSv1.SetRouteProfile"
 	ReplicatorSv1SetAttributeProfile = "ReplicatorSv1.SetAttributeProfile"
@@ -1278,7 +1271,7 @@ const (
 	ReplicatorSv1RemoveTrend            = "ReplicatorSv1.RemoveTrend"
 	ReplicatorSv1RemoveResource         = "ReplicatorSv1.RemoveResource"
 	ReplicatorSv1RemoveResourceProfile  = "ReplicatorSv1.RemoveResourceProfile"
-	ReplicatorSv1RemoveIP               = "ReplicatorSv1.RemoveIP"
+	ReplicatorSv1RemoveIPAllocations    = "ReplicatorSv1.RemoveIPAllocations"
 	ReplicatorSv1RemoveIPProfile        = "ReplicatorSv1.RemoveIPProfile"
 	ReplicatorSv1RemoveRouteProfile     = "ReplicatorSv1.RemoveRouteProfile"
 	ReplicatorSv1RemoveAttributeProfile = "ReplicatorSv1.RemoveAttributeProfile"
@@ -1617,18 +1610,18 @@ const (
 
 // IPs APIs
 const (
-	IPsV1Ping                  = "IPsV1.Ping"
-	IPsV1GetIP                 = "IPsV1.GetIP"
-	IPsV1GetIPsForEvent        = "IPsV1.GetIPsForEvent"
-	IPsV1AuthorizeIPs          = "IPsV1.AuthorizeIPs"
-	IPsV1AllocateIPs           = "IPsV1.AllocateIPs"
-	IPsV1ReleaseIPs            = "IPsV1.ReleaseIPs"
-	AdminSv1SetIPProfile       = "AdminSv1.SetIPProfile"
-	AdminSv1GetIPProfiles      = "AdminSv1.GetIPProfiles"
-	AdminSv1RemoveIPProfile    = "AdminSv1.RemoveIPProfile"
-	AdminSv1GetIPProfile       = "AdminSv1.GetIPProfile"
-	AdminSv1GetIPProfileIDs    = "AdminSv1.GetIPProfileIDs"
-	AdminSv1GetIPProfilesCount = "AdminSv1.GetIPProfilesCount"
+	IPsV1Ping                     = "IPsV1.Ping"
+	IPsV1GetIPAllocations         = "IPsV1.GetIPAllocations"
+	IPsV1GetIPAllocationsForEvent = "IPsV1.GetIPAllocationsForEvent"
+	IPsV1AuthorizeIPs             = "IPsV1.AuthorizeIPs"
+	IPsV1AllocateIPs              = "IPsV1.AllocateIPs"
+	IPsV1ReleaseIPs               = "IPsV1.ReleaseIPs"
+	AdminSv1SetIPProfile          = "AdminSv1.SetIPProfile"
+	AdminSv1GetIPProfiles         = "AdminSv1.GetIPProfiles"
+	AdminSv1RemoveIPProfile       = "AdminSv1.RemoveIPProfile"
+	AdminSv1GetIPProfile          = "AdminSv1.GetIPProfile"
+	AdminSv1GetIPProfileIDs       = "AdminSv1.GetIPProfileIDs"
+	AdminSv1GetIPProfilesCount    = "AdminSv1.GetIPProfilesCount"
 )
 
 // SessionS APIs
@@ -1826,7 +1819,6 @@ const (
 // Table Name
 const (
 	TBLTPResources       = "tp_resources"
-	TBLTPIPs             = "tp_ips"
 	TBLTPStats           = "tp_stats"
 	TBLTPRankings        = "tp_rankings"
 	TBLTPTrends          = "tp_trends"
@@ -1852,7 +1844,7 @@ const (
 	CacheResources                   = "*resources"
 	CacheResourceProfiles            = "*resource_profiles"
 	CacheEventResources              = "*event_resources"
-	CacheIPs                         = "*ips"
+	CacheIPAllocations               = "*ip_allocations"
 	CacheIPProfiles                  = "*ip_profiles"
 	CacheEventIPs                    = "*event_ips"
 	CacheStatQueueProfiles           = "*statqueue_profiles"

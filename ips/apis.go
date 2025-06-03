@@ -28,8 +28,8 @@ import (
 	"github.com/cgrates/guardian"
 )
 
-// V1GetIPsForEvent returns active IPs matching the event.
-func (s *IPService) V1GetIPsForEvent(ctx *context.Context, args *utils.CGREvent, reply *IPs) (err error) {
+// V1GetIPAllocationsForEvent returns active IPs matching the event.
+func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils.CGREvent, reply *IPAllocationsList) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -60,14 +60,14 @@ func (s *IPService) V1GetIPsForEvent(ctx *context.Context, args *utils.CGREvent,
 
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.IPsV1GetIPsForEvent, utils.ConcatenatedKey(tnt, args.ID))
+		cacheKey := utils.ConcatenatedKey(utils.IPsV1GetIPAllocationsForEvent, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*IPs)
+				*reply = *cachedResp.Result.(*IPAllocationsList)
 			}
 			return cachedResp.Error
 		}
@@ -77,8 +77,8 @@ func (s *IPService) V1GetIPsForEvent(ctx *context.Context, args *utils.CGREvent,
 	}
 	// end of RPC caching
 
-	var mtcRLs IPs
-	if mtcRLs, err = s.matchingIPsForEvent(ctx, tnt, args, usageID, usageTTL); err != nil {
+	var mtcRLs IPAllocationsList
+	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, usageID, usageTTL); err != nil {
 		return err
 	}
 	*reply = mtcRLs
@@ -141,8 +141,8 @@ func (s *IPService) V1AuthorizeIPs(ctx *context.Context, args *utils.CGREvent, r
 	}
 	// end of RPC caching
 
-	var mtcRLs IPs
-	if mtcRLs, err = s.matchingIPsForEvent(ctx, tnt, args, usageID, usageTTL); err != nil {
+	var mtcRLs IPAllocationsList
+	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, usageID, usageTTL); err != nil {
 		return err
 	}
 	defer mtcRLs.unlock()
@@ -211,8 +211,8 @@ func (s *IPService) V1AllocateIPs(ctx *context.Context, args *utils.CGREvent, re
 	}
 	// end of RPC caching
 
-	var mtcRLs IPs
-	if mtcRLs, err = s.matchingIPsForEvent(ctx, tnt, args, usageID,
+	var mtcRLs IPAllocationsList
+	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, usageID,
 		usageTTL); err != nil {
 		return err
 	}
@@ -224,7 +224,7 @@ func (s *IPService) V1AllocateIPs(ctx *context.Context, args *utils.CGREvent, re
 	*/
 
 	// index it for storing
-	if err = s.storeMatchedIPs(ctx, mtcRLs); err != nil {
+	if err = s.storeMatchedIPAllocations(ctx, mtcRLs); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -281,8 +281,8 @@ func (s *IPService) V1ReleaseIPs(ctx *context.Context, args *utils.CGREvent, rep
 	}
 	// end of RPC caching
 
-	var mtcRLs IPs
-	if mtcRLs, err = s.matchingIPsForEvent(ctx, tnt, args, usageID,
+	var mtcRLs IPAllocationsList
+	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, usageID,
 		usageTTL); err != nil {
 		return
 	}
@@ -294,7 +294,7 @@ func (s *IPService) V1ReleaseIPs(ctx *context.Context, args *utils.CGREvent, rep
 	*/
 
 	// Handle storing
-	if err = s.storeMatchedIPs(ctx, mtcRLs); err != nil {
+	if err = s.storeMatchedIPAllocations(ctx, mtcRLs); err != nil {
 		return
 	}
 
@@ -302,8 +302,8 @@ func (s *IPService) V1ReleaseIPs(ctx *context.Context, args *utils.CGREvent, rep
 	return
 }
 
-// V1GetIP returns a resource configuration
-func (s *IPService) V1GetIP(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IP) error {
+// V1GetIPAllocations returns a resource configuration
+func (s *IPService) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -315,10 +315,10 @@ func (s *IPService) V1GetIP(ctx *context.Context, arg *utils.TenantIDWithAPIOpts
 	// make sure resource is locked at process level
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
-		utils.IPLockKey(tnt, arg.ID))
+		utils.IPAllocationsLockKey(tnt, arg.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 
-	ip, err := s.dm.GetIP(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
+	ip, err := s.dm.GetIPAllocations(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
