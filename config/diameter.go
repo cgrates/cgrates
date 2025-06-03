@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -31,6 +33,8 @@ type DiameterAgentCfg struct {
 	DictionariesPath  string
 	CeApplications    []string
 	SessionSConns     []string
+	StatSConns        []string
+	ThresholdSConns   []string
 	OriginHost        string
 	OriginRealm       string
 	VendorID          int
@@ -72,6 +76,12 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 				da.SessionSConns[idx] = utils.ConcatenatedKey(attrConn, utils.MetaSessionS)
 			}
 		}
+	}
+	if jsnCfg.StatSConns != nil {
+		da.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+	}
+	if jsnCfg.ThresholdSConns != nil {
+		da.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
 	}
 	if jsnCfg.Origin_host != nil {
 		da.OriginHost = *jsnCfg.Origin_host
@@ -120,8 +130,8 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg, separa
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
-	initialMP = map[string]any{
+func (da *DiameterAgentCfg) AsMapInterface(separator string) map[string]any {
+	m := map[string]any{
 		utils.EnabledCfg:          da.Enabled,
 		utils.ListenNetCfg:        da.ListenNet,
 		utils.ListenCfg:           da.Listen,
@@ -134,19 +144,21 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 		utils.ASRTemplateCfg:      da.ASRTemplate,
 		utils.RARTemplateCfg:      da.RARTemplate,
 		utils.ForcedDisconnectCfg: da.ForcedDisconnect,
+		utils.StatSConnsCfg:       stripInternalConns(da.StatSConns),
+		utils.ThresholdSConnsCfg:  stripInternalConns(da.ThresholdSConns),
 	}
 
 	if da.CeApplications != nil {
 		apps := make([]string, len(da.CeApplications))
 		copy(apps, da.CeApplications)
-		initialMP[utils.CeApplicationsCfg] = apps
+		m[utils.CeApplicationsCfg] = apps
 	}
 
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	initialMP[utils.RequestProcessorsCfg] = requestProcessors
+	m[utils.RequestProcessorsCfg] = requestProcessors
 
 	if da.SessionSConns != nil {
 		sessionSConns := make([]string, len(da.SessionSConns))
@@ -158,18 +170,22 @@ func (da *DiameterAgentCfg) AsMapInterface(separator string) (initialMP map[stri
 				sessionSConns[i] = rpcclient.BiRPCInternal
 			}
 		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		m[utils.SessionSConnsCfg] = sessionSConns
 	}
-	return
+	return m
 }
 
 // Clone returns a deep copy of DiameterAgentCfg
-func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
-	cln = &DiameterAgentCfg{
+func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
+	clone := &DiameterAgentCfg{
 		Enabled:          da.Enabled,
 		ListenNet:        da.ListenNet,
 		Listen:           da.Listen,
 		DictionariesPath: da.DictionariesPath,
+		CeApplications:   slices.Clone(da.CeApplications),
+		SessionSConns:    slices.Clone(da.SessionSConns),
+		StatSConns:       slices.Clone(da.StatSConns),
+		ThresholdSConns:  slices.Clone(da.ThresholdSConns),
 		OriginHost:       da.OriginHost,
 		OriginRealm:      da.OriginRealm,
 		VendorID:         da.VendorID,
@@ -179,19 +195,11 @@ func (da DiameterAgentCfg) Clone() (cln *DiameterAgentCfg) {
 		RARTemplate:      da.RARTemplate,
 		ForcedDisconnect: da.ForcedDisconnect,
 	}
-	if da.CeApplications != nil {
-		cln.CeApplications = make([]string, len(da.CeApplications))
-		copy(cln.CeApplications, da.CeApplications)
-	}
-	if da.SessionSConns != nil {
-		cln.SessionSConns = make([]string, len(da.SessionSConns))
-		copy(cln.SessionSConns, da.SessionSConns)
-	}
 	if da.RequestProcessors != nil {
-		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
+		clone.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
 		for i, req := range da.RequestProcessors {
-			cln.RequestProcessors[i] = req.Clone()
+			clone.RequestProcessors[i] = req.Clone()
 		}
 	}
-	return
+	return clone
 }

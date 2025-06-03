@@ -549,6 +549,8 @@ type DiameterAgentJsonCfg struct {
 	Dictionaries_path    *string
 	Ce_applications      *[]string
 	Sessions_conns       *[]string
+	StatSConns           *[]string `json:"stats_conns"`
+	ThresholdSConns      *[]string `json:"thresholds_conns"`
 	Origin_host          *string
 	Origin_realm         *string
 	Vendor_id            *int

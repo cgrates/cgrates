@@ -763,6 +763,8 @@ const CGRATES_CFG_JSON = `
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	// "ce_applications": [],					// list of applications in dictionaries wanted to be included in Capability-Exchange. Needed either "app name", "app ID", or "vendor name.app name/ID"
 	"sessions_conns": ["*birpc_internal"],
+	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],						// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"origin_host": "CGR-DA",					// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",					// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,							// diameter Vendor-Id AVP used in replies
