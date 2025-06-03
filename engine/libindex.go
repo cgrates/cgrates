@@ -585,6 +585,24 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 				}, newFlt); err != nil && err != utils.ErrNotFound {
 				return utils.APIErrorHandler(err)
 			}
+		case utils.CacheIPFilterIndexes:
+			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
+				removeIndexKeys, indx); err != nil {
+				return
+			}
+			idxSlice := indx.AsSlice()
+			if _, err = ComputeIndexes(ctx, dm, newFlt.Tenant, utils.EmptyString, idxItmType, // compute all the indexes for afected items
+				&idxSlice, utils.NonTransactional, func(tnt, id, grp string) (*[]string, error) {
+					ipp, e := dm.GetIPProfile(ctx, tnt, id, true, false, utils.NonTransactional)
+					if e != nil {
+						return nil, e
+					}
+					fltrIDs := make([]string, len(ipp.FilterIDs))
+					copy(fltrIDs, ipp.FilterIDs)
+					return &fltrIDs, nil
+				}, newFlt); err != nil && err != utils.ErrNotFound {
+				return utils.APIErrorHandler(err)
+			}
 		case utils.CacheRouteFilterIndexes:
 			if err = removeFilterIndexesForFilter(ctx, dm, idxItmType, newFlt.Tenant, // remove the indexes for the filter
 				removeIndexKeys, indx); err != nil {

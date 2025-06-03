@@ -157,6 +157,7 @@ type ArgsComputeFilterIndexIDs struct {
 	APIOpts          map[string]any
 	AttributeIDs     []string
 	ResourceIDs      []string
+	IPIDs            []string
 	StatIDs          []string
 	RouteIDs         []string
 	ThresholdIDs     []string
@@ -171,6 +172,7 @@ type ArgsComputeFilterIndexes struct {
 	APIOpts    map[string]any
 	AttributeS bool
 	ResourceS  bool
+	IPs        bool
 	StatS      bool
 	RouteS     bool
 	ThresholdS bool

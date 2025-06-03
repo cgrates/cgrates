@@ -70,6 +70,12 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 			return
 		}
 		filterIDs = rs.FilterIDs
+	case utils.CacheIPFilterIndexes:
+		var ipp *utils.IPProfile
+		if ipp, err = dm.GetIPProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
+			return
+		}
+		filterIDs = ipp.FilterIDs
 	case utils.CacheStatFilterIndexes:
 		var st *StatQueueProfile
 		if st, err = dm.GetStatQueueProfile(ctx, tnt, id, true, false, utils.NonTransactional); err != nil {
