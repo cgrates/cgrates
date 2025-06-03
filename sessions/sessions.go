@@ -376,7 +376,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		args.APIOpts[utils.OptsIPsUsageID] = s.ID
 		args.APIOpts[utils.OptsIPsUnits] = 1
 		if err := sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
-			utils.IPsV1ReleaseIPs,
+			utils.IPsV1ReleaseIP,
 			args, &reply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s could not release IP %q",

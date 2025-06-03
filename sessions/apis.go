@@ -161,7 +161,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		args.APIOpts[utils.OptsIPsUsageID] = originID
 		args.APIOpts[utils.OptsIPsUnits] = 1
 		var allocMsg string
-		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns, utils.IPsV1AuthorizeIPs,
+		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns, utils.IPsV1AuthorizeIP,
 			args, &allocMsg); err != nil {
 			return utils.NewErrIPs(err)
 		}
@@ -394,14 +394,14 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		args.APIOpts[utils.OptsIPsUnits] = 1
 		var allocMessage string
 		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
-			utils.IPsV1AllocateIPs, args, &allocMessage); err != nil {
+			utils.IPsV1AllocateIP, args, &allocMessage); err != nil {
 			return utils.NewErrIPs(err)
 		}
 		rply.IPAllocation = &allocMessage
 		defer func() { // we need to release the IPs back in case of errors
 			if err != nil {
 				var reply string
-				if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns, utils.IPsV1ReleaseIPs,
+				if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns, utils.IPsV1ReleaseIP,
 					args, &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: %s releasing IPs for event %+v.",

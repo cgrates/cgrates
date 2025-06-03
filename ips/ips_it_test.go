@@ -243,10 +243,10 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 		}
 
 		var reply string
-		if err := client.Call(context.Background(), utils.IPsV1AuthorizeIPs,
+		if err := client.Call(context.Background(), utils.IPsV1AuthorizeIP,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "AuthorizeIPs1",
+				ID:     "AuthorizeIP1",
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
@@ -259,10 +259,10 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 			t.Error(err)
 		}
 
-		if err := client.Call(context.Background(), utils.IPsV1AllocateIPs,
+		if err := client.Call(context.Background(), utils.IPsV1AllocateIP,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "AllocateIPs1",
+				ID:     "AllocateIP1",
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
@@ -275,10 +275,10 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 			t.Error(err)
 		}
 
-		if err := client.Call(context.Background(), utils.IPsV1ReleaseIPs,
+		if err := client.Call(context.Background(), utils.IPsV1ReleaseIP,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
-				ID:     "ReleaseIPs1",
+				ID:     "ReleaseIP1",
 				Event: map[string]any{
 					utils.AccountField: "1001",
 				},
