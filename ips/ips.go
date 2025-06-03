@@ -70,7 +70,6 @@ type ipAllocations struct {
 	IPAllocations *utils.IPAllocations
 	lkID          string         // ID of the lock used when matching the ipAllocations
 	ttl           *time.Duration // time to leave for these ip allocations, picked up on each IPAllocations initialization out of config
-	tUsage        *float64       // sum of all usages
 	dirty         *bool          // the usages were modified, needs save, *bool so we only save if enabled in config
 	cfg           *ipProfile     // for ordering purposes
 }
@@ -113,22 +112,12 @@ func (a *ipAllocations) removeExpiredUnits() {
 		return
 	}
 	for _, uID := range a.IPAllocations.TTLIdx[:firstActive] {
-		usage, has := a.IPAllocations.Usages[uID]
-		if !has {
+		if _, has := a.IPAllocations.Usages[uID]; !has {
 			continue
 		}
 		delete(a.IPAllocations.Usages, uID)
-		if a.tUsage != nil { //  total usage was not yet calculated so we do not need to update it
-			*a.tUsage -= usage.Units
-			if *a.tUsage < 0 { // something went wrong
-				utils.Logger.Warning(
-					fmt.Sprintf("resetting total usage for IP allocations %q, usage smaller than 0: %f", a.IPAllocations.ID, *a.tUsage))
-				a.tUsage = nil
-			}
-		}
 	}
 	a.IPAllocations.TTLIdx = a.IPAllocations.TTLIdx[firstActive:]
-	a.tUsage = nil
 }
 
 // recordUsage records a new usage
@@ -144,9 +133,6 @@ func (a *ipAllocations) recordUsage(usage *utils.IPUsage) error {
 		usage.ExpiryTime = time.Now().Add(*a.ttl)
 	}
 	a.IPAllocations.Usages[usage.ID] = usage
-	if a.tUsage != nil {
-		*a.tUsage += usage.Units
-	}
 	if !usage.ExpiryTime.IsZero() {
 		a.IPAllocations.TTLIdx = append(a.IPAllocations.TTLIdx, usage.ID)
 	}
@@ -166,9 +152,6 @@ func (a *ipAllocations) clearUsage(usageID string) error {
 				break
 			}
 		}
-	}
-	if a.tUsage != nil {
-		*a.tUsage -= usage.Units
 	}
 	delete(a.IPAllocations.Usages, usageID)
 	return nil
