@@ -86,8 +86,8 @@ func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils
 	return
 }
 
-// V1AuthorizeIPs queries service to find if an Usage is allowed
-func (s *IPService) V1AuthorizeIPs(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+// V1AuthorizeIP queries service to find if an Usage is allowed
+func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -124,7 +124,7 @@ func (s *IPService) V1AuthorizeIPs(ctx *context.Context, args *utils.CGREvent, r
 
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.IPsV1AuthorizeIPs, utils.ConcatenatedKey(tnt, args.ID))
+		cacheKey := utils.ConcatenatedKey(utils.IPsV1AuthorizeIP, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -156,8 +156,8 @@ func (s *IPService) V1AuthorizeIPs(ctx *context.Context, args *utils.CGREvent, r
 	return
 }
 
-// V1AllocateIPs is called when an IP requires allocation.
-func (s *IPService) V1AllocateIPs(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+// V1AllocateIP is called when an IP requires allocation.
+func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -194,7 +194,7 @@ func (s *IPService) V1AllocateIPs(ctx *context.Context, args *utils.CGREvent, re
 
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.IPsV1AllocateIPs, utils.ConcatenatedKey(tnt, args.ID))
+		cacheKey := utils.ConcatenatedKey(utils.IPsV1AllocateIP, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -231,8 +231,8 @@ func (s *IPService) V1AllocateIPs(ctx *context.Context, args *utils.CGREvent, re
 	return
 }
 
-// V1ReleaseIPs is called when we need to clear an allocation
-func (s *IPService) V1ReleaseIPs(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+// V1ReleaseIP is called when we need to clear an allocation
+func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -264,7 +264,7 @@ func (s *IPService) V1ReleaseIPs(ctx *context.Context, args *utils.CGREvent, rep
 
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.IPsV1ReleaseIPs, utils.ConcatenatedKey(tnt, args.ID))
+		cacheKey := utils.ConcatenatedKey(utils.IPsV1ReleaseIP, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
