@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"net/netip"
 	"slices"
 	"time"
 )
@@ -330,7 +331,7 @@ type IPUsage struct {
 	Tenant     string
 	ID         string
 	ExpiryTime time.Time
-	Units      float64
+	Address    netip.Addr
 }
 
 // TenantID returns the concatenated key between tenant and ID.
@@ -393,16 +394,6 @@ func (a *IPAllocations) CacheClone() any {
 // TenantID returns the unique ID in a multi-tenant environment
 func (a *IPAllocations) TenantID() string {
 	return ConcatenatedKey(a.Tenant, a.ID)
-}
-
-// TotalUsage returns the sum of all usage units
-// Exported to be used in FilterS
-func (a *IPAllocations) TotalUsage() float64 {
-	var tu float64
-	for _, ru := range a.Usages {
-		tu += ru.Units
-	}
-	return tu
 }
 
 // IPAllocationsLockKey returns the ID used to lock IP allocations with guardian
