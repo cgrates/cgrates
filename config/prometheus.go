@@ -67,13 +67,6 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 	}
 	if jc.StatSConns != nil {
 		c.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
-		c.StatSConns = make([]string, len(*jc.StatSConns))
-		for idx, connID := range *jc.StatSConns {
-			c.StatSConns[idx] = connID
-			if connID == utils.MetaInternal {
-				c.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
-			}
-		}
 	}
 	if jc.StatQueueIDs != nil {
 		c.StatQueueIDs = *jc.StatQueueIDs
