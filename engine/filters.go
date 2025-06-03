@@ -771,7 +771,7 @@ func (fltr *FilterRule) passSentryPeer(ctx *context.Context, dDP utils.DataProvi
 		}
 		return false, err
 	}
-	if fltr.Values[0] != utils.MetaNumber && fltr.Values[0] != utils.MetaIp {
+	if fltr.Values[0] != utils.MetaNumber && fltr.Values[0] != utils.MetaIP {
 		return false, fmt.Errorf("invalid value for sentrypeer filter: <%s>", fltr.Values[0])
 	}
 	return GetSentryPeer(ctx, strVal, config.CgrConfig().SentryPeerCfg(), fltr.Values[0])

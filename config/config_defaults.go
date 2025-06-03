@@ -124,7 +124,7 @@ const CGRATES_CFG_JSON = `
 		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*ips": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
+		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
@@ -272,8 +272,8 @@ const CGRATES_CFG_JSON = `
 		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control resources caching
 		"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching resources to events
 		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control ip profiles caching
-		"*ips": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control ips caching
-		"*event_ips": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching ips to events
+		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// control ip allocations caching
+		"*event_ips": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},				// matching ip allocations to events
 		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// statqueue profiles
 		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},		// statqueues with metrics
 		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false, "remote":false, "replicate": false},	// control threshold profiles caching

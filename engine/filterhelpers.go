@@ -163,7 +163,7 @@ func GetSentryPeer(ctx *context.Context, val string, sentryPeerCfg *config.Sentr
 		token = cachedToken.(string)
 	}
 	switch dataType {
-	case utils.MetaIp:
+	case utils.MetaIP:
 		apiUrl, err = url.JoinPath(sentryPeerCfg.IpsUrl, val)
 	case utils.MetaNumber:
 		apiUrl, err = url.JoinPath(sentryPeerCfg.NumbersUrl, val)

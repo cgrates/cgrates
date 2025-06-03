@@ -157,9 +157,9 @@ func (rplSv1 *ReplicatorSv1) GetResourceProfile(ctx *context.Context, tntID *uti
 }
 
 // GetIP is the remote method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) GetIP(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.IP) error {
-	engine.UpdateReplicationFilters(utils.IPsPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
-	rcv, err := rplSv1.dm.DataDB().GetIPDrv(ctx, tntID.Tenant, tntID.ID)
+func (rplSv1 *ReplicatorSv1) GetIP(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
+	engine.UpdateReplicationFilters(utils.IPAllocationsPrefix, tntID.TenantID.TenantID(), utils.IfaceAsString(tntID.APIOpts[utils.RemoteHostOpt]))
+	rcv, err := rplSv1.dm.DataDB().GetIPAllocationsDrv(ctx, tntID.Tenant, tntID.ID)
 	if err != nil {
 		return err
 	}
@@ -424,8 +424,8 @@ func (rplSv1 *ReplicatorSv1) SetIPProfile(ctx *context.Context, ipp *utils.IPPro
 }
 
 // SetIP is the replication method coresponding to the dataDb driver method
-func (rplSv1 *ReplicatorSv1) SetIP(ctx *context.Context, ip *utils.IPWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().SetIPDrv(ctx, ip.IP); err != nil {
+func (rplSv1 *ReplicatorSv1) SetIP(ctx *context.Context, ip *utils.IPAllocationsWithAPIOpts, reply *string) (err error) {
+	if err = rplSv1.dm.DataDB().SetIPAllocationsDrv(ctx, ip.IPAllocations); err != nil {
 		return
 	}
 	// delay if needed before cache call
@@ -434,7 +434,7 @@ func (rplSv1 *ReplicatorSv1) SetIP(ctx *context.Context, ip *utils.IPWithAPIOpts
 		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(ip.APIOpts[utils.MetaCache]),
-		ip.Tenant, utils.CacheIPs, ip.TenantID(), utils.EmptyString, nil, ip.APIOpts); err != nil {
+		ip.Tenant, utils.CacheIPAllocations, ip.TenantID(), utils.EmptyString, nil, ip.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -703,7 +703,7 @@ func (rplSv1 *ReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *u
 
 // RemoveIP is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) RemoveIP(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveIPDrv(ctx, args.Tenant, args.ID); err != nil {
+	if err = rplSv1.dm.DataDB().RemoveIPAllocationsDrv(ctx, args.Tenant, args.ID); err != nil {
 		return
 	}
 	// delay if needed before cache call
@@ -712,7 +712,7 @@ func (rplSv1 *ReplicatorSv1) RemoveIP(ctx *context.Context, args *utils.TenantID
 		time.Sleep(rplSv1.v1.cfg.GeneralCfg().CachingDelay)
 	}
 	if err = rplSv1.v1.CallCache(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, utils.CacheIPs, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheIPAllocations, args.TenantID.TenantID(), utils.EmptyString, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

@@ -64,7 +64,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Serv
 	cacheS := srvDeps[utils.CacheS].(*CacheService)
 	if err := cacheS.WaitToPrecache(shutdown,
 		utils.CacheIPProfiles,
-		utils.CacheIPs,
+		utils.CacheIPAllocations,
 		utils.CacheIPFilterIndexes); err != nil {
 		return err
 	}

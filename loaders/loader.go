@@ -217,7 +217,7 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 	case utils.MetaIPs:
 		cacheIDs = []string{utils.CacheIPFilterIndexes}
 		cacheArgs[utils.CacheIPProfiles] = []string{tntId}
-		cacheArgs[utils.CacheIPs] = []string{tntId}
+		cacheArgs[utils.CacheIPAllocations] = []string{tntId}
 	case utils.MetaFilters:
 		cacheArgs[utils.CacheFilters] = []string{tntId}
 	case utils.MetaStats:

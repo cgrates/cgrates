@@ -103,7 +103,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			utils.CacheIPProfiles: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
-			utils.CacheIPs: {Limit: utils.IntPointer(-1),
+			utils.CacheIPAllocations: {Limit: utils.IntPointer(-1),
 				Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 				Precache: utils.BoolPointer(false), Remote: utils.BoolPointer(false), Replicate: utils.BoolPointer(false)},
 			utils.CacheEventIPs: {Limit: utils.IntPointer(-1),
@@ -309,7 +309,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			RedisPoolPipelineLimit:    utils.IntPointer(0),
 		},
 		Items: map[string]*ItemOptsJson{
-			utils.MetaAccounts: {
+			utils.CacheAccounts: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
@@ -323,112 +323,112 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaResourceProfile: {
+			utils.CacheResourceProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaIPProfiles: {
+			utils.CacheIPProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaStatQueues: {
+			utils.CacheStatQueues: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaResources: {
+			utils.CacheResources: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaIPs: {
+			utils.CacheIPAllocations: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaStatQueueProfiles: {
+			utils.CacheStatQueueProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaThresholds: {
+			utils.CacheThresholds: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaTrends: {
+			utils.CacheTrends: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaThresholdProfiles: {
+			utils.CacheThresholdProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaFilters: {
+			utils.CacheFilters: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaRouteProfiles: {
+			utils.CacheRouteProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaAttributeProfiles: {
+			utils.CacheAttributeProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaRateProfiles: {
+			utils.CacheRateProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaActionProfiles: {
+			utils.CacheActionProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaChargerProfiles: {
+			utils.CacheChargerProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
 			},
-			utils.MetaLoadIDs: {
+			utils.CacheLoadIDs: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
 				Limit:      utils.IntPointer(-1),

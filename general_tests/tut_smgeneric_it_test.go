@@ -150,7 +150,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheResourceProfiles].Items = 1
 	expectedStats[utils.CacheResources].Items = 1
 	expectedStats[utils.CacheIPProfiles].Items = 1
-	expectedStats[utils.CacheIPs].Items = 1
+	expectedStats[utils.CacheIPAllocations].Items = 1
 	expectedStats[utils.CacheStatQueues].Items = 7
 	expectedStats[utils.CacheStatQueueProfiles].Items = 7
 	expectedStats[utils.CacheThresholds].Items = 1

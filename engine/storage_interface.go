@@ -49,9 +49,9 @@ type DataDB interface {
 	GetIPProfileDrv(*context.Context, string, string) (*utils.IPProfile, error)
 	SetIPProfileDrv(*context.Context, *utils.IPProfile) error
 	RemoveIPProfileDrv(*context.Context, string, string) error
-	GetIPDrv(*context.Context, string, string) (*utils.IP, error)
-	SetIPDrv(*context.Context, *utils.IP) error
-	RemoveIPDrv(*context.Context, string, string) error
+	GetIPAllocationsDrv(*context.Context, string, string) (*utils.IPAllocations, error)
+	SetIPAllocationsDrv(*context.Context, *utils.IPAllocations) error
+	RemoveIPAllocationsDrv(*context.Context, string, string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error)
