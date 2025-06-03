@@ -1002,7 +1002,7 @@ func testLoadersGetIPProfiles(t *testing.T) {
 			},
 			TTL:    time.Second,
 			Stored: true,
-			Pools: []*utils.Pool{
+			Pools: []*utils.IPPool{
 				{
 					ID:        "POOL1",
 					FilterIDs: []string{"*string:~*req.Destination:2001"},
@@ -1060,7 +1060,7 @@ func testLoadersGetIPProfiles(t *testing.T) {
 			},
 			TTL:    2 * time.Second,
 			Stored: false,
-			Pools: []*utils.Pool{
+			Pools: []*utils.IPPool{
 				{
 					ID:        "POOL1",
 					FilterIDs: []string{"*string:~*req.Destination:3001"},

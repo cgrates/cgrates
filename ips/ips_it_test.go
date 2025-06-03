@@ -152,7 +152,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 					},
 					TTL:    -1,
 					Stored: false,
-					Pools: []*utils.Pool{
+					Pools: []*utils.IPPool{
 						{
 							ID:        "FIRST_POOL",
 							FilterIDs: []string{},

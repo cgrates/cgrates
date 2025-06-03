@@ -31,7 +31,7 @@ type IPProfile struct {
 	Weights   DynamicWeights
 	TTL       time.Duration
 	Stored    bool
-	Pools     []*Pool
+	Pools     []*IPPool
 }
 
 // IPProfileWithAPIOpts wraps IPProfile with APIOpts.
@@ -50,7 +50,7 @@ func (p *IPProfile) Clone() *IPProfile {
 	if p == nil {
 		return nil
 	}
-	pools := make([]*Pool, 0, len(p.Pools))
+	pools := make([]*IPPool, 0, len(p.Pools))
 	for _, pool := range p.Pools {
 		pools = append(pools, pool.Clone())
 	}
@@ -102,7 +102,7 @@ func (p *IPProfile) Set(path []string, val any, newBranch bool) error {
 			return nil
 		}
 		if len(p.Pools) == 0 || newBranch {
-			p.Pools = append(p.Pools, new(Pool))
+			p.Pools = append(p.Pools, new(IPPool))
 		}
 		pool := p.Pools[len(p.Pools)-1]
 		return pool.Set(path[1:], val, newBranch)
@@ -127,7 +127,7 @@ func (p *IPProfile) Merge(other any) {
 		p.Stored = o.Stored
 	}
 	for _, pool := range o.Pools {
-		if idx := slices.IndexFunc(p.Pools, func(p *Pool) bool {
+		if idx := slices.IndexFunc(p.Pools, func(p *IPPool) bool {
 			return p.ID == pool.ID
 		}); idx != -1 {
 			p.Pools[idx].Merge(pool)
@@ -189,7 +189,7 @@ func IPProfileLockKey(tnt, id string) string {
 	return ConcatenatedKey(CacheIPProfiles, tnt, id)
 }
 
-type Pool struct {
+type IPPool struct {
 	ID        string
 	FilterIDs []string
 	Type      string
@@ -201,11 +201,11 @@ type Pool struct {
 }
 
 // Clone creates a deep copy of Pool for thread-safe use.
-func (p *Pool) Clone() *Pool {
+func (p *IPPool) Clone() *IPPool {
 	if p == nil {
 		return nil
 	}
-	return &Pool{
+	return &IPPool{
 		ID:        p.ID,
 		FilterIDs: slices.Clone(p.FilterIDs),
 		Type:      p.Type,
@@ -217,7 +217,7 @@ func (p *Pool) Clone() *Pool {
 	}
 }
 
-func (p *Pool) Set(path []string, val any, _ bool) error {
+func (p *IPPool) Set(path []string, val any, _ bool) error {
 	if len(path) != 1 {
 		return ErrWrongPath
 	}
@@ -251,8 +251,8 @@ func (p *Pool) Set(path []string, val any, _ bool) error {
 	return err
 }
 
-func (p *Pool) Merge(other any) {
-	o := other.(*Pool)
+func (p *IPPool) Merge(other any) {
+	o := other.(*IPPool)
 
 	// NOTE: Merge gets called when the IDs are equal, so this is a no-op.
 	// Kept for consistency with other components.
@@ -277,9 +277,9 @@ func (p *Pool) Merge(other any) {
 	p.Blockers = append(p.Blockers, o.Blockers...)
 }
 
-func (p *Pool) String() string { return ToJSON(p) }
+func (p *IPPool) String() string { return ToJSON(p) }
 
-func (p *Pool) FieldAsString(fldPath []string) (string, error) {
+func (p *IPPool) FieldAsString(fldPath []string) (string, error) {
 	val, err := p.FieldAsInterface(fldPath)
 	if err != nil {
 		return "", err
@@ -287,7 +287,7 @@ func (p *Pool) FieldAsString(fldPath []string) (string, error) {
 	return IfaceAsString(val), nil
 }
 
-func (p *Pool) FieldAsInterface(fldPath []string) (any, error) {
+func (p *IPPool) FieldAsInterface(fldPath []string) (any, error) {
 	if len(fldPath) == 0 {
 		return p, nil
 	}
