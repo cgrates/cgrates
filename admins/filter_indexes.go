@@ -64,6 +64,8 @@ func (adms *AdminS) V1RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 		arg.ItemType = utils.CacheStatFilterIndexes
 	case utils.MetaResources:
 		arg.ItemType = utils.CacheResourceFilterIndexes
+	case utils.MetaIPs:
+		arg.ItemType = utils.CacheIPFilterIndexes
 	case utils.MetaChargers:
 		arg.ItemType = utils.CacheChargerFilterIndexes
 	case utils.MetaAccounts:
@@ -118,6 +120,8 @@ func (adms *AdminS) V1GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 		arg.ItemType = utils.CacheStatFilterIndexes
 	case utils.MetaResources:
 		arg.ItemType = utils.CacheResourceFilterIndexes
+	case utils.MetaIPs:
+		arg.ItemType = utils.CacheIPFilterIndexes
 	case utils.MetaChargers:
 		arg.ItemType = utils.CacheChargerFilterIndexes
 	case utils.MetaAccounts:
@@ -278,6 +282,21 @@ func (adms *AdminS) V1ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 		}
 		args.ResourceS = indexes.Size() != 0
 	}
+	//IPProfile Indexes
+	if args.IPs {
+		cacheIDs[utils.CacheIPFilterIndexes] = []string{utils.MetaAny}
+		if indexes, err = engine.ComputeIndexes(ctx, adms.dm, tnt, utils.EmptyString, utils.CacheIPFilterIndexes,
+			nil, transactionID, func(tnt, id, grp string) (*[]string, error) {
+				ipp, e := adms.dm.GetIPProfile(ctx, tnt, id, true, false, utils.NonTransactional)
+				if e != nil {
+					return nil, e
+				}
+				return utils.SliceStringPointer(slices.Clone(ipp.FilterIDs)), nil
+			}, nil); err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
+		args.IPs = indexes.Size() != 0
+	}
 	//RouteSProfile Indexes
 	if args.RouteS {
 		cacheIDs[utils.CacheRouteFilterIndexes] = []string{utils.MetaAny}
@@ -402,6 +421,12 @@ func (adms *AdminS) V1ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 			return
 		}
 	}
+	//IPProfile Indexes
+	if args.IPs {
+		if err = adms.dm.SetIndexes(ctx, utils.CacheIPFilterIndexes, tnt, nil, true, transactionID); err != nil {
+			return
+		}
+	}
 	//RouteProfile Indexes
 	if args.RouteS {
 		if err = adms.dm.SetIndexes(ctx, utils.CacheRouteFilterIndexes, tnt, nil, true, transactionID); err != nil {
@@ -515,6 +540,21 @@ func (adms *AdminS) V1ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 	}
 	if indexes.Size() != 0 {
 		cacheIDs[utils.CacheResourceFilterIndexes] = indexes.AsSlice()
+	}
+	//IPProfile Indexes
+	if indexes, err = engine.ComputeIndexes(ctx, adms.dm, tnt, utils.EmptyString, utils.CacheIPFilterIndexes,
+		&args.IPIDs, transactionID, func(tnt, id, grp string) (*[]string, error) {
+			ipp, e := adms.dm.GetIPProfile(ctx, tnt, id, true, false, utils.NonTransactional)
+			if e != nil {
+				return nil, e
+			}
+			cacheIDs[utils.CacheIPFilterIndexes] = []string{ipp.ID}
+			return utils.SliceStringPointer(slices.Clone(ipp.FilterIDs)), nil
+		}, nil); err != nil && err != utils.ErrNotFound {
+		return utils.APIErrorHandler(err)
+	}
+	if indexes.Size() != 0 {
+		cacheIDs[utils.CacheIPFilterIndexes] = indexes.AsSlice()
 	}
 	//RouteProfile Indexes
 	if indexes, err = engine.ComputeIndexes(ctx, adms.dm, tnt, utils.EmptyString, utils.CacheRouteFilterIndexes,
@@ -675,6 +715,20 @@ func (adms *AdminS) V1GetResourcesIndexesHealth(ctx *context.Context, args *engi
 		return err
 	}
 	*reply = *rp
+	return nil
+}
+
+func (adms *AdminS) V1GetIPsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+	iph, err := engine.GetFltrIdxHealth(ctx, adms.dm,
+		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, false, nil),
+		ltcache.NewCache(args.ObjectCacheLimit, args.ObjectCacheTTL, args.ObjectCacheStaticTTL, false, nil),
+		utils.CacheIPFilterIndexes,
+	)
+	if err != nil {
+		return err
+	}
+	*reply = *iph
 	return nil
 }
 

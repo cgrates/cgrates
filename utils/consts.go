@@ -2504,7 +2504,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsRoutesMaxItems,
 	OptsSesChargeable, RemoteHostOpt, MetaCache, OptsThresholdsProfileIDs, OptsRoutesProfilesCount,
 	OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
-	MetaCDRs, OptsSesCDRsDerivedReply, MetaResources, OptsSesResourceSAuthorize,
+	MetaCDRs, OptsSesCDRsDerivedReply, MetaResources, MetaIPs, OptsSesResourceSAuthorize,
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, MetaRoutes,
 	OptsSesRouteSDerivedReply, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
 	OptsSesSTIRInitiate, OptsSesThresholdSDerivedReply,
