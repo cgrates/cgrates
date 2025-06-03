@@ -815,6 +815,93 @@ func (apierSv1 *APIerSv1) SetActionPlan(ctx *context.Context, attrs *engine.Attr
 	return nil
 }
 
+func (apierSv1 *APIerSv1) SetActionPlanAccounts(ctx *context.Context, attrs *engine.AttrSetActionPlanAccounts, reply *string) (err error) {
+	if missing := utils.MissingStructFields(attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	for _, at := range attrs.ActionPlan {
+		requiredFields := []string{"ActionsId", "Time", "Weight"}
+		if missing := utils.MissingStructFields(at, requiredFields); len(missing) != 0 {
+			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), at.ActionsId, missing)
+		}
+	}
+	err = guardian.Guardian.Guard(func() error {
+		var prevAccountIDs utils.StringMap
+		if prevAP, err := apierSv1.DataManager.GetActionPlan(attrs.Id, true, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return utils.NewErrServerError(err)
+		} else if err == nil && !attrs.Overwrite {
+			return utils.ErrExists
+		} else if prevAP != nil {
+			prevAccountIDs = prevAP.AccountIDs
+		}
+		ap := &engine.ActionPlan{
+			Id:         attrs.Id,
+			AccountIDs: utils.StringMapFromSlice(attrs.AccountIDs),
+		}
+		for _, apiAtm := range attrs.ActionPlan {
+			if exists, err := apierSv1.DataManager.HasData(utils.ActionPrefix, apiAtm.ActionsId, ""); err != nil {
+				return utils.NewErrServerError(err)
+			} else if !exists {
+				return fmt.Errorf("%s:%s", utils.ErrBrokenReference.Error(), apiAtm.ActionsId)
+			}
+			timing, err := apiAtm.GetRITiming(apierSv1.DataManager)
+			if err != nil {
+				return err
+			}
+			ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
+				Uuid:      utils.GenUUID(),
+				Weight:    apiAtm.Weight,
+				Timing:    &engine.RateInterval{Timing: timing},
+				ActionsID: apiAtm.ActionsId,
+			})
+		}
+		if err := apierSv1.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+			return utils.NewErrServerError(err)
+		}
+		if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
+			utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
+				ActionPlanIDs: []string{ap.Id},
+			}, reply); err != nil {
+			return err
+		}
+		for acntID := range prevAccountIDs {
+			if err := apierSv1.DataManager.RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
+				if errors.Is(err, utils.ErrNotFound) { // needed for DynaPrepaid accounts
+					utils.Logger.Warning(fmt.Sprintf("<%s> error: <%s> when removing AccountActionPlans: accountID <%s> ActionPlanID <%s>",
+						utils.ApierS, err.Error(), acntID, attrs.Id))
+					continue
+				}
+				return utils.NewErrServerError(err)
+			}
+		}
+		if len(prevAccountIDs) != 0 {
+			if err := apierSv1.ConnMgr.Call(context.TODO(), apierSv1.Config.ApierCfg().CachesConns,
+				utils.CacheSv1ReloadCache, &utils.AttrReloadCacheWithAPIOpts{
+					AccountActionPlanIDs: prevAccountIDs.Slice(),
+				}, reply); err != nil {
+				return err
+			}
+		}
+		return nil
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ActionPlanPrefix)
+	if err != nil {
+		return err
+	}
+	if attrs.ReloadScheduler {
+		sched := apierSv1.SchedulerService.GetScheduler()
+		if sched == nil {
+			return errors.New(utils.SchedulerNotRunningCaps)
+		}
+		sched.Reload()
+	}
+	//generate a loadID for CacheActionPlans and store it in database
+	if err := apierSv1.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionPlans: time.Now().UnixNano()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
 type AttrGetActionPlan struct {
 	ID string
 }

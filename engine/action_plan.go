@@ -390,6 +390,14 @@ func (atpl ActionTimingWeightOnlyPriorityList) Sort() {
 	sort.Sort(atpl)
 }
 
+type AttrSetActionPlanAccounts struct {
+	Id              string            // Profile id
+	ActionPlan      []*AttrActionPlan // Set of actions this Actions profile will perform
+	AccountIDs      []string          // Set of accounts which the actions can be performed on
+	Overwrite       bool              // If previously defined, will be overwritten
+	ReloadScheduler bool              // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
+}
+
 type AttrSetActionPlan struct {
 	Id              string            // Profile id
 	ActionPlan      []*AttrActionPlan // Set of actions this Actions profile will perform

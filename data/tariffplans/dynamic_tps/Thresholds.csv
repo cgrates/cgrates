@@ -1,0 +1,7 @@
+#Tenant[0];Id[1];FilterIDs[2];ActivationInterval[3];MaxHits[4];MinHits[5];MinSleep[6];Blocker[7];Weight[8];ActionIDs[9];Async[10];EeIDs[11];APIOpts[12]
+*tenant;THD_ACNT_<~*req.Account>;*string:~*req.StatID:Stat_<~*req.Account>&*string:~*req.*sum#1:100;*now;-1;1;5s;true;4;ACT_BLOCK_ACC&ACT_DYN_ACT_PLAN_ACC_ENABLE;true;;
+
+*tenant;THD_BLOCKER_ACNT_<~*req.Account>;*string:~*opts.*accountID:<~*req.Account>;*now;-1;1;;true;3;;true;;*accountID:<~*req.Account>
+
+cgrates.org;THD_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;1;1;1s;true;10;ACT_LOG_WARNING;true;eeID1&eeID2;
+

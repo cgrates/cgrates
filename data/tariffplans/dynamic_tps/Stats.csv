@@ -1,0 +1,6 @@
+#Tenant[0];Id[1];FilterIDs[2];ActivationInterval[3];QueueLength[4];TTL[5];MinItems[6];Metrics[7];MetricFilterIDs[8];Stored[9];Blocker[10];Weight[11];ThresholdIDs[12];APIOpts[13]
+*tenant;Stat_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*exists:~*opts.*accountID:;*now;;5s;;*sum#1;;true;false;10;THD_ACNT_<~*req.Account>&THD_BLOCKER_ACNT_<~*req.Account>;
+
+cgrates.org;Stat_1;FLTR_STS1;2014-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;*accountID:<~*req.Account>
+
+*tenant;Stat_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;

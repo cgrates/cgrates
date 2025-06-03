@@ -1,0 +1,4 @@
+#Id[0];ActionsId[1];TimingId[2];Weight[3];Overwrite[4];Tenant:AccountIDs[5]
+PACKAGE_1001;TOPUP_RST_MONETARY_10;*asap;10;false;cgrates.org:1001
+ACTION_PLAN_ENABLE_ACC_AFTER_5S;ACT_ENABLE_ACC;TM_AFTER_5S;10;true;<*tenant+:+~*opts.*accountID>
+PACKAGE_<~*opts.*accountID>;TOPUP_RST_DATA_100;*asap;10;false;cgrates.org:<~*opts.*accountID>&cgrates.org:1002

@@ -179,7 +179,7 @@ func testDynThdCheckForAction(t *testing.T) {
 
 func testDynThdCheckForDestination(t *testing.T) {
 	var rply *engine.Destination
-	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetDestination, "1005", &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetDestination, "DYNAMICLY_DST_1005", &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -233,7 +233,7 @@ func testDynThdSetAction(t *testing.T) {
 			},
 			{
 				Identifier:      utils.MetaDynamicDestination,
-				ExtraParameters: "DST_1005;1005",
+				ExtraParameters: "DYNAMICLY_DST_1005;1005",
 			},
 		}}
 	if err := dynThdRpc.Call(context.Background(), utils.APIerSv2SetActions,
@@ -591,50 +591,13 @@ func testDynThdCheckForDynCreatedAction(t *testing.T) {
 
 func testDynThdCheckForDynCreatedDestination(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
-	args := &v2.AttrGetActions{ActionIDs: []string{"DYNAMICLY_DST_1005"}}
-	result1 := make(map[string]engine.Actions)
-	if err := dynThdRpc.Call(context.Background(), utils.APIerSv2GetActions, args, &result1); err != nil {
-		t.Fatal(err)
+	var result1 *engine.Destination
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetDestination, "DYNAMICLY_DST_1005", &result1); err != nil {
+		t.Error(err)
 	}
-	exp := map[string]engine.Actions{
-		"DYNAMICLY_ACT_1002": {
-			{
-				Id:               "DYNAMICLY_ACT_1002",
-				ActionType:       utils.CDRLog,
-				ExtraParameters:  "{\"Account\":\"1002\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}",
-				Filters:          []string{"*string:~*req.Account:1002", "filter2"},
-				ExpirationString: utils.MetaUnlimited,
-				Weight:           10,
-				Balance: &engine.BalanceFilter{
-					Uuid: result1["DYNAMICLY_ACT_1002"][0].Balance.Uuid,
-					ID:   utils.StringPointer("balID"),
-					Type: utils.StringPointer(utils.MetaMonetary),
-					Value: &utils.ValueFormula{
-						Method: utils.EmptyString,
-						Params: nil,
-						Static: 10,
-					},
-					ExpirationDate: nil,
-					Weight:         utils.Float64Pointer(10),
-					DestinationIDs: &utils.StringMap{"1002": true, "1003": true},
-					RatingSubject:  utils.StringPointer("SPECIAL_1002"),
-					Categories:     &utils.StringMap{"call": true, "data": true},
-					SharedGroups:   &utils.StringMap{"SHARED_A": true, "SHARED_B": true},
-					TimingIDs:      &utils.StringMap{utils.MetaDaily: true},
-					Timings: []*engine.RITiming{{
-						ID:        utils.MetaDaily,
-						Years:     utils.Years{},
-						Months:    utils.Months{},
-						MonthDays: utils.MonthDays{},
-						WeekDays:  utils.WeekDays{},
-						StartTime: result1["DYNAMICLY_ACT_1002"][0].Balance.Timings[0].StartTime, //depends on time it ran
-					}},
-					Disabled: utils.BoolPointer(false),
-					Factors:  nil,
-					Blocker:  utils.BoolPointer(true),
-				},
-			},
-		},
+	exp := &engine.Destination{
+		Id:       "DYNAMICLY_DST_1005",
+		Prefixes: []string{"1005"},
 	}
 	if !reflect.DeepEqual(exp, result1) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))

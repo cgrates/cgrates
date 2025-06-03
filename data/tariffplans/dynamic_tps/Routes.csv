@@ -1,0 +1,4 @@
+#Tenant[0];ID[1];FilterIDs[2];ActivationInterval[3];Sorting[4];SortingParameters[5];RouteID[6];RouteFilterIDs[7];RouteAccountIDs[8];RouteRatingPlanIDs[9];RouteResourceIDs[10];RouteStatIDs[11];RouteWeight[12];RouteBlocker[13];RouteParameters[14];Weight[15];APIOpts[16]
+cgrates.org;ROUTE_WEIGHT_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;
+
+*tenant;ROUTE_WEIGHT_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;*now&3000-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;<~*req.Account>&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;*accountID:<~*req.Account>

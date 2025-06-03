@@ -46,9 +46,16 @@ func ProcessFieldPath(fldPath, sep string, dP DataProvider) (newPath string, err
 	newPath = fldPath[:startIdx]
 	for path := range strings.SplitSeq(fldPath[startIdx+1:endIdx], sep) { // proccess the found path
 		var val string
-		if val, err = DPDynamicString(path, dP); err != nil {
-			newPath = EmptyString
-			return
+		if strings.HasPrefix(path, MetaNow) || strings.HasPrefix(path, MetaTenant) {
+			if val, err = dP.FieldAsString(SplitPath(path, NestingSep[0], -1)); err != nil {
+				newPath = EmptyString
+				return
+			}
+		} else {
+			if val, err = DPDynamicString(path, dP); err != nil {
+				newPath = EmptyString
+				return
+			}
 		}
 		newPath += val
 	}

@@ -5791,6 +5791,195 @@ func TestDynamicActionPlan(t *testing.T) {
 	}
 }
 
+func TestDynamicActionPlanAccount(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var ap *AttrSetActionPlanAccounts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetActionPlanAccounts: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if ap, canCast = args.(*AttrSetActionPlanAccounts); !canCast {
+					return fmt.Errorf("couldnt cast AttrSetActionPlanAccounts")
+				}
+				return nil
+			},
+			utils.APIerSv1GetActions: func(ctx *context.Context, args2, reply any) error {
+				return nil
+			},
+			utils.APIerSv1GetTiming: func(ctx *context.Context, args3, reply any) error {
+				var canCast bool
+				if args3, canCast = args3.(*utils.ArgsGetTimingID); !canCast {
+					return fmt.Errorf("couldnt cast ArgsGetTimingID")
+				}
+				var exp *utils.TPTiming
+				if utils.ToJSON(args3) == utils.ToJSON(&utils.ArgsGetTimingID{ID: "Timing_1"}) {
+					exp = &utils.TPTiming{
+						ID:        "Timing_1",
+						Years:     utils.Years{2025},
+						Months:    utils.Months{2},
+						MonthDays: utils.MonthDays{3},
+						WeekDays:  utils.WeekDays{1, 2, 3},
+						StartTime: "00:12:12",
+						EndTime:   "12:12:12",
+					}
+				}
+				if utils.ToJSON(args3) == utils.ToJSON(&utils.ArgsGetTimingID{ID: "*asap"}) {
+					exp = &utils.TPTiming{
+						ID:        "*asap",
+						Years:     utils.Years{2025},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: "*asap",
+					}
+				}
+				if exp == nil {
+					return utils.ErrNotFound
+				}
+				*reply.(*utils.TPTiming) = *exp
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expAp       *AttrSetActionPlanAccounts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expAp: &AttrSetActionPlanAccounts{
+				Id: "ActPl_1",
+				ActionPlan: []*AttrActionPlan{
+					{
+						ActionsId: "Action_1",
+						TimingID:  "Timing_1",
+						Years:     "2025",
+						Months:    "2",
+						MonthDays: "3",
+						WeekDays:  "1;2;3",
+						Time:      "00:12:12;12:12:12",
+						Weight:    10,
+					},
+				},
+				AccountIDs:      []string{"cgrates.org:1001"},
+				Overwrite:       true,
+				ReloadScheduler: true,
+			},
+			extraParams: "ActPl_1;Action_1;Timing_1;10;true;cgrates.org:1001",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expAp: &AttrSetActionPlanAccounts{
+				Id: "ActPl_1",
+				ActionPlan: []*AttrActionPlan{
+					{
+						ActionsId: "Action_1001",
+						TimingID:  "*asap",
+						Years:     "2025",
+						Months:    "*any",
+						MonthDays: "*any",
+						WeekDays:  "*any",
+						Time:      "*asap",
+						Weight:    10,
+					},
+				},
+				AccountIDs:      []string{"cgrates.org:1001"},
+				Overwrite:       false,
+				ReloadScheduler: true,
+			},
+			extraParams: "ActPl_1;Action_<~*req.Account>;*asap;10;;<*tenant+:+~*req.Account>",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expAp: &AttrSetActionPlanAccounts{
+				Id: "ActPl_1",
+				ActionPlan: []*AttrActionPlan{
+					{
+						ActionsId: "Action_1",
+						TimingID:  "",
+						Weight:    0,
+					},
+				},
+				Overwrite:       false,
+				ReloadScheduler: true,
+			},
+			extraParams: "ActPl_1;Action_1;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "ActPl_1;Action_1;*asap;10;;",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "ActPl_1;Action_1;*asap;10;;;",
+			expectedErr: "invalid number of parameters <7> expected 6",
+		},
+		{
+			name:        "ActionIdEmptyFail",
+			extraParams: "ActPl_1;;*asap;10;;",
+			expectedErr: `empty ActionsId for <ActPl_1> dynamic_action_plan`,
+		},
+		{
+			name:        "WeightFail",
+			connIDs:     []string{connID},
+			extraParams: "ActPl_1;Action_1;*asap;BadString;;",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				ap = nil
+			})
+			err := dynamicActionPlanAccount(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if utils.ToJSON(ap) != utils.ToJSON(tc.expAp) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAp), utils.ToJSON(ap))
+			}
+		})
+	}
+}
+
 func TestDynamicActionAll(t *testing.T) {
 	tempConn := connMgr
 	tmpDm := dm

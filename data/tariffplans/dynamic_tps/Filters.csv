@@ -1,0 +1,4 @@
+#Tenant[0];ID[1];Type[2];Path[3];Values[4];ActivationInterval[5];APIOpts[6]
+cgrates.org,FLTR_1,*string,~*req.Account,<~*req.Account>;1002,*now;
+cgrates.org;Fltr_2;*string;~*req.Account;1001&1002;2014-07-29T15:00:00Z;
+*tenant;Fltr_<~*req.Account>;*string;~*req.<~*req.ExtraInfo>;<~*req.Account>&1002;*now&3000-07-29T15:00:00Z;

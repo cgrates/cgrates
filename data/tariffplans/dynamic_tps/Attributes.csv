@@ -1,0 +1,5 @@
+#Tenant[0];ID[1];Contexts[2];FilterIDs[3];ActivationInterval[4];AttributeFilterIDs[5];Path[6];Type[7];Value[8];Blocker[9];Weight[10];APIOpts[11]
+
+cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1&SUPPLIER2;true;10;*accountID:<~*req.Account>
+
+*tenant;Attr_<~*req.Account>;*any;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;
