@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -296,6 +297,7 @@ func cacheRadiusPacket(packet *radigo.Packet, address string, cfg *config.Radius
 // processRequest represents one processor processing the request
 func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest, rpl *radigo.Packet) (processed bool, err error) {
+	startTime := time.Now()
 	if pass, err := ra.filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
@@ -452,6 +454,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(utils.RadauthFailed)
 		}
 	}
+
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) {
 		var rplyCDRs string
@@ -464,7 +467,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
-
+	endTime := time.Now()
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, Radius reply: %s",
@@ -474,6 +477,48 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, Radius reply: %s",
 				utils.RadiusAgent, agReq.Reply))
+	}
+	if reqProcessor.Flags.Has(utils.MetaDryRun) {
+		return true, nil
+	}
+
+	statIDs := reqProcessor.Flags.ParamsSlice(utils.MetaRAStats, utils.MetaIDs)
+	thIDs := reqProcessor.Flags.ParamsSlice(utils.MetaRAThresholds, utils.MetaIDs)
+
+	// Early return if nothing to process.
+	if len(statIDs) == 0 && len(thIDs) == 0 {
+		return true, nil
+	}
+
+	// Clone is needed to prevent data races if requests are sent
+	// asynchronously.
+	ev := cgrEv.Clone()
+
+	ev.Event[utils.StartTime] = startTime
+	ev.Event[utils.EndTime] = endTime
+	ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)
+	ev.Event[utils.Source] = utils.RadiusAgent
+	ev.APIOpts[utils.MetaEventType] = utils.ProcessTime
+
+	if len(statIDs) > 0 {
+		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
+		var reply []string
+		if err := ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().StatSConns,
+			utils.StatSv1ProcessEvent, ev, &reply); err != nil {
+			return false, fmt.Errorf("failed to process %s event in %s: %v",
+				utils.RadiusAgent, utils.StatS, err)
+		}
+		// NOTE: ProfileIDs APIOpts key persists for the ThresholdS request,
+		// although it would be ignored. Might want to delete it.
+	}
+	if len(thIDs) > 0 {
+		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+		var reply []string
+		if err := ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().ThresholdSConns,
+			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
+			return false, fmt.Errorf("failed to process %s event in %s: %v",
+				utils.RadiusAgent, utils.ThresholdS, err)
+		}
 	}
 	return true, nil
 }

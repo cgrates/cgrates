@@ -37,9 +37,13 @@ func TestNewHTTPAgent(t *testing.T) {
 		{},
 	}
 	sessionConns := []string{"conn1", "conn2"}
+	statsConns := []string{"conn1", "conn2"}
+	thresholdsConns := []string{"conn1", "conn2"}
 	agent := NewHTTPAgent(
 		connMgr,
 		sessionConns,
+		statsConns,
+		thresholdsConns,
 		filterS,
 		dfltTenant,
 		reqPayload,
@@ -76,6 +80,16 @@ func TestNewHTTPAgent(t *testing.T) {
 	for i, conn := range sessionConns {
 		if agent.sessionConns[i] != conn {
 			t.Errorf("Expected sessionConns[%d] %s, got %s", i, conn, agent.sessionConns[i])
+		}
+	}
+	for i, conn := range statsConns {
+		if agent.statsConns[i] != conn {
+			t.Errorf("Expected statsConns[%d] %s, got %s", i, conn, agent.statsConns[i])
+		}
+	}
+	for i, conn := range thresholdsConns {
+		if agent.thresholdsConns[i] != conn {
+			t.Errorf("Expected thresholdsConns[%d] %s, got %s", i, conn, agent.thresholdsConns[i])
 		}
 	}
 }
