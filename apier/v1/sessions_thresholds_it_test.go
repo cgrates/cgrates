@@ -67,7 +67,6 @@ var (
 func TestSessionSITtests(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.Skip("unfinished, resources solution needed")
 		sessionsConfDIR = "sessions_internal"
 	case utils.MetaMySQL:
 		sessionsConfDIR = "sessions_mysql"

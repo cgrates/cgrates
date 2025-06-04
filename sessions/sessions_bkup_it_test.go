@@ -23,6 +23,7 @@ package sessions
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"testing"
 	"time"
@@ -94,7 +95,12 @@ var (
 func TestSessionsBkup(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		sBkupCfgDIR = "sessions_backup_internal"
+		defer func() {
+			if err := os.RemoveAll("/tmp/internal_db"); err != nil {
+				t.Error(err)
+			}
+		}()
 	case utils.MetaMySQL:
 		sBkupCfgDIR = "sessions_backup_mysql"
 	case utils.MetaMongo:
@@ -113,6 +119,14 @@ func testSessionSBkupInitCfg(t *testing.T) {
 	sBkupCfgPath = path.Join(*utils.DataDir, "conf", "samples", sBkupCfgDIR)
 	if sBkupCfg, err = config.NewCGRConfigFromPath(sBkupCfgPath); err != nil {
 		t.Fatal(err)
+	}
+	if *utils.DBType == utils.MetaInternal {
+		if err := os.MkdirAll(sBkupCfg.DataDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll(sBkupCfg.StorDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
@@ -433,7 +447,9 @@ func testSessionSBkupCallBackup2(t *testing.T) {
 }
 
 func testSessionSBkupGetBackedupSessions(t *testing.T) {
-
+	if *utils.DBType == utils.MetaInternal {
+		t.SkipNow()
+	}
 	if *utils.DBType == utils.MetaMySQL || *utils.DBType == utils.MetaPostgres {
 		dataDB, err = engine.NewRedisStorage(
 			fmt.Sprintf("%s:%s", sBkupCfg.DataDbCfg().Host, sBkupCfg.DataDbCfg().Port),
@@ -560,6 +576,9 @@ func testSessionSBkupCallBackup3(t *testing.T) {
 }
 
 func testSessionSBkupCheckUpdatedAt(t *testing.T) {
+	if *utils.DBType == utils.MetaInternal {
+		t.SkipNow()
+	}
 	var getBackSess []*Session
 	storedSessions, err := dataDB.GetSessionsBackupDrv(sBkupCfg.GeneralCfg().NodeID,
 		sBkupCfg.GeneralCfg().DefaultTenant)
