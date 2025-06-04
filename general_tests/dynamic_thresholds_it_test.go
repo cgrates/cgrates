@@ -391,9 +391,16 @@ func testDynThdGetAccountAfterDebit(t *testing.T) {
 }
 
 func testDynThdGetThresholdAfterDebit(t *testing.T) {
+	expThd := &engine.Threshold{
+		Tenant: "cgrates.org",
+		ID:     "THD_ACNT_1002",
+		Hits:   1,
+	}
 	var result2 *engine.Threshold
-	if err := dynThdRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}}, &result2); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := dynThdRpc.Call(context.Background(), utils.ThresholdSv1GetThreshold, &utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1002"}}, &result2); err != nil {
 		t.Error(err)
+	} else if result2.Snooze = expThd.Snooze; !reflect.DeepEqual(result2, expThd) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expThd), utils.ToJSON(result2))
 	}
 }
 

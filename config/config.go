@@ -479,8 +479,8 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	// in case of internalDB we need to disable the cache
 	// so we enforce it here
 	if cfg.dataDbCfg.Type == utils.MetaInternal {
-		// overwrite only DataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
-		for key := range utils.DataDBPartitions {
+		// overwrite only StatelessDataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
+		for key := range utils.StatelessDataDBPartitions {
 			if _, has := cfg.cacheCfg.Partitions[key]; has {
 				cfg.cacheCfg.Partitions[key] = &CacheParamCfg{}
 			}
