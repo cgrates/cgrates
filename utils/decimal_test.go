@@ -192,7 +192,6 @@ func TestNewDecimalFromFloat64(t *testing.T) {
 	x := 21.5
 	xExp, _ := new(decimal.Big).SetString(strconv.FormatFloat(x, 'f', -1, 64))
 	expected := &Decimal{xExp}
-	// fmt.Printf("%v of type %T", expected, expected)
 	rcv := NewDecimalFromFloat64(x)
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected <+%v> but received <+%v>", xExp, rcv)
