@@ -403,7 +403,7 @@ func main() {
 	if tpReader, err = engine.NewTpReader(dataDB, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
-		ldrCfg.LoaderCgrCfg().SchedulerConns, false); err != nil {
+		ldrCfg.LoaderCgrCfg().SchedulerConns); err != nil {
 		log.Fatal(err)
 	}
 	if err = tpReader.LoadAll(); err != nil {

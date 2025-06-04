@@ -264,8 +264,7 @@ func (apierSv1 *APIerSv1) LoadDestination(ctx *context.Context, attrs *AttrLoadD
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone, apierSv1.Config.ApierCfg().CachesConns,
-		apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -296,8 +295,7 @@ func (apierSv1 *APIerSv1) LoadRatingPlan(ctx *context.Context, attrs *AttrLoadRa
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -320,8 +318,7 @@ func (apierSv1 *APIerSv1) LoadRatingProfile(ctx *context.Context, attrs *utils.T
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -355,8 +352,7 @@ func (apierSv1 *APIerSv1) LoadSharedGroup(ctx *context.Context, attrs *AttrLoadS
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -382,8 +378,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(ctx *context.Context, attrs *
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -970,8 +965,7 @@ func (apierSv1 *APIerSv1) LoadAccountActions(ctx *context.Context, attrs *utils.
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1014,8 +1008,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(ctx *context.Context, attrs *
 	// create the TpReader
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
 		csvStorage, "", apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1091,8 +1084,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(ctx *context.Context, attrs *utils.
 	// create the TpReader
 	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
 		csvStorage, "", apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1150,8 +1142,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(ctx *context.Context, attrs *AttrLo
 	}
 	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
-		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns,
-		apierSv1.Config.DataDbCfg().Type == utils.MetaInternal)
+		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
