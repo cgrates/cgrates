@@ -74,7 +74,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 			destinationRates, ratingPlans, ratingProfiles,
 			sharedGroups, actions, actionPlans, actionTriggers, accountActions,
 			resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers,
-			attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil, false)
+			attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}

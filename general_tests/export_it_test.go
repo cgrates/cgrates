@@ -279,7 +279,7 @@ func testExpVerifyStats(t *testing.T) {
 			},
 		},
 		Blocker:      true,
-		Stored:       true,
+		Stored:       false,
 		Weight:       30,
 		MinItems:     0,
 		ThresholdIDs: []string{utils.MetaNone},

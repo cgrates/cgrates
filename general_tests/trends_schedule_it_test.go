@@ -106,8 +106,8 @@ func TestTrendSchedule(t *testing.T) {
 cgrates.org,TREND_1,@every 1s,Stats1_1,,-1,-1,1,*last,1,false,Threshold1;Threshold2
 cgrates.org,TREND_2,@every 1s,Stats1_2,,-1,-1,1,*last,1,false,*none`,
 		utils.StatsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
-cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,,*tcc;*acd;*tcd,,true,,,
-cgrates.org,Stats1_2,*string:~*req.Account:1002,,,,,*sum#~*req.Usage;*pdd,,true,,,`,
+cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,,*tcc;*acd;*tcd,,false,,,
+cgrates.org,Stats1_2,*string:~*req.Account:1002,,,,,*sum#~*req.Usage;*pdd,,false,,,`,
 		utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10],EeIDs[11]
 cgrates.org,Threshold1,*string:~*req.Metrics.*acd.ID:*acd,2024-07-29T15:00:00Z,-1,10,1s,false,10,,true,
 cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,2024-07-29T15:00:00Z,-1,10,1s,false,10,,true,

@@ -300,7 +300,7 @@ func init() {
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
 		ResourcesCSVContent, IPsCSVContent, StatsCSVContent, TrendsCSVContent, RankingsCSVContent,
 		ThresholdsCSVContent, FiltersCSVContent, RoutesCSVContent, AttributesCSVContent,
-		ChargersCSVContent, DispatcherCSVContent, DispatcherHostCSVContent), testTPID, "", nil, nil, false)
+		ChargersCSVContent, DispatcherCSVContent, DispatcherHostCSVContent), testTPID, "", nil, nil)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
