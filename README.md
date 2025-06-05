@@ -37,6 +37,6 @@ Browsable HTML docs http://readthedocs.org/docs/cgrates/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
-API reference [godoc](https://godoc.org/github.com/cgrates/cgrates/apier)
+API reference [godoc](https://pkg.go.dev/github.com/cgrates/cgrates@v1.0.0-dev)
 
 Also check [irc.freenode.net #cgrates](irc://irc.freenode.net:6667/cgrates) ([Webchat](http://webchat.freenode.net?randomnick=1&channels=%23cgrates)) and [Google group](https://groups.google.com/forum/#!forum/cgrates) for a more real-time support.
