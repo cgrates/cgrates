@@ -373,8 +373,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		var reply string
 		args := s.OriginCGREvent.Clone()
 		args.ID = utils.UUIDSha1Prefix()
-		args.APIOpts[utils.OptsIPsUsageID] = s.ID
-		args.APIOpts[utils.OptsIPsUnits] = 1
+		args.APIOpts[utils.OptsIPsAllocationID] = s.ID
 		if err := sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
 			utils.IPsV1ReleaseIP,
 			args, &reply); err != nil {

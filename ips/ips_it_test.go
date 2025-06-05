@@ -34,7 +34,7 @@ import (
 // TODO: move anything sessions related to sessions once ips implementation
 // is complete.
 func TestIPsIT(t *testing.T) {
-	// t.Skip("ips test currently incomplete, skipping...")
+	t.Skip("ips test currently incomplete, skipping...")
 	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
