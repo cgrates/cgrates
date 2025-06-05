@@ -158,8 +158,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		if originID == "" {
 			originID = utils.UUIDSha1Prefix()
 		}
-		args.APIOpts[utils.OptsIPsUsageID] = originID
-		args.APIOpts[utils.OptsIPsUnits] = 1
+		args.APIOpts[utils.OptsIPsAllocationID] = originID
 		var allocMsg string
 		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns, utils.IPsV1AuthorizeIP,
 			args, &allocMsg); err != nil {
@@ -390,8 +389,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		if originID == utils.EmptyString {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
-		args.APIOpts[utils.OptsIPsUsageID] = originID
-		args.APIOpts[utils.OptsIPsUnits] = 1
+		args.APIOpts[utils.OptsIPsAllocationID] = originID
 		var allocMessage string
 		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
 			utils.IPsV1AllocateIP, args, &allocMessage); err != nil {
