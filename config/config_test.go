@@ -1343,7 +1343,7 @@ func TestLoadHttpAgentCfgError(t *testing.T) {
 		},
 	],	
 }`
-	expected := "json: cannot unmarshal array into Go struct field HttpAgentJsonCfg.Id of type string"
+	expected := "json: cannot unmarshal array into Go struct field HttpAgentJsonCfg.id of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
