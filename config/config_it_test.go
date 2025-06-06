@@ -710,7 +710,9 @@ func testCGRConfigReloadDNSAgent(t *testing.T) {
 				Network: "tcp",
 			},
 		},
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		SessionSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		StatSConns:      []string{},
+		ThresholdSConns: []string{},
 		// Timezone          string
 		// RequestProcessors []*RequestProcessor
 	}

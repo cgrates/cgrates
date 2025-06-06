@@ -1162,9 +1162,11 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 				Address: utils.StringPointer("127.0.0.1:53"),
 			},
 		},
-		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
-		Timezone:           utils.StringPointer(""),
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		SessionSConns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
+		StatSConns:        &[]string{},
+		ThresholdSConns:   &[]string{},
+		Timezone:          utils.StringPointer(""),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

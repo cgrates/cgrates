@@ -610,11 +610,13 @@ type DnsListenerJsnCfg struct {
 
 // DNSAgentJsonCfg
 type DNSAgentJsonCfg struct {
-	Enabled            *bool
-	Listeners          *[]*DnsListenerJsnCfg
-	Sessions_conns     *[]string
-	Timezone           *string
-	Request_processors *[]*ReqProcessorJsnCfg
+	Enabled           *bool                  `json:"enabled"`
+	Listeners         *[]*DnsListenerJsnCfg  `json:"listeners"`
+	SessionSConns     *[]string              `json:"sessions_conns"`
+	StatSConns        *[]string              `json:"stats_conns"`
+	ThresholdSConns   *[]string              `json:"thresholds_conns"`
+	Timezone          *string                `json:"timezone"`
+	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 type ReqProcessorJsnCfg struct {

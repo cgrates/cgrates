@@ -33,9 +33,11 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 				Network: utils.StringPointer("udp"),
 			},
 		},
-		Sessions_conns: &[]string{utils.MetaInternal, "*conn1"},
-		Timezone:       utils.StringPointer("UTC"),
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		SessionSConns:   &[]string{utils.MetaInternal, "*conn1"},
+		StatSConns:      &[]string{utils.MetaInternal, "*conn1"},
+		ThresholdSConns: &[]string{utils.MetaInternal, "*conn1"},
+		Timezone:        utils.StringPointer("UTC"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
 				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
@@ -57,8 +59,10 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
-		Timezone:      "UTC",
+		SessionSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		StatSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ThresholdSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		Timezone:        "UTC",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -116,7 +120,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorDNSAgentloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &DNSAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Tenant: utils.StringPointer("a{*"),
 			},
@@ -140,7 +144,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
        }
 }`
 	cfgJSON := &DNSAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID: utils.StringPointer("random"),
 			},
@@ -155,7 +159,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
 
 func TestRequestProcessorReplyFieldsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &DNSAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Reply_fields: &[]*FcTemplateJsonCfg{
 					{
@@ -175,7 +179,7 @@ func TestRequestProcessorReplyFieldsloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorRequestFieldsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &DNSAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Request_fields: &[]*FcTemplateJsonCfg{
 					{
@@ -216,6 +220,8 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			},
 		},
 		utils.SessionSConnsCfg:     []string{"*internal"},
+		utils.StatSConnsCfg:        []string{},
+		utils.ThresholdSConnsCfg:   []string{},
 		utils.TimezoneCfg:          "",
 		utils.RequestProcessorsCfg: []map[string]any{},
 	}
@@ -237,6 +243,8 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				}
 			],
 			"sessions_conns": ["*internal:*sessions", "*conn1"],
+			"stats_conns": ["*internal:*stats", "*conn1"],
+			"thresholds_conns": ["*internal:*thresholds", "*conn1"],
 			"timezone": "UTC",
 			"request_processors": [
 			{
@@ -270,8 +278,10 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				utils.NetworkCfg: "udp",
 			},
 		},
-		utils.SessionSConnsCfg: []string{utils.MetaInternal, "*conn1"},
-		utils.TimezoneCfg:      "UTC",
+		utils.SessionSConnsCfg:   []string{utils.MetaInternal, "*conn1"},
+		utils.StatSConnsCfg:      []string{utils.MetaInternal, "*conn1"},
+		utils.ThresholdSConnsCfg: []string{utils.MetaInternal, "*conn1"},
+		utils.TimezoneCfg:        "UTC",
 		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
@@ -330,8 +340,10 @@ func TestDNSAgentCfgClone(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
-		Timezone:      "UTC",
+		SessionSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		StatSConns:      []string{},
+		ThresholdSConns: []string{},
+		Timezone:        "UTC",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
