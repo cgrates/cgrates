@@ -593,12 +593,14 @@ type RadiusAgentJsonCfg struct {
 
 // Conecto Agent configuration section
 type HttpAgentJsonCfg struct {
-	Id                 *string
-	Url                *string
-	Sessions_conns     *[]string
-	Request_payload    *string
-	Reply_payload      *string
-	Request_processors *[]*ReqProcessorJsnCfg
+	ID                *string                `json:"id"`
+	URL               *string                `json:"url"`
+	SessionSConns     *[]string              `json:"sessions_conns"`
+	StatSConns        *[]string              `json:"stats_conns"`
+	ThresholdSConns   *[]string              `json:"thresholds_conns"`
+	RequestPayload    *string                `json:"request_payload"`
+	ReplyPayload      *string                `json:"reply_payload"`
+	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 type DnsListenerJsnCfg struct {

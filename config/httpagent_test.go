@@ -29,12 +29,12 @@ import (
 func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Id:              utils.StringPointer("RandomID"),
-			Url:             utils.StringPointer("/randomURL"),
-			Sessions_conns:  &[]string{"*internal"},
-			Reply_payload:   utils.StringPointer(utils.MetaXml),
-			Request_payload: utils.StringPointer(utils.MetaUrl),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:             utils.StringPointer("RandomID"),
+			URL:            utils.StringPointer("/randomURL"),
+			SessionSConns:  &[]string{"*internal"},
+			ReplyPayload:   utils.StringPointer(utils.MetaXml),
+			RequestPayload: utils.StringPointer(utils.MetaUrl),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("OutboundAUTHDryRun"),
 					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -91,12 +91,12 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Id:              utils.StringPointer("conecto1"),
-			Url:             utils.StringPointer("/conecto"),
-			Sessions_conns:  &[]string{utils.MetaLocalHost},
-			Request_payload: utils.StringPointer(utils.MetaUrl),
-			Reply_payload:   utils.StringPointer(utils.MetaXml),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:             utils.StringPointer("conecto1"),
+			URL:            utils.StringPointer("/conecto"),
+			SessionSConns:  &[]string{utils.MetaLocalHost},
+			RequestPayload: utils.StringPointer(utils.MetaUrl),
+			ReplyPayload:   utils.StringPointer(utils.MetaXml),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("OutboundAUTHDryRun"),
 					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -142,12 +142,12 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 				}},
 		},
 		{
-			Id:              utils.StringPointer("conecto_xml"),
-			Url:             utils.StringPointer("/conecto_xml"),
-			Sessions_conns:  &[]string{utils.MetaLocalHost},
-			Request_payload: utils.StringPointer("*xml"),
-			Reply_payload:   utils.StringPointer("*xml"),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:             utils.StringPointer("conecto_xml"),
+			URL:            utils.StringPointer("/conecto_xml"),
+			SessionSConns:  &[]string{utils.MetaLocalHost},
+			RequestPayload: utils.StringPointer("*xml"),
+			ReplyPayload:   utils.StringPointer("*xml"),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("cdr_from_xml"),
 					Tenant:         utils.StringPointer("cgrates.org"),
@@ -230,12 +230,12 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 
 func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	jsnhttpCfg := &HttpAgentJsonCfg{
-		Id:              utils.StringPointer("conecto1"),
-		Url:             utils.StringPointer("/conecto"),
-		Sessions_conns:  &[]string{utils.MetaLocalHost},
-		Request_payload: utils.StringPointer("*url"),
-		Reply_payload:   utils.StringPointer("*xml"),
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		ID:             utils.StringPointer("conecto1"),
+		URL:            utils.StringPointer("/conecto"),
+		SessionSConns:  &[]string{utils.MetaLocalHost},
+		RequestPayload: utils.StringPointer("*url"),
+		ReplyPayload:   utils.StringPointer("*xml"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
 				Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -272,12 +272,12 @@ func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Id:              utils.StringPointer("conecto1"),
-			Url:             utils.StringPointer("/conecto"),
-			Sessions_conns:  &[]string{utils.MetaLocalHost},
-			Request_payload: utils.StringPointer(utils.MetaUrl),
-			Reply_payload:   utils.StringPointer(utils.MetaXml),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:             utils.StringPointer("conecto1"),
+			URL:            utils.StringPointer("/conecto"),
+			SessionSConns:  &[]string{utils.MetaLocalHost},
+			RequestPayload: utils.StringPointer(utils.MetaUrl),
+			ReplyPayload:   utils.StringPointer(utils.MetaXml),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("OutboundAUTHDryRun"),
 					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -323,12 +323,12 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 				}},
 		},
 		{
-			Id:              utils.StringPointer("conecto_xml"),
-			Url:             utils.StringPointer("/conecto_xml"),
-			Sessions_conns:  &[]string{utils.MetaLocalHost},
-			Request_payload: utils.StringPointer("*xml"),
-			Reply_payload:   utils.StringPointer("*xml"),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:             utils.StringPointer("conecto_xml"),
+			URL:            utils.StringPointer("/conecto_xml"),
+			SessionSConns:  &[]string{utils.MetaLocalHost},
+			RequestPayload: utils.StringPointer("*xml"),
+			ReplyPayload:   utils.StringPointer("*xml"),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("cdr_from_xml"),
 					Tenant:         utils.StringPointer("a{*"),
@@ -349,7 +349,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 func TestHttpAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Request_processors: nil,
+			RequestProcessors: nil,
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -378,7 +378,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 }`
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Id: utils.StringPointer("RandomID"),
+			ID: utils.StringPointer("RandomID"),
 		},
 	}
 	expected := HTTPAgentCfgs{
@@ -498,6 +498,8 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 		"id": "conecto1",
 		"url": "/conecto",
 		"sessions_conns": ["*birpc_internal", "*localhost","*internal"],
+		"stats_conns": ["*internal", "*localhost","*internal"],
+		"thresholds_conns": ["*internal", "*localhost","*internal"],
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -527,11 +529,13 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := []map[string]any{
 		{
-			utils.IDCfg:             "conecto1",
-			utils.URLCfg:            "/conecto",
-			utils.SessionSConnsCfg:  []string{rpcclient.BiRPCInternal, "*localhost", "*internal"},
-			utils.RequestPayloadCfg: "*url",
-			utils.ReplyPayloadCfg:   "*xml",
+			utils.IDCfg:              "conecto1",
+			utils.URLCfg:             "/conecto",
+			utils.SessionSConnsCfg:   []string{rpcclient.BiRPCInternal, "*localhost", "*internal"},
+			utils.StatSConnsCfg:      []string{rpcclient.InternalRPC, "*localhost", "*internal"},
+			utils.ThresholdSConnsCfg: []string{rpcclient.InternalRPC, "*localhost", "*internal"},
+			utils.RequestPayloadCfg:  "*url",
+			utils.ReplyPayloadCfg:    "*xml",
 			utils.RequestProcessorsCfg: []map[string]any{
 				{
 					utils.IDCfg:            "OutboundAUTHDryRun",
