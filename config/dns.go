@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,6 +34,8 @@ type DNSAgentCfg struct {
 	Enabled           bool
 	Listeners         []DnsListener
 	SessionSConns     []string
+	StatSConns        []string
+	ThresholdSConns   []string
 	Timezone          string
 	RequestProcessors []*RequestProcessor
 }
@@ -60,9 +64,9 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	if jsnCfg.Timezone != nil {
 		da.Timezone = *jsnCfg.Timezone
 	}
-	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, connID := range *jsnCfg.Sessions_conns {
+	if jsnCfg.SessionSConns != nil {
+		da.SessionSConns = make([]string, len(*jsnCfg.SessionSConns))
+		for idx, connID := range *jsnCfg.SessionSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			da.SessionSConns[idx] = connID
 			if connID == utils.MetaInternal {
@@ -70,8 +74,14 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 			}
 		}
 	}
-	if jsnCfg.Request_processors != nil {
-		for _, reqProcJsn := range *jsnCfg.Request_processors {
+	if jsnCfg.StatSConns != nil {
+		da.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+	}
+	if jsnCfg.ThresholdSConns != nil {
+		da.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+	}
+	if jsnCfg.RequestProcessors != nil {
+		for _, reqProcJsn := range *jsnCfg.RequestProcessors {
 			rp := new(RequestProcessor)
 			var haveID bool
 			for _, rpSet := range da.RequestProcessors {
@@ -102,24 +112,23 @@ func (lstn *DnsListener) AsMapInterface(separator string) map[string]any {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
-	initialMP = map[string]any{
-		utils.EnabledCfg:  da.Enabled,
-		utils.TimezoneCfg: da.Timezone,
-	}
-
+func (da *DNSAgentCfg) AsMapInterface(sep string) map[string]any {
 	listeners := make([]map[string]any, len(da.Listeners))
 	for i, item := range da.Listeners {
-		listeners[i] = item.AsMapInterface(separator)
+		listeners[i] = item.AsMapInterface(sep)
 	}
-	initialMP[utils.ListenersCfg] = listeners
-
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface(separator)
+		requestProcessors[i] = item.AsMapInterface(sep)
 	}
-	initialMP[utils.RequestProcessorsCfg] = requestProcessors
-
+	m := map[string]any{
+		utils.EnabledCfg:           da.Enabled,
+		utils.ListenersCfg:         listeners,
+		utils.TimezoneCfg:          da.Timezone,
+		utils.StatSConnsCfg:        stripInternalConns(da.StatSConns),
+		utils.ThresholdSConnsCfg:   stripInternalConns(da.ThresholdSConns),
+		utils.RequestProcessorsCfg: requestProcessors,
+	}
 	if da.SessionSConns != nil {
 		sessionSConns := make([]string, len(da.SessionSConns))
 		for i, item := range da.SessionSConns {
@@ -128,35 +137,28 @@ func (da *DNSAgentCfg) AsMapInterface(separator string) (initialMP map[string]an
 				sessionSConns[i] = utils.MetaInternal
 			}
 		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		m[utils.SessionSConnsCfg] = sessionSConns
 	}
-	return
+	return m
 }
 
 // Clone returns a deep copy of DNSAgentCfg
-func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
-	cln = &DNSAgentCfg{
-		Enabled:   da.Enabled,
-		Listeners: da.Listeners,
-		Timezone:  da.Timezone,
-	}
-
-	if da.Listeners != nil {
-		cln.Listeners = make([]DnsListener, len(da.Listeners))
-		copy(cln.Listeners, da.Listeners)
-	}
-
-	if da.SessionSConns != nil {
-		cln.SessionSConns = make([]string, len(da.SessionSConns))
-		copy(cln.SessionSConns, da.SessionSConns)
+func (da DNSAgentCfg) Clone() *DNSAgentCfg {
+	clone := &DNSAgentCfg{
+		Enabled:         da.Enabled,
+		Listeners:       slices.Clone(da.Listeners),
+		Timezone:        da.Timezone,
+		SessionSConns:   slices.Clone(da.SessionSConns),
+		StatSConns:      slices.Clone(da.StatSConns),
+		ThresholdSConns: slices.Clone(da.ThresholdSConns),
 	}
 	if da.RequestProcessors != nil {
-		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
+		clone.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
 		for i, req := range da.RequestProcessors {
-			cln.RequestProcessors[i] = req.Clone()
+			clone.RequestProcessors[i] = req.Clone()
 		}
 	}
-	return
+	return clone
 }
 
 // RequestProcessor is the request processor configuration
