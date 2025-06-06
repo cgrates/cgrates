@@ -197,6 +197,8 @@ func (da *DNSAgent) handleQuestion(dnsDP utils.DataProvider, rply *dns.Msg, q *d
 				da.fltrS, nil),
 			utils.DNSAgent, da.connMgr,
 			da.cgrCfg.DNSAgentCfg().SessionSConns,
+			da.cgrCfg.DNSAgentCfg().StatSConns,
+			da.cgrCfg.DNSAgentCfg().ThresholdSConns,
 			da.fltrS); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing message: %s from %s",

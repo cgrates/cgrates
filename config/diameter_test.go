@@ -27,21 +27,23 @@ import (
 
 func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	jsonCFG := &DiameterAgentJsonCfg{
-		Enabled:              utils.BoolPointer(true),
-		Listen_net:           utils.StringPointer("tcp"),
-		Listen:               utils.StringPointer("127.0.0.1:3868"),
-		Ce_applications:      utils.SliceStringPointer([]string{"Base"}),
-		Dictionaries_path:    utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Sessions_conns:       &[]string{utils.MetaInternal, "*conn1"},
-		Origin_host:          utils.StringPointer("CGR-DA"),
-		Origin_realm:         utils.StringPointer("cgrates.org"),
-		Vendor_id:            utils.IntPointer(0),
-		Product_name:         utils.StringPointer("randomName"),
-		Synced_conn_requests: utils.BoolPointer(true),
-		Asr_template:         utils.StringPointer("randomTemplate"),
-		Rar_template:         utils.StringPointer("randomTemplate"),
-		Forced_disconnect:    utils.StringPointer("forced"),
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		Enabled:            utils.BoolPointer(true),
+		ListenNet:          utils.StringPointer("tcp"),
+		Listen:             utils.StringPointer("127.0.0.1:3868"),
+		CeApplications:     utils.SliceStringPointer([]string{"Base"}),
+		DictionariesPath:   utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
+		SessionSConns:      &[]string{utils.MetaInternal, "*conn1"},
+		StatSConns:         &[]string{utils.MetaInternal, "*conn1"},
+		ThresholdSConns:    &[]string{utils.MetaInternal, "*conn1"},
+		OriginHost:         utils.StringPointer("CGR-DA"),
+		OriginRealm:        utils.StringPointer("cgrates.org"),
+		VendorID:           utils.IntPointer(0),
+		ProductName:        utils.StringPointer("randomName"),
+		SyncedConnRequests: utils.BoolPointer(true),
+		ASRTemplate:        utils.StringPointer("randomTemplate"),
+		RARTemplate:        utils.StringPointer("randomTemplate"),
+		ForcedDisconnect:   utils.StringPointer("forced"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:       utils.StringPointer(utils.CGRateSLwr),
 				Timezone: utils.StringPointer("Local"),
@@ -55,6 +57,8 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		CeApplications:   []string{"Base"},
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
 		SessionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
 		OriginHost:       "CGR-DA",
 		OriginRealm:      "cgrates.org",
 		VendorID:         0,
@@ -80,7 +84,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorloadFromJsonCfg1(t *testing.T) {
 	cfgJSON := &DiameterAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Tenant: utils.StringPointer("a{*"),
 			},
@@ -104,7 +108,7 @@ func TestRequestProcessorloadFromJsonCfg2(t *testing.T) {
        }
 }`
 	cfgJSON := &DiameterAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID: utils.StringPointer("random"),
 			},
@@ -127,6 +131,8 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 			"Base",
 		],
 		"sessions_conns": ["*birpc_internal","*internal", "*conn1"],
+		"stats_conns": ["*internal", "*conn1"],
+		"thresholds_conns": ["*internal", "*conn1"],
 		"origin_host": "CGR-DA",									
 		"origin_realm": "cgrates.org",								
 		"vendor_id": 0,												
@@ -161,6 +167,8 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		utils.ProductNameCfg:      "CGRateS",
 		utils.RARTemplateCfg:      "",
 		utils.SessionSConnsCfg:    []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"},
+		utils.StatSConnsCfg:       []string{utils.MetaInternal, "*conn1"},
+		utils.ThresholdSConnsCfg:  []string{utils.MetaInternal, "*conn1"},
 		utils.SyncedConnReqsCfg:   true,
 		utils.VendorIDCfg:         0,
 		utils.RequestProcessorsCfg: []map[string]any{
@@ -209,6 +217,8 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		"ce_applications": [
 			"Nokia.4",
 		],	
+		"stats_conns": ["*internal"],
+		"thresholds_conns": ["conn1"],
 		"synced_conn_requests": false,
 	},
 }`
@@ -225,6 +235,8 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		utils.ProductNameCfg:       "CGRateS",
 		utils.RARTemplateCfg:       "",
 		utils.SessionSConnsCfg:     []string{rpcclient.BiRPCInternal},
+		utils.StatSConnsCfg:        []string{rpcclient.InternalRPC},
+		utils.ThresholdSConnsCfg:   []string{"conn1"},
 		utils.SyncedConnReqsCfg:    false,
 		utils.VendorIDCfg:          0,
 		utils.RequestProcessorsCfg: []map[string]any{},

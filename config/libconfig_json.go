@@ -543,21 +543,23 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled              *bool
-	Listen               *string
-	Listen_net           *string
-	Dictionaries_path    *string
-	Ce_applications      *[]string
-	Sessions_conns       *[]string
-	Origin_host          *string
-	Origin_realm         *string
-	Vendor_id            *int
-	Product_name         *string
-	Synced_conn_requests *bool
-	Asr_template         *string
-	Rar_template         *string
-	Forced_disconnect    *string
-	Request_processors   *[]*ReqProcessorJsnCfg
+	Enabled            *bool                  `json:"enabled"`
+	Listen             *string                `json:"listen"`
+	ListenNet          *string                `json:"listen_net"`
+	DictionariesPath   *string                `json:"dictionaries_path"`
+	CeApplications     *[]string              `json:"ce_applications"`
+	SessionSConns      *[]string              `json:"sessions_conns"`
+	StatSConns         *[]string              `json:"stats_conns"`
+	ThresholdSConns    *[]string              `json:"thresholds_conns"`
+	OriginHost         *string                `json:"origin_host"`
+	OriginRealm        *string                `json:"origin_realm"`
+	VendorID           *int                   `json:"vendor_id"`
+	ProductName        *string                `json:"product_name"`
+	SyncedConnRequests *bool                  `json:"synced_conn_requests"`
+	ASRTemplate        *string                `json:"asr_template"`
+	RARTemplate        *string                `json:"rar_template"`
+	ForcedDisconnect   *string                `json:"forced_disconnect"`
+	RequestProcessors  *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 type RadiListenerJsnCfg struct {
@@ -580,7 +582,9 @@ type RadiusAgentJsonCfg struct {
 	ClientSecrets      *map[string]string          `json:"client_secrets"`
 	ClientDictionaries *map[string][]string        `json:"client_dictionaries"`
 	ClientDaAddresses  map[string]DAClientOptsJson `json:"client_da_addresses"`
-	Sessions_conns     *[]string                   `json:"sessions_conns"`
+	SessionSConns      *[]string                   `json:"sessions_conns"`
+	StatSConns         *[]string                   `json:"stats_conns"`
+	ThresholdSConns    *[]string                   `json:"thresholds_conns"`
 	RequestsCacheKey   *string                     `json:"requests_cache_key"`
 	DMRTemplate        *string                     `json:"dmr_template"`
 	CoATemplate        *string                     `json:"coa_template"`
@@ -589,12 +593,14 @@ type RadiusAgentJsonCfg struct {
 
 // Conecto Agent configuration section
 type HttpAgentJsonCfg struct {
-	Id                 *string
-	Url                *string
-	Sessions_conns     *[]string
-	Request_payload    *string
-	Reply_payload      *string
-	Request_processors *[]*ReqProcessorJsnCfg
+	ID                *string                `json:"id"`
+	URL               *string                `json:"url"`
+	SessionSConns     *[]string              `json:"sessions_conns"`
+	StatSConns        *[]string              `json:"stats_conns"`
+	ThresholdSConns   *[]string              `json:"thresholds_conns"`
+	RequestPayload    *string                `json:"request_payload"`
+	ReplyPayload      *string                `json:"reply_payload"`
+	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 type DnsListenerJsnCfg struct {
@@ -604,11 +610,13 @@ type DnsListenerJsnCfg struct {
 
 // DNSAgentJsonCfg
 type DNSAgentJsonCfg struct {
-	Enabled            *bool
-	Listeners          *[]*DnsListenerJsnCfg
-	Sessions_conns     *[]string
-	Timezone           *string
-	Request_processors *[]*ReqProcessorJsnCfg
+	Enabled           *bool                  `json:"enabled"`
+	Listeners         *[]*DnsListenerJsnCfg  `json:"listeners"`
+	SessionSConns     *[]string              `json:"sessions_conns"`
+	StatSConns        *[]string              `json:"stats_conns"`
+	ThresholdSConns   *[]string              `json:"thresholds_conns"`
+	Timezone          *string                `json:"timezone"`
+	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 type ReqProcessorJsnCfg struct {

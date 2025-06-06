@@ -1076,20 +1076,22 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
-		Enabled:              utils.BoolPointer(false),
-		Listen:               utils.StringPointer("127.0.0.1:3868"),
-		Listen_net:           utils.StringPointer(utils.TCP),
-		Dictionaries_path:    utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Sessions_conns:       &[]string{rpcclient.BiRPCInternal},
-		Origin_host:          utils.StringPointer("CGR-DA"),
-		Origin_realm:         utils.StringPointer("cgrates.org"),
-		Vendor_id:            utils.IntPointer(0),
-		Product_name:         utils.StringPointer("CGRateS"),
-		Synced_conn_requests: utils.BoolPointer(false),
-		Asr_template:         utils.StringPointer(""),
-		Rar_template:         utils.StringPointer(""),
-		Forced_disconnect:    utils.StringPointer(utils.MetaNone),
-		Request_processors:   &[]*ReqProcessorJsnCfg{},
+		Enabled:            utils.BoolPointer(false),
+		Listen:             utils.StringPointer("127.0.0.1:3868"),
+		ListenNet:          utils.StringPointer(utils.TCP),
+		DictionariesPath:   utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
+		SessionSConns:      &[]string{rpcclient.BiRPCInternal},
+		StatSConns:         &[]string{},
+		ThresholdSConns:    &[]string{},
+		OriginHost:         utils.StringPointer("CGR-DA"),
+		OriginRealm:        utils.StringPointer("cgrates.org"),
+		VendorID:           utils.IntPointer(0),
+		ProductName:        utils.StringPointer("CGRateS"),
+		SyncedConnRequests: utils.BoolPointer(false),
+		ASRTemplate:        utils.StringPointer(""),
+		RARTemplate:        utils.StringPointer(""),
+		ForcedDisconnect:   utils.StringPointer(utils.MetaNone),
+		RequestProcessors:  &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -1118,7 +1120,9 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		ClientDictionaries: utils.MapStringSlicePointer(map[string][]string{
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		}),
-		Sessions_conns:    &[]string{utils.MetaInternal},
+		SessionSConns:     &[]string{utils.MetaInternal},
+		StatSConns:        &[]string{},
+		ThresholdSConns:   &[]string{},
 		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 		DMRTemplate:       utils.StringPointer("*dmr"),
 		CoATemplate:       utils.StringPointer("*coa"),
@@ -1158,9 +1162,11 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 				Address: utils.StringPointer("127.0.0.1:53"),
 			},
 		},
-		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
-		Timezone:           utils.StringPointer(""),
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		SessionSConns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
+		StatSConns:        &[]string{},
+		ThresholdSConns:   &[]string{},
+		Timezone:          utils.StringPointer(""),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

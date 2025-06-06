@@ -5,17 +5,10 @@
     name: "{{ rabbitmq_dependencies }}"
     state: present
 
-- name: Download RabbitMQ keys
+- name: Download and install RabbitMQ keys
   become: yes
-  ansible.builtin.get_url:
-    url: "{{ item.url }}"
-    dest: "{{ item.dest }}_armored"
-  loop: "{{ rabbitmq_keys }}"
-
-- name: De-Armor RabbitMQ keys
-  become: yes
-  shell: gpg --dearmor < {{ item.dest }}_armored > {{ item.dest }}
-  no_log: true
+  ansible.builtin.shell: |
+    curl -1sLf "{{ item.url }}" | gpg --dearmor | tee {{ item.dest }} > /dev/null
   args:
     creates: "{{ item.dest }}"
   loop: "{{ rabbitmq_keys }}"
@@ -25,21 +18,18 @@
   ansible.builtin.apt_repository:
     repo: "{{ item }}"
     state: present
+    update_cache: no
+  loop: "{{ rabbitmq_repositories }}"
+
+- name: Update package cache after adding repositories
+  become: yes
+  ansible.builtin.apt:
     update_cache: yes
-  loop:
-    - "deb [signed-by=/usr/share/keyrings/rabbitmq.E495BB49CC4BBE5B.gpg] https://ppa1.novemberain.com/rabbitmq/rabbitmq-erlang/deb/ubuntu jammy main"
-    - "deb-src [signed-by=/usr/share/keyrings/rabbitmq.E495BB49CC4BBE5B.gpg] https://ppa1.novemberain.com/rabbitmq/rabbitmq-erlang/deb/ubuntu jammy main"
-    - "deb [signed-by=/usr/share/keyrings/rabbitmq.E495BB49CC4BBE5B.gpg] https://ppa2.novemberain.com/rabbitmq/rabbitmq-erlang/deb/ubuntu jammy main"
-    - "deb-src [signed-by=/usr/share/keyrings/rabbitmq.E495BB49CC4BBE5B.gpg] https://ppa2.novemberain.com/rabbitmq/rabbitmq-erlang/deb/ubuntu jammy main"
-    - "deb [signed-by=/usr/share/keyrings/rabbitmq.9F4587F226208342.gpg] https://ppa1.novemberain.com/rabbitmq/rabbitmq-server/deb/ubuntu jammy main"
-    - "deb-src [signed-by=/usr/share/keyrings/rabbitmq.9F4587F226208342.gpg] https://ppa1.novemberain.com/rabbitmq/rabbitmq-server/deb/ubuntu jammy main"
-    - "deb [signed-by=/usr/share/keyrings/rabbitmq.9F4587F226208342.gpg] https://ppa2.novemberain.com/rabbitmq/rabbitmq-server/deb/ubuntu jammy main"
-    - "deb-src [signed-by=/usr/share/keyrings/rabbitmq.9F4587F226208342.gpg] https://ppa2.novemberain.com/rabbitmq/rabbitmq-server/deb/ubuntu jammy main"
 
 - name: Install Erlang packages
   become: yes
   ansible.builtin.apt:
-    name: "{{ erlang_dependencies }}"
+    name: "{{ rabbitmq_erlang_dependencies }}"
     state: present
 
 - name: Install RabbitMQ server

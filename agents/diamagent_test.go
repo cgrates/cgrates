@@ -460,7 +460,11 @@ func TestProcessRequest(t *testing.T) {
 		t.Fatal(err)
 	}
 	da.ctx = context.WithClient(context.TODO(), srv)
-	pr, err := processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err := processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr,
+		da.cgrCfg.DiameterAgentCfg().SessionSConns,
+		da.cgrCfg.DiameterAgentCfg().StatSConns,
+		da.cgrCfg.DiameterAgentCfg().ThresholdSConns,
+		da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -477,7 +481,11 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr,
+		da.cgrCfg.DiameterAgentCfg().SessionSConns,
+		da.cgrCfg.DiameterAgentCfg().StatSConns,
+		da.cgrCfg.DiameterAgentCfg().ThresholdSConns,
+		da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -494,7 +502,11 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr,
+		da.cgrCfg.DiameterAgentCfg().SessionSConns,
+		da.cgrCfg.DiameterAgentCfg().StatSConns,
+		da.cgrCfg.DiameterAgentCfg().ThresholdSConns,
+		da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -517,7 +529,11 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr,
+		da.cgrCfg.DiameterAgentCfg().SessionSConns,
+		da.cgrCfg.DiameterAgentCfg().StatSConns,
+		da.cgrCfg.DiameterAgentCfg().ThresholdSConns,
+		da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -534,7 +550,11 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr,
+		da.cgrCfg.DiameterAgentCfg().SessionSConns,
+		da.cgrCfg.DiameterAgentCfg().StatSConns,
+		da.cgrCfg.DiameterAgentCfg().ThresholdSConns,
+		da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {

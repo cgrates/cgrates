@@ -312,6 +312,24 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DiameterAgent, connID)
 			}
 		}
+		for _, connID := range cfg.diameterAgentCfg.StatSConns {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.DiameterAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DiameterAgent, connID)
+			}
+		}
+		for _, connID := range cfg.diameterAgentCfg.ThresholdSConns {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.DiameterAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DiameterAgent, connID)
+			}
+		}
 		for prf, tmp := range cfg.templates {
 			for _, field := range tmp {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
@@ -392,6 +410,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RadiusAgent, connID)
 			}
 		}
+		for _, connID := range cfg.radiusAgentCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.RadiusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RadiusAgent, connID)
+			}
+		}
+		for _, connID := range cfg.radiusAgentCfg.ThresholdSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.RadiusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RadiusAgent, connID)
+			}
+		}
 		for _, req := range cfg.radiusAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
@@ -444,6 +478,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DNSAgent, connID)
 			}
 		}
+		for _, connID := range cfg.dnsAgentCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.DNSAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DNSAgent, connID)
+			}
+		}
+		for _, connID := range cfg.dnsAgentCfg.ThresholdSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.DNSAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DNSAgent, connID)
+			}
+		}
 		for _, req := range cfg.dnsAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
@@ -489,6 +539,24 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
 			if isInternal && !cfg.sessionSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.SessionS, httpAgentCfg.ID)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
+				return fmt.Errorf("<%s> template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)
+			}
+		}
+		for _, connID := range httpAgentCfg.StatSConns {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.StatS, httpAgentCfg.ID)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
+				return fmt.Errorf("<%s> template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)
+			}
+		}
+		for _, connID := range httpAgentCfg.ThresholdSConns {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
+			if isInternal && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.ThresholdS, httpAgentCfg.ID)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
 				return fmt.Errorf("<%s> template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)

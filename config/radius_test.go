@@ -40,7 +40,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		},
 		ClientSecrets:      &map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: &map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
-		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		SessionSConns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
@@ -62,7 +62,6 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 			},
 		},
 		ClientDaAddresses: map[string]DAClientOptsJson{
-
 			"fsfdsz": {
 				Transport: utils.StringPointer("http"),
 				Host:      utils.StringPointer("localhost"),
@@ -83,6 +82,8 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string][]string{utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"}},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		StatSConns:         []string{},
+		ThresholdSConns:    []string{},
 		DMRTemplate:        "*dmr",
 		CoATemplate:        "*coa",
 		ClientDaAddresses: map[string]DAClientOpts{
@@ -193,6 +194,8 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 			],			
 	     },
 	     "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
+	     "stats_conns": ["*internal", "*conn1","*conn2"],
+	     "thresholds_conns": ["*internal", "*conn1","*conn2"],
 		 "dmr_template": "*dmr",
 		 "coa_template": "*coa",
 		 "requests_cache_key": "~*req.Acc-Session-Id",
@@ -226,6 +229,8 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 			utils.MetaDefault: {"/usr/share/cgrates/"},
 		},
 		utils.SessionSConnsCfg:    []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
+		utils.StatSConnsCfg:       []string{rpcclient.InternalRPC, "*conn1", "*conn2"},
+		utils.ThresholdSConnsCfg:  []string{rpcclient.InternalRPC, "*conn1", "*conn2"},
 		utils.DMRTemplateCfg:      "*dmr",
 		utils.CoATemplateCfg:      "*coa",
 		utils.RequestsCacheKeyCfg: "~*req.Acc-Session-Id",
@@ -270,6 +275,8 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		},
 		utils.SessionSConnsCfg:     []string{"*internal"},
+		utils.StatSConnsCfg:        []string{},
+		utils.ThresholdSConnsCfg:   []string{},
 		utils.DMRTemplateCfg:       "*dmr",
 		utils.CoATemplateCfg:       "*coa",
 		utils.RequestsCacheKeyCfg:  "",

@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"slices"
 
+	"maps"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,6 +41,8 @@ type RadiusAgentCfg struct {
 	ClientDictionaries map[string][]string
 	ClientDaAddresses  map[string]DAClientOpts
 	SessionSConns      []string
+	StatSConns         []string
+	ThresholdSConns    []string
 	RequestsCacheKey   RSRParsers
 	DMRTemplate        string
 	CoATemplate        string
@@ -72,17 +76,13 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 		if ra.ClientSecrets == nil {
 			ra.ClientSecrets = make(map[string]string)
 		}
-		for k, v := range *jsnCfg.ClientSecrets {
-			ra.ClientSecrets[k] = v
-		}
+		maps.Copy(ra.ClientSecrets, *jsnCfg.ClientSecrets)
 	}
 	if jsnCfg.ClientDictionaries != nil {
 		if ra.ClientDictionaries == nil {
 			ra.ClientDictionaries = make(map[string][]string)
 		}
-		for k, v := range *jsnCfg.ClientDictionaries {
-			ra.ClientDictionaries[k] = v
-		}
+		maps.Copy(ra.ClientDictionaries, *jsnCfg.ClientDictionaries)
 	}
 	if len(jsnCfg.ClientDaAddresses) != 0 {
 		if ra.ClientDaAddresses == nil {
@@ -95,15 +95,21 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg, separator 
 			ra.ClientDaAddresses[hostKey] = cfg
 		}
 	}
-	if jsnCfg.Sessions_conns != nil {
-		ra.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, attrConn := range *jsnCfg.Sessions_conns {
+	if jsnCfg.SessionSConns != nil {
+		ra.SessionSConns = make([]string, len(*jsnCfg.SessionSConns))
+		for idx, attrConn := range *jsnCfg.SessionSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			ra.SessionSConns[idx] = attrConn
 			if attrConn == utils.MetaInternal {
 				ra.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			}
 		}
+	}
+	if jsnCfg.StatSConns != nil {
+		ra.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+	}
+	if jsnCfg.ThresholdSConns != nil {
+		ra.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
 	}
 	if jsnCfg.RequestsCacheKey != nil {
 		ra.RequestsCacheKey, err = NewRSRParsers(*jsnCfg.RequestsCacheKey, separator)
@@ -153,26 +159,27 @@ func (lstn *RadiusListener) AsMapInterface(separator string) map[string]any {
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
-	initialMP = map[string]any{
-		utils.EnabledCfg:          ra.Enabled,
-		utils.RequestsCacheKeyCfg: ra.RequestsCacheKey.GetRule(separator),
-		utils.DMRTemplateCfg:      ra.DMRTemplate,
-		utils.CoATemplateCfg:      ra.CoATemplate,
-	}
-
+func (ra *RadiusAgentCfg) AsMapInterface(separator string) map[string]any {
 	listeners := make([]map[string]any, len(ra.Listeners))
 	for i, item := range ra.Listeners {
 		listeners[i] = item.AsMapInterface(separator)
 	}
-	initialMP[utils.ListenersCfg] = listeners
-
 	requestProcessors := make([]map[string]any, len(ra.RequestProcessors))
 	for i, item := range ra.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	initialMP[utils.RequestProcessorsCfg] = requestProcessors
-
+	m := map[string]any{
+		utils.EnabledCfg:            ra.Enabled,
+		utils.ListenersCfg:          listeners,
+		utils.ClientSecretsCfg:      maps.Clone(ra.ClientSecrets),
+		utils.ClientDictionariesCfg: maps.Clone(ra.ClientDictionaries),
+		utils.RequestsCacheKeyCfg:   ra.RequestsCacheKey.GetRule(separator),
+		utils.DMRTemplateCfg:        ra.DMRTemplate,
+		utils.CoATemplateCfg:        ra.CoATemplate,
+		utils.StatSConnsCfg:         stripInternalConns(ra.StatSConns),
+		utils.ThresholdSConnsCfg:    stripInternalConns(ra.ThresholdSConns),
+		utils.RequestProcessorsCfg:  requestProcessors,
+	}
 	if ra.SessionSConns != nil {
 		sessionSConns := make([]string, len(ra.SessionSConns))
 		for i, item := range ra.SessionSConns {
@@ -181,68 +188,49 @@ func (ra *RadiusAgentCfg) AsMapInterface(separator string) (initialMP map[string
 				sessionSConns[i] = utils.MetaInternal
 			}
 		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		m[utils.SessionSConnsCfg] = sessionSConns
 	}
-	clientSecrets := make(map[string]string)
-	for k, v := range ra.ClientSecrets {
-		clientSecrets[k] = v
-	}
-	initialMP[utils.ClientSecretsCfg] = clientSecrets
-	clientDictionaries := make(map[string][]string)
-	for k, v := range ra.ClientDictionaries {
-		clientDictionaries[k] = v
-	}
-	initialMP[utils.ClientDictionariesCfg] = clientDictionaries
 	if len(ra.ClientDaAddresses) != 0 {
 		clientDaAddresses := make(map[string]any)
 		for k, v := range ra.ClientDaAddresses {
 			clientDaAddresses[k] = v.AsMapInterface()
 		}
-		initialMP[utils.ClientDaAddressesCfg] = clientDaAddresses
+		m[utils.ClientDaAddressesCfg] = clientDaAddresses
 	}
-	return
+	return m
 }
 
 // Clone returns a deep copy of RadiusAgentCfg
-func (ra RadiusAgentCfg) Clone() (cln *RadiusAgentCfg) {
-	cln = &RadiusAgentCfg{
-		Enabled:            ra.Enabled,
-		Listeners:          ra.Listeners,
-		ClientSecrets:      make(map[string]string),
-		ClientDictionaries: make(map[string][]string),
-		RequestsCacheKey:   ra.RequestsCacheKey.Clone(),
-		DMRTemplate:        ra.DMRTemplate,
-		CoATemplate:        ra.CoATemplate,
+func (ra RadiusAgentCfg) Clone() *RadiusAgentCfg {
+	clone := &RadiusAgentCfg{
+		Enabled:       ra.Enabled,
+		Listeners:     slices.Clone(ra.Listeners),
+		ClientSecrets: maps.Clone(ra.ClientSecrets),
+
+		// NOTE: shallow clone and value is a slice
+		ClientDictionaries: maps.Clone(ra.ClientDictionaries),
+
+		SessionSConns:    slices.Clone(ra.SessionSConns),
+		StatSConns:       slices.Clone(ra.StatSConns),
+		ThresholdSConns:  slices.Clone(ra.ThresholdSConns),
+		RequestsCacheKey: ra.RequestsCacheKey.Clone(),
+		DMRTemplate:      ra.DMRTemplate,
+		CoATemplate:      ra.CoATemplate,
 	}
 
-	if ra.Listeners != nil {
-		cln.Listeners = make([]RadiusListener, len(ra.Listeners))
-		copy(cln.Listeners, ra.Listeners)
-	}
-
-	if ra.SessionSConns != nil {
-		cln.SessionSConns = make([]string, len(ra.SessionSConns))
-		copy(cln.SessionSConns, ra.SessionSConns)
-	}
-	for k, v := range ra.ClientSecrets {
-		cln.ClientSecrets[k] = v
-	}
-	for k, v := range ra.ClientDictionaries {
-		cln.ClientDictionaries[k] = v
-	}
 	if len(ra.ClientDaAddresses) != 0 {
-		cln.ClientDaAddresses = make(map[string]DAClientOpts, len(ra.ClientDaAddresses))
+		clone.ClientDaAddresses = make(map[string]DAClientOpts, len(ra.ClientDaAddresses))
 		for k, v := range ra.ClientDaAddresses {
-			cln.ClientDaAddresses[k] = *v.Clone()
+			clone.ClientDaAddresses[k] = *v.Clone()
 		}
 	}
 	if ra.RequestProcessors != nil {
-		cln.RequestProcessors = make([]*RequestProcessor, len(ra.RequestProcessors))
+		clone.RequestProcessors = make([]*RequestProcessor, len(ra.RequestProcessors))
 		for i, req := range ra.RequestProcessors {
-			cln.RequestProcessors[i] = req.Clone()
+			clone.RequestProcessors[i] = req.Clone()
 		}
 	}
-	return
+	return clone
 }
 
 type DAClientOpts struct {
