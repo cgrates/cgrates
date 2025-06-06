@@ -804,6 +804,8 @@ const CGRATES_CFG_JSON = `
 	},
 	"requests_cache_key": "",				// used to choose the cache key of a RADIUS packet <RSRParsers>
 	"sessions_conns": ["*internal"],
+	"stats_conns": [],					// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],					// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"dmr_template": "*dmr",					// template used to build the Disconnect-Request packet
 	"coa_template": "*coa",					// template used to build the CoA-Request packet
 	"request_processors": []				// request processors to be applied to Radius messages

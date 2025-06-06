@@ -582,7 +582,9 @@ type RadiusAgentJsonCfg struct {
 	ClientSecrets      *map[string]string          `json:"client_secrets"`
 	ClientDictionaries *map[string][]string        `json:"client_dictionaries"`
 	ClientDaAddresses  map[string]DAClientOptsJson `json:"client_da_addresses"`
-	Sessions_conns     *[]string                   `json:"sessions_conns"`
+	SessionSConns      *[]string                   `json:"sessions_conns"`
+	StatSConns         *[]string                   `json:"stats_conns"`
+	ThresholdSConns    *[]string                   `json:"thresholds_conns"`
 	RequestsCacheKey   *string                     `json:"requests_cache_key"`
 	DMRTemplate        *string                     `json:"dmr_template"`
 	CoATemplate        *string                     `json:"coa_template"`

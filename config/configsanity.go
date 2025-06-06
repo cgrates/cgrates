@@ -410,6 +410,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RadiusAgent, connID)
 			}
 		}
+		for _, connID := range cfg.radiusAgentCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.RadiusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RadiusAgent, connID)
+			}
+		}
+		for _, connID := range cfg.radiusAgentCfg.ThresholdSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.RadiusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.RadiusAgent, connID)
+			}
+		}
 		for _, req := range cfg.radiusAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {

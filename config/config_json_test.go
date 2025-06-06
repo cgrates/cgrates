@@ -1120,7 +1120,9 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		ClientDictionaries: utils.MapStringSlicePointer(map[string][]string{
 			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		}),
-		Sessions_conns:    &[]string{utils.MetaInternal},
+		SessionSConns:     &[]string{utils.MetaInternal},
+		StatSConns:        &[]string{},
+		ThresholdSConns:   &[]string{},
 		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 		DMRTemplate:       utils.StringPointer("*dmr"),
 		CoATemplate:       utils.StringPointer("*coa"),
