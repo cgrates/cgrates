@@ -104,8 +104,9 @@ func (ip *IPProfile) unlock() {
 	if ip.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(ip.lkID)
+	tmp := ip.lkID
 	ip.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(tmp)
 }
 
 // IPUsage represents an usage counted.
@@ -206,8 +207,10 @@ func (ip *IP) unlock() {
 	if ip.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(ip.lkID)
+	tmp := ip.lkID
 	ip.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(tmp)
+
 }
 
 type IPWithAPIOpts struct {
