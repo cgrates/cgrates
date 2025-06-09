@@ -56,6 +56,8 @@ var (
 		testDynThdCheckForActionPlan,
 		testDynThdCheckForAction,
 		testDynThdCheckForDestination,
+		testDynThdCheckForFilter,
+		testDynThdCheckForRoute,
 		testDynThdSetLogAction,
 		testDynThdSetAction,
 		testDynThdSetThresholdProfile,
@@ -73,6 +75,8 @@ var (
 		testDynThdCheckForDynCreatedActionPlan,
 		testDynThdCheckForDynCreatedAction,
 		testDynThdCheckForDynCreatedDestination,
+		testDynThdCheckForDynCreatedFilter,
+		testDynThdCheckForDynCreatedRoute,
 		testDynThdStopEngine,
 	}
 )
@@ -184,6 +188,20 @@ func testDynThdCheckForDestination(t *testing.T) {
 	}
 }
 
+func testDynThdCheckForFilter(t *testing.T) {
+	var rply *engine.Filter
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_FLT_1002"}, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testDynThdCheckForRoute(t *testing.T) {
+	var rply *engine.RouteProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_ROUTE_1002"}, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
 func testDynThdSetLogAction(t *testing.T) {
 	var reply string
 
@@ -234,6 +252,14 @@ func testDynThdSetAction(t *testing.T) {
 			{
 				Identifier:      utils.MetaDynamicDestination,
 				ExtraParameters: "DYNAMICLY_DST_1005;1005",
+			},
+			{
+				Identifier:      utils.MetaDynamicFilter,
+				ExtraParameters: "*tenant;DYNAMICLY_FLT_<~*req.ID>;*string;~*req.Account;<~*req.ID>;*now;",
+			},
+			{
+				Identifier:      utils.MetaDynamicRoute,
+				ExtraParameters: "*tenant;DYNAMICLY_ROUTE_<~*req.ID>;*string:~*req.Account:<~*req.ID>&*string:~*req.Destination:1003;*now;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.ID>&*string:~*req.Destination:1003;<~*req.ID>;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
 			},
 		}}
 	if err := dynThdRpc.Call(context.Background(), utils.APIerSv2SetActions,
@@ -606,6 +632,80 @@ func testDynThdCheckForDynCreatedDestination(t *testing.T) {
 		Id:       "DYNAMICLY_DST_1005",
 		Prefixes: []string{"1005"},
 	}
+	if !reflect.DeepEqual(exp, result1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))
+	}
+}
+
+func testDynThdCheckForDynCreatedFilter(t *testing.T) {
+	time.Sleep(50 * time.Millisecond)
+	var result1 *engine.Filter
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_FLT_1002"}, &result1); err != nil {
+		t.Fatal(err)
+	}
+	exp := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "DYNAMICLY_FLT_1002",
+		Rules: []*engine.FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1002"},
+			},
+		},
+		ActivationInterval: result1.ActivationInterval,
+	}
+	if !reflect.DeepEqual(exp, result1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))
+	}
+}
+
+func testDynThdCheckForDynCreatedRoute(t *testing.T) {
+	time.Sleep(50 * time.Millisecond)
+	var result1 *engine.RouteProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetRouteProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_ROUTE_1002"}, &result1); err != nil {
+		t.Fatal(err)
+	}
+	exp := &engine.RouteProfile{
+		Tenant: "cgrates.org",
+		ID:     "DYNAMICLY_ROUTE_1002",
+		FilterIDs: []string{
+			"*string:~*req.Account:1002",
+			"*string:~*req.Destination:1003",
+		},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: result1.ActivationInterval.ActivationTime,
+		},
+		Sorting:           utils.MetaWeight,
+		SortingParameters: []string{utils.MetaACD, utils.MetaTCC},
+		Routes: []*engine.Route{
+			{
+				ID: "route1",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Destination:1003",
+				},
+				AccountIDs: []string{"1002"},
+				RatingPlanIDs: []string{
+					"RP1",
+					"RP2",
+				},
+				ResourceIDs: []string{
+					"RS1",
+					"RS2",
+				},
+				StatIDs: []string{
+					"Stat_1",
+					"Stat_1_1",
+				},
+				Weight:          10,
+				Blocker:         true,
+				RouteParameters: "param",
+			},
+		},
+		Weight: 10,
+	}
+
 	if !reflect.DeepEqual(exp, result1) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))
 	}

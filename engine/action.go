@@ -130,7 +130,7 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaDynamicAttribute, utils.MetaDynamicActionPlan,
 		utils.MetaDynamicActionPlanAccounts, utils.MetaDynamicAction,
 		utils.MetaDynamicDestination, utils.MetaDynamicFilter,
-		utils.MetaDynamicRoute,
+		utils.MetaDynamicRoute, utils.MetaDynamicRatingProfile,
 	}
 	act := ActionConnCfg{}
 	switch source {
@@ -200,6 +200,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicFilter] = dynamicFilter
 	actionFuncMap[utils.MetaDynamicRoute] = dynamicRoute
 	actionFuncMap[utils.MetaDynamicRanking] = dynamicRanking
+	actionFuncMap[utils.MetaDynamicRatingProfile] = dynamicRatingProfile
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -2481,4 +2482,70 @@ func dynamicRanking(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the RankingProfile based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetRankingProfile, ranking, &reply)
+}
+
+// dynamicRatingProfile processes the `ExtraParameters` field from the action to
+// construct a RatingProfile
+//
+// The ExtraParameters field format is expected as follows:
+//
+//		0 Tenant: string
+//		1 Category: string
+//		2 Subject: string
+//		3 ActivationTime: string
+//		4 RatingPlanId: string
+//		5 RatesFallbackSubject: string
+//	    6 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicRatingProfile(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 7 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 7", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		var onlyEncapsulatead bool
+		if i == 3 { // dont parse "*now" string for ActivationTime
+			onlyEncapsulatead = true
+		}
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, onlyEncapsulatead); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	ratingProf := &utils.AttrSetRatingProfile{
+		Tenant:   params[0],
+		Category: params[1],
+		Subject:  params[2],
+		RatingPlanActivations: []*utils.TPRatingActivation{
+			{
+				ActivationTime:   params[3],
+				RatingPlanId:     params[4],
+				FallbackSubjects: params[5],
+			},
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate RatingProfiles's APIOpts
+	if params[6] != utils.EmptyString {
+		if err := parseParamStringToMap(params[6], ratingProf.APIOpts); err != nil {
+			return err
+		}
+	}
+	// create the RatingProfile based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetRatingProfile, ratingProf, &reply)
 }

@@ -6818,3 +6818,127 @@ func TestDynamicRanking(t *testing.T) {
 		})
 	}
 }
+
+func TestDynamicRatingProfile(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var rpwo *utils.AttrSetRatingProfile
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetRatingProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rpwo, canCast = args.(*utils.AttrSetRatingProfile); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expRpwo     *utils.AttrSetRatingProfile
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expRpwo: &utils.AttrSetRatingProfile{
+				Tenant:   "cgrates.org",
+				Category: "call",
+				Subject:  utils.MetaAny,
+				RatingPlanActivations: []*utils.TPRatingActivation{
+					{
+						ActivationTime:   "2014-07-29T15:00:00Z",
+						RatingPlanId:     "RP_TESTIT1",
+						FallbackSubjects: "RP_TEST",
+					},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;call;*any;2014-07-29T15:00:00Z;RP_TESTIT1;RP_TEST;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expRpwo: &utils.AttrSetRatingProfile{
+				Tenant:   "cgrates.org",
+				Category: "call",
+				Subject:  "1001",
+				RatingPlanActivations: []*utils.TPRatingActivation{
+					{
+						ActivationTime:   "*now",
+						RatingPlanId:     "RP_TEST1001",
+						FallbackSubjects: "RP_TEST",
+					},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;call;~*req.Account;*now;RP_TEST<~*req.Account>;RP_TEST;key:value",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;call;*any;2014-07-29T15:00:00Z;RP_TESTIT1;RP_TEST;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "cgrates.org;;;",
+			expectedErr: "invalid number of parameters <4> expected 7",
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;call;*any;2014-07-29T15:00:00Z;RP_TESTIT1;RP_TEST;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				rpwo = nil
+			})
+			err := dynamicRatingProfile(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(rpwo, tc.expRpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+			}
+		})
+	}
+}

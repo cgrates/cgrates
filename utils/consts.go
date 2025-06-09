@@ -1238,6 +1238,7 @@ const (
 	MetaDynamicFilter             = "*dynamic_filter"
 	MetaDynamicRoute              = "*dynamic_route"
 	MetaDynamicRanking            = "*dynamic_ranking"
+	MetaDynamicRatingProfile      = "*dynamic_rating_profile"
 	ActionID                      = "ActionID"
 	ActionType                    = "ActionType"
 	ActionValue                   = "ActionValue"
