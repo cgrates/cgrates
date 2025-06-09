@@ -56,8 +56,9 @@ func (rp *resourceProfile) unlock() {
 	if rp.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(rp.lkID)
+	tmp := rp.lkID
 	rp.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(tmp)
 }
 
 // isLocked returns the locks status of this resourceProfile
@@ -92,8 +93,9 @@ func (r *resource) unlock() {
 	if r.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(r.lkID)
+	tmp := r.lkID
 	r.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(tmp)
 }
 
 // isLocked returns the locks status of this resource
