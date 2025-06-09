@@ -117,8 +117,9 @@ func (tp *ThresholdProfile) unlock() {
 	if tp.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(tp.lkID)
+	tmp := tp.lkID
 	tp.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(tmp)
 }
 
 // isLocked returns the locks status of this ThresholdProfile
@@ -209,8 +210,9 @@ func (t *Threshold) unlock() {
 	if t.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(t.lkID)
+	tmp := t.lkID
 	t.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(tmp)
 }
 
 // isLocked returns the locks status of this threshold

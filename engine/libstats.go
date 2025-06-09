@@ -119,8 +119,9 @@ func (sqp *StatQueueProfile) unlock() {
 	if sqp.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(sqp.lkID)
+	tmp := sqp.lkID
 	sqp.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(tmp)
 }
 
 // isLocked returns the locks status of this StatQueueProfile
@@ -320,8 +321,10 @@ func (sq *StatQueue) unlock() {
 	if sq.lkID == utils.EmptyString {
 		return
 	}
-	guardian.Guardian.UnguardIDs(sq.lkID)
+	tmp := sq.lkID
 	sq.lkID = utils.EmptyString
+	guardian.Guardian.UnguardIDs(tmp)
+
 }
 
 // isLocked returns the locks status of this StatQueue
