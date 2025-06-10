@@ -201,6 +201,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicRoute] = dynamicRoute
 	actionFuncMap[utils.MetaDynamicRanking] = dynamicRanking
 	actionFuncMap[utils.MetaDynamicRatingProfile] = dynamicRatingProfile
+	actionFuncMap[utils.MetaDynamicRanking] = dynamicTrend
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -1535,7 +1536,7 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	// populate Threshold's MinSleep
 	if params[6] != utils.EmptyString {
-		thProf.MinSleep, err = time.ParseDuration(params[6])
+		thProf.MinSleep, err = utils.ParseDurationWithNanosecs(params[6])
 		if err != nil {
 			return err
 		}
@@ -1659,9 +1660,9 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 			return err
 		}
 	}
-	// populate Stat's QueueLeTTLngh
+	// populate Stat's TTL
 	if params[5] != utils.EmptyString {
-		stQProf.TTL, err = time.ParseDuration(params[5])
+		stQProf.TTL, err = utils.ParseDurationWithNanosecs(params[5])
 		if err != nil {
 			return err
 		}
@@ -2548,4 +2549,112 @@ func dynamicRatingProfile(_ *Account, act *Action, _ Actions, _ *FilterS, ev any
 	// create the RatingProfile based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetRatingProfile, ratingProf, &reply)
+}
+
+// dynamicTrend processes the `ExtraParameters` field from the action to
+// construct a TrendProfile
+//
+// The ExtraParameters field format is expected as follows:
+//
+//		0 Tenant: string
+//		1 ID: string
+//		2 Schedule: string
+//		3 StatID: string
+//		4 Metrics: strings separated by "&".
+//		5 TTL: duration
+//		6 QueueLength: integer
+//		7 MinItems: integer
+//		8 CorrelationType: string
+//		9 Tolerance: float
+//	   10 Stored: bool
+//	   11 ThresholdIDs: strings separated by "&".
+//	   12 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicTrend(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 13 {
+		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 13", len(params)))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	trend := &TrendProfileWithAPIOpts{
+		TrendProfile: &TrendProfile{
+			Tenant:          params[0],
+			ID:              params[1],
+			Schedule:        params[2],
+			StatID:          params[3],
+			CorrelationType: params[8],
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Trend's Metrics
+	if params[4] != utils.EmptyString {
+		trend.Metrics = strings.Split(params[4], utils.ANDSep)
+	}
+	// populate Trend's TTL
+	if params[5] != utils.EmptyString {
+		trend.TTL, err = utils.ParseDurationWithNanosecs(params[5])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Trend's QueueLength
+	if params[6] != utils.EmptyString {
+		trend.QueueLength, err = strconv.Atoi(params[6])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Trend's MinItems
+	if params[7] != utils.EmptyString {
+		trend.MinItems, err = strconv.Atoi(params[7])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Trend's Tolerance
+	if params[9] != utils.EmptyString {
+		trend.Tolerance, err = strconv.ParseFloat(params[9], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Trend's Stored
+	if params[10] != utils.EmptyString {
+		trend.Stored, err = strconv.ParseBool(params[10])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Trend's ThresholdIDs
+	if params[11] != utils.EmptyString {
+		trend.ThresholdIDs = strings.Split(params[11], utils.ANDSep)
+	}
+	// populate Trend's APIOpts
+	if params[12] != utils.EmptyString {
+		if err := parseParamStringToMap(params[12], trend.APIOpts); err != nil {
+			return err
+		}
+	}
+	// create the TrendProfile based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetTrendProfile, trend, &reply)
 }

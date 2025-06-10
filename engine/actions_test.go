@@ -6942,3 +6942,182 @@ func TestDynamicRatingProfile(t *testing.T) {
 		})
 	}
 }
+
+func TestDynamicTrend(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var tpwo *TrendProfileWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetTrendProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if tpwo, canCast = args.(*TrendProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expTpwo     *TrendProfileWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expTpwo: &TrendProfileWithAPIOpts{
+				TrendProfile: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND1",
+					Schedule:        "0 12 * * *",
+					StatID:          "Stats2",
+					Metrics:         []string{"*acc", "*tcc"},
+					TTL:             -1,
+					QueueLength:     -1,
+					MinItems:        1,
+					CorrelationType: "*average",
+					Tolerance:       2.1,
+					Stored:          true,
+					ThresholdIDs:    []string{"TD1", "TD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expTpwo: &TrendProfileWithAPIOpts{
+				TrendProfile: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND_1001",
+					Schedule:        "0 12 * * *",
+					StatID:          "Stats2",
+					Metrics:         []string{"*acc", "*tcc"},
+					TTL:             -1,
+					QueueLength:     -1,
+					MinItems:        1,
+					CorrelationType: "*average",
+					Tolerance:       2.1,
+					Stored:          true,
+					ThresholdIDs:    []string{"TD1", "TD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;TREND_<~*req.Account>;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expTpwo: &TrendProfileWithAPIOpts{
+				TrendProfile: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND_1001",
+					Schedule:        "0 12 * * *",
+					StatID:          "",
+					Metrics:         nil,
+					TTL:             0,
+					QueueLength:     0,
+					MinItems:        0,
+					CorrelationType: "",
+					Tolerance:       0,
+					Stored:          false,
+					ThresholdIDs:    nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;TREND_1001;0 12 * * *;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;TREND1;;",
+			expectedErr: "invalid number of parameters <4> expected 13",
+		},
+		{
+			name:        "TTLFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;BadString;-1;1;*average;2.1;true;TD1&TD2;key:value",
+			expectedErr: `time: invalid duration "BadString"`,
+		},
+		{
+			name:        "QueueLengthFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;BadString;1;*average;2.1;true;TD1&TD2;key:value",
+			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "MinItemsFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;BadString;*average;2.1;true;TD1&TD2;key:value",
+			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "ToleranceFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;BadString;true;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "StoredFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;BadString;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				tpwo = nil
+			})
+			err := dynamicTrend(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(tpwo, tc.expTpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expTpwo), utils.ToJSON(tpwo))
+			}
+		})
+	}
+}
