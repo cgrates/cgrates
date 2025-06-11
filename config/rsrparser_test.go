@@ -877,3 +877,36 @@ func TestRSRParsersClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
+func TestRSRParsersValues(t *testing.T) {
+	ts := []struct {
+		name        string
+		prsRules    string
+		value       string
+		parsedValue string
+	}{
+		{name: "TestSearchAndReplaceNumber", prsRules: "~*req.Config.FilterIDs[0]:s/^\\*gt:.*(\\d+)$/${1}/", value: "*gt:~*req.*sum#1:9", parsedValue: "9"},
+		{name: "TestSearchAndReplaceNumberNotMatch", prsRules: "~*req.Destination:s/^\\+41(\\d+)$/${1}/", value: "+415504", parsedValue: "5504"},
+		{name: "TestSearchAndReplaceEmptyReplace", prsRules: "~*req.Destination:s/^\\+41(\\d+)$//", value: "+415504", parsedValue: ""},
+		{name: "TestSearchAndReplaceEmptySearch", prsRules: "~*req.Account:s/^100/${1}/", value: "1001", parsedValue: ""},
+		{name: "TestReplaceInMiddle", prsRules: "~*req:User-Agent:s/^(kamailio)_(\\w+)$/${1}-${2}/", value: "kamailio_agent", parsedValue: "kamailio-agent"},
+	}
+
+	for _, tt := range ts {
+		t.Run(tt.name, func(t *testing.T) {
+			parser, err := NewRSRParser(tt.prsRules)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := parser.Compile(); err != nil {
+				t.Error(err)
+			}
+			val, err := parser.parseValue(tt.value)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if val != tt.parsedValue {
+				t.Errorf("expected %s, received %s", tt.parsedValue, val)
+			}
+		})
+	}
+}
