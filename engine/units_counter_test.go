@@ -978,3 +978,175 @@ func TestEngineUnitCounterString(t *testing.T) {
 		t.Errorf("Expected JSON: %s, got: %s", want, got)
 	}
 }
+
+func TestResetCounters(t *testing.T) {
+	tests := []struct {
+		name             string
+		initialCounters  UnitCounters
+		action           *Action
+		expectedCounters UnitCounters
+	}{
+		{
+			name: "ResetAlCountersNilAction",
+			initialCounters: UnitCounters{
+				utils.MetaMonetary: []*UnitCounter{
+					{
+						CounterType: utils.MetaCounterEvent,
+						Counters: CounterFilters{
+							{Value: 100.0, Filter: &BalanceFilter{ID: utils.StringPointer("BAL_MON1")}},
+							{Value: 200.0, Filter: &BalanceFilter{ID: utils.StringPointer("BAL_MON2")}},
+						},
+					},
+					{
+						CounterType: utils.MetaBalance,
+						Counters: CounterFilters{
+							{Value: 50.0, Filter: &BalanceFilter{ID: utils.StringPointer("BAL_MON1")}},
+						},
+					},
+				},
+				utils.MetaVoice: []*UnitCounter{
+					{
+						CounterType: utils.MetaCounterEvent,
+						Counters: CounterFilters{
+							{Value: 150.0, Filter: &BalanceFilter{ID: utils.StringPointer("VOICE1")}},
+						},
+					},
+				},
+			},
+			action: nil,
+			expectedCounters: UnitCounters{
+				utils.MetaMonetary: []*UnitCounter{
+					{
+						CounterType: utils.MetaCounterEvent,
+						Counters: CounterFilters{
+							{Value: 0.0, Filter: &BalanceFilter{ID: utils.StringPointer("BAL_MON1")}},
+							{Value: 0.0, Filter: &BalanceFilter{ID: utils.StringPointer("BAL_MON2")}},
+						},
+					},
+					{
+						CounterType: utils.MetaBalance,
+						Counters: CounterFilters{
+							{Value: 0.0, Filter: &BalanceFilter{ID: utils.StringPointer("BAL_MON1")}},
+						},
+					},
+				},
+				utils.MetaVoice: []*UnitCounter{
+					{
+						CounterType: utils.MetaCounterEvent,
+						Counters: CounterFilters{
+							{Value: 0.0, Filter: &BalanceFilter{ID: utils.StringPointer("VOICE1")}},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "ResetCountersMonetaryBalanceType",
+			initialCounters: UnitCounters{
+				"*monetary": []*UnitCounter{
+					{
+						CounterType: utils.MetaBalance,
+						Counters: CounterFilters{
+							{Value: 100.0, Filter: &BalanceFilter{ID: utils.StringPointer("MON1")}},
+							{Value: 200.0, Filter: &BalanceFilter{ID: utils.StringPointer("MON2")}},
+						},
+					},
+				},
+				"*data": []*UnitCounter{
+					{
+						CounterType: utils.MetaCounterEvent,
+						Counters: CounterFilters{
+							{Value: 50.0, Filter: &BalanceFilter{ID: utils.StringPointer("MB_BAL")}},
+						},
+					},
+				},
+			},
+			action: &Action{
+				Balance: &BalanceFilter{Type: utils.StringPointer("*monetary")},
+			},
+			expectedCounters: UnitCounters{
+				"*monetary": []*UnitCounter{
+					{
+						CounterType: utils.MetaBalance,
+						Counters: CounterFilters{
+							{Value: 100.0, Filter: &BalanceFilter{ID: utils.StringPointer("MON1")}},
+							{Value: 200.0, Filter: &BalanceFilter{ID: utils.StringPointer("MON2")}},
+						},
+					},
+				},
+				"*data": []*UnitCounter{
+					{
+						CounterType: utils.MetaCounterEvent,
+						Counters: CounterFilters{
+							{Value: 50.0, Filter: &BalanceFilter{ID: utils.StringPointer("MB_BAL")}},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "ResetSpecificBalanceType",
+			initialCounters: UnitCounters{
+				"*monetary": []*UnitCounter{
+					{
+						CounterType: utils.MetaBalance,
+						Counters: CounterFilters{
+							{Value: 100.0, Filter: &BalanceFilter{ID: utils.StringPointer("MON1"), Type: utils.StringPointer("*monetary")}},
+							{Value: 200.0, Filter: &BalanceFilter{ID: utils.StringPointer("MON2"), Type: utils.StringPointer("*monetary")}},
+						},
+					},
+				},
+			},
+			action: &Action{
+				Balance: &BalanceFilter{ID: utils.StringPointer("MON1"), Type: utils.StringPointer("*monetary")},
+			},
+			expectedCounters: UnitCounters{
+				"*monetary": []*UnitCounter{
+					{
+						CounterType: utils.MetaBalance,
+						Counters: CounterFilters{
+							{Value: 0.0, Filter: &BalanceFilter{ID: utils.StringPointer("MON1"), Type: utils.StringPointer("*monetary")}},
+							{Value: 200.0, Filter: &BalanceFilter{ID: utils.StringPointer("MON2"), Type: utils.StringPointer("*monetary")}},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "ActionBalanceTypeNotExist",
+			initialCounters: UnitCounters{
+				"*data": []*UnitCounter{
+					{
+						CounterType: utils.MetaCounterEvent,
+						Counters: CounterFilters{
+							{Value: 150.0, Filter: &BalanceFilter{ID: utils.StringPointer("DATA1"), Type: utils.StringPointer("*data")}},
+						},
+					},
+				},
+			},
+			action: &Action{
+				Balance: &BalanceFilter{Type: utils.StringPointer("*monetary")},
+			},
+			expectedCounters: UnitCounters{
+				"*data": []*UnitCounter{
+					{
+						CounterType: utils.MetaCounterEvent,
+						Counters: CounterFilters{
+							{Value: 150.0, Filter: &BalanceFilter{ID: utils.StringPointer("DATA1"), Type: utils.StringPointer("*data")}},
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cloneInitialCounters := tt.initialCounters.Clone()
+			cloneInitialCounters.resetCounters(tt.action)
+			if !reflect.DeepEqual(cloneInitialCounters, tt.expectedCounters) {
+				t.Errorf("mismatch after resetCounters.\nExpected:\n%s\nGot:\n%s",
+					utils.ToJSON(tt.expectedCounters), utils.ToJSON(cloneInitialCounters))
+			}
+		})
+	}
+}
