@@ -23,6 +23,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -2162,4 +2163,78 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	}
 
 	utils.Logger.SetLogLevel(0)
+}
+
+func TestThresholdProcessEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ThresholdSCfg().IndexedSelects = false
+	db, _ := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	fS := NewFilterS(cfg, nil, dm)
+	ths := NewThresholdService(dm, cfg, fS, nil)
+	thps := []*ThresholdProfile{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			MinHits:   3,
+			MaxHits:   2,
+		},
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TH2",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			MinHits:   2,
+			MaxHits:   3,
+		}, {
+			Tenant:    "cgrates.org",
+			ID:        "TH3",
+			FilterIDs: []string{"*string:~*req.Account:1003"},
+			MinHits:   1,
+			MaxHits:   -1,
+		},
+	}
+	for _, thP := range thps {
+		if err := ths.dm.SetThresholdProfile(thP, false); err != nil {
+			t.Error(err)
+		}
+	}
+	tts := []struct {
+		name         string
+		runs         int
+		cgrEvnt      map[string]any
+		matchedthIDs []string
+	}{
+		{
+			name: "MinHitsLargerThanMaxHits",
+			runs: 3,
+			cgrEvnt: map[string]any{
+				utils.AccountField: "1001",
+			},
+		},
+		{
+			name: "MinHitsLargerThanMaxHits",
+			runs: 4,
+			cgrEvnt: map[string]any{
+				utils.AccountField: "1002",
+			},
+		},
+		{},
+	}
+	for _, tt := range tts {
+		t.Run(tt.name, func(t *testing.T) {
+			var thIDs []string
+			for range tt.runs {
+				var err error
+				thIDs, err = ths.processEvent("cgrates.org", &utils.CGREvent{Event: tt.cgrEvnt})
+				if err != nil {
+					t.Error(err)
+				}
+			}
+			if !slices.Equal(thIDs, tt.matchedthIDs) {
+				t.Errorf("expected: %v, received: %v", tt.matchedthIDs, thIDs)
+			}
+
+		})
+	}
 }
