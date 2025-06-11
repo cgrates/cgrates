@@ -131,6 +131,7 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaDynamicActionPlanAccounts, utils.MetaDynamicAction,
 		utils.MetaDynamicDestination, utils.MetaDynamicFilter,
 		utils.MetaDynamicRoute, utils.MetaDynamicRatingProfile,
+		utils.MetaDynamicResource,
 	}
 	act := ActionConnCfg{}
 	switch source {
@@ -202,6 +203,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicRanking] = dynamicRanking
 	actionFuncMap[utils.MetaDynamicRatingProfile] = dynamicRatingProfile
 	actionFuncMap[utils.MetaDynamicRanking] = dynamicTrend
+	actionFuncMap[utils.MetaDynamicResource] = dynamicResource
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -1005,7 +1007,7 @@ func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, ";")
 	if len(params) != 5 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 5", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 5", len(params))
 	}
 
 	// If conversion fails, limit will default to 0.
@@ -1050,7 +1052,7 @@ func forceDisconnectSessionsAction(_ *Account, act *Action, _ Actions, _ *Filter
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, ";")
 	if len(params) != 5 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 5", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 5", len(params))
 	}
 
 	// If conversion fails, limit will default to 0.
@@ -1484,7 +1486,7 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 13 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 13", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 13", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1617,7 +1619,7 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 14 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 14", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 14", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1759,7 +1761,7 @@ func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 12 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 12", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 12", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1868,7 +1870,7 @@ func dynamicActionPlan(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 5 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 5", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 5", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -1956,7 +1958,7 @@ func dynamicActionPlanAccount(_ *Account, act *Action, _ Actions, _ *FilterS, ev
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 6 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 6", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 6", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -2077,7 +2079,7 @@ func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	params = append(params, bildr.String()) // append last param left even if empty
 	// Parse action parameters based on the predefined format.
 	if len(params) != 17 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 17", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 17", len(params))
 	}
 	// replace '&' with ';' before parsing to comply with TPAction fields that need ";" seperators
 	params[3] = strings.ReplaceAll(params[3], utils.ANDSep, utils.InfieldSep)
@@ -2156,7 +2158,7 @@ func dynamicDestination(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse Destination parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 2 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 2", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 2", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -2207,7 +2209,7 @@ func dynamicFilter(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 7 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 7", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 7", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -2302,7 +2304,7 @@ func dynamicRoute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 17 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 17", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 17", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -2433,7 +2435,7 @@ func dynamicRanking(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 10 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 10", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 10", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -2514,7 +2516,7 @@ func dynamicRatingProfile(_ *Account, act *Action, _ Actions, _ *FilterS, ev any
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 7 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 7", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 7", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -2586,7 +2588,7 @@ func dynamicTrend(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// Parse action parameters based on the predefined format.
 	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 13 {
-		return errors.New(fmt.Sprintf("invalid number of parameters <%d> expected 13", len(params)))
+		return fmt.Errorf("invalid number of parameters <%d> expected 13", len(params))
 	}
 	// parse dynamic parameters
 	for i := range params {
@@ -2657,4 +2659,125 @@ func dynamicTrend(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the TrendProfile based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetTrendProfile, trend, &reply)
+}
+
+// dynamicResource processes the `ExtraParameters` field from the action to
+// construct a ResourceProfile
+//
+// The ExtraParameters field format is expected as follows:
+//
+//		0 Tenant: string
+//		1 Id: string
+//		2 FilterIDs: strings separated by "&".
+//		3 ActivationInterval: strings separated by "&".
+//		4 TTL: duration
+//		5 Limit: float
+//		6 AllocationMessage: string
+//		7 Blocker: bool
+//		8 Stored: bool
+//		9 Weight: float
+//	   10 ThresholdIDs: strings separated by "&".
+//	   11 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicResource(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 12 {
+		return fmt.Errorf("invalid number of parameters <%d> expected 12", len(params))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	rsc := &ResourceProfileWithAPIOpts{
+		ResourceProfile: &ResourceProfile{
+			Tenant:             params[0],
+			ID:                 params[1],
+			ActivationInterval: &utils.ActivationInterval{}, // avoid reaching inside a nil pointer
+			AllocationMessage:  params[6],
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Resource's FilterIDs
+	if params[2] != utils.EmptyString {
+		rsc.FilterIDs = strings.Split(params[2], utils.ANDSep)
+	}
+	// populate Resource's ActivationInterval
+	aISplit := strings.Split(params[3], utils.ANDSep)
+	if len(aISplit) > 2 {
+		return utils.ErrUnsupportedFormat
+	}
+	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
+		if err := rsc.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
+			return err
+		}
+		if len(aISplit) == 2 {
+			if err := rsc.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+				return err
+			}
+		}
+	}
+	// populate Resource's UsageTTL
+	if params[4] != utils.EmptyString {
+		rsc.UsageTTL, err = utils.ParseDurationWithNanosecs(params[4])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's Limit
+	if params[5] != utils.EmptyString {
+		rsc.Limit, err = strconv.ParseFloat(params[5], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's Blocker
+	if params[7] != utils.EmptyString {
+		rsc.Blocker, err = strconv.ParseBool(params[7])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's Stored
+	if params[8] != utils.EmptyString {
+		rsc.Stored, err = strconv.ParseBool(params[8])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's Weight
+	if params[9] != utils.EmptyString {
+		rsc.Weight, err = strconv.ParseFloat(params[9], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's ThresholdIDs
+	if params[10] != utils.EmptyString {
+		rsc.ThresholdIDs = strings.Split(params[10], utils.ANDSep)
+	}
+	// populate Resource's APIOpts
+	if params[11] != utils.EmptyString {
+		if err := parseParamStringToMap(params[11], rsc.APIOpts); err != nil {
+			return err
+		}
+	}
+	// create the ResourceProfile based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetResourceProfile, rsc, &reply)
 }
