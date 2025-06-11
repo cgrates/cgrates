@@ -213,21 +213,21 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		return true, nil
 	}
 
-	var statIDs, thIDs []string
+	var rawStatIDs, rawThIDs string
 	switch agentName {
 	case utils.DiameterAgent:
-		statIDs = reqProcessor.Flags.ParamsSlice(utils.MetaDAStats, utils.MetaIDs)
-		thIDs = reqProcessor.Flags.ParamsSlice(utils.MetaDAThresholds, utils.MetaIDs)
+		rawStatIDs = reqProcessor.Flags.ParamValue(utils.MetaDAStats)
+		rawThIDs = reqProcessor.Flags.ParamValue(utils.MetaDAThresholds)
 	case utils.HTTPAgent:
-		statIDs = reqProcessor.Flags.ParamsSlice(utils.MetaHAStats, utils.MetaIDs)
-		thIDs = reqProcessor.Flags.ParamsSlice(utils.MetaHAThresholds, utils.MetaIDs)
+		rawStatIDs = reqProcessor.Flags.ParamValue(utils.MetaHAStats)
+		rawThIDs = reqProcessor.Flags.ParamValue(utils.MetaHAThresholds)
 	case utils.DNSAgent:
-		statIDs = reqProcessor.Flags.ParamsSlice(utils.MetaDNSStats, utils.MetaIDs)
-		thIDs = reqProcessor.Flags.ParamsSlice(utils.MetaDNSThresholds, utils.MetaIDs)
+		rawStatIDs = reqProcessor.Flags.ParamValue(utils.MetaDNSStats)
+		rawThIDs = reqProcessor.Flags.ParamValue(utils.MetaDNSThresholds)
 	}
 
 	// Return early if nothing to process.
-	if len(statIDs) == 0 && len(thIDs) == 0 {
+	if rawStatIDs == "" && rawThIDs == "" {
 		return true, nil
 	}
 
@@ -241,7 +241,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	ev.Event[utils.Source] = agentName
 	ev.APIOpts[utils.MetaEventType] = utils.ProcessTime
 
-	if len(statIDs) > 0 {
+	if rawStatIDs != "" {
+		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 		var reply []string
 		if err := connMgr.Call(ctx, statsConns, utils.StatSv1ProcessEvent,
@@ -252,7 +253,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		// NOTE: ProfileIDs APIOpts key persists for the ThresholdS request,
 		// although it would be ignored. Might want to delete it.
 	}
-	if len(thIDs) > 0 {
+	if rawThIDs != "" {
+		thIDs := strings.Split(rawThIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 		var reply []string
 		if err := connMgr.Call(ctx, thConns, utils.ThresholdSv1ProcessEvent,

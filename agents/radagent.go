@@ -482,11 +482,11 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		return true, nil
 	}
 
-	statIDs := reqProcessor.Flags.ParamsSlice(utils.MetaRAStats, utils.MetaIDs)
-	thIDs := reqProcessor.Flags.ParamsSlice(utils.MetaRAThresholds, utils.MetaIDs)
+	rawStatIDs := reqProcessor.Flags.ParamValue(utils.MetaRAStats)
+	rawThIDs := reqProcessor.Flags.ParamValue(utils.MetaRAThresholds)
 
 	// Early return if nothing to process.
-	if len(statIDs) == 0 && len(thIDs) == 0 {
+	if rawStatIDs == "" && rawThIDs == "" {
 		return true, nil
 	}
 
@@ -500,7 +500,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	ev.Event[utils.Source] = utils.RadiusAgent
 	ev.APIOpts[utils.MetaEventType] = utils.ProcessTime
 
-	if len(statIDs) > 0 {
+	if rawStatIDs != "" {
+		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 		var reply []string
 		if err := ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().StatSConns,
@@ -511,7 +512,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		// NOTE: ProfileIDs APIOpts key persists for the ThresholdS request,
 		// although it would be ignored. Might want to delete it.
 	}
-	if len(thIDs) > 0 {
+	if rawThIDs != "" {
+		thIDs := strings.Split(rawThIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 		var reply []string
 		if err := ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().ThresholdSConns,
