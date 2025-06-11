@@ -69,7 +69,7 @@ func TestDiamPrometheus(t *testing.T) {
 "prometheus_agent": {
 	"enabled": true,
 	"stats_conns": ["*localhost"],
-	"stat_queue_ids": ["SQ_1"]
+	"stat_queue_ids": ["SQ_1","SQ_2"]
 },
 "stats": {
 	"enabled": true,
@@ -105,8 +105,8 @@ func TestDiamPrometheus(t *testing.T) {
 			"*message",
 			"*accounts",
 			"*cdrs",
-			"*daStats:*ids:SQ_1",
-			"*daThresholds:*ids:TH_1",
+			"*daStats:SQ_1&SQ_2",
+			"*daThresholds:TH_1&TH_2",
 		],
 		"request_fields": [{
 				"tag": "ToR",
@@ -248,6 +248,29 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 		t.Fatal(err)
 	}
 
+	if err := client.Call(context.Background(), utils.APIerSv1SetStatQueueProfile,
+		engine.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &engine.StatQueueProfile{
+				Tenant:      "cgrates.org",
+				ID:          "SQ_2",
+				FilterIDs:   []string{"*string:~*req.Category:sms"},
+				QueueLength: -1,
+				TTL:         10 * time.Second,
+				Metrics: []*engine.MetricWithFilters{
+					{
+						MetricID: "*average#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*sum#~*req.ProcessingTime",
+					},
+				},
+				Stored:   true,
+				MinItems: 1,
+			},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
 	if err := client.Call(context.Background(), utils.APIerSv1SetThresholdProfile,
 		engine.ThresholdProfileWithAPIOpts{
 			ThresholdProfile: &engine.ThresholdProfile{
@@ -256,6 +279,21 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 				FilterIDs: []string{"*string:~*req.Category:sms"},
 				MaxHits:   -1,
 				MinHits:   8,
+				MinSleep:  time.Second,
+				ActionIDs: []string{"ACT_LOG_WARNING"},
+			},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv1SetThresholdProfile,
+		engine.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &engine.ThresholdProfile{
+				Tenant:    "cgrates.org",
+				ID:        "TH_2",
+				FilterIDs: []string{"*string:~*req.Category:sms"},
+				MaxHits:   -1,
+				MinHits:   10,
 				MinSleep:  time.Second,
 				ActionIDs: []string{"ACT_LOG_WARNING"},
 			},
