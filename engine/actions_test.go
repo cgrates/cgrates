@@ -7121,3 +7121,216 @@ func TestDynamicTrend(t *testing.T) {
 		})
 	}
 }
+
+func TestDynamicResource(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var rpwo *ResourceProfileWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rpwo, canCast = args.(*ResourceProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expRpwo     *ResourceProfileWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expRpwo: &ResourceProfileWithAPIOpts{
+				ResourceProfile: &ResourceProfile{
+					Tenant:    "cgrates.org",
+					ID:        "RES_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					UsageTTL:          time.Hour,
+					Limit:             1,
+					AllocationMessage: "msg_1001",
+					Blocker:           true,
+					Stored:            true,
+					Weight:            10,
+					ThresholdIDs:      []string{"TD1", "TD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expRpwo: &ResourceProfileWithAPIOpts{
+				ResourceProfile: &ResourceProfile{
+					Tenant:    "cgrates.org",
+					ID:        "RES_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Now(),
+						ExpiryTime:     time.Date(3000, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					UsageTTL:          time.Hour,
+					Limit:             1,
+					AllocationMessage: "msg_1001",
+					Blocker:           true,
+					Stored:            true,
+					Weight:            10,
+					ThresholdIDs:      []string{"TD1", "TD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;RES_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;1h;1;msg_<~*req.Account>;true;true;10;TD1&TD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expRpwo: &ResourceProfileWithAPIOpts{
+				ResourceProfile: &ResourceProfile{
+					Tenant:             "cgrates.org",
+					ID:                 "RES_ACNT_1001",
+					FilterIDs:          nil,
+					ActivationInterval: &utils.ActivationInterval{},
+					UsageTTL:           0,
+					Limit:              0,
+					AllocationMessage:  "",
+					Blocker:            false,
+					Stored:             false,
+					Weight:             0,
+					ThresholdIDs:       nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;RES_ACNT_1001;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;RSC;;",
+			expectedErr: "invalid number of parameters <4> expected 12",
+		},
+		{
+			name:        "ActivationIntervalLengthFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z&&;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: utils.ErrUnsupportedFormat.Error(),
+		},
+		{
+			name:        "ActivationIntervalBadStringFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;bad String;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "ActivationIntervalBadStringFail2",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z&bad String;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "TTLFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;BadString;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: `time: invalid duration "BadString"`,
+		},
+		{
+			name:        "LimitFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;BadString;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "BlockerFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;BadString;true;10;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "StoredFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;BadString;10;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;true;BadString;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;true;10;TD1&TD2;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				rpwo = nil
+			})
+			err := dynamicResource(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(rpwo, tc.expRpwo) {
+				if i != 1 {
+					t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+				} else {
+					// Get the absolute difference between the times
+					diff := rpwo.ActivationInterval.ActivationTime.Sub(tc.expRpwo.ActivationInterval.ActivationTime)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff <= time.Second {
+						tc.expRpwo.ActivationInterval.ActivationTime = rpwo.ActivationInterval.ActivationTime
+						if !reflect.DeepEqual(rpwo, tc.expRpwo) {
+							t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+						}
+					} else {
+						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+					}
+				}
+			}
+		})
+	}
+}
