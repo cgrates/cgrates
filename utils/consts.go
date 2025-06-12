@@ -1125,9 +1125,15 @@ const (
 	MetaSum      = "*sum"
 	MetaAverage  = "*average"
 	MetaDistinct = "*distinct"
-	MetaRAR      = "*rar"
-	MetaDMR      = "*dmr"
-	MetaCoA      = "*coa"
+	MetaHighest  = "*highest"
+	MetaLowest   = "*lowest"
+)
+
+// Diameter/Radius request types
+const (
+	MetaRAR = "*rar"
+	MetaDMR = "*dmr"
+	MetaCoA = "*coa"
 )
 
 // Services

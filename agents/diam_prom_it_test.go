@@ -240,6 +240,15 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 					{
 						MetricID: "*sum#~*req.ProcessingTime",
 					},
+					{
+						MetricID: "*highest#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*lowest#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*distinct#~*req.ProcessingTime",
+					},
 				},
 				Stored:   true,
 				MinItems: 1,
@@ -262,6 +271,15 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 					},
 					{
 						MetricID: "*sum#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*highest#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*lowest#~*req.ProcessingTime",
+					},
+					{
+						MetricID: "*distinct#~*req.ProcessingTime",
 					},
 				},
 				Stored:   true,
