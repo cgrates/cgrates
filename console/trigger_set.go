@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSetTriggers{
 		name:      "triggers_set",
 		rpcMethod: utils.APIerSv1SetActionTrigger,
-		rpcParams: &v1.AttrSetActionTrigger{},
+		rpcParams: &engine.AttrSetActionTrigger{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSetTriggers struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrSetActionTrigger
+	rpcParams *engine.AttrSetActionTrigger
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdSetTriggers) RpcMethod() string {
 
 func (self *CmdSetTriggers) RpcParams(reset bool) any {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrSetActionTrigger{}
+		self.rpcParams = &engine.AttrSetActionTrigger{}
 	}
 	return self.rpcParams
 }

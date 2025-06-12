@@ -7334,3 +7334,264 @@ func TestDynamicResource(t *testing.T) {
 		})
 	}
 }
+
+func TestDynamicActionTrigger(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var at *AttrSetActionTrigger
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetActionTrigger: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if at, canCast = args.(*AttrSetActionTrigger); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expAt       *AttrSetActionTrigger
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expAt: &AttrSetActionTrigger{
+				GroupID:  "STANDARD_TRIGGERS",
+				UniqueID: "uid",
+				ActionTrigger: map[string]any{
+					utils.ThresholdType:         "*max_balance",
+					utils.ThresholdValue:        float64(20),
+					utils.Recurrent:             true,
+					utils.MinSleep:              time.Second,
+					utils.ActivationDate:        time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					utils.BalanceID:             "*default",
+					utils.BalanceType:           "*monetary",
+					utils.BalanceCategories:     []string{utils.Call, "data"},
+					utils.BalanceDestinationIds: []string{"DST1", "DST2"},
+					utils.BalanceRatingSubject:  "SPECIAL_1002",
+					utils.BalanceSharedGroups:   []string{"SHRGroup1", "SHRGroup2"},
+					utils.BalanceExpirationDate: time.Date(2030, 7, 29, 15, 0, 0, 0, time.UTC),
+					utils.BalanceTimingTags:     []string{"*asap"},
+					utils.BalanceWeight:         float64(10),
+					utils.BalanceBlocker:        true,
+					utils.BalanceDisabled:       true,
+					utils.ActionsID:             "ACT_1001",
+					utils.Weight:                float64(20),
+				},
+			},
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expAt: &AttrSetActionTrigger{
+				GroupID:  "STANDARD_TRIGGERS_1001",
+				UniqueID: "uid_1001",
+				ActionTrigger: map[string]any{
+					utils.ThresholdType:         "*max_balance",
+					utils.ThresholdValue:        float64(20),
+					utils.Recurrent:             true,
+					utils.MinSleep:              time.Second,
+					utils.ExpirationDate:        time.Now(),
+					utils.ActivationDate:        time.Now(),
+					utils.BalanceID:             "*default",
+					utils.BalanceType:           "*monetary",
+					utils.BalanceCategories:     []string{utils.Call, "data"},
+					utils.BalanceDestinationIds: []string{"DST_1001", "DST2"},
+					utils.BalanceRatingSubject:  "SPECIAL_1001",
+					utils.BalanceSharedGroups:   []string{"SHRGroup_1001", "SHRGroup2"},
+					utils.BalanceExpirationDate: time.Now(),
+					utils.BalanceTimingTags:     []string{"*asap"},
+					utils.BalanceWeight:         float64(10),
+					utils.BalanceBlocker:        true,
+					utils.BalanceDisabled:       true,
+					utils.ActionsID:             "ACT_1001",
+					utils.Weight:                float64(20),
+				},
+			},
+			extraParams: "STANDARD_TRIGGERS_<~*req.Account>;uid_<~*req.Account>;*max_balance;20;true;1s;*now;*now;*default;*monetary;call&data;DST_<~*req.Account>&DST2;SPECIAL_<~*req.Account>;SHRGroup_<~*req.Account>&SHRGroup2;*now;*asap;10;true;true;ACT_<~*req.Account>;20",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expAt: &AttrSetActionTrigger{
+				GroupID:  "STANDARD_TRIGGERS",
+				UniqueID: "uid",
+				ActionTrigger: map[string]any{
+					utils.ThresholdType:  "*max_balance",
+					utils.ThresholdValue: float64(20),
+				},
+			},
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;;;;;;;;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20",
+			expectedErr: "invalid number of parameters <4> expected 21",
+		},
+		{
+			name:        "ThresholdValueFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;BadString;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "RecurrentFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;BadString;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "MinSleepFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;BadString;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `time: invalid duration "BadString"`,
+		},
+		{
+			name:        "ExpirationDateBadStringFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;bad String;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `Unsupported time format`,
+		},
+		{
+			name:        "ActivationDateBadStringFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;bad String;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `Unsupported time format`,
+		},
+		{
+			name:        "BalanceExpirationDateBadStringFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;bad String;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `Unsupported time format`,
+		},
+		{
+			name:        "BalanceWeightFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;BadString;true;true;ACT_1001;20",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "BalanceBlockerFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;BadString;true;ACT_1001;20",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "BalanceDisabledFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;BadString;ACT_1001;20",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;BadString",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				at = nil
+			})
+			err := dynamicActionTrigger(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(at, tc.expAt) {
+				if i != 1 {
+					t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+				} else {
+					// Get the absolute difference between the times
+					rcvExpDate, err := utils.IfaceAsTime(at.ActionTrigger[utils.ExpirationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					expExpDate, err := utils.IfaceAsTime(tc.expAt.ActionTrigger[utils.ExpirationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					diff := rcvExpDate.Sub(expExpDate)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff > time.Second {
+						t.Fatalf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+					}
+					tc.expAt.ActionTrigger[utils.ExpirationDate] = rcvExpDate
+					// Get the absolute difference between the times
+					rcvExpDate, err = utils.IfaceAsTime(at.ActionTrigger[utils.ActivationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					expExpDate, err = utils.IfaceAsTime(tc.expAt.ActionTrigger[utils.ActivationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					diff = rcvExpDate.Sub(expExpDate)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff > time.Second {
+						t.Fatalf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+					}
+					tc.expAt.ActionTrigger[utils.ActivationDate] = rcvExpDate
+					// Get the absolute difference between the times
+					rcvExpDate, err = utils.IfaceAsTime(at.ActionTrigger[utils.BalanceExpirationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					expExpDate, err = utils.IfaceAsTime(tc.expAt.ActionTrigger[utils.BalanceExpirationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					diff = rcvExpDate.Sub(expExpDate)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff > time.Second {
+						t.Fatalf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+					}
+					tc.expAt.ActionTrigger[utils.BalanceExpirationDate] = rcvExpDate
+					if !reflect.DeepEqual(at, tc.expAt) {
+						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+					}
+				}
+			}
+		})
+	}
+}

@@ -1131,7 +1131,7 @@ func testInternalReplicateITActionTrigger(t *testing.T) {
 	}
 	// set
 	var reply string
-	attrSet := AttrSetActionTrigger{
+	attrSet := engine.AttrSetActionTrigger{
 		GroupID:  "TestATR",
 		UniqueID: "UniqueID",
 		ActionTrigger: map[string]any{
