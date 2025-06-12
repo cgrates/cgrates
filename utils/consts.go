@@ -1241,6 +1241,7 @@ const (
 	MetaDynamicRatingProfile      = "*dynamic_rating_profile"
 	MetaDynamicTrend              = "*dynamic_trend"
 	MetaDynamicResource           = "*dynamic_resource"
+	MetaDynamicActionTrigger      = "*dynamic_action_trigger"
 	ActionID                      = "ActionID"
 	ActionType                    = "ActionType"
 	ActionValue                   = "ActionValue"

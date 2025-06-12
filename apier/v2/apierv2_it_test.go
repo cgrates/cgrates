@@ -174,7 +174,7 @@ func testAPIerSv2itSetAccountActionTriggers(t *testing.T) {
 	attrs := v1.AttrSetAccountActionTriggers{
 		Tenant:  "cgrates.org",
 		Account: "dan",
-		AttrSetActionTrigger: v1.AttrSetActionTrigger{
+		AttrSetActionTrigger: engine.AttrSetActionTrigger{
 			GroupID: "MONITOR_MAX_BALANCE",
 			ActionTrigger: map[string]any{
 				utils.ThresholdType:  utils.TriggerMaxBalance,

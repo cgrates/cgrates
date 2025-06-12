@@ -216,7 +216,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 
 			t.Run("GetActionTriggers", func(t *testing.T) {
 				var reply string
-				if err := client.Call(context.Background(), utils.APIerSv1SetActionTrigger, v1.AttrSetActionTrigger{
+				if err := client.Call(context.Background(), utils.APIerSv1SetActionTrigger, engine.AttrSetActionTrigger{
 					GroupID:  "GroupID",
 					UniqueID: "ID",
 					ActionTrigger: map[string]any{

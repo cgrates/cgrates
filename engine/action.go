@@ -131,7 +131,7 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaDynamicActionPlanAccounts, utils.MetaDynamicAction,
 		utils.MetaDynamicDestination, utils.MetaDynamicFilter,
 		utils.MetaDynamicRoute, utils.MetaDynamicRatingProfile,
-		utils.MetaDynamicResource,
+		utils.MetaDynamicResource, utils.MetaDynamicActionTrigger,
 	}
 	act := ActionConnCfg{}
 	switch source {
@@ -204,6 +204,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicRatingProfile] = dynamicRatingProfile
 	actionFuncMap[utils.MetaDynamicRanking] = dynamicTrend
 	actionFuncMap[utils.MetaDynamicResource] = dynamicResource
+	actionFuncMap[utils.MetaDynamicActionTrigger] = dynamicActionTrigger
 }
 
 func getActionFunc(typ string) (f actionTypeFunc, exists bool) {
@@ -2780,4 +2781,173 @@ func dynamicResource(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	// create the ResourceProfile based on the populated parameters
 	var reply string
 	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetResourceProfile, rsc, &reply)
+}
+
+// dynamicActionTrigger processes the `ExtraParameters` field from the action to
+// construct a ActionTrigger
+//
+// The ExtraParameters field format is expected as follows:
+//
+//		0 Tag: string
+//		1 UniqueId: string
+//		2 ThresholdType: string
+//		3 ThresholdValue: float
+//		4 Recurrent: bool
+//		5 MinSleep: duration
+//		6 ExpiryTime: time
+//		7 ActivationTime: time
+//		8 BalanceTag: string
+//		9 BalanceType: string
+//	   10 BalanceCategories: strings separated by "&".
+//	   11 BalanceDestinationIds: strings separated by "&".
+//	   12 BalanceRatingSubject: string
+//	   13 BalanceSharedGroup: strings separated by "&".
+//	   14 BalanceExpiryTime: time
+//	   15 BalanceTimingIds: strings separated by "&".
+//	   16 BalanceWeight: float
+//	   17 BalanceBlocker: bool
+//	   18 BalanceDisabled: bool
+//	   19 ActionsId: string
+//	   20 Weight: float
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+func dynamicActionTrigger(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
+	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := ev.(*utils.CGREvent)
+	if !canCast {
+		return errors.New("Couldn't cast event to CGREvent")
+	}
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaReq:    cgrEv.Event,
+		utils.MetaTenant: cgrEv.Tenant,
+		utils.MetaNow:    time.Now(),
+		utils.MetaOpts:   cgrEv.APIOpts,
+	}
+	// Parse action parameters based on the predefined format.
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
+	if len(params) != 21 {
+		return fmt.Errorf("invalid number of parameters <%d> expected 21", len(params))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, false); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	at := &AttrSetActionTrigger{
+		GroupID:       params[0],
+		UniqueID:      utils.FirstNonEmpty(params[1], utils.GenUUID()),
+		ActionTrigger: make(map[string]any),
+	}
+	// populate ActionTrigger's ThresholdType
+	if params[2] != utils.EmptyString {
+		at.ActionTrigger[utils.ThresholdType] = params[2]
+	}
+	// populate ActionTrigger's ThresholdValue
+	if params[3] != utils.EmptyString {
+		at.ActionTrigger[utils.ThresholdValue], err = strconv.ParseFloat(params[3], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's Recurrent
+	if params[4] != utils.EmptyString {
+		at.ActionTrigger[utils.Recurrent], err = strconv.ParseBool(params[4])
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's MinSleep
+	if params[5] != utils.EmptyString {
+		at.ActionTrigger[utils.MinSleep], err = utils.ParseDurationWithNanosecs(params[5])
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's ExpirationDate
+	if params[6] != utils.EmptyString {
+		at.ActionTrigger[utils.ExpirationDate], err = utils.ParseTimeDetectLayout(params[6], config.CgrConfig().GeneralCfg().DefaultTimezone)
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's ActivationDate
+	if params[7] != utils.EmptyString {
+		at.ActionTrigger[utils.ActivationDate], err = utils.ParseTimeDetectLayout(params[7], config.CgrConfig().GeneralCfg().DefaultTimezone)
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's BalanceID
+	if params[8] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceID] = params[8]
+	}
+	// populate ActionTrigger's BalanceType
+	if params[9] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceType] = params[9]
+	}
+	// populate ActionTrigger's BalanceCategories
+	if params[10] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceCategories] = strings.Split(params[10], utils.ANDSep)
+	}
+	// populate ActionTrigger's BalanceDestinationIds
+	if params[11] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceDestinationIds] = strings.Split(params[11], utils.ANDSep)
+	}
+	// populate ActionTrigger's BalanceRatingSubject
+	if params[12] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceRatingSubject] = params[12]
+	}
+	// populate ActionTrigger's BalanceSharedGroups
+	if params[13] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceSharedGroups] = strings.Split(params[13], utils.ANDSep)
+	}
+	// populate ActionTrigger's BalanceExpirationDate
+	if params[14] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceExpirationDate], err = utils.ParseTimeDetectLayout(params[14], config.CgrConfig().GeneralCfg().DefaultTimezone)
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's BalanceTimingTags
+	if params[15] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceTimingTags] = strings.Split(params[15], utils.ANDSep)
+	}
+	// populate ActionTrigger's BalanceWeight
+	if params[16] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceWeight], err = strconv.ParseFloat(params[16], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's BalanceBlocker
+	if params[17] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceBlocker], err = strconv.ParseBool(params[17])
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's BalanceDisabled
+	if params[18] != utils.EmptyString {
+		at.ActionTrigger[utils.BalanceDisabled], err = strconv.ParseBool(params[18])
+		if err != nil {
+			return err
+		}
+	}
+	// populate ActionTrigger's ActionsID
+	if params[19] != utils.EmptyString {
+		at.ActionTrigger[utils.ActionsID] = params[19]
+	}
+	// populate ActionTrigger's Weight
+	if params[20] != utils.EmptyString {
+		at.ActionTrigger[utils.Weight], err = strconv.ParseFloat(params[20], 64)
+		if err != nil {
+			return err
+		}
+	}
+
+	// create the ActionTrigger based on the populated parameters
+	var reply string
+	return connMgr.Call(context.Background(), connCfg.ConnIDs, utils.APIerSv1SetActionTrigger, at, &reply)
 }
