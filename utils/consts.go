@@ -36,6 +36,18 @@ var (
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheRatingProfilesTmp, CacheCapsEvents, CacheReplicationHosts})
 
+	// DataDBPartitions excluding Resources, Thresholds, Trends, Rankings, IPs, Stats
+	StatelessDataDBPartitions = NewStringSet([]string{
+		CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
+		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
+		CacheChargerProfiles, CacheActions, CacheActionTriggers, CacheSharedGroups,
+		CacheTimings, CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
+		CacheRouteFilterIndexes, CacheAttributeFilterIndexes,
+		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs,
+		CacheReverseFilterIndexes, CacheActionPlans, CacheAccountActionPlans,
+		CacheAccounts, CacheVersions,
+	})
+
 	DataDBPartitions = NewStringSet([]string{
 		CacheDestinations, CacheReverseDestinations, CacheRatingPlans,
 		CacheRatingProfiles, CacheDispatcherProfiles, CacheDispatcherHosts,
@@ -1226,6 +1238,10 @@ const (
 	MetaDynamicFilter             = "*dynamic_filter"
 	MetaDynamicRoute              = "*dynamic_route"
 	MetaDynamicRanking            = "*dynamic_ranking"
+	MetaDynamicRatingProfile      = "*dynamic_rating_profile"
+	MetaDynamicTrend              = "*dynamic_trend"
+	MetaDynamicResource           = "*dynamic_resource"
+	MetaDynamicActionTrigger      = "*dynamic_action_trigger"
 	ActionID                      = "ActionID"
 	ActionType                    = "ActionType"
 	ActionValue                   = "ActionValue"

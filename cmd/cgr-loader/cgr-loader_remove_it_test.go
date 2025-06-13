@@ -387,7 +387,6 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, time.July, 29, 15, 0, 0, 0, time.UTC),
 		},
-		Stored: true,
 	}
 	var replySts *engine.StatQueueProfile
 	if err := cgrLdrRPC.Call(context.Background(), utils.APIerSv1GetStatQueueProfile,

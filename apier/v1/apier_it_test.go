@@ -1061,7 +1061,7 @@ func testApierGetActionTrigger(t *testing.T) {
 	//set an ActionTrigger in database
 	var reply string
 	if err := rater.Call(context.Background(), utils.APIerSv1SetActionTrigger,
-		AttrSetActionTrigger{
+		engine.AttrSetActionTrigger{
 			GroupID:  "TEST_ID1",
 			UniqueID: "TEST_ID2",
 		}, &reply); err != nil {
@@ -1394,7 +1394,7 @@ func testApierSetAccountActionTriggers(t *testing.T) {
 	setReq := AttrSetAccountActionTriggers{
 		Tenant:  "cgrates.org",
 		Account: "dan2",
-		AttrSetActionTrigger: AttrSetActionTrigger{
+		AttrSetActionTrigger: engine.AttrSetActionTrigger{
 			UniqueID: reply[0].UniqueID,
 			ActionTrigger: map[string]any{
 				utils.ActivationDate: "2016-02-05T18:00:00Z",

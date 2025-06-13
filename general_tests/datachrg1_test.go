@@ -53,7 +53,7 @@ RP_DATA1,DR_DATA_2,TM2,10`
 		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString,
 	),
-		utils.EmptyString, utils.EmptyString, nil, nil, false)
+		utils.EmptyString, utils.EmptyString, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}

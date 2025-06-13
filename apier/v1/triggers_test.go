@@ -28,7 +28,7 @@ import (
 )
 
 func TestAttrSetActionTriggerUpdateActionTrigger(t *testing.T) {
-	ast := AttrSetActionTrigger{}
+	ast := engine.AttrSetActionTrigger{}
 	if _, err := ast.UpdateActionTrigger(nil, ""); err == nil || err.Error() != "Empty ActionTrigger" {
 		t.Errorf("Expected error \"Empty ActionTrigger\", received: %v", err)
 	}
@@ -43,7 +43,7 @@ func TestAttrSetActionTriggerUpdateActionTrigger(t *testing.T) {
 		t.Errorf("Expected error %s , received: %v", expErr, err)
 	}
 	tNow := time.Now()
-	ast = AttrSetActionTrigger{
+	ast = engine.AttrSetActionTrigger{
 		GroupID:  "GroupID",
 		UniqueID: "ID",
 		ActionTrigger: map[string]any{
@@ -182,7 +182,7 @@ func TestAttrSetActionTriggerUpdateActionTrigger(t *testing.T) {
 		ID:       "GroupID2",
 		UniqueID: "ID2",
 	}
-	ast = AttrSetActionTrigger{
+	ast = engine.AttrSetActionTrigger{
 		GroupID:  "GroupID",
 		UniqueID: "ID",
 	}
@@ -195,7 +195,7 @@ func TestAttrSetActionTriggerUpdateActionTrigger(t *testing.T) {
 		ID:       "GroupID",
 		UniqueID: "ID2",
 	}
-	ast = AttrSetActionTrigger{
+	ast = engine.AttrSetActionTrigger{
 		GroupID:  "GroupID",
 		UniqueID: "ID",
 	}
