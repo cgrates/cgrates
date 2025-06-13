@@ -416,6 +416,8 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,			// starts the EventReader service: <true|false>
 	"sessions_conns": ["*internal"],	// RPC Connections IDs
 	"ees_conns": [],			// connection for routing processed and invalid messages through EEs
+	"stats_conns": [],			// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],			// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"concurrent_events": 1,			// number of events to generate concurrently on CGRateS side
 	"partial_cache_ttl": "1s",		// the duration to cache partial records when not pairing
 	"readers": [
