@@ -1312,6 +1312,8 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:5060",		// address where to listen for SIP requests <x.y.z.y:1234>
 	"listen_net": "udp",			// network to listen on <udp|tcp|tcp-tls>
 	"sessions_conns": ["*internal"],
+	"stats_conns": [],			// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],			// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"timezone": "",				// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"retransmission_timer": "1s",		// the duration to wait to receive an ACK before resending the reply
 	"request_processors": []		// request processors to be applied to SIP messages
