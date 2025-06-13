@@ -563,3 +563,145 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 		t.Errorf("Expected %v, received %v", utils.ToJSON(expectedVal), utils.ToJSON(reply))
 	}
 }
+
+func TestCDRsV1ProcessStoredEvents(t *testing.T) {
+	testCache := engine.Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		engine.Cache = testCache
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	connMng := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	storDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDB)
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	testCGREvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "test-cgrid-1",
+		Event: map[string]any{
+			"CGRID":       "test-cgrid-1",
+			"Tenant":      "cgrates.org",
+			"Category":    "call",
+			"Account":     "1001",
+			"Destination": "1002",
+			"SetupTime":   time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
+			"AnswerTime":  time.Date(2024, 1, 1, 10, 0, 5, 0, time.UTC),
+			"Usage":       60 * time.Second,
+			"Cost":        1.5,
+		},
+	}
+
+	ctx := context.Background()
+	err := storDB.SetCDR(ctx, testCGREvent, false)
+	if err != nil {
+		t.Fatalf("Failed to set CDR: %v", err)
+	}
+
+	args := &utils.CDRFilters{
+		Tenant: "cgrates.org",
+	}
+	var reply string
+	err = newCDRSrv.V1ProcessStoredEvents(context.Background(), args, &reply)
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected reply to be %s, got: %s", utils.OK, reply)
+	}
+	if args.ID == utils.EmptyString {
+		t.Error("Expected args.ID to be set")
+	}
+}
+
+func TestCDRsV1ProcessStoredEventsWithEmptyArgs(t *testing.T) {
+	testCache := engine.Cache
+	tmpC := config.CgrConfig()
+	defer func() {
+		engine.Cache = testCache
+		config.SetCgrConfig(tmpC)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs)}
+
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	connMng := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	engine.Cache = engine.NewCacheS(cfg, dm, nil, nil)
+	storDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	newCDRSrv := NewCDRServer(cfg, dm, fltrs, connMng, storDB)
+
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				*reply.(*map[string]map[string]any) = map[string]map[string]any{}
+				return nil
+			},
+		},
+	}
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	newCDRSrv.connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal,
+		utils.MetaEEs), utils.ThresholdSv1, rpcInternal)
+
+	testCGREvent := &utils.CGREvent{
+		Tenant: cfg.GeneralCfg().DefaultTenant,
+		ID:     "test-cgrid-empty-args",
+		Event: map[string]any{
+			"CGRID":       "test-cgrid-empty-args",
+			"Tenant":      cfg.GeneralCfg().DefaultTenant,
+			"Category":    "call",
+			"Account":     "1001",
+			"Destination": "1002",
+			"SetupTime":   time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
+			"AnswerTime":  time.Date(2024, 1, 1, 10, 0, 5, 0, time.UTC),
+			"Usage":       60 * time.Second,
+			"Cost":        1.5,
+		},
+	}
+
+	ctx := context.Background()
+	err := storDB.SetCDR(ctx, testCGREvent, false)
+	if err != nil {
+		t.Fatalf("Failed to set CDR: %v", err)
+	}
+
+	args := &utils.CDRFilters{}
+	var reply string
+	err = newCDRSrv.V1ProcessStoredEvents(context.Background(), args, &reply)
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected reply to be %s, got: %s", utils.OK, reply)
+	}
+	if args.ID == utils.EmptyString {
+		t.Error("Expected args.ID to be generated")
+	}
+	if args.Tenant != cfg.GeneralCfg().DefaultTenant {
+		t.Errorf("Expected args.Tenant to be %s, got: %s", cfg.GeneralCfg().DefaultTenant, args.Tenant)
+	}
+}
