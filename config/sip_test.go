@@ -27,13 +27,15 @@ import (
 
 func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSONS := &SIPAgentJsonCfg{
-		Enabled:              utils.BoolPointer(true),
-		Listen:               utils.StringPointer("127.0.0.1:5060"),
-		Listen_net:           utils.StringPointer("udp"),
-		Sessions_conns:       &[]string{utils.MetaInternal},
-		Timezone:             utils.StringPointer("local"),
-		Retransmission_timer: utils.StringPointer("1"),
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		Enabled:             utils.BoolPointer(true),
+		Listen:              utils.StringPointer("127.0.0.1:5060"),
+		ListenNet:           utils.StringPointer("udp"),
+		SessionSConns:       &[]string{utils.MetaInternal},
+		StatSConns:          &[]string{utils.MetaInternal},
+		ThresholdSConns:     &[]string{utils.MetaInternal},
+		Timezone:            utils.StringPointer("local"),
+		RetransmissionTimer: utils.StringPointer("1"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
 				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
@@ -56,6 +58,8 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Listen:              "127.0.0.1:5060",
 		ListenNet:           "udp",
 		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		StatSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		ThresholdSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		Timezone:            "local",
 		RetransmissionTimer: 1,
 		RequestProcessors: []*RequestProcessor{
@@ -90,7 +94,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 
 func TestSIPAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &SIPAgentJsonCfg{
-		Retransmission_timer: utils.StringPointer("1ss"),
+		RetransmissionTimer: utils.StringPointer("1ss"),
 	}
 	expected := "time: unknown unit \"ss\" in duration \"1ss\""
 	jsonCfg := NewDefaultCGRConfig()
@@ -110,7 +114,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 	},
 }`
 	sipAgent := &SIPAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{{
 			ID: utils.StringPointer("randomID"),
 		}},
 	}
@@ -132,7 +136,7 @@ func TestSIPAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 
 func TestSIPAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 	sipAgent := &SIPAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{{
 			Tenant: utils.StringPointer("a{*"),
 		}},
 	}
@@ -150,6 +154,8 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		"listen": "127.0.0.1:5060",
 		"listen_net": "udp",
 		"sessions_conns": ["*internal"],
+		"stats_conns": ["*internal"],
+		"thresholds_conns": ["*internal"],
 		"timezone": "",
         "retransmission_timer": "2s",
 		"request_processors": [
@@ -161,6 +167,8 @@ func TestSIPAgentCfgAsMapInterface(t *testing.T) {
 		utils.ListenCfg:              "127.0.0.1:5060",
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.StatSConnsCfg:          []string{"*internal"},
+		utils.ThresholdSConnsCfg:     []string{"*internal"},
 		utils.TimezoneCfg:            "",
 		utils.RetransmissionTimerCfg: 2 * time.Second,
 		utils.RequestProcessorsCfg:   []map[string]any{},
@@ -179,6 +187,8 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 			"listen": "127.0.0.1:5060",
 			"listen_net": "udp",
 			"sessions_conns": ["*internal"],
+			"stats_conns": ["*internal"],
+			"thresholds_conns": ["*internal"],
 			"timezone": "UTC",
             "retransmission_timer": "5s",
 			"request_processors": [
@@ -211,6 +221,8 @@ func TestSIPAgentCfgAsMapInterface1(t *testing.T) {
 		utils.ListenCfg:              "127.0.0.1:5060",
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*internal"},
+		utils.StatSConnsCfg:          []string{"*internal"},
+		utils.ThresholdSConnsCfg:     []string{"*internal"},
 		utils.TimezoneCfg:            "UTC",
 		utils.RetransmissionTimerCfg: 5 * time.Second,
 		utils.RequestProcessorsCfg: []map[string]any{
@@ -244,6 +256,8 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		"enabled": true,
 		"listen": "",
 		"sessions_conns": ["*conn1", "*conn2"],
+		"stats_conns": ["*conn1", "*conn2"],
+		"thresholds_conns": ["*conn1", "*conn2"],
 		"request_processors": [
          {
 			"id": "Register",
@@ -265,6 +279,8 @@ func TestSIPAgentCfgAsMapInterface2(t *testing.T) {
 		utils.ListenCfg:              "",
 		utils.ListenNetCfg:           "udp",
 		utils.SessionSConnsCfg:       []string{"*conn1", "*conn2"},
+		utils.StatSConnsCfg:          []string{"*conn1", "*conn2"},
+		utils.ThresholdSConnsCfg:     []string{"*conn1", "*conn2"},
 		utils.TimezoneCfg:            "",
 		utils.RetransmissionTimerCfg: time.Second,
 		utils.RequestProcessorsCfg: []map[string]any{
@@ -294,6 +310,8 @@ func TestSIPAgentCfgClone(t *testing.T) {
 		Listen:              "127.0.0.1:5060",
 		ListenNet:           "udp",
 		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		StatSConns:          []string{},
+		ThresholdSConns:     []string{},
 		Timezone:            "UTC",
 		RetransmissionTimer: 1,
 		RequestProcessors: []*RequestProcessor{

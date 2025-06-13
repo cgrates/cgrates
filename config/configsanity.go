@@ -621,6 +621,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SIPAgent, connID)
 			}
 		}
+		for _, connID := range cfg.sipAgentCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.SIPAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SIPAgent, connID)
+			}
+		}
+		for _, connID := range cfg.sipAgentCfg.ThresholdSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.SIPAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.SIPAgent, connID)
+			}
+		}
 		for _, req := range cfg.sipAgentCfg.RequestProcessors {
 			for _, field := range req.RequestFields {
 				if field.Type != utils.MetaNone && field.Path == utils.EmptyString {
