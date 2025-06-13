@@ -227,12 +227,14 @@ type CdrsJsonCfg struct {
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
-	Enabled           *bool
-	Sessions_conns    *[]string
-	Ees_conns         *[]string
-	Concurrent_events *int
-	Readers           *[]*EventReaderJsonCfg
-	Partial_cache_ttl *string
+	Enabled          *bool                  `json:"enabled"`
+	SessionSConns    *[]string              `json:"sessions_conns"`
+	EEsConns         *[]string              `json:"ees_conns"`
+	StatSConns       *[]string              `json:"stats_conns"`
+	ThresholdSConns  *[]string              `json:"thresholds_conns"`
+	ConcurrentEvents *int                   `json:"concurrent_events"`
+	Readers          *[]*EventReaderJsonCfg `json:"readers"`
+	PartialCacheTTL  *string                `json:"partial_cache_ttl"`
 }
 
 type EventReaderOptsJson struct {
