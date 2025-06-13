@@ -130,7 +130,8 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaDynamicAttribute, utils.MetaDynamicActionPlan,
 		utils.MetaDynamicActionPlanAccounts, utils.MetaDynamicAction,
 		utils.MetaDynamicDestination, utils.MetaDynamicFilter,
-		utils.MetaDynamicRoute, utils.MetaDynamicRatingProfile,
+		utils.MetaDynamicRoute, utils.MetaDynamicRanking,
+		utils.MetaDynamicRatingProfile, utils.MetaDynamicTrend,
 		utils.MetaDynamicResource, utils.MetaDynamicActionTrigger,
 	}
 	act := ActionConnCfg{}
@@ -202,7 +203,7 @@ func init() {
 	actionFuncMap[utils.MetaDynamicRoute] = dynamicRoute
 	actionFuncMap[utils.MetaDynamicRanking] = dynamicRanking
 	actionFuncMap[utils.MetaDynamicRatingProfile] = dynamicRatingProfile
-	actionFuncMap[utils.MetaDynamicRanking] = dynamicTrend
+	actionFuncMap[utils.MetaDynamicTrend] = dynamicTrend
 	actionFuncMap[utils.MetaDynamicResource] = dynamicResource
 	actionFuncMap[utils.MetaDynamicActionTrigger] = dynamicActionTrigger
 }
