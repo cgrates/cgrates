@@ -745,6 +745,8 @@ const (
 	MetaHAThresholds         = "*haThresholds"
 	MetaSAStats              = "*saStats"
 	MetaSAThresholds         = "*saThresholds"
+	MetaERsStats             = "*ersStats"
+	MetaERsThresholds        = "*ersThresholds"
 	MetaDryRun               = "*dryrun"
 	MetaRALsDryRun           = "*ralsDryRun"
 	Event                    = "Event"
