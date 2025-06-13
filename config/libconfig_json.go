@@ -937,13 +937,15 @@ type STIRJsonCfg struct {
 
 // SIPAgentJsonCfg
 type SIPAgentJsonCfg struct {
-	Enabled              *bool
-	Listen               *string
-	Listen_net           *string
-	Sessions_conns       *[]string
-	Timezone             *string
-	Retransmission_timer *string
-	Request_processors   *[]*ReqProcessorJsnCfg
+	Enabled             *bool                  `json:"enabled"`
+	Listen              *string                `json:"listen"`
+	ListenNet           *string                `json:"listen_net"`
+	SessionSConns       *[]string              `json:"sessions_conns"`
+	StatSConns          *[]string              `json:"stats_conns"`
+	ThresholdSConns     *[]string              `json:"thresholds_conns"`
+	Timezone            *string                `json:"timezone"`
+	RetransmissionTimer *string                `json:"retransmission_timer"`
+	RequestProcessors   *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 type JanusAgentJsonCfg struct {
