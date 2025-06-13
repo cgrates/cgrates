@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -49,7 +48,7 @@ var (
 		testDynThdInitStorDb,
 		testDynThdStartEngine,
 		testDynThdRpcConn,
-		testDynThdLoadDefaultTimings,
+		testDynThdLoadTpsForTimingsAndRatingPlans,
 		testDynThdCheckForThresholdProfile,
 		testDynThdCheckForStatsProfile,
 		testDynThdCheckForAttributeProfile,
@@ -58,6 +57,11 @@ var (
 		testDynThdCheckForDestination,
 		testDynThdCheckForFilter,
 		testDynThdCheckForRoute,
+		testDynThdCheckForRanking,
+		testDynThdCheckForRatingProfile,
+		testDynThdCheckForTrend,
+		testDynThdCheckForResource,
+		testDynThdCheckForActionTrigger,
 		testDynThdSetLogAction,
 		testDynThdSetAction,
 		testDynThdSetThresholdProfile,
@@ -77,6 +81,11 @@ var (
 		testDynThdCheckForDynCreatedDestination,
 		testDynThdCheckForDynCreatedFilter,
 		testDynThdCheckForDynCreatedRoute,
+		testDynThdCheckForDynCreatedRanking,
+		testDynThdCheckForDynRatingProfile,
+		testDynThdCheckForDynCreatedTrend,
+		testDynThdCheckForDynResource,
+		testDynThdCheckForDynActionTrigger,
 		testDynThdStopEngine,
 	}
 )
@@ -132,13 +141,9 @@ func testDynThdRpcConn(t *testing.T) {
 	dynThdRpc = engine.NewRPCClient(t, dynThdCfg.ListenCfg())
 }
 
-func testDynThdLoadDefaultTimings(t *testing.T) {
-	emptyFolderPath := "/tmp/tmpFldr"
-	if err := os.MkdirAll(emptyFolderPath, 0777); err != nil {
-		t.Fatal(err)
-	}
+func testDynThdLoadTpsForTimingsAndRatingPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: emptyFolderPath}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*utils.DataDir, "tariffplans", "tutorial")}
 	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -202,6 +207,43 @@ func testDynThdCheckForRoute(t *testing.T) {
 	}
 }
 
+func testDynThdCheckForRanking(t *testing.T) {
+	var rply *engine.RankingProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetRankingProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_RANKING_1002"}, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testDynThdCheckForRatingProfile(t *testing.T) {
+	var rply *engine.RatingProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetRatingProfile, &utils.AttrGetRatingProfile{Tenant: "cgrates.org", Category: "call", Subject: "1002"}, &rply); err != nil {
+		t.Error(err)
+	} else if len(rply.RatingPlanActivations) != 1 {
+		t.Errorf("Expected only 1 RatingPlanActivations, received <%+v>", rply.RatingPlanActivations)
+	}
+}
+
+func testDynThdCheckForTrend(t *testing.T) {
+	var rply *engine.TrendProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetTrendProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_TREND_1002"}, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testDynThdCheckForResource(t *testing.T) {
+	var rply *engine.ResourceProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_RESOURCE_1002"}, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testDynThdCheckForActionTrigger(t *testing.T) {
+	var rply *engine.ActionTriggers
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetActionTriggers, &v1.AttrGetActionTriggers{GroupIDs: []string{"DYNAMICLY_ACTTRGR_1002"}}, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
 func testDynThdSetLogAction(t *testing.T) {
 	var reply string
 
@@ -260,6 +302,26 @@ func testDynThdSetAction(t *testing.T) {
 			{
 				Identifier:      utils.MetaDynamicRoute,
 				ExtraParameters: "*tenant;DYNAMICLY_ROUTE_<~*req.ID>;*string:~*req.Account:<~*req.ID>&*string:~*req.Destination:1003;*now;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.ID>&*string:~*req.Destination:1003;<~*req.ID>;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			},
+			{
+				Identifier:      utils.MetaDynamicRanking,
+				ExtraParameters: "*tenant;DYNAMICLY_RANKING_<~*req.ID>;@every 15m;Stats2&Stats3&Stats4;Metric1&Metric3;*asc;metricA:true&metricB:false;true;THD1&THD2;key:value",
+			},
+			{
+				Identifier:      utils.MetaDynamicRatingProfile,
+				ExtraParameters: "*tenant;call;~*req.ID;*now;RP_<~*req.ID>;;key:value",
+			},
+			{
+				Identifier:      utils.MetaDynamicTrend,
+				ExtraParameters: "*tenant;DYNAMICLY_TREND_<~*req.ID>;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
+			},
+			{
+				Identifier:      utils.MetaDynamicResource,
+				ExtraParameters: "*tenant;DYNAMICLY_RESOURCE_<~*req.ID>;*string:~*req.Account:<~*req.ID>;;1h;1;msg_<~*req.ID>;true;true;10;TD1&TD2;key:value",
+			},
+			{
+				Identifier:      utils.MetaDynamicActionTrigger,
+				ExtraParameters: "DYNAMICLY_ACTTRGR_<~*req.ID>;uid_<~*req.ID>;*max_balance;20;true;1s;2014-07-29T15:00:00Z;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST_<~*req.ID>&DST2;SPECIAL_<~*req.ID>;SHRGroup_<~*req.ID>&SHRGroup2;2014-07-29T15:00:00Z;*asap;10;true;true;ACT_<~*req.ID>;20",
 			},
 		}}
 	if err := dynThdRpc.Call(context.Background(), utils.APIerSv2SetActions,
@@ -704,6 +766,151 @@ func testDynThdCheckForDynCreatedRoute(t *testing.T) {
 			},
 		},
 		Weight: 10,
+	}
+
+	if !reflect.DeepEqual(exp, result1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))
+	}
+}
+
+func testDynThdCheckForDynCreatedRanking(t *testing.T) {
+	time.Sleep(50 * time.Millisecond)
+	var result1 *engine.RankingProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetRankingProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_RANKING_1002"}, &result1); err != nil {
+		t.Fatal(err)
+	}
+	exp := &engine.RankingProfile{
+		Tenant:            "cgrates.org",
+		ID:                "DYNAMICLY_RANKING_1002",
+		Schedule:          "@every 15m",
+		StatIDs:           []string{"Stats2", "Stats3", "Stats4"},
+		MetricIDs:         []string{"Metric1", "Metric3"},
+		Sorting:           "*asc",
+		SortingParameters: []string{"metricA:true", "metricB:false"},
+		Stored:            true,
+		ThresholdIDs:      []string{"THD1", "THD2"},
+	}
+
+	if !reflect.DeepEqual(exp, result1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))
+	}
+}
+
+func testDynThdCheckForDynRatingProfile(t *testing.T) {
+	time.Sleep(50 * time.Millisecond)
+	var result1 *engine.RatingProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetRatingProfile, &utils.AttrGetRatingProfile{Tenant: "cgrates.org", Category: "call", Subject: "1002"}, &result1); err != nil {
+		t.Fatal(err)
+	}
+	exp := &engine.RatingProfile{
+		Id: "*out:cgrates.org:call:1002",
+		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC),
+				RatingPlanId:   "RP_1002",
+				FallbackKeys:   nil,
+			},
+			{
+				ActivationTime: result1.RatingPlanActivations[1].ActivationTime,
+				RatingPlanId:   "RP_1002",
+				FallbackKeys:   nil,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(exp, result1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))
+	}
+}
+
+func testDynThdCheckForDynCreatedTrend(t *testing.T) {
+	time.Sleep(50 * time.Millisecond)
+	var result1 *engine.TrendProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetTrendProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_TREND_1002"}, &result1); err != nil {
+		t.Fatal(err)
+	}
+	exp := &engine.TrendProfile{
+		Tenant:          "cgrates.org",
+		ID:              "DYNAMICLY_TREND_1002",
+		Schedule:        "0 12 * * *",
+		StatID:          "Stats2",
+		Metrics:         []string{"*acc", "*tcc"},
+		TTL:             -1,
+		QueueLength:     -1,
+		MinItems:        1,
+		CorrelationType: "*average",
+		Tolerance:       2.1,
+		Stored:          true,
+		ThresholdIDs:    []string{"TD1", "TD2"},
+	}
+	if !reflect.DeepEqual(exp, result1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))
+	}
+}
+
+func testDynThdCheckForDynResource(t *testing.T) {
+	time.Sleep(50 * time.Millisecond)
+	var result1 *engine.ResourceProfile
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetResourceProfile, &utils.TenantID{Tenant: "cgrates.org", ID: "DYNAMICLY_RESOURCE_1002"}, &result1); err != nil {
+		t.Fatal(err)
+	}
+	exp := &engine.ResourceProfile{
+		Tenant: "cgrates.org",
+		ID:     "DYNAMICLY_RESOURCE_1002",
+		FilterIDs: []string{
+			"*string:~*req.Account:1002",
+		},
+		ActivationInterval: &utils.ActivationInterval{},
+		UsageTTL:           time.Hour,
+		Limit:              1,
+		AllocationMessage:  "msg_1002",
+		Blocker:            true,
+		Stored:             true,
+		Weight:             10,
+		ThresholdIDs:       []string{"TD1", "TD2"},
+	}
+
+	if !reflect.DeepEqual(exp, result1) {
+		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", utils.ToJSON(exp), utils.ToJSON(result1))
+	}
+}
+
+func testDynThdCheckForDynActionTrigger(t *testing.T) {
+	time.Sleep(50 * time.Millisecond)
+	var result1 *engine.ActionTriggers
+	if err := dynThdRpc.Call(context.Background(), utils.APIerSv1GetActionTriggers, &v1.AttrGetActionTriggers{GroupIDs: []string{"DYNAMICLY_ACTTRGR_1002"}}, &result1); err != nil {
+		t.Fatal(err)
+	}
+	exp := &engine.ActionTriggers{
+		{
+			ID:             "DYNAMICLY_ACTTRGR_1002",
+			UniqueID:       "uid_1002",
+			ThresholdType:  "*max_balance",
+			ThresholdValue: 20,
+			Recurrent:      true,
+			MinSleep:       time.Second,
+			ExpirationDate: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			ActivationDate: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			Balance: &engine.BalanceFilter{
+				Uuid:           nil,
+				ID:             utils.StringPointer(utils.MetaDefault),
+				Type:           utils.StringPointer(utils.MetaMonetary),
+				Value:          nil,
+				ExpirationDate: utils.TimePointer(time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)),
+				Weight:         utils.Float64Pointer(10),
+				DestinationIDs: &utils.StringMap{"DST2": true, "DST_1002": true},
+				RatingSubject:  utils.StringPointer("SPECIAL_1002"),
+				Categories:     &utils.StringMap{"call": true, "data": true},
+				SharedGroups:   &utils.StringMap{"SHRGroup2": true, "SHRGroup_1002": true},
+				TimingIDs:      &utils.StringMap{utils.MetaASAP: true},
+				Timings:        nil,
+				Disabled:       utils.BoolPointer(true),
+				Factors:        nil,
+				Blocker:        utils.BoolPointer(true),
+			},
+			Weight:    20,
+			ActionsID: "ACT_1002",
+		},
 	}
 
 	if !reflect.DeepEqual(exp, result1) {
