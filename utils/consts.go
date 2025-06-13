@@ -731,6 +731,8 @@ const (
 	MetaDNSThresholds        = "*dnsThresholds"
 	MetaHAStats              = "*haStats"
 	MetaHAThresholds         = "*haThresholds"
+	MetaSAStats              = "*saStats"
+	MetaSAThresholds         = "*saThresholds"
 	MetaDryRun               = "*dryrun"
 	MetaRALsDryRun           = "*ralsDryRun"
 	Event                    = "Event"
