@@ -6818,3 +6818,780 @@ func TestDynamicRanking(t *testing.T) {
 		})
 	}
 }
+
+func TestDynamicRatingProfile(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var rpwo *utils.AttrSetRatingProfile
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetRatingProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rpwo, canCast = args.(*utils.AttrSetRatingProfile); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expRpwo     *utils.AttrSetRatingProfile
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expRpwo: &utils.AttrSetRatingProfile{
+				Tenant:   "cgrates.org",
+				Category: "call",
+				Subject:  utils.MetaAny,
+				RatingPlanActivations: []*utils.TPRatingActivation{
+					{
+						ActivationTime:   "2014-07-29T15:00:00Z",
+						RatingPlanId:     "RP_TESTIT1",
+						FallbackSubjects: "RP_TEST",
+					},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;call;*any;2014-07-29T15:00:00Z;RP_TESTIT1;RP_TEST;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expRpwo: &utils.AttrSetRatingProfile{
+				Tenant:   "cgrates.org",
+				Category: "call",
+				Subject:  "1001",
+				RatingPlanActivations: []*utils.TPRatingActivation{
+					{
+						ActivationTime:   "*now",
+						RatingPlanId:     "RP_TEST1001",
+						FallbackSubjects: "RP_TEST",
+					},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;call;~*req.Account;*now;RP_TEST<~*req.Account>;RP_TEST;key:value",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;call;*any;2014-07-29T15:00:00Z;RP_TESTIT1;RP_TEST;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "cgrates.org;;;",
+			expectedErr: "invalid number of parameters <4> expected 7",
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;call;*any;2014-07-29T15:00:00Z;RP_TESTIT1;RP_TEST;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				rpwo = nil
+			})
+			err := dynamicRatingProfile(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(rpwo, tc.expRpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+			}
+		})
+	}
+}
+
+func TestDynamicTrend(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var tpwo *TrendProfileWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetTrendProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if tpwo, canCast = args.(*TrendProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expTpwo     *TrendProfileWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expTpwo: &TrendProfileWithAPIOpts{
+				TrendProfile: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND1",
+					Schedule:        "0 12 * * *",
+					StatID:          "Stats2",
+					Metrics:         []string{"*acc", "*tcc"},
+					TTL:             -1,
+					QueueLength:     -1,
+					MinItems:        1,
+					CorrelationType: "*average",
+					Tolerance:       2.1,
+					Stored:          true,
+					ThresholdIDs:    []string{"TD1", "TD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expTpwo: &TrendProfileWithAPIOpts{
+				TrendProfile: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND_1001",
+					Schedule:        "0 12 * * *",
+					StatID:          "Stats2",
+					Metrics:         []string{"*acc", "*tcc"},
+					TTL:             -1,
+					QueueLength:     -1,
+					MinItems:        1,
+					CorrelationType: "*average",
+					Tolerance:       2.1,
+					Stored:          true,
+					ThresholdIDs:    []string{"TD1", "TD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;TREND_<~*req.Account>;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expTpwo: &TrendProfileWithAPIOpts{
+				TrendProfile: &TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND_1001",
+					Schedule:        "0 12 * * *",
+					StatID:          "",
+					Metrics:         nil,
+					TTL:             0,
+					QueueLength:     0,
+					MinItems:        0,
+					CorrelationType: "",
+					Tolerance:       0,
+					Stored:          false,
+					ThresholdIDs:    nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;TREND_1001;0 12 * * *;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;TREND1;;",
+			expectedErr: "invalid number of parameters <4> expected 13",
+		},
+		{
+			name:        "TTLFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;BadString;-1;1;*average;2.1;true;TD1&TD2;key:value",
+			expectedErr: `time: invalid duration "BadString"`,
+		},
+		{
+			name:        "QueueLengthFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;BadString;1;*average;2.1;true;TD1&TD2;key:value",
+			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "MinItemsFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;BadString;*average;2.1;true;TD1&TD2;key:value",
+			expectedErr: `strconv.Atoi: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "ToleranceFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;BadString;true;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "StoredFail",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;BadString;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				tpwo = nil
+			})
+			err := dynamicTrend(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(tpwo, tc.expTpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expTpwo), utils.ToJSON(tpwo))
+			}
+		})
+	}
+}
+
+func TestDynamicResource(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var rpwo *ResourceProfileWithAPIOpts
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rpwo, canCast = args.(*ResourceProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expRpwo     *ResourceProfileWithAPIOpts
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expRpwo: &ResourceProfileWithAPIOpts{
+				ResourceProfile: &ResourceProfile{
+					Tenant:    "cgrates.org",
+					ID:        "RES_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					UsageTTL:          time.Hour,
+					Limit:             1,
+					AllocationMessage: "msg_1001",
+					Blocker:           true,
+					Stored:            true,
+					Weight:            10,
+					ThresholdIDs:      []string{"TD1", "TD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expRpwo: &ResourceProfileWithAPIOpts{
+				ResourceProfile: &ResourceProfile{
+					Tenant:    "cgrates.org",
+					ID:        "RES_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: time.Now(),
+						ExpiryTime:     time.Date(3000, 7, 29, 15, 0, 0, 0, time.UTC),
+					},
+					UsageTTL:          time.Hour,
+					Limit:             1,
+					AllocationMessage: "msg_1001",
+					Blocker:           true,
+					Stored:            true,
+					Weight:            10,
+					ThresholdIDs:      []string{"TD1", "TD2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			extraParams: "*tenant;RES_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*now&3000-07-29T15:00:00Z;1h;1;msg_<~*req.Account>;true;true;10;TD1&TD2;key:value",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expRpwo: &ResourceProfileWithAPIOpts{
+				ResourceProfile: &ResourceProfile{
+					Tenant:             "cgrates.org",
+					ID:                 "RES_ACNT_1001",
+					FilterIDs:          nil,
+					ActivationInterval: &utils.ActivationInterval{},
+					UsageTTL:           0,
+					Limit:              0,
+					AllocationMessage:  "",
+					Blocker:            false,
+					Stored:             false,
+					Weight:             0,
+					ThresholdIDs:       nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			extraParams: "cgrates.org;RES_ACNT_1001;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "tenant;RSC;;",
+			expectedErr: "invalid number of parameters <4> expected 12",
+		},
+		{
+			name:        "ActivationIntervalLengthFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z&&;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: utils.ErrUnsupportedFormat.Error(),
+		},
+		{
+			name:        "ActivationIntervalBadStringFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;bad String;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "ActivationIntervalBadStringFail2",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z&bad String;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+		},
+		{
+			name:        "TTLFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;BadString;1;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: `time: invalid duration "BadString"`,
+		},
+		{
+			name:        "LimitFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;BadString;msg_1001;true;true;10;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "BlockerFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;BadString;true;10;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "StoredFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;BadString;10;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;true;BadString;TD1&TD2;key:value",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "InvalidOptsMap",
+			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z;1h;1;msg_1001;true;true;10;TD1&TD2;opt",
+			expectedErr: "invalid key-value pair: opt",
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				rpwo = nil
+			})
+			err := dynamicResource(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(rpwo, tc.expRpwo) {
+				if i != 1 {
+					t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+				} else {
+					// Get the absolute difference between the times
+					diff := rpwo.ActivationInterval.ActivationTime.Sub(tc.expRpwo.ActivationInterval.ActivationTime)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff <= time.Second {
+						tc.expRpwo.ActivationInterval.ActivationTime = rpwo.ActivationInterval.ActivationTime
+						if !reflect.DeepEqual(rpwo, tc.expRpwo) {
+							t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+						}
+					} else {
+						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestDynamicActionTrigger(t *testing.T) {
+	tempConn := connMgr
+	tmpDm := dm
+	tmpCache := Cache
+	defer func() {
+		config.SetCgrConfig(config.NewDefaultCGRConfig())
+		SetConnManager(tempConn)
+		dm = tmpDm
+		Cache = tmpCache
+	}()
+	Cache.Clear(nil)
+	var at *AttrSetActionTrigger
+	ccMock := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.APIerSv1SetActionTrigger: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if at, canCast = args.(*AttrSetActionTrigger); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier)
+	clientconn := make(chan birpc.ClientConnector, 1)
+	clientconn <- ccMock
+	NewConnManager(config.NewDefaultCGRConfig(), map[string]chan birpc.ClientConnector{
+		connID: clientconn,
+	})
+	testcases := []struct {
+		name        string
+		extraParams string
+		connIDs     []string
+		expAt       *AttrSetActionTrigger
+		expectedErr string
+	}{
+		{
+			name:    "SuccessfulRequest",
+			connIDs: []string{connID},
+			expAt: &AttrSetActionTrigger{
+				GroupID:  "STANDARD_TRIGGERS",
+				UniqueID: "uid",
+				ActionTrigger: map[string]any{
+					utils.ThresholdType:         "*max_balance",
+					utils.ThresholdValue:        float64(20),
+					utils.Recurrent:             true,
+					utils.MinSleep:              time.Second,
+					utils.ActivationDate:        time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+					utils.BalanceID:             "*default",
+					utils.BalanceType:           "*monetary",
+					utils.BalanceCategories:     []string{utils.Call, "data"},
+					utils.BalanceDestinationIds: []string{"DST1", "DST2"},
+					utils.BalanceRatingSubject:  "SPECIAL_1002",
+					utils.BalanceSharedGroups:   []string{"SHRGroup1", "SHRGroup2"},
+					utils.BalanceExpirationDate: time.Date(2030, 7, 29, 15, 0, 0, 0, time.UTC),
+					utils.BalanceTimingTags:     []string{"*asap"},
+					utils.BalanceWeight:         float64(10),
+					utils.BalanceBlocker:        true,
+					utils.BalanceDisabled:       true,
+					utils.ActionsID:             "ACT_1001",
+					utils.Weight:                float64(20),
+				},
+			},
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+		},
+		{
+			name:    "SuccessfulRequestWithDynamicPaths",
+			connIDs: []string{connID},
+			expAt: &AttrSetActionTrigger{
+				GroupID:  "STANDARD_TRIGGERS_1001",
+				UniqueID: "uid_1001",
+				ActionTrigger: map[string]any{
+					utils.ThresholdType:         "*max_balance",
+					utils.ThresholdValue:        float64(20),
+					utils.Recurrent:             true,
+					utils.MinSleep:              time.Second,
+					utils.ExpirationDate:        time.Now(),
+					utils.ActivationDate:        time.Now(),
+					utils.BalanceID:             "*default",
+					utils.BalanceType:           "*monetary",
+					utils.BalanceCategories:     []string{utils.Call, "data"},
+					utils.BalanceDestinationIds: []string{"DST_1001", "DST2"},
+					utils.BalanceRatingSubject:  "SPECIAL_1001",
+					utils.BalanceSharedGroups:   []string{"SHRGroup_1001", "SHRGroup2"},
+					utils.BalanceExpirationDate: time.Now(),
+					utils.BalanceTimingTags:     []string{"*asap"},
+					utils.BalanceWeight:         float64(10),
+					utils.BalanceBlocker:        true,
+					utils.BalanceDisabled:       true,
+					utils.ActionsID:             "ACT_1001",
+					utils.Weight:                float64(20),
+				},
+			},
+			extraParams: "STANDARD_TRIGGERS_<~*req.Account>;uid_<~*req.Account>;*max_balance;20;true;1s;*now;*now;*default;*monetary;call&data;DST_<~*req.Account>&DST2;SPECIAL_<~*req.Account>;SHRGroup_<~*req.Account>&SHRGroup2;*now;*asap;10;true;true;ACT_<~*req.Account>;20",
+		},
+		{
+			name:    "SuccessfulRequestEmptyFields",
+			connIDs: []string{connID},
+			expAt: &AttrSetActionTrigger{
+				GroupID:  "STANDARD_TRIGGERS",
+				UniqueID: "uid",
+				ActionTrigger: map[string]any{
+					utils.ThresholdType:  "*max_balance",
+					utils.ThresholdValue: float64(20),
+				},
+			},
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;;;;;;;;;;;;;;;;;",
+		},
+		{
+			name:        "MissingConns",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
+		},
+		{
+			name:        "WrongNumberOfParams",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20",
+			expectedErr: "invalid number of parameters <4> expected 21",
+		},
+		{
+			name:        "ThresholdValueFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;BadString;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "RecurrentFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;BadString;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "MinSleepFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;BadString;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `time: invalid duration "BadString"`,
+		},
+		{
+			name:        "ExpirationDateBadStringFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;bad String;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `Unsupported time format`,
+		},
+		{
+			name:        "ActivationDateBadStringFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;bad String;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `Unsupported time format`,
+		},
+		{
+			name:        "BalanceExpirationDateBadStringFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;bad String;*asap;10;true;true;ACT_1001;20",
+			expectedErr: `Unsupported time format`,
+		},
+		{
+			name:        "BalanceWeightFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;BadString;true;true;ACT_1001;20",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "BalanceBlockerFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;BadString;true;ACT_1001;20",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "BalanceDisabledFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;BadString;ACT_1001;20",
+			expectedErr: `strconv.ParseBool: parsing "BadString": invalid syntax`,
+		},
+		{
+			name:        "WeightFail",
+			extraParams: "STANDARD_TRIGGERS;uid;*max_balance;20;true;1s;;2014-07-29T15:00:00Z;*default;*monetary;call&data;DST1&DST2;SPECIAL_1002;SHRGroup1&SHRGroup2;2030-07-29T15:00:00Z;*asap;10;true;true;ACT_1001;BadString",
+			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			action := &Action{ExtraParameters: tc.extraParams}
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Time:   &time.Time{},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			t.Cleanup(func() {
+				at = nil
+			})
+			err := dynamicActionTrigger(nil, action, nil, nil, ev,
+				SharedActionsData{}, ActionConnCfg{
+					ConnIDs: tc.connIDs,
+				})
+			if tc.expectedErr != "" {
+				if err == nil || err.Error() != tc.expectedErr {
+					t.Errorf("expected error <%v>, received <%v>", tc.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(at, tc.expAt) {
+				if i != 1 {
+					t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+				} else {
+					// Get the absolute difference between the times
+					rcvExpDate, err := utils.IfaceAsTime(at.ActionTrigger[utils.ExpirationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					expExpDate, err := utils.IfaceAsTime(tc.expAt.ActionTrigger[utils.ExpirationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					diff := rcvExpDate.Sub(expExpDate)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff > time.Second {
+						t.Fatalf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+					}
+					tc.expAt.ActionTrigger[utils.ExpirationDate] = rcvExpDate
+					// Get the absolute difference between the times
+					rcvExpDate, err = utils.IfaceAsTime(at.ActionTrigger[utils.ActivationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					expExpDate, err = utils.IfaceAsTime(tc.expAt.ActionTrigger[utils.ActivationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					diff = rcvExpDate.Sub(expExpDate)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff > time.Second {
+						t.Fatalf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+					}
+					tc.expAt.ActionTrigger[utils.ActivationDate] = rcvExpDate
+					// Get the absolute difference between the times
+					rcvExpDate, err = utils.IfaceAsTime(at.ActionTrigger[utils.BalanceExpirationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					expExpDate, err = utils.IfaceAsTime(tc.expAt.ActionTrigger[utils.BalanceExpirationDate], config.CgrConfig().GeneralCfg().DefaultTimezone)
+					if err != nil {
+						t.Fatal(err)
+					}
+					diff = rcvExpDate.Sub(expExpDate)
+					if diff < 0 {
+						diff = -diff // Make sure it's positive
+					}
+					// Check if difference is less than or equal to 1 second
+					if diff > time.Second {
+						t.Fatalf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+					}
+					tc.expAt.ActionTrigger[utils.BalanceExpirationDate] = rcvExpDate
+					if !reflect.DeepEqual(at, tc.expAt) {
+						t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expAt), utils.ToJSON(at))
+					}
+				}
+			}
+		})
+	}
+}

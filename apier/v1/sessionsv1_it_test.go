@@ -107,9 +107,6 @@ func TestSSv1ItWithPrepaid(t *testing.T) {
 	if *utils.DBType == utils.MetaPostgres {
 		t.SkipNow()
 	}
-	if *utils.DBType == utils.MetaInternal {
-		t.Skip("unfinished, resources solution needed")
-	}
 	sSV1RequestType = utils.MetaPrepaid
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
@@ -119,9 +116,6 @@ func TestSSv1ItWithPrepaid(t *testing.T) {
 func TestSSv1ItWithPostPaid(t *testing.T) {
 	if *utils.DBType == utils.MetaPostgres {
 		t.SkipNow()
-	}
-	if *utils.DBType == utils.MetaInternal {
-		t.Skip("unfinished, resources solution needed")
 	}
 	sSV1RequestType = utils.MetaPostpaid
 	for _, stest := range sTestSessionSv1 {
@@ -133,9 +127,6 @@ func TestSSv1ItWithRated(t *testing.T) {
 	if *utils.DBType == utils.MetaPostgres {
 		t.SkipNow()
 	}
-	if *utils.DBType == utils.MetaInternal {
-		t.Skip("unfinished, resources solution needed")
-	}
 	sSV1RequestType = utils.MetaRated
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
@@ -145,9 +136,6 @@ func TestSSv1ItWithRated(t *testing.T) {
 func TestSSv1ItWithPseudoPrepaid(t *testing.T) {
 	if *utils.DBType == utils.MetaPostgres {
 		t.SkipNow()
-	}
-	if *utils.DBType == utils.MetaInternal {
-		t.Skip("unfinished, resources solution needed")
 	}
 	sSV1RequestType = utils.MetaPseudoPrepaid
 	for _, stest := range sTestSessionSv1 {

@@ -110,9 +110,12 @@ var (
 func TestRsV1IT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.Skip("unfinished, resources solution needed")
-		rlsV1ConfDIR = "tutinternal"
-		sTestsRLSV1 = sTestsRLSV1[:len(sTestsRLSV1)-24]
+		rlsV1ConfDIR = "tutinternal_offline"
+		defer func() {
+			if err := os.RemoveAll("/tmp/internal_db"); err != nil {
+				t.Error(err)
+			}
+		}()
 	case utils.MetaMySQL:
 		rlsV1ConfDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -132,6 +135,14 @@ func testV1RsLoadConfig(t *testing.T) {
 	rlsV1CfgPath = path.Join(*utils.DataDir, "conf", "samples", rlsV1ConfDIR)
 	if rlsV1Cfg, err = config.NewCGRConfigFromPath(rlsV1CfgPath); err != nil {
 		t.Error(err)
+	}
+	if *utils.DBType == utils.MetaInternal {
+		if err := os.MkdirAll(rlsV1Cfg.DataDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll(rlsV1Cfg.StorDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 

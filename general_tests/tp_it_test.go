@@ -162,7 +162,7 @@ func testTpActionTriggers(t *testing.T) {
 		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
 	}
 	var reply string
-	if err := tpRPC.Call(context.Background(), utils.APIerSv1SetActionTrigger, v1.AttrSetActionTrigger{
+	if err := tpRPC.Call(context.Background(), utils.APIerSv1SetActionTrigger, engine.AttrSetActionTrigger{
 		GroupID:  "TestATR",
 		UniqueID: "Unique atr id",
 		ActionTrigger: map[string]any{

@@ -67,7 +67,7 @@ func TestAuthLoadCsvError(t *testing.T) {
 	chargerProfiles := ``
 	csvr, err := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
-		resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil, false)
+		resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -104,7 +104,7 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 	chargerProfiles := ``
 	csvr, err := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
-		resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil, false)
+		resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
