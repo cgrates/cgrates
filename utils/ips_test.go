@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"net/netip"
 	"reflect"
 	"strings"
 	"testing"
@@ -482,5 +483,190 @@ func TestIPProfileFieldAsInterface(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestIPAllocationsLockKey(t *testing.T) {
+	tnt := "cgrates.org"
+	id := "1001"
+	expected := "*ip_allocations:cgrates.org:1001"
+
+	got := IPAllocationsLockKey(tnt, id)
+	if got != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, got)
+	}
+}
+
+func TestIPAllocationsTenantID(t *testing.T) {
+	ipAlloc := &IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "1001",
+	}
+	expected := "cgrates.org:1001"
+
+	got := ipAlloc.TenantID()
+	if got != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, got)
+	}
+}
+
+func TestIPAllocationsCacheClone(t *testing.T) {
+	orig := &IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "1001",
+	}
+
+	clonedAny := orig.CacheClone()
+	cloned, ok := clonedAny.(*IPAllocations)
+	if !ok {
+		t.Errorf("Expected type *IPAllocations, got %T", clonedAny)
+	}
+
+	if !reflect.DeepEqual(orig, cloned) {
+		t.Errorf("Expected cloned object to equal original.\nOriginal: %+v\nCloned: %+v", orig, cloned)
+	}
+
+	if orig == cloned {
+		t.Errorf("Expected different pointer for clone, got the same")
+	}
+}
+
+func TestIPUsageTenantID(t *testing.T) {
+	usage := &IPUsage{
+		Tenant: "cgrates.org",
+		ID:     "192.0.2.1",
+	}
+
+	expected := "cgrates.org:192.0.2.1"
+
+	got := usage.TenantID()
+	if got != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, got)
+	}
+}
+
+func TestIPUsageIsActive(t *testing.T) {
+	now := time.Now()
+
+	tests := []struct {
+		name       string
+		expiry     time.Time
+		atTime     time.Time
+		wantActive bool
+	}{
+		{
+			name:       "No expiry (zero time)",
+			expiry:     time.Time{},
+			atTime:     now,
+			wantActive: true,
+		},
+		{
+			name:       "Expiry in the future",
+			expiry:     now.Add(10 * time.Minute),
+			atTime:     now,
+			wantActive: true,
+		},
+		{
+			name:       "Expiry in the past",
+			expiry:     now.Add(-10 * time.Minute),
+			atTime:     now,
+			wantActive: false,
+		},
+		{
+			name:       "Expiry exactly at time",
+			expiry:     now,
+			atTime:     now,
+			wantActive: false,
+		},
+	}
+
+	for _, tt := range tests {
+		u := &IPUsage{ExpiryTime: tt.expiry}
+		got := u.IsActive(tt.atTime)
+		if got != tt.wantActive {
+			t.Errorf("Test '%s': expected %v, got %v", tt.name, tt.wantActive, got)
+		}
+	}
+}
+
+func TestIPProfileLockKey(t *testing.T) {
+	tnt := "cgrates.org"
+	id := "profile123"
+	expected := "*ip_profiles:cgrates.org:profile123"
+
+	got := IPProfileLockKey(tnt, id)
+	if got != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, got)
+	}
+}
+
+func TestIPPoolString(t *testing.T) {
+	pool := &IPPool{
+		ID:        "FIRST_POOL",
+		FilterIDs: []string{},
+		Type:      "*ipv4",
+		Range:     "192.168.122.1/24",
+		Strategy:  "*ascending",
+		Message:   "Some message",
+		Weights: DynamicWeights{
+			&DynamicWeight{
+				FilterIDs: nil,
+				Weight:    15,
+			},
+		},
+		Blockers: DynamicBlockers{
+			&DynamicBlocker{
+				FilterIDs: nil,
+				Blocker:   false,
+			},
+		},
+	}
+
+	jsonStr := pool.String()
+
+	if !strings.Contains(jsonStr, `"ID":"FIRST_POOL"`) {
+		t.Errorf("Expected JSON to contain ID 'FIRST_POOL', got: %s", jsonStr)
+	}
+	if !strings.Contains(jsonStr, `"Type":"*ipv4"`) {
+		t.Errorf("Expected JSON to contain Type '*ipv4', got: %s", jsonStr)
+	}
+	if !strings.Contains(jsonStr, `"Range":"192.168.122.1/24"`) {
+		t.Errorf("Expected JSON to contain Range, got: %s", jsonStr)
+	}
+	if !strings.Contains(jsonStr, `"Weight":15`) {
+		t.Errorf("Expected JSON to contain Weight 15, got: %s", jsonStr)
+	}
+	if !strings.Contains(jsonStr, `"Blocker":false`) {
+		t.Errorf("Expected JSON to contain Blocker false, got: %s", jsonStr)
+	}
+}
+
+func TestIPUsageClone(t *testing.T) {
+	addr := netip.MustParseAddr("192.168.0.1")
+	expiry := time.Now().Add(2 * time.Hour)
+
+	original := &IPUsage{
+		Tenant:     "cgrates.org",
+		ID:         "1001",
+		ExpiryTime: expiry,
+		Address:    addr,
+	}
+
+	clone := original.Clone()
+
+	if clone == nil {
+		t.Error("Expected clone to be non-nil")
+	}
+	if *original != *clone {
+		t.Errorf("Expected clone to equal original\nOriginal: %+v\nClone: %+v", original, clone)
+	}
+	if clone == original {
+		t.Error("Expected clone to be a different pointer from original")
+	}
+
+	var nilUsage *IPUsage
+	nilClone := nilUsage.Clone()
+	if nilClone != nil {
+		t.Errorf("Expected nil clone for nil receiver, got: %+v", nilClone)
 	}
 }
