@@ -33,6 +33,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		Thresholds_conns:          &[]string{utils.MetaInternal},
 		Stats_conns:               &[]string{utils.MetaInternal},
 		Accounts_conns:            &[]string{utils.MetaInternal},
+		Admins_conns:              &[]string{utils.MetaInternal},
 		Indexed_selects:           utils.BoolPointer(false),
 		Tenants:                   &[]string{"itsyscom.com"},
 		String_indexed_fields:     &[]string{"*req.index1"},
@@ -50,6 +51,7 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		ThresholdSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		StatSConns:               []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
 		AccountSConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+		AdminSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)},
 		IndexedSelects:           false,
 		Tenants:                  &[]string{"itsyscom.com"},
 		StringIndexedFields:      &[]string{"*req.index1"},
@@ -118,6 +120,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 	"thresholds_conns": ["*internal"],					
 	"stats_conns": ["*internal"],						
 	"accounts_conns": ["*internal"],						
+	"admins_conns": ["*internal"],						
 	"tenants": ["itsyscom.com"],
 	"indexed_selects": false,
 	"string_indexed_fields": ["*req.index1"],			
@@ -137,6 +140,7 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.StatSConnsCfg:             []string{utils.MetaInternal},
 		utils.CDRsConnsCfg:              []string{utils.MetaInternal},
 		utils.AccountSConnsCfg:          []string{utils.MetaInternal},
+		utils.AdminSConnsCfg:            []string{utils.MetaInternal},
 		utils.Tenants:                   []string{"itsyscom.com"},
 		utils.IndexedSelectsCfg:         false,
 		utils.StringIndexedFieldsCfg:    []string{"*req.index1"},
@@ -167,6 +171,7 @@ func TestActionSCfgClone(t *testing.T) {
 		ThresholdSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		StatSConns:               []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
 		AccountSConns:            []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)},
+		AdminSConns:              []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)},
 		Tenants:                  &[]string{"itsyscom.com"},
 		IndexedSelects:           false,
 		StringIndexedFields:      &[]string{"*req.index1"},
@@ -207,6 +212,9 @@ func TestActionSCfgClone(t *testing.T) {
 	if rcv.AccountSConns[0] = utils.EmptyString; ban.AccountSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+	if rcv.AdminSConns[0] = utils.EmptyString; ban.AdminSConns[0] != utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
 	if rcv.DynaprepaidActionProfile[0] = utils.EmptyString; ban.DynaprepaidActionProfile[0] != "val1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
@@ -222,6 +230,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		ThresholdSConns:          []string{},
 		StatSConns:               []string{},
 		AccountSConns:            []string{},
+		AdminSConns:              []string{},
 		Tenants:                  &[]string{},
 		IndexedSelects:           false,
 		StringIndexedFields:      &[]string{},
@@ -252,6 +261,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		ThresholdSConns:          []string{"*localhost"},
 		StatSConns:               []string{"*localhost"},
 		AccountSConns:            []string{"*localhost"},
+		AdminSConns:              []string{"*localhost"},
 		Tenants:                  &[]string{"cgrates.org"},
 		IndexedSelects:           true,
 		StringIndexedFields:      &[]string{"*req.Index1"},
@@ -282,6 +292,7 @@ func TestDiffActionSJsonCfg(t *testing.T) {
 		Thresholds_conns:          &[]string{"*localhost"},
 		Stats_conns:               &[]string{"*localhost"},
 		Accounts_conns:            &[]string{"*localhost"},
+		Admins_conns:              &[]string{"*localhost"},
 		Tenants:                   &[]string{"cgrates.org"},
 		Indexed_selects:           utils.BoolPointer(true),
 		String_indexed_fields:     &[]string{"*req.Index1"},
@@ -329,6 +340,7 @@ func TestActionSCloneSection(t *testing.T) {
 		ThresholdSConns:          []string{"*localhost"},
 		StatSConns:               []string{"*localhost"},
 		AccountSConns:            []string{"*localhost"},
+		AdminSConns:              []string{"*localhost"},
 		Tenants:                  &[]string{"cgrates.org"},
 		IndexedSelects:           true,
 		StringIndexedFields:      &[]string{"*req.Index1"},
@@ -351,6 +363,7 @@ func TestActionSCloneSection(t *testing.T) {
 		ThresholdSConns:          []string{"*localhost"},
 		StatSConns:               []string{"*localhost"},
 		AccountSConns:            []string{"*localhost"},
+		AdminSConns:              []string{"*localhost"},
 		Tenants:                  &[]string{"cgrates.org"},
 		IndexedSelects:           true,
 		StringIndexedFields:      &[]string{"*req.Index1"},
