@@ -46,6 +46,7 @@ type ActionSCfg struct {
 	ThresholdSConns          []string
 	StatSConns               []string
 	AccountSConns            []string
+	AdminSConns              []string
 	Tenants                  *[]string
 	IndexedSelects           bool
 	StringIndexedFields      *[]string
@@ -109,6 +110,9 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 	if jsnCfg.Accounts_conns != nil {
 		acS.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
+	if jsnCfg.Admins_conns != nil {
+		acS.AdminSConns = tagInternalConns(*jsnCfg.Admins_conns, utils.MetaAdminS)
+	}
 	if jsnCfg.Tenants != nil {
 		acS.Tenants = utils.SliceStringPointer(slices.Clone(*jsnCfg.Tenants))
 	}
@@ -171,6 +175,9 @@ func (acS ActionSCfg) AsMapInterface() any {
 	}
 	if acS.EEsConns != nil {
 		mp[utils.EEsConnsCfg] = stripInternalConns(acS.EEsConns)
+	}
+	if acS.AdminSConns != nil {
+		mp[utils.AdminSConnsCfg] = stripInternalConns(acS.AdminSConns)
 	}
 	if acS.Tenants != nil {
 		mp[utils.Tenants] = slices.Clone(*acS.Tenants)
@@ -239,6 +246,9 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 	if acS.EEsConns != nil {
 		cln.EEsConns = slices.Clone(acS.EEsConns)
 	}
+	if acS.AdminSConns != nil {
+		cln.AdminSConns = slices.Clone(acS.AdminSConns)
+	}
 	if acS.Tenants != nil {
 		cln.Tenants = utils.SliceStringPointer(slices.Clone(*acS.Tenants))
 	}
@@ -278,6 +288,7 @@ type ActionSJsonCfg struct {
 	Thresholds_conns          *[]string
 	Stats_conns               *[]string
 	Accounts_conns            *[]string
+	Admins_conns              *[]string
 	Tenants                   *[]string
 	Indexed_selects           *bool
 	String_indexed_fields     *[]string
@@ -327,6 +338,9 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
 		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
+	}
+	if !slices.Equal(v1.AdminSConns, v2.AdminSConns) {
+		d.Admins_conns = utils.SliceStringPointer(stripInternalConns(v2.AdminSConns))
 	}
 
 	if v1.Tenants != v2.Tenants {

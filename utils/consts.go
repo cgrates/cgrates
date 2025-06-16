@@ -1126,6 +1126,7 @@ const (
 	MetaSetBalance            = "*set_balance"
 	MetaRemBalance            = "*rem_balance"
 	DynaprepaidActionplansCfg = "dynaprepaid_actionprofile"
+	MetaDynamicThreshold      = "*dynamic_threshold"
 )
 
 // Migrator Metas
@@ -2367,6 +2368,9 @@ const (
 	// AccountSCfg
 	MaxIterations = "max_iterations"
 	MaxUsage      = "max_usage"
+
+	// AdminSCfg
+	AdminSConnsCfg = "admins_conns"
 )
 
 // FC Template

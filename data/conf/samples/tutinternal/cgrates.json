@@ -70,7 +70,8 @@
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1"
+	"store_interval": "-1",
+	"actions_conns": ["*internal"]
 },
 
 
@@ -106,12 +107,14 @@
 
 "actions": {
 	"enabled": true,
-	"accounts_conns": ["*localhost"]
+	"accounts_conns": ["*localhost"],
+	"admins_conns":  ["*internal"]
 },
 
 
 "accounts": {
-	"enabled": true
+	"enabled": true,
+	"rates_conns": ["*internal"]
 },
 
 
