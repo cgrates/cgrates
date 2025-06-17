@@ -670,3 +670,210 @@ func TestIPUsageClone(t *testing.T) {
 		t.Errorf("Expected nil clone for nil receiver, got: %+v", nilClone)
 	}
 }
+
+func TestIPPoolClone(t *testing.T) {
+	t.Run("Clone valid IPPool", func(t *testing.T) {
+		original := &IPPool{
+			ID:        "FIRST_POOL",
+			FilterIDs: []string{"flt1", "flt2"},
+			Type:      "*ipv4",
+			Range:     "192.168.122.1/24",
+			Strategy:  "*ascending",
+			Message:   "Some message",
+			Weights: DynamicWeights{
+				&DynamicWeight{
+					FilterIDs: nil,
+					Weight:    15,
+				},
+			},
+			Blockers: DynamicBlockers{
+				&DynamicBlocker{
+					FilterIDs: nil,
+					Blocker:   false,
+				},
+			},
+		}
+
+		clone := original.Clone()
+
+		if clone == nil {
+			t.Fatal("Expected clone to be non-nil")
+		}
+		if clone == original {
+			t.Error("Clone should not be the same pointer as original")
+		}
+
+		if clone.ID != original.ID || clone.Type != original.Type || clone.Range != original.Range ||
+			clone.Strategy != original.Strategy || clone.Message != original.Message {
+			t.Error("Basic fields not cloned correctly")
+		}
+
+		if &clone.FilterIDs == &original.FilterIDs {
+			t.Error("FilterIDs slice was not deeply copied")
+		}
+		if len(clone.FilterIDs) != 2 || clone.FilterIDs[0] != "flt1" {
+			t.Errorf("Unexpected FilterIDs in clone: %+v", clone.FilterIDs)
+		}
+
+		if &clone.Weights == &original.Weights {
+			t.Error("Weights slice was not deeply copied")
+		}
+		if len(clone.Weights) != 1 || clone.Weights[0].Weight != 15 {
+			t.Errorf("Unexpected Weights in clone: %+v", clone.Weights)
+		}
+		if clone.Weights[0] == original.Weights[0] {
+			t.Error("Weight pointer not deeply cloned")
+		}
+
+		if &clone.Blockers == &original.Blockers {
+			t.Error("Blockers slice was not deeply copied")
+		}
+		if len(clone.Blockers) != 1 || clone.Blockers[0].Blocker != false {
+			t.Errorf("Unexpected Blockers in clone: %+v", clone.Blockers)
+		}
+		if clone.Blockers[0] == original.Blockers[0] {
+			t.Error("Blocker pointer not deeply cloned")
+		}
+	})
+
+	t.Run("Clone nil IPPool", func(t *testing.T) {
+		var p *IPPool
+		if p.Clone() != nil {
+			t.Error("Expected nil from Clone() on nil receiver")
+		}
+	})
+}
+
+func TestIPAllocationsClone(t *testing.T) {
+	t.Run("Clone non-nil IPAllocations", func(t *testing.T) {
+		expiry := time.Now().Add(time.Hour)
+		addr := netip.MustParseAddr("192.168.0.1")
+
+		original := &IPAllocations{
+			Tenant: "cgrates.org",
+			ID:     "1001",
+			TTLIdx: []string{"entry1", "entry2"},
+			Usages: map[string]*IPUsage{
+				"u1": {
+					Tenant:     "cgrates.org",
+					ID:         "ip-001",
+					ExpiryTime: expiry,
+					Address:    addr,
+				},
+			},
+		}
+
+		clone := original.Clone()
+
+		if clone == nil {
+			t.Fatal("Expected clone to be non-nil")
+		}
+		if clone == original {
+			t.Error("Expected different pointer from original")
+		}
+
+		if clone.Tenant != original.Tenant || clone.ID != original.ID {
+			t.Error("Tenant or ID not cloned properly")
+		}
+
+		if &clone.TTLIdx == &original.TTLIdx {
+			t.Error("TTLIdx slice not deeply cloned")
+		}
+		if len(clone.TTLIdx) != len(original.TTLIdx) || clone.TTLIdx[0] != "entry1" {
+			t.Errorf("Unexpected TTLIdx in clone: %+v", clone.TTLIdx)
+		}
+
+		if &clone.Usages == &original.Usages {
+			t.Error("Usages map not deeply cloned")
+		}
+		if len(clone.Usages) != 1 {
+			t.Errorf("Expected 1 usage in clone, got: %d", len(clone.Usages))
+		}
+		origUsage := original.Usages["u1"]
+		clonedUsage := clone.Usages["u1"]
+		if clonedUsage == nil {
+			t.Error("Cloned usage is nil")
+		}
+		if clonedUsage == origUsage {
+			t.Error("Usage entry not deeply cloned")
+		}
+		if *clonedUsage != *origUsage {
+			t.Errorf("Cloned usage does not match original: %+v vs %+v", clonedUsage, origUsage)
+		}
+	})
+
+	t.Run("Clone nil IPAllocations", func(t *testing.T) {
+		var nilAlloc *IPAllocations
+		if nilAlloc.Clone() != nil {
+			t.Error("Expected nil from Clone() on nil receiver")
+		}
+	})
+}
+
+func TestIPPoolFieldAsString(t *testing.T) {
+	pool := &IPPool{
+		ID:        "FIRST_POOL",
+		FilterIDs: []string{"flt1", "flt2"},
+		Type:      "*ipv4",
+		Range:     "192.168.122.1/24",
+		Strategy:  "*ascending",
+		Message:   "Some message",
+	}
+
+	tests := []struct {
+		name    string
+		fldPath []string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "ID field",
+			fldPath: []string{"ID"},
+			want:    "FIRST_POOL",
+			wantErr: false,
+		},
+		{
+			name:    "Type field",
+			fldPath: []string{"Type"},
+			want:    "*ipv4",
+			wantErr: false,
+		},
+		{
+			name:    "Range field",
+			fldPath: []string{"Range"},
+			want:    "192.168.122.1/24",
+			wantErr: false,
+		},
+		{
+			name:    "Strategy field",
+			fldPath: []string{"Strategy"},
+			want:    "*ascending",
+			wantErr: false,
+		},
+		{
+			name:    "Message field",
+			fldPath: []string{"Message"},
+			want:    "Some message",
+			wantErr: false,
+		},
+		{
+			name:    "Invalid field",
+			fldPath: []string{"Unknown"},
+			want:    "",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := pool.FieldAsString(tt.fldPath)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FieldAsString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("FieldAsString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
