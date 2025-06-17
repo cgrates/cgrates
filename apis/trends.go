@@ -20,6 +20,7 @@ package apis
 
 import (
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/trends"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -138,4 +139,34 @@ func (adms *AdminSv1) RemoveTrendProfile(ctx *context.Context, args *utils.Tenan
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewTrendSv1 initializes the TrendSv1 object.
+func NewTrendSv1(trndS *trends.TrendS) *TrendSv1 {
+	return &TrendSv1{trndS: trndS}
+}
+
+// TrendSv1 represents the RPC object to register for trends v1 APIs.
+type TrendSv1 struct {
+	trndS *trends.TrendS
+}
+
+// V1ScheduleQueries manually schedules or reschedules trend queries.
+func (tS *TrendSv1) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
+	return tS.trndS.V1ScheduleQueries(ctx, args, scheduled)
+}
+
+// V1GetTrend retrieves trend metrics with optional time and index filtering.
+func (tS *TrendSv1) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTrend *utils.Trend) (err error) {
+	return tS.trndS.V1GetTrend(ctx, arg, retTrend)
+}
+
+// V1GetScheduledTrends retrieves information about currently scheduled trends.
+func (tS *TrendSv1) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) (err error) {
+	return tS.trndS.V1GetScheduledTrends(ctx, args, schedTrends)
+}
+
+// V1GetTrendSummary retrieves the most recent trend summary.
+func (tS *TrendSv1) V1GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *utils.TrendSummary) (err error) {
+	return tS.trndS.V1GetTrendSummary(ctx, arg, reply)
 }

@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -58,4 +59,29 @@ func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *utils.CDRFilters, re
 	}
 	*reply = utils.OK
 	return
+}
+
+// NewCdrSv1 initializes the CdrSv1 object.
+func NewCdrSv1(cdrs *cdrs.CDRServer) *CdrSv1 {
+	return &CdrSv1{cdrs: cdrs}
+}
+
+// CdrSv1 represents the RPC object to register for cdrs v1 APIs.
+type CdrSv1 struct {
+	cdrs *cdrs.CDRServer
+}
+
+// V1ProcessEvent will process the CGREvent
+func (cdrS *CdrSv1) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	return cdrS.cdrs.V1ProcessEvent(ctx, args, reply)
+}
+
+// V1ProcessEventWithGet has the same logic with V1ProcessEvent except it adds the proccessed events to the reply
+func (cdrS *CdrSv1) V1ProcessEventWithGet(ctx *context.Context, args *utils.CGREvent, evs *[]*utils.EventsWithOpts) (err error) {
+	return cdrS.cdrs.V1ProcessEventWithGet(ctx, args, evs)
+}
+
+// V1ProcessStoredEvents processes stored events based on provided filters.
+func (cdrS *CdrSv1) V1ProcessStoredEvents(ctx *context.Context, args *utils.CDRFilters, reply *string) (err error) {
+	return cdrS.cdrs.V1ProcessStoredEvents(ctx, args, reply)
 }

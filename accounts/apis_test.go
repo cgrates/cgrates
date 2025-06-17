@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -99,71 +98,6 @@ func TestAccountsActionRemoveBalance(t *testing.T) {
 	}
 }
 
-func TestAccountsGetAccount(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	acc := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
-	fltrs := engine.NewFilterS(cfg, connMgr, dm)
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
-	admS := apis.NewAdminSv1(cfg, dm, nil, fltrs, nil)
-	acc_args := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
-			Tenant: "cgrates.org",
-			ID:     "test_ID1",
-			Opts:   map[string]any{},
-			Balances: map[string]*utils.Balance{
-				"VoiceBalance": {
-					ID: "VoiceBalance",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 12,
-						},
-					},
-					Type: "*abstract",
-					Opts: map[string]any{
-						"Destination": 10,
-					},
-					CostIncrements: []*utils.CostIncrement{
-						{
-							RecurrentFee: utils.NewDecimal(1, 0),
-							Increment:    utils.NewDecimal(1, 1),
-						},
-					},
-					Units: utils.NewDecimal(0, 0),
-				},
-			},
-			Weights: utils.DynamicWeights{
-				{
-					Weight: 10,
-				},
-			},
-		},
-		APIOpts: nil,
-	}
-
-	var setRply string
-	err := admS.SetAccount(context.Background(), acc_args, &setRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-
-	var reply utils.Account
-
-	args := &utils.TenantIDWithAPIOpts{
-		TenantID: utils.NewTenantID("cgrates.org:test_ID1"),
-	}
-
-	if err := acc.V1GetAccount(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	}
-	if !reflect.DeepEqual(&reply, acc_args.Account) {
-		t.Errorf("Expected %v\n but received %v", reply, acc_args.Account)
-	}
-}
-
 func TestAccountsDebitConcretes(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
@@ -172,9 +106,8 @@ func TestAccountsDebitConcretes(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
-	admS := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
-	args := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
+	if err := dm.SetAccount(context.Background(),
+		&utils.Account{
 
 			Tenant:    "cgrates.org",
 			ID:        "TestV1DebitAbstracts",
@@ -232,11 +165,7 @@ func TestAccountsDebitConcretes(t *testing.T) {
 					},
 				},
 			},
-		},
-		APIOpts: nil,
-	}
-	var setRpl string
-	if err := admS.SetAccount(context.Background(), args, &setRpl); err != nil {
+		}, true); err != nil {
 		t.Error(err)
 	}
 
@@ -263,9 +192,8 @@ func TestAccountsMaxConcretes(t *testing.T) {
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
-	admS := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
-	args := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
+	if err := dm.SetAccount(context.Background(),
+		&utils.Account{
 			Tenant:    "cgrates.org",
 			ID:        "TestV1DebitAbstracts",
 			FilterIDs: []string{"*string:~*req.Account:1004"},
@@ -322,11 +250,7 @@ func TestAccountsMaxConcretes(t *testing.T) {
 					},
 				},
 			},
-		},
-		APIOpts: nil,
-	}
-	var setRpl string
-	if err := admS.SetAccount(context.Background(), args, &setRpl); err != nil {
+		}, true); err != nil {
 		t.Error(err)
 	}
 
@@ -514,11 +438,10 @@ func TestAccountsActionSetBalance(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	args := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
+	if err := dm.SetAccount(context.Background(),
+		&utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
 			Opts:   map[string]any{},
@@ -548,67 +471,9 @@ func TestAccountsActionSetBalance(t *testing.T) {
 					Weight: 10,
 				},
 			},
-		},
-		APIOpts: nil,
+		}, true); err != nil {
+		t.Errorf("expected <%+v>,\nreceived <%+v>", nil, err)
 	}
-
-	var setRply string
-	err := admS.SetAccount(context.Background(), args, &setRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	if !reflect.DeepEqual(setRply, `OK`) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
-	}
-	var getRply utils.Account
-	err = admS.GetAccount(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "",
-				ID:     "test_ID1",
-			},
-			APIOpts: nil,
-		}, &getRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	expectedGet := utils.Account{
-		Tenant: "cgrates.org",
-		ID:     "test_ID1",
-		Opts:   map[string]any{},
-		Balances: map[string]*utils.Balance{
-			"VoiceBalance": {
-				ID: "VoiceBalance",
-				Weights: utils.DynamicWeights{
-					{
-						FilterIDs: nil,
-						Weight:    12,
-					},
-				},
-				Type: "*abstract",
-				Opts: map[string]any{
-					"Destination": 10,
-				},
-				CostIncrements: []*utils.CostIncrement{
-					{
-						RecurrentFee: utils.NewDecimal(1, 1),
-						Increment:    utils.NewDecimal(1, 1),
-					},
-				},
-				Units: utils.NewDecimal(0, 0),
-			},
-		},
-		Weights: utils.DynamicWeights{
-			{
-				FilterIDs: nil,
-				Weight:    10,
-			},
-		},
-	}
-	if !reflect.DeepEqual(getRply, expectedGet) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
-	}
-
 	accS := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 
 	var rpEv utils.EventCharges
@@ -620,8 +485,7 @@ func TestAccountsActionSetBalance(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	err = accS.V1DebitAbstracts(context.Background(), ev, &rpEv)
-	if err != nil {
+	if err := accS.V1DebitAbstracts(context.Background(), ev, &rpEv); err != nil {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 
@@ -700,11 +564,11 @@ func TestAccountsDebitAbstracts(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
+	accS := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 	engine.Cache = newCache
-	args := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
+	err := dm.SetAccount(context.Background(),
+		&utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
 			Opts:   map[string]any{},
@@ -734,68 +598,10 @@ func TestAccountsDebitAbstracts(t *testing.T) {
 					Weight: 10,
 				},
 			},
-		},
-		APIOpts: nil,
-	}
-
-	var setRply string
-	err := admS.SetAccount(context.Background(), args, &setRply)
+		}, true)
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(setRply, `OK`) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
-	}
-	var getRply utils.Account
-	err = admS.GetAccount(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "",
-				ID:     "test_ID1",
-			},
-			APIOpts: nil,
-		}, &getRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	expectedGet := utils.Account{
-		Tenant: "cgrates.org",
-		ID:     "test_ID1",
-		Opts:   map[string]any{},
-		Balances: map[string]*utils.Balance{
-			"VoiceBalance": {
-				ID: "VoiceBalance",
-				Weights: utils.DynamicWeights{
-					{
-						FilterIDs: nil,
-						Weight:    12,
-					},
-				},
-				Type: "*abstract",
-				Opts: map[string]any{
-					"Destination": 10,
-				},
-				Units: utils.NewDecimal(0, 0),
-				CostIncrements: []*utils.CostIncrement{
-					{
-						RecurrentFee: utils.NewDecimal(1, 0),
-						Increment:    utils.NewDecimal(1, 1),
-					},
-				},
-			},
-		},
-		Weights: utils.DynamicWeights{
-			{
-				FilterIDs: nil,
-				Weight:    10,
-			},
-		},
-	}
-	if !reflect.DeepEqual(getRply, expectedGet) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
-	}
-
-	accS := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 
 	var rpEv utils.EventCharges
 	ev := &utils.CGREvent{
@@ -886,11 +692,10 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	args := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
+	err := dm.SetAccount(context.Background(),
+		&utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
 			Opts:   map[string]any{},
@@ -920,65 +725,10 @@ func TestAccountsMaxAbstracts(t *testing.T) {
 					Weight: 10,
 				},
 			},
-		},
-		APIOpts: nil,
-	}
-
-	var setRply string
-	err := admS.SetAccount(context.Background(), args, &setRply)
+		}, true)
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	} else if setRply != utils.OK {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
+		t.Fatal(err)
 	}
-	var getRply utils.Account
-	err = admS.GetAccount(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				ID: "test_ID1",
-			},
-			APIOpts: map[string]any{},
-		}, &getRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	expectedGet := utils.Account{
-		Tenant: "cgrates.org",
-		ID:     "test_ID1",
-		Opts:   map[string]any{},
-		Balances: map[string]*utils.Balance{
-			"VoiceBalance": {
-				ID: "VoiceBalance",
-				Weights: utils.DynamicWeights{
-					{
-						FilterIDs: nil,
-						Weight:    12,
-					},
-				},
-				Type: "*abstract",
-				Opts: map[string]any{
-					"Destination": 10,
-				},
-				Units: utils.NewDecimal(0, 0),
-				CostIncrements: []*utils.CostIncrement{
-					{
-						RecurrentFee: utils.NewDecimal(1, 1),
-						Increment:    utils.NewDecimal(1, 1),
-					},
-				},
-			},
-		},
-		Weights: utils.DynamicWeights{
-			{
-				FilterIDs: nil,
-				Weight:    10,
-			},
-		},
-	}
-	if !reflect.DeepEqual(getRply, expectedGet) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
-	}
-
 	cfg.AccountSCfg().RateSConns = []string{"*internal"}
 	accS := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 
@@ -1072,11 +822,10 @@ func TestAccountsAccountsForEvent(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := apis.NewAdminSv1(cfg, dm, connMgr, nil, nil)
 	newCache := engine.NewCacheS(cfg, dm, connMgr, nil)
 	engine.Cache = newCache
-	args := &utils.AccountWithAPIOpts{
-		Account: &utils.Account{
+	err := dm.SetAccount(context.Background(),
+		&utils.Account{
 			Tenant: "cgrates.org",
 			ID:     "test_ID1",
 			Opts:   map[string]any{},
@@ -1100,61 +849,10 @@ func TestAccountsAccountsForEvent(t *testing.T) {
 					Weight: 10,
 				},
 			},
-		},
-		APIOpts: nil,
-	}
-
-	var setRply string
-	err := admS.SetAccount(context.Background(), args, &setRply)
+		}, true)
 	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
+		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(setRply, `OK`) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", `OK`, utils.ToJSON(setRply))
-	}
-	var getRply utils.Account
-	err = admS.GetAccount(context.Background(),
-		&utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "",
-				ID:     "test_ID1",
-			},
-			APIOpts: nil,
-		}, &getRply)
-	if err != nil {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
-	}
-	expectedGet := utils.Account{
-		Tenant: "cgrates.org",
-		ID:     "test_ID1",
-		Opts:   map[string]any{},
-		Balances: map[string]*utils.Balance{
-			"VoiceBalance": {
-				ID: "VoiceBalance",
-				Weights: utils.DynamicWeights{
-					{
-						FilterIDs: nil,
-						Weight:    12,
-					},
-				},
-				Type: "*abstract",
-				Opts: map[string]any{
-					"Destination": 10,
-				},
-				Units: utils.NewDecimal(0, 0),
-			},
-		},
-		Weights: utils.DynamicWeights{
-			{
-				FilterIDs: nil,
-				Weight:    10,
-			},
-		},
-	}
-	if !reflect.DeepEqual(getRply, expectedGet) {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(expectedGet), utils.ToJSON(getRply))
-	}
-
 	accS := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
 
 	rpEv := make([]*utils.Account, 0)

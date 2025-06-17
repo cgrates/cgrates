@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 
+	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -305,4 +306,32 @@ func (admS *AdminSv1) RemoveRateProfile(ctx *context.Context, arg *utils.TenantI
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewRateSv1 initializes the RateSv1 object.
+func NewRateSv1(rtS *rates.RateS) *RateSv1 {
+	return &RateSv1{rtS: rtS}
+}
+
+// RateSv1 represents the RPC object to register for rates v1 APIs.
+type RateSv1 struct {
+	rtS *rates.RateS
+}
+
+// V1RateProfilesForEvent will be called to list the RateProfilesIDs that are matching the event
+func (rtS *RateSv1) V1RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
+	return rtS.rtS.V1RateProfilesForEvent(ctx, args, rpIDs)
+}
+
+// RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
+func (rS *RateSv1) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
+	return rS.rtS.V1RateProfileRatesForEvent(ctx, args, rtIDs)
+}
+
+// V1CostForEvent calculates the cost for an event using matching rate
+// profiles. If a higher priority profile fails, it tries the next matching
+// profile. This continues until a valid cost is found or all profiles are
+// exhausted.
+func (rS *RateSv1) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
+	return rS.rtS.V1CostForEvent(ctx, args, rpCost)
 }
