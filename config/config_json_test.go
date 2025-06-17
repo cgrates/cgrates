@@ -761,18 +761,20 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 
 func TestRadiusAgentJsonCfg(t *testing.T) {
 	eCfg := &RadiusAgentJsonCfg{
-		Enabled:     utils.BoolPointer(false),
-		Listen_net:  utils.StringPointer("udp"),
-		Listen_auth: utils.StringPointer("127.0.0.1:1812"),
-		Listen_acct: utils.StringPointer("127.0.0.1:1813"),
-		Client_secrets: map[string]string{
+		Enabled:    utils.BoolPointer(false),
+		ListenNet:  utils.StringPointer("udp"),
+		ListenAuth: utils.StringPointer("127.0.0.1:1812"),
+		ListenAcct: utils.StringPointer("127.0.0.1:1813"),
+		ClientSecrets: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
-		Client_dictionaries: map[string]string{
+		ClientDictionaries: map[string]string{
 			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
 		},
-		Sessions_conns:     &[]string{utils.MetaInternal},
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		SessionSConns:     &[]string{utils.MetaInternal},
+		StatSConns:        &[]string{},
+		ThresholdSConns:   &[]string{},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -782,8 +784,8 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 	if err := dfCgrJSONCfg.GetSection(context.Background(), RadiusAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		rcv := *cfg.Request_processors
-		t.Errorf("Received: %+v", rcv)
+		rcv := *cfg.RequestProcessors
+		t.Errorf("Received: %+v", utils.ToJSON(rcv))
 	}
 }
 
