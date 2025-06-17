@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/ips"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -174,4 +175,39 @@ func (s *AdminSv1) RemoveIPProfile(ctx *context.Context, arg *utils.TenantIDWith
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewIPSv1 initializes the IPSv1 object.
+func NewIPSv1(ipS *ips.IPService) *IPSv1 {
+	return &IPSv1{ips: ipS}
+}
+
+// IPSv1 represents the RPC object to register for ips v1 APIs.
+type IPSv1 struct {
+	ips *ips.IPService
+}
+
+// V1GetIPAllocationsForEvent returns active IPs matching the event.
+func (ipS *IPSv1) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils.CGREvent, reply *ips.IPAllocationsList) (err error) {
+	return ipS.V1GetIPAllocationsForEvent(ctx, args, reply)
+}
+
+// V1AuthorizeIP queries service to find if an Usage is allowed
+func (ipS *IPSv1) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	return ipS.ips.V1AuthorizeIP(ctx, args, reply)
+}
+
+// V1AllocateIP is called when an IP requires allocation.
+func (ipS *IPSv1) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	return ipS.ips.V1AllocateIP(ctx, args, reply)
+}
+
+// V1ReleaseIP is called when we need to clear an allocation
+func (ipS *IPSv1) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+	return ipS.ips.V1ReleaseIP(ctx, args, reply)
+}
+
+// V1GetIPAllocations returns all IP allocations for a tenant.
+func (ipS *IPSv1) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) (err error) {
+	return ipS.ips.V1GetIPAllocations(ctx, arg, reply)
 }

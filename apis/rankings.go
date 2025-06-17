@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/rankings"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -172,4 +173,34 @@ func (adms *AdminSv1) RemoveRankingProfile(ctx *context.Context, args *utils.Ten
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewRankingSv1 initializes the RankingSv1 object.
+func NewRankingSv1(rnkS *rankings.RankingS) *RankingSv1 {
+	return &RankingSv1{rnkS: rnkS}
+}
+
+// RankingSv1 represents the RPC object to register for rankings v1 APIs.
+type RankingSv1 struct {
+	rnkS *rankings.RankingS
+}
+
+// V1ScheduleQueries manually schedules or reschedules ranking queries.
+func (rnkS *RankingSv1) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
+	return rnkS.rnkS.V1ScheduleQueries(ctx, args, scheduled)
+}
+
+// V1GetRanking retrieves ranking metrics with optional filtering.
+func (rnkS *RankingSv1) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, retRanking *utils.Ranking) (err error) {
+	return rnkS.rnkS.V1GetRanking(ctx, arg, retRanking)
+}
+
+// V1GetSchedule retrieves information about currently scheduled rankings.
+func (rnkS *RankingSv1) V1GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
+	return rnkS.rnkS.V1GetSchedule(ctx, args, schedRankings)
+}
+
+// V1GetRankingSummary retrieves the most recent ranking summary.
+func (rnkS *RankingSv1) V1GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
+	return rnkS.rnkS.V1GetRankingSummary(ctx, arg, reply)
 }

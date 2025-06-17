@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -172,4 +173,24 @@ func (adms *AdminSv1) RemoveRouteProfile(ctx *context.Context, args *utils.Tenan
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewRouteSv1 initializes the RouteSv1 object.
+func NewRouteSv1(rpS *routes.RouteS) *RouteSv1 {
+	return &RouteSv1{rpS: rpS}
+}
+
+// RouteSv1 represents the RPC object to register for routes v1 APIs.
+type RouteSv1 struct {
+	rpS *routes.RouteS
+}
+
+// V1GetRoutes returns the list of valid routes.
+func (rpS *RouteSv1) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *routes.SortedRoutesList) (err error) {
+	return rpS.rpS.V1GetRoutes(ctx, args, reply)
+}
+
+// V1GetRoutesList returns the list of valid routes.
+func (rpS *RouteSv1) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+	return rpS.rpS.V1GetRoutesList(ctx, args, reply)
 }

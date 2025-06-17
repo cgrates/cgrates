@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -175,4 +176,24 @@ func (admS *AdminSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.Te
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewAttributeSv1 initializes the AttributeSv1 object.
+func NewAttributeSv1(atrs *attributes.AttributeS) *AttributeSv1 {
+	return &AttributeSv1{atrs: atrs}
+}
+
+// AttributeSv1 represents the RPC object to register for attributes v1 APIs.
+type AttributeSv1 struct {
+	atrs *attributes.AttributeS
+}
+
+// V1GetAttributeForEvent returns the AttributeProfile that matches the event
+func (atrS *AttributeSv1) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent, attrPrf *utils.APIAttributeProfile) (err error) {
+	return atrS.V1GetAttributeForEvent(ctx, args, attrPrf)
+}
+
+// V1ProcessEvent proccess the event and returns the result
+func (atrS *AttributeSv1) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, attrEvntRpl *attributes.AttrSProcessEventReply) (err error) {
+	return atrS.V1ProcessEvent(ctx, args, attrEvntRpl)
 }
