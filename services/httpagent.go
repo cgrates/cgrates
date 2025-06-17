@@ -69,9 +69,9 @@ func (ha *HTTPAgent) Start(_ *utils.SyncedChan, registry *servmanager.ServiceReg
 	ha.started = true
 	for _, agntCfg := range ha.cfg.HTTPAgentCfg() {
 		cl.RegisterHttpHandler(agntCfg.URL,
-			agents.NewHTTPAgent(cm, agntCfg.SessionSConns, fs,
-				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
-				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
+			agents.NewHTTPAgent(cm, agntCfg.SessionSConns, agntCfg.StatSConns, agntCfg.ThresholdSConns,
+				fs, ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload, agntCfg.ReplyPayload,
+				agntCfg.RequestProcessors))
 	}
 	return
 }
