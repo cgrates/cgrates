@@ -30,6 +30,8 @@ type ERsCfg struct {
 	Enabled          bool
 	SessionSConns    []string
 	EEsConns         []string
+	StatSConns       []string
+	ThresholdSConns  []string
 	ConcurrentEvents int
 	Readers          []*EventReaderCfg
 	PartialCacheTTL  time.Duration
@@ -38,8 +40,8 @@ type ERsCfg struct {
 // ReaderCfg iterates over the Readers slice and returns the reader
 // configuration associated with the specified "id". If none were found, the
 // method will return nil.
-func (erS *ERsCfg) ReaderCfg(id string) *EventReaderCfg {
-	for _, rdr := range erS.Readers {
+func (c *ERsCfg) ReaderCfg(id string) *EventReaderCfg {
+	for _, rdr := range c.Readers {
 		if rdr.ID == id {
 			return rdr
 		}
@@ -47,55 +49,46 @@ func (erS *ERsCfg) ReaderCfg(id string) *EventReaderCfg {
 	return nil
 }
 
-func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
-	if jsnCfg == nil {
+func (c *ERsCfg) loadFromJSONCfg(jc *ERsJsonCfg, msgTemplates map[string][]*FCTemplate, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
+	if jc == nil {
 		return
 	}
-	if jsnCfg.Enabled != nil {
-		erS.Enabled = *jsnCfg.Enabled
+	if jc.Enabled != nil {
+		c.Enabled = *jc.Enabled
 	}
-
-	if jsnCfg.Sessions_conns != nil {
-		erS.SessionSConns = make([]string, 0, len(*jsnCfg.Sessions_conns))
-		for _, fID := range *jsnCfg.Sessions_conns {
+	if jc.SessionSConns != nil {
+		c.SessionSConns = make([]string, 0, len(*jc.SessionSConns))
+		for _, fID := range *jc.SessionSConns {
 
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if fID != utils.MetaInternal {
-				erS.SessionSConns = append(erS.SessionSConns, fID)
+				c.SessionSConns = append(c.SessionSConns, fID)
 			} else {
-				erS.SessionSConns = append(erS.SessionSConns, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS))
+				c.SessionSConns = append(c.SessionSConns, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS))
 			}
 		}
 	}
-	if jsnCfg.Ees_conns != nil {
-		erS.EEsConns = make([]string, 0, len(*jsnCfg.Ees_conns))
-		for _, fID := range *jsnCfg.Ees_conns {
-
-			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
-			if fID != utils.MetaInternal {
-				erS.EEsConns = append(erS.EEsConns, fID)
-			} else {
-				erS.EEsConns = append(erS.EEsConns, utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs))
-			}
-		}
+	if jc.EEsConns != nil {
+		c.EEsConns = tagInternalConns(*jc.EEsConns, utils.MetaEEs)
 	}
-
-	if jsnCfg.Concurrent_events != nil {
-		erS.ConcurrentEvents = *jsnCfg.Concurrent_events
-		if erS.ConcurrentEvents < 1 {
-			erS.ConcurrentEvents = 1
-		}
+	if jc.StatSConns != nil {
+		c.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
 	}
-
-	if jsnCfg.Partial_cache_ttl != nil {
-		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_cache_ttl); err != nil {
+	if jc.ThresholdSConns != nil {
+		c.ThresholdSConns = tagInternalConns(*jc.ThresholdSConns, utils.MetaThresholds)
+	}
+	if jc.ConcurrentEvents != nil {
+		c.ConcurrentEvents = max(*jc.ConcurrentEvents, 1)
+	}
+	if jc.PartialCacheTTL != nil {
+		if c.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jc.PartialCacheTTL); err != nil {
 			return
 		}
 	}
-	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates, sep, dfltRdrCfg)
+	return c.appendERsReaders(jc.Readers, msgTemplates, sep, dfltRdrCfg)
 }
 
-func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string,
+func (c *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate, sep string,
 	dfltRdrCfg *EventReaderCfg) (err error) {
 	if jsnReaders == nil {
 		return
@@ -103,7 +96,7 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 	for _, jsnReader := range *jsnReaders {
 		var rdr *EventReaderCfg
 		if jsnReader.Id != nil {
-			for _, reader := range erS.Readers {
+			for _, reader := range c.Readers {
 				if reader.ID == *jsnReader.Id {
 					rdr = reader
 					break
@@ -117,7 +110,7 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 				rdr = new(EventReaderCfg)
 				rdr.Opts = &EventReaderOpts{}
 			}
-			erS.Readers = append(erS.Readers, rdr)
+			c.Readers = append(c.Readers, rdr)
 		}
 		if err := rdr.loadFromJSONCfg(jsnReader, msgTemplates, sep); err != nil {
 			return err
@@ -128,61 +121,55 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 }
 
 // Clone returns a deep copy of ERsCfg
-func (erS *ERsCfg) Clone() (cln *ERsCfg) {
-	cln = &ERsCfg{
-		Enabled:          erS.Enabled,
-		SessionSConns:    slices.Clone(erS.SessionSConns),
-		EEsConns:         slices.Clone(erS.EEsConns),
-		Readers:          make([]*EventReaderCfg, len(erS.Readers)),
-		ConcurrentEvents: erS.ConcurrentEvents,
-		PartialCacheTTL:  erS.PartialCacheTTL,
+func (c *ERsCfg) Clone() *ERsCfg {
+	clone := &ERsCfg{
+		Enabled:          c.Enabled,
+		SessionSConns:    slices.Clone(c.SessionSConns),
+		EEsConns:         slices.Clone(c.EEsConns),
+		StatSConns:       slices.Clone(c.StatSConns),
+		ThresholdSConns:  slices.Clone(c.ThresholdSConns),
+		Readers:          make([]*EventReaderCfg, len(c.Readers)),
+		ConcurrentEvents: c.ConcurrentEvents,
+		PartialCacheTTL:  c.PartialCacheTTL,
 	}
-	for idx, rdr := range erS.Readers {
-		cln.Readers[idx] = rdr.Clone()
+	for idx, rdr := range c.Readers {
+		clone.Readers[idx] = rdr.Clone()
 	}
-	return
+	return clone
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (erS *ERsCfg) AsMapInterface(separator string) (initialMP map[string]any) {
-	initialMP = map[string]any{
-		utils.EnabledCfg:          erS.Enabled,
-		utils.ConcurrentEventsCfg: erS.ConcurrentEvents,
+func (c *ERsCfg) AsMapInterface(sep string) map[string]any {
+	m := map[string]any{
+		utils.EnabledCfg:          c.Enabled,
+		utils.EEsConnsCfg:         stripInternalConns(c.EEsConns),
+		utils.StatSConnsCfg:       stripInternalConns(c.StatSConns),
+		utils.ThresholdSConnsCfg:  stripInternalConns(c.ThresholdSConns),
+		utils.ConcurrentEventsCfg: c.ConcurrentEvents,
 		utils.PartialCacheTTLCfg:  "0",
 	}
-	if erS.PartialCacheTTL != 0 {
-		initialMP[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()
+	if c.PartialCacheTTL != 0 {
+		m[utils.PartialCacheTTLCfg] = c.PartialCacheTTL.String()
 	}
-	if erS.SessionSConns != nil {
-		sessionSConns := make([]string, 0, len(erS.SessionSConns))
-		for _, item := range erS.SessionSConns {
+	if c.SessionSConns != nil {
+		sessionSConns := make([]string, 0, len(c.SessionSConns))
+		for _, item := range c.SessionSConns {
 			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
 				sessionSConns = append(sessionSConns, utils.MetaInternal)
 			} else {
 				sessionSConns = append(sessionSConns, item)
 			}
 		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		m[utils.SessionSConnsCfg] = sessionSConns
 	}
-	if erS.EEsConns != nil {
-		eesConns := make([]string, 0, len(erS.EEsConns))
-		for _, item := range erS.EEsConns {
-			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs) {
-				eesConns = append(eesConns, utils.MetaInternal)
-			} else {
-				eesConns = append(eesConns, item)
-			}
+	if c.Readers != nil {
+		readers := make([]map[string]any, 0, len(c.Readers))
+		for _, item := range c.Readers {
+			readers = append(readers, item.AsMapInterface(sep))
 		}
-		initialMP[utils.EEsConnsCfg] = eesConns
+		m[utils.ReadersCfg] = readers
 	}
-	if erS.Readers != nil {
-		readers := make([]map[string]any, 0, len(erS.Readers))
-		for _, item := range erS.Readers {
-			readers = append(readers, item.AsMapInterface(separator))
-		}
-		initialMP[utils.ReadersCfg] = readers
-	}
-	return
+	return m
 }
 
 type AMQPROpts struct {

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"slices"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -30,6 +31,8 @@ type SIPAgentCfg struct {
 	Listen              string
 	ListenNet           string // udp or tcp
 	SessionSConns       []string
+	StatSConns          []string
+	ThresholdSConns     []string
 	Timezone            string
 	RetransmissionTimer time.Duration // timeout replies if not reaching back
 	RequestProcessors   []*RequestProcessor
@@ -42,8 +45,8 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 	if jsnCfg.Enabled != nil {
 		sa.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Listen_net != nil {
-		sa.ListenNet = *jsnCfg.Listen_net
+	if jsnCfg.ListenNet != nil {
+		sa.ListenNet = *jsnCfg.ListenNet
 	}
 	if jsnCfg.Listen != nil {
 		sa.Listen = *jsnCfg.Listen
@@ -51,9 +54,9 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 	if jsnCfg.Timezone != nil {
 		sa.Timezone = *jsnCfg.Timezone
 	}
-	if jsnCfg.Sessions_conns != nil {
-		sa.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
-		for idx, connID := range *jsnCfg.Sessions_conns {
+	if jsnCfg.SessionSConns != nil {
+		sa.SessionSConns = make([]string, len(*jsnCfg.SessionSConns))
+		for idx, connID := range *jsnCfg.SessionSConns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			sa.SessionSConns[idx] = connID
 			if connID == utils.MetaInternal {
@@ -61,13 +64,19 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 			}
 		}
 	}
-	if jsnCfg.Retransmission_timer != nil {
-		if sa.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.Retransmission_timer); err != nil {
+	if jsnCfg.StatSConns != nil {
+		sa.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+	}
+	if jsnCfg.ThresholdSConns != nil {
+		sa.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+	}
+	if jsnCfg.RetransmissionTimer != nil {
+		if sa.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.RetransmissionTimer); err != nil {
 			return err
 		}
 	}
-	if jsnCfg.Request_processors != nil {
-		for _, reqProcJsn := range *jsnCfg.Request_processors {
+	if jsnCfg.RequestProcessors != nil {
+		for _, reqProcJsn := range *jsnCfg.RequestProcessors {
 			rp := new(RequestProcessor)
 			var haveID bool
 			for _, rpSet := range sa.RequestProcessors {
@@ -89,21 +98,21 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg, sep string) (err
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]any) {
-	initialMP = map[string]any{
-		utils.EnabledCfg:             sa.Enabled,
-		utils.ListenCfg:              sa.Listen,
-		utils.ListenNetCfg:           sa.ListenNet,
-		utils.TimezoneCfg:            sa.Timezone,
-		utils.RetransmissionTimerCfg: sa.RetransmissionTimer,
-	}
-
+func (sa *SIPAgentCfg) AsMapInterface(separator string) map[string]any {
 	requestProcessors := make([]map[string]any, len(sa.RequestProcessors))
 	for i, item := range sa.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface(separator)
 	}
-	initialMP[utils.RequestProcessorsCfg] = requestProcessors
-
+	m := map[string]any{
+		utils.EnabledCfg:             sa.Enabled,
+		utils.ListenCfg:              sa.Listen,
+		utils.ListenNetCfg:           sa.ListenNet,
+		utils.StatSConnsCfg:          stripInternalConns(sa.StatSConns),
+		utils.ThresholdSConnsCfg:     stripInternalConns(sa.ThresholdSConns),
+		utils.TimezoneCfg:            sa.Timezone,
+		utils.RetransmissionTimerCfg: sa.RetransmissionTimer,
+		utils.RequestProcessorsCfg:   requestProcessors,
+	}
 	if sa.SessionSConns != nil {
 		sessionSConns := make([]string, len(sa.SessionSConns))
 		for i, item := range sa.SessionSConns {
@@ -112,29 +121,28 @@ func (sa *SIPAgentCfg) AsMapInterface(separator string) (initialMP map[string]an
 				sessionSConns[i] = utils.MetaInternal
 			}
 		}
-		initialMP[utils.SessionSConnsCfg] = sessionSConns
+		m[utils.SessionSConnsCfg] = sessionSConns
 	}
-	return
+	return m
 }
 
 // Clone returns a deep copy of SIPAgentCfg
-func (sa SIPAgentCfg) Clone() (cln *SIPAgentCfg) {
-	cln = &SIPAgentCfg{
+func (sa SIPAgentCfg) Clone() *SIPAgentCfg {
+	clone := &SIPAgentCfg{
 		Enabled:             sa.Enabled,
 		Listen:              sa.Listen,
 		ListenNet:           sa.ListenNet,
+		SessionSConns:       slices.Clone(sa.SessionSConns),
+		StatSConns:          slices.Clone(sa.StatSConns),
+		ThresholdSConns:     slices.Clone(sa.ThresholdSConns),
 		Timezone:            sa.Timezone,
 		RetransmissionTimer: sa.RetransmissionTimer,
 	}
-	if sa.SessionSConns != nil {
-		cln.SessionSConns = make([]string, len(sa.SessionSConns))
-		copy(cln.SessionSConns, sa.SessionSConns)
-	}
 	if sa.RequestProcessors != nil {
-		cln.RequestProcessors = make([]*RequestProcessor, len(sa.RequestProcessors))
+		clone.RequestProcessors = make([]*RequestProcessor, len(sa.RequestProcessors))
 		for i, rp := range sa.RequestProcessors {
-			cln.RequestProcessors[i] = rp.Clone()
+			clone.RequestProcessors[i] = rp.Clone()
 		}
 	}
-	return
+	return clone
 }

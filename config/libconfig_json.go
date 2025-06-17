@@ -227,12 +227,14 @@ type CdrsJsonCfg struct {
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
-	Enabled           *bool
-	Sessions_conns    *[]string
-	Ees_conns         *[]string
-	Concurrent_events *int
-	Readers           *[]*EventReaderJsonCfg
-	Partial_cache_ttl *string
+	Enabled          *bool                  `json:"enabled"`
+	SessionSConns    *[]string              `json:"sessions_conns"`
+	EEsConns         *[]string              `json:"ees_conns"`
+	StatSConns       *[]string              `json:"stats_conns"`
+	ThresholdSConns  *[]string              `json:"thresholds_conns"`
+	ConcurrentEvents *int                   `json:"concurrent_events"`
+	Readers          *[]*EventReaderJsonCfg `json:"readers"`
+	PartialCacheTTL  *string                `json:"partial_cache_ttl"`
 }
 
 type EventReaderOptsJson struct {
@@ -937,13 +939,15 @@ type STIRJsonCfg struct {
 
 // SIPAgentJsonCfg
 type SIPAgentJsonCfg struct {
-	Enabled              *bool
-	Listen               *string
-	Listen_net           *string
-	Sessions_conns       *[]string
-	Timezone             *string
-	Retransmission_timer *string
-	Request_processors   *[]*ReqProcessorJsnCfg
+	Enabled             *bool                  `json:"enabled"`
+	Listen              *string                `json:"listen"`
+	ListenNet           *string                `json:"listen_net"`
+	SessionSConns       *[]string              `json:"sessions_conns"`
+	StatSConns          *[]string              `json:"stats_conns"`
+	ThresholdSConns     *[]string              `json:"thresholds_conns"`
+	Timezone            *string                `json:"timezone"`
+	RetransmissionTimer *string                `json:"retransmission_timer"`
+	RequestProcessors   *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 type JanusAgentJsonCfg struct {

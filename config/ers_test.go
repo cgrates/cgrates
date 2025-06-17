@@ -30,6 +30,9 @@ func TestERSClone(t *testing.T) {
 "ers": {									
 	"enabled": true,						
 	"sessions_conns":["*internal"],			
+	"ees_conns":["*internal"],			
+	"stats_conns":["*internal"],			
+	"thresholds_conns":["*internal"],			
 	"readers": [
          {
             "id": "file_reader1",
@@ -62,7 +65,9 @@ func TestERSClone(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:          true,
 		SessionSConns:    []string{"*internal:*sessions"},
-		EEsConns:         []string{},
+		EEsConns:         []string{"*internal:*ees"},
+		StatSConns:       []string{"*internal:*stats"},
+		ThresholdSConns:  []string{"*internal:*thresholds"},
 		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
@@ -213,7 +218,7 @@ func TestEventReaderloadFromJsonCase1(t *testing.T) {
 	}
 	cfgJson := &ERsJsonCfg{
 
-		Partial_cache_ttl: utils.StringPointer("test"),
+		PartialCacheTTL: utils.StringPointer("test"),
 	}
 
 	if err := jsoncfg.ersCfg.loadFromJSONCfg(cfgJson, jsoncfg.templates, jsoncfg.generalCfg.RSRSep, jsoncfg.dfltEvRdr); err == nil {
@@ -240,7 +245,9 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
 		Enabled:          true,
 		SessionSConns:    []string{"conn1", "conn3"},
-		EEsConns:         []string{},
+		EEsConns:         []string{"conn1", "conn3"},
+		StatSConns:       []string{"conn1", "conn3"},
+		ThresholdSConns:  []string{"conn1", "conn3"},
 		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
@@ -373,6 +380,9 @@ func TestERSLoadFromjsonCfg(t *testing.T) {
 "ers": {
 	"enabled": true,
 	"sessions_conns":["conn1","conn3"],
+	"ees_conns":["conn1","conn3"],
+	"stats_conns":["conn1","conn3"],
+	"thresholds_conns":["conn1","conn3"],
 	"readers": [
 		{
 			"id": "file_reader1",
@@ -466,9 +476,9 @@ func TestERSloadFromJsonCase2(t *testing.T) {
 
 func TestERSloadFromJsonCase3(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:           utils.BoolPointer(true),
-		Sessions_conns:    &[]string{"*conn1"},
-		Concurrent_events: utils.IntPointer(1),
+		Enabled:          utils.BoolPointer(true),
+		SessionSConns:    &[]string{"*conn1"},
+		ConcurrentEvents: utils.IntPointer(1),
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                     utils.StringPointer("file_reader1"),
@@ -499,6 +509,8 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 		Enabled:          true,
 		SessionSConns:    []string{"*conn1"},
 		EEsConns:         []string{},
+		StatSConns:       []string{},
+		ThresholdSConns:  []string{},
 		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
@@ -630,8 +642,8 @@ func TestERSloadFromJsonCase3(t *testing.T) {
 
 func TestERSloadFromJsonCase4(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{"*conn1"},
+		Enabled:       utils.BoolPointer(true),
+		SessionSConns: &[]string{"*conn1"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                     utils.StringPointer("file_reader1"),
@@ -662,6 +674,8 @@ func TestERSloadFromJsonCase4(t *testing.T) {
 		Enabled:          true,
 		SessionSConns:    []string{"*conn1"},
 		EEsConns:         []string{},
+		StatSConns:       []string{},
+		ThresholdSConns:  []string{},
 		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
@@ -818,6 +832,8 @@ func TestEventReaderSameID(t *testing.T) {
 		Enabled:          true,
 		SessionSConns:    []string{"conn1"},
 		EEsConns:         []string{},
+		StatSConns:       []string{},
+		ThresholdSConns:  []string{},
 		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
@@ -994,6 +1010,8 @@ func TestERsCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EnabledCfg:          true,
 		utils.SessionSConnsCfg:    []string{"conn1", "conn3"},
 		utils.EEsConnsCfg:         []string{},
+		utils.StatSConnsCfg:       []string{},
+		utils.ThresholdSConnsCfg:  []string{},
 		utils.ConcurrentEventsCfg: 1,
 		utils.ReadersCfg: []map[string]any{
 			{
@@ -1087,6 +1105,9 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	"ers": {
 		"enabled": true,
 		"sessions_conns":["conn1","conn3"],
+		"ees_conns":["conn1","conn3"],
+		"stats_conns":["conn1","conn3"],
+		"thresholds_conns":["conn1","conn3"],
 		"readers": [
 			{
                 "id": "file_reader1",
@@ -1141,7 +1162,9 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 	eMap := map[string]any{
 		utils.EnabledCfg:          true,
 		utils.SessionSConnsCfg:    []string{"conn1", "conn3"},
-		utils.EEsConnsCfg:         []string{},
+		utils.EEsConnsCfg:         []string{"conn1", "conn3"},
+		utils.StatSConnsCfg:       []string{"conn1", "conn3"},
+		utils.ThresholdSConnsCfg:  []string{"conn1", "conn3"},
 		utils.ConcurrentEventsCfg: 1,
 		utils.ReadersCfg: []map[string]any{
 			{
@@ -1265,8 +1288,8 @@ func TestERSCfgAsMapInterfaceCase2(t *testing.T) {
 
 func TestERsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &ERsJsonCfg{
-		Enabled:        utils.BoolPointer(true),
-		Sessions_conns: &[]string{"*conn1"},
+		Enabled:       utils.BoolPointer(true),
+		SessionSConns: &[]string{"*conn1"},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				Id:                     utils.StringPointer("file_reader1"),
@@ -1298,6 +1321,8 @@ func TestERsloadFromJsonCfg(t *testing.T) {
 		Enabled:          true,
 		SessionSConns:    []string{"*conn1"},
 		EEsConns:         []string{},
+		StatSConns:       []string{},
+		ThresholdSConns:  []string{},
 		ConcurrentEvents: 1,
 		Readers: []*EventReaderCfg{
 			{
