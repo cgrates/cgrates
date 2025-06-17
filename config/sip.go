@@ -32,6 +32,8 @@ type SIPAgentCfg struct {
 	Listen              string
 	ListenNet           string // udp or tcp
 	SessionSConns       []string
+	StatSConns          []string
+	ThresholdSConns     []string
 	Timezone            string
 	RetransmissionTimer time.Duration // timeout replies if not reaching back
 	RequestProcessors   []*RequestProcessor
@@ -53,8 +55,8 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg) (err error) {
 	if jsnCfg.Enabled != nil {
 		sa.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Listen_net != nil {
-		sa.ListenNet = *jsnCfg.Listen_net
+	if jsnCfg.ListenNet != nil {
+		sa.ListenNet = *jsnCfg.ListenNet
 	}
 	if jsnCfg.Listen != nil {
 		sa.Listen = *jsnCfg.Listen
@@ -62,36 +64,40 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg) (err error) {
 	if jsnCfg.Timezone != nil {
 		sa.Timezone = *jsnCfg.Timezone
 	}
-	if jsnCfg.Sessions_conns != nil {
-		sa.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+	if jsnCfg.SessionSConns != nil {
+		sa.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
 	}
-	if jsnCfg.Retransmission_timer != nil {
-		if sa.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.Retransmission_timer); err != nil {
+	if jsnCfg.StatSConns != nil {
+		sa.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+	}
+	if jsnCfg.ThresholdSConns != nil {
+		sa.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+	}
+	if jsnCfg.RetransmissionTimer != nil {
+		if sa.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.RetransmissionTimer); err != nil {
 			return err
 		}
 	}
-	sa.RequestProcessors, err = appendRequestProcessors(sa.RequestProcessors, jsnCfg.Request_processors)
+	sa.RequestProcessors, err = appendRequestProcessors(sa.RequestProcessors, jsnCfg.RequestProcessors)
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
 func (sa SIPAgentCfg) AsMapInterface() any {
-	mp := map[string]any{
-		utils.EnabledCfg:             sa.Enabled,
-		utils.ListenCfg:              sa.Listen,
-		utils.ListenNetCfg:           sa.ListenNet,
-		utils.TimezoneCfg:            sa.Timezone,
-		utils.RetransmissionTimerCfg: sa.RetransmissionTimer.String(),
-	}
-
 	requestProcessors := make([]map[string]any, len(sa.RequestProcessors))
 	for i, item := range sa.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface()
 	}
-	mp[utils.RequestProcessorsCfg] = requestProcessors
-
-	if sa.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = stripInternalConns(sa.SessionSConns)
+	mp := map[string]any{
+		utils.EnabledCfg:             sa.Enabled,
+		utils.ListenCfg:              sa.Listen,
+		utils.ListenNetCfg:           sa.ListenNet,
+		utils.SessionSConnsCfg:       stripInternalConns(sa.SessionSConns),
+		utils.StatSConnsCfg:          stripInternalConns(sa.StatSConns),
+		utils.ThresholdSConnsCfg:     stripInternalConns(sa.ThresholdSConns),
+		utils.TimezoneCfg:            sa.Timezone,
+		utils.RetransmissionTimerCfg: sa.RetransmissionTimer.String(),
+		utils.RequestProcessorsCfg:   requestProcessors,
 	}
 	return mp
 }
@@ -100,35 +106,37 @@ func (SIPAgentCfg) SName() string            { return SIPAgentJSON }
 func (sa SIPAgentCfg) CloneSection() Section { return sa.Clone() }
 
 // Clone returns a deep copy of SIPAgentCfg
-func (sa SIPAgentCfg) Clone() (cln *SIPAgentCfg) {
-	cln = &SIPAgentCfg{
+func (sa SIPAgentCfg) Clone() *SIPAgentCfg {
+	clone := &SIPAgentCfg{
 		Enabled:             sa.Enabled,
 		Listen:              sa.Listen,
 		ListenNet:           sa.ListenNet,
+		SessionSConns:       slices.Clone(sa.SessionSConns),
+		StatSConns:          slices.Clone(sa.StatSConns),
+		ThresholdSConns:     slices.Clone(sa.ThresholdSConns),
 		Timezone:            sa.Timezone,
 		RetransmissionTimer: sa.RetransmissionTimer,
 	}
-	if sa.SessionSConns != nil {
-		cln.SessionSConns = slices.Clone(sa.SessionSConns)
-	}
 	if sa.RequestProcessors != nil {
-		cln.RequestProcessors = make([]*RequestProcessor, len(sa.RequestProcessors))
+		clone.RequestProcessors = make([]*RequestProcessor, len(sa.RequestProcessors))
 		for i, rp := range sa.RequestProcessors {
-			cln.RequestProcessors[i] = rp.Clone()
+			clone.RequestProcessors[i] = rp.Clone()
 		}
 	}
-	return
+	return clone
 }
 
 // SIPAgentJsonCfg
 type SIPAgentJsonCfg struct {
-	Enabled              *bool
-	Listen               *string
-	Listen_net           *string
-	Sessions_conns       *[]string
-	Timezone             *string
-	Retransmission_timer *string
-	Request_processors   *[]*ReqProcessorJsnCfg
+	Enabled             *bool                  `json:"enabled"`
+	Listen              *string                `json:"listen"`
+	ListenNet           *string                `json:"listen_net"`
+	SessionSConns       *[]string              `json:"sessions_conns"`
+	StatSConns          *[]string              `json:"stats_conns"`
+	ThresholdSConns     *[]string              `json:"thresholds_conns"`
+	Timezone            *string                `json:"timezone"`
+	RetransmissionTimer *string                `json:"retransmission_timer"`
+	RequestProcessors   *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonCfg {
@@ -142,17 +150,23 @@ func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonC
 		d.Listen = utils.StringPointer(v2.Listen)
 	}
 	if v1.ListenNet != v2.ListenNet {
-		d.Listen_net = utils.StringPointer(v2.ListenNet)
+		d.ListenNet = utils.StringPointer(v2.ListenNet)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
+		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
+	}
+	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
+		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
+	}
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
+		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}
 	if v1.RetransmissionTimer != v2.RetransmissionTimer {
-		d.Retransmission_timer = utils.StringPointer(v2.RetransmissionTimer.String())
+		d.RetransmissionTimer = utils.StringPointer(v2.RetransmissionTimer.String())
 	}
-	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
+	d.RequestProcessors = diffReqProcessorsJsnCfg(d.RequestProcessors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }
