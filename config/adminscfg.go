@@ -51,16 +51,16 @@ func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Caches_conns != nil {
-		aCfg.CachesConns = updateInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
+		aCfg.CachesConns = tagInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
 	}
 	if jsnCfg.Actions_conns != nil {
-		aCfg.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
+		aCfg.ActionSConns = tagInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
 	}
 	if jsnCfg.Attributes_conns != nil {
-		aCfg.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
+		aCfg.AttributeSConns = tagInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.Ees_conns != nil {
-		aCfg.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+		aCfg.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	return
 }
@@ -71,16 +71,16 @@ func (aCfg AdminSCfg) AsMapInterface() any {
 		utils.EnabledCfg: aCfg.Enabled,
 	}
 	if aCfg.CachesConns != nil {
-		mp[utils.CachesConnsCfg] = getInternalJSONConns(aCfg.CachesConns)
+		mp[utils.CachesConnsCfg] = stripInternalConns(aCfg.CachesConns)
 	}
 	if aCfg.ActionSConns != nil {
-		mp[utils.ActionSConnsCfg] = getInternalJSONConns(aCfg.ActionSConns)
+		mp[utils.ActionSConnsCfg] = stripInternalConns(aCfg.ActionSConns)
 	}
 	if aCfg.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(aCfg.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = stripInternalConns(aCfg.AttributeSConns)
 	}
 	if aCfg.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = getInternalJSONConns(aCfg.EEsConns)
+		mp[utils.EEsConnsCfg] = stripInternalConns(aCfg.EEsConns)
 	}
 	return mp
 }
@@ -124,16 +124,16 @@ func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 *AdminSCfg) *AdminSJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.CachesConns, v2.CachesConns) {
-		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CachesConns))
+		d.Caches_conns = utils.SliceStringPointer(stripInternalConns(v2.CachesConns))
 	}
 	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
-		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
+		d.Actions_conns = utils.SliceStringPointer(stripInternalConns(v2.ActionSConns))
 	}
 	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	return d
 }

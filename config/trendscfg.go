@@ -61,16 +61,16 @@ func (t *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendSJsonCfg) (err error) {
 		t.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
 	}
 	if jsnCfg.Stats_conns != nil {
-		t.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+		t.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
 	}
 	if jsnCfg.Scheduled_ids != nil {
 		t.ScheduledIDs = jsnCfg.Scheduled_ids
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		t.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+		t.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.Ees_conns != nil {
-		t.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+		t.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		t.EEsExporterIDs = append(t.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
@@ -89,16 +89,16 @@ func (t *TrendSCfg) AsMapInterface() any {
 		mp[utils.StoreIntervalCfg] = t.StoreInterval.String()
 	}
 	if t.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = getInternalJSONConns(t.StatSConns)
+		mp[utils.StatSConnsCfg] = stripInternalConns(t.StatSConns)
 	}
 	if t.ScheduledIDs != nil {
 		mp[utils.ScheduledIDsCfg] = t.ScheduledIDs
 	}
 	if t.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(t.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = stripInternalConns(t.ThresholdSConns)
 	}
 	if t.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = getInternalJSONConns(t.EEsConns)
+		mp[utils.EEsConnsCfg] = stripInternalConns(t.EEsConns)
 	}
 	return mp
 }
@@ -159,13 +159,13 @@ func diffTrendsJsonCfg(d *TrendSJsonCfg, v1, v2 *TrendSCfg) *TrendSJsonCfg {
 	}
 	d.Scheduled_ids = diffMapStringSlice(d.Scheduled_ids, v1.ScheduledIDs, v2.ScheduledIDs)
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
 		d.Ees_exporter_ids = &v2.EEsExporterIDs

@@ -181,31 +181,31 @@ func (cdrscfg *CdrsCfg) loadFromJSONCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		cdrscfg.SMCostRetries = *jsnCdrsCfg.Session_cost_retries
 	}
 	if jsnCdrsCfg.Chargers_conns != nil {
-		cdrscfg.ChargerSConns = updateInternalConns(*jsnCdrsCfg.Chargers_conns, utils.MetaChargers)
+		cdrscfg.ChargerSConns = tagInternalConns(*jsnCdrsCfg.Chargers_conns, utils.MetaChargers)
 	}
 	if jsnCdrsCfg.Attributes_conns != nil {
-		cdrscfg.AttributeSConns = updateInternalConns(*jsnCdrsCfg.Attributes_conns, utils.MetaAttributes)
+		cdrscfg.AttributeSConns = tagInternalConns(*jsnCdrsCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCdrsCfg.Thresholds_conns != nil {
-		cdrscfg.ThresholdSConns = updateInternalConns(*jsnCdrsCfg.Thresholds_conns, utils.MetaThresholds)
+		cdrscfg.ThresholdSConns = tagInternalConns(*jsnCdrsCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCdrsCfg.Stats_conns != nil {
-		cdrscfg.StatSConns = updateInternalConns(*jsnCdrsCfg.Stats_conns, utils.MetaStats)
+		cdrscfg.StatSConns = tagInternalConns(*jsnCdrsCfg.Stats_conns, utils.MetaStats)
 	}
 	if jsnCdrsCfg.Online_cdr_exports != nil {
 		cdrscfg.OnlineCDRExports = append(cdrscfg.OnlineCDRExports, *jsnCdrsCfg.Online_cdr_exports...)
 	}
 	if jsnCdrsCfg.Actions_conns != nil {
-		cdrscfg.ActionSConns = updateInternalConns(*jsnCdrsCfg.Actions_conns, utils.MetaActions)
+		cdrscfg.ActionSConns = tagInternalConns(*jsnCdrsCfg.Actions_conns, utils.MetaActions)
 	}
 	if jsnCdrsCfg.Ees_conns != nil {
-		cdrscfg.EEsConns = updateInternalConns(*jsnCdrsCfg.Ees_conns, utils.MetaEEs)
+		cdrscfg.EEsConns = tagInternalConns(*jsnCdrsCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCdrsCfg.Rates_conns != nil {
-		cdrscfg.RateSConns = updateInternalConns(*jsnCdrsCfg.Rates_conns, utils.MetaRates)
+		cdrscfg.RateSConns = tagInternalConns(*jsnCdrsCfg.Rates_conns, utils.MetaRates)
 	}
 	if jsnCdrsCfg.Accounts_conns != nil {
-		cdrscfg.AccountSConns = updateInternalConns(*jsnCdrsCfg.Accounts_conns, utils.MetaAccounts)
+		cdrscfg.AccountSConns = tagInternalConns(*jsnCdrsCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	if jsnCdrsCfg.Opts != nil {
 		cdrscfg.Opts.loadFromJSONCfg(jsnCdrsCfg.Opts)
@@ -236,28 +236,28 @@ func (cdrscfg CdrsCfg) AsMapInterface() any {
 	}
 
 	if cdrscfg.ChargerSConns != nil {
-		mp[utils.ChargerSConnsCfg] = getInternalJSONConns(cdrscfg.ChargerSConns)
+		mp[utils.ChargerSConnsCfg] = stripInternalConns(cdrscfg.ChargerSConns)
 	}
 	if cdrscfg.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(cdrscfg.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = stripInternalConns(cdrscfg.AttributeSConns)
 	}
 	if cdrscfg.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(cdrscfg.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = stripInternalConns(cdrscfg.ThresholdSConns)
 	}
 	if cdrscfg.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = getInternalJSONConns(cdrscfg.StatSConns)
+		mp[utils.StatSConnsCfg] = stripInternalConns(cdrscfg.StatSConns)
 	}
 	if cdrscfg.ActionSConns != nil {
-		mp[utils.ActionSConnsCfg] = getInternalJSONConns(cdrscfg.ActionSConns)
+		mp[utils.ActionSConnsCfg] = stripInternalConns(cdrscfg.ActionSConns)
 	}
 	if cdrscfg.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = getInternalJSONConns(cdrscfg.EEsConns)
+		mp[utils.EEsConnsCfg] = stripInternalConns(cdrscfg.EEsConns)
 	}
 	if cdrscfg.RateSConns != nil {
-		mp[utils.RateSConnsCfg] = getInternalJSONConns(cdrscfg.RateSConns)
+		mp[utils.RateSConnsCfg] = stripInternalConns(cdrscfg.RateSConns)
 	}
 	if cdrscfg.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = getInternalJSONConns(cdrscfg.AccountSConns)
+		mp[utils.AccountSConnsCfg] = stripInternalConns(cdrscfg.AccountSConns)
 	}
 	return mp
 }
@@ -442,31 +442,31 @@ func diffCdrsJsonCfg(d *CdrsJsonCfg, v1, v2 *CdrsCfg) *CdrsJsonCfg {
 		d.Session_cost_retries = utils.IntPointer(v2.SMCostRetries)
 	}
 	if !slices.Equal(v1.ChargerSConns, v2.ChargerSConns) {
-		d.Chargers_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ChargerSConns))
+		d.Chargers_conns = utils.SliceStringPointer(stripInternalConns(v2.ChargerSConns))
 	}
 	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.OnlineCDRExports, v2.OnlineCDRExports) {
 		d.Online_cdr_exports = &v2.OnlineCDRExports
 	}
 	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
-		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
+		d.Actions_conns = utils.SliceStringPointer(stripInternalConns(v2.ActionSConns))
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
-		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
+		d.Rates_conns = utils.SliceStringPointer(stripInternalConns(v2.RateSConns))
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
 	}
 	d.Opts = diffCdrsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d

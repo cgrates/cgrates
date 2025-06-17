@@ -63,7 +63,7 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg) (err error) {
 		sa.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Sessions_conns != nil {
-		sa.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+		sa.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	if jsnCfg.Retransmission_timer != nil {
 		if sa.RetransmissionTimer, err = utils.ParseDurationWithNanosecs(*jsnCfg.Retransmission_timer); err != nil {
@@ -91,7 +91,7 @@ func (sa SIPAgentCfg) AsMapInterface() any {
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 
 	if sa.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(sa.SessionSConns)
+		mp[utils.SessionSConnsCfg] = stripInternalConns(sa.SessionSConns)
 	}
 	return mp
 }
@@ -145,7 +145,7 @@ func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonC
 		d.Listen_net = utils.StringPointer(v2.ListenNet)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)

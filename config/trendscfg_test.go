@@ -161,10 +161,10 @@ func TestTrendSCfgAsMapInterface(t *testing.T) {
 		utils.EnabledCfg:                true,
 		utils.StoreIntervalCfg:          storeInterval.String(),
 		utils.StoreUncompressedLimitCfg: storeUncompressedLimit,
-		utils.StatSConnsCfg:             getInternalJSONConns(statSConns),
-		utils.ThresholdSConnsCfg:        getInternalJSONConns(thresholdSConns),
+		utils.StatSConnsCfg:             stripInternalConns(statSConns),
+		utils.ThresholdSConnsCfg:        stripInternalConns(thresholdSConns),
 		utils.ScheduledIDsCfg:           scheduledIDs,
-		utils.EEsConnsCfg:               getInternalJSONConns(eesConns),
+		utils.EEsConnsCfg:               stripInternalConns(eesConns),
 		utils.EEsExporterIDsCfg:         eesExporterIDs,
 	}
 	result := trendCfg.AsMapInterface().(map[string]any)

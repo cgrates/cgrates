@@ -64,10 +64,10 @@ func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][
 		erS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.SessionSConns != nil {
-		erS.SessionSConns = updateInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
+		erS.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
 	}
 	if jsnCfg.EEsConns != nil {
-		erS.EEsConns = updateInternalConns(*jsnCfg.EEsConns, utils.MetaEEs)
+		erS.EEsConns = tagInternalConns(*jsnCfg.EEsConns, utils.MetaEEs)
 	}
 	if jsnCfg.PartialCacheTTL != nil {
 		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.PartialCacheTTL); err != nil {
@@ -130,10 +130,10 @@ func (erS ERsCfg) AsMapInterface() any {
 		mp[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()
 	}
 	if erS.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = getInternalJSONConns(erS.SessionSConns)
+		mp[utils.SessionSConnsCfg] = stripInternalConns(erS.SessionSConns)
 	}
 	if erS.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = getInternalJSONConns(erS.EEsConns)
+		mp[utils.EEsConnsCfg] = stripInternalConns(erS.EEsConns)
 	}
 	if erS.Readers != nil {
 		readers := make([]map[string]any, len(erS.Readers))
@@ -1412,10 +1412,10 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(getInternalJSONConns(v2.SessionSConns))
+		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.EEsConns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+		d.EEsConns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {
 		d.PartialCacheTTL = utils.StringPointer(v2.PartialCacheTTL.String())

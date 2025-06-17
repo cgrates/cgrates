@@ -73,7 +73,7 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jsnCfg *RadiusAgentJsonCfg) (err error
 		}
 	}
 	if jsnCfg.Sessions_conns != nil {
-		ra.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+		ra.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	ra.RequestProcessors, err = appendRequestProcessors(ra.RequestProcessors, jsnCfg.Request_processors)
 	return
@@ -95,7 +95,7 @@ func (ra RadiusAgentCfg) AsMapInterface() any {
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 
 	if ra.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(ra.SessionSConns)
+		mp[utils.SessionSConnsCfg] = stripInternalConns(ra.SessionSConns)
 	}
 	clientSecrets := make(map[string]string)
 	for k, v := range ra.ClientSecrets {
@@ -172,7 +172,7 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *Radi
 	d.Client_secrets = diffMapString(d.Client_secrets, v1.ClientSecrets, v2.ClientSecrets)
 	d.Client_dictionaries = diffMapString(d.Client_dictionaries, v1.ClientDictionaries, v2.ClientDictionaries)
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	return d

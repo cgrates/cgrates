@@ -98,7 +98,7 @@ func (rlcfg *ResourceSConfig) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) (err err
 		rlcfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		rlcfg.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+		rlcfg.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.Store_interval != nil {
 		if rlcfg.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
@@ -144,7 +144,7 @@ func (rlcfg ResourceSConfig) AsMapInterface() any {
 		utils.OptsCfg:           opts,
 	}
 	if rlcfg.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(rlcfg.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = stripInternalConns(rlcfg.ThresholdSConns)
 	}
 	if rlcfg.StringIndexedFields != nil {
 		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*rlcfg.StringIndexedFields)
@@ -270,7 +270,7 @@ func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSConfig) *Resourc
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if v1.StoreInterval != v2.StoreInterval {
 		d.Store_interval = utils.StringPointer(v2.StoreInterval.String())
