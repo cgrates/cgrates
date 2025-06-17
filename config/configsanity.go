@@ -726,6 +726,22 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.ERs, connID)
 			}
 		}
+		for _, connID := range cfg.ersCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.ERs)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.ERs, connID)
+			}
+		}
+		for _, connID := range cfg.ersCfg.ThresholdSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.ERs)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.ERs, connID)
+			}
+		}
 		for _, rdr := range cfg.ersCfg.Readers {
 			if len(rdr.EEsSuccessIDs) != 0 || len(rdr.EEsFailedIDs) != 0 {
 				if len(cfg.ersCfg.EEsConns) == 0 || !cfg.eesCfg.Enabled {

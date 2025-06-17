@@ -465,8 +465,11 @@ func testCGRConfigReloadERs(t *testing.T) {
 		v.ComputePath()
 	}
 	expAttr := &ERsCfg{
-		Enabled:       true,
-		SessionSConns: []string{utils.MetaLocalHost},
+		Enabled:         true,
+		SessionSConns:   []string{utils.MetaLocalHost},
+		EEsConns:        []string{},
+		StatSConns:      []string{},
+		ThresholdSConns: []string{},
 		Readers: []*EventReaderCfg{
 			{
 				ID:                   utils.MetaDefault,
@@ -742,6 +745,9 @@ func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 		"sessions_conns": []string{
 			utils.MetaLocalHost,
 		},
+		utils.EEsConnsCfg:        []string{},
+		utils.StatSConnsCfg:      []string{},
+		utils.ThresholdSConnsCfg: []string{},
 	}
 
 	cfg := NewDefaultCGRConfig()

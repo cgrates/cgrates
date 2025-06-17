@@ -31,6 +31,8 @@ type ERsCfg struct {
 	Enabled         bool
 	SessionSConns   []string
 	EEsConns        []string
+	StatSConns      []string
+	ThresholdSConns []string
 	Readers         []*EventReaderCfg
 	PartialCacheTTL time.Duration
 }
@@ -38,8 +40,8 @@ type ERsCfg struct {
 // ReaderCfg iterates over the Readers slice and returns the reader
 // configuration associated with the specified "id". If none were found, the
 // method will return nil.
-func (erS *ERsCfg) ReaderCfg(id string) *EventReaderCfg {
-	for _, rdr := range erS.Readers {
+func (c *ERsCfg) ReaderCfg(id string) *EventReaderCfg {
+	for _, rdr := range c.Readers {
 		if rdr.ID == id {
 			return rdr
 		}
@@ -48,43 +50,49 @@ func (erS *ERsCfg) ReaderCfg(id string) *EventReaderCfg {
 }
 
 // loadErsCfg loads the Ers section of the configuration
-func (erS *ERsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (c *ERsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnERsCfg := new(ERsJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ERsJSON, jsnERsCfg); err != nil {
 		return
 	}
-	return erS.loadFromJSONCfg(jsnERsCfg, cfg.templates)
+	return c.loadFromJSONCfg(jsnERsCfg, cfg.templates)
 }
 
-func (erS *ERsCfg) loadFromJSONCfg(jsnCfg *ERsJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
-	if jsnCfg == nil {
+func (c *ERsCfg) loadFromJSONCfg(jc *ERsJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
+	if jc == nil {
 		return
 	}
-	if jsnCfg.Enabled != nil {
-		erS.Enabled = *jsnCfg.Enabled
+	if jc.Enabled != nil {
+		c.Enabled = *jc.Enabled
 	}
-	if jsnCfg.SessionSConns != nil {
-		erS.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
+	if jc.SessionSConns != nil {
+		c.SessionSConns = tagInternalConns(*jc.SessionSConns, utils.MetaSessionS)
 	}
-	if jsnCfg.EEsConns != nil {
-		erS.EEsConns = tagInternalConns(*jsnCfg.EEsConns, utils.MetaEEs)
+	if jc.EEsConns != nil {
+		c.EEsConns = tagInternalConns(*jc.EEsConns, utils.MetaEEs)
 	}
-	if jsnCfg.PartialCacheTTL != nil {
-		if erS.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.PartialCacheTTL); err != nil {
+	if jc.StatSConns != nil {
+		c.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
+	}
+	if jc.ThresholdSConns != nil {
+		c.ThresholdSConns = tagInternalConns(*jc.ThresholdSConns, utils.MetaThresholds)
+	}
+	if jc.PartialCacheTTL != nil {
+		if c.PartialCacheTTL, err = utils.ParseDurationWithNanosecs(*jc.PartialCacheTTL); err != nil {
 			return
 		}
 	}
-	return erS.appendERsReaders(jsnCfg.Readers, msgTemplates)
+	return c.appendERsReaders(jc.Readers, msgTemplates)
 }
 
-func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
+func (c *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplates map[string][]*FCTemplate) (err error) {
 	if jsnReaders == nil {
 		return
 	}
 	for _, jsnReader := range *jsnReaders {
 		var rdr *EventReaderCfg
 		if jsnReader.ID != nil {
-			for _, reader := range erS.Readers {
+			for _, reader := range c.Readers {
 				if reader.ID == *jsnReader.ID {
 					rdr = reader
 					break
@@ -93,7 +101,7 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 		}
 		if rdr == nil {
 			rdr = getDftEvRdrCfg()
-			erS.Readers = append(erS.Readers, rdr)
+			c.Readers = append(c.Readers, rdr)
 		}
 		if err := rdr.loadFromJSONCfg(jsnReader, msgTemplates); err != nil {
 			return err
@@ -102,42 +110,42 @@ func (erS *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTempla
 	}
 	return nil
 }
-func (ERsCfg) SName() string             { return ERsJSON }
-func (erS ERsCfg) CloneSection() Section { return erS.Clone() }
+func (ERsCfg) SName() string           { return ERsJSON }
+func (c ERsCfg) CloneSection() Section { return c.Clone() }
 
 // Clone returns a deep copy of ERsCfg
-func (erS ERsCfg) Clone() (cln *ERsCfg) {
-	cln = &ERsCfg{
-		Enabled:         erS.Enabled,
-		SessionSConns:   slices.Clone(erS.SessionSConns),
-		EEsConns:        slices.Clone(erS.EEsConns),
-		Readers:         make([]*EventReaderCfg, len(erS.Readers)),
-		PartialCacheTTL: erS.PartialCacheTTL,
+func (c ERsCfg) Clone() *ERsCfg {
+	clone := &ERsCfg{
+		Enabled:         c.Enabled,
+		SessionSConns:   slices.Clone(c.SessionSConns),
+		EEsConns:        slices.Clone(c.EEsConns),
+		StatSConns:      slices.Clone(c.StatSConns),
+		ThresholdSConns: slices.Clone(c.ThresholdSConns),
+		Readers:         make([]*EventReaderCfg, len(c.Readers)),
+		PartialCacheTTL: c.PartialCacheTTL,
 	}
-	for idx, rdr := range erS.Readers {
-		cln.Readers[idx] = rdr.Clone()
+	for idx, rdr := range c.Readers {
+		clone.Readers[idx] = rdr.Clone()
 	}
-	return
+	return clone
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (erS ERsCfg) AsMapInterface() any {
+func (c ERsCfg) AsMapInterface() any {
 	mp := map[string]any{
-		utils.EnabledCfg:         erS.Enabled,
+		utils.EnabledCfg:         c.Enabled,
+		utils.SessionSConnsCfg:   stripInternalConns(c.SessionSConns),
+		utils.EEsConnsCfg:        stripInternalConns(c.EEsConns),
+		utils.StatSConnsCfg:      stripInternalConns(c.StatSConns),
+		utils.ThresholdSConnsCfg: stripInternalConns(c.ThresholdSConns),
 		utils.PartialCacheTTLCfg: "0",
 	}
-	if erS.PartialCacheTTL != 0 {
-		mp[utils.PartialCacheTTLCfg] = erS.PartialCacheTTL.String()
+	if c.PartialCacheTTL != 0 {
+		mp[utils.PartialCacheTTLCfg] = c.PartialCacheTTL.String()
 	}
-	if erS.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = stripInternalConns(erS.SessionSConns)
-	}
-	if erS.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = stripInternalConns(erS.EEsConns)
-	}
-	if erS.Readers != nil {
-		readers := make([]map[string]any, len(erS.Readers))
-		for i, item := range erS.Readers {
+	if c.Readers != nil {
+		readers := make([]map[string]any, len(c.Readers))
+		for i, item := range c.Readers {
 			readers[i] = item.AsMapInterface()
 		}
 		mp[utils.ReadersCfg] = readers
@@ -1400,6 +1408,8 @@ type ERsJsonCfg struct {
 	Enabled         *bool                  `json:"enabled"`
 	SessionSConns   *[]string              `json:"sessions_conns"`
 	EEsConns        *[]string              `json:"ees_conns"`
+	StatSConns      *[]string              `json:"stats_conns"`
+	ThresholdSConns *[]string              `json:"thresholds_conns"`
 	Readers         *[]*EventReaderJsonCfg `json:"readers"`
 	PartialCacheTTL *string                `json:"partial_cache_ttl"`
 }
@@ -1416,6 +1426,12 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
 		d.EEsConns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
+	}
+	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
+		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
+	}
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
+		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {
 		d.PartialCacheTTL = utils.StringPointer(v2.PartialCacheTTL.String())
