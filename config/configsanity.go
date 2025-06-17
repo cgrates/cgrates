@@ -493,6 +493,24 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)
 			}
 		}
+		for _, connID := range httpAgentCfg.StatSConns {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
+			if isInternal && !cfg.statsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.StatS, httpAgentCfg.ID)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
+				return fmt.Errorf("<%s> template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)
+			}
+		}
+		for _, connID := range httpAgentCfg.ThresholdSConns {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
+			if isInternal && !cfg.thresholdSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.ThresholdS, httpAgentCfg.ID)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
+				return fmt.Errorf("<%s> template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)
+			}
+		}
 		if !slices.Contains([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
 			return fmt.Errorf("<%s> unsupported request payload %s", utils.HTTPAgent, httpAgentCfg.RequestPayload)
 		}
