@@ -27,7 +27,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -49,10 +48,9 @@ func TestActionsAPIs(t *testing.T) {
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(data, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 	aS := NewActionS(cfg, fltrs, dm, nil)
-	actPrf := &utils.ActionProfileWithAPIOpts{
-		ActionProfile: &utils.ActionProfile{
+	if err := dm.SetActionProfile(context.Background(),
+		&utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "actPrfID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
@@ -61,11 +59,7 @@ func TestActionsAPIs(t *testing.T) {
 					ID: "actID",
 				},
 			},
-		},
-	}
-
-	var reply string
-	if err := adms.SetActionProfile(context.Background(), actPrf, &reply); err != nil {
+		}, true); err != nil {
 		t.Error(err)
 	}
 
@@ -80,6 +74,7 @@ func TestActionsAPIs(t *testing.T) {
 		},
 	}
 
+	var reply string
 	if err := aS.V1ScheduleActions(context.Background(), ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -129,35 +124,27 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), utils.ThresholdSv1, rpcInternal)
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &utils.ActionProfileWithAPIOpts{
-		ActionProfile: &utils.ActionProfile{
-			Tenant: "cgrates.org",
-			ID:     "actPrfID",
-			Actions: []*utils.APAction{
-				{
-					ID:   "actID",
-					Type: utils.MetaResetThreshold,
-				},
+	actPrf := &utils.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "actPrfID",
+		Actions: []*utils.APAction{
+			{
+				ID:   "actID",
+				Type: utils.MetaResetThreshold,
 			},
-			Targets: map[string]utils.StringSet{
-				utils.MetaThresholds: {
-					"THD_ID": struct{}{},
-				},
+		},
+		Targets: map[string]utils.StringSet{
+			utils.MetaThresholds: {
+				"THD_ID": struct{}{},
 			},
 		},
 	}
-
-	var reply string
-	if err := adms.SetActionProfile(context.Background(), actPrf,
-		&reply); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 
 	// ExecuteActions with ResetThreshold
@@ -172,6 +159,7 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 		},
 	}
 
+	var reply string
 	if err := aS.V1ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
@@ -221,35 +209,27 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, rpcInternal)
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &utils.ActionProfileWithAPIOpts{
-		ActionProfile: &utils.ActionProfile{
-			Tenant: "cgrates.org",
-			ID:     "actPrfID",
-			Actions: []*utils.APAction{
-				{
-					ID:   "actID",
-					Type: utils.MetaResetStatQueue,
-				},
+	actPrf := &utils.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "actPrfID",
+		Actions: []*utils.APAction{
+			{
+				ID:   "actID",
+				Type: utils.MetaResetStatQueue,
 			},
-			Targets: map[string]utils.StringSet{
-				utils.MetaStats: {
-					"SQ_ID": struct{}{},
-				},
+		},
+		Targets: map[string]utils.StringSet{
+			utils.MetaStats: {
+				"SQ_ID": struct{}{},
 			},
 		},
 	}
-
-	var reply string
-	if err := adms.SetActionProfile(context.Background(), actPrf,
-		&reply); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 
 	// ExecuteActions with ResetStatQueue
@@ -264,6 +244,7 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 		},
 	}
 
+	var reply string
 	if err := aS.V1ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
@@ -311,35 +292,29 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &utils.ActionProfileWithAPIOpts{
-		ActionProfile: &utils.ActionProfile{
-			Tenant: "cgrates.org",
-			ID:     "actPrfID",
-			Actions: []*utils.APAction{
-				{
-					ID:   "actID",
-					Type: utils.MetaSetBalance,
-				},
+	actPrf := &utils.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "actPrfID",
+		Actions: []*utils.APAction{
+			{
+				ID:   "actID",
+				Type: utils.MetaSetBalance,
 			},
-			Targets: map[string]utils.StringSet{
-				utils.MetaAccounts: {
-					"ACC_ID": struct{}{},
-				},
+		},
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts: {
+				"ACC_ID": struct{}{},
 			},
 		},
 	}
 
 	var reply string
-	if err := adms.SetActionProfile(context.Background(), actPrf,
-		&reply); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 
 	// ExecuteActions with SetBalance
@@ -400,35 +375,29 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &utils.ActionProfileWithAPIOpts{
-		ActionProfile: &utils.ActionProfile{
-			Tenant: "cgrates.org",
-			ID:     "actPrfID",
-			Actions: []*utils.APAction{
-				{
-					ID:   "actID",
-					Type: utils.MetaAddBalance,
-				},
+	actPrf := &utils.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "actPrfID",
+		Actions: []*utils.APAction{
+			{
+				ID:   "actID",
+				Type: utils.MetaAddBalance,
 			},
-			Targets: map[string]utils.StringSet{
-				utils.MetaAccounts: {
-					"ACC_ID": struct{}{},
-				},
+		},
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts: {
+				"ACC_ID": struct{}{},
 			},
 		},
 	}
 
-	var reply string
-	if err := adms.SetActionProfile(context.Background(), actPrf,
-		&reply); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf,
+		true); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 
 	// ExecuteActions with AddBalance
@@ -442,7 +411,7 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 			utils.OptsActionsProfileIDs: []string{"actPrfID"},
 		},
 	}
-
+	var reply string
 	if err := aS.V1ExecuteActions(context.Background(), ev,
 		&reply); err != nil {
 		t.Error(err)
@@ -472,32 +441,26 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := engine.NewDataManager(dataDB, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, nil)
 
 	// Set ActionProfile
-	actPrf := &utils.ActionProfileWithAPIOpts{
-		ActionProfile: &utils.ActionProfile{
-			Tenant: "cgrates.org",
-			ID:     "actPrfID",
-			Actions: []*utils.APAction{
-				{
-					ID:   "actID",
-					Type: utils.MetaLog,
-				},
+	actPrf := &utils.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "actPrfID",
+		Actions: []*utils.APAction{
+			{
+				ID:   "actID",
+				Type: utils.MetaLog,
 			},
 		},
 	}
 
 	var reply string
-	if err := adms.SetActionProfile(context.Background(), actPrf,
-		&reply); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf,
+		true); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
-
 	// ExecuteActions with Log
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -557,30 +520,25 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs), utils.CDRsV1, rpcInternal)
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &utils.ActionProfileWithAPIOpts{
-		ActionProfile: &utils.ActionProfile{
-			Tenant: "cgrates.org",
-			ID:     "actPrfID",
-			Actions: []*utils.APAction{
-				{
-					ID:   "actID",
-					Type: utils.CDRLog,
-				},
+	actPrf := &utils.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "actPrfID",
+		Actions: []*utils.APAction{
+			{
+				ID:   "actID",
+				Type: utils.CDRLog,
 			},
 		},
 	}
 
 	var reply string
-	if err := adms.SetActionProfile(context.Background(), actPrf,
-		&reply); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf,
+		true); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 
 	// ExecuteActions with CDRLog
@@ -645,35 +603,30 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	rpcInternal <- cc
 	cM := engine.NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
-	adms := apis.NewAdminSv1(cfg, dm, nil, nil, nil)
 
 	aS := NewActionS(cfg, fltrs, dm, cM)
 
 	// Set ActionProfile
-	actPrf := &utils.ActionProfileWithAPIOpts{
-		ActionProfile: &utils.ActionProfile{
-			Tenant: "cgrates.org",
-			ID:     "actPrfID",
-			Actions: []*utils.APAction{
-				{
-					ID:   "actID",
-					Type: utils.MetaRemBalance,
-				},
+	actPrf := &utils.ActionProfile{
+		Tenant: "cgrates.org",
+		ID:     "actPrfID",
+		Actions: []*utils.APAction{
+			{
+				ID:   "actID",
+				Type: utils.MetaRemBalance,
 			},
-			Targets: map[string]utils.StringSet{
-				utils.MetaAccounts: {
-					"ACC_ID": struct{}{},
-				},
+		},
+		Targets: map[string]utils.StringSet{
+			utils.MetaAccounts: {
+				"ACC_ID": struct{}{},
 			},
 		},
 	}
 
 	var reply string
-	if err := adms.SetActionProfile(context.Background(), actPrf,
-		&reply); err != nil {
+	if err := dm.SetActionProfile(context.Background(), actPrf,
+		true); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 
 	// ExecuteActions with RemBalance

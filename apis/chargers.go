@@ -24,6 +24,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -171,4 +172,24 @@ func (adms *AdminSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.Tena
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewChargerSv1 initializes the ChargerSv1 object.
+func NewChargerSv1(chgs *chargers.ChargerS) *ChargerSv1 {
+	return &ChargerSv1{chgs: chgs}
+}
+
+// ChargerSv1 represents the RPC object to register for chargers v1 APIs.
+type ChargerSv1 struct {
+	chgs *chargers.ChargerS
+}
+
+// V1ProcessEvent will process the event received via API and return list of events forked
+func (chgS *ChargerSv1) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*chargers.ChrgSProcessEventReply) (err error) {
+	return chgS.chgs.V1ProcessEvent(ctx, args, reply)
+}
+
+// V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
+func (chgS *ChargerSv1) V1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent, rply *[]*utils.ChargerProfile) (err error) {
+	return chgS.chgs.V1GetChargersForEvent(ctx, args, rply)
 }

@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/accounts"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -171,4 +172,54 @@ func (admS *AdminSv1) RemoveAccount(ctx *context.Context, arg *utils.TenantIDWit
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewAccountSv1 initializes the AccountSv1 object.
+func NewAccountSv1(accs *accounts.AccountS) *AccountSv1 {
+	return &AccountSv1{accs: accs}
+}
+
+// AccountSv1 represents the RPC object to register for accounts v1 APIs.
+type AccountSv1 struct {
+	accs *accounts.AccountS
+}
+
+// AccountsForEvent returns the matching Accounts for Event
+func (aS *AccountSv1) AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) error {
+	return aS.accs.V1AccountsForEvent(ctx, args, aps)
+}
+
+// MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
+func (aS *AccountSv1) MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) error {
+	return aS.accs.V1MaxAbstracts(ctx, args, eEc)
+}
+
+// DebitAbstracts performs debit for the provided event
+func (aS *AccountSv1) DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+	return aS.accs.V1DebitAbstracts(ctx, args, eEc)
+}
+
+// MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
+func (aS *AccountSv1) MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+	return aS.accs.V1MaxConcretes(ctx, args, eEc)
+}
+
+// DebitConcretes performs debit of concrete units for the provided event
+func (aS *AccountSv1) DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+	return aS.accs.V1DebitConcretes(ctx, args, eEc)
+}
+
+// RefundCharges will refund charges recorded inside EventCharges
+func (aS *AccountSv1) RefundCharges(ctx *context.Context, args *utils.APIEventCharges, rply *string) (err error) {
+	return aS.accs.V1RefundCharges(ctx, args, rply)
+}
+
+// ActionSetBalance performs an update for a specific balance in account
+func (aS *AccountSv1) ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance, rply *string) (err error) {
+	return aS.accs.V1ActionSetBalance(ctx, args, rply)
+}
+
+// RemoveBalance removes a balance for a specific account
+func (aS *AccountSv1) ActionRemoveBalance(ctx *context.Context, args *utils.ArgsActRemoveBalances, rply *string) (err error) {
+	return aS.accs.V1ActionRemoveBalance(ctx, args, rply)
 }

@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/actions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -172,4 +173,24 @@ func (admS *AdminSv1) RemoveActionProfile(ctx *context.Context, arg *utils.Tenan
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// NewActionSv1 initializes the ActionSv1 object.
+func NewActionSv1(acts *actions.ActionS) *ActionSv1 {
+	return &ActionSv1{acts: acts}
+}
+
+// ActionSv1 represents the RPC object to register for actions v1 APIs.
+type ActionSv1 struct {
+	acts *actions.ActionS
+}
+
+// ScheduleActions will be called to schedule actions matching the arguments
+func (aS *ActionSv1) ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+	return aS.acts.V1ScheduleActions(ctx, args, rpl)
+}
+
+// ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
+func (aS *ActionSv1) ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+	return aS.acts.V1ExecuteActions(ctx, args, rpl)
 }
