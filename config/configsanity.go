@@ -313,8 +313,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.diameterAgentCfg.StatSConns {
-			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-			if isInternal && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
+			if isInternal && !cfg.statsCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.DiameterAgent)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
@@ -322,8 +322,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.diameterAgentCfg.ThresholdSConns {
-			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-			if isInternal && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
+			if isInternal && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.DiameterAgent)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
@@ -411,7 +411,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.radiusAgentCfg.StatSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.RadiusAgent)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -419,7 +419,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.radiusAgentCfg.ThresholdSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.RadiusAgent)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -479,7 +479,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.dnsAgentCfg.StatSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatS, utils.DNSAgent)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -487,7 +487,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range cfg.dnsAgentCfg.ThresholdSConns {
-			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ThresholdS, utils.DNSAgent)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
@@ -545,8 +545,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range httpAgentCfg.StatSConns {
-			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-			if isInternal && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
+			if isInternal && !cfg.statsCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.StatS, httpAgentCfg.ID)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
@@ -554,8 +554,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, connID := range httpAgentCfg.ThresholdSConns {
-			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
-			if isInternal && !cfg.sessionSCfg.Enabled {
+			isInternal := strings.HasPrefix(connID, utils.MetaInternal)
+			if isInternal && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template", utils.ThresholdS, httpAgentCfg.ID)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !isInternal {
