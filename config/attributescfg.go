@@ -105,13 +105,13 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Stats_conns != nil {
-		alS.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+		alS.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
 	}
 	if jsnCfg.Resources_conns != nil {
-		alS.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
+		alS.ResourceSConns = tagInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
 	if jsnCfg.Accounts_conns != nil {
-		alS.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
+		alS.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	if jsnCfg.Indexed_selects != nil {
 		alS.IndexedSelects = *jsnCfg.Indexed_selects
@@ -170,13 +170,13 @@ func (alS AttributeSCfg) AsMapInterface() any {
 		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*alS.NotExistsIndexedFields)
 	}
 	if alS.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = getInternalJSONConns(alS.StatSConns)
+		mp[utils.StatSConnsCfg] = stripInternalConns(alS.StatSConns)
 	}
 	if alS.ResourceSConns != nil {
-		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(alS.ResourceSConns)
+		mp[utils.ResourceSConnsCfg] = stripInternalConns(alS.ResourceSConns)
 	}
 	if alS.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = getInternalJSONConns(alS.AccountSConns)
+		mp[utils.AccountSConnsCfg] = stripInternalConns(alS.AccountSConns)
 	}
 	return mp
 }
@@ -295,13 +295,13 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
-		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
+		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.ResourceSConns))
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+		d.Resources_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)

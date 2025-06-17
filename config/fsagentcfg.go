@@ -125,7 +125,7 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		fscfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.SessionSConns != nil {
-		fscfg.SessionSConns = updateBiRPCInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
+		fscfg.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
 	}
 	if jsnCfg.SubscribePark != nil {
 		fscfg.SubscribePark = *jsnCfg.SubscribePark
@@ -180,7 +180,7 @@ func (fscfg FsAgentCfg) AsMapInterface() any {
 		utils.ActiveSessionDelimiterCfg: fscfg.ActiveSessionDelimiter,
 	}
 	if fscfg.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(fscfg.SessionSConns)
+		mp[utils.SessionSConnsCfg] = stripInternalConns(fscfg.SessionSConns)
 	}
 	requestProcessors := make([]map[string]any, len(fscfg.RequestProcessors))
 	for i, item := range fscfg.RequestProcessors {
@@ -310,7 +310,7 @@ func diffFreeswitchAgentJsonCfg(d *FreeswitchAgentJsonCfg, v1, v2 *FsAgentCfg) *
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	if v1.SubscribePark != v2.SubscribePark {
 		d.SubscribePark = utils.BoolPointer(v2.SubscribePark)

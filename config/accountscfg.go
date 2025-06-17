@@ -100,13 +100,13 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 		acS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Attributes_conns != nil {
-		acS.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
+		acS.AttributeSConns = tagInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.Rates_conns != nil {
-		acS.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
+		acS.RateSConns = tagInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		acS.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+		acS.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.String_indexed_fields != nil {
 		acS.StringIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.String_indexed_fields))
@@ -155,13 +155,13 @@ func (acS AccountSCfg) AsMapInterface() any {
 		utils.OptsCfg:           opts,
 	}
 	if acS.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(acS.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = stripInternalConns(acS.AttributeSConns)
 	}
 	if acS.RateSConns != nil {
-		mp[utils.RateSConnsCfg] = getInternalJSONConns(acS.RateSConns)
+		mp[utils.RateSConnsCfg] = stripInternalConns(acS.RateSConns)
 	}
 	if acS.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = stripInternalConns(acS.ThresholdSConns)
 	}
 	if acS.StringIndexedFields != nil {
 		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*acS.StringIndexedFields)
@@ -291,13 +291,13 @@ func diffAccountSJsonCfg(d *AccountSJsonCfg, v1, v2 *AccountSCfg) *AccountSJsonC
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
 	}
 	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
-		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
+		d.Rates_conns = utils.SliceStringPointer(stripInternalConns(v2.RateSConns))
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)

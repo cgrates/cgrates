@@ -75,10 +75,10 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 		c.CollectProcessMetrics = *jc.CollectProcessMetrics
 	}
 	if jc.CoreSConns != nil {
-		c.CoreSConns = updateBiRPCInternalConns(*jc.CoreSConns, utils.MetaCore)
+		c.CoreSConns = tagInternalConns(*jc.CoreSConns, utils.MetaCore)
 	}
 	if jc.StatSConns != nil {
-		c.StatSConns = updateBiRPCInternalConns(*jc.StatSConns, utils.MetaStats)
+		c.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
 	}
 	if jc.StatQueueIDs != nil {
 		c.StatQueueIDs = *jc.StatQueueIDs
@@ -93,8 +93,8 @@ func (c PrometheusAgentCfg) AsMapInterface() any {
 		utils.PathCfg:                  c.Path,
 		utils.CollectGoMetricsCfg:      c.CollectGoMetrics,
 		utils.CollectProcessMetricsCfg: c.CollectProcessMetrics,
-		utils.CoreSConnsCfg:            getBiRPCInternalJSONConns(c.CoreSConns),
-		utils.StatSConnsCfg:            getBiRPCInternalJSONConns(c.StatSConns),
+		utils.CoreSConnsCfg:            stripInternalConns(c.CoreSConns),
+		utils.StatSConnsCfg:            stripInternalConns(c.StatSConns),
 		utils.StatQueueIDsCfg:          c.StatQueueIDs,
 	}
 }

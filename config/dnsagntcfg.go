@@ -72,7 +72,7 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg) (err error) {
 		da.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+		da.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.Request_processors)
 	return
@@ -105,7 +105,7 @@ func (da DNSAgentCfg) AsMapInterface() any {
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 
 	if da.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(da.SessionSConns)
+		mp[utils.SessionSConnsCfg] = stripInternalConns(da.SessionSConns)
 	}
 	return mp
 }
@@ -197,7 +197,7 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonC
 	d.Listeners = diffListeners
 
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)

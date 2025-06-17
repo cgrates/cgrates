@@ -71,13 +71,13 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg) (err e
 		da.DictionariesPath = *jsnCfg.DictionariesPath
 	}
 	if jsnCfg.SessionSConns != nil {
-		da.SessionSConns = updateBiRPCInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
+		da.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
 	}
 	if jsnCfg.StatSConns != nil {
-		da.StatSConns = updateBiRPCInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+		da.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
 	}
 	if jsnCfg.ThresholdSConns != nil {
-		da.ThresholdSConns = updateBiRPCInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+		da.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
 	}
 	if jsnCfg.OriginHost != nil {
 		da.OriginHost = *jsnCfg.OriginHost
@@ -118,9 +118,9 @@ func (da DiameterAgentCfg) AsMapInterface() any {
 		utils.ListenNetCfg:         da.ListenNet,
 		utils.ListenCfg:            da.Listen,
 		utils.DictionariesPathCfg:  da.DictionariesPath,
-		utils.SessionSConnsCfg:     getBiRPCInternalJSONConns(da.SessionSConns),
-		utils.StatSConnsCfg:        getBiRPCInternalJSONConns(da.StatSConns),
-		utils.ThresholdSConnsCfg:   getBiRPCInternalJSONConns(da.ThresholdSConns),
+		utils.SessionSConnsCfg:     stripInternalConns(da.SessionSConns),
+		utils.StatSConnsCfg:        stripInternalConns(da.StatSConns),
+		utils.ThresholdSConnsCfg:   stripInternalConns(da.ThresholdSConns),
 		utils.OriginHostCfg:        da.OriginHost,
 		utils.OriginRealmCfg:       da.OriginRealm,
 		utils.VendorIDCfg:          da.VendorID,
@@ -202,13 +202,13 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg)
 		d.DictionariesPath = utils.StringPointer(v2.DictionariesPath)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.SessionSConns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.StatSConns))
+		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.ThresholdSConns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.ThresholdSConns))
+		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if v1.OriginHost != v2.OriginHost {
 		d.OriginHost = utils.StringPointer(v2.OriginHost)

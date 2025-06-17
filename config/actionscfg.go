@@ -95,19 +95,19 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 		acS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Cdrs_conns != nil {
-		acS.CDRsConns = updateInternalConns(*jsnCfg.Cdrs_conns, utils.MetaCDRs)
+		acS.CDRsConns = tagInternalConns(*jsnCfg.Cdrs_conns, utils.MetaCDRs)
 	}
 	if jsnCfg.Ees_conns != nil {
-		acS.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+		acS.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		acS.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+		acS.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.Stats_conns != nil {
-		acS.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+		acS.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
 	}
 	if jsnCfg.Accounts_conns != nil {
-		acS.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
+		acS.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	if jsnCfg.Tenants != nil {
 		acS.Tenants = utils.SliceStringPointer(slices.Clone(*jsnCfg.Tenants))
@@ -158,19 +158,19 @@ func (acS ActionSCfg) AsMapInterface() any {
 		utils.OptsCfg:                   opts,
 	}
 	if acS.CDRsConns != nil {
-		mp[utils.CDRsConnsCfg] = getInternalJSONConns(acS.CDRsConns)
+		mp[utils.CDRsConnsCfg] = stripInternalConns(acS.CDRsConns)
 	}
 	if acS.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(acS.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = stripInternalConns(acS.ThresholdSConns)
 	}
 	if acS.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = getInternalJSONConns(acS.StatSConns)
+		mp[utils.StatSConnsCfg] = stripInternalConns(acS.StatSConns)
 	}
 	if acS.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = getInternalJSONConns(acS.AccountSConns)
+		mp[utils.AccountSConnsCfg] = stripInternalConns(acS.AccountSConns)
 	}
 	if acS.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = getInternalJSONConns(acS.EEsConns)
+		mp[utils.EEsConnsCfg] = stripInternalConns(acS.EEsConns)
 	}
 	if acS.Tenants != nil {
 		mp[utils.Tenants] = slices.Clone(*acS.Tenants)
@@ -314,19 +314,19 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.CDRsConns, v2.CDRsConns) {
-		d.Cdrs_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CDRsConns))
+		d.Cdrs_conns = utils.SliceStringPointer(stripInternalConns(v2.CDRsConns))
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
 	}
 
 	if v1.Tenants != v2.Tenants {
@@ -344,7 +344,7 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
 	if !slices.Equal(v1.DynaprepaidActionProfile, v2.DynaprepaidActionProfile) {
-		d.Dynaprepaid_actionprofile = utils.SliceStringPointer(getInternalJSONConns(v2.DynaprepaidActionProfile))
+		d.Dynaprepaid_actionprofile = utils.SliceStringPointer(stripInternalConns(v2.DynaprepaidActionProfile))
 	}
 	d.Opts = diffActionsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
