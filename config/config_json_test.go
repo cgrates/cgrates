@@ -730,20 +730,22 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
-		Enabled:              utils.BoolPointer(false),
-		Listen:               utils.StringPointer("127.0.0.1:3868"),
-		Listen_net:           utils.StringPointer(utils.TCP),
-		Dictionaries_path:    utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Sessions_conns:       &[]string{rpcclient.BiRPCInternal},
-		Origin_host:          utils.StringPointer("CGR-DA"),
-		Origin_realm:         utils.StringPointer("cgrates.org"),
-		Vendor_id:            utils.IntPointer(0),
-		Product_name:         utils.StringPointer("CGRateS"),
-		Synced_conn_requests: utils.BoolPointer(false),
-		Asr_template:         utils.StringPointer(""),
-		Rar_template:         utils.StringPointer(""),
-		Forced_disconnect:    utils.StringPointer(utils.MetaNone),
-		Request_processors:   &[]*ReqProcessorJsnCfg{},
+		Enabled:            utils.BoolPointer(false),
+		Listen:             utils.StringPointer("127.0.0.1:3868"),
+		ListenNet:          utils.StringPointer(utils.TCP),
+		DictionariesPath:   utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
+		SessionSConns:      &[]string{rpcclient.BiRPCInternal},
+		StatSConns:         &[]string{},
+		ThresholdSConns:    &[]string{},
+		OriginHost:         utils.StringPointer("CGR-DA"),
+		OriginRealm:        utils.StringPointer("cgrates.org"),
+		VendorID:           utils.IntPointer(0),
+		ProductName:        utils.StringPointer("CGRateS"),
+		SyncedConnRequests: utils.BoolPointer(false),
+		ASRTemplate:        utils.StringPointer(""),
+		RARTemplate:        utils.StringPointer(""),
+		ForcedDisconnect:   utils.StringPointer(utils.MetaNone),
+		RequestProcessors:  &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -759,18 +761,20 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 
 func TestRadiusAgentJsonCfg(t *testing.T) {
 	eCfg := &RadiusAgentJsonCfg{
-		Enabled:     utils.BoolPointer(false),
-		Listen_net:  utils.StringPointer("udp"),
-		Listen_auth: utils.StringPointer("127.0.0.1:1812"),
-		Listen_acct: utils.StringPointer("127.0.0.1:1813"),
-		Client_secrets: map[string]string{
+		Enabled:    utils.BoolPointer(false),
+		ListenNet:  utils.StringPointer("udp"),
+		ListenAuth: utils.StringPointer("127.0.0.1:1812"),
+		ListenAcct: utils.StringPointer("127.0.0.1:1813"),
+		ClientSecrets: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
-		Client_dictionaries: map[string]string{
+		ClientDictionaries: map[string]string{
 			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
 		},
-		Sessions_conns:     &[]string{utils.MetaInternal},
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		SessionSConns:     &[]string{utils.MetaInternal},
+		StatSConns:        &[]string{},
+		ThresholdSConns:   &[]string{},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -780,8 +784,8 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 	if err := dfCgrJSONCfg.GetSection(context.Background(), RadiusAgentJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		rcv := *cfg.Request_processors
-		t.Errorf("Received: %+v", rcv)
+		rcv := *cfg.RequestProcessors
+		t.Errorf("Received: %+v", utils.ToJSON(rcv))
 	}
 }
 
@@ -809,9 +813,11 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 			},
 		},
 
-		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
-		Timezone:           utils.StringPointer(""),
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		SessionSConns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
+		StatSConns:        &[]string{},
+		ThresholdSConns:   &[]string{},
+		Timezone:          utils.StringPointer(""),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -2083,8 +2089,11 @@ func TestDfEventReaderCfg(t *testing.T) {
 			Value: utils.StringPointer("~*req.13"), Mandatory: utils.BoolPointer(true)},
 	}
 	eCfg := &ERsJsonCfg{
-		Enabled:       utils.BoolPointer(false),
-		SessionSConns: &[]string{utils.MetaInternal},
+		Enabled:         utils.BoolPointer(false),
+		SessionSConns:   &[]string{utils.MetaInternal},
+		EEsConns:        &[]string{},
+		StatSConns:      &[]string{},
+		ThresholdSConns: &[]string{},
 		Readers: &[]*EventReaderJsonCfg{
 			{
 				ID:                   utils.StringPointer(utils.MetaDefault),

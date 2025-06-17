@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -29,9 +30,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor, agReq *AgentRequest,
-	agentName string, connMgr *engine.ConnManager, sessionsConns []string,
+func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
+	agReq *AgentRequest, agentName string, connMgr *engine.ConnManager,
+	sessionsConns, statsConns, thConns []string,
 	filterS *engine.FilterS) (_ bool, err error) {
+	startTime := time.Now()
 	if pass, err := filterS.Pass(ctx, agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
@@ -123,6 +126,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return
 	}
+	endTime := time.Now()
 	if reqProcessor.Flags.Has(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, %s reply: %s",
@@ -132,6 +136,60 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, %s reply: %s",
 				agentName, agentName[:len(agentName)-5], agReq.Reply))
+	}
+	if reqProcessor.Flags.Has(utils.MetaDryRun) {
+		return true, nil
+	}
+
+	var rawStatIDs, rawThIDs string
+	switch agentName {
+	case utils.DiameterAgent:
+		rawStatIDs = reqProcessor.Flags.ParamValue(utils.MetaDAStats)
+		rawThIDs = reqProcessor.Flags.ParamValue(utils.MetaDAThresholds)
+	case utils.HTTPAgent:
+		rawStatIDs = reqProcessor.Flags.ParamValue(utils.MetaHAStats)
+		rawThIDs = reqProcessor.Flags.ParamValue(utils.MetaHAThresholds)
+	case utils.DNSAgent:
+		rawStatIDs = reqProcessor.Flags.ParamValue(utils.MetaDNSStats)
+		rawThIDs = reqProcessor.Flags.ParamValue(utils.MetaDNSThresholds)
+	}
+
+	// Return early if nothing to process.
+	if rawStatIDs == "" && rawThIDs == "" {
+		return true, nil
+	}
+
+	// Clone is needed to prevent data races if requests are sent
+	// asynchronously.
+	ev := cgrEv.Clone()
+
+	ev.Event[utils.StartTime] = startTime
+	ev.Event[utils.EndTime] = endTime
+	ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)
+	ev.Event[utils.Source] = agentName
+	ev.APIOpts[utils.MetaEventType] = utils.ProcessTime
+
+	if rawStatIDs != "" {
+		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
+		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
+		var reply []string
+		if err := connMgr.Call(ctx, statsConns, utils.StatSv1ProcessEvent,
+			ev, &reply); err != nil {
+			return false, fmt.Errorf("failed to process %s event in %s: %v",
+				agentName, utils.StatS, err)
+		}
+		// NOTE: ProfileIDs APIOpts key persists for the ThresholdS request,
+		// although it would be ignored. Might want to delete it.
+	}
+	if rawThIDs != "" {
+		thIDs := strings.Split(rawThIDs, utils.ANDSep)
+		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+		var reply []string
+		if err := connMgr.Call(ctx, thConns, utils.ThresholdSv1ProcessEvent,
+			ev, &reply); err != nil {
+			return false, fmt.Errorf("failed to process %s event in %s: %v",
+				agentName, utils.ThresholdS, err)
+		}
 	}
 	return true, nil
 }

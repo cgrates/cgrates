@@ -420,31 +420,31 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.ListenBiGob = *jsnCfg.ListenBiGob
 	}
 	if jsnCfg.ChargerSConns != nil {
-		scfg.ChargerSConns = updateInternalConns(*jsnCfg.ChargerSConns, utils.MetaChargers)
+		scfg.ChargerSConns = tagInternalConns(*jsnCfg.ChargerSConns, utils.MetaChargers)
 	}
 	if jsnCfg.ResourceSConns != nil {
-		scfg.ResourceSConns = updateInternalConns(*jsnCfg.ResourceSConns, utils.MetaResources)
+		scfg.ResourceSConns = tagInternalConns(*jsnCfg.ResourceSConns, utils.MetaResources)
 	}
 	if jsnCfg.IPsConns != nil {
-		scfg.IPsConns = updateInternalConns(*jsnCfg.IPsConns, utils.MetaIPs)
+		scfg.IPsConns = tagInternalConns(*jsnCfg.IPsConns, utils.MetaIPs)
 	}
 	if jsnCfg.ThresholdSConns != nil {
-		scfg.ThresholdSConns = updateInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+		scfg.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
 	}
 	if jsnCfg.StatSConns != nil {
-		scfg.StatSConns = updateInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+		scfg.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
 	}
 	if jsnCfg.RouteSConns != nil {
-		scfg.RouteSConns = updateInternalConns(*jsnCfg.RouteSConns, utils.MetaRoutes)
+		scfg.RouteSConns = tagInternalConns(*jsnCfg.RouteSConns, utils.MetaRoutes)
 	}
 	if jsnCfg.AttributeSConns != nil {
-		scfg.AttributeSConns = updateInternalConns(*jsnCfg.AttributeSConns, utils.MetaAttributes)
+		scfg.AttributeSConns = tagInternalConns(*jsnCfg.AttributeSConns, utils.MetaAttributes)
 	}
 	if jsnCfg.CDRsConns != nil {
-		scfg.CDRsConns = updateInternalConns(*jsnCfg.CDRsConns, utils.MetaCDRs)
+		scfg.CDRsConns = tagInternalConns(*jsnCfg.CDRsConns, utils.MetaCDRs)
 	}
 	if jsnCfg.ActionSConns != nil {
-		scfg.ActionSConns = updateInternalConns(*jsnCfg.ActionSConns, utils.MetaActions)
+		scfg.ActionSConns = tagInternalConns(*jsnCfg.ActionSConns, utils.MetaActions)
 	}
 	if jsnCfg.ReplicationConns != nil {
 		scfg.ReplicationConns = make([]string, len(*jsnCfg.ReplicationConns))
@@ -456,10 +456,10 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.RateSConns != nil {
-		scfg.RateSConns = updateInternalConns(*jsnCfg.RateSConns, utils.MetaRates)
+		scfg.RateSConns = tagInternalConns(*jsnCfg.RateSConns, utils.MetaRates)
 	}
 	if jsnCfg.AccountSConns != nil {
-		scfg.AccountSConns = updateInternalConns(*jsnCfg.AccountSConns, utils.MetaAccounts)
+		scfg.AccountSConns = tagInternalConns(*jsnCfg.AccountSConns, utils.MetaAccounts)
 	}
 	if jsnCfg.StoreSCosts != nil {
 		scfg.StoreSCosts = *jsnCfg.StoreSCosts
@@ -585,37 +585,37 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		mp[utils.MinDurLowBalanceCfg] = scfg.MinDurLowBalance.String()
 	}
 	if scfg.ChargerSConns != nil {
-		mp[utils.ChargerSConnsCfg] = getInternalJSONConns(scfg.ChargerSConns)
+		mp[utils.ChargerSConnsCfg] = stripInternalConns(scfg.ChargerSConns)
 	}
 	if scfg.ResourceSConns != nil {
-		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(scfg.ResourceSConns)
+		mp[utils.ResourceSConnsCfg] = stripInternalConns(scfg.ResourceSConns)
 	}
 	if scfg.IPsConns != nil {
-		mp[utils.IPsConnsCfg] = getInternalJSONConns(scfg.IPsConns)
+		mp[utils.IPsConnsCfg] = stripInternalConns(scfg.IPsConns)
 	}
 	if scfg.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(scfg.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = stripInternalConns(scfg.ThresholdSConns)
 	}
 	if scfg.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = getInternalJSONConns(scfg.StatSConns)
+		mp[utils.StatSConnsCfg] = stripInternalConns(scfg.StatSConns)
 	}
 	if scfg.RouteSConns != nil {
-		mp[utils.RouteSConnsCfg] = getInternalJSONConns(scfg.RouteSConns)
+		mp[utils.RouteSConnsCfg] = stripInternalConns(scfg.RouteSConns)
 	}
 	if scfg.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(scfg.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = stripInternalConns(scfg.AttributeSConns)
 	}
 	if scfg.CDRsConns != nil {
-		mp[utils.CDRsConnsCfg] = getInternalJSONConns(scfg.CDRsConns)
+		mp[utils.CDRsConnsCfg] = stripInternalConns(scfg.CDRsConns)
 	}
 	if scfg.ActionSConns != nil {
-		mp[utils.ActionSConnsCfg] = getInternalJSONConns(scfg.ActionSConns)
+		mp[utils.ActionSConnsCfg] = stripInternalConns(scfg.ActionSConns)
 	}
 	if scfg.RateSConns != nil {
-		mp[utils.RateSConnsCfg] = getInternalJSONConns(scfg.RateSConns)
+		mp[utils.RateSConnsCfg] = stripInternalConns(scfg.RateSConns)
 	}
 	if scfg.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = getInternalJSONConns(scfg.AccountSConns)
+		mp[utils.AccountSConnsCfg] = stripInternalConns(scfg.AccountSConns)
 	}
 	return mp
 }
@@ -1020,37 +1020,37 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 		d.ListenBiGob = utils.StringPointer(v2.ListenBiGob)
 	}
 	if !slices.Equal(v1.ChargerSConns, v2.ChargerSConns) {
-		d.ChargerSConns = utils.SliceStringPointer(getInternalJSONConns(v2.ChargerSConns))
+		d.ChargerSConns = utils.SliceStringPointer(stripInternalConns(v2.ChargerSConns))
 	}
 	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
-		d.ResourceSConns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
+		d.ResourceSConns = utils.SliceStringPointer(stripInternalConns(v2.ResourceSConns))
 	}
 	if !slices.Equal(v1.IPsConns, v2.IPsConns) {
-		d.IPsConns = utils.SliceStringPointer(getInternalJSONConns(v2.IPsConns))
+		d.IPsConns = utils.SliceStringPointer(stripInternalConns(v2.IPsConns))
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.ThresholdSConns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.StatSConns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.RouteSConns, v2.RouteSConns) {
-		d.RouteSConns = utils.SliceStringPointer(getInternalJSONConns(v2.RouteSConns))
+		d.RouteSConns = utils.SliceStringPointer(stripInternalConns(v2.RouteSConns))
 	}
 	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.CDRsConns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+		d.CDRsConns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
 	}
 	if !slices.Equal(v1.CDRsConns, v2.CDRsConns) {
-		d.ReplicationConns = utils.SliceStringPointer(getInternalJSONConns(v2.CDRsConns))
+		d.ReplicationConns = utils.SliceStringPointer(stripInternalConns(v2.CDRsConns))
 	}
 	if !slices.Equal(v1.ReplicationConns, v2.ReplicationConns) {
 		d.AttributeSConns = utils.SliceStringPointer(v2.ReplicationConns)
 	}
 	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
-		d.RateSConns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
+		d.RateSConns = utils.SliceStringPointer(stripInternalConns(v2.RateSConns))
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.AccountSConns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+		d.AccountSConns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
 	}
 	if v1.StoreSCosts != v2.StoreSCosts {
 		d.StoreSCosts = utils.BoolPointer(v2.StoreSCosts)
@@ -1074,7 +1074,7 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 		d.MinDurLowBalance = utils.StringPointer(v2.MinDurLowBalance.String())
 	}
 	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
-		d.ActionSConns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
+		d.ActionSConns = utils.SliceStringPointer(stripInternalConns(v2.ActionSConns))
 	}
 	d.Stir = diffSTIRJsonCfg(d.Stir, v1.STIRCfg, v2.STIRCfg)
 	if d.DefaultUsage == nil {

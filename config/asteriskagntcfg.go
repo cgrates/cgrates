@@ -118,7 +118,7 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		aCfg.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+		aCfg.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	if jsnCfg.Create_cdr != nil {
 		aCfg.CreateCDR = *jsnCfg.Create_cdr
@@ -148,7 +148,7 @@ func (aCfg AsteriskAgentCfg) AsMapInterface() any {
 		mp[utils.AsteriskConnsCfg] = conns
 	}
 	if aCfg.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(aCfg.SessionSConns)
+		mp[utils.SessionSConnsCfg] = stripInternalConns(aCfg.SessionSConns)
 	}
 	return mp
 }
@@ -243,7 +243,7 @@ func diffAsteriskAgentJsonCfg(d *AsteriskAgentJsonCfg, v1, v2 *AsteriskAgentCfg)
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	if v1.CreateCDR != v2.CreateCDR {
 		d.Create_cdr = utils.BoolPointer(v2.CreateCDR)

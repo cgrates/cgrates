@@ -254,6 +254,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 				da.filterS, nil),
 			utils.DiameterAgent, da.connMgr,
 			da.cgrCfg.DiameterAgentCfg().SessionSConns,
+			da.cgrCfg.DiameterAgentCfg().StatSConns,
+			da.cgrCfg.DiameterAgentCfg().ThresholdSConns,
 			da.filterS)
 		if lclProcessed {
 			processed = lclProcessed

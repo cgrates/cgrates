@@ -105,10 +105,10 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		st.ThresholdSConns = updateInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
+		st.ThresholdSConns = tagInternalConns(*jsnCfg.Thresholds_conns, utils.MetaThresholds)
 	}
 	if jsnCfg.Ees_conns != nil {
-		st.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+		st.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		st.EEsExporterIDs = append(st.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
@@ -172,10 +172,10 @@ func (st StatSCfg) AsMapInterface() any {
 		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*st.NotExistsIndexedFields)
 	}
 	if st.ThresholdSConns != nil {
-		mp[utils.ThresholdSConnsCfg] = getInternalJSONConns(st.ThresholdSConns)
+		mp[utils.ThresholdSConnsCfg] = stripInternalConns(st.ThresholdSConns)
 	}
 	if st.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = getInternalJSONConns(st.EEsConns)
+		mp[utils.EEsConnsCfg] = stripInternalConns(st.EEsConns)
 	}
 	return mp
 }
@@ -297,10 +297,10 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 		d.Store_uncompressed_limit = utils.IntPointer(v2.StoreUncompressedLimit)
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
-		d.Thresholds_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ThresholdSConns))
+		d.Thresholds_conns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
 		d.Ees_exporter_ids = &v2.EEsExporterIDs

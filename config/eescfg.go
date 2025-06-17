@@ -71,7 +71,7 @@ func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][
 		eeS.Cache[kJsn] = val
 	}
 	if jsnCfg.Attributes_conns != nil {
-		eeS.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
+		eeS.AttributeSConns = tagInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	return eeS.appendEEsExporters(jsnCfg.Exporters, msgTemplates)
 }
@@ -129,7 +129,7 @@ func (eeS EEsCfg) AsMapInterface() any {
 		utils.EnabledCfg: eeS.Enabled,
 	}
 	if eeS.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(eeS.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = stripInternalConns(eeS.AttributeSConns)
 	}
 	if eeS.Cache != nil {
 		cache := make(map[string]any, len(eeS.Cache))
@@ -560,7 +560,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.FailedPostsDir = *jsnEec.Failed_posts_dir
 	}
 	if jsnEec.Efs_conns != nil {
-		eeC.EFsConns = updateInternalConns(*jsnEec.Efs_conns, utils.MetaEFs)
+		eeC.EFsConns = tagInternalConns(*jsnEec.Efs_conns, utils.MetaEFs)
 	}
 	if jsnEec.Opts != nil {
 		err = eeC.Opts.loadFromJSONCfg(jsnEec.Opts)
@@ -941,7 +941,7 @@ func (eeC *EventExporterCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.OptsCfg:               eeC.Opts.AsMapInterface(),
 	}
 	if eeC.EFsConns != nil {
-		initialMP[utils.EFsConnsCfg] = getInternalJSONConns(eeC.EFsConns)
+		initialMP[utils.EFsConnsCfg] = stripInternalConns(eeC.EFsConns)
 	}
 	if eeC.Fields != nil {
 		fields := make([]map[string]any, 0, len(eeC.Fields))
@@ -1775,7 +1775,7 @@ func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg) *EEsJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
 	}
 	d.Cache = diffCacheParamsJsonCfg(d.Cache, v2.Cache)
 	d.Exporters = diffEventExportersJsonCfg(d.Exporters, v1.Exporters, v2.Exporters)

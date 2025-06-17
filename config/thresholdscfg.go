@@ -111,7 +111,7 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 		t.NestedFields = *jsnCfg.Nested_fields
 	}
 	if jsnCfg.Actions_conns != nil {
-		t.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
+		t.ActionSConns = tagInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
 	}
 	if jsnCfg.Opts != nil {
 		err = t.Opts.loadFromJSONCfg(jsnCfg.Opts)
@@ -152,7 +152,7 @@ func (t ThresholdSCfg) AsMapInterface() any {
 		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*t.NotExistsIndexedFields)
 	}
 	if t.ActionSConns != nil {
-		mp[utils.ActionSConnsCfg] = getInternalJSONConns(t.ActionSConns)
+		mp[utils.ActionSConnsCfg] = stripInternalConns(t.ActionSConns)
 	}
 	return mp
 }
@@ -261,7 +261,7 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
 	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
-		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
+		d.Actions_conns = utils.SliceStringPointer(stripInternalConns(v2.ActionSConns))
 	}
 	d.Opts = diffThresholdsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d

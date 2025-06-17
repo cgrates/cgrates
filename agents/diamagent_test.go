@@ -455,7 +455,7 @@ func TestProcessRequest(t *testing.T) {
 	}
 	srv, _ := birpc.NewService(da, "", false)
 	da.ctx = context.WithClient(context.Background(), srv)
-	pr, err := processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err := processRequest(da.ctx, reqProcessor, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, nil, nil, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -484,7 +484,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, nil, nil, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -513,7 +513,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, nil, nil, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -544,7 +544,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, nil, nil, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -572,7 +572,7 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters, nil)
 
-	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, da.filterS)
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, da.cgrCfg.DiameterAgentCfg().SessionSConns, nil, nil, da.filterS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {

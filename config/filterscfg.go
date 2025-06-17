@@ -48,19 +48,19 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		return
 	}
 	if jsnCfg.Stats_conns != nil {
-		fSCfg.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+		fSCfg.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
 	}
 	if jsnCfg.Resources_conns != nil {
-		fSCfg.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
+		fSCfg.ResourceSConns = tagInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
 	if jsnCfg.Accounts_conns != nil {
-		fSCfg.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
+		fSCfg.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	if jsnCfg.Trends_conns != nil {
-		fSCfg.TrendSConns = updateInternalConns(*jsnCfg.Trends_conns, utils.MetaTrends)
+		fSCfg.TrendSConns = tagInternalConns(*jsnCfg.Trends_conns, utils.MetaTrends)
 	}
 	if jsnCfg.Rankings_conns != nil {
-		fSCfg.RankingSConns = updateInternalConns(*jsnCfg.Rankings_conns, utils.MetaRankings)
+		fSCfg.RankingSConns = tagInternalConns(*jsnCfg.Rankings_conns, utils.MetaRankings)
 	}
 	return
 }
@@ -69,19 +69,19 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 func (fSCfg FilterSCfg) AsMapInterface() any {
 	mp := make(map[string]any)
 	if fSCfg.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = getInternalJSONConns(fSCfg.StatSConns)
+		mp[utils.StatSConnsCfg] = stripInternalConns(fSCfg.StatSConns)
 	}
 	if fSCfg.ResourceSConns != nil {
-		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(fSCfg.ResourceSConns)
+		mp[utils.ResourceSConnsCfg] = stripInternalConns(fSCfg.ResourceSConns)
 	}
 	if fSCfg.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = getInternalJSONConns(fSCfg.AccountSConns)
+		mp[utils.AccountSConnsCfg] = stripInternalConns(fSCfg.AccountSConns)
 	}
 	if fSCfg.TrendSConns != nil {
-		mp[utils.TrendSConnsCfg] = getInternalJSONConns(fSCfg.TrendSConns)
+		mp[utils.TrendSConnsCfg] = stripInternalConns(fSCfg.TrendSConns)
 	}
 	if fSCfg.RankingSConns != nil {
-		mp[utils.RankingSConnsCfg] = getInternalJSONConns(fSCfg.RankingSConns)
+		mp[utils.RankingSConnsCfg] = stripInternalConns(fSCfg.RankingSConns)
 	}
 	return mp
 }
@@ -124,19 +124,19 @@ func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
 		d = new(FilterSJsonCfg)
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
-		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
+		d.Resources_conns = utils.SliceStringPointer(stripInternalConns(v2.ResourceSConns))
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
 	}
 	if !slices.Equal(v1.TrendSConns, v2.TrendSConns) {
-		d.Trends_conns = utils.SliceStringPointer(getInternalJSONConns(v2.TrendSConns))
+		d.Trends_conns = utils.SliceStringPointer(stripInternalConns(v2.TrendSConns))
 	}
 	if !slices.Equal(v1.RankingSConns, v2.RankingSConns) {
-		d.Rankings_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RankingSConns))
+		d.Rankings_conns = utils.SliceStringPointer(stripInternalConns(v2.RankingSConns))
 	}
 	return d
 }

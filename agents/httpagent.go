@@ -29,29 +29,34 @@ import (
 )
 
 // NewHttpAgent will construct a HTTPAgent
-func NewHTTPAgent(connMgr *engine.ConnManager, sessionConns []string,
+func NewHTTPAgent(connMgr *engine.ConnManager,
+	sessionConns, statsConns, thresholdsConns []string,
 	filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
 	reqProcessors []*config.RequestProcessor) *HTTPAgent {
 	return &HTTPAgent{
-		connMgr:       connMgr,
-		filterS:       filterS,
-		dfltTenant:    dfltTenant,
-		reqPayload:    reqPayload,
-		rplyPayload:   rplyPayload,
-		reqProcessors: reqProcessors,
-		sessionConns:  sessionConns,
+		connMgr:         connMgr,
+		filterS:         filterS,
+		dfltTenant:      dfltTenant,
+		reqPayload:      reqPayload,
+		rplyPayload:     rplyPayload,
+		reqProcessors:   reqProcessors,
+		sessionConns:    sessionConns,
+		statsConns:      statsConns,
+		thresholdsConns: thresholdsConns,
 	}
 }
 
 // HTTPAgent is a handler for HTTP requests
 type HTTPAgent struct {
-	connMgr       *engine.ConnManager
-	filterS       *engine.FilterS
-	dfltTenant    string
-	reqPayload    string
-	rplyPayload   string
-	reqProcessors []*config.RequestProcessor
-	sessionConns  []string
+	connMgr         *engine.ConnManager
+	filterS         *engine.FilterS
+	dfltTenant      string
+	reqPayload      string
+	rplyPayload     string
+	reqProcessors   []*config.RequestProcessor
+	sessionConns    []string
+	statsConns      []string
+	thresholdsConns []string
 }
 
 // ServeHTTP implements http.Handler interface
@@ -73,8 +78,9 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ha.filterS, nil)
-		lclProcessed, err := processRequest(context.TODO(), reqProcessor, agReq,
-			utils.HTTPAgent, ha.connMgr, ha.sessionConns,
+		lclProcessed, err := processRequest(context.TODO(),
+			reqProcessor, agReq, utils.HTTPAgent, ha.connMgr,
+			ha.sessionConns, ha.statsConns, ha.thresholdsConns,
 			agReq.filterS)
 		if err != nil {
 			utils.Logger.Warning(

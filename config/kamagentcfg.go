@@ -101,7 +101,7 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 		ka.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		ka.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+		ka.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	if jsnCfg.Create_cdr != nil {
 		ka.CreateCdr = *jsnCfg.Create_cdr
@@ -134,7 +134,7 @@ func (ka KamAgentCfg) AsMapInterface() any {
 		mp[utils.EvapiConnsCfg] = evapiConns
 	}
 	if ka.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(ka.SessionSConns)
+		mp[utils.SessionSConnsCfg] = stripInternalConns(ka.SessionSConns)
 	}
 	return mp
 }
@@ -218,7 +218,7 @@ func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonC
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	if v1.CreateCdr != v2.CreateCdr {
 		d.Create_cdr = utils.BoolPointer(v2.CreateCdr)

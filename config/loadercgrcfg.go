@@ -65,10 +65,10 @@ func (ld *LoaderCgrCfg) loadFromJSONCfg(jsnCfg *LoaderCfgJson) (err error) {
 		ld.FieldSeparator = rune(sepStr[0])
 	}
 	if jsnCfg.Caches_conns != nil {
-		ld.CachesConns = updateInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
+		ld.CachesConns = tagInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
 	}
 	if jsnCfg.Actions_conns != nil {
-		ld.ActionSConns = updateInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
+		ld.ActionSConns = tagInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
 	}
 	if jsnCfg.Gapi_credentials != nil {
 		ld.GapiCredentials = *jsnCfg.Gapi_credentials
@@ -88,10 +88,10 @@ func (ld LoaderCgrCfg) AsMapInterface() any {
 		utils.FieldSepCfg:       string(ld.FieldSeparator),
 	}
 	if ld.CachesConns != nil {
-		mp[utils.CachesConnsCfg] = getInternalJSONConns(ld.CachesConns)
+		mp[utils.CachesConnsCfg] = stripInternalConns(ld.CachesConns)
 	}
 	if ld.ActionSConns != nil {
-		mp[utils.ActionSConnsCfg] = getInternalJSONConns(ld.ActionSConns)
+		mp[utils.ActionSConnsCfg] = stripInternalConns(ld.ActionSConns)
 	}
 	if ld.GapiCredentials != nil {
 		mp[utils.GapiCredentialsCfg] = ld.GapiCredentials
@@ -153,10 +153,10 @@ func diffLoaderCfgJson(d *LoaderCfgJson, v1, v2 *LoaderCgrCfg) *LoaderCfgJson {
 		d.Field_separator = utils.StringPointer(string(v2.FieldSeparator))
 	}
 	if !slices.Equal(v1.CachesConns, v2.CachesConns) {
-		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CachesConns))
+		d.Caches_conns = utils.SliceStringPointer(stripInternalConns(v2.CachesConns))
 	}
 	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
-		d.Actions_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ActionSConns))
+		d.Actions_conns = utils.SliceStringPointer(stripInternalConns(v2.ActionSConns))
 	}
 	gc1 := string(v1.GapiCredentials)
 	gc2 := string(v2.GapiCredentials)

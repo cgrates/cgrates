@@ -421,7 +421,9 @@ const CGRATES_CFG_JSON = `
 "ers": {				// EventReaderService
 	"enabled": false,		// starts the EventReader service: <true|false>
 	"sessions_conns":["*internal"],	// RPC Connections IDs
-	// "ees_conns": [],		// connection for routing processed and invalid messages through EEs
+	"ees_conns": [],		// connection for routing processed and invalid messages through EEs
+	"stats_conns": [],		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],		// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"partial_cache_ttl": "1s",	// the duration to cache partial records when not pairing	
 	"readers": [
 		{
@@ -1022,6 +1024,8 @@ const CGRATES_CFG_JSON = `
 	"listen_net": "tcp",						// transport type for diameter <tcp|sctp>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sessions_conns": ["*birpc_internal"],
+	"stats_conns": [],						// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],						// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"origin_host": "CGR-DA",					// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",					// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,							// diameter Vendor-Id AVP used in replies
@@ -1046,6 +1050,8 @@ const CGRATES_CFG_JSON = `
 		"*default": "/usr/share/cgrates/radius/dict/",	// key represents the client IP or catch-all <*default|$client_ip>
 	},
 	"sessions_conns": ["*internal"],
+	"stats_conns": [],					// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],					// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"request_processors": []				// request processors to be applied to Radius messages
 },
 
@@ -1062,6 +1068,8 @@ const CGRATES_CFG_JSON = `
 		}
 	],
 	"sessions_conns": ["*internal"],
+	"stats_conns": [],				// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],				// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"timezone": "",					// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"request_processors": []			// request processors to be applied to DNS messages
 },
@@ -1072,9 +1080,9 @@ const CGRATES_CFG_JSON = `
 	"path": "/prometheus",			// endpoint for prometheus metrics
 	"collect_go_metrics": false, 		// include Go runtime metrics (memory, GC, goroutines)
 	"collect_process_metrics": false, 	// include process metrics (CPU, file descriptors)
-	// "cores_conns": [], 			// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>
-	// "stats_conns": [],			// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
-	// "stat_queue_ids": []			// StatQueue IDs to collect metrics from <[tenant]:ID>
+	"cores_conns": [], 			// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>
+	"stats_conns": [],			// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"stat_queue_ids": []			// StatQueue IDs to collect metrics from <[tenant]:ID>
 },
 
 
@@ -1823,6 +1831,8 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:5060",	// address where to listen for SIP requests <x.y.z.y:1234>
 	"listen_net": "udp",		// network to listen on <udp|tcp|tcp-tls>
 	"sessions_conns": ["*internal"],
+	"stats_conns": [],		// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],		// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"timezone": "",			// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"retransmission_timer": "1s",	// the duration to wait to receive an ACK before resending the reply
 	"request_processors": []	// request processors to be applied to SIP messages

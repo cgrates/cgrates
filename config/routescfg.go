@@ -156,19 +156,19 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 		rts.NotExistsIndexedFields = utils.SliceStringPointer(slices.Clone(*jsnCfg.Notexists_indexed_fields))
 	}
 	if jsnCfg.Attributes_conns != nil {
-		rts.AttributeSConns = updateInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
+		rts.AttributeSConns = tagInternalConns(*jsnCfg.Attributes_conns, utils.MetaAttributes)
 	}
 	if jsnCfg.Resources_conns != nil {
-		rts.ResourceSConns = updateInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
+		rts.ResourceSConns = tagInternalConns(*jsnCfg.Resources_conns, utils.MetaResources)
 	}
 	if jsnCfg.Stats_conns != nil {
-		rts.StatSConns = updateInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
+		rts.StatSConns = tagInternalConns(*jsnCfg.Stats_conns, utils.MetaStats)
 	}
 	if jsnCfg.Rates_conns != nil {
-		rts.RateSConns = updateInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
+		rts.RateSConns = tagInternalConns(*jsnCfg.Rates_conns, utils.MetaRates)
 	}
 	if jsnCfg.Accounts_conns != nil {
-		rts.AccountSConns = updateInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
+		rts.AccountSConns = tagInternalConns(*jsnCfg.Accounts_conns, utils.MetaAccounts)
 	}
 	if jsnCfg.Default_ratio != nil {
 		rts.DefaultRatio = *jsnCfg.Default_ratio
@@ -263,19 +263,19 @@ func (rts RouteSCfg) AsMapInterface() any {
 		mp[utils.NotExistsIndexedFieldsCfg] = slices.Clone(*rts.NotExistsIndexedFields)
 	}
 	if rts.AttributeSConns != nil {
-		mp[utils.AttributeSConnsCfg] = getInternalJSONConns(rts.AttributeSConns)
+		mp[utils.AttributeSConnsCfg] = stripInternalConns(rts.AttributeSConns)
 	}
 	if rts.ResourceSConns != nil {
-		mp[utils.ResourceSConnsCfg] = getInternalJSONConns(rts.ResourceSConns)
+		mp[utils.ResourceSConnsCfg] = stripInternalConns(rts.ResourceSConns)
 	}
 	if rts.StatSConns != nil {
-		mp[utils.StatSConnsCfg] = getInternalJSONConns(rts.StatSConns)
+		mp[utils.StatSConnsCfg] = stripInternalConns(rts.StatSConns)
 	}
 	if rts.RateSConns != nil {
-		mp[utils.RateSConnsCfg] = getInternalJSONConns(rts.RateSConns)
+		mp[utils.RateSConnsCfg] = stripInternalConns(rts.RateSConns)
 	}
 	if rts.AccountSConns != nil {
-		mp[utils.AccountSConnsCfg] = getInternalJSONConns(rts.AccountSConns)
+		mp[utils.AccountSConnsCfg] = stripInternalConns(rts.AccountSConns)
 	}
 	return mp
 }
@@ -405,19 +405,19 @@ func diffRouteSJsonCfg(d *RouteSJsonCfg, v1, v2 *RouteSCfg) *RouteSJsonCfg {
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
 	if !slices.Equal(v1.AttributeSConns, v2.AttributeSConns) {
-		d.Attributes_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AttributeSConns))
+		d.Attributes_conns = utils.SliceStringPointer(stripInternalConns(v2.AttributeSConns))
 	}
 	if !slices.Equal(v1.ResourceSConns, v2.ResourceSConns) {
-		d.Resources_conns = utils.SliceStringPointer(getInternalJSONConns(v2.ResourceSConns))
+		d.Resources_conns = utils.SliceStringPointer(stripInternalConns(v2.ResourceSConns))
 	}
 	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
-		d.Stats_conns = utils.SliceStringPointer(getInternalJSONConns(v2.StatSConns))
+		d.Stats_conns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
 	}
 	if !slices.Equal(v1.RateSConns, v2.RateSConns) {
-		d.Rates_conns = utils.SliceStringPointer(getInternalJSONConns(v2.RateSConns))
+		d.Rates_conns = utils.SliceStringPointer(stripInternalConns(v2.RateSConns))
 	}
 	if !slices.Equal(v1.AccountSConns, v2.AccountSConns) {
-		d.Accounts_conns = utils.SliceStringPointer(getInternalJSONConns(v2.AccountSConns))
+		d.Accounts_conns = utils.SliceStringPointer(stripInternalConns(v2.AccountSConns))
 	}
 	if v1.DefaultRatio != v2.DefaultRatio {
 		d.Default_ratio = utils.IntPointer(v2.DefaultRatio)

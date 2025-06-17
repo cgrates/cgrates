@@ -60,7 +60,7 @@ func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Ees_conns != nil {
-		cS.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+		cS.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCfg.Shutdown_timeout != nil {
 		if cS.ShutdownTimeout, err = utils.ParseDurationWithNanosecs(*jsnCfg.Shutdown_timeout); err != nil {
@@ -82,7 +82,7 @@ func (cS CoreSCfg) AsMapInterface() any {
 		mp[utils.CapsStatsIntervalCfg] = "0"
 	}
 	if cS.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = getInternalJSONConns(cS.EEsConns)
+		mp[utils.EEsConnsCfg] = stripInternalConns(cS.EEsConns)
 	}
 	if cS.ShutdownTimeout == 0 {
 		mp[utils.ShutdownTimeoutCfg] = "0"
@@ -130,7 +130,7 @@ func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 *CoreSCfg) *CoreSJsonCfg {
 		d.Caps_stats_interval = utils.StringPointer(v2.CapsStatsInterval.String())
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EEsConns))
+		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	if v1.ShutdownTimeout != v2.ShutdownTimeout {
 		d.Shutdown_timeout = utils.StringPointer(v2.ShutdownTimeout.String())

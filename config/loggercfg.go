@@ -53,7 +53,7 @@ func (loggCfg *LoggerCfg) loadFromJSONCfg(jsnLoggerCfg *LoggerJsonCfg) (err erro
 		loggCfg.Level = *jsnLoggerCfg.Level
 	}
 	if jsnLoggerCfg.Efs_conns != nil {
-		loggCfg.EFsConns = updateInternalConns(*jsnLoggerCfg.Efs_conns, utils.MetaEFs)
+		loggCfg.EFsConns = tagInternalConns(*jsnLoggerCfg.Efs_conns, utils.MetaEFs)
 	}
 	if jsnLoggerCfg.Opts != nil {
 		loggCfg.Opts.loadFromJSONCfg(jsnLoggerCfg.Opts)
@@ -69,7 +69,7 @@ func (loggCfg *LoggerCfg) AsMapInterface() any {
 		utils.OptsCfg:  loggCfg.Opts.AsMapInterface(),
 	}
 	if loggCfg.EFsConns != nil {
-		mp[utils.EFsConnsCfg] = getInternalJSONConns(loggCfg.EFsConns)
+		mp[utils.EFsConnsCfg] = stripInternalConns(loggCfg.EFsConns)
 	}
 	return mp
 }
@@ -164,7 +164,7 @@ func diffLoggerJsonCfg(d *LoggerJsonCfg, v1, v2 *LoggerCfg) *LoggerJsonCfg {
 		d.Level = utils.IntPointer(v2.Level)
 	}
 	if !slices.Equal(v1.EFsConns, v2.EFsConns) {
-		d.Efs_conns = utils.SliceStringPointer(getInternalJSONConns(v2.EFsConns))
+		d.Efs_conns = utils.SliceStringPointer(stripInternalConns(v2.EFsConns))
 	}
 	d.Opts = diffLoggerOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d

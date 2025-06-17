@@ -103,7 +103,7 @@ func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg) (err erro
 		jaCfg.URL = *jsnCfg.Url
 	}
 	if jsnCfg.Sessions_conns != nil {
-		jaCfg.SessionSConns = updateBiRPCInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+		jaCfg.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
 	}
 	if jsnCfg.Janus_conns != nil {
 		jaCfg.JanusConns = make([]*JanusConn, len(*jsnCfg.Janus_conns))
@@ -131,7 +131,7 @@ func (jaCfg JanusAgentCfg) AsMapInterface() any {
 	}
 	mp[utils.RequestProcessorsCfg] = requestProcessors
 	if jaCfg.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = getBiRPCInternalJSONConns(jaCfg.SessionSConns)
+		mp[utils.SessionSConnsCfg] = stripInternalConns(jaCfg.SessionSConns)
 	}
 	janConns := make([]map[string]any, len(jaCfg.JanusConns))
 	for i, jc := range jaCfg.JanusConns {
@@ -246,7 +246,7 @@ func diffJanusAgentSJsonCfg(d *JanusAgentJsonCfg, v1, v2 *JanusAgentCfg) *JanusA
 		d.Url = utils.StringPointer(v2.URL)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.SessionSConns))
+		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
 	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	d.Janus_conns = diffJanusConnsJsonCfg(d.Janus_conns, v1.JanusConns, v2.JanusConns)

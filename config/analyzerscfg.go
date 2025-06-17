@@ -78,7 +78,7 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Ees_conns != nil {
-		alS.EEsConns = updateInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+		alS.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
 	}
 	if jsnCfg.Cleanup_interval != nil {
 		if alS.CleanupInterval, err = time.ParseDuration(*jsnCfg.Cleanup_interval); err != nil {
@@ -105,7 +105,7 @@ func (alS AnalyzerSCfg) AsMapInterface() any {
 		utils.OptsCfg:            opts,
 	}
 	if alS.EEsConns != nil {
-		mp[utils.EEsConnsCfg] = getInternalJSONConns(alS.EEsConns)
+		mp[utils.EEsConnsCfg] = stripInternalConns(alS.EEsConns)
 	}
 	return mp
 }
@@ -180,7 +180,7 @@ func diffAnalyzerSJsonCfg(d *AnalyzerSJsonCfg, v1, v2 *AnalyzerSCfg) *AnalyzerSJ
 		d.Ttl = utils.StringPointer(v2.TTL.String())
 	}
 	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
-		d.Ees_conns = utils.SliceStringPointer(getBiRPCInternalJSONConns(v2.EEsConns))
+		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
 	}
 	if v1.CleanupInterval != v2.CleanupInterval {
 		d.Cleanup_interval = utils.StringPointer(v2.CleanupInterval.String())

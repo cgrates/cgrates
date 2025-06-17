@@ -29,12 +29,14 @@ import (
 func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Id:              utils.StringPointer("RandomID"),
-			Url:             utils.StringPointer("/randomURL"),
-			Sessions_conns:  &[]string{"*internal"},
-			Reply_payload:   utils.StringPointer(utils.MetaXml),
-			Request_payload: utils.StringPointer(utils.MetaUrl),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:              utils.StringPointer("RandomID"),
+			URL:             utils.StringPointer("/randomURL"),
+			SessionSConns:   &[]string{"*internal"},
+			StatSConns:      &[]string{"*internal"},
+			ThresholdSConns: &[]string{"*internal"},
+			ReplyPayload:    utils.StringPointer(utils.MetaXml),
+			RequestPayload:  utils.StringPointer(utils.MetaUrl),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("OutboundAUTHDryRun"),
 					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -57,11 +59,13 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 	}
 	expected := HTTPAgentCfgs{
 		{
-			ID:             "RandomID",
-			URL:            "/randomURL",
-			SessionSConns:  []string{"*internal:*sessions"},
-			RequestPayload: "*url",
-			ReplyPayload:   "*xml",
+			ID:              "RandomID",
+			URL:             "/randomURL",
+			SessionSConns:   []string{"*internal:*sessions"},
+			StatSConns:      []string{"*internal:*stats"},
+			ThresholdSConns: []string{"*internal:*thresholds"},
+			RequestPayload:  "*url",
+			ReplyPayload:    "*xml",
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "OutboundAUTHDryRun",
 				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -91,12 +95,14 @@ func TestHttpAgentCfgsloadFromJsonCfgCase1(t *testing.T) {
 func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Id:              utils.StringPointer("conecto1"),
-			Url:             utils.StringPointer("/conecto"),
-			Sessions_conns:  &[]string{utils.MetaLocalHost},
-			Request_payload: utils.StringPointer(utils.MetaUrl),
-			Reply_payload:   utils.StringPointer(utils.MetaXml),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:              utils.StringPointer("conecto1"),
+			URL:             utils.StringPointer("/conecto"),
+			SessionSConns:   &[]string{utils.MetaLocalHost},
+			StatSConns:      &[]string{utils.MetaLocalHost},
+			ThresholdSConns: &[]string{utils.MetaLocalHost},
+			RequestPayload:  utils.StringPointer(utils.MetaUrl),
+			ReplyPayload:    utils.StringPointer(utils.MetaXml),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("OutboundAUTHDryRun"),
 					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -142,12 +148,14 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 				}},
 		},
 		{
-			Id:              utils.StringPointer("conecto_xml"),
-			Url:             utils.StringPointer("/conecto_xml"),
-			Sessions_conns:  &[]string{utils.MetaLocalHost},
-			Request_payload: utils.StringPointer("*xml"),
-			Reply_payload:   utils.StringPointer("*xml"),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:              utils.StringPointer("conecto_xml"),
+			URL:             utils.StringPointer("/conecto_xml"),
+			SessionSConns:   &[]string{utils.MetaLocalHost},
+			StatSConns:      &[]string{utils.MetaLocalHost},
+			ThresholdSConns: &[]string{utils.MetaLocalHost},
+			RequestPayload:  utils.StringPointer("*xml"),
+			ReplyPayload:    utils.StringPointer("*xml"),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("cdr_from_xml"),
 					Tenant:         utils.StringPointer("cgrates.org"),
@@ -160,11 +168,13 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 	}
 	expected := HTTPAgentCfgs{
 		&HTTPAgentCfg{
-			ID:             "conecto1",
-			URL:            "/conecto",
-			SessionSConns:  []string{utils.MetaLocalHost},
-			RequestPayload: utils.MetaUrl,
-			ReplyPayload:   utils.MetaXml,
+			ID:              "conecto1",
+			URL:             "/conecto",
+			SessionSConns:   []string{utils.MetaLocalHost},
+			StatSConns:      []string{utils.MetaLocalHost},
+			ThresholdSConns: []string{utils.MetaLocalHost},
+			RequestPayload:  utils.MetaUrl,
+			ReplyPayload:    utils.MetaXml,
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID:            "OutboundAUTHDryRun",
@@ -204,11 +214,13 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 					}},
 				}},
 		}, &HTTPAgentCfg{
-			ID:             "conecto_xml",
-			URL:            "/conecto_xml",
-			SessionSConns:  []string{utils.MetaLocalHost},
-			RequestPayload: utils.MetaXml,
-			ReplyPayload:   utils.MetaXml,
+			ID:              "conecto_xml",
+			URL:             "/conecto_xml",
+			SessionSConns:   []string{utils.MetaLocalHost},
+			StatSConns:      []string{utils.MetaLocalHost},
+			ThresholdSConns: []string{utils.MetaLocalHost},
+			RequestPayload:  utils.MetaXml,
+			ReplyPayload:    utils.MetaXml,
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "cdr_from_xml",
 				Tenant:        utils.NewRSRParsersMustCompile("cgrates.org", utils.InfieldSep),
@@ -230,12 +242,12 @@ func TestHttpAgentCfgsloadFromJsonCfgCase2(t *testing.T) {
 
 func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	jsnhttpCfg := &HttpAgentJsonCfg{
-		Id:              utils.StringPointer("conecto1"),
-		Url:             utils.StringPointer("/conecto"),
-		Sessions_conns:  &[]string{utils.MetaLocalHost},
-		Request_payload: utils.StringPointer("*url"),
-		Reply_payload:   utils.StringPointer("*xml"),
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		ID:             utils.StringPointer("conecto1"),
+		URL:            utils.StringPointer("/conecto"),
+		SessionSConns:  &[]string{utils.MetaLocalHost},
+		RequestPayload: utils.StringPointer("*url"),
+		ReplyPayload:   utils.StringPointer("*xml"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
 				Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -272,12 +284,12 @@ func TestHttpAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Id:              utils.StringPointer("conecto1"),
-			Url:             utils.StringPointer("/conecto"),
-			Sessions_conns:  &[]string{utils.MetaLocalHost},
-			Request_payload: utils.StringPointer(utils.MetaUrl),
-			Reply_payload:   utils.StringPointer(utils.MetaXml),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:             utils.StringPointer("conecto1"),
+			URL:            utils.StringPointer("/conecto"),
+			SessionSConns:  &[]string{utils.MetaLocalHost},
+			RequestPayload: utils.StringPointer(utils.MetaUrl),
+			ReplyPayload:   utils.StringPointer(utils.MetaXml),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("OutboundAUTHDryRun"),
 					Filters:        &[]string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -323,12 +335,12 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 				}},
 		},
 		{
-			Id:              utils.StringPointer("conecto_xml"),
-			Url:             utils.StringPointer("/conecto_xml"),
-			Sessions_conns:  &[]string{utils.MetaLocalHost},
-			Request_payload: utils.StringPointer("*xml"),
-			Reply_payload:   utils.StringPointer("*xml"),
-			Request_processors: &[]*ReqProcessorJsnCfg{
+			ID:             utils.StringPointer("conecto_xml"),
+			URL:            utils.StringPointer("/conecto_xml"),
+			SessionSConns:  &[]string{utils.MetaLocalHost},
+			RequestPayload: utils.StringPointer("*xml"),
+			ReplyPayload:   utils.StringPointer("*xml"),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{
 				{
 					ID:             utils.StringPointer("cdr_from_xml"),
 					Tenant:         utils.StringPointer("a{*"),
@@ -349,7 +361,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase4(t *testing.T) {
 func TestHttpAgentCfgloadFromJsonCfgCase5(t *testing.T) {
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Request_processors: nil,
+			RequestProcessors: nil,
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -376,7 +388,7 @@ func TestHttpAgentCfgloadFromJsonCfgCase7(t *testing.T) {
 }`
 	cfgJSON := &[]*HttpAgentJsonCfg{
 		{
-			Id: utils.StringPointer("RandomID"),
+			ID: utils.StringPointer("RandomID"),
 		},
 	}
 	expected := HTTPAgentCfgs{
@@ -405,7 +417,9 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 	{
 		"id": "conecto1",
 		"url": "/conecto",
-		"sessions_conns": ["*birpc_internal", "*localhost","*internal"],
+		"sessions_conns": ["*birpc_internal", "*localhost","conn1"],
+		"stats_conns": ["*birpc_internal", "*localhost","conn1"],
+		"thresholds_conns": ["*birpc_internal", "*localhost","conn1"],
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -435,11 +449,13 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 }`
 	eMap := []map[string]any{
 		{
-			utils.IDCfg:             "conecto1",
-			utils.URLCfg:            "/conecto",
-			utils.SessionSConnsCfg:  []string{rpcclient.BiRPCInternal, "*localhost", "*internal"},
-			utils.RequestPayloadCfg: "*url",
-			utils.ReplyPayloadCfg:   "*xml",
+			utils.IDCfg:              "conecto1",
+			utils.URLCfg:             "/conecto",
+			utils.SessionSConnsCfg:   []string{rpcclient.BiRPCInternal, "*localhost", "conn1"},
+			utils.StatSConnsCfg:      []string{rpcclient.BiRPCInternal, "*localhost", "conn1"},
+			utils.ThresholdSConnsCfg: []string{rpcclient.BiRPCInternal, "*localhost", "conn1"},
+			utils.RequestPayloadCfg:  "*url",
+			utils.ReplyPayloadCfg:    "*xml",
 			utils.RequestProcessorsCfg: []map[string]any{
 				{
 					utils.IDCfg:            "OutboundAUTHDryRun",
@@ -469,11 +485,13 @@ func TestHttpAgentCfgAsMapInterface(t *testing.T) {
 func TestHTTPAgentCfgsClone(t *testing.T) {
 	ban := HTTPAgentCfgs{
 		{
-			ID:             "RandomID",
-			URL:            "/randomURL",
-			SessionSConns:  []string{"*internal:*sessions", "*conn1"},
-			RequestPayload: "*url",
-			ReplyPayload:   "*xml",
+			ID:              "RandomID",
+			URL:             "/randomURL",
+			SessionSConns:   []string{"*internal:*sessions", "*conn1"},
+			StatSConns:      []string{"*internal:*stats", "*conn1"},
+			ThresholdSConns: []string{"*internal:*thresholds", "*conn1"},
+			RequestPayload:  "*url",
+			ReplyPayload:    "*xml",
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "OutboundAUTHDryRun",
 				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
@@ -498,6 +516,12 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 	if (*rcv)[0].SessionSConns[1] = ""; ban[0].SessionSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+	if (*rcv)[0].StatSConns[1] = ""; ban[0].StatSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if (*rcv)[0].ThresholdSConns[1] = ""; ban[0].ThresholdSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
 	if (*rcv)[0].RequestProcessors[0].ID = ""; ban[0].RequestProcessors[0].ID != "OutboundAUTHDryRun" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
@@ -506,11 +530,13 @@ func TestHTTPAgentCfgsClone(t *testing.T) {
 func TestEqualsHTTPAgentCfgs(t *testing.T) {
 	v1 := HTTPAgentCfgs{
 		{
-			ID:             "RANDOM_ID",
-			URL:            "/url",
-			SessionSConns:  []string{"*localhost"},
-			RequestPayload: "*url",
-			ReplyPayload:   "*xml",
+			ID:              "RANDOM_ID",
+			URL:             "/url",
+			SessionSConns:   []string{"*localhost"},
+			StatSConns:      []string{"*localhost"},
+			ThresholdSConns: []string{"*localhost"},
+			RequestPayload:  "*url",
+			ReplyPayload:    "*xml",
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID:            "OutboundAUTHDryRun",
@@ -535,11 +561,13 @@ func TestEqualsHTTPAgentCfgs(t *testing.T) {
 
 	v2 := HTTPAgentCfgs{
 		{
-			ID:             "RANDOM_ID2",
-			URL:            "/url",
-			SessionSConns:  []string{"*localhost"},
-			RequestPayload: "*url",
-			ReplyPayload:   "*xml",
+			ID:              "RANDOM_ID2",
+			URL:             "/url",
+			SessionSConns:   []string{"*localhost"},
+			StatSConns:      []string{"*localhost"},
+			ThresholdSConns: []string{"*localhost"},
+			RequestPayload:  "*url",
+			ReplyPayload:    "*xml",
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID:            "OutboundAUTHDryRun",
@@ -581,16 +609,16 @@ func TestEqualsHTTPAgentCfgs(t *testing.T) {
 func TestGetHttpAgentJsonCfg(t *testing.T) {
 	d := []*HttpAgentJsonCfg{
 		{
-			Id:             utils.StringPointer("ID_1"),
-			Url:            utils.StringPointer("/url"),
-			Sessions_conns: &[]string{"*localhost"},
+			ID:            utils.StringPointer("ID_1"),
+			URL:           utils.StringPointer("/url"),
+			SessionSConns: &[]string{"*localhost"},
 		},
 	}
 
 	expected := &HttpAgentJsonCfg{
-		Id:             utils.StringPointer("ID_1"),
-		Url:            utils.StringPointer("/url"),
-		Sessions_conns: &[]string{"*localhost"},
+		ID:            utils.StringPointer("ID_1"),
+		URL:           utils.StringPointer("/url"),
+		SessionSConns: &[]string{"*localhost"},
 	}
 
 	rcv, idx := getHttpAgentJsonCfg(d, "ID_1")
@@ -639,11 +667,13 @@ func TestDiffHttpAgentJson(t *testing.T) {
 	var d *HttpAgentJsonCfg
 
 	v1 := &HTTPAgentCfg{
-		ID:             "http_agent",
-		URL:            "http_url",
-		SessionSConns:  []string{"*localhost"},
-		RequestPayload: "request_payload",
-		ReplyPayload:   "reply_payload",
+		ID:              "http_agent",
+		URL:             "http_url",
+		SessionSConns:   []string{"*localhost"},
+		StatSConns:      []string{"*localhost"},
+		ThresholdSConns: []string{"*localhost"},
+		RequestPayload:  "request_payload",
+		ReplyPayload:    "reply_payload",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID: "req_processors",
@@ -654,19 +684,23 @@ func TestDiffHttpAgentJson(t *testing.T) {
 	v2 := &HTTPAgentCfg{
 		ID:                "http_agent2",
 		URL:               "http_url2",
-		SessionSConns:     []string{"*birpc"},
+		SessionSConns:     []string{"*internal"},
+		StatSConns:        []string{"*internal"},
+		ThresholdSConns:   []string{"*internal"},
 		RequestPayload:    "request_payload2",
 		ReplyPayload:      "reply_payload2",
 		RequestProcessors: []*RequestProcessor{},
 	}
 
 	expected := &HttpAgentJsonCfg{
-		Id:                 utils.StringPointer("http_agent2"),
-		Url:                utils.StringPointer("http_url2"),
-		Sessions_conns:     &[]string{"*birpc"},
-		Request_payload:    utils.StringPointer("request_payload2"),
-		Reply_payload:      utils.StringPointer("reply_payload2"),
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		ID:                utils.StringPointer("http_agent2"),
+		URL:               utils.StringPointer("http_url2"),
+		SessionSConns:     &[]string{"*internal"},
+		StatSConns:        &[]string{"*internal"},
+		ThresholdSConns:   &[]string{"*internal"},
+		RequestPayload:    utils.StringPointer("request_payload2"),
+		ReplyPayload:      utils.StringPointer("reply_payload2"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 
 	rcv := diffHttpAgentJsonCfg(d, v1, v2)
@@ -676,7 +710,7 @@ func TestDiffHttpAgentJson(t *testing.T) {
 
 	v1 = v2
 	expected = &HttpAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 	rcv = diffHttpAgentJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {
@@ -689,11 +723,13 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 
 	v1 := HTTPAgentCfgs{
 		{
-			ID:             "http_agent",
-			URL:            "http_url",
-			SessionSConns:  []string{"*localhost"},
-			RequestPayload: "request_payload",
-			ReplyPayload:   "reply_payload",
+			ID:              "http_agent",
+			URL:             "http_url",
+			SessionSConns:   []string{"*localhost"},
+			StatSConns:      []string{"*localhost"},
+			ThresholdSConns: []string{"*localhost"},
+			RequestPayload:  "request_payload",
+			ReplyPayload:    "reply_payload",
 			RequestProcessors: []*RequestProcessor{
 				{
 					ID: "req_processors",
@@ -706,7 +742,9 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 		{
 			ID:                "http_agent2",
 			URL:               "http_url2",
-			SessionSConns:     []string{"*birpc"},
+			SessionSConns:     []string{"*internal"},
+			StatSConns:        []string{"*internal"},
+			ThresholdSConns:   []string{"*internal"},
 			RequestPayload:    "request_payload2",
 			ReplyPayload:      "reply_payload2",
 			RequestProcessors: []*RequestProcessor{},
@@ -715,12 +753,14 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 
 	expected := &[]*HttpAgentJsonCfg{
 		{
-			Id:                 utils.StringPointer("http_agent2"),
-			Url:                utils.StringPointer("http_url2"),
-			Sessions_conns:     &[]string{"*birpc"},
-			Request_payload:    utils.StringPointer("request_payload2"),
-			Reply_payload:      utils.StringPointer("reply_payload2"),
-			Request_processors: &[]*ReqProcessorJsnCfg{},
+			ID:                utils.StringPointer("http_agent2"),
+			URL:               utils.StringPointer("http_url2"),
+			SessionSConns:     &[]string{"*internal"},
+			StatSConns:        &[]string{"*internal"},
+			ThresholdSConns:   &[]string{"*internal"},
+			RequestPayload:    utils.StringPointer("request_payload2"),
+			ReplyPayload:      utils.StringPointer("reply_payload2"),
+			RequestProcessors: &[]*ReqProcessorJsnCfg{},
 		},
 	}
 
@@ -731,7 +771,7 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 
 	d = &[]*HttpAgentJsonCfg{
 		{
-			Id: utils.StringPointer("http_agent2"),
+			ID: utils.StringPointer("http_agent2"),
 		},
 	}
 
@@ -742,14 +782,14 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 
 	d = &[]*HttpAgentJsonCfg{
 		{
-			Id: utils.StringPointer("http_agent2"),
+			ID: utils.StringPointer("http_agent2"),
 		},
 	}
 
 	v1 = v2
 	expected = &[]*HttpAgentJsonCfg{
 		{
-			Id: utils.StringPointer("http_agent2"),
+			ID: utils.StringPointer("http_agent2"),
 		},
 	}
 	rcv = diffHttpAgentsJsonCfg(d, v1, v2)
@@ -761,11 +801,13 @@ func TestDiffHttpAgentsJsonCfg(t *testing.T) {
 func TestHttpAgentCloneSection(t *testing.T) {
 	httpCfg := HTTPAgentCfgs{
 		{
-			ID:             "http_agent",
-			URL:            "http_url",
-			SessionSConns:  []string{"*localhost"},
-			RequestPayload: "request_payload",
-			ReplyPayload:   "reply_payload",
+			ID:              "http_agent",
+			URL:             "http_url",
+			SessionSConns:   []string{"*localhost"},
+			StatSConns:      []string{"*localhost"},
+			ThresholdSConns: []string{"*localhost"},
+			RequestPayload:  "request_payload",
+			ReplyPayload:    "reply_payload",
 		},
 	}
 
@@ -774,6 +816,8 @@ func TestHttpAgentCloneSection(t *testing.T) {
 			ID:                "http_agent",
 			URL:               "http_url",
 			SessionSConns:     []string{"*localhost"},
+			StatSConns:        []string{"*localhost"},
+			ThresholdSConns:   []string{"*localhost"},
 			RequestPayload:    "request_payload",
 			ReplyPayload:      "reply_payload",
 			RequestProcessors: []*RequestProcessor{},

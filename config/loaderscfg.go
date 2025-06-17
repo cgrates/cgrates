@@ -192,7 +192,7 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 		}
 	}
 	if jsnCfg.Caches_conns != nil {
-		l.CacheSConns = updateInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
+		l.CacheSConns = tagInternalConns(*jsnCfg.Caches_conns, utils.MetaCaches)
 	}
 	if jsnCfg.Field_separator != nil {
 		l.FieldSeparator = *jsnCfg.Field_separator
@@ -348,7 +348,7 @@ func (l LoaderSCfg) AsMapInterface() (mp map[string]any) {
 		mp[utils.RunDelayCfg] = l.RunDelay.String()
 	}
 	if l.CacheSConns != nil {
-		mp[utils.CachesConnsCfg] = getInternalJSONConns(l.CacheSConns)
+		mp[utils.CachesConnsCfg] = stripInternalConns(l.CacheSConns)
 	}
 	if l.Cache != nil {
 		cache := make(map[string]any, len(l.Cache))
@@ -442,7 +442,7 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg) (d *LoaderJsonCfg) {
 		d.Lockfile_path = utils.StringPointer(v2.LockFilePath)
 	}
 	if !slices.Equal(v1.CacheSConns, v2.CacheSConns) {
-		d.Caches_conns = utils.SliceStringPointer(getInternalJSONConns(v2.CacheSConns))
+		d.Caches_conns = utils.SliceStringPointer(stripInternalConns(v2.CacheSConns))
 	}
 	if v1.FieldSeparator != v2.FieldSeparator {
 		d.Field_separator = utils.StringPointer(v2.FieldSeparator)
