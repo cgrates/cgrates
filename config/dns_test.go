@@ -33,9 +33,11 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 				Network: utils.StringPointer("udp"),
 			},
 		},
-		Sessions_conns: &[]string{utils.MetaInternal, "*conn1"},
-		Timezone:       utils.StringPointer("UTC"),
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		SessionSConns:   &[]string{utils.MetaInternal, "*conn1"},
+		StatSConns:      &[]string{utils.MetaInternal, "*conn1"},
+		ThresholdSConns: &[]string{utils.MetaInternal, "*conn1"},
+		Timezone:        utils.StringPointer("UTC"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
 				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
@@ -57,8 +59,10 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
-		Timezone:      "UTC",
+		SessionSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		StatSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ThresholdSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		Timezone:        "UTC",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -120,7 +124,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorDNSAgentloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &DNSAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Tenant: utils.StringPointer("a{*"),
 			},
@@ -144,7 +148,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
        }
 }`
 	cfgJSON := &DNSAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID: utils.StringPointer("random"),
 			},
@@ -159,7 +163,7 @@ func TestRequestProcessorDNSAgentloadFromJsonCfg1(t *testing.T) {
 
 func TestRequestProcessorReplyFieldsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &DNSAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Reply_fields: &[]*FcTemplateJsonCfg{
 					{
@@ -179,7 +183,7 @@ func TestRequestProcessorReplyFieldsloadFromJsonCfg(t *testing.T) {
 
 func TestRequestProcessorRequestFieldsloadFromJsonCfg(t *testing.T) {
 	cfgJSON := &DNSAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Request_fields: &[]*FcTemplateJsonCfg{
 					{
@@ -207,6 +211,8 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			}
 		],
 		"sessions_conns": ["*internal"],
+		"stats_conns": ["*internal"],
+		"thresholds_conns": ["*internal"],
 		"timezone": "",
 		"request_processors": [],
 	},
@@ -218,6 +224,8 @@ func TestDNSAgentCfgAsMapInterface(t *testing.T) {
 			utils.NetworkCfg: "udp",
 		}},
 		utils.SessionSConnsCfg:     []string{"*internal"},
+		utils.StatSConnsCfg:        []string{"*internal"},
+		utils.ThresholdSConnsCfg:   []string{"*internal"},
 		utils.TimezoneCfg:          "",
 		utils.RequestProcessorsCfg: []map[string]any{},
 	}
@@ -239,6 +247,8 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				}
 			],
 			"sessions_conns": ["*internal:*sessions", "*conn1"],
+			"stats_conns": ["*internal:*stats", "*conn1"],
+			"thresholds_conns": ["*internal:*thresholds", "*conn1"],
 			"timezone": "UTC",
 			"request_processors": [
 			{
@@ -272,8 +282,10 @@ func TestDNSAgentCfgAsMapInterface1(t *testing.T) {
 				utils.NetworkCfg: "udp",
 			},
 		},
-		utils.SessionSConnsCfg: []string{utils.MetaInternal, "*conn1"},
-		utils.TimezoneCfg:      "UTC",
+		utils.SessionSConnsCfg:   []string{utils.MetaInternal, "*conn1"},
+		utils.StatSConnsCfg:      []string{utils.MetaInternal, "*conn1"},
+		utils.ThresholdSConnsCfg: []string{utils.MetaInternal, "*conn1"},
+		utils.TimezoneCfg:        "UTC",
 		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
@@ -332,8 +344,10 @@ func TestDNSAgentCfgClone(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
-		Timezone:      "UTC",
+		SessionSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		StatSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ThresholdSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		Timezone:        "UTC",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -354,6 +368,12 @@ func TestDNSAgentCfgClone(t *testing.T) {
 	if rcv.SessionSConns[1] = ""; ban.SessionSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
+	if rcv.StatSConns[1] = ""; ban.StatSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.ThresholdSConns[1] = ""; ban.ThresholdSConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
 	if rcv.RequestProcessors[0].ID = ""; ban.RequestProcessors[0].ID != "OutboundAUTHDryRun" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
@@ -371,6 +391,8 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 			},
 		},
 		SessionSConns:     []string{"*localhost"},
+		StatSConns:        []string{"*localhost"},
+		ThresholdSConns:   []string{"*localhost"},
 		Timezone:          "UTC",
 		RequestProcessors: []*RequestProcessor{},
 	}
@@ -383,8 +405,10 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 				Network: "udp",
 			},
 		},
-		SessionSConns: []string{"*birpc"},
-		Timezone:      "EEST",
+		SessionSConns:   []string{"*internal"},
+		StatSConns:      []string{"*internal"},
+		ThresholdSConns: []string{"*internal"},
+		Timezone:        "EEST",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID: "id",
@@ -400,9 +424,11 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 				Network: utils.StringPointer("udp"),
 			},
 		},
-		Sessions_conns: &[]string{"*birpc"},
-		Timezone:       utils.StringPointer("EEST"),
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		SessionSConns:   &[]string{"*internal"},
+		StatSConns:      &[]string{"*internal"},
+		ThresholdSConns: &[]string{"*internal"},
+		Timezone:        utils.StringPointer("EEST"),
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID: utils.StringPointer("id"),
 			},
@@ -416,8 +442,8 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 
 	v2_2 := v1
 	expected2 := &DNSAgentJsonCfg{
-		Listeners:          &[]*ListenerJsnCfg{},
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		Listeners:         &[]*ListenerJsnCfg{},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 
 	rcv = diffDNSAgentJsonCfg(d, v1, v2_2)
@@ -465,7 +491,7 @@ func TestDiffDNSAgentJsonCfgExtraV1(t *testing.T) {
 				Network: utils.StringPointer("udp"),
 			},
 		},
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 
 	rcv := diffDNSAgentJsonCfg(d, v1, v2)
@@ -513,7 +539,7 @@ func TestDiffDNSAgentJsonCfgExtraV2(t *testing.T) {
 				Network: utils.StringPointer("udp"),
 			},
 		},
-		Request_processors: &[]*ReqProcessorJsnCfg{},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{},
 	}
 
 	rcv := diffDNSAgentJsonCfg(d, v1, v2)
@@ -532,6 +558,8 @@ func TestDnsAgentCloneSection(t *testing.T) {
 			},
 		},
 		SessionSConns:     []string{"*localhost"},
+		StatSConns:        []string{"*localhost"},
+		ThresholdSConns:   []string{"*localhost"},
 		Timezone:          "UTC",
 		RequestProcessors: []*RequestProcessor{},
 	}
@@ -545,6 +573,8 @@ func TestDnsAgentCloneSection(t *testing.T) {
 			},
 		},
 		SessionSConns:     []string{"*localhost"},
+		StatSConns:        []string{"*localhost"},
+		ThresholdSConns:   []string{"*localhost"},
 		Timezone:          "UTC",
 		RequestProcessors: []*RequestProcessor{},
 	}

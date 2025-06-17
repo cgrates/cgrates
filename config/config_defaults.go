@@ -1066,6 +1066,8 @@ const CGRATES_CFG_JSON = `
 		}
 	],
 	"sessions_conns": ["*internal"],
+	"stats_conns": [],				// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
+	"thresholds_conns": [],				// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
 	"timezone": "",					// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"request_processors": []			// request processors to be applied to DNS messages
 },

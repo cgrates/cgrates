@@ -35,6 +35,8 @@ type DNSAgentCfg struct {
 	Enabled           bool
 	Listeners         []Listener
 	SessionSConns     []string
+	StatSConns        []string
+	ThresholdSConns   []string
 	Timezone          string
 	RequestProcessors []*RequestProcessor
 }
@@ -71,10 +73,16 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg) (err error) {
 	if jsnCfg.Timezone != nil {
 		da.Timezone = *jsnCfg.Timezone
 	}
-	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = tagInternalConns(*jsnCfg.Sessions_conns, utils.MetaSessionS)
+	if jsnCfg.SessionSConns != nil {
+		da.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
 	}
-	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.Request_processors)
+	if jsnCfg.StatSConns != nil {
+		da.StatSConns = tagInternalConns(*jsnCfg.StatSConns, utils.MetaStats)
+	}
+	if jsnCfg.ThresholdSConns != nil {
+		da.ThresholdSConns = tagInternalConns(*jsnCfg.ThresholdSConns, utils.MetaThresholds)
+	}
+	da.RequestProcessors, err = appendRequestProcessors(da.RequestProcessors, jsnCfg.RequestProcessors)
 	return
 }
 
@@ -87,25 +95,22 @@ func (lstn *Listener) AsMapInterface() map[string]any {
 
 // AsMapInterface returns the config as a map[string]any
 func (da DNSAgentCfg) AsMapInterface() any {
-	mp := map[string]any{
-		utils.EnabledCfg:  da.Enabled,
-		utils.TimezoneCfg: da.Timezone,
-	}
-
 	listeners := make([]map[string]any, len(da.Listeners))
 	for i, item := range da.Listeners {
 		listeners[i] = item.AsMapInterface()
 	}
-	mp[utils.ListenersCfg] = listeners
-
 	requestProcessors := make([]map[string]any, len(da.RequestProcessors))
 	for i, item := range da.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface()
 	}
-	mp[utils.RequestProcessorsCfg] = requestProcessors
-
-	if da.SessionSConns != nil {
-		mp[utils.SessionSConnsCfg] = stripInternalConns(da.SessionSConns)
+	mp := map[string]any{
+		utils.EnabledCfg:           da.Enabled,
+		utils.ListenersCfg:         listeners,
+		utils.SessionSConnsCfg:     stripInternalConns(da.SessionSConns),
+		utils.StatSConnsCfg:        stripInternalConns(da.StatSConns),
+		utils.ThresholdSConnsCfg:   stripInternalConns(da.ThresholdSConns),
+		utils.TimezoneCfg:          da.Timezone,
+		utils.RequestProcessorsCfg: requestProcessors,
 	}
 	return mp
 }
@@ -114,27 +119,22 @@ func (DNSAgentCfg) SName() string            { return DNSAgentJSON }
 func (da DNSAgentCfg) CloneSection() Section { return da.Clone() }
 
 // Clone returns a deep copy of DNSAgentCfg
-func (da DNSAgentCfg) Clone() (cln *DNSAgentCfg) {
-	cln = &DNSAgentCfg{
-		Enabled:   da.Enabled,
-		Listeners: da.Listeners,
-		Timezone:  da.Timezone,
-	}
-
-	if da.Listeners != nil {
-		cln.Listeners = make([]Listener, len(da.Listeners))
-		copy(cln.Listeners, da.Listeners)
-	}
-	if da.SessionSConns != nil {
-		cln.SessionSConns = slices.Clone(da.SessionSConns)
+func (da DNSAgentCfg) Clone() *DNSAgentCfg {
+	clone := &DNSAgentCfg{
+		Enabled:         da.Enabled,
+		Listeners:       slices.Clone(da.Listeners),
+		SessionSConns:   slices.Clone(da.SessionSConns),
+		StatSConns:      slices.Clone(da.StatSConns),
+		ThresholdSConns: slices.Clone(da.ThresholdSConns),
+		Timezone:        da.Timezone,
 	}
 	if da.RequestProcessors != nil {
-		cln.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
+		clone.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
 		for i, req := range da.RequestProcessors {
-			cln.RequestProcessors[i] = req.Clone()
+			clone.RequestProcessors[i] = req.Clone()
 		}
 	}
-	return
+	return clone
 }
 
 type ListenerJsnCfg struct {
@@ -144,11 +144,13 @@ type ListenerJsnCfg struct {
 
 // DNSAgentJsonCfg
 type DNSAgentJsonCfg struct {
-	Enabled            *bool
-	Listeners          *[]*ListenerJsnCfg
-	Sessions_conns     *[]string
-	Timezone           *string
-	Request_processors *[]*ReqProcessorJsnCfg
+	Enabled           *bool                  `json:"enabled"`
+	Listeners         *[]*ListenerJsnCfg     `json:"listeners"`
+	SessionSConns     *[]string              `json:"sessions_conns"`
+	StatSConns        *[]string              `json:"stats_conns"`
+	ThresholdSConns   *[]string              `json:"thresholds_conns"`
+	Timezone          *string                `json:"timezone"`
+	RequestProcessors *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonCfg {
@@ -159,14 +161,11 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonC
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 
-	minLen := len(v1.Listeners)
-	if len(v2.Listeners) < minLen {
-		minLen = len(v2.Listeners)
-	}
+	minLen := min(len(v2.Listeners), len(v1.Listeners))
 
 	diffListeners := &[]*ListenerJsnCfg{}
 
-	for i := 0; i < minLen; i++ {
+	for i := range minLen {
 		if v1.Listeners[i].Address != v2.Listeners[i].Address ||
 			v1.Listeners[i].Network != v2.Listeners[i].Network {
 			*diffListeners = append(*diffListeners, &ListenerJsnCfg{
@@ -197,11 +196,17 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonC
 	d.Listeners = diffListeners
 
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
-		d.Sessions_conns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
+		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
+	}
+	if !slices.Equal(v1.StatSConns, v2.StatSConns) {
+		d.StatSConns = utils.SliceStringPointer(stripInternalConns(v2.StatSConns))
+	}
+	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
+		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}
-	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
+	d.RequestProcessors = diffReqProcessorsJsnCfg(d.RequestProcessors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }
