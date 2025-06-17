@@ -28,14 +28,16 @@ import (
 
 func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 	cfgJSON := &RadiusAgentJsonCfg{
-		Enabled:             utils.BoolPointer(true),
-		Listen_net:          utils.StringPointer(utils.UDP),
-		Listen_auth:         utils.StringPointer("127.0.0.1:1812"),
-		Listen_acct:         utils.StringPointer("127.0.0.1:1813"),
-		Client_secrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
-		Client_dictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
-		Sessions_conns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		Enabled:            utils.BoolPointer(true),
+		ListenNet:          utils.StringPointer(utils.UDP),
+		ListenAuth:         utils.StringPointer("127.0.0.1:1812"),
+		ListenAcct:         utils.StringPointer("127.0.0.1:1813"),
+		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
+		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
+		SessionSConns:      &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		StatSConns:         &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		ThresholdSConns:    &[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:             utils.StringPointer("OutboundAUTHDryRun"),
 				Filters:        &[]string{"*string:~*req.request_type:OutboundAUTH", "*string:~*req.Msisdn:497700056231"},
@@ -64,6 +66,8 @@ func TestRadiusAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		StatSConns:         []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)},
+		ThresholdSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:            "OutboundAUTHDryRun",
@@ -111,7 +115,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
      },
 }`
 	cfgJSON := &RadiusAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID: utils.StringPointer("OutboundAUTHDryRun"),
 			},
@@ -136,7 +140,7 @@ func TestRadiusAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 
 func TestRadiusAgentCfgloadFromJsonCfgCase3(t *testing.T) {
 	cfgJSON := &RadiusAgentJsonCfg{
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				Tenant: utils.StringPointer("a{*"),
 			},
@@ -160,6 +164,8 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 	    	"*default": "/usr/share/cgrates/",			
 	     },
 	     "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
+	     "stats_conns": ["*internal", "*conn1","*conn2"],
+	     "thresholds_conns": ["*internal", "*conn1","*conn2"],
          "request_processors": [
 			{
 				"id": "OutboundAUTHDryRun",
@@ -185,7 +191,9 @@ func TestRadiusAgentCfgAsMapInterface(t *testing.T) {
 		utils.ClientDictionariesCfg: map[string]string{
 			utils.MetaDefault: "/usr/share/cgrates/",
 		},
-		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
+		utils.SessionSConnsCfg:   []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
+		utils.StatSConnsCfg:      []string{utils.MetaInternal, "*conn1", "*conn2"},
+		utils.ThresholdSConnsCfg: []string{utils.MetaInternal, "*conn1", "*conn2"},
 		utils.RequestProcessorsCfg: []map[string]any{
 			{
 				utils.IDCfg:            "OutboundAUTHDryRun",
@@ -223,6 +231,8 @@ func TestRadiusAgentCfgAsMapInterface1(t *testing.T) {
 			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
 		},
 		utils.SessionSConnsCfg:     []string{"*internal"},
+		utils.StatSConnsCfg:        []string{},
+		utils.ThresholdSConnsCfg:   []string{},
 		utils.RequestProcessorsCfg: []map[string]any{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -291,6 +301,8 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		ClientSecrets:      map[string]string{},
 		ClientDictionaries: map[string]string{},
 		SessionSConns:      []string{"*localhost"},
+		StatSConns:         []string{"*localhost"},
+		ThresholdSConns:    []string{"*localhost"},
 		RequestProcessors:  []*RequestProcessor{},
 	}
 
@@ -305,7 +317,9 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 		ClientDictionaries: map[string]string{
 			"radius_dict1": "radius_val1",
 		},
-		SessionSConns: []string{"*birpc"},
+		SessionSConns:   []string{"*internal"},
+		StatSConns:      []string{"*internal"},
+		ThresholdSConns: []string{"*internal"},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:      "REQ_PROC1",
@@ -315,18 +329,20 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 	}
 
 	expected := &RadiusAgentJsonCfg{
-		Enabled:     utils.BoolPointer(true),
-		Listen_net:  utils.StringPointer("udp"),
-		Listen_auth: utils.StringPointer("radius_auth2"),
-		Listen_acct: utils.StringPointer("radius_account2"),
-		Client_secrets: map[string]string{
+		Enabled:    utils.BoolPointer(true),
+		ListenNet:  utils.StringPointer("udp"),
+		ListenAuth: utils.StringPointer("radius_auth2"),
+		ListenAcct: utils.StringPointer("radius_account2"),
+		ClientSecrets: map[string]string{
 			"radius_user": "radius_pass",
 		},
-		Client_dictionaries: map[string]string{
+		ClientDictionaries: map[string]string{
 			"radius_dict1": "radius_val1",
 		},
-		Sessions_conns: &[]string{"*birpc"},
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		SessionSConns:   &[]string{"*internal"},
+		StatSConns:      &[]string{"*internal"},
+		ThresholdSConns: &[]string{"*internal"},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{
 				ID:      utils.StringPointer("REQ_PROC1"),
 				Filters: &[]string{"filter1"},
@@ -341,9 +357,9 @@ func TestDiffRadiusAgentJsonCfg(t *testing.T) {
 
 	v1 = v2
 	expected = &RadiusAgentJsonCfg{
-		Client_secrets:      map[string]string{},
-		Client_dictionaries: map[string]string{},
-		Request_processors: &[]*ReqProcessorJsnCfg{
+		ClientSecrets:      map[string]string{},
+		ClientDictionaries: map[string]string{},
+		RequestProcessors: &[]*ReqProcessorJsnCfg{
 			{},
 		},
 	}
@@ -365,7 +381,9 @@ func TestRadiusAgentCloneSection(t *testing.T) {
 		ClientDictionaries: map[string]string{
 			"radius_dict1": "radius_val1",
 		},
-		SessionSConns: []string{"*birpc"},
+		SessionSConns:   []string{"*internal"},
+		StatSConns:      []string{"*internal"},
+		ThresholdSConns: []string{"*internal"},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:      "REQ_PROC1",
@@ -385,7 +403,9 @@ func TestRadiusAgentCloneSection(t *testing.T) {
 		ClientDictionaries: map[string]string{
 			"radius_dict1": "radius_val1",
 		},
-		SessionSConns: []string{"*birpc"},
+		SessionSConns:   []string{"*internal"},
+		StatSConns:      []string{"*internal"},
+		ThresholdSConns: []string{"*internal"},
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:      "REQ_PROC1",
