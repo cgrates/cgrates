@@ -53,6 +53,11 @@ func init() {
 	gob.Register(new(utils.ResourceProfileWithAPIOpts))
 	gob.Register(new(utils.ResourceWithAPIOpts))
 	gob.Register(new(utils.TPResourceProfile))
+	// IP
+	gob.Register(new(utils.IPAllocations))
+	gob.Register(new(utils.IPProfile))
+	gob.Register(new(utils.IPProfileWithAPIOpts))
+	gob.Register(new(utils.IPAllocationsWithAPIOpts))
 	// Stats
 	gob.Register(new(StatQueue))
 	gob.Register(new(StatQueueProfile))
