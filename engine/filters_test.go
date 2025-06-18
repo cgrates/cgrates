@@ -3451,3 +3451,101 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 		})
 	}
 }
+
+func TestWeightFromDynamics2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connMgr = NewConnManager(cfg, nil)
+	db, _ := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	filterS := NewFilterS(cfg, connMgr, dm)
+	testCases := []struct {
+		name           string
+		dynamicWeights []*utils.DynamicWeight
+		tenant         string
+		event          utils.DataProvider
+		expectedWeight float64
+		expectedErr    bool
+	}{
+		{
+			name:           "EmptyDynamicWeight",
+			dynamicWeights: []*utils.DynamicWeight{},
+			tenant:         "cgrates.org",
+			event:          utils.MapStorage{},
+			expectedWeight: 0.0,
+			expectedErr:    false,
+		},
+		{
+			name: "MatchingWeight",
+			dynamicWeights: []*utils.DynamicWeight{
+				{
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weight:    10.0,
+				},
+			},
+			tenant: "cgrates.org",
+			event: utils.MapStorage{
+				"*req": utils.MapStorage{
+					"Account": "1001",
+				},
+			},
+			expectedWeight: 10.0,
+		},
+		{
+			name: "MultipleMatchingWeights",
+			dynamicWeights: []*utils.DynamicWeight{
+				{
+					FilterIDs: []string{"*prefix:~*req.Destination:GER"},
+					Weight:    10.0,
+				},
+				{
+					FilterIDs: []string{"*string:~*opts.subsys:*sessions"},
+					Weight:    5.0,
+				},
+			},
+			tenant: "cgrates.org",
+			event: utils.MapStorage{
+				"*req": utils.MapStorage{
+					"Destination": "GER_0055",
+				},
+				"*opts": utils.MapStorage{
+					"*subsys": "*sessions",
+				},
+			},
+			expectedWeight: 10.0,
+		},
+		{
+			name: "NoMatchingWeightFilterErr",
+			dynamicWeights: []*utils.DynamicWeight{
+				{
+					FilterIDs: []string{"FLTR1"},
+					Weight:    10.0,
+				},
+			},
+			tenant: "cgrates.org",
+			event: utils.MapStorage{
+				"*req": utils.MapStorage{
+					"Account": "1001",
+				},
+			},
+			expectedErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			weight, err := WeightFromDynamics(tc.dynamicWeights, filterS, tc.tenant, tc.event)
+			if tc.expectedErr {
+				if err == nil {
+					t.Error("Expected error but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if weight != tc.expectedWeight {
+					t.Errorf("Expected weight %v, got %v", tc.expectedWeight, weight)
+				}
+			}
+		})
+	}
+}

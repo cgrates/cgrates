@@ -768,3 +768,122 @@ func TestCheckDefaultTiming(t *testing.T) {
 		})
 	}
 }
+func TestActionTimingGetNextStartTime2(t *testing.T) {
+	tests := []struct {
+		name          string
+		actionTiming  *ActionTiming
+		startTime     time.Time
+		expectedTime  time.Time
+		expectedError bool
+	}{
+		{
+			name: "MonthlyEstimatedTiming",
+			actionTiming: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        utils.MetaMonthlyEstimated,
+						StartTime: "00:00:00",
+						Years:     []int{2024},
+						Months:    []time.Month{1, 2, 3},
+						MonthDays: []int{31},
+					},
+				},
+			},
+			startTime:    time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC),
+			expectedTime: time.Date(2024, 1, 31, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "WeekDaysCron",
+			actionTiming: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						StartTime: "09:00:00",
+						Years:     []int{2024},
+						Months:    []time.Month{1, 2, 3},
+						MonthDays: []int{1, 15},
+						WeekDays:  []time.Weekday{time.Monday, time.Wednesday, time.Friday},
+						EndTime:   "17:00:00",
+					},
+				},
+			},
+			startTime:    time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
+			expectedTime: time.Date(2024, 1, 3, 9, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "YearTransition",
+			actionTiming: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						StartTime: "00:00:00",
+						Years:     []int{2024, 2025},
+						Months:    []time.Month{12, 1},
+						MonthDays: []int{31, 1},
+					},
+				},
+			},
+			startTime:    time.Date(2024, 12, 31, 23, 0, 0, 0, time.UTC),
+			expectedTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "LeapYear",
+			actionTiming: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						StartTime: "00:00:00",
+						Years:     []int{2024},
+						Months:    []time.Month{2},
+						MonthDays: []int{29},
+					},
+				},
+			},
+			startTime:    time.Date(2024, 2, 28, 0, 0, 0, 0, time.UTC),
+			expectedTime: time.Date(2024, 2, 29, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name: "NilTiming",
+			actionTiming: &ActionTiming{
+				Timing: nil,
+			},
+			startTime:     time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			expectedTime:  time.Time{},
+			expectedError: true,
+		},
+		{
+			name: "EmptyTiming",
+			actionTiming: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: nil,
+				},
+			},
+			startTime:     time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			expectedTime:  time.Time{},
+			expectedError: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if tt.actionTiming != nil {
+				tt.actionTiming.ResetStartTimeCache()
+			}
+
+			result := tt.actionTiming.GetNextStartTime(tt.startTime)
+
+			if tt.expectedError {
+				if !result.IsZero() {
+					t.Errorf("Expected zero time for error case, got: %v", result)
+				}
+				return
+			}
+			if !result.Equal(tt.expectedTime) {
+				t.Errorf("GetNextStartTime(%v) = %v; want %v",
+					tt.startTime, result, tt.expectedTime)
+			}
+			cachedResult := tt.actionTiming.GetNextStartTime(tt.startTime)
+			if !cachedResult.Equal(result) {
+				t.Errorf("Cached result differs: got %v, want %v",
+					cachedResult, result)
+			}
+		})
+	}
+}
