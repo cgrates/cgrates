@@ -321,10 +321,10 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					t.Error(err)
 				} else if dirs != 36 {
 					t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
-				} else if i > 6 && files != 31 {
-					t.Errorf("expected <%d> files, received <%d>", 31, files)
-				} else if i < 6 && files != 30 {
-					t.Errorf("expected <%d> files, received <%d>", 30, files)
+				} else if i > 6 && files != 33 {
+					t.Errorf("expected <%d> files, received <%d>", 33, files)
+				} else if i < 6 && files != 32 {
+					t.Errorf("expected <%d> files, received <%d>", 32, files)
 				}
 			})
 
@@ -345,7 +345,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 				} else if dirs != 3 {
 					t.Errorf("expected <%d> directories, received <%d>", 3, dirs)
 				} else if files != 1 {
-					t.Errorf("expected <%d> files, received <%d>", 1, files)
+					t.Errorf("expected <%d> files, received <%d>", 3, files)
 				}
 			})
 
