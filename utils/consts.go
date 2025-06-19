@@ -1127,6 +1127,7 @@ const (
 	MetaRemBalance            = "*rem_balance"
 	DynaprepaidActionplansCfg = "dynaprepaid_actionprofile"
 	MetaDynamicThreshold      = "*dynamic_threshold"
+	MetaDynamicStats          = "*dynamic_stats"
 )
 
 // Migrator Metas

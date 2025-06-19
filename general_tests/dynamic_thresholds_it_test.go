@@ -165,14 +165,26 @@ func TestDynThdIT(t *testing.T) {
 						Weight: 10,
 					},
 				},
-				Targets: map[string]utils.StringSet{utils.MetaThresholds: {"someID": {}}},
+				Targets: map[string]utils.StringSet{
+					utils.MetaThresholds: {"someID": {}},
+					utils.MetaStats:      {"someID": {}},
+				},
 				Actions: []*utils.APAction{
 					{
 						Type: utils.MetaDynamicThreshold,
 						Diktats: []*utils.APDiktat{
 							{
 								Path:  "ExtraParameters",
-								Value: "cgrates.org;THD_ACNT_1001;*string:~*req.Account:1002;&10;1;1;1s;false;ACT_LOG_WARNING;true;",
+								Value: "*tenant;DYNAMICLY_THD_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;~*opts",
+							},
+						},
+					},
+					{
+						Type: utils.MetaDynamicStats,
+						Diktats: []*utils.APDiktat{
+							{
+								Path:  "ExtraParameters",
+								Value: "*tenant;DYNAMICLY_STAT_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&30;*string:~*req.Account:1002&true;100;-1;0;false;*none;*tcc&*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002&true;~*opts",
 							},
 						},
 					},
@@ -276,7 +288,7 @@ func TestDynThdIT(t *testing.T) {
 		}
 		time.Sleep(100 * time.Millisecond) //wait for async
 	})
-	t.Run("GetThresholdProfile", func(t *testing.T) {
+	t.Run("GetDynamicThresholdProfile", func(t *testing.T) {
 		var thrsholds []*engine.ThresholdProfile
 		if err := client.Call(context.Background(), utils.AdminSv1GetThresholdProfiles,
 			&utils.ArgsItemIDs{
@@ -305,7 +317,7 @@ func TestDynThdIT(t *testing.T) {
 			},
 			{
 				Tenant:    utils.CGRateSorg,
-				ID:        "THD_ACNT_1001",
+				ID:        "DYNAMICLY_THD_1002",
 				FilterIDs: []string{"*string:~*req.Account:1002"},
 				MaxHits:   1,
 				MinHits:   1,
@@ -313,7 +325,7 @@ func TestDynThdIT(t *testing.T) {
 				Blocker:   false,
 				Weights: utils.DynamicWeights{
 					&utils.DynamicWeight{
-						FilterIDs: nil,
+						FilterIDs: []string{"*string:~*req.Account:1002"},
 						Weight:    10,
 					},
 				},
@@ -323,6 +335,64 @@ func TestDynThdIT(t *testing.T) {
 		}
 		if !reflect.DeepEqual(thrsholds, exp) {
 			t.Errorf("Expected <%v> \n received <%v>", utils.ToJSON(exp), utils.ToJSON(thrsholds))
+		}
+	})
+
+	t.Run("GetDynamicStatQueueProfile", func(t *testing.T) {
+		exp := &engine.StatQueueProfile{
+			Tenant:    utils.CGRateSorg,
+			ID:        "DYNAMICLY_STAT_1002",
+			FilterIDs: []string{"*string:~*req.Account:1002"},
+			Weights: utils.DynamicWeights{
+				{
+					FilterIDs: []string{"*string:~*req.Account:1002"},
+					Weight:    30,
+				},
+			},
+			Blockers: utils.DynamicBlockers{
+				{
+					FilterIDs: []string{"*string:~*req.Account:1002"},
+					Blocker:   true,
+				},
+			},
+			QueueLength:  100,
+			TTL:          -1,
+			MinItems:     0,
+			Stored:       false,
+			ThresholdIDs: []string{utils.MetaNone},
+			Metrics: []*engine.MetricWithFilters{
+				{
+					MetricID:  utils.MetaTCC,
+					FilterIDs: []string{"*string:~*req.Account:1002"},
+					Blockers: utils.DynamicBlockers{
+						{
+							FilterIDs: []string{"*string:~*req.Account:1002"},
+							Blocker:   true,
+						},
+					},
+				},
+				{
+					MetricID:  utils.MetaTCD,
+					FilterIDs: []string{"*string:~*req.Account:1002"},
+					Blockers: utils.DynamicBlockers{
+						{
+							FilterIDs: []string{"*string:~*req.Account:1002"},
+							Blocker:   true,
+						},
+					},
+				},
+			},
+		}
+
+		var rply *engine.StatQueueProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetStatQueueProfile, &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: utils.CGRateSorg,
+				ID:     "DYNAMICLY_STAT_1002"},
+		}, &rply); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(exp, rply) {
+			t.Errorf("Expected <%v> \n received <%v>", utils.ToJSON(exp), utils.ToJSON(rply))
 		}
 	})
 
