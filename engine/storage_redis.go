@@ -24,6 +24,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -67,6 +68,7 @@ const (
 	redis_RENAME   = "RENAME"
 	redis_HMSET    = "HMSET"
 	redis_HSET     = "HSET"
+	redis_SCAN     = "SCAN"
 
 	redisLoadError = "Redis is loading the dataset in memory"
 	RedisLimit     = 524287 // https://github.com/StackExchange/StackExchange.Redis/issues/201#issuecomment-98639005
@@ -270,22 +272,45 @@ func (rs *RedisStorage) RebbuildActionPlanKeys() (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetKeysForPrefix(prefix string) (keys []string, err error) {
-	if prefix == utils.ActionPlanPrefix { // so we can avoid the full scan on scheduler reloads
-		err = rs.Cmd(&keys, redis_SMEMBERS, utils.ActionPlanIndexes)
-	} else {
-		err = rs.Cmd(&keys, redis_KEYS, prefix+"*")
-	}
-	if err != nil {
-		return
-	}
-	if len(keys) != 0 {
-		if filterIndexesPrefixMap.Has(prefix) {
-			return rs.getKeysForFilterIndexesKeys(keys)
+func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+	var keys []string
+	if prefix == utils.ActionPlanPrefix {
+		if err := rs.Cmd(&keys, redis_SMEMBERS, utils.ActionPlanIndexes); err != nil {
+			return nil, fmt.Errorf("failed to get ActionPlan from index: %v", err)
 		}
-		return
+	} else {
+		// Use SCAN for other prefixes to avoid blocking Redis.
+		var err error
+		if keys, err = rs.scanKeysForPrefix(prefix); err != nil {
+			return nil, fmt.Errorf("failed to scan keys for prefix %s: %v", prefix, err)
+		}
 	}
-	return nil, nil
+	if len(keys) == 0 {
+		return nil, nil
+	}
+	if filterIndexesPrefixMap.Has(prefix) {
+		return rs.getKeysForFilterIndexesKeys(keys)
+	}
+	return keys, nil
+}
+
+// scanKeysWithPrefix performs a non-blocking scan for keys matching the given prefix.
+func (rs *RedisStorage) scanKeysForPrefix(prefix string) ([]string, error) {
+	var keys []string
+	scanner := radix.NewScanner(rs.client, radix.ScanOpts{
+		Command: redis_SCAN,
+		Pattern: prefix + "*", // Match all keys with the given prefix
+	})
+	var key string
+	for scanner.Next(&key) {
+		if strings.HasPrefix(key, prefix) {
+			keys = append(keys, key)
+		}
+	}
+	if err := scanner.Close(); err != nil {
+		return nil, err
+	}
+	return keys, nil
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
