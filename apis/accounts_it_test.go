@@ -1465,7 +1465,7 @@ func testAccRefundCharges(t *testing.T) {
 		t.Errorf("Expected %v, received %v", abstractCost, reply.Abstracts)
 	}
 	if !reflect.DeepEqual(concreteCost, reply.Concretes) {
-		t.Errorf("Expected %v, received %v", abstractCost, reply.Charges)
+		t.Errorf("Expected %v, received %v", concreteCost, reply.Concretes)
 	}
 
 	// 50 - 49.5(3.3 * 15 uf) = 0.5   3m27s --> 207 seconds -->  2.7 debit + 0.6 fixedFee = 3.3 debited
