@@ -363,3 +363,148 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
 		utils.AdminSv1SetStatQueueProfile, args, &rply)
 }
+
+// actDynamicAttribute processes the `ActionValue` field from the action to construct a AttributeProfile
+//
+// The ActionValue field format is expected as follows:
+//
+//		 0 Tenant: string
+//		 1 ID: string
+//		 2 FilterIDs: strings separated by "&".
+//		 3 Weights: strings separated by "&".
+//		 4 Blocker: strings separated by "&".
+//	 	 5 AttributeFilterIDs: strings separated by "&".
+//	 	 6 AttributeBlockers: strings separated by "&".
+//	 	 7 Path: string
+//	 	 8 Type: string
+//	 	 9 Value: strings separated by "&".
+//		10 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+type actDynamicAttribute struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	aCfg    *utils.APAction
+	tnt     string
+	cgrEv   *utils.CGREvent
+}
+
+func (aL *actDynamicAttribute) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actDynamicAttribute) cfg() *utils.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+		return fmt.Errorf("no connection with AdminS")
+	}
+	data[utils.MetaNow] = time.Now()
+	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	// Parse action parameters based on the predefined format.
+	if len(aL.aCfg.Diktats) == 0 {
+		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+	}
+	params := strings.Split(aL.aCfg.Diktats[0].Value, utils.InfieldSep)
+	if len(params) != 11 {
+		return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	args := &utils.APIAttributeProfileWithAPIOpts{
+		APIAttributeProfile: &utils.APIAttributeProfile{
+			Tenant: params[0],
+			ID:     params[1],
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Attribute's FilterIDs
+	if params[2] != utils.EmptyString {
+		args.FilterIDs = strings.Split(params[2], utils.ANDSep)
+	}
+	// populate Attribute's Weights
+	if params[3] != utils.EmptyString {
+		args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+		wghtSplit := strings.Split(params[3], utils.ANDSep)
+		if len(wghtSplit) > 2 {
+			return utils.ErrUnsupportedFormat
+		}
+		if wghtSplit[0] != utils.EmptyString {
+			args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+		}
+		if wghtSplit[1] != utils.EmptyString {
+			args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// populate Attribute's Blockers
+	if params[4] != utils.EmptyString {
+		args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+		blckrSplit := strings.Split(params[4], utils.ANDSep)
+		if len(blckrSplit) > 2 {
+			return utils.ErrUnsupportedFormat
+		}
+		if blckrSplit[0] != utils.EmptyString {
+			args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
+		}
+		if blckrSplit[1] != utils.EmptyString {
+			args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// populate Attribute's Attributes
+	if params[7] != utils.EmptyString {
+		var attrFltrIDs []string
+		if params[5] != utils.EmptyString {
+			attrFltrIDs = strings.Split(params[5], utils.ANDSep)
+		}
+		var attrFltrBlckrs utils.DynamicBlockers
+		if params[6] != utils.EmptyString {
+			attrFltrBlckrs = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+			blckrSplit := strings.Split(params[6], utils.ANDSep)
+			if len(blckrSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if blckrSplit[0] != utils.EmptyString {
+				attrFltrBlckrs[0].FilterIDs = []string{blckrSplit[0]}
+			}
+			if blckrSplit[1] != utils.EmptyString {
+				attrFltrBlckrs[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+				if err != nil {
+					return err
+				}
+			}
+		}
+		args.Attributes = append(args.Attributes, &utils.ExternalAttribute{
+			FilterIDs: attrFltrIDs,
+			Blockers:  attrFltrBlckrs,
+			Path:      params[7],
+			Type:      params[8],
+			Value:     params[9],
+		})
+	}
+	// populate Attribute's APIOpts
+	if params[10] != utils.EmptyString {
+		if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
+			return err
+		}
+	}
+
+	// create the AttributeProfile based on the populated parameters
+	var rply string
+	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		utils.AdminSv1SetAttributeProfile, args, &rply)
+}
