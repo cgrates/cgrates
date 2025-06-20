@@ -168,9 +168,11 @@ func TestDynThdIT(t *testing.T) {
 				Targets: map[string]utils.StringSet{
 					utils.MetaThresholds: {"someID": {}},
 					utils.MetaStats:      {"someID": {}},
+					utils.MetaAttributes: {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
+						ID:   "Dynamic_Threshold_ID",
 						Type: utils.MetaDynamicThreshold,
 						Diktats: []*utils.APDiktat{
 							{
@@ -180,11 +182,22 @@ func TestDynThdIT(t *testing.T) {
 						},
 					},
 					{
+						ID:   "Dynamic_Stats_ID",
 						Type: utils.MetaDynamicStats,
 						Diktats: []*utils.APDiktat{
 							{
 								Path:  "ExtraParameters",
 								Value: "*tenant;DYNAMICLY_STAT_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&30;*string:~*req.Account:1002&true;100;-1;0;false;*none;*tcc&*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002&true;~*opts",
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Attribute_ID",
+						Type: utils.MetaDynamicAttribute,
+						Diktats: []*utils.APDiktat{
+							{
+								Path:  "ExtraParameters",
+								Value: "*tenant;DYNAMICLY_ATTR_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;*string:~*req.Account:<~*req.Account>&true;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&true;*req.Subject;*constant;SUPPLIER1;~*opts",
 							},
 						},
 					},
@@ -388,11 +401,63 @@ func TestDynThdIT(t *testing.T) {
 		if err := client.Call(context.Background(), utils.AdminSv1GetStatQueueProfile, &utils.TenantIDWithAPIOpts{
 			TenantID: &utils.TenantID{
 				Tenant: utils.CGRateSorg,
-				ID:     "DYNAMICLY_STAT_1002"},
+				ID:     "DYNAMICLY_STAT_1002",
+			},
 		}, &rply); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(exp, rply) {
 			t.Errorf("Expected <%v> \n received <%v>", utils.ToJSON(exp), utils.ToJSON(rply))
+		}
+	})
+
+	t.Run("GetDynamicAttributeProfile", func(t *testing.T) {
+		var attrs []*utils.APIAttributeProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetAttributeProfiles,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &attrs); err != nil {
+			t.Errorf("AdminSv1GetAttributeProfiles failed unexpectedly: %v", err)
+		}
+		if len(attrs) != 1 {
+			t.Fatalf("AdminSv1GetAttributeProfiles len(attrs)=%v, want 1", len(attrs))
+		}
+
+		exp := []*utils.APIAttributeProfile{
+			{
+				Tenant:    utils.CGRateSorg,
+				ID:        "DYNAMICLY_ATTR_1002",
+				FilterIDs: []string{"*string:~*req.Account:1002"},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+						Weight:    30,
+					},
+				},
+				Blockers: utils.DynamicBlockers{
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+						Blocker:   true,
+					},
+				},
+				Attributes: []*utils.ExternalAttribute{
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+						Blockers: utils.DynamicBlockers{
+							{
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Blocker:   true,
+							},
+						},
+						Path:  "*req.Subject",
+						Type:  "*constant",
+						Value: "SUPPLIER1",
+					},
+				},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, attrs) {
+			t.Errorf("Expected attributes to be the same. Before shutdown \n<%v>\nAfter rebooting <%v>", utils.ToJSON(attrs), utils.ToJSON(exp))
 		}
 	})
 
