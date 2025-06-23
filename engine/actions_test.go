@@ -6542,7 +6542,7 @@ func TestDynamicRoute(t *testing.T) {
 					"key": "value",
 				},
 			},
-			extraParams: "*tenant;RTP_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;*now&3000-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;<~*req.Account>&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			extraParams: "*tenant;route1@RTP_ACNT_1001;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;*now&3000-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;<~*req.Account>&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
 		},
 		{
 			name:    "SuccessfulRequestEmptyFields",
@@ -6583,6 +6583,11 @@ func TestDynamicRoute(t *testing.T) {
 			name:        "WrongNumberOfParams",
 			extraParams: "tenant;RTP1;;",
 			expectedErr: "invalid number of parameters <4> expected 17",
+		},
+		{
+			name:        "RouteProfileIDFail",
+			extraParams: "cgrates.org;@@@;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			expectedErr: `more than 1 "@" character for RouteProfileID: <@@@>`,
 		},
 		{
 			name:        "ActivationIntervalLengthFail",

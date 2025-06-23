@@ -768,6 +768,7 @@ type RouteSJsonCfg struct {
 	Suffix_indexed_fields *[]string
 	ExistsIndexedFields   *[]string `json:"exists_indexed_fields"`
 	Nested_fields         *bool     // applies when indexed fields is not defined
+	Route_Profile         *bool     // attaches RouteProfileIDs to RouteIDs list in reply events of switch agents
 	Attributes_conns      *[]string
 	Resources_conns       *[]string
 	Stats_conns           *[]string

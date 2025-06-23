@@ -38,6 +38,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		Rals_conns:            &[]string{utils.MetaInternal, "conn1"},
 		Default_ratio:         utils.IntPointer(10),
 		Nested_fields:         utils.BoolPointer(true),
+		Route_Profile:         utils.BoolPointer(true),
 		Opts: &RoutesOptsJson{
 			MaxCost:      utils.IntPointer(3),
 			Limit:        utils.IntPointer(3),
@@ -58,6 +59,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
+		RouteProfile:        true,
 		Opts: &RoutesOpts{
 			Context:      utils.MetaRoutes,
 			IgnoreErrors: false,
@@ -133,6 +135,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 			"stats_conns": ["*internal:*stats", "conn1"],
 			"rals_conns": ["*internal:*responder", "conn1"],
 			"default_ratio":2,
+			"route_profile": false,
 		},
 	}`
 	eMap := map[string]any{
@@ -148,6 +151,7 @@ func TestRouteSCfgAsMapInterface1(t *testing.T) {
 		utils.StatSConnsCfg:          []string{utils.MetaInternal, "conn1"},
 		utils.RALsConnsCfg:           []string{utils.MetaInternal, "conn1"},
 		utils.DefaultRatioCfg:        2,
+		utils.RouteProfileCfg:        false,
 		utils.OptsCfg: map[string]any{
 			utils.OptsContext:         utils.MetaRoutes,
 			utils.MetaIgnoreErrorsCfg: false,
@@ -174,6 +178,7 @@ func TestRouteSCfgClone(t *testing.T) {
 		RALsConns:           []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder), "conn1"},
 		DefaultRatio:        10,
 		NestedFields:        true,
+		RouteProfile:        true,
 		Opts: &RoutesOpts{
 			ProfileCount: utils.IntPointer(0),
 			Limit:        utils.IntPointer(0),

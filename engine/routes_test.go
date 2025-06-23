@@ -2637,7 +2637,7 @@ func TestSortedRoutesListDigestCase(t *testing.T) {
 		},
 	}
 	expectedDigest := "route1:param1,route2,route3:param3,route4"
-	result := srs.Digest()
+	result := srs.Digest(false)
 	if result != expectedDigest {
 		t.Errorf("Expected digest %s, but got %s", expectedDigest, result)
 	}

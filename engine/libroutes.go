@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -251,23 +252,30 @@ func (ssd RouteSortDispatcher) SortRoutes(prflID, strategy string,
 // SortedRoutesList represents the list of matched routes grouped based of profile
 type SortedRoutesList []*SortedRoutes
 
-// RouteIDs returns a list of route IDs
+// RouteIDs returns a list of route IDs. Attach RouteProfileID to the RouteIDs if RouteProfile is enabled in RouteSCfg
 func (sRs SortedRoutesList) RouteIDs() (rIDs []string) {
 	for _, sR := range sRs {
 		for _, r := range sR.Routes {
-			rIDs = append(rIDs, r.RouteID)
+			route := r.RouteID
+			if config.CgrConfig().RouteSCfg().RouteProfile {
+				route += "@" + sR.ProfileID
+			}
+			rIDs = append(rIDs, route)
 		}
 	}
 	return
 }
 
 // RoutesWithParams returns a list of routes IDs with Parameters
-func (sRs SortedRoutesList) RoutesWithParams() (sPs []string) {
+func (sRs SortedRoutesList) RoutesWithParams(setRouteProfile bool) (sPs []string) {
 	for _, sR := range sRs {
 		for _, spl := range sR.Routes {
 			route := spl.RouteID
 			if spl.RouteParameters != "" {
 				route += utils.InInFieldSep + spl.RouteParameters
+			}
+			if setRouteProfile {
+				route += "@" + sR.ProfileID
 			}
 			sPs = append(sPs, route)
 		}
@@ -277,8 +285,8 @@ func (sRs SortedRoutesList) RoutesWithParams() (sPs []string) {
 
 // Digest returns list of routeIDs + parameters for easier outside access
 // format route1:route1params,route2:route2params
-func (sRs SortedRoutesList) Digest() string {
-	return strings.Join(sRs.RoutesWithParams(), utils.FieldsSep)
+func (sRs SortedRoutesList) Digest(setRouteProfile bool) string {
+	return strings.Join(sRs.RoutesWithParams(setRouteProfile), utils.FieldsSep)
 }
 
 // AsNavigableMap returns the SortedRoutesSet as NMInterface object

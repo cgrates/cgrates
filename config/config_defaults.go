@@ -970,6 +970,7 @@ const CGRATES_CFG_JSON = `
 	"stats_conns": [],		// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"rals_conns": [],		// connections to Rater for calculating cost, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"default_ratio":1,		// default ratio used in case of *load strategy
+	"route_profile": false,		// attaches RouteProfileID to RouteIDs which are sent as reply to switch agent authorization requests
 	"opts": {
 		"*context": "*routes",
 		// "*profileCount": 1,

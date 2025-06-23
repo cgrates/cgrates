@@ -2636,6 +2636,7 @@ const (
 	MetaMaxCostCfg      = "*maxCost"
 	MetaLimitCfg        = "*limit"
 	MetaOffsetCfg       = "*offset"
+	RouteProfileCfg     = "route_profile"
 
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanup_interval"

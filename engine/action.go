@@ -2308,6 +2308,13 @@ func dynamicRoute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 			return err
 		}
 	}
+	// Take only the string after @, for cases when the RouteProfileID is gotten from a switch agents event
+	parts := strings.Split(params[1], "@")
+	if len(parts) > 2 {
+		return fmt.Errorf("more than 1 \"@\" character for RouteProfileID: <%s>", params[1])
+	} else if len(parts) > 1 {
+		params[1] = parts[1]
+	}
 	// Prepare request arguments based on provided parameters.
 	route := &RouteWithAPIOpts{
 		RouteProfile: &RouteProfile{

@@ -829,6 +829,6 @@ func (rpS *RouteService) V1GetRoutesList(ctx *context.Context, args *utils.CGREv
 	if err = rpS.V1GetRoutes(ctx, args, sR); err != nil {
 		return
 	}
-	*reply = sR.RoutesWithParams()
+	*reply = sR.RoutesWithParams(false)
 	return
 }

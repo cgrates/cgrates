@@ -47,6 +47,7 @@ type RouteSCfg struct {
 	RALsConns           []string
 	DefaultRatio        int
 	NestedFields        bool
+	RouteProfile        bool
 	Opts                *RoutesOpts
 }
 
@@ -149,6 +150,9 @@ func (rts *RouteSCfg) loadFromJSONCfg(jsnCfg *RouteSJsonCfg) (err error) {
 	if jsnCfg.Nested_fields != nil {
 		rts.NestedFields = *jsnCfg.Nested_fields
 	}
+	if jsnCfg.Route_Profile != nil {
+		rts.RouteProfile = *jsnCfg.Route_Profile
+	}
 	if jsnCfg.Opts != nil {
 		rts.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
@@ -178,6 +182,7 @@ func (rts *RouteSCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.IndexedSelectsCfg: rts.IndexedSelects,
 		utils.DefaultRatioCfg:   rts.DefaultRatio,
 		utils.NestedFieldsCfg:   rts.NestedFields,
+		utils.RouteProfileCfg:   rts.RouteProfile,
 		utils.OptsCfg:           opts,
 	}
 	if rts.StringIndexedFields != nil {
@@ -270,6 +275,7 @@ func (rts RouteSCfg) Clone() (cln *RouteSCfg) {
 		IndexedSelects: rts.IndexedSelects,
 		DefaultRatio:   rts.DefaultRatio,
 		NestedFields:   rts.NestedFields,
+		RouteProfile:   rts.RouteProfile,
 		Opts:           rts.Opts.Clone(),
 	}
 	if rts.AttributeSConns != nil {
