@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"net/netip"
 	"reflect"
 	"strings"
@@ -1154,6 +1155,197 @@ func TestIPPoolSet(t *testing.T) {
 			}
 			if tt.check != nil && !tt.wantErr {
 				tt.check(t, pool)
+			}
+		})
+	}
+}
+
+func TestIPProfileMerge(t *testing.T) {
+	tests := []struct {
+		name     string
+		original *IPProfile
+		other    *IPProfile
+		expected *IPProfile
+	}{
+		{
+			name: "Merge non-empty fields and merge pools by ID",
+			original: &IPProfile{
+				Tenant:    "cgrates.org",
+				ID:        "origID",
+				FilterIDs: []string{"f1"},
+				Weights: DynamicWeights{
+					&DynamicWeight{FilterIDs: []string{"w1"}, Weight: 10},
+				},
+				TTL:    0,
+				Stored: false,
+				Pools: []*IPPool{
+					{ID: "pool1", Message: "original"},
+				},
+			},
+			other: &IPProfile{
+				Tenant:    "newTenant",
+				ID:        "newID",
+				FilterIDs: []string{"f2"},
+				Weights: DynamicWeights{
+					&DynamicWeight{FilterIDs: []string{"w2"}, Weight: 20},
+				},
+				TTL:    1 * time.Hour,
+				Stored: true,
+				Pools: []*IPPool{
+					{ID: "pool1", Message: "merged"},
+					{ID: "pool2", Message: "new"},
+				},
+			},
+			expected: &IPProfile{
+				Tenant:    "newTenant",
+				ID:        "newID",
+				FilterIDs: []string{"f1", "f2"},
+				Weights: DynamicWeights{
+					&DynamicWeight{FilterIDs: []string{"w1"}, Weight: 10},
+					&DynamicWeight{FilterIDs: []string{"w2"}, Weight: 20},
+				},
+				TTL:    1 * time.Hour,
+				Stored: true,
+				Pools: []*IPPool{
+					{ID: "pool1", Message: "merged"},
+					{ID: "pool2", Message: "new"},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.original.Merge(tt.other)
+
+			if tt.original.Tenant != tt.expected.Tenant {
+				t.Errorf("Tenant = %v, want %v", tt.original.Tenant, tt.expected.Tenant)
+			}
+			if tt.original.ID != tt.expected.ID {
+				t.Errorf("ID = %v, want %v", tt.original.ID, tt.expected.ID)
+			}
+			if !reflect.DeepEqual(tt.original.FilterIDs, tt.expected.FilterIDs) {
+				t.Errorf("FilterIDs = %v, want %v", tt.original.FilterIDs, tt.expected.FilterIDs)
+			}
+			if !reflect.DeepEqual(tt.original.Weights, tt.expected.Weights) {
+				t.Errorf("Weights = %v, want %v", tt.original.Weights, tt.expected.Weights)
+			}
+			if tt.original.TTL != tt.expected.TTL {
+				t.Errorf("TTL = %v, want %v", tt.original.TTL, tt.expected.TTL)
+			}
+			if tt.original.Stored != tt.expected.Stored {
+				t.Errorf("Stored = %v, want %v", tt.original.Stored, tt.expected.Stored)
+			}
+			if len(tt.original.Pools) != len(tt.expected.Pools) {
+				t.Fatalf("Pools length = %v, want %v", len(tt.original.Pools), len(tt.expected.Pools))
+			}
+			for i := range tt.original.Pools {
+				if tt.original.Pools[i].ID != tt.expected.Pools[i].ID ||
+					tt.original.Pools[i].Message != tt.expected.Pools[i].Message {
+					t.Errorf("Pools[%d] = %+v, want %+v", i, tt.original.Pools[i], tt.expected.Pools[i])
+				}
+			}
+		})
+	}
+}
+
+func TestIPProfileFieldAsString(t *testing.T) {
+	profile := &IPProfile{
+		Tenant:    "cgrates.org",
+		ID:        "prof1",
+		FilterIDs: []string{"flt1", "flt2"},
+		Weights: DynamicWeights{
+			&DynamicWeight{FilterIDs: []string{"fltW"}, Weight: 10},
+		},
+		TTL:    3600 * time.Second,
+		Stored: true,
+		Pools: []*IPPool{
+			{
+				ID:        "pool1",
+				FilterIDs: []string{"poolflt"},
+				Type:      "*ipv4",
+			},
+		},
+	}
+
+	tests := []struct {
+		name    string
+		fldPath []string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "Tenant field",
+			fldPath: []string{"Tenant"},
+			want:    "cgrates.org",
+			wantErr: false,
+		},
+		{
+			name:    "ID field",
+			fldPath: []string{"ID"},
+			want:    "prof1",
+			wantErr: false,
+		},
+		{
+			name:    "FilterIDs full slice",
+			fldPath: []string{"FilterIDs"},
+			want:    `["flt1","flt2"]`,
+			wantErr: false,
+		},
+		{
+			name:    "TTL field",
+			fldPath: []string{"TTL"},
+			want:    "1h0m0s",
+			wantErr: false,
+		},
+		{
+			name:    "Stored field",
+			fldPath: []string{"Stored"},
+			want:    "true",
+			wantErr: false,
+		},
+		{
+			name:    "Weights field",
+			fldPath: []string{"Weights"},
+			want:    `[{"FilterIDs":["fltW"],"Weight":10}]`,
+			wantErr: false,
+		},
+		{
+			name:    "Pools field",
+			fldPath: []string{"Pools"},
+			want:    fmt.Sprintf("[%v]", profile.Pools[0]),
+			wantErr: false,
+		},
+
+		{
+			name:    "Invalid field",
+			fldPath: []string{"Invalid"},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "Too deep path",
+			fldPath: []string{"Tenant", "extra"},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "Invalid index in FilterIDs",
+			fldPath: []string{"FilterIDs:10"},
+			want:    "",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := profile.FieldAsString(tt.fldPath)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FieldAsString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("FieldAsString() = %v, want %v", got, tt.want)
 			}
 		})
 	}
