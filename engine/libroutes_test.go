@@ -1465,7 +1465,7 @@ func TestSortedRoutesListRoutesWithParams(t *testing.T) {
 			},
 		},
 	}
-	val := sRs.RoutesWithParams()
+	val := sRs.RoutesWithParams(false)
 	sort.Slice(val, func(i, j int) bool {
 		return val[i] < val[j]
 	})
@@ -1670,7 +1670,7 @@ func TestSortedRoutesListDigest(t *testing.T) {
 
 	exp := "ROUTE_ID1:PARAM_1,ROUTE_ID2:PARAM_2,ROUTE_ID1:PARAM_1,ROUTE_ID2:PARAM_2"
 
-	if val := sRs.Digest(); val != exp {
+	if val := sRs.Digest(false); val != exp {
 		t.Errorf("received %v", val)
 	}
 }

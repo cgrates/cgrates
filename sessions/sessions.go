@@ -2271,7 +2271,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(ctx *context.Context,
 		authReply.MaxUsage = initAuthRply.MaxUsage.Seconds()
 	}
 	if args.GetRoutes {
-		authReply.RoutesDigest = utils.StringPointer(initAuthRply.RouteProfiles.Digest())
+		authReply.RoutesDigest = utils.StringPointer(initAuthRply.RouteProfiles.Digest(false))
 	}
 	if args.ProcessThresholds {
 		authReply.Thresholds = utils.StringPointer(

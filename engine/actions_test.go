@@ -5057,12 +5057,12 @@ func TestDynamicThreshold(t *testing.T) {
 		{
 			name:        "ActivationIntervalBadStringFail",
 			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;bad String;1;1;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "ActivationIntervalBadStringFail2",
 			extraParams: "cgrates.org;THD_ACNT_1001;FLTR_ACNT_1001;2014-07-29T15:00:00Z&bad String;1;1;1s;false;10;ACT_LOG_WARNING;true;eeID1&eeID2;",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "MaxHitsFail",
@@ -5304,12 +5304,12 @@ func TestDynamicStats(t *testing.T) {
 		{
 			name:        "ActivationIntervalBadStringFail",
 			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;bad String;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "ActivationIntervalBadStringFail2",
 			extraParams: "cgrates.org;Stat_1;FLTR_STAT_1;2014-07-29T15:00:00Z&bad String;100;10s;0;*acd&*tcd&*asr;Metric_FLTR;false;true;30;*none;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "QueueLengthFail",
@@ -5527,12 +5527,12 @@ func TestDynamicAttribute(t *testing.T) {
 		{
 			name:        "ActivationIntervalBadStringFail",
 			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;bad String;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "ActivationIntervalBadStringFail2",
 			extraParams: "cgrates.org;Attr_1;*sessions&*chargers;FLTR_ATTR_1&FLTR_ATTR_2;2014-07-29T15:00:00Z&bad String;AttrFltr_1&AttrFltr2;*req.Subject;*constant;SUPPLIER1;true;10;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "AttributesValueFail",
@@ -6043,7 +6043,7 @@ func TestDynamicActionAll(t *testing.T) {
 				},
 				Overwrite: false,
 			},
-			extraParams: "Alter_Session_10;*alter_sessions;\fcgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:mycustomvalue\f;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
+			extraParams: "Alter_Session_10;*alter_sessions;\fcgrates.org;*string:~*req.Account:1001;1;*radCoATemplate:mycoa;CustomFilter:mycustomvalue\f;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10;false",
 		},
 		{
 			name:    "SuccessfulRequestWithDynamicPaths",
@@ -6070,9 +6070,9 @@ func TestDynamicActionAll(t *testing.T) {
 						Weight:          10,
 					},
 				},
-				Overwrite: false,
+				Overwrite: true,
 			},
-			extraParams: "CDR_Log_<~*req.Account>;*cdrlog;\f{\"Account\":\"<~*req.Account>\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}\f;*string:~*req.Account:<~*req.Account>&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
+			extraParams: "CDR_Log_<~*req.Account>;*cdrlog;\f{\"Account\":\"<~*req.Account>\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}\f;*string:~*req.Account:<~*req.Account>&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10;true",
 		},
 		{
 			name:    "SuccessfulRequestEmptyFields",
@@ -6085,31 +6085,31 @@ func TestDynamicActionAll(t *testing.T) {
 					},
 				},
 			},
-			extraParams: "DISABLE_ACC;*disable_account;;;;;;;;;;;;;;;",
+			extraParams: "DISABLE_ACC;*disable_account;;;;;;;;;;;;;;;;",
 		},
 		{
 			name:        "MissingConns",
-			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10",
+			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10;",
 			expectedErr: "MANDATORY_IE_MISSING: [connIDs]",
 		},
 		{
 			name:        "WrongNumberOfParams",
 			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;10;;;",
-			expectedErr: "invalid number of parameters <20> expected 17",
+			expectedErr: "invalid number of parameters <20> expected 18",
 		},
 		{
 			name:        "ActionIdEmptyFail",
-			extraParams: "DISABLE_ACC;;;;;;;;;;;;;;;;",
+			extraParams: "DISABLE_ACC;;;;;;;;;;;;;;;;;",
 			expectedErr: `empty Action for <DISABLE_ACC> dynamic_action`,
 		},
 		{
 			name:        "ActionIdEmptyFail",
-			extraParams: ";;;;;;;;;;;;;;;;",
+			extraParams: ";;;;;;;;;;;;;;;;;",
 			expectedErr: `empty ActionsId for dynamic_action`,
 		},
 		{
 			name:        "WeightFail",
-			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;BadString",
+			extraParams: "TOPUP_MONETARY_10;*topup;;*string:~*req.Account:1001&filter2;badID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;weekdays&offpeak;10;10;true;true;BadString;",
 			expectedErr: `strconv.ParseFloat: parsing "BadString": invalid syntax`,
 		},
 	}
@@ -6376,12 +6376,12 @@ func TestDynamicFilter(t *testing.T) {
 		{
 			name:        "ActivationIntervalBadStringFail",
 			extraParams: "cgrates.org;Fltr_1;*string;~*req.Account;1001&1002;bad String;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "ActivationIntervalBadStringFail2",
 			extraParams: "cgrates.org;Fltr_1;*string;~*req.Account;1001&1002;2014-07-29T15:00:00Z&bad String;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "InvalidOptsMap",
@@ -6458,6 +6458,9 @@ func TestDynamicRoute(t *testing.T) {
 				if rwo, canCast = args.(*RouteWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
 				}
+				return nil
+			},
+			utils.APIerSv1GetRouteProfile: func(ctx *context.Context, args2, reply any) error {
 				return nil
 			},
 		},
@@ -6542,7 +6545,7 @@ func TestDynamicRoute(t *testing.T) {
 					"key": "value",
 				},
 			},
-			extraParams: "*tenant;RTP_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;*now&3000-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;<~*req.Account>&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			extraParams: "*tenant;route1@RTP_ACNT_1001;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;*now&3000-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:<~*req.Account>&*string:~*req.Account:1002;<~*req.Account>&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
 		},
 		{
 			name:    "SuccessfulRequestEmptyFields",
@@ -6552,7 +6555,7 @@ func TestDynamicRoute(t *testing.T) {
 					Tenant:             "cgrates.org",
 					ID:                 "RTP_ACNT_1001",
 					FilterIDs:          nil,
-					ActivationInterval: &utils.ActivationInterval{},
+					ActivationInterval: nil,
 					SortingParameters:  nil,
 					Routes: []*Route{
 						{
@@ -6585,6 +6588,11 @@ func TestDynamicRoute(t *testing.T) {
 			expectedErr: "invalid number of parameters <4> expected 17",
 		},
 		{
+			name:        "RouteProfileIDFail",
+			extraParams: "cgrates.org;@@@;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
+			expectedErr: `more than 1 "@" character for RouteProfileID: <@@@>`,
+		},
+		{
 			name:        "ActivationIntervalLengthFail",
 			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z&&;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
 			expectedErr: utils.ErrUnsupportedFormat.Error(),
@@ -6592,12 +6600,12 @@ func TestDynamicRoute(t *testing.T) {
 		{
 			name:        "ActivationIntervalBadStringFail",
 			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;bad String;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "ActivationIntervalBadStringFail2",
 			extraParams: "cgrates.org;RTP_ACNT_1001;*string:~*req.Account:1001&*string:~*req.Account:1002;2014-07-29T15:00:00Z&bad String;*weight;*acd&*tcc;route1;*string:~*req.Account:1001&*string:~*req.Account:1002;1001&1002;RP1&RP2;RS1&RS2;Stat_1&Stat_1_1;10;true;param;10;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "RouteWeightFail",
@@ -7248,12 +7256,12 @@ func TestDynamicResource(t *testing.T) {
 		{
 			name:        "ActivationIntervalBadStringFail",
 			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;bad String;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "ActivationIntervalBadStringFail2",
 			extraParams: "cgrates.org;RES_ACNT_1001;*string:~*req.Account:1001;2014-07-29T15:00:00Z&bad String;1h;1;msg_1001;true;true;10;TD1&TD2;key:value",
-			expectedErr: `parsing time "bad String" as "2006-01-02T15:04:05Z07:00": cannot parse "bad String" as "2006"`,
+			expectedErr: `Unsupported time format`,
 		},
 		{
 			name:        "TTLFail",

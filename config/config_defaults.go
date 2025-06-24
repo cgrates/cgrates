@@ -706,6 +706,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,			// starts the Asterisk agent: <true|false>
 	"sessions_conns": ["*birpc_internal"],
 	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
+	"route_profile": false,			// attaches RouteProfileID to RouteIDs which are sent as reply to asteristk agent authorization requests
 	"asterisk_conns":[			// instantiate connections to multiple Asterisk servers
 		{
 			"address": "127.0.0.1:8088",
@@ -730,6 +731,7 @@ const CGRATES_CFG_JSON = `
 	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
 	"active_session_delimiter": ",",		// delimiter for 'show channels' responses and requests
+	"route_profile": false,					// attaches RouteProfileID to RouteIDs which are sent as reply to freeswitch agent authorization requests
 	"event_socket_conns":[				// instantiate connections to multiple FreeSWITCH servers
 		{
 			"address": "127.0.0.1:8021", 	// FreeSWITCH server address and port
@@ -748,6 +750,7 @@ const CGRATES_CFG_JSON = `
 	"sessions_conns": ["*birpc_internal"],
 	"create_cdr": false,				// create CDR out of events and sends them to CDRS component
 	"timezone": "",					// timezone of the Kamailio server
+	"route_profile": false,				// attaches RouteProfileID to RouteIDs which are sent as reply to kamailio agent authorization requests
 	"evapi_conns":[					// instantiate connections to multiple Kamailio servers
 		{
 			"address": "127.0.0.1:8448",

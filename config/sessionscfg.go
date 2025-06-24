@@ -588,6 +588,7 @@ type FsAgentCfg struct {
 	EmptyBalanceAnnFile    string
 	ActiveSessionDelimiter string
 	MaxWaitConnection      time.Duration
+	RouteProfile           bool
 	EventSocketConns       []*FsConnCfg
 }
 
@@ -615,6 +616,9 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 	}
 	if jsnCfg.CreateCDR != nil {
 		fscfg.CreateCDR = *jsnCfg.CreateCDR
+	}
+	if jsnCfg.RouteProfile != nil {
+		fscfg.RouteProfile = *jsnCfg.RouteProfile
 	}
 	if jsnCfg.ExtraFields != nil {
 		if fscfg.ExtraFields, err = NewRSRParsersFromSlice(*jsnCfg.ExtraFields); err != nil {
@@ -655,6 +659,7 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 		utils.EnabledCfg:                fscfg.Enabled,
 		utils.SubscribeParkCfg:          fscfg.SubscribePark,
 		utils.CreateCdrCfg:              fscfg.CreateCDR,
+		utils.RouteProfileCfg:           fscfg.RouteProfile,
 		utils.LowBalanceAnnFileCfg:      fscfg.LowBalanceAnnFile,
 		utils.EmptyBalanceContextCfg:    fscfg.EmptyBalanceContext,
 		utils.EmptyBalanceAnnFileCfg:    fscfg.EmptyBalanceAnnFile,
@@ -697,6 +702,7 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 		Enabled:                fscfg.Enabled,
 		SubscribePark:          fscfg.SubscribePark,
 		CreateCDR:              fscfg.CreateCDR,
+		RouteProfile:           fscfg.RouteProfile,
 		ExtraFields:            fscfg.ExtraFields.Clone(),
 		LowBalanceAnnFile:      fscfg.LowBalanceAnnFile,
 		EmptyBalanceContext:    fscfg.EmptyBalanceContext,
@@ -798,6 +804,7 @@ type AsteriskAgentCfg struct {
 	Enabled       bool
 	SessionSConns []string
 	CreateCDR     bool
+	RouteProfile  bool
 	AsteriskConns []*AsteriskConnCfg
 }
 
@@ -822,6 +829,9 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 	if jsnCfg.Create_cdr != nil {
 		aCfg.CreateCDR = *jsnCfg.Create_cdr
 	}
+	if jsnCfg.Route_profile != nil {
+		aCfg.RouteProfile = *jsnCfg.Route_profile
+	}
 
 	if jsnCfg.Asterisk_conns != nil {
 		aCfg.AsteriskConns = make([]*AsteriskConnCfg, len(*jsnCfg.Asterisk_conns))
@@ -836,8 +846,9 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 // AsMapInterface returns the config as a map[string]any
 func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:   aCfg.Enabled,
-		utils.CreateCDRCfg: aCfg.CreateCDR,
+		utils.EnabledCfg:      aCfg.Enabled,
+		utils.CreateCDRCfg:    aCfg.CreateCDR,
+		utils.RouteProfileCfg: aCfg.RouteProfile,
 	}
 	if aCfg.AsteriskConns != nil {
 		conns := make([]map[string]any, len(aCfg.AsteriskConns))
@@ -864,8 +875,9 @@ func (aCfg *AsteriskAgentCfg) AsMapInterface() (initialMP map[string]any) {
 // Clone returns a deep copy of AsteriskAgentCfg
 func (aCfg AsteriskAgentCfg) Clone() (cln *AsteriskAgentCfg) {
 	cln = &AsteriskAgentCfg{
-		Enabled:   aCfg.Enabled,
-		CreateCDR: aCfg.CreateCDR,
+		Enabled:      aCfg.Enabled,
+		CreateCDR:    aCfg.CreateCDR,
+		RouteProfile: aCfg.RouteProfile,
 	}
 	if aCfg.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(aCfg.SessionSConns))

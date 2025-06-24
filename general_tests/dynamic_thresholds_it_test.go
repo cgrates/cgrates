@@ -289,7 +289,7 @@ func testDynThdSetAction(t *testing.T) {
 			},
 			{
 				Identifier:      utils.MetaDynamicAction,
-				ExtraParameters: "DYNAMICLY_ACT_<~*req.ID>;*cdrlog;\f{\"Account\":\"<~*req.ID>\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}\f;*string:~*req.Account:<~*req.ID>&filter2;balID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;*daily;10;10;true;false;10",
+				ExtraParameters: "DYNAMICLY_ACT_<~*req.ID>;*cdrlog;\f{\"Account\":\"<~*req.ID>\",\"RequestType\":\"*pseudoprepaid\",\"Subject\":\"DifferentThanAccount\", \"ToR\":\"~ActionType:s/^\\*(.*)$/did_$1/\"}\f;*string:~*req.Account:<~*req.ID>&filter2;balID;*monetary;call&data;1002&1003;SPECIAL_1002;SHARED_A&SHARED_B;*unlimited;*daily;10;10;true;false;10;false",
 			},
 			{
 				Identifier:      utils.MetaDynamicDestination,

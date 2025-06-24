@@ -90,6 +90,7 @@ type KamAgentCfg struct {
 	CreateCdr     bool
 	EvapiConns    []*KamConnCfg
 	Timezone      string
+	RouteProfile  bool
 }
 
 func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
@@ -123,15 +124,19 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 	if jsnCfg.Timezone != nil {
 		ka.Timezone = *jsnCfg.Timezone
 	}
+	if jsnCfg.Route_profile != nil {
+		ka.RouteProfile = *jsnCfg.Route_profile
+	}
 	return nil
 }
 
 // AsMapInterface returns the config as a map[string]any
 func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.EnabledCfg:   ka.Enabled,
-		utils.CreateCdrCfg: ka.CreateCdr,
-		utils.TimezoneCfg:  ka.Timezone,
+		utils.EnabledCfg:      ka.Enabled,
+		utils.CreateCdrCfg:    ka.CreateCdr,
+		utils.TimezoneCfg:     ka.Timezone,
+		utils.RouteProfileCfg: ka.RouteProfile,
 	}
 	if ka.EvapiConns != nil {
 		evapiConns := make([]map[string]any, len(ka.EvapiConns))
@@ -158,9 +163,10 @@ func (ka *KamAgentCfg) AsMapInterface() (initialMP map[string]any) {
 // Clone returns a deep copy of KamAgentCfg
 func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 	cln = &KamAgentCfg{
-		Enabled:   ka.Enabled,
-		CreateCdr: ka.CreateCdr,
-		Timezone:  ka.Timezone,
+		Enabled:      ka.Enabled,
+		CreateCdr:    ka.CreateCdr,
+		Timezone:     ka.Timezone,
+		RouteProfile: ka.RouteProfile,
 	}
 	if ka.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(ka.SessionSConns))

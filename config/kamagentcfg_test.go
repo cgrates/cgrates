@@ -30,6 +30,7 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:        utils.BoolPointer(true),
 		Sessions_conns: &[]string{"*internal"},
 		Create_cdr:     utils.BoolPointer(true),
+		Route_profile:  utils.BoolPointer(true),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			{
 				Alias:      utils.StringPointer("randomAlias"),
@@ -43,6 +44,7 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		CreateCdr:     true,
+		RouteProfile:  true,
 		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
 		Timezone:      "Local",
 	}
@@ -99,6 +101,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 		"kamailio_agent": {
 			"sessions_conns": ["*birpc_internal", "*conn1","*conn2", "*internal"],
 			"create_cdr": true,
+			"route_profile": true,
 			"timezone": "UTC",
 			"evapi_conns":[
 				{"address": "127.0.0.1:8448", "reconnects": 5, "alias": ""}
@@ -109,6 +112,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 		utils.EnabledCfg:       false,
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2", utils.MetaInternal},
 		utils.CreateCdrCfg:     true,
+		utils.RouteProfileCfg:  true,
 		utils.TimezoneCfg:      "UTC",
 		utils.EvapiConnsCfg: []map[string]any{
 			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: ""},
@@ -129,6 +133,7 @@ func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 		utils.EnabledCfg:       false,
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal},
 		utils.CreateCdrCfg:     false,
+		utils.RouteProfileCfg:  false,
 		utils.TimezoneCfg:      "",
 		utils.EvapiConnsCfg: []map[string]any{
 			{utils.AddressCfg: "127.0.0.1:8448", utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s", utils.AliasCfg: ""},
@@ -146,6 +151,7 @@ func TestKamAgentCfgClone(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		CreateCdr:     true,
+		RouteProfile:  true,
 		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
 		Timezone:      "Local",
 	}
