@@ -31,6 +31,7 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
 		Enabled:       utils.BoolPointer(true),
 		CreateCDR:     utils.BoolPointer(true),
+		RouteProfile:  utils.BoolPointer(true),
 		SubscribePark: utils.BoolPointer(true),
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
@@ -49,6 +50,7 @@ func TestFsAgentCfgloadFromJsonCfg1(t *testing.T) {
 	eFsAgentConfig := &FsAgentCfg{
 		Enabled:       true,
 		CreateCDR:     true,
+		RouteProfile:  true,
 		SubscribePark: true,
 		EventSocketConns: []*FsConnCfg{
 			{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5, ReplyTimeout: 5 * time.Second, Alias: "1.2.3.4:8021"},
@@ -502,6 +504,7 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		Enabled:                utils.BoolPointer(true),
 		SessionSConns:          &[]string{utils.MetaInternal},
 		CreateCDR:              utils.BoolPointer(true),
+		RouteProfile:           utils.BoolPointer(true),
 		SubscribePark:          utils.BoolPointer(true),
 		LowBalanceAnnFile:      utils.StringPointer("randomFile"),
 		EmptyBalanceAnnFile:    utils.StringPointer("randomEmptyFile"),
@@ -524,6 +527,7 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		SessionSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		SubscribePark:          true,
 		CreateCDR:              true,
+		RouteProfile:           true,
 		LowBalanceAnnFile:      "randomFile",
 		EmptyBalanceAnnFile:    "randomEmptyFile",
 		EmptyBalanceContext:    "randomEmptyContext",
@@ -579,6 +583,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.SessionSConnsCfg:          []string{rpcclient.BiRPCInternal},
 		utils.SubscribeParkCfg:          true,
 		utils.CreateCdrCfg:              false,
+		utils.RouteProfileCfg:           false,
 		utils.ExtraFieldsCfg:            "",
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
@@ -610,6 +615,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
           "sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 	      "subscribe_park": false,					
 	      "create_cdr": true,
+	      "route_profile": true,
 	      "max_wait_connection": "7s",	
 		  "active_session_delimiter": "\tsep\t",		
 	      "event_socket_conns":[					
@@ -621,6 +627,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.SessionSConnsCfg:          []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.SubscribeParkCfg:          false,
 		utils.CreateCdrCfg:              true,
+		utils.RouteProfileCfg:           true,
 		utils.ExtraFieldsCfg:            "",
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
@@ -659,6 +666,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		utils.SessionSConnsCfg:          []string{utils.MetaInternal},
 		utils.SubscribeParkCfg:          true,
 		utils.CreateCdrCfg:              false,
+		utils.RouteProfileCfg:           false,
 		utils.ExtraFieldsCfg:            "randomFields",
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
@@ -750,6 +758,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:        utils.BoolPointer(true),
 		Sessions_conns: &[]string{utils.MetaInternal},
 		Create_cdr:     utils.BoolPointer(true),
+		Route_profile:  utils.BoolPointer(true),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Alias:            utils.StringPointer("127.0.0.1:8448"),
@@ -765,6 +774,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		CreateCDR:     true,
+		RouteProfile:  true,
 		AsteriskConns: []*AsteriskConnCfg{{
 			Alias:           "127.0.0.1:8448",
 			Address:         "127.0.0.1:8088",
@@ -792,6 +802,7 @@ func TestAsteriskAgentCfgAsMapInterface(t *testing.T) {
 		utils.EnabledCfg:       false,
 		utils.SessionSConnsCfg: []string{utils.MetaInternal},
 		utils.CreateCdrCfg:     false,
+		utils.RouteProfileCfg:  false,
 		utils.AsteriskConnsCfg: []map[string]any{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8088", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 3, utils.ReconnectsCfg: 5, utils.MaxReconnectIntervalCfg: "0s"},
 		},
@@ -809,6 +820,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		"enabled": true,
 		"sessions_conns": ["*birpc_internal", "*conn1","*conn2"],
 		"create_cdr": true,
+		"route_profile": true,
 		"asterisk_conns":[
 			{"address": "127.0.0.1:8089","connect_attempts": 5,"reconnects": 8}
 		],
@@ -818,6 +830,7 @@ func TestAsteriskAgentCfgAsMapInterface1(t *testing.T) {
 		utils.EnabledCfg:       true,
 		utils.SessionSConnsCfg: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"},
 		utils.CreateCdrCfg:     true,
+		utils.RouteProfileCfg:  true,
 		utils.AsteriskConnsCfg: []map[string]any{
 			{utils.AliasCfg: "", utils.AddressCfg: "127.0.0.1:8089", utils.UserCf: "cgrates", utils.Password: "CGRateS.org", utils.ConnectAttemptsCfg: 5, utils.ReconnectsCfg: 8, utils.MaxReconnectIntervalCfg: "0s"},
 		},
@@ -873,6 +886,7 @@ func TestAsteriskAgentCfgClone(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 		CreateCDR:     true,
+		RouteProfile:  true,
 		AsteriskConns: []*AsteriskConnCfg{{
 			Alias:           "127.0.0.1:8448",
 			Address:         "127.0.0.1:8088",
@@ -898,6 +912,7 @@ func TestFsAgentCfgClone(t *testing.T) {
 	ban := &FsAgentCfg{
 		Enabled:             true,
 		CreateCDR:           true,
+		RouteProfile:        true,
 		SubscribePark:       true,
 		EmptyBalanceAnnFile: "file",
 		EmptyBalanceContext: "context",

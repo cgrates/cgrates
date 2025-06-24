@@ -2539,9 +2539,10 @@ const (
 	AdminPasswordCfg = "admin_password"
 
 	// KamAgentCfg
-	EvapiConnsCfg = "evapi_conns"
-	TimezoneCfg   = "timezone"
-	TimezoneCfgC  = "Timezone"
+	EvapiConnsCfg   = "evapi_conns"
+	TimezoneCfg     = "timezone"
+	TimezoneCfgC    = "Timezone"
+	RouteProfileCfg = "route_profile"
 
 	// AsteriskConnCfg
 	UserCf = "user"

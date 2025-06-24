@@ -677,7 +677,7 @@ func TestSliceAsArraySortingParameter(t *testing.T) {
 		},
 	}}
 	expFs := "ARRAY::4|:rt1|:rt2|:RT1|:RT2"
-	if fsArray := SliceAsFsArray(eSplrs.RoutesWithParams()); expFs != fsArray {
+	if fsArray := SliceAsFsArray(eSplrs.RoutesWithParams(false)); expFs != fsArray {
 		t.Errorf("Expected %+v, received %+v", expFs, fsArray)
 	}
 }

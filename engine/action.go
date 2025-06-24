@@ -1515,12 +1515,14 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		return utils.ErrUnsupportedFormat
 	}
 	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
-		if err := thProf.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
-			return err
-		}
-		if len(aISplit) == 2 {
-			if err := thProf.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+		for i := range aISplit {
+			if timeParsed, err := utils.ParseTimeDetectLayout(aISplit[i],
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return err
+			} else if i == 0 {
+				thProf.ActivationInterval.ActivationTime = timeParsed
+			} else if i == 1 {
+				thProf.ActivationInterval.ExpiryTime = timeParsed
 			}
 		}
 	}
@@ -1648,12 +1650,14 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		return utils.ErrUnsupportedFormat
 	}
 	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
-		if err := stQProf.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
-			return err
-		}
-		if len(aISplit) == 2 {
-			if err := stQProf.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+		for i := range aISplit {
+			if timeParsed, err := utils.ParseTimeDetectLayout(aISplit[i],
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return err
+			} else if i == 0 {
+				stQProf.ActivationInterval.ActivationTime = timeParsed
+			} else if i == 1 {
+				stQProf.ActivationInterval.ExpiryTime = timeParsed
 			}
 		}
 	}
@@ -1794,12 +1798,14 @@ func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		return utils.ErrUnsupportedFormat
 	}
 	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
-		if err := attrP.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
-			return err
-		}
-		if len(aISplit) == 2 {
-			if err := attrP.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+		for i := range aISplit {
+			if timeParsed, err := utils.ParseTimeDetectLayout(aISplit[i],
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return err
+			} else if i == 0 {
+				attrP.ActivationInterval.ActivationTime = timeParsed
+			} else if i == 1 {
+				attrP.ActivationInterval.ExpiryTime = timeParsed
 			}
 		}
 	}
@@ -2046,6 +2052,7 @@ func dynamicActionPlanAccount(_ *Account, act *Action, _ Actions, _ *FilterS, ev
 //	   14 BalanceBlocker: string
 //	   15 BalanceDisabled: string
 //	   16 Weight: float
+//	   17 Overwrite: bool
 //
 // Parameters are separated by ";" and must be provided in the specified order.
 func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
@@ -2080,8 +2087,8 @@ func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	}
 	params = append(params, bildr.String()) // append last param left even if empty
 	// Parse action parameters based on the predefined format.
-	if len(params) != 17 {
-		return fmt.Errorf("invalid number of parameters <%d> expected 17", len(params))
+	if len(params) != 18 {
+		return fmt.Errorf("invalid number of parameters <%d> expected 18", len(params))
 	}
 	// replace '&' with ';' before parsing to comply with TPAction fields that need ";" seperators
 	params[3] = strings.ReplaceAll(params[3], utils.ANDSep, utils.InfieldSep)
@@ -2109,6 +2116,14 @@ func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 			return err
 		}
 	}
+	var overwrite bool
+	// populate Action's Overwrite
+	if params[17] != utils.EmptyString {
+		overwrite, err = strconv.ParseBool(params[17])
+		if err != nil {
+			return err
+		}
+	}
 	// populate action parameters
 	ap := &utils.AttrSetActions{
 		ActionsId: params[0],
@@ -2132,6 +2147,7 @@ func dynamicAction(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 				Weight:          weight,
 			},
 		},
+		Overwrite: overwrite,
 	}
 
 	// create the Action based on the populated parameters
@@ -2247,12 +2263,14 @@ func dynamicFilter(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		return utils.ErrUnsupportedFormat
 	}
 	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
-		if err := fltr.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
-			return err
-		}
-		if len(aISplit) == 2 {
-			if err := fltr.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+		for i := range aISplit {
+			if timeParsed, err := utils.ParseTimeDetectLayout(aISplit[i],
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return err
+			} else if i == 0 {
+				fltr.ActivationInterval.ActivationTime = timeParsed
+			} else if i == 1 {
+				fltr.ActivationInterval.ExpiryTime = timeParsed
 			}
 		}
 	}
@@ -2314,87 +2332,165 @@ func dynamicRoute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 			return err
 		}
 	}
-	// Prepare request arguments based on provided parameters.
+	// Take only the string after @, for cases when the RouteProfileID is gotten from a switch agents event
+	routeFieldParts := strings.Split(params[1], "@")
+	routeProfileFound := new(RouteProfile)
+	if len(routeFieldParts) > 2 {
+		return fmt.Errorf("more than 1 \"@\" character for RouteProfileID: <%s>", params[1])
+	} else if len(routeFieldParts) > 1 {
+		params[1] = routeFieldParts[1]
+		if err := connMgr.Call(context.Background(), connCfg.ConnIDs,
+			utils.APIerSv1GetRouteProfile, &utils.TenantID{Tenant: utils.FirstNonEmpty(cgrEv.Tenant,
+				config.CgrConfig().GeneralCfg().DefaultTenant), ID: params[1]},
+			&routeProfileFound); err != nil && err.Error() != utils.ErrNotFound.Error() {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters. If any param is left empty,
+	// the field corresponding to it will be populated by the routeProfileFound field if it exists
 	route := &RouteWithAPIOpts{
 		RouteProfile: &RouteProfile{
-			Tenant:             params[0],
+			Tenant:             utils.FirstNonEmpty(params[0], routeProfileFound.Tenant),
 			ID:                 params[1],
 			ActivationInterval: &utils.ActivationInterval{}, // avoid reaching inside a nil pointer
-			Sorting:            params[4],
-			Routes: []*Route{
-				{
-					ID:              params[6],
-					RouteParameters: params[14],
-				},
-			},
+			Sorting:            utils.FirstNonEmpty(params[4], routeProfileFound.Sorting),
 		},
 		APIOpts: make(map[string]any),
 	}
-	// populate Route's FilterIDs
+	// populate RouteProfile's FilterIDs
 	if params[2] != utils.EmptyString {
 		route.FilterIDs = strings.Split(params[2], utils.ANDSep)
+	} else {
+		route.FilterIDs = routeProfileFound.FilterIDs
 	}
-	// populate Route's ActivationInterval
+	// populate RouteProfile's ActivationInterval
 	aISplit := strings.Split(params[3], utils.ANDSep)
 	if len(aISplit) > 2 {
 		return utils.ErrUnsupportedFormat
 	}
 	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
-		if err := route.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
-			return err
-		}
-		if len(aISplit) == 2 {
-			if err := route.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+		for i := range aISplit {
+			if timeParsed, err := utils.ParseTimeDetectLayout(aISplit[i],
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return err
+			} else if i == 0 {
+				route.ActivationInterval.ActivationTime = timeParsed
+			} else if i == 1 {
+				route.ActivationInterval.ExpiryTime = timeParsed
 			}
 		}
+	} else {
+		route.ActivationInterval = routeProfileFound.ActivationInterval
 	}
-	// populate Route's SortingParameters
+	// populate RouteProfile's SortingParameters
 	if params[5] != utils.EmptyString {
 		route.SortingParameters = strings.Split(params[5], utils.ANDSep)
+	} else {
+		route.SortingParameters = routeProfileFound.SortingParameters
 	}
-	// populate Route's RouteFilterIDs
-	if params[7] != utils.EmptyString {
-		route.Routes[0].FilterIDs = strings.Split(params[7], utils.ANDSep)
-	}
-	// populate Route's RouteAccountIDs
-	if params[8] != utils.EmptyString {
-		route.Routes[0].AccountIDs = strings.Split(params[8], utils.ANDSep)
-	}
-	// populate Route's RouteRatingPlanIDs
-	if params[9] != utils.EmptyString {
-		route.Routes[0].RatingPlanIDs = strings.Split(params[9], utils.ANDSep)
-	}
-	// populate Route's RouteResourceIDs
-	if params[10] != utils.EmptyString {
-		route.Routes[0].ResourceIDs = strings.Split(params[10], utils.ANDSep)
-	}
-	// populate Route's RouteStatIDs
-	if params[11] != utils.EmptyString {
-		route.Routes[0].StatIDs = strings.Split(params[11], utils.ANDSep)
-	}
-	// populate Route's RouteWeight
-	if params[12] != utils.EmptyString {
-		route.Routes[0].Weight, err = strconv.ParseFloat(params[12], 64)
-		if err != nil {
-			return err
+	// populate RouteProfile's Routes
+	if params[6] != utils.EmptyString {
+		// keep the existing routes if routeProfile already existed, and modify the specified Routes by ID
+		var routeModified bool // if route doesnt exist in the found route Profile
+		for _, existingRoute := range routeProfileFound.Routes {
+			if existingRoute.ID == params[6] { // modify routes with ID
+				// populate RouteProfile's RouteFilterIDs
+				if params[7] != utils.EmptyString {
+					existingRoute.FilterIDs = strings.Split(params[7], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteAccountIDs
+				if params[8] != utils.EmptyString {
+					existingRoute.AccountIDs = strings.Split(params[8], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteRatingPlanIDs
+				if params[9] != utils.EmptyString {
+					existingRoute.RatingPlanIDs = strings.Split(params[9], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteResourceIDs
+				if params[10] != utils.EmptyString {
+					existingRoute.ResourceIDs = strings.Split(params[10], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteStatIDs
+				if params[11] != utils.EmptyString {
+					existingRoute.StatIDs = strings.Split(params[11], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteWeight
+				if params[12] != utils.EmptyString {
+					existingRoute.Weight, err = strconv.ParseFloat(params[12], 64)
+					if err != nil {
+						return err
+					}
+				}
+				// populate RouteProfile's RouteBlocker
+				if params[13] != utils.EmptyString {
+					existingRoute.Blocker, err = strconv.ParseBool(params[13])
+					if err != nil {
+						return err
+					}
+				}
+				if params[14] != utils.EmptyString {
+					existingRoute.RouteParameters = params[14]
+				}
+				routeModified = true
+			}
+			route.Routes = append(route.Routes, existingRoute)
 		}
-	}
-	// populate Route's RouteBlocker
-	if params[13] != utils.EmptyString {
-		route.Routes[0].Blocker, err = strconv.ParseBool(params[13])
-		if err != nil {
-			return err
+		if !routeModified { // if no existing routes were modified, append a new route
+			appendRoute := new(Route) // new route to be appended
+			// populate RouteProfile's RouteID
+			appendRoute.ID = params[6]
+			// populate RouteProfile's RouteFilterIDs
+			if params[7] != utils.EmptyString {
+				appendRoute.FilterIDs = strings.Split(params[7], utils.ANDSep)
+			}
+			// populate RouteProfile's RouteAccountIDs
+			if params[8] != utils.EmptyString {
+				appendRoute.AccountIDs = strings.Split(params[8], utils.ANDSep)
+			}
+			// populate RouteProfile's RouteRatingPlanIDs
+			if params[9] != utils.EmptyString {
+				appendRoute.RatingPlanIDs = strings.Split(params[9], utils.ANDSep)
+			}
+			// populate RouteProfile's RouteResourceIDs
+			if params[10] != utils.EmptyString {
+				appendRoute.ResourceIDs = strings.Split(params[10], utils.ANDSep)
+			}
+			// populate RouteProfile's RouteStatIDs
+			if params[11] != utils.EmptyString {
+				appendRoute.StatIDs = strings.Split(params[11], utils.ANDSep)
+			}
+			// populate RouteProfile's RouteWeight
+			if params[12] != utils.EmptyString {
+				appendRoute.Weight, err = strconv.ParseFloat(params[12], 64)
+				if err != nil {
+					return err
+				}
+			}
+			// populate RouteProfile's RouteBlocker
+			if params[13] != utils.EmptyString {
+				appendRoute.Blocker, err = strconv.ParseBool(params[13])
+				if err != nil {
+					return err
+				}
+			}
+			// populate RouteProfile's RouteParameters
+			appendRoute.RouteParameters = params[14]
+			route.Routes = append(route.Routes, appendRoute)
 		}
+	} else {
+		route.Routes = routeProfileFound.Routes
 	}
-	// populate Route's Weight
+
+	// populate RouteProfile's Weight
 	if params[15] != utils.EmptyString {
 		route.Weight, err = strconv.ParseFloat(params[15], 64)
 		if err != nil {
 			return err
 		}
+	} else {
+		route.Weight = routeProfileFound.Weight
 	}
-	// populate Route's APIOpts
+	// populate RouteProfile's APIOpts
 	if params[16] != utils.EmptyString {
 		if err := parseParamStringToMap(params[16], route.APIOpts); err != nil {
 			return err
@@ -2725,12 +2821,14 @@ func dynamicResource(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		return utils.ErrUnsupportedFormat
 	}
 	if len(aISplit) > 0 && aISplit[0] != utils.EmptyString {
-		if err := rsc.ActivationInterval.ActivationTime.UnmarshalText([]byte(aISplit[0])); err != nil {
-			return err
-		}
-		if len(aISplit) == 2 {
-			if err := rsc.ActivationInterval.ExpiryTime.UnmarshalText([]byte(aISplit[1])); err != nil {
+		for i := range aISplit {
+			if timeParsed, err := utils.ParseTimeDetectLayout(aISplit[i],
+				config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil {
 				return err
+			} else if i == 0 {
+				rsc.ActivationInterval.ActivationTime = timeParsed
+			} else if i == 1 {
+				rsc.ActivationInterval.ExpiryTime = timeParsed
 			}
 		}
 	}

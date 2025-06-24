@@ -994,6 +994,7 @@ func TestFsAgentJsonCfg(t *testing.T) {
 		SessionSConns:          &[]string{rpcclient.BiRPCInternal},
 		SubscribePark:          utils.BoolPointer(true),
 		CreateCDR:              utils.BoolPointer(false),
+		RouteProfile:           utils.BoolPointer(false),
 		ExtraFields:            &[]string{},
 		LowBalanceAnnFile:      utils.StringPointer(""),
 		EmptyBalanceContext:    utils.StringPointer(""),
@@ -1026,6 +1027,7 @@ func TestKamAgentJsonCfg(t *testing.T) {
 		Enabled:        utils.BoolPointer(false),
 		Sessions_conns: &[]string{rpcclient.BiRPCInternal},
 		Create_cdr:     utils.BoolPointer(false),
+		Route_profile:  utils.BoolPointer(false),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			{
 				Address:                utils.StringPointer("127.0.0.1:8448"),
@@ -1052,6 +1054,7 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 		Enabled:        utils.BoolPointer(false),
 		Sessions_conns: &[]string{rpcclient.BiRPCInternal},
 		Create_cdr:     utils.BoolPointer(false),
+		Route_profile:  utils.BoolPointer(false),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Address:                utils.StringPointer("127.0.0.1:8088"),

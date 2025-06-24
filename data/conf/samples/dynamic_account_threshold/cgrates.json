@@ -19,7 +19,8 @@
     
     "schedulers": {
         "enabled": true,
-        "dynaprepaid_actionplans": ["DYNA_ACC"]
+        "dynaprepaid_actionplans": ["DYNA_ACC"],
+         "thresholds_conns": ["*localhost"]
     },
     
     "chargers": {

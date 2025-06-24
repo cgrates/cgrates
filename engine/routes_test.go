@@ -2637,7 +2637,31 @@ func TestSortedRoutesListDigestCase(t *testing.T) {
 		},
 	}
 	expectedDigest := "route1:param1,route2,route3:param3,route4"
-	result := srs.Digest()
+	result := srs.Digest(false)
+	if result != expectedDigest {
+		t.Errorf("Expected digest %s, but got %s", expectedDigest, result)
+	}
+}
+
+func TestSortedRoutesListDigestCaseWithRouteProfile(t *testing.T) {
+	srs := SortedRoutesList{
+		&SortedRoutes{
+			ProfileID: "profile1",
+			Routes: []*SortedRoute{
+				{RouteID: "route1", RouteParameters: "param1", SortingData: map[string]any{"key1": "value1"}, sortingDataF64: map[string]float64{utils.Weight: 1.0}},
+				{RouteID: "route2", RouteParameters: "", SortingData: map[string]any{"key2": "value2"}, sortingDataF64: map[string]float64{utils.Weight: 2.0}},
+			},
+		},
+		&SortedRoutes{
+			ProfileID: "profile2",
+			Routes: []*SortedRoute{
+				{RouteID: "route3", RouteParameters: "param3", SortingData: map[string]any{"key3": "value3"}, sortingDataF64: map[string]float64{utils.Weight: 3.0}},
+				{RouteID: "route4", RouteParameters: "", SortingData: map[string]any{"key4": "value4"}, sortingDataF64: map[string]float64{utils.Weight: 4.0}},
+			},
+		},
+	}
+	expectedDigest := "route1:param1@profile1,route2@profile1,route3:param3@profile2,route4@profile2"
+	result := srs.Digest(true)
 	if result != expectedDigest {
 		t.Errorf("Expected digest %s, but got %s", expectedDigest, result)
 	}

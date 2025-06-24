@@ -452,6 +452,7 @@ type FreeswitchAgentJsonCfg struct {
 	EmptyBalanceAnnFile    *string           `json:"empty_balance_ann_file"`
 	ActiveSessionDelimiter *string           `json:"active_session_delimiter"`
 	MaxWaitConnection      *string           `json:"max_wait_connection"`
+	RouteProfile           *bool             `json:"route_profile"`
 	EventSocketConns       *[]*FsConnJsonCfg `json:"event_socket_conns"`
 }
 
@@ -502,6 +503,7 @@ type AsteriskAgentJsonCfg struct {
 	Enabled        *bool
 	Sessions_conns *[]string
 	Create_cdr     *bool
+	Route_profile  *bool
 	Asterisk_conns *[]*AstConnJsonCfg
 }
 
@@ -527,6 +529,7 @@ type KamAgentJsonCfg struct {
 	Create_cdr     *bool
 	Evapi_conns    *[]*KamConnJsonCfg
 	Timezone       *string
+	Route_profile  *bool
 }
 
 // Represents one connection instance towards Kamailio

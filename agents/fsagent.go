@@ -211,7 +211,8 @@ func (fsa *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 		}
 	}
 	if authReply.RouteProfiles != nil {
-		fsArray := SliceAsFsArray(authReply.RouteProfiles.RoutesWithParams())
+		fsArray := SliceAsFsArray(authReply.RouteProfiles.RoutesWithParams(
+			config.CgrConfig().FsAgentCfg().RouteProfile))
 		if _, err := fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
 			fsev.GetUUID(), utils.CGRRoutes, fsArray)); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<%s> error setting routes: %s",

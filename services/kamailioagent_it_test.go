@@ -102,6 +102,7 @@ func TestKamailioAgentReload(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{utils.ConcatenatedKey("*birpc_internal", utils.MetaSessionS)},
 		CreateCdr:     true,
+		RouteProfile:  false,
 		EvapiConns:    []*config.KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
 		Timezone:      "Local",
 	}
