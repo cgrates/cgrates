@@ -277,7 +277,11 @@ func testCGRConfigReloadThresholdS(t *testing.T) {
 		Opts: &ThresholdsOpts{
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ThresholdsProfileIgnoreFiltersDftOpt}},
-		}}
+		},
+		EEsExporterIDs: []string{},
+		EEsConns:       []string{},
+	}
+
 	if !reflect.DeepEqual(expAttr, cfg.ThresholdSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ThresholdSCfg()))
 	}

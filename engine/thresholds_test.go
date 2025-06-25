@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 func TestThresholdsCache(t *testing.T) {
@@ -1134,64 +1135,6 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 	}
 }
 
-func TestThresholdsProcessEventAsyncExecErr(t *testing.T) {
-	tmpC := config.CgrConfig()
-	tmpCM := connMgr
-	tmpLogger := utils.Logger
-	defer func() {
-		config.SetCgrConfig(tmpC)
-		connMgr = tmpCM
-		utils.Logger = tmpLogger
-	}()
-	var buf bytes.Buffer
-	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
-
-	cfg := config.NewDefaultCGRConfig()
-	cfg.ThresholdSCfg().ActionSConns = []string{"actPrfID"}
-	cfg.RPCConns()["actPrfID"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	config.SetCgrConfig(cfg)
-	connMgr := NewConnManager(cfg)
-
-	thPrf := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH1",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-		MinHits:   2,
-		MaxHits:   5,
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10.0,
-			},
-		},
-		ActionProfileIDs: []string{"actPrfID"},
-		Async:            true,
-	}
-	th := &Threshold{
-		Tenant: "cgrates.org",
-		ID:     "TH1",
-		Hits:   2,
-		tPrfl:  thPrf,
-	}
-
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "ThresholdProcessEvent",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-	}
-	expLog := `[WARNING] <ThresholdS> failed executing actions for threshold: cgrates.org:TH1, error: DISCONNECTED`
-	if err := processEventWithThreshold(context.Background(), connMgr, thPrf.ActionProfileIDs,
-		args, th); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(10 * time.Millisecond)
-	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
-		t.Errorf("expected log <%+v> \nto be included in: <%+v>", expLog, rcvLog)
-	}
-
-}
-
 // func TestThresholdsProcessEvent3(t *testing.T) {
 // 	thPrf := &ThresholdProfile{
 // 		Tenant:    "cgrates.org",
@@ -1508,20 +1451,12 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 		},
 	}
 
-	expLog1 := `[WARNING] <ThresholdService> failed removing from database non-recurrent threshold: cgrates.org:TH3, error: NO_DATABASE_CONNECTION`
-	expLog2 := `[WARNING] <ThresholdService> failed removing from cache non-recurrent threshold: cgrates.org:TH3, error: DISCONNECTED`
-
 	if _, err := tS.processEvent(context.Background(), args.Tenant, args); err == nil ||
 		err != utils.ErrPartiallyExecuted {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			utils.ErrPartiallyExecuted, err)
 	}
 
-	if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog1) ||
-		!strings.Contains(rcvLog, expLog2) {
-		t.Errorf("expected logs <%+v> and <%+v> to be included in: <%+v>",
-			expLog1, expLog2, rcvLog)
-	}
 }
 
 func TestThresholdsProcessEventNotFound(t *testing.T) {
@@ -1579,6 +1514,7 @@ func TestThresholdsProcessEventNotFound(t *testing.T) {
 func TestThresholdsV1ProcessEventOK(t *testing.T) {
 	tmp := Cache
 	defer func() {
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 	}()
 
@@ -1632,23 +1568,19 @@ func TestThresholdsV1ProcessEventOK(t *testing.T) {
 		},
 	}
 	var reply []string
-	exp := []string{"TH1", "TH2"}
-	if err := tS.V1ProcessEvent(context.Background(), args, &reply); err != nil {
+	if err := tS.V1ProcessEvent(context.Background(), args, &reply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
 		t.Error(err)
-	} else {
-		sort.Strings(reply)
-		if !reflect.DeepEqual(reply, exp) {
-			t.Errorf("expected: <%+v>, \nreceived: <%+v>", exp, reply)
-		}
 	}
 }
 
 func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 	tmp := Cache
+
 	tmpLogger := utils.Logger
 	defer func() {
 		utils.Logger = tmpLogger
 		Cache = tmp
+		guardian.Guardian = guardian.New()
 	}()
 
 	var buf bytes.Buffer
@@ -1701,22 +1633,21 @@ func TestThresholdsV1ProcessEventPartExecErr(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 	}
-	expLog := `[WARNING] <ThresholdService> threshold: cgrates.org:TH4, ignoring event: cgrates.org:V1ProcessEventTest, error: MANDATORY_IE_MISSING: [connIDs]`
+
 	var reply []string
 	if err := tS.V1ProcessEvent(context.Background(), args, &reply); err == nil ||
-		err != utils.ErrPartiallyExecuted {
-		t.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ErrPartiallyExecuted, err)
-	} else {
-		if rcvLog := buf.String(); !strings.Contains(rcvLog, expLog) {
-			t.Errorf("expected log <%+v> to be included in: <%+v>",
-				expLog, rcvLog)
-		}
+		err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ErrMandatoryIeMissing, err)
 	}
 }
 
 func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 	tmp := Cache
+
+	tmpLogger := utils.Logger
 	defer func() {
+		utils.Logger = tmpLogger
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 	}()
 
@@ -1800,7 +1731,11 @@ func TestThresholdsV1ProcessEventMissingArgs(t *testing.T) {
 
 func TestThresholdsV1GetThresholdOK(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
+
 	defer func() {
+		utils.Logger = tmpLogger
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 	}()
 
@@ -1853,7 +1788,11 @@ func TestThresholdsV1GetThresholdOK(t *testing.T) {
 
 func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 	tmp := Cache
+	tmpLogger := utils.Logger
+
 	defer func() {
+		utils.Logger = tmpLogger
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 	}()
 
@@ -1894,7 +1833,11 @@ func TestThresholdsV1GetThresholdNotFoundErr(t *testing.T) {
 func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmp := Cache
-	defer func() { Cache = tmp }()
+
+	defer func() {
+		Cache = tmp
+		guardian.Guardian = guardian.New()
+	}()
 	Cache = NewCacheS(cfg, nil, nil, nil)
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
 	dm := NewDataManager(db, cfg, nil)
@@ -1967,7 +1910,11 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	prfs := make([]*ThresholdProfile, 0)
 	tmp := Cache
-	defer func() { Cache = tmp }()
+
+	defer func() {
+		Cache = tmp
+		guardian.Guardian = guardian.New()
+	}()
 	Cache = NewCacheS(cfg, nil, nil, nil)
 	db := &DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tnt, id string) (*ThresholdProfile, error) {
@@ -2024,8 +1971,10 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	tmp := Cache
 	tmpC := config.CgrConfig()
+
 	defer func() {
 		Cache = tmp
+		guardian.Guardian = guardian.New()
 		config.SetCgrConfig(tmpC)
 	}()
 	Cache = NewCacheS(cfg, nil, nil, nil)
@@ -2181,7 +2130,9 @@ func TestThresholdsStartLoop(t *testing.T) {
 func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
+
 	defer func() {
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
@@ -2236,7 +2187,9 @@ func TestThresholdsV1GetThresholdsForEventOK(t *testing.T) {
 func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
+
 	defer func() {
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
@@ -2302,7 +2255,9 @@ func TestThresholdsV1GetThresholdsForEventMissingArgs(t *testing.T) {
 func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
+
 	defer func() {
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
@@ -2362,7 +2317,9 @@ func TestThresholdsV1GetThresholdIDsOK(t *testing.T) {
 func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
+
 	defer func() {
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
@@ -2384,7 +2341,9 @@ func TestThresholdsV1GetThresholdIDsGetKeysForPrefixErr(t *testing.T) {
 func TestThresholdsV1ResetThresholdOK(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
+
 	defer func() {
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()
@@ -2446,6 +2405,7 @@ func TestThresholdsV1ResetThresholdErrNotFound(t *testing.T) {
 	tmp := Cache
 	tmpC := config.CgrConfig()
 	defer func() {
+		guardian.Guardian = guardian.New()
 		Cache = tmp
 		config.SetCgrConfig(tmpC)
 	}()

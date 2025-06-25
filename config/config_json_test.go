@@ -970,6 +970,8 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Nested_fields:            utils.BoolPointer(false),
 		Actions_conns:            &[]string{},
 		Opts:                     &ThresholdsOptsJson{},
+		Ees_conns:                &[]string{},
+		Ees_exporter_ids:         &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -1354,6 +1356,11 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 							Path:  utils.StringPointer("Async"),
 							Type:  utils.StringPointer(utils.MetaVariable),
 							Value: utils.StringPointer("~*req.9")},
+						{Tag: utils.StringPointer("EeIDs"),
+							Path:  utils.StringPointer("EeIDs"),
+							Type:  utils.StringPointer(utils.MetaVariable),
+							Value: utils.StringPointer("~*req.10"),
+						},
 					},
 				},
 				{

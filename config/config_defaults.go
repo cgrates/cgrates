@@ -1267,6 +1267,8 @@ const CGRATES_CFG_JSON = `
 	"notexists_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"nested_fields": false,			// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"actions_conns": [],			// connections to ActionS to execute the actions
+	"ees_conns": [],			// connections to EEs to sent threshold events, empty to disable export functionality: <""|*internal|$rpc_conns_id>
+	"ees_exporter_ids": [],			// list of EventExporter profiles to use for real-time threshold exports
 	"opts":{
 		// "*thresholdsIDs": [
 		// 	{
@@ -1514,7 +1516,8 @@ const CGRATES_CFG_JSON = `
 					{"tag": "MinSleep", "path": "MinSleep", "type": "*variable", "value": "~*req.6"},
 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.7"},
 					{"tag": "ActionProfileIDs", "path": "ActionProfileIDs", "type": "*variable", "value": "~*req.8"},
-					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~*req.9"}
+					{"tag": "Async", "path": "Async", "type": "*variable", "value": "~*req.9"} , 
+					{"tag": "EeIDs", "path": "EeIDs", "type": "*variable", "value": "~*req.10"}
 				]
 			},
 			{

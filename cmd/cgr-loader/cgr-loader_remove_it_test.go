@@ -662,6 +662,7 @@ func testCgrLdrGetThresholdProfileAfterLoad(t *testing.T) {
 		MaxHits:          -1,
 		MinHits:          0,
 		ActionProfileIDs: []string{"TOPUP_MONETARY_10"},
+		EeIDs:            []string{},
 	}
 	var replyThdPrf *engine.ThresholdProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetThresholdProfile,

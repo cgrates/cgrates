@@ -781,6 +781,7 @@ const (
 	OrderIDEnd              = "OrderIDEnd"
 	MinCost                 = "MinCost"
 	MaxCost                 = "MaxCost"
+	EeIDs                   = "EeIDs"
 	MetaLoaders             = "*loaders"
 	TmpSuffix               = ".tmp"
 	MetaDiamreq             = "*diamreq"
@@ -2633,6 +2634,11 @@ const (
 	OptsRoundingDecimals = "*roundingDecimals"
 
 	// Thresholds
+	ThresholdHit = "ThresholdHit"
+
+	Hits                     = "Hits"
+	Snooze                   = "Snooze"
+	ThresholdConfig          = "Config"
 	OptsThresholdsProfileIDs = "*thdProfileIDs"
 
 	// STIR
