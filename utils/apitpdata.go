@@ -293,6 +293,7 @@ type TPThresholdProfile struct {
 	Blocker          bool   // blocker flag to stop processing on filters matched
 	Weights          string // Weight to sort the thresholds
 	ActionProfileIDs []string
+	EeIDs            []string
 	Async            bool
 }
 

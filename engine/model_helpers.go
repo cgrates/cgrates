@@ -872,13 +872,14 @@ type ThresholdMdls []*ThresholdMdl
 func (tps ThresholdMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs, utils.Weights,
 		utils.MaxHits, utils.MinHits, utils.MinSleep,
-		utils.Blocker, utils.ActionProfileIDs, utils.Async}
+		utils.Blocker, utils.ActionProfileIDs, utils.Async, utils.EeIDs}
 }
 
 func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 	mst := make(map[string]*utils.TPThresholdProfile)
 	filterMap := make(map[string]utils.StringSet)
 	actionMap := make(map[string]utils.StringSet)
+	eesIDsMap := make(map[string]utils.StringSet)
 	for _, tp := range tps {
 		tenID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
 		th, found := mst[tenID]
@@ -909,6 +910,12 @@ func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 			}
 			filterMap[tenID].AddSlice(strings.Split(tp.FilterIDs, utils.InfieldSep))
 		}
+		if tp.EeIDs != utils.EmptyString {
+			if _, has := eesIDsMap[tenID]; !has {
+				eesIDsMap[tenID] = make(utils.StringSet)
+			}
+			eesIDsMap[tenID].AddSlice(strings.Split(tp.EeIDs, utils.InfieldSep))
+		}
 
 		mst[tenID] = th
 	}
@@ -918,6 +925,7 @@ func (tps ThresholdMdls) AsTPThreshold() (result []*utils.TPThresholdProfile) {
 		result[i] = th
 		result[i].FilterIDs = filterMap[tntID].AsSlice()
 		result[i].ActionProfileIDs = actionMap[tntID].AsSlice()
+		result[i].EeIDs = eesIDsMap[tntID].AsSlice()
 		i++
 	}
 	return
@@ -945,6 +953,13 @@ func APItoModelTPThreshold(th *utils.TPThresholdProfile) (mdls ThresholdMdls) {
 				mdl.MinHits = th.MinHits
 				mdl.MinSleep = th.MinSleep
 				mdl.Async = th.Async
+
+				for i, val := range th.EeIDs {
+					if i != 0 {
+						mdl.EeIDs += utils.InfieldSep
+					}
+					mdl.EeIDs += val
+				}
 			}
 			mdl.FilterIDs = th.FilterIDs[i]
 			mdl.ActionProfileIDs = th.ActionProfileIDs[i]
@@ -995,6 +1010,7 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 		Async:            tpTH.Async,
 		ActionProfileIDs: make([]string, len(tpTH.ActionProfileIDs)),
 		FilterIDs:        make([]string, len(tpTH.FilterIDs)),
+		EeIDs:            make([]string, len(tpTH.EeIDs)),
 	}
 	if tpTH.Weights != utils.EmptyString {
 		if th.Weights, err = utils.NewDynamicWeightsFromString(tpTH.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
@@ -1006,6 +1022,7 @@ func APItoThresholdProfile(tpTH *utils.TPThresholdProfile, timezone string) (th 
 			return nil, err
 		}
 	}
+	copy(th.EeIDs, tpTH.EeIDs)
 	copy(th.ActionProfileIDs, tpTH.ActionProfileIDs)
 	copy(th.FilterIDs, tpTH.FilterIDs)
 	return th, nil
@@ -1022,12 +1039,14 @@ func ThresholdProfileToAPI(th *ThresholdProfile) (tpTH *utils.TPThresholdProfile
 		Weights:          th.Weights.String(utils.InfieldSep, utils.ANDSep),
 		ActionProfileIDs: make([]string, len(th.ActionProfileIDs)),
 		Async:            th.Async,
+		EeIDs:            make([]string, len(th.EeIDs)),
 	}
 	if th.MinSleep != time.Duration(0) {
 		tpTH.MinSleep = th.MinSleep.String()
 	}
 	copy(tpTH.FilterIDs, th.FilterIDs)
 	copy(tpTH.ActionProfileIDs, th.ActionProfileIDs)
+	copy(tpTH.EeIDs, th.EeIDs)
 	return
 }
 

@@ -124,6 +124,7 @@ type ThresholdMdl struct {
 	Blocker          bool   `index:"7" re:".*"`
 	ActionProfileIDs string `index:"8" re:".*"`
 	Async            bool   `index:"9" re:".*"`
+	EeIDs            string `index:"10"  re:".*"`
 	CreatedAt        time.Time
 }
 

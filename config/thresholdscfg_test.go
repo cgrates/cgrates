@@ -54,6 +54,8 @@ func TestThresholdSCfgloadFromJsonCfgCase1(t *testing.T) {
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 		},
+		EEsConns:       []string{},
+		EEsExporterIDs: []string{},
 	}
 	jsonCfg := NewDefaultCGRConfig()
 	if err := jsonCfg.thresholdSCfg.loadFromJSONCfg(cfgJSON); err != nil {
@@ -134,6 +136,8 @@ func TestThresholdSCfgAsMapInterfaceCase1(t *testing.T) {
 				{},
 			},
 		},
+		utils.EEsConnsCfg:       []string{},
+		utils.EEsExporterIDsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -174,6 +178,8 @@ func TestThresholdSCfgAsMapInterfaceCase2(t *testing.T) {
 				{},
 			},
 		},
+		utils.EEsConnsCfg:       []string{},
+		utils.EEsExporterIDsCfg: []string{},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)

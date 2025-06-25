@@ -120,10 +120,10 @@ func TestRPCExpIT(t *testing.T) {
 }
 }`,
 		TpFiles: map[string]string{
-			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
-cgrates.org,THD_1,*string:~*req.Account:1001,;10,5,3,,,*none,true
-cgrates.org,THD_2,*string:~*req.Account:1001,;20,3,2,,,*none,true
-cgrates.org,THD_3,*string:~*req.Account:1001,;15,4,1,,,*none,true`,
+			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9],EeIDs[10]
+cgrates.org,THD_1,*string:~*req.Account:1001,;10,5,3,,,*none,true,
+cgrates.org,THD_2,*string:~*req.Account:1001,;20,3,2,,,*none,true,
+cgrates.org,THD_3,*string:~*req.Account:1001,;15,4,1,,,*none,true,`,
 		},
 		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,

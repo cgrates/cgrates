@@ -102,8 +102,8 @@ cgrates.org,Ranking1,15m,Stats2;Stats3;Stats4,Metric1;Metric3,*asc,,THD1;THD2
 cgrates.org,TREND1,5m,Stats2,-1,-1,,*average,TD1;THD2
 `
 	ThresholdsCSVContent := `
-#Tenant[0],Id[1],FilterIDs[2],Weights[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
-cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,;10,12,10,1s,true,THRESH1,true
+#Tenant[0],Id[1],FilterIDs[2],Weights[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9],EeIDs[10]
+cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,;10,12,10,1s,true,THRESH1,true,
 `
 
 	FiltersCSVContent := `

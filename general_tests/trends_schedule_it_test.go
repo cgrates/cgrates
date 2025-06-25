@@ -108,9 +108,9 @@ cgrates.org,TREND_2,@every 1s,Stats1_2,,-1,-1,1,*last,1,false,*none`,
 		utils.StatsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weights[3],Blockers[4],QueueLength[5],TTL[6],MinItems[7],Stored[8],ThresholdIDs[9],MetricIDs[10],MetricFilterIDs[11],MetricBlockers[12]
 cgrates.org,Stats1_1,*string:~*req.Account:1001,,,,-1,,,,*tcc;*acd;*tcd,,
 cgrates.org,Stats1_2,*string:~*req.Account:1002,,,,-1,,,,*sum#~*opts.*usage;*pdd,,`,
-		utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9]
-cgrates.org,Threshold1,*string:~*req.Metrics.*acd.ID:*acd,;10,-1,0,1s,false,,true
-cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,true`}
+		utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],ActionProfileIDs[8],Async[9],EeIDs[10]
+cgrates.org,Threshold1,*string:~*req.Metrics.*acd.ID:*acd,;10,-1,0,1s,false,,true,
+cgrates.org,Threshold2,*string:~*req.Metrics.*pdd.ID:*pdd,;10,-1,0,1s,false,,true,`}
 	ng := engine.TestEngine{
 		ConfigJSON: content,
 		TpFiles:    tpFiles,

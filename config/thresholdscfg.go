@@ -47,6 +47,8 @@ type ThresholdSCfg struct {
 	NotExistsIndexedFields *[]string
 	NestedFields           bool
 	ActionSConns           []string // connections towards ActionS
+	EEsConns               []string
+	EEsExporterIDs         []string
 	Opts                   *ThresholdsOpts
 }
 
@@ -113,6 +115,12 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) (err error) {
 	if jsnCfg.Actions_conns != nil {
 		t.ActionSConns = tagInternalConns(*jsnCfg.Actions_conns, utils.MetaActions)
 	}
+	if jsnCfg.Ees_conns != nil {
+		t.EEsConns = tagInternalConns(*jsnCfg.Ees_conns, utils.MetaEEs)
+	}
+	if jsnCfg.Ees_exporter_ids != nil {
+		t.EEsExporterIDs = slices.Clone(*jsnCfg.Ees_exporter_ids)
+	}
 	if jsnCfg.Opts != nil {
 		err = t.Opts.loadFromJSONCfg(jsnCfg.Opts)
 	}
@@ -153,6 +161,12 @@ func (t ThresholdSCfg) AsMapInterface() any {
 	}
 	if t.ActionSConns != nil {
 		mp[utils.ActionSConnsCfg] = stripInternalConns(t.ActionSConns)
+	}
+	if t.EEsConns != nil {
+		mp[utils.EEsConnsCfg] = stripInternalConns(t.EEsConns)
+	}
+	if t.EEsExporterIDs != nil {
+		mp[utils.EEsExporterIDsCfg] = slices.Clone(t.EEsExporterIDs)
 	}
 	return mp
 }
@@ -203,6 +217,12 @@ func (t ThresholdSCfg) Clone() (cln *ThresholdSCfg) {
 	if t.ActionSConns != nil {
 		cln.ActionSConns = slices.Clone(t.ActionSConns)
 	}
+	if t.EEsConns != nil {
+		cln.EEsConns = slices.Clone(t.EEsConns)
+	}
+	if t.EEsExporterIDs != nil {
+		cln.EEsExporterIDs = slices.Clone(t.EEsExporterIDs)
+	}
 	return
 }
 
@@ -223,6 +243,8 @@ type ThresholdSJsonCfg struct {
 	Notexists_indexed_fields *[]string
 	Nested_fields            *bool // applies when indexed fields is not defined
 	Actions_conns            *[]string
+	Ees_conns                *[]string
+	Ees_exporter_ids         *[]string
 	Opts                     *ThresholdsOptsJson
 }
 
@@ -262,6 +284,12 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 	}
 	if !slices.Equal(v1.ActionSConns, v2.ActionSConns) {
 		d.Actions_conns = utils.SliceStringPointer(stripInternalConns(v2.ActionSConns))
+	}
+	if !slices.Equal(v1.EEsConns, v2.EEsConns) {
+		d.Ees_conns = utils.SliceStringPointer(stripInternalConns(v2.EEsConns))
+	}
+	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
+		d.Ees_exporter_ids = &v2.EEsExporterIDs
 	}
 	d.Opts = diffThresholdsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d

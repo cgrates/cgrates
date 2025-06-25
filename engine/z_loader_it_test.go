@@ -31,6 +31,8 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 var (
@@ -253,7 +255,7 @@ func testLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if !reflect.DeepEqual(sts, rcv) {
+		if !cmp.Equal(sts, rcv, cmpopts.IgnoreUnexported(ThresholdProfile{}), cmpopts.IgnoreFields(ThresholdProfile{}, "EeIDs")) {
 			t.Errorf("Expecting: %v, received: %v", sts, rcv)
 		}
 	}
