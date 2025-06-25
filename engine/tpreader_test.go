@@ -646,11 +646,11 @@ func TestTpReaderLoadAll(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	storeCSV := &CSVStorage{}
 	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	tpr, err := NewTpReader(db, storeCSV, "", "", nil, nil, true)
+	tpr, err := NewTpReader(db, storeCSV, "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	tprCopy, err := NewTpReader(db, storeCSV, "", "", nil, nil, true)
+	tprCopy, err := NewTpReader(db, storeCSV, "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
