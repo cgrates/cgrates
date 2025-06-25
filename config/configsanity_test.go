@@ -1839,15 +1839,14 @@ func TestCGRConfigcheckConfigSanityCacheSErr(t *testing.T) {
 
 	cfg := NewDefaultCGRConfig()
 	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{
-
-		utils.CacheResourceProfiles: {
+		utils.CacheAccounts: {
 			Limit: 1,
 		},
 	}
 	cfg.dataDbCfg.Type = utils.MetaInternal
 
-	expErr := "<CacheS> *resource_profiles needs to be 0 when DataBD is *internal, received : 1"
-	if err := cfg.checkConfigSanity(); err.Error() != expErr {
+	expErr := "<CacheS> *accounts needs to be 0 when DataBD is *internal, received : 1"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
 	}
 }

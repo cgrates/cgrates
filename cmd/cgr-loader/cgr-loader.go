@@ -334,7 +334,7 @@ func main() {
 	if tpReader, err = engine.NewTpReader(dataDB, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
-		ldrCfg.LoaderCgrCfg().ActionSConns, false); err != nil {
+		ldrCfg.LoaderCgrCfg().ActionSConns); err != nil {
 		log.Fatal(err)
 	}
 	if err = tpReader.LoadAll(); err != nil {

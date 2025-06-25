@@ -614,7 +614,6 @@ func testCgrLdrGetStatsProfileAfterLoad(t *testing.T) {
 		},
 		Blockers:     utils.DynamicBlockers{{Blocker: true}},
 		ThresholdIDs: []string{utils.MetaNone},
-		Stored:       true,
 	}
 	var replySts *engine.StatQueueProfile
 	if err := cgrLdrBIRPC.Call(context.Background(), utils.AdminSv1GetStatQueueProfile,

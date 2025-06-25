@@ -36,6 +36,16 @@ var (
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheCapsEvents, CacheReplicationHosts})
 
+	// DataDBPartitions excluding Resources, Thresholds, Trends, Rankings, IPs, Stats
+	StatelessDataDBPartitions = NewStringSet([]string{
+		CacheFilters, CacheRouteProfiles, CacheAttributeProfiles,
+		CacheChargerProfiles, CacheActionProfiles, CacheRouteFilterIndexes,
+		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheLoadIDs,
+		CacheRateProfiles, CacheRateProfilesFilterIndexes,
+		CacheRateFilterIndexes, CacheActionProfilesFilterIndexes,
+		CacheAccountsFilterIndexes, CacheReverseFilterIndexes, CacheAccounts,
+	})
+
 	DataDBPartitions = NewStringSet([]string{
 		CacheResourceProfiles, CacheResources, CacheEventResources, CacheIPProfiles, CacheIPAllocations,
 		CacheEventIPs, CacheStatQueueProfiles, CacheStatQueues, CacheThresholdProfiles,

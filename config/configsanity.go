@@ -1040,7 +1040,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				cfg.dataDbCfg.Opts.InternalDBFileSizeLimit)
 		}
 		for key, config := range cfg.cacheCfg.Partitions {
-			if utils.DataDBPartitions.Has(key) && config.Limit != 0 {
+			if utils.StatelessDataDBPartitions.Has(key) && config.Limit != 0 {
 				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
 			}
 		}

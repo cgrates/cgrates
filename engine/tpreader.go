@@ -48,11 +48,10 @@ type TpReader struct {
 	accounts          map[utils.TenantID]*utils.TPAccount
 	cacheConns        []string
 	//schedulerConns     []string
-	isInternalDB bool // do not reload cache if we use internalDB
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
-	cacheConns, schedulerConns []string, isInternalDB bool) (*TpReader, error) {
+	cacheConns, schedulerConns []string) (*TpReader, error) {
 
 	tpr := &TpReader{
 		tpid:       tpid,
@@ -61,7 +60,6 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 		lr:         lr,
 		cacheConns: cacheConns,
 		//schedulerConns: schedulerConns,
-		isInternalDB: isInternalDB,
 	}
 	tpr.Init()
 
@@ -860,9 +858,6 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disableReverse bool) (err error
 }
 
 func (tpr *TpReader) ReloadCache(ctx *context.Context, caching string, verbose bool, opts map[string]any, tenant string) (err error) {
-	if tpr.isInternalDB {
-		return
-	}
 	if len(tpr.cacheConns) == 0 {
 		log.Print("Disabled automatic reload")
 		return

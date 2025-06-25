@@ -125,7 +125,7 @@ func testLoaderITRemoveLoad(t *testing.T) {
 		t.Fatal(err)
 	}
 	loader, err = NewTpReader(dataDbCsv.DataDB(), csvStorage, "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -171,7 +171,7 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 		t.Fatal(err)
 	}
 	loader, err = NewTpReader(dataDbCsv.DataDB(), csvStorage, "", "",
-		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil, false)
+		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}
