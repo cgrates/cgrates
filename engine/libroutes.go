@@ -258,7 +258,7 @@ func (sRs SortedRoutesList) RouteIDs() (rIDs []string) {
 		for _, r := range sR.Routes {
 			route := r.RouteID
 			if config.CgrConfig().AsteriskAgentCfg().RouteProfile {
-				route += "@" + sR.ProfileID
+				route += utils.AtChar + sR.ProfileID
 			}
 			rIDs = append(rIDs, route)
 		}
@@ -275,7 +275,7 @@ func (sRs SortedRoutesList) RoutesWithParams(setRouteProfile bool) (sPs []string
 				route += utils.InInFieldSep + spl.RouteParameters
 			}
 			if setRouteProfile {
-				route += "@" + sR.ProfileID
+				route += utils.AtChar + sR.ProfileID
 			}
 			sPs = append(sPs, route)
 		}

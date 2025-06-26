@@ -706,7 +706,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,			// starts the Asterisk agent: <true|false>
 	"sessions_conns": ["*birpc_internal"],
 	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
-	"route_profile": false,			// attaches RouteProfileID to RouteIDs which are sent as reply to asteristk agent authorization requests
+	"route_profile": false,			// attaches RouteProfileID to RouteIDs which are sent as reply to asterisk agent authorization requests
 	"asterisk_conns":[			// instantiate connections to multiple Asterisk servers
 		{
 			"address": "127.0.0.1:8088",
