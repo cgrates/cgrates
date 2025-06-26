@@ -229,6 +229,7 @@ const (
 	FilterValEnd             = ")"
 	PlusChar                 = "+"
 	MinusChar                = "-"
+	AtChar                   = "@"
 	JSON                     = "json"
 	JSONCaps                 = "JSON"
 	GOBCaps                  = "GOB"
