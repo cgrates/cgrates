@@ -224,3 +224,169 @@ func TestIPsCfgCloneSection(t *testing.T) {
 		t.Errorf("CloneSection() = %+v; want %+v", clone, expected)
 	}
 }
+
+func TestDiffIPsJsonCfg(t *testing.T) {
+	v1 := &IPsCfg{
+		Enabled:                true,
+		IndexedSelects:         false,
+		StoreInterval:          24 * time.Hour,
+		StringIndexedFields:    &[]string{"field1", "field2"},
+		PrefixIndexedFields:    &[]string{"prefix1"},
+		SuffixIndexedFields:    &[]string{"suffix1"},
+		ExistsIndexedFields:    &[]string{"exists1"},
+		NotExistsIndexedFields: &[]string{"notexists1"},
+		NestedFields:           true,
+		Opts:                   &IPsOpts{},
+	}
+
+	v2 := &IPsCfg{
+		Enabled:                false,
+		IndexedSelects:         true,
+		StoreInterval:          48 * time.Hour,
+		StringIndexedFields:    &[]string{"field2", "field3"},
+		PrefixIndexedFields:    &[]string{"prefix2"},
+		SuffixIndexedFields:    &[]string{"suffix2"},
+		ExistsIndexedFields:    &[]string{"exists2"},
+		NotExistsIndexedFields: &[]string{"notexists2"},
+		NestedFields:           false,
+		Opts:                   &IPsOpts{},
+	}
+
+	diff := diffIPsJsonCfg(nil, v1, v2)
+
+	if diff.Enabled == nil || *diff.Enabled != v2.Enabled {
+		t.Errorf("Expected Enabled = %v, got %+v", v2.Enabled, diff.Enabled)
+	}
+	if diff.IndexedSelects == nil || *diff.IndexedSelects != v2.IndexedSelects {
+		t.Errorf("Expected IndexedSelects = %v, got %+v", v2.IndexedSelects, diff.IndexedSelects)
+	}
+	if diff.NestedFields == nil || *diff.NestedFields != v2.NestedFields {
+		t.Errorf("Expected NestedFields = %v, got %+v", v2.NestedFields, diff.NestedFields)
+	}
+	expectedInterval := v2.StoreInterval.String()
+	if diff.StoreInterval == nil || *diff.StoreInterval != expectedInterval {
+		t.Errorf("Expected StoreInterval = %v, got %+v", expectedInterval, diff.StoreInterval)
+	}
+
+	if diff.StringIndexedFields == nil || !reflect.DeepEqual(*diff.StringIndexedFields, *v2.StringIndexedFields) {
+		t.Errorf("Expected StringIndexedFields = %+v, got %+v", *v2.StringIndexedFields, diff.StringIndexedFields)
+	}
+	if diff.PrefixIndexedFields == nil || !reflect.DeepEqual(*diff.PrefixIndexedFields, *v2.PrefixIndexedFields) {
+		t.Errorf("Expected PrefixIndexedFields = %+v, got %+v", *v2.PrefixIndexedFields, diff.PrefixIndexedFields)
+	}
+	if diff.SuffixIndexedFields == nil || !reflect.DeepEqual(*diff.SuffixIndexedFields, *v2.SuffixIndexedFields) {
+		t.Errorf("Expected SuffixIndexedFields = %+v, got %+v", *v2.SuffixIndexedFields, diff.SuffixIndexedFields)
+	}
+	if diff.ExistsIndexedFields == nil || !reflect.DeepEqual(*diff.ExistsIndexedFields, *v2.ExistsIndexedFields) {
+		t.Errorf("Expected ExistsIndexedFields = %+v, got %+v", *v2.ExistsIndexedFields, diff.ExistsIndexedFields)
+	}
+	if diff.NotExistsIndexedFields == nil || !reflect.DeepEqual(*diff.NotExistsIndexedFields, *v2.NotExistsIndexedFields) {
+		t.Errorf("Expected NotExistsIndexedFields = %+v, got %+v", *v2.NotExistsIndexedFields, diff.NotExistsIndexedFields)
+	}
+
+	if diff.Opts != nil && (diff.Opts.AllocationID != nil || diff.Opts.TTL != nil) {
+		t.Errorf("Expected Opts to be nil or empty, got: %+v", diff.Opts)
+	}
+}
+
+func TestDiffIPsOptsJsonCfg(t *testing.T) {
+	ttl1 := []*DynamicDurationOpt{{value: 72 * time.Hour}}
+	ttl2 := []*DynamicDurationOpt{{value: 24 * time.Hour}}
+
+	allocID1 := []*DynamicStringOpt{{value: "id1"}}
+	allocID2 := []*DynamicStringOpt{{value: "id2"}}
+
+	tests := []struct {
+		name        string
+		v1, v2      *IPsOpts
+		expectDiff  bool
+		expectedTTL []*DynamicInterfaceOpt
+		expectedID  []*DynamicInterfaceOpt
+	}{
+		{
+			name:       "No difference",
+			v1:         &IPsOpts{AllocationID: allocID1, TTL: ttl1},
+			v2:         &IPsOpts{AllocationID: allocID1, TTL: ttl1},
+			expectDiff: false,
+		},
+		{
+			name:        "TTL differs",
+			v1:          &IPsOpts{AllocationID: allocID1, TTL: ttl1},
+			v2:          &IPsOpts{AllocationID: allocID1, TTL: ttl2},
+			expectDiff:  true,
+			expectedTTL: DurationToIfaceDynamicOpts(ttl2),
+		},
+		{
+			name:       "AllocationID differs",
+			v1:         &IPsOpts{AllocationID: allocID1, TTL: ttl1},
+			v2:         &IPsOpts{AllocationID: allocID2, TTL: ttl1},
+			expectDiff: true,
+			expectedID: DynamicStringToInterfaceOpts(allocID2),
+		},
+		{
+			name:        "Both differ",
+			v1:          &IPsOpts{AllocationID: allocID1, TTL: ttl1},
+			v2:          &IPsOpts{AllocationID: allocID2, TTL: ttl2},
+			expectDiff:  true,
+			expectedID:  DynamicStringToInterfaceOpts(allocID2),
+			expectedTTL: DurationToIfaceDynamicOpts(ttl2),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			diff := diffIPsOptsJsonCfg(nil, tt.v1, tt.v2)
+
+			if tt.expectDiff {
+				if tt.expectedID != nil && !reflect.DeepEqual(diff.AllocationID, tt.expectedID) {
+					t.Errorf("Expected AllocationID diff: %+v, got: %+v", tt.expectedID, diff.AllocationID)
+				}
+				if tt.expectedTTL != nil && !reflect.DeepEqual(diff.TTL, tt.expectedTTL) {
+					t.Errorf("Expected TTL diff: %+v, got: %+v", tt.expectedTTL, diff.TTL)
+				}
+			} else {
+				if diff.AllocationID != nil || diff.TTL != nil {
+					t.Errorf("Expected no differences, but got AllocationID: %+v, TTL: %+v", diff.AllocationID, diff.TTL)
+				}
+			}
+		})
+	}
+}
+
+func TestIPsOptsloadFromJSONCfg(t *testing.T) {
+	opts := &IPsOpts{}
+	if err := opts.loadFromJSONCfg(nil); err != nil {
+		t.Errorf("Expected nil error on nil input, got: %v", err)
+	}
+
+	jCfg := &IPsOptsJson{
+		AllocationID: []*DynamicInterfaceOpt{
+			{Value: "alloc1"},
+			{Value: "alloc2"},
+		},
+		TTL: []*DynamicInterfaceOpt{
+			{Value: "48h"},
+			{Value: "72h"},
+		},
+	}
+
+	expected := &IPsOpts{
+		AllocationID: []*DynamicStringOpt{
+			{value: "alloc1"},
+			{value: "alloc2"},
+		},
+		TTL: []*DynamicDurationOpt{
+			{value: 48 * time.Hour},
+			{value: 72 * time.Hour},
+		},
+	}
+
+	opts = &IPsOpts{}
+	if err := opts.loadFromJSONCfg(jCfg); err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if !reflect.DeepEqual(opts, expected) {
+		t.Errorf("Expected %+v, got %+v", utils.ToJSON(expected), utils.ToJSON(opts))
+	}
+
+}
