@@ -227,8 +227,8 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 		}
 
 		allocID := "api_allocation"
-		var evIPs IPAllocationsList
-		if err := client.Call(context.Background(), utils.IPsV1GetIPAllocationsForEvent,
+		var evIP utils.IPAllocations
+		if err := client.Call(context.Background(), utils.IPsV1GetIPAllocationForEvent,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "GetIPsForEvent1",
@@ -238,7 +238,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				APIOpts: map[string]any{
 					utils.OptsIPsAllocationID: allocID,
 				},
-			}, &evIPs); err != nil {
+			}, &evIP); err != nil {
 			t.Error(err)
 		}
 

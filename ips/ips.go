@@ -34,28 +34,6 @@ import (
 	"github.com/cgrates/guardian"
 )
 
-// IPAllocationsList is a collection of ipAllocations objects.
-type IPAllocationsList []*utils.IPAllocations
-
-// unlock will unlock IP allocations in this slice
-func (al IPAllocationsList) unlock() {
-	for _, allocs := range al {
-		allocs.Unlock()
-		if prfl := allocs.Config(); prfl != nil {
-			prfl.Unlock()
-		}
-	}
-}
-
-// ids returns a map of IP allocation IDs which is used for caching
-func (al IPAllocationsList) ids() utils.StringSet {
-	ids := make(utils.StringSet)
-	for _, allocs := range al {
-		ids.Add(allocs.ID)
-	}
-	return ids
-}
-
 // IPService is the service handling IP allocations
 type IPService struct {
 	dm           *engine.DataManager // So we can load the data in cache and index it
@@ -175,30 +153,26 @@ func (s *IPService) storeIPAllocations(ctx *context.Context, allocs *utils.IPAll
 }
 
 // storeMatchedIPAllocations will store the list of IP allocations based on the StoreInterval
-func (s *IPService) storeMatchedIPAllocations(ctx *context.Context, matched IPAllocationsList) error {
+func (s *IPService) storeMatchedIPAllocations(ctx *context.Context, matched *utils.IPAllocations) error {
 	if s.cfg.IPsCfg().StoreInterval == 0 {
 		return nil
 	}
 	if s.cfg.IPsCfg().StoreInterval > 0 {
 		s.storedIPsMux.Lock()
-		defer s.storedIPsMux.Unlock()
+		s.storedIPs.Add(matched.TenantID())
+		s.storedIPsMux.Unlock()
+		return nil
 	}
-	for _, allocs := range matched {
-		if s.cfg.IPsCfg().StoreInterval > 0 {
-			s.storedIPs.Add(allocs.TenantID())
-			continue
-		}
-		if err := s.storeIPAllocations(ctx, allocs); err != nil {
-			return err
-		}
+	if err := s.storeIPAllocations(ctx, matched); err != nil {
+		return err
 	}
 	return nil
 }
 
-// matchingIPAllocationsForEvent returns ordered list of matching IP
-// allocations which are active by the time of the API call.
+// matchingIPAllocationsForEvent returns the IP allocation with the highest weight
+// matching the event.
 func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
-	ev *utils.CGREvent, evUUID string) (al IPAllocationsList, err error) {
+	ev *utils.CGREvent, evUUID string) (allocs *utils.IPAllocations, err error) {
 	var itemIDs utils.StringSet
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -242,8 +216,8 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 			return nil, err
 		}
 	}
-	al = make(IPAllocationsList, 0, len(itemIDs))
-	weights := make(map[string]float64) // stores sorting weights by IP allocation ID
+	var matchedPrfl *utils.IPProfile
+	var maxWeight float64
 	for id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
@@ -254,88 +228,83 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 			if err == utils.ErrNotFound {
 				continue
 			}
-			al.unlock()
 			return nil, err
 		}
 		prfl.Lock(lkPrflID)
 		var pass bool
 		if pass, err = s.fltrs.Pass(ctx, tnt, prfl.FilterIDs, evNm); err != nil {
 			prfl.Unlock()
-			al.unlock()
 			return nil, err
 		} else if !pass {
 			prfl.Unlock()
 			continue
 		}
-		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.IPAllocationsLockKey(prfl.Tenant, prfl.ID))
-		var allocs *utils.IPAllocations
-		if allocs, err = s.dm.GetIPAllocations(ctx, prfl.Tenant, prfl.ID, true, true, ""); err != nil {
-			guardian.Guardian.UnguardIDs(lkID)
-			prfl.Unlock()
-			al.unlock()
-			return nil, err
-		}
-		allocs.Lock(lkID)
-
-		// Clone profile to avoid modifying cached version during pool sorting.
-		profileCopy := prfl.Clone()
-		if err = sortPools(ctx, profileCopy, s.fltrs, evNm); err != nil {
-			allocs.Unlock()
-			prfl.Unlock()
-			al.unlock()
-			return nil, err
-		}
-
-		if err = allocs.ComputeUnexported(profileCopy); err != nil {
-			allocs.Unlock()
-			prfl.Unlock()
-			al.unlock()
-			return nil, err
-		}
 		var weight float64
 		if weight, err = engine.WeightFromDynamics(ctx, prfl.Weights, s.fltrs, tnt, evNm); err != nil {
-			allocs.Unlock()
 			prfl.Unlock()
-			al.unlock()
 			return nil, err
 		}
-		weights[allocs.ID] = weight
-		al = append(al, allocs)
+		if matchedPrfl == nil || maxWeight < weight {
+			if matchedPrfl != nil {
+				matchedPrfl.Unlock()
+			}
+			matchedPrfl = prfl
+			maxWeight = weight
+		} else {
+			prfl.Unlock()
+		}
 	}
-
-	if len(al) == 0 {
+	if matchedPrfl == nil {
 		return nil, utils.ErrNotFound
 	}
-
-	// Sort by weight (higher values first).
-	slices.SortFunc(al, func(a, b *utils.IPAllocations) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
-
-	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID, al.ids(), nil,
-		true, ""); err != nil {
-		al.unlock()
+	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
+		config.CgrConfig().GeneralCfg().LockingTimeout,
+		utils.IPAllocationsLockKey(matchedPrfl.Tenant, matchedPrfl.ID))
+	allocs, err = s.dm.GetIPAllocations(ctx, matchedPrfl.Tenant, matchedPrfl.ID, true, true, "")
+	if err != nil {
+		guardian.Guardian.UnguardIDs(lkID)
+		matchedPrfl.Unlock()
+		return nil, err
 	}
-	return al, nil
+	allocs.Lock(lkID)
+
+	// Clone profile to avoid modifying cached version during pool sorting.
+	prfl := matchedPrfl.Clone()
+	if err = sortPools(ctx, prfl, s.fltrs, evNm); err != nil {
+		allocs.Unlock()
+		return nil, err
+	}
+	if err = allocs.ComputeUnexported(prfl); err != nil {
+		allocs.Unlock()
+		return nil, err
+	}
+
+	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID,
+
+		// TODO: check if we still should rely on caching previously matched
+		// allocations for an allocationID. Currently setting a StringSet to
+		// maintain previous functionality, but this doesn't seem right.
+		utils.StringSet{allocs.ID: struct{}{}},
+
+		nil, true, ""); err != nil {
+		allocs.Unlock()
+	}
+	return allocs, nil
 }
 
-// allocateFirstAvailable attempts IP allocation across pools in priority order.
+// allocateFromPools attempts IP allocation across all pools in priority order.
 // Continues to next pool only if current pool returns ErrIPAlreadyAllocated.
-// Returns first successful allocation or the last "already allocated" error.
-func (s *IPService) allocateFirstAvailable(allocs IPAllocationsList, allocID string,
+// Returns first successful allocation or the last allocation error.
+func (s *IPService) allocateFromPools(allocs *utils.IPAllocations, allocID string,
 	dryRun bool) (*utils.AllocatedIP, error) {
 	var err error
-	for _, alloc := range allocs {
-		for _, pool := range alloc.Config().Pools {
-			var result *utils.AllocatedIP
-			if result, err = alloc.AllocateIPOnPool(allocID, pool, dryRun); err == nil {
-				return result, nil
-			}
-			if !errors.Is(err, utils.ErrIPAlreadyAllocated) {
-				return nil, err
-			}
+	for _, pool := range allocs.Config().Pools {
+		var result *utils.AllocatedIP
+		if result, err = allocs.AllocateIPOnPool(allocID, pool, dryRun); err == nil {
+			return result, nil
+		}
+		if !errors.Is(err, utils.ErrIPAlreadyAllocated) {
+			return nil, err
 		}
 	}
 	return nil, err

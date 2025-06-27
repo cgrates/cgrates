@@ -550,6 +550,10 @@ func (a *IPAllocations) Unlock() {
 	id := a.lockID
 	a.lockID = ""
 	guardian.Guardian.UnguardIDs(id)
+
+	if a.prfl != nil {
+		a.prfl.Unlock()
+	}
 }
 
 // Config returns the IPAllocations' profile configuration.
