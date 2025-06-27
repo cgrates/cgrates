@@ -1129,6 +1129,7 @@ const (
 	MetaDynamicThreshold      = "*dynamic_threshold"
 	MetaDynamicStats          = "*dynamic_stats"
 	MetaDynamicAttribute      = "*dynamic_attribute"
+	MetaDynamicResource       = "*dynamic_resource"
 )
 
 // Migrator Metas
