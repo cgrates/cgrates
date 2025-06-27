@@ -508,3 +508,133 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
 		utils.AdminSv1SetAttributeProfile, args, &rply)
 }
+
+// actDynamicResource processes the `ActionValue` field from the action to construct a ResourceProfile
+//
+// The ActionValue field format is expected as follows:
+//
+//		 0 Tenant: string
+//		 1 ID: string
+//		 2 FilterIDs: strings separated by "&".
+//		 3 Weights: strings separated by "&".
+//		 4 TTL: duration
+//	 	 5 Limit: float
+//	 	 6 AllocationMessage: string
+//	 	 7 Blocker: bool
+//	 	 8 Stored: bool
+//	 	 9 ThresholdIDs: strings separated by "&".
+//		10 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+type actDynamicResource struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	aCfg    *utils.APAction
+	tnt     string
+	cgrEv   *utils.CGREvent
+}
+
+func (aL *actDynamicResource) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actDynamicResource) cfg() *utils.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+		return fmt.Errorf("no connection with AdminS")
+	}
+	data[utils.MetaNow] = time.Now()
+	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	// Parse action parameters based on the predefined format.
+	if len(aL.aCfg.Diktats) == 0 {
+		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+	}
+	params := strings.Split(aL.aCfg.Diktats[0].Value, utils.InfieldSep)
+	if len(params) != 11 {
+		return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+			return err
+		}
+	}
+	// Prepare request arguments based on provided parameters.
+	args := &utils.ResourceProfileWithAPIOpts{
+		ResourceProfile: &utils.ResourceProfile{
+			Tenant:            params[0],
+			ID:                params[1],
+			AllocationMessage: params[6],
+		},
+		APIOpts: make(map[string]any),
+	}
+	// populate Resource's FilterIDs
+	if params[2] != utils.EmptyString {
+		args.FilterIDs = strings.Split(params[2], utils.ANDSep)
+	}
+	// populate Resource's Weights
+	if params[3] != utils.EmptyString {
+		args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+		wghtSplit := strings.Split(params[3], utils.ANDSep)
+		if len(wghtSplit) > 2 {
+			return utils.ErrUnsupportedFormat
+		}
+		if wghtSplit[0] != utils.EmptyString {
+			args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+		}
+		if wghtSplit[1] != utils.EmptyString {
+			args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// populate Resource's UsageTTL
+	if params[4] != utils.EmptyString {
+		args.UsageTTL, err = utils.ParseDurationWithNanosecs(params[4])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's Limit
+	if params[5] != utils.EmptyString {
+		args.Limit, err = strconv.ParseFloat(params[5], 64)
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's Blocker
+	if params[7] != utils.EmptyString {
+		args.Blocker, err = strconv.ParseBool(params[7])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's Stored
+	if params[8] != utils.EmptyString {
+		args.Stored, err = strconv.ParseBool(params[8])
+		if err != nil {
+			return err
+		}
+	}
+	// populate Resource's ThresholdIDs
+	if params[9] != utils.EmptyString {
+		args.ThresholdIDs = strings.Split(params[9], utils.ANDSep)
+	}
+	// populate Resource's APIOpts
+	if params[10] != utils.EmptyString {
+		if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
+			return err
+		}
+	}
+
+	// create the ResourceProfile based on the populated parameters
+	var rply string
+	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+		utils.AdminSv1SetResourceProfile, args, &rply)
+}
