@@ -169,6 +169,7 @@ func TestDynThdIT(t *testing.T) {
 					utils.MetaThresholds: {"someID": {}},
 					utils.MetaStats:      {"someID": {}},
 					utils.MetaAttributes: {"someID": {}},
+					utils.MetaResources:  {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
@@ -198,6 +199,16 @@ func TestDynThdIT(t *testing.T) {
 							{
 								Path:  "ExtraParameters",
 								Value: "*tenant;DYNAMICLY_ATTR_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;*string:~*req.Account:<~*req.Account>&true;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&true;*req.Subject;*constant;SUPPLIER1;~*opts",
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Attribute_ID",
+						Type: utils.MetaDynamicResource,
+						Diktats: []*utils.APDiktat{
+							{
+								Path:  "ExtraParameters",
+								Value: "*tenant;DYNAMICLY_RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts",
 							},
 						},
 					},
@@ -457,7 +468,44 @@ func TestDynThdIT(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(exp, attrs) {
-			t.Errorf("Expected attributes to be the same. Before shutdown \n<%v>\nAfter rebooting <%v>", utils.ToJSON(attrs), utils.ToJSON(exp))
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(attrs), utils.ToJSON(exp))
+		}
+	})
+
+	t.Run("GetDynamicResourceProfile", func(t *testing.T) {
+		var rsc []*utils.ResourceProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetResourceProfiles,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rsc); err != nil {
+			t.Errorf("AdminSv1GetResourceProfiles failed unexpectedly: %v", err)
+		}
+		if len(rsc) != 1 {
+			t.Fatalf("AdminSv1GetResourceProfiles len(rsc)=%v, want 1", len(rsc))
+		}
+
+		exp := []*utils.ResourceProfile{
+			{
+				Tenant:            "cgrates.org",
+				ID:                "DYNAMICLY_RES_1002",
+				FilterIDs:         []string{"*string:~*req.Account:1002"},
+				UsageTTL:          5 * time.Second,
+				Limit:             5,
+				AllocationMessage: "alloc_msg",
+				Blocker:           true,
+				Stored:            true,
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{"*string:~*req.Account:1002"},
+						Weight:    30,
+					},
+				},
+				ThresholdIDs: []string{"THID1", "THID2"},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rsc) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(rsc), utils.ToJSON(exp))
 		}
 	})
 
