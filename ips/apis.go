@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ips
 
 import (
-	"time"
+	"errors"
+	"fmt"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -42,13 +43,6 @@ func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils
 		utils.OptsIPsAllocationID); err != nil {
 		return
 	}
-
-	var ttl time.Duration
-	if ttl, err = engine.GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.TTL,
-		utils.OptsIPsTTL); err != nil {
-		return
-	}
-	usageTTL := utils.DurationPointer(ttl)
 
 	if allocID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
@@ -77,17 +71,17 @@ func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils
 	}
 	// end of RPC caching
 
-	var mtcRLs IPAllocationsList
-	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID, usageTTL); err != nil {
+	var allocsList IPAllocationsList
+	if allocsList, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
 		return err
 	}
-	*reply = mtcRLs
-	mtcRLs.unlock()
+	defer allocsList.unlock()
+	*reply = allocsList
 	return
 }
 
-// V1AuthorizeIP queries service to find if an Usage is allowed
-func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+// V1AuthorizeIP checks if it's able to allocate an IP address for the given event.
+func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -100,14 +94,6 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 		utils.OptsIPsAllocationID); err != nil {
 		return
 	}
-
-	var ttl time.Duration
-	if ttl, err = engine.GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.TTL,
-		utils.OptsIPsTTL); err != nil {
-		return
-	}
-	usageTTL := utils.DurationPointer(ttl)
-
 	if allocID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
 	}
@@ -126,7 +112,7 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*string)
+				*reply = *cachedResp.Result.(*utils.AllocatedIP)
 			}
 			return cachedResp.Error
 		}
@@ -136,23 +122,26 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 	}
 	// end of RPC caching
 
-	var mtcRLs IPAllocationsList
-	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID, usageTTL); err != nil {
+	var allocsList IPAllocationsList
+	if allocsList, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
 		return err
 	}
-	defer mtcRLs.unlock()
+	defer allocsList.unlock()
 
-	/*
-		authorize logic
-		...
-	*/
+	var allocIP *utils.AllocatedIP
+	if allocIP, err = s.allocateFirstAvailable(allocsList, allocID, true); err != nil {
+		if errors.Is(err, utils.ErrIPAlreadyAllocated) {
+			return utils.ErrIPUnauthorized
+		}
+		return err
+	}
 
-	*reply = utils.OK
+	*reply = *allocIP
 	return
 }
 
-// V1AllocateIP is called when an IP requires allocation.
-func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+// V1AllocateIP allocates an IP address for the given event.
+func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -165,14 +154,6 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 		utils.OptsIPsAllocationID); err != nil {
 		return
 	}
-
-	var ttl time.Duration
-	if ttl, err = engine.GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.TTL,
-		utils.OptsIPsTTL); err != nil {
-		return
-	}
-	usageTTL := utils.DurationPointer(ttl)
-
 	if allocID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
 	}
@@ -191,7 +172,7 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*string)
+				*reply = *cachedResp.Result.(*utils.AllocatedIP)
 			}
 			return cachedResp.Error
 		}
@@ -201,27 +182,26 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 	}
 	// end of RPC caching
 
-	var mtcRLs IPAllocationsList
-	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID,
-		usageTTL); err != nil {
+	var allocsList IPAllocationsList
+	if allocsList, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
 		return err
 	}
-	defer mtcRLs.unlock()
+	defer allocsList.unlock()
 
-	/*
-		allocate logic
-		...
-	*/
+	var result *utils.AllocatedIP
+	if result, err = s.allocateFirstAvailable(allocsList, allocID, false); err != nil {
+		return err
+	}
 
 	// index it for storing
-	if err = s.storeMatchedIPAllocations(ctx, mtcRLs); err != nil {
+	if err = s.storeMatchedIPAllocations(ctx, allocsList); err != nil {
 		return
 	}
-	*reply = utils.OK
-	return
+	*reply = *result
+	return nil
 }
 
-// V1ReleaseIP is called when we need to clear an allocation
+// V1ReleaseIP releases an allocated IP address for the given event.
 func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
@@ -235,14 +215,6 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 		utils.OptsIPsAllocationID); err != nil {
 		return
 	}
-
-	var ttl time.Duration
-	if ttl, err = engine.GetDurationOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.TTL,
-		utils.OptsIPsTTL); err != nil {
-		return
-	}
-	usageTTL := utils.DurationPointer(ttl)
-
 	if allocID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
 	}
@@ -271,20 +243,21 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 	}
 	// end of RPC caching
 
-	var mtcRLs IPAllocationsList
-	if mtcRLs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID,
-		usageTTL); err != nil {
+	var allocsList IPAllocationsList
+	if allocsList, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
 		return
 	}
-	defer mtcRLs.unlock()
+	defer allocsList.unlock()
 
-	/*
-		release logic
-		...
-	*/
+	for _, alloc := range allocsList {
+		if err = alloc.ReleaseAllocation(allocID); err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> failed to remove allocation from IPAllocations with ID %q: %v", utils.IPs, alloc.TenantID(), err))
+		}
+	}
 
 	// Handle storing
-	if err = s.storeMatchedIPAllocations(ctx, mtcRLs); err != nil {
+	if err = s.storeMatchedIPAllocations(ctx, allocsList); err != nil {
 		return
 	}
 

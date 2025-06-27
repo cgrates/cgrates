@@ -20,6 +20,7 @@ package ips
 
 import (
 	"cmp"
+	"errors"
 	"fmt"
 	"runtime"
 	"slices"
@@ -33,139 +34,15 @@ import (
 	"github.com/cgrates/guardian"
 )
 
-// ipProfile wraps IPProfile with lkID.
-type ipProfile struct {
-	IPProfile *utils.IPProfile
-	lkID      string // holds the reference towards guardian lock key
-}
-
-// lock will lock the ipProfile using guardian and store the lock within p.lkID
-// if lkID is passed as argument, the lock is considered as executed
-func (p *ipProfile) lock(lkID string) {
-	if lkID == utils.EmptyString {
-		lkID = guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.IPProfileLockKey(p.IPProfile.Tenant, p.IPProfile.ID))
-	}
-	p.lkID = lkID
-}
-
-// unlock will unlock the ipProfile and clear p.lkID.
-func (p *ipProfile) unlock() {
-	if p.lkID == utils.EmptyString {
-		return
-	}
-	guardian.Guardian.UnguardIDs(p.lkID)
-	p.lkID = utils.EmptyString
-}
-
-// isLocked returns the locks status of this ipProfile
-func (p *ipProfile) isLocked() bool {
-	return p.lkID != utils.EmptyString
-}
-
-// ipAllocations represents ipAllocations in the system
-// not thread safe, needs locking at process level
-type ipAllocations struct {
-	IPAllocations *utils.IPAllocations
-	lkID          string         // ID of the lock used when matching the ipAllocations
-	ttl           *time.Duration // time to leave for these ip allocations, picked up on each IPAllocations initialization out of config
-	dirty         *bool          // the usages were modified, needs save, *bool so we only save if enabled in config
-	cfg           *ipProfile     // for ordering purposes
-}
-
-// lock will lock the ipAllocations using guardian and store the lock within ipAllocations.lkID
-// if lkID is passed as argument, the lock is considered as executed
-func (a *ipAllocations) lock(lkID string) {
-	if lkID == utils.EmptyString {
-		lkID = guardian.Guardian.GuardIDs("",
-			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.IPAllocationsLockKey(a.IPAllocations.Tenant, a.IPAllocations.ID))
-	}
-	a.lkID = lkID
-}
-
-// unlock will unlock the ipAllocations and clear ipAllocations.lkID
-func (a *ipAllocations) unlock() {
-	if a.lkID == utils.EmptyString {
-		return
-	}
-	guardian.Guardian.UnguardIDs(a.lkID)
-	a.lkID = utils.EmptyString
-}
-
-// isLocked returns the locks status of this ipAllocations object.
-func (a *ipAllocations) isLocked() bool {
-	return a.lkID != utils.EmptyString
-}
-
-// removeExpiredUnits removes units which are expired from the ipAllocations object.
-func (a *ipAllocations) removeExpiredUnits() {
-	var firstActive int
-	for _, usageID := range a.IPAllocations.TTLIdx {
-		if u, has := a.IPAllocations.Usages[usageID]; has && u.IsActive(time.Now()) {
-			break
-		}
-		firstActive++
-	}
-	if firstActive == 0 {
-		return
-	}
-	for _, uID := range a.IPAllocations.TTLIdx[:firstActive] {
-		if _, has := a.IPAllocations.Usages[uID]; !has {
-			continue
-		}
-		delete(a.IPAllocations.Usages, uID)
-	}
-	a.IPAllocations.TTLIdx = a.IPAllocations.TTLIdx[firstActive:]
-}
-
-// recordUsage records a new usage
-func (a *ipAllocations) recordUsage(usage *utils.IPUsage) error {
-	if _, has := a.IPAllocations.Usages[usage.ID]; has {
-		return fmt.Errorf("duplicate ip usage with id: %s", usage.TenantID())
-	}
-	if a.ttl != nil && *a.ttl != -1 {
-		if *a.ttl == 0 {
-			return nil // no recording for ttl of 0
-		}
-		usage = usage.Clone() // don't influence the initial ru
-		usage.ExpiryTime = time.Now().Add(*a.ttl)
-	}
-	a.IPAllocations.Usages[usage.ID] = usage
-	if !usage.ExpiryTime.IsZero() {
-		a.IPAllocations.TTLIdx = append(a.IPAllocations.TTLIdx, usage.ID)
-	}
-	return nil
-}
-
-// clearUsage clears the usage for an ID
-func (a *ipAllocations) clearUsage(usageID string) error {
-	usage, has := a.IPAllocations.Usages[usageID]
-	if !has {
-		return fmt.Errorf("cannot find usage record with id: %s", usageID)
-	}
-	if !usage.ExpiryTime.IsZero() {
-		for i, uIDIdx := range a.IPAllocations.TTLIdx {
-			if uIDIdx == usageID {
-				a.IPAllocations.TTLIdx = slices.Delete(a.IPAllocations.TTLIdx, i, i+1)
-				break
-			}
-		}
-	}
-	delete(a.IPAllocations.Usages, usageID)
-	return nil
-}
-
 // IPAllocationsList is a collection of ipAllocations objects.
-type IPAllocationsList []*ipAllocations
+type IPAllocationsList []*utils.IPAllocations
 
 // unlock will unlock IP allocations in this slice
 func (al IPAllocationsList) unlock() {
 	for _, allocs := range al {
-		allocs.unlock()
-		if allocs.cfg != nil {
-			allocs.cfg.unlock()
+		allocs.Unlock()
+		if prfl := allocs.Config(); prfl != nil {
+			prfl.Unlock()
 		}
 	}
 }
@@ -174,7 +51,7 @@ func (al IPAllocationsList) unlock() {
 func (al IPAllocationsList) ids() utils.StringSet {
 	ids := make(utils.StringSet)
 	for _, allocs := range al {
-		ids.Add(allocs.IPAllocations.ID)
+		ids.Add(allocs.ID)
 	}
 	return ids
 }
@@ -255,25 +132,19 @@ func (s *IPService) storeIPAllocationsList(ctx *context.Context) {
 		if allocsID == "" {
 			break // no more keys, backup completed
 		}
-		rIf, ok := engine.Cache.Get(utils.CacheIPAllocations, allocsID)
-		if !ok || rIf == nil {
+		allocIf, ok := engine.Cache.Get(utils.CacheIPAllocations, allocsID)
+		if !ok || allocIf == nil {
 			utils.Logger.Warning(fmt.Sprintf(
 				"<%s> failed retrieving from cache IP allocations with ID %q", utils.IPs, allocsID))
 			continue
 		}
-		allocs := &ipAllocations{
-			IPAllocations: rIf.(*utils.IPAllocations),
-
-			// NOTE: dirty is hardcoded to true, otherwise IP allocations would
-			// never be stored.
-			// Previously, dirty was part of the cached resource.
-			dirty: utils.BoolPointer(true),
-		}
-		allocs.lock(utils.EmptyString)
+		allocs := allocIf.(*utils.IPAllocations)
+		allocs.Lock(utils.EmptyString)
 		if err := s.storeIPAllocations(ctx, allocs); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> %v", utils.IPs, err))
 			failedRIDs = append(failedRIDs, allocsID) // record failure so we can schedule it for next backup
 		}
-		allocs.unlock()
+		allocs.Unlock()
 		// randomize the CPU load and give up thread control
 		runtime.Gosched()
 	}
@@ -284,68 +155,61 @@ func (s *IPService) storeIPAllocationsList(ctx *context.Context) {
 	}
 }
 
-// storeIPAllocations stores the IP allocations in DB and corrects dirty flag.
-func (s *IPService) storeIPAllocations(ctx *context.Context, allocs *ipAllocations) error {
-	if allocs.dirty == nil || !*allocs.dirty {
-		return nil
-	}
-	if err := s.dm.SetIPAllocations(ctx, allocs.IPAllocations); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<IPs> failed saving IP allocations %q: %v",
-				allocs.IPAllocations.ID, err))
+// storeIPAllocations stores the IP allocations in DB.
+func (s *IPService) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocations) error {
+	if err := s.dm.SetIPAllocations(ctx, allocs); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<IPs> could not save IP allocations %q: %v", allocs.ID, err))
 		return err
 	}
 	//since we no longer handle cache in DataManager do here a manual caching
-	if tntID := allocs.IPAllocations.TenantID(); engine.Cache.HasItem(utils.CacheIPAllocations, tntID) { // only cache if previously there
-		if err := engine.Cache.Set(ctx, utils.CacheIPAllocations, tntID, allocs.IPAllocations, nil,
+	if tntID := allocs.TenantID(); engine.Cache.HasItem(utils.CacheIPAllocations, tntID) { // only cache if previously there
+		if err := engine.Cache.Set(ctx, utils.CacheIPAllocations, tntID, allocs, nil,
 			true, utils.NonTransactional); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<IPs> failed caching IP allocations %q: %v", tntID, err))
+			utils.Logger.Warning(fmt.Sprintf(
+				"<IPs> could not cache IP allocations %q: %v", tntID, err))
 			return err
 		}
 	}
-	*allocs.dirty = false
 	return nil
 }
 
 // storeMatchedIPAllocations will store the list of IP allocations based on the StoreInterval
-func (s *IPService) storeMatchedIPAllocations(ctx *context.Context, matched IPAllocationsList) (err error) {
+func (s *IPService) storeMatchedIPAllocations(ctx *context.Context, matched IPAllocationsList) error {
 	if s.cfg.IPsCfg().StoreInterval == 0 {
-		return
+		return nil
 	}
 	if s.cfg.IPsCfg().StoreInterval > 0 {
 		s.storedIPsMux.Lock()
 		defer s.storedIPsMux.Unlock()
 	}
 	for _, allocs := range matched {
-		if allocs.dirty != nil {
-			*allocs.dirty = true // mark it to be saved
-			if s.cfg.IPsCfg().StoreInterval > 0 {
-				s.storedIPs.Add(allocs.IPAllocations.TenantID())
-				continue
-			}
-			if err = s.storeIPAllocations(ctx, allocs); err != nil {
-				return
-			}
+		if s.cfg.IPsCfg().StoreInterval > 0 {
+			s.storedIPs.Add(allocs.TenantID())
+			continue
 		}
-
+		if err := s.storeIPAllocations(ctx, allocs); err != nil {
+			return err
+		}
 	}
-	return
+	return nil
 }
 
-// matchingIPAllocationsForEvent returns ordered list of matching IP allocations which are active by the time of the call
-func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
-	evUUID string, ttl *time.Duration) (al IPAllocationsList, err error) {
-	var rIDs utils.StringSet
+// matchingIPAllocationsForEvent returns ordered list of matching IP
+// allocations which are active by the time of the API call.
+func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
+	ev *utils.CGREvent, evUUID string) (al IPAllocationsList, err error) {
+	var itemIDs utils.StringSet
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 	}
-	if x, ok := engine.Cache.Get(utils.CacheEventIPs, evUUID); ok { // The IPIDs were cached as utils.StringSet{"resID":bool}
+	if x, ok := engine.Cache.Get(utils.CacheEventIPs, evUUID); ok {
+		// IPIDs cached as utils.StringSet{"resID":bool}
 		if x == nil {
 			return nil, utils.ErrNotFound
 		}
-		rIDs = x.(utils.StringSet)
+		itemIDs = x.(utils.StringSet)
 		defer func() { // make sure we uncache if we find errors
 			if err != nil {
 				// TODO: Consider using RemoveWithoutReplicate instead, as
@@ -358,7 +222,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 			}
 		}()
 	} else { // select the IP allocation IDs out of dataDB
-		rIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
+		itemIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
 			s.cfg.IPsCfg().StringIndexedFields,
 			s.cfg.IPsCfg().PrefixIndexedFields,
 			s.cfg.IPsCfg().SuffixIndexedFields,
@@ -370,73 +234,74 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 		)
 		if err != nil {
 			if err == utils.ErrNotFound {
-				if errCh := engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID, nil, nil, true, ""); errCh != nil { // cache negative match
+				if errCh := engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID,
+					nil, nil, true, ""); errCh != nil { // cache negative match
 					return nil, errCh
 				}
 			}
-			return
+			return nil, err
 		}
 	}
-	al = make(IPAllocationsList, 0, len(rIDs))
+	al = make(IPAllocationsList, 0, len(itemIDs))
 	weights := make(map[string]float64) // stores sorting weights by IP allocation ID
-	for resName := range rIDs {
+	for id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.IPProfileLockKey(tnt, resName))
-		var rp *utils.IPProfile
-		if rp, err = s.dm.GetIPProfile(ctx, tnt, resName,
-			true, true, utils.NonTransactional); err != nil {
+			utils.IPProfileLockKey(tnt, id))
+		var prfl *utils.IPProfile
+		if prfl, err = s.dm.GetIPProfile(ctx, tnt, id, true, true, utils.NonTransactional); err != nil {
 			guardian.Guardian.UnguardIDs(lkPrflID)
 			if err == utils.ErrNotFound {
 				continue
 			}
 			al.unlock()
-			return
+			return nil, err
 		}
-		rPrf := &ipProfile{
-			IPProfile: rp,
-		}
-		rPrf.lock(lkPrflID)
+		prfl.Lock(lkPrflID)
 		var pass bool
-		if pass, err = s.fltrs.Pass(ctx, tnt, rPrf.IPProfile.FilterIDs,
-			evNm); err != nil {
-			rPrf.unlock()
+		if pass, err = s.fltrs.Pass(ctx, tnt, prfl.FilterIDs, evNm); err != nil {
+			prfl.Unlock()
 			al.unlock()
 			return nil, err
 		} else if !pass {
-			rPrf.unlock()
+			prfl.Unlock()
 			continue
 		}
 		lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 			config.CgrConfig().GeneralCfg().LockingTimeout,
-			utils.IPAllocationsLockKey(rPrf.IPProfile.Tenant, rPrf.IPProfile.ID))
-		var res *utils.IPAllocations
-		if res, err = s.dm.GetIPAllocations(ctx, rPrf.IPProfile.Tenant, rPrf.IPProfile.ID, true, true, ""); err != nil {
+			utils.IPAllocationsLockKey(prfl.Tenant, prfl.ID))
+		var allocs *utils.IPAllocations
+		if allocs, err = s.dm.GetIPAllocations(ctx, prfl.Tenant, prfl.ID, true, true, ""); err != nil {
 			guardian.Guardian.UnguardIDs(lkID)
-			rPrf.unlock()
+			prfl.Unlock()
 			al.unlock()
 			return nil, err
 		}
-		allocs := &ipAllocations{
-			IPAllocations: res,
-		}
-		allocs.lock(lkID) // pass the lock into IP allocations so we have it as reference
-		if rPrf.IPProfile.Stored && allocs.dirty == nil {
-			allocs.dirty = utils.BoolPointer(false)
-		}
-		if ttl != nil {
-			if *ttl != 0 {
-				allocs.ttl = ttl
-			}
-		} else if rPrf.IPProfile.TTL >= 0 {
-			allocs.ttl = utils.DurationPointer(rPrf.IPProfile.TTL)
-		}
-		allocs.cfg = rPrf
-		weight, err := engine.WeightFromDynamics(ctx, rPrf.IPProfile.Weights, s.fltrs, tnt, evNm)
-		if err != nil {
+		allocs.Lock(lkID)
+
+		// Clone profile to avoid modifying cached version during pool sorting.
+		profileCopy := prfl.Clone()
+		if err = sortPools(ctx, profileCopy, s.fltrs, evNm); err != nil {
+			allocs.Unlock()
+			prfl.Unlock()
+			al.unlock()
 			return nil, err
 		}
-		weights[allocs.IPAllocations.ID] = weight
+
+		if err = allocs.ComputeUnexported(profileCopy); err != nil {
+			allocs.Unlock()
+			prfl.Unlock()
+			al.unlock()
+			return nil, err
+		}
+		var weight float64
+		if weight, err = engine.WeightFromDynamics(ctx, prfl.Weights, s.fltrs, tnt, evNm); err != nil {
+			allocs.Unlock()
+			prfl.Unlock()
+			al.unlock()
+			return nil, err
+		}
+		weights[allocs.ID] = weight
 		al = append(al, allocs)
 	}
 
@@ -445,12 +310,63 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 	}
 
 	// Sort by weight (higher values first).
-	slices.SortFunc(al, func(a, b *ipAllocations) int {
-		return cmp.Compare(weights[b.IPAllocations.ID], weights[a.IPAllocations.ID])
+	slices.SortFunc(al, func(a, b *utils.IPAllocations) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
 	})
 
-	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID, al.ids(), nil, true, ""); err != nil {
+	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID, al.ids(), nil,
+		true, ""); err != nil {
 		al.unlock()
 	}
-	return
+	return al, nil
+}
+
+// allocateFirstAvailable attempts IP allocation across pools in priority order.
+// Continues to next pool only if current pool returns ErrIPAlreadyAllocated.
+// Returns first successful allocation or the last "already allocated" error.
+func (s *IPService) allocateFirstAvailable(allocs IPAllocationsList, allocID string,
+	dryRun bool) (*utils.AllocatedIP, error) {
+	var err error
+	for _, alloc := range allocs {
+		for _, pool := range alloc.Config().Pools {
+			var result *utils.AllocatedIP
+			if result, err = alloc.AllocateIPOnPool(allocID, pool, dryRun); err == nil {
+				return result, nil
+			}
+			if !errors.Is(err, utils.ErrIPAlreadyAllocated) {
+				return nil, err
+			}
+		}
+	}
+	return nil, err
+}
+
+// sortPools orders pools by weight (highest first) and truncates at first blocking pool.
+func sortPools(ctx *context.Context, prfl *utils.IPProfile, fltrs *engine.FilterS,
+	ev utils.DataProvider) error {
+	weights := make(map[string]float64) // stores sorting weights by pool ID
+	for _, pool := range prfl.Pools {
+		weight, err := engine.WeightFromDynamics(ctx, pool.Weights, fltrs, prfl.Tenant, ev)
+		if err != nil {
+			return err
+		}
+		weights[pool.ID] = weight
+	}
+
+	// Sort by weight (higher values first).
+	slices.SortFunc(prfl.Pools, func(a, b *utils.IPPool) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+
+	for i, pool := range prfl.Pools {
+		block, err := engine.BlockerFromDynamics(ctx, pool.Blockers, fltrs, prfl.Tenant, ev)
+		if err != nil {
+			return err
+		}
+		if block {
+			prfl.Pools = prfl.Pools[0 : i+1]
+			break
+		}
+	}
+	return nil
 }

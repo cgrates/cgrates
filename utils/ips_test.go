@@ -524,69 +524,11 @@ func TestIPAllocationsCacheClone(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(orig, cloned) {
-		t.Errorf("Expected cloned object to equal original.\nOriginal: %+v\nCloned: %+v", orig, cloned)
+		t.Errorf("Expected cloned object to equal original.\nOriginal: %#v\nCloned: %#v", orig, cloned)
 	}
 
 	if orig == cloned {
 		t.Errorf("Expected different pointer for clone, got the same")
-	}
-}
-
-func TestIPUsageTenantID(t *testing.T) {
-	usage := &IPUsage{
-		Tenant: "cgrates.org",
-		ID:     "192.0.2.1",
-	}
-
-	expected := "cgrates.org:192.0.2.1"
-
-	got := usage.TenantID()
-	if got != expected {
-		t.Errorf("Expected '%s', got '%s'", expected, got)
-	}
-}
-
-func TestIPUsageIsActive(t *testing.T) {
-	now := time.Now()
-
-	tests := []struct {
-		name       string
-		expiry     time.Time
-		atTime     time.Time
-		wantActive bool
-	}{
-		{
-			name:       "No expiry (zero time)",
-			expiry:     time.Time{},
-			atTime:     now,
-			wantActive: true,
-		},
-		{
-			name:       "Expiry in the future",
-			expiry:     now.Add(10 * time.Minute),
-			atTime:     now,
-			wantActive: true,
-		},
-		{
-			name:       "Expiry in the past",
-			expiry:     now.Add(-10 * time.Minute),
-			atTime:     now,
-			wantActive: false,
-		},
-		{
-			name:       "Expiry exactly at time",
-			expiry:     now,
-			atTime:     now,
-			wantActive: false,
-		},
-	}
-
-	for _, tt := range tests {
-		u := &IPUsage{ExpiryTime: tt.expiry}
-		got := u.IsActive(tt.atTime)
-		if got != tt.wantActive {
-			t.Errorf("Test '%s': expected %v, got %v", tt.name, tt.wantActive, got)
-		}
 	}
 }
 
@@ -639,36 +581,6 @@ func TestIPPoolString(t *testing.T) {
 	}
 	if !strings.Contains(jsonStr, `"Blocker":false`) {
 		t.Errorf("Expected JSON to contain Blocker false, got: %s", jsonStr)
-	}
-}
-
-func TestIPUsageClone(t *testing.T) {
-	addr := netip.MustParseAddr("192.168.0.1")
-	expiry := time.Now().Add(2 * time.Hour)
-
-	original := &IPUsage{
-		Tenant:     "cgrates.org",
-		ID:         "1001",
-		ExpiryTime: expiry,
-		Address:    addr,
-	}
-
-	clone := original.Clone()
-
-	if clone == nil {
-		t.Error("Expected clone to be non-nil")
-	}
-	if *original != *clone {
-		t.Errorf("Expected clone to equal original\nOriginal: %+v\nClone: %+v", original, clone)
-	}
-	if clone == original {
-		t.Error("Expected clone to be a different pointer from original")
-	}
-
-	var nilUsage *IPUsage
-	nilClone := nilUsage.Clone()
-	if nilClone != nil {
-		t.Errorf("Expected nil clone for nil receiver, got: %+v", nilClone)
 	}
 }
 
@@ -740,72 +652,6 @@ func TestIPPoolClone(t *testing.T) {
 	t.Run("Clone nil IPPool", func(t *testing.T) {
 		var p *IPPool
 		if p.Clone() != nil {
-			t.Error("Expected nil from Clone() on nil receiver")
-		}
-	})
-}
-
-func TestIPAllocationsClone(t *testing.T) {
-	t.Run("Clone non-nil IPAllocations", func(t *testing.T) {
-		expiry := time.Now().Add(time.Hour)
-		addr := netip.MustParseAddr("192.168.0.1")
-
-		original := &IPAllocations{
-			Tenant: "cgrates.org",
-			ID:     "1001",
-			TTLIdx: []string{"entry1", "entry2"},
-			Usages: map[string]*IPUsage{
-				"u1": {
-					Tenant:     "cgrates.org",
-					ID:         "ip-001",
-					ExpiryTime: expiry,
-					Address:    addr,
-				},
-			},
-		}
-
-		clone := original.Clone()
-
-		if clone == nil {
-			t.Fatal("Expected clone to be non-nil")
-		}
-		if clone == original {
-			t.Error("Expected different pointer from original")
-		}
-
-		if clone.Tenant != original.Tenant || clone.ID != original.ID {
-			t.Error("Tenant or ID not cloned properly")
-		}
-
-		if &clone.TTLIdx == &original.TTLIdx {
-			t.Error("TTLIdx slice not deeply cloned")
-		}
-		if len(clone.TTLIdx) != len(original.TTLIdx) || clone.TTLIdx[0] != "entry1" {
-			t.Errorf("Unexpected TTLIdx in clone: %+v", clone.TTLIdx)
-		}
-
-		if &clone.Usages == &original.Usages {
-			t.Error("Usages map not deeply cloned")
-		}
-		if len(clone.Usages) != 1 {
-			t.Errorf("Expected 1 usage in clone, got: %d", len(clone.Usages))
-		}
-		origUsage := original.Usages["u1"]
-		clonedUsage := clone.Usages["u1"]
-		if clonedUsage == nil {
-			t.Error("Cloned usage is nil")
-		}
-		if clonedUsage == origUsage {
-			t.Error("Usage entry not deeply cloned")
-		}
-		if *clonedUsage != *origUsage {
-			t.Errorf("Cloned usage does not match original: %+v vs %+v", clonedUsage, origUsage)
-		}
-	})
-
-	t.Run("Clone nil IPAllocations", func(t *testing.T) {
-		var nilAlloc *IPAllocations
-		if nilAlloc.Clone() != nil {
 			t.Error("Expected nil from Clone() on nil receiver")
 		}
 	})
@@ -1348,5 +1194,68 @@ func TestIPProfileFieldAsString(t *testing.T) {
 				t.Errorf("FieldAsString() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestIPAllocationsAllocateIP(t *testing.T) {
+	prfl := &IPProfile{
+		Tenant: "cgrates.org",
+		ID:     "TestIPAllocationsAllocateIP",
+		FilterIDs: []string{
+			"*string:~*req.IMSI:12345678",
+		},
+		TTL:    time.Duration(1) * time.Minute,
+		Stored: true,
+		Pools: []*IPPool{
+			{
+				ID:        "FIRST_POOL",
+				FilterIDs: []string{},
+				Type:      MetaIPv4,
+				Range:     "10.10.10.10/32",
+				Strategy:  MetaAscending,
+				Message:   "FIRST_POOL_ALLOCATION",
+				Weights: DynamicWeights{&DynamicWeight{
+					Weight: 10.0,
+				}},
+				Blockers: DynamicBlockers{},
+			},
+			{
+				ID:        "SECOND_POOL",
+				FilterIDs: []string{},
+				Type:      MetaIPv4,
+				Range:     "10.10.10.20/32",
+				Strategy:  MetaAscending,
+				Message:   "SECOND_POOL_ALLOCATION",
+				Weights: DynamicWeights{&DynamicWeight{
+					Weight: 5.0,
+				}},
+				Blockers: DynamicBlockers{},
+			},
+		},
+	}
+	alcIP := netip.MustParseAddr("10.10.10.10")
+	ipa := &IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "TestIPAllocationsAllocateIP",
+		Allocations: map[string]*PoolAllocation{
+			"alloc1": {
+				PoolID:  "FIRST_POOL",
+				Address: alcIP,
+				Time:    time.Date(2025, time.June, 06, 14, 00, 00, 0, time.UTC),
+			},
+		},
+		TTLIndex: []string{},
+	}
+
+	if err := ipa.ComputeUnexported(prfl); err != nil {
+		t.Error(err)
+	}
+	now := time.Now()
+	if ipAddr, err := ipa.AllocateIPOnPool("alloc1", prfl.Pools[0], false); err != nil {
+		t.Error(err)
+	} else if ipAddr.Address != ipa.Allocations["alloc1"].Address {
+		t.Errorf("Expecting: %s, received: %s", ipa.Allocations["alloc1"].Address, ipAddr)
+	} else if ipa.Allocations["alloc1"].Time.Sub(now) > time.Duration(1)*time.Second {
+		t.Errorf("Allocation time is: %v", ipa.Allocations["alloc1"].Time)
 	}
 }

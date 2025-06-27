@@ -193,12 +193,12 @@ func (ipS *IPSv1) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils.C
 }
 
 // V1AuthorizeIP queries service to find if an Usage is allowed
-func (ipS *IPSv1) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (ipS *IPSv1) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
 	return ipS.ips.V1AuthorizeIP(ctx, args, reply)
 }
 
 // V1AllocateIP is called when an IP requires allocation.
-func (ipS *IPSv1) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (ipS *IPSv1) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
 	return ipS.ips.V1AllocateIP(ctx, args, reply)
 }
 

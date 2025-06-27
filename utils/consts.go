@@ -286,6 +286,8 @@ const (
 	TestSQL                   = "TEST_SQL"
 	MetaAsc                   = "*asc"
 	MetaDesc                  = "*desc"
+	MetaAscending             = "*ascending"
+	MetaDescending            = "*descending"
 	MetaConstant              = "*constant"
 	MetaPositive              = "*positive"
 	MetaNegative              = "*negative"
@@ -1032,6 +1034,7 @@ const (
 	MetaActionProfiles    = "*action_profiles"
 	MetaLoadIDs           = "*load_ids"
 	MetaNodeID            = "*node_id"
+	MetaIPv4              = "*ipv4"
 )
 
 // MetaMetrics

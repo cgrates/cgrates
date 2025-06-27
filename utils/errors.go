@@ -21,6 +21,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var (
@@ -82,6 +83,8 @@ var (
 	ErrCastFailed                    = errors.New("CAST_FAILED")
 	ErrCorrelationUndefined          = errors.New("CORRELATION_UNDEFINED")
 	ErrUnsupportedServiceID          = errors.New(UnsupportedServiceIDCaps)
+	ErrIPUnauthorized                = errors.New("IP_UNAUTHORIZED")
+	ErrIPAlreadyAllocated            = errors.New("IP_ALREADY_ALLOCATED")
 
 	ErrMap = map[string]error{
 		ErrNoMoreData.Error():              ErrNoMoreData,
@@ -103,6 +106,8 @@ var (
 		ErrNotConvertible.Error():          ErrNotConvertible,
 		ErrResourceUnavailable.Error():     ErrResourceUnavailable,
 		ErrResourceUnauthorized.Error():    ErrResourceUnauthorized,
+		ErrIPUnauthorized.Error():          ErrIPUnauthorized,
+		ErrIPAlreadyAllocated.Error():      ErrIPAlreadyAllocated,
 		ErrNoActiveSession.Error():         ErrNoActiveSession,
 		ErrPartiallyExecuted.Error():       ErrPartiallyExecuted,
 		ErrMaxUsageExceeded.Error():        ErrMaxUsageExceeded,
@@ -230,8 +235,29 @@ func APIErrorHandler(errIn error) (err error) {
 	cgrErr.ActivateAPIError()
 	return cgrErr
 }
+
+// ErrPrefix returns the errWithPrefix
 func ErrPrefix(err error, reason string) error {
-	return fmt.Errorf("%s:%s", err.Error(), reason)
+	return fmt.Errorf("%s%s%s", err.Error(), ConcatenatedKeySep, reason)
+}
+
+// NewErrPrefix constructs a new error from prefix and reason
+func NewErrPrefix(prfx, reason string) error {
+	return fmt.Errorf("%s%s%s", prfx, ConcatenatedKeySep, reason)
+}
+
+// GetErrPrefix extracts the prefix out of errWithPrefix
+func GetErrPrefix(err error) string {
+	return strings.Split(err.Error(), ConcatenatedKeySep)[0]
+}
+
+// GetErrReason extracts the reason out of errWithPrefix
+func GetErrReason(err error) (rsn string) {
+	splt := strings.Split(err.Error(), ConcatenatedKeySep)
+	if len(splt) < 1 {
+		return
+	}
+	return splt[1]
 }
 
 func ErrPrefixNotFound(reason string) error {
