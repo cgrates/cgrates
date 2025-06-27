@@ -29,8 +29,8 @@ import (
 	"github.com/cgrates/guardian"
 )
 
-// V1GetIPAllocationsForEvent returns active IPs matching the event.
-func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils.CGREvent, reply *IPAllocationsList) (err error) {
+// V1GetIPAllocationForEvent returns the IPAllocations object matching the event.
+func (s *IPService) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent, reply *utils.IPAllocations) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -54,14 +54,14 @@ func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils
 
 	// RPC caching
 	if config.CgrConfig().CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.IPsV1GetIPAllocationsForEvent, utils.ConcatenatedKey(tnt, args.ID))
+		cacheKey := utils.ConcatenatedKey(utils.IPsV1GetIPAllocationForEvent, utils.ConcatenatedKey(tnt, args.ID))
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*reply = *cachedResp.Result.(*IPAllocationsList)
+				*reply = *cachedResp.Result.(*utils.IPAllocations)
 			}
 			return cachedResp.Error
 		}
@@ -71,12 +71,12 @@ func (s *IPService) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils
 	}
 	// end of RPC caching
 
-	var allocsList IPAllocationsList
-	if allocsList, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
+	var allocs *utils.IPAllocations
+	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
 		return err
 	}
-	defer allocsList.unlock()
-	*reply = allocsList
+	defer allocs.Unlock()
+	*reply = *allocs
 	return
 }
 
@@ -122,14 +122,14 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 	}
 	// end of RPC caching
 
-	var allocsList IPAllocationsList
-	if allocsList, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
+	var allocs *utils.IPAllocations
+	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
 		return err
 	}
-	defer allocsList.unlock()
+	defer allocs.Unlock()
 
 	var allocIP *utils.AllocatedIP
-	if allocIP, err = s.allocateFirstAvailable(allocsList, allocID, true); err != nil {
+	if allocIP, err = s.allocateFromPools(allocs, allocID, true); err != nil {
 		if errors.Is(err, utils.ErrIPAlreadyAllocated) {
 			return utils.ErrIPUnauthorized
 		}
@@ -182,22 +182,22 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 	}
 	// end of RPC caching
 
-	var allocsList IPAllocationsList
-	if allocsList, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
+	var allocs *utils.IPAllocations
+	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
 		return err
 	}
-	defer allocsList.unlock()
+	defer allocs.Unlock()
 
-	var result *utils.AllocatedIP
-	if result, err = s.allocateFirstAvailable(allocsList, allocID, false); err != nil {
+	var allocIP *utils.AllocatedIP
+	if allocIP, err = s.allocateFromPools(allocs, allocID, false); err != nil {
 		return err
 	}
 
 	// index it for storing
-	if err = s.storeMatchedIPAllocations(ctx, allocsList); err != nil {
+	if err = s.storeMatchedIPAllocations(ctx, allocs); err != nil {
 		return
 	}
-	*reply = *result
+	*reply = *allocIP
 	return nil
 }
 
@@ -243,21 +243,19 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 	}
 	// end of RPC caching
 
-	var allocsList IPAllocationsList
-	if allocsList, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
+	var allocs *utils.IPAllocations
+	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
 		return
 	}
-	defer allocsList.unlock()
+	defer allocs.Unlock()
 
-	for _, alloc := range allocsList {
-		if err = alloc.ReleaseAllocation(allocID); err != nil {
-			utils.Logger.Warning(fmt.Sprintf(
-				"<%s> failed to remove allocation from IPAllocations with ID %q: %v", utils.IPs, alloc.TenantID(), err))
-		}
+	if err = allocs.ReleaseAllocation(allocID); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> failed to remove allocation from IPAllocations with ID %q: %v", utils.IPs, allocs.TenantID(), err))
 	}
 
 	// Handle storing
-	if err = s.storeMatchedIPAllocations(ctx, allocsList); err != nil {
+	if err = s.storeMatchedIPAllocations(ctx, allocs); err != nil {
 		return
 	}
 

@@ -1639,18 +1639,18 @@ const (
 
 // IPs APIs
 const (
-	IPsV1Ping                     = "IPsV1.Ping"
-	IPsV1GetIPAllocations         = "IPsV1.GetIPAllocations"
-	IPsV1GetIPAllocationsForEvent = "IPsV1.GetIPAllocationsForEvent"
-	IPsV1AuthorizeIP              = "IPsV1.AuthorizeIP"
-	IPsV1AllocateIP               = "IPsV1.AllocateIP"
-	IPsV1ReleaseIP                = "IPsV1.ReleaseIP"
-	AdminSv1SetIPProfile          = "AdminSv1.SetIPProfile"
-	AdminSv1GetIPProfiles         = "AdminSv1.GetIPProfiles"
-	AdminSv1RemoveIPProfile       = "AdminSv1.RemoveIPProfile"
-	AdminSv1GetIPProfile          = "AdminSv1.GetIPProfile"
-	AdminSv1GetIPProfileIDs       = "AdminSv1.GetIPProfileIDs"
-	AdminSv1GetIPProfilesCount    = "AdminSv1.GetIPProfilesCount"
+	IPsV1Ping                    = "IPsV1.Ping"
+	IPsV1GetIPAllocations        = "IPsV1.GetIPAllocations"
+	IPsV1GetIPAllocationForEvent = "IPsV1.GetIPAllocationForEvent"
+	IPsV1AuthorizeIP             = "IPsV1.AuthorizeIP"
+	IPsV1AllocateIP              = "IPsV1.AllocateIP"
+	IPsV1ReleaseIP               = "IPsV1.ReleaseIP"
+	AdminSv1SetIPProfile         = "AdminSv1.SetIPProfile"
+	AdminSv1GetIPProfiles        = "AdminSv1.GetIPProfiles"
+	AdminSv1RemoveIPProfile      = "AdminSv1.RemoveIPProfile"
+	AdminSv1GetIPProfile         = "AdminSv1.GetIPProfile"
+	AdminSv1GetIPProfileIDs      = "AdminSv1.GetIPProfileIDs"
+	AdminSv1GetIPProfilesCount   = "AdminSv1.GetIPProfilesCount"
 )
 
 // SessionS APIs

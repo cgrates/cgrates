@@ -187,27 +187,27 @@ type IPSv1 struct {
 	ips *ips.IPService
 }
 
-// V1GetIPAllocationsForEvent returns active IPs matching the event.
-func (ipS *IPSv1) V1GetIPAllocationsForEvent(ctx *context.Context, args *utils.CGREvent, reply *ips.IPAllocationsList) (err error) {
-	return ipS.V1GetIPAllocationsForEvent(ctx, args, reply)
+// V1GetIPAllocationForEvent returns the IPAllocations object matching the event.
+func (ipS *IPSv1) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent, reply *utils.IPAllocations) error {
+	return ipS.ips.V1GetIPAllocationForEvent(ctx, args, reply)
 }
 
-// V1AuthorizeIP queries service to find if an Usage is allowed
-func (ipS *IPSv1) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
+// V1AuthorizeIP checks if it's able to allocate an IP address for the given event.
+func (ipS *IPSv1) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
 	return ipS.ips.V1AuthorizeIP(ctx, args, reply)
 }
 
-// V1AllocateIP is called when an IP requires allocation.
-func (ipS *IPSv1) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
+// V1AllocateIP allocates an IP address for the given event.
+func (ipS *IPSv1) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
 	return ipS.ips.V1AllocateIP(ctx, args, reply)
 }
 
-// V1ReleaseIP is called when we need to clear an allocation
-func (ipS *IPSv1) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+// V1ReleaseIP releases an allocated IP address for the given event.
+func (ipS *IPSv1) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) error {
 	return ipS.ips.V1ReleaseIP(ctx, args, reply)
 }
 
-// V1GetIPAllocations returns all IP allocations for a tenant.
-func (ipS *IPSv1) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) (err error) {
+// V1GetIPAllocations returns all IP allocations for a tenantID.
+func (ipS *IPSv1) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
 	return ipS.ips.V1GetIPAllocations(ctx, arg, reply)
 }
