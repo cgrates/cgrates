@@ -2155,3 +2155,67 @@ func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 	}
 
 }
+
+func TestMetricWithFiltersClone(t *testing.T) {
+	tests := []struct {
+		name     string
+		original *MetricWithFilters
+	}{
+		{
+			name: "Full clone",
+			original: &MetricWithFilters{
+				MetricID:  "metric_1",
+				FilterIDs: []string{"f1", "f2"},
+				Blockers: utils.DynamicBlockers{
+					&utils.DynamicBlocker{FilterIDs: []string{"f1"}, Blocker: true},
+				},
+			},
+		},
+		{
+			name:     "Nil clone",
+			original: nil,
+		},
+		{
+			name: "No filters or blockers",
+			original: &MetricWithFilters{
+				MetricID: "metric_2",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cloned := tt.original.Clone()
+
+			if tt.original == nil {
+				if cloned != nil {
+					t.Errorf("Clone() = %v, want nil", cloned)
+				}
+				return
+			}
+
+			if cloned == tt.original {
+				t.Errorf("Clone() returned the same reference")
+			}
+
+			if cloned.MetricID != tt.original.MetricID {
+				t.Errorf("MetricID = %s, want %s", cloned.MetricID, tt.original.MetricID)
+			}
+
+			if !reflect.DeepEqual(cloned.FilterIDs, tt.original.FilterIDs) {
+				t.Errorf("FilterIDs = %v, want %v", cloned.FilterIDs, tt.original.FilterIDs)
+			}
+
+			if !reflect.DeepEqual(cloned.Blockers, tt.original.Blockers) {
+				t.Errorf("Blockers = %v, want %v", cloned.Blockers, tt.original.Blockers)
+			}
+
+			if len(tt.original.FilterIDs) > 0 && &cloned.FilterIDs[0] == &tt.original.FilterIDs[0] {
+				t.Errorf("FilterIDs slice not deeply cloned")
+			}
+			if len(tt.original.Blockers) > 0 && cloned.Blockers[0] == tt.original.Blockers[0] {
+				t.Errorf("Blockers slice not deeply cloned")
+			}
+		})
+	}
+}

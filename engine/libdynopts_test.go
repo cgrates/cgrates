@@ -2919,3 +2919,293 @@ func TestOptIfaceFromDP(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertOptsToMapStringAny(t *testing.T) {
+	t.Run("MapEvent_Account", func(t *testing.T) {
+		accountEvent := MapEvent{
+			"Account":        "1001",
+			"Tenant":         "cgrates.org",
+			"BalanceMap":     map[string]float64{"*monetary": 100.5},
+			"ActionTriggers": []string{"STANDARD_TRIGGERS"},
+		}
+
+		result, err := ConvertOptsToMapStringAny(accountEvent)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if len(result) != 4 {
+			t.Fatalf("Expected 4 keys, got %d", len(result))
+		}
+
+		if result["Account"] != "1001" {
+			t.Errorf("Expected Account=1001, got %v", result["Account"])
+		}
+		if result["Tenant"] != "cgrates.org" {
+			t.Errorf("Expected Tenant=cgrates.org, got %v", result["Tenant"])
+		}
+	})
+
+	t.Run("MapEvent_CDR", func(t *testing.T) {
+		cdrEvent := MapEvent{
+			"CGRID":       "cdr123456789",
+			"OrderID":     12345,
+			"OriginHost":  "192.168.1.1",
+			"Source":      "SessionS",
+			"OriginID":    "session_001",
+			"ToR":         "*voice",
+			"RequestType": "*prepaid",
+			"Tenant":      "cgrates.org",
+			"Category":    "call",
+			"Account":     "1001",
+			"Subject":     "1001",
+			"Destination": "+4986517174963",
+			"SetupTime":   "2024-01-15T10:30:00Z",
+			"AnswerTime":  "2024-01-15T10:30:05Z",
+			"Usage":       300.0,
+			"Cost":        2.5,
+		}
+
+		result, err := ConvertOptsToMapStringAny(cdrEvent)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if result["CGRID"] != "cdr123456789" {
+			t.Errorf("Expected CGRID=cdr123456789, got %v", result["CGRID"])
+		}
+		if result["Account"] != "1001" {
+			t.Errorf("Expected Account=1001, got %v", result["Account"])
+		}
+		if result["Usage"] != 300.0 {
+			t.Errorf("Expected Usage=300.0, got %v", result["Usage"])
+		}
+	})
+
+	t.Run("MapStorage_RatingProfile", func(t *testing.T) {
+		ratingStorage := utils.MapStorage{
+			"Tenant":   "cgrates.org",
+			"Category": "call",
+			"Subject":  "*any",
+			"RatingPlanActivations": []map[string]any{
+				{
+					"ActivationTime": "2024-01-01T00:00:00Z",
+					"RatingPlanId":   "RP_RETAIL",
+					"FallbackKeys":   []string{"*any"},
+				},
+			},
+		}
+
+		result, err := ConvertOptsToMapStringAny(ratingStorage)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if result["Tenant"] != "cgrates.org" {
+			t.Errorf("Expected Tenant=cgrates.org, got %v", result["Tenant"])
+		}
+		if result["Subject"] != "*any" {
+			t.Errorf("Expected Subject=*any, got %v", result["Subject"])
+		}
+	})
+
+	t.Run("MapStorage_Destination", func(t *testing.T) {
+		destStorage := utils.MapStorage{
+			"Id":       "DST_GERMANY",
+			"Prefixes": []string{"+49", "+4915", "+4916"},
+		}
+
+		result, err := ConvertOptsToMapStringAny(destStorage)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if result["Id"] != "DST_GERMANY" {
+			t.Errorf("Expected Id=DST_GERMANY, got %v", result["Id"])
+		}
+
+		prefixes, ok := result["Prefixes"].([]string)
+		if !ok || len(prefixes) != 3 {
+			t.Errorf("Expected Prefixes to be []string with 3 elements, got %v", result["Prefixes"])
+		}
+	})
+
+	t.Run("DirectMapStringAny", func(t *testing.T) {
+		directMap := map[string]any{
+			"ActionId":   "TOPUP_MONETARY_10",
+			"ActionType": "*topup_reset",
+			"ExtraParameters": map[string]string{
+				"*balance_type": "*monetary",
+				"*units":        "10",
+			},
+		}
+
+		result, err := ConvertOptsToMapStringAny(directMap)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if !reflect.DeepEqual(result, directMap) {
+			t.Errorf("Expected result to be identical to input map")
+		}
+
+		if result["ActionId"] != "TOPUP_MONETARY_10" {
+			t.Errorf("Expected ActionId=TOPUP_MONETARY_10, got %v", result["ActionId"])
+		}
+	})
+
+	t.Run("EmptyMapEvent", func(t *testing.T) {
+		emptyEvent := MapEvent{}
+
+		result, err := ConvertOptsToMapStringAny(emptyEvent)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if len(result) != 0 {
+			t.Errorf("Expected empty map, got %v", result)
+		}
+	})
+
+	t.Run("EmptyMapStorage", func(t *testing.T) {
+		emptyStorage := utils.MapStorage{}
+
+		result, err := ConvertOptsToMapStringAny(emptyStorage)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if len(result) != 0 {
+			t.Errorf("Expected empty map, got %v", result)
+		}
+	})
+
+	t.Run("UnsupportedType_String", func(t *testing.T) {
+		_, err := ConvertOptsToMapStringAny("invalid_string")
+		if err == nil {
+			t.Fatal("Expected error for unsupported type, got nil")
+		}
+
+		expectedErr := "cannot convert to map[string]any"
+		if err.Error() != expectedErr {
+			t.Errorf("Expected error '%s', got '%s'", expectedErr, err.Error())
+		}
+	})
+
+	t.Run("UnsupportedType_Int", func(t *testing.T) {
+		_, err := ConvertOptsToMapStringAny(12345)
+		if err == nil {
+			t.Fatal("Expected error for unsupported type, got nil")
+		}
+	})
+
+	t.Run("UnsupportedType_Slice", func(t *testing.T) {
+		_, err := ConvertOptsToMapStringAny([]string{"account1", "account2"})
+		if err == nil {
+			t.Fatal("Expected error for unsupported type, got nil")
+		}
+	})
+
+	t.Run("MapEvent_Session", func(t *testing.T) {
+		sessionEvent := MapEvent{
+			"CGRID":           "session_abc123",
+			"Tenant":          "cgrates.org",
+			"Account":         "1002",
+			"Destination":     "+4986517174999",
+			"InitialMaxUsage": 3600.0,
+			"MaxUsage":        1800.0,
+			"LastUsed":        600.0,
+			"LoopIndex":       0,
+			"DurationIndex":   600.0,
+		}
+
+		result, err := ConvertOptsToMapStringAny(sessionEvent)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if result["Account"] != "1002" {
+			t.Errorf("Expected Account=1002, got %v", result["Account"])
+		}
+		if result["MaxUsage"] != 1800.0 {
+			t.Errorf("Expected MaxUsage=1800.0, got %v", result["MaxUsage"])
+		}
+	})
+
+	t.Run("MapStorage_ActionPlan", func(t *testing.T) {
+		actionPlanStorage := utils.MapStorage{
+			"Id": "PACKAGE_10_SHARED_A_5",
+			"ActionTimings": []map[string]any{
+				{
+					"Uuid":      "088fc6cc-192c-4d8e-9f5e-7b9c3d2c5b8d",
+					"Timing":    "*asap",
+					"ActionsId": "TOPUP_RST_10",
+					"Weight":    10.0,
+				},
+			},
+		}
+
+		result, err := ConvertOptsToMapStringAny(actionPlanStorage)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if result["Id"] != "PACKAGE_10_SHARED_A_5" {
+			t.Errorf("Expected Id=PACKAGE_10_SHARED_A_5, got %v", result["Id"])
+		}
+	})
+
+	t.Run("MapEvent_ResourceEvent", func(t *testing.T) {
+		resourceEvent := MapEvent{
+			"Tenant":      "cgrates.org",
+			"ID":          "RES_GRP_1",
+			"UsageID":     "call_usage_001",
+			"ResourceID":  "RES_ACNT_1001",
+			"Units":       1.0,
+			"Account":     "1001",
+			"Destination": "+4986517174963",
+		}
+
+		result, err := ConvertOptsToMapStringAny(resourceEvent)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if result["ID"] != "RES_GRP_1" {
+			t.Errorf("Expected ID=RES_GRP_1, got %v", result["ID"])
+		}
+		if result["Units"] != 1.0 {
+			t.Errorf("Expected Units=1.0, got %v", result["Units"])
+		}
+	})
+
+	t.Run("MapStorage_ThresholdProfile", func(t *testing.T) {
+		thresholdStorage := utils.MapStorage{
+			"Tenant":    "cgrates.org",
+			"ID":        "THD_ACNT_1001",
+			"FilterIDs": []string{"*string:~*req.Account:1001"},
+			"ActivationInterval": map[string]any{
+				"ActivationTime": "2024-01-01T00:00:00Z",
+				"ExpiryTime":     "*never",
+			},
+			"MaxHits":   -1,
+			"MinHits":   1,
+			"MinSleep":  "1s",
+			"Blocker":   false,
+			"Weight":    20.0,
+			"ActionIDs": []string{"LOG_WARNING"},
+		}
+
+		result, err := ConvertOptsToMapStringAny(thresholdStorage)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if result["ID"] != "THD_ACNT_1001" {
+			t.Errorf("Expected ID=THD_ACNT_1001, got %v", result["ID"])
+		}
+		if result["Weight"] != 20.0 {
+			t.Errorf("Expected Weight=20.0, got %v", result["Weight"])
+		}
+	})
+}
