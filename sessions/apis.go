@@ -159,12 +159,12 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 			originID = utils.UUIDSha1Prefix()
 		}
 		args.APIOpts[utils.OptsIPsAllocationID] = originID
-		var allocMsg string
+		var allocIP utils.AllocatedIP
 		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns, utils.IPsV1AuthorizeIP,
-			args, &allocMsg); err != nil {
+			args, &allocIP); err != nil {
 			return utils.NewErrIPs(err)
 		}
-		authReply.IPAllocation = &allocMsg
+		authReply.IPAllocation = &allocIP.Message
 	}
 	if routeS {
 		routesReply, err := sS.getRoutes(ctx, args.Clone())
@@ -390,12 +390,12 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		args.APIOpts[utils.OptsIPsAllocationID] = originID
-		var allocMessage string
+		var allocIP utils.AllocatedIP
 		if err = sS.connMgr.Call(ctx, sS.cfg.SessionSCfg().IPsConns,
-			utils.IPsV1AllocateIP, args, &allocMessage); err != nil {
+			utils.IPsV1AllocateIP, args, &allocIP); err != nil {
 			return utils.NewErrIPs(err)
 		}
-		rply.IPAllocation = &allocMessage
+		rply.IPAllocation = &allocIP.Message
 		defer func() { // we need to release the IPs back in case of errors
 			if err != nil {
 				var reply string

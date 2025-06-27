@@ -93,11 +93,11 @@ func TestIPsIT(t *testing.T) {
     "exists_indexed_fields": [],
     "notexists_indexed_fields": [],
     "opts":{
-		"*usageID": [
+		"*allocationID": [
 			{
 				"Tenant": "cgrates.org",
 				"FilterIDs": ["*string:~*req.Account:1001"],
-				"Value": "cfg_usage"
+				"Value": "cfg_allocation"
 			}
 		],
 		// "*ttl": [
@@ -124,10 +124,10 @@ func TestIPsIT(t *testing.T) {
 			utils.IPsCsv: `
 #Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Type[5],AddressPool[6],Allocation[7],Stored[8]
 cgrates.org,IPs1,*string:~*req.Account:1001,;10,1s,true,,,,,,,,
-cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/24,*ascending,alloc_success,;15,
+cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/32,*ascending,alloc_success,;15,
 cgrates.org,IPs1,,,,,POOL1,,,,,,*exists:~*req.GimmeMoreWeight:;50,*exists:~*req.ShouldBlock:;true
-cgrates.org,IPs1,,,,,POOL2,*string:~*req.Destination:2002,*ipv4,192.168.122.1/24,*random,alloc_new,;25,;true
-cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Destination:3001,*ipv4,127.0.0.1/24,*descending,alloc_msg,;35,;true`,
+cgrates.org,IPs1,,,,,POOL2,*string:~*req.Destination:2002,*ipv4,192.168.122.1/32,*random,alloc_new,;25,;true
+cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Destination:3001,*ipv4,127.0.0.1/32,*descending,alloc_msg,;35,;true`,
 		},
 		DBCfg:            dbCfg,
 		Encoding:         *utils.Encoding,
@@ -157,7 +157,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 							ID:        "FIRST_POOL",
 							FilterIDs: []string{},
 							Type:      "*ipv4",
-							Range:     "192.168.122.1/24",
+							Range:     "192.168.122.1/32",
 							Strategy:  "*ascending",
 							Message:   "Some message",
 							Weights: utils.DynamicWeights{
@@ -226,7 +226,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 			t.Error(err)
 		}
 
-		allocID := "api_usage"
+		allocID := "api_allocation"
 		var evIPs IPAllocationsList
 		if err := client.Call(context.Background(), utils.IPsV1GetIPAllocationsForEvent,
 			&utils.CGREvent{
@@ -242,7 +242,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 			t.Error(err)
 		}
 
-		var reply string
+		var allocIP utils.AllocatedIP
 		if err := client.Call(context.Background(), utils.IPsV1AuthorizeIP,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",
@@ -251,7 +251,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 					utils.AccountField: "1001",
 				},
 				APIOpts: map[string]any{},
-			}, &reply); err != nil {
+			}, &allocIP); err != nil {
 			t.Error(err)
 		}
 
@@ -263,10 +263,11 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 					utils.AccountField: "1001",
 				},
 				APIOpts: map[string]any{},
-			}, &reply); err != nil {
+			}, &allocIP); err != nil {
 			t.Error(err)
 		}
 
+		var reply string
 		if err := client.Call(context.Background(), utils.IPsV1ReleaseIP,
 			&utils.CGREvent{
 				Tenant: "cgrates.org",

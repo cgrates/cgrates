@@ -1867,16 +1867,16 @@ func (dm *DataManager) SetIPProfile(ctx *context.Context, ipp *utils.IPProfile, 
 		oldIPP.TTL != ipp.TTL ||
 		oldIPP.Stored != ipp.Stored && oldIPP.Stored { // reset the resource if the profile changed this fields
 		err = dm.SetIPAllocations(ctx, &utils.IPAllocations{
-			Tenant: ipp.Tenant,
-			ID:     ipp.ID,
-			Usages: make(map[string]*utils.IPUsage),
+			Tenant:      ipp.Tenant,
+			ID:          ipp.ID,
+			Allocations: make(map[string]*utils.PoolAllocation),
 		})
 	} else if _, errRs := dm.GetIPAllocations(ctx, ipp.Tenant, ipp.ID, // do not try to get the resource if the configuration changed
 		true, false, utils.NonTransactional); errRs == utils.ErrNotFound { // the resource does not exist
 		err = dm.SetIPAllocations(ctx, &utils.IPAllocations{
-			Tenant: ipp.Tenant,
-			ID:     ipp.ID,
-			Usages: make(map[string]*utils.IPUsage),
+			Tenant:      ipp.Tenant,
+			ID:          ipp.ID,
+			Allocations: make(map[string]*utils.PoolAllocation),
 		})
 	}
 	return
