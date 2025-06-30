@@ -343,7 +343,7 @@ func (tS *TrendS) StopTrendS() {
 	// Wait for cron
 	select {
 	case <-ctx.Done():
-	case <-time.After(timeEnd.Sub(time.Now())):
+	case <-time.After(time.Until(timeEnd)):
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> timeout waiting for Cron to finish",
@@ -353,7 +353,7 @@ func (tS *TrendS) StopTrendS() {
 	// Wait for backup and other operations
 	select {
 	case <-tS.storingStopped:
-	case <-time.After(timeEnd.Sub(time.Now())):
+	case <-time.After(time.Until(timeEnd)):
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> timeout waiting for TrendS to finish",
