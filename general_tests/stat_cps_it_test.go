@@ -24,8 +24,8 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"slices"
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -35,10 +35,10 @@ import (
 )
 
 var (
-	count = flag.Int("no_events", 1000, "no_events")
+	count = flag.Int("event_rate", 2000, "event_rate")
 )
 
-func TestStressStatsProcessEvent(t *testing.T) {
+func TestLoadStatsProcessEvent(t *testing.T) {
 	var dbConfig engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -122,50 +122,69 @@ func TestStressStatsProcessEvent(t *testing.T) {
 	})
 
 	t.Run("StatExportEvent", func(t *testing.T) {
-		var wg sync.WaitGroup
-		start := time.Now()
-		var sucessEvent atomic.Int32
-		errCH := make(chan error, *count)
+		ticker := time.NewTicker(time.Second / time.Duration(*count))
+		defer ticker.Stop()
+		jobs := make(chan int, *count)
 		for i := 1; i <= *count; i++ {
+			jobs <- i
+		}
+		close(jobs)
+		numWrk := 50
+		var wg sync.WaitGroup
+		latencies := make(chan time.Duration, *count)
+		totalCall := time.Now()
+		for range numWrk {
 			wg.Add(1)
-			go func(i int) {
+			go func() {
 				defer wg.Done()
-				args := &engine.CGREventWithEeIDs{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "voiceEvent",
-						Time:   utils.TimePointer(time.Now()),
-						Event: map[string]any{
-							utils.AccountField: fmt.Sprintf("100%d", ((i-1)%10)+1),
-							utils.AnswerTime:   utils.TimePointer(time.Now()),
-							utils.Usage:        45,
-							utils.Cost:         12.1,
+				for i := range jobs {
+					<-ticker.C
+					callStart := time.Now()
+					args := &engine.CGREventWithEeIDs{
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "voiceEvent",
+							Time:   utils.TimePointer(time.Now()),
+							Event: map[string]any{
+								utils.AccountField: fmt.Sprintf("100%d", ((i-1)%10)+1),
+								utils.AnswerTime:   utils.TimePointer(time.Now()),
+								utils.Usage:        45,
+								utils.Cost:         12.1,
+							},
 						},
-					},
+					}
+					var reply []string
+					if err := client.Call(context.Background(), utils.StatSv1ProcessEvent, args, &reply); err != nil {
+						t.Errorf("Error processing event %d: %v", i, err)
+						continue
+					}
+					latencies <- time.Since(callStart)
 				}
-				var reply []string
-				if err := client.Call(context.Background(), utils.StatSv1ProcessEvent, args, &reply); err != nil {
-					errCH <- fmt.Errorf("no loop %d event id %s failed with err: %v", i, args.Event[utils.AccountField], err)
-					return
-				}
-				sucessEvent.Add(1)
-			}(i)
+			}()
 		}
-		doneCH := make(chan struct{})
-		go func() {
-			wg.Wait()
-			close(doneCH)
-		}()
-		select {
-		case <-doneCH:
-		case <-time.After(10 * time.Minute):
-			t.Error("timeout")
+		wg.Wait()
+		totalDuration := time.Since(totalCall)
+		close(latencies)
+		latencySlice := make([]time.Duration, 0, *count)
+		for latency := range latencies {
+			latencySlice = append(latencySlice, latency)
 		}
-		close(errCH)
-		for err := range errCH {
-			t.Error(err)
-		}
-		t.Logf("Processed %v events in %v (%.2f events/sec)", sucessEvent.Load(), time.Since(start), float64(*count)/time.Since(start).Seconds())
+		actualThroughput := float64(len(latencySlice)) / totalDuration.Seconds()
+		slices.Sort(latencySlice)
+		t.Logf("Performance Load Test Results")
+		t.Logf("Target Rate: %d events/sec", *count)
+		t.Logf("Actual Throughput:  %.2f events/sec", actualThroughput)
+		t.Logf("Total Duration:     %v", totalDuration)
+
+		// Calculate percentiles
+		p50Index := int(float64(len(latencySlice)) * 0.50)
+		p90Index := int(float64(len(latencySlice)) * 0.90)
+		p99Index := int(float64(len(latencySlice)) * 0.99)
+
+		t.Logf("p50 Latency: %v", latencySlice[p50Index])
+		t.Logf("p90 Latency: %v", latencySlice[p90Index])
+		t.Logf("p99 Latency: %v", latencySlice[p99Index])
+
 	})
 }
 

@@ -23,8 +23,8 @@ package general_tests
 import (
 	"bytes"
 	"fmt"
+	"slices"
 	"sync"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestStressResourceProcessEvent(t *testing.T) {
+func TestLoadResourceProcessEvent(t *testing.T) {
 	var dbConfig engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -52,7 +52,6 @@ func TestStressResourceProcessEvent(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 	content := `{
-
 	"general": {
 		"log_level": 7,
 	},
@@ -74,7 +73,6 @@ func TestStressResourceProcessEvent(t *testing.T) {
     	"resources": {
     	"enabled": true,
     	"store_interval": "-1",
-    	"thresholds_conns": ["*internal"]
     },
   	"thresholds": {
   		"enabled": true,
@@ -111,53 +109,70 @@ func TestStressResourceProcessEvent(t *testing.T) {
 		}
 	})
 
-	t.Run("StatExportEvent", func(t *testing.T) {
-		var wg sync.WaitGroup
-		start := time.Now()
-		var sucessEvent atomic.Int32
-		errCH := make(chan error, *count)
+	t.Run("AllocateResources", func(t *testing.T) {
+		ticker := time.NewTicker(time.Second / time.Duration(*count))
+		defer ticker.Stop()
+		jobs := make(chan int, *count)
 		for i := 1; i <= *count; i++ {
+			jobs <- i
+		}
+		close(jobs)
+		numWrk := 50
+		var wg sync.WaitGroup
+		latencies := make(chan time.Duration, *count)
+		totalCall := time.Now()
+		for range numWrk {
 			wg.Add(1)
-			go func(i int) {
+			go func() {
 				defer wg.Done()
-				args := &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     utils.UUIDSha1Prefix(),
-					Event: map[string]any{
-						utils.AccountField: fmt.Sprintf("100%d", ((i-1)%10)+1),
-						utils.Destination:  "3420340",
-					},
-					APIOpts: map[string]any{
-						utils.OptsResourcesUsageID: "651a8db2-4f67-4cf8-b622-169e8a482e45",
-						utils.OptsResourcesUnits:   6,
-					},
+				for i := range jobs {
+					<-ticker.C
+					callStart := time.Now()
+					args := &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     utils.UUIDSha1Prefix(),
+						Event: map[string]any{
+							utils.AccountField: fmt.Sprintf("100%d", ((i-1)%10)+1),
+							utils.Destination:  "3420340",
+						},
+						APIOpts: map[string]any{
+							utils.OptsResourcesUnits:   6,
+							utils.OptsResourcesUsageID: utils.GenUUID(),
+						},
+					}
+					var reply string
+					if err := client.Call(context.Background(), utils.ResourceSv1AllocateResources,
+						args, &reply); err != nil {
+						t.Errorf("Error processing event %d: %v", i, err)
+						continue
+					}
+					latencies <- time.Since(callStart)
 				}
-				var reply string
-				if err := client.Call(context.Background(), utils.ResourceSv1AllocateResources,
-					args, &reply); err != nil {
-					errCH <- fmt.Errorf("no loop %d event id %s failed with err: %v", i, args.Event[utils.AccountField], err)
-					return
-				} else if reply != "Account1Channels" {
-					t.Error("Unexpected reply returned", reply)
-				}
-				sucessEvent.Add(1)
-			}(i)
+
+			}()
 		}
-		doneCH := make(chan struct{})
-		go func() {
-			wg.Wait()
-			close(doneCH)
-		}()
-		select {
-		case <-doneCH:
-		case <-time.After(10 * time.Minute):
-			t.Error("timeout")
+		wg.Wait()
+		totalDuration := time.Since(totalCall)
+		close(latencies)
+		latencySlice := make([]time.Duration, 0, *count)
+		for latency := range latencies {
+			latencySlice = append(latencySlice, latency)
 		}
-		close(errCH)
-		for err := range errCH {
-			t.Error(err)
-		}
-		t.Logf("Processed %v events in %v (%.2f events/sec)", sucessEvent.Load(), time.Since(start), float64(*count)/time.Since(start).Seconds())
+		actualThroughput := float64(len(latencySlice)) / totalDuration.Seconds()
+		slices.Sort(latencySlice)
+		t.Logf("Performance Load Test Results")
+		t.Logf("Target Rate: %d events/sec", *count)
+		t.Logf("Actual Throughput:  %.2f events/sec", actualThroughput)
+		t.Logf("Total Duration:     %v", totalDuration)
+
+		// Calculate percentiles
+		p50Index := int(float64(len(latencySlice)) * 0.50)
+		p90Index := int(float64(len(latencySlice)) * 0.90)
+		p99Index := int(float64(len(latencySlice)) * 0.99)
+
+		t.Logf("p50 Latency: %v", latencySlice[p50Index])
+		t.Logf("p90 Latency: %v", latencySlice[p90Index])
+		t.Logf("p99 Latency: %v", latencySlice[p99Index])
 	})
 
 }

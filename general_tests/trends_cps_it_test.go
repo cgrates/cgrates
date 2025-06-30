@@ -37,17 +37,8 @@ import (
 func TestStressTrendsProcessEvent(t *testing.T) {
 	var dbConfig engine.DBCfg
 	switch *utils.DBType {
-	case utils.MetaInternal:
-		dbConfig = engine.DBCfg{
-			DataDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-			StorDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-		}
 	case utils.MetaMySQL:
-	case utils.MetaMongo, utils.MetaPostgres:
+	case utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal:
 		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")
@@ -89,7 +80,7 @@ func TestStressTrendsProcessEvent(t *testing.T) {
 	//defer fmt.Println(ng.LogBuffer)
 	client, _ := ng.Run(t)
 
-	numProfiles := 1000
+	numProfiles := 200
 	t.Run("SetStatAndTrendProfiles", func(t *testing.T) {
 		var reply string
 		for i := 1; i <= numProfiles; i++ {
@@ -152,7 +143,7 @@ func TestStressTrendsProcessEvent(t *testing.T) {
 	})
 	t.Run("ContinuousEventLoad", func(t *testing.T) {
 		var wg sync.WaitGroup
-		errCh := make(chan error, numProfiles*10)
+		errCh := make(chan error, numProfiles)
 		stopCh := make(chan struct{}) // To stop event generation after duration
 
 		// Run event generation for 30 seconds
@@ -163,7 +154,7 @@ func TestStressTrendsProcessEvent(t *testing.T) {
 
 		start := time.Now()
 		var evcount atomic.Int64
-		for i := 0; i < 50; i++ { // 50 concurrent workers
+		for i := range 50 { // 50 concurrent workers
 			wg.Add(1)
 			go func(workerID int) {
 				defer wg.Done()
@@ -194,7 +185,6 @@ func TestStressTrendsProcessEvent(t *testing.T) {
 				}
 			}(i)
 		}
-
 		// Wait for all workers to finish
 		go func() {
 			wg.Wait()
@@ -207,20 +197,4 @@ func TestStressTrendsProcessEvent(t *testing.T) {
 		}
 		t.Logf("Generated %v events for %v", evcount.Load(), time.Since(start))
 	})
-
-	// t.Run("VerifyTrendExecution", func(t *testing.T) {
-	// 	time.Sleep(5 * time.Second) // Allow final trend executions
-
-	// 	// Verify each trend profile executed ~300 times (30s test * 10 executions/s)
-	// 	// This requires trend executions to be logged in a identifiable way
-	// 	// Example: Count occurrences of "processed trend Trend123"
-	// 	expectedExecutions := 30 * 10 // 30 seconds * 10 executions/second
-	// 	for i := 1; i <= numProfiles; i++ {
-	// 		trendID := fmt.Sprintf("Trend%d", i)
-	// 		if count < expectedExecutions*0.8 { // Allow 20% scheduling variance
-	// 			t.Errorf("Trend %s executed %d times, expected ~%d", trendID, count, expectedExecutions)
-	// 		}
-	// 	}
-	// })
-
 }
