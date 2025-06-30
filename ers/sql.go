@@ -146,6 +146,10 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 		}
 	}
 	for _, filterObj := range filtersObjList { // seperate filters used for WHERE clause from other filters, and build query conditions out of them
+		if err := engine.CheckFilter(filterObj); err != nil {
+			rdr.rdrErr <- err
+			return
+		}
 		var lazyFltrPopulated bool // Track if a lazyFilter is already populated by the previous filterObj.Rules, so we dont store the same lazy filter more than once
 		for _, rule := range filterObj.Rules {
 			if strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep) { // convert filter to WHERE condition only on filters with ~*req.

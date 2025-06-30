@@ -2446,6 +2446,24 @@ func TestCheckFilterErr(t *testing.T) {
 	}
 }
 
+func TestCheckFilterNotEmptyErr(t *testing.T) {
+	fltr := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "TestFilter",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaNotEmpty,
+				Element: "~*req.Account",
+				Values:  []string{"''"},
+			},
+		},
+	}
+	expErr := `value of filter <TestFilter> is not empty <''>`
+	if err := CheckFilter(fltr); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+}
+
 func TestFilterPassRegexErr(t *testing.T) {
 	cd := &CallDescriptor{
 		Category:      "callx",
@@ -3169,13 +3187,13 @@ func TestFilterToSQLQuery(t *testing.T) {
 	}{
 		{"MetaEqual with values", FilterRule{Type: utils.MetaEqual, Element: "~*req.cost_details.Charges[0].RatingID", Values: []string{"RatingID2"}}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') = 'RatingID2'"}},
 
-		{"MetaExists with no values", FilterRule{Type: utils.MetaExists, Element: "~*req.answer_time", Values: nil}, []string{"answer_time IS NULL"}},
+		{"MetaExists with no values", FilterRule{Type: utils.MetaExists, Element: "~*req.answer_time", Values: nil}, []string{"answer_time IS NOT NULL"}},
 
-		{"MetaExists with JSON field", FilterRule{Type: utils.MetaExists, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') IS NULL"}},
+		{"MetaExists with JSON field", FilterRule{Type: utils.MetaExists, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') IS NOT NULL"}},
 
-		{"MetaNotExists with no values", FilterRule{Type: utils.MetaNotExists, Element: "~*req.answer_time", Values: nil}, []string{"answer_time IS NOT NULL"}},
+		{"MetaNotExists with no values", FilterRule{Type: utils.MetaNotExists, Element: "~*req.answer_time", Values: nil}, []string{"answer_time IS NULL"}},
 
-		{"MetaNotExists with JSON field", FilterRule{Type: utils.MetaNotExists, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') IS NOT NULL"}},
+		{"MetaNotExists with JSON field", FilterRule{Type: utils.MetaNotExists, Element: "~*req.cost_details.Charges[0].RatingID", Values: nil}, []string{"JSON_VALUE(cost_details, '$.Charges[0].RatingID') IS NULL"}},
 
 		{"MetaString with values", FilterRule{Type: utils.MetaString, Element: "~*req.answer_time", Values: []string{"value1", "value2"}}, []string{"answer_time = 'value1'", "answer_time = 'value2'"}},
 
@@ -3396,7 +3414,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.column1",
 				Values:  nil,
 			},
-			expected: []string{"column1 IS NULL"},
+			expected: []string{"column1 IS NOT NULL"},
 		},
 		{
 			name: "MetaNotExists with no values",
@@ -3405,7 +3423,7 @@ func TestFilterToSQLQueryValidations(t *testing.T) {
 				Element: "~*req.json_field.key",
 				Values:  nil,
 			},
-			expected: []string{"JSON_VALUE(json_field, '$.key') IS NOT NULL"},
+			expected: []string{"JSON_VALUE(json_field, '$.key') IS NULL"},
 		},
 		{
 			name: "MetaString with values",

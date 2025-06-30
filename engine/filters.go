@@ -823,6 +823,12 @@ func CheckFilter(fltr *Filter) (err error) {
 			return fmt.Errorf("%s for filter <%v>", err, fltr) //encapsulated error
 		}
 		for _, val := range rls.Values {
+			if rls.Type == utils.MetaEmpty || rls.Type == utils.MetaNotEmpty ||
+				rls.Type == utils.MetaExists || rls.Type == utils.MetaNotExists &&
+				val != utils.EmptyString {
+				return fmt.Errorf("value of filter <%s> is not empty <%s>",
+					fltr.ID, val)
+			}
 			if err = valFunc(val); err != nil {
 				return fmt.Errorf("%s for filter <%v>", err, fltr) //encapsulated error
 			}
@@ -881,19 +887,20 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
 	if len(fltr.Values) == 0 {
 		switch fltr.Type {
 		case utils.MetaExists, utils.MetaNotExists:
-			if not {
+			if not { // not existing means Column IS NULL
 				if firstItem == utils.EmptyString {
-					conditions = append(conditions, fmt.Sprintf("%s IS NOT NULL", restOfItems))
+					conditions = append(conditions, fmt.Sprintf("%s IS NULL", restOfItems))
 					return
 				}
-				conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NOT NULL", firstItem, restOfItems))
+				conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NULL", firstItem, restOfItems))
 				return
 			}
+			// existing means Column IS NOT NULL
 			if firstItem == utils.EmptyString {
-				conditions = append(conditions, fmt.Sprintf("%s IS NULL", restOfItems))
+				conditions = append(conditions, fmt.Sprintf("%s IS NOT NULL", restOfItems))
 				return
 			}
-			conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NULL", firstItem, restOfItems))
+			conditions = append(conditions, fmt.Sprintf("JSON_VALUE(%s, '$.%s') IS NOT NULL", firstItem, restOfItems))
 		case utils.MetaEmpty, utils.MetaNotEmpty:
 			if not {
 				if firstItem == utils.EmptyString {
@@ -938,25 +945,26 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
 			}
 		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
 			parsedValAny := utils.StringToInterface(value)
-			if fltr.Type == utils.MetaGreaterOrEqual {
+			switch fltr.Type {
+			case utils.MetaGreaterOrEqual:
 				if firstItem == utils.EmptyString {
 					singleCond = fmt.Sprintf("%s >= '%v'", restOfItems, parsedValAny)
 				} else {
 					singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') >= '%v'", firstItem, restOfItems, parsedValAny)
 				}
-			} else if fltr.Type == utils.MetaGreaterThan {
+			case utils.MetaGreaterThan:
 				if firstItem == utils.EmptyString {
 					singleCond = fmt.Sprintf("%s > '%v'", restOfItems, parsedValAny)
 				} else {
 					singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') > '%v'", firstItem, restOfItems, parsedValAny)
 				}
-			} else if fltr.Type == utils.MetaLessOrEqual {
+			case utils.MetaLessOrEqual:
 				if firstItem == utils.EmptyString {
 					singleCond = fmt.Sprintf("%s <= '%v'", restOfItems, parsedValAny)
 				} else {
 					singleCond = fmt.Sprintf("JSON_VALUE(%s, '$.%s') <= '%v'", firstItem, restOfItems, parsedValAny)
 				}
-			} else if fltr.Type == utils.MetaLessThan {
+			case utils.MetaLessThan:
 				if firstItem == utils.EmptyString {
 					singleCond = fmt.Sprintf("%s < '%v'", restOfItems, parsedValAny)
 				} else {
