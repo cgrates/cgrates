@@ -3234,3 +3234,367 @@ func TestThresholdsV1ResetThresholdStoreErr(t *testing.T) {
 		t.Errorf("Expected error <%+v>, Received error <%+v>", utils.ErrDisconnected, err)
 	}
 }
+
+func TestThresholdsProfileSet(t *testing.T) {
+	tests := []struct {
+		name      string
+		path      []string
+		val       any
+		expectErr bool
+	}{
+		{
+			name:      "Set Tenant",
+			path:      []string{utils.Tenant},
+			val:       "cgrates.org",
+			expectErr: false,
+		},
+		{
+			name:      "Set ID",
+			path:      []string{utils.ID},
+			val:       "TH001",
+			expectErr: false,
+		},
+		{
+			name:      "Set Blocker true",
+			path:      []string{utils.Blocker},
+			val:       true,
+			expectErr: false,
+		},
+		{
+			name:      "Set Async true",
+			path:      []string{utils.Async},
+			val:       "true",
+			expectErr: false,
+		},
+		{
+			name:      "Set MaxHits",
+			path:      []string{utils.MaxHits},
+			val:       99,
+			expectErr: false,
+		},
+		{
+			name:      "Set MinHits",
+			path:      []string{utils.MinHits},
+			val:       "10",
+			expectErr: false,
+		},
+		{
+			name:      "Set MinSleep",
+			path:      []string{utils.MinSleep},
+			val:       "2s",
+			expectErr: false,
+		},
+		{
+			name:      "Append FilterIDs",
+			path:      []string{utils.FilterIDs},
+			val:       []string{"flt1", "flt2"},
+			expectErr: false,
+		},
+		{
+			name:      "Append ActionProfileIDs",
+			path:      []string{utils.ActionProfileIDs},
+			val:       []string{"act1"},
+			expectErr: false,
+		},
+		{
+			name:      "Append EeIDs",
+			path:      []string{utils.EeIDs},
+			val:       []string{"ee1"},
+			expectErr: false,
+		},
+		{
+			name:      "Invalid path",
+			path:      []string{"Invalid"},
+			val:       "test",
+			expectErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tp := &ThresholdProfile{}
+			err := tp.Set(tc.path, tc.val, false)
+			if (err != nil) != tc.expectErr {
+				t.Errorf("expected error=%v, got %v", tc.expectErr, err)
+			}
+
+		})
+	}
+}
+
+func TestThresholdProfileClone(t *testing.T) {
+	orig := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THRESHOLD_TEST",
+		FilterIDs:        []string{"*string:~*req.Account:1001", "*string:~*req.Subject:1001"},
+		MaxHits:          100,
+		MinHits:          5,
+		MinSleep:         10 * time.Second,
+		Blocker:          true,
+		Weights:          utils.DynamicWeights{&utils.DynamicWeight{Weight: 20.0}},
+		ActionProfileIDs: []string{"ACT_LOG", "ACT_MAIL", "ACT_CDR"},
+		Async:            true,
+		EeIDs:            []string{"EE1", "EE2"},
+		lkID:             "lkID",
+	}
+
+	cloned := orig.Clone()
+
+	if cloned == nil {
+		t.Errorf("Expected cloned ThresholdProfile, got nil")
+		return
+	}
+
+	if cloned.Tenant != orig.Tenant {
+		t.Errorf("Tenant mismatch: got %s, want %s", cloned.Tenant, orig.Tenant)
+	}
+	if cloned.ID != orig.ID {
+		t.Errorf("ID mismatch: got %s, want %s", cloned.ID, orig.ID)
+	}
+	if cloned.MaxHits != orig.MaxHits {
+		t.Errorf("MaxHits mismatch: got %d, want %d", cloned.MaxHits, orig.MaxHits)
+	}
+	if cloned.MinHits != orig.MinHits {
+		t.Errorf("MinHits mismatch: got %d, want %d", cloned.MinHits, orig.MinHits)
+	}
+	if cloned.MinSleep != orig.MinSleep {
+		t.Errorf("MinSleep mismatch: got %v, want %v", cloned.MinSleep, orig.MinSleep)
+	}
+	if cloned.Blocker != orig.Blocker {
+		t.Errorf("Blocker mismatch: got %v, want %v", cloned.Blocker, orig.Blocker)
+	}
+	if cloned.Async != orig.Async {
+		t.Errorf("Async mismatch: got %v, want %v", cloned.Async, orig.Async)
+	}
+
+	if !reflect.DeepEqual(cloned.FilterIDs, orig.FilterIDs) {
+		t.Errorf("FilterIDs mismatch: got %v, want %v", cloned.FilterIDs, orig.FilterIDs)
+	}
+	if !reflect.DeepEqual(cloned.ActionProfileIDs, orig.ActionProfileIDs) {
+		t.Errorf("ActionProfileIDs mismatch: got %v, want %v", cloned.ActionProfileIDs, orig.ActionProfileIDs)
+	}
+	if !reflect.DeepEqual(cloned.Weights, orig.Weights) {
+		t.Errorf("Weights mismatch: got %v, want %v", cloned.Weights, orig.Weights)
+	}
+	if len(cloned.Weights) > 0 && cloned.Weights[0] == orig.Weights[0] {
+		t.Errorf("Weights not deep copied")
+	}
+	if cloned.lkID != "" {
+		t.Errorf("lkID should not be cloned, got: %s", cloned.lkID)
+	}
+	if len(cloned.EeIDs) != 0 {
+		t.Errorf("EeIDs should not be cloned, got: %v", cloned.EeIDs)
+	}
+
+	var nilTP *ThresholdProfile
+	nilClone := nilTP.Clone()
+	if nilClone != nil {
+		t.Errorf("Expected nil from Clone on nil receiver, got: %+v", nilClone)
+	}
+}
+
+func TestThresholdClone(t *testing.T) {
+	origDirty := true
+	orig := &Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH001",
+		Hits:   42,
+		Snooze: time.Date(2025, 1, 1, 12, 0, 0, 0, time.UTC),
+		dirty:  &origDirty,
+		tPrfl: &ThresholdProfile{
+			Tenant:           "cgrates.org",
+			ID:               "THRESHOLD_TEST",
+			FilterIDs:        []string{"*string:~*req.Account:1001", "*string:~*req.Subject:1001"},
+			MaxHits:          100,
+			MinHits:          5,
+			MinSleep:         10 * time.Second,
+			Blocker:          true,
+			Weights:          utils.DynamicWeights{&utils.DynamicWeight{Weight: 20.0}},
+			ActionProfileIDs: []string{"ACT_LOG", "ACT_MAIL", "ACT_CDR"},
+			Async:            true,
+			EeIDs:            []string{"EE1", "EE2"},
+			lkID:             "lkID",
+		},
+	}
+
+	cloned := orig.Clone()
+
+	if cloned == nil {
+		t.Errorf("Expected non-nil clone")
+		return
+	}
+
+	if cloned.Tenant != orig.Tenant {
+		t.Errorf("Tenant mismatch: got %s, want %s", cloned.Tenant, orig.Tenant)
+	}
+	if cloned.ID != orig.ID {
+		t.Errorf("ID mismatch: got %s, want %s", cloned.ID, orig.ID)
+	}
+	if cloned.Hits != orig.Hits {
+		t.Errorf("Hits mismatch: got %d, want %d", cloned.Hits, orig.Hits)
+	}
+	if cloned.Snooze != orig.Snooze {
+		t.Errorf("Snooze mismatch: got %v, want %v", cloned.Snooze, orig.Snooze)
+	}
+
+	if cloned.tPrfl == nil {
+		t.Errorf("Expected tPrfl to be cloned, got nil")
+	} else if cloned.tPrfl == orig.tPrfl {
+		t.Errorf("tPrfl not deep cloned")
+	} else if cloned.tPrfl.ID != orig.tPrfl.ID {
+		t.Errorf("tPrfl.ID mismatch: got %s, want %s", cloned.tPrfl.ID, orig.tPrfl.ID)
+	}
+
+	if cloned.dirty == nil {
+		t.Errorf("Expected dirty to be cloned, got nil")
+	} else if cloned.dirty == orig.dirty {
+		t.Errorf("dirty not deep copied")
+	} else if *cloned.dirty != *orig.dirty {
+		t.Errorf("dirty value mismatch: got %v, want %v", *cloned.dirty, *orig.dirty)
+	}
+
+	var nilThreshold *Threshold
+	nilClone := nilThreshold.Clone()
+	if nilClone != nil {
+		t.Errorf("Expected nil from Clone on nil receiver, got: %+v", nilClone)
+	}
+}
+
+func TestThresholdProfileFieldAsInterface(t *testing.T) {
+	tp := &ThresholdProfile{
+		Tenant:           "cgrates.org",
+		ID:               "THRESHOLD_TEST",
+		FilterIDs:        []string{"flt1", "flt2"},
+		MaxHits:          100,
+		MinHits:          10,
+		MinSleep:         5 * time.Second,
+		Blocker:          true,
+		Weights:          utils.DynamicWeights{&utils.DynamicWeight{Weight: 1.23}},
+		ActionProfileIDs: []string{"act1", "act2"},
+		Async:            true,
+		EeIDs:            []string{"ee1", "ee2"},
+	}
+
+	tests := []struct {
+		name    string
+		path    []string
+		want    any
+		wantErr bool
+	}{
+		{
+			name:    "Tenant",
+			path:    []string{utils.Tenant},
+			want:    "cgrates.org",
+			wantErr: false,
+		},
+		{
+			name:    "ID",
+			path:    []string{utils.ID},
+			want:    "THRESHOLD_TEST",
+			wantErr: false,
+		},
+		{
+			name:    "FilterIDs",
+			path:    []string{utils.FilterIDs},
+			want:    []string{"flt1", "flt2"},
+			wantErr: false,
+		},
+		{
+			name:    "FilterIDs[1]",
+			path:    []string{"FilterIDs[1]"},
+			want:    "flt2",
+			wantErr: false,
+		},
+		{
+			name:    "ActionProfileIDs",
+			path:    []string{utils.ActionProfileIDs},
+			want:    []string{"act1", "act2"},
+			wantErr: false,
+		},
+		{
+			name:    "ActionProfileIDs[0]",
+			path:    []string{"ActionProfileIDs[0]"},
+			want:    "act1",
+			wantErr: false,
+		},
+		{
+			name:    "EeIDs",
+			path:    []string{utils.EeIDs},
+			want:    []string{"ee1", "ee2"},
+			wantErr: false,
+		},
+		{
+			name:    "EeIDs[1]",
+			path:    []string{"EeIDs[1]"},
+			want:    "ee2",
+			wantErr: false,
+		},
+		{
+			name:    "MaxHits",
+			path:    []string{utils.MaxHits},
+			want:    100,
+			wantErr: false,
+		},
+		{
+			name:    "MinHits",
+			path:    []string{utils.MinHits},
+			want:    10,
+			wantErr: false,
+		},
+		{
+			name:    "MinSleep",
+			path:    []string{utils.MinSleep},
+			want:    5 * time.Second,
+			wantErr: false,
+		},
+		{
+			name:    "Blocker",
+			path:    []string{utils.Blocker},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name:    "Async",
+			path:    []string{utils.Async},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name:    "Weights",
+			path:    []string{utils.Weights},
+			want:    tp.Weights,
+			wantErr: false,
+		},
+		{
+			name:    "Unknown field",
+			path:    []string{"UnknownField"},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "Out of range index",
+			path:    []string{"EeIDs[10]"},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "Invalid path length",
+			path:    []string{"FilterIDs", "Extra"},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := tp.FieldAsInterface(tc.path)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Expected error: %v, got: %v", tc.wantErr, err)
+				return
+			}
+			if !tc.wantErr && !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("Got value %v (%T), expected %v (%T)", got, got, tc.want, tc.want)
+			}
+		})
+	}
+}
