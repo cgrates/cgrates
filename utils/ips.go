@@ -381,9 +381,10 @@ func (a *PoolAllocation) Clone() *PoolAllocation {
 
 // AllocatedIP represents one IP allocated on a pool, together with the message.
 type AllocatedIP struct {
-	PoolID  string
-	Message string
-	Address netip.Addr
+	ProfileID string
+	PoolID    string
+	Message   string
+	Address   netip.Addr
 }
 
 // IPAllocations represents IP allocations with usage tracking and TTL management.
@@ -461,9 +462,10 @@ func (a *IPAllocations) AllocateIPOnPool(allocID string, pool *IPPool,
 		}
 		a.TTLIndex = append(a.TTLIndex, allocID)
 		return &AllocatedIP{
-			PoolID:  pool.ID,
-			Message: pool.Message,
-			Address: poolAlloc.Address,
+			ProfileID: a.ID,
+			PoolID:    pool.ID,
+			Message:   pool.Message,
+			Address:   poolAlloc.Address,
 		}, nil
 	}
 	poolRange := a.poolRanges[pool.ID]
@@ -478,9 +480,10 @@ func (a *IPAllocations) AllocateIPOnPool(allocID string, pool *IPPool,
 		}
 	}
 	allocIP := &AllocatedIP{
-		PoolID:  pool.ID,
-		Message: pool.Message,
-		Address: addr,
+		ProfileID: a.ID,
+		PoolID:    pool.ID,
+		Message:   pool.Message,
+		Address:   addr,
 	}
 	if dryRun {
 		return allocIP, nil
