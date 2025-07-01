@@ -136,7 +136,7 @@ func (msqlS *MySQLStorage) valueQry(ruleType, elem, field string, values []strin
 				conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') != ''", elem, field))
 				return
 			}
-			conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') != ''", elem, field))
+			conditions = append(conditions, fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') == ''", elem, field))
 		}
 		return
 	}
@@ -153,13 +153,14 @@ func (msqlS *MySQLStorage) valueQry(ruleType, elem, field string, values []strin
 			}
 			singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') = '%s'", elem, field, value)
 		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
-			if ruleType == utils.MetaGreaterOrEqual {
+			switch ruleType {
+			case utils.MetaGreaterOrEqual:
 				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') >= %s", elem, field, value)
-			} else if ruleType == utils.MetaGreaterThan {
+			case utils.MetaGreaterThan:
 				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') > %s", elem, field, value)
-			} else if ruleType == utils.MetaLessOrEqual {
+			case utils.MetaLessOrEqual:
 				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') <= %s", elem, field, value)
-			} else if ruleType == utils.MetaLessThan {
+			case utils.MetaLessThan:
 				singleCond = fmt.Sprintf(" JSON_VALUE(%s, '$.\"%s\"') < %s", elem, field, value)
 			}
 		case utils.MetaPrefix, utils.MetaNotPrefix:

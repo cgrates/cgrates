@@ -30,10 +30,17 @@ import (
 )
 
 func TestSessionBasics(t *testing.T) {
+	var dbcfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
-		t.SkipNow()
+		dbcfg = engine.InternalDBCfg
+	case utils.MetaMySQL:
+	case utils.MetaMongo:
+		t.SkipNow() // unfinished look into errors
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		t.SkipNow() // unfinished look into postgres flush
+		dbcfg = engine.PostgresDBCfg
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
@@ -72,7 +79,7 @@ cgrates.org,RP_STANDARD,,;10,,,,RT_STANDARD,*string:~*req.Destination:1002,"* * 
 cgrates.org,RP_STANDARD,,,,,,RT_STANDARD,,,,,1m,0,0.6,1m,1s
 cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * * * *",;0,false,0s,0,0.01,1s,1s`,
 		},
-		DBCfg:    engine.InternalDBCfg,
+		DBCfg:    dbcfg,
 		Encoding: *utils.Encoding,
 		// LogBuffer: new(bytes.Buffer),
 	}
@@ -157,6 +164,9 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			&utils.CDRFilters{
 				FilterIDs: []string{
 					fmt.Sprintf("*string:~*opts.*originID:%s", originID),
+					"*exists:~*opts.*originID:",
+					"*notexists:~*req.NonExistentField:",
+					"*notempty:~*opts.*originID:",
 				},
 			}, &cdrs); err != nil {
 			t.Fatal(err)
@@ -187,12 +197,30 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			switch costKey {
 			case utils.Abstracts, utils.Concretes:
 				cd := getCostDetails(t, cdr, utils.MetaAccountSCost)
-				got = cd[costKey].(float64)
+				if cd == nil {
+					t.Fatalf("Nil costDetails")
+				}
+				var canCast bool
+				got, canCast = cd[costKey].(float64)
+				if !canCast {
+					t.Fatalf("Could not cast cdr.Opts[utils.MetaCost] to float64")
+				}
 			case utils.Cost:
 				cd := getCostDetails(t, cdr, utils.MetaRateSCost)
-				got = cd[costKey].(float64)
+				if cd == nil {
+					t.Fatalf("Nil costDetails")
+				}
+				var canCast bool
+				got, canCast = cd[costKey].(float64)
+				if !canCast {
+					t.Fatalf("Could not cast cdr.Opts[utils.MetaCost] to float64")
+				}
 			case utils.MetaCost:
-				got = cdr.Opts[utils.MetaCost].(float64)
+				var canCast bool
+				got, canCast = cdr.Opts[utils.MetaCost].(float64)
+				if !canCast {
+					t.Fatalf("Could not cast cdr.Opts[utils.MetaCost] to float64")
+				}
 			default:
 				t.Fatalf("invalid cdr cost key: %q", costKey)
 			}

@@ -2230,7 +2230,6 @@ func TestFilterRulePassRegexParseErr(t *testing.T) {
 	}
 }
 func TestCheckFilterErrValFuncElement(t *testing.T) {
-
 	fltr := &Filter{
 		Tenant: utils.CGRateSorg,
 		ID:     "FLTR_CP_1",
@@ -2243,13 +2242,12 @@ func TestCheckFilterErrValFuncElement(t *testing.T) {
 		},
 	}
 	expErr := `Path is missing  for filter <{"Tenant":"cgrates.org","ID":"FLTR_CP_1","Rules":[{"Type":"*string","Element":"~missing path","Values":["ChargerProfile1"]}]}>`
-	if err := CheckFilter(fltr); err.Error() != expErr {
+	if err := CheckFilter(fltr); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
 }
 
 func TestCheckFilterErrValFuncValues(t *testing.T) {
-
 	fltr := &Filter{
 		Tenant: utils.CGRateSorg,
 		ID:     "FLTR_CP_1",
@@ -2262,7 +2260,25 @@ func TestCheckFilterErrValFuncValues(t *testing.T) {
 		},
 	}
 	expErr := `Path is missing  for filter <{"Tenant":"cgrates.org","ID":"FLTR_CP_1","Rules":[{"Type":"*string","Element":"~*req.Charger","Values":["~missing path"]}]}>`
-	if err := CheckFilter(fltr); err.Error() != expErr {
+	if err := CheckFilter(fltr); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+}
+
+func TestCheckFilterErrNotEmpty(t *testing.T) {
+	fltr := &Filter{
+		Tenant: utils.CGRateSorg,
+		ID:     "FLTR_CP_1",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaNotEmpty,
+				Element: "~*req.Charger",
+				Values:  []string{"''"},
+			},
+		},
+	}
+	expErr := `value of filter <FLTR_CP_1> is not empty <''>`
+	if err := CheckFilter(fltr); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
 }
