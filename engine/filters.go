@@ -836,6 +836,12 @@ func CheckFilter(fltr *Filter) (err error) {
 			return fmt.Errorf("%s for filter <%v>", err, fltr) //encapsulated error
 		}
 		for _, val := range rls.Values {
+			if rls.Type == utils.MetaEmpty || rls.Type == utils.MetaNotEmpty ||
+				rls.Type == utils.MetaExists || rls.Type == utils.MetaNotExists &&
+				val != utils.EmptyString {
+				return fmt.Errorf("value of filter <%s> is not empty <%s>",
+					fltr.ID, val)
+			}
 			if err = valFunc(val); err != nil {
 				return fmt.Errorf("%s for filter <%v>", err, fltr) //encapsulated error
 			}

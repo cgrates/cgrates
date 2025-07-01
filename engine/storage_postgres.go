@@ -161,13 +161,14 @@ func (poS *PostgresStorage) valueQry(ruleType, elem, field string, values []stri
 			}
 			singleCond = fmt.Sprintf(" (%s ->> '%s') = '%s'", elem, field, value)
 		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
-			if ruleType == utils.MetaGreaterOrEqual {
+			switch ruleType {
+			case utils.MetaGreaterOrEqual:
 				singleCond = fmt.Sprintf(" (%s ->> '%s')::numeric >= '%s'", elem, field, value)
-			} else if ruleType == utils.MetaGreaterThan {
+			case utils.MetaGreaterThan:
 				singleCond = fmt.Sprintf(" (%s ->> '%s')::numeric > '%s'", elem, field, value)
-			} else if ruleType == utils.MetaLessOrEqual {
+			case utils.MetaLessOrEqual:
 				singleCond = fmt.Sprintf(" (%s ->> '%s')::numeric <= '%s'", elem, field, value)
-			} else if ruleType == utils.MetaLessThan {
+			case utils.MetaLessThan:
 				singleCond = fmt.Sprintf(" (%s ->> '%s')::numeric < '%s'", elem, field, value)
 			}
 		case utils.MetaPrefix, utils.MetaNotPrefix:
