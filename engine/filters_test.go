@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -2722,4 +2723,206 @@ func TestFilterRanking(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := NewDataManager(data, cfg, nil)
+
+	fltID := "fltTest"
+	tenant := "cgrates.org"
+	filter := &Filter{
+		ID:     fltID,
+		Tenant: tenant,
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "Account",
+				Values:  []string{"1007"},
+			},
+		},
+	}
+
+	ctx := &context.Context{}
+
+	err := dm.SetFilter(ctx, filter, true)
+	if err != nil {
+		t.Errorf("Failed to insert test filter: %v", err)
+	}
+
+	filterIDs := []string{fltID}
+	result, err := GetFilters(ctx, filterIDs, tenant, dm)
+	if err != nil {
+		t.Errorf("GetFilters returned error: %v", err)
+	}
+	if len(result) != 1 {
+		t.Errorf("Expected 1 filter, got %d", len(result))
+	}
+	if result[0].ID != fltID {
+		t.Errorf("Expected filter ID %s, got %s", fltID, result[0].ID)
+	}
+}
+
+func TestCheckFilter(t *testing.T) {
+	validFilter := &Filter{
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "validpath",
+				Values:  []string{"val1"},
+			},
+		},
+	}
+
+	err := CheckFilter(validFilter)
+	if err != nil {
+		t.Errorf("Expected no error for valid filter, got: %v", err)
+	}
+
+}
+
+func TestFilterRulepassSentryPeer(t *testing.T) {
+	ctx := context.TODO()
+
+	dp := utils.MapStorage{
+		"IPAddr": "192.165.56.1",
+	}
+
+	rsrParse := &utils.RSRParser{
+		Path: "IPAddr",
+	}
+	if err := rsrParse.Compile(); err != nil {
+		t.Fatal("failed to compile RSRParser:", err)
+	}
+
+	fltr := &FilterRule{
+		rsrElement: rsrParse,
+		Values:     []string{utils.MetaIP},
+	}
+
+	pass, err := fltr.passSentryPeer(ctx, dp)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+
+	fltr.Values = []string{"invalidValue"}
+
+	pass, err = fltr.passSentryPeer(ctx, dp)
+	if err == nil {
+		t.Errorf("Expected error for invalid sentrypeer value, got nil")
+	}
+	if pass {
+		t.Errorf("Expected pass to be false on error")
+	}
+
+	dpEmpty := utils.MapStorage{}
+
+	fltr.Values = []string{utils.MetaNumber}
+
+	pass, err = fltr.passSentryPeer(ctx, dpEmpty)
+	if err != nil {
+		t.Errorf("Unexpected error when data not found: %v", err)
+	}
+
+}
+
+func TestFilterClone(t *testing.T) {
+	orig := &Filter{
+		Tenant: "cgrates.org",
+		ID:     "flt123",
+		Rules: []*FilterRule{
+			{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001", "1002"},
+			},
+			{
+				Type:    utils.MetaNumber,
+				Element: "~*req.Duration",
+				Values:  []string{"60"},
+			},
+		},
+	}
+
+	clone := orig.Clone()
+
+	if clone == nil {
+		t.Fatal("Clone returned nil")
+	}
+
+	if clone.Tenant != orig.Tenant {
+		t.Errorf("Tenant mismatch: got %s, want %s", clone.Tenant, orig.Tenant)
+	}
+	if clone.ID != orig.ID {
+		t.Errorf("ID mismatch: got %s, want %s", clone.ID, orig.ID)
+	}
+
+	if &clone.Rules[0] == &orig.Rules[0] {
+		t.Error("Rules elements not cloned (same pointer)")
+	}
+
+	if len(clone.Rules) != len(orig.Rules) {
+		t.Errorf("Rules length mismatch: got %d, want %d", len(clone.Rules), len(orig.Rules))
+	}
+
+	for i := range orig.Rules {
+		if clone.Rules[i].Type != orig.Rules[i].Type {
+			t.Errorf("Rule %d Type mismatch: got %s, want %s", i, clone.Rules[i].Type, orig.Rules[i].Type)
+		}
+		if clone.Rules[i].Element != orig.Rules[i].Element {
+			t.Errorf("Rule %d Element mismatch: got %s, want %s", i, clone.Rules[i].Element, orig.Rules[i].Element)
+		}
+		if len(clone.Rules[i].Values) != len(orig.Rules[i].Values) {
+			t.Errorf("Rule %d Values length mismatch: got %d, want %d", i, len(clone.Rules[i].Values), len(orig.Rules[i].Values))
+		}
+		for j := range orig.Rules[i].Values {
+			if clone.Rules[i].Values[j] != orig.Rules[i].Values[j] {
+				t.Errorf("Rule %d Value %d mismatch: got %s, want %s", i, j, clone.Rules[i].Values[j], orig.Rules[i].Values[j])
+			}
+		}
+	}
+
+	var nilFilter *Filter
+	if nilFilter.Clone() != nil {
+		t.Error("Expected nil clone from nil Filter")
+	}
+}
+
+func TestNewFilterRule(t *testing.T) {
+	rf, err := NewFilterRule(utils.MetaString, "~*req.Account", []string{"1001", "1002"})
+	if err != nil {
+		t.Fatalf("Unexpected error for valid filter: %v", err)
+	}
+	if rf == nil {
+		t.Fatal("Expected non-nil FilterRule for valid input")
+	}
+	if rf.Type != utils.MetaString {
+		t.Errorf("Expected Type %s, got %s", utils.MetaString, rf.Type)
+	}
+	if rf.Element != "~*req.Account" {
+		t.Errorf("Expected Element '~*req.Account', got %s", rf.Element)
+	}
+	if rf.negative == nil || *rf.negative {
+		t.Errorf("Expected negative=false, got %v", rf.negative)
+	}
+	if len(rf.Values) != 2 {
+		t.Errorf("Expected 2 values, got %d", len(rf.Values))
+	}
+
+	_, err = NewFilterRule("unsupportedType", "field", []string{"val"})
+	if err == nil || !strings.Contains(err.Error(), "Unsupported filter Type") {
+		t.Errorf("Expected unsupported type error, got %v", err)
+	}
+
+	_, err = NewFilterRule(utils.MetaString, "", []string{"val"})
+	if err == nil || !strings.Contains(err.Error(), "Element is mandatory") {
+		t.Errorf("Expected missing element error, got %v", err)
+	}
+
+	_, err = NewFilterRule(utils.MetaString, "field", nil)
+	if err == nil || !strings.Contains(err.Error(), "Values is mandatory") {
+		t.Errorf("Expected missing values error, got %v", err)
+	}
+
 }
