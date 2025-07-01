@@ -270,7 +270,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 
 	// Clone profile to avoid modifying cached version during pool sorting.
 	prfl := matchedPrfl.Clone()
-	if err = sortPools(ctx, prfl, s.fltrs, evNm); err != nil {
+	if err = filterAndSortPools(ctx, prfl, s.fltrs, evNm); err != nil {
 		allocs.Unlock()
 		return nil, err
 	}
@@ -310,32 +310,43 @@ func (s *IPService) allocateFromPools(allocs *utils.IPAllocations, allocID strin
 	return nil, err
 }
 
-// sortPools orders pools by weight (highest first) and truncates at first blocking pool.
-func sortPools(ctx *context.Context, prfl *utils.IPProfile, fltrs *engine.FilterS,
+// filterAndSortPools filters pools by their FilterIDs, sorts by weight (highest first),
+// and truncates at the first blocking pool.
+func filterAndSortPools(ctx *context.Context, prfl *utils.IPProfile, fltrs *engine.FilterS,
 	ev utils.DataProvider) error {
+	var filteredPools []*utils.IPPool
 	weights := make(map[string]float64) // stores sorting weights by pool ID
 	for _, pool := range prfl.Pools {
+		pass, err := fltrs.Pass(ctx, prfl.Tenant, pool.FilterIDs, ev)
+		if err != nil {
+			return err
+		}
+		if !pass {
+			continue
+		}
 		weight, err := engine.WeightFromDynamics(ctx, pool.Weights, fltrs, prfl.Tenant, ev)
 		if err != nil {
 			return err
 		}
 		weights[pool.ID] = weight
+		filteredPools = append(filteredPools, pool)
 	}
 
 	// Sort by weight (higher values first).
-	slices.SortFunc(prfl.Pools, func(a, b *utils.IPPool) int {
+	slices.SortFunc(filteredPools, func(a, b *utils.IPPool) int {
 		return cmp.Compare(weights[b.ID], weights[a.ID])
 	})
 
-	for i, pool := range prfl.Pools {
+	for i, pool := range filteredPools {
 		block, err := engine.BlockerFromDynamics(ctx, pool.Blockers, fltrs, prfl.Tenant, ev)
 		if err != nil {
 			return err
 		}
 		if block {
-			prfl.Pools = prfl.Pools[0 : i+1]
+			filteredPools = filteredPools[0 : i+1]
 			break
 		}
 	}
+	prfl.Pools = filteredPools
 	return nil
 }
