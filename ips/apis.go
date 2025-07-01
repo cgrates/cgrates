@@ -90,9 +90,9 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 	}
 
 	var allocID string
-	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.AllocationID,
-		utils.OptsIPsAllocationID); err != nil {
-		return
+	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs,
+		s.cfg.IPsCfg().Opts.AllocationID, utils.OptsIPsAllocationID); err != nil {
+		return err
 	}
 	if allocID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
@@ -128,8 +128,14 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 	}
 	defer allocs.Unlock()
 
+	var poolIDs []string
+	if poolIDs, err = filterAndSortPools(ctx, tnt, allocs.Config().Pools, s.fltrs,
+		args.AsDataProvider()); err != nil {
+		return err
+	}
+
 	var allocIP *utils.AllocatedIP
-	if allocIP, err = s.allocateFromPools(allocs, allocID, true); err != nil {
+	if allocIP, err = s.allocateFromPools(allocs, allocID, poolIDs, true); err != nil {
 		if errors.Is(err, utils.ErrIPAlreadyAllocated) {
 			return utils.ErrIPUnauthorized
 		}
@@ -137,7 +143,7 @@ func (s *IPService) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, re
 	}
 
 	*reply = *allocIP
-	return
+	return nil
 }
 
 // V1AllocateIP allocates an IP address for the given event.
@@ -152,7 +158,7 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 	var allocID string
 	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.AllocationID,
 		utils.OptsIPsAllocationID); err != nil {
-		return
+		return err
 	}
 	if allocID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
@@ -188,14 +194,20 @@ func (s *IPService) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, rep
 	}
 	defer allocs.Unlock()
 
+	var poolIDs []string
+	if poolIDs, err = filterAndSortPools(ctx, tnt, allocs.Config().Pools, s.fltrs,
+		args.AsDataProvider()); err != nil {
+		return err
+	}
+
 	var allocIP *utils.AllocatedIP
-	if allocIP, err = s.allocateFromPools(allocs, allocID, false); err != nil {
+	if allocIP, err = s.allocateFromPools(allocs, allocID, poolIDs, false); err != nil {
 		return err
 	}
 
 	// index it for storing
 	if err = s.storeMatchedIPAllocations(ctx, allocs); err != nil {
-		return
+		return err
 	}
 	*reply = *allocIP
 	return nil
@@ -213,7 +225,7 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 	var allocID string
 	if allocID, err = engine.GetStringOpts(ctx, args.Tenant, args.AsDataProvider(), nil, s.fltrs, s.cfg.IPsCfg().Opts.AllocationID,
 		utils.OptsIPsAllocationID); err != nil {
-		return
+		return err
 	}
 	if allocID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AllocationID)
@@ -245,7 +257,7 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 
 	var allocs *utils.IPAllocations
 	if allocs, err = s.matchingIPAllocationsForEvent(ctx, tnt, args, allocID); err != nil {
-		return
+		return err
 	}
 	defer allocs.Unlock()
 
@@ -256,11 +268,11 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 
 	// Handle storing
 	if err = s.storeMatchedIPAllocations(ctx, allocs); err != nil {
-		return
+		return err
 	}
 
 	*reply = utils.OK
-	return
+	return nil
 }
 
 // V1GetIPAllocations returns a resource configuration

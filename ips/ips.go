@@ -267,18 +267,10 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 		return nil, err
 	}
 	allocs.Lock(lkID)
-
-	// Clone profile to avoid modifying cached version during pool sorting.
-	prfl := matchedPrfl.Clone()
-	if err = filterAndSortPools(ctx, prfl, s.fltrs, evNm); err != nil {
+	if err = allocs.ComputeUnexported(matchedPrfl); err != nil {
 		allocs.Unlock()
 		return nil, err
 	}
-	if err = allocs.ComputeUnexported(prfl); err != nil {
-		allocs.Unlock()
-		return nil, err
-	}
-
 	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID,
 
 		// TODO: check if we still should rely on caching previously matched
@@ -296,9 +288,13 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 // Continues to next pool only if current pool returns ErrIPAlreadyAllocated.
 // Returns first successful allocation or the last allocation error.
 func (s *IPService) allocateFromPools(allocs *utils.IPAllocations, allocID string,
-	dryRun bool) (*utils.AllocatedIP, error) {
+	poolIDs []string, dryRun bool) (*utils.AllocatedIP, error) {
 	var err error
-	for _, pool := range allocs.Config().Pools {
+	for _, poolID := range poolIDs {
+		pool := findPoolByID(allocs.Config().Pools, poolID)
+		if pool == nil {
+			return nil, fmt.Errorf("pool %q: %w", poolID, utils.ErrNotFound)
+		}
 		var result *utils.AllocatedIP
 		if result, err = allocs.AllocateIPOnPool(allocID, pool, dryRun); err == nil {
 			return result, nil
@@ -310,23 +306,34 @@ func (s *IPService) allocateFromPools(allocs *utils.IPAllocations, allocID strin
 	return nil, err
 }
 
-// filterAndSortPools filters pools by their FilterIDs, sorts by weight (highest first),
-// and truncates at the first blocking pool.
-func filterAndSortPools(ctx *context.Context, prfl *utils.IPProfile, fltrs *engine.FilterS,
-	ev utils.DataProvider) error {
+func findPoolByID(pools []*utils.IPPool, id string) *utils.IPPool {
+	for _, pool := range pools {
+		if pool.ID == id {
+			return pool
+		}
+	}
+	return nil
+}
+
+// filterAndSortPools filters pools by their FilterIDs, sorts by weight
+// (highest first), and truncates at the first blocking pool.
+// TODO: check whether pre-allocating filteredPools & poolIDs improves
+// performance or wastes memory when filtering is aggressive.
+func filterAndSortPools(ctx *context.Context, tenant string, pools []*utils.IPPool,
+	fltrs *engine.FilterS, ev utils.DataProvider) ([]string, error) {
 	var filteredPools []*utils.IPPool
 	weights := make(map[string]float64) // stores sorting weights by pool ID
-	for _, pool := range prfl.Pools {
-		pass, err := fltrs.Pass(ctx, prfl.Tenant, pool.FilterIDs, ev)
+	for _, pool := range pools {
+		pass, err := fltrs.Pass(ctx, tenant, pool.FilterIDs, ev)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if !pass {
 			continue
 		}
-		weight, err := engine.WeightFromDynamics(ctx, pool.Weights, fltrs, prfl.Tenant, ev)
+		weight, err := engine.WeightFromDynamics(ctx, pool.Weights, fltrs, tenant, ev)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		weights[pool.ID] = weight
 		filteredPools = append(filteredPools, pool)
@@ -337,16 +344,16 @@ func filterAndSortPools(ctx *context.Context, prfl *utils.IPProfile, fltrs *engi
 		return cmp.Compare(weights[b.ID], weights[a.ID])
 	})
 
-	for i, pool := range filteredPools {
-		block, err := engine.BlockerFromDynamics(ctx, pool.Blockers, fltrs, prfl.Tenant, ev)
+	var poolIDs []string
+	for _, pool := range filteredPools {
+		block, err := engine.BlockerFromDynamics(ctx, pool.Blockers, fltrs, tenant, ev)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		poolIDs = append(poolIDs, pool.ID)
 		if block {
-			filteredPools = filteredPools[0 : i+1]
 			break
 		}
 	}
-	prfl.Pools = filteredPools
-	return nil
+	return poolIDs, nil
 }
