@@ -83,7 +83,7 @@ func TestDNSitSimple(t *testing.T) {
 	case utils.MetaMongo:
 		dnsCfgDIR = "dnsagent_mongo"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		dnsCfgDIR = "dnsagent_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

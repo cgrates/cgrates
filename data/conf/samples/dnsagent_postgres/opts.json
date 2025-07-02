@@ -1,0 +1,117 @@
+{
+    "dns_agent": {
+        "request_processors": [
+            {
+                "id": "OptsNAPTR",
+                "filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:5986517174965", "*string:~*req.Option[0].Uri:sip:cgrates@cgrates.org"],
+                "flags": ["*dryRun","*log"],
+                "request_fields":[
+                    {"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"}
+                ],
+                "reply_fields":[
+                    {"tag": "NAPTROrder", "path": "*rep.Answer.Order", "type": "*constant", "value": "100"},
+                    {"tag": "NAPTRPreference", "path": "*rep.Answer.Preference", "type": "*constant", "value": "10"},
+                    {"tag": "NAPTRFlags", "path": "*rep.Answer.Flags", "type": "*constant", "value": "U"},
+                    {"tag": "NAPTRService", "path": "*rep.Answer.Service", "type": "*constant", "value": "E2U+SIP"},
+                    {"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
+                    {"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement", "type": "*constant", "value": "."},
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*constant", "value": "sip:cgrates@cgrates.co"},
+                    {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "new_branch":true},
+                    {"tag": "Opts3", "path": "*rep.Option[0].Uri", "type": "*constant", "value": "sip:cgrates@cgrates.com"}
+                ]
+            },
+            {
+                "id": "OptsWithAttributes",
+                "filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:5986517174967"],
+                "flags": ["*event","*attributes"],
+                "request_fields":[
+                    {"tag": "Origin", "path": "*cgreq.Origin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
+                    {"tag": "Domanin", "path": "*cgreq.Domanin", "type": "*variable", "value": "~*vars.QueryName{*e164Domain}"},
+                    {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
+                ],
+                "reply_fields":[
+                    {"tag": "NAPTROrder", "path": "*rep.Answer.Order", "type": "*constant", "value": "100"},
+                    {"tag": "NAPTRPreference", "path": "*rep.Answer.Preference", "type": "*constant", "value": "10"},
+                    {"tag": "NAPTRFlags", "path": "*rep.Answer.Flags", "type": "*constant", "value": "U"},
+                    {"tag": "NAPTRService", "path": "*rep.Answer.Service", "type": "*constant", "value": "E2U+SIP"},
+                    {"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
+                    {"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement", "type": "*constant", "value": "."},
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes[*raw].SipURI", "mandatory": true}
+                ]
+            },
+            {
+				"id": "OptsA",
+				"filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:example.com.", "*string:~*req.Option[0].Uri:sip:cgrates@cgrates.org"],
+				"flags": ["*dryRun","*log"],
+				"request_fields":[
+					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"}
+				],
+				"reply_fields":[
+				{"tag": "Aname", "path": "*rep.Answer.Hdr.Name", "type": "*constant", "value": "example.com."},
+				{"tag": "Attl", "path": "*rep.Answer.Hdr.Ttl", "type": "*constant", "value": "300"},
+				{"tag": "Aclass", "path": "*rep.Answer.Hdr.Class", "type": "*constant", "value": "1"},
+				{"tag": "Arrtype", "path": "*rep.Answer.Hdr.Rrtype", "type": "*constant", "value": "1"},
+				{"tag": "Aip", "path": "*rep.Answer.A", "type": "*constant", "value": "93.184.216.34"},
+                {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*constant", "value": "sip:cgrates@cgrates.co"},
+                {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "new_branch":true},
+                {"tag": "Opts3", "path": "*rep.Option[0].Uri", "type": "*constant", "value": "sip:cgrates@cgrates.com"}
+				]
+			},
+            {
+                "id": "AOptsWithAttributes",
+                "filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:opendns.com."],
+                "flags": ["*event","*attributes"],
+                "request_fields":[
+                    {"tag": "Origin", "path": "*cgreq.AOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
+                    {"tag": "Domain", "path": "*cgreq.ASIPDomain", "type": "*variable", "value": "~*vars.QueryName"},
+                    {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
+                ],
+                "reply_fields":[
+                    {"tag": "Aname", "path": "*rep.Answer.Hdr.Name", "type": "*constant", "value": "example.com."},
+                    {"tag": "Attl", "path": "*rep.Answer.Hdr.Ttl", "type": "*constant", "value": "300"},
+                    {"tag": "Aclass", "path": "*rep.Answer.Hdr.Class", "type": "*constant", "value": "1"},
+                    {"tag": "Arrtype", "path": "*rep.Answer.Hdr.Rrtype", "type": "*constant", "value": "1"},
+                    {"tag": "Aip", "path": "*rep.Answer.A", "type": "*constant", "value": "146.112.62.105"},
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes[*raw].SipURI", "mandatory": true}
+                ]
+            },
+            {
+                "id": "OptsSRV",
+                "filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_matrix._tcp.matrix.org.", "*string:~*req.Option[0].Uri:sip:cgrates@cgrates.org"],
+                "flags": ["*dryRun","*log"],
+                "request_fields":[
+                    {"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*sms"}
+                ],
+                "reply_fields":[
+                    {"tag": "SRVHdr", "path": "*rep.Answer.Hdr.Name", "type": "*constant", "value": "_xmpp-client._tcp.xmpp.org."},
+                    {"tag": "SRVPriority", "path": "*rep.Answer.Priority", "type": "*constant", "value": "10"},
+                    {"tag": "SRVWeight", "path": "*rep.Answer.Weight", "type": "*constant", "value": "5"},
+                    {"tag": "SRVPort", "path": "*rep.Answer.Port", "type": "*constant", "value": "8443"},
+                    {"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*constant", "value": "matrix-federation.matrix.org.cdn.cloudflare.net."},
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*constant", "value": "sip:cgrates@cgrates.co"},
+                    {"tag": "Opts2", "path": "*rep.Option.Uri", "type": "*group", "value": "sip:cgrates@cgrates.net", "new_branch":true},
+                    {"tag": "Opts3", "path": "*rep.Option[0].Uri", "type": "*constant", "value": "sip:cgrates@cgrates.com"}
+                ]
+            },
+            {
+                "id": "SRVOptsWithAttributes",
+                "filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_sip._udp.opensips.org."],
+                "flags": ["*event","*attributes"],
+                "request_fields":[
+                    {"tag": "Origin", "path": "*cgreq.SRVOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
+                    {"tag": "Domain", "path": "*cgreq.SRVDomain", "type": "*variable", "value": "~*vars.QueryName"},
+                    {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
+                ],
+                "reply_fields":[
+                    {"tag": "SRVHdr", "path": "*rep.Answer.Hdr.Name", "type": "*constant", "value": "_sip._udp.opensips.org."},
+                    {"tag": "SRVPriority", "path": "*rep.Answer.Priority", "type": "*constant", "value": "0"},
+                    {"tag": "SRVWeight", "path": "*rep.Answer.Weight", "type": "*constant", "value": "50"},
+                    {"tag": "SRVPort", "path": "*rep.Answer.Port", "type": "*constant", "value": "5060"},
+                    {"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*constant", "value": "opensips.org."},
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes[*raw].SipURI", "mandatory": true}
+                ]
+            }
+        ]
+    }
+    
+}

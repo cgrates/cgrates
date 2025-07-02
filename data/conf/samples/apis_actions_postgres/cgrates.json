@@ -1,0 +1,46 @@
+{
+
+"logger": {
+    "level": 7
+},
+
+"data_db": {								
+    "db_type": "redis",						
+    "db_port": 6379, 						
+    "db_name": "10"					
+},
+
+"stor_db": {
+	"db_type": "postgres",					
+	"db_port": 5432, 						
+	"db_password": "CGRateS.org"
+},
+
+"actions": {
+    "enabled": true,
+    "thresholds_conns": ["*internal"],
+    "stats_conns": ["*internal"],
+    "accounts_conns": ["*internal"]
+},
+
+"accounts": {
+    "enabled": true
+},
+
+"stats": {
+    "enabled": true,
+    "store_interval": "-1",
+    "thresholds_conns": ["*internal"]
+},
+
+"thresholds": {	
+    "enabled": true,
+    "store_interval": "-1",
+    "actions_conns": ["*internal"]
+},
+
+"admins": {
+    "enabled": true
+}
+
+}

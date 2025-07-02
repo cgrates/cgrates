@@ -1,0 +1,122 @@
+{
+
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+
+"logger": {
+    "level": 7
+},
+
+"stor_db": {
+	"db_type": "postgres",					
+	"db_port": 5432, 						
+	"db_password": "CGRateS.org"
+},
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": ["*localhost"],
+	"rates_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+	"routes_conns": ["*localhost"],
+	"opts": {
+		"*attributes": [					
+			{
+				"Tenant": "*any",
+				"FilterIDs": [],
+				"Value": "true",
+			},
+		],
+		"*routes": [						
+			{
+				"Tenant": "*any",
+				"FilterIDs": ["*string:~*req.Account:1001"],
+				"Value": "true",
+			},
+			{
+				"Tenant": "*any",
+				"FilterIDs": ["*string:~*req.Account:1002"],
+				"Value": "true",
+			},
+			{
+				"Tenant": "*any",
+				"FilterIDs": ["*string:~*req.Account:1003"],
+				"Value": "true",
+			},
+		],
+	}
+},
+
+
+"rates": {
+	"enabled": true,
+},
+
+"loaders": [
+	{
+		"enabled":true,
+		"id": "*default",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/dnsagent",
+		"tp_out_dir": "",
+		"lockfile_path": ".cgr.lck",
+	},
+],
+
+"cdrs": {
+	"enabled": true,
+	"rates_conns": ["*internal"],
+},
+
+
+"chargers": {
+	"enabled": true,
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"routes": {
+	"enabled": true,
+},
+
+"tls": {
+	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			// path to server certificate(must conatin server.crt + ca.crt)
+	"server_key":"/usr/share/cgrates/tls/server.key",					// path to server key
+	"client_certificate" : "/usr/share/cgrates/tls/client.crt",			// path to client certificate(must conatin client.crt + ca.crt)
+	"client_key":"/usr/share/cgrates/tls/client.key",					// path to client key
+	"ca_certificate":"/usr/share/cgrates/tls/ca.crt",
+},
+
+"dns_agent": {
+	"enabled": true,
+	"listeners":[
+		{
+			"address":":2053",
+			"network":"udp"
+		},
+		{
+			"address":":2053",
+			"network":"tcp"
+		},
+		{
+			"address":":2054",
+			"network":"tcp-tls"
+		}
+	],
+	"sessions_conns": ["*localhost"],
+},
+
+
+"admins": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"],
+},
+}

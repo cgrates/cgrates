@@ -74,7 +74,7 @@ func TestCacheSv1IT(t *testing.T) {
 	case utils.MetaMongo:
 		cacheConfigDIR = "tutmongo"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		cacheConfigDIR = "tutpostgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

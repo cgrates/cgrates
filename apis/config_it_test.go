@@ -76,13 +76,13 @@ var (
 func TestCfgSIT(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		t.SkipNow()
+		cfgDIR = "apis_config_internal"
 	case utils.MetaMongo:
 		cfgDIR = "apis_config_mongo"
 	case utils.MetaMySQL:
 		cfgDIR = "apis_config_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		cfgDIR = "apis_config_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}
