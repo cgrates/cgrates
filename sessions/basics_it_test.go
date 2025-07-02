@@ -36,10 +36,9 @@ func TestSessionBasics(t *testing.T) {
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 	case utils.MetaMongo:
-		t.SkipNow() // unfinished look into errors
+		t.SkipNow() // unfinished look into errors with decimals in CDRs
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
-		t.SkipNow() // unfinished look into postgres flush
 		dbcfg = engine.PostgresDBCfg
 	default:
 		t.Fatal("unsupported dbtype value")

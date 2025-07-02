@@ -1,0 +1,72 @@
+{
+	"dns_agent": {
+		"request_processors": [
+			{
+				"id": "NAPTRAttributes",
+				"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174964"],
+				"flags": ["*authorize", "*attributes","*log"],
+				"request_fields":[
+					{"tag": "E164Address", "path": "*cgreq.E164Address", 
+						"type": "*constant", "value": "4986517174964"},
+					{"tag": "NAPTRAddress", "path": "*cgreq.NAPTRAddress", 
+						"type": "*constant", "value": "*attributes"}
+				],
+				"reply_fields":[
+					{"tag": "NAPTROrder", "path": "*rep.Answer.Order", 
+						"type": "*constant", "value": "100"},
+					{"tag": "NAPTRPreference", "path": "*rep.Answer.Preference", 
+						"type": "*constant", "value": "10"},
+					{"tag": "NAPTRFlags", "path": "*rep.Answer.Flags", 
+						"type": "*constant", "value": "U"},
+					{"tag": "NAPTRService", "path": "*rep.Answer.Service", 
+						"type": "*constant", "value": "E2U+SIP"},
+					{"tag": "NAPTRRegex", "path": "*rep.Answer.Regexp", 
+						"type": "*variable", "value": "~*cgrep.Attributes.NAPTRAddress"}
+				]
+			},
+			{
+				"id": "AAttributes",
+				"filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:dns.google."],
+				"flags": ["*authorize","*attributes","*log"],
+				"request_fields":[
+					{"tag": "Domain", "path": "*cgreq.Domain", 
+						"type": "*constant", "value": "dns.google."},
+					{"tag": "ADomain0", "path": "*cgreq.Aip0", 
+						"type": "*constant", "value": "*attributes"},
+						{"tag": "ADomain1", "path": "*cgreq.Aip1", 
+						"type": "*constant", "value": "*attributes"}
+				],
+				"reply_fields":[
+					{"tag": "Aname", "path": "*rep.Answer.Hdr.Name", "type": "*constant", "value": "dns.google."},
+					{"tag": "Attl", "path": "*rep.Answer.Hdr.Ttl", "type": "*constant", "value": "300"},
+					{"tag": "Aclass", "path": "*rep.Answer.Hdr.Class", "type": "*constant", "value": "1"},
+					{"tag": "Arrtype", "path": "*rep.Answer.Hdr.Rrtype", "type": "*constant", "value": "1"},
+					{"tag": "Aip0", "path": "*rep.Answer.A", "type": "*variable", "value": "~*cgrep.Attributes.Aip0"},
+					{"tag": "Aname1", "path": "*rep.Answer[1].Hdr.Name", "type": "*constant", "value": "dns.google."},
+					{"tag": "Attl1", "path": "*rep.Answer[1].Hdr.Ttl", "type": "*constant", "value": "300"},
+					{"tag": "Aclass1", "path": "*rep.Answer[1].Hdr.Class", "type": "*constant", "value": "1"},
+					{"tag": "Arrtype1", "path": "*rep.Answer[1].Hdr.Rrtype", "type": "*constant", "value": "1"},
+					{"tag": "Aip1", "path": "*rep.Answer[1].A", "type": "*variable", "value": "~*cgrep.Attributes.Aip1"}
+				]
+			},
+			{
+				"id": "SRVAttributes",
+				"filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_ldap._tcp.google.com."],
+				"flags": ["*authorize", "*attributes","*log"],
+				"request_fields":[
+					{"tag": "SRVAddress", "path": "*cgreq.SRVAddress", 
+						"type": "*constant", "value": "_ldap._tcp.google.com."},
+					{"tag": "SRVName", "path": "*cgreq.SRVName", 
+						"type": "*constant", "value": "*attributes"}
+				],
+				"reply_fields":[
+					{"tag": "SRVHdr", "path": "*rep.Answer.Hdr.Name", "type": "*constant", "value": "_ldap._tcp.google.com."},
+					{"tag": "SRVPriority", "path": "*rep.Answer.Priority", "type": "*constant", "value": "5"},
+					{"tag": "SRVWeight", "path": "*rep.Answer.Weight", "type": "*constant", "value": "0"},
+					{"tag": "SRVPort", "path": "*rep.Answer.Port", "type": "*constant", "value": "389"},
+					{"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*variable", "value": "~*cgrep.Attributes.SRVName"}
+				]
+			}
+		]
+	}
+	}

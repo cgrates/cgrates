@@ -156,7 +156,7 @@ CREATE TABLE tp_routes (
   "id" varchar(64) NOT NULL,
   "filter_ids" varchar(64) NOT NULL,
   "weights" varchar(64) NOT NULL,
-  `blockers` varchar(64) NOT NULL,
+  "blockers" varchar(64) NOT NULL,
   "sorting" varchar(32) NOT NULL,
   "sorting_parameters" varchar(64) NOT NULL,
   "route_id" varchar(32) NOT NULL,

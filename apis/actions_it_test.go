@@ -107,7 +107,7 @@ func TestActionsIT(t *testing.T) {
 	case utils.MetaMySQL:
 		actConfigDIR = "apis_actions_mysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		actConfigDIR = "apis_actions_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

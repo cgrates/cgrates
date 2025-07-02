@@ -88,7 +88,7 @@ func TestAccSIT(t *testing.T) {
 	case utils.MetaMySQL:
 		accPrfConfigDIR = "tutmysql"
 	case utils.MetaPostgres:
-		t.SkipNow()
+		accPrfConfigDIR = "tutpostgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}

@@ -1,0 +1,139 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+  "reply_timeout": "50s",
+  "caching_delay": "1s",
+},
+
+"logger": {
+	"level": 7
+},
+
+"listen": {
+  "rpc_json": ":2012",
+  "rpc_gob": ":2013",
+  "http": ":2080",
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "*internal",					
+},
+
+"stor_db": {
+	"db_type": "*internal",					
+},
+
+"cdrs": {
+  "enabled": true,
+  "chargers_conns":["*internal"],
+},
+
+
+"attributes": {
+  "enabled": true,
+  "stats_conns": ["*localhost"],
+  "resources_conns": ["*localhost"],
+  "accounts_conns": ["*localhost"]
+},
+
+
+"chargers": {
+  "enabled": true,
+  "attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+  "enabled": true,
+  "store_interval": "1s",
+  "thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+  "enabled": true,
+  "store_interval": "1s",
+  "thresholds_conns": ["*internal"],
+},
+
+
+"thresholds": {
+  "enabled": true,
+  "store_interval": "1s",
+},
+
+
+"routes": {
+  "enabled": true,
+  "prefix_indexed_fields":["*req.Destination"],
+  "stats_conns": ["*internal"],
+  "resources_conns": ["*internal"],
+  "rates_conns": ["*internal"],
+},
+
+
+"sessions": {
+  "enabled": true,
+  "routes_conns": ["*internal"],
+  "resources_conns": ["*internal"],
+  "attributes_conns": ["*internal"],
+  "rates_conns": ["*internal"],
+  "cdrs_conns": ["*internal"],
+  "chargers_conns": ["*internal"],
+},
+
+
+"migrator":{
+
+  "users_filters":["Account"],
+},
+
+
+"admins": {
+  "enabled": true,
+},
+
+
+"rates": {
+  "enabled": false
+},
+
+
+"actions": {
+  "enabled": true,
+  "accounts_conns": ["*localhost"]
+},
+
+
+"accounts": {
+  "enabled": true
+},
+
+
+"filters": {
+  "stats_conns": ["*internal"],
+  "resources_conns": ["*internal"],
+  "accounts_conns": ["*internal"],
+},
+
+"config_db": {
+  "db_type": "redis",
+  "db_port": 6379,
+  "db_name": "12"
+},
+
+"loaders": [
+	{
+		"id": "*default",
+		"enabled": true,
+		"tenant": "cgrates.org",
+		"lockfile_path": ".cgr.lck",
+		"tp_in_dir": "/usr/share/cgrates/tariffplans/testit",
+		"tp_out_dir": ""
+	}
+]
+
+}
