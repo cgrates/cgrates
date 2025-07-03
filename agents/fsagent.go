@@ -104,40 +104,44 @@ func (fsa *FSsessions) createHandlers() map[string][]func(string, int) {
 
 // Sets the call timeout valid of starting of the call
 func (fsa *FSsessions) setMaxCallDuration(uuid string, connIdx int,
-	maxDur time.Duration, destNr string) error {
+	maxDur time.Duration, destNr string) (err error) {
+	// set variable cgr_max_usage to the fs channel
+	if _, err = fsa.conns[connIdx].SendApiCmd(
+		fmt.Sprintf("uuid_setvar %s %s %d \n\n",
+			uuid, VarCGRMaxUsage, int(maxDur.Seconds()))); err != nil {
+		utils.Logger.Err(
+			fmt.Sprintf("<%s> Could not set %s variable to freeswitch channel, error: <%s>, connIdx: %v",
+				utils.FreeSWITCHAgent, VarCGRMaxUsage, err.Error(), connIdx))
+		return
+	}
 	if len(fsa.cfg.EmptyBalanceContext) != 0 {
-		_, err := fsa.conns[connIdx].SendApiCmd(
+		if _, err = fsa.conns[connIdx].SendApiCmd(
 			fmt.Sprintf("uuid_setvar %s execute_on_answer sched_transfer +%d %s XML %s\n\n",
-				uuid, int(maxDur.Seconds()), destNr, fsa.cfg.EmptyBalanceContext))
-		if err != nil {
+				uuid, int(maxDur.Seconds()), destNr, fsa.cfg.EmptyBalanceContext)); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not transfer the call to empty balance context, error: <%s>, connIdx: %v",
 					utils.FreeSWITCHAgent, err.Error(), connIdx))
-			return err
 		}
-		return nil
+		return
 	}
 	if len(fsa.cfg.EmptyBalanceAnnFile) != 0 {
-		if _, err := fsa.conns[connIdx].SendApiCmd(
+		if _, err = fsa.conns[connIdx].SendApiCmd(
 			fmt.Sprintf("sched_broadcast +%d %s playback!manager_request::%s aleg\n\n",
 				int(maxDur.Seconds()), uuid, fsa.cfg.EmptyBalanceAnnFile)); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not send uuid_broadcast to freeswitch, error: <%s>, connIdx: %v",
 					utils.FreeSWITCHAgent, err.Error(), connIdx))
-			return err
 		}
-		return nil
+		return
 	}
-	_, err := fsa.conns[connIdx].SendApiCmd(
+	if _, err = fsa.conns[connIdx].SendApiCmd(
 		fmt.Sprintf("uuid_setvar %s execute_on_answer sched_hangup +%d alloted_timeout\n\n",
-			uuid, int(maxDur.Seconds())))
-	if err != nil {
+			uuid, int(maxDur.Seconds()))); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not send sched_hangup command to freeswitch, error: <%s>, connIdx: %v",
 				utils.FreeSWITCHAgent, err.Error(), connIdx))
-		return err
 	}
-	return nil
+	return
 }
 
 // Sends the transfer command to unpark the call to freeswitch
