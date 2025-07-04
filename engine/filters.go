@@ -393,17 +393,17 @@ func (fltr *FilterRule) Pass(dDP utils.DataProvider) (result bool, err error) {
 	}
 
 	switch fltr.Type {
-	case utils.MetaString, utils.MetaNotString:
+	case utils.MetaString, utils.MetaNotString, utils.MetaNIString:
 		result, err = fltr.passString(dDP)
 	case utils.MetaContains, utils.MetaNotContains:
 		result, err = fltr.passContains(dDP)
 	case utils.MetaEmpty, utils.MetaNotEmpty:
 		result, err = fltr.passEmpty(dDP)
-	case utils.MetaExists, utils.MetaNotExists:
+	case utils.MetaExists, utils.MetaNotExists, utils.MetaNIExists:
 		result, err = fltr.passExists(dDP)
-	case utils.MetaPrefix, utils.MetaNotPrefix:
+	case utils.MetaPrefix, utils.MetaNotPrefix, utils.MetaNIPrefix:
 		result, err = fltr.passStringPrefix(dDP)
-	case utils.MetaSuffix, utils.MetaNotSuffix:
+	case utils.MetaSuffix, utils.MetaNotSuffix, utils.MetaNISuffix:
 		result, err = fltr.passStringSuffix(dDP)
 	case utils.MetaTimings, utils.MetaNotTimings:
 		result, err = fltr.passTimings(dDP)
