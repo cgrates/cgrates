@@ -150,6 +150,31 @@ func decimalDecoder(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val refle
 	return nil
 }
 
+// when trying to decode into map[string]any, range over the map and convert the primitive.Binary underlying types, back to decimal
+func mapStringAnyDecoderWithDecimal(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
+	defaultDecoder, err := bson.NewRegistry().LookupDecoder(val.Type())
+	if err != nil {
+		return err
+	}
+	// decode map[string]any using default decoder
+	if err := defaultDecoder.DecodeValue(dc, vr, val); err != nil {
+		return err
+	}
+	// convert binary val values back to decimal
+	m := val.Interface().(map[string]any)
+	for k, v := range m {
+		if binary, ok := v.(primitive.Binary); ok {
+			// Convert binary to decimal
+			dBig := decimal.WithContext(utils.DecimalContext)
+			if err := dBig.UnmarshalText(binary.Data); err != nil {
+				return err
+			}
+			m[k] = &utils.Decimal{Big: dBig}
+		}
+	}
+	return nil
+}
+
 // NewMongoStorage initializes a new MongoDB storage instance with provided connection parameters and settings.
 // Returns an error if the setup fails.
 func NewMongoStorage(scheme, host, port, db, user, pass, mrshlerStr string, storageType string,
@@ -165,6 +190,7 @@ func NewMongoStorage(scheme, host, port, db, user, pass, mrshlerStr string, stor
 	decimalType := reflect.TypeOf(utils.Decimal{})
 	reg.RegisterTypeEncoder(decimalType, bsoncodec.ValueEncoderFunc(decimalEncoder))
 	reg.RegisterTypeDecoder(decimalType, bsoncodec.ValueDecoderFunc(decimalDecoder))
+	reg.RegisterTypeDecoder(reflect.TypeOf(map[string]any{}), bsoncodec.ValueDecoderFunc(mapStringAnyDecoderWithDecimal))
 	// serverAPI := options.ServerAPI(options.ServerAPIVersion1).SetStrict(true).SetDeprecationErrors(true)
 	opts := options.Client().
 		ApplyURI(uri).

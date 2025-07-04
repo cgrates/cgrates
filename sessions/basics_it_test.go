@@ -36,7 +36,6 @@ func TestSessionBasics(t *testing.T) {
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
 	case utils.MetaMongo:
-		t.SkipNow() // unfinished look into errors with decimals in CDRs
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
 		dbcfg = engine.PostgresDBCfg
@@ -229,6 +228,34 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 		}
 	}
 
+	checkCDRMongo := func(t *testing.T, cdr *utils.CDR, wantCosts map[string]float64) {
+		t.Helper()
+		var got float64
+		for costKey, want := range wantCosts {
+			switch costKey {
+			case "abstracts", "concretes":
+				cd := getCostDetails(t, cdr, utils.MetaAccountSCost)
+				if cd == nil {
+					t.Fatalf("Nil costDetails")
+				}
+				got = cd[costKey].(float64)
+			case "cost":
+				cd := getCostDetails(t, cdr, utils.MetaRateSCost)
+				if cd == nil {
+					t.Fatalf("Nil costDetails")
+				}
+				got = cd[costKey].(float64)
+			case utils.MetaCost:
+				got = cdr.Opts[utils.MetaCost].(float64)
+			default:
+				t.Fatalf("invalid cdr cost key: %q", costKey)
+			}
+			if got != want {
+				t.Errorf("cdr %s = %g, want %g", costKey, got, want)
+			}
+		}
+	}
+
 	// session helpers
 	authEvent := func(t *testing.T, wantUsage, wantErr string) {
 		t.Helper()
@@ -334,12 +361,22 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 
 		// accounting via CostIncrements
 		cdr := processCDR(t, "1001", "1002", "1m30s", utils.MetaAccounts)
-		checkCDR(t, cdr,
-			map[string]float64{
-				utils.Abstracts: 90000000000.0,
-				utils.Concretes: 0.9,
-				utils.MetaCost:  0.9,
-			})
+		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+			checkCDRMongo(t, cdr,
+				map[string]float64{
+					"abstracts":    90000000000.0,
+					"concretes":    0.9,
+					utils.MetaCost: 0.9,
+				})
+		} else {
+			checkCDR(t, cdr,
+				map[string]float64{
+					utils.Abstracts: 90000000000.0,
+					utils.Concretes: 0.9,
+					utils.MetaCost:  0.9,
+				})
+		}
+
 		checkAccountBalances(t, "1001", map[string]float64{
 			"CONCRETE1": 9.1,
 		})
@@ -355,12 +392,21 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			},
 		})
 		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaAccounts)
-		checkCDR(t, cdr,
-			map[string]float64{
-				utils.Abstracts: float64(150 * time.Second),
-				utils.Concretes: 2.9,
-				utils.MetaCost:  2.9,
-			})
+		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+			checkCDRMongo(t, cdr,
+				map[string]float64{
+					"abstracts":    float64(150 * time.Second),
+					"concretes":    2.9,
+					utils.MetaCost: 2.9,
+				})
+		} else {
+			checkCDR(t, cdr,
+				map[string]float64{
+					utils.Abstracts: float64(150 * time.Second),
+					utils.Concretes: 2.9,
+					utils.MetaCost:  2.9,
+				})
+		}
 		checkAccountBalances(t, "1001", map[string]float64{
 			"CONCRETE1": 7.1,
 		})
@@ -376,11 +422,19 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			},
 		})
 		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaRates)
-		checkCDR(t, cdr,
-			map[string]float64{
-				utils.Cost:     2.9,
-				utils.MetaCost: 2.9,
-			})
+		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+			checkCDRMongo(t, cdr,
+				map[string]float64{
+					"cost":         2.9,
+					utils.MetaCost: 2.9,
+				})
+		} else {
+			checkCDR(t, cdr,
+				map[string]float64{
+					utils.Cost:     2.9,
+					utils.MetaCost: 2.9,
+				})
+		}
 	})
 
 	t.Run("rates accounting with fallback", func(t *testing.T) {
@@ -394,12 +448,21 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			},
 		})
 		cdr := processCDR(t, "1001", "1002", "3m15s", utils.MetaAccounts)
-		checkCDR(t, cdr,
-			map[string]float64{
-				utils.Abstracts: float64(150 * time.Second),
-				utils.Concretes: 2.9,
-				utils.MetaCost:  2.9,
-			})
+		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+			checkCDRMongo(t, cdr,
+				map[string]float64{
+					"abstracts":    float64(150 * time.Second),
+					"concretes":    2.9,
+					utils.MetaCost: 2.9,
+				})
+		} else {
+			checkCDR(t, cdr,
+				map[string]float64{
+					utils.Abstracts: float64(150 * time.Second),
+					utils.Concretes: 2.9,
+					utils.MetaCost:  2.9,
+				})
+		}
 		checkAccountBalances(t, "1001", map[string]float64{
 			"CONCRETE1": 7.1,
 		})
@@ -420,13 +483,23 @@ cgrates.org,RP_FALLBACK,,;0,,,,RT_FALLBACK,*string:~*req.Destination:1002,"* * *
 			},
 		})
 		cdr := processCDR(t, "1001", "1002", "2m30s", utils.MetaAccounts, utils.MetaRates)
-		checkCDR(t, cdr,
-			map[string]float64{
-				utils.Abstracts: float64(150 * time.Second),
-				utils.Concretes: 1.5,
-				utils.MetaCost:  1.5,
-				utils.Cost:      2.9,
-			})
+		if *utils.DBType == utils.MetaMongo { // field names are lowercase on mongo
+			checkCDRMongo(t, cdr,
+				map[string]float64{
+					"abstracts":    float64(150 * time.Second),
+					"concretes":    1.5,
+					utils.MetaCost: 1.5,
+					"cost":         2.9,
+				})
+		} else {
+			checkCDR(t, cdr,
+				map[string]float64{
+					utils.Abstracts: float64(150 * time.Second),
+					utils.Concretes: 1.5,
+					utils.MetaCost:  1.5,
+					utils.Cost:      2.9,
+				})
+		}
 		checkAccountBalances(t, "1001", map[string]float64{
 			"CONCRETE1": 8.5,
 		})
