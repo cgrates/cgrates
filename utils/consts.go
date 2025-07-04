@@ -1407,6 +1407,11 @@ const (
 	MetaNotContains           = "*notcontains"
 
 	MetaEC = "*ec"
+	// not indexed
+	MetaNIString = "*nistring"
+	MetaNIPrefix = "*niprefix"
+	MetaNIExists = "*niexists"
+	MetaNISuffix = "*nisuffix"
 )
 
 // ReplicatorSv1 APIs
