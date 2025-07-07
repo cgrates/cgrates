@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -43,37 +44,56 @@ const (
 	MSCHAP2SuccessAVP  = "MS-CHAP2-Success"
 )
 
-func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	connMgr *engine.ConnManager) (ra *RadiusAgent, err error) {
-	dts := make(map[string]*radigo.Dictionary, len(cgrCfg.RadiusAgentCfg().ClientDictionaries))
-	for clntID, dictPath := range cgrCfg.RadiusAgentCfg().ClientDictionaries {
-		utils.Logger.Info(
-			fmt.Sprintf("<%s> loading dictionary for clientID: <%s> out of path <%s>",
-				utils.RadiusAgent, clntID, dictPath))
-		if dts[clntID], err = radigo.NewDictionaryFromFoldersWithRFC2865(dictPath); err != nil {
-			return
+func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS,
+	cm *engine.ConnManager) (*RadiusAgent, error) {
+	ra := &RadiusAgent{
+		cfg:   cfg,
+		fltrs: fltrs,
+		cm:    cm,
+	}
+
+	raCfg := cfg.RadiusAgentCfg()
+	dts := make(map[string]*radigo.Dictionary, len(raCfg.ClientDictionaries))
+	for clntID, dictPath := range raCfg.ClientDictionaries {
+		utils.Logger.Info(fmt.Sprintf(
+			"<%s> loading dictionary for clientID %q out of path %q",
+			utils.RadiusAgent, clntID, dictPath))
+		dt, err := radigo.NewDictionaryFromFoldersWithRFC2865(dictPath)
+		if err != nil {
+			return nil, err
 		}
+		dts[clntID] = dt
 	}
 	dicts := radigo.NewDictionaries(dts)
-	ra = &RadiusAgent{cgrCfg: cgrCfg, filterS: filterS, connMgr: connMgr}
-	secrets := radigo.NewSecrets(cgrCfg.RadiusAgentCfg().ClientSecrets)
-	ra.rsAuth = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
-		cgrCfg.RadiusAgentCfg().ListenAuth, secrets, dicts,
-		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
-			radigo.AccessRequest: ra.handleAuth}, nil, utils.Logger)
-	ra.rsAcct = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
-		cgrCfg.RadiusAgentCfg().ListenAcct, secrets, dicts,
-		map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
-			radigo.AccountingRequest: ra.handleAcct}, nil, utils.Logger)
-	return
+	secrets := radigo.NewSecrets(raCfg.ClientSecrets)
+
+	ra.rsAuth = make(map[string]*radigo.Server, len(raCfg.Listeners))
+	ra.rsAcct = make(map[string]*radigo.Server, len(raCfg.Listeners))
+	for i := range raCfg.Listeners {
+		net := raCfg.Listeners[i].Network
+		authAddr := raCfg.Listeners[i].AuthAddr
+		ra.rsAuth[net+"://"+authAddr] = radigo.NewServer(net, authAddr, secrets, dicts,
+			map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
+				radigo.AccessRequest: ra.handleAuth,
+			}, nil, utils.Logger)
+		acctAddr := raCfg.Listeners[i].AcctAddr
+		ra.rsAcct[net+"://"+acctAddr] = radigo.NewServer(net, acctAddr, secrets, dicts,
+			map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
+				radigo.AccountingRequest: ra.handleAcct,
+			}, nil, utils.Logger)
+	}
+
+	return ra, nil
 }
 
 type RadiusAgent struct {
-	cgrCfg  *config.CGRConfig // reference for future config reloads
-	connMgr *engine.ConnManager
-	filterS *engine.FilterS
-	rsAuth  *radigo.Server
-	rsAcct  *radigo.Server
+	mu     sync.RWMutex
+	cfg    *config.CGRConfig // reference for future config reloads
+	cm     *engine.ConnManager
+	fltrs  *engine.FilterS
+	rsAuth map[string]*radigo.Server
+	rsAcct map[string]*radigo.Server
+	wg     sync.WaitGroup
 }
 
 // handleAuth handles RADIUS Authorization request
@@ -87,12 +107,12 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	opts := utils.MapStorage{}
 	var processed bool
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr().String())}}
-	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
+	for _, reqProcessor := range ra.cfg.RadiusAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
-			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
+			reqProcessor.Tenant, ra.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.filterS, nil)
+			ra.fltrs, nil)
 		agReq.Vars.Map[MetaRadReqType] = utils.NewLeafNode(MetaRadAuth)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
@@ -132,12 +152,12 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	opts := utils.MapStorage{}
 	var processed bool
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr().String())}}
-	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
+	for _, reqProcessor := range ra.cfg.RadiusAgentCfg().RequestProcessors {
 		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
-			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
+			reqProcessor.Tenant, ra.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.filterS, nil)
+			ra.fltrs, nil)
 		var lclProcessed bool
 		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
@@ -167,7 +187,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest, rpl *radigo.Packet) (processed bool, err error) {
 	startTime := time.Now()
-	if pass, err := ra.filterS.Pass(context.TODO(), agReq.Tenant,
+	if pass, err := ra.fltrs.Pass(context.TODO(), agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
@@ -202,30 +222,30 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 				utils.RadiusAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
-		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
+		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
-		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
+		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInitiate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
 		rply := new(sessions.V1UpdateSessionReply)
-		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
+		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesUpdate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		var rply string
-		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
+		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			cgrEv, &rply)
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
 		rply := new(sessions.V1ProcessMessageReply)
-		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessMessage, cgrEv, rply)
+		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessMessage, cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else
@@ -237,7 +257,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
-		err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
+		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -257,7 +277,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) {
 		var rplyCDRs string
-		if err = ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessCDR,
+		if err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 		}
@@ -303,7 +323,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 		var reply []string
-		if err := ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().StatSConns,
+		if err := ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().StatSConns,
 			utils.StatSv1ProcessEvent, ev, &reply); err != nil {
 			return false, fmt.Errorf("failed to process %s event in %s: %v",
 				utils.RadiusAgent, utils.StatS, err)
@@ -315,7 +335,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		thIDs := strings.Split(rawThIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 		var reply []string
-		if err := ra.connMgr.Call(context.TODO(), ra.cgrCfg.RadiusAgentCfg().ThresholdSConns,
+		if err := ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
 			return false, fmt.Errorf("failed to process %s event in %s: %v",
 				utils.RadiusAgent, utils.ThresholdS, err)
@@ -326,18 +346,38 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 
 func (ra *RadiusAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 	errListen := make(chan error, 2)
-	go func() {
-		utils.Logger.Info(fmt.Sprintf("<%s> Start listening for auth requests on <%s>", utils.RadiusAgent, ra.cgrCfg.RadiusAgentCfg().ListenAuth))
-		if err := ra.rsAuth.ListenAndServe(stopChan); err != nil {
-			errListen <- err
-		}
-	}()
-	go func() {
-		utils.Logger.Info(fmt.Sprintf("<%s> Start listening for acct req on <%s>", utils.RadiusAgent, ra.cgrCfg.RadiusAgentCfg().ListenAcct))
-		if err := ra.rsAcct.ListenAndServe(stopChan); err != nil {
-			errListen <- err
-		}
-	}()
+	for uri, server := range ra.rsAuth {
+		ra.wg.Add(1)
+		go func(srv *radigo.Server, uri string) {
+			defer ra.wg.Done()
+			utils.Logger.Info(fmt.Sprintf("<%s> Start listening for auth requests on <%s>", utils.RadiusAgent, uri))
+			if err := srv.ListenAndServe(stopChan); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s>",
+					utils.RadiusAgent, err, uri))
+				if strings.Contains(err.Error(), "address already in use") {
+					return
+				}
+				errListen <- err
+			}
+		}(server, uri)
+	}
+	for uri, server := range ra.rsAcct {
+		ra.wg.Add(1)
+		go func(srv *radigo.Server, uri string) {
+			defer ra.wg.Done()
+			utils.Logger.Info(fmt.Sprintf("<%s> Start listening for acct requests on <%s>", utils.RadiusAgent, uri))
+			if err := srv.ListenAndServe(stopChan); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> error <%v>, on ListenAndServe <%s>",
+					utils.RadiusAgent, err, uri))
+				if strings.Contains(err.Error(), "address already in use") {
+					return
+				}
+				errListen <- err
+			}
+		}(server, uri)
+	}
 	err = <-errListen
 	return
 }
+
+func (ra *RadiusAgent) Wait() { ra.wg.Wait() }

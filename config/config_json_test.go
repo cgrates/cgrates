@@ -761,10 +761,14 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 
 func TestRadiusAgentJsonCfg(t *testing.T) {
 	eCfg := &RadiusAgentJsonCfg{
-		Enabled:    utils.BoolPointer(false),
-		ListenNet:  utils.StringPointer("udp"),
-		ListenAuth: utils.StringPointer("127.0.0.1:1812"),
-		ListenAcct: utils.StringPointer("127.0.0.1:1813"),
+		Enabled: utils.BoolPointer(false),
+		Listeners: &[]*RadiusListenerJsonCfg{
+			{
+				Network:     utils.StringPointer("udp"),
+				AuthAddress: utils.StringPointer("127.0.0.1:1812"),
+				AcctAddress: utils.StringPointer("127.0.0.1:1813"),
+			},
+		},
 		ClientSecrets: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
