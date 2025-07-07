@@ -1047,7 +1047,9 @@ const CGRATES_CFG_JSON = `
 		"*default": "CGRateS.org"
 	},
 	"client_dictionaries": {				// per client path towards directory holding additional dictionaries to load (extra to RFC)
-		"*default": "/usr/share/cgrates/radius/dict/",	// key represents the client IP or catch-all <*default|$client_ip>
+		"*default": [					// key represents the client IP or catch-all <*default|$client_ip>
+			"/usr/share/cgrates/radius/dict/"
+		]
 	},
 	"sessions_conns": ["*internal"],
 	"stats_conns": [],					// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>

@@ -50,7 +50,7 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> loading dictionary for clientID: <%s> out of path <%s>",
 				utils.RadiusAgent, clntID, dictPath))
-		if dts[clntID], err = radigo.NewDictionaryFromFoldersWithRFC2865([]string{dictPath}); err != nil {
+		if dts[clntID], err = radigo.NewDictionaryFromFoldersWithRFC2865(dictPath); err != nil {
 			return
 		}
 	}

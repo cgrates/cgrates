@@ -34,7 +34,7 @@ type RadiusAgentCfg struct {
 	ListenAuth         string
 	ListenAcct         string
 	ClientSecrets      map[string]string
-	ClientDictionaries map[string]string
+	ClientDictionaries map[string][]string
 	SessionSConns      []string
 	StatSConns         []string
 	ThresholdSConns    []string
@@ -108,18 +108,20 @@ func (ra RadiusAgentCfg) CloneSection() Section { return ra.Clone() }
 // Clone returns a deep copy of RadiusAgentCfg
 func (ra RadiusAgentCfg) Clone() *RadiusAgentCfg {
 	clone := &RadiusAgentCfg{
-		Enabled:       ra.Enabled,
-		ListenNet:     ra.ListenNet,
-		ListenAuth:    ra.ListenAuth,
-		ListenAcct:    ra.ListenAcct,
-		ClientSecrets: maps.Clone(ra.ClientSecrets),
-
-		// NOTE: shallow clone and value is a slice
-		ClientDictionaries: maps.Clone(ra.ClientDictionaries),
-
+		Enabled:         ra.Enabled,
+		ListenNet:       ra.ListenNet,
+		ListenAuth:      ra.ListenAuth,
+		ListenAcct:      ra.ListenAcct,
+		ClientSecrets:   maps.Clone(ra.ClientSecrets),
 		SessionSConns:   slices.Clone(ra.SessionSConns),
 		StatSConns:      slices.Clone(ra.StatSConns),
 		ThresholdSConns: slices.Clone(ra.ThresholdSConns),
+	}
+	if ra.ClientDictionaries != nil {
+		clone.ClientDictionaries = make(map[string][]string, len(ra.ClientDictionaries))
+		for key, val := range ra.ClientDictionaries {
+			clone.ClientDictionaries[key] = slices.Clone(val)
+		}
 	}
 	if ra.RequestProcessors != nil {
 		clone.RequestProcessors = make([]*RequestProcessor, len(ra.RequestProcessors))
@@ -137,7 +139,7 @@ type RadiusAgentJsonCfg struct {
 	ListenAuth         *string                `json:"listen_auth"`
 	ListenAcct         *string                `json:"listen_acct"`
 	ClientSecrets      map[string]string      `json:"client_secrets"`
-	ClientDictionaries map[string]string      `json:"client_dictionaries"`
+	ClientDictionaries map[string][]string    `json:"client_dictionaries"`
 	SessionSConns      *[]string              `json:"sessions_conns"`
 	StatSConns         *[]string              `json:"stats_conns"`
 	ThresholdSConns    *[]string              `json:"thresholds_conns"`
@@ -161,7 +163,7 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *Radi
 		d.ListenAcct = utils.StringPointer(v2.ListenAcct)
 	}
 	d.ClientSecrets = diffMapString(d.ClientSecrets, v1.ClientSecrets, v2.ClientSecrets)
-	d.ClientDictionaries = diffMapString(d.ClientDictionaries, v1.ClientDictionaries, v2.ClientDictionaries)
+	d.ClientDictionaries = diffMapStringSlice(d.ClientDictionaries, v1.ClientDictionaries, v2.ClientDictionaries)
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}

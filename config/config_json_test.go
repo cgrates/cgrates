@@ -768,8 +768,8 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		ClientSecrets: map[string]string{
 			utils.MetaDefault: "CGRateS.org",
 		},
-		ClientDictionaries: map[string]string{
-			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
+		ClientDictionaries: map[string][]string{
+			utils.MetaDefault: {"/usr/share/cgrates/radius/dict/"},
 		},
 		SessionSConns:     &[]string{utils.MetaInternal},
 		StatSConns:        &[]string{},

@@ -187,7 +187,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		asteriskAgentCfg: new(AsteriskAgentCfg),
 		diameterAgentCfg: new(DiameterAgentCfg),
 		radiusAgentCfg: &RadiusAgentCfg{
-			ClientDictionaries: make(map[string]string),
+			ClientDictionaries: make(map[string][]string),
 			ClientSecrets:      make(map[string]string),
 		},
 		dnsAgentCfg:        new(DNSAgentCfg),
