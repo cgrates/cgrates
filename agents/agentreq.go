@@ -60,6 +60,7 @@ func NewAgentRequest(req utils.DataProvider,
 		Vars:       vars,
 		CGRRequest: utils.NewOrderedNavigableMap(),
 		diamreq:    utils.NewOrderedNavigableMap(), // special case when CGRateS is building the request
+		radDAReq:   utils.NewOrderedNavigableMap(),
 		CGRReply:   cgrRply,
 		Reply:      rply,
 		Timezone:   timezone,
@@ -87,6 +88,7 @@ type AgentRequest struct {
 	Timezone   string
 	filterS    *engine.FilterS
 	diamreq    *utils.OrderedNavigableMap // used in case of building requests (ie. DisconnectSession)
+	radDAReq   *utils.OrderedNavigableMap // used for building RADIUS server-initiated Disconnect Requests
 	tmp        *utils.DataNode            // used in case you want to store temporary items and access them later
 	Opts       utils.MapStorage
 	Cfg        utils.DataProvider
@@ -136,6 +138,10 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val any, err error) 
 			val, err = ar.diamreq.FieldAsInterface(fldPath[1:])
 		} else {
 			val = ar.diamreq
+		}
+	case utils.MetaRadDAReq:
+		if len(fldPath) != 1 {
+			val, err = ar.radDAReq.FieldAsInterface(fldPath[1:])
 		}
 	case utils.MetaRep:
 		if len(fldPath) != 1 {
@@ -282,6 +288,11 @@ func (ar *AgentRequest) SetAsSlice(fullPath *utils.FullPath, nm *utils.DataLeaf)
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
+	case utils.MetaRadDAReq:
+		return ar.radDAReq.SetAsSlice(&utils.FullPath{
+			PathSlice: fullPath.PathSlice[1:],
+			Path:      fullPath.Path[14:],
+		}, []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 	case utils.MetaTmp:
 		_, err = ar.tmp.Set(fullPath.PathSlice[1:], []*utils.DataNode{{Type: utils.NMDataType, Value: nm}})
 		return
@@ -307,6 +318,8 @@ func (ar *AgentRequest) RemoveAll(prefix string) error {
 		ar.Reply.RemoveAll()
 	case utils.MetaDiamreq:
 		ar.diamreq.RemoveAll()
+	case utils.MetaRadDAReq:
+		ar.radDAReq.RemoveAll()
 	case utils.MetaTmp:
 		ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	case utils.MetaUCH:
@@ -340,6 +353,11 @@ func (ar *AgentRequest) Remove(fullPath *utils.FullPath) error {
 		return ar.diamreq.Remove(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
+		})
+	case utils.MetaRadDAReq:
+		return ar.radDAReq.Remove(&utils.FullPath{
+			PathSlice: fullPath.PathSlice[1:],
+			Path:      fullPath.Path[14:],
 		})
 	case utils.MetaTmp:
 		return ar.tmp.Remove(slices.Clone(fullPath.PathSlice[1:]))
@@ -421,6 +439,11 @@ func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (e
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
 		}, val)
+	case utils.MetaRadDAReq:
+		return ar.radDAReq.Append(&utils.FullPath{
+			PathSlice: fullPath.PathSlice[1:],
+			Path:      fullPath.Path[14:],
+		}, val)
 	case utils.MetaTmp:
 		_, err = ar.tmp.Append(fullPath.PathSlice[1:], val)
 		return
@@ -455,6 +478,11 @@ func (ar *AgentRequest) Compose(fullPath *utils.FullPath, val *utils.DataLeaf) (
 		return ar.diamreq.Compose(&utils.FullPath{
 			PathSlice: fullPath.PathSlice[1:],
 			Path:      fullPath.Path[9:],
+		}, val)
+	case utils.MetaRadDAReq:
+		return ar.radDAReq.Compose(&utils.FullPath{
+			PathSlice: fullPath.PathSlice[1:],
+			Path:      fullPath.Path[14:],
 		}, val)
 	case utils.MetaTmp:
 		return ar.tmp.Compose(fullPath.PathSlice[1:], val)

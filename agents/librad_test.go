@@ -97,7 +97,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 	if err := agReq.SetFields(rplyFlds); err != nil {
 		t.Error(err)
 	}
-	if err := radReplyAppendAttributes(rply, agReq.Reply); err != nil {
+	if err := radAppendAttributes(rply, agReq.Reply); err != nil {
 		t.Error(err)
 	}
 	if rply.Code != radigo.AccessAccept {

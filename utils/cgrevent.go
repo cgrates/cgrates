@@ -55,6 +55,15 @@ func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 	return IfaceAsString(iface), nil
 }
 
+// OptAsString returns an option as string
+func (ev *CGREvent) OptAsString(optName string) (string, error) {
+	v, exists := ev.APIOpts[optName]
+	if !exists {
+		return "", ErrNotFound
+	}
+	return IfaceAsString(v), nil
+}
+
 // OptAsInt64 returns an option as int64
 func (ev *CGREvent) OptAsInt64(optName string) (int64, error) {
 	iface, has := ev.APIOpts[optName]

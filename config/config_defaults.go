@@ -302,6 +302,7 @@ const CGRATES_CFG_JSON = `
 		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control coount profile filter indexes caching
 		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}, 			// control reverse filter indexes caching used only for set and remove filters
 		"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},			// diameter messages caching
+		"*radius_packets": {"limit": -1, "ttl": "3h", "static_ttl": false, "remote":false, "replicate": false},				// radius packets caching
 		"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "remote":false, "replicate": false},				// RPC responses caching
 		"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},			// closed sessions cached for CDRs
 		"*event_charges": {"limit": 0, "ttl": "10s", "static_ttl": false, "remote":false, "replicate": false},				// events proccessed by ChargerS
@@ -1055,9 +1056,20 @@ const CGRATES_CFG_JSON = `
 			"/usr/share/cgrates/radius/dict/"
 		]
 	},
+	"client_da_addresses": { 				// configuration for clients capable of handling Dynamic Authorization (CoA/DM) requests.
+		// "nasIdentifier": { 				// identifier for the NAS, typically the host from the initial RADIUS packet.
+		// 	"transport": "udp", 			// transport protocol for Dynamic Authorization requests, defaults to UDP.
+		// 	"host": "", 				// optionally specify an alternative host for DA requests. Defaults to the NAS identifier if empty.
+		// 	"port": 3799, 				// port for Dynamic Authorization requests, default is 3799.
+		// 	"flags": [] 				// additional options, currently supports *log for logging DA requests before sending.
+		// }
+	},
+	"requests_cache_key": "",				// used to choose the cache key of a RADIUS packet <RSRParsers>
 	"sessions_conns": ["*internal"],
 	"stats_conns": [],					// connections to StatS, empty to disable: <""|*internal|$rpc_conns_id>
 	"thresholds_conns": [],					// connections to ThresholdS, empty to disable: <""|*internal|$rpc_conns_id>
+	"dmr_template": "*dmr",					// template used to build the Disconnect-Request packet
+	"coa_template": "*coa",					// template used to build the CoA-Request packet
 	"request_processors": []				// request processors to be applied to Radius messages
 },
 
@@ -1958,6 +1970,26 @@ const CGRATES_CFG_JSON = `
 			 "value": "~*vars.*appid", "mandatory": true},
 		{"tag": "ReAuthRequestType", "path": "*diamreq.Re-Auth-Request-Type", "type": "*constant",
 			"value": "0"}
+	],
+	"*dmr": [  // used by RadiusAgent when sending Disconnect message towards the client
+		{"tag": "User-Name", "path": "*radDAReq.User-Name", "type": "*variable",
+			"value": "~*oreq.User-Name"},
+		{"tag": "NAS-IP-Address", "path": "*radDAReq.NAS-IP-Address", "type": "*variable",
+			"value": "~*oreq.NAS-IP-Address"},
+		{"tag": "Acct-Session-Id", "path": "*radDAReq.Acct-Session-Id", "type": "*variable",
+			"value": "~*oreq.Acct-Session-Id"},
+		{"tag": "Reply-Message", "path": "*radDAReq.Reply-Message", "type": "*variable",
+			"value": "~*req.DisconnectCause"}
+	],
+	"*coa": [ // used by RadiusAgent when sending ChangeOfAuthorization message towards the client
+		{"tag": "User-Name", "path": "*radDAReq.User-Name", "type": "*variable",
+			"value": "~*oreq.User-Name"},
+		{"tag": "NAS-IP-Address", "path": "*radDAReq.NAS-IP-Address", "type": "*variable",
+			"value": "~*oreq.NAS-IP-Address"},
+		{"tag": "Acct-Session-Id", "path": "*radDAReq.Acct-Session-Id", "type": "*variable",
+			"value": "~*oreq.Acct-Session-Id"},
+		{"tag": "Filter-Id", "path": "*radDAReq.Filter-Id", "type": "*variable",
+			"value": "~*req.CustomFilter"}
 	],
 	"*errSip": [
 			{"tag": "Request", "path": "*rep.Request", "type": "*constant",

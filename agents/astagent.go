@@ -325,8 +325,8 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 }
 
 // V1DisconnectSession is internal method to disconnect session in asterisk
-func (sma *AsteriskAgent) V1DisconnectSession(_ *context.Context, args utils.AttrDisconnectSession, reply *string) error {
-	channelID := engine.NewMapEvent(args.EventStart).GetStringIgnoreErrors(utils.OriginID)
+func (sma *AsteriskAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+	channelID := engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.OriginID)
 	sma.hangupChannel(channelID, "")
 	*reply = utils.OK
 	return nil
@@ -360,17 +360,17 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(_ *context.Context, _ string,
 
 }
 
-// V1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1ReAuthorize(_ *context.Context, originID string, reply *string) (err error) {
+// V1AlterSession is used to implement the sessions.BiRPClient interface
+func (*AsteriskAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1DisconnectPeer(_ *context.Context, args *utils.DPRArgs, reply *string) (err error) {
+func (*AsteriskAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (sma *AsteriskAgent) V1WarnDisconnect(_ *context.Context, args map[string]any, reply *string) (err error) {
+func (sma *AsteriskAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }

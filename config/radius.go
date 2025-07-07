@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"maps"
 	"slices"
 
@@ -26,19 +27,33 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type RadiusListener struct {
-	AuthAddr string
-	AcctAddr string
-	Network  string // udp or tcp
+// Radius Agent configuration section
+type RadiusAgentJsonCfg struct {
+	Enabled            *bool                       `json:"enabled"`
+	Listeners          *[]*RadiusListenerJsonCfg   `json:"listeners"`
+	ClientSecrets      map[string]string           `json:"client_secrets"`
+	ClientDictionaries map[string][]string         `json:"client_dictionaries"`
+	ClientDaAddresses  map[string]DAClientOptsJson `json:"client_da_addresses"`
+	SessionSConns      *[]string                   `json:"sessions_conns"`
+	StatSConns         *[]string                   `json:"stats_conns"`
+	ThresholdSConns    *[]string                   `json:"thresholds_conns"`
+	RequestsCacheKey   *string                     `json:"requests_cache_key"`
+	DMRTemplate        *string                     `json:"dmr_template"`
+	CoATemplate        *string                     `json:"coa_template"`
+	RequestProcessors  *[]*ReqProcessorJsnCfg      `json:"request_processors"`
 }
 
-// AsMapInterface returns the config as a map[string]any.
-func (lstn *RadiusListener) AsMapInterface() map[string]any {
-	return map[string]any{
-		utils.AuthAddrCfg: lstn.AuthAddr,
-		utils.AcctAddrCfg: lstn.AcctAddr,
-		utils.NetworkCfg:  lstn.Network,
-	}
+type RadiusListenerJsonCfg struct {
+	Network     *string `json:"network"`
+	AuthAddress *string `json:"auth_address"`
+	AcctAddress *string `json:"acct_address"`
+}
+
+type DAClientOptsJson struct {
+	Transport *string  `json:"transport"`
+	Host      *string  `json:"host"`
+	Port      *int     `json:"port"`
+	Flags     []string `json:"flags"`
 }
 
 // RadiusAgentCfg the config section that describes the Radius Agent
@@ -47,10 +62,27 @@ type RadiusAgentCfg struct {
 	Listeners          []RadiusListener
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string][]string
+	ClientDaAddresses  map[string]DAClientOpts
 	SessionSConns      []string
 	StatSConns         []string
 	ThresholdSConns    []string
+	RequestsCacheKey   utils.RSRParsers
+	DMRTemplate        string
+	CoATemplate        string
 	RequestProcessors  []*RequestProcessor
+}
+
+type RadiusListener struct {
+	AuthAddr string
+	AcctAddr string
+	Network  string // udp or tcp
+}
+
+type DAClientOpts struct {
+	Transport string                // transport protocol for Dynamic Authorization requests <UDP|TCP>.
+	Host      string                // alternative host for DA requests
+	Port      int                   // port for Dynamic Authorization requests
+	Flags     utils.FlagsWithParams // flags (only *log for now)
 }
 
 // loadRadiusAgentCfg loads the RadiusAgent section of the configuration
@@ -87,6 +119,17 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jc *RadiusAgentJsonCfg) (err error) {
 	}
 	maps.Copy(ra.ClientSecrets, jc.ClientSecrets)
 	maps.Copy(ra.ClientDictionaries, jc.ClientDictionaries)
+	if len(jc.ClientDaAddresses) != 0 {
+		if ra.ClientDaAddresses == nil {
+			ra.ClientDaAddresses = make(map[string]DAClientOpts)
+		}
+		ra.ClientDaAddresses = make(map[string]DAClientOpts, len(jc.ClientDaAddresses))
+		for hostKey, clientOpts := range jc.ClientDaAddresses {
+			cfg := DAClientOpts{}
+			cfg.loadFromJSONCfg(clientOpts, hostKey)
+			ra.ClientDaAddresses[hostKey] = cfg
+		}
+	}
 	if jc.SessionSConns != nil {
 		ra.SessionSConns = tagInternalConns(*jc.SessionSConns, utils.MetaSessionS)
 	}
@@ -96,25 +139,48 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jc *RadiusAgentJsonCfg) (err error) {
 	if jc.ThresholdSConns != nil {
 		ra.ThresholdSConns = tagInternalConns(*jc.ThresholdSConns, utils.MetaThresholds)
 	}
+	if jc.RequestsCacheKey != nil {
+		ra.RequestsCacheKey, err = utils.NewRSRParsers(*jc.RequestsCacheKey, utils.RSRSep)
+		if err != nil {
+			return fmt.Errorf(
+				"failed to initialize RSRParsers based %s value: %w",
+				utils.RequestsCacheKeyCfg, err,
+			)
+		}
+	}
+	if jc.DMRTemplate != nil {
+		ra.DMRTemplate = *jc.DMRTemplate
+	}
+	if jc.CoATemplate != nil {
+		ra.CoATemplate = *jc.CoATemplate
+	}
 	ra.RequestProcessors, err = appendRequestProcessors(ra.RequestProcessors, jc.RequestProcessors)
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
 func (ra RadiusAgentCfg) AsMapInterface() any {
-	requestProcessors := make([]map[string]any, len(ra.RequestProcessors))
-	for i, item := range ra.RequestProcessors {
-		requestProcessors[i] = item.AsMapInterface()
-	}
 	listeners := make([]map[string]any, len(ra.Listeners))
 	for i, item := range ra.Listeners {
 		listeners[i] = item.AsMapInterface()
+	}
+	clientDaAddresses := make(map[string]any, len(ra.ClientDaAddresses))
+	for k, v := range ra.ClientDaAddresses {
+		clientDaAddresses[k] = v.AsMapInterface()
+	}
+	requestProcessors := make([]map[string]any, len(ra.RequestProcessors))
+	for i, item := range ra.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:            ra.Enabled,
 		utils.ListenersCfg:          listeners,
 		utils.ClientSecretsCfg:      maps.Clone(ra.ClientSecrets),
 		utils.ClientDictionariesCfg: maps.Clone(ra.ClientDictionaries),
+		utils.ClientDaAddressesCfg:  clientDaAddresses,
+		utils.RequestsCacheKeyCfg:   ra.RequestsCacheKey.GetRule(),
+		utils.DMRTemplateCfg:        ra.DMRTemplate,
+		utils.CoATemplateCfg:        ra.CoATemplate,
 		utils.SessionSConnsCfg:      stripInternalConns(ra.SessionSConns),
 		utils.StatSConnsCfg:         stripInternalConns(ra.StatSConns),
 		utils.ThresholdSConnsCfg:    stripInternalConns(ra.ThresholdSConns),
@@ -129,17 +195,26 @@ func (ra RadiusAgentCfg) CloneSection() Section { return ra.Clone() }
 // Clone returns a deep copy of RadiusAgentCfg
 func (ra RadiusAgentCfg) Clone() *RadiusAgentCfg {
 	clone := &RadiusAgentCfg{
-		Enabled:         ra.Enabled,
-		Listeners:       slices.Clone(ra.Listeners),
-		ClientSecrets:   maps.Clone(ra.ClientSecrets),
-		SessionSConns:   slices.Clone(ra.SessionSConns),
-		StatSConns:      slices.Clone(ra.StatSConns),
-		ThresholdSConns: slices.Clone(ra.ThresholdSConns),
+		Enabled:          ra.Enabled,
+		Listeners:        slices.Clone(ra.Listeners),
+		ClientSecrets:    maps.Clone(ra.ClientSecrets),
+		SessionSConns:    slices.Clone(ra.SessionSConns),
+		StatSConns:       slices.Clone(ra.StatSConns),
+		ThresholdSConns:  slices.Clone(ra.ThresholdSConns),
+		DMRTemplate:      ra.DMRTemplate,
+		CoATemplate:      ra.CoATemplate,
+		RequestsCacheKey: ra.RequestsCacheKey,
 	}
 	if ra.ClientDictionaries != nil {
 		clone.ClientDictionaries = make(map[string][]string, len(ra.ClientDictionaries))
 		for key, val := range ra.ClientDictionaries {
 			clone.ClientDictionaries[key] = slices.Clone(val)
+		}
+	}
+	if len(ra.ClientDaAddresses) != 0 {
+		clone.ClientDaAddresses = make(map[string]DAClientOpts, len(ra.ClientDaAddresses))
+		for k, v := range ra.ClientDaAddresses {
+			clone.ClientDaAddresses[k] = *v.Clone()
 		}
 	}
 	if ra.RequestProcessors != nil {
@@ -151,22 +226,56 @@ func (ra RadiusAgentCfg) Clone() *RadiusAgentCfg {
 	return clone
 }
 
-type RadiusListenerJsonCfg struct {
-	Network     *string `json:"network"`
-	AuthAddress *string `json:"auth_address"`
-	AcctAddress *string `json:"acct_address"`
+// AsMapInterface returns the config as a map[string]any.
+func (l *RadiusListener) AsMapInterface() map[string]any {
+	return map[string]any{
+		utils.AuthAddrCfg: l.AuthAddr,
+		utils.AcctAddrCfg: l.AcctAddr,
+		utils.NetworkCfg:  l.Network,
+	}
 }
 
-// Radius Agent configuration section
-type RadiusAgentJsonCfg struct {
-	Enabled            *bool                     `json:"enabled"`
-	Listeners          *[]*RadiusListenerJsonCfg `json:"listeners"`
-	ClientSecrets      map[string]string         `json:"client_secrets"`
-	ClientDictionaries map[string][]string       `json:"client_dictionaries"`
-	SessionSConns      *[]string                 `json:"sessions_conns"`
-	StatSConns         *[]string                 `json:"stats_conns"`
-	ThresholdSConns    *[]string                 `json:"thresholds_conns"`
-	RequestProcessors  *[]*ReqProcessorJsnCfg    `json:"request_processors"`
+func (cda *DAClientOpts) loadFromJSONCfg(jsnCfg DAClientOptsJson, defaultHost string) error {
+	cda.Transport = utils.UDP
+	if jsnCfg.Transport != nil {
+		cda.Transport = *jsnCfg.Transport
+	}
+	cda.Host = defaultHost
+	if jsnCfg.Host != nil {
+		cda.Host = *jsnCfg.Host
+	}
+	cda.Port = 3799
+	if jsnCfg.Port != nil {
+		cda.Port = *jsnCfg.Port
+	}
+	if jsnCfg.Flags != nil {
+		cda.Flags = utils.FlagsWithParamsFromSlice(jsnCfg.Flags)
+	}
+	return nil
+}
+
+func (cda *DAClientOpts) Clone() *DAClientOpts {
+	cln := DAClientOpts{
+		Transport: cda.Transport,
+		Host:      cda.Host,
+		Port:      cda.Port,
+	}
+	if cda.Flags != nil {
+		cln.Flags = cda.Flags.Clone()
+	}
+	return &cln
+}
+
+func (cda *DAClientOpts) AsMapInterface() map[string]any {
+	mp := map[string]any{
+		utils.TransportCfg: cda.Transport,
+		utils.HostCfg:      cda.Host,
+		utils.PortCfg:      cda.Port,
+	}
+	if len(cda.Flags) != 0 {
+		mp[utils.FlagsCfg] = cda.Flags.SliceFlags()
+	}
+	return mp
 }
 
 func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *RadiusAgentJsonCfg {
@@ -189,6 +298,28 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *Radi
 	}
 	d.ClientSecrets = diffMapString(d.ClientSecrets, v1.ClientSecrets, v2.ClientSecrets)
 	d.ClientDictionaries = diffMapStringSlice(d.ClientDictionaries, v1.ClientDictionaries, v2.ClientDictionaries)
+	if !maps.EqualFunc(v1.ClientDaAddresses, v2.ClientDaAddresses,
+		func(v1, v2 DAClientOpts) bool {
+			return v1.Transport == v2.Transport &&
+				v1.Host == v2.Host &&
+				v1.Port == v2.Port &&
+				v1.Flags.Equal(v2.Flags)
+		},
+	) {
+		clientDaAddresses := make(map[string]DAClientOptsJson, len(v2.ClientDaAddresses))
+		for k, opts := range v2.ClientDaAddresses {
+			jsonOpts := DAClientOptsJson{
+				Transport: utils.StringPointer(opts.Transport),
+				Host:      utils.StringPointer(opts.Host),
+				Port:      utils.IntPointer(opts.Port),
+			}
+			if len(opts.Flags) != 0 {
+				jsonOpts.Flags = opts.Flags.SliceFlags()
+			}
+			clientDaAddresses[k] = jsonOpts
+		}
+		d.ClientDaAddresses = clientDaAddresses
+	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))
 	}
@@ -197,6 +328,17 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *Radi
 	}
 	if !slices.Equal(v1.ThresholdSConns, v2.ThresholdSConns) {
 		d.ThresholdSConns = utils.SliceStringPointer(stripInternalConns(v2.ThresholdSConns))
+	}
+	cacheKey1 := v1.RequestsCacheKey.GetRule()
+	cacheKey2 := v2.RequestsCacheKey.GetRule()
+	if cacheKey1 != cacheKey2 {
+		d.RequestsCacheKey = utils.StringPointer(cacheKey2)
+	}
+	if v1.DMRTemplate != v2.DMRTemplate {
+		d.DMRTemplate = utils.StringPointer(v2.DMRTemplate)
+	}
+	if v1.CoATemplate != v2.CoATemplate {
+		d.CoATemplate = utils.StringPointer(v2.CoATemplate)
 	}
 	d.RequestProcessors = diffReqProcessorsJsnCfg(d.RequestProcessors, v1.RequestProcessors, v2.RequestProcessors)
 	return d

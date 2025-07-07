@@ -44,14 +44,14 @@ var authReqs = engine.MapEvent{
 	utils.MetaPseudoPrepaid: struct{}{},
 }
 
-// BiRPClient is the interface implemented by Agents which are able to
+// BiRPCClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
-type BiRPClient interface {
-	V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error)
-	V1GetActiveSessionIDs(ctx *context.Context, ignParam string, sessionIDs *[]*SessionID) (err error)
-	V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error)
-	V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error)
-	V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error)
+type BiRPCClient interface {
+	V1DisconnectSession(*context.Context, utils.CGREvent, *string) error
+	V1GetActiveSessionIDs(*context.Context, string, *[]*SessionID) error
+	V1AlterSession(*context.Context, utils.CGREvent, *string) error
+	V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error
+	V1WarnDisconnect(*context.Context, map[string]any, *string) error
 }
 
 // GetSetOptsOriginID will populate the originID key if not present and return it

@@ -585,6 +585,11 @@ type SessionFilter struct {
 	APIOpts map[string]any
 }
 
+type SessionFilterWithEvent struct {
+	*SessionFilter
+	Event map[string]any
+}
+
 type SessionIDsWithAPIOpts struct {
 	IDs     []string
 	Tenant  string
