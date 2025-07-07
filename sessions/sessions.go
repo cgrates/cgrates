@@ -383,20 +383,20 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 		}
 	}
 	sS.replicateSessions(ctx, s.ID, false, sS.cfg.SessionSCfg().ReplicationConns)
-	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
+	if clnt := sS.biJClnt(s.ClientConnID); clnt != nil {
 		go func() {
 			var rply string
-			if err := clntConn.conn.Call(ctx,
-				utils.SessionSv1DisconnectSession,
-				utils.AttrDisconnectSession{
-					EventStart: s.OriginCGREvent.Event,
-					Reason:     ErrForcedDisconnect.Error()},
-				&rply); err != nil {
-				if err != utils.ErrNotImplemented {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
-							utils.SessionS, err.Error(), s.ID))
-				}
+			if err := clnt.conn.Call(ctx,
+				utils.AgentV1DisconnectSession,
+				utils.CGREvent{
+					ID: utils.GenUUID(),
+					// EventStart: s.OriginCGREvent.Event,
+					// Reason:     ErrForcedDisconnect.Error(),
+				},
+				&rply); err != nil && err != utils.ErrNotImplemented {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
+						utils.SessionS, err.Error(), s.ID))
 			}
 		}()
 	}
@@ -544,10 +544,10 @@ func (sS *SessionS) warnSession(connID string, ev map[string]any, opt map[string
 	clnt := sS.biJClnt(connID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.SessionSv1WarnDisconnect, connID)
+			utils.AgentV1WarnDisconnect, connID)
 	}
 	var rply string
-	if err = clnt.conn.Call(context.TODO(), utils.SessionSv1WarnDisconnect,
+	if err = clnt.conn.Call(context.TODO(), utils.AgentV1WarnDisconnect,
 		ev, &rply); err != nil {
 		if err != utils.ErrNotImplemented {
 			utils.Logger.Warning(fmt.Sprintf("<%s> failed to warn session: <%s>, err: <%s>",
@@ -2630,50 +2630,67 @@ func (sS *SessionS) processAttributes(ctx *context.Context, cgrEv *utils.CGREven
 	return
 }
 
-func (sS *SessionS) sendRar(ctx *context.Context, s *Session) (err error) {
+func (sS *SessionS) alterSession(ctx *context.Context, s *Session, apiOpts map[string]any, event map[string]any) (err error) {
 	clnt := sS.biJClnt(s.ClientConnID)
 	if clnt == nil {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-			utils.SessionSv1ReAuthorize, s.ClientConnID)
+			utils.AgentV1AlterSession, s.ClientConnID)
 	}
+
+	// Merge parameter event with the session event. Losing the initial event's
+	// OriginID could create unwanted behaviour.
+	if event == nil {
+		event = make(map[string]any)
+	}
+	for key, val := range s.OriginCGREvent.Event {
+		if _, has := event[key]; !has {
+			event[key] = val
+		}
+	}
+	args := utils.CGREvent{
+		ID:      utils.GenUUID(),
+		APIOpts: apiOpts,
+		Event:   event,
+	}
+
 	var rply string
-	if err = clnt.conn.Call(ctx, utils.SessionSv1ReAuthorize, s.ID, &rply); err == utils.ErrNotImplemented {
+	if err = clnt.conn.Call(ctx, utils.AgentV1AlterSession, args, &rply); err == utils.ErrNotImplemented {
 		err = nil
 	}
 	return
 }
 
-// BiRPCv1ReAuthorize sends a RAR for the matching sessions
-func (sS *SessionS) BiRPCv1ReAuthorize(ctx *context.Context,
-	args *utils.SessionFilter, reply *string) (err error) {
-	if args == nil { //protection in case on nil
-		args = &utils.SessionFilter{}
+// BiRPCv1AlterSession sends a RAR for the matching sessions
+func (sS *SessionS) BiRPCv1AlterSession(ctx *context.Context,
+	args utils.SessionFilterWithEvent, reply *string) (err error) {
+	if args.SessionFilter == nil { //protection in case on nil
+		args.SessionFilter = &utils.SessionFilter{}
 	}
-	aSs := sS.filterSessions(ctx, args, false)
+	aSs := sS.filterSessions(ctx, args.SessionFilter, false)
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
-	// cache := utils.NewStringSet(nil)
+	// uniqueSIDs := utils.NewStringSet(nil)
 	// for _, as := range aSs {
-	// 	if cache.Has(as.CGRID) {
-	// 		continue
-	// 	}
-	// 	cache.Add(as.CGRID)
-	// 	ss := sS.getSessions(as.CGRID, false)
-	// 	if len(ss) == 0 {
-	// 		continue
-	// 	}
-	// 	if errTerm := sS.sendRar(ctx, ss[0]); errTerm != nil {
-	// 		utils.Logger.Warning(
-	// 			fmt.Sprintf(
-	// 				"<%s> failed sending RAR for session with id: <%s>, err: <%s>",
-	// 				utils.SessionS, ss[0].originID(), errTerm.Error()))
-	// 		err = utils.ErrPartiallyExecuted
-	// 	}
+	// if uniqueSIDs.Has(as.CGRID) {
+	// 	continue
 	// }
-	if err != nil {
-		return
-	}
+	// uniqueSIDs.Add(as.CGRID)
+	// ss := sS.getSessions(as.CGRID, false)
+	// if len(ss) == 0 {
+	// 	continue
+	// }
+	// if errTerm := sS.alterSession(ctx, ss[0], args.APIOpts, args.Event); errTerm != nil {
+	// 	utils.Logger.Warning(
+	// 		fmt.Sprintf(
+	// 			"<%s> altering session with id '%s' failed: <%v>",
+	// 			utils.SessionS, ss[0].cgrID(), errTerm))
+	// 	err = utils.ErrPartiallyExecuted
+	// }
+	// }
+	// if err != nil {
+	// 	return
+	// }
 	*reply = utils.OK
 	return
 }

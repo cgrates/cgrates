@@ -52,42 +52,42 @@ func FlagsWithParamsFromSlice(s []string) (flags FlagsWithParams) {
 type FlagParams map[string][]string
 
 // Has returns if the key was mentioned in flags
-func (fWp FlagParams) Has(opt string) (has bool) {
-	_, has = fWp[opt]
-	return
+func (fp FlagParams) Has(opt string) bool {
+	_, has := fp[opt]
+	return has
 }
 
 // ParamValue returns the value of the flag
-func (fWp FlagParams) ParamValue(opt string) (ps string) {
-	for _, ps = range fWp[opt] {
-		if ps != EmptyString {
-			return
+func (fp FlagParams) ParamValue(opt string) string {
+	for _, v := range fp[opt] {
+		if v != EmptyString {
+			return v
 		}
 	}
-	return
+	return ""
 }
 
 // Add adds the options to the flag
-func (fWp FlagParams) Add(opts []string) {
+func (fp FlagParams) Add(opts []string) {
 	switch len(opts) {
 	default: // just in case we call this function with more elements than needed
 		fallthrough
 	case 2:
-		fWp[opts[0]] = strings.Split(opts[1], ANDSep)
+		fp[opts[0]] = strings.Split(opts[1], ANDSep)
 	case 0:
 	case 1:
-		fWp[opts[0]] = []string{}
+		fp[opts[0]] = []string{}
 	}
 }
 
 // ParamsSlice returns the list of profiles for the subsystem
-func (fWp FlagParams) ParamsSlice(opt string) (ps []string) {
-	return fWp[opt] // if it doesn't have the option it will return an empty slice
+func (fp FlagParams) ParamsSlice(opt string) []string {
+	return fp[opt] // if it doesn't have the option it will return an empty slice
 }
 
 // SliceFlags converts from FlagsParams to []string
-func (fWp FlagParams) SliceFlags() (sls []string) {
-	for key, sub := range fWp {
+func (fp FlagParams) SliceFlags() (sls []string) {
+	for key, sub := range fp {
 		if len(sub) == 0 { // no option for these subsystem
 			sls = append(sls, key)
 			continue
@@ -98,49 +98,61 @@ func (fWp FlagParams) SliceFlags() (sls []string) {
 }
 
 // Clone returns a deep copy of FlagParams
-func (fWp FlagParams) Clone() (cln FlagParams) {
-	if fWp == nil {
-		return
+func (fp FlagParams) Clone() FlagParams {
+	if fp == nil {
+		return nil
 	}
-	cln = make(FlagParams)
-	for flg, params := range fWp {
+	cln := make(FlagParams)
+	for flg, params := range fp {
 		var cprm []string
 		if params != nil {
 			cprm = slices.Clone(params)
 		}
 		cln[flg] = cprm
 	}
-	return
+	return cln
+}
+
+func (fp FlagParams) Equal(other FlagParams) bool {
+	if len(fp) != len(other) {
+		return false
+	}
+	for k, v := range fp {
+		if otherV, exists := other[k]; !exists || !slices.Equal(v, otherV) {
+			return false
+		}
+	}
+	return true
 }
 
 // FlagsWithParams should store a list of flags for each subsystem
 type FlagsWithParams map[string]FlagParams
 
 // Has returns if the key was mentioned in flags
-func (fWp FlagsWithParams) Has(flag string) (has bool) {
-	_, has = fWp[flag]
-	return
+func (fwp FlagsWithParams) Has(flag string) bool {
+	_, has := fwp[flag]
+	return has
 }
 
 // ParamsSlice returns the list of profiles for the subsystem
-func (fWp FlagsWithParams) ParamsSlice(subs, opt string) (ps []string) {
-	if psIfc, has := fWp[subs]; has {
-		ps = psIfc.ParamsSlice(opt)
+func (fwp FlagsWithParams) ParamsSlice(subs, opt string) []string {
+	if psIfc, has := fwp[subs]; has {
+		return psIfc.ParamsSlice(opt)
 	}
-	return
+	return nil
 }
 
 // ParamValue returns the value of the flag
-func (fWp FlagsWithParams) ParamValue(subs string) (ps string) {
-	for ps = range fWp[subs] {
-		return
+func (fwp FlagsWithParams) ParamValue(subs string) string {
+	for v := range fwp[subs] {
+		return v
 	}
-	return
+	return ""
 }
 
 // SliceFlags converts from FlagsWithParams back to []string
-func (fWp FlagsWithParams) SliceFlags() (sls []string) {
-	for key, sub := range fWp {
+func (fwp FlagsWithParams) SliceFlags() (sls []string) {
+	for key, sub := range fwp {
 		if len(sub) == 0 { // no option for these subsystem
 			sls = append(sls, key)
 			continue
@@ -157,10 +169,10 @@ func (fWp FlagsWithParams) SliceFlags() (sls []string) {
 }
 
 // GetBool returns the flag as boolean
-func (fWp FlagsWithParams) GetBool(key string) (b bool) {
-	var v FlagParams
-	if v, b = fWp[key]; !b {
-		return // not present means false
+func (fwp FlagsWithParams) GetBool(key string) bool {
+	v, exists := fwp[key]
+	if !exists {
+		return false // not present means false
 	}
 	if len(v) == 0 {
 		return true // empty map
@@ -169,15 +181,27 @@ func (fWp FlagsWithParams) GetBool(key string) (b bool) {
 }
 
 // Clone returns a deep copy of FlagsWithParams
-func (fWp FlagsWithParams) Clone() (cln FlagsWithParams) {
-	if fWp == nil {
-		return
+func (fwp FlagsWithParams) Clone() FlagsWithParams {
+	if fwp == nil {
+		return nil
 	}
-	cln = make(FlagsWithParams)
-	for flg, p := range fWp {
+	cln := make(FlagsWithParams)
+	for flg, p := range fwp {
 		cln[flg] = p.Clone()
 	}
-	return
+	return cln
+}
+
+func (fwp FlagsWithParams) Equal(other FlagsWithParams) bool {
+	if len(fwp) != len(other) {
+		return false
+	}
+	for k, v := range fwp {
+		if otherV, exists := other[k]; !exists || !v.Equal(otherV) {
+			return false
+		}
+	}
+	return true
 }
 
 func MapStringStringEqual(v1, v2 map[string]string) bool {

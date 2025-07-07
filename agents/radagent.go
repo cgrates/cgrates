@@ -19,11 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"fmt"
+	"net"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -52,6 +56,15 @@ func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS,
 		cm:    cm,
 	}
 
+	// Register RadiusAgent methods whose names start with "V1" under the "AgentV1" object name.
+	srv, err := birpc.NewServiceWithMethodsRename(ra, utils.AgentV1, true, func(oldFn string) (newFn string) {
+		return strings.TrimPrefix(oldFn, "V1")
+	})
+	if err != nil {
+		return nil, err
+	}
+	ra.ctx = context.WithClient(context.TODO(), srv)
+
 	raCfg := cfg.RadiusAgentCfg()
 	dts := make(map[string]*radigo.Dictionary, len(raCfg.ClientDictionaries))
 	for clntID, dictPath := range raCfg.ClientDictionaries {
@@ -66,7 +79,7 @@ func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS,
 	}
 	dicts := radigo.NewDictionaries(dts)
 	secrets := radigo.NewSecrets(raCfg.ClientSecrets)
-
+	ra.dacCfg = newRadiusDAClientCfg(dicts, secrets, raCfg)
 	ra.rsAuth = make(map[string]*radigo.Server, len(raCfg.Listeners))
 	ra.rsAcct = make(map[string]*radigo.Server, len(raCfg.Listeners))
 	for i := range raCfg.Listeners {
@@ -88,99 +101,189 @@ func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS,
 
 type RadiusAgent struct {
 	mu     sync.RWMutex
+	wg     sync.WaitGroup
 	cfg    *config.CGRConfig // reference for future config reloads
 	cm     *engine.ConnManager
 	fltrs  *engine.FilterS
 	rsAuth map[string]*radigo.Server
 	rsAcct map[string]*radigo.Server
-	wg     sync.WaitGroup
+	dacCfg radiusDAClientCfg
+	ctx    *context.Context
+}
+
+// radiusDAClientCfg holds the dictionaries and secrets necessary for initializing Dynamic Authorization Clients in RADIUS (only for
+// the clients mentioned in the client_da_addresses map).
+// This configuration enables the RadiusAgent to send server-initiated actions, such as Disconnect Requests and CoA requests,
+// to manage ongoing user sessions dynamically.
+type radiusDAClientCfg struct {
+	dicts   *radigo.Dictionaries
+	secrets *radigo.Secrets
+}
+
+// newRadiusDAClientCfg is a constructor for the radiusDAClientCfg type.
+func newRadiusDAClientCfg(dicts *radigo.Dictionaries, secrets *radigo.Secrets,
+	raCfg *config.RadiusAgentCfg) radiusDAClientCfg {
+	dacDicts := make(map[string]*radigo.Dictionary, len(raCfg.ClientDaAddresses))
+	dacSecrets := make(map[string]string, len(raCfg.ClientDaAddresses))
+	for client := range raCfg.ClientDaAddresses {
+		dacDicts[client] = dicts.GetInstance(client)
+		dacSecrets[client] = secrets.GetSecret(client)
+	}
+	var rdac radiusDAClientCfg
+	if len(dacDicts) != 0 {
+		rdac.dicts = radigo.NewDictionaries(dacDicts)
+	}
+	if len(dacSecrets) != 0 {
+		rdac.secrets = radigo.NewSecrets(dacSecrets)
+	}
+	return rdac
 }
 
 // handleAuth handles RADIUS Authorization request
-func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	req.SetAVPValues()             // populate string values in AVPs
-	dcdr := newRADataProvider(req) // dcdr will provide information from request
-	rpl = req.Reply()
-	rpl.Code = radigo.AccessAccept
-	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
-	rplyNM := utils.NewOrderedNavigableMap()
+func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, error) {
+	reqPacket.SetAVPValues() // populate string values in AVPs
+	replyPacket := reqPacket.Reply()
+	replyPacket.Code = radigo.AccessAccept
+	cgrReplyNM := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map:  map[string]*utils.DataNode{},
+	}
+	replyNM := utils.NewOrderedNavigableMap()
 	opts := utils.MapStorage{}
+
+	varsDataNode := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.RemoteHost: utils.NewLeafNode(reqPacket.RemoteAddr().String()),
+		},
+	}
+	radDP := newRADataProvider(reqPacket)
 	var processed bool
-	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr().String())}}
+	var processReqErr error
 	for _, reqProcessor := range ra.cfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
+		agReq := NewAgentRequest(radDP, varsDataNode, cgrReplyNM, replyNM, opts,
 			reqProcessor.Tenant, ra.cfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ra.fltrs, nil)
 		agReq.Vars.Map[MetaRadReqType] = utils.NewLeafNode(MetaRadAuth)
 		var lclProcessed bool
-		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
+		if lclProcessed, processReqErr = ra.processRequest(reqPacket, reqProcessor, agReq, replyPacket); lclProcessed {
 			processed = lclProcessed
 		}
-		if err != nil || lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
+		if processReqErr != nil || lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
 			break
 		}
 	}
-
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s",
-			utils.RadiusAgent, err.Error(), utils.ToJSON(req)))
+	if processReqErr != nil {
+		utils.Logger.Warning(fmt.Sprintf("<%s> error: <%v> ignoring request: %s",
+			utils.RadiusAgent, processReqErr, utils.ToJSON(reqPacket)))
 		return nil, nil
 	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
-			utils.RadiusAgent, utils.ToJSON(req)))
+		utils.Logger.Warning(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
+			utils.RadiusAgent, utils.ToJSON(reqPacket)))
 		return nil, nil
 	}
-	if err := radReplyAppendAttributes(rpl, rplyNM); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> err: %s, replying to message: %+v",
-			utils.RadiusAgent, err.Error(), utils.ToIJSON(req)))
+	if err := radAppendAttributes(replyPacket, replyNM); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> err: %v, replying to message: %+v",
+			utils.RadiusAgent, err, utils.ToIJSON(reqPacket)))
 		return nil, err
 	}
-	return
+	return replyPacket, nil
 }
 
-// handleAcct handles RADIUS Accounting request
-// supports: Acct-Status-Type = Start, Interim-Update, Stop
-func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
-	req.SetAVPValues()             // populate string values in AVPs
-	dcdr := newRADataProvider(req) // dcdr will provide information from request
-	rpl = req.Reply()
-	rpl.Code = radigo.AccountingResponse
-	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+// handleAcct processes RADIUS Accounting requests and generates a reply.
+// It supports Acct-Status-Type values: Start, Interim-Update, Stop.
+func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, error) {
+	reqPacket.SetAVPValues() // populate string values in AVPs
+	replyPacket := reqPacket.Reply()
+	replyPacket.Code = radigo.AccountingResponse
+	cgrRplyNM := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map:  map[string]*utils.DataNode{},
+	}
 	rplyNM := utils.NewOrderedNavigableMap()
 	opts := utils.MapStorage{}
+
+	remoteAddr := reqPacket.RemoteAddr().String()
+	varsDataNode := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.RemoteHost: utils.NewLeafNode(remoteAddr),
+		},
+	}
+
+	radDP := newRADataProvider(reqPacket)
+	raCfg := ra.cfg.RadiusAgentCfg()
 	var processed bool
-	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.RemoteHost: utils.NewLeafNode(req.RemoteAddr().String())}}
-	for _, reqProcessor := range ra.cfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM, opts,
+	for _, reqProcessor := range raCfg.RequestProcessors {
+		agReq := NewAgentRequest(
+			radDP, varsDataNode, cgrRplyNM, rplyNM, opts,
 			reqProcessor.Tenant, ra.cfg.GeneralCfg().DefaultTenant,
-			utils.FirstNonEmpty(reqProcessor.Timezone,
-				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ra.fltrs, nil)
-		var lclProcessed bool
-		if lclProcessed, err = ra.processRequest(req, reqProcessor, agReq, rpl); lclProcessed {
-			processed = lclProcessed
+			utils.FirstNonEmpty(
+				reqProcessor.Timezone,
+				config.CgrConfig().GeneralCfg().DefaultTimezone,
+			),
+			ra.fltrs, nil,
+		)
+		lclProcessed, err := ra.processRequest(reqPacket,
+			reqProcessor, agReq, replyPacket)
+		if err != nil {
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> error: <%v> ignoring request: %s",
+					utils.RadiusAgent, err, utils.ToJSON(reqPacket)))
+			return nil, nil
 		}
-		if err != nil || lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue) {
-			break
+		if lclProcessed {
+			processed = true
+			if !reqProcessor.Flags.GetBool(utils.MetaContinue) {
+				break
+			}
 		}
 	}
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s> ignoring request: %s, ",
-			utils.RadiusAgent, err.Error(), utils.ToIJSON(req)))
-		return nil, nil
-	} else if !processed {
-		utils.Logger.Err(fmt.Sprintf("<%s> no request processor enabled, ignoring request %s",
-			utils.RadiusAgent, utils.ToIJSON(req)))
+	if !processed {
+		utils.Logger.Err(fmt.Sprintf(
+			"<%s> no request processor enabled, ignoring request %s",
+			utils.RadiusAgent, utils.ToIJSON(reqPacket)))
 		return nil, nil
 	}
-	if err := radReplyAppendAttributes(rpl, rplyNM); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> err: %s, replying to message: %+v",
-			utils.RadiusAgent, err.Error(), utils.ToIJSON(req)))
+
+	// Cache the RADIUS Packet for future CoA/Disconnect Requests.
+	if cacheKeyTpl := raCfg.RequestsCacheKey; cacheKeyTpl != nil {
+		err := cacheRadiusPacket(reqPacket, remoteAddr, raCfg,
+			utils.MapStorage{
+				utils.MetaReq:  radDP,
+				utils.MetaVars: varsDataNode,
+			})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err := radAppendAttributes(replyPacket, rplyNM); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> err: %v, replying to message: %s",
+			utils.RadiusAgent, err, utils.ToJSON(reqPacket)))
 		return nil, err
 	}
-	return
+	return replyPacket, nil
+}
+
+// cacheRadiusPacket caches a RADIUS packet if there are client options found for its source address.
+func cacheRadiusPacket(packet *radigo.Packet, address string, cfg *config.RadiusAgentCfg,
+	dp utils.DataProvider) error {
+	// Match address against configured client DA addresses.
+	if _, _, err := daRequestAddress(address, cfg.ClientDaAddresses); err != nil {
+		return nil // Address did not match any client; proceed without caching.
+	}
+	cacheKey, err := cfg.RequestsCacheKey.ParseDataProvider(dp)
+	if err != nil {
+		return fmt.Errorf("failed to parse the RADIUS packet cache key: %w", err)
+	}
+	if err = engine.Cache.Set(context.TODO(), utils.CacheRadiusPackets, cacheKey, packet,
+		nil, true, utils.NonTransactional); err != nil {
+		return fmt.Errorf("failed to cache RADIUS packet: %w", err)
+	}
+	return nil
 }
 
 // processRequest represents one processor processing the request
@@ -222,30 +325,30 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 				utils.RadiusAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
-		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
+		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
-		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
+		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInitiate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
 		rply := new(sessions.V1UpdateSessionReply)
-		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
+		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesUpdate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		var rply string
-		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
+		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			cgrEv, &rply)
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
 		rply := new(sessions.V1ProcessMessageReply)
-		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessMessage, cgrEv, rply)
+		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessMessage, cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		// } else
@@ -257,7 +360,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
-		err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
+		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -274,11 +377,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(utils.RadauthFailed)
 		}
 	}
+
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) {
 		var rplyCDRs string
-		if err = ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1ProcessCDR,
-			cgrEv, &rplyCDRs); err != nil {
+		if err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns,
+			utils.SessionSv1ProcessCDR, cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 		}
 	}
@@ -323,7 +427,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		statIDs := strings.Split(rawStatIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsStatsProfileIDs] = statIDs
 		var reply []string
-		if err := ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().StatSConns,
+		if err := ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().StatSConns,
 			utils.StatSv1ProcessEvent, ev, &reply); err != nil {
 			return false, fmt.Errorf("failed to process %s event in %s: %v",
 				utils.RadiusAgent, utils.StatS, err)
@@ -335,7 +439,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		thIDs := strings.Split(rawThIDs, utils.ANDSep)
 		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
 		var reply []string
-		if err := ra.cm.Call(context.TODO(), ra.cfg.RadiusAgentCfg().ThresholdSConns,
+		if err := ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
 			return false, fmt.Errorf("failed to process %s event in %s: %v",
 				utils.RadiusAgent, utils.ThresholdS, err)
@@ -381,3 +485,152 @@ func (ra *RadiusAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 }
 
 func (ra *RadiusAgent) Wait() { ra.wg.Wait() }
+
+// V1DisconnectSession remotely disconnects a session by making use of the RADIUS Disconnect Message functionality.
+func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+	ifaceOriginID, has := cgrEv.Event[utils.OriginID]
+	if !has {
+		return utils.NewErrMandatoryIeMissing(utils.OriginID)
+	}
+	originID := utils.IfaceAsString(ifaceOriginID)
+
+	dmrTpl := ra.cfg.RadiusAgentCfg().DMRTemplate
+	if optTpl, err := cgrEv.OptAsString(utils.MetaRadDMRTemplate); err == nil {
+		dmrTpl = optTpl
+	}
+	if _, found := ra.cfg.TemplatesCfg()[dmrTpl]; !found {
+		return fmt.Errorf("%w: DMR Template %s", utils.ErrNotFound, dmrTpl)
+	}
+
+	replyCode, err := ra.sendRadDaReq(radigo.DisconnectRequest, dmrTpl,
+		originID, utils.MapStorage(cgrEv.Event), nil)
+	if err != nil {
+		return err
+	}
+	switch replyCode {
+	case radigo.DisconnectACK:
+		*reply = utils.OK
+	case radigo.DisconnectNAK:
+		return errors.New("received DisconnectNAK from RADIUS client")
+	default:
+		return errors.New("unexpected reply code")
+	}
+	return nil
+}
+
+// V1AlterSession updates session authorization using RADIUS CoA functionality.
+func (ra *RadiusAgent) V1AlterSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+	originID, err := cgrEv.FieldAsString(utils.OriginID)
+	if err != nil {
+		return fmt.Errorf("could not retrieve OriginID: %w", err)
+	}
+	if originID == "" {
+		return utils.NewErrMandatoryIeMissing(utils.OriginID)
+	}
+	coaTpl := ra.cfg.RadiusAgentCfg().CoATemplate
+	if optTpl, err := cgrEv.OptAsString(utils.MetaRadCoATemplate); err == nil {
+		coaTpl = optTpl
+	}
+	if _, found := ra.cfg.TemplatesCfg()[coaTpl]; !found {
+		return fmt.Errorf("%w: CoA Template %s", utils.ErrNotFound, coaTpl)
+	}
+
+	replyCode, err := ra.sendRadDaReq(radigo.CoARequest, coaTpl,
+		originID, utils.MapStorage(cgrEv.Event), nil)
+	if err != nil {
+		return err
+	}
+	switch replyCode {
+	case radigo.CoAACK:
+		*reply = utils.OK
+	case radigo.CoANAK:
+		return errors.New("received CoANAK from RADIUS client")
+	default:
+		return errors.New("unexpected reply code")
+	}
+	return nil
+}
+
+// sendRadDaReq prepares and sends a Radius CoA/Disconnect Request and returns the reply code or an error.
+func (ra *RadiusAgent) sendRadDaReq(requestType radigo.PacketCode, requestTemplate, sessionID string,
+	requestEv utils.DataProvider, requestVars *utils.DataNode) (radigo.PacketCode, error) {
+	cachedPacket, has := engine.Cache.Get(utils.CacheRadiusPackets, sessionID)
+	if !has {
+		return 0, fmt.Errorf("failed to retrieve packet from cache: %w", utils.ErrNotFound)
+	}
+	packet := cachedPacket.(*radigo.Packet)
+
+	agReq := NewAgentRequest(
+		requestEv, requestVars, nil, nil, nil, nil,
+		ra.cfg.GeneralCfg().DefaultTenant,
+		ra.cfg.GeneralCfg().DefaultTimezone,
+		ra.fltrs, map[string]utils.DataProvider{
+			utils.MetaOReq: newRADataProvider(packet),
+		})
+	err := agReq.SetFields(ra.cfg.TemplatesCfg()[requestTemplate])
+	if err != nil {
+		return 0, fmt.Errorf("could not set attributes: %w", err)
+	}
+
+	remoteAddr, remoteHost, err := daRequestAddress(packet.RemoteAddr().String(),
+		ra.cfg.RadiusAgentCfg().ClientDaAddresses)
+	if err != nil {
+		return 0, fmt.Errorf("retrieving remote address failed: %w", err)
+	}
+	clientOpts := ra.cfg.RadiusAgentCfg().ClientDaAddresses[remoteHost]
+	dynAuthClient, err := radigo.NewClient(clientOpts.Transport, remoteAddr,
+		ra.dacCfg.secrets.GetSecret(remoteHost),
+		ra.dacCfg.dicts.GetInstance(remoteHost),
+		ra.cfg.GeneralCfg().ConnectAttempts, nil, utils.Logger)
+	if err != nil {
+		return 0, fmt.Errorf("dynamic authorization client init failed: %w", err)
+	}
+	dynAuthReq := dynAuthClient.NewRequest(requestType, 1)
+	if err = radAppendAttributes(dynAuthReq, agReq.radDAReq); err != nil {
+		return 0, fmt.Errorf("could not append attributes to the request packet: %w", err)
+	}
+	if clientOpts.Flags.Has(utils.MetaLog) {
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> LOG, sending %s for session with ID '%s' to '%s': %s",
+				utils.RadiusAgent, requestType, sessionID, remoteAddr, utils.ToJSON(dynAuthReq)))
+	}
+	dynAuthReply, err := dynAuthClient.SendRequest(dynAuthReq)
+	if err != nil {
+		return 0, fmt.Errorf("failed to send request: %w", err)
+	}
+	return dynAuthReply.Code, nil
+}
+
+// daRequestAddress ranges over the client_da_addresses map and returns the address configured for a
+// specific client alongside the host.
+func daRequestAddress(remoteAddr string, dynAuthAddresses map[string]config.DAClientOpts) (string, string, error) {
+	if len(dynAuthAddresses) == 0 {
+		return "", "", utils.ErrNotFound
+	}
+	remoteHost, _, err := net.SplitHostPort(remoteAddr)
+	if err != nil {
+		return "", "", err
+	}
+	for host, opts := range dynAuthAddresses {
+		if host == remoteHost {
+			address := opts.Host + ":" + strconv.Itoa(opts.Port)
+			return address, host, nil
+		}
+	}
+	return "", "", utils.ErrNotFound
+}
+
+// V1WarnDisconnect is needed to satisfy the sessions.BiRPClient interface
+func (*RadiusAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
+	return utils.ErrNotImplemented
+}
+
+// V1DisconnectPeer is needed to satisfy the sessions.BiRPClient interface
+func (*RadiusAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
+	return utils.ErrNotImplemented
+}
+
+// V1GetActiveSessionIDs is needed to satisfy the sessions.BiRPClient interface
+func (*RadiusAgent) V1GetActiveSessionIDs(*context.Context, string, *[]*sessions.SessionID) error {
+	return utils.ErrNotImplemented
+}

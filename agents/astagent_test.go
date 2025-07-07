@@ -24,5 +24,5 @@ import (
 )
 
 func TestAAsSessionSClientIface(t *testing.T) {
-	_ = sessions.BiRPClient(new(AsteriskAgent))
+	_ = sessions.BiRPCClient(new(AsteriskAgent))
 }

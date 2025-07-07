@@ -292,31 +292,30 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 }
 
 // V1DisconnectSession is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error) {
-	ssID, has := args.EventStart[utils.OriginID]
+func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) error {
+	ssID, has := cgrEv.Event[utils.OriginID]
 	if !has {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot disconnect session, missing OriginID in event: %s",
-				utils.DiameterAgent, utils.ToJSON(args.EventStart)))
+				utils.DiameterAgent, utils.ToJSON(cgrEv.Event)))
 		return utils.ErrMandatoryIeMissing
 	}
 	originID := ssID.(string)
 	switch da.cgrCfg.DiameterAgentCfg().ForcedDisconnect {
 	case utils.MetaNone:
 		*reply = utils.OK
-		return
+		return nil
 	case utils.MetaASR:
 		return da.sendASR(originID, reply)
 	case utils.MetaRAR:
-		return da.V1ReAuthorize(ctx, originID, reply)
+		return da.V1AlterSession(ctx, utils.CGREvent{Event: cgrEv.Event}, reply)
 	default:
 		return fmt.Errorf("Unsupported request type <%s>", da.cgrCfg.DiameterAgentCfg().ForcedDisconnect)
 	}
 }
 
 // V1GetActiveSessionIDs is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1GetActiveSessionIDs(ctx *context.Context, _ string,
-	sessionIDs *[]*sessions.SessionID) error {
+func (da *DiameterAgent) V1GetActiveSessionIDs(*context.Context, string, *[]*sessions.SessionID) error {
 	return utils.ErrNotImplemented
 }
 
@@ -356,8 +355,12 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 	return
 }
 
-// V1ReAuthorize  sends a rar message to diameter client
-func (da *DiameterAgent) V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error) {
+// V1AlterSession sends a rar message to diameter client
+func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+	originID, err := cgrEv.FieldAsString(utils.OriginID)
+	if err != nil {
+		return fmt.Errorf("could not retrieve OriginID: %w", err)
+	}
 	if originID == "" {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot send RAR, missing session ID",
@@ -540,6 +543,6 @@ func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRA
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (*DiameterAgent) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
+func (*DiameterAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }

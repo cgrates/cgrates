@@ -438,9 +438,10 @@ func (fsa *FSsessions) Shutdown() (err error) {
 }
 
 // V1DisconnectSession internal method to disconnect session in FreeSWITCH
-func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, args utils.AttrDisconnectSession, reply *string) (err error) {
-	ev := engine.NewMapEvent(args.EventStart)
+func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+	ev := engine.NewMapEvent(cgrEv.Event)
 	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
+	disconnectCause := ev.GetStringIgnoreErrors(utils.DisconnectCause)
 	connIdx, err := ev.GetTInt64(FsConnID)
 	if err != nil {
 		utils.Logger.Err(
@@ -455,7 +456,7 @@ func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, args utils.Attr
 	}
 	if err = fsa.disconnectSession(int(connIdx), channelID,
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(CALL_DEST_NR), ev.GetStringIgnoreErrors(SIP_REQ_USER)),
-		args.Reason); err != nil {
+		disconnectCause); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -506,13 +507,13 @@ func (fsa *FSsessions) Reload() {
 	fsa.senderPools = make([]*fsock.FSockPool, len(fsa.cfg.EventSocketConns))
 }
 
-// V1ReAuthorize is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1ReAuthorize(ctx *context.Context, originID string, reply *string) (err error) {
+// V1AlterSession is used to implement the sessions.BiRPClient interface
+func (*FSsessions) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
+func (*FSsessions) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 

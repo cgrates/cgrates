@@ -440,29 +440,6 @@ func TestDeactivateSessions(t *testing.T) {
 	}
 }
 
-func TestReAuthorize(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	connMgr := engine.NewConnManager(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
-	cfg.SessionSCfg().CDRsConns = []string{"*internal"}
-	ssv1 := &SessionSv1{
-		ping: struct{}{},
-		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
-	}
-
-	var reply string
-	args := &utils.SessionFilter{
-		Limit:   utils.IntPointer(2),
-		Filters: []string{},
-		Tenant:  "cgrates.org",
-		APIOpts: map[string]any{},
-	}
-	if err := ssv1.ReAuthorize(context.Background(), args, &reply); err != utils.ErrNotFound {
-		t.Errorf("Expected %v\n but received %v", utils.ErrNotFound, err)
-	}
-}
-
 func TestDisconnectPeer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	connMgr := engine.NewConnManager(cfg)

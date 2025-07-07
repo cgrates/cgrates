@@ -32,7 +32,7 @@ var (
 	GitCommitHash string // If set, it will be processed as part of versioning
 
 	extraDBPartition = NewStringSet([]string{
-		CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
+		CacheDiameterMessages, CacheRadiusPackets, CacheRPCResponses, CacheClosedSessions,
 		CacheCDRIDs, CacheRPCConnections, CacheUCH, CacheSTIR, CacheEventCharges, MetaAPIBan, MetaSentryPeer,
 		CacheCapsEvents, CacheReplicationHosts})
 
@@ -641,6 +641,7 @@ const (
 	MetaUrl                  = "*url"
 	MetaZip                  = "*zip"
 	MetaXml                  = "*xml"
+	MetaOReq                 = "*oreq"
 	MetaReq                  = "*req"
 	MetaVars                 = "*vars"
 	MetaRep                  = "*rep"
@@ -785,6 +786,9 @@ const (
 	MetaLoaders             = "*loaders"
 	TmpSuffix               = ".tmp"
 	MetaDiamreq             = "*diamreq"
+	MetaRadDAReq            = "*radDAReq"
+	MetaRadCoATemplate      = "*radCoATemplate"
+	MetaRadDMRTemplate      = "*radDMRTemplate"
 	MetaCost                = "*cost"
 	MetaRateSCost           = "*rateSCost"
 	MetaAccountSCost        = "*accountSCost"
@@ -1050,7 +1054,13 @@ const (
 	MetaSum      = "*sum"
 	MetaAverage  = "*average"
 	MetaDistinct = "*distinct"
-	MetaRAR      = "*rar"
+)
+
+// Diameter/Radius request types
+const (
+	MetaRAR = "*rar"
+	MetaDMR = "*dmr"
+	MetaCoA = "*coa"
 )
 
 // Services
@@ -1671,7 +1681,6 @@ const (
 	SessionSv1ProcessMessage             = "SessionSv1.ProcessMessage"
 	SessionSv1ProcessEvent               = "SessionSv1.ProcessEvent"
 	SessionSv1GetCost                    = "SessionSv1.GetCost"
-	SessionSv1DisconnectSession          = "SessionSv1.DisconnectSession"
 	SessionSv1GetActiveSessions          = "SessionSv1.GetActiveSessions"
 	SessionSv1GetActiveSessionsCount     = "SessionSv1.GetActiveSessionsCount"
 	SessionSv1ForceDisconnect            = "SessionSv1.ForceDisconnect"
@@ -1679,17 +1688,25 @@ const (
 	SessionSv1GetPassiveSessionsCount    = "SessionSv1.GetPassiveSessionsCount"
 	SessionSv1SetPassiveSession          = "SessionSv1.SetPassiveSession"
 	SessionSv1Ping                       = "SessionSv1.Ping"
-	SessionSv1GetActiveSessionIDs        = "SessionSv1.GetActiveSessionIDs"
 	SessionSv1RegisterInternalBiJSONConn = "SessionSv1.RegisterInternalBiJSONConn"
 	SessionSv1ReplicateSessions          = "SessionSv1.ReplicateSessions"
 	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
 	SessionSv1DeactivateSessions         = "SessionSv1.DeactivateSessions"
-	SessionSv1ReAuthorize                = "SessionSv1.ReAuthorize"
+	SessionSv1AlterSession               = "SessionSv1.AlterSession"
 	SessionSv1DisconnectPeer             = "SessionSv1.DisconnectPeer"
-	SessionSv1WarnDisconnect             = "SessionSv1.WarnDisconnect"
 	SessionSv1STIRAuthenticate           = "SessionSv1.STIRAuthenticate"
 	SessionSv1STIRIdentity               = "SessionSv1.STIRIdentity"
 	SessionSv1Sleep                      = "SessionSv1.Sleep"
+)
+
+// Agent APIs
+const (
+	AgentV1                    = "AgentV1"
+	AgentV1DisconnectSession   = "AgentV1.DisconnectSession"
+	AgentV1GetActiveSessionIDs = "AgentV1.GetActiveSessionIDs"
+	AgentV1AlterSession        = "AgentV1.AlterSession"
+	AgentV1DisconnectPeer      = "AgentV1.DisconnectPeer"
+	AgentV1WarnDisconnect      = "AgentV1.WarnDisconnect"
 )
 
 // DispatcherS APIs
@@ -1904,6 +1921,7 @@ const (
 	CacheAttributeFilterIndexes      = "*attribute_filter_indexes"
 	CacheChargerFilterIndexes        = "*charger_filter_indexes"
 	CacheDiameterMessages            = "*diameter_messages"
+	CacheRadiusPackets               = "*radius_packets"
 	CacheRPCResponses                = "*rpc_responses"
 	CacheClosedSessions              = "*closed_sessions"
 	CacheRateProfilesFilterIndexes   = "*rate_profile_filter_indexes"
@@ -2262,6 +2280,12 @@ const (
 	AcctAddrCfg           = "acct_address"
 	ClientSecretsCfg      = "client_secrets"
 	ClientDictionariesCfg = "client_dictionaries"
+	ClientDaAddressesCfg  = "client_da_addresses"
+	RequestsCacheKeyCfg   = "requests_cache_key"
+	DMRTemplateCfg        = "dmr_template"
+	CoATemplateCfg        = "coa_template"
+	HostCfg               = "host"
+	PortCfg               = "port"
 
 	// JanusAgentCfg
 	JanusConnsCfg    = "janus_conns"

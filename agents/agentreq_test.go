@@ -275,6 +275,28 @@ func TestAgentRequestSetFields(t *testing.T) {
 		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
 	}
 
+	// case utils.MetaRadDAReq
+	input = []*config.FCTemplate{
+		{
+			Path:  fmt.Sprintf("%s.Account", utils.MetaRadDAReq),
+			Tag:   fmt.Sprintf("%s.Account", utils.MetaRadDAReq),
+			Type:  utils.MetaVariable,
+			Value: utils.NewRSRParsersMustCompile("~"+utils.MetaReq+".Account", utils.InfieldSep),
+		},
+	}
+	input[0].ComputePath()
+	if err := ar.SetFields(input); err != nil {
+		t.Error(err)
+	} else if val, err := ar.radDAReq.FieldAsInterface([]string{"Account"}); err != nil {
+		t.Error(err)
+	} else if nm, ok := val.([]*utils.DataNode); !ok {
+		t.Error("Expecting NM items")
+	} else if len(nm) != 1 {
+		t.Error("Expecting one item")
+	} else if nm[0].Value.Data != "1009" {
+		t.Error("Expecting 1009, received: ", nm[0].Value.Data)
+	}
+
 	//MetaComposed
 	input = []*config.FCTemplate{
 		{
