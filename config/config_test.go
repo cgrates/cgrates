@@ -1547,7 +1547,7 @@ func TestRadiusAgentConfig(t *testing.T) {
 func TestDNSAgentConfig(t *testing.T) {
 	expected := &DNSAgentCfg{
 		Enabled: false,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "127.0.0.1:53",
 				Network: "udp",

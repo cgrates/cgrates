@@ -53,7 +53,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	}
 	expected := &DNSAgentCfg{
 		Enabled: true,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "127.0.0.1:2053",
 				Network: "udp",
@@ -338,7 +338,7 @@ func TestRequestProcessorClone(t *testing.T) {
 func TestDNSAgentCfgClone(t *testing.T) {
 	ban := &DNSAgentCfg{
 		Enabled: true,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "127.0.0.1:2053",
 				Network: "udp",
@@ -384,7 +384,7 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 
 	v1 := &DNSAgentCfg{
 		Enabled: false,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "localhost:8080",
 				Network: "tcp",
@@ -399,7 +399,7 @@ func TestDiffDNSAgentJsonCfg(t *testing.T) {
 
 	v2 := &DNSAgentCfg{
 		Enabled: true,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "localhost:8037",
 				Network: "udp",
@@ -457,7 +457,7 @@ func TestDiffDNSAgentJsonCfgExtraV1(t *testing.T) {
 
 	v1 := &DNSAgentCfg{
 		Enabled: false,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "localhost:8080",
 				Network: "tcp",
@@ -471,7 +471,7 @@ func TestDiffDNSAgentJsonCfgExtraV1(t *testing.T) {
 
 	v2 := &DNSAgentCfg{
 		Enabled: true,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "localhost:8037",
 				Network: "udp",
@@ -505,7 +505,7 @@ func TestDiffDNSAgentJsonCfgExtraV2(t *testing.T) {
 
 	v1 := &DNSAgentCfg{
 		Enabled: false,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "localhost:8080",
 				Network: "tcp",
@@ -515,7 +515,7 @@ func TestDiffDNSAgentJsonCfgExtraV2(t *testing.T) {
 
 	v2 := &DNSAgentCfg{
 		Enabled: true,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "localhost:8037",
 				Network: "udp",
@@ -551,7 +551,7 @@ func TestDiffDNSAgentJsonCfgExtraV2(t *testing.T) {
 func TestDnsAgentCloneSection(t *testing.T) {
 	dnsCfg := &DNSAgentCfg{
 		Enabled: false,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "localhost:8080",
 				Network: "tcp",
@@ -566,7 +566,7 @@ func TestDnsAgentCloneSection(t *testing.T) {
 
 	exp := &DNSAgentCfg{
 		Enabled: false,
-		Listeners: []Listener{
+		Listeners: []DNSListener{
 			{
 				Address: "localhost:8080",
 				Network: "tcp",
