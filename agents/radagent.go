@@ -48,12 +48,13 @@ const (
 	MSCHAP2SuccessAVP  = "MS-CHAP2-Success"
 )
 
-func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS,
-	cm *engine.ConnManager) (*RadiusAgent, error) {
+func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS, cm *engine.ConnManager,
+	caps *engine.Caps) (*RadiusAgent, error) {
 	ra := &RadiusAgent{
 		cfg:   cfg,
 		fltrs: fltrs,
 		cm:    cm,
+		caps:  caps,
 	}
 
 	// Register RadiusAgent methods whose names start with "V1" under the "AgentV1" object name.
@@ -104,6 +105,7 @@ type RadiusAgent struct {
 	wg     sync.WaitGroup
 	cfg    *config.CGRConfig // reference for future config reloads
 	cm     *engine.ConnManager
+	caps   *engine.Caps
 	fltrs  *engine.FilterS
 	rsAuth map[string]*radigo.Server
 	rsAcct map[string]*radigo.Server
@@ -141,6 +143,12 @@ func newRadiusDAClientCfg(dicts *radigo.Dictionaries, secrets *radigo.Secrets,
 
 // handleAuth handles RADIUS Authorization request
 func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, error) {
+	if ra.caps.IsLimited() {
+		if err := ra.caps.Allocate(); err != nil {
+			return reqPacket, err
+		}
+		defer ra.caps.Deallocate()
+	}
 	reqPacket.SetAVPValues() // populate string values in AVPs
 	replyPacket := reqPacket.Reply()
 	replyPacket.Code = radigo.AccessAccept
@@ -195,6 +203,12 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 // handleAcct processes RADIUS Accounting requests and generates a reply.
 // It supports Acct-Status-Type values: Start, Interim-Update, Stop.
 func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, error) {
+	if ra.caps.IsLimited() {
+		if err := ra.caps.Allocate(); err != nil {
+			return nil, err
+		}
+		defer ra.caps.Deallocate()
+	}
 	reqPacket.SetAVPValues() // populate string values in AVPs
 	replyPacket := reqPacket.Reply()
 	replyPacket.Code = radigo.AccountingResponse

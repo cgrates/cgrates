@@ -51,18 +51,20 @@ func (rad *RadiusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
+			utils.CapS,
 		},
 		registry, rad.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
 		return
 	}
-	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-	fs := srvDeps[utils.FilterS].(*FilterService)
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
+	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
+	caps := srvDeps[utils.CapS].(*CapService).Caps()
 
 	rad.mu.Lock()
 	defer rad.mu.Unlock()
 
-	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.FilterS(), cms.ConnManager()); err != nil {
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs, cms, caps); err != nil {
 		return
 	}
 	rad.stopChan = make(chan struct{})
