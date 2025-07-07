@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type Listener struct {
+type DNSListener struct {
 	Address string
 	Network string // udp or tcp
 }
@@ -33,7 +33,7 @@ type Listener struct {
 // DNSAgentCfg the config section that describes the DNS Agent
 type DNSAgentCfg struct {
 	Enabled           bool
-	Listeners         []Listener
+	Listeners         []DNSListener
 	SessionSConns     []string
 	StatSConns        []string
 	ThresholdSConns   []string
@@ -58,9 +58,9 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg) (err error) {
 		da.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Listeners != nil {
-		da.Listeners = make([]Listener, 0, len(*jsnCfg.Listeners))
+		da.Listeners = make([]DNSListener, 0, len(*jsnCfg.Listeners))
 		for _, listnr := range *jsnCfg.Listeners {
-			var ls Listener
+			var ls DNSListener
 			if listnr.Address != nil {
 				ls.Address = *listnr.Address
 			}
@@ -86,7 +86,7 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg) (err error) {
 	return
 }
 
-func (lstn *Listener) AsMapInterface() map[string]any {
+func (lstn *DNSListener) AsMapInterface() map[string]any {
 	return map[string]any{
 		utils.AddressCfg: lstn.Address,
 		utils.NetworkCfg: lstn.Network,
