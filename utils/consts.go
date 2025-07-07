@@ -2258,8 +2258,8 @@ const (
 	ReplyFieldsCfg   = "reply_fields"
 
 	// RadiusAgentCfg
-	ListenAuthCfg         = "listen_auth"
-	ListenAcctCfg         = "listen_acct"
+	AuthAddrCfg           = "auth_address"
+	AcctAddrCfg           = "acct_address"
 	ClientSecretsCfg      = "client_secrets"
 	ClientDictionariesCfg = "client_dictionaries"
 

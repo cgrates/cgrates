@@ -1040,9 +1040,13 @@ const CGRATES_CFG_JSON = `
 
 "radius_agent": {
 	"enabled": false,					// enables the radius agent: <true|false>
-	"listen_net": "udp",					// network to listen on <udp|tcp>
-	"listen_auth": "127.0.0.1:1812",			// address where to listen for radius authentication requests <x.y.z.y:1234>
-	"listen_acct": "127.0.0.1:1813",			// address where to listen for radius accounting requests <x.y.z.y:1234>
+	"listeners":[
+		{
+			"network": "udp",			// network to listen on <udp|tcp>
+			"auth_address": "127.0.0.1:1812",	// address where to listen for radius authentication requests <x.y.z.y:1234>
+			"acct_address": "127.0.0.1:1813"	// address where to listen for radius accounting requests <x.y.z.y:1234>
+		}
+	],
 	"client_secrets": {					// hash containing secrets for clients connecting here <*default|$client_ip>
 		"*default": "CGRateS.org"
 	},

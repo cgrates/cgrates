@@ -42,9 +42,6 @@ type RadiusAgent struct {
 	cfg       *config.CGRConfig
 	stopChan  chan struct{}
 	rad       *agents.RadiusAgent
-	lnet      string
-	lauth     string
-	lacct     string
 	stateDeps *StateDependencies // channel subscriptions for state changes
 }
 
@@ -65,10 +62,6 @@ func (rad *RadiusAgent) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	rad.mu.Lock()
 	defer rad.mu.Unlock()
 
-	rad.lnet = rad.cfg.RadiusAgentCfg().ListenNet
-	rad.lauth = rad.cfg.RadiusAgentCfg().ListenAuth
-	rad.lacct = rad.cfg.RadiusAgentCfg().ListenAcct
-
 	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, fs.FilterS(), cms.ConnManager()); err != nil {
 		return
 	}
@@ -88,27 +81,21 @@ func (rad *RadiusAgent) listenAndServe(r *agents.RadiusAgent, shutdown *utils.Sy
 
 // Reload handles the change of config
 func (rad *RadiusAgent) Reload(shutdown *utils.SyncedChan, registry *servmanager.ServiceRegistry) (err error) {
-	if rad.lnet == rad.cfg.RadiusAgentCfg().ListenNet &&
-		rad.lauth == rad.cfg.RadiusAgentCfg().ListenAuth &&
-		rad.lacct == rad.cfg.RadiusAgentCfg().ListenAcct {
-		return
-	}
-
-	rad.shutdown()
+	rad.Shutdown(registry)
 	return rad.Start(shutdown, registry)
 }
 
 // Shutdown stops the service
-func (rad *RadiusAgent) Shutdown(_ *servmanager.ServiceRegistry) (err error) {
-	rad.shutdown()
-	return // no shutdown for the momment
-}
-
-func (rad *RadiusAgent) shutdown() {
+func (rad *RadiusAgent) Shutdown(_ *servmanager.ServiceRegistry) error {
+	if rad.rad == nil {
+		return nil
+	}
+	close(rad.stopChan)
+	rad.rad.Wait()
 	rad.mu.Lock()
 	defer rad.mu.Unlock()
-	close(rad.stopChan)
 	rad.rad = nil
+	return nil
 }
 
 // ServiceName returns the service name
