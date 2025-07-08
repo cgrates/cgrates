@@ -13,4 +13,6 @@ Welcome to `CGRateS`_'s documentation!
 
    installation
    configuration
+   core_concepts
+   components
    troubleshooting
