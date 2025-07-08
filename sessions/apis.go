@@ -164,7 +164,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 			utils.IPsV1AuthorizeIP, args, &allocIP); err != nil {
 			return utils.NewErrIPs(err)
 		}
-		authReply.IPAllocation = &allocIP
+		authReply.AllocatedIP = &allocIP
 	}
 	if routeS {
 		routesReply, err := sS.getRoutes(ctx, args.Clone())
@@ -386,7 +386,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 			utils.IPsV1AllocateIP, args, &allocIP); err != nil {
 			return utils.NewErrIPs(err)
 		}
-		rply.IPAllocation = &allocIP
+		rply.AllocatedIP = &allocIP
 		defer func() { // we need to release the IPs back in case of errors
 			if err != nil {
 				var reply string

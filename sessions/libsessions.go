@@ -438,7 +438,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() map[string]*utils.DataNode
 type V1AuthorizeReply struct {
 	Attributes         *attributes.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                            `json:",omitempty"`
-	IPAllocation       *utils.AllocatedIP                 `json:",omitempty"`
+	AllocatedIP        *utils.AllocatedIP                 `json:",omitempty"`
 	MaxUsage           *utils.Decimal                     `json:",omitempty"`
 	RouteProfiles      routes.SortedRoutesList            `json:",omitempty"`
 	ThresholdIDs       *[]string                          `json:",omitempty"`
@@ -471,12 +471,11 @@ func (r *V1AuthorizeReply) AsNavigableMap() map[string]*utils.DataNode {
 		}
 		cgrReply[utils.CapAttributes] = attrs
 	}
-	if r.IPAllocation != nil {
-		alloc := &utils.DataNode{
+	if r.AllocatedIP != nil {
+		cgrReply[utils.AllocatedIPField] = &utils.DataNode{
 			Type: utils.NMMapType,
-			Map:  r.IPAllocation.AsNavigableMap(),
+			Map:  r.AllocatedIP.AsNavigableMap(),
 		}
-		cgrReply[utils.CapIPAllocation] = alloc
 	}
 	if r.ResourceAllocation != nil {
 		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*r.ResourceAllocation)
@@ -522,7 +521,7 @@ type V1AuthorizeReplyWithDigest struct {
 type V1InitSessionReply struct {
 	Attributes         *attributes.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                            `json:",omitempty"`
-	IPAllocation       *utils.AllocatedIP                 `json:",omitempty"`
+	AllocatedIP        *utils.AllocatedIP                 `json:",omitempty"`
 	MaxUsage           *time.Duration                     `json:",omitempty"`
 	ThresholdIDs       *[]string                          `json:",omitempty"`
 	StatQueueIDs       *[]string                          `json:",omitempty"`
@@ -554,12 +553,11 @@ func (r *V1InitSessionReply) AsNavigableMap() map[string]*utils.DataNode {
 		}
 		cgrReply[utils.CapAttributes] = attrs
 	}
-	if r.IPAllocation != nil {
-		alloc := &utils.DataNode{
+	if r.AllocatedIP != nil {
+		cgrReply[utils.AllocatedIPField] = &utils.DataNode{
 			Type: utils.NMMapType,
-			Map:  r.IPAllocation.AsNavigableMap(),
+			Map:  r.AllocatedIP.AsNavigableMap(),
 		}
-		cgrReply[utils.CapIPAllocation] = alloc
 	}
 	if r.ResourceAllocation != nil {
 		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*r.ResourceAllocation)
