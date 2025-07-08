@@ -438,7 +438,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() map[string]*utils.DataNode
 type V1AuthorizeReply struct {
 	Attributes         *attributes.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                            `json:",omitempty"`
-	IPAllocation       *string                            `json:",omitempty"`
+	IPAllocation       *utils.AllocatedIP                 `json:",omitempty"`
 	MaxUsage           *utils.Decimal                     `json:",omitempty"`
 	RouteProfiles      routes.SortedRoutesList            `json:",omitempty"`
 	ThresholdIDs       *[]string                          `json:",omitempty"`
@@ -449,51 +449,58 @@ type V1AuthorizeReply struct {
 
 // SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
 // only used for gob encoding
-func (v1AuthReply *V1AuthorizeReply) SetMaxUsageNeeded(getMaxUsage bool) {
-	if v1AuthReply == nil {
+func (r *V1AuthorizeReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if r == nil {
 		return
 	}
-	v1AuthReply.needsMaxUsage = getMaxUsage
+	r.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1AuthReply *V1AuthorizeReply) AsNavigableMap() map[string]*utils.DataNode {
+func (r *V1AuthorizeReply) AsNavigableMap() map[string]*utils.DataNode {
 	cgrReply := make(map[string]*utils.DataNode)
-	if v1AuthReply.Attributes != nil {
+	if r.Attributes != nil {
 		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, altered := range v1AuthReply.Attributes.AlteredFields {
+		for _, altered := range r.Attributes.AlteredFields {
 			for _, fldName := range altered.Fields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-				if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
-					attrs.Map[fldName] = utils.NewLeafNode(v1AuthReply.Attributes.CGREvent.Event[fldName])
+				if r.Attributes.CGREvent.HasField(fldName) {
+					attrs.Map[fldName] = utils.NewLeafNode(r.Attributes.CGREvent.Event[fldName])
 				}
 			}
 		}
 		cgrReply[utils.CapAttributes] = attrs
 	}
-	if v1AuthReply.ResourceAllocation != nil {
-		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*v1AuthReply.ResourceAllocation)
+	if r.IPAllocation != nil {
+		alloc := &utils.DataNode{
+			Type: utils.NMMapType,
+			Map:  r.IPAllocation.AsNavigableMap(),
+		}
+		cgrReply[utils.CapIPAllocation] = alloc
 	}
-	if v1AuthReply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(v1AuthReply.MaxUsage)
-	} else if v1AuthReply.needsMaxUsage {
+	if r.ResourceAllocation != nil {
+		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*r.ResourceAllocation)
+	}
+	if r.MaxUsage != nil {
+		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(r.MaxUsage)
+	} else if r.needsMaxUsage {
 		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(0)
 	}
 
-	if v1AuthReply.RouteProfiles != nil {
-		nm := v1AuthReply.RouteProfiles.AsNavigableMap()
+	if r.RouteProfiles != nil {
+		nm := r.RouteProfiles.AsNavigableMap()
 		cgrReply[utils.CapRouteProfiles] = nm
 	}
-	if v1AuthReply.ThresholdIDs != nil {
-		thIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1AuthReply.ThresholdIDs))}
-		for i, v := range *v1AuthReply.ThresholdIDs {
+	if r.ThresholdIDs != nil {
+		thIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*r.ThresholdIDs))}
+		for i, v := range *r.ThresholdIDs {
 			thIDs.Slice[i] = utils.NewLeafNode(v)
 		}
 		cgrReply[utils.CapThresholds] = thIDs
 	}
-	if v1AuthReply.StatQueueIDs != nil {
-		stIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1AuthReply.StatQueueIDs))}
-		for i, v := range *v1AuthReply.StatQueueIDs {
+	if r.StatQueueIDs != nil {
+		stIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*r.StatQueueIDs))}
+		for i, v := range *r.StatQueueIDs {
 			stIDs.Slice[i] = utils.NewLeafNode(v)
 		}
 		cgrReply[utils.CapStatQueues] = stIDs
@@ -515,7 +522,7 @@ type V1AuthorizeReplyWithDigest struct {
 type V1InitSessionReply struct {
 	Attributes         *attributes.AttrSProcessEventReply `json:",omitempty"`
 	ResourceAllocation *string                            `json:",omitempty"`
-	IPAllocation       *string                            `json:",omitempty"`
+	IPAllocation       *utils.AllocatedIP                 `json:",omitempty"`
 	MaxUsage           *time.Duration                     `json:",omitempty"`
 	ThresholdIDs       *[]string                          `json:",omitempty"`
 	StatQueueIDs       *[]string                          `json:",omitempty"`
@@ -525,47 +532,54 @@ type V1InitSessionReply struct {
 
 // SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
 // only used for gob encoding
-func (v1Rply *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
-	if v1Rply == nil {
+func (r *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if r == nil {
 		return
 	}
-	v1Rply.needsMaxUsage = getMaxUsage
+	r.needsMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1InitSessionReply) AsNavigableMap() map[string]*utils.DataNode {
+func (r *V1InitSessionReply) AsNavigableMap() map[string]*utils.DataNode {
 	cgrReply := make(map[string]*utils.DataNode)
-	if v1Rply.Attributes != nil {
+	if r.Attributes != nil {
 		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, altered := range v1Rply.Attributes.AlteredFields {
+		for _, altered := range r.Attributes.AlteredFields {
 			for _, fldName := range altered.Fields {
 				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-				if v1Rply.Attributes.CGREvent.HasField(fldName) {
-					attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
+				if r.Attributes.CGREvent.HasField(fldName) {
+					attrs.Map[fldName] = utils.NewLeafNode(r.Attributes.CGREvent.Event[fldName])
 				}
 			}
 		}
 		cgrReply[utils.CapAttributes] = attrs
 	}
-	if v1Rply.ResourceAllocation != nil {
-		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*v1Rply.ResourceAllocation)
+	if r.IPAllocation != nil {
+		alloc := &utils.DataNode{
+			Type: utils.NMMapType,
+			Map:  r.IPAllocation.AsNavigableMap(),
+		}
+		cgrReply[utils.CapIPAllocation] = alloc
 	}
-	if v1Rply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(*v1Rply.MaxUsage)
-	} else if v1Rply.needsMaxUsage {
+	if r.ResourceAllocation != nil {
+		cgrReply[utils.CapResourceAllocation] = utils.NewLeafNode(*r.ResourceAllocation)
+	}
+	if r.MaxUsage != nil {
+		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(*r.MaxUsage)
+	} else if r.needsMaxUsage {
 		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(0)
 	}
 
-	if v1Rply.ThresholdIDs != nil {
-		thIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1Rply.ThresholdIDs))}
-		for i, v := range *v1Rply.ThresholdIDs {
+	if r.ThresholdIDs != nil {
+		thIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*r.ThresholdIDs))}
+		for i, v := range *r.ThresholdIDs {
 			thIDs.Slice[i] = utils.NewLeafNode(v)
 		}
 		cgrReply[utils.CapThresholds] = thIDs
 	}
-	if v1Rply.StatQueueIDs != nil {
-		stIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*v1Rply.StatQueueIDs))}
-		for i, v := range *v1Rply.StatQueueIDs {
+	if r.StatQueueIDs != nil {
+		stIDs := &utils.DataNode{Type: utils.NMSliceType, Slice: make([]*utils.DataNode, len(*r.StatQueueIDs))}
+		for i, v := range *r.StatQueueIDs {
 			stIDs.Slice[i] = utils.NewLeafNode(v)
 		}
 		cgrReply[utils.CapStatQueues] = stIDs
