@@ -1,0 +1,446 @@
+{
+  "radius_agent": {
+    "request_processors": [
+      {
+        "id": "IPSAccountingStart",
+        "filters": [
+          "*string:~*req.Acct-Status-Type:Start"
+        ],
+        "flags": [
+          "*initiate",
+          "*ips"
+        ],
+        "request_fields": [
+          {
+            "tag": "Category",
+            "path": "*cgreq.Category",
+            "type": "*constant",
+            "value": "ips"
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*prepaid",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginID",
+            "path": "*opts.*originID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginHost",
+            "path": "*cgreq.OriginHost",
+            "type": "*variable",
+            "value": "~*req.NAS-IP-Address",
+            "mandatory": true
+          },
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "Subject",
+            "path": "*cgreq.Subject",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "Destination",
+            "path": "*cgreq.Destination",
+            "type": "*variable",
+            "value": "~*req.Called-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "SetupTime",
+            "path": "*cgreq.SetupTime",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+          {
+            "tag": "AnswerTime",
+            "path": "*cgreq.AnswerTime",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+          {
+            "tag": "IMSI",
+            "path": "*cgreq.IMSI",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "APN",
+            "path": "*cgreq.APN",
+            "type": "*variable",
+            "value": "~*req.Called-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "CallingStationId",
+            "path": "*cgreq.CallingStationId",
+            "type": "*variable",
+            "value": "~*req.Calling-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "NAS-Identifier",
+            "path": "*cgreq.NAS-Identifier",
+            "type": "*variable",
+            "value": "~*req.NAS-Identifier",
+            "mandatory": true
+          },
+          {
+            "tag": "ServiceType",
+            "path": "*cgreq.ServiceType",
+            "type": "*variable",
+            "value": "~*req.Service-Type",
+            "mandatory": true
+          },
+          {
+            "tag": "FramedProtocol",
+            "path": "*cgreq.FramedProtocol",
+            "type": "*variable",
+            "value": "~*req.Framed-Protocol",
+            "mandatory": true
+          },
+          {
+            "tag": "NASPortType",
+            "path": "*cgreq.NASPortType",
+            "type": "*variable",
+            "value": "~*req.NAS-Port-Type",
+            "mandatory": true
+          },
+          {
+            "tag": "AcctAuthentic",
+            "path": "*cgreq.AcctAuthentic",
+            "type": "*variable",
+            "value": "~*req.Acct-Authentic",
+            "mandatory": true
+          },
+          {
+            "tag": "AcctDelayTime",
+            "path": "*cgreq.AcctDelayTime",
+            "type": "*variable",
+            "value": "~*req.Acct-Delay-Time",
+            "mandatory": true
+          },
+          {
+            "tag": "AllocatedIP",
+            "path": "*cgreq.AllocatedIP",
+            "type": "*variable",
+            "value": "~*req.Framed-IP-Address",
+            "mandatory": true
+          },
+          {
+            "tag": "SessionID",
+            "path": "*vars.*sessionID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id"
+          },
+          {
+            "tag": "RemoteAddr",
+            "path": "*cgreq.RemoteAddr",
+            "type": "*variable",
+            "value": "~*vars.RemoteHost:s/(.*):\\d+/${1}/"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "ProxyState",
+            "path": "*rep.Proxy-State",
+            "type": "*variable",
+            "value": "~*req.Proxy-State",
+            "mandatory": true
+          }
+        ]
+      },
+      {
+        "id": "IPSAccountingAlive",
+        "filters": [
+          "*string:~*req.Acct-Status-Type:Alive"
+        ],
+        "flags": [
+          "*update"
+        ],
+        "request_fields": [
+          {
+            "tag": "Category",
+            "path": "*cgreq.Category",
+            "type": "*constant",
+            "value": "ips"
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*prepaid",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginID",
+            "path": "*opts.*originID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "Subject",
+            "path": "*cgreq.Subject",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "Destination",
+            "path": "*cgreq.Destination",
+            "type": "*variable",
+            "value": "~*req.Called-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "SetupTime",
+            "path": "*cgreq.SetupTime",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+          {
+            "tag": "IMSI",
+            "path": "*cgreq.IMSI",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "APN",
+            "path": "*cgreq.APN",
+            "type": "*variable",
+            "value": "~*req.Called-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "CallingStationId",
+            "path": "*cgreq.CallingStationId",
+            "type": "*variable",
+            "value": "~*req.Calling-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "NAS-Identifier",
+            "path": "*cgreq.NAS-Identifier",
+            "type": "*variable",
+            "value": "~*req.NAS-Identifier",
+            "mandatory": true
+          },
+          {
+            "tag": "ServiceType",
+            "path": "*cgreq.ServiceType",
+            "type": "*variable",
+            "value": "~*req.Service-Type",
+            "mandatory": true
+          },
+          {
+            "tag": "FramedProtocol",
+            "path": "*cgreq.FramedProtocol",
+            "type": "*variable",
+            "value": "~*req.Framed-Protocol",
+            "mandatory": true
+          },
+          {
+            "tag": "AcctInputOctets",
+            "path": "*cgreq.AcctInputOctets",
+            "type": "*variable",
+            "value": "~*req.Acct-Input-Octets",
+            "mandatory": true
+          },
+          {
+            "tag": "AcctOutputOctets",
+            "path": "*cgreq.AcctOutputOctets",
+            "type": "*variable",
+            "value": "~*req.Acct-Output-Octets",
+            "mandatory": true
+          },
+          {
+            "tag": "SessionID",
+            "path": "*vars.*sessionID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "ProxyState",
+            "path": "*rep.Proxy-State",
+            "type": "*variable",
+            "value": "~*req.Proxy-State",
+            "mandatory": true
+          }
+        ]
+      },
+      {
+        "id": "IPSAccountingStop",
+        "filters": [
+          "*string:~*req.Acct-Status-Type:Stop"
+        ],
+        "flags": [
+          "*terminate",
+          "*ips"
+        ],
+        "request_fields": [
+          {
+            "tag": "Category",
+            "path": "*cgreq.Category",
+            "type": "*constant",
+            "value": "ips"
+          },
+          {
+            "tag": "RequestType",
+            "path": "*cgreq.RequestType",
+            "type": "*constant",
+            "value": "*prepaid",
+            "mandatory": true
+          },
+          {
+            "tag": "OriginID",
+            "path": "*opts.*originID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "Account",
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "Subject",
+            "path": "*cgreq.Subject",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "Destination",
+            "path": "*cgreq.Destination",
+            "type": "*variable",
+            "value": "~*req.Called-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "SetupTime",
+            "path": "*cgreq.SetupTime",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+          {
+            "tag": "Usage",
+            "path": "*cgreq.Usage",
+            "type": "*variable",
+            "value": "~*req.Event-Timestamp",
+            "mandatory": true
+          },
+          {
+            "tag": "IMSI",
+            "path": "*cgreq.IMSI",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "tag": "APN",
+            "path": "*cgreq.APN",
+            "type": "*variable",
+            "value": "~*req.Called-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "CallingStationId",
+            "path": "*cgreq.CallingStationId",
+            "type": "*variable",
+            "value": "~*req.Calling-Station-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "NAS-Identifier",
+            "path": "*cgreq.NAS-Identifier",
+            "type": "*variable",
+            "value": "~*req.NAS-Identifier",
+            "mandatory": true
+          },
+          {
+            "tag": "ServiceType",
+            "path": "*cgreq.ServiceType",
+            "type": "*variable",
+            "value": "~*req.Service-Type",
+            "mandatory": true
+          },
+          {
+            "tag": "FramedProtocol",
+            "path": "*cgreq.FramedProtocol",
+            "type": "*variable",
+            "value": "~*req.Framed-Protocol",
+            "mandatory": true
+          },
+          {
+            "tag": "AcctInputOctets",
+            "path": "*cgreq.AcctInputOctets",
+            "type": "*variable",
+            "value": "~*req.Acct-Input-Octets",
+            "mandatory": true
+          },
+          {
+            "tag": "AcctOutputOctets",
+            "path": "*cgreq.AcctOutputOctets",
+            "type": "*variable",
+            "value": "~*req.Acct-Output-Octets",
+            "mandatory": true
+          },
+          {
+            "tag": "AcctTerminateCause",
+            "path": "*cgreq.AcctTerminateCause",
+            "type": "*variable",
+            "value": "~*req.Acct-Terminate-Cause",
+            "mandatory": true
+          },
+          {
+            "tag": "SessionID",
+            "path": "*vars.*sessionID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id"
+          }
+        ],
+        "reply_fields": [
+          {
+            "tag": "ProxyState",
+            "path": "*rep.Proxy-State",
+            "type": "*variable",
+            "value": "~*req.Proxy-State",
+            "mandatory": true
+          }
+        ]
+      }
+    ]
+  }
+}
