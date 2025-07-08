@@ -387,6 +387,16 @@ type AllocatedIP struct {
 	Address   netip.Addr
 }
 
+// AsNavigableMap implements engine.NavigableMapper.
+func (ip *AllocatedIP) AsNavigableMap() map[string]*DataNode {
+	return map[string]*DataNode{
+		ProfileID: NewLeafNode(ip.ProfileID),
+		PoolID:    NewLeafNode(ip.PoolID),
+		Message:   NewLeafNode(ip.Message),
+		Address:   NewLeafNode(ip.Address.String()),
+	}
+}
+
 // IPAllocations represents IP allocations with usage tracking and TTL management.
 type IPAllocations struct {
 	Tenant      string

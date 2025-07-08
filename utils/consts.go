@@ -807,6 +807,7 @@ const (
 	MetaFD                  = "*fd"
 	SortingData             = "SortingData"
 	ProfileID               = "ProfileID"
+	PoolID                  = "PoolID"
 	SortedRoutes            = "SortedRoutes"
 	MetaMonthly             = "*monthly"
 	MetaYearly              = "*yearly"
