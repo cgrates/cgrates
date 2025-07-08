@@ -70,8 +70,8 @@ func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS, cm *engine.Con
 	dts := make(map[string]*radigo.Dictionary, len(raCfg.ClientDictionaries))
 	for clntID, dictPath := range raCfg.ClientDictionaries {
 		utils.Logger.Info(fmt.Sprintf(
-			"<%s> loading dictionary for clientID %q out of path %q",
-			utils.RadiusAgent, clntID, dictPath))
+			"<%s> loading dictionary for clientID %q out of path(s): %s",
+			utils.RadiusAgent, clntID, strings.Join(dictPath, ", ")))
 		dt, err := radigo.NewDictionaryFromFoldersWithRFC2865(dictPath)
 		if err != nil {
 			return nil, err
