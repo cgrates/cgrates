@@ -3140,3 +3140,288 @@ func TestFiltersgetFieldValueDataProvider(t *testing.T) {
 		})
 	}
 }
+
+func TestFiltersPassNIString(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			utils.Destination: "1002",
+			utils.Category:    "call",
+		},
+	}
+
+	tests := []struct {
+		name string
+		fltr *FilterRule
+		want bool
+	}{
+		{
+			name: "NIStringMatch",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIString,
+				Element: "~*req.Category",
+				Values:  []string{"call"},
+			},
+			want: true,
+		},
+		{
+			name: "NIStringNotMatch",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIString,
+				Element: "~*req.Category",
+				Values:  []string{"premium"},
+			},
+			want: false,
+		},
+		{
+			name: "NIStringMultipleValues",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIString,
+				Element: "~*req.Destination",
+				Values:  []string{"1001", "1002", "1003"},
+			},
+			want: true,
+		},
+	}
+	var fS *FilterS
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.fltr.CompileValues(); err != nil {
+				t.Fatal(err)
+			}
+			fieldNameDP, err := fS.getFieldNameDataProvider(ev, tt.fltr.Element, utils.EmptyString)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fieldValuesDP, err := fS.getFieldValuesDataProviders(ev, tt.fltr.Values, utils.EmptyString)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, gotErr := tt.fltr.Pass(fieldNameDP, fieldValuesDP)
+			if gotErr != nil {
+				t.Errorf("Pass() failed: %v", gotErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Pass() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFiltersPassNISuffix(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			utils.Account:     "1001",
+			utils.Destination: "+4985837291",
+			utils.Category:    "call",
+		},
+	}
+
+	tests := []struct {
+		name string
+		fltr *FilterRule
+		want bool
+	}{
+		{
+			name: "MatchingNISuffix",
+			fltr: &FilterRule{
+				Type:    utils.MetaNISuffix,
+				Element: "~*req.Destination",
+				Values:  []string{"91"},
+			},
+			want: true,
+		},
+		{
+			name: "NonMatchingSuffix",
+			fltr: &FilterRule{
+				Type:    utils.MetaNISuffix,
+				Element: "~*req.Account",
+				Values:  []string{"02"},
+			},
+			want: false,
+		},
+		{
+			name: "NISuffixPassMultipleValues",
+			fltr: &FilterRule{
+				Type:    utils.MetaNISuffix,
+				Element: "~*req.Destination",
+				Values:  []string{"3", "91", "22"},
+			},
+			want: true,
+		},
+	}
+
+	var fS *FilterS
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.fltr.CompileValues(); err != nil {
+				t.Fatal(err)
+			}
+			fieldNameDP, err := fS.getFieldNameDataProvider(ev, tt.fltr.Element, utils.EmptyString)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fieldValuesDP, err := fS.getFieldValuesDataProviders(ev, tt.fltr.Values, utils.EmptyString)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := tt.fltr.Pass(fieldNameDP, fieldValuesDP)
+			if err != nil {
+				t.Errorf("Pass() error = %v", err)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Pass() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFiltersPassNIExists(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+			utils.Category:    "call",
+		},
+	}
+
+	tests := []struct {
+		name string
+		fltr *FilterRule
+		want bool
+	}{
+		{
+			name: "NIExistsField",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIExists,
+				Element: "~*req.Category",
+				Values:  []string{},
+			},
+			want: true,
+		},
+		{
+			name: "NonNIExistentField",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIExists,
+				Element: "~*req.NonExistentField",
+				Values:  []string{},
+			},
+			want: false,
+		},
+		{
+			name: "NIExistsAccount",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIExists,
+				Element: "~*req.Account",
+				Values:  []string{},
+			},
+			want: true,
+		},
+		{
+			name: "NIExistsDestination",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIExists,
+				Element: "~*req.Destination",
+				Values:  []string{},
+			},
+			want: true,
+		},
+	}
+
+	var fS *FilterS
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.fltr.CompileValues(); err != nil {
+				t.Fatal(err)
+			}
+
+			fieldNameDP, err := fS.getFieldNameDataProvider(ev, tt.fltr.Element, utils.EmptyString)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fieldValuesDP, err := fS.getFieldValuesDataProviders(ev, tt.fltr.Values, utils.EmptyString)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			got, err := tt.fltr.Pass(fieldNameDP, fieldValuesDP)
+			if err != nil {
+				t.Errorf("Pass() error = %v", err)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Pass() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFiltersPassNIPrefix(t *testing.T) {
+	ev := utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			utils.Account:     "1001",
+			utils.Destination: "+4985837291",
+			utils.Category:    "call",
+		},
+	}
+
+	tests := []struct {
+		name string
+		fltr *FilterRule
+		want bool
+	}{
+		{
+			name: "MatchingNIPrefix",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIPrefix,
+				Element: "~*req.Destination",
+				Values:  []string{"+49"},
+			},
+			want: true,
+		},
+		{
+			name: "NonMatchingNIPrefix",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIPrefix,
+				Element: "~*req.Account",
+				Values:  []string{"20"},
+			},
+			want: false,
+		},
+		{
+			name: "NIPrefixPassMultipleValues",
+			fltr: &FilterRule{
+				Type:    utils.MetaNIPrefix,
+				Element: "~*req.Destination",
+				Values:  []string{"+49", "+21", "+35"},
+			},
+			want: true,
+		},
+	}
+
+	var fS *FilterS
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.fltr.CompileValues(); err != nil {
+				t.Fatal(err)
+			}
+			fieldNameDP, err := fS.getFieldNameDataProvider(ev, tt.fltr.Element, utils.EmptyString)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fieldValuesDP, err := fS.getFieldValuesDataProviders(ev, tt.fltr.Values, utils.EmptyString)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := tt.fltr.Pass(fieldNameDP, fieldValuesDP)
+			if err != nil {
+				t.Errorf("Pass() error = %v", err)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Pass() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -207,15 +207,15 @@ func (fltr *FilterRule) Pass(fieldNameDP utils.DataProvider,
 	}
 
 	switch fltr.Type {
-	case utils.MetaString, utils.MetaNotString:
+	case utils.MetaString, utils.MetaNotString, utils.MetaNIString:
 		result, err = fltr.passString(fieldNameDP, fieldValuesDP)
 	case utils.MetaEmpty, utils.MetaNotEmpty:
 		result, err = fltr.passEmpty(fieldNameDP)
-	case utils.MetaExists, utils.MetaNotExists:
+	case utils.MetaExists, utils.MetaNotExists, utils.MetaNIExists:
 		result, err = fltr.passExists(fieldNameDP)
-	case utils.MetaPrefix, utils.MetaNotPrefix:
+	case utils.MetaPrefix, utils.MetaNotPrefix, utils.MetaNIPrefix:
 		result, err = fltr.passStringPrefix(fieldNameDP, fieldValuesDP)
-	case utils.MetaSuffix, utils.MetaNotSuffix:
+	case utils.MetaSuffix, utils.MetaNotSuffix, utils.MetaNISuffix:
 		result, err = fltr.passStringSuffix(fieldNameDP, fieldValuesDP)
 	case utils.MetaTimings, utils.MetaNotTimings:
 		result, err = fltr.passTimings(fieldNameDP, fieldValuesDP)
