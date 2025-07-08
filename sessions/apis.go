@@ -137,7 +137,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		if len(sS.cfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
-		originID, _ := args.FieldAsString(utils.OriginID)
+		originID, _ := args.OptAsString(utils.MetaOriginID)
 		if originID == "" {
 			originID = utils.UUIDSha1Prefix()
 		}
@@ -154,7 +154,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(ctx *context.Context,
 		if len(sS.cfg.SessionSCfg().IPsConns) == 0 {
 			return utils.NewErrNotConnected(utils.IPs)
 		}
-		originID, _ := args.FieldAsString(utils.OriginID)
+		originID, _ := args.OptAsString(utils.MetaOriginID)
 		if originID == "" {
 			originID = utils.UUIDSha1Prefix()
 		}
@@ -284,20 +284,17 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	}
 	// end of RPC caching
 
-	var originID string
-	dP := args.AsDataProvider()
-	if originID, err = engine.GetStringOpts(ctx, args.Tenant, dP, nil, sS.fltrS, nil,
-		utils.MetaOriginID); err != nil {
-		return
-	} else if originID == utils.EmptyString {
-		return utils.NewErrMandatoryIeMissing(utils.OriginID)
+	originID, err := args.OptAsString(utils.MetaOriginID)
+	if err != nil {
+		return err
 	}
-	if _, has := args.APIOpts[utils.MetaOriginID]; !has {
-		args.APIOpts[utils.MetaOriginID] = originID
+	if originID == "" {
+		return utils.NewErrMandatoryIeMissing(utils.OriginID)
 	}
 
 	rply.MaxUsage = utils.DurationPointer(time.Duration(utils.InvalidUsage)) // temp
 
+	dP := args.AsDataProvider()
 	var acntS bool
 	if acntS, err = engine.GetBoolOpts(ctx, args.Tenant, dP, nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.MaxUsage,
 		utils.MetaAccounts); err != nil {
@@ -358,9 +355,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		if len(sS.cfg.SessionSCfg().ResourceSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
-		if originID == utils.EmptyString {
-			return utils.NewErrMandatoryIeMissing(utils.OriginID)
-		}
 		args.APIOpts[utils.OptsResourcesUsageID] = originID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		var allocMessage string
@@ -385,9 +379,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	if ipS {
 		if len(sS.cfg.SessionSCfg().IPsConns) == 0 {
 			return utils.NewErrNotConnected(utils.IPs)
-		}
-		if originID == utils.EmptyString {
-			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		args.APIOpts[utils.OptsIPsAllocationID] = originID
 		var allocIP utils.AllocatedIP
