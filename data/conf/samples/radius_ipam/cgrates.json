@@ -3,11 +3,17 @@
     "enabled": true,
     "ips_conns": [
       "*localhost"
+    ],
+    "cdrs_conns": [
+      "*localhost"
     ]
   },
   "ips": {
     "enabled": true,
     "store_interval": "-1"
+  },
+  "cdrs": {
+    "enabled": true
   },
   "radius_agent": {
     "enabled": true,

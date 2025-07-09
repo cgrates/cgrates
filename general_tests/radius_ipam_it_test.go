@@ -297,6 +297,7 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 		},
 	)
 	checkAllocs(t, client, "IPsAPI")
+	checkCDR(t, client, imsi)
 }
 
 func sendRadReq(t *testing.T, client *radigo.Client, code radigo.PacketCode, id uint8, avps map[string]string) *radigo.Packet {
@@ -359,4 +360,21 @@ func checkAllocs(t *testing.T, client *birpc.Client, id string, wantAllocs ...st
 			return
 		}
 	}
+}
+
+func checkCDR(t *testing.T, client *birpc.Client, acnt string) {
+	t.Helper()
+	var cdrs []*utils.CDR
+	if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
+		&utils.CDRFilters{
+			FilterIDs: []string{
+				fmt.Sprintf("*string:~*req.Account:%s", acnt),
+			},
+		}, &cdrs); err != nil {
+		t.Fatal(err)
+	}
+	if len(cdrs) != 1 {
+		t.Fatalf("%s received %d cdrs, want exactly one", utils.AdminSv1GetCDRs, len(cdrs))
+	}
+	t.Logf("CDR contents: %s", utils.ToIJSON(cdrs[0]))
 }

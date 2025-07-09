@@ -303,6 +303,7 @@
         ],
         "flags": [
           "*terminate",
+          "*cdrs",
           "*ips"
         ],
         "request_fields": [
