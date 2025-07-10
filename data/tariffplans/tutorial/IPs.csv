@@ -1,1 +1,1 @@
-#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Type[5],AddressPool[6],Allocation[7],Stored[8]
+#Tenant[0],ID[1],FilterIDs[2],Weights[3],TTL[4],Stored[5],PoolID[6],PoolFilterIDs[7],PoolType[8],PoolRange[9],PoolStrategy[10],PoolMessage[11],PoolWeights[12],PoolBlockers[13]

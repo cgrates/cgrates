@@ -1,5 +1,5 @@
-#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Type[5],AddressPool[6],Allocation[7],Stored[8]
+#Tenant[0],ID[1],FilterIDs[2],Weights[3],TTL[4],Stored[5],PoolID[6],PoolFilterIDs[7],PoolType[8],PoolRange[9],PoolStrategy[10],PoolMessage[11],PoolWeights[12],PoolBlockers[13]
 cgrates.org,IPs1,*string:~*req.Account:1001,;10,1s,true,,,,,,,,
 cgrates.org,IPs1,,,,,POOL1,*string:~*req.Destination:2001,*ipv4,172.16.1.1/24,*ascending,alloc_success,;15,
-cgrates.org,IPs1,,,,,POOL1,,,,,,*exists:~*req.GimmeMoreWeight:;50,*exists:~*req.ShouldBlock:;true
+cgrates.org,IPs1,,,,,POOL1,,,,,,*exists:~*req.NeedMoreWeight:;50,*exists:~*req.ShouldBlock:;true
 cgrates.org,IPs1,,,,,POOL2,*string:~*req.Destination:2002,*ipv4,192.168.122.1/24,*random,alloc_new,;25,;true
