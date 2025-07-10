@@ -52,9 +52,9 @@ enabled
 store_interval
     How often to dump allocations to dataDB. Values: <""|duration>
 
-    - "": Dump only at start/shutdown
-    - ">0": Regular dump interval (e.g., "30s")
-    - "<0": Never dump to DB
+    - `"-1"`: Always sync IPs from cache and dataDB in real-time
+    - `""`: Disabled
+    - Valid duration (e.g., "10s", "1h", "15m"): Updates IPs from dataDB with cached version at specified intervals
 
 indexed_selects
     Enable profile matching exclusively on indexes for better performance. Values: <true|false>
