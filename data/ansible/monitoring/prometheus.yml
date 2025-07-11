@@ -1,0 +1,15 @@
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: node
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9100']
+
+  - job_name: cgrates
+    metrics_path: /prometheus
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:2080']
