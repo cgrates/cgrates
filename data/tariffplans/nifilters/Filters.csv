@@ -1,0 +1,9 @@
+#Tenant[0],ID[1],Type[2],Element[3],Values[4],ActivationInterval[5]
+cgrates.org,NIFLTR_ACT_1001,*nistring,~*req.Account,1001,
+cgrates.org,NIFLTR_PRF,*niprefix,~*req.Destination,10;20,
+cgrates.org,NIFLTR_SFX,*nisuffix,~*req.Destination,01,2014-07-29T15:00:00Z
+
+
+
+
+
