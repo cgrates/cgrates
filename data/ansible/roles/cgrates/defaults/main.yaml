@@ -5,6 +5,16 @@ cgrates_clone_repo: true
 cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
 cgrates_branch: 1.0
 
+# Installation method: "source" or "package"
+cgrates_install_method: "source"
+
+# Package installation variables
+cgrates_package_dependencies:
+  - wget
+  - gnupg
+cgrates_package_version: "1.0"
+cgrates_debian_codename: "bookworm"
+
 # Leave empty to skip creating symlinks
 cgrates_data_path: "/usr/share/cgrates"
 cgrates_bin_path: "/usr/bin"
