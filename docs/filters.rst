@@ -54,17 +54,27 @@ The following types are implemented:
 \*notstring 
 	Is the negation of *\*string*.
 
+\*nistring
+     Non-indexed version of *\*string*. Bypasses field indexing.
+
 \*prefix
 	Will match at beginning of *Element* one of the values defined inside *Values*.
 
 \*notprefix 
 	Is the negation of *\*prefix*.
 
+\*niprefix
+    Non-indexed version of *\*prefix*. Bypasses field indexing.
+
+
 \*suffix
 	Will match at end of *Element* one of the values defined inside *Values*.
 
 \*notsuffix* 
 	Is the negation of *\*suffix*.
+
+\*nisuffix*
+    Non-indexed version of *\*suffix*.. Bypasses field indexing.
 
 \*empty
 	Will make sure that *Element* is empty or it does not exist in the event.
@@ -77,6 +87,9 @@ The following types are implemented:
 
 \*notexists
 	Is the negation of *\*exists*.
+
+\*niexists
+    Non-indexed version of *\*exists*. Bypasses field indexing.
 
 \*timings
 	Will compare the time contained in *Element* with one of the TimingIDs defined in Values.
