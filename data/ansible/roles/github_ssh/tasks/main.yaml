@@ -1,0 +1,112 @@
+---
+- name: Ensure SSH directory exists
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/.ssh"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0700'
+
+- name: Generate SSH key pair
+  ansible.builtin.command:
+    cmd: ssh-keygen -f "{{ github_ssh_key_path }}" -N ""
+    creates: "{{ github_ssh_key_path }}"
+
+- name: Set SSH private key permissions
+  ansible.builtin.file:
+    path: "{{ github_ssh_key_path }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+
+- name: Set SSH public key permissions
+  ansible.builtin.file:
+    path: "{{ github_ssh_key_path }}.pub"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+
+- name: Add GitHub to known hosts
+  ansible.builtin.lineinfile:
+    path: "{{ github_ssh_known_hosts_file }}"
+    line: "github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk="
+    regexp: "^github\\.com\\s+ssh-rsa"
+    create: true
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+  become_user: "{{ ansible_user }}"
+
+- name: Read SSH public key
+  ansible.builtin.slurp:
+    src: "{{ github_ssh_key_path }}.pub"
+  register: github_ssh_public_key
+
+- name: Add SSH key as deploy key to GitHub repository
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/{{ github_ssh_repo_owner }}/{{ github_ssh_repo_name }}/keys"
+    method: POST
+    headers:
+      Authorization: "token {{ github_ssh_token }}"
+      Accept: "application/vnd.github.v3+json"
+    body_format: json
+    body:
+      title: "{{ github_ssh_key_name }}"
+      key: "{{ github_ssh_public_key.content | b64decode | trim }}"
+      read_only: "{{ github_ssh_deploy_key_read_only }}"
+    status_code: [201, 422]  # 201 = created, 422 = key already exists
+  register: github_deploy_key_result
+  failed_when: false
+  when:
+    - github_ssh_use_deploy_keys
+    - github_ssh_token != ""
+    - github_ssh_repo_owner != ""
+    - github_ssh_repo_name != ""
+
+- name: Add SSH key to GitHub user account
+  ansible.builtin.uri:
+    url: "https://api.github.com/user/keys"
+    method: POST
+    headers:
+      Authorization: "token {{ github_ssh_token }}"
+      Accept: "application/vnd.github.v3+json"
+    body_format: json
+    body:
+      title: "{{ github_ssh_key_name }}"
+      key: "{{ github_ssh_public_key.content | b64decode | trim }}"
+    status_code: [201, 422]  # 201 = created, 422 = key already exists
+  register: github_user_key_result
+  failed_when: false
+  when:
+    - not (github_ssh_use_deploy_keys)
+    - github_ssh_token != ""
+
+- name: Create SSH config for GitHub
+  ansible.builtin.blockinfile:
+    path: "{{ github_ssh_config_file }}"
+    block: |
+      Host github.com
+        HostName github.com
+        User git
+        IdentityFile {{ github_ssh_key_path }}
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - GitHub SSH"
+    create: true
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+  become_user: "{{ ansible_user }}"
+
+- name: Verify SSH access to GitHub
+  ansible.builtin.command:
+    cmd: ssh -T git@github.com
+  register: github_ssh_test
+  changed_when: false
+  failed_when: "'successfully authenticated' not in github_ssh_test.stderr"
+  become_user: "{{ ansible_user }}"
+
+- name: Confirm GitHub SSH access
+  ansible.builtin.debug:
+    msg: "GitHub SSH access confirmed"
+  when:
+    - github_ssh_test is defined
+    - "'successfully authenticated' in github_ssh_test.stderr"
