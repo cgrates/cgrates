@@ -104,12 +104,12 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 	// writing in files the csv containing the profile for ActionProfile
 	if err := os.WriteFile(path.Join("/tmp/ActionsIn", utils.ActionsCsv), []byte(`
 #Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionWeights,ActionBlockers,ActionDiktatsID,ActionDiktatsFilterIDs,ActionDiktatsOpts,ActionDiktatsWeights,ActionDiktatsBlockers
-cgrates.org,ONE_TIME_ACT,,;10,,*asap,*accounts,1001;1002,TOPUP,,0s,*add_balance,,,,ADDBALVALUE,,*balancePath:*balance.TestBalance.Value;*balanceValue:10,,
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,0s,*set_balance,,,,SETBALTYPE,,*balancePath:*balance.TestDataBalance.Type;*balanceValue:*data,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,0s,*add_balance,,,,ADDBALVALUE,,*balancePath:*balance.TestDataBalance.Value;*balanceValue:1024,,
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,0s,*set_balance,,,,SETBALTYPE,,*balancePath:*balance.TestVoiceBalance.Type;*balanceValue:*voice,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,,,ADDBALVALUE1,,*balancePath:*balance.TestVoiceBalance.Value;*balanceValue:15m15s,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,,,ADDBALVALUE2,,*balancePath:*balance.TestVoiceBalance2.Value;*balanceValue:15m15s,,
+cgrates.org,ONE_TIME_ACT,,;10,,*asap,*accounts,1001;1002,TOPUP,,0s,*addBalance,,,,ADDBALVALUE,,*balancePath:*balance.TestBalance.Value;*balanceValue:10,,
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,0s,*setBalance,,,,SETBALTYPE,,*balancePath:*balance.TestDataBalance.Type;*balanceValue:*data,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,0s,*addBalance,,,,ADDBALVALUE,,*balancePath:*balance.TestDataBalance.Value;*balanceValue:1024,,
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,0s,*setBalance,,,,SETBALTYPE,,*balancePath:*balance.TestVoiceBalance.Type;*balanceValue:*voice,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*addBalance,,,,ADDBALVALUE1,,*balancePath:*balance.TestVoiceBalance.Value;*balanceValue:15m15s,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*addBalance,,,,ADDBALVALUE2,,*balancePath:*balance.TestVoiceBalance2.Value;*balanceValue:15m15s,,
 `), 0644); err != nil {
 		t.Fatalf("Err %v when writing in file %s", err, utils.ActionsCsv)
 	}

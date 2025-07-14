@@ -2,6 +2,6 @@
 
 # TOPUP_RST_MONETARY_10 resets the <*default> <*monetary> balance to 10 units
 
-#cgrates.org,TOPUP_RST_MONETARY_10,,;10,,*asap,*accounts,1001,TOPUP,,0s,*add_balance,,;10,;false,*asap,,,,,,10,10,,,,ADDBAL,,*balanceValue:10,,
+#cgrates.org,TOPUP_RST_MONETARY_10,,;10,,*asap,*accounts,1001,TOPUP,,0s,*addBalance,,;10,;false,*asap,,,,,,10,10,,,,ADDBAL,,*balanceValue:10,,
 
-cgrates.org,TOPUP_RST_MONETARY_10,,;10,,*asap,*accounts,1001,TOPUP,,0s,*add_balance,,,,ADDBALUNITS,,*balancePath:*balance.Concrete1.Units;*balanceValue:10,,
+cgrates.org,TOPUP_RST_MONETARY_10,,;10,,*asap,*accounts,1001,TOPUP,,0s,*addBalance,,,,ADDBALUNITS,,*balancePath:*balance.Concrete1.Units;*balanceValue:10,,
