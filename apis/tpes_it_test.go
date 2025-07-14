@@ -1069,7 +1069,7 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
-			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*reset_threshold", "", "", ""},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*resetThreshold", "", "", ""},
 		},
 		utils.ThresholdsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async", "EeIDs"},
@@ -1197,8 +1197,8 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 		},
 		utils.ActionsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
-			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*reset_threshold", "", "", ""},
-			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "0s", "*set_balance", "", "MONETARY", "10"},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*resetThreshold", "", "", ""},
+			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "0s", "*setBalance", "", "MONETARY", "10"},
 		},
 		utils.ThresholdsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async", "EeIDs"},
