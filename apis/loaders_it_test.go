@@ -199,14 +199,14 @@ cgrates.org,1002,,;30,;false,,VoiceBalance,,;10,,*voice,14,fltr3&fltr4;150;fltr5
 #Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionWeights,ActionBlockers,ActionDiktatsID,ActionDiktatsFilterIDs,ActionDiktatsOpts,ActionDiktatsWeights,ActionDiktatsBlockers
 cgrates.org,ONE_TIME_ACT,,,,,,,,,,,,,,,,,,
 cgrates.org,ONE_TIME_ACT,,;10,;true,*asap,*accounts,1001;1002,,,,,,,,,,,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,0s,*add_balance,,,,ADDBALVALUE,,,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,0s,*addBalance,,,,ADDBALVALUE,,,,
 cgrates.org,ONE_TIME_ACT,,,,*asap,*accounts,1001;1002,,,,,,,,,,,,
 cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP,,,,,,,ADDBALVALUE,,*balancePath:*balance.TestBalance.Value;*balanceValue:10,,
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,0s,*set_balance,,,,SETBALTYPE,,*balancePath:*balance.TestDataBalance.Type;*balanceValue:*data,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,0s,*add_balance,,,,ADDBALVALUE,,*balancePath:*balance.TestDataBalance.Value;*balanceValue:1024,,
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,0s,*set_balance,,,,SETBALTYPE,,*balancePath:*balance.TestVoiceBalance.Type;*balanceValue:*voice,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,,,ADDBALVALUE1,,*balancePath:*balance.TestVoiceBalance.Value;*balanceValue:15m15s,,
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,,,ADDBALVALUE2,,*balancePath:*balance.TestVoiceBalance2.Value;*balanceValue:15m15s,,
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,0s,*setBalance,,,,SETBALTYPE,,*balancePath:*balance.TestDataBalance.Type;*balanceValue:*data,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,0s,*addBalance,,,,ADDBALVALUE,,*balancePath:*balance.TestDataBalance.Value;*balanceValue:1024,,
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,0s,*setBalance,,,,SETBALTYPE,,*balancePath:*balance.TestVoiceBalance.Type;*balanceValue:*voice,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*addBalance,,,,ADDBALVALUE1,,*balancePath:*balance.TestVoiceBalance.Value;*balanceValue:15m15s,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*addBalance,,,,ADDBALVALUE2,,*balancePath:*balance.TestVoiceBalance2.Value;*balanceValue:15m15s,,
 `); err != nil {
 		t.Fatal(err)
 	}
