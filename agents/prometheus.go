@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -84,8 +85,10 @@ type PrometheusAgent struct {
 	cfg *config.CGRConfig
 	cm  *engine.ConnManager
 
-	handler     http.Handler
-	statMetrics *prometheus.GaugeVec
+	handler           http.Handler
+	statMetrics       *prometheus.GaugeVec
+	cacheGroupsMetric *prometheus.GaugeVec
+	cacheItemsMetric  *prometheus.GaugeVec
 }
 
 // NewPrometheusAgent creates and initializes a PrometheusAgent with
@@ -98,6 +101,23 @@ func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager) *Promethe
 		reg.MustRegister(coreMetricsCollector)
 	}
 
+	cacheGroupsMetric := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "cgrates",
+			Subsystem: "cache",
+			Name:      "groups_total",
+			Help:      "Total number of cache groups",
+		}, []string{"cache"})
+	reg.MustRegister(cacheGroupsMetric)
+
+	cacheItemsMetric := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: "cgrates",
+			Subsystem: "cache",
+			Name:      "items_total",
+			Help:      "Total number of cache items",
+		}, []string{"cache"})
+	reg.MustRegister(cacheItemsMetric)
 	statMetrics := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: "cgrates",
@@ -119,16 +139,19 @@ func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager) *Promethe
 	)
 
 	return &PrometheusAgent{
-		cfg:         cfg,
-		cm:          cm,
-		handler:     handler,
-		statMetrics: statMetrics,
+		cfg:               cfg,
+		cm:                cm,
+		handler:           handler,
+		statMetrics:       statMetrics,
+		cacheGroupsMetric: cacheGroupsMetric,
+		cacheItemsMetric:  cacheItemsMetric,
 	}
 }
 
 // ServeHTTP implements http.Handler interface. It updates all metrics on each
 // scrape request before exposing them via the Prometheus HTTP handler.
 func (pa *PrometheusAgent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	pa.updateCacheStats()
 	pa.updateStatsMetrics()
 	pa.handler.ServeHTTP(w, r)
 }
@@ -163,6 +186,35 @@ func (pa *PrometheusAgent) updateStatsMetrics() {
 			for metricID, val := range metrics {
 				pa.statMetrics.WithLabelValues(tenantID.Tenant, tenantID.ID, metricID).Set(val)
 			}
+		}
+	}
+}
+
+// updateCacheStats fetches cache statistics from configured CacheS connections
+// and updates the corresponding Prometheus metrics.
+func (pa *PrometheusAgent) updateCacheStats() {
+	if len(pa.cfg.PrometheusAgentCfg().CacheSConns) == 0 {
+		return
+	}
+	for _, connID := range pa.cfg.PrometheusAgentCfg().CacheSConns {
+		var cacheStats map[string]*ltcache.CacheStats
+		if err := pa.cm.Call(context.Background(), []string{connID},
+			utils.CacheSv1GetCacheStats,
+			&utils.AttrCacheIDsWithAPIOpts{
+				CacheIDs: pa.cfg.PrometheusAgentCfg().CacheIDs,
+			}, &cacheStats); err != nil {
+			utils.Logger.Err(fmt.Sprintf(
+				"<%s> failed to retrieve cache stats (connID=%q): %v",
+				utils.PrometheusAgent, connID, err))
+			continue
+		}
+
+		for cacheID, stats := range cacheStats {
+			if stats == nil {
+				continue
+			}
+			pa.cacheGroupsMetric.WithLabelValues(cacheID).Set(float64(stats.Groups))
+			pa.cacheItemsMetric.WithLabelValues(cacheID).Set(float64(stats.Items))
 		}
 	}
 }
