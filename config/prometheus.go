@@ -33,6 +33,8 @@ type PrometheusAgentJsonCfg struct {
 	Path                  *string   `json:"path"`
 	CollectGoMetrics      *bool     `json:"collect_go_metrics"`
 	CollectProcessMetrics *bool     `json:"collect_process_metrics"`
+	CacheSConns           *[]string `json:"caches_conns"`
+	CacheIDs              *[]string `json:"cache_ids"`
 	CoreSConns            *[]string `json:"cores_conns"`
 	StatSConns            *[]string `json:"stats_conns"`
 	StatQueueIDs          *[]string `json:"stat_queue_ids"`
@@ -44,6 +46,8 @@ type PrometheusAgentCfg struct {
 	Path                  string
 	CollectGoMetrics      bool
 	CollectProcessMetrics bool
+	CacheSConns           []string
+	CacheIDs              []string
 	CoreSConns            []string
 	StatSConns            []string
 	StatQueueIDs          []string
@@ -74,6 +78,12 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 	if jc.CollectProcessMetrics != nil {
 		c.CollectProcessMetrics = *jc.CollectProcessMetrics
 	}
+	if jc.CacheSConns != nil {
+		c.CacheSConns = tagInternalConns(*jc.CacheSConns, utils.MetaCaches)
+	}
+	if jc.CacheIDs != nil {
+		c.CacheIDs = *jc.CacheIDs
+	}
 	if jc.CoreSConns != nil {
 		c.CoreSConns = tagInternalConns(*jc.CoreSConns, utils.MetaCore)
 	}
@@ -93,6 +103,8 @@ func (c PrometheusAgentCfg) AsMapInterface() any {
 		utils.PathCfg:                  c.Path,
 		utils.CollectGoMetricsCfg:      c.CollectGoMetrics,
 		utils.CollectProcessMetricsCfg: c.CollectProcessMetrics,
+		utils.CacheSConnsCfg:           stripInternalConns(c.CacheSConns),
+		utils.CacheIDsCfg:              stripInternalConns(c.CacheIDs),
 		utils.CoreSConnsCfg:            stripInternalConns(c.CoreSConns),
 		utils.StatSConnsCfg:            stripInternalConns(c.StatSConns),
 		utils.StatQueueIDsCfg:          c.StatQueueIDs,
@@ -109,6 +121,8 @@ func (c PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
 		Path:                  c.Path,
 		CollectGoMetrics:      c.CollectGoMetrics,
 		CollectProcessMetrics: c.CollectProcessMetrics,
+		CacheSConns:           slices.Clone(c.CacheSConns),
+		CacheIDs:              slices.Clone(c.CacheIDs),
 		CoreSConns:            slices.Clone(c.CoreSConns),
 		StatSConns:            slices.Clone(c.StatSConns),
 		StatQueueIDs:          slices.Clone(c.StatQueueIDs),

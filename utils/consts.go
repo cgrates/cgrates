@@ -2267,12 +2267,6 @@ const (
 	TemplatesCfg         = "templates"
 	RequestProcessorsCfg = "request_processors"
 
-	// PrometheusAgentCfg
-	CoreSConnsCfg            = "cores_conns"
-	CollectGoMetricsCfg      = "collect_go_metrics"
-	CollectProcessMetricsCfg = "collect_process_metrics"
-	StatQueueIDsCfg          = "stat_queue_ids"
-
 	// RequestProcessor
 	RequestFieldsCfg = "request_fields"
 	ReplyFieldsCfg   = "reply_fields"
@@ -2293,6 +2287,13 @@ const (
 	JanusConnsCfg    = "janus_conns"
 	AdminAddressCfg  = "admin_address"
 	AdminPasswordCfg = "admin_password"
+
+	// PrometheusAgentCfg
+	CoreSConnsCfg            = "cores_conns"
+	CollectGoMetricsCfg      = "collect_go_metrics"
+	CollectProcessMetricsCfg = "collect_process_metrics"
+	CacheIDsCfg              = "cache_ids"
+	StatQueueIDsCfg          = "stat_queue_ids"
 
 	// AttributeSCfg
 	IndexedSelectsCfg  = "indexed_selects"
