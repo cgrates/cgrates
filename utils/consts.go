@@ -2596,6 +2596,7 @@ const (
 	CoreSConnsCfg            = "cores_conns"
 	CollectGoMetricsCfg      = "collect_go_metrics"
 	CollectProcessMetricsCfg = "collect_process_metrics"
+	CacheIDsCfg              = "cache_ids"
 	StatQueueIDsCfg          = "stat_queue_ids"
 
 	// AttributeSCfg
