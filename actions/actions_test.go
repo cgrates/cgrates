@@ -63,8 +63,10 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -177,8 +179,10 @@ func TestScheduledActions(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -241,8 +245,10 @@ func TestScheduleAction(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -347,8 +353,10 @@ func TestV1ScheduleActions(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -403,8 +411,10 @@ func TestV1ExecuteActions(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -452,8 +462,10 @@ func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -962,7 +974,9 @@ func TestExportActionResetStatStaticID(t *testing.T) {
 		ID:   "ACT_RESET_ST",
 		Type: utils.MetaResetStatQueue,
 		Diktats: []*utils.APDiktat{{
-			Value: "ST1",
+			Opts: map[string]any{
+				"*balanceValue": "ST1",
+			},
 		}},
 	}
 	exportAction := &actResetStat{
@@ -996,8 +1010,10 @@ func TestACScheduledActions(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      "inexistent_type",
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -1111,8 +1127,10 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -1164,8 +1182,10 @@ func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      utils.MetaLog,
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},

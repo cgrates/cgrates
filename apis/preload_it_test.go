@@ -103,13 +103,13 @@ cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;fals
 	}
 	// writing in files the csv containing the profile for ActionProfile
 	if err := os.WriteFile(path.Join("/tmp/ActionsIn", utils.ActionsCsv), []byte(`
-#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
-cgrates.org,ONE_TIME_ACT,,;10,,*asap,*accounts,1001;1002,TOPUP,,0s,*add_balance,,*balance.TestBalance.Value,10
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,0s,*set_balance,,*balance.TestDataBalance.Type,*data
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,0s,*add_balance,,*balance.TestDataBalance.Value,1024
-cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,0s,*set_balance,,*balance.TestVoiceBalance.Type,*voice
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,*balance.TestVoiceBalance.Value,15m15s
-cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,*balance.TestVoiceBalance2.Value,15m15s
+#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionWeights,ActionBlockers,ActionDiktatsID,ActionDiktatsFilterIDs,ActionDiktatsOpts,ActionDiktatsWeights,ActionDiktatsBlockers
+cgrates.org,ONE_TIME_ACT,,;10,,*asap,*accounts,1001;1002,TOPUP,,0s,*add_balance,,,,ADDBALVALUE,,*balancePath:*balance.TestBalance.Value;*balanceValue:10,,
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_DATA,,0s,*set_balance,,,,SETBALTYPE,,*balancePath:*balance.TestDataBalance.Type;*balanceValue:*data,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_DATA,,0s,*add_balance,,,,ADDBALVALUE,,*balancePath:*balance.TestDataBalance.Value;*balanceValue:1024,,
+cgrates.org,ONE_TIME_ACT,,,,,,,SET_BALANCE_TEST_VOICE,,0s,*set_balance,,,,SETBALTYPE,,*balancePath:*balance.TestVoiceBalance.Type;*balanceValue:*voice,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,,,ADDBALVALUE1,,*balancePath:*balance.TestVoiceBalance.Value;*balanceValue:15m15s,,
+cgrates.org,ONE_TIME_ACT,,,,,,,TOPUP_TEST_VOICE,,0s,*add_balance,,,,ADDBALVALUE2,,*balancePath:*balance.TestVoiceBalance2.Value;*balanceValue:15m15s,,
 `), 0644); err != nil {
 		t.Fatalf("Err %v when writing in file %s", err, utils.ActionsCsv)
 	}
@@ -336,8 +336,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				Opts: map[string]any{},
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestBalance.Value",
-						Value: "10",
+						ID: "ADDBALVALUE",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestBalance.Value",
+							"*balanceValue": "10",
+						},
 					},
 				},
 			},
@@ -348,8 +351,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				Opts: map[string]any{},
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestDataBalance.Type",
-						Value: utils.MetaData,
+						ID: "SETBALTYPE",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestDataBalance.Type",
+							"*balanceValue": utils.MetaData,
+						},
 					},
 				},
 			},
@@ -360,8 +366,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				Opts: map[string]any{},
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestDataBalance.Value",
-						Value: "1024",
+						ID: "ADDBALVALUE",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestDataBalance.Value",
+							"*balanceValue": "1024",
+						},
 					},
 				},
 			},
@@ -372,8 +381,11 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				Opts: map[string]any{},
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestVoiceBalance.Type",
-						Value: utils.MetaVoice,
+						ID: "SETBALTYPE",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestVoiceBalance.Type",
+							"*balanceValue": utils.MetaVoice,
+						},
 					},
 				},
 			},
@@ -384,12 +396,18 @@ func testPreloadITVerifyActionProfiles(t *testing.T) {
 				Opts: map[string]any{},
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestVoiceBalance.Value",
-						Value: "15m15s",
+						ID: "ADDBALVALUE1",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestVoiceBalance.Value",
+							"*balanceValue": "15m15s",
+						},
 					},
 					{
-						Path:  "*balance.TestVoiceBalance2.Value",
-						Value: "15m15s",
+						ID: "ADDBALVALUE2",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestVoiceBalance2.Value",
+							"*balanceValue": "15m15s",
+						},
 					},
 				},
 			},

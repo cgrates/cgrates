@@ -885,8 +885,11 @@ func testTPeSetActions(t *testing.T) {
 					Type: utils.MetaSetBalance,
 					Diktats: []*utils.APDiktat{
 						{
-							Path:  "MONETARY",
-							Value: "10",
+							ID: "SetBalMonetary10",
+							Opts: map[string]any{
+								"*balancePath":  "MONETARY",
+								"*balanceValue": "10",
+							},
 						}},
 				},
 			},
@@ -1068,8 +1071,13 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "SQ_basic", "", ";10", ";true", "0", "", "3", "true", "*none", "*tcd", "", ""},
 		},
 		utils.ActionsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
-			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*reset_threshold", "", "", ""},
+			{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+				utils.Weights, utils.Blockers, utils.Schedule, utils.TargetType,
+				utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionTTL,
+				utils.ActionType, utils.ActionOpts, utils.ActionWeights, utils.ActionBlockers,
+				utils.ActionDiktatsID, utils.ActionDiktatsFilterIDs, utils.ActionDiktatsOpts,
+				utils.ActionDiktatsWeights, utils.ActionDiktatsBlockers},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*reset_threshold", "", "", "", "", "", "", "", ""},
 		},
 		utils.ThresholdsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async", "EeIDs"},
@@ -1196,9 +1204,14 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "SQ_2", "", "", "", "0", "", "0", "false", "", "*tcd", "", ""},
 		},
 		utils.ActionsCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Schedule", "TargetType", "TargetIDs", "ActionID", "ActionFilterIDs", "ActionTTL", "ActionType", "ActionOpts", "ActionPath", "ActionValue"},
-			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*reset_threshold", "", "", ""},
-			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "0s", "*set_balance", "", "MONETARY", "10"},
+			{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
+				utils.Weights, utils.Blockers, utils.Schedule, utils.TargetType,
+				utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionTTL,
+				utils.ActionType, utils.ActionOpts, utils.ActionWeights, utils.ActionBlockers,
+				utils.ActionDiktatsID, utils.ActionDiktatsFilterIDs, utils.ActionDiktatsOpts,
+				utils.ActionDiktatsWeights, utils.ActionDiktatsBlockers},
+			{"cgrates.org", "Execute_thd", "", ";20", "", "", "*thresholds", "THD_1", "actID", "", "0s", "*reset_threshold", "", "", "", "", "", "", "", ""},
+			{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "0s", "*set_balance", "", "", "", "SetBalMonetary10", "", "*balancePath:MONETARY;*balanceValue:10", "", ""},
 		},
 		utils.ThresholdsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "MaxHits", "MinHits", "MinSleep", "Blocker", "ActionProfileIDs", "Async", "EeIDs"},
@@ -1212,7 +1225,15 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 	expected[utils.AccountsCsv] = csvRply[utils.AccountsCsv]
 
 	if !reflect.DeepEqual(expected, csvRply) {
-		t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
+		if !reflect.DeepEqual(csvRply[utils.ActionsCsv][2], []string{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "0s", "*set_balance", "", "", "", "SetBalMonetary10", "", "*balanceValue:10;*balancePath:MONETARY", "", ""}) {
+			t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
+		} else {
+			newCsvReply := csvRply[utils.ActionsCsv][:1]
+			newExpected := expected[utils.ActionsCsv][:1] // make sure the rest of the tariffs are equal
+			if !reflect.DeepEqual(newExpected, newCsvReply) {
+				t.Errorf("Expected %+v \n received %+v", utils.ToJSON(newExpected), utils.ToJSON(newCsvReply))
+			}
+		}
 	}
 
 	// by giving an empty list of exportItems, this will do the same, it will get all the tariffplan in CSV format
@@ -1245,7 +1266,15 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 	}
 	// expected will remain the same
 	if !reflect.DeepEqual(expected, csvRply) {
-		t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
+		if !reflect.DeepEqual(csvRply[utils.ActionsCsv][2], []string{"cgrates.org", "SET_BAL", "*string:~*req.Account:1001", ";10", "", "*asap", "*accounts", "1001", "SET_BAL", "", "0s", "*set_balance", "", "", "", "SetBalMonetary10", "", "*balanceValue:10;*balancePath:MONETARY", "", ""}) {
+			t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
+		} else {
+			csvRply[utils.ActionsCsv][2] = nil
+			expected[utils.ActionsCsv][2] = nil // make sure the rest of the tariffs are equal
+			if !reflect.DeepEqual(expected, csvRply) {
+				t.Errorf("Expected %+v \n received %+v", utils.ToJSON(expected), utils.ToJSON(csvRply))
+			}
+		}
 	}
 }
 

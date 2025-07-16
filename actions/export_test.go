@@ -38,8 +38,9 @@ func TestACHTTPPostExecute(t *testing.T) {
 		Type: utils.CDRLog,
 		Diktats: []*utils.APDiktat{
 			{
-				Path:  "~*balance.TestBalance.Value",
-				Value: "10",
+				Opts: map[string]any{
+					"*url": "~*balance.TestBalance.Value",
+				},
 			},
 		},
 	}
@@ -101,8 +102,9 @@ func TestACHTTPPostValues(t *testing.T) {
 		Type: utils.MetaHTTPPost,
 		Diktats: []*utils.APDiktat{
 			{
-				Path:  "~*balance.TestBalance.Value",
-				Value: "80",
+				Opts: map[string]any{
+					"*balancePath": "~*balance.TestBalance.Value",
+				},
 			},
 		},
 	}

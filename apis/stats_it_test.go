@@ -1204,7 +1204,10 @@ func testStatsSetActionProfileBeforeProcessEv(t *testing.T) {
 					Type: utils.MetaHTTPPost,
 					Diktats: []*utils.APDiktat{
 						{
-							Path: sqSrv.URL,
+							ID: "HttpPost",
+							Opts: map[string]any{
+								"*url": sqSrv.URL,
+							},
 						},
 					},
 					TTL: time.Duration(time.Minute),

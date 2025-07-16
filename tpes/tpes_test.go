@@ -103,8 +103,10 @@ func TestGetTariffPlansKeys(t *testing.T) {
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "MONETARY",
-						Value: "10",
+						Opts: map[string]any{
+							"*balancePath":  "MONETARY",
+							"*balanceValue": "10",
+						},
 					}},
 			},
 		},
