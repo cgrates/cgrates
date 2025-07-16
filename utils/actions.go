@@ -20,6 +20,7 @@ package utils
 
 import (
 	"maps"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -297,6 +298,8 @@ type APAction struct {
 	TTL       time.Duration  // Cancel Action if not executed within TTL
 	Type      string         // Type of Action
 	Opts      map[string]any // Extra options to pass depending on action type
+	Weights   DynamicWeights
+	Blockers  DynamicBlockers
 	Diktats   []*APDiktat
 }
 
@@ -318,6 +321,12 @@ func (a *APAction) Clone() *APAction {
 		cloned.Opts = make(map[string]any, len(a.Opts))
 		maps.Copy(cloned.Opts, a.Opts)
 	}
+	if a.Weights != nil {
+		cloned.Weights = a.Weights.Clone()
+	}
+	if a.Blockers != nil {
+		cloned.Blockers = a.Blockers.Clone()
+	}
 	if a.Diktats != nil {
 		cloned.Diktats = make([]*APDiktat, len(a.Diktats))
 		for i, diktat := range a.Diktats {
@@ -335,6 +344,12 @@ func (a *APAction) Set(path []string, val any, newBranch bool) (err error) {
 	default:
 		if path[0] == Opts {
 			return MapStorage(a.Opts).Set(path[1:], val)
+		}
+		if path[0] == Diktats && path[1] == Opts {
+			if len(a.Diktats) == 0 || newBranch {
+				a.Diktats = append(a.Diktats, new(APDiktat))
+			}
+			return MapStorage(a.Diktats[len(a.Diktats)-1].Opts).Set(path[2:], val)
 		}
 		return ErrWrongPath
 	case 0:
@@ -360,6 +375,14 @@ func (a *APAction) Set(path []string, val any, newBranch bool) (err error) {
 			a.TTL, err = IfaceAsDuration(val)
 		case Opts:
 			a.Opts, err = NewMapFromCSV(IfaceAsString(val))
+		case Weights:
+			if val != EmptyString {
+				a.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			}
+		case Blockers:
+			if val != EmptyString {
+				a.Blockers, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
+			}
 		}
 	case 2:
 		switch path[0] {
@@ -372,10 +395,34 @@ func (a *APAction) Set(path []string, val any, newBranch bool) (err error) {
 				a.Diktats = append(a.Diktats, new(APDiktat))
 			}
 			switch path[1] {
-			case Path:
-				a.Diktats[len(a.Diktats)-1].Path = IfaceAsString(val)
-			case Value:
-				a.Diktats[len(a.Diktats)-1].Value = IfaceAsString(val)
+			default:
+				if strings.HasPrefix(path[1], Opts) &&
+					path[1][4] == '[' && path[1][len(path[1])-1] == ']' {
+					a.Opts[path[1][5:len(path[1])-1]] = val
+					return
+				}
+				return ErrWrongPath
+			case ID:
+				if dID := IfaceAsString(val); dID == EmptyString {
+					return ErrWrongPath
+				} else {
+					a.Diktats[len(a.Diktats)-1].ID = dID
+				}
+			case FilterIDs:
+				var valA []string
+				valA, err = IfaceAsStringSlice(val)
+				a.Diktats[len(a.Diktats)-1].FilterIDs = append(a.Diktats[len(a.Diktats)-1].
+					FilterIDs, valA...)
+			case Opts:
+				a.Diktats[len(a.Diktats)-1].Opts, err = NewMapFromCSV(IfaceAsString(val))
+			case Weights:
+				if val != EmptyString {
+					a.Diktats[len(a.Diktats)-1].Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
+				}
+			case Blockers:
+				if val != EmptyString {
+					a.Diktats[len(a.Diktats)-1].Blockers, err = NewDynamicBlockersFromString(IfaceAsString(val), InfieldSep, ANDSep)
+				}
 			}
 		}
 	}
@@ -387,23 +434,31 @@ func (a *APAction) Merge(v2 *APAction) {
 	if len(v2.ID) != 0 {
 		a.ID = v2.ID
 	}
+	a.FilterIDs = append(a.FilterIDs, v2.FilterIDs...)
 	if v2.TTL != 0 {
 		a.TTL = v2.TTL
 	}
 	if len(v2.Type) != 0 {
 		a.Type = v2.Type
 	}
-	for key, value := range v2.Opts {
-		a.Opts[key] = value
+	maps.Copy(a.Opts, v2.Opts)
+	if v2.Blockers != nil {
+		a.Blockers = append(a.Blockers, v2.Blockers...)
 	}
-	a.FilterIDs = append(a.FilterIDs, v2.FilterIDs...)
-	if len(a.Diktats) == 1 && a.Diktats[0].Path == EmptyString {
+	if v2.Weights != nil {
+		a.Weights = append(a.Weights, v2.Weights...)
+	}
+	if len(a.Diktats) == 1 && len(a.Diktats[0].Opts) == 0 {
 		a.Diktats = a.Diktats[:0]
 	}
-	for _, diktat := range v2.Diktats {
-		if diktat.Path != EmptyString {
-			a.Diktats = append(a.Diktats, diktat)
+	for _, diktatV2 := range v2.Diktats {
+		if idx := slices.IndexFunc(a.Diktats, func(a *APDiktat) bool {
+			return a.ID == diktatV2.ID
+		}); idx != -1 {
+			a.Diktats[idx].Merge(diktatV2)
+			continue
 		}
+		a.Diktats = append(a.Diktats, diktatV2)
 	}
 }
 
@@ -472,19 +527,20 @@ func (a *APAction) FieldAsInterface(fldPath []string) (_ any, err error) {
 			return a.Type, nil
 		case Opts:
 			return a.Opts, nil
+		case Weights:
+			return a.Weights, nil
+		case Blockers:
+			return a.Blockers, nil
 		}
 	case 2:
-		fld, idxStr := GetPathIndexString(fldPath[0])
-		switch fld {
-		default:
+		if fld, _ := GetPathIndexString(fldPath[0]); fld != Opts {
 			return nil, ErrNotFound
-		case Opts:
-			path := fldPath[1:]
-			if idxStr != nil {
-				path = append([]string{*idxStr}, path...)
-			}
-			return MapStorage(a.Opts).FieldAsInterface(path)
-		case Diktats:
+		}
+		return MapStorage(a.Opts).FieldAsInterface(fldPath[1:])
+	case 3:
+		if fld, idxStr := GetPathIndexString(fldPath[0]); fld != Diktats {
+			return nil, ErrNotFound
+		} else {
 			if idxStr == nil {
 				return nil, ErrNotFound
 			}
@@ -502,8 +558,11 @@ func (a *APAction) FieldAsInterface(fldPath []string) (_ any, err error) {
 
 // APDiktat defines a path and value operation to be executed by an action.
 type APDiktat struct {
-	Path  string // Path to execute
-	Value string // Value to execute on Path
+	ID        string         // Diktat ID
+	FilterIDs []string       // Diktat FilterIDs
+	Opts      map[string]any // Diktat options to pass
+	Weights   DynamicWeights
+	Blockers  DynamicBlockers
 
 	valRSR RSRParsers
 }
@@ -514,8 +573,21 @@ func (d *APDiktat) Clone() *APDiktat {
 		return nil
 	}
 	cloned := &APDiktat{
-		Path:  d.Path,
-		Value: d.Value,
+		ID: d.ID,
+	}
+	if d.FilterIDs != nil {
+		cloned.FilterIDs = make([]string, len(d.FilterIDs))
+		copy(cloned.FilterIDs, d.FilterIDs)
+	}
+	if d.Opts != nil {
+		cloned.Opts = make(map[string]any, len(d.Opts))
+		maps.Copy(cloned.Opts, d.Opts)
+	}
+	if d.Weights != nil {
+		cloned.Weights = d.Weights.Clone()
+	}
+	if d.Blockers != nil {
+		cloned.Blockers = d.Blockers.Clone()
 	}
 	if d.valRSR != nil {
 		cloned.valRSR = d.valRSR.Clone()
@@ -523,10 +595,20 @@ func (d *APDiktat) Clone() *APDiktat {
 	return cloned
 }
 
+// Merge combines the values from another APDiktat into this one.
+func (a *APDiktat) Merge(v2 *APDiktat) {
+	a.FilterIDs = append(a.FilterIDs, v2.FilterIDs...)
+	maps.Copy(a.Opts, v2.Opts)
+	a.Blockers = append(a.Blockers, v2.Blockers...)
+	a.Weights = append(a.Weights, v2.Weights...)
+}
+
 // RSRValues returns the Value as RSRParsers or creates new ones if not initialized.
 func (dk *APDiktat) RSRValues() (RSRParsers, error) {
 	if dk.valRSR == nil {
-		return NewRSRParsers(dk.Value, RSRSep)
+		if _, has := dk.Opts[MetaBalanceValue]; has {
+			return NewRSRParsers(IfaceAsString(dk.Opts[MetaBalanceValue]), RSRSep)
+		}
 	}
 	return dk.valRSR, nil
 }
@@ -545,15 +627,52 @@ func (dk *APDiktat) FieldAsString(fldPath []string) (_ string, err error) {
 
 // FieldAsInterface implements the DataProvider interface, retrieving field value as interface.
 func (dk *APDiktat) FieldAsInterface(fldPath []string) (_ any, err error) {
-	if len(fldPath) != 1 {
-		return nil, ErrNotFound
-	}
-	switch fldPath[0] {
+	switch len(fldPath) {
 	default:
+		if fld, idxStr := GetPathIndexString(fldPath[0]); fld == Opts {
+			path := fldPath[1:]
+			if idxStr != nil {
+				path = append([]string{*idxStr}, path...)
+			}
+			return MapStorage(dk.Opts).FieldAsInterface(path)
+		}
+		fallthrough
+	case 0:
 		return nil, ErrNotFound
-	case Path:
-		return dk.Path, nil
-	case Value:
-		return dk.Value, nil
+	case 1:
+		switch fldPath[0] {
+		default:
+			fld, idxStr := GetPathIndexString(fldPath[0])
+			if idxStr != nil {
+				switch fld {
+				case FilterIDs:
+					var idx int
+					if idx, err = strconv.Atoi(*idxStr); err != nil {
+						return
+					}
+					if idx < len(dk.FilterIDs) {
+						return dk.FilterIDs[idx], nil
+					}
+				case Opts:
+					return MapStorage(dk.Opts).FieldAsInterface([]string{*idxStr})
+				}
+			}
+			return nil, ErrNotFound
+		case ID:
+			return dk.ID, nil
+		case FilterIDs:
+			return dk.FilterIDs, nil
+		case Opts:
+			return dk.Opts, nil
+		case Weights:
+			return dk.Weights, nil
+		case Blockers:
+			return dk.Blockers, nil
+		}
+	case 2:
+		if fld, _ := GetPathIndexString(fldPath[0]); fld != Opts {
+			return nil, ErrNotFound
+		}
+		return MapStorage(dk.Opts).FieldAsInterface(fldPath[1:])
 	}
 }

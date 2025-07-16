@@ -121,6 +121,17 @@ func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *utils.ActionPro
 	if missing := utils.MissingStructFields(ap.ActionProfile, []string{utils.ID, utils.Actions}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	for i := range ap.ActionProfile.Actions {
+		if ap.ActionProfile.Actions[i] == nil {
+			continue
+		}
+		for j := range ap.ActionProfile.Actions[i].Diktats { // if there are diktats, make sure their ID exists
+			if missing := utils.MissingStructFields(ap.ActionProfile.Actions[i].
+				Diktats[j], []string{utils.ID}); len(missing) != 0 {
+				return utils.NewErrMandatoryIeMissing(missing...)
+			}
+		}
+	}
 	if ap.Tenant == utils.EmptyString {
 		ap.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}

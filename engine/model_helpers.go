@@ -2024,7 +2024,9 @@ func (apm ActionProfileMdls) CSVHeader() (result []string) {
 	return []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
 		utils.Weights, utils.Blockers, utils.Schedule, utils.TargetType, utils.TargetIDs,
 		utils.ActionID, utils.ActionFilterIDs, utils.ActionTTL,
-		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
+		utils.ActionType, utils.ActionOpts, utils.ActionWeights, utils.ActionBlockers,
+		utils.ActionDiktatsID, utils.ActionDiktatsFilterIDs, utils.ActionDiktatsOpts,
+		utils.ActionDiktatsWeights, utils.ActionDiktatsBlockers,
 	}
 }
 
@@ -2074,19 +2076,45 @@ func (apm ActionProfileMdls) AsTPActionProfile() (result []*utils.TPActionProfil
 					Type: tp.ActionType,
 					Opts: tp.ActionOpts,
 					Diktats: []*utils.TPAPDiktat{{
-						Path:  tp.ActionPath,
-						Value: tp.ActionValue,
+						ID:   tp.ActionDiktatsID,
+						Opts: tp.ActionDiktatsOpts,
 					}},
 				}
 				if tp.ActionFilterIDs != utils.EmptyString {
 					tpAAction.FilterIDs = utils.NewStringSet(strings.Split(tp.ActionFilterIDs, utils.InfieldSep)).AsSlice()
 				}
+				if tp.ActionWeights != utils.EmptyString {
+					tpAAction.Weights = tp.ActionWeights
+				}
+				if tp.ActionBlockers != utils.EmptyString {
+					tpAAction.Blockers = tp.ActionBlockers
+				}
+				if tp.ActionDiktatsFilterIDs != utils.EmptyString {
+					tpAAction.Diktats[0].FilterIDs = utils.NewStringSet(strings.Split(tp.ActionDiktatsFilterIDs, utils.InfieldSep)).AsSlice()
+				}
+				if tp.ActionDiktatsWeights != utils.EmptyString {
+					tpAAction.Diktats[0].Weights = tp.ActionDiktatsWeights
+				}
+				if tp.ActionDiktatsBlockers != utils.EmptyString {
+					tpAAction.Diktats[0].Blockers = tp.ActionDiktatsBlockers
+				}
 				aPrf.Actions = append(aPrf.Actions, tpAAction)
 			} else {
-				aPrf.Actions[lacts-1].Diktats = append(aPrf.Actions[lacts-1].Diktats, &utils.TPAPDiktat{
-					Path:  tp.ActionPath,
-					Value: tp.ActionValue,
-				})
+				diktat := &utils.TPAPDiktat{
+					ID:   tp.ActionDiktatsID,
+					Opts: tp.ActionDiktatsOpts,
+				}
+				if tp.ActionDiktatsFilterIDs != utils.EmptyString {
+					diktat.FilterIDs = utils.NewStringSet(strings.Split(tp.ActionDiktatsFilterIDs, utils.InfieldSep)).AsSlice()
+				}
+				if tp.ActionDiktatsWeights != utils.EmptyString {
+					diktat.Weights = tp.ActionDiktatsWeights
+				}
+				if tp.ActionDiktatsBlockers != utils.EmptyString {
+					diktat.Blockers = tp.ActionDiktatsBlockers
+				}
+				aPrf.Actions[lacts-1].Diktats = append(aPrf.Actions[lacts-1].Diktats,
+					diktat)
 			}
 		}
 		actPrfMap[tenID] = aPrf
@@ -2129,6 +2157,8 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 		mdl.ActionTTL = action.TTL
 		mdl.ActionType = action.Type
 		mdl.ActionOpts = action.Opts
+		mdl.ActionWeights = action.Weights
+		mdl.ActionBlockers = action.Blockers
 		for j, actD := range action.Diktats {
 			if j != 0 {
 				mdl = &ActionProfileMdl{
@@ -2139,8 +2169,11 @@ func APItoModelTPActionProfile(tPrf *utils.TPActionProfile) (mdls ActionProfileM
 					ActionType: mdl.ActionType,
 				}
 			}
-			mdl.ActionPath = actD.Path
-			mdl.ActionValue = actD.Value
+			mdl.ActionDiktatsID = actD.ID
+			mdl.ActionDiktatsFilterIDs = strings.Join(actD.FilterIDs, utils.InfieldSep)
+			mdl.ActionDiktatsOpts = actD.Opts
+			mdl.ActionDiktatsWeights = actD.Weights
+			mdl.ActionDiktatsBlockers = actD.Blockers
 		}
 		mdls = append(mdls, mdl)
 	}
@@ -2173,9 +2206,33 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *utils
 	for i, act := range tpAp.Actions {
 		actDs := make([]*utils.APDiktat, len(act.Diktats))
 		for j, actD := range act.Diktats {
+			if actD.ID == utils.EmptyString {
+				return nil, fmt.Errorf("missing ID from Diktats of ActionProfile <%s> Action <%s>", ap.TenantID(), actD.ID)
+			}
 			actDs[j] = &utils.APDiktat{
-				Path:  actD.Path,
-				Value: actD.Value,
+				ID:        actD.ID,
+				FilterIDs: actD.FilterIDs,
+			}
+			if actD.Opts != utils.EmptyString {
+				actDs[j].Opts = make(map[string]any)
+				for opt := range strings.SplitSeq(actD.Opts, utils.InfieldSep) { // example of opts: key1:val1;key2:val2;key3:val3
+					keyValSls := utils.SplitPath(opt, utils.InInFieldSep[0], 2)
+					if len(keyValSls) != 2 {
+						return nil, fmt.Errorf("malformed option for ActionProfile <%s> for action <%s> for diktat <%s>", ap.TenantID(), actD.ID, actD.ID)
+
+					}
+					actDs[j].Opts[keyValSls[0]] = keyValSls[1]
+				}
+			}
+			if actD.Weights != utils.EmptyString {
+				if actDs[j].Weights, err = utils.NewDynamicWeightsFromString(actD.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+					return
+				}
+			}
+			if actD.Blockers != utils.EmptyString {
+				if actDs[j].Blockers, err = utils.NewDynamicBlockersFromString(actD.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+					return
+				}
 			}
 		}
 		ap.Actions[i] = &utils.APAction{
@@ -2189,8 +2246,8 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *utils
 		}
 		if act.Opts != utils.EmptyString {
 			ap.Actions[i].Opts = make(map[string]any)
-			for _, opt := range strings.Split(act.Opts, utils.InfieldSep) { // example of opts: key1:val1;key2:val2;key3:val3
-				keyValSls := utils.SplitConcatenatedKey(opt)
+			for opt := range strings.SplitSeq(act.Opts, utils.InfieldSep) { // example of opts: key1:val1;key2:val2;key3:val3
+				keyValSls := utils.SplitPath(opt, utils.InInFieldSep[0], 2)
 				if len(keyValSls) != 2 {
 					err = fmt.Errorf("malformed option for ActionProfile <%s> for action <%s>", ap.TenantID(), act.ID)
 					return
@@ -2198,7 +2255,16 @@ func APItoActionProfile(tpAp *utils.TPActionProfile, timezone string) (ap *utils
 				ap.Actions[i].Opts[keyValSls[0]] = keyValSls[1]
 			}
 		}
-
+		if act.Weights != utils.EmptyString {
+			if ap.Actions[i].Weights, err = utils.NewDynamicWeightsFromString(act.Weights, utils.InfieldSep, utils.ANDSep); err != nil {
+				return
+			}
+		}
+		if act.Blockers != utils.EmptyString {
+			if ap.Actions[i].Blockers, err = utils.NewDynamicBlockersFromString(act.Blockers, utils.InfieldSep, utils.ANDSep); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -2221,9 +2287,16 @@ func ActionProfileToAPI(ap *utils.ActionProfile) (tpAp *utils.TPActionProfile) {
 	for i, act := range ap.Actions {
 		actDs := make([]*utils.TPAPDiktat, len(act.Diktats))
 		for j, actD := range act.Diktats {
+			elems := make([]string, 0, len(actD.Opts))
+			for k, v := range actD.Opts {
+				elems = append(elems, utils.ConcatenatedKey(k, utils.IfaceAsString(v)))
+			}
 			actDs[j] = &utils.TPAPDiktat{
-				Path:  actD.Path,
-				Value: actD.Value,
+				ID:        actD.ID,
+				FilterIDs: actD.FilterIDs,
+				Opts:      strings.Join(elems, utils.InfieldSep),
+				Weights:   actD.Weights.String(utils.InfieldSep, utils.ANDSep),
+				Blockers:  actD.Blockers.String(utils.InfieldSep, utils.ANDSep),
 			}
 		}
 
@@ -2236,8 +2309,10 @@ func ActionProfileToAPI(ap *utils.ActionProfile) (tpAp *utils.TPActionProfile) {
 			FilterIDs: act.FilterIDs,
 			TTL:       act.TTL.String(),
 			Type:      act.Type,
-			Diktats:   actDs,
 			Opts:      strings.Join(elems, utils.InfieldSep),
+			Weights:   act.Weights.String(utils.InfieldSep, utils.ANDSep),
+			Blockers:  act.Blockers.String(utils.InfieldSep, utils.ANDSep),
+			Diktats:   actDs,
 		}
 	}
 	return
