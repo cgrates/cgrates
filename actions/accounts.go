@@ -66,9 +66,8 @@ func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 		if val, err = rsr.ParseDataProvider(data); err != nil {
 			return
 		}
-
 		args.Diktats[i] = &utils.BalDiktat{
-			Path:  actD.Path,
+			Path:  utils.IfaceAsString(actD.Opts[utils.MetaBalancePath]),
 			Value: val,
 		}
 	}
@@ -106,7 +105,7 @@ func (aL *actRemBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 		APIOpts:    aL.cfg().Opts,
 	}
 	for i, actD := range aL.cfg().Diktats {
-		args.BalanceIDs[i] = actD.Path
+		args.BalanceIDs[i] = utils.IfaceAsString(actD.Opts[utils.MetaBalancePath])
 	}
 	var rply string
 	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AccountSConns,

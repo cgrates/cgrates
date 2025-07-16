@@ -45,9 +45,9 @@ func parseParamStringToMap(paramStr string, targetMap map[string]any) error {
 	return nil
 }
 
-// actDynamicThreshold processes the `ActionValue` field from the action to construct a Threshold profile
+// actDynamicThreshold processes the `ActionDiktatsOpts` field from the action to construct a Threshold profile
 //
-// The ActionValue field format is expected as follows:
+// The ActionDiktatsOpts field format is expected as follows:
 //
 //	 0 Tenant: string
 //	 1 ID: string
@@ -91,7 +91,8 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
 	}
-	params := strings.Split(aL.aCfg.Diktats[0].Value, utils.InfieldSep)
+	params := strings.Split(utils.IfaceAsString(aL.aCfg.Diktats[0].Opts[utils.MetaTemplate]),
+		utils.InfieldSep)
 	if len(params) != 11 {
 		return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
 	}
@@ -181,9 +182,9 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 		utils.AdminSv1SetThresholdProfile, args, &rply)
 }
 
-// actDynamicStats processes the `ActionValue` field from the action to construct a StatQueueProfile
+// actDynamicStats processes the `ActionDiktatsOpts` field from the action to construct a StatQueueProfile
 //
-// The ActionValue field format is expected as follows:
+// The ActionDiktatsOpts field format is expected as follows:
 //
 //	 0 Tenant: string
 //	 1 ID: string
@@ -229,7 +230,8 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
 	}
-	params := strings.Split(aL.aCfg.Diktats[0].Value, utils.InfieldSep)
+	params := strings.Split(utils.IfaceAsString(aL.aCfg.Diktats[0].Opts[utils.MetaTemplate]),
+		utils.InfieldSep)
 	if len(params) != 14 {
 		return fmt.Errorf("invalid number of parameters <%d> expected 14", len(params))
 	}
@@ -364,9 +366,9 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 		utils.AdminSv1SetStatQueueProfile, args, &rply)
 }
 
-// actDynamicAttribute processes the `ActionValue` field from the action to construct a AttributeProfile
+// actDynamicAttribute processes the `ActionDiktatsOpts` field from the action to construct a AttributeProfile
 //
-// The ActionValue field format is expected as follows:
+// The ActionDiktatsOpts field format is expected as follows:
 //
 //		 0 Tenant: string
 //		 1 ID: string
@@ -409,7 +411,8 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
 	}
-	params := strings.Split(aL.aCfg.Diktats[0].Value, utils.InfieldSep)
+	params := strings.Split(utils.IfaceAsString(aL.aCfg.Diktats[0].Opts[utils.MetaTemplate]),
+		utils.InfieldSep)
 	if len(params) != 11 {
 		return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
 	}
@@ -509,9 +512,9 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 		utils.AdminSv1SetAttributeProfile, args, &rply)
 }
 
-// actDynamicResource processes the `ActionValue` field from the action to construct a ResourceProfile
+// actDynamicResource processes the `ActionDiktatsOpts` field from the action to construct a ResourceProfile
 //
-// The ActionValue field format is expected as follows:
+// The ActionDiktatsOpts field format is expected as follows:
 //
 //		 0 Tenant: string
 //		 1 ID: string
@@ -554,7 +557,8 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
 	}
-	params := strings.Split(aL.aCfg.Diktats[0].Value, utils.InfieldSep)
+	params := strings.Split(utils.IfaceAsString(aL.aCfg.Diktats[0].Opts[utils.MetaTemplate]),
+		utils.InfieldSep)
 	if len(params) != 11 {
 		return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
 	}
