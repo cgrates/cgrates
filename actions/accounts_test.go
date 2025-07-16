@@ -39,8 +39,10 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 		Type: utils.MetaSetBalance,
 		Diktats: []*utils.APDiktat{
 			{
-				Path:  "~*balance.TestBalance.Value",
-				Value: "\"constant;`>;q=0.7;expires=3600constant\"",
+				Opts: map[string]any{
+					"*balancePath":  "~*balance.TestBalance.Value",
+					"*balanceValue": "\"constant;`>;q=0.7;expires=3600constant\"",
+				},
 			},
 		},
 	}
@@ -72,7 +74,7 @@ func TestACExecuteAccountsSetBalance(t *testing.T) {
 	}
 
 	//invalid to parse a value from diktats
-	actCdrLG.aCfg.Diktats[0].Value = "10"
+	actCdrLG.aCfg.Diktats[0].Opts["*balanceValue"] = "10"
 	ctx, cancel := context.WithTimeout(context.Background(), 10)
 	expected = context.DeadlineExceeded.Error()
 	if err := actCdrLG.execute(ctx, dataStorage, utils.MetaBalanceLimit); err == nil || err.Error() != expected {
@@ -91,8 +93,10 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 		Type: utils.MetaSetBalance,
 		Diktats: []*utils.APDiktat{
 			{
-				Path:  "~*balance.TestBalance.Value",
-				Value: "10",
+				Opts: map[string]any{
+					"*balancePath":  "~*balance.TestBalance.Value",
+					"*balanceValue": "10",
+				},
 			},
 		},
 	}
@@ -129,8 +133,10 @@ func TestACExecuteAccountsParseError(t *testing.T) {
 		Type: utils.MetaSetBalance,
 		Diktats: []*utils.APDiktat{
 			{
-				Path:  "~*balance.TestBalance.Value",
-				Value: "~10",
+				Opts: map[string]any{
+					"*balancePath":  "~*balance.TestBalance.Value",
+					"*balanceValue": "~10",
+				},
 			},
 		},
 	}

@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"bytes"
 	"os"
 	"path"
 	"path/filepath"
@@ -67,7 +68,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 		if err := os.MkdirAll(dfltCfg.ConfigDBCfg().Opts.InternalDBDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
-		// buf := &bytes.Buffer{} // to print logs
+		buf := &bytes.Buffer{} // to print logs
 		// t.Cleanup(func() {
 		// 	fmt.Println(buf)
 		// })
@@ -76,7 +77,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 				ConfigPath:       pth,
 				GracefulShutdown: true,
 				Encoding:         *utils.Encoding,
-				// LogBuffer:        buf,
+				LogBuffer:        buf,
 			}
 			client, cfg := ng.Run(t)
 			time.Sleep(100 * time.Millisecond)

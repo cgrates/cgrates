@@ -309,8 +309,11 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 				Type: utils.MetaAddBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestBalance.Units",
-						Value: "10",
+						ID: "ADDBALUNITS",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestBalance.Units",
+							"*balanceValue": "10",
+						},
 					},
 				},
 			},
@@ -319,8 +322,11 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestDataBalance.Type",
-						Value: utils.MetaData,
+						ID: "SETBALTYPE",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestDataBalance.Type",
+							"*balanceValue": utils.MetaData,
+						},
 					},
 				},
 			},
@@ -329,8 +335,11 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 				Type: utils.MetaAddBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestDataBalance.Units",
-						Value: "1024",
+						ID: "ADDBALUNITS",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestDataBalance.Units",
+							"*balanceValue": "1024",
+						},
 					},
 				},
 			},
@@ -339,8 +348,11 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestVoiceBalance.Type",
-						Value: utils.MetaVoice,
+						ID: "SETBALTYPE",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestVoiceBalance.Type",
+							"*balanceValue": utils.MetaVoice,
+						},
 					},
 				},
 			},
@@ -349,8 +361,11 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 				Type: utils.MetaAddBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestVoiceBalance.Units",
-						Value: "15m15s",
+						ID: "ADDBALUNITS",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestVoiceBalance.Units",
+							"*balanceValue": "15m15s",
+						},
 					},
 				},
 			},
@@ -359,8 +374,11 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "*balance.TestVoiceBalance.Filters",
-						Value: "*string:~*req.CustomField:500",
+						ID: "SETBALFILTER",
+						Opts: map[string]any{
+							"*balancePath":  "*balance.TestVoiceBalance.Filters",
+							"*balanceValue": "*string:~*req.CustomField:500",
+						},
 					},
 				},
 			},
@@ -369,7 +387,10 @@ func testCgrLdrGetActionProfileAfterLoad(t *testing.T) {
 				Type: utils.MetaRemBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path: "TestVoiceBalance2",
+						ID: "REMBAL",
+						Opts: map[string]any{
+							"*balancePath": "TestVoiceBalance2",
+						},
 					},
 				},
 			},

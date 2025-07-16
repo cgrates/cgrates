@@ -552,6 +552,7 @@ func startEngine(t testing.TB, cfg *config.CGRConfig, logBuffer io.Writer, grace
 			}
 			if err := engine.Wait(); err != nil {
 				t.Errorf("cgr-engine process failed to exit cleanly: %v", err)
+				t.Log("Logs: \n", logBuffer)
 			}
 		} else {
 			if err := engine.Process.Kill(); err != nil {
