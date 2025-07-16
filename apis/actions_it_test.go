@@ -437,7 +437,10 @@ func testActionsSetActionProfileBeforeExecuteHTTPPost(t *testing.T) {
 					Type: utils.MetaHTTPPost,
 					Diktats: []*utils.APDiktat{
 						{
-							Path: actSrv.URL,
+							ID: "HttpPost",
+							Opts: map[string]any{
+								"*url": actSrv.URL,
+							},
 						},
 					},
 					TTL: time.Duration(time.Minute),

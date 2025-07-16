@@ -577,8 +577,10 @@ func testExpVerifyActionProfiles(t *testing.T) {
 				ID:   "TOPUP",
 				Type: utils.MetaAddBalance,
 				Diktats: []*utils.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Units,
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  utils.MetaBalance + utils.NestingSep + "TestBalance" + utils.NestingSep + utils.Units,
+						"*balanceValue": "10",
+					},
 				}},
 			},
 
@@ -586,47 +588,59 @@ func testExpVerifyActionProfiles(t *testing.T) {
 				ID:   "SET_BALANCE_TEST_DATA",
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
-					Value: utils.MetaData,
+					Opts: map[string]any{
+						"*balancePath":  utils.MetaBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Type,
+						"*balanceValue": utils.MetaData,
+					},
 				}},
 			},
 			{
 				ID:   "TOPUP_TEST_DATA",
 				Type: utils.MetaAddBalance,
 				Diktats: []*utils.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Units,
-					Value: "1024",
+					Opts: map[string]any{
+						"*balancePath":  utils.MetaBalance + utils.NestingSep + "TestDataBalance" + utils.NestingSep + utils.Units,
+						"*balanceValue": "1024",
+					},
 				}},
 			},
 			{
 				ID:   "SET_BALANCE_TEST_VOICE",
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
-					Value: utils.MetaVoice,
+					Opts: map[string]any{
+						"*balancePath":  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Type,
+						"*balanceValue": utils.MetaVoice,
+					},
 				}},
 			},
 			{
 				ID:   "TOPUP_TEST_VOICE",
 				Type: utils.MetaAddBalance,
 				Diktats: []*utils.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Units,
-					Value: "15m15s",
+					Opts: map[string]any{
+						"*balancePath":  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Units,
+						"*balanceValue": "15m15s",
+					},
 				}},
 			},
 			{
 				ID:   "SET_BALANCE_TEST_FILTERS",
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{{
-					Path:  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Filters,
-					Value: "*string:~*req.CustomField:500",
+					Opts: map[string]any{
+						"*balancePath":  utils.MetaBalance + utils.NestingSep + "TestVoiceBalance" + utils.NestingSep + utils.Filters,
+						"*balanceValue": "*string:~*req.CustomField:500",
+					},
 				}},
 			},
 			{
 				ID:   "TOPUP_REM_VOICE",
 				Type: utils.MetaRemBalance,
 				Diktats: []*utils.APDiktat{{
-					Path: "TestVoiceBalance2",
+					Opts: map[string]any{
+						"*balancePath": "TestVoiceBalance2",
+					},
 				}},
 			},
 		},

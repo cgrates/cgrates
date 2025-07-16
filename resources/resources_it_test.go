@@ -605,7 +605,10 @@ func testResourceSSetActionProfile(t *testing.T) {
 					Type: utils.MetaHTTPPost,
 					Diktats: []*utils.APDiktat{
 						{
-							Path: rsSrv.URL,
+							ID: "HttpsPost",
+							Opts: map[string]any{
+								"*url": rsSrv.URL,
+							},
 						},
 					},
 					TTL: time.Duration(time.Minute),

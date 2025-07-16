@@ -43,20 +43,19 @@ func TestDynThdIT(t *testing.T) {
 	case utils.MetaMongo:
 		dbCfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
-		t.SkipNow()
+		dbCfg = engine.PostgresDBCfg
 	default:
 		t.Fatal("Unknown Database type")
 	}
 
-	// buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
 		ConfigPath: path.Join(*utils.DataDir, "conf", "samples", "tutinternal"),
 		DBCfg:      dbCfg,
 		Encoding:   *utils.Encoding,
-		// LogBuffer:  buf,
+		// LogBuffer:  &bytes.Buffer{},
 	}
 	// t.Cleanup(func() {
-	// 	t.Log(buf)
+	// 	t.Log(ng.LogBuffer)
 	// })
 	client, _ := ng.Run(t)
 
@@ -73,24 +72,39 @@ func TestDynThdIT(t *testing.T) {
 						Type: utils.MetaSetBalance,
 						Diktats: []*utils.APDiktat{
 							{
-								Path:  "*balance.VOICE.ID",
-								Value: "testBalanceIDMonetary",
+								ID: "SetVoiceID",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.ID",
+									"*balanceValue": "testBalanceIDMonetary",
+								},
 							},
 							{
-								Path:  "*balance.MONETARY.Type",
-								Value: utils.MetaConcrete,
+								ID: "SetMonetaryType",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.MONETARY.Type",
+									"*balanceValue": utils.MetaConcrete,
+								},
 							},
 							{
-								Path:  "*balance.MONETARY.Units",
-								Value: "1048576",
+								ID: "SetMonetaryUnits",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.MONETARY.Units",
+									"*balanceValue": "1048576",
+								},
 							},
 							{
-								Path:  "*balance.MONETARY.Weights",
-								Value: "`;2`",
+								ID: "SetMonetaryWeights",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.MONETARY.Weights",
+									"*balanceValue": "`;2`",
+								},
 							},
 							{
-								Path:  "*balance.MONETARY.CostIncrements",
-								Value: "`*string:~*req.ToR:*data;1024;0;0.01`",
+								ID: "SetMonetaryCostIncrements",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.MONETARY.CostIncrements",
+									"*balanceValue": "`*string:~*req.ToR:*data;1024;0;0.01`",
+								},
 							},
 						},
 					},
@@ -99,28 +113,46 @@ func TestDynThdIT(t *testing.T) {
 						Type: utils.MetaAddBalance,
 						Diktats: []*utils.APDiktat{
 							{
-								Path:  "*balance.VOICE.ID",
-								Value: "testBalanceID",
+								ID: "AddVoiceID",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.ID",
+									"*balanceValue": "testBalanceID",
+								},
 							},
 							{
-								Path:  "*balance.VOICE.Type",
-								Value: utils.MetaAbstract,
+								ID: "AddVoiceType",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.Type",
+									"*balanceValue": utils.MetaAbstract,
+								},
 							},
 							{
-								Path:  "*balance.VOICE.FilterIDs",
-								Value: "`*string:~*req.ToR:*voice`",
+								ID: "AddVoiceFilterIDs",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.FilterIDs",
+									"*balanceValue": "`*string:~*req.ToR:*voice`",
+								},
 							},
 							{
-								Path:  "*balance.VOICE.Units",
-								Value: strconv.FormatInt((time.Hour).Nanoseconds(), 10),
+								ID: "AddVoiceUnits",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.Units",
+									"*balanceValue": strconv.FormatInt((time.Hour).Nanoseconds(), 10),
+								},
 							},
 							{
-								Path:  "*balance.VOICE.Weights",
-								Value: "`;2`",
+								ID: "AddVoiceWeights",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.Weights",
+									"*balanceValue": "`;2`",
+								},
 							},
 							{
-								Path:  "*balance.VOICE.CostIncrements",
-								Value: "`*string:~*req.ToR:*voice;1000000000;0;0.01`",
+								ID: "AddVoiceCostIncrements",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.CostIncrements",
+									"*balanceValue": "`*string:~*req.ToR:*voice;1000000000;0;0.01`",
+								},
 							},
 						},
 					},
@@ -177,8 +209,10 @@ func TestDynThdIT(t *testing.T) {
 						Type: utils.MetaDynamicThreshold,
 						Diktats: []*utils.APDiktat{
 							{
-								Path:  "ExtraParameters",
-								Value: "*tenant;DYNAMICLY_THD_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;~*opts",
+								ID: "CreateDynamicThreshold1001",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_THD_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;~*opts",
+								},
 							},
 						},
 					},
@@ -187,8 +221,10 @@ func TestDynThdIT(t *testing.T) {
 						Type: utils.MetaDynamicStats,
 						Diktats: []*utils.APDiktat{
 							{
-								Path:  "ExtraParameters",
-								Value: "*tenant;DYNAMICLY_STAT_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&30;*string:~*req.Account:1002&true;100;-1;0;false;*none;*tcc&*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002&true;~*opts",
+								ID: "CreateDynamicStat1001",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_STAT_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&30;*string:~*req.Account:1002&true;100;-1;0;false;*none;*tcc&*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002&true;~*opts",
+								},
 							},
 						},
 					},
@@ -197,8 +233,10 @@ func TestDynThdIT(t *testing.T) {
 						Type: utils.MetaDynamicAttribute,
 						Diktats: []*utils.APDiktat{
 							{
-								Path:  "ExtraParameters",
-								Value: "*tenant;DYNAMICLY_ATTR_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;*string:~*req.Account:<~*req.Account>&true;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&true;*req.Subject;*constant;SUPPLIER1;~*opts",
+								ID: "CreateDynamicAttribute1001",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_ATTR_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;*string:~*req.Account:<~*req.Account>&true;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&true;*req.Subject;*constant;SUPPLIER1;~*opts",
+								},
 							},
 						},
 					},
@@ -207,8 +245,10 @@ func TestDynThdIT(t *testing.T) {
 						Type: utils.MetaDynamicResource,
 						Diktats: []*utils.APDiktat{
 							{
-								Path:  "ExtraParameters",
-								Value: "*tenant;DYNAMICLY_RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts",
+								ID: "CreateDynamicResource1001",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts",
+								},
 							},
 						},
 					},

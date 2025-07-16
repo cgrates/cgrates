@@ -3148,7 +3148,9 @@ func TestActionProfileMdlsCSVHeader(t *testing.T) {
 	expStruct := []string{"#" + utils.Tenant, utils.ID, utils.FilterIDs,
 		utils.Weights, utils.Blockers, utils.Schedule, utils.TargetType,
 		utils.TargetIDs, utils.ActionID, utils.ActionFilterIDs, utils.ActionTTL,
-		utils.ActionType, utils.ActionOpts, utils.ActionPath, utils.ActionValue,
+		utils.ActionType, utils.ActionOpts, utils.ActionWeights, utils.ActionBlockers,
+		utils.ActionDiktatsID, utils.ActionDiktatsFilterIDs, utils.ActionDiktatsOpts,
+		utils.ActionDiktatsWeights, utils.ActionDiktatsBlockers,
 	}
 	result := testStruct.CSVHeader()
 	if !reflect.DeepEqual(result, expStruct) {
@@ -3314,7 +3316,8 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
+					ID:   "actDiktatID",
+					Opts: "*balancePath:test_path",
 				}},
 				Opts: "key1:val1;key2:val2",
 			},
@@ -3340,7 +3343,10 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				Diktats: []*utils.APDiktat{{
-					Path: "test_path",
+					ID: "actDiktatID",
+					Opts: map[string]any{
+						"*balancePath": "test_path",
+					},
 				}},
 				Opts: map[string]any{
 					"key1": "val1",
@@ -3349,7 +3355,10 @@ func TestModelHelpersAPItoActionProfile(t *testing.T) {
 			},
 		},
 	}
-	result, _ := APItoActionProfile(testStruct, "")
+	result, err := APItoActionProfile(testStruct, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 	sort.Strings(result.FilterIDs)
 	if !reflect.DeepEqual(result, expStruct) {
 		t.Errorf("\nExpecting <%+v>,\n Received <%+v>", utils.ToJSON(expStruct), utils.ToJSON(result))
@@ -3369,7 +3378,8 @@ func TestModelHelpersAPItoActionProfileError3(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
+					ID:   "actDiktatID",
+					Opts: "*balancePath:test_path",
 				}},
 				TTL: "cat",
 			},
@@ -3394,7 +3404,8 @@ func TestModelHelpersAPItoActionProfileError4(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
+					ID:   "actDiktatID",
+					Opts: "*balancePath:test_path",
 				}},
 				Opts: "test_opt",
 			},
@@ -3424,7 +3435,9 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				TTL:       time.Second,
 				Diktats: []*utils.APDiktat{{
-					Path: "test_path",
+					Opts: map[string]any{
+						"*balancePath": "test_path",
+					},
 				}},
 				Opts: map[string]any{
 					"key1": "val1",
@@ -3445,7 +3458,7 @@ func TestModelHelpersActionProfileToAPI(t *testing.T) {
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				TTL:       "1s",
 				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
+					Opts: "*balancePath:test_path",
 				}},
 				Opts: "key1:val1",
 			},
@@ -4462,7 +4475,8 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
 				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
+					ID:   "actDiktatID",
+					Opts: "*balancePath:test_path",
 				}},
 				Opts: "key1:val1",
 			},
@@ -4486,7 +4500,8 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
 				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
+					ID:   "actDiktatID",
+					Opts: "*balancePath:test_path",
 				}},
 				Opts: "key1:val1",
 				TTL:  "0s",
@@ -4496,7 +4511,7 @@ func TestModelHelpersActionProfileToAPICase2(t *testing.T) {
 
 	result, err := APItoActionProfile(testStruct, "")
 	if err != nil {
-		t.Errorf("\nExpecting <nil>,\n Received <%+v>", err)
+		t.Fatalf("\nExpecting <nil>,\n Received <%+v>", err)
 	}
 	result2 := ActionProfileToAPI(result)
 	sort.Strings(result2.FilterIDs)
@@ -4778,7 +4793,7 @@ func TestAPItoActionProfileNewDynamicWeightsFromStringErr(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
 				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
+					Opts: "*balancePath:test_path",
 				}},
 				Opts: "key1:val1",
 			},
@@ -4811,7 +4826,7 @@ func TestAPItoActionProfileNewDynamicBlockersFromStringErr(t *testing.T) {
 				ID:        "test_action_id",
 				FilterIDs: []string{"test_action_filter_id1"},
 				Diktats: []*utils.TPAPDiktat{{
-					Path: "test_path",
+					Opts: "*balancePath:test_path",
 				}},
 				Opts: "key1:val1",
 			},
@@ -4845,24 +4860,21 @@ func TestAPItoModelTPActionProfileActionProfileMdl(t *testing.T) {
 				FilterIDs: []string{"test_action_filter_id1", "test_action_filter_id2"},
 				Diktats: []*utils.TPAPDiktat{
 					{
-						Path:  "*balance.AbstractBalance1.Units",
-						Value: "10",
+						Opts: "*balancePath:*balance.AbstractBalance1.Units;*balanceValue:10",
 					},
 					{
-						Path:  "*balance.AbstractBalance1.Units",
-						Value: "5",
+						Opts: "*balancePath:*balance.AbstractBalance1.Units;*balanceValue:5",
 					}},
 			},
 		},
 	}
 
 	expStruct := ActionProfileMdls{{
-		Tpid:        "test_id",
-		Tenant:      "cgrates.org",
-		ID:          "RP1",
-		ActionID:    "test_action_id",
-		ActionPath:  "*balance.AbstractBalance1.Units",
-		ActionValue: "5",
+		Tpid:              "test_id",
+		Tenant:            "cgrates.org",
+		ID:                "RP1",
+		ActionID:          "test_action_id",
+		ActionDiktatsOpts: "*balancePath:*balance.AbstractBalance1.Units;*balanceValue:5",
 	}}
 	result := APItoModelTPActionProfile(testStruct)
 	if !reflect.DeepEqual(result, expStruct) {

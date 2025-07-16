@@ -126,24 +126,39 @@ func testAccActionsSetActionProfile(t *testing.T) {
 					Type:      utils.MetaSetBalance,
 					Diktats: []*utils.APDiktat{
 						{
-							Path:  "*account.ThresholdIDs",
-							Value: utils.MetaNone,
+							ID: "SetAccThresholds",
+							Opts: map[string]any{
+								"*balancePath":  "*account.ThresholdIDs",
+								"*balanceValue": utils.MetaNone,
+							},
 						},
 						{
-							Path:  "*balance.MONETARY.Type",
-							Value: utils.MetaConcrete,
+							ID: "SetBalMonetaryType",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.MONETARY.Type",
+								"*balanceValue": utils.MetaConcrete,
+							},
 						},
 						{
-							Path:  "*balance.MONETARY.Units",
-							Value: "1048576",
+							ID: "SetBalMonetaryUnits",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.MONETARY.Units",
+								"*balanceValue": "1048576",
+							},
 						},
 						{
-							Path:  "*balance.MONETARY.Weights",
-							Value: "`;0`",
+							ID: "SetBalMonetaryWeights",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.MONETARY.Weights",
+								"*balanceValue": "`;0`",
+							},
 						},
 						{
-							Path:  "*balance.MONETARY.CostIncrements",
-							Value: "`*string:~*req.ToR:*data;1024;0;0.01`",
+							ID: "SetBalMonetaryCostIncrements",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.MONETARY.CostIncrements",
+								"*balanceValue": "`*string:~*req.ToR:*data;1024;0;0.01`",
+							},
 						},
 					},
 				},
@@ -153,24 +168,39 @@ func testAccActionsSetActionProfile(t *testing.T) {
 					Type:      utils.MetaAddBalance,
 					Diktats: []*utils.APDiktat{
 						{
-							Path:  "*balance.VOICE.Type",
-							Value: utils.MetaAbstract,
+							ID: "AddBalVoiceType",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.VOICE.Type",
+								"*balanceValue": utils.MetaAbstract,
+							},
 						},
 						{
-							Path:  "*balance.VOICE.Units",
-							Value: strconv.FormatInt((3 * time.Hour).Nanoseconds(), 10),
+							ID: "AddBalVoiceUnits",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.VOICE.Units",
+								"*balanceValue": strconv.FormatInt((3 * time.Hour).Nanoseconds(), 10),
+							},
 						},
 						{
-							Path:  "*balance.VOICE.FilterIDs",
-							Value: "`*string:~*req.ToR:*voice`",
+							ID: "AddBalVoiceFilters",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.VOICE.FilterIDs",
+								"*balanceValue": "`*string:~*req.ToR:*voice`",
+							},
 						},
 						{
-							Path:  "*balance.VOICE.Weights",
-							Value: "`;2`",
+							ID: "AddBalVoiceWeights",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.VOICE.Weights",
+								"*balanceValue": "`;2`",
+							},
 						},
 						{
-							Path:  "*balance.VOICE.CostIncrements",
-							Value: "`*string:~*req.ToR:*voice;1000000000;0;0.01`",
+							ID: "AddBalVoiceCostIncrements",
+							Opts: map[string]any{
+								"*balancePath":  "*balance.VOICE.CostIncrements",
+								"*balanceValue": "`*string:~*req.ToR:*voice;1000000000;0;0.01`",
+							},
 						},
 					},
 				},
@@ -291,10 +321,16 @@ func testAccActionsSetActionProfile2(t *testing.T) {
 					Type: utils.MetaRemBalance,
 					Diktats: []*utils.APDiktat{
 						{
-							Path: "MONETARY",
+							ID: "RemBalMonetary",
+							Opts: map[string]any{
+								"*balancePath": "MONETARY",
+							},
 						},
 						{
-							Path: "VOICE",
+							ID: "RemBalVoice",
+							Opts: map[string]any{
+								"*balancePath": "VOICE",
+							},
 						},
 					},
 				},

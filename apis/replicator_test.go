@@ -2921,8 +2921,10 @@ func TestReplicatorGetActionProfile(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -2963,8 +2965,10 @@ func TestReplicatorGetActionProfileErr(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -3138,8 +3142,10 @@ func TestReplicatorSetActionProfile(t *testing.T) {
 					FilterIDs: []string{},
 					Type:      "*topup",
 					Diktats: []*utils.APDiktat{{
-						Path:  "~*balance.TestBalance.Value",
-						Value: "10",
+						Opts: map[string]any{
+							"*balancePath":  "~*balance.TestBalance.Value",
+							"*balanceValue": "10",
+						},
 					}},
 				},
 			},
@@ -3184,8 +3190,10 @@ func TestReplicatorSetActionProfileErr(t *testing.T) {
 					FilterIDs: []string{},
 					Type:      "*topup",
 					Diktats: []*utils.APDiktat{{
-						Path:  "~*balance.TestBalance.Value",
-						Value: "10",
+						Opts: map[string]any{
+							"*balancePath":  "~*balance.TestBalance.Value",
+							"*balanceValue": "10",
+						},
 					}},
 				},
 			},
@@ -3363,8 +3371,10 @@ func TestReplicatorRemoveActionProfile(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
@@ -3410,8 +3420,10 @@ func TestReplicatorRemoveActionProfileErr(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Diktats: []*utils.APDiktat{{
-					Path:  "~*balance.TestBalance.Value",
-					Value: "10",
+					Opts: map[string]any{
+						"*balancePath":  "~*balance.TestBalance.Value",
+						"*balanceValue": "10",
+					},
 				}},
 			},
 		},
