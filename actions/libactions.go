@@ -138,13 +138,13 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 	case utils.MetaRemBalance:
 		return &actRemBalance{cfg, connMgr, aCfg, tnt}, nil
 	case utils.MetaDynamicThreshold:
-		return &actDynamicThreshold{cfg, connMgr, aCfg, tnt, cgrEv}, nil
+		return &actDynamicThreshold{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	case utils.MetaDynamicStats:
-		return &actDynamicStats{cfg, connMgr, aCfg, tnt, cgrEv}, nil
+		return &actDynamicStats{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	case utils.MetaDynamicAttribute:
-		return &actDynamicAttribute{cfg, connMgr, aCfg, tnt, cgrEv}, nil
+		return &actDynamicAttribute{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	case utils.MetaDynamicResource:
-		return &actDynamicResource{cfg, connMgr, aCfg, tnt, cgrEv}, nil
+		return &actDynamicResource{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 
