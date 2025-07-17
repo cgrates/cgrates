@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -66,6 +68,7 @@ func parseParamStringToMap(paramStr string, targetMap map[string]any) error {
 type actDynamicThreshold struct {
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 	aCfg    *utils.APAction
 	tnt     string
 	cgrEv   *utils.CGREvent
@@ -91,95 +94,127 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
 	}
-	params := strings.Split(utils.IfaceAsString(aL.aCfg.Diktats[0].Opts[utils.MetaTemplate]),
-		utils.InfieldSep)
-	if len(params) != 11 {
-		return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
-	}
-	// parse dynamic parameters
-	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if _, has := diktat.Opts[utils.MetaTemplate]; !has {
+			continue
+		}
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
 			return err
 		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
 	}
-	// Prepare request arguments based on provided parameters.
-	args := &engine.ThresholdProfileWithAPIOpts{
-		ThresholdProfile: &engine.ThresholdProfile{
-			Tenant: params[0],
-			ID:     params[1],
-		},
-		APIOpts: make(map[string]any),
-	}
-	// populate Threshold's FilterIDs
-	if params[2] != utils.EmptyString {
-		args.FilterIDs = strings.Split(params[2], utils.ANDSep)
-	}
-	// populate Threshold's Weight
-	if params[3] != utils.EmptyString {
-		args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-		wghtSplit := strings.Split(params[3], utils.ANDSep)
-		if len(wghtSplit) > 2 {
-			return utils.ErrUnsupportedFormat
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 11 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
 		}
-		if wghtSplit[0] != utils.EmptyString {
-			args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+				return err
+			}
 		}
-		if wghtSplit[1] != utils.EmptyString {
-			args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+		// Prepare request arguments based on provided parameters.
+		args := &engine.ThresholdProfileWithAPIOpts{
+			ThresholdProfile: &engine.ThresholdProfile{
+				Tenant: params[0],
+				ID:     params[1],
+			},
+			APIOpts: make(map[string]any),
+		}
+		// populate Threshold's FilterIDs
+		if params[2] != utils.EmptyString {
+			args.FilterIDs = strings.Split(params[2], utils.ANDSep)
+		}
+		// populate Threshold's Weight
+		if params[3] != utils.EmptyString {
+			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+			wghtSplit := strings.Split(params[3], utils.ANDSep)
+			if len(wghtSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if wghtSplit[0] != utils.EmptyString {
+				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+			}
+			if wghtSplit[1] != utils.EmptyString {
+				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		// populate Threshold's MaxHits
+		if params[4] != utils.EmptyString {
+			args.MaxHits, err = strconv.Atoi(params[4])
 			if err != nil {
 				return err
 			}
 		}
-	}
-	// populate Threshold's MaxHits
-	if params[4] != utils.EmptyString {
-		args.MaxHits, err = strconv.Atoi(params[4])
-		if err != nil {
+		// populate Threshold's MinHits
+		if params[5] != utils.EmptyString {
+			args.MinHits, err = strconv.Atoi(params[5])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Threshold's MinSleep
+		if params[6] != utils.EmptyString {
+			args.MinSleep, err = utils.ParseDurationWithNanosecs(params[6])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Threshold's Blocker
+		if params[7] != utils.EmptyString {
+			args.Blocker, err = strconv.ParseBool(params[7])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Threshold's ActionProfileIDs
+		if params[8] != utils.EmptyString {
+			args.ActionProfileIDs = strings.Split(params[8], utils.ANDSep)
+		}
+		// populate Threshold's Async bool
+		if params[9] != utils.EmptyString {
+			args.Async, err = strconv.ParseBool(params[9])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Threshold's APIOpts
+		if params[10] != utils.EmptyString {
+			if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
+				return err
+			}
+		}
+		// create the ThresholdProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetThresholdProfile, args, &rply); err != nil {
 			return err
 		}
-	}
-	// populate Threshold's MinHits
-	if params[5] != utils.EmptyString {
-		args.MinHits, err = strconv.Atoi(params[5])
-		if err != nil {
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
 			return err
+		} else if blocker {
+			break
 		}
 	}
-	// populate Threshold's MinSleep
-	if params[6] != utils.EmptyString {
-		args.MinSleep, err = utils.ParseDurationWithNanosecs(params[6])
-		if err != nil {
-			return err
-		}
-	}
-	// populate Threshold's Blocker
-	if params[7] != utils.EmptyString {
-		args.Blocker, err = strconv.ParseBool(params[7])
-		if err != nil {
-			return err
-		}
-	}
-	// populate Threshold's ActionProfileIDs
-	if params[8] != utils.EmptyString {
-		args.ActionProfileIDs = strings.Split(params[8], utils.ANDSep)
-	}
-	// populate Threshold's Async bool
-	if params[9] != utils.EmptyString {
-		args.Async, err = strconv.ParseBool(params[9])
-		if err != nil {
-			return err
-		}
-	}
-	// populate Threshold's APIOpts
-	if params[10] != utils.EmptyString {
-		if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
-			return err
-		}
-	}
-	// create the ThresholdProfile based on the populated parameters
-	var rply string
-	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
-		utils.AdminSv1SetThresholdProfile, args, &rply)
+	return
 }
 
 // actDynamicStats processes the `ActionDiktatsOpts` field from the action to construct a StatQueueProfile
@@ -205,6 +240,7 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 type actDynamicStats struct {
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 	aCfg    *utils.APAction
 	tnt     string
 	cgrEv   *utils.CGREvent
@@ -230,140 +266,172 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
 	}
-	params := strings.Split(utils.IfaceAsString(aL.aCfg.Diktats[0].Opts[utils.MetaTemplate]),
-		utils.InfieldSep)
-	if len(params) != 14 {
-		return fmt.Errorf("invalid number of parameters <%d> expected 14", len(params))
-	}
-	// parse dynamic parameters
-	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if _, has := diktat.Opts[utils.MetaTemplate]; !has {
+			continue
+		}
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
 			return err
 		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
 	}
-	// Prepare request arguments based on provided parameters.
-	args := &engine.StatQueueProfileWithAPIOpts{
-		StatQueueProfile: &engine.StatQueueProfile{
-			Tenant: params[0],
-			ID:     params[1],
-		},
-		APIOpts: make(map[string]any),
-	}
-	// populate Stat's FilterIDs
-	if params[2] != utils.EmptyString {
-		args.FilterIDs = strings.Split(params[2], utils.ANDSep)
-	}
-	// populate Stat's Weights
-	if params[3] != utils.EmptyString {
-		args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-		wghtSplit := strings.Split(params[3], utils.ANDSep)
-		if len(wghtSplit) > 2 {
-			return utils.ErrUnsupportedFormat
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 14 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 14", len(params))
 		}
-		if wghtSplit[0] != utils.EmptyString {
-			args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-		}
-		if wghtSplit[1] != utils.EmptyString {
-			args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-			if err != nil {
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
 				return err
 			}
 		}
-	}
-	// populate Stat's Blockers
-	if params[4] != utils.EmptyString {
-		args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-		blckrSplit := strings.Split(params[4], utils.ANDSep)
-		if len(blckrSplit) > 2 {
-			return utils.ErrUnsupportedFormat
+		// Prepare request arguments based on provided parameters.
+		args := &engine.StatQueueProfileWithAPIOpts{
+			StatQueueProfile: &engine.StatQueueProfile{
+				Tenant: params[0],
+				ID:     params[1],
+			},
+			APIOpts: make(map[string]any),
 		}
-		if blckrSplit[0] != utils.EmptyString {
-			args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
+		// populate Stat's FilterIDs
+		if params[2] != utils.EmptyString {
+			args.FilterIDs = strings.Split(params[2], utils.ANDSep)
 		}
-		if blckrSplit[1] != utils.EmptyString {
-			args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-			if err != nil {
-				return err
+		// populate Stat's Weights
+		if params[3] != utils.EmptyString {
+			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+			wghtSplit := strings.Split(params[3], utils.ANDSep)
+			if len(wghtSplit) > 2 {
+				return utils.ErrUnsupportedFormat
 			}
-		}
-	}
-	// populate Stat's QueueLengh
-	if params[5] != utils.EmptyString {
-		args.QueueLength, err = strconv.Atoi(params[5])
-		if err != nil {
-			return err
-		}
-	}
-	// populate Stat's TTL
-	if params[6] != utils.EmptyString {
-		args.TTL, err = utils.ParseDurationWithNanosecs(params[6])
-		if err != nil {
-			return err
-		}
-	}
-	// populate Stat's MinItems
-	if params[7] != utils.EmptyString {
-		args.MinItems, err = strconv.Atoi(params[7])
-		if err != nil {
-			return err
-		}
-	}
-	// populate Stat's Stored
-	if params[8] != utils.EmptyString {
-		args.Stored, err = strconv.ParseBool(params[8])
-		if err != nil {
-			return err
-		}
-	}
-	// populate Stat's ThresholdIDs
-	if params[9] != utils.EmptyString {
-		args.ThresholdIDs = strings.Split(params[9], utils.ANDSep)
-	}
-	// populate Stat's MetricID
-	if params[10] != utils.EmptyString {
-		metrics := strings.Split(params[10], utils.ANDSep)
-		args.Metrics = make([]*engine.MetricWithFilters, len(metrics))
-		for i, strM := range metrics {
-			args.Metrics[i] = &engine.MetricWithFilters{MetricID: strM}
-		}
-	}
-	// populate Stat's metricFliterIDs
-	if params[11] != utils.EmptyString {
-		metricFliters := strings.Split(params[11], utils.ANDSep)
-		for i := range args.Metrics {
-			args.Metrics[i].FilterIDs = metricFliters
-		}
-	}
-	// populate Stat's metricBlockers
-	if params[12] != utils.EmptyString {
-		blckrSplit := strings.Split(params[12], utils.ANDSep)
-		if len(blckrSplit) > 2 {
-			return utils.ErrUnsupportedFormat
-		}
-		for i := range args.Metrics {
-			args.Metrics[i].Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-			if blckrSplit[0] != utils.EmptyString {
-				args.Metrics[i].Blockers[0].FilterIDs = []string{blckrSplit[0]}
+			if wghtSplit[0] != utils.EmptyString {
+				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
 			}
-			if blckrSplit[1] != utils.EmptyString {
-				args.Metrics[i].Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+			if wghtSplit[1] != utils.EmptyString {
+				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
 				if err != nil {
 					return err
 				}
 			}
 		}
-	}
-	// populate Stat's APIOpts
-	if params[13] != utils.EmptyString {
-		if err := parseParamStringToMap(params[13], args.APIOpts); err != nil {
+		// populate Stat's Blockers
+		if params[4] != utils.EmptyString {
+			args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+			blckrSplit := strings.Split(params[4], utils.ANDSep)
+			if len(blckrSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if blckrSplit[0] != utils.EmptyString {
+				args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
+			}
+			if blckrSplit[1] != utils.EmptyString {
+				args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+				if err != nil {
+					return err
+				}
+			}
+		}
+		// populate Stat's QueueLengh
+		if params[5] != utils.EmptyString {
+			args.QueueLength, err = strconv.Atoi(params[5])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Stat's TTL
+		if params[6] != utils.EmptyString {
+			args.TTL, err = utils.ParseDurationWithNanosecs(params[6])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Stat's MinItems
+		if params[7] != utils.EmptyString {
+			args.MinItems, err = strconv.Atoi(params[7])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Stat's Stored
+		if params[8] != utils.EmptyString {
+			args.Stored, err = strconv.ParseBool(params[8])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Stat's ThresholdIDs
+		if params[9] != utils.EmptyString {
+			args.ThresholdIDs = strings.Split(params[9], utils.ANDSep)
+		}
+		// populate Stat's MetricID
+		if params[10] != utils.EmptyString {
+			metrics := strings.Split(params[10], utils.ANDSep)
+			args.Metrics = make([]*engine.MetricWithFilters, len(metrics))
+			for i, strM := range metrics {
+				args.Metrics[i] = &engine.MetricWithFilters{MetricID: strM}
+			}
+		}
+		// populate Stat's metricFliterIDs
+		if params[11] != utils.EmptyString {
+			metricFliters := strings.Split(params[11], utils.ANDSep)
+			for i := range args.Metrics {
+				args.Metrics[i].FilterIDs = metricFliters
+			}
+		}
+		// populate Stat's metricBlockers
+		if params[12] != utils.EmptyString {
+			blckrSplit := strings.Split(params[12], utils.ANDSep)
+			if len(blckrSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			for i := range args.Metrics {
+				args.Metrics[i].Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+				if blckrSplit[0] != utils.EmptyString {
+					args.Metrics[i].Blockers[0].FilterIDs = []string{blckrSplit[0]}
+				}
+				if blckrSplit[1] != utils.EmptyString {
+					args.Metrics[i].Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+		// populate Stat's APIOpts
+		if params[13] != utils.EmptyString {
+			if err := parseParamStringToMap(params[13], args.APIOpts); err != nil {
+				return err
+			}
+		}
+
+		// create the StatQueueProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetStatQueueProfile, args, &rply); err != nil {
 			return err
 		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
 	}
-
-	// create the StatQueueProfile based on the populated parameters
-	var rply string
-	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
-		utils.AdminSv1SetStatQueueProfile, args, &rply)
+	return
 }
 
 // actDynamicAttribute processes the `ActionDiktatsOpts` field from the action to construct a AttributeProfile
@@ -386,6 +454,7 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 type actDynamicAttribute struct {
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 	aCfg    *utils.APAction
 	tnt     string
 	cgrEv   *utils.CGREvent
@@ -411,105 +480,137 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
 	}
-	params := strings.Split(utils.IfaceAsString(aL.aCfg.Diktats[0].Opts[utils.MetaTemplate]),
-		utils.InfieldSep)
-	if len(params) != 11 {
-		return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
-	}
-	// parse dynamic parameters
-	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if _, has := diktat.Opts[utils.MetaTemplate]; !has {
+			continue
+		}
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
 			return err
 		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
 	}
-	// Prepare request arguments based on provided parameters.
-	args := &utils.APIAttributeProfileWithAPIOpts{
-		APIAttributeProfile: &utils.APIAttributeProfile{
-			Tenant: params[0],
-			ID:     params[1],
-		},
-		APIOpts: make(map[string]any),
-	}
-	// populate Attribute's FilterIDs
-	if params[2] != utils.EmptyString {
-		args.FilterIDs = strings.Split(params[2], utils.ANDSep)
-	}
-	// populate Attribute's Weights
-	if params[3] != utils.EmptyString {
-		args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-		wghtSplit := strings.Split(params[3], utils.ANDSep)
-		if len(wghtSplit) > 2 {
-			return utils.ErrUnsupportedFormat
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 11 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
 		}
-		if wghtSplit[0] != utils.EmptyString {
-			args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-		}
-		if wghtSplit[1] != utils.EmptyString {
-			args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-			if err != nil {
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
 				return err
 			}
 		}
-	}
-	// populate Attribute's Blockers
-	if params[4] != utils.EmptyString {
-		args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-		blckrSplit := strings.Split(params[4], utils.ANDSep)
-		if len(blckrSplit) > 2 {
-			return utils.ErrUnsupportedFormat
+		// Prepare request arguments based on provided parameters.
+		args := &utils.APIAttributeProfileWithAPIOpts{
+			APIAttributeProfile: &utils.APIAttributeProfile{
+				Tenant: params[0],
+				ID:     params[1],
+			},
+			APIOpts: make(map[string]any),
 		}
-		if blckrSplit[0] != utils.EmptyString {
-			args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
+		// populate Attribute's FilterIDs
+		if params[2] != utils.EmptyString {
+			args.FilterIDs = strings.Split(params[2], utils.ANDSep)
 		}
-		if blckrSplit[1] != utils.EmptyString {
-			args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// populate Attribute's Attributes
-	if params[7] != utils.EmptyString {
-		var attrFltrIDs []string
-		if params[5] != utils.EmptyString {
-			attrFltrIDs = strings.Split(params[5], utils.ANDSep)
-		}
-		var attrFltrBlckrs utils.DynamicBlockers
-		if params[6] != utils.EmptyString {
-			attrFltrBlckrs = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-			blckrSplit := strings.Split(params[6], utils.ANDSep)
-			if len(blckrSplit) > 2 {
+		// populate Attribute's Weights
+		if params[3] != utils.EmptyString {
+			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+			wghtSplit := strings.Split(params[3], utils.ANDSep)
+			if len(wghtSplit) > 2 {
 				return utils.ErrUnsupportedFormat
 			}
-			if blckrSplit[0] != utils.EmptyString {
-				attrFltrBlckrs[0].FilterIDs = []string{blckrSplit[0]}
+			if wghtSplit[0] != utils.EmptyString {
+				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
 			}
-			if blckrSplit[1] != utils.EmptyString {
-				attrFltrBlckrs[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+			if wghtSplit[1] != utils.EmptyString {
+				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
 				if err != nil {
 					return err
 				}
 			}
 		}
-		args.Attributes = append(args.Attributes, &utils.ExternalAttribute{
-			FilterIDs: attrFltrIDs,
-			Blockers:  attrFltrBlckrs,
-			Path:      params[7],
-			Type:      params[8],
-			Value:     params[9],
-		})
-	}
-	// populate Attribute's APIOpts
-	if params[10] != utils.EmptyString {
-		if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
+		// populate Attribute's Blockers
+		if params[4] != utils.EmptyString {
+			args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+			blckrSplit := strings.Split(params[4], utils.ANDSep)
+			if len(blckrSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if blckrSplit[0] != utils.EmptyString {
+				args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
+			}
+			if blckrSplit[1] != utils.EmptyString {
+				args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+				if err != nil {
+					return err
+				}
+			}
+		}
+		// populate Attribute's Attributes
+		if params[7] != utils.EmptyString {
+			var attrFltrIDs []string
+			if params[5] != utils.EmptyString {
+				attrFltrIDs = strings.Split(params[5], utils.ANDSep)
+			}
+			var attrFltrBlckrs utils.DynamicBlockers
+			if params[6] != utils.EmptyString {
+				attrFltrBlckrs = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+				blckrSplit := strings.Split(params[6], utils.ANDSep)
+				if len(blckrSplit) > 2 {
+					return utils.ErrUnsupportedFormat
+				}
+				if blckrSplit[0] != utils.EmptyString {
+					attrFltrBlckrs[0].FilterIDs = []string{blckrSplit[0]}
+				}
+				if blckrSplit[1] != utils.EmptyString {
+					attrFltrBlckrs[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+					if err != nil {
+						return err
+					}
+				}
+			}
+			args.Attributes = append(args.Attributes, &utils.ExternalAttribute{
+				FilterIDs: attrFltrIDs,
+				Blockers:  attrFltrBlckrs,
+				Path:      params[7],
+				Type:      params[8],
+				Value:     params[9],
+			})
+		}
+		// populate Attribute's APIOpts
+		if params[10] != utils.EmptyString {
+			if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
+				return err
+			}
+		}
+
+		// create the AttributeProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetAttributeProfile, args, &rply); err != nil {
 			return err
 		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
 	}
-
-	// create the AttributeProfile based on the populated parameters
-	var rply string
-	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
-		utils.AdminSv1SetAttributeProfile, args, &rply)
+	return
 }
 
 // actDynamicResource processes the `ActionDiktatsOpts` field from the action to construct a ResourceProfile
@@ -532,6 +633,7 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 type actDynamicResource struct {
 	config  *config.CGRConfig
 	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
 	aCfg    *utils.APAction
 	tnt     string
 	cgrEv   *utils.CGREvent
@@ -557,88 +659,120 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
 	}
-	params := strings.Split(utils.IfaceAsString(aL.aCfg.Diktats[0].Opts[utils.MetaTemplate]),
-		utils.InfieldSep)
-	if len(params) != 11 {
-		return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
-	}
-	// parse dynamic parameters
-	for i := range params {
-		if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if _, has := diktat.Opts[utils.MetaTemplate]; !has {
+			continue
+		}
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
 			return err
 		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
 	}
-	// Prepare request arguments based on provided parameters.
-	args := &utils.ResourceProfileWithAPIOpts{
-		ResourceProfile: &utils.ResourceProfile{
-			Tenant:            params[0],
-			ID:                params[1],
-			AllocationMessage: params[6],
-		},
-		APIOpts: make(map[string]any),
-	}
-	// populate Resource's FilterIDs
-	if params[2] != utils.EmptyString {
-		args.FilterIDs = strings.Split(params[2], utils.ANDSep)
-	}
-	// populate Resource's Weights
-	if params[3] != utils.EmptyString {
-		args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-		wghtSplit := strings.Split(params[3], utils.ANDSep)
-		if len(wghtSplit) > 2 {
-			return utils.ErrUnsupportedFormat
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 11 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
 		}
-		if wghtSplit[0] != utils.EmptyString {
-			args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+				return err
+			}
 		}
-		if wghtSplit[1] != utils.EmptyString {
-			args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+		// Prepare request arguments based on provided parameters.
+		args := &utils.ResourceProfileWithAPIOpts{
+			ResourceProfile: &utils.ResourceProfile{
+				Tenant:            params[0],
+				ID:                params[1],
+				AllocationMessage: params[6],
+			},
+			APIOpts: make(map[string]any),
+		}
+		// populate Resource's FilterIDs
+		if params[2] != utils.EmptyString {
+			args.FilterIDs = strings.Split(params[2], utils.ANDSep)
+		}
+		// populate Resource's Weights
+		if params[3] != utils.EmptyString {
+			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+			wghtSplit := strings.Split(params[3], utils.ANDSep)
+			if len(wghtSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if wghtSplit[0] != utils.EmptyString {
+				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+			}
+			if wghtSplit[1] != utils.EmptyString {
+				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		// populate Resource's UsageTTL
+		if params[4] != utils.EmptyString {
+			args.UsageTTL, err = utils.ParseDurationWithNanosecs(params[4])
 			if err != nil {
 				return err
 			}
 		}
-	}
-	// populate Resource's UsageTTL
-	if params[4] != utils.EmptyString {
-		args.UsageTTL, err = utils.ParseDurationWithNanosecs(params[4])
-		if err != nil {
-			return err
+		// populate Resource's Limit
+		if params[5] != utils.EmptyString {
+			args.Limit, err = strconv.ParseFloat(params[5], 64)
+			if err != nil {
+				return err
+			}
 		}
-	}
-	// populate Resource's Limit
-	if params[5] != utils.EmptyString {
-		args.Limit, err = strconv.ParseFloat(params[5], 64)
-		if err != nil {
-			return err
+		// populate Resource's Blocker
+		if params[7] != utils.EmptyString {
+			args.Blocker, err = strconv.ParseBool(params[7])
+			if err != nil {
+				return err
+			}
 		}
-	}
-	// populate Resource's Blocker
-	if params[7] != utils.EmptyString {
-		args.Blocker, err = strconv.ParseBool(params[7])
-		if err != nil {
-			return err
+		// populate Resource's Stored
+		if params[8] != utils.EmptyString {
+			args.Stored, err = strconv.ParseBool(params[8])
+			if err != nil {
+				return err
+			}
 		}
-	}
-	// populate Resource's Stored
-	if params[8] != utils.EmptyString {
-		args.Stored, err = strconv.ParseBool(params[8])
-		if err != nil {
-			return err
+		// populate Resource's ThresholdIDs
+		if params[9] != utils.EmptyString {
+			args.ThresholdIDs = strings.Split(params[9], utils.ANDSep)
 		}
-	}
-	// populate Resource's ThresholdIDs
-	if params[9] != utils.EmptyString {
-		args.ThresholdIDs = strings.Split(params[9], utils.ANDSep)
-	}
-	// populate Resource's APIOpts
-	if params[10] != utils.EmptyString {
-		if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
-			return err
+		// populate Resource's APIOpts
+		if params[10] != utils.EmptyString {
+			if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
+				return err
+			}
 		}
-	}
 
-	// create the ResourceProfile based on the populated parameters
-	var rply string
-	return aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
-		utils.AdminSv1SetResourceProfile, args, &rply)
+		// create the ResourceProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetResourceProfile, args, &rply); err != nil {
+			return err
+		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
+	}
+	return
 }
