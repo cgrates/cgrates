@@ -1,4 +1,10 @@
 ---
+- name: Ensure Git is installed
+  become: true
+  ansible.builtin.apt:
+    name: git
+    state: present
+
 - name: Ensure SSH directory exists
   ansible.builtin.file:
     path: "/home/{{ ansible_user }}/.ssh"
