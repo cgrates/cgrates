@@ -15,4 +15,5 @@ Welcome to `CGRateS`_'s documentation!
    configuration
    core_concepts
    components
+   agents
    troubleshooting

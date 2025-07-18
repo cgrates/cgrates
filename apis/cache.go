@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 type CacheSv1 struct {
@@ -85,10 +84,10 @@ func (chSv1 *CacheSv1) Clear(ctx *context.Context, args *utils.AttrCacheIDsWithA
 	return chSv1.cacheS.V1Clear(ctx, args, reply)
 }
 
-// GetCacheStats returns CacheStats filtered by cacheIDs
-func (chSv1 *CacheSv1) GetCacheStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, //
-	rply *map[string]*ltcache.CacheStats) error {
-	return chSv1.cacheS.V1GetCacheStats(ctx, args, rply)
+// GetStats returns CacheStats filtered by cacheIDs
+func (chSv1 *CacheSv1) GetStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
+	rply *engine.CacheStatsWithMetadata) error {
+	return chSv1.cacheS.V1GetStats(ctx, args, rply)
 }
 
 // PrecacheStatus checks status of active precache processes

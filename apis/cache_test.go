@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 func TestCacheHasItemAndGetItem(t *testing.T) {
@@ -293,18 +292,19 @@ func TestGetCacheStats(t *testing.T) {
 	ch := engine.NewCacheS(cfg, dm, connMgr, nil)
 	cache := NewCacheSv1(ch)
 	ch.SetWithoutReplicate(utils.CacheAttributeProfiles, "cgrates.org:TestGetCacheStats", nil, nil, true, utils.NonTransactional)
-	var reply map[string]*ltcache.CacheStats
+	var reply engine.CacheStatsWithMetadata
 
 	args := &utils.AttrCacheIDsWithAPIOpts{
 		Tenant:   "cgrates.org",
 		APIOpts:  map[string]any{},
 		CacheIDs: []string{utils.CacheAttributeProfiles},
 	}
-	if err := cache.GetCacheStats(context.Background(), args, &reply); err != nil {
+	if err := cache.GetStats(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
-	if reply[utils.CacheAttributeProfiles].Items != 1 {
-		t.Errorf("Expected 1\n but received %v", reply[utils.CacheAttributeProfiles].Items)
+	cacheStats := reply.CacheStatistics
+	if cacheStats[utils.CacheAttributeProfiles].Items != 1 {
+		t.Errorf("Expected 1\n but received %v", cacheStats[utils.CacheAttributeProfiles].Items)
 	}
 }
 

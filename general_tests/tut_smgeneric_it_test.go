@@ -32,7 +32,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 var (
@@ -134,7 +133,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	// 	Actions: 9, ActionPlans: 4, AccountActionPlans: 5, SharedGroups: 1, ResourceProfiles: 3,
 	// 	Resources: 3, StatQueues: 1, StatQueueProfiles: 1, Thresholds: 7, ThresholdProfiles: 7, Filters: 15,
 	// 	SupplierProfiles: 3, AttributeProfiles: 2}
-	var rcvStats map[string]*ltcache.CacheStats
+	var rcvStats engine.CacheStatsWithMetadata
 	expectedStats := engine.GetDefaultEmptyCacheStats()
 	expectedStats[utils.CacheAccountsFilterIndexes].Items = 1
 	expectedStats[utils.CacheAccountsFilterIndexes].Groups = 1
@@ -184,9 +183,9 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheAttributeFilterIndexes].Groups = 1
 	expectedStats[utils.CacheReverseFilterIndexes].Items = 19
 	expectedStats[utils.CacheReverseFilterIndexes].Groups = 16
-	if err := tutSMGRpc.Call(context.Background(), utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
+	if err := tutSMGRpc.Call(context.Background(), utils.CacheSv1GetStats, new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
-	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
+	} else if !reflect.DeepEqual(expectedStats, rcvStats.CacheStatistics) {
 		t.Errorf("expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 }
