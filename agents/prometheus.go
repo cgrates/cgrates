@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -107,7 +106,7 @@ func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager) *Promethe
 			Subsystem: "cache",
 			Name:      "groups_total",
 			Help:      "Total number of cache groups",
-		}, []string{"cache"})
+		}, []string{"cache", "node_id"})
 	reg.MustRegister(cacheGroupsMetric)
 
 	cacheItemsMetric := prometheus.NewGaugeVec(
@@ -116,7 +115,7 @@ func NewPrometheusAgent(cfg *config.CGRConfig, cm *engine.ConnManager) *Promethe
 			Subsystem: "cache",
 			Name:      "items_total",
 			Help:      "Total number of cache items",
-		}, []string{"cache"})
+		}, []string{"cache", "node_id"})
 	reg.MustRegister(cacheItemsMetric)
 	statMetrics := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -197,24 +196,26 @@ func (pa *PrometheusAgent) updateCacheStats() {
 		return
 	}
 	for _, connID := range pa.cfg.PrometheusAgentCfg().CacheSConns {
-		var cacheStats map[string]*ltcache.CacheStats
+		var reply engine.CacheStatsWithMetadata
 		if err := pa.cm.Call(context.Background(), []string{connID},
-			utils.CacheSv1GetCacheStats,
+			utils.CacheSv1GetStats,
 			&utils.AttrCacheIDsWithAPIOpts{
 				CacheIDs: pa.cfg.PrometheusAgentCfg().CacheIDs,
-			}, &cacheStats); err != nil {
+			}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf(
 				"<%s> failed to retrieve cache stats (connID=%q): %v",
 				utils.PrometheusAgent, connID, err))
 			continue
 		}
+		cacheStats := reply.CacheStatistics
+		nodeID := utils.IfaceAsString(reply.Metadata[utils.NodeID])
 
 		for cacheID, stats := range cacheStats {
 			if stats == nil {
 				continue
 			}
-			pa.cacheGroupsMetric.WithLabelValues(cacheID).Set(float64(stats.Groups))
-			pa.cacheItemsMetric.WithLabelValues(cacheID).Set(float64(stats.Items))
+			pa.cacheGroupsMetric.WithLabelValues(cacheID, nodeID).Set(float64(stats.Groups))
+			pa.cacheItemsMetric.WithLabelValues(cacheID, nodeID).Set(float64(stats.Items))
 		}
 	}
 }

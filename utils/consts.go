@@ -1438,7 +1438,6 @@ const (
 
 	// APIerSv1GetDataCost              = "APIerSv1.GetDataCost"
 	// APIerSv1ReplayFailedPosts        = "APIerSv1.ReplayFailedPosts"
-	// APIerSv1GetCacheStats            = "APIerSv1.GetCacheStats"
 	// APIerSv1ReloadCache              = "APIerSv1.ReloadCache"
 	// APIerSv1RemoveActions            = "APIerSv1.RemoveActions"
 	// APIerSv1GetLoadHistory           = "APIerSv1.GetLoadHistory"
@@ -1764,7 +1763,7 @@ const (
 // CacheS APIs
 const (
 	CacheSv1                  = "CacheSv1"
-	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
+	CacheSv1GetStats          = "CacheSv1.GetStats"
 	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
 	CacheSv1HasItem           = "CacheSv1.HasItem"
 	CacheSv1GetItem           = "CacheSv1.GetItem"
