@@ -325,23 +325,28 @@ func (RateProfileMdl) TableName() string {
 }
 
 type ActionProfileMdl struct {
-	PK              uint `gorm:"primary_key"`
-	Tpid            string
-	Tenant          string `index:"0" re:".*"`
-	ID              string `index:"1" re:".*"`
-	FilterIDs       string `index:"2" re:".*"`
-	Weights         string `index:"3" re:".*"`
-	Blockers        string `index:"4" re:".*"`
-	Schedule        string `index:"5" re:".*"`
-	TargetType      string `index:"6" re:".*"`
-	TargetIDs       string `index:"7" re:".*"`
-	ActionID        string `index:"8" re:".*"`
-	ActionFilterIDs string `index:"9" re:".*"`
-	ActionTTL       string `index:"10" re:".*"`
-	ActionType      string `index:"11" re:".*"`
-	ActionOpts      string `index:"12" re:".*"`
-	ActionPath      string `index:"13" re:".*"`
-	ActionValue     string `index:"14" re:".*"`
+	PK                     uint `gorm:"primary_key"`
+	Tpid                   string
+	Tenant                 string `index:"0" re:".*"`
+	ID                     string `index:"1" re:".*"`
+	FilterIDs              string `index:"2" re:".*"`
+	Weights                string `index:"3" re:".*"`
+	Blockers               string `index:"4" re:".*"`
+	Schedule               string `index:"5" re:".*"`
+	TargetType             string `index:"6" re:".*"`
+	TargetIDs              string `index:"7" re:".*"`
+	ActionID               string `index:"8" re:".*"`
+	ActionFilterIDs        string `index:"9" re:".*"`
+	ActionTTL              string `index:"10" re:".*"`
+	ActionType             string `index:"11" re:".*"`
+	ActionOpts             string `index:"12" re:".*"`
+	ActionWeights          string `index:"13" re:".*"`
+	ActionBlockers         string `index:"14" re:".*"`
+	ActionDiktatsID        string `index:"15" re:".*"`
+	ActionDiktatsFilterIDs string `index:"16" re:".*"`
+	ActionDiktatsOpts      string `index:"17" re:".*"`
+	ActionDiktatsWeights   string `index:"18" re:".*"`
+	ActionDiktatsBlockers  string `index:"19" re:".*"`
 
 	CreatedAt time.Time
 }

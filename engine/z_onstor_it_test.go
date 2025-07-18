@@ -1066,7 +1066,9 @@ func testOnStorITActionProfile(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Diktats: []*utils.APDiktat{{
-					Path: "~*balance.TestBalance.Value",
+					Opts: map[string]any{
+						"*balancePath": "~*balance.TestBalance.Value",
+					},
 				}},
 			},
 			{
@@ -1074,7 +1076,9 @@ func testOnStorITActionProfile(t *testing.T) {
 				FilterIDs: []string{},
 				Type:      "*topup",
 				Diktats: []*utils.APDiktat{{
-					Path: "~*balance.TestVoiceBalance.Value",
+					Opts: map[string]any{
+						"*balancePath": "~*balance.TestVoiceBalance.Value",
+					},
 				}},
 			},
 		},

@@ -1320,10 +1320,16 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 					Type: utils.MetaRemBalance,
 					Diktats: []*utils.APDiktat{
 						{
-							Path: "MONETARY",
+							ID: "RemBalMonetary",
+							Opts: map[string]any{
+								"*balancePath": "MONETARY",
+							},
 						},
 						{
-							Path: "VOICE",
+							ID: "RemBalVoice",
+							Opts: map[string]any{
+								"*balancePath": "VOICE",
+							},
 						},
 					},
 				},
@@ -1431,10 +1437,16 @@ func testV1FIdxSetActionProfileMoreFltrsMoreIndexing(t *testing.T) {
 					Type: utils.MetaRemBalance,
 					Diktats: []*utils.APDiktat{
 						{
-							Path: "MONETARY",
+							ID: "RemBalMonetary",
+							Opts: map[string]any{
+								"*balancePath": "MONETARY",
+							},
 						},
 						{
-							Path: "VOICE",
+							ID: "RemBalVoice",
+							Opts: map[string]any{
+								"*balancePath": "VOICE",
+							},
 						},
 					},
 				},
@@ -1549,9 +1561,13 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 					Type: utils.MetaAddBalance,
 					Diktats: []*utils.APDiktat{
 						{
-							Path:  "MONETARY",
-							Value: "10",
-						}},
+							ID: "AddBalMonetary",
+							Opts: map[string]any{
+								"*balancePath":  "MONETARY",
+								"*balanceValue": "10",
+							},
+						},
+					},
 				},
 			},
 		},
@@ -1576,9 +1592,13 @@ func testV1FIdxActionMoreProfileForFilters(t *testing.T) {
 					Type: utils.MetaSetBalance,
 					Diktats: []*utils.APDiktat{
 						{
-							Path:  "MONETARY",
-							Value: "10",
-						}},
+							ID: "SetBalMonetary",
+							Opts: map[string]any{
+								"*balancePath":  "MONETARY",
+								"*balanceValue": "10",
+							},
+						},
+					},
 				},
 			},
 		},

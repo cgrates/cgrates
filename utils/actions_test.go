@@ -68,7 +68,9 @@ func TestActionAPDiktatRSRValuesNil(t *testing.T) {
 
 func TestActionAPDiktatRSRValuesError(t *testing.T) {
 	apdDiktat := APDiktat{
-		Value: "val`val2val3",
+		Opts: map[string]any{
+			"*balanceValue": "val`val2val3",
+		},
 	}
 	expErr := "Closed unspilit syntax"
 	_, err := apdDiktat.RSRValues()
@@ -78,7 +80,11 @@ func TestActionAPDiktatRSRValuesError(t *testing.T) {
 
 }
 func TestAPDiktatRSRValues(t *testing.T) {
-	dk := &APDiktat{Value: "1001"}
+	dk := &APDiktat{
+		Opts: map[string]any{
+			"*balanceValue": "1001",
+		},
+	}
 	if rply, err := dk.RSRValues(); err != nil {
 		return
 	} else if exp := NewRSRParsersMustCompile("1001", InfieldSep); !reflect.DeepEqual(exp, rply) {
@@ -118,9 +124,33 @@ func TestActionProfileSet(t *testing.T) {
 				"opt2": "val1",
 				"opt3": MapStorage{"opt4": "val1"},
 			},
+			Weights: DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Blockers: DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
 			Diktats: []*APDiktat{{
-				Path:  "path",
-				Value: "val1",
+				ID:        "dID",
+				FilterIDs: []string{"fltr1"},
+				Opts: map[string]any{
+					"*balancePath":  "path",
+					"*balanceValue": "val1",
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Blockers: DynamicBlockers{
+					{
+						Blocker: true,
+					},
+				},
 			}},
 		}},
 	}
@@ -147,6 +177,9 @@ func TestActionProfileSet(t *testing.T) {
 		t.Error(err)
 	}
 	if err := ap.Set([]string{Weights}, ";10", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Blockers}, ";true", false); err != nil {
 		t.Error(err)
 	}
 	if err := ap.Set([]string{Targets + "[" + MetaAccounts + "]"}, "1001;1002", false); err != nil {
@@ -191,18 +224,39 @@ func TestActionProfileSet(t *testing.T) {
 	if err := ap.Set([]string{Actions, "acc1", TTL}, "10", false); err != nil {
 		t.Error(err)
 	}
-	if err := ap.Set([]string{Actions, "acc1", Diktats, Path}, "path", false); err != nil {
+	if err := ap.Set([]string{Actions, "acc1", Weights}, ";10", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Actions, "acc1", Blockers}, ";true", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Actions, "acc1", Diktats, ID}, "dID", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Actions, "acc1", Diktats, FilterIDs}, "fltr1", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Actions, "acc1", Diktats, Path}, "path", false); err != ErrWrongPath {
 		t.Error(err)
 	}
 
-	if err := ap.Set([]string{Actions, "acc1", Diktats, Value}, "val1", false); err != nil {
+	if err := ap.Set([]string{Actions, "acc1", Diktats, Value}, "val1", false); err != ErrWrongPath {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Actions, "acc1", Diktats, Opts}, "*balancePath:path", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Actions, "acc1", Diktats, Opts, "*balanceValue"}, "val1", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Actions, "acc1", Diktats, Weights}, ";10", false); err != nil {
+		t.Error(err)
+	}
+	if err := ap.Set([]string{Actions, "acc1", Diktats, Blockers}, ";true", false); err != nil {
 		t.Error(err)
 	}
 
 	if err := ap.Actions[0].Set(nil, "", false); err != ErrWrongPath {
-		t.Error(err)
-	}
-	if err := ap.Set([]string{Blockers}, ";true", false); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(exp, ap) {
@@ -242,8 +296,10 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 				"opt3": MapStorage{"opt4": "val1"},
 			},
 			Diktats: []*APDiktat{{
-				Path:  "path",
-				Value: "val1",
+				Opts: map[string]any{
+					"*balancePath":  "path",
+					"*balanceValue": "val1",
+				},
 			}},
 		}},
 	}
@@ -412,18 +468,18 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 	if _, err := ap.FieldAsInterface([]string{Actions + "[0]", Diktats + "[0]", "0"}); err != ErrNotFound {
 		t.Fatal(err)
 	}
-	if _, err := ap.FieldAsInterface([]string{Actions + "[0]", Diktats + "[a]", "0"}); err == nil || err.Error() != expErrMsg {
+	if _, err := ap.FieldAsInterface([]string{Actions + "[0]", Diktats + "[a]", FilterIDs + "[0]", "Blocker"}); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	if val, err := ap.FieldAsInterface([]string{Actions + "[0]", Diktats + "[0]", Path}); err != nil {
+	if val, err := ap.FieldAsInterface([]string{Actions + "[0]", Diktats + "[0]", Opts, "*balancePath"}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Actions[0].Diktats[0].Path; !reflect.DeepEqual(exp, val) {
+	} else if exp := ap.Actions[0].Diktats[0].Opts["*balancePath"]; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
 	}
-	if val, err := ap.FieldAsInterface([]string{Actions + "[0]", Diktats + "[0]", Value}); err != nil {
+	if val, err := ap.FieldAsInterface([]string{Actions + "[0]", Diktats + "[0]", Opts, "*balanceValue"}); err != nil {
 		t.Fatal(err)
-	} else if exp := ap.Actions[0].Diktats[0].Value; !reflect.DeepEqual(exp, val) {
+	} else if exp := ap.Actions[0].Diktats[0].Opts["*balanceValue"]; !reflect.DeepEqual(exp, val) {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
 	}
 
@@ -454,7 +510,7 @@ func TestActionProfileFieldAsInterface(t *testing.T) {
 	if _, err := ap.Actions[0].Diktats[0].FieldAsString([]string{"", ""}); err != ErrNotFound {
 		t.Fatal(err)
 	}
-	if val, err := ap.Actions[0].Diktats[0].FieldAsString([]string{Path}); err != nil {
+	if val, err := ap.Actions[0].Diktats[0].FieldAsString([]string{Opts, "*balancePath"}); err != nil {
 		t.Fatal(err)
 	} else if exp := "path"; exp != val {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
@@ -552,8 +608,10 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 				},
 				Diktats: []*APDiktat{
 					{
-						Path:  "path2",
-						Value: "value2",
+						Opts: map[string]any{
+							"*balancePath":  "path2",
+							"*balanceValue": "val2",
+						},
 					},
 				},
 			},
@@ -585,8 +643,10 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 				},
 				Diktats: []*APDiktat{
 					{
-						Path:  "path2",
-						Value: "value2",
+						Opts: map[string]any{
+							"*balancePath":  "path2",
+							"*balanceValue": "val2",
+						},
 					},
 				},
 			},
@@ -607,8 +667,10 @@ func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
 		},
 		Diktats: []*APDiktat{
 			{
-				Path:  "path",
-				Value: "value",
+				Opts: map[string]any{
+					"*balancePath":  "path",
+					"*balanceValue": "value",
+				},
 			},
 		},
 	}
@@ -622,8 +684,10 @@ func TestActionProfileAPActionMergeEmptyV2(t *testing.T) {
 		},
 		Diktats: []*APDiktat{
 			{
-				Path:  "path",
-				Value: "value",
+				Opts: map[string]any{
+					"*balancePath":  "path",
+					"*balanceValue": "value",
+				},
 			},
 		},
 	}
@@ -649,8 +713,10 @@ func TestActionProfileAPActionMergeEmptyV1(t *testing.T) {
 		},
 		Diktats: []*APDiktat{
 			{
-				Path:  "path",
-				Value: "value",
+				Opts: map[string]any{
+					"*balancePath":  "path",
+					"*balanceValue": "value",
+				},
 			},
 		},
 	}
@@ -665,8 +731,10 @@ func TestActionProfileAPActionMergeEmptyV1(t *testing.T) {
 		},
 		Diktats: []*APDiktat{
 			{
-				Path:  "path",
-				Value: "value",
+				Opts: map[string]any{
+					"*balancePath":  "path",
+					"*balanceValue": "value",
+				},
 			},
 		},
 	})
@@ -685,10 +753,38 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 		Opts: map[string]any{
 			"key1": "value1",
 		},
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"fltr2"},
+				Weight:    40,
+			},
+		},
+		Blockers: DynamicBlockers{
+			{
+				FilterIDs: []string{"fltr2"},
+				Blocker:   true,
+			},
+		},
 		Diktats: []*APDiktat{
 			{
-				Path:  "",
-				Value: "",
+				ID:        "DID1",
+				FilterIDs: []string{"fltr1"},
+				Opts: map[string]any{
+					"*balancePath":  "",
+					"*balanceValue": "",
+				},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{"fltr2"},
+						Weight:    40,
+					},
+				},
+				Blockers: DynamicBlockers{
+					{
+						FilterIDs: []string{"fltr2"},
+						Blocker:   true,
+					},
+				},
 			},
 		},
 	}
@@ -701,7 +797,54 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 			"key1": "value1",
 			"key2": "value2",
 		},
-		Diktats: []*APDiktat{},
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"fltr2"},
+				Weight:    40,
+			},
+			{
+				Weight: 65,
+			},
+		},
+		Blockers: DynamicBlockers{
+			{
+				FilterIDs: []string{"fltr2"},
+				Blocker:   true,
+			},
+			{
+				FilterIDs: []string{"fltr3"},
+				Blocker:   true,
+			},
+		},
+		Diktats: []*APDiktat{
+			{
+				ID:        "DID1",
+				FilterIDs: []string{"fltr1", "fltr1"},
+				Opts: map[string]any{
+					"*balancePath":  "",
+					"*balanceValue": "value1",
+				},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{"fltr2"},
+						Weight:    40,
+					},
+					{
+						Weight: 65,
+					},
+				},
+				Blockers: DynamicBlockers{
+					{
+						FilterIDs: []string{"fltr2"},
+						Blocker:   true,
+					},
+					{
+						FilterIDs: []string{"fltr3"},
+						Blocker:   true,
+					},
+				},
+			},
+		},
 	}
 
 	apAct.Merge(&APAction{
@@ -712,10 +855,36 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 		Opts: map[string]any{
 			"key2": "value2",
 		},
+		Weights: DynamicWeights{
+			{
+				Weight: 65,
+			},
+		},
+		Blockers: DynamicBlockers{
+			{
+				FilterIDs: []string{"fltr3"},
+				Blocker:   true,
+			},
+		},
 		Diktats: []*APDiktat{
 			{
-				Path:  "",
-				Value: "value1",
+				ID:        "DID1",
+				FilterIDs: []string{"fltr1"},
+				Opts: map[string]any{
+					"*balancePath":  "",
+					"*balanceValue": "value1",
+				},
+				Weights: DynamicWeights{
+					{
+						Weight: 65,
+					},
+				},
+				Blockers: DynamicBlockers{
+					{
+						FilterIDs: []string{"fltr3"},
+						Blocker:   true,
+					},
+				},
 			},
 		},
 	})
@@ -733,10 +902,58 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 			"key1": "value1",
 			"key2": "value3",
 		},
+		Weights: DynamicWeights{
+			{
+				FilterIDs: []string{"fltr2"},
+				Weight:    40,
+			},
+			{
+				Weight: 65,
+			},
+		},
+		Blockers: DynamicBlockers{
+			{
+				FilterIDs: []string{"fltr2"},
+				Blocker:   true,
+			},
+			{
+				FilterIDs: []string{"fltr3"},
+				Blocker:   true,
+			},
+		},
 		Diktats: []*APDiktat{
 			{
-				Path:  "path2",
-				Value: "value2",
+				ID:        "DID1",
+				FilterIDs: []string{"fltr1", "fltr1"},
+				Opts: map[string]any{
+					"*balancePath":  "",
+					"*balanceValue": "value1",
+				},
+				Weights: DynamicWeights{
+					{
+						FilterIDs: []string{"fltr2"},
+						Weight:    40,
+					},
+					{
+						Weight: 65,
+					},
+				},
+				Blockers: DynamicBlockers{
+					{
+						FilterIDs: []string{"fltr2"},
+						Blocker:   true,
+					},
+					{
+						FilterIDs: []string{"fltr3"},
+						Blocker:   true,
+					},
+				},
+			},
+			{
+				Opts: map[string]any{
+					"*balancePath":  "path2",
+					"*balanceValue": "value2",
+				},
 			},
 		},
 	}
@@ -750,8 +967,10 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 		},
 		Diktats: []*APDiktat{
 			{
-				Path:  "path2",
-				Value: "value2",
+				Opts: map[string]any{
+					"*balancePath":  "path2",
+					"*balanceValue": "value2",
+				},
 			},
 		},
 	})

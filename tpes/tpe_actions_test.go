@@ -53,8 +53,10 @@ func TestTPEnewTPActions(t *testing.T) {
 						Type: utils.MetaSetBalance,
 						Diktats: []*utils.APDiktat{
 							{
-								Path:  "MONETARY",
-								Value: "10",
+								Opts: map[string]any{
+									"*balancePath":  "MONETARY",
+									"*balanceValue": "10",
+								},
 							}},
 					},
 				},
@@ -97,8 +99,10 @@ func TestTPEExportItemsActions(t *testing.T) {
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "MONETARY",
-						Value: "10",
+						Opts: map[string]any{
+							"*balancePath":  "MONETARY",
+							"*balanceValue": "10",
+						},
 					}},
 			},
 		},
@@ -150,8 +154,10 @@ func TestTPEExportItemsActionsNoDbConn(t *testing.T) {
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "MONETARY",
-						Value: "10",
+						Opts: map[string]any{
+							"*balancePath":  "MONETARY",
+							"*balanceValue": "10",
+						},
 					}},
 			},
 		},
@@ -189,8 +195,10 @@ func TestTPEExportItemsActionsIDNotFound(t *testing.T) {
 				Type: utils.MetaSetBalance,
 				Diktats: []*utils.APDiktat{
 					{
-						Path:  "MONETARY",
-						Value: "10",
+						Opts: map[string]any{
+							"*balancePath":  "MONETARY",
+							"*balanceValue": "10",
+						},
 					}},
 			},
 		},

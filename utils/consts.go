@@ -834,7 +834,13 @@ const (
 	ActionFilterIDs         = "ActionFilterIDs"
 	ActionTTL               = "ActionTTL"
 	ActionOpts              = "ActionOpts"
-	ActionPath              = "ActionPath"
+	ActionWeights           = "ActionWeights"
+	ActionBlockers          = "ActionBlockers"
+	ActionDiktatsID         = "ActionDiktatsID"
+	ActionDiktatsFilterIDs  = "ActionDiktatsFilterIDs"
+	ActionDiktatsOpts       = "ActionDiktatsOpts"
+	ActionDiktatsWeights    = "ActionDiktatsWeights"
+	ActionDiktatsBlockers   = "ActionDiktatsBlockers"
 	TPid                    = "TPid"
 	LoadId                  = "LoadId"
 	ActionPlanId            = "ActionPlanId"
@@ -1131,7 +1137,6 @@ const (
 	MetaRemoteSetAccount   = "*remote_set_account"
 	ActionID               = "ActionID"
 	ActionType             = "ActionType"
-	ActionValue            = "ActionValue"
 	BalanceValue           = "BalanceValue"
 	BalanceUnits           = "BalanceUnits"
 	BalanceUnitFactors     = "BalanceUnitFactors"
@@ -1145,6 +1150,11 @@ const (
 	MetaDynamicStats          = "*dynamic_stats"
 	MetaDynamicAttribute      = "*dynamic_attribute"
 	MetaDynamicResource       = "*dynamic_resource"
+
+	// Diktats Opts Fields
+	MetaBalancePath  = "*balancePath"
+	MetaBalanceValue = "*balanceValue"
+	MetaURL          = "*url"
 )
 
 // Migrator Metas

@@ -687,12 +687,17 @@ type TPAPAction struct {
 	TTL       string
 	Type      string
 	Opts      string
+	Weights   string
+	Blockers  string
 	Diktats   []*TPAPDiktat
 }
 
 type TPAPDiktat struct {
-	Path  string
-	Value string
+	ID        string
+	FilterIDs []string
+	Opts      string
+	Weights   string
+	Blockers  string
 }
 
 type TPAccount struct {
