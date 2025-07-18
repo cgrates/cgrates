@@ -90,6 +90,12 @@ func (chSv1 *CacheSv1) GetCacheStats(ctx *context.Context, args *utils.AttrCache
 	return chSv1.cacheS.V1GetCacheStats(ctx, args, rply)
 }
 
+// GetStats returns CacheStats filtered by cacheIDs
+func (chSv1 *CacheSv1) GetStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
+	rply *engine.CacheStatsWithMetadata) error {
+	return chSv1.cacheS.V1GetStats(ctx, args, rply)
+}
+
 // PrecacheStatus checks status of active precache processes
 func (chSv1 *CacheSv1) PrecacheStatus(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) error {
 	return chSv1.cacheS.V1PrecacheStatus(ctx, args, rply)

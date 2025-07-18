@@ -443,6 +443,22 @@ func (chS *CacheS) V1GetCacheStats(ctx *context.Context, args *utils.AttrCacheID
 	return
 }
 
+type CacheStatsWithMetadata struct {
+	CacheStatistics map[string]*ltcache.CacheStats
+	Metadata        map[string]any
+}
+
+func (chS *CacheS) V1GetStats(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts,
+	rply *CacheStatsWithMetadata) error {
+	*rply = CacheStatsWithMetadata{
+		CacheStatistics: chS.tCache.GetCacheStats(args.CacheIDs),
+		Metadata: map[string]any{
+			utils.NodeID: chS.cfg.GeneralCfg().NodeID,
+		},
+	}
+	return nil
+}
+
 func (chS *CacheS) V1PrecacheStatus(ctx *context.Context, args *utils.AttrCacheIDsWithAPIOpts, rply *map[string]string) (err error) {
 	if len(args.CacheIDs) == 0 {
 		args.CacheIDs = utils.CachePartitions.AsSlice()
