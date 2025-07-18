@@ -72,13 +72,18 @@ install -D -m 0755 -p bin/cgr-engine %{buildroot}%{_bindir}/cgr-engine
 install -D -m 0755 -p bin/cgr-loader %{buildroot}%{_bindir}/cgr-loader
 install -D -m 0755 -p bin/cgr-tester %{buildroot}%{_bindir}/cgr-tester
 install -D -m 0755 -p bin/cgr-migrator %{buildroot}%{_bindir}/cgr-migrator
-mkdir -p %{buildroot}%{_logdir}/cdre/csv
-mkdir -p %{buildroot}%{_logdir}/cdre/fwv
-mkdir -p %{buildroot}%{_spooldir}/cdre/csv
-mkdir -p %{buildroot}%{_spooldir}/cdre/fwv
-mkdir -p %{buildroot}%{_spooldir}/tpe
+mkdir -p %{buildroot}%{_spooldir}/analyzers
+mkdir -p %{buildroot}%{_spooldir}/ees
+mkdir -p %{buildroot}%{_spooldir}/ers/in
+mkdir -p %{buildroot}%{_spooldir}/ers/out
 mkdir -p %{buildroot}%{_spooldir}/failed_posts
-mkdir -p %{buildroot}%{_libdir}/cache_dump
+mkdir -p %{buildroot}%{_spooldir}/loader/in
+mkdir -p %{buildroot}%{_spooldir}/loader/out
+mkdir -p %{buildroot}%{_spooldir}/tpe
+mkdir -p %{buildroot}%{_libdir}/internal_db/datadb
+mkdir -p %{buildroot}%{_libdir}/internal_db/backup/datadb
+mkdir -p %{buildroot}%{_libdir}/internal_db/stordb
+mkdir -p %{buildroot}%{_libdir}/internal_db/backup/stordb
 mkdir -p %{buildroot}/etc/logrotate.d
 mkdir -p %{buildroot}/etc/rsyslog.d
 install -m 0644 src/github.com/cgrates/cgrates/data/conf/logging/logrotate.conf %{buildroot}/etc/logrotate.d/%{name}
