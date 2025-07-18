@@ -26,8 +26,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/ltcache"
-
 	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/engine"
@@ -342,16 +340,16 @@ func testCacheSLoadCache(t *testing.T) {
 		t.Errorf("Unexpected reply returned")
 	}
 
-	var rcvStats map[string]*ltcache.CacheStats
+	var rcvStats engine.CacheStatsWithMetadata
 	expstats := engine.GetDefaultEmptyCacheStats()
 	expstats[utils.CacheAttributeProfiles].Items = 1
 	expstats[utils.CacheAttributeFilterIndexes].Groups = 1
 	expstats[utils.CacheAttributeFilterIndexes].Items = 1
 	expstats[utils.CacheLoadIDs].Items = 28
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetStats,
 		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvStats, expstats) {
+	} else if !reflect.DeepEqual(rcvStats.CacheStatistics, expstats) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expstats), utils.ToJSON(rcvStats))
 	}
 }
@@ -518,7 +516,7 @@ func testCacheGetStatusMoreIDs(t *testing.T) {
 		t.Errorf("Unexpected reply returned")
 	}
 
-	var rcvStats map[string]*ltcache.CacheStats
+	var rcvStats engine.CacheStatsWithMetadata
 	expstats := engine.GetDefaultEmptyCacheStats()
 	expstats[utils.CacheAttributeProfiles].Items = 4
 	expstats[utils.CacheAttributeFilterIndexes].Groups = 1
@@ -531,10 +529,10 @@ func testCacheGetStatusMoreIDs(t *testing.T) {
 	expstats[utils.CacheFilters].Items = 6
 	expstats[utils.CacheRPCConnections].Items = 1
 	expstats[utils.CacheLoadIDs].Items = 28
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetStats,
 		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvStats, expstats) {
+	} else if !reflect.DeepEqual(rcvStats.CacheStatistics, expstats) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expstats), utils.ToJSON(rcvStats))
 	}
 }
@@ -549,12 +547,12 @@ func testCacheSClearCache(t *testing.T) {
 	}
 
 	//all cache cleared, empty items in cache
-	var rcvStats map[string]*ltcache.CacheStats
+	var rcvStats engine.CacheStatsWithMetadata
 	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetCacheStats,
+	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetStats,
 		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcvStats, expStats) {
+	} else if !reflect.DeepEqual(rcvStats.CacheStatistics, expStats) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 }

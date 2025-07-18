@@ -19,14 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 func init() {
 	c := &CmdGetCacheStats{
 		name:      "cache_stats",
-		rpcMethod: utils.CacheSv1GetCacheStats,
+		rpcMethod: utils.CacheSv1GetStats,
 		rpcParams: &utils.AttrCacheIDsWithAPIOpts{},
 	}
 	commands[c.Name()] = c
@@ -61,6 +61,5 @@ func (self *CmdGetCacheStats) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetCacheStats) RpcResult() any {
-	reply := make(map[string]*ltcache.CacheStats)
-	return &reply
+	return &engine.CacheStatsWithMetadata{}
 }
