@@ -2010,6 +2010,7 @@ const (
 const (
 	CacheSv1                  = "CacheSv1"
 	CacheSv1GetCacheStats     = "CacheSv1.GetCacheStats"
+	CacheSv1GetStats          = "CacheSv1.GetStats"
 	CacheSv1GetItemIDs        = "CacheSv1.GetItemIDs"
 	CacheSv1HasItem           = "CacheSv1.HasItem"
 	CacheSv1GetItem           = "CacheSv1.GetItem"

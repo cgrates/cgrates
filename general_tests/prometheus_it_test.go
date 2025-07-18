@@ -61,8 +61,13 @@ func TestPrometheusAgentIT(t *testing.T) {
 "prometheus_agent": {
 	"enabled": true,
 	"path": "/metrics",
-	"collect_go_metrics": false,
-	"collect_process_metrics": false,
+	"caches_conns": ["*localhost", "external"],
+	"cache_ids": [
+		"*statqueue_profiles",
+		"*statqueues",
+		"*stat_filter_indexes",
+		"*rpc_connections"
+	],
 	"stats_conns": ["*localhost", "external"],
 	"stat_queue_ids": ["cgrates.org:SQ_1","SQ_2"]
 }
