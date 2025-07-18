@@ -72,10 +72,16 @@ func TestDynThdIT(t *testing.T) {
 						Type: utils.MetaSetBalance,
 						Diktats: []*utils.APDiktat{
 							{
-								ID: "SetVoiceID",
+								ID:        "SetVoiceID",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
 								Opts: map[string]any{
 									"*balancePath":  "*balance.VOICE.ID",
 									"*balanceValue": "testBalanceIDMonetary",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 14,
+									},
 								},
 							},
 							{
@@ -84,12 +90,22 @@ func TestDynThdIT(t *testing.T) {
 									"*balancePath":  "*balance.MONETARY.Type",
 									"*balanceValue": utils.MetaConcrete,
 								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 13,
+									},
+								},
 							},
 							{
 								ID: "SetMonetaryUnits",
 								Opts: map[string]any{
 									"*balancePath":  "*balance.MONETARY.Units",
 									"*balanceValue": "1048576",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 12,
+									},
 								},
 							},
 							{
@@ -98,12 +114,52 @@ func TestDynThdIT(t *testing.T) {
 									"*balancePath":  "*balance.MONETARY.Weights",
 									"*balanceValue": "`;2`",
 								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 11,
+									},
+								},
 							},
 							{
 								ID: "SetMonetaryCostIncrements",
 								Opts: map[string]any{
 									"*balancePath":  "*balance.MONETARY.CostIncrements",
 									"*balanceValue": "`*string:~*req.ToR:*data;1024;0;0.01`",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 9,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID:        "SetVoiceIDNotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.ID",
+									"*balanceValue": "testBalanceIDMonetaryNOTFOUND",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+							{
+								ID: "SetVoiceIDBlocked",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.ID",
+									"*balanceValue": "testBalanceIDMonetaryBLOCKED",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 8,
+									},
 								},
 							},
 						},

@@ -70,9 +70,9 @@ func TestACExecuteCDRLog(t *testing.T) {
 		&actExport{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaExport}},
 		&actResetStat{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaResetStatQueue}},
 		&actResetThreshold{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaResetThreshold}},
-		&actSetBalance{cfg, nil, &utils.APAction{Type: utils.MetaAddBalance}, "cgrates.org", false},
-		&actSetBalance{cfg, nil, &utils.APAction{Type: utils.MetaSetBalance}, "cgrates.org", true},
-		&actRemBalance{cfg, nil, &utils.APAction{Type: utils.MetaRemBalance}, "cgrates.org"},
+		&actSetBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaAddBalance}, "cgrates.org", false},
+		&actSetBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaSetBalance}, "cgrates.org", true},
+		&actRemBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaRemBalance}, "cgrates.org"},
 	}
 
 	acts, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, fltr, dm, nil, actCfg, "cgrates.org")

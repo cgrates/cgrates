@@ -132,11 +132,11 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 	case utils.MetaResetThreshold:
 		return &actResetThreshold{tnt, cfg, connMgr, aCfg}, nil
 	case utils.MetaAddBalance:
-		return &actSetBalance{cfg, connMgr, aCfg, tnt, false}, nil
+		return &actSetBalance{cfg, connMgr, fltrS, aCfg, tnt, false}, nil
 	case utils.MetaSetBalance:
-		return &actSetBalance{cfg, connMgr, aCfg, tnt, true}, nil
+		return &actSetBalance{cfg, connMgr, fltrS, aCfg, tnt, true}, nil
 	case utils.MetaRemBalance:
-		return &actRemBalance{cfg, connMgr, aCfg, tnt}, nil
+		return &actRemBalance{cfg, connMgr, fltrS, aCfg, tnt}, nil
 	case utils.MetaDynamicThreshold:
 		return &actDynamicThreshold{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	case utils.MetaDynamicStats:

@@ -101,9 +101,14 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 		},
 	}
 
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
 	actRemBal := &actRemBalance{
 		config:  cfg,
 		connMgr: connMngr,
+		fltrS:   engine.NewFilterS(cfg, connMngr, engine.NewDataManager(idb, cfg, connMngr)),
 		aCfg:    apAction,
 		tnt:     "cgrates.org",
 	}
