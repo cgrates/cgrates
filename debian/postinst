@@ -29,12 +29,20 @@ case "$1" in
 	configure)
 		adduser --quiet --system --group --disabled-password --shell /bin/false --home /run/cgrates --gecos "CGRateS" cgrates || true
 		chown cgrates:cgrates /var/lib/cgrates/
-		chown cgrates:cgrates /var/lib/cgrates/cache_dump/
+		chown cgrates:cgrates /var/lib/cgrates/internal_db/
+		chown cgrates:cgrates /var/lib/cgrates/internal_db/datadb/
+		chown cgrates:cgrates /var/lib/cgrates/internal_db/backup/
+		chown cgrates:cgrates /var/lib/cgrates/internal_db/backup/datadb/
+		chown cgrates:cgrates /var/lib/cgrates/internal_db/stordb/
+		chown cgrates:cgrates /var/lib/cgrates/internal_db/backup/stordb/
+		chown cgrates:cgrates /var/lib/cgrates/internal_db/configdb/
+		chown cgrates:cgrates /var/lib/cgrates/internal_db/backup/configdb/
 		chown cgrates:cgrates /var/spool/cgrates/
 		chown cgrates:cgrates /var/spool/cgrates/analyzers/
-		chown cgrates:cgrates /var/spool/cgrates/cdre/
-		chown cgrates:cgrates /var/spool/cgrates/cdre/csv/
-		chown cgrates:cgrates /var/spool/cgrates/cdre/fwv/
+		chown cgrates:cgrates /var/spool/cgrates/ees/
+		chown cgrates:cgrates /var/spool/cgrates/loader/
+		chown cgrates:cgrates /var/spool/cgrates/loader/in/
+		chown cgrates:cgrates /var/spool/cgrates/loader/out/
 		chown cgrates:cgrates /var/spool/cgrates/ers/
 		chown cgrates:cgrates /var/spool/cgrates/ers/in/
 		chown cgrates:cgrates /var/spool/cgrates/ers/out/
