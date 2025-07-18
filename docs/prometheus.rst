@@ -7,7 +7,7 @@ PrometheusAgent
 
 1. **Core metrics** - collected from configured CGRateS engines via CoreSv1.Status API
 2. **StatQueue metrics** - values from CGRateS :ref:`StatS <stats>` component, collected via StatSv1.GetQueueFloatMetrics API
-3. **Cache statistics** - collected from configured :ref:`CacheS <caches>` components via CacheSv1.GetCacheStats API
+3. **Cache statistics** - collected from configured :ref:`CacheS <caches>` components via CacheSv1.GetStats API
 
 For core metrics, the agent computes real-time values on each Prometheus scrape request. For StatQueue metrics, it retrieves the current state of the stored StatQueues without additional calculations. For cache statistics, it collects current cache utilization data from the configured cache partitions.
 
@@ -103,9 +103,10 @@ The PrometheusAgent exposes the following metrics:
         go_memstats_alloc_bytes{node_id="e94160b"} 1.1360808e+07
 
 3. **Cache Metrics** (when caches_conns is configured)
-    - Two separate metrics for cache statistics: ``cgrates_cache_groups_total`` and ``cgrates_cache_items_total`` with cache partition ID label
+    - Two separate metrics for cache statistics: ``cgrates_cache_groups_total`` and ``cgrates_cache_items_total`` with cache partition ID and node_id labels
     - Obtained from CacheS services on each scrape request
     - Useful for identifying memory usage patterns and potential performance issues
+    - Includes node_id labels for multi-engine environments, allowing collection from multiple CGRateS engines
 
     Example of cache metrics output:
 
@@ -113,15 +114,15 @@ The PrometheusAgent exposes the following metrics:
 
         # HELP cgrates_cache_groups_total Total number of cache groups
         # TYPE cgrates_cache_groups_total gauge
-        cgrates_cache_groups_total{cache="*attribute_filter_indexes"} 2
-        cgrates_cache_groups_total{cache="*charger_profiles"} 0
-        cgrates_cache_groups_total{cache="*rpc_connections"} 0
+        cgrates_cache_groups_total{cache="*attribute_filter_indexes",node_id="dc2cb63"} 2
+        cgrates_cache_groups_total{cache="*charger_profiles",node_id="dc2cb63"} 0
+        cgrates_cache_groups_total{cache="*rpc_connections",node_id="dc2cb63"} 0
 
         # HELP cgrates_cache_items_total Total number of cache items
         # TYPE cgrates_cache_items_total gauge
-        cgrates_cache_items_total{cache="*attribute_filter_indexes"} 6
-        cgrates_cache_items_total{cache="*charger_profiles"} 2
-        cgrates_cache_items_total{cache="*rpc_connections"} 1
+        cgrates_cache_items_total{cache="*attribute_filter_indexes",node_id="dc2cb63"} 6
+        cgrates_cache_items_total{cache="*charger_profiles",node_id="dc2cb63"} 2
+        cgrates_cache_items_total{cache="*rpc_connections",node_id="dc2cb63"} 1
 
 
 How It Works
