@@ -92,14 +92,21 @@ install -D -m 0755 -p bin/cgr-engine $RPM_BUILD_ROOT%{_bindir}/cgr-engine
 install -D -m 0755 -p bin/cgr-loader $RPM_BUILD_ROOT%{_bindir}/cgr-loader
 install -D -m 0755 -p bin/cgr-tester $RPM_BUILD_ROOT%{_bindir}/cgr-tester
 install -D -m 0755 -p bin/cgr-migrator $RPM_BUILD_ROOT%{_bindir}/cgr-migrator
-mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/csv
-mkdir -p $RPM_BUILD_ROOT%{_logdir}/cdre/fwv
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/csv
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/cdre/fwv
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
-mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
 mkdir -p $RPM_BUILD_ROOT%{_spooldir}/analyzers
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/cache_dump
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/configs
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/ees
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/ers/in
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/ers/out
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/failed_posts
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/loader/in
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/loader/out
+mkdir -p $RPM_BUILD_ROOT%{_spooldir}/tpe
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/datadb
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/backup/datadb
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/stordb
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/backup/stordb
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/configdb
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/internal_db/backup/configdb
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
 mkdir -p $RPM_BUILD_ROOT/etc/rsyslog.d
 install -m 755 src/github.com/cgrates/cgrates/data/conf/logging/logrotate.conf $RPM_BUILD_ROOT/etc/logrotate.d/%{name}
