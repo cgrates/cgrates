@@ -97,9 +97,6 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
 	for _, diktat := range aL.aCfg.Diktats {
-		if _, has := diktat.Opts[utils.MetaTemplate]; !has {
-			continue
-		}
 		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
 			return err
 		} else if !pass {
@@ -269,9 +266,6 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
 	for _, diktat := range aL.aCfg.Diktats {
-		if _, has := diktat.Opts[utils.MetaTemplate]; !has {
-			continue
-		}
 		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
 			return err
 		} else if !pass {
@@ -483,9 +477,6 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
 	for _, diktat := range aL.aCfg.Diktats {
-		if _, has := diktat.Opts[utils.MetaTemplate]; !has {
-			continue
-		}
 		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
 			return err
 		} else if !pass {
@@ -662,9 +653,6 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
 	for _, diktat := range aL.aCfg.Diktats {
-		if _, has := diktat.Opts[utils.MetaTemplate]; !has {
-			continue
-		}
 		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
 			return err
 		} else if !pass {
