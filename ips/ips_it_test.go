@@ -24,8 +24,10 @@ import (
 	"bytes"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -318,4 +320,153 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 			t.Error(err)
 		}
 	})
+}
+func BenchmarkIPsAuthorize(b *testing.B) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	cm := engine.NewConnManager(cfg)
+	ipService := NewIPService(dm, cfg, fltrs, cm)
+
+	ctx := context.Background()
+	profile := &utils.IPProfile{
+		Tenant:    "cgrates.org",
+		ID:        "IP1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights:   utils.DynamicWeights{{Weight: 10}},
+		TTL:       time.Second,
+		Stored:    false,
+		Pools: []*utils.IPPool{{
+			ID:        "POOL1",
+			FilterIDs: []string{},
+			Type:      "*ipv4",
+			Range:     "192.168.122.1/32",
+			Strategy:  "*ascending",
+			Message:   "bench pool",
+			Weights:   utils.DynamicWeights{{Weight: 10}},
+			Blockers:  utils.DynamicBlockers{{Blocker: false}},
+		}},
+	}
+	if err := dm.SetIPProfile(ctx, profile, true); err != nil {
+		b.Fatalf("Failed to set IPProfile: %v", err)
+	}
+
+	for b.Loop() {
+		b.StopTimer()
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.OptsIPsAllocationID: "alloc1",
+			},
+		}
+		var allocIP utils.AllocatedIP
+		b.StartTimer()
+		if err := ipService.V1AuthorizeIP(ctx, args, &allocIP); err != nil {
+			b.Error("AuthorizeIP failed:", err)
+		}
+	}
+}
+
+func BenchmarkIPsAllocate(b *testing.B) {
+	cfg := config.NewDefaultCGRConfig()
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	cm := engine.NewConnManager(cfg)
+	ipService := NewIPService(dm, cfg, fltrs, cm)
+
+	ctx := context.Background()
+	profile := &utils.IPProfile{
+		Tenant:    "cgrates.org",
+		ID:        "IP2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights:   utils.DynamicWeights{{Weight: 10}},
+		TTL:       time.Second,
+		Stored:    false,
+		Pools: []*utils.IPPool{{
+			ID:        "POOL1",
+			FilterIDs: []string{},
+			Type:      "*ipv4",
+			Range:     "192.168.122.1/32",
+			Strategy:  "*ascending",
+			Message:   "bench pool",
+			Weights:   utils.DynamicWeights{{Weight: 10}},
+			Blockers:  utils.DynamicBlockers{{Blocker: false}},
+		}},
+	}
+	if err := dm.SetIPProfile(ctx, profile, true); err != nil {
+		b.Fatalf("Failed to set IPProfile: %v", err)
+	}
+	for b.Loop() {
+		b.StopTimer()
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.OptsIPsAllocationID: "alloc1",
+			},
+		}
+		var allocIP utils.AllocatedIP
+		b.StartTimer()
+		if err := ipService.V1AllocateIP(ctx, args, &allocIP); err != nil {
+			b.Error("AuthorizeIP failed:", err)
+		}
+	}
+}
+func BenchmarkIPsRelease(b *testing.B) {
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	cm := engine.NewConnManager(cfg)
+	ipService := NewIPService(dm, cfg, fltrs, cm)
+	ctx := context.Background()
+	profile := &utils.IPProfile{
+		Tenant:    "cgrates.org",
+		ID:        "IP3",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights:   utils.DynamicWeights{{Weight: 10}},
+		TTL:       time.Second,
+		Stored:    false,
+		Pools: []*utils.IPPool{{
+			ID:        "POOL1",
+			FilterIDs: []string{},
+			Type:      "*ipv4",
+			Range:     "192.168.122.1/32",
+			Strategy:  "*ascending",
+			Message:   "bench pool",
+			Weights:   utils.DynamicWeights{{Weight: 10}},
+			Blockers:  utils.DynamicBlockers{{Blocker: false}},
+		}},
+	}
+	if err := dm.SetIPProfile(ctx, profile, true); err != nil {
+		b.Fatalf("Failed to set IPProfile: %v", err)
+	}
+
+	for b.Loop() {
+		b.StopTimer()
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.OptsIPsAllocationID: "alloc1",
+			},
+		}
+		var reply string
+		b.StartTimer()
+		if err := ipService.V1ReleaseIP(ctx, args, &reply); err != nil {
+			b.Error("AuthorizeIP failed:", err)
+		}
+	}
 }

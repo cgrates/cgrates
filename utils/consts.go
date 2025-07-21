@@ -1126,8 +1126,8 @@ const (
 	MetaRemoveSessionCosts = "*remove_session_costs"
 	MetaPostEvent          = "*post_event"
 	MetaCDRAccount         = "*reset_account_cdr"
-	MetaResetThreshold     = "*reset_threshold"
-	MetaResetStatQueue     = "*reset_stat_queue"
+	MetaResetThreshold     = "*resetThreshold"
+	MetaResetStatQueue     = "*resetStatQueue"
 	MetaRemoteSetAccount   = "*remote_set_account"
 	ActionID               = "ActionID"
 	ActionType             = "ActionType"
@@ -1137,14 +1137,14 @@ const (
 	BalanceUnitFactors     = "BalanceUnitFactors"
 	ExtraParameters        = "ExtraParameters"
 
-	MetaAddBalance            = "*add_balance"
-	MetaSetBalance            = "*set_balance"
-	MetaRemBalance            = "*rem_balance"
+	MetaAddBalance            = "*addBalance"
+	MetaSetBalance            = "*setBalance"
+	MetaRemBalance            = "*remBalance"
 	DynaprepaidActionplansCfg = "dynaprepaid_actionprofile"
-	MetaDynamicThreshold      = "*dynamic_threshold"
-	MetaDynamicStats          = "*dynamic_stats"
-	MetaDynamicAttribute      = "*dynamic_attribute"
-	MetaDynamicResource       = "*dynamic_resource"
+	MetaDynamicThreshold      = "*dynamicThreshold"
+	MetaDynamicStats          = "*dynamicStats"
+	MetaDynamicAttribute      = "*dynamicAttribute"
+	MetaDynamicResource       = "*dynamicResource"
 )
 
 // Migrator Metas
