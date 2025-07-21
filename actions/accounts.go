@@ -56,9 +56,6 @@ func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *balancePath in opts, will be weight sorted later
 	for _, diktat := range aL.cfg().Diktats {
-		if _, has := diktat.Opts[utils.MetaBalancePath]; !has {
-			continue
-		}
 		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
 			return err
 		} else if !pass {
@@ -132,9 +129,6 @@ func (aL *actRemBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *balancePath in opts, will be weight sorted later
 	for _, diktat := range aL.cfg().Diktats {
-		if _, has := diktat.Opts[utils.MetaBalancePath]; !has {
-			continue
-		}
 		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
 			return err
 		} else if !pass {

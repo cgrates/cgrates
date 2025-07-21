@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package actions
 
 import (
+	"cmp"
 	"encoding/json"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -32,12 +34,32 @@ import (
 
 func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 	fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTPPost, err error) {
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *balancePath in opts, will be weight sorted later
+	data := cgrEv.AsDataProvider()
+	for _, diktat := range aCfg.Diktats {
+		if pass, err := fltrS.Pass(ctx, cfg.GeneralCfg().DefaultTenant, diktat.FilterIDs, data); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, fltrS, cfg.GeneralCfg().DefaultTenant, data)
+		if err != nil {
+			return nil, err
+		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
+	}
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
 	aL = &actHTTPPost{
 		config: cfg,
 		aCfg:   aCfg,
-		pstrs:  make([]*ees.HTTPjsonMapEE, len(aCfg.Diktats)),
+		pstrs:  make([]*ees.HTTPjsonMapEE, len(diktats)),
 	}
-	for i, actD := range aL.cfg().Diktats {
+	for i, actD := range diktats {
 		attempts, err := engine.GetIntOpts(ctx, tnt, cgrEv.AsDataProvider(), nil, fltrS, cfg.ActionSCfg().Opts.PosterAttempts,
 			utils.MetaPosterAttempts)
 		if err != nil {
@@ -48,6 +70,11 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 			cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir,
 			attempts, nil)
 		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(eeCfg, cfg, nil, nil)
+		if blocker, err := engine.BlockerFromDynamics(ctx, actD.Blockers, aL.fltrS, aL.config.GeneralCfg().DefaultTenant, data); err != nil {
+			return nil, err
+		} else if blocker {
+			break
+		}
 	}
 	return
 }
@@ -55,6 +82,7 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 type actHTTPPost struct {
 	config *config.CGRConfig
 	aCfg   *utils.APAction
+	fltrS  *engine.FilterS
 
 	pstrs []*ees.HTTPjsonMapEE
 }
