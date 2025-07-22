@@ -41,6 +41,8 @@ func actionTarget(act string) string {
 		return utils.MetaAttributes
 	case utils.MetaDynamicResource:
 		return utils.MetaResources
+	case utils.MetaDynamicTrend:
+		return utils.MetaTrends
 	default:
 		return utils.MetaNone
 	}
@@ -145,6 +147,8 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 		return &actDynamicAttribute{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	case utils.MetaDynamicResource:
 		return &actDynamicResource{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
+	case utils.MetaDynamicTrend:
+		return &actDynamicTrend{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 
