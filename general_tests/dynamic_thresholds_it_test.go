@@ -258,6 +258,7 @@ func TestDynThdIT(t *testing.T) {
 					utils.MetaStats:      {"someID": {}},
 					utils.MetaAttributes: {"someID": {}},
 					utils.MetaResources:  {"someID": {}},
+					utils.MetaTrends:     {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
@@ -479,6 +480,63 @@ func TestDynThdIT(t *testing.T) {
 								ID: "CreateDynamicResource1002Blocked",
 								Opts: map[string]any{
 									"*template": "*tenant;DYNAMICLY_RES_4_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Trend_ID",
+						Type: utils.MetaDynamicTrend,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicTrend1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_TRND_<~*req.Account>;@every 1s;Stats1_1;*acc&*tcc;-1;-1;1;*last;1;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicTrend1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_TRND_2_<~*req.Account>;@every 1s;Stats1_1;*acc&*tcc;-1;-1;1;*last;1;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicTrend1002Blocker",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_TRND_3_<~*req.Account>;@every 1s;Stats1_1;*acc&*tcc;-1;-1;1;*last;1;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicTrend1002Blocked",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_TRND_4_<~*req.Account>;@every 1s;Stats1_1;*acc&*tcc;-1;-1;1;*last;1;true;THID1&THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -844,7 +902,7 @@ func TestDynThdIT(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(exp, attrs) {
-			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(attrs), utils.ToJSON(exp))
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(attrs))
 		}
 	})
 
@@ -900,7 +958,58 @@ func TestDynThdIT(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(exp, rsc) {
-			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(rsc), utils.ToJSON(exp))
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rsc))
+		}
+	})
+
+	t.Run("GetDynamicTrendProfile", func(t *testing.T) {
+		var rcv []*utils.TrendProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetTrendProfiles,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rcv); err != nil {
+			t.Errorf("AdminSv1GetTrendProfiles failed unexpectedly: %v", err)
+		}
+		if len(rcv) != 2 {
+			t.Fatalf("AdminSv1GetTrendProfiles len(rcv)=%v, want 2", len(rcv))
+		}
+		sort.Slice(rcv, func(i, j int) bool {
+			return rcv[i].ID > rcv[j].ID
+		})
+		exp := []*utils.TrendProfile{
+			{
+				Tenant:          "cgrates.org",
+				ID:              "DYNAMICLY_TRND_3_1002",
+				Schedule:        "@every 1s",
+				StatID:          "Stats1_1",
+				Metrics:         []string{"*acc", "*tcc"},
+				TTL:             -1,
+				QueueLength:     -1,
+				MinItems:        1,
+				CorrelationType: "*last",
+				Tolerance:       1,
+				Stored:          true,
+				ThresholdIDs:    []string{"THID1", "THID2"},
+			},
+			{
+
+				Tenant:          "cgrates.org",
+				ID:              "DYNAMICLY_TRND_1002",
+				Schedule:        "@every 1s",
+				StatID:          "Stats1_1",
+				Metrics:         []string{"*acc", "*tcc"},
+				TTL:             -1,
+				QueueLength:     -1,
+				MinItems:        1,
+				CorrelationType: "*last",
+				Tolerance:       1,
+				Stored:          true,
+				ThresholdIDs:    []string{"THID1", "THID2"},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
 		}
 	})
 

@@ -43,7 +43,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 
 	expectedErr := "unsupported action type: <not_a_type>"
 	if _, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, fltr, dm, nil,
-		actCfg, "cgrates.org"); err == nil || err.Error() != expectedErr {
+		actCfg, utils.CGRateSorg); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
@@ -56,6 +56,10 @@ func TestACExecuteCDRLog(t *testing.T) {
 		{Type: utils.MetaAddBalance},
 		{Type: utils.MetaSetBalance},
 		{Type: utils.MetaRemBalance},
+		{Type: utils.MetaDynamicThreshold},
+		{Type: utils.MetaDynamicStats},
+		{Type: utils.MetaDynamicAttribute},
+		{Type: utils.MetaDynamicResource},
 	}
 
 	actHttp, err := newActHTTPPost(context.Background(), cfg.GeneralCfg().DefaultTenant, new(utils.CGREvent), new(engine.FilterS),
@@ -67,15 +71,19 @@ func TestACExecuteCDRLog(t *testing.T) {
 	expectedActs := []actioner{
 		&actCDRLog{cfg, fltr, nil, &utils.APAction{Type: utils.CDRLog}},
 		actHttp,
-		&actExport{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaExport}},
-		&actResetStat{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaResetStatQueue}},
-		&actResetThreshold{"cgrates.org", cfg, nil, &utils.APAction{Type: utils.MetaResetThreshold}},
-		&actSetBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaAddBalance}, "cgrates.org", false},
-		&actSetBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaSetBalance}, "cgrates.org", true},
-		&actRemBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaRemBalance}, "cgrates.org"},
+		&actExport{utils.CGRateSorg, cfg, nil, &utils.APAction{Type: utils.MetaExport}},
+		&actResetStat{utils.CGRateSorg, cfg, nil, &utils.APAction{Type: utils.MetaResetStatQueue}},
+		&actResetThreshold{utils.CGRateSorg, cfg, nil, &utils.APAction{Type: utils.MetaResetThreshold}},
+		&actSetBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaAddBalance}, utils.CGRateSorg, false},
+		&actSetBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaSetBalance}, utils.CGRateSorg, true},
+		&actRemBalance{cfg, nil, fltr, &utils.APAction{Type: utils.MetaRemBalance}, utils.CGRateSorg},
+		&actDynamicThreshold{cfg, nil, fltr, &utils.APAction{Type: utils.MetaDynamicThreshold}, utils.CGRateSorg, new(utils.CGREvent)},
+		&actDynamicStats{cfg, nil, fltr, &utils.APAction{Type: utils.MetaDynamicStats}, utils.CGRateSorg, new(utils.CGREvent)},
+		&actDynamicAttribute{cfg, nil, fltr, &utils.APAction{Type: utils.MetaDynamicAttribute}, utils.CGRateSorg, new(utils.CGREvent)},
+		&actDynamicResource{cfg, nil, fltr, &utils.APAction{Type: utils.MetaDynamicResource}, utils.CGRateSorg, new(utils.CGREvent)},
 	}
 
-	acts, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, fltr, dm, nil, actCfg, "cgrates.org")
+	acts, err := newActionersFromActions(context.Background(), new(utils.CGREvent), cfg, fltr, dm, nil, actCfg, utils.CGRateSorg)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acts, expectedActs) {
@@ -98,7 +106,7 @@ func TestACExecuteScheduledAction(t *testing.T) {
 		utils.LogLevelCfg: 7,
 	}
 
-	schedActs := newScheduledActs(nil, "cgrates.org", "FirstAction",
+	schedActs := newScheduledActs(nil, utils.CGRateSorg, "FirstAction",
 		utils.EmptyString, utils.MetaTopUp, utils.MetaNow,
 		dataStorage, acts)
 

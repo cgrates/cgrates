@@ -1150,6 +1150,7 @@ const (
 	MetaDynamicStats          = "*dynamic_stats"
 	MetaDynamicAttribute      = "*dynamic_attribute"
 	MetaDynamicResource       = "*dynamic_resource"
+	MetaDynamicTrend          = "*dynamicTrend"
 
 	// Diktats Opts Fields
 	MetaBalancePath  = "*balancePath"

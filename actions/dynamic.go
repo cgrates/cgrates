@@ -764,3 +764,158 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 	}
 	return
 }
+
+// actDynamicTrend processes the `ActionDiktatsOpts` field from the action to construct a TrendProfile
+//
+// The ActionDiktatsOpts field format is expected as follows:
+//
+//		 0 Tenant: string
+//		 1 ID: string
+//		 2 Schedule: string
+//		 3 StatID: string
+//		 4 Metrics: strings separated by "&".
+//	 	 5 TTL: duration
+//	 	 6 QueueLength: integer
+//	 	 7 MinItems: integer
+//	 	 8 CorrelationType: string
+//	 	 9 Tolerance: float
+//	 	10 Stored: bool
+//	 	11 ThresholdIDs: strings separated by "&".
+//		12 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+type actDynamicTrend struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
+	aCfg    *utils.APAction
+	tnt     string
+	cgrEv   *utils.CGREvent
+}
+
+func (aL *actDynamicTrend) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actDynamicTrend) cfg() *utils.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actDynamicTrend) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+		return fmt.Errorf("no connection with AdminS")
+	}
+	data[utils.MetaNow] = time.Now()
+	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	// Parse action parameters based on the predefined format.
+	if len(aL.aCfg.Diktats) == 0 {
+		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+	}
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
+			return err
+		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
+	}
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 13 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 13", len(params))
+		}
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+				return err
+			}
+		}
+		// Prepare request arguments based on provided parameters.
+		args := &utils.TrendProfileWithAPIOpts{
+			TrendProfile: &utils.TrendProfile{
+				Tenant:          params[0],
+				ID:              params[1],
+				Schedule:        params[2],
+				StatID:          params[3],
+				CorrelationType: params[8],
+			},
+			APIOpts: make(map[string]any),
+		}
+		// populate Trend's Metrics
+		if params[4] != utils.EmptyString {
+			args.Metrics = strings.Split(params[4], utils.ANDSep)
+		}
+		// populate Trend's TTL
+		if params[5] != utils.EmptyString {
+			args.TTL, err = utils.ParseDurationWithNanosecs(params[5])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Trend's QueueLengh
+		if params[6] != utils.EmptyString {
+			args.QueueLength, err = strconv.Atoi(params[6])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Trend's MinItems
+		if params[7] != utils.EmptyString {
+			args.MinItems, err = strconv.Atoi(params[7])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Trend's Tolerance
+		if params[9] != utils.EmptyString {
+			args.Tolerance, err = strconv.ParseFloat(params[9], 64)
+			if err != nil {
+				return err
+			}
+		}
+		// populate Trend's Stored
+		if params[10] != utils.EmptyString {
+			args.Stored, err = strconv.ParseBool(params[10])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Trend's ThresholdIDs
+		if params[11] != utils.EmptyString {
+			args.ThresholdIDs = strings.Split(params[11], utils.ANDSep)
+		}
+		// populate Trend's APIOpts
+		if params[12] != utils.EmptyString {
+			if err := parseParamStringToMap(params[12], args.APIOpts); err != nil {
+				return err
+			}
+		}
+
+		// create the TrendProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetTrendProfile, args, &rply); err != nil {
+			return err
+		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
+	}
+	return
+}
