@@ -259,6 +259,7 @@ func TestDynThdIT(t *testing.T) {
 					utils.MetaAttributes: {"someID": {}},
 					utils.MetaResources:  {"someID": {}},
 					utils.MetaTrends:     {"someID": {}},
+					utils.MetaRankings:   {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
@@ -537,6 +538,63 @@ func TestDynThdIT(t *testing.T) {
 								ID: "CreateDynamicTrend1002Blocked",
 								Opts: map[string]any{
 									"*template": "*tenant;DYNAMICLY_TRND_4_<~*req.Account>;@every 1s;Stats1_1;*acc&*tcc;-1;-1;1;*last;1;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Ranking_ID",
+						Type: utils.MetaDynamicRanking,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicRanking1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RNK_<~*req.Account>;@every 1s;Stats1&Stats2;*acc&*tcc;*asc;*acc&*pdd;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicRanking1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RNK_2_<~*req.Account>;@every 1s;Stats1&Stats2;*acc&*tcc;*asc;*acc&*pdd;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRanking1002Blocker",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RNK_3_<~*req.Account>;@every 1s;Stats1&Stats2;*acc&*tcc;*asc;*acc&*pdd;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRanking1002Blocked",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RNK_4_<~*req.Account>;@every 1s;Stats1&Stats2;*acc&*tcc;*asc;*acc&*pdd;true;THID1&THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -1005,6 +1063,51 @@ func TestDynThdIT(t *testing.T) {
 				Tolerance:       1,
 				Stored:          true,
 				ThresholdIDs:    []string{"THID1", "THID2"},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
+
+	t.Run("GetDynamicRankingProfile", func(t *testing.T) {
+		var rcv []*utils.RankingProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetRankingProfiles,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rcv); err != nil {
+			t.Errorf("AdminSv1GetRankingProfiles failed unexpectedly: %v", err)
+		}
+		if len(rcv) != 2 {
+			t.Fatalf("AdminSv1GetRankingProfiles len(rcv)=%v, want 2", len(rcv))
+		}
+		sort.Slice(rcv, func(i, j int) bool {
+			return rcv[i].ID > rcv[j].ID
+		})
+		exp := []*utils.RankingProfile{
+			{
+				Tenant:            "cgrates.org",
+				ID:                "DYNAMICLY_RNK_3_1002",
+				Schedule:          "@every 1s",
+				StatIDs:           []string{"Stats1", "Stats2"},
+				MetricIDs:         []string{"*acc", "*tcc"},
+				Sorting:           "*asc",
+				SortingParameters: []string{"*acc", "*pdd"},
+				Stored:            true,
+				ThresholdIDs:      []string{"THID1", "THID2"},
+			},
+			{
+
+				Tenant:            "cgrates.org",
+				ID:                "DYNAMICLY_RNK_1002",
+				Schedule:          "@every 1s",
+				StatIDs:           []string{"Stats1", "Stats2"},
+				MetricIDs:         []string{"*acc", "*tcc"},
+				Sorting:           "*asc",
+				SortingParameters: []string{"*acc", "*pdd"},
+				Stored:            true,
+				ThresholdIDs:      []string{"THID1", "THID2"},
 			},
 		}
 
