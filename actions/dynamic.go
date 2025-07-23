@@ -38,11 +38,11 @@ func parseParamStringToMap(paramStr string, targetMap map[string]any) error {
 	for tuple := range strings.SplitSeq(paramStr, utils.ANDSep) {
 		// Use strings.Cut to split 'tuple' into key-value pairs at the first occurrence of ':'.
 		// This ensures that additional ':' characters within the value do not affect parsing.
-		key, value, found := strings.Cut(tuple, utils.InInFieldSep)
-		if !found {
+		keyVal := strings.SplitN(tuple, utils.InInFieldSep, 2)
+		if len(keyVal) != 2 {
 			return fmt.Errorf("invalid key-value pair: %s", tuple)
 		}
-		targetMap[key] = value
+		targetMap[keyVal[0]] = keyVal[1]
 	}
 	return nil
 }
@@ -909,6 +909,137 @@ func (aL *actDynamicTrend) execute(ctx *context.Context, data utils.MapStorage, 
 		var rply string
 		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
 			utils.AdminSv1SetTrendProfile, args, &rply); err != nil {
+			return err
+		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
+	}
+	return
+}
+
+// actDynamicRanking processes the `ActionDiktatsOpts` field from the action to construct a RankingProfile
+//
+// The ActionDiktatsOpts field format is expected as follows:
+//
+//		 0 Tenant: string
+//		 1 ID: string
+//		 2 Schedule: string
+//		 3 StatIDs: strings separated by "&".
+//		 4 MetricIDs: strings separated by "&".
+//	 	 5 Sorting: string
+//	 	 6 SortingParameters: strings separated by "&".
+//	 	 7 Stored: bool
+//	 	 8 ThresholdIDs: strings separated by "&".
+//		 9 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+type actDynamicRanking struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
+	aCfg    *utils.APAction
+	tnt     string
+	cgrEv   *utils.CGREvent
+}
+
+func (aL *actDynamicRanking) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actDynamicRanking) cfg() *utils.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actDynamicRanking) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+		return fmt.Errorf("no connection with AdminS")
+	}
+	data[utils.MetaNow] = time.Now()
+	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	// Parse action parameters based on the predefined format.
+	if len(aL.aCfg.Diktats) == 0 {
+		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+	}
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
+			return err
+		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
+	}
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 10 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 10", len(params))
+		}
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+				return err
+			}
+		}
+		// Prepare request arguments based on provided parameters.
+		args := &utils.RankingProfileWithAPIOpts{
+			RankingProfile: &utils.RankingProfile{
+				Tenant:   params[0],
+				ID:       params[1],
+				Schedule: params[2],
+				Sorting:  params[5],
+			},
+			APIOpts: make(map[string]any),
+		}
+		// populate Ranking's StatIDs
+		if params[3] != utils.EmptyString {
+			args.StatIDs = strings.Split(params[3], utils.ANDSep)
+		}
+		// populate Ranking's MetricIDs
+		if params[4] != utils.EmptyString {
+			args.MetricIDs = strings.Split(params[4], utils.ANDSep)
+		}
+		// populate Ranking's SortingParameters
+		if params[6] != utils.EmptyString {
+			args.SortingParameters = strings.Split(params[6], utils.ANDSep)
+		}
+		// populate Ranking's Stored
+		if params[7] != utils.EmptyString {
+			args.Stored, err = strconv.ParseBool(params[7])
+			if err != nil {
+				return err
+			}
+		}
+		// populate Ranking's ThresholdIDs
+		if params[8] != utils.EmptyString {
+			args.ThresholdIDs = strings.Split(params[8], utils.ANDSep)
+		}
+		// populate Ranking's APIOpts
+		if params[9] != utils.EmptyString {
+			if err := parseParamStringToMap(params[9], args.APIOpts); err != nil {
+				return err
+			}
+		}
+
+		// create the RankingProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetRankingProfile, args, &rply); err != nil {
 			return err
 		}
 		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
