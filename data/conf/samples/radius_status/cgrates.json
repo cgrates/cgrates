@@ -1,0 +1,107 @@
+{
+  
+    "logger": {
+        "level": 7
+    },
+    
+    
+    "listen": {
+        "rpc_json": ":2012",				// RPC JSON listening address
+        "rpc_gob": ":2013",					// RPC GOB listening address
+        "http": ":2080",					// HTTP listening address
+    },
+    
+    
+    "data_db": {
+        "db_type": "*internal",	
+    },
+    
+    "stor_db": {
+        "db_type": "*internal"			
+    },
+    
+    "rals": {
+        "enabled": true,
+    },
+    
+    "schedulers": {
+        "enabled": true,
+    },
+    
+    "cdrs": {
+        "enabled": true,
+        "rals_conns": ["*internal"],
+    },
+    
+    "resources": {
+        "enabled": true,
+        "store_interval": "-1",
+    },
+    
+    "attributes": {
+        "enabled": true,
+    },
+    
+    "routes": {
+        "enabled": true,
+    },
+    
+    "chargers": {
+        "enabled": true,
+    },
+    
+    "sessions": {
+        "enabled": true,
+        "attributes_conns": ["*localhost"],
+        "cdrs_conns": ["*localhost"],
+        "rals_conns": ["*localhost"],
+        "resources_conns": ["*localhost"],
+        "chargers_conns": ["*internal"],
+        "debit_interval": "10s",
+    },
+    
+    "radius_agent": {
+        "enabled": true,
+        "sessions_conns": ["*bijson_localhost"],
+        "listeners": [
+      {
+        "network": "udp",
+        "auth_address": "127.0.0.1:1812",
+        "acct_address": "127.0.0.1:1813"
+      }
+    ],
+        "client_dictionaries": {
+            "*default": [ "/usr/share/cgrates/radius/dict/"]
+        },
+        "request_processors": [
+            {
+              "id": "Status",
+              "filters": [
+                "*string:~*vars.*radReqCode:StatusServer"
+              ],
+              "flags": [
+                "*none","*log",
+              ],
+              "reply_fields": [
+                {
+                  "tag": "ReplyMessage",
+                  "path": "*rep.Reply-Message",
+                  "type": "*constant",
+                  "mandatory": true,
+                  "value": "OK",
+                }
+              ]
+            }
+          ]
+    },
+    
+    
+    
+    "admins": {
+        "enabled": true,
+        "scheduler_conns": ["*internal"],
+    },
+    
+    
+    }
+    
