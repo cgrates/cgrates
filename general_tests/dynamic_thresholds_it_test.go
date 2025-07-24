@@ -260,6 +260,7 @@ func TestDynThdIT(t *testing.T) {
 					utils.MetaResources:  {"someID": {}},
 					utils.MetaTrends:     {"someID": {}},
 					utils.MetaRankings:   {"someID": {}},
+					utils.MetaFilters:    {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
@@ -595,6 +596,63 @@ func TestDynThdIT(t *testing.T) {
 								ID: "CreateDynamicRanking1002Blocked",
 								Opts: map[string]any{
 									"*template": "*tenant;DYNAMICLY_RNK_4_<~*req.Account>;@every 1s;Stats1&Stats2;*acc&*tcc;*asc;*acc&*pdd;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Filter_ID",
+						Type: utils.MetaDynamicFilter,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicFilter1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_FLTR_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicFilter1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_FLTR_2_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicFilter1002Blocker",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_FLTR_3_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicFilter1002Blocked",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_FLTR_4_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -1116,4 +1174,48 @@ func TestDynThdIT(t *testing.T) {
 		}
 	})
 
+	t.Run("GetDynamicFilter", func(t *testing.T) {
+		var rcv []*engine.Filter
+		if err := client.Call(context.Background(), utils.AdminSv1GetFilters,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rcv); err != nil {
+			t.Errorf("AdminSv1GetFilters failed unexpectedly: %v", err)
+		}
+		if len(rcv) != 2 {
+			t.Fatalf("AdminSv1GetFilters len(rcv)=%v, want 2", len(rcv))
+		}
+		sort.Slice(rcv, func(i, j int) bool {
+			return rcv[i].ID > rcv[j].ID
+		})
+		exp := []*engine.Filter{
+			{
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_FLTR_3_1002",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1003", "1002"},
+					},
+				},
+			},
+			{
+
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_FLTR_1002",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1003", "1002"},
+					},
+				},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
 }

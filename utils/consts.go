@@ -1152,6 +1152,7 @@ const (
 	MetaDynamicResource       = "*dynamic_resource"
 	MetaDynamicTrend          = "*dynamicTrend"
 	MetaDynamicRanking        = "*dynamicRanking"
+	MetaDynamicFilter         = "*dynamicFilter"
 
 	// Diktats Opts Fields
 	MetaBalancePath  = "*balancePath"

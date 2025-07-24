@@ -1050,3 +1050,117 @@ func (aL *actDynamicRanking) execute(ctx *context.Context, data utils.MapStorage
 	}
 	return
 }
+
+// actDynamicFilter processes the `ActionDiktatsOpts` field from the action to construct a Filter
+//
+// The ActionDiktatsOpts field format is expected as follows:
+//
+//		0 Tenant: string
+//		1 ID: string
+//		2 Type: string
+//		3 Path: string
+//		4 Values: strings separated by "&".
+//	 	5 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+type actDynamicFilter struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
+	aCfg    *utils.APAction
+	tnt     string
+	cgrEv   *utils.CGREvent
+}
+
+func (aL *actDynamicFilter) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actDynamicFilter) cfg() *utils.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+		return fmt.Errorf("no connection with AdminS")
+	}
+	data[utils.MetaNow] = time.Now()
+	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	// Parse action parameters based on the predefined format.
+	if len(aL.aCfg.Diktats) == 0 {
+		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+	}
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
+			return err
+		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
+	}
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 6 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 6", len(params))
+		}
+		// parse dynamic parameters
+		for i := range params {
+			var onlyEncapsulatead bool
+			if i == 3 { // dont parse un-encapsulated "< >" string from Path
+				onlyEncapsulatead = true
+			}
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, onlyEncapsulatead); err != nil {
+				return err
+			}
+		}
+		// Prepare request arguments based on provided parameters.
+		args := &engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: params[0],
+				ID:     params[1],
+				Rules: []*engine.FilterRule{{
+					Type:    params[2],
+					Element: params[3],
+				}},
+			},
+			APIOpts: make(map[string]any),
+		}
+		// populate Filter's Values
+		if params[4] != utils.EmptyString {
+			args.Filter.Rules[0].Values = strings.Split(params[4], utils.ANDSep)
+		}
+		// populate Filter's APIOpts
+		if params[5] != utils.EmptyString {
+			if err := parseParamStringToMap(params[5], args.APIOpts); err != nil {
+				return err
+			}
+		}
+
+		// create the Filter based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetFilter, args, &rply); err != nil {
+			return err
+		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
+	}
+	return
+}
