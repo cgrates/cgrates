@@ -39,6 +39,8 @@ import (
 const (
 	MetaRadReqType     = "*radReqType"
 	MetaRadAuth        = "*radAuth"
+	MetaRadAccount     = "*radAccount"
+	MetaRadReqCode     = "*radReqCode"
 	MetaRadReplyCode   = "*radReplyCode"
 	UserPasswordAVP    = "User-Password"
 	CHAPPasswordAVP    = "CHAP-Password"
@@ -89,11 +91,13 @@ func NewRadiusAgent(cfg *config.CGRConfig, fltrs *engine.FilterS, cm *engine.Con
 		ra.rsAuth[net+"://"+authAddr] = radigo.NewServer(net, authAddr, secrets, dicts,
 			map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
 				radigo.AccessRequest: ra.handleAuth,
+				radigo.StatusServer:  ra.handleAuth,
 			}, nil, utils.Logger)
 		acctAddr := raCfg.Listeners[i].AcctAddr
 		ra.rsAcct[net+"://"+acctAddr] = radigo.NewServer(net, acctAddr, secrets, dicts,
 			map[radigo.PacketCode]func(*radigo.Packet) (*radigo.Packet, error){
 				radigo.AccountingRequest: ra.handleAcct,
+				radigo.StatusServer:      ra.handleAcct,
 			}, nil, utils.Logger)
 	}
 
@@ -163,6 +167,7 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 		Type: utils.NMMapType,
 		Map: map[string]*utils.DataNode{
 			utils.RemoteHost: utils.NewLeafNode(reqPacket.RemoteAddr().String()),
+			MetaRadReqCode:   utils.NewLeafNode(reqPacket.Code.String()),
 		},
 	}
 	radDP := newRADataProvider(reqPacket)
@@ -224,6 +229,8 @@ func (ra *RadiusAgent) handleAcct(reqPacket *radigo.Packet) (*radigo.Packet, err
 		Type: utils.NMMapType,
 		Map: map[string]*utils.DataNode{
 			utils.RemoteHost: utils.NewLeafNode(remoteAddr),
+			MetaRadReqType:   utils.NewLeafNode(MetaRadAccount),
+			MetaRadReqCode:   utils.NewLeafNode(reqPacket.Code.String()),
 		},
 	}
 
