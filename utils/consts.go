@@ -167,6 +167,7 @@ const (
 	CSVSep                   = ','
 	FallbackSep              = ';'
 	InfieldSep               = ";"
+	AtChar                   = "@"
 	RSRSep                   = ";"
 	MetaPipe                 = "*|"
 	FieldsSep                = ","
@@ -1152,6 +1153,8 @@ const (
 	MetaDynamicResource       = "*dynamic_resource"
 	MetaDynamicTrend          = "*dynamicTrend"
 	MetaDynamicRanking        = "*dynamicRanking"
+	MetaDynamicFilter         = "*dynamicFilter"
+	MetaDynamicRoute          = "*dynamicRoute"
 
 	// Diktats Opts Fields
 	MetaBalancePath  = "*balancePath"

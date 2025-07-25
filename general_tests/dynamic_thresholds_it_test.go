@@ -260,6 +260,8 @@ func TestDynThdIT(t *testing.T) {
 					utils.MetaResources:  {"someID": {}},
 					utils.MetaTrends:     {"someID": {}},
 					utils.MetaRankings:   {"someID": {}},
+					utils.MetaFilters:    {"someID": {}},
+					utils.MetaRoutes:     {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
@@ -595,6 +597,120 @@ func TestDynThdIT(t *testing.T) {
 								ID: "CreateDynamicRanking1002Blocked",
 								Opts: map[string]any{
 									"*template": "*tenant;DYNAMICLY_RNK_4_<~*req.Account>;@every 1s;Stats1&Stats2;*acc&*tcc;*asc;*acc&*pdd;true;THID1&THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Filter_ID",
+						Type: utils.MetaDynamicFilter,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicFilter1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_FLTR_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicFilter1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_FLTR_2_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicFilter1002Blocker",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_FLTR_3_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicFilter1002Blocked",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_FLTR_4_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Route_ID",
+						Type: utils.MetaDynamicRoute,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicRoute1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RT_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*weight;*dcc;route1;*string:~*req.Account:1002&*string:~*req.Account:1003;1002&1003;RTP1&RTP2;RSC1&RSC2;STAT1&STAT2;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;rtParam1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicRoute1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RT_2_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*weight;*dcc;route1;*string:~*req.Account:1002&*string:~*req.Account:1003;1002&1003;RTP1&RTP2;RSC1&RSC2;STAT1&STAT2;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;rtParam1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRoute1002Blocker",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RT_3_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*weight;*dcc;route1;*string:~*req.Account:1002&*string:~*req.Account:1003;1002&1003;RTP1&RTP2;RSC1&RSC2;STAT1&STAT2;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;rtParam1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRoute1002Blocked",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RT_4_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*weight;*dcc;route1;*string:~*req.Account:1002&*string:~*req.Account:1003;1002&1003;RTP1&RTP2;RSC1&RSC2;STAT1&STAT2;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;rtParam1;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -1116,4 +1232,207 @@ func TestDynThdIT(t *testing.T) {
 		}
 	})
 
+	t.Run("GetDynamicFilter", func(t *testing.T) {
+		var rcv []*engine.Filter
+		if err := client.Call(context.Background(), utils.AdminSv1GetFilters,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rcv); err != nil {
+			t.Errorf("AdminSv1GetFilters failed unexpectedly: %v", err)
+		}
+		if len(rcv) != 2 {
+			t.Fatalf("AdminSv1GetFilters len(rcv)=%v, want 2", len(rcv))
+		}
+		sort.Slice(rcv, func(i, j int) bool {
+			return rcv[i].ID > rcv[j].ID
+		})
+		exp := []*engine.Filter{
+			{
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_FLTR_3_1002",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1003", "1002"},
+					},
+				},
+			},
+			{
+
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_FLTR_1002",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{"1003", "1002"},
+					},
+				},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
+
+	t.Run("GetDynamicRouteProfile", func(t *testing.T) {
+		var rcv []*utils.RouteProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetRouteProfiles,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rcv); err != nil {
+			t.Errorf("AdminSv1GetRouteProfiles failed unexpectedly: %v", err)
+		}
+		if len(rcv) != 2 {
+			t.Fatalf("AdminSv1GetRouteProfiles len(rcv)=%v, want 2", len(rcv))
+		}
+		sort.Slice(rcv, func(i, j int) bool {
+			return rcv[i].ID > rcv[j].ID
+		})
+		exp := []*utils.RouteProfile{
+			{
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_RT_3_1002",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Account:1003",
+				},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Weight: 10,
+					},
+				},
+				Blockers: utils.DynamicBlockers{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Blocker: true,
+					},
+				},
+				Sorting:           "*weight",
+				SortingParameters: []string{"*dcc"},
+				Routes: []*utils.Route{
+					{
+						ID: "route1",
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+							"*string:~*req.Account:1003",
+						},
+						AccountIDs: []string{
+							"1002",
+							"1003",
+						},
+						RateProfileIDs: []string{
+							"RTP1",
+							"RTP2",
+						},
+						ResourceIDs: []string{
+							"RSC1",
+							"RSC2",
+						},
+						StatIDs: []string{
+							"STAT1",
+							"STAT2",
+						},
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Weight: 10,
+							},
+						},
+						Blockers: utils.DynamicBlockers{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Blocker: true,
+							},
+						},
+						RouteParameters: "rtParam1",
+					},
+				},
+			},
+			{
+
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_RT_1002",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Account:1003",
+				},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Weight: 10,
+					},
+				},
+				Blockers: utils.DynamicBlockers{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Blocker: true,
+					},
+				},
+				Sorting:           "*weight",
+				SortingParameters: []string{"*dcc"},
+				Routes: []*utils.Route{
+					{
+						ID: "route1",
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+							"*string:~*req.Account:1003",
+						},
+						AccountIDs: []string{
+							"1002",
+							"1003",
+						},
+						RateProfileIDs: []string{
+							"RTP1",
+							"RTP2",
+						},
+						ResourceIDs: []string{
+							"RSC1",
+							"RSC2",
+						},
+						StatIDs: []string{
+							"STAT1",
+							"STAT2",
+						},
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Weight: 10,
+							},
+						},
+						Blockers: utils.DynamicBlockers{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Blocker: true,
+							},
+						},
+						RouteParameters: "rtParam1",
+					},
+				},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
 }
