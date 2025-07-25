@@ -1164,3 +1164,316 @@ func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage,
 	}
 	return
 }
+
+// actDynamicRoute processes the `ActionDiktatsOpts` field from the action to construct a RouteProfile
+//
+// The ActionDiktatsOpts field format is expected as follows:
+//
+//		 0 Tenant: string
+//		 1 ID: string
+//		 2 FilterIDs: strings separated by "&".
+//		 3 Weights: strings separated by "&".
+//		 4 Blockers: strings separated by "&".
+//	 	 5 Sorting: string
+//	 	 6 SortingParameters: strings separated by "&".
+//	 	 7 RouteID: string
+//	 	 8 RouteFilterIDs: strings separated by "&".
+//	 	 9 RouteAccountIDs: strings separated by "&".
+//	 	10 RouteRateProfileIDs: strings separated by "&".
+//	 	11 RouteResourceIDs: strings separated by "&".
+//	 	12 RouteStatIDs: strings separated by "&".
+//	 	13 RouteWeights: strings separated by "&".
+//	 	14 RouteBlockers: strings separated by "&".
+//	 	15 RouteParameters: string
+//		16 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+type actDynamicRoute struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	dm      *engine.DataManager
+	fltrS   *engine.FilterS
+	aCfg    *utils.APAction
+	tnt     string
+	cgrEv   *utils.CGREvent
+}
+
+func (aL *actDynamicRoute) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actDynamicRoute) cfg() *utils.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+		return fmt.Errorf("no connection with AdminS")
+	}
+	data[utils.MetaNow] = time.Now()
+	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	// Parse action parameters based on the predefined format.
+	if len(aL.aCfg.Diktats) == 0 {
+		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+	}
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
+			return err
+		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
+	}
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 17 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 17", len(params))
+		}
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+				return err
+			}
+		}
+		// Take only the string after @, for cases when the RouteProfileID is gotten from a switch agents event
+		routeFieldParts := strings.Split(params[1], utils.AtChar)
+		routeProfileFound := new(utils.RouteProfile)
+		if len(routeFieldParts) > 2 {
+			return fmt.Errorf("more than 1 \"@\" character for RouteProfileID: <%s>", params[1])
+		} else if len(routeFieldParts) > 1 {
+			params[1] = routeFieldParts[1]
+			if routeProfileFound, err = aL.dm.GetRouteProfile(context.Background(),
+				utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+					config.CgrConfig().GeneralCfg().DefaultTenant),
+				params[1], true, true, utils.NonTransactional); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				return err
+			}
+		}
+		// Prepare request arguments based on provided parameters.
+		args := &utils.RouteProfileWithAPIOpts{
+			RouteProfile: &utils.RouteProfile{
+				Tenant:  utils.FirstNonEmpty(params[0], routeProfileFound.Tenant),
+				ID:      params[1],
+				Sorting: utils.FirstNonEmpty(params[5], routeProfileFound.Sorting),
+			},
+			APIOpts: make(map[string]any),
+		}
+		// populate RouteProfile's FilterIDs
+		if params[2] != utils.EmptyString {
+			args.FilterIDs = strings.Split(params[2], utils.ANDSep)
+		} else {
+			args.FilterIDs = routeProfileFound.FilterIDs
+		}
+		// populate RouteProfile's Weights
+		if params[3] != utils.EmptyString {
+			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+			wghtSplit := strings.Split(params[3], utils.ANDSep)
+			if len(wghtSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if wghtSplit[0] != utils.EmptyString {
+				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+			}
+			if wghtSplit[1] != utils.EmptyString {
+				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			args.Weights = routeProfileFound.Weights
+		}
+		// populate RouteProfile's Blockers
+		if params[4] != utils.EmptyString {
+			args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+			blckrSplit := strings.Split(params[4], utils.ANDSep)
+			if len(blckrSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if blckrSplit[0] != utils.EmptyString {
+				args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
+			}
+			if blckrSplit[1] != utils.EmptyString {
+				args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			args.Blockers = routeProfileFound.Blockers
+		}
+		// populate RouteProfile's SortingParameters
+		if params[6] != utils.EmptyString {
+			args.SortingParameters = strings.Split(params[6], utils.ANDSep)
+		} else {
+			args.SortingParameters = routeProfileFound.SortingParameters
+		}
+		// populate RouteProfile's Routes
+		if params[7] != utils.EmptyString {
+			// keep the existing routes if routeProfile already existed, and modify the specified Routes by ID
+			var routeModified bool // if route doesnt exist in the found route Profile
+			for _, existingRoute := range routeProfileFound.Routes {
+				if existingRoute.ID == params[7] { // modify routes with ID
+					// populate RouteProfile's RouteFilterIDs
+					if params[8] != utils.EmptyString {
+						existingRoute.FilterIDs = strings.Split(params[8], utils.ANDSep)
+					}
+					// populate RouteProfile's RouteAccountIDs
+					if params[9] != utils.EmptyString {
+						existingRoute.AccountIDs = strings.Split(params[9], utils.ANDSep)
+					}
+					// populate RouteProfile's RouteRateProfileIDs
+					if params[10] != utils.EmptyString {
+						existingRoute.RateProfileIDs = strings.Split(params[10], utils.ANDSep)
+					}
+					// populate RouteProfile's RouteResourceIDs
+					if params[11] != utils.EmptyString {
+						existingRoute.ResourceIDs = strings.Split(params[11], utils.ANDSep)
+					}
+					// populate RouteProfile's RouteStatIDs
+					if params[12] != utils.EmptyString {
+						existingRoute.StatIDs = strings.Split(params[12], utils.ANDSep)
+					}
+					// populate RouteProfile's RouteWeight
+					if params[13] != utils.EmptyString {
+						existingRoute.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+						wghtSplit := strings.Split(params[13], utils.ANDSep)
+						if len(wghtSplit) > 2 {
+							return utils.ErrUnsupportedFormat
+						}
+						if wghtSplit[0] != utils.EmptyString {
+							existingRoute.Weights[0].FilterIDs = []string{wghtSplit[0]}
+						}
+						if wghtSplit[1] != utils.EmptyString {
+							existingRoute.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+							if err != nil {
+								return err
+							}
+						}
+					}
+					// populate RouteProfile's RouteBlocker
+					if params[14] != utils.EmptyString {
+						existingRoute.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+						blckrSplit := strings.Split(params[14], utils.ANDSep)
+						if len(blckrSplit) > 2 {
+							return utils.ErrUnsupportedFormat
+						}
+						if blckrSplit[0] != utils.EmptyString {
+							existingRoute.Blockers[0].FilterIDs = []string{blckrSplit[0]}
+						}
+						if blckrSplit[1] != utils.EmptyString {
+							existingRoute.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+							if err != nil {
+								return err
+							}
+						}
+					}
+					// populate RouteProfile's RouteParameters
+					if params[15] != utils.EmptyString {
+						existingRoute.RouteParameters = params[15]
+					}
+					routeModified = true
+				}
+				args.Routes = append(args.Routes, existingRoute)
+			}
+			if !routeModified { // if no existing routes were modified, append a new route
+				appendRoute := new(utils.Route) // new route to be appended
+				// populate RouteProfile's RouteID
+				appendRoute.ID = params[7]
+				// populate RouteProfile's RouteFilterIDs
+				if params[8] != utils.EmptyString {
+					appendRoute.FilterIDs = strings.Split(params[8], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteAccountIDs
+				if params[9] != utils.EmptyString {
+					appendRoute.AccountIDs = strings.Split(params[9], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteRateProfileIDs
+				if params[10] != utils.EmptyString {
+					appendRoute.RateProfileIDs = strings.Split(params[10], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteResourceIDs
+				if params[11] != utils.EmptyString {
+					appendRoute.ResourceIDs = strings.Split(params[11], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteStatIDs
+				if params[12] != utils.EmptyString {
+					appendRoute.StatIDs = strings.Split(params[12], utils.ANDSep)
+				}
+				// populate RouteProfile's RouteWeight
+				if params[13] != utils.EmptyString {
+					appendRoute.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+					wghtSplit := strings.Split(params[13], utils.ANDSep)
+					if len(wghtSplit) > 2 {
+						return utils.ErrUnsupportedFormat
+					}
+					if wghtSplit[0] != utils.EmptyString {
+						appendRoute.Weights[0].FilterIDs = []string{wghtSplit[0]}
+					}
+					if wghtSplit[1] != utils.EmptyString {
+						appendRoute.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+						if err != nil {
+							return err
+						}
+					}
+				}
+				// populate RouteProfile's RouteBlocker
+				if params[14] != utils.EmptyString {
+					appendRoute.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+					blckrSplit := strings.Split(params[14], utils.ANDSep)
+					if len(blckrSplit) > 2 {
+						return utils.ErrUnsupportedFormat
+					}
+					if blckrSplit[0] != utils.EmptyString {
+						appendRoute.Blockers[0].FilterIDs = []string{blckrSplit[0]}
+					}
+					if blckrSplit[1] != utils.EmptyString {
+						appendRoute.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+						if err != nil {
+							return err
+						}
+					}
+				}
+				// populate RouteProfile's RouteParameters
+				appendRoute.RouteParameters = params[15]
+				args.Routes = append(args.Routes, appendRoute)
+			}
+		} else {
+			args.Routes = routeProfileFound.Routes
+		}
+		// populate RouteProfile's APIOpts
+		if params[16] != utils.EmptyString {
+			if err := parseParamStringToMap(params[16], args.APIOpts); err != nil {
+				return err
+			}
+		}
+
+		// create the RouteProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetRouteProfile, args, &rply); err != nil {
+			return err
+		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
+	}
+	return
+}

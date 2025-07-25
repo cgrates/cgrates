@@ -47,6 +47,8 @@ func actionTarget(act string) string {
 		return utils.MetaRankings
 	case utils.MetaDynamicFilter:
 		return utils.MetaFilters
+	case utils.MetaDynamicRoute:
+		return utils.MetaRoutes
 	default:
 		return utils.MetaNone
 	}
@@ -157,6 +159,8 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 		return &actDynamicRanking{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	case utils.MetaDynamicFilter:
 		return &actDynamicFilter{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
+	case utils.MetaDynamicRoute:
+		return &actDynamicRoute{cfg, connMgr, dm, fltrS, aCfg, tnt, cgrEv}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 
