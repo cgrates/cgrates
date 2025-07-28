@@ -1259,3 +1259,204 @@ func TestIPAllocationsAllocateIP(t *testing.T) {
 		t.Errorf("Allocation time is: %v", ipa.Allocations["alloc1"].Time)
 	}
 }
+
+func TestIPAllocationsConfig(t *testing.T) {
+	prfl := &IPProfile{
+		Tenant: "cgrates.org",
+		ID:     "ID1",
+		FilterIDs: []string{
+			"*string:~*vars.radReqCode:StatusServer",
+		},
+		TTL:    time.Minute,
+		Stored: true,
+		Pools: []*IPPool{
+			{
+				ID:        "ID1001",
+				FilterIDs: []string{},
+				Type:      "*ipv4",
+				Range:     "10.0.0.11/32",
+				Strategy:  "*ascending",
+				Message:   "OK",
+				Weights: DynamicWeights{&DynamicWeight{
+					Weight: 15.0,
+				}},
+				Blockers: DynamicBlockers{},
+			},
+			{
+				ID:        "ID1002",
+				FilterIDs: []string{},
+				Type:      "*ipv4",
+				Range:     "10.0.0.12/32",
+				Strategy:  "*ascending",
+				Message:   "OK",
+				Weights: DynamicWeights{&DynamicWeight{
+					Weight: 7.5,
+				}},
+				Blockers: DynamicBlockers{},
+			},
+		},
+	}
+
+	ipAllocs := &IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "statusServerAlloc",
+		prfl:   prfl,
+	}
+
+	got := ipAllocs.Config()
+	if got != prfl {
+		t.Errorf("Config() returned wrong profile:\ngot:  %+v\nwant: %+v", got, prfl)
+	}
+}
+
+func TestIPAllocationsLock(t *testing.T) {
+	ipAlloc := &IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "IDLock",
+	}
+
+	givenLockID := "ID2012"
+	ipAlloc.Lock(givenLockID)
+	if ipAlloc.lockID != givenLockID {
+		t.Errorf("Expected lockID %s, got %s", givenLockID, ipAlloc.lockID)
+	}
+
+	ipAlloc2 := &IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "testAutoLock",
+	}
+	ipAlloc2.Lock("")
+	if ipAlloc2.lockID == "" {
+		t.Errorf("Expected auto-generated lockID, got empty string")
+	}
+}
+
+func TestIPAllocationsUnlock(t *testing.T) {
+	ipa1 := &IPAllocations{}
+	ipa1.Unlock()
+	if ipa1.lockID != "" {
+		t.Errorf("Expected empty lockID, got %q", ipa1.lockID)
+	}
+
+	ipa2 := &IPAllocations{
+		lockID: "LockID",
+	}
+	ipa2.Unlock()
+	if ipa2.lockID != "" {
+		t.Errorf("Expected lockID to be cleared, got %q", ipa2.lockID)
+	}
+}
+
+func TestIPAllocationsRremoveAllocFromTTLIndex(t *testing.T) {
+	ipa := &IPAllocations{
+		TTLIndex: []string{"allocID1", "allocID2", "allocID3"},
+	}
+
+	ipa.removeAllocFromTTLIndex("allocID2")
+	expected := []string{"allocID1", "allocID3"}
+	if !reflect.DeepEqual(ipa.TTLIndex, expected) {
+		t.Errorf("After removing 'alloc2', TTLIndex = %v, want %v", ipa.TTLIndex, expected)
+	}
+
+	ipa.removeAllocFromTTLIndex("nonexistent")
+	if !reflect.DeepEqual(ipa.TTLIndex, expected) {
+		t.Errorf("After removing 'nonexistent', TTLIndex = %v, want %v", ipa.TTLIndex, expected)
+	}
+}
+
+func TestIPAllocationsReleaseAllocation(t *testing.T) {
+	allocID1 := "allocID1"
+	allocID2 := "allocID2"
+
+	addr1 := netip.MustParseAddr("10.20.30.40")
+	addr2 := netip.MustParseAddr("10.20.30.41")
+
+	poolID1 := "firstPool"
+
+	ipa := &IPAllocations{
+		Allocations: map[string]*PoolAllocation{
+			allocID1: {PoolID: poolID1, Address: addr1, Time: time.Now()},
+			allocID2: {PoolID: poolID1, Address: addr2, Time: time.Now()},
+		},
+		poolAllocs: map[string]map[netip.Addr]string{
+			poolID1: {
+				addr1: allocID1,
+				addr2: allocID2,
+			},
+		},
+		TTLIndex: []string{allocID1, allocID2},
+		prfl: &IPProfile{
+			TTL: 5 * time.Minute,
+		},
+	}
+
+	err := ipa.ReleaseAllocation(allocID1)
+	if err != nil {
+		t.Fatalf("ReleaseAllocation returned error: %v", err)
+	}
+
+	if _, exists := ipa.Allocations[allocID1]; exists {
+		t.Errorf("Allocation %s was not removed from Allocations", allocID1)
+	}
+
+	if _, exists := ipa.poolAllocs[poolID1][addr1]; exists {
+		t.Errorf("Allocation %s was not removed from poolAllocs", allocID1)
+	}
+
+	for _, id := range ipa.TTLIndex {
+		if id == allocID1 {
+			t.Errorf("Allocation %s was not removed from TTLIndex", allocID1)
+		}
+	}
+
+	if _, exists := ipa.Allocations[allocID2]; !exists {
+		t.Errorf("Allocation %s should still exist", allocID2)
+	}
+
+	err = ipa.ReleaseAllocation("nonExistingAlloc")
+	if err == nil {
+		t.Error("Expected error when releasing non-existing allocation, got nil")
+	}
+}
+func TestAllocatedIPAsNavigableMap(t *testing.T) {
+	ip := &AllocatedIP{
+		ProfileID: "IDprofile",
+		PoolID:    "ID1",
+		Message:   "OK",
+		Address:   netip.MustParseAddr("192.168.1.100"),
+	}
+
+	nmap := ip.AsNavigableMap()
+
+	tests := []struct {
+		key     string
+		wantVal string
+	}{
+		{"ProfileID", "IDprofile"},
+		{"PoolID", "ID1"},
+		{"Message", "OK"},
+		{"Address", "192.168.1.100"},
+	}
+
+	for _, tt := range tests {
+		node, ok := nmap[tt.key]
+		if !ok {
+			t.Errorf("AsNavigableMap() missing key %q", tt.key)
+			continue
+		}
+		if node == nil || node.Value == nil {
+			t.Errorf("AsNavigableMap() key %q has nil DataNode or Value", tt.key)
+			continue
+		}
+
+		strVal, ok := node.Value.Data.(string)
+		if !ok {
+			t.Errorf("AsNavigableMap() key %q data is not a string", tt.key)
+			continue
+		}
+
+		if strVal != tt.wantVal {
+			t.Errorf("AsNavigableMap() key %q = %q; want %q", tt.key, strVal, tt.wantVal)
+		}
+	}
+}

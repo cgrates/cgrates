@@ -162,6 +162,10 @@ func TestRadiusStat(t *testing.T) {
 		t.Errorf("Expected 18 , received %v", replyPacket.AVPs[0].Number)
 	}
 
+	if string(replyPacket.AVPs[0].RawValue) != "OK" {
+		t.Errorf("Expected Reply-Message 'OK', received %v", string(replyPacket.AVPs[0].RawValue))
+	}
+
 	clientAcct, err := radigo.NewClient(net, acctAddr, secret, dictRad, 1, nil, utils.Logger)
 	if err != nil {
 		t.Fatal(err)
@@ -188,6 +192,10 @@ func TestRadiusStat(t *testing.T) {
 
 	if replyPacket.AVPs[0].Number != 18 {
 		t.Errorf("Expected 18 , received %v", replyPacket.AVPs[0].Number)
+	}
+
+	if string(replyPacket.AVPs[0].RawValue) != "OK" {
+		t.Errorf("Expected Reply-Message 'OK', received %v", string(replyPacket.AVPs[0].RawValue))
 	}
 
 }
