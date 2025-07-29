@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"net/netip"
 	"reflect"
@@ -1458,5 +1459,316 @@ func TestAllocatedIPAsNavigableMap(t *testing.T) {
 		if strVal != tt.wantVal {
 			t.Errorf("AsNavigableMap() key %q = %q; want %q", tt.key, strVal, tt.wantVal)
 		}
+	}
+}
+
+func TestIPAllocationsRemoveExpiredUnits(t *testing.T) {
+	now := time.Now()
+
+	expiredAlloc := &PoolAllocation{
+		PoolID:  "pool1",
+		Address: netip.MustParseAddr("192.168.100.119"),
+		Time:    now.Add(-2 * time.Hour),
+	}
+	activeAlloc := &PoolAllocation{
+		PoolID:  "pool1",
+		Address: netip.MustParseAddr("192.168.56.1"),
+		Time:    now,
+	}
+
+	ipAlloc := &IPAllocations{
+		Allocations: map[string]*PoolAllocation{
+			"expired": expiredAlloc,
+			"active":  activeAlloc,
+		},
+		TTLIndex: []string{"expired", "active"},
+		prfl:     &IPProfile{TTL: time.Hour},
+		poolAllocs: map[string]map[netip.Addr]string{
+			"pool1": {
+				expiredAlloc.Address: "expired",
+				activeAlloc.Address:  "active",
+			},
+		},
+	}
+
+	ipAlloc.removeExpiredUnits()
+
+	if len(ipAlloc.Allocations) != 1 {
+		t.Fatalf("expected 1 allocation after cleanup, got %d", len(ipAlloc.Allocations))
+	}
+	if _, exists := ipAlloc.Allocations["expired"]; exists {
+		t.Error("expired allocation was not removed")
+	}
+	if _, exists := ipAlloc.Allocations["active"]; !exists {
+		t.Error("active allocation was incorrectly removed")
+	}
+	if len(ipAlloc.TTLIndex) != 1 || ipAlloc.TTLIndex[0] != "active" {
+		t.Errorf("TTLIndex not updated correctly, got %v", ipAlloc.TTLIndex)
+	}
+	if _, exists := ipAlloc.poolAllocs["pool1"][expiredAlloc.Address]; exists {
+		t.Error("expired address not removed from poolAllocs")
+	}
+}
+func TestIPProfileLock(t *testing.T) {
+	ipProf := &IPProfile{
+		Tenant: "cgrates.org",
+		ID:     "ID1",
+	}
+
+	customLockID := "LockID"
+	ipProf.Lock(customLockID)
+
+	if ipProf.lockID != customLockID {
+		t.Errorf("expected lockID %q, got %q", customLockID, ipProf.lockID)
+	}
+
+	ipProf = &IPProfile{
+		Tenant: "cgrates.org",
+		ID:     "ID2",
+	}
+
+	ipProf.Lock("")
+
+	if ipProf.lockID == "" {
+		t.Error("expected non-empty lockID from Guardian, got empty string")
+	}
+}
+
+func TestIPProfileUnlock(t *testing.T) {
+	lockID := "IDlock1"
+	ipProf := &IPProfile{
+		Tenant: "cgrates.org",
+		ID:     "ID1",
+		lockID: lockID,
+	}
+
+	ipProf.Unlock()
+
+	if ipProf.lockID != "" {
+		t.Errorf("expected lockID to be cleared after Unlock, got %q", ipProf.lockID)
+	}
+
+	ipProf = &IPProfile{
+		Tenant: "cgrates.org",
+		ID:     "ID2",
+		lockID: "",
+	}
+
+	ipProf.Unlock()
+}
+
+func TestPoolAllocationIsActive(t *testing.T) {
+	ttl := 5 * time.Minute
+
+	alloc := &PoolAllocation{
+		PoolID:  "ID1",
+		Address: netip.MustParseAddr("192.168.100.42"),
+		Time:    time.Now().Add(-3 * time.Minute),
+	}
+
+	if !alloc.IsActive(ttl) {
+		t.Errorf("expected allocation to be active (within TTL), but got inactive")
+	}
+
+	allocExpired := &PoolAllocation{
+		PoolID:  "ID2",
+		Address: netip.MustParseAddr("10.10.10.25"),
+		Time:    time.Now().Add(-10 * time.Minute),
+	}
+
+	if allocExpired.IsActive(ttl) {
+		t.Errorf("expected allocation to be inactive (TTL expired), but got active")
+	}
+}
+
+func TestPoolAllocationClone(t *testing.T) {
+	original := &PoolAllocation{
+		PoolID:  "ID1",
+		Address: netip.MustParseAddr("172.16.0.10"),
+		Time:    time.Now(),
+	}
+	cloned := original.Clone()
+
+	if cloned == nil {
+		t.Fatal("expected cloned object, got nil")
+	}
+	if cloned == original {
+		t.Errorf("expected a different instance, got the same")
+	}
+	if *cloned != *original {
+		t.Errorf("expected clone to be equal to original, got different values")
+	}
+
+	var nilOriginal *PoolAllocation
+	nilCloned := nilOriginal.Clone()
+
+	if nilCloned != nil {
+		t.Errorf("expected nil clone from nil original, got non-nil")
+	}
+}
+
+func TestIPAllocationsClone(t *testing.T) {
+	now := time.Now()
+
+	orig := &IPAllocations{
+		Tenant:   "cgrates.org",
+		ID:       "alloc1",
+		TTLIndex: []string{"allocA", "allocB"},
+		prfl: &IPProfile{
+			Tenant: "cgrates.org",
+			ID:     "profile1",
+			TTL:    time.Hour * 24,
+		},
+		poolRanges: map[string]netip.Prefix{
+			"pool1": netip.MustParsePrefix("192.168.100.0/24"),
+		},
+		poolAllocs: map[string]map[netip.Addr]string{
+			"pool1": {
+				netip.MustParseAddr("192.168.100.119"): "allocA",
+			},
+		},
+		Allocations: map[string]*PoolAllocation{
+			"allocA": {
+				PoolID:  "pool1",
+				Address: netip.MustParseAddr("192.168.100.119"),
+				Time:    now.Add(-time.Hour),
+			},
+			"allocB": {
+				PoolID:  "pool1",
+				Address: netip.MustParseAddr("192.168.56.1"),
+				Time:    now,
+			},
+		},
+	}
+
+	clone := orig.Clone()
+
+	if clone.Tenant != orig.Tenant {
+		t.Errorf("Tenant mismatch: got %s, want %s", clone.Tenant, orig.Tenant)
+	}
+	if clone.ID != orig.ID {
+		t.Errorf("ID mismatch: got %s, want %s", clone.ID, orig.ID)
+	}
+
+	if &clone.TTLIndex == &orig.TTLIndex {
+		t.Error("TTLIndex slice was not cloned deeply")
+	}
+	if len(clone.TTLIndex) != len(orig.TTLIndex) {
+		t.Errorf("TTLIndex length mismatch: got %d, want %d", len(clone.TTLIndex), len(orig.TTLIndex))
+	}
+
+	if clone.prfl == orig.prfl {
+		t.Error("IPProfile was not cloned deeply")
+	}
+	if clone.prfl.ID != orig.prfl.ID {
+		t.Errorf("Profile ID mismatch: got %s, want %s", clone.prfl.ID, orig.prfl.ID)
+	}
+
+	if &clone.poolRanges == &orig.poolRanges {
+		t.Error("poolRanges map was not cloned deeply")
+	}
+	if _, ok := clone.poolRanges["pool1"]; !ok {
+		t.Error("poolRanges missing pool1")
+	}
+
+	if &clone.poolAllocs == &orig.poolAllocs {
+		t.Error("poolAllocs map was not cloned deeply")
+	}
+	if poolMap, ok := clone.poolAllocs["pool1"]; !ok || poolMap[netip.MustParseAddr("192.168.100.119")] != "allocA" {
+		t.Error("poolAllocs missing expected allocation")
+	}
+
+	if &clone.Allocations == &orig.Allocations {
+		t.Error("Allocations map was not cloned deeply")
+	}
+	if alloc, ok := clone.Allocations["allocA"]; !ok {
+		t.Error("Allocations missing allocA")
+	} else {
+		if alloc.Address != orig.Allocations["allocA"].Address {
+			t.Error("Allocation address mismatch")
+		}
+		if alloc == orig.Allocations["allocA"] {
+			t.Error("Allocation PoolAllocation was not cloned deeply")
+		}
+	}
+}
+
+func TestIPAllocationsCloneNil(t *testing.T) {
+	var a *IPAllocations = nil
+	clone := a.Clone()
+	if clone != nil {
+		t.Error("Clone() of nil IPAllocations should return nil")
+	}
+}
+
+func TestIPAllocationsAllocateIPOnPool(t *testing.T) {
+	pool := &IPPool{
+		ID:      "poolA",
+		Message: "OK",
+	}
+	prefix, _ := netip.ParsePrefix("192.168.100.119/32")
+	allocs := &IPAllocations{
+		Tenant:   "cgrTenant",
+		ID:       "profile1",
+		TTLIndex: []string{},
+		prfl:     &IPProfile{TTL: time.Minute * 5},
+		poolRanges: map[string]netip.Prefix{
+			pool.ID: prefix,
+		},
+		poolAllocs:  make(map[string]map[netip.Addr]string),
+		Allocations: make(map[string]*PoolAllocation),
+	}
+
+	allocID := "alloc1"
+	allocatedIP, err := allocs.AllocateIPOnPool(allocID, pool, true)
+	if err != nil {
+		t.Fatalf("DryRun allocation failed: %v", err)
+	}
+	if allocatedIP.Address != prefix.Addr() {
+		t.Errorf("Expected address %v, got %v", prefix.Addr(), allocatedIP.Address)
+	}
+	if len(allocs.Allocations) != 0 {
+		t.Errorf("DryRun should not create allocation, but allocations exist")
+	}
+
+	allocatedIP, err = allocs.AllocateIPOnPool(allocID, pool, false)
+	if err != nil {
+		t.Fatalf("Allocation failed: %v", err)
+	}
+	if allocatedIP.Address != prefix.Addr() {
+		t.Errorf("Expected address %v, got %v", prefix.Addr(), allocatedIP.Address)
+	}
+	if len(allocs.Allocations) != 1 {
+		t.Errorf("Expected 1 allocation, got %d", len(allocs.Allocations))
+	}
+
+	oldTime := allocs.Allocations[allocID].Time
+	time.Sleep(10 * time.Millisecond)
+	allocatedIP, err = allocs.AllocateIPOnPool(allocID, pool, false)
+	if err != nil {
+		t.Fatalf("Re-allocation failed: %v", err)
+	}
+	if !allocs.Allocations[allocID].Time.After(oldTime) {
+		t.Errorf("Allocation time was not refreshed")
+	}
+	if len(allocs.TTLIndex) == 0 || allocs.TTLIndex[len(allocs.TTLIndex)-1] != allocID {
+		t.Errorf("TTLIndex was not updated correctly")
+	}
+
+	allocID2 := "alloc2"
+	_, err = allocs.AllocateIPOnPool(allocID2, pool, false)
+	if err == nil {
+		t.Fatal("Expected allocation conflict error, got none")
+	}
+	if !errors.Is(err, ErrIPAlreadyAllocated) {
+		t.Fatalf("Expected ErrIPAlreadyAllocated, got %v", err)
+	}
+
+	multiPrefix, _ := netip.ParsePrefix("192.168.100.0/24")
+	allocs.poolRanges["multiPool"] = multiPrefix
+	multiPool := &IPPool{ID: "multiPool", Message: "multi pool"}
+	_, err = allocs.AllocateIPOnPool("alloc3", multiPool, false)
+	if err == nil || err.Error() != "only single IP Pools are supported for now" {
+		t.Fatalf("Expected error for multi IP pool, got %v", err)
 	}
 }
