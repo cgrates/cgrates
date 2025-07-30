@@ -79,21 +79,11 @@ func TestDiamPrometheus(t *testing.T) {
 	"enabled": true,
 	"store_interval": "-1"
 },
-"rpc_conns": {
-	"async": {
-		"strategy": "*async",
-		"conns": [
-			{
-				"address": "*internal"
-			}
-		]
-	}
-},
 "diameter_agent": {
 	"enabled": true,
 	"sessions_conns": ["*birpc_internal"],
-	"stats_conns": ["async"],
-	"thresholds_conns": ["async"],
+	"stats_conns": ["*internal"],
+	"thresholds_conns": ["*internal"],
 	"request_processors": [{
 		"id": "message",
 		"filters": [
@@ -230,7 +220,7 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 			StatQueueProfile: &engine.StatQueueProfile{
 				Tenant:      "cgrates.org",
 				ID:          "SQ_1",
-				FilterIDs:   []string{"*string:~*req.Category:sms"},
+				FilterIDs:   []string{"*string:~*opts.*eventType:ProcessTime"},
 				QueueLength: -1,
 				TTL:         5 * time.Second,
 				Metrics: []*engine.MetricWithFilters{
@@ -249,6 +239,15 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 					{
 						MetricID: "*distinct#~*req.ProcessingTime",
 					},
+					{
+						MetricID: utils.MetaREPSC,
+					},
+					{
+						MetricID: utils.MetaREPFC,
+					},
+					{
+						MetricID: utils.MetaREPFC + "#ERR_MESSAGE",
+					},
 				},
 				Stored:   true,
 				MinItems: 1,
@@ -262,7 +261,7 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 			StatQueueProfile: &engine.StatQueueProfile{
 				Tenant:      "cgrates.org",
 				ID:          "SQ_2",
-				FilterIDs:   []string{"*string:~*req.Category:sms"},
+				FilterIDs:   []string{"*string:~*opts.*eventType:ProcessTime"},
 				QueueLength: -1,
 				TTL:         10 * time.Second,
 				Metrics: []*engine.MetricWithFilters{
@@ -281,6 +280,15 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 					{
 						MetricID: "*distinct#~*req.ProcessingTime",
 					},
+					{
+						MetricID: utils.MetaREPSC,
+					},
+					{
+						MetricID: utils.MetaREPFC,
+					},
+					{
+						MetricID: utils.MetaREPFC + "#ERR_MESSAGE",
+					},
 				},
 				Stored:   true,
 				MinItems: 1,
@@ -294,7 +302,7 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 			ThresholdProfile: &engine.ThresholdProfile{
 				Tenant:    "cgrates.org",
 				ID:        "TH_1",
-				FilterIDs: []string{"*string:~*req.Category:sms"},
+				FilterIDs: []string{"*string:~*opts.*eventType:ProcessTime"},
 				MaxHits:   -1,
 				MinHits:   8,
 				MinSleep:  time.Second,
@@ -309,7 +317,7 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 			ThresholdProfile: &engine.ThresholdProfile{
 				Tenant:    "cgrates.org",
 				ID:        "TH_2",
-				FilterIDs: []string{"*string:~*req.Category:sms"},
+				FilterIDs: []string{"*string:~*opts.*eventType:ProcessTime"},
 				MaxHits:   -1,
 				MinHits:   10,
 				MinSleep:  time.Second,
