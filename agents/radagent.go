@@ -162,6 +162,7 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 		Map: map[string]*utils.DataNode{
 			utils.RemoteHost: utils.NewLeafNode(reqPacket.RemoteAddr().String()),
 			MetaRadReqCode:   utils.NewLeafNode(reqPacket.Code.String()),
+			MetaRadReqType:   utils.NewLeafNode(MetaRadAuth),
 		},
 	}
 	radDP := newRADataProvider(reqPacket)
@@ -173,7 +174,6 @@ func (ra *RadiusAgent) handleAuth(reqPacket *radigo.Packet) (*radigo.Packet, err
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
 			ra.filterS, nil)
-		agReq.Vars.Map[MetaRadReqType] = utils.NewLeafNode(MetaRadAuth)
 		var lclProcessed bool
 		if lclProcessed, processReqErr = ra.processRequest(reqPacket, reqProcessor, agReq, replyPacket); lclProcessed {
 			processed = lclProcessed
