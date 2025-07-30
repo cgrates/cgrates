@@ -339,6 +339,8 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			fmt.Sprintf("<%s> LOG, processorID: %s, radius message: %s",
 				utils.RadiusAgent, reqProcessor.ID, agReq.Request.String()))
 	}
+
+	replyState := utils.OK
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
@@ -366,6 +368,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1AuthorizeReply)
 		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateAuthorize
+		}
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
@@ -382,6 +387,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1InitSessionReply)
 		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			initArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateInitiate
+		}
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
@@ -397,6 +405,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateUpdate
+		}
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
@@ -411,6 +422,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		var rply string
 		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			terminateArgs, &rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateTerminate
+		}
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
 		evArgs := sessions.NewV1ProcessMessageArgs(
@@ -431,6 +445,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1ProcessMessageReply)
 		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns,
 			utils.SessionSv1ProcessMessage, evArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateMessage
+		}
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if evArgs.Debit {
@@ -447,6 +464,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		rply := new(sessions.V1ProcessEventReply)
 		err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns,
 			utils.SessionSv1ProcessEvent, evArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateEvent
+		}
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
@@ -455,9 +475,13 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		agReq.setCGRReply(rply, err)
 	case utils.MetaCDRs: // allow this method
 	case utils.MetaRadauth:
-		if pass, err := radauthReq(reqProcessor.Flags, req, agReq, rpl); err != nil {
+		var pass bool
+		if pass, err = radauthReq(reqProcessor.Flags, req, agReq, rpl); err != nil {
+			replyState = utils.ErrReplyStateRadauth
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
 		} else if !pass {
+			// Assume failed auth counts as a failed request.
+			replyState = utils.ErrReplyStateRadauth
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(utils.RadauthFailed)
 		}
 	}
@@ -468,6 +492,11 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		if err = ra.connMgr.Call(ra.ctx, ra.cgrCfg.RadiusAgentCfg().SessionSConns,
 			utils.SessionSv1ProcessCDR, cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
+			if replyState == utils.OK {
+				replyState = utils.ErrReplyStateCDRs
+			} else {
+				replyState += ";" + utils.ErrReplyStateCDRs
+			}
 		}
 	}
 
@@ -501,6 +530,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	// asynchronously.
 	ev := cgrEv.Clone()
 
+	ev.Event[utils.ReplyState] = replyState
 	ev.Event[utils.StartTime] = startTime
 	ev.Event[utils.EndTime] = endTime
 	ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)

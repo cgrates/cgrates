@@ -68,6 +68,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			fmt.Sprintf("<%s> LOG, processorID: %s, %s message: %s",
 				agentName, reqProcessor.ID, strings.ToLower(agentName[:len(agentName)-5]), agReq.Request.String()))
 	}
+
+	replyState := utils.OK
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
@@ -96,6 +98,9 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateAuthorize
+		}
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
@@ -112,6 +117,9 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1InitSessionReply)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1InitiateSession,
 			initArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateInitiate
+		}
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
@@ -128,6 +136,9 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateUpdate
+		}
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
@@ -141,6 +152,9 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		var rply string
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1TerminateSession,
 			terminateArgs, &rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateTerminate
+		}
 		agReq.setCGRReply(nil, err)
 	case utils.MetaMessage:
 		msgArgs := sessions.NewV1ProcessMessageArgs(
@@ -162,6 +176,9 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1ProcessMessageReply)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessMessage,
 			msgArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateMessage
+		}
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if msgArgs.Debit {
@@ -178,6 +195,9 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1ProcessEventReply)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateEvent
+		}
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
@@ -186,6 +206,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		agReq.setCGRReply(rply, err)
 	case utils.MetaCDRs: // allow CDR processing
 	}
+
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.GetBool(utils.MetaCDRs) &&
 		!reqProcessor.Flags.Has(utils.MetaDryRun) {
@@ -193,6 +214,11 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		if err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessCDR,
 			cgrEv, &rplyCDRs); err != nil {
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
+			if replyState == utils.OK {
+				replyState = utils.ErrReplyStateCDRs
+			} else {
+				replyState += ";" + utils.ErrReplyStateCDRs
+			}
 		}
 	}
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
@@ -235,6 +261,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	// asynchronously.
 	ev := cgrEv.Clone()
 
+	ev.Event[utils.ReplyState] = replyState
 	ev.Event[utils.StartTime] = startTime
 	ev.Event[utils.EndTime] = endTime
 	ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)
