@@ -83,6 +83,8 @@ func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMe
 		utils.MetaDistinct: NewStatDistinct,
 		utils.MetaHighest:  NewStatHighest,
 		utils.MetaLowest:   NewStatLowest,
+		utils.MetaRSC:      NewStatRSC,
+		utils.MetaRFC:      NewStatRFC,
 	}
 	// split the metricID
 	// in case of *sum we have *sum#~*req.FieldName
@@ -1419,8 +1421,12 @@ func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
 }
 
 func NewStatSum(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatSum{Events: make(map[string]*StatWithCompress),
-		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
+	return &StatSum{
+		Events:    make(map[string]*StatWithCompress),
+		MinItems:  minItems,
+		FieldName: extraParams,
+		FilterIDs: filterIDs,
+	}, nil
 }
 
 type StatSum struct {
@@ -2331,6 +2337,329 @@ func (s *StatLowest) Compress(queueLen int64, defaultID string, decimals int) []
 }
 
 func (s *StatLowest) GetCompressFactor(events map[string]int) map[string]int {
+	for id := range s.Events {
+		if _, exists := events[id]; !exists {
+			events[id] = 1
+		}
+	}
+	return events
+}
+
+// NewStatRSC creates a StatRSC metric for counting successful requests.
+func NewStatRSC(minItems int, _ string, filterIDs []string) (StatMetric, error) {
+	return &StatRSC{
+		FilterIDs: filterIDs,
+		MinItems:  minItems,
+		Events:    make(map[string]struct{}),
+	}, nil
+}
+
+// StatRSC counts requests where ReplyState equals "OK"
+type StatRSC struct {
+	FilterIDs []string            // event filters to apply before processing
+	MinItems  int                 // minimum events required for valid results
+	Count     int64               // number of successful events tracked
+	Events    map[string]struct{} // event IDs indexed for deletion
+	cachedVal *float64            // cached result to avoid recalculation
+}
+
+// Clone creates a deep copy of StatRSC.
+func (s *StatRSC) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatRSC{
+		FilterIDs: slices.Clone(s.FilterIDs),
+		MinItems:  s.MinItems,
+		Count:     s.Count,
+		Events:    maps.Clone(s.Events),
+	}
+	if s.cachedVal != nil {
+		clone.cachedVal = utils.Float64Pointer(*s.cachedVal)
+	}
+	return clone
+}
+
+func (s *StatRSC) GetStringValue(decimals int) string {
+	v := s.getValue(decimals)
+	if v == utils.StatsNA {
+		return utils.NotAvailable
+	}
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
+func (s *StatRSC) GetValue(decimals int) any {
+	return s.getValue(decimals)
+}
+
+func (s *StatRSC) GetFloat64Value(decimals int) float64 {
+	return s.getValue(decimals)
+}
+
+// getValue returns current count value, calculating if cache is invalid.
+func (s *StatRSC) getValue(_ int) float64 {
+	if s.cachedVal != nil {
+		return *s.cachedVal
+	}
+
+	if s.Count == 0 || s.Count < int64(s.MinItems) {
+		s.cachedVal = utils.Float64Pointer(utils.StatsNA)
+		return *s.cachedVal
+	}
+
+	v := float64(s.Count)
+	s.cachedVal = &v
+	return *s.cachedVal
+}
+
+// getFieldValue gets the value of the ReplyState field from the DataProvider.
+func (s *StatRSC) getFieldValue(ev utils.DataProvider) (string, error) {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.ReplyState})
+	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			return "", utils.ErrPrefix(err, utils.ReplyState)
+			// NOTE: return below might be clearer
+			// return 0, fmt.Errorf("field %s: %v", utils.ReplyState, err)
+		}
+		return "", err
+	}
+	return utils.IfaceAsString(ival), nil
+}
+
+// AddEvent processes a new event, incrementing count if ReplyState is "OK".
+func (s *StatRSC) AddEvent(evID string, ev utils.DataProvider) error {
+	replyState, err := s.getFieldValue(ev)
+	if err != nil {
+		return err
+	}
+	if replyState != utils.OK {
+		return nil
+	}
+
+	// Only increment count for new events.
+	if _, exists := s.Events[evID]; !exists {
+		s.Events[evID] = struct{}{}
+		s.Count++
+		s.cachedVal = nil
+	}
+
+	return nil
+}
+
+// AddOneEvent processes event without storing for removal (used when events
+// never expire).
+func (s *StatRSC) AddOneEvent(ev utils.DataProvider) error {
+	replyState, err := s.getFieldValue(ev)
+	if err != nil {
+		return err
+	}
+	if replyState != utils.OK {
+		return nil
+	}
+
+	s.Count++
+	s.cachedVal = nil
+	return nil
+}
+
+func (s *StatRSC) RemEvent(evID string) {
+	if _, exists := s.Events[evID]; !exists {
+		return
+	}
+	delete(s.Events, evID)
+	s.Count--
+	s.cachedVal = nil
+}
+
+func (s *StatRSC) Marshal(ms Marshaler) ([]byte, error) {
+	return ms.Marshal(s)
+}
+
+func (s *StatRSC) LoadMarshaled(ms Marshaler, marshaled []byte) error {
+	return ms.Unmarshal(marshaled, &s)
+}
+
+// GetFilterIDs is part of StatMetric interface.
+func (s *StatRSC) GetFilterIDs() []string {
+	return s.FilterIDs
+}
+
+// GetMinItems returns the minimum items for the metric.
+func (s *StatRSC) GetMinItems() int {
+	return s.MinItems
+}
+
+// Compress is part of StatMetric interface.
+func (s *StatRSC) Compress(queueLen int64, defaultID string, decimals int) []string {
+	eventIDs := make([]string, 0, len(s.Events))
+	for id := range s.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return eventIDs
+}
+
+func (s *StatRSC) GetCompressFactor(events map[string]int) map[string]int {
+	for id := range s.Events {
+		if _, exists := events[id]; !exists {
+			events[id] = 1
+		}
+	}
+	return events
+}
+
+// NewStatRFC creates a StatRFC metric for counting failed requests.
+func NewStatRFC(minItems int, _ string, filterIDs []string) (StatMetric, error) {
+	return &StatRFC{
+		FilterIDs: filterIDs,
+		MinItems:  minItems,
+		Events:    make(map[string]struct{}),
+	}, nil
+}
+
+// StatRFC counts requests where ReplyState is not "OK".
+type StatRFC struct {
+	FilterIDs []string            // event filters to apply before processing
+	MinItems  int                 // minimum events required for valid results
+	Count     int64               // number of failed events tracked
+	Events    map[string]struct{} // event IDs indexed for deletion
+	cachedVal *float64            // cached result to avoid recalculation
+}
+
+// Clone creates a deep copy of StatRFC.
+func (s *StatRFC) Clone() StatMetric {
+	if s == nil {
+		return nil
+	}
+	clone := &StatRFC{
+		FilterIDs: slices.Clone(s.FilterIDs),
+		MinItems:  s.MinItems,
+		Count:     s.Count,
+		Events:    maps.Clone(s.Events),
+	}
+	if s.cachedVal != nil {
+		clone.cachedVal = utils.Float64Pointer(*s.cachedVal)
+	}
+	return clone
+}
+
+func (s *StatRFC) GetStringValue(decimals int) string {
+	v := s.getValue(decimals)
+	if v == utils.StatsNA {
+		return utils.NotAvailable
+	}
+	return strconv.FormatFloat(v, 'f', -1, 64)
+}
+
+func (s *StatRFC) GetValue(decimals int) any {
+	return s.getValue(decimals)
+}
+
+func (s *StatRFC) GetFloat64Value(decimals int) float64 {
+	return s.getValue(decimals)
+}
+
+// getValue returns current count value, calculating if cache is invalid.
+func (s *StatRFC) getValue(_ int) float64 {
+	if s.cachedVal != nil {
+		return *s.cachedVal
+	}
+
+	if s.Count == 0 || s.Count < int64(s.MinItems) {
+		s.cachedVal = utils.Float64Pointer(utils.StatsNA)
+		return *s.cachedVal
+	}
+
+	v := float64(s.Count)
+	s.cachedVal = &v
+	return *s.cachedVal
+}
+
+// getFieldValue gets the value of the ReplyState field from the DataProvider.
+func (s *StatRFC) getFieldValue(ev utils.DataProvider) (string, error) {
+	ival, err := ev.FieldAsInterface([]string{utils.MetaReq, utils.ReplyState})
+	if err != nil {
+		if errors.Is(err, utils.ErrNotFound) {
+			return "", utils.ErrPrefix(err, utils.ReplyState)
+			// NOTE: return below might be clearer
+			// return 0, fmt.Errorf("field %s: %v", utils.ReplyState, err)
+		}
+		return "", err
+	}
+	return utils.IfaceAsString(ival), nil
+}
+
+// AddEvent processes a new event, incrementing count if ReplyState is not "OK".
+func (s *StatRFC) AddEvent(evID string, ev utils.DataProvider) error {
+	replyState, err := s.getFieldValue(ev)
+	if err != nil {
+		return err
+	}
+	if replyState == utils.OK {
+		return nil
+	}
+
+	// Only increment count for new events.
+	if _, exists := s.Events[evID]; !exists {
+		s.Events[evID] = struct{}{}
+		s.Count++
+		s.cachedVal = nil
+	}
+
+	return nil
+}
+
+// AddOneEvent processes event without storing for removal (used when events
+// never expire).
+func (s *StatRFC) AddOneEvent(ev utils.DataProvider) error {
+	replyState, err := s.getFieldValue(ev)
+	if err != nil {
+		return err
+	}
+	if replyState == utils.OK {
+		return nil
+	}
+	s.Count++
+	s.cachedVal = nil
+	return nil
+}
+
+func (s *StatRFC) RemEvent(evID string) {
+	if _, exists := s.Events[evID]; !exists {
+		return
+	}
+	delete(s.Events, evID)
+	s.Count--
+	s.cachedVal = nil
+}
+
+func (s *StatRFC) Marshal(ms Marshaler) ([]byte, error) {
+	return ms.Marshal(s)
+}
+
+func (s *StatRFC) LoadMarshaled(ms Marshaler, marshaled []byte) error {
+	return ms.Unmarshal(marshaled, &s)
+}
+
+// GetFilterIDs is part of StatMetric interface.
+func (s *StatRFC) GetFilterIDs() []string {
+	return s.FilterIDs
+}
+
+// GetMinItems returns the minimum items for the metric.
+func (s *StatRFC) GetMinItems() int {
+	return s.MinItems
+}
+
+// Compress is part of StatMetric interface.
+func (s *StatRFC) Compress(queueLen int64, defaultID string, decimals int) []string {
+	eventIDs := make([]string, 0, len(s.Events))
+	for id := range s.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return eventIDs
+}
+
+func (s *StatRFC) GetCompressFactor(events map[string]int) map[string]int {
 	for id := range s.Events {
 		if _, exists := events[id]; !exists {
 			events[id] = 1

@@ -134,6 +134,18 @@ Following metrics are implemented:
 \*distinct
 	Generic metric to return the distinct number of appearance of a field name within *Events*. Format: <*\*distinct#FieldName*>.
 
+\*highest
+	Generic metric to return the highest value of a specific field within *Events*. Format: <*\*highest#FieldName*>.
+
+\*lowest
+	Generic metric to return the lowest value of a specific field within *Events*. Format: <*\*lowest#FieldName*>.
+
+\*rsc
+	Reply success count. Counts requests where ReplyState equals "OK". Uses *ReplyState* field in the *Event*.
+
+\*rfc
+	Reply fail count. Counts requests where ReplyState is not "OK". Uses *ReplyState* field in the *Event*.
+
 
 Use cases
 ---------
