@@ -379,6 +379,7 @@ func (sa *SIPAgent) handleMessage(sipMessage sipingo.Message, remoteHost string)
 func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
 	startTime := time.Now()
+	replyState := utils.OK
 	if pass, err := sa.filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
@@ -440,6 +441,9 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = sa.connMgr.Call(context.TODO(), sa.cfg.SIPAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateAuthorize
+		}
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
@@ -452,6 +456,9 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1ProcessEventReply)
 		err = sa.connMgr.Call(context.TODO(), sa.cfg.SIPAgentCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
+		if err != nil {
+			replyState = utils.ErrReplyStateEvent
+		}
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
@@ -459,6 +466,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 		agReq.setCGRReply(rply, err)
 	}
+
 	if err := agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
 	}
@@ -489,6 +497,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// asynchronously.
 	ev := cgrEv.Clone()
 
+	ev.Event[utils.ReplyState] = replyState
 	ev.Event[utils.StartTime] = startTime
 	ev.Event[utils.EndTime] = endTime
 	ev.Event[utils.ProcessingTime] = endTime.Sub(startTime)
