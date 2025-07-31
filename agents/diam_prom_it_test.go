@@ -249,6 +249,12 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 					{
 						MetricID: "*distinct#~*req.ProcessingTime",
 					},
+					{
+						MetricID: utils.MetaRSC,
+					},
+					{
+						MetricID: utils.MetaRFC,
+					},
 				},
 				Stored:   true,
 				MinItems: 1,
@@ -280,6 +286,12 @@ cgrates.org,DEFAULT,*string:~*req.Account:1001,,*default,*none,10`,
 					},
 					{
 						MetricID: "*distinct#~*req.ProcessingTime",
+					},
+					{
+						MetricID: utils.MetaRSC,
+					},
+					{
+						MetricID: utils.MetaRFC,
 					},
 				},
 				Stored:   true,
