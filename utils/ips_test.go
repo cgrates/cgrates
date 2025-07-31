@@ -1102,7 +1102,7 @@ func TestIPProfileFieldAsString(t *testing.T) {
 		ID:        "prof1",
 		FilterIDs: []string{"flt1", "flt2"},
 		Weights: DynamicWeights{
-			&DynamicWeight{FilterIDs: []string{"fltW"}, Weight: 10},
+			{FilterIDs: []string{"fltW"}, Weight: 10},
 		},
 		TTL:    3600 * time.Second,
 		Stored: true,
@@ -1163,7 +1163,6 @@ func TestIPProfileFieldAsString(t *testing.T) {
 			want:    fmt.Sprintf("[%v]", profile.Pools[0]),
 			wantErr: false,
 		},
-
 		{
 			name:    "Invalid field",
 			fldPath: []string{"Invalid"},
@@ -1171,16 +1170,16 @@ func TestIPProfileFieldAsString(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "Too deep path",
-			fldPath: []string{"Tenant", "extra"},
+			name:    "Invalid index in FilterIDs",
+			fldPath: []string{"FilterIDs[10]"},
 			want:    "",
 			wantErr: true,
 		},
 		{
-			name:    "Invalid index in FilterIDs",
-			fldPath: []string{"FilterIDs:10"},
-			want:    "",
-			wantErr: true,
+			name:    "FilterIDs indexed access",
+			fldPath: []string{"FilterIDs[1]"},
+			want:    "flt2",
+			wantErr: false,
 		},
 	}
 
@@ -1197,7 +1196,6 @@ func TestIPProfileFieldAsString(t *testing.T) {
 		})
 	}
 }
-
 func TestIPAllocationsAllocateIP(t *testing.T) {
 	prfl := &IPProfile{
 		Tenant: "cgrates.org",
@@ -1770,5 +1768,136 @@ func TestIPAllocationsAllocateIPOnPool(t *testing.T) {
 	_, err = allocs.AllocateIPOnPool("alloc3", multiPool, false)
 	if err == nil || err.Error() != "only single IP Pools are supported for now" {
 		t.Fatalf("Expected error for multi IP pool, got %v", err)
+	}
+}
+
+func TestIPProfileFieldsAsInterface(t *testing.T) {
+	ip := &IPProfile{
+		Tenant:    "cgrates.org",
+		ID:        "id1",
+		FilterIDs: []string{"filter1", "filter2"},
+		Weights: DynamicWeights{
+			{FilterIDs: []string{"wfilter1"}, Weight: 0.5},
+			{FilterIDs: []string{"wfilter2"}, Weight: 0.7},
+		},
+		TTL:    10,
+		Stored: true,
+		Pools: []*IPPool{
+			{
+				ID:       "pool1",
+				Range:    "192.168.0.0/24",
+				Strategy: MetaAscending,
+				Message:  "test",
+				Weights: DynamicWeights{
+					{FilterIDs: []string{"fw1"}, Weight: 0.1},
+					{FilterIDs: []string{"fw2"}, Weight: 0.9},
+				},
+				Blockers: []*DynamicBlocker{
+					{FilterIDs: []string{"block1"}, Blocker: true},
+					{FilterIDs: []string{"block2"}, Blocker: false},
+				},
+			},
+			{
+				ID:       "pool2",
+				Range:    "192.168.0.0/24",
+				Strategy: MetaAscending,
+				Message:  "test",
+				Weights: DynamicWeights{
+					{FilterIDs: []string{"fw1"}, Weight: 0.1},
+					{FilterIDs: []string{"fw2"}, Weight: 0.9},
+				},
+				Blockers: []*DynamicBlocker{
+					{FilterIDs: []string{"block1"}, Blocker: true},
+					{FilterIDs: []string{"block2"}, Blocker: false},
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name    string
+		fldPath []string
+		exp     any
+		expErr  bool
+	}{
+		{
+			name:    "Tenant",
+			fldPath: []string{"Tenant"},
+			exp:     "cgrates.org",
+		},
+		{
+			name:    "ID",
+			fldPath: []string{"ID"},
+			exp:     "id1",
+		},
+		{
+			name:    "FilterIDs whole slice",
+			fldPath: []string{"FilterIDs"},
+			exp:     []string{"filter1", "filter2"},
+		},
+		{
+			name:    "FilterIDs first element",
+			fldPath: []string{"FilterIDs[0]"},
+			exp:     "filter1",
+		},
+		{
+			name:    "Stored",
+			fldPath: []string{"Stored"},
+			exp:     true,
+		},
+		{
+			name:    "TTL",
+			fldPath: []string{"TTL"},
+			exp:     time.Duration(10),
+		},
+		{
+			name:    "Weights whole slice",
+			fldPath: []string{"Weights"},
+			exp:     ip.Weights,
+		},
+		{
+			name:    "Pools first pool ID",
+			fldPath: []string{"Pools[0]", "ID"},
+			exp:     "pool1",
+		},
+		{
+			name:    "Pools first pool Strategy",
+			fldPath: []string{"Pools[0]", "Strategy"},
+			exp:     "*ascending",
+		},
+		{
+			name:    "Pools first pool Message",
+			fldPath: []string{"Pools[0]", "Message"},
+			exp:     "test",
+		},
+		{
+			name:    "Pools first pool Message",
+			fldPath: []string{"Pools[1]", "Message"},
+			exp:     "test",
+		},
+		{
+			name:    "Unknown field",
+			fldPath: []string{"Unknown"},
+			expErr:  true,
+		},
+		{
+			name:    "Empty path",
+			fldPath: []string{},
+			expErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ip.FieldAsInterface(tt.fldPath)
+			if (err != nil) != tt.expErr {
+				t.Fatalf("FieldAsInterface() error = %v, wantErr %v", err, tt.expErr)
+			}
+			if !tt.expErr {
+				if !reflect.DeepEqual(got, tt.exp) {
+					t.Errorf("FieldAsInterface() = %v, want %v", ToJSON(got), tt.exp)
+				}
+			}
+		})
 	}
 }
