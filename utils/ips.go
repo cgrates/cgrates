@@ -157,7 +157,7 @@ func (p *IPProfile) FieldAsString(fldPath []string) (string, error) {
 }
 
 func (p *IPProfile) FieldAsInterface(fldPath []string) (any, error) {
-	if len(fldPath) != 1 {
+	if len(fldPath) == 0 {
 		return nil, ErrNotFound
 	}
 	switch fldPath[0] {
