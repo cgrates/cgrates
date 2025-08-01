@@ -1901,3 +1901,329 @@ func TestIPProfileFieldsAsInterface(t *testing.T) {
 		})
 	}
 }
+
+func TestIPAllocationUnlock(t *testing.T) {
+	ipAlloc := &IPAllocations{
+		lockID: "",
+		prfl:   nil,
+	}
+	ipAlloc.Unlock()
+	if ipAlloc.lockID != "" {
+		t.Errorf("expected lockID to remain empty, got %q", ipAlloc.lockID)
+	}
+
+	ipAlloc.lockID = "lock1"
+	ipAlloc.prfl = nil
+	ipAlloc.Unlock()
+	if ipAlloc.lockID != "" {
+		t.Errorf("expected lockID cleared, got %q", ipAlloc.lockID)
+	}
+
+	profile := &IPProfile{
+		lockID: "profileLock2",
+	}
+	ipAlloc.lockID = "lock2"
+	ipAlloc.prfl = profile
+
+	ipAlloc.Unlock()
+
+	if ipAlloc.lockID != "" {
+		t.Errorf("expected ipAlloc lockID cleared, got %q", ipAlloc.lockID)
+	}
+	if profile.lockID != "" {
+		t.Errorf("expected profile lockID cleared after Unlock, got %q", profile.lockID)
+	}
+}
+
+func TestIPAllocationsComputeUnexported(t *testing.T) {
+	tests := []struct {
+		name           string
+		allocations    *IPAllocations
+		profile        *IPProfile
+		expectedError  bool
+		validateResult func(t *testing.T, a *IPAllocations)
+	}{
+		{
+			name: "successful computation",
+			allocations: &IPAllocations{
+				Tenant: "cgrates.org",
+				ID:     "ID1",
+				Allocations: map[string]*PoolAllocation{
+					"alloc1": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.1.10"),
+						Time:    time.Now(),
+					},
+					"alloc2": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.1.11"),
+						Time:    time.Now(),
+					},
+					"alloc3": {
+						PoolID:  "pool2",
+						Address: netip.MustParseAddr("10.0.0.5"),
+						Time:    time.Now(),
+					},
+				},
+			},
+			profile: &IPProfile{
+				Tenant: "cgrates.org",
+				ID:     "IPProfileID1",
+				Pools: []*IPPool{
+					{
+						ID:    "pool1",
+						Range: "192.168.1.0/24",
+						Type:  "static",
+					},
+					{
+						ID:    "pool2",
+						Range: "10.0.0.0/16",
+						Type:  "dynamic",
+					},
+				},
+			},
+			expectedError: false,
+			validateResult: func(t *testing.T, a *IPAllocations) {
+				if a.prfl == nil {
+					t.Error("Expected profile to be set")
+				}
+				if a.prfl.ID != "IPProfileID1" {
+					t.Errorf("Expected profile ID 'IPProfileID1', got '%s'", a.prfl.ID)
+				}
+
+				if len(a.poolAllocs) != 2 {
+					t.Errorf("Expected 2 pools in poolAllocs, got %d", len(a.poolAllocs))
+				}
+
+				pool1Allocs := a.poolAllocs["pool1"]
+				if len(pool1Allocs) != 2 {
+					t.Errorf("Expected 2 allocations in pool1, got %d", len(pool1Allocs))
+				}
+				if allocID := pool1Allocs[netip.MustParseAddr("192.168.1.10")]; allocID != "alloc1" {
+					t.Errorf("Expected alloc1 for IP 192.168.1.10, got %s", allocID)
+				}
+				if allocID := pool1Allocs[netip.MustParseAddr("192.168.1.11")]; allocID != "alloc2" {
+					t.Errorf("Expected alloc2 for IP 192.168.1.11, got %s", allocID)
+				}
+
+				pool2Allocs := a.poolAllocs["pool2"]
+				if len(pool2Allocs) != 1 {
+					t.Errorf("Expected 1 allocation in pool2, got %d", len(pool2Allocs))
+				}
+				if allocID := pool2Allocs[netip.MustParseAddr("10.0.0.5")]; allocID != "alloc3" {
+					t.Errorf("Expected alloc3 for IP 10.0.0.5, got %s", allocID)
+				}
+
+				if len(a.poolRanges) != 2 {
+					t.Errorf("Expected 2 pool ranges, got %d", len(a.poolRanges))
+				}
+
+				expectedPrefix1 := netip.MustParsePrefix("192.168.1.0/24")
+				if a.poolRanges["pool1"] != expectedPrefix1 {
+					t.Errorf("Expected prefix %s for pool1, got %s", expectedPrefix1, a.poolRanges["pool1"])
+				}
+
+				expectedPrefix2 := netip.MustParsePrefix("10.0.0.0/16")
+				if a.poolRanges["pool2"] != expectedPrefix2 {
+					t.Errorf("Expected prefix %s for pool2, got %s", expectedPrefix2, a.poolRanges["pool2"])
+				}
+			},
+		},
+		{
+			name: "empty allocations",
+			allocations: &IPAllocations{
+				Tenant:      "cgrates.org",
+				ID:          "ID1",
+				Allocations: map[string]*PoolAllocation{},
+			},
+			profile: &IPProfile{
+				Tenant: "cgrates.org",
+				ID:     "IPProfileID1",
+				Pools: []*IPPool{
+					{
+						ID:    "pool1",
+						Range: "192.168.1.0/24",
+						Type:  "static",
+					},
+				},
+			},
+			expectedError: false,
+			validateResult: func(t *testing.T, a *IPAllocations) {
+				if a.prfl == nil {
+					t.Error("Expected profile to be set")
+				}
+				if len(a.poolAllocs) != 0 {
+					t.Errorf("Expected 0 pools in poolAllocs, got %d", len(a.poolAllocs))
+				}
+				if len(a.poolRanges) != 1 {
+					t.Errorf("Expected 1 pool range, got %d", len(a.poolRanges))
+				}
+			},
+		},
+		{
+			name: "nil allocations map",
+			allocations: &IPAllocations{
+				Tenant:      "cgrates.org",
+				ID:          "ID1",
+				Allocations: nil,
+			},
+			profile: &IPProfile{
+				Tenant: "cgrates.org",
+				ID:     "IPProfileID1",
+				Pools: []*IPPool{
+					{
+						ID:    "pool1",
+						Range: "192.168.1.0/24",
+						Type:  "static",
+					},
+				},
+			},
+			expectedError: false,
+			validateResult: func(t *testing.T, a *IPAllocations) {
+				if a.prfl == nil {
+					t.Error("Expected profile to be set")
+				}
+				if len(a.poolAllocs) != 0 {
+					t.Errorf("Expected 0 pools in poolAllocs, got %d", len(a.poolAllocs))
+				}
+				if len(a.poolRanges) != 1 {
+					t.Errorf("Expected 1 pool range, got %d", len(a.poolRanges))
+				}
+			},
+		},
+		{
+			name: "invalid CIDR range",
+			allocations: &IPAllocations{
+				Tenant:      "cgrates.org",
+				ID:          "ID1",
+				Allocations: map[string]*PoolAllocation{},
+			},
+			profile: &IPProfile{
+				Tenant: "cgrates.org",
+				ID:     "IPProfileID1",
+				Pools: []*IPPool{
+					{
+						ID:    "pool1",
+						Range: "invalid-cidr",
+						Type:  "static",
+					},
+				},
+			},
+			expectedError: true,
+			validateResult: func(t *testing.T, a *IPAllocations) {
+				if a.prfl == nil {
+					t.Error("Expected profile to be set even on error")
+				}
+			},
+		},
+		{
+			name: "profile with no pools",
+			allocations: &IPAllocations{
+				Tenant: "cgrates.org",
+				ID:     "ID1",
+				Allocations: map[string]*PoolAllocation{
+					"alloc1": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.1.10"),
+						Time:    time.Now(),
+					},
+				},
+			},
+			profile: &IPProfile{
+				Tenant: "cgrates.org",
+				ID:     "IPProfileID1",
+				Pools:  []*IPPool{},
+			},
+			expectedError: false,
+			validateResult: func(t *testing.T, a *IPAllocations) {
+				if a.prfl == nil {
+					t.Error("Expected profile to be set")
+				}
+				if len(a.poolAllocs) != 1 {
+					t.Errorf("Expected 1 pool in poolAllocs, got %d", len(a.poolAllocs))
+				}
+				if len(a.poolRanges) != 0 {
+					t.Errorf("Expected 0 pool ranges, got %d", len(a.poolRanges))
+				}
+			},
+		},
+		{
+			name: "multiple IPs in same pool",
+			allocations: &IPAllocations{
+				Tenant: "cgrates.org",
+				ID:     "ID1",
+				Allocations: map[string]*PoolAllocation{
+					"alloc1": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.1.10"),
+						Time:    time.Now(),
+					},
+					"alloc2": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.1.11"),
+						Time:    time.Now(),
+					},
+					"alloc3": {
+						PoolID:  "pool1",
+						Address: netip.MustParseAddr("192.168.1.12"),
+						Time:    time.Now(),
+					},
+				},
+			},
+			profile: &IPProfile{
+				Tenant: "cgrates.org",
+				ID:     "IPProfileID1",
+				Pools: []*IPPool{
+					{
+						ID:    "pool1",
+						Range: "192.168.1.0/24",
+						Type:  "static",
+					},
+				},
+			},
+			expectedError: false,
+			validateResult: func(t *testing.T, a *IPAllocations) {
+				if len(a.poolAllocs) != 1 {
+					t.Errorf("Expected 1 pool in poolAllocs, got %d", len(a.poolAllocs))
+				}
+				pool1Allocs := a.poolAllocs["pool1"]
+				if len(pool1Allocs) != 3 {
+					t.Errorf("Expected 3 allocations in pool1, got %d", len(pool1Allocs))
+				}
+
+				expectedMappings := map[string]string{
+					"192.168.1.10": "alloc1",
+					"192.168.1.11": "alloc2",
+					"192.168.1.12": "alloc3",
+				}
+
+				for ipStr, expectedAllocID := range expectedMappings {
+					ip := netip.MustParseAddr(ipStr)
+					if actualAllocID := pool1Allocs[ip]; actualAllocID != expectedAllocID {
+						t.Errorf("Expected %s for IP %s, got %s", expectedAllocID, ipStr, actualAllocID)
+					}
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.allocations.ComputeUnexported(tt.profile)
+
+			if tt.expectedError {
+				if err == nil {
+					t.Error("Expected an error but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error but got: %v", err)
+				}
+			}
+
+			if tt.validateResult != nil {
+				tt.validateResult(t, tt.allocations)
+			}
+		})
+	}
+}
