@@ -4321,3 +4321,305 @@ func TestStatMetricsStatASRAddEventErr3(t *testing.T) {
 		t.Errorf("\nExpecting <%+v>,\n Recevied <%+v>", utils.ErrAccountNotFound, err)
 	}
 }
+
+func TestDurationWithCompressClone(t *testing.T) {
+	original := &DurationWithCompress{
+		Duration:       10 * time.Second,
+		CompressFactor: 3,
+	}
+	cloned := original.Clone()
+
+	if cloned == nil {
+		t.Errorf("Cloned result is nil, expected non-nil")
+	}
+	if cloned.Duration != original.Duration {
+		t.Errorf("Duration mismatch: expected %v, got %v", original.Duration, cloned.Duration)
+	}
+	if cloned.CompressFactor != original.CompressFactor {
+		t.Errorf("CompressFactor mismatch: expected %d, got %d", original.CompressFactor, cloned.CompressFactor)
+	}
+	if cloned == original {
+		t.Errorf("Expected a different memory address for cloned object")
+	}
+
+	var nilOriginal *DurationWithCompress
+	nilCloned := nilOriginal.Clone()
+
+	if nilCloned != nil {
+		t.Errorf("Expected nil clone from nil receiver, got: %+v", nilCloned)
+	}
+}
+
+func TestStatWithCompressClone(t *testing.T) {
+	original := &StatWithCompress{
+		Stat:           100.45,
+		CompressFactor: 5,
+	}
+	cloned := original.Clone()
+
+	if cloned == nil {
+		t.Errorf("Expected non-nil clone, got nil")
+	}
+	if cloned.Stat != original.Stat {
+		t.Errorf("Stat mismatch: expected %v, got %v", original.Stat, cloned.Stat)
+	}
+	if cloned.CompressFactor != original.CompressFactor {
+		t.Errorf("CompressFactor mismatch: expected %d, got %d", original.CompressFactor, cloned.CompressFactor)
+	}
+	if cloned == original {
+		t.Errorf("Expected different memory address for clone, got same")
+	}
+
+	var nilOriginal *StatWithCompress
+	nilCloned := nilOriginal.Clone()
+
+	if nilCloned != nil {
+		t.Errorf("Expected nil clone from nil receiver, got: %+v", nilCloned)
+	}
+}
+
+func TestStatASRClone(t *testing.T) {
+	val := 0.876
+	original := &StatASR{
+		FilterIDs: []string{"*string:~*req.Tenant:cgrates.org"},
+		Answered:  90.0,
+		Count:     100,
+		MinItems:  10,
+		val:       &val,
+		Events: map[string]*StatWithCompress{
+			"event1": {Stat: 45.5, CompressFactor: 2},
+			"event2": nil,
+		},
+	}
+
+	cloned := original.Clone()
+	if cloned == nil {
+		t.Errorf("Expected non-nil clone, got nil")
+	}
+
+	clone, ok := cloned.(*StatASR)
+	if !ok {
+		t.Errorf("Expected *StatASR type, got different type")
+		return
+	}
+
+	if clone.Answered != original.Answered {
+		t.Errorf("Answered mismatch: expected %v, got %v", original.Answered, clone.Answered)
+	}
+	if clone.Count != original.Count {
+		t.Errorf("Count mismatch: expected %v, got %v", original.Count, clone.Count)
+	}
+	if clone.MinItems != original.MinItems {
+		t.Errorf("MinItems mismatch: expected %v, got %v", original.MinItems, clone.MinItems)
+	}
+
+	if len(clone.FilterIDs) != len(original.FilterIDs) {
+		t.Errorf("FilterIDs length mismatch")
+	}
+	for i := range original.FilterIDs {
+		if clone.FilterIDs[i] != original.FilterIDs[i] {
+			t.Errorf("FilterIDs[%d] mismatch: expected %s, got %s", i, original.FilterIDs[i], clone.FilterIDs[i])
+		}
+	}
+	if &clone.FilterIDs[0] == &original.FilterIDs[0] {
+		t.Errorf("Expected deep copy of FilterIDs slice, got shallow copy")
+	}
+
+	if len(clone.Events) != 1 {
+		t.Errorf("Events length mismatch: expected 1, got %d", len(clone.Events))
+	}
+	if e1 := clone.Events["event1"]; e1 == nil || e1.Stat != 45.5 || e1.CompressFactor != 2 {
+		t.Errorf("Cloned Events[event1] mismatch")
+	}
+	if _, exists := clone.Events["event2"]; exists {
+		t.Errorf("Expected 'event2' to be skipped in clone due to nil value")
+	}
+	if clone.Events["event1"] == original.Events["event1"] {
+		t.Errorf("Expected deep copy of Events[event1], got same pointer")
+	}
+
+	if clone.val == nil || *clone.val != *original.val {
+		t.Errorf("val mismatch or nil")
+	}
+	if clone.val == original.val {
+		t.Errorf("Expected val to be deep copied, got same pointer")
+	}
+
+	var nilOriginal *StatASR
+	nilCloned := nilOriginal.Clone()
+	if nilCloned != nil {
+		t.Errorf("Expected nil clone from nil receiver, got: %+v", nilCloned)
+	}
+}
+
+func TestStatHighestClone(t *testing.T) {
+	var nilStat *StatHighest
+	if result := nilStat.Clone(); result != nil {
+		t.Error("Expected nil for nil StatHighest, got non-nil")
+	}
+
+	cachedValue := 3600.5
+	original := &StatHighest{
+		FilterIDs: []string{"*string:~*req.Account:1001", "*prefix:~*req.Destination:+49"},
+		FieldName: "*duration",
+		MinItems:  10,
+		Highest:   3600.5,
+		Count:     25,
+		Events: map[string]float64{
+			"call001": 1800.0,
+			"call002": 3600.5,
+		},
+		cachedVal: &cachedValue,
+	}
+
+	result := original.Clone()
+	if result == nil {
+		t.Fatal("Clone returned nil")
+	}
+
+	cloned := result.(*StatHighest)
+
+	if !reflect.DeepEqual(cloned.FilterIDs, original.FilterIDs) {
+		t.Errorf("FilterIDs mismatch: expected %v, got %v", original.FilterIDs, cloned.FilterIDs)
+	}
+	if cloned.FieldName != original.FieldName {
+		t.Errorf("FieldName mismatch: expected %s, got %s", original.FieldName, cloned.FieldName)
+	}
+	if cloned.MinItems != original.MinItems {
+		t.Errorf("MinItems mismatch: expected %d, got %d", original.MinItems, cloned.MinItems)
+	}
+	if cloned.Highest != original.Highest {
+		t.Errorf("Highest mismatch: expected %f, got %f", original.Highest, cloned.Highest)
+	}
+	if cloned.Count != original.Count {
+		t.Errorf("Count mismatch: expected %d, got %d", original.Count, cloned.Count)
+	}
+	if !reflect.DeepEqual(cloned.Events, original.Events) {
+		t.Errorf("Events mismatch: expected %v, got %v", original.Events, cloned.Events)
+	}
+	if *cloned.cachedVal != *original.cachedVal {
+		t.Errorf("cachedVal mismatch: expected %f, got %f", *original.cachedVal, *cloned.cachedVal)
+	}
+
+	cloned.FilterIDs[0] = "modified"
+	cloned.Events["call001"] = 999.0
+	*cloned.cachedVal = 999.0
+
+	if original.FilterIDs[0] == "modified" {
+		t.Error("Original FilterIDs was affected by clone modification")
+	}
+	if original.Events["call001"] == 999.0 {
+		t.Error("Original Events was affected by clone modification")
+	}
+	if *original.cachedVal == 999.0 {
+		t.Error("Original cachedVal was affected by clone modification")
+	}
+}
+
+func TestStatHighestGetStringValue(t *testing.T) {
+	statNA := &StatHighest{
+		MinItems: 10,
+		Count:    5,
+	}
+
+	result := statNA.GetStringValue(2)
+	if result != utils.NotAvailable {
+		t.Errorf("Expected %s, got %s", utils.NotAvailable, result)
+	}
+
+	statValid := &StatHighest{
+		MinItems: 5,
+		Count:    10,
+		Highest:  3600.75,
+	}
+
+	result = statValid.GetStringValue(2)
+	expected := "3600.75"
+	if result != expected {
+		t.Errorf("Expected %s, got %s", expected, result)
+	}
+
+	statZero := &StatHighest{
+		MinItems: 1,
+		Count:    5,
+		Highest:  0.0,
+	}
+
+	result = statZero.GetStringValue(2)
+	expected = "0"
+	if result != expected {
+		t.Errorf("Expected %s, got %s", expected, result)
+	}
+}
+
+func TestStatHighestGetValue(t *testing.T) {
+	statNA := &StatHighest{
+		MinItems: 10,
+		Count:    5,
+	}
+
+	result := statNA.GetValue(2)
+	if result != utils.StatsNA {
+		t.Errorf("Expected %v, got %v", utils.StatsNA, result)
+	}
+
+	statValid := &StatHighest{
+		MinItems: 5,
+		Count:    10,
+		Highest:  3600.75,
+	}
+
+	result = statValid.GetValue(2)
+	expected := 3600.75
+	if result != expected {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+
+	statZero := &StatHighest{
+		MinItems: 1,
+		Count:    5,
+		Highest:  0.0,
+	}
+
+	result = statZero.GetValue(2)
+	expected = 0.0
+	if result != expected {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+}
+
+func TestStatHighestGetFloat64Value(t *testing.T) {
+	statNA := &StatHighest{
+		MinItems: 10,
+		Count:    5,
+	}
+
+	result := statNA.GetFloat64Value(2)
+	if result != utils.StatsNA {
+		t.Errorf("Expected %v, got %v", utils.StatsNA, result)
+	}
+
+	statValid := &StatHighest{
+		MinItems: 5,
+		Count:    10,
+		Highest:  3600.75,
+	}
+
+	result = statValid.GetFloat64Value(2)
+	expected := 3600.75
+	if result != expected {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+
+	statZero := &StatHighest{
+		MinItems: 1,
+		Count:    5,
+		Highest:  0.0,
+	}
+
+	result = statZero.GetFloat64Value(2)
+	expected = 0.0
+	if result != expected {
+		t.Errorf("Expected %v, got %v", expected, result)
+	}
+}
