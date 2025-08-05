@@ -338,7 +338,7 @@ func sendRadReq(t *testing.T, client *radigo.Client, code radigo.PacketCode, id 
 	return replyPacket
 }
 
-func checkAllocs(t *testing.T, client *birpc.Client, id string, wantAllocs ...string) {
+func checkAllocs(t testing.TB, client *birpc.Client, id string, wantAllocs ...string) {
 	t.Helper()
 	var allocs utils.IPAllocations
 	if err := client.Call(context.Background(), utils.IPsV1GetIPAllocations,
@@ -362,7 +362,46 @@ func checkAllocs(t *testing.T, client *birpc.Client, id string, wantAllocs ...st
 	}
 }
 
-func checkCDR(t *testing.T, client *birpc.Client, acnt string) {
+func allocateIP(t testing.TB, client *birpc.Client, eventID, id, allocID string) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     eventID,
+		Event: map[string]any{
+			utils.AccountField: id,
+			utils.AnswerTime:   utils.TimePointer(time.Now()),
+			utils.Usage:        10,
+			utils.Tenant:       "cgrates.org",
+		},
+		APIOpts: map[string]any{
+			utils.OptsIPsAllocationID: allocID,
+		},
+	}
+	var reply utils.AllocatedIP
+	if err := client.Call(context.Background(), utils.IPsV1AllocateIP, args, &reply); err != nil {
+		t.Errorf("Error allocating IPProfile %s: %v", id, err)
+	}
+}
+
+func releaseIP(t testing.TB, client *birpc.Client, id, allocID string) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.GenUUID(),
+		Event: map[string]any{
+			utils.AccountField: id,
+			utils.AnswerTime:   utils.TimePointer(time.Now()),
+			utils.Usage:        10,
+			utils.Tenant:       "cgrates.org",
+		},
+		APIOpts: map[string]any{
+			utils.OptsIPsAllocationID: allocID,
+		},
+	}
+	if err := client.Call(context.Background(), utils.IPsV1ReleaseIP, args, nil); err != nil {
+		t.Errorf("Error releasing IPProfile %s: %v", id, err)
+	}
+}
+
+func checkCDR(t testing.TB, client *birpc.Client, acnt string) {
 	t.Helper()
 	var cdrs []*utils.CDR
 	if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
