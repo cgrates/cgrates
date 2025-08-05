@@ -92,7 +92,7 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 		config.CgrConfig().GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
-		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
@@ -261,7 +261,7 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 		config.CgrConfig().GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
-		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
@@ -472,7 +472,7 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 		config.CgrConfig().GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
-		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
@@ -648,7 +648,7 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 		config.CgrConfig().GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
-		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
@@ -811,7 +811,7 @@ func (aL *actDynamicTrend) execute(ctx *context.Context, data utils.MapStorage, 
 		config.CgrConfig().GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
-		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
@@ -963,7 +963,7 @@ func (aL *actDynamicRanking) execute(ctx *context.Context, data utils.MapStorage
 		config.CgrConfig().GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
-		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
@@ -1090,7 +1090,7 @@ func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage,
 		config.CgrConfig().GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
-		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
@@ -1216,7 +1216,7 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 		config.CgrConfig().GeneralCfg().DefaultTenant)
 	// Parse action parameters based on the predefined format.
 	if len(aL.aCfg.Diktats) == 0 {
-		return fmt.Errorf("No diktats were speified for action <%v>", aL.aCfg.ID)
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
 	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
 	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
@@ -1467,6 +1467,229 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 		var rply string
 		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
 			utils.AdminSv1SetRouteProfile, args, &rply); err != nil {
+			return err
+		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
+	}
+	return
+}
+
+// actDynamicRate processes the `ActionDiktatsOpts` field from the action to construct a RateProfile
+//
+// The ActionDiktatsOpts field format is expected as follows:
+//
+//		 0 Tenant: string
+//		 1 ID: string
+//		 2 FilterIDs: strings separated by "&".
+//		 3 Weights: strings separated by "&".
+//		 4 MinCost: string
+//	 	 5 MaxCost: string
+//	 	 6 MaxCostStrategy: string
+//	 	 7 RateID: string
+//	 	 8 RateFilterIDs: strings separated by "&".
+//	 	 9 RateActivationStart: string
+//	 	10 RateWeights: strings separated by "&".
+//	 	11 RateBlocker: bool
+//	 	12 RateIntervalStart: string
+//	 	13 RateFixedFee: string
+//	 	14 RateRecurrentFee: string
+//	 	15 RateUnit: string
+//	 	16 RateIncrement: string
+//		17 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+type actDynamicRate struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
+	aCfg    *utils.APAction
+	tnt     string
+	cgrEv   *utils.CGREvent
+}
+
+func (aL *actDynamicRate) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actDynamicRate) cfg() *utils.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+		return fmt.Errorf("no connection with AdminS")
+	}
+	data[utils.MetaNow] = time.Now()
+	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	// Parse action parameters based on the predefined format.
+	if len(aL.aCfg.Diktats) == 0 {
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
+	}
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
+			return err
+		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
+	}
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 18 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 18", len(params))
+		}
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+				return err
+			}
+		}
+		// Prepare request arguments based on provided parameters.
+		args := &utils.APIRateProfile{
+			RateProfile: &utils.RateProfile{
+				Tenant:          params[0],
+				ID:              params[1],
+				MaxCostStrategy: params[6],
+				Rates: map[string]*utils.Rate{
+					params[7]: {
+						ID:              params[7],
+						ActivationTimes: params[9],
+						IntervalRates:   []*utils.IntervalRate{{}},
+					},
+				},
+			},
+			APIOpts: make(map[string]any),
+		}
+		// populate RateProfile's FilterIDs
+		if params[2] != utils.EmptyString {
+			args.FilterIDs = strings.Split(params[2], utils.ANDSep)
+		}
+		// populate RateProfile's Weights
+		if params[3] != utils.EmptyString {
+			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+			wghtSplit := strings.Split(params[3], utils.ANDSep)
+			if len(wghtSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if wghtSplit[0] != utils.EmptyString {
+				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+			}
+			if wghtSplit[1] != utils.EmptyString {
+				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		// populate RateProfile's MinCost
+		if params[4] != utils.EmptyString {
+			args.MinCost, err = utils.NewDecimalFromString(params[4])
+			if err != nil {
+				return err
+			}
+		}
+		// populate RateProfile's MaxCost
+		if params[5] != utils.EmptyString {
+			args.MaxCost, err = utils.NewDecimalFromString(params[5])
+			if err != nil {
+				return err
+			}
+		}
+		// populate RateProfile's Rate
+		if params[7] != utils.EmptyString {
+			// populate Rate's FilterIDs
+			if params[8] != utils.EmptyString {
+				args.Rates[params[7]].FilterIDs = strings.Split(params[8], utils.ANDSep)
+			}
+			// populate Rate's Weights
+			if params[10] != utils.EmptyString {
+				args.Rates[params[7]].Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+				wghtSplit := strings.Split(params[10], utils.ANDSep)
+				if len(wghtSplit) > 2 {
+					return utils.ErrUnsupportedFormat
+				}
+				if wghtSplit[0] != utils.EmptyString {
+					args.Rates[params[7]].Weights[0].FilterIDs = []string{wghtSplit[0]}
+				}
+				if wghtSplit[1] != utils.EmptyString {
+					args.Rates[params[7]].Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+					if err != nil {
+						return err
+					}
+				}
+			}
+			// populate Rate's Blocker
+			if params[11] != utils.EmptyString {
+				args.Rates[params[7]].Blocker, err = strconv.ParseBool(params[11])
+				if err != nil {
+					return err
+				}
+			}
+			// populate Rate's IntervalStart
+			if params[12] != utils.EmptyString {
+				args.Rates[params[7]].IntervalRates[0].IntervalStart, err = utils.NewDecimalFromString(params[12])
+				if err != nil {
+					return err
+				}
+			}
+			// populate Rate's FixedFee
+			if params[13] != utils.EmptyString {
+				args.Rates[params[7]].IntervalRates[0].FixedFee, err = utils.NewDecimalFromString(params[13])
+				if err != nil {
+					return err
+				}
+			}
+			// populate Rate's RecurrentFee
+			if params[14] != utils.EmptyString {
+				args.Rates[params[7]].IntervalRates[0].RecurrentFee, err = utils.NewDecimalFromString(params[14])
+				if err != nil {
+					return err
+				}
+			}
+			// populate Rate's Unit
+			if params[15] != utils.EmptyString {
+				args.Rates[params[7]].IntervalRates[0].Unit, err = utils.NewDecimalFromString(params[15])
+				if err != nil {
+					return err
+				}
+			}
+			// populate Rate's Increment
+			if params[16] != utils.EmptyString {
+				args.Rates[params[7]].IntervalRates[0].Increment, err = utils.NewDecimalFromString(params[16])
+				if err != nil {
+					return err
+				}
+			}
+		}
+		// populate RateProfile's APIOpts
+		if params[17] != utils.EmptyString {
+			if err := parseParamStringToMap(params[17], args.APIOpts); err != nil {
+				return err
+			}
+		}
+
+		// create the RateProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetRateProfile, args, &rply); err != nil {
 			return err
 		}
 		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {

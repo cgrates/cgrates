@@ -262,6 +262,7 @@ func TestDynThdIT(t *testing.T) {
 					utils.MetaRankings:   {"someID": {}},
 					utils.MetaFilters:    {"someID": {}},
 					utils.MetaRoutes:     {"someID": {}},
+					utils.MetaRates:      {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
@@ -720,6 +721,63 @@ func TestDynThdIT(t *testing.T) {
 							},
 						},
 					},
+					{
+						ID:   "Dynamic_Rate_ID",
+						Type: utils.MetaDynamicRate,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicRate1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RATE_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;5;10;*free;RT_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;* * * * *;*string:~*req.Account:1002&20;true;0s;5;0.01;1m;1s;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicRate1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RATE_2_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;5;10;*free;RT_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;* * * * *;*string:~*req.Account:1002&20;true;0s;5;0.01;1m;1s;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRate1002Blocker",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RATE_3_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;5;10;*free;RT_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;* * * * *;*string:~*req.Account:1002&20;true;0s;5;0.01;1m;1s;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRate1002Blocked",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_RATE_4_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;5;10;*free;RT_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;* * * * *;*string:~*req.Account:1002&20;true;0s;5;0.01;1m;1s;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		}
@@ -818,7 +876,7 @@ func TestDynThdIT(t *testing.T) {
 		} else if !reflect.DeepEqual(ids, []string{"THD_ACNT_1002"}) {
 			t.Error("Unexpected reply returned", ids)
 		}
-		time.Sleep(100 * time.Millisecond) //wait for async
+		time.Sleep(1000 * time.Millisecond) //wait for async
 	})
 	t.Run("GetDynamicThresholdProfile", func(t *testing.T) {
 		var thrsholds []*engine.ThresholdProfile
@@ -1426,6 +1484,123 @@ func TestDynThdIT(t *testing.T) {
 							},
 						},
 						RouteParameters: "rtParam1",
+					},
+				},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
+
+	t.Run("GetDynamicRateProfile", func(t *testing.T) {
+		var rcv []*utils.RateProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetRateProfiles,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rcv); err != nil {
+			t.Errorf("AdminSv1GetRateProfiles failed unexpectedly: %v", err)
+		}
+		if len(rcv) != 2 {
+			t.Fatalf("AdminSv1GetRateProfiles len(rcv)=%v, want 2", len(rcv))
+		}
+		sort.Slice(rcv, func(i, j int) bool {
+			return rcv[i].ID > rcv[j].ID
+		})
+		exp := []*utils.RateProfile{
+			{
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_RATE_3_1002",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Account:1003",
+				},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Weight: 10,
+					},
+				},
+				MinCost:         utils.NewDecimalFromFloat64(5),
+				MaxCost:         utils.NewDecimalFromFloat64(10),
+				MaxCostStrategy: utils.MetaMaxCostFree,
+				Rates: map[string]*utils.Rate{
+					"RT_1002": {
+						ID: "RT_1002",
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+							"*string:~*req.Account:1003",
+						},
+						ActivationTimes: "* * * * *",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Weight: 20,
+							},
+						},
+						Blocker: true,
+						IntervalRates: []*utils.IntervalRate{
+							{
+								IntervalStart: utils.NewDecimalFromFloat64(0),
+								FixedFee:      utils.NewDecimalFromFloat64(5),
+								RecurrentFee:  utils.NewDecimalFromFloat64(0.01),
+								Unit:          utils.NewDecimalFromFloat64(60000000000),
+								Increment:     utils.NewDecimalFromFloat64(1000000000),
+							},
+						},
+					},
+				},
+			},
+			{
+
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_RATE_1002",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Account:1003",
+				},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Weight: 10,
+					},
+				},
+				MinCost:         utils.NewDecimalFromFloat64(5),
+				MaxCost:         utils.NewDecimalFromFloat64(10),
+				MaxCostStrategy: utils.MetaMaxCostFree,
+				Rates: map[string]*utils.Rate{
+					"RT_1002": {
+						ID: "RT_1002",
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+							"*string:~*req.Account:1003",
+						},
+						ActivationTimes: "* * * * *",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Weight: 20,
+							},
+						},
+						Blocker: true,
+						IntervalRates: []*utils.IntervalRate{
+							{
+								IntervalStart: utils.NewDecimalFromFloat64(0),
+								FixedFee:      utils.NewDecimalFromFloat64(5),
+								RecurrentFee:  utils.NewDecimalFromFloat64(0.01),
+								Unit:          utils.NewDecimalFromFloat64(60000000000),
+								Increment:     utils.NewDecimalFromFloat64(1000000000),
+							},
+						},
 					},
 				},
 			},
