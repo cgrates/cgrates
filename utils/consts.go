@@ -1155,6 +1155,7 @@ const (
 	MetaDynamicRanking        = "*dynamicRanking"
 	MetaDynamicFilter         = "*dynamicFilter"
 	MetaDynamicRoute          = "*dynamicRoute"
+	MetaDynamicRate           = "*dynamicRate"
 
 	// Diktats Opts Fields
 	MetaBalancePath  = "*balancePath"
