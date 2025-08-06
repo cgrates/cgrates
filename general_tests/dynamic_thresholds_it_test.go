@@ -263,6 +263,7 @@ func TestDynThdIT(t *testing.T) {
 					utils.MetaFilters:    {"someID": {}},
 					utils.MetaRoutes:     {"someID": {}},
 					utils.MetaRates:      {"someID": {}},
+					utils.MetaIPs:        {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
@@ -778,6 +779,63 @@ func TestDynThdIT(t *testing.T) {
 							},
 						},
 					},
+					{
+						ID:   "Dynamic_IP_ID",
+						Type: utils.MetaDynamicIP,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicIP1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_IP_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;1s;true;Pool1;*string:~*req.Account:1002&*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicIP1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_IP_2_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;1s;true;Pool1;*string:~*req.Account:1002&*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicIP1002Blocker",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_IP_3_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;1s;true;Pool1;*string:~*req.Account:1002&*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicIP1002Blocked",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_IP_4_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;1s;true;Pool1;*string:~*req.Account:1002&*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		}
@@ -876,7 +934,7 @@ func TestDynThdIT(t *testing.T) {
 		} else if !reflect.DeepEqual(ids, []string{"THD_ACNT_1002"}) {
 			t.Error("Unexpected reply returned", ids)
 		}
-		time.Sleep(1000 * time.Millisecond) //wait for async
+		time.Sleep(700 * time.Millisecond) //wait for async
 	})
 	t.Run("GetDynamicThresholdProfile", func(t *testing.T) {
 		var thrsholds []*engine.ThresholdProfile
@@ -1610,4 +1668,118 @@ func TestDynThdIT(t *testing.T) {
 			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
 		}
 	})
+
+	t.Run("GetDynamicIPProfile", func(t *testing.T) {
+		var rcv []*utils.IPProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetIPProfiles,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rcv); err != nil {
+			t.Errorf("AdminSv1GetIPProfiles failed unexpectedly: %v", err)
+		}
+		if len(rcv) != 2 {
+			t.Fatalf("AdminSv1GetIPProfiles len(rcv)=%v, want 2", len(rcv))
+		}
+		sort.Slice(rcv, func(i, j int) bool {
+			return rcv[i].ID > rcv[j].ID
+		})
+		exp := []*utils.IPProfile{
+			{
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_IP_3_1002",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Account:1003",
+				},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Weight: 10,
+					},
+				},
+				TTL:    time.Second,
+				Stored: true,
+				Pools: []*utils.IPPool{
+					{
+						ID: "Pool1",
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+							"*string:~*req.Account:1003",
+						},
+						Type:     utils.MetaIPv4,
+						Range:    "172.16.1.1/24",
+						Strategy: utils.MetaAscending,
+						Message:  "alloc_success",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Weight: 20,
+							},
+						},
+						Blockers: utils.DynamicBlockers{
+							{
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Blocker:   true,
+							},
+						},
+					},
+				},
+			},
+			{
+
+				Tenant: "cgrates.org",
+				ID:     "DYNAMICLY_IP_1002",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Account:1003",
+				},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Weight: 10,
+					},
+				},
+				TTL:    time.Second,
+				Stored: true,
+				Pools: []*utils.IPPool{
+					{
+						ID: "Pool1",
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+							"*string:~*req.Account:1003",
+						},
+						Type:     utils.MetaIPv4,
+						Range:    "172.16.1.1/24",
+						Strategy: utils.MetaAscending,
+						Message:  "alloc_success",
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Weight: 20,
+							},
+						},
+						Blockers: utils.DynamicBlockers{
+							{
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Blocker:   true,
+							},
+						},
+					},
+				},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
+
 }
