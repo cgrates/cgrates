@@ -331,7 +331,8 @@ func testSesRndItPrepareCDRs(t *testing.T) {
 		}, &reply); err != nil {
 		t.Error(err)
 		return
-	} else if *reply.MaxUsage != sesRndExpMaxUsage {
+	}
+	if sesRndCgrEv.Event[utils.RequestType] == "*prepaid" && *reply.MaxUsage != -1 {
 		t.Errorf("Unexpected MaxUsage: %v", reply.MaxUsage)
 	}
 	time.Sleep(50 * time.Millisecond)

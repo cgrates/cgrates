@@ -453,6 +453,7 @@ type FreeswitchAgentJsonCfg struct {
 	ActiveSessionDelimiter *string           `json:"active_session_delimiter"`
 	MaxWaitConnection      *string           `json:"max_wait_connection"`
 	RouteProfile           *bool             `json:"route_profile"`
+	SchedTransferExtension *string           `json:"sched_transfer_extension"`
 	EventSocketConns       *[]*FsConnJsonCfg `json:"event_socket_conns"`
 }
 

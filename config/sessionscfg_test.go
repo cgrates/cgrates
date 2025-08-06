@@ -534,6 +534,7 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		MaxWaitConnection:      2,
 		ExtraFields:            RSRParsers{},
 		ActiveSessionDelimiter: ";",
+		SchedTransferExtension: "CGRateS",
 		EventSocketConns: []*FsConnCfg{
 			{
 				Address:      "1.2.3.4:8021",
@@ -590,6 +591,7 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg:    "",
 		utils.ActiveSessionDelimiterCfg: ",",
 		utils.MaxWaitConnectionCfg:      "2s",
+		utils.SchedTransferExtensionCfg: "CGRateS",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8021",
@@ -634,6 +636,7 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg:    "",
 		utils.MaxWaitConnectionCfg:      "7s",
 		utils.ActiveSessionDelimiterCfg: "\tsep\t",
+		utils.SchedTransferExtensionCfg: "CGRateS",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8000",
@@ -673,6 +676,7 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 		utils.EmptyBalanceAnnFileCfg:    "",
 		utils.MaxWaitConnectionCfg:      "",
 		utils.ActiveSessionDelimiterCfg: "\t",
+		utils.SchedTransferExtensionCfg: "CGRateS",
 		utils.EventSocketConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8021",

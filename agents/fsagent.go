@@ -120,11 +120,19 @@ func (fsa *FSsessions) setMaxCallDuration(uuid string, connIdx int,
 		}
 		return
 	}
-	if _, err = fsa.conns[connIdx].SendApiCmd(
-		fmt.Sprintf("uuid_setvar %s execute_on_answer sched_hangup +%d alloted_timeout\n\n",
-			uuid, int(maxDur.Seconds()))); err != nil {
+	if fsa.cfg.SchedTransferExtension != utils.EmptyString {
+		if _, err = fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s execute_on_answer sched_transfer +%d %s XML default\n\n",
+			uuid, int(maxDur.Seconds()), fsa.cfg.SchedTransferExtension)); err != nil {
+			utils.Logger.Err(
+				fmt.Sprintf("<%s> Could not send sched_transfer to freeswitch, error: <%s>, connIdx: %v",
+					utils.FreeSWITCHAgent, err.Error(), connIdx))
+		}
+		return
+	}
+	if _, err = fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s execute_on_answer sched_hangup +%d alloted_timeout\n\n",
+		uuid, int(maxDur.Seconds()))); err != nil {
 		utils.Logger.Err(
-			fmt.Sprintf("<%s> Could not send sched_hangup command to freeswitch, error: <%s>, connIdx: %v",
+			fmt.Sprintf("<%s> Could not send sched_hangup to freeswitch, error: <%s>, connIdx: %v",
 				utils.FreeSWITCHAgent, err.Error(), connIdx))
 	}
 	return
@@ -264,6 +272,36 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 		fsa.disconnectSession(connIdx, chanUUID, "", err.Error())
 		return
 	}
+	if fsa.cfg.SchedTransferExtension != utils.EmptyString {
+		if initReply.MaxUsage != nil && *initReply.MaxUsage == -1 {
+			lastSchedID, err := fsa.getLastSchedID(fsev.GetUUID(), connIdx)
+			if err != nil {
+				utils.Logger.Err(
+					fmt.Sprintf("<%s> Failed to retrieve last_sched_id for UUID %s, error: %s",
+						utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
+				return
+			}
+			if _, err = fsa.conns[connIdx].SendApiCmd(
+				fmt.Sprintf("sched_del %s\n\n", lastSchedID)); err != nil {
+				utils.Logger.Err(
+					fmt.Sprintf("<%s> Could not cancel scheduled task for UUID %s, error: %s, connIdx: %v",
+						utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error(), connIdx))
+			}
+		}
+	}
+}
+
+// GetLastSchedID retrieves the last_sched_id for scheduled tasks
+func (fsa *FSsessions) getLastSchedID(uuid string, connIdx int) (string, error) {
+	lastSchedID, err := fsa.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_getvar %s last_sched_id\n\n", uuid))
+	if err != nil {
+		return "", err
+	}
+	lastSchedID = strings.TrimSpace(lastSchedID)
+	if lastSchedID == "" || lastSchedID == "_undef_" {
+		return "", fmt.Errorf("no scheduled task found for UUID %s", uuid)
+	}
+	return lastSchedID, nil
 }
 
 func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {

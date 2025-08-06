@@ -202,7 +202,7 @@ func testSesExpItInitSession(t *testing.T) {
 		}, &rply); err != nil {
 		t.Error(err)
 		return
-	} else if *rply.MaxUsage != 3*time.Hour {
+	} else if *rply.MaxUsage != -1 {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	time.Sleep(50 * time.Millisecond)

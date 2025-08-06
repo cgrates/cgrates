@@ -1001,6 +1001,7 @@ func TestFsAgentJsonCfg(t *testing.T) {
 		EmptyBalanceAnnFile:    utils.StringPointer(""),
 		ActiveSessionDelimiter: utils.StringPointer(","),
 		MaxWaitConnection:      utils.StringPointer("2s"),
+		SchedTransferExtension: utils.StringPointer("CGRateS"),
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
 				Address:              utils.StringPointer("127.0.0.1:8021"),
