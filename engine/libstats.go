@@ -570,6 +570,10 @@ func (sq *StatQueue) UnmarshalJSON(data []byte) (err error) {
 			metric = new(StatHighest)
 		case utils.MetaLowest:
 			metric = new(StatLowest)
+		case utils.MetaREPSC:
+			metric = new(StatREPSC)
+		case utils.MetaREPFC:
+			metric = new(StatREPFC)
 		default:
 			return fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
 		}
