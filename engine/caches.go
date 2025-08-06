@@ -101,6 +101,10 @@ func init() {
 	gob.Register(new(StatSum))
 	gob.Register(new(StatAverage))
 	gob.Register(new(StatDistinct))
+	gob.Register(new(StatHighest))
+	gob.Register(new(StatLowest))
+	gob.Register(new(StatREPSC))
+	gob.Register(new(StatREPFC))
 
 	// others
 	gob.Register([]any{})
