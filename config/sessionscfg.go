@@ -589,6 +589,7 @@ type FsAgentCfg struct {
 	ActiveSessionDelimiter string
 	MaxWaitConnection      time.Duration
 	RouteProfile           bool
+	TransferExtension      string
 	EventSocketConns       []*FsConnCfg
 }
 
@@ -643,6 +644,9 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 			return err
 		}
 	}
+	if jsnCfg.TransferExtension != nil {
+		fscfg.TransferExtension = *jsnCfg.TransferExtension
+	}
 	if jsnCfg.EventSocketConns != nil {
 		fscfg.EventSocketConns = make([]*FsConnCfg, len(*jsnCfg.EventSocketConns))
 		for idx, jsnConnCfg := range *jsnCfg.EventSocketConns {
@@ -664,6 +668,7 @@ func (fscfg *FsAgentCfg) AsMapInterface(separator string) (initialMP map[string]
 		utils.EmptyBalanceContextCfg:    fscfg.EmptyBalanceContext,
 		utils.EmptyBalanceAnnFileCfg:    fscfg.EmptyBalanceAnnFile,
 		utils.ActiveSessionDelimiterCfg: fscfg.ActiveSessionDelimiter,
+		utils.TransferExtensionCfg:      fscfg.TransferExtension,
 	}
 	if fscfg.SessionSConns != nil {
 		sessionSConns := make([]string, len(fscfg.SessionSConns))
@@ -709,6 +714,7 @@ func (fscfg FsAgentCfg) Clone() (cln *FsAgentCfg) {
 		EmptyBalanceAnnFile:    fscfg.EmptyBalanceAnnFile,
 		ActiveSessionDelimiter: fscfg.ActiveSessionDelimiter,
 		MaxWaitConnection:      fscfg.MaxWaitConnection,
+		TransferExtension:      fscfg.TransferExtension,
 	}
 	if fscfg.SessionSConns != nil {
 		cln.SessionSConns = make([]string, len(fscfg.SessionSConns))

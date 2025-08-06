@@ -2494,7 +2494,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		hasDebitLoops := s.debitStop != nil
 		s.RUnlock()
 		if hasDebitLoops { //active debit
-			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().GetDefaultUsage(utils.IfaceAsString(args.CGREvent.Event[utils.ToR])))
+			rply.MaxUsage = utils.DurationPointer(-1)
 		} else {
 			var sRunsUsage map[string]time.Duration
 			if sRunsUsage, err = sS.updateSession(s, nil, args.APIOpts, false); err != nil {
