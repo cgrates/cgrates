@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"net"
 	"reflect"
 	"sort"
@@ -4621,5 +4622,272 @@ func TestStatHighestGetFloat64Value(t *testing.T) {
 	expected = 0.0
 	if result != expected {
 		t.Errorf("Expected %v, got %v", expected, result)
+	}
+}
+
+func TestStatHighestRemEvent(t *testing.T) {
+	stat := &StatHighest{
+		FieldName: "Cost",
+		MinItems:  1,
+		Count:     3,
+		Highest:   30.0,
+		Events: map[string]float64{
+			"ev1": 10.0,
+			"ev2": 20.0,
+			"ev3": 30.0,
+		},
+		cachedVal: new(float64),
+	}
+
+	stat.RemEvent("ev2")
+	if stat.Count != 2 {
+		t.Errorf("Expected count = 2 after removing ev2, got %d", stat.Count)
+	}
+	if stat.Highest != 30.0 {
+		t.Errorf("Expected highest to remain 30.0 after removing ev2, got %.2f", stat.Highest)
+	}
+	if _, exists := stat.Events["ev2"]; exists {
+		t.Errorf("ev2 should have been deleted")
+	}
+	if stat.cachedVal != nil {
+		t.Errorf("Expected cachedVal to be nil after removal")
+	}
+
+	stat.RemEvent("ev3")
+	if stat.Count != 1 {
+		t.Errorf("Expected count = 1 after removing ev3, got %d", stat.Count)
+	}
+	if stat.Highest != 10.0 {
+		t.Errorf("Expected highest to update to 10.0 after removing ev3, got %.2f", stat.Highest)
+	}
+	if _, exists := stat.Events["ev3"]; exists {
+		t.Errorf("ev3 should have been deleted")
+	}
+
+	stat.RemEvent("ev1")
+	if stat.Count != 0 {
+		t.Errorf("Expected count = 0 after removing ev1, got %d", stat.Count)
+	}
+	if stat.Highest != 0.0 {
+		t.Errorf("Expected highest = 0.0 after removing all events, got %.2f", stat.Highest)
+	}
+	if len(stat.Events) != 0 {
+		t.Errorf("Expected Events map to be empty, got length %d", len(stat.Events))
+	}
+
+	stat.RemEvent("nonexistent")
+	if stat.Count != 0 {
+		t.Errorf("Count should remain 0 after removing nonexistent event, got %d", stat.Count)
+	}
+	if stat.Highest != 0.0 {
+		t.Errorf("Highest should remain 0.0 after removing nonexistent event, got %.2f", stat.Highest)
+	}
+}
+
+func TestStatHighestMarshal(t *testing.T) {
+	tests := []struct {
+		name string
+		stat *StatHighest
+	}{
+		{
+			name: "valid data",
+			stat: &StatHighest{
+				FilterIDs: []string{"filter1", "filter2"},
+				FieldName: "usage",
+				MinItems:  5,
+				Highest:   99.99,
+				Count:     10,
+				Events: map[string]float64{
+					"event1": 50.0,
+					"event2": 99.99,
+				},
+			},
+		},
+		{
+			name: "empty struct",
+			stat: &StatHighest{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			marshaler := &JSONMarshaler{}
+			result, err := tt.stat.Marshal(marshaler)
+
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
+
+			if len(result) == 0 {
+				t.Error("Expected non-empty result")
+			}
+
+			var unmarshaled StatHighest
+			if err := json.Unmarshal(result, &unmarshaled); err != nil {
+				t.Errorf("Result is not valid JSON: %v", err)
+			}
+
+			if tt.stat.FieldName != "" && unmarshaled.FieldName != tt.stat.FieldName {
+				t.Errorf("Expected FieldName %s, got %s", tt.stat.FieldName, unmarshaled.FieldName)
+			}
+		})
+	}
+}
+
+func TestStatHighestUnmarshal(t *testing.T) {
+	tests := []struct {
+		name      string
+		inputJSON string
+		want      *StatHighest
+		wantErr   bool
+	}{
+		{
+			name:      "valid json",
+			inputJSON: `{"FilterIDs":["filter1","filter2"],"FieldName":"usage","MinItems":5,"Highest":99.99,"Count":10,"Events":{"event1":50.0,"event2":99.99}}`,
+			want: &StatHighest{
+				FilterIDs: []string{"filter1", "filter2"},
+				FieldName: "usage",
+				MinItems:  5,
+				Highest:   99.99,
+				Count:     10,
+				Events: map[string]float64{
+					"event1": 50.0,
+					"event2": 99.99,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:      "empty json",
+			inputJSON: `{}`,
+			want:      &StatHighest{},
+			wantErr:   false,
+		},
+		{
+			name:      "invalid json",
+			inputJSON: `{"FilterIDs": "not an array"}`,
+			want:      nil,
+			wantErr:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ms := &JSONMarshaler{}
+			got := &StatHighest{}
+			err := got.LoadMarshaled(ms, []byte(tt.inputJSON))
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Unmarshal() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if err == nil {
+				if len(got.FilterIDs) != len(tt.want.FilterIDs) {
+					t.Errorf("FilterIDs length mismatch, got %d want %d", len(got.FilterIDs), len(tt.want.FilterIDs))
+				}
+				if got.FieldName != tt.want.FieldName {
+					t.Errorf("FieldName mismatch, got %s want %s", got.FieldName, tt.want.FieldName)
+				}
+				if got.MinItems != tt.want.MinItems {
+					t.Errorf("MinItems mismatch, got %d want %d", got.MinItems, tt.want.MinItems)
+				}
+				if got.Highest != tt.want.Highest {
+					t.Errorf("Highest mismatch, got %f want %f", got.Highest, tt.want.Highest)
+				}
+				if got.Count != tt.want.Count {
+					t.Errorf("Count mismatch, got %d want %d", got.Count, tt.want.Count)
+				}
+				if len(got.Events) != len(tt.want.Events) {
+					t.Errorf("Events map length mismatch, got %d want %d", len(got.Events), len(tt.want.Events))
+				}
+			}
+		})
+	}
+}
+
+func TestStatHighestGetFilterIDs(t *testing.T) {
+	tests := []struct {
+		name       string
+		stat       *StatHighest
+		wantFilter []string
+	}{
+		{
+			name: "non-empty FilterIDs",
+			stat: &StatHighest{
+				FilterIDs: []string{"fltr1", "fltr2"},
+			},
+			wantFilter: []string{"fltr1", "fltr2"},
+		},
+		{
+			name:       "empty FilterIDs",
+			stat:       &StatHighest{},
+			wantFilter: nil,
+		},
+		{
+			name:       "nil receiver",
+			stat:       nil,
+			wantFilter: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got []string
+			if tt.stat != nil {
+				got = tt.stat.GetFilterIDs()
+			} else {
+				got = nil
+			}
+
+			if len(got) != len(tt.wantFilter) {
+				t.Errorf("GetFilterIDs() length = %d, want %d", len(got), len(tt.wantFilter))
+				return
+			}
+			for i := range got {
+				if got[i] != tt.wantFilter[i] {
+					t.Errorf("GetFilterIDs()[%d] = %s, want %s", i, got[i], tt.wantFilter[i])
+				}
+			}
+		})
+	}
+}
+
+func TestStatHighestGetMinItems(t *testing.T) {
+	tests := []struct {
+		name    string
+		stat    *StatHighest
+		wantMin int
+	}{
+		{
+			name:    "MinItems set",
+			stat:    &StatHighest{MinItems: 10},
+			wantMin: 10,
+		},
+		{
+			name:    "MinItems zero",
+			stat:    &StatHighest{MinItems: 0},
+			wantMin: 0,
+		},
+		{
+			name:    "Nil receiver",
+			stat:    nil,
+			wantMin: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got int
+			if tt.stat != nil {
+				got = tt.stat.GetMinItems()
+			} else {
+				got = 0
+			}
+
+			if got != tt.wantMin {
+				t.Errorf("GetMinItems() = %d, want %d", got, tt.wantMin)
+			}
+		})
 	}
 }
