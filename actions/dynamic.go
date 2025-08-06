@@ -1700,3 +1700,199 @@ func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, t
 	}
 	return
 }
+
+// actDynamicIP processes the `ActionDiktatsOpts` field from the action to construct a IPProfile
+//
+// The ActionDiktatsOpts field format is expected as follows:
+//
+//		 0 Tenant: string
+//		 1 ID: string
+//		 2 FilterIDs: strings separated by "&".
+//		 3 Weights: strings separated by "&".
+//		 4 TTL: duration
+//	 	 5 Stored: bool
+//	 	 6 PoolID: string
+//	 	 7 PoolFilterIDs: strings separated by "&".
+//	 	 8 PoolType: string
+//	 	 9 PoolRange: string
+//	 	10 PoolStrategy: string
+//	 	11 PoolMessage: string
+//	 	12 PoolWeights: strings separated by "&".
+//	 	13 PoolBlockers: strings separated by "&".
+//		14 APIOpts: set of key-value pairs (separated by "&").
+//
+// Parameters are separated by ";" and must be provided in the specified order.
+type actDynamicIP struct {
+	config  *config.CGRConfig
+	connMgr *engine.ConnManager
+	fltrS   *engine.FilterS
+	aCfg    *utils.APAction
+	tnt     string
+	cgrEv   *utils.CGREvent
+}
+
+func (aL *actDynamicIP) id() string {
+	return aL.aCfg.ID
+}
+
+func (aL *actDynamicIP) cfg() *utils.APAction {
+	return aL.aCfg
+}
+
+// execute implements actioner interface
+func (aL *actDynamicIP) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+	if len(aL.config.ActionSCfg().AdminSConns) == 0 {
+		return fmt.Errorf("no connection with AdminS")
+	}
+	data[utils.MetaNow] = time.Now()
+	data[utils.MetaTenant] = utils.FirstNonEmpty(aL.cgrEv.Tenant, aL.tnt,
+		config.CgrConfig().GeneralCfg().DefaultTenant)
+	// Parse action parameters based on the predefined format.
+	if len(aL.aCfg.Diktats) == 0 {
+		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
+	}
+	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
+	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
+	for _, diktat := range aL.aCfg.Diktats {
+		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
+			return err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
+		if err != nil {
+			return err
+		}
+		weights[diktat.ID] = weight
+		diktats = append(diktats, diktat)
+	}
+	// Sort by weight (higher values first).
+	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	for _, diktat := range diktats {
+		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
+			utils.InfieldSep)
+		if len(params) != 15 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 15", len(params))
+		}
+		// parse dynamic parameters
+		for i := range params {
+			if params[i], err = utils.ParseParamForDataProvider(params[i], data, false); err != nil {
+				return err
+			}
+		}
+		// Prepare request arguments based on provided parameters.
+		args := &utils.IPProfileWithAPIOpts{
+			IPProfile: &utils.IPProfile{
+				Tenant: params[0],
+				ID:     params[1],
+				Pools: []*utils.IPPool{
+					{
+						ID:       params[6],
+						Type:     params[8],
+						Range:    params[9],
+						Strategy: params[10],
+						Message:  params[11],
+					},
+				},
+			},
+			APIOpts: make(map[string]any),
+		}
+		// populate IPProfile's FilterIDs
+		if params[2] != utils.EmptyString {
+			args.FilterIDs = strings.Split(params[2], utils.ANDSep)
+		}
+		// populate IPProfile's Weights
+		if params[3] != utils.EmptyString {
+			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+			wghtSplit := strings.Split(params[3], utils.ANDSep)
+			if len(wghtSplit) > 2 {
+				return utils.ErrUnsupportedFormat
+			}
+			if wghtSplit[0] != utils.EmptyString {
+				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
+			}
+			if wghtSplit[1] != utils.EmptyString {
+				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		// populate IPProfile's TTL
+		if params[4] != utils.EmptyString {
+			args.TTL, err = utils.ParseDurationWithNanosecs(params[4])
+			if err != nil {
+				return err
+			}
+		}
+		// populate IPProfile's Stored
+		if params[5] != utils.EmptyString {
+			args.Stored, err = strconv.ParseBool(params[5])
+			if err != nil {
+				return err
+			}
+		}
+		// populate IPProfile's Pool
+		if params[6] != utils.EmptyString {
+			// populate Pool's FilterIDs
+			if params[7] != utils.EmptyString {
+				args.Pools[0].FilterIDs = strings.Split(params[7], utils.ANDSep)
+			}
+			// populate Pool's Weights
+			if params[12] != utils.EmptyString {
+				args.Pools[0].Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
+				wghtSplit := strings.Split(params[12], utils.ANDSep)
+				if len(wghtSplit) > 2 {
+					return utils.ErrUnsupportedFormat
+				}
+				if wghtSplit[0] != utils.EmptyString {
+					args.Pools[0].Weights[0].FilterIDs = []string{wghtSplit[0]}
+				}
+				if wghtSplit[1] != utils.EmptyString {
+					args.Pools[0].Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
+					if err != nil {
+						return err
+					}
+				}
+			}
+			// populate Pool's Blocker
+			if params[13] != utils.EmptyString {
+				args.Pools[0].Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
+				blckrSplit := strings.Split(params[13], utils.ANDSep)
+				if len(blckrSplit) > 2 {
+					return utils.ErrUnsupportedFormat
+				}
+				if blckrSplit[0] != utils.EmptyString {
+					args.Pools[0].Blockers[0].FilterIDs = []string{blckrSplit[0]}
+				}
+				if blckrSplit[1] != utils.EmptyString {
+					args.Pools[0].Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+		// populate IPProfile's APIOpts
+		if params[14] != utils.EmptyString {
+			if err := parseParamStringToMap(params[14], args.APIOpts); err != nil {
+				return err
+			}
+		}
+
+		// create the IPProfile based on the populated parameters
+		var rply string
+		if err = aL.connMgr.Call(ctx, aL.config.ActionSCfg().AdminSConns,
+			utils.AdminSv1SetIPProfile, args, &rply); err != nil {
+			return err
+		}
+		if blocker, err := engine.BlockerFromDynamics(ctx, diktat.Blockers, aL.fltrS, aL.tnt, data); err != nil {
+			return err
+		} else if blocker {
+			break
+		}
+	}
+	return
+}
