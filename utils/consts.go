@@ -2557,6 +2557,7 @@ const (
 	EventSocketConnsCfg       = "event_socket_conns"
 	EmptyBalanceContext       = "empty_balance_context"
 	ActiveSessionDelimiterCfg = "active_session_delimiter"
+	SchedTransferExtensionCfg = "sched_transfer_extension"
 )
 
 // From Config

@@ -732,6 +732,7 @@ const CGRATES_CFG_JSON = `
 	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
 	"active_session_delimiter": ",",		// delimiter for 'show channels' responses and requests
 	"route_profile": false,					// attaches RouteProfileID to RouteIDs which are sent as reply to freeswitch agent authorization requests
+	"sched_transfer_extension": "CGRateS",				// prepaid calls will be transferred to this extension in authorization 
 	"event_socket_conns":[				// instantiate connections to multiple FreeSWITCH servers
 		{
 			"address": "127.0.0.1:8021", 	// FreeSWITCH server address and port
