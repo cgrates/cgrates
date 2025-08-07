@@ -338,6 +338,9 @@ func filterAndSortPools(ctx *context.Context, tenant string, pools []*utils.IPPo
 		weights[pool.ID] = weight
 		filteredPools = append(filteredPools, pool)
 	}
+	if len(filteredPools) == 0 {
+		return nil, utils.ErrNotFound
+	}
 
 	// Sort by weight (higher values first).
 	slices.SortFunc(filteredPools, func(a, b *utils.IPPool) int {
