@@ -4891,3 +4891,343 @@ func TestStatHighestGetMinItems(t *testing.T) {
 		})
 	}
 }
+
+func TestStatACCClone(t *testing.T) {
+	t.Run("clone nil receiver", func(t *testing.T) {
+		var nilStat *StatACC
+		cloned := nilStat.Clone()
+		if cloned != nil {
+			t.Error("Expected nil from Clone() on nil receiver, got non-nil")
+		}
+	})
+
+	t.Run("clone populated struct", func(t *testing.T) {
+		originalVal := 3.1415
+
+		original := &StatACC{
+			FilterIDs: []string{"*string:~*req.Account:1001", "*prefix:~*req.Destination:+44"},
+			Sum:       125.50,
+			Count:     5,
+			MinItems:  3,
+			Events: map[string]*StatWithCompress{
+				"call001": {Stat: 25.10, CompressFactor: 1},
+				"call002": {Stat: 50.20, CompressFactor: 2},
+			},
+			val: &originalVal,
+		}
+
+		cloned := original.Clone()
+		if cloned == nil {
+			t.Fatal("Clone returned nil")
+		}
+
+		clonedStat, ok := cloned.(*StatACC)
+		if !ok {
+			t.Fatalf("Clone returned unexpected type: %T", cloned)
+		}
+
+		if clonedStat.Sum != original.Sum {
+			t.Errorf("Expected Sum %.2f, got %.2f", original.Sum, clonedStat.Sum)
+		}
+		if clonedStat.Count != original.Count {
+			t.Errorf("Expected Count %d, got %d", original.Count, clonedStat.Count)
+		}
+		if clonedStat.MinItems != original.MinItems {
+			t.Errorf("Expected MinItems %d, got %d", original.MinItems, clonedStat.MinItems)
+		}
+
+		if !reflect.DeepEqual(clonedStat.FilterIDs, original.FilterIDs) {
+			t.Errorf("Expected FilterIDs %v, got %v", original.FilterIDs, clonedStat.FilterIDs)
+		}
+
+		if !reflect.DeepEqual(clonedStat.Events, original.Events) {
+			t.Errorf("Expected Events %v, got %v", original.Events, clonedStat.Events)
+		}
+
+		original.FilterIDs[0] = "MODIFIED"
+		original.Events["call001"].Stat = 999.99
+		*original.val = 0
+
+		if clonedStat.FilterIDs[0] == "MODIFIED" {
+			t.Error("FilterIDs not deeply copied")
+		}
+		if clonedStat.Events["call001"].Stat == 999.99 {
+			t.Error("Events not deeply copied")
+		}
+		if *clonedStat.val == 0 {
+			t.Error("val not deeply copied")
+		}
+	})
+}
+
+func TestStatPDDClone(t *testing.T) {
+	t.Run("clone nil receiver", func(t *testing.T) {
+		var nilStat *StatPDD
+		cloned := nilStat.Clone()
+		if cloned != nil {
+			t.Error("Expected nil from Clone() on nil receiver, got non-nil")
+		}
+	})
+
+	t.Run("clone populated struct", func(t *testing.T) {
+		durationVal := 1500 * time.Millisecond
+
+		original := &StatPDD{
+			FilterIDs: []string{"*string:~*req.Account:1002", "*prefix:~*req.Destination:+33"},
+			Sum:       10 * time.Second,
+			Count:     4,
+			MinItems:  2,
+			Events: map[string]*DurationWithCompress{
+				"call001": {Duration: 2 * time.Second, CompressFactor: 1},
+				"call002": {Duration: 3 * time.Second, CompressFactor: 2},
+			},
+			val: &durationVal,
+		}
+
+		cloned := original.Clone()
+		if cloned == nil {
+			t.Fatal("Clone returned nil")
+		}
+
+		clonedStat, ok := cloned.(*StatPDD)
+		if !ok {
+			t.Fatalf("Expected *StatPDD from Clone, got %T", cloned)
+		}
+
+		if clonedStat.Sum != original.Sum {
+			t.Errorf("Expected Sum %v, got %v", original.Sum, clonedStat.Sum)
+		}
+		if clonedStat.Count != original.Count {
+			t.Errorf("Expected Count %d, got %d", original.Count, clonedStat.Count)
+		}
+		if clonedStat.MinItems != original.MinItems {
+			t.Errorf("Expected MinItems %d, got %d", original.MinItems, clonedStat.MinItems)
+		}
+
+		if !reflect.DeepEqual(clonedStat.FilterIDs, original.FilterIDs) {
+			t.Errorf("Expected FilterIDs %v, got %v", original.FilterIDs, clonedStat.FilterIDs)
+		}
+
+		if !reflect.DeepEqual(clonedStat.Events, original.Events) {
+			t.Errorf("Expected Events %v, got %v", original.Events, clonedStat.Events)
+		}
+
+		original.FilterIDs[0] = "MODIFIED"
+		original.Events["call001"].Duration = 99 * time.Second
+		*original.val = 0
+
+		if clonedStat.FilterIDs[0] == "MODIFIED" {
+			t.Error("FilterIDs not deeply copied")
+		}
+		if clonedStat.Events["call001"].Duration == 99*time.Second {
+			t.Error("Events not deeply copied")
+		}
+		if *clonedStat.val == 0 {
+			t.Error("val not deeply copied")
+		}
+	})
+}
+
+func TestStatDDCClone(t *testing.T) {
+	t.Run("nil receiver", func(t *testing.T) {
+		var original *StatDDC
+		if original.Clone() != nil {
+			t.Error("Expected nil Clone result for nil receiver")
+		}
+	})
+
+	t.Run("deep copy", func(t *testing.T) {
+		original := &StatDDC{
+			FilterIDs:   []string{"*req.Account:1001"},
+			MinItems:    5,
+			Count:       10,
+			FieldValues: map[string]utils.StringSet{"account": utils.NewStringSet([]string{"subject1", "subject2"})},
+			Events: map[string]map[string]int64{
+				"evt1": {"subject1": 1, "subject2": 2},
+			},
+		}
+
+		cloned := original.Clone()
+		clonedStat, ok := cloned.(*StatDDC)
+		if !ok {
+			t.Fatal("Cloned object is not of type *StatDDC")
+		}
+
+		if !reflect.DeepEqual(original, clonedStat) {
+			t.Error("Cloned object is not deeply equal to original")
+		}
+
+		original.FilterIDs[0] = "MODIFIED"
+		original.FieldValues["account"].Add("newSubject")
+		original.Events["evt1"]["subject1"] = 999
+
+		if clonedStat.FilterIDs[0] == "MODIFIED" {
+			t.Error("FilterIDs not deeply copied")
+		}
+
+		found := false
+		for _, v := range clonedStat.FieldValues["account"].AsSlice() {
+			if v == "newSubject" {
+				found = true
+				break
+			}
+		}
+		if found {
+			t.Error("FieldValues not deeply copied")
+		}
+
+		if clonedStat.Events["evt1"]["subject1"] == 999 {
+			t.Error("Events not deeply copied")
+		}
+	})
+}
+
+func TestStatSumClone(t *testing.T) {
+	t.Run("nil receiver", func(t *testing.T) {
+		var original *StatSum
+		if original.Clone() != nil {
+			t.Error("Expected nil Clone result for nil receiver")
+		}
+	})
+
+	t.Run("deep copy", func(t *testing.T) {
+		val := 42.0
+		original := &StatSum{
+			FilterIDs: []string{"*req.Account:1001"},
+			Sum:       123.45,
+			Count:     5,
+			MinItems:  3,
+			FieldName: "*cost",
+			val:       &val,
+			Events: map[string]*StatWithCompress{
+				"event1": {Stat: 55.5, CompressFactor: 2},
+				"event2": {Stat: 67.8, CompressFactor: 1},
+			},
+		}
+
+		cloned := original.Clone()
+		clonedStat, ok := cloned.(*StatSum)
+		if !ok {
+			t.Fatal("Cloned object is not of type *StatSum")
+		}
+
+		if !reflect.DeepEqual(original, clonedStat) {
+			t.Error("Cloned object is not deeply equal to original")
+		}
+
+		original.FilterIDs[0] = "MODIFIED"
+		original.Events["event1"].Stat = 999.99
+		*original.val = 0
+
+		if clonedStat.FilterIDs[0] == "MODIFIED" {
+			t.Error("FilterIDs not deeply copied")
+		}
+		if clonedStat.Events["event1"].Stat == 999.99 {
+			t.Error("Events not deeply copied")
+		}
+		if *clonedStat.val == 0 {
+			t.Error("Cached val not deeply copied")
+		}
+	})
+}
+
+func TestStatAverageClone(t *testing.T) {
+	t.Run("nil receiver", func(t *testing.T) {
+		var original *StatAverage
+		if original.Clone() != nil {
+			t.Error("Expected nil Clone result for nil receiver")
+		}
+	})
+
+	t.Run("deep copy", func(t *testing.T) {
+		val := 7.89
+		original := &StatAverage{
+			FilterIDs: []string{"*req.Account:2001"},
+			Sum:       150.0,
+			Count:     6,
+			MinItems:  4,
+			FieldName: "*duration",
+			val:       &val,
+			Events: map[string]*StatWithCompress{
+				"event1": {Stat: 75.0, CompressFactor: 1},
+				"event2": {Stat: 75.0, CompressFactor: 1},
+			},
+		}
+
+		cloned := original.Clone()
+		clonedStat, ok := cloned.(*StatAverage)
+		if !ok {
+			t.Fatal("Cloned object is not of type *StatAverage")
+		}
+
+		if !reflect.DeepEqual(original, clonedStat) {
+			t.Error("Cloned object is not deeply equal to original")
+		}
+
+		original.FilterIDs[0] = "CHANGED"
+		original.Events["event1"].Stat = 999.9
+		*original.val = 0.0
+
+		if clonedStat.FilterIDs[0] == "CHANGED" {
+			t.Error("FilterIDs not deeply copied")
+		}
+		if clonedStat.Events["event1"].Stat == 999.9 {
+			t.Error("Events not deeply copied")
+		}
+		if *clonedStat.val == 0.0 {
+			t.Error("Cached val not deeply copied")
+		}
+	})
+}
+
+func TestNewStatHighest(t *testing.T) {
+	filterIDs := []string{"filter1", "filter2"}
+	fieldName := "cost"
+	minItems := 3
+
+	statMetric, err := NewStatHighest(minItems, fieldName, filterIDs)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+
+	statHighest, ok := statMetric.(*StatHighest)
+	if !ok {
+		t.Fatalf("Expected type *StatHighest, got: %T", statMetric)
+	}
+
+	if !reflect.DeepEqual(statHighest.FilterIDs, filterIDs) {
+		t.Errorf("FilterIDs mismatch, got: %v, want: %v", statHighest.FilterIDs, filterIDs)
+	}
+	if statHighest.FieldName != fieldName {
+		t.Errorf("FieldName mismatch, got: %s, want: %s", statHighest.FieldName, fieldName)
+	}
+	if statHighest.MinItems != minItems {
+		t.Errorf("MinItems mismatch, got: %d, want: %d", statHighest.MinItems, minItems)
+	}
+	if len(statHighest.Events) != 0 {
+		t.Errorf("Expected Events to be empty, got: %v", statHighest.Events)
+	}
+	if statHighest.cachedVal != nil {
+		t.Errorf("Expected cachedVal to be nil, got: %v", statHighest.cachedVal)
+	}
+}
+
+func TestStatHighestCompress(t *testing.T) {
+	s := &StatHighest{
+		Events: map[string]float64{
+			"evt1": 1.45,
+			"evt2": 4.85,
+			"evt3": 7.81,
+		},
+	}
+
+	got := s.Compress(10, "defaultID", 2)
+
+	expected := []string{"evt1", "evt2", "evt3"}
+	sort.Strings(got)
+	sort.Strings(expected)
+
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("Compress() returned %v, expected %v", got, expected)
+	}
+}
