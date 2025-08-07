@@ -1,0 +1,5 @@
+#Tenant[0];Id[1];FilterIDs[2];Weights[3];TTL[4];Limit[5];AllocationMessage[6];Blocker[7];Stored[8];ThresholdIDs[9];APIOpts[10]
+
+cgrates.org;RES_ACNT_1001;FLTR_ACCOUNT_1001;&10;1h;1;;false;false;;
+
+*tenant;DYNAMICLY_RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts

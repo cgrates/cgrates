@@ -3382,8 +3382,8 @@ func TestThresholdProfileClone(t *testing.T) {
 	if cloned.lkID != "" {
 		t.Errorf("lkID should not be cloned, got: %s", cloned.lkID)
 	}
-	if len(cloned.EeIDs) != 0 {
-		t.Errorf("EeIDs should not be cloned, got: %v", cloned.EeIDs)
+	if !reflect.DeepEqual(cloned.EeIDs, orig.EeIDs) {
+		t.Errorf("EeIDs mismatch: got %v, want %v", cloned.EeIDs, orig.EeIDs)
 	}
 
 	var nilTP *ThresholdProfile

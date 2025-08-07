@@ -1157,6 +1157,7 @@ const (
 	MetaDynamicRoute          = "*dynamicRoute"
 	MetaDynamicRate           = "*dynamicRate"
 	MetaDynamicIP             = "*dynamicIP"
+	MetaDynamicAction         = "*dynamicAction"
 
 	// Diktats Opts Fields
 	MetaBalancePath  = "*balancePath"

@@ -1,0 +1,5 @@
+#Tenant[0];Id[1];FilterIDs[2];Weights[3];Blockers[4];QueueLength[5];TTL[6];MinItems[7];Stored[8];ThresholdIDs[9];MetricIDs[10];MetricFilterIDs[11];MetricBlockers[12];APIOpts[13]
+
+cgrates.org;Stat_1;FLTR_STAT_1;&30;&true;100;10s;0;false;*none;*acd&*tcd&*asr;;;
+
+*tenant;DYNAMICLY_STAT_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&30;*string:~*req.Account:1002&true;100;-1;0;false;*none;*tcc&*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002&true;~*opts

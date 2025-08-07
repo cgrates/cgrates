@@ -1,0 +1,6 @@
+#Tenant[0];ID[1];Type[2];Path[3];Values[4];APIOpts[5]
+
+cgrates.org;FLTR_ACCOUNT_1001;*string;~*req.Account;1001;
+cgrates.org;FLTR_1;*string;~*req.Account;1003&1002;
+
+*tenant;DYNAMICLY_FLTR_<~*req.Account>;*string;~*req.Account;1003&1002;~*opts

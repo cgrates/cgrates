@@ -1,0 +1,5 @@
+#Tenant[0];ID[1];FilterIDs[2];Weights[3];Blockers[4];Sorting[5];SortingParameters[6];RouteID[7];RouteFilterIDs[8];RouteAccountIDs[9];RouteRateProfileIDs[10];RouteResourceIDs[11];RouteStatIDs[12];RouteWeights[13];RouteBlockers[14];RouteParameters[15];APIOpts[16]
+
+cgrates.org;ROUTE_ACNT_1001;FLTR_ACCOUNT_1001;&10;;*weight;;route1;;;;;;&20;;;
+
+*tenant;DYNAMICLY_RT_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*weight;*dcc;route1;*string:~*req.Account:1002&*string:~*req.Account:1003;1002&1003;RTP1&RTP2;RSC1&RSC2;STAT1&STAT2;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;rtParam1;~*opts
