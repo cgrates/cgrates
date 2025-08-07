@@ -1,0 +1,5 @@
+#Tenant[0];ID[1];FilterIDs[2];Weights[3];Blockers[4];AttributeFilterIDs[5];AttributeBlockers[6];Path[7];Type[8];Value[9];APIOpts[10]
+
+cgrates.org;ATTR_ACNT_1001;*string:~*opts.*context:*sessions&FLTR_ACCOUNT_1001;&10;&false;;;*req.OfficeGroup;*constant;Marketing;
+
+*tenant;DYNAMICLY_ATTR_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;*string:~*req.Account:<~*req.Account>&true;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&true;*req.Subject;*constant;SUPPLIER1;~*opts

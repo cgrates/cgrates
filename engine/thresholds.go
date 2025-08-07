@@ -80,6 +80,10 @@ func (tp *ThresholdProfile) Clone() *ThresholdProfile {
 	if tp.Weights != nil {
 		clone.Weights = tp.Weights.Clone()
 	}
+	if tp.EeIDs != nil {
+		clone.EeIDs = make([]string, len(tp.EeIDs))
+		copy(clone.EeIDs, tp.EeIDs)
+	}
 	return clone
 }
 

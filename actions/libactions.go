@@ -53,6 +53,8 @@ func actionTarget(act string) string {
 		return utils.MetaRates
 	case utils.MetaDynamicIP:
 		return utils.MetaIPs
+	case utils.MetaDynamicAction:
+		return utils.MetaActions
 	default:
 		return utils.MetaNone
 	}
@@ -169,6 +171,8 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 		return &actDynamicRate{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	case utils.MetaDynamicIP:
 		return &actDynamicIP{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
+	case utils.MetaDynamicAction:
+		return &actDynamicAction{cfg, connMgr, fltrS, aCfg, tnt, cgrEv}, nil
 	default:
 		return nil, fmt.Errorf("unsupported action type: <%s>", aCfg.Type)
 

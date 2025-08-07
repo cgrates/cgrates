@@ -1,0 +1,5 @@
+#Tenant[0];ID[1];FilterIDs[2];Weights[3];MinCost[4];MaxCost[5];MaxCostStrategy[6];RateID[7];RateFilterIDs[8];RateActivationStart[9];RateWeights[10];RateBlocker[11];RateIntervalStart[12];RateFixedFee[13];RateRecurrentFee[14];RateUnit[15];RateIncrement[16];APIOpts[17]
+
+cgrates.org;RT_SPECIAL_1002;*string:~*req.Account:1002;&10;0;0;*free;RT_ALWAYS;;"* * * * *";&0;false;0s;;0.01;1m;1s;
+
+*tenant;DYNAMICLY_RNK_<~*req.Account>;@every 1s;Stats1&Stats2;*acc&*tcc;*asc;*acc&*pdd;true;THID1&THID2;~*opts

@@ -1,0 +1,5 @@
+#Tenant[0];ID[1];FilterIDs[2];Weights[3];TTL[4];Stored[5];PoolID[6];PoolFilterIDs[7];PoolType[8];PoolRange[9];PoolStrategy[10];PoolMessage[11];PoolWeights[12];PoolBlockers[13];APIOpts[14]
+
+cgrates.org;IPs1;*string:~*req.Account:1001;&10;1s;true;POOL1;*string:~*req.Destination:2001;*ipv4;172.16.1.1/24;*ascending;alloc_success;&15;;
+
+*tenant;DYNAMICLY_IP_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;1s;true;Pool1;*string:~*req.Account:1002&*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts

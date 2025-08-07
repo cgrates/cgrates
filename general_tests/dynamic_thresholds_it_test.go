@@ -40,6 +40,24 @@ func TestDynThdIT(t *testing.T) {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbCfg = engine.DBCfg{
+			StorDB: &engine.DBParams{
+				Type:     utils.StringPointer(utils.MetaMySQL),
+				Port:     utils.IntPointer(3306),
+				Host:     utils.StringPointer("127.0.0.1"),
+				Name:     utils.StringPointer("cgrates"),
+				User:     utils.StringPointer("cgrates"),
+				Password: utils.StringPointer("CGRateS.org"),
+			},
+			DataDB: &engine.DBParams{
+				Type:     utils.StringPointer(utils.MetaRedis),
+				Port:     utils.IntPointer(6379),
+				Host:     utils.StringPointer("127.0.0.1"),
+				Name:     utils.StringPointer("10"),
+				User:     utils.StringPointer("cgrates"),
+				Password: utils.StringPointer(""),
+			},
+		}
 	case utils.MetaMongo:
 		dbCfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -264,6 +282,7 @@ func TestDynThdIT(t *testing.T) {
 					utils.MetaRoutes:     {"someID": {}},
 					utils.MetaRates:      {"someID": {}},
 					utils.MetaIPs:        {"someID": {}},
+					utils.MetaActions:    {"someID": {}},
 				},
 				Actions: []*utils.APAction{
 					{
@@ -274,7 +293,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicThreshold1002",
 								FilterIDs: []string{"*string:~*req.Account:1002"},
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_THD_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;~*opts",
+									"*template": "*tenant;DYNAMICLY_THD_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -286,7 +305,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicThreshold1002NotFoundFilter",
 								FilterIDs: []string{"*string:~*req.Account:1003"},
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_THD_2_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;~*opts",
+									"*template": "*tenant;DYNAMICLY_THD_2_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -297,7 +316,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicThreshold1002Blocker",
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_THD_3_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;~*opts",
+									"*template": "*tenant;DYNAMICLY_THD_3_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -313,7 +332,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicThreshold1002Blocked",
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_THD_4_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;~*opts",
+									"*template": "*tenant;DYNAMICLY_THD_4_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&10;1;1;1s;false;ACT_LOG_WARNING;true;EEID1&EEID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -368,7 +387,7 @@ func TestDynThdIT(t *testing.T) {
 								},
 							},
 							{
-								ID: "CreateDynamicStat10022Blocked",
+								ID: "CreateDynamicStat1002Blocked",
 								Opts: map[string]any{
 									"*template": "*tenant;DYNAMICLY_STAT_4_<~*req.Account>;*string:~*req.Account:1002;*string:~*req.Account:1002&30;*string:~*req.Account:1002&true;100;-1;0;false;*none;*tcc&*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002&true;~*opts",
 								},
@@ -397,8 +416,8 @@ func TestDynThdIT(t *testing.T) {
 								},
 							},
 							{
-								ID:        "CreateDynamicAttribute1002",
-								FilterIDs: []string{"*string:~*req.Account:1003NotFoundFilter"},
+								ID:        "CreateDynamicAttribute1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
 								Opts: map[string]any{
 									"*template": "*tenant;DYNAMICLY_ATTR_2_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;*string:~*req.Account:<~*req.Account>&true;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&true;*req.Subject;*constant;SUPPLIER1;~*opts",
 								},
@@ -409,7 +428,7 @@ func TestDynThdIT(t *testing.T) {
 								},
 							},
 							{
-								ID: "CreateDynamicAttribute1002Blockers",
+								ID: "CreateDynamicAttribute1002Blocker",
 								Opts: map[string]any{
 									"*template": "*tenant;DYNAMICLY_ATTR_3_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;*string:~*req.Account:<~*req.Account>&true;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&true;*req.Subject;*constant;SUPPLIER1;~*opts",
 								},
@@ -836,6 +855,63 @@ func TestDynThdIT(t *testing.T) {
 							},
 						},
 					},
+					{
+						ID:   "Dynamic_Action_ID",
+						Type: utils.MetaDynamicAction,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicAction1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_Action_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*asap;*accounts;1001&1002;TOPUP;*string:~*req.Account:1002&*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;ADDBALUNITS;*string:~*req.Account:1002&*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units&*balanceValue:10;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicAction1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_Action_2_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*asap;*accounts;1001&1002;TOPUP;*string:~*req.Account:1002&*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;ADDBALUNITS;*string:~*req.Account:1002&*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units&*balanceValue:10;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicAction1002Blocker",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_Action_3_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*asap;*accounts;1001&1002;TOPUP;*string:~*req.Account:1002&*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;ADDBALUNITS;*string:~*req.Account:1002&*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units&*balanceValue:10;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicAction1002Blocked",
+								Opts: map[string]any{
+									"*template": "*tenant;DYNAMICLY_Action_4_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*asap;*accounts;1001&1002;TOPUP;*string:~*req.Account:1002&*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;ADDBALUNITS;*string:~*req.Account:1002&*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units&*balanceValue:10;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		}
@@ -979,6 +1055,7 @@ func TestDynThdIT(t *testing.T) {
 				},
 				ActionProfileIDs: []string{"ACT_LOG_WARNING"},
 				Async:            true,
+				EeIDs:            []string{"EEID1", "EEID2"},
 			},
 			{
 				Tenant:    utils.CGRateSorg,
@@ -996,6 +1073,7 @@ func TestDynThdIT(t *testing.T) {
 				},
 				ActionProfileIDs: []string{"ACT_LOG_WARNING"},
 				Async:            true,
+				EeIDs:            []string{"EEID1", "EEID2"},
 			},
 		}
 		if !reflect.DeepEqual(thrsholds, exp) {
@@ -1212,7 +1290,7 @@ func TestDynThdIT(t *testing.T) {
 		})
 		exp := []*utils.ResourceProfile{
 			{
-				Tenant:            "cgrates.org",
+				Tenant:            utils.CGRateSorg,
 				ID:                "DYNAMICLY_RES_3_1002",
 				FilterIDs:         []string{"*string:~*req.Account:1002"},
 				UsageTTL:          5 * time.Second,
@@ -1229,7 +1307,7 @@ func TestDynThdIT(t *testing.T) {
 				ThresholdIDs: []string{"THID1", "THID2"},
 			},
 			{
-				Tenant:            "cgrates.org",
+				Tenant:            utils.CGRateSorg,
 				ID:                "DYNAMICLY_RES_1002",
 				FilterIDs:         []string{"*string:~*req.Account:1002"},
 				UsageTTL:          5 * time.Second,
@@ -1268,7 +1346,7 @@ func TestDynThdIT(t *testing.T) {
 		})
 		exp := []*utils.TrendProfile{
 			{
-				Tenant:          "cgrates.org",
+				Tenant:          utils.CGRateSorg,
 				ID:              "DYNAMICLY_TRND_3_1002",
 				Schedule:        "@every 1s",
 				StatID:          "Stats1_1",
@@ -1283,7 +1361,7 @@ func TestDynThdIT(t *testing.T) {
 			},
 			{
 
-				Tenant:          "cgrates.org",
+				Tenant:          utils.CGRateSorg,
 				ID:              "DYNAMICLY_TRND_1002",
 				Schedule:        "@every 1s",
 				StatID:          "Stats1_1",
@@ -1319,7 +1397,7 @@ func TestDynThdIT(t *testing.T) {
 		})
 		exp := []*utils.RankingProfile{
 			{
-				Tenant:            "cgrates.org",
+				Tenant:            utils.CGRateSorg,
 				ID:                "DYNAMICLY_RNK_3_1002",
 				Schedule:          "@every 1s",
 				StatIDs:           []string{"Stats1", "Stats2"},
@@ -1331,7 +1409,7 @@ func TestDynThdIT(t *testing.T) {
 			},
 			{
 
-				Tenant:            "cgrates.org",
+				Tenant:            utils.CGRateSorg,
 				ID:                "DYNAMICLY_RNK_1002",
 				Schedule:          "@every 1s",
 				StatIDs:           []string{"Stats1", "Stats2"},
@@ -1364,7 +1442,7 @@ func TestDynThdIT(t *testing.T) {
 		})
 		exp := []*engine.Filter{
 			{
-				Tenant: "cgrates.org",
+				Tenant: utils.CGRateSorg,
 				ID:     "DYNAMICLY_FLTR_3_1002",
 				Rules: []*engine.FilterRule{
 					{
@@ -1376,7 +1454,7 @@ func TestDynThdIT(t *testing.T) {
 			},
 			{
 
-				Tenant: "cgrates.org",
+				Tenant: utils.CGRateSorg,
 				ID:     "DYNAMICLY_FLTR_1002",
 				Rules: []*engine.FilterRule{
 					{
@@ -1409,7 +1487,7 @@ func TestDynThdIT(t *testing.T) {
 		})
 		exp := []*utils.RouteProfile{
 			{
-				Tenant: "cgrates.org",
+				Tenant: utils.CGRateSorg,
 				ID:     "DYNAMICLY_RT_3_1002",
 				FilterIDs: []string{
 					"*string:~*req.Account:1002",
@@ -1478,7 +1556,7 @@ func TestDynThdIT(t *testing.T) {
 			},
 			{
 
-				Tenant: "cgrates.org",
+				Tenant: utils.CGRateSorg,
 				ID:     "DYNAMICLY_RT_1002",
 				FilterIDs: []string{
 					"*string:~*req.Account:1002",
@@ -1568,7 +1646,7 @@ func TestDynThdIT(t *testing.T) {
 		})
 		exp := []*utils.RateProfile{
 			{
-				Tenant: "cgrates.org",
+				Tenant: utils.CGRateSorg,
 				ID:     "DYNAMICLY_RATE_3_1002",
 				FilterIDs: []string{
 					"*string:~*req.Account:1002",
@@ -1616,7 +1694,7 @@ func TestDynThdIT(t *testing.T) {
 			},
 			{
 
-				Tenant: "cgrates.org",
+				Tenant: utils.CGRateSorg,
 				ID:     "DYNAMICLY_RATE_1002",
 				FilterIDs: []string{
 					"*string:~*req.Account:1002",
@@ -1685,7 +1763,7 @@ func TestDynThdIT(t *testing.T) {
 		})
 		exp := []*utils.IPProfile{
 			{
-				Tenant: "cgrates.org",
+				Tenant: utils.CGRateSorg,
 				ID:     "DYNAMICLY_IP_3_1002",
 				FilterIDs: []string{
 					"*string:~*req.Account:1002",
@@ -1731,7 +1809,7 @@ func TestDynThdIT(t *testing.T) {
 			},
 			{
 
-				Tenant: "cgrates.org",
+				Tenant: utils.CGRateSorg,
 				ID:     "DYNAMICLY_IP_1002",
 				FilterIDs: []string{
 					"*string:~*req.Account:1002",
@@ -1770,6 +1848,1018 @@ func TestDynThdIT(t *testing.T) {
 							{
 								FilterIDs: []string{"*string:~*req.Account:1002"},
 								Blocker:   true,
+							},
+						},
+					},
+				},
+			},
+		}
+
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected <%v>\nReceived <%v>", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
+
+	t.Run("GetDynamicActionProfile", func(t *testing.T) {
+		var rcv []*utils.ActionProfile
+		if err := client.Call(context.Background(), utils.AdminSv1GetActionProfiles,
+			&utils.ArgsItemIDs{
+				Tenant: utils.CGRateSorg,
+			}, &rcv); err != nil {
+			t.Errorf("AdminSv1GetActionProfiles failed unexpectedly: %v", err)
+		}
+		if len(rcv) != 4 {
+			t.Fatalf("AdminSv1GetActionProfiles len(rcv)=%v, want 4", len(rcv))
+		}
+		sort.Slice(rcv, func(i, j int) bool {
+			return rcv[i].ID > rcv[j].ID
+		})
+		exp := []*utils.ActionProfile{
+			{
+				Tenant: utils.CGRateSorg,
+				ID:     "DYNAMIC_THRESHOLD_ACTION",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Targets: map[string]utils.StringSet{
+					"*actions":    {},
+					"*attributes": {},
+					"*filters":    {},
+					"*ips":        {},
+					"*rankings":   {},
+					"*rates":      {},
+					"*resources":  {},
+					"*routes":     {},
+					"*stats":      {},
+					"*thresholds": {},
+					"*trends":     {},
+				},
+				Actions: []*utils.APAction{
+					{
+						ID:   "Dynamic_Threshold_ID",
+						Type: utils.MetaDynamicThreshold,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicThreshold1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicThreshold1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_2_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicThreshold1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_3_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicThreshold1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_THD_4_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002610;1;1;1s;false;ACT_LOG_WARNING;true;EEID1\u0026EEID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Stats_ID",
+						Type: utils.MetaDynamicStats,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicStat1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_STAT_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002630;*string:~*req.Account:1002\u0026true;100;-1;0;false;*none;*tcc\u0026*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicStat1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_STAT_2_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002630;*string:~*req.Account:1002\u0026true;100;-1;0;false;*none;*tcc\u0026*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicStat1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_STAT_3_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002630;*string:~*req.Account:1002\u0026true;100;-1;0;false;*none;*tcc\u0026*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicStat1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_STAT_4_\u003c~*req.Account\u003e;*string:~*req.Account:1002;*string:~*req.Account:1002\u002630;*string:~*req.Account:1002\u0026true;100;-1;0;false;*none;*tcc\u0026*tcd;*string:~*req.Account:1002;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Attribute_ID",
+						Type: utils.MetaDynamicAttribute,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicAttribute1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_ATTR_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;*string:~*req.Account:\u003c~*req.Account\u003e\u0026true;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u0026true;*req.Subject;*constant;SUPPLIER1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicAttribute1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_ATTR_2_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;*string:~*req.Account:\u003c~*req.Account\u003e\u0026true;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u0026true;*req.Subject;*constant;SUPPLIER1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicAttribute1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_ATTR_3_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;*string:~*req.Account:\u003c~*req.Account\u003e\u0026true;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u0026true;*req.Subject;*constant;SUPPLIER1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicAttribute1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_ATTR_4_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;*string:~*req.Account:\u003c~*req.Account\u003e\u0026true;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u0026true;*req.Subject;*constant;SUPPLIER1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Resource_ID",
+						Type: utils.MetaDynamicResource,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicResource1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicResource1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_2_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicResource1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_3_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicResource1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_4_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Trend_ID",
+						Type: utils.MetaDynamicTrend,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicTrend1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_TRND_\u003c~*req.Account\u003e;@every 1s;Stats1_1;*acc\u0026*tcc;-1;-1;1;*last;1;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicTrend1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_TRND_2_\u003c~*req.Account\u003e;@every 1s;Stats1_1;*acc\u0026*tcc;-1;-1;1;*last;1;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicTrend1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_TRND_3_\u003c~*req.Account\u003e;@every 1s;Stats1_1;*acc\u0026*tcc;-1;-1;1;*last;1;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicTrend1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_TRND_4_\u003c~*req.Account\u003e;@every 1s;Stats1_1;*acc\u0026*tcc;-1;-1;1;*last;1;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Ranking_ID",
+						Type: utils.MetaDynamicRanking,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicRanking1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RNK_\u003c~*req.Account\u003e;@every 1s;Stats1\u0026Stats2;*acc\u0026*tcc;*asc;*acc\u0026*pdd;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicRanking1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RNK_2_\u003c~*req.Account\u003e;@every 1s;Stats1\u0026Stats2;*acc\u0026*tcc;*asc;*acc\u0026*pdd;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRanking1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RNK_3_\u003c~*req.Account\u003e;@every 1s;Stats1\u0026Stats2;*acc\u0026*tcc;*asc;*acc\u0026*pdd;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRanking1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RNK_4_\u003c~*req.Account\u003e;@every 1s;Stats1\u0026Stats2;*acc\u0026*tcc;*asc;*acc\u0026*pdd;true;THID1\u0026THID2;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Filter_ID",
+						Type: utils.MetaDynamicFilter,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicFilter1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_FLTR_\u003c~*req.Account\u003e;*string;~*req.Account;1003\u00261002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicFilter1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_FLTR_2_\u003c~*req.Account\u003e;*string;~*req.Account;1003\u00261002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicFilter1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_FLTR_3_\u003c~*req.Account\u003e;*string;~*req.Account;1003\u00261002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicFilter1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_FLTR_4_\u003c~*req.Account\u003e;*string;~*req.Account;1003\u00261002;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Route_ID",
+						Type: utils.MetaDynamicRoute,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicRoute1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RT_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;*weight;*dcc;route1;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;1002\u00261003;RTP1\u0026RTP2;RSC1\u0026RSC2;STAT1\u0026STAT2;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;rtParam1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicRoute1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RT_2_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;*weight;*dcc;route1;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;1002\u00261003;RTP1\u0026RTP2;RSC1\u0026RSC2;STAT1\u0026STAT2;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;rtParam1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRoute1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RT_3_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;*weight;*dcc;route1;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;1002\u00261003;RTP1\u0026RTP2;RSC1\u0026RSC2;STAT1\u0026STAT2;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;rtParam1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRoute1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RT_4_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;*weight;*dcc;route1;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;1002\u00261003;RTP1\u0026RTP2;RSC1\u0026RSC2;STAT1\u0026STAT2;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;rtParam1;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Rate_ID",
+						Type: utils.MetaDynamicRate,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicRate1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RATE_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;5;10;*free;RT_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;* * * * *;*string:~*req.Account:1002\u002620;true;0s;5;0.01;1m;1s;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicRate1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RATE_2_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;5;10;*free;RT_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;* * * * *;*string:~*req.Account:1002\u002620;true;0s;5;0.01;1m;1s;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRate1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RATE_3_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;5;10;*free;RT_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;* * * * *;*string:~*req.Account:1002\u002620;true;0s;5;0.01;1m;1s;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicRate1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RATE_4_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;5;10;*free;RT_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;* * * * *;*string:~*req.Account:1002\u002620;true;0s;5;0.01;1m;1s;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_IP_ID",
+						Type: utils.MetaDynamicIP,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicIP1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_IP_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;1s;true;Pool1;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicIP1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_IP_2_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;1s;true;Pool1;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicIP1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_IP_3_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;1s;true;Pool1;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicIP1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_IP_4_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;1s;true;Pool1;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*ipv4;172.16.1.1/24;*ascending;alloc_success;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "Dynamic_Action_ID",
+						Type: utils.MetaDynamicAction,
+						Diktats: []*utils.APDiktat{
+							{
+								ID:        "CreateDynamicAction1002",
+								FilterIDs: []string{"*string:~*req.Account:1002"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_Action_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;*asap;*accounts;1001\u00261002;TOPUP;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;ADDBALUNITS;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units\u0026*balanceValue:10;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 50,
+									},
+								},
+							},
+							{
+								ID:        "CreateDynamicAction1002NotFoundFilter",
+								FilterIDs: []string{"*string:~*req.Account:1003"},
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_Action_2_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;*asap;*accounts;1001\u00261002;TOPUP;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;ADDBALUNITS;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units\u0026*balanceValue:10;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 90,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicAction1002Blocker",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_Action_3_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;*asap;*accounts;1001\u00261002;TOPUP;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;ADDBALUNITS;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units\u0026*balanceValue:10;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										Blocker: true,
+									},
+								},
+							},
+							{
+								ID: "CreateDynamicAction1002Blocked",
+								Opts: map[string]any{
+									utils.MetaTemplate: "*tenant;DYNAMICLY_Action_4_\u003c~*req.Account\u003e;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*string:~*req.Account:1002\u002610;*string:~*req.Account:1002\u0026true;*asap;*accounts;1001\u00261002;TOPUP;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;ADDBALUNITS;*string:~*req.Account:1002\u0026*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units\u0026*balanceValue:10;*string:~*req.Account:1002\u002620;*string:~*req.Account:1002\u0026true;~*opts",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Tenant: utils.CGRateSorg,
+				ID:     "DYNAMICLY_Action_3_1002",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Account:1003",
+				},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Weight: 10,
+					},
+				},
+				Blockers: utils.DynamicBlockers{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Blocker: true,
+					},
+				},
+				Schedule: utils.MetaASAP,
+				Targets: map[string]utils.StringSet{
+					utils.MetaAccounts: {
+						"1001": struct{}{},
+						"1002": struct{}{},
+					},
+				},
+				Actions: []*utils.APAction{
+					{
+						ID: "TOPUP",
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+							"*string:~*req.Account:1003",
+						},
+						TTL:  10 * time.Second,
+						Type: utils.MetaAddBalance,
+						Opts: map[string]any{
+							"{\"*acntProfileIDs\"": "\"1002\",\"*actProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*usage\":5000000000}",
+						},
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Weight: 20,
+							},
+						},
+						Blockers: utils.DynamicBlockers{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Blocker: true,
+							},
+						},
+						Diktats: []*utils.APDiktat{
+							{
+								ID: "ADDBALUNITS",
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+									"*string:~*req.Account:1003",
+								},
+								Opts: map[string]any{
+									"*balancePath":  "*balance.TestBalance.Units",
+									"*balanceValue": "10",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										FilterIDs: []string{
+											"*string:~*req.Account:1002",
+										},
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										FilterIDs: []string{
+											"*string:~*req.Account:1002",
+										},
+										Blocker: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+
+				Tenant: utils.CGRateSorg,
+				ID:     "DYNAMICLY_Action_1002",
+				FilterIDs: []string{
+					"*string:~*req.Account:1002",
+					"*string:~*req.Account:1003",
+				},
+				Weights: utils.DynamicWeights{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Weight: 10,
+					},
+				},
+				Blockers: utils.DynamicBlockers{
+					{
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+						},
+						Blocker: true,
+					},
+				},
+				Schedule: utils.MetaASAP,
+				Targets: map[string]utils.StringSet{
+					utils.MetaAccounts: {
+						"1001": struct{}{},
+						"1002": struct{}{},
+					},
+				},
+				Actions: []*utils.APAction{
+					{
+						ID: "TOPUP",
+						FilterIDs: []string{
+							"*string:~*req.Account:1002",
+							"*string:~*req.Account:1003",
+						},
+						TTL:  10 * time.Second,
+						Type: utils.MetaAddBalance,
+						Opts: map[string]any{
+							"{\"*acntProfileIDs\"": "\"1002\",\"*actProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*usage\":5000000000}",
+						},
+						Weights: utils.DynamicWeights{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Weight: 20,
+							},
+						},
+						Blockers: utils.DynamicBlockers{
+							{
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Blocker: true,
+							},
+						},
+						Diktats: []*utils.APDiktat{
+							{
+								ID: "ADDBALUNITS",
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+									"*string:~*req.Account:1003",
+								},
+								Opts: map[string]any{
+									"*balancePath":  "*balance.TestBalance.Units",
+									"*balanceValue": "10",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										FilterIDs: []string{
+											"*string:~*req.Account:1002",
+										},
+										Weight: 20,
+									},
+								},
+								Blockers: utils.DynamicBlockers{
+									{
+										FilterIDs: []string{
+											"*string:~*req.Account:1002",
+										},
+										Blocker: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+
+				Tenant:   utils.CGRateSorg,
+				ID:       "1002",
+				Schedule: utils.MetaASAP,
+				Targets: map[string]utils.StringSet{
+					utils.MetaAccounts: {},
+				},
+				Actions: []*utils.APAction{
+					{
+						ID:   "SET_NEW_BAL",
+						TTL:  0,
+						Type: utils.MetaSetBalance,
+						Diktats: []*utils.APDiktat{
+							{
+								ID: "SetVoiceID",
+								FilterIDs: []string{
+									"*string:~*req.Account:1002",
+								},
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.ID",
+									"*balanceValue": "testBalanceIDMonetary",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 14,
+									},
+								},
+							},
+							{
+								ID: "SetMonetaryType",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.MONETARY.Type",
+									"*balanceValue": "*concrete",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 13,
+									},
+								},
+							},
+							{
+								ID: "SetMonetaryUnits",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.MONETARY.Units",
+									"*balanceValue": "1048576",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 12,
+									},
+								},
+							},
+							{
+								ID: "SetMonetaryWeights",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.MONETARY.Weights",
+									"*balanceValue": "`;2`",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 11,
+									},
+								},
+							},
+							{
+								ID: "SetMonetaryCostIncrements",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.MONETARY.CostIncrements",
+									"*balanceValue": "`*string:~*req.ToR:*data;1024;0;0.01`",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 9,
+									},
+								},
+								Blockers: utils.DynamicBlockers{{Blocker: true}},
+							},
+							{
+								ID: "SetVoiceIDNotFoundFilter",
+								FilterIDs: []string{
+									"*string:~*req.Account:1003",
+								},
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.ID",
+									"*balanceValue": "testBalanceIDMonetaryNOTFOUND",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 10,
+									},
+								},
+							},
+							{
+								ID: "SetVoiceIDBlocked",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.ID",
+									"*balanceValue": "testBalanceIDMonetaryBLOCKED",
+								},
+								Weights: utils.DynamicWeights{
+									{
+										Weight: 8,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:   "SET_ADD_BAL",
+						TTL:  0,
+						Type: utils.MetaAddBalance,
+						Diktats: []*utils.APDiktat{
+							{
+								ID: "AddVoiceID",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.ID",
+									"*balanceValue": "testBalanceID",
+								},
+							},
+							{
+								ID: "AddVoiceType",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.Type",
+									"*balanceValue": "*abstract",
+								},
+							},
+							{
+								ID: "AddVoiceFilterIDs",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.FilterIDs",
+									"*balanceValue": "`*string:~*req.ToR:*voice`",
+								},
+							},
+							{
+								ID: "AddVoiceUnits",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.Units",
+									"*balanceValue": "3600000000000",
+								},
+							},
+							{
+								ID: "AddVoiceWeights",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.Weights",
+									"*balanceValue": "`;2`",
+								},
+							},
+							{
+								ID: "AddVoiceCostIncrements",
+								Opts: map[string]any{
+									"*balancePath":  "*balance.VOICE.CostIncrements",
+									"*balanceValue": "`*string:~*req.ToR:*voice;1000000000;0;0.01`",
+								},
 							},
 						},
 					},

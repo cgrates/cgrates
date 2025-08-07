@@ -1,0 +1,5 @@
+#Tenant[0];ID[1];FilterIDs[2];Weights[3];Blockers[4];Schedule[5];TargetType[6];TargetIDs[7];ActionID[8];ActionFilterIDs[9];ActionTTL[10];ActionType[11];ActionOpts[12];ActionWeights[13];ActionBlockers[14];ActionDiktatsID[15];ActionDiktatsFilterIDs[16];ActionDiktatsOpts[17];ActionDiktatsWeights[18];ActionDiktatsBlockers[19];APIOpts[20]
+
+cgrates.org;ONE_TIME_ACT;;&10;;*asap;*accounts;1001&1002;TOPUP;;0s;*addBalance;;;;ADDBALUNITS;;*balancePath:*balance.TestBalance.Units&*balanceValue:10;;;
+
+*tenant;DYNAMICLY_Action_<~*req.Account>;*string:~*req.Account:1002&*string:~*req.Account:1003;*string:~*req.Account:1002&10;*string:~*req.Account:1002&true;*asap;*accounts;1001&1002;TOPUP;*string:~*req.Account:1002&*string:~*req.Account:1003;10s;*addBalance;~*opts;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;ADDBALUNITS;*string:~*req.Account:1002&*string:~*req.Account:1003;*balancePath:*balance.TestBalance.Units&*balanceValue:10;*string:~*req.Account:1002&20;*string:~*req.Account:1002&true;~*opts
