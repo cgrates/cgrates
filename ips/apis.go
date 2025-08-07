@@ -275,7 +275,7 @@ func (s *IPService) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, repl
 	return nil
 }
 
-// V1GetIPAllocations returns a resource configuration
+// V1GetIPAllocations returns all IP allocations for a tenantID.
 func (s *IPService) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -296,5 +296,37 @@ func (s *IPService) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantID
 		return err
 	}
 	*reply = *ip
+	return nil
+}
+
+// V1ClearIPAllocations clears IP allocations from an IPAllocations object.
+// If args.AllocationIDs is empty or nil, all allocations will be cleared.
+func (s *IPService) V1ClearIPAllocations(ctx *context.Context, args *utils.ClearIPAllocationsArgs, reply *string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = s.cfg.GeneralCfg().DefaultTenant
+	}
+
+	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
+		config.CgrConfig().GeneralCfg().LockingTimeout,
+		utils.IPAllocationsLockKey(tnt, args.ID))
+	defer guardian.Guardian.UnguardIDs(lkID)
+
+	allocs, err := s.dm.GetIPAllocations(ctx, tnt, args.ID, true, true, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	if err := allocs.ClearAllocations(args.AllocationIDs); err != nil {
+		return err
+	}
+	if err := s.storeIPAllocations(ctx, allocs); err != nil {
+		return err
+	}
+
+	*reply = utils.OK
 	return nil
 }

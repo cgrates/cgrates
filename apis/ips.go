@@ -211,3 +211,9 @@ func (ipS *IPSv1) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply 
 func (ipS *IPSv1) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
 	return ipS.ips.V1GetIPAllocations(ctx, arg, reply)
 }
+
+// V1ClearIPAllocations clears IP allocations from an IPAllocations object.
+// If args.AllocationIDs is empty or nil, all allocations will be cleared.
+func (ipS *IPSv1) V1ClearIPAllocations(ctx *context.Context, arg *utils.ClearIPAllocationsArgs, reply *string) error {
+	return ipS.ips.V1ClearIPAllocations(ctx, arg, reply)
+}

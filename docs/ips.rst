@@ -154,15 +154,21 @@ Checks if an IP can be allocated without actually allocating it (dry run).
 ::
 
    {
-     "Tenant": "cgrates.org",
-     "ID": "unique_event_id",
-     "Event": {
-       "Account": "1001",
-       "Destination": "1002"
-     },
-     "APIOpts": {
-       "*ipAllocationID": "ip_allocation_abc123"
-     }
+     "method": "IPsV1.AuthorizeIP",
+     "params": [
+       {
+         "Tenant": "cgrates.org",
+         "ID": "unique_event_id",
+         "Event": {
+           "Account": "1001",
+           "Destination": "1002"
+         },
+         "APIOpts": {
+           "*ipAllocationID": "ip_allocation_abc123"
+         }
+       }
+     ],
+     "id": 1
    }
 
 **Returns:**
@@ -235,6 +241,40 @@ Gets the matching IPAllocations object for a specific event.
 **Returns:**
 
 - IPAllocations object for the matching profile
+
+V1ClearIPAllocations
+~~~~~~~~~~~~~~~~~~~~
+
+Clears IP allocations from an IPAllocations object.
+
+**Request:**
+
+::
+
+   {
+     "method": "IPsV1.ClearIPAllocations",
+     "params": [
+       {
+         "Tenant": "cgrates.org",
+         "ID": "profile_id",
+         "AllocationIDs": [
+           "alloc1",
+           "alloc2"
+         ]
+       }
+     ],
+     "id": 6
+   }
+
+**Parameters:**
+
+- Tenant and Profile ID (required)
+- AllocationIDs: Array of specific allocation IDs to clear (optional - if empty or omitted, all allocations will be cleared)
+
+**Returns:**
+
+- Success confirmation
+- Error if any specified allocation IDs don't exist
 
 Use Cases
 ---------

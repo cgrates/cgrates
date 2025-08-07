@@ -95,26 +95,12 @@ func TestIPsIT(t *testing.T) {
     "exists_indexed_fields": [],
     "notexists_indexed_fields": [],
     "opts":{
-		"*allocationID": [
-			{
-				"Tenant": "cgrates.org",
-				"FilterIDs": ["*string:~*req.Account:1001"],
-				"Value": "cfg_allocation"
-			}
-		],
-		// "*ttl": [
-		//     {
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": "72h"
-		//     }
-		// ],
-		// "*units": [
-		//     {
-		// 		"Tenant": "*any",
-		// 		"FilterIDs": [],
-		// 		"Value": 1
-		//     }
+		// "*allocationID": [
+		// 	{
+		// 		"Tenant": "cgrates.org",
+		// 		"FilterIDs": ["*string:~*req.Account:1001"],
+		// 		"Value": "cfg_allocation"
+		// 	}
 		// ]
     }
 },
@@ -236,6 +222,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				ID:     "GetIPsForEvent1",
 				Event: map[string]any{
 					utils.AccountField: "1001",
+					utils.Destination:  "2001",
 				},
 				APIOpts: map[string]any{
 					utils.OptsIPsAllocationID: allocID,
@@ -251,8 +238,11 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				ID:     "AuthorizeIP1",
 				Event: map[string]any{
 					utils.AccountField: "1001",
+					utils.Destination:  "2001",
 				},
-				APIOpts: map[string]any{},
+				APIOpts: map[string]any{
+					utils.OptsIPsAllocationID: allocID,
+				},
 			}, &allocIP); err != nil {
 			t.Error(err)
 		}
@@ -263,8 +253,11 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				ID:     "AllocateIP1",
 				Event: map[string]any{
 					utils.AccountField: "1001",
+					utils.Destination:  "2001",
 				},
-				APIOpts: map[string]any{},
+				APIOpts: map[string]any{
+					utils.OptsIPsAllocationID: allocID,
+				},
 			}, &allocIP); err != nil {
 			t.Error(err)
 		}
@@ -276,8 +269,20 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				ID:     "ReleaseIP1",
 				Event: map[string]any{
 					utils.AccountField: "1001",
+					utils.Destination:  "2001",
 				},
-				APIOpts: map[string]any{},
+				APIOpts: map[string]any{
+					utils.OptsIPsAllocationID: allocID,
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+
+		if err := client.Call(context.Background(), utils.IPsV1ClearIPAllocations,
+			&utils.ClearIPAllocationsArgs{
+				Tenant: "cgrates.org",
+				ID:     "IPs1",
+				// AllocationIDs: []string{allocID},
 			}, &reply); err != nil {
 			t.Error(err)
 		}
@@ -298,7 +303,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
-					utils.Destination:  "1002",
+					utils.Destination:  "2001",
 					utils.SetupTime:    "2018-01-07T17:00:00Z",
 				},
 			}, &reply); err != nil {
@@ -313,7 +318,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
-					utils.Destination:  "1002",
+					utils.Destination:  "2001",
 					utils.SetupTime:    "2018-01-07T17:00:00Z",
 				},
 			}, &reply); err != nil {
@@ -321,6 +326,7 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 		}
 	})
 }
+
 func BenchmarkIPsAuthorize(b *testing.B) {
 	cfg := config.NewDefaultCGRConfig()
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)

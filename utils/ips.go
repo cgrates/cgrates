@@ -416,6 +416,15 @@ type IPAllocationsWithAPIOpts struct {
 	APIOpts map[string]any
 }
 
+// ClearIPAllocationsArgs contains arguments for clearing IP allocations.
+// If AllocationIDs is empty or nil, all allocations will be cleared.
+type ClearIPAllocationsArgs struct {
+	Tenant        string
+	ID            string
+	AllocationIDs []string
+	APIOpts       map[string]any
+}
+
 // ComputeUnexported populates lookup maps and profile reference from exported fields.
 // Must be called after retrieving from DB.
 func (a *IPAllocations) ComputeUnexported(prfl *IPProfile) error {
@@ -456,6 +465,46 @@ func (a *IPAllocations) ReleaseAllocation(allocID string) error {
 		}
 	}
 	delete(a.Allocations, allocID)
+	return nil
+}
+
+// ClearAllocations clears specified IP allocations or all allocations if allocIDs is empty/nil.
+// Either all specified IDs exist and get cleared, or none are cleared and an error is returned.
+func (a *IPAllocations) ClearAllocations(allocIDs []string) error {
+	if len(allocIDs) == 0 {
+		clear(a.Allocations)
+		clear(a.poolAllocs)
+		a.TTLIndex = a.TTLIndex[:0] // maintain capacity
+		return nil
+	}
+
+	// Validate all IDs exist before clearing any.
+	var notFound []string
+	for _, allocID := range allocIDs {
+		if _, has := a.Allocations[allocID]; !has {
+			notFound = append(notFound, allocID)
+		}
+	}
+	if len(notFound) > 0 {
+		return fmt.Errorf("cannot find allocation records with ids: %v", notFound)
+	}
+
+	for _, allocID := range allocIDs {
+		alloc := a.Allocations[allocID]
+		if poolMap, hasPool := a.poolAllocs[alloc.PoolID]; hasPool {
+			delete(poolMap, alloc.Address)
+		}
+		if a.prfl.TTL > 0 {
+			for i, refID := range a.TTLIndex {
+				if refID == allocID {
+					a.TTLIndex = slices.Delete(a.TTLIndex, i, i+1)
+					break
+				}
+			}
+		}
+		delete(a.Allocations, allocID)
+	}
+
 	return nil
 }
 

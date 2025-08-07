@@ -1679,6 +1679,7 @@ const (
 	IPsV1AuthorizeIP             = "IPsV1.AuthorizeIP"
 	IPsV1AllocateIP              = "IPsV1.AllocateIP"
 	IPsV1ReleaseIP               = "IPsV1.ReleaseIP"
+	IPsV1ClearIPAllocations      = "IPsV1.ClearIPAllocations"
 	AdminSv1SetIPProfile         = "AdminSv1.SetIPProfile"
 	AdminSv1GetIPProfiles        = "AdminSv1.GetIPProfiles"
 	AdminSv1RemoveIPProfile      = "AdminSv1.RemoveIPProfile"
