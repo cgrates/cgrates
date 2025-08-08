@@ -19,9 +19,11 @@ package engine
 
 import (
 	"encoding/json"
+	"math"
 	"net"
 	"reflect"
 	"sort"
+	"strconv"
 	"testing"
 	"time"
 
@@ -5229,5 +5231,282 @@ func TestStatHighestCompress(t *testing.T) {
 
 	if !reflect.DeepEqual(got, expected) {
 		t.Errorf("Compress() returned %v, expected %v", got, expected)
+	}
+}
+
+func TestStatHighestGetCompressFactor(t *testing.T) {
+	s := &StatHighest{
+		FilterIDs: []string{"*req.Account:1001"},
+		Events: map[string]float64{
+			"id1": 10.0,
+			"id2": 20.0,
+		},
+	}
+
+	t.Run("empty events map", func(t *testing.T) {
+		input := make(map[string]int)
+		got := s.GetCompressFactor(input)
+		expected := map[string]int{
+			"id1": 1,
+			"id2": 1,
+		}
+
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("Expected %v, got %v", expected, got)
+		}
+	})
+
+	t.Run("map with existing ID", func(t *testing.T) {
+		input := map[string]int{
+			"id1": 5,
+		}
+		got := s.GetCompressFactor(input)
+		expected := map[string]int{
+			"id1": 5,
+			"id2": 1,
+		}
+
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("Expected %v, got %v", expected, got)
+		}
+	})
+}
+
+func TestNewStatLowest(t *testing.T) {
+	filterIDs := []string{"f1", "f2"}
+	fieldName := "duration"
+	minItems := 4
+
+	statMetric, err := NewStatLowest(minItems, fieldName, filterIDs)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+
+	statLowest, ok := statMetric.(*StatLowest)
+	if !ok {
+		t.Fatalf("Expected type *StatLowest, got: %T", statMetric)
+	}
+
+	if !reflect.DeepEqual(statLowest.FilterIDs, filterIDs) {
+		t.Errorf("FilterIDs mismatch, got: %v, want: %v", statLowest.FilterIDs, filterIDs)
+	}
+	if statLowest.FieldName != fieldName {
+		t.Errorf("FieldName mismatch, got: %s, want: %s", statLowest.FieldName, fieldName)
+	}
+	if statLowest.MinItems != minItems {
+		t.Errorf("MinItems mismatch, got: %d, want: %d", statLowest.MinItems, minItems)
+	}
+	if statLowest.Lowest != math.MaxFloat64 {
+		t.Errorf("Lowest mismatch, got: %v, want: %v", statLowest.Lowest, math.MaxFloat64)
+	}
+	if len(statLowest.Events) != 0 {
+		t.Errorf("Expected Events to be empty, got: %v", statLowest.Events)
+	}
+}
+
+func TestStatLowestClone(t *testing.T) {
+	t.Run("nil receiver", func(t *testing.T) {
+		var s *StatLowest
+		if got := s.Clone(); got != nil {
+			t.Errorf("Expected nil clone for nil receiver, got: %#v", got)
+		}
+	})
+
+	t.Run("deep copy", func(t *testing.T) {
+		cachedVal := 5.55
+		original := &StatLowest{
+			FilterIDs: []string{"f1", "f2"},
+			FieldName: "duration",
+			MinItems:  3,
+			Lowest:    1.23,
+			Count:     10,
+			Events: map[string]float64{
+				"e1": 1.23,
+				"e2": 4.56,
+			},
+			cachedVal: &cachedVal,
+		}
+
+		cloneMetric := original.Clone()
+		clone, ok := cloneMetric.(*StatLowest)
+		if !ok {
+			t.Fatalf("Expected *StatLowest, got %T", cloneMetric)
+		}
+
+		if !reflect.DeepEqual(original, clone) {
+			t.Errorf("Clone mismatch.\nGot: %#v\nWant: %#v", clone, original)
+		}
+
+		clone.FilterIDs[0] = "changed"
+		clone.Events["e1"] = 9.99
+		clone.Lowest = 99.99
+		if reflect.DeepEqual(original, clone) {
+			t.Errorf("Expected deep copy, but changes to clone affected original")
+		}
+	})
+}
+
+func TestStatLowestGetStringValue(t *testing.T) {
+	t.Run("not enough items", func(t *testing.T) {
+		s := &StatLowest{
+			MinItems: 2,
+			Count:    1,
+			Lowest:   5.55,
+			Events:   make(map[string]float64),
+		}
+		got := s.GetStringValue(2)
+		if got != utils.NotAvailable {
+			t.Errorf("Expected %q, got %q", utils.NotAvailable, got)
+		}
+	})
+
+	t.Run("valid lowest value", func(t *testing.T) {
+		s := &StatLowest{
+			MinItems: 1,
+			Count:    2,
+			Lowest:   5.55555,
+			Events:   make(map[string]float64),
+		}
+		got := s.GetStringValue(2)
+		expected := strconv.FormatFloat(utils.Round(5.55555, 2, utils.MetaRoundingMiddle), 'f', -1, 64)
+		if got != expected {
+			t.Errorf("Expected %q, got %q", expected, got)
+		}
+	})
+}
+
+func TestStatLowestGetValue(t *testing.T) {
+	t.Run("not enough items", func(t *testing.T) {
+		s := &StatLowest{
+			MinItems: 3,
+			Count:    2,
+			Lowest:   1.11,
+			Events:   make(map[string]float64),
+		}
+
+		got := s.GetValue(2)
+		if got != utils.StatsNA {
+			t.Errorf("Expected %v, got %v", utils.StatsNA, got)
+		}
+	})
+
+	t.Run("enough items", func(t *testing.T) {
+		s := &StatLowest{
+			MinItems: 1,
+			Count:    3,
+			Lowest:   5.5555,
+			Events:   make(map[string]float64),
+		}
+
+		got := s.GetValue(2)
+		expected := utils.Round(5.5555, 2, utils.MetaRoundingMiddle)
+		if got != expected {
+			t.Errorf("Expected %v, got %v", expected, got)
+		}
+	})
+}
+
+func TestStatLowestGetFloat64Value(t *testing.T) {
+	t.Run("not enough items", func(t *testing.T) {
+		s := &StatLowest{
+			MinItems: 3,
+			Count:    2,
+			Lowest:   1.45,
+			Events:   make(map[string]float64),
+		}
+
+		got := s.GetFloat64Value(2)
+		if got != utils.StatsNA {
+			t.Errorf("Expected %v, got %v", utils.StatsNA, got)
+		}
+	})
+
+	t.Run("enough items", func(t *testing.T) {
+		s := &StatLowest{
+			MinItems: 1,
+			Count:    5,
+			Lowest:   7.77777,
+			Events:   make(map[string]float64),
+		}
+
+		got := s.GetFloat64Value(3)
+		expected := utils.Round(7.77777, 3, utils.MetaRoundingMiddle)
+		if got != expected {
+			t.Errorf("Expected %v, got %v", expected, got)
+		}
+	})
+}
+
+func TestStatLowestRemEvent(t *testing.T) {
+	t.Run("remove non-existent event", func(t *testing.T) {
+		s := &StatLowest{
+			Lowest: math.MaxFloat64,
+			Count:  1,
+			Events: map[string]float64{"a": 10},
+		}
+		s.RemEvent("missing")
+
+		if len(s.Events) != 1 {
+			t.Errorf("Expected 1 event, got %d", len(s.Events))
+		}
+		if s.Count != 1 {
+			t.Errorf("Expected Count=1, got %d", s.Count)
+		}
+	})
+
+	t.Run("remove event not lowest", func(t *testing.T) {
+		s := &StatLowest{
+			Lowest: 5,
+			Count:  2,
+			Events: map[string]float64{"a": 5, "b": 10},
+		}
+		s.RemEvent("b")
+
+		if s.Count != 1 {
+			t.Errorf("Expected Count=1, got %d", s.Count)
+		}
+		if s.Lowest != 5 {
+			t.Errorf("Expected Lowest=5, got %v", s.Lowest)
+		}
+	})
+
+	t.Run("remove event that is lowest", func(t *testing.T) {
+		s := &StatLowest{
+			Lowest: 5,
+			Count:  3,
+			Events: map[string]float64{"a": 5, "b": 10, "c": 7},
+		}
+		s.RemEvent("a")
+
+		if s.Count != 2 {
+			t.Errorf("Expected Count=2, got %d", s.Count)
+		}
+		if s.Lowest != 7 {
+			t.Errorf("Expected Lowest=7, got %v", s.Lowest)
+		}
+		if s.cachedVal != nil {
+			t.Errorf("Expected cachedVal to be nil after removal, got %v", s.cachedVal)
+		}
+	})
+}
+
+func TestStatLowestCompress(t *testing.T) {
+	s := &StatLowest{
+		Events: map[string]float64{
+			"evt1": 1.85,
+			"evt2": 4.55,
+			"evt3": 0.5,
+		},
+	}
+
+	got := s.Compress(10, "default", 2)
+
+	expected := []string{"evt1", "evt2", "evt3"}
+
+	sort.Strings(got)
+	sort.Strings(expected)
+
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("Compress() returned %v, want %v", got, expected)
 	}
 }
