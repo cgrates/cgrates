@@ -260,17 +260,13 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 	lkID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout,
 		utils.IPAllocationsLockKey(matchedPrfl.Tenant, matchedPrfl.ID))
-	allocs, err = s.dm.GetIPAllocations(ctx, matchedPrfl.Tenant, matchedPrfl.ID, true, true, "")
+	allocs, err = s.dm.GetIPAllocations(ctx, matchedPrfl.Tenant, matchedPrfl.ID, true, true, "", matchedPrfl)
 	if err != nil {
 		guardian.Guardian.UnguardIDs(lkID)
 		matchedPrfl.Unlock()
 		return nil, err
 	}
 	allocs.Lock(lkID)
-	if err = allocs.ComputeUnexported(matchedPrfl); err != nil {
-		allocs.Unlock()
-		return nil, err
-	}
 	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID,
 
 		// TODO: check if we still should rely on caching previously matched

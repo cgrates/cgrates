@@ -291,7 +291,7 @@ func (s *IPService) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantID
 		utils.IPAllocationsLockKey(tnt, arg.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 
-	ip, err := s.dm.GetIPAllocations(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
+	ip, err := s.dm.GetIPAllocations(ctx, tnt, arg.ID, true, true, utils.NonTransactional, nil)
 	if err != nil {
 		return err
 	}

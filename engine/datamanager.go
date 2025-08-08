@@ -170,7 +170,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 		case utils.IPAllocationsPrefix:
 			tntID := utils.NewTenantID(dataID)
 			lkID := guardian.Guardian.GuardIDs("", dm.cfg.GeneralCfg().LockingTimeout, utils.IPAllocationsLockKey(tntID.Tenant, tntID.ID))
-			_, err = dm.GetIPAllocations(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = dm.GetIPAllocations(ctx, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional, nil)
 			guardian.Guardian.UnguardIDs(lkID)
 		case utils.StatQueueProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
@@ -1684,7 +1684,7 @@ func (dm *DataManager) RemoveResourceProfile(ctx *context.Context, tenant, id st
 }
 
 func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (ip *utils.IPAllocations, err error) {
+	transactionID string, prfl *utils.IPProfile) (ip *utils.IPAllocations, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheIPAllocations, tntID); ok {
@@ -1721,6 +1721,11 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 				}
 
 			}
+			return nil, err
+		}
+	}
+	if prfl != nil {
+		if err = ip.ComputeUnexported(prfl); err != nil {
 			return nil, err
 		}
 	}
@@ -1871,8 +1876,8 @@ func (dm *DataManager) SetIPProfile(ctx *context.Context, ipp *utils.IPProfile, 
 			ID:          ipp.ID,
 			Allocations: make(map[string]*utils.PoolAllocation),
 		})
-	} else if _, errRs := dm.GetIPAllocations(ctx, ipp.Tenant, ipp.ID, // do not try to get the resource if the configuration changed
-		true, false, utils.NonTransactional); errRs == utils.ErrNotFound { // the resource does not exist
+	} else if _, errGet := dm.GetIPAllocations(ctx, ipp.Tenant, ipp.ID, // do not try to get the resource if the configuration changed
+		true, false, utils.NonTransactional, nil); errGet == utils.ErrNotFound { // the resource does not exist
 		err = dm.SetIPAllocations(ctx, &utils.IPAllocations{
 			Tenant:      ipp.Tenant,
 			ID:          ipp.ID,
