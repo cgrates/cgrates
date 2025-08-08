@@ -59,15 +59,15 @@
     body:
       title: "{{ github_ssh_key_name }}"
       key: "{{ github_ssh_public_key.content | b64decode | trim }}"
-      read_only: "{{ github_ssh_deploy_key_read_only }}"
+      read_only: "{{ github_ssh_deploy_key_read_only | bool }}"
     status_code: [201, 422]  # 201 = created, 422 = key already exists
   register: github_deploy_key_result
   failed_when: false
   when:
-    - github_ssh_use_deploy_keys
-    - github_ssh_token != ""
-    - github_ssh_repo_owner != ""
-    - github_ssh_repo_name != ""
+    - github_ssh_use_deploy_keys | bool
+    - github_ssh_token | length > 0
+    - github_ssh_repo_owner | length > 0
+    - github_ssh_repo_name | length > 0
 
 - name: Add SSH key to GitHub user account
   ansible.builtin.uri:
@@ -84,8 +84,8 @@
   register: github_user_key_result
   failed_when: false
   when:
-    - not (github_ssh_use_deploy_keys)
-    - github_ssh_token != ""
+    - not (github_ssh_use_deploy_keys | bool)
+    - github_ssh_token | length > 0
 
 - name: Create SSH config for GitHub
   ansible.builtin.blockinfile:
