@@ -16,6 +16,7 @@ require (
 	github.com/cgrates/birpc v1.3.1-0.20211117095917-5b0ff29f3084
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
 	github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b
+	github.com/cgrates/go-diameter v0.0.0-20250228104837-c21fdf924ab5
 	github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b
 	github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73
 	github.com/cgrates/kamevapi v0.0.0-20240307160311-26273f03eedf
@@ -28,7 +29,6 @@ require (
 	github.com/elastic/elastic-transport-go/v8 v8.6.0
 	github.com/elastic/go-elasticsearch/v8 v8.15.0
 	github.com/ericlagergren/decimal v0.0.0-20240411145413-00de7ca16731
-	github.com/fiorix/go-diameter/v4 v4.0.4
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/google/go-cmp v0.7.0

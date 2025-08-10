@@ -31,6 +31,7 @@ type DiameterAgentCfg struct {
 	ListenNet         string // sctp or tcp
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesPath  string
+	CEApplications    []string
 	SessionSConns     []string
 	StatSConns        []string
 	ThresholdSConns   []string
@@ -69,6 +70,10 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jsnCfg *DiameterAgentJsonCfg) (err e
 	}
 	if jsnCfg.DictionariesPath != nil {
 		da.DictionariesPath = *jsnCfg.DictionariesPath
+	}
+	if jsnCfg.CEApplications != nil {
+		da.CEApplications = make([]string, len(*jsnCfg.CEApplications))
+		copy(da.CEApplications, *jsnCfg.CEApplications)
 	}
 	if jsnCfg.SessionSConns != nil {
 		da.SessionSConns = tagInternalConns(*jsnCfg.SessionSConns, utils.MetaSessionS)
@@ -131,6 +136,11 @@ func (da DiameterAgentCfg) AsMapInterface() any {
 		utils.ForcedDisconnectCfg:  da.ForcedDisconnect,
 		utils.RequestProcessorsCfg: requestProcessors,
 	}
+	if da.CEApplications != nil {
+		apps := make([]string, len(da.CEApplications))
+		copy(apps, da.CEApplications)
+		mp[utils.CEApplicationsCfg] = apps
+	}
 	return mp
 }
 
@@ -144,6 +154,7 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 		ListenNet:        da.ListenNet,
 		Listen:           da.Listen,
 		DictionariesPath: da.DictionariesPath,
+		CEApplications:   slices.Clone(da.CEApplications),
 		SessionSConns:    slices.Clone(da.SessionSConns),
 		StatSConns:       slices.Clone(da.StatSConns),
 		ThresholdSConns:  slices.Clone(da.ThresholdSConns),
@@ -155,6 +166,10 @@ func (da DiameterAgentCfg) Clone() *DiameterAgentCfg {
 		ASRTemplate:      da.ASRTemplate,
 		RARTemplate:      da.RARTemplate,
 		ForcedDisconnect: da.ForcedDisconnect,
+	}
+	if da.CEApplications != nil {
+		clone.CEApplications = make([]string, len(da.CEApplications))
+		copy(clone.CEApplications, da.CEApplications)
 	}
 	if da.RequestProcessors != nil {
 		clone.RequestProcessors = make([]*RequestProcessor, len(da.RequestProcessors))
@@ -171,6 +186,7 @@ type DiameterAgentJsonCfg struct {
 	Listen             *string                `json:"listen"`
 	ListenNet          *string                `json:"listen_net"`
 	DictionariesPath   *string                `json:"dictionaries_path"`
+	CEApplications     *[]string              `json:"ce_applications"`
 	SessionSConns      *[]string              `json:"sessions_conns"`
 	StatSConns         *[]string              `json:"stats_conns"`
 	ThresholdSConns    *[]string              `json:"thresholds_conns"`
@@ -200,6 +216,9 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg)
 	}
 	if v1.DictionariesPath != v2.DictionariesPath {
 		d.DictionariesPath = utils.StringPointer(v2.DictionariesPath)
+	}
+	if !slices.Equal(v1.CEApplications, v2.CEApplications) {
+		d.CEApplications = utils.SliceStringPointer(v2.CEApplications)
 	}
 	if !slices.Equal(v1.SessionSConns, v2.SessionSConns) {
 		d.SessionSConns = utils.SliceStringPointer(stripInternalConns(v2.SessionSConns))

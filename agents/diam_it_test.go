@@ -81,6 +81,20 @@ package agents
 // 	}
 // }
 //
+// func TestDiamItTcpNoDefaults(t *testing.T) {
+// 	switch *utils.DBType {
+// 	case utils.MetaInternal:
+// 		diamConfigDIR = "diamagent_internal_supp_apps"
+// 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+// 		t.SkipNow()
+// 	default:
+// 		t.Fatal("Unknown Database type")
+// 	}
+// 	for _, stest := range sTestsDiam {
+// 		t.Run(diamConfigDIR, stest)
+// 	}
+// }
+//
 // func TestDiamItDispatcher(t *testing.T) {
 // 	if *utils.Encoding == utils.MetaGOB {
 // 		t.SkipNow()

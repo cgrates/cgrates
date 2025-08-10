@@ -1,0 +1,200 @@
+{
+
+"diameter_agent": {
+	"request_processors": [
+		{
+			"id": "dryrun1",
+			"filters": [
+				"*string:~*vars.*cmd:CCR",
+				"*string:~*req.Service-Context-Id:TestDiamItDryRun"
+			],
+			"flags": ["*dryrun","*continue"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*sms"
+				},
+				{
+					"tag": "Val1",
+					"path": "*cgreq.Val1",
+					"type": "*constant",
+					"value": "1"
+				},
+				{
+					"tag": "Val2",
+					"path": "*cgreq.Val2",
+					"type": "*constant",
+					"value": "2"
+				},
+				{
+					"tag": "Val3",
+					"path": "*cgreq.Val3",
+					"type": "*constant",
+					"value": "3"
+				},
+				{
+					"tag": "OptionalField",
+					"path":"*cgreq.OptionalField",
+					"type":"*variable",
+					"value":"~*req.Inexistent",
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable", 
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType", 
+					"type": "*constant",
+					"value": "*prepaid"
+				},
+				{
+					"tag": "SetupTime",
+					"path": "*cgreq.SetupTime",
+					"type": "*variable", 
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "UsedUnits1",
+					"path": "*cgreq.UsedUnits1",
+					"type": "*variable",
+					"mandatory": true,
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(1)]"
+				},
+				{
+					"tag": "UsedUnits2",
+					"path": "*cgreq.UsedUnits2",
+					"type": "*variable",
+					"mandatory": true,
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(2)]"
+				},
+				
+			],
+			"reply_fields":[
+				{
+					"tag": "CCATemplate",
+					"type": "*template",
+					"value": "*cca"
+				},
+				{
+					"tag": "ResultCode",
+					"path": "*rep.Result-Code",
+					"type": "*constant",
+					"value": "2002"
+				},
+				{
+					"tag": "RatingGroup",
+					"path": "*rep.Multiple-Services-Credit-Control.Rating-Group",
+					"type": "*constant",
+					"value": "1"
+				},
+				{
+					"tag": "CCTotalOctets1",
+					"path": "*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets",
+					"type": "*variable",
+					"value": "~*cgreq.UsedUnits1"
+				},
+				{
+					"tag": "GrantedUsage",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
+					"type": "*sum", 
+					"value": "~*cgreq.Val1;~*cgreq.Val2;~*cgreq.Val3"},
+			],
+		},
+		{
+			"id": "dryrun2",
+			"filters": ["*notempty:~*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[0]:"], // make sure the CC-Total-Octets was populated in the previous processor
+			"flags": ["*dryrun"],
+			"request_fields":[
+				{
+					"tag": "ToR",
+					"path": "*cgreq.ToR",
+					"type": "*constant",
+					"value": "*sms"
+				},
+				{
+					"tag": "Val1",
+					"path": "*cgreq.Val1",
+					"type": "*constant",
+					"value": "1"
+				},
+				{
+					"tag": "Val2",
+					"path": "*cgreq.Val2",
+					"type": "*constant",
+					"value": "2"
+				},
+				{
+					"tag": "Val3",
+					"path": "*cgreq.Val3",
+					"type": "*constant",
+					"value": "3"
+				},
+				{
+					"tag": "OptionalField",
+					"path":"*cgreq.OptionalField",
+					"type":"*variable",
+					"value":"~*req.Inexistent"
+				},
+				{
+					"tag": "OriginID",
+					"path": "*cgreq.OriginID",
+					"type": "*variable", 
+					"value": "~*req.Session-Id",
+					"mandatory": true
+				},
+				{
+					"tag": "RequestType",
+					"path": "*cgreq.RequestType", 
+					"type": "*constant",
+					"value": "*prepaid"
+				},
+				{
+					"tag": "SetupTime",
+					"path": "*cgreq.SetupTime",
+					"type": "*variable", 
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
+				},
+				{
+					"tag": "UsedUnits1",
+					"path": "*cgreq.UsedUnits1",
+					"type": "*variable",
+					"mandatory": true,
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(1)]"
+				},
+				{
+					"tag": "UsedUnits2",
+					"path": "*cgreq.UsedUnits2",
+					"type": "*variable",
+					"mandatory": true,
+					"value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets[~Rating-Group(2)]"
+				},			
+			],
+			"reply_fields":[
+				{
+					"tag": "RatingGroup",
+					"path": "*rep.Multiple-Services-Credit-Control.Rating-Group",
+					"type": "*group",
+					"value": "2",
+					"new_branch": true
+				},
+				{
+					"tag": "CCTotalOctets2",
+					"path": "*rep.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets",
+					"type": "*group",
+					"value": "~*cgreq.UsedUnits2"
+				},
+			],
+		},
+
+	],
+},
+
+}

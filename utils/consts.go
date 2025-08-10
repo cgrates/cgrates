@@ -2274,6 +2274,7 @@ const (
 	ListenersCfg         = "listeners"
 	ListenCfg            = "listen"
 	DictionariesPathCfg  = "dictionaries_path"
+	CEApplicationsCfg    = "ce_applications"
 	OriginHostCfg        = "origin_host"
 	OriginRealmCfg       = "origin_realm"
 	VendorIDCfg          = "vendor_id"
