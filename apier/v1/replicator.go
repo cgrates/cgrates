@@ -523,6 +523,10 @@ func (rplSv1 *ReplicatorSv1) SetTrendProfile(ctx *context.Context, sg *engine.Tr
 	if err = rplSv1.dm.DataDB().SetTrendProfileDrv(sg.TrendProfile); err != nil {
 		return
 	}
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(sg.APIOpts[utils.CacheOpt]),
+		sg.Tenant, utils.CacheTrendProfiles, sg.TenantID(), utils.EmptyString, nil, nil, sg.APIOpts); err != nil {
+		return
+	}
 	*reply = utils.OK
 	return
 }
@@ -1017,7 +1021,10 @@ func (rplSv1 *ReplicatorSv1) RemoveTrendProfile(ctx *context.Context, args *util
 	if err = rplSv1.dm.DataDB().RemTrendProfileDrv(args.Tenant, args.ID); err != nil {
 		return
 	}
-
+	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+		args.Tenant, utils.CacheTrendProfiles, args.TenantIDConcatenated(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		return
+	}
 	*reply = utils.OK
 	return
 }
