@@ -22,6 +22,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"maps"
 	"runtime"
 	"slices"
 	"sync"
@@ -173,17 +174,17 @@ func (s *IPService) storeMatchedIPAllocations(ctx *context.Context, matched *uti
 // matching the event.
 func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
 	ev *utils.CGREvent, evUUID string) (allocs *utils.IPAllocations, err error) {
-	var itemIDs utils.StringSet
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
 	}
+	var itemIDs []string
 	if x, ok := engine.Cache.Get(utils.CacheEventIPs, evUUID); ok {
 		// IPIDs cached as utils.StringSet{"resID":bool}
 		if x == nil {
 			return nil, utils.ErrNotFound
 		}
-		itemIDs = x.(utils.StringSet)
+		itemIDs = []string{x.(string)}
 		defer func() { // make sure we uncache if we find errors
 			if err != nil {
 				// TODO: Consider using RemoveWithoutReplicate instead, as
@@ -196,7 +197,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 			}
 		}()
 	} else { // select the IP allocation IDs out of dataDB
-		itemIDs, err = engine.MatchingItemIDsForEvent(ctx, evNm,
+		matchedItemIDs, err := engine.MatchingItemIDsForEvent(ctx, evNm,
 			s.cfg.IPsCfg().StringIndexedFields,
 			s.cfg.IPsCfg().PrefixIndexedFields,
 			s.cfg.IPsCfg().SuffixIndexedFields,
@@ -215,10 +216,11 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 			}
 			return nil, err
 		}
+		itemIDs = slices.Sorted(maps.Keys(matchedItemIDs))
 	}
 	var matchedPrfl *utils.IPProfile
 	var maxWeight float64
-	for id := range itemIDs {
+	for _, id := range itemIDs {
 		lkPrflID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout,
 			utils.IPProfileLockKey(tnt, id))
@@ -267,14 +269,7 @@ func (s *IPService) matchingIPAllocationsForEvent(ctx *context.Context, tnt stri
 		return nil, err
 	}
 	allocs.Lock(lkID)
-	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID,
-
-		// TODO: check if we still should rely on caching previously matched
-		// allocations for an allocationID. Currently setting a StringSet to
-		// maintain previous functionality, but this doesn't seem right.
-		utils.StringSet{allocs.ID: struct{}{}},
-
-		nil, true, ""); err != nil {
+	if err = engine.Cache.Set(ctx, utils.CacheEventIPs, evUUID, allocs.ID, nil, true, ""); err != nil {
 		allocs.Unlock()
 	}
 	return allocs, nil
