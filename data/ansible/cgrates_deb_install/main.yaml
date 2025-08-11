@@ -24,7 +24,7 @@
         github_ssh_token: "{{ vault_github_token }}"
         github_ssh_repo_owner: "{{ vault_github_repo_owner }}"
         github_ssh_repo_name: "{{ vault_github_repo_name }}"
-      when: 
+      when:
         - vault_github_token is defined
         - vault_github_repo_owner is defined
         - vault_github_repo_name is defined
@@ -83,6 +83,22 @@
           ansible.builtin.debug:
             msg: "Source path '{{ cgrates_config_source_path }}' not found in repository, skipping configuration"
           when: not config_source_stat.stat.exists
+
+    - name: Setup TP directory permissions needed for cgrates to create lock files when loading TP data
+      block:
+        - name: Add cgrates user to ansible user's group for shared access
+          ansible.builtin.user:
+            name: cgrates
+            groups: "{{ ansible_user }}"
+            append: true
+
+        - name: Set group write permission on TP directory for cgrates lock file creation
+          ansible.builtin.file:
+            path: "{{ cgrates_repo_dir }}/{{ vault_cgrates_tp_path }}"
+            mode: '0775'
+          when:
+            - config_source_stat.stat.exists
+            - vault_cgrates_tp_path is defined
 
   handlers:
     - name: restart cgrates
