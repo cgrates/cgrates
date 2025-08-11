@@ -474,8 +474,8 @@ const CGRATES_CFG_JSON = `
 				// "kafkaSkipTLSVerify": false,			// if true it will skip certificate verification
 
 				// SQL
-				// "sqlDBName": "cgrates", 			// the name of the database from were the events are read
-				// "sqlTableName": "cdrs",			// the name of the table from were the events are read
+				// "sqlDBName": "cgrates", 			// the name of the database from where the events are read
+				// "sqlTableName": "cdrs",			// the name of the table from where the events are read
 				// "sqlBatchSize: 0, 				// number of SQL rows that can be selected at a time. 0 or lower for unlimited
 				// "sqlDeleteIndexedFields": [],   		// list of fields to DELETE from the table
 				// "pgSSLMode": "disable",			// the ssl mode for postgres db
@@ -487,10 +487,10 @@ const CGRATES_CFG_JSON = `
 				// "awsToken": "",
 
 				// SQS
-				// "sqsQueueID": "cgrates_cdrs", 		// the queue id for SQS readers from were the events are read
+				// "sqsQueueID": "cgrates_cdrs", 		// the queue id for SQS readers from where the events are read
 				
 				// S3
-				// "s3BucketID": "cgrates_cdrs", 		// the bucket id for S3 readers from were the events are read
+				// "s3BucketID": "cgrates_cdrs", 		// the bucket id for S3 readers from where the events are read
 
 				// nats
 				// "natsJetStream": false,			// controls if the nats reader uses the JetStream
