@@ -5510,3 +5510,320 @@ func TestStatLowestCompress(t *testing.T) {
 		t.Errorf("Compress() returned %v, want %v", got, expected)
 	}
 }
+
+func TestStatDistinctClone(t *testing.T) {
+	t.Run("nil receiver", func(t *testing.T) {
+		var s *StatDistinct
+		if got := s.Clone(); got != nil {
+			t.Errorf("Expected nil clone for nil receiver, got: %#v", got)
+		}
+	})
+
+	t.Run("deep copy", func(t *testing.T) {
+		original := &StatDistinct{
+			FilterIDs: []string{"fltr1", "fltr2"},
+			MinItems:  5,
+			FieldName: "Account",
+			Count:     10,
+			FieldValues: map[string]utils.StringSet{
+				"1001": utils.NewStringSet([]string{"event1", "event2"}),
+				"1002": utils.NewStringSet([]string{"event3"}),
+			},
+			Events: map[string]map[string]int64{
+				"cgrates.org:event1": {"1001": 1, "1002": 2},
+				"cgrates.org:event2": {"1001": 3},
+			},
+		}
+
+		cloneMetric := original.Clone()
+		clone, ok := cloneMetric.(*StatDistinct)
+		if !ok {
+			t.Fatalf("Expected *StatDistinct, got %T", cloneMetric)
+		}
+
+		if !reflect.DeepEqual(original, clone) {
+			t.Errorf("Clone mismatch.\nGot: %#v\nWant: %#v", clone, original)
+		}
+
+		clone.FilterIDs[0] = "changed"
+		clone.FieldValues["1001"].Add("newEvent")
+		clone.Events["cgrates.org:event1"]["1001"] = 99
+		clone.FieldName = "ChangedField"
+		if reflect.DeepEqual(original, clone) {
+			t.Errorf("Expected deep copy, but changes to clone affected original")
+		}
+	})
+}
+
+func TestStatLowestGetFilterIDs(t *testing.T) {
+	t.Run("with filter IDs", func(t *testing.T) {
+		s := &StatLowest{
+			FilterIDs: []string{"filter1", "filter2"},
+		}
+		got := s.GetFilterIDs()
+		want := []string{"filter1", "filter2"}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("GetFilterIDs() = %v; want %v", got, want)
+		}
+	})
+
+	t.Run("no filter IDs", func(t *testing.T) {
+		s := &StatLowest{}
+		got := s.GetFilterIDs()
+		if len(got) != 0 {
+			t.Errorf("Expected empty slice, got %v", got)
+		}
+	})
+}
+
+func TestNewStatREPFC(t *testing.T) {
+	t.Run("create with valid params", func(t *testing.T) {
+		filterIDs := []string{"Tenant:cgrates.org", "*string:Account:1001"}
+		minItems := 5
+		errorType := "Error"
+
+		metric, err := NewStatREPFC(minItems, errorType, filterIDs)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		stat, ok := metric.(*StatREPFC)
+		if !ok {
+			t.Fatalf("expected *StatREPFC, got %T", metric)
+		}
+
+		if !reflect.DeepEqual(stat.FilterIDs, filterIDs) {
+			t.Errorf("FilterIDs mismatch: got %v, want %v", stat.FilterIDs, filterIDs)
+		}
+		if stat.MinItems != minItems {
+			t.Errorf("MinItems mismatch: got %d, want %d", stat.MinItems, minItems)
+		}
+		if stat.ErrorType != errorType {
+			t.Errorf("ErrorType mismatch: got %s, want %s", stat.ErrorType, errorType)
+		}
+		if stat.Events == nil {
+			t.Error("Events map should be initialized")
+		}
+		if len(stat.Events) != 0 {
+			t.Errorf("Events map should be empty, got %d entries", len(stat.Events))
+		}
+	})
+
+	t.Run("empty params", func(t *testing.T) {
+		metric, err := NewStatREPFC(0, "", nil)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		stat := metric.(*StatREPFC)
+
+		if stat.MinItems != 0 {
+			t.Errorf("MinItems mismatch: got %d, want 0", stat.MinItems)
+		}
+		if stat.ErrorType != "" {
+			t.Errorf("ErrorType mismatch: got %s, want empty", stat.ErrorType)
+		}
+		if stat.FilterIDs != nil {
+			t.Errorf("FilterIDs mismatch: got %v, want nil", stat.FilterIDs)
+		}
+		if stat.Events == nil {
+			t.Error("Events map should be initialized")
+		}
+	})
+}
+
+func TestStatREPFCClone(t *testing.T) {
+	t.Run("nil receiver", func(t *testing.T) {
+		var s *StatREPFC
+		if got := s.Clone(); got != nil {
+			t.Errorf("Expected nil clone for nil receiver, got %#v", got)
+		}
+	})
+
+	t.Run("deep copy", func(t *testing.T) {
+		cached := 3.14
+		original := &StatREPFC{
+			FilterIDs: []string{"*string:Account:1001", "*destination:1002"},
+			MinItems:  2,
+			ErrorType: "ERROR",
+			Count:     7,
+			Events: map[string]struct{}{
+				"event_1001": {},
+				"event_1002": {},
+			},
+			cachedVal: &cached,
+		}
+
+		cloneMetric := original.Clone()
+		clone, ok := cloneMetric.(*StatREPFC)
+		if !ok {
+			t.Fatalf("Expected *StatREPFC, got %T", cloneMetric)
+		}
+
+		if !reflect.DeepEqual(original, clone) {
+			t.Errorf("Clone mismatch.\nGot: %#v\nWant: %#v", clone, original)
+		}
+
+		clone.FilterIDs[0] = "changed"
+		clone.Events["event_1001"] = struct{}{}
+		clone.Count = 99
+		if reflect.DeepEqual(original, clone) {
+			t.Errorf("Expected deep copy, but changes to clone affected original")
+		}
+
+		if clone.cachedVal == original.cachedVal {
+			t.Error("cachedVal pointer should be different in deep copy")
+		}
+		if *clone.cachedVal != *original.cachedVal {
+			t.Errorf("cachedVal value mismatch: got %v, want %v", *clone.cachedVal, *original.cachedVal)
+		}
+	})
+}
+
+func TestStatREPFCGetStringValue(t *testing.T) {
+	t.Run("cached value already set", func(t *testing.T) {
+		cached := 42.0
+		s := &StatREPFC{cachedVal: &cached}
+		got := s.GetStringValue(2)
+		want := strconv.FormatFloat(cached, 'f', -1, 64)
+		if got != want {
+			t.Errorf("expected %q, got %q", want, got)
+		}
+	})
+
+	t.Run("count is zero", func(t *testing.T) {
+		s := &StatREPFC{MinItems: 1, Count: 0}
+		got := s.GetStringValue(2)
+		if got != utils.NotAvailable {
+			t.Errorf("expected %q, got %q", utils.NotAvailable, got)
+		}
+	})
+
+	t.Run("count below minItems", func(t *testing.T) {
+		s := &StatREPFC{MinItems: 5, Count: 3}
+		got := s.GetStringValue(2)
+		if got != utils.NotAvailable {
+			t.Errorf("expected %q, got %q", utils.NotAvailable, got)
+		}
+	})
+
+	t.Run("count meets minItems", func(t *testing.T) {
+		s := &StatREPFC{MinItems: 3, Count: 3}
+		got := s.GetStringValue(2)
+		want := strconv.FormatFloat(float64(3), 'f', -1, 64)
+		if got != want {
+			t.Errorf("expected %q, got %q", want, got)
+		}
+	})
+}
+
+func TestStatREPFCGetStringValueAndGetValue(t *testing.T) {
+	t.Run("Count below MinItems returns NA", func(t *testing.T) {
+		s := &StatREPFC{
+			MinItems: 5,
+			Count:    3,
+		}
+		gotStr := s.GetStringValue(2)
+		if gotStr != utils.NotAvailable {
+			t.Errorf("GetStringValue() = %v, want %v", gotStr, utils.NotAvailable)
+		}
+		if gotVal := s.GetValue(2); gotVal != utils.StatsNA {
+			t.Errorf("GetValue() = %v, want %v", gotVal, utils.StatsNA)
+		}
+	})
+
+	t.Run("Count meets MinItems returns Count", func(t *testing.T) {
+		s := &StatREPFC{
+			MinItems: 3,
+			Count:    3,
+		}
+		expected := float64(3)
+		wantStr := strconv.FormatFloat(expected, 'f', -1, 64)
+		if gotStr := s.GetStringValue(0); gotStr != wantStr {
+			t.Errorf("GetStringValue() = %v, want %v", gotStr, wantStr)
+		}
+		if gotVal := s.GetValue(0); gotVal != expected {
+			t.Errorf("GetValue() = %v, want %v", gotVal, expected)
+		}
+	})
+
+	t.Run("Uses cachedVal if set", func(t *testing.T) {
+		cached := float64(42)
+		s := &StatREPFC{
+			MinItems:  5,
+			Count:     1,
+			cachedVal: &cached,
+		}
+		wantStr := strconv.FormatFloat(cached, 'f', -1, 64)
+		if gotStr := s.GetStringValue(0); gotStr != wantStr {
+			t.Errorf("GetStringValue() = %v, want %v", gotStr, wantStr)
+		}
+		if gotVal := s.GetValue(0); gotVal != cached {
+			t.Errorf("GetValue() = %v, want %v", gotVal, cached)
+		}
+	})
+}
+
+func TestStatREPFCRemEvent(t *testing.T) {
+	t.Run("event does not exist", func(t *testing.T) {
+		s := &StatREPFC{
+			Count:  5,
+			Events: map[string]struct{}{"existingID": {}},
+		}
+
+		s.cachedVal = utils.Float64Pointer(123.45)
+
+		s.RemEvent("nonExistingID")
+
+		if s.Count != 5 {
+			t.Errorf("Expected Count to remain 5, got %d", s.Count)
+		}
+		if _, exists := s.Events["existingID"]; !exists {
+			t.Errorf("Expected existingID to remain in Events")
+		}
+		if s.cachedVal == nil || *s.cachedVal != 123.45 {
+			t.Errorf("Expected cachedVal to remain unchanged, got %v", s.cachedVal)
+		}
+	})
+
+	t.Run("event exists", func(t *testing.T) {
+		s := &StatREPFC{
+			Count:  3,
+			Events: map[string]struct{}{"ev1": {}, "ev2": {}},
+		}
+
+		s.cachedVal = utils.Float64Pointer(999.99)
+
+		s.RemEvent("ev1")
+
+		if _, exists := s.Events["ev1"]; exists {
+			t.Errorf("Expected ev1 to be removed from Events")
+		}
+		if s.Count != 2 {
+			t.Errorf("Expected Count to decrement to 2, got %d", s.Count)
+		}
+		if s.cachedVal != nil {
+			t.Errorf("Expected cachedVal to be nil after removal, got %v", s.cachedVal)
+		}
+	})
+}
+
+func TestStatREPFCGetMinItems(t *testing.T) {
+	s := &StatREPFC{
+		MinItems: 7,
+	}
+	if got := s.GetMinItems(); got != 7 {
+		t.Errorf("GetMinItems() = %v, want %v", got, 7)
+	}
+}
+
+func TestStatREPFCGetFilterIDs(t *testing.T) {
+	s := &StatREPFC{
+		FilterIDs: []string{"filter1", "filter2"},
+	}
+
+	got := s.GetFilterIDs()
+	if !reflect.DeepEqual(got, []string{"filter1", "filter2"}) {
+		t.Errorf("GetFilterIDs() = %v, want %v", got, []string{"filter1", "filter2"})
+	}
+}
