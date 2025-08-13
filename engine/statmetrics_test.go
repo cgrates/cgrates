@@ -5827,3 +5827,266 @@ func TestStatREPFCGetFilterIDs(t *testing.T) {
 		t.Errorf("GetFilterIDs() = %v, want %v", got, []string{"filter1", "filter2"})
 	}
 }
+
+func TestStatREPSCRemEvent(t *testing.T) {
+	s := &StatREPSC{
+		Count: 2,
+		Events: map[string]struct{}{
+			"ev1": {},
+			"ev2": {},
+		},
+		cachedVal: func() *float64 {
+			v := 42.0
+			return &v
+		}(),
+	}
+
+	s.RemEvent("ev1")
+
+	if _, exists := s.Events["ev1"]; exists {
+		t.Errorf("RemEvent() did not delete the event")
+	}
+	if s.Count != 1 {
+		t.Errorf("RemEvent() Count = %d, want %d", s.Count, 1)
+	}
+	if s.cachedVal != nil {
+		t.Errorf("RemEvent() cachedVal not reset, got %v", *s.cachedVal)
+	}
+
+	s.Count = 1
+	s.RemEvent("nonexistent")
+	if s.Count != 1 {
+		t.Errorf("RemEvent() changed Count when removing non-existing event")
+	}
+}
+
+func TestStatREPSCCompress(t *testing.T) {
+	s := &StatREPSC{
+		Events: map[string]struct{}{
+			"ev1": {},
+			"ev2": {},
+			"ev3": {},
+		},
+	}
+
+	result := s.Compress(10, "default", 2)
+
+	expected := map[string]bool{"ev1": true, "ev2": true, "ev3": true}
+	if len(result) != len(expected) {
+		t.Fatalf("Compress() returned %d items, want %d", len(result), len(expected))
+	}
+	for _, id := range result {
+		if !expected[id] {
+			t.Errorf("Compress() returned unexpected event ID: %s", id)
+		}
+	}
+
+	s.Events = map[string]struct{}{}
+	result = s.Compress(5, "default", 0)
+	if len(result) != 0 {
+		t.Errorf("Compress() with no events returned %d items, want 0", len(result))
+	}
+}
+
+func TestStatREPSCGetCompressFactor(t *testing.T) {
+	s := &StatREPSC{
+		Events: map[string]struct{}{
+			"ev1": {},
+			"ev2": {},
+			"ev3": {},
+		},
+	}
+
+	initialMap := make(map[string]int)
+	result := s.GetCompressFactor(initialMap)
+
+	expected := map[string]int{
+		"ev1": 1,
+		"ev2": 1,
+		"ev3": 1,
+	}
+
+	if len(result) != len(expected) {
+		t.Fatalf("Expected %d entries, got %d", len(expected), len(result))
+	}
+	for k, v := range expected {
+		if got, exists := result[k]; !exists || got != v {
+			t.Errorf("Expected %s -> %d, got %d", k, v, got)
+		}
+	}
+
+	initialMap = map[string]int{"ev2": 5}
+	result = s.GetCompressFactor(initialMap)
+
+	if result["ev2"] != 5 {
+		t.Errorf("Expected ev2 to remain 5, got %d", result["ev2"])
+	}
+
+	if result["ev1"] != 1 || result["ev3"] != 1 {
+		t.Errorf("Expected ev1 and ev3 to be added with 1, got %+v", result)
+	}
+}
+
+func TestStatREPFCGetFloat64Value(t *testing.T) {
+	t.Run("Returns StatsNA when Count is below MinItems", func(t *testing.T) {
+		s := &StatREPFC{
+			MinItems: 5,
+			Count:    3,
+			Events: map[string]struct{}{
+				"Evt1001": {},
+				"Evt1002": {},
+				"Evt1003": {},
+			},
+			cachedVal: nil,
+		}
+
+		got := s.GetFloat64Value(2)
+		if got != utils.StatsNA {
+			t.Errorf("expected %v, got %v", utils.StatsNA, got)
+		}
+	})
+
+	t.Run("Returns Count when Count >= MinItems", func(t *testing.T) {
+		s := &StatREPFC{
+			MinItems: 2,
+			Count:    4,
+			Events: map[string]struct{}{
+				"Evt001": {},
+				"Evt002": {},
+				"Evt003": {},
+				"Evt004": {},
+			},
+			cachedVal: nil,
+		}
+
+		got := s.GetFloat64Value(2)
+		if got != float64(s.Count) {
+			t.Errorf("expected %v, got %v", float64(s.Count), got)
+		}
+	})
+
+	t.Run("Uses cached value if available", func(t *testing.T) {
+		cached := 42.5
+		s := &StatREPFC{
+			MinItems: 0,
+			Count:    10,
+			Events: map[string]struct{}{
+				"EevtACC_1001": {},
+				"EevtACC_1002": {},
+			},
+			cachedVal: &cached,
+		}
+
+		got := s.GetFloat64Value(2)
+		if got != cached {
+			t.Errorf("expected cached value %v, got %v", cached, got)
+		}
+	})
+}
+
+func TestStatREPFCCompress(t *testing.T) {
+	t.Run("Returns all event IDs in Events map", func(t *testing.T) {
+		s := &StatREPFC{
+			Events: map[string]struct{}{
+				"Evt1001": {},
+				"EvtE01":  {},
+				"EvtR01":  {},
+			},
+		}
+
+		got := s.Compress(10, "default", 2)
+
+		expected := []string{"Evt1001", "EvtE01", "EvtR01"}
+
+		if len(got) != len(expected) {
+			t.Fatalf("expected %d IDs, got %d", len(expected), len(got))
+		}
+
+		expectedSet := make(map[string]struct{})
+		for _, id := range expected {
+			expectedSet[id] = struct{}{}
+		}
+		for _, id := range got {
+			if _, ok := expectedSet[id]; !ok {
+				t.Errorf("unexpected ID in result: %v", id)
+			}
+		}
+	})
+
+	t.Run("Returns empty slice when no events", func(t *testing.T) {
+		s := &StatREPFC{
+			Events: map[string]struct{}{},
+		}
+
+		got := s.Compress(5, "default", 2)
+
+		if len(got) != 0 {
+			t.Errorf("expected empty slice, got %v", got)
+		}
+	})
+}
+
+func TestStatREPFCGetCompressFactor(t *testing.T) {
+	t.Run("Adds missing event IDs to the map with value 1", func(t *testing.T) {
+		s := &StatREPFC{
+			Events: map[string]struct{}{
+				"Evt1001": {},
+				"EvtE01":  {},
+			},
+		}
+
+		input := map[string]int{
+			"ExistingID": 5,
+		}
+
+		got := s.GetCompressFactor(input)
+
+		expected := map[string]int{
+			"ExistingID": 5,
+			"Evt1001":    1,
+			"EvtE01":     1,
+		}
+
+		if len(got) != len(expected) {
+			t.Fatalf("expected map length %d, got %d", len(expected), len(got))
+		}
+
+		for key, val := range expected {
+			if gotVal, ok := got[key]; !ok || gotVal != val {
+				t.Errorf("expected key %s to have value %d, got %d", key, val, gotVal)
+			}
+		}
+	})
+
+	t.Run("Does not modify values for existing event IDs", func(t *testing.T) {
+		s := &StatREPFC{
+			Events: map[string]struct{}{
+				"Evt2001": {},
+			},
+		}
+
+		input := map[string]int{
+			"Evt2001": 99,
+		}
+
+		got := s.GetCompressFactor(input)
+
+		if got["Evt2001"] != 99 {
+			t.Errorf("expected value for Evt2001 to remain 99, got %d", got["Evt2001"])
+		}
+	})
+
+	t.Run("Handles empty Events map", func(t *testing.T) {
+		s := &StatREPFC{
+			Events: map[string]struct{}{},
+		}
+
+		input := map[string]int{"ANY": 42}
+
+		got := s.GetCompressFactor(input)
+
+		if len(got) != 1 || got["ANY"] != 42 {
+			t.Errorf("unexpected result for empty Events map: %v", got)
+		}
+	})
+}
