@@ -128,11 +128,11 @@ Regarding the SIP Servers, click on the tab corresponding to the choice you made
 
       .. code-block:: bash
 
-       curl https://apt.opensips.org/opensips-org.gpg -o /usr/share/keyrings/opensips-org.gpg
-       echo "deb [signed-by=/usr/share/keyrings/opensips-org.gpg] https://apt.opensips.org bookworm 3.4-releases" >/etc/apt/sources.list.d/opensips.list
-       echo "deb [signed-by=/usr/share/keyrings/opensips-org.gpg] https://apt.opensips.org bookworm cli-nightly" >/etc/apt/sources.list.d/opensips-cli.list
+       sudo curl https://apt.opensips.org/opensips-org.gpg -o /usr/share/keyrings/opensips-org.gpg
+       echo "deb [signed-by=/usr/share/keyrings/opensips-org.gpg] https://apt.opensips.org bullseye 3.5-releases" | sudo tee /etc/apt/sources.list.d/opensips.list
+       echo "deb [signed-by=/usr/share/keyrings/opensips-org.gpg] https://apt.opensips.org bullseye cli-nightly" | sudo tee  /etc/apt/sources.list.d/opensips-cli.list
        sudo apt-get update
-       sudo apt-get install opensips opensips-mysql-module opensips-cgrates-module opensips-cli
+       sudo apt-get install opensips opensips-mysql-module opensips-cgrates-module opensips-cli -y
 
 Configuration and initialization
 --------------------------------
@@ -216,28 +216,18 @@ Regarding the SIP Servers, we have prepared custom configurations in advance, as
          - *residential* configuration;
          - user accounts configuration not needed since it's enough for them to only be defined within CGRateS;
          - for simplicity, no authentication was configured (WARNING: Not suitable for production).
-         - creating database for the DRouting module, using the following command:
 
             .. code-block:: bash
 
-               opensips-cli -x database create
+               sudo opensips-cli -x database create
      
-      After creating the database for DRouting module  populate  the tables with  routing info:
-
-            .. code-block:: bash
-
-               insert into dr_gateways (gwid,type,address) values("gw2_1",0,"sip:127.0.0.1:5082");
-               insert into dr_gateways (gwid,type,address) values("gw1_1",0,"sip:127.0.0.1:5081"); 
-               insert into dr_carriers (carrierid,gwlist) values("route1","gw1_1");
-               insert into dr_carriers (carrierid,gwlist) values("route2","gw2_1");  
-
 
       To start OpenSIPS_ with the prepared custom configuration, run:
 
             .. code-block:: bash
 
                sudo mv /etc/opensips  /etc/opensips.old 
-               sudo cp -r /usr/share/cgrates/tutorials/osips/opensips/etc/opensips /etc 
+               sudo cp -r /usr/share/cgrates/tutorial_tests/osips/opensips/etc/opensips /etc 
                sudo systemctl restart opensips
 
 
@@ -245,95 +235,8 @@ Regarding the SIP Servers, we have prepared custom configurations in advance, as
 
             .. code-block:: bash
 
-               opensips-cli -x mi uptime
+               sudo opensips-cli -x mi uptime
 
-
-      Since we are using OpenSIPS_  with DRouting module we have to set up a SIP entity that OpenSIPS_ can forward the calls to for our setup. 
-      In this  example we  use SIPp  a free Open Source test tool / traffic generator for the SIP protocol.
-      The install SiPp use commands below :
-             
-             .. code-block:: bash 
-
-                apt update
-                apt install git pkg-config dh-autoreconf ncurses-dev build-essential libssl-dev libpcap-dev libncurses5-dev libsctp-dev lksctp-tools cmake
-                git clone https://github.com/SIPp/sipp.git
-                cd sipp
-                git checkout v3.7.0
-                git submodule init
-                git submodule update
-                ./build.sh --common
-                cmake . -DUSE_SSL=1 -DUSE_SCTP=0 -DUSE_PCAP=1 -DUSE_GSL=1
-                make all
-                make install
-
-               
-
-      Write SIPp XML scenario named uas.xml or to your liking with the content  below,this scenario will  simulate calls with OpenSIPS_ .
-      Change  "OpenSIPS_IP" in the line *<sip:OpenSIPS_IP:[local_port];transport=[transport]>*  with your  OpenSIPS_ IP.  
-
-          .. code-block:: XML 
-
-             <!--  This program is free software; you can redistribute it and/or       -->
-             <!--  modify it under the terms of the GNU General Public License as      -->
-             <!--  published by the Free Software Foundation; either version 2 of the  -->
-             <!--  License, or (at your option) any later version.                     -->
-             <!--                                                                      -->
-             <!--  This program is distributed in the hope that it will be useful,     -->
-             <!--  but WITHOUT ANY WARRANTY; without even the implied warranty of      -->
-             <!--  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the       -->
-             <!--  GNU General Public License for more details.                        -->
-             <!--                                                                      -->
-             <!--  You should have received a copy of the GNU General Public License   -->
-             <!--  along with this program; if not, write to the                       -->
-             <!--  Free Software Foundation, Inc.,                                     -->
-             <!--  59 Temple Place, Suite 330, Boston, MA  02111-1307 USA              -->
-             <!--                                                                      -->
-             <!--                  Sipp default 'uas' scenario.                        -->
-             <!--                                                                      -->
-             <scenario name="Basic UAS responder">
-             <!--  By adding rrs="true" (Record Route Sets), the route sets          -->
-             <!--  are saved and used for following messages sent. Useful to test    -->
-             <!--  against stateful SIP proxies/B2BUAs.                              -->
-             <!--  Adding ignoresdp="true" here would ignore the SDP data: that      -->
-             <!--  can be useful if you want to reject reINVITEs and keep the        -->
-             <!--  media stream flowing.                                             -->
-             <recv request="INVITE" crlf="true"> </recv>
-             <!--  The '[last_*]' keyword is replaced automatically by the           -->
-             <!--  specified header if it was present in the last message received   -->
-             <!--  (except if it was a retransmission). If the header was not        -->
-             <!--  present or if no message has been received, the '[last_*]'        -->
-             <!--  keyword is discarded, and all bytes until the end of the line     -->
-             <!--  are also discarded.                                               -->
-             <!--                                                                    -->
-             <!--  If the specified header was present several times in the          -->
-             <!--  message, all occurrences are concatenated (CRLF separated)        -->
-             <!--  to be used in place of the '[last_*]' keyword.                    -->
-             <send>
-             <![CDATA[ SIP/2.0 180 Ringing [last_Via:] [last_From:] [last_To:];tag=[pid]SIPpTag01[call_number] [last_Call-ID:] [last_CSeq:] Contact: <sip:[local_ip]:[local_port];transport=[transport]> Content-Length: 0 ]]>
-             </send>
-             <send retrans="500">
-             <![CDATA[ SIP/2.0 200 OK [last_Via:] [last_From:] [last_To:];tag=[pid]SIPpTag01[call_number] [last_Call-ID:] [last_Record-Route:] [last_CSeq:] Contact: <sip:OpenSIPS_IP:[local_port];transport=[transport]> Content-Type: application/sdp Content-Length: [len] v=0 o=user1 53655765 2353687637 IN IP[local_ip_type] [local_ip] s=- c=IN IP[media_ip_type] [media_ip] t=0 0 m=audio [media_port] RTP/AVP 0 a=rtpmap:0 PCMU/8000 ]]>
-             </send>
-             <recv request="ACK" optional="true" rtd="true" crlf="true"> </recv>
-             <recv request="BYE"> </recv>
-             <send>
-             <![CDATA[ SIP/2.0 200 OK [last_Via:] [last_From:] [last_To:] [last_Call-ID:] [last_CSeq:] Contact: <sip:[local_ip]:[local_port];transport=[transport]> Content-Length: 0 ]]>
-             </send>
-             <!--  Keep the call open for a while in case the 200 is lost to be      -->
-             <!--  able to retransmit it if we receive the BYE again.                -->
-             <timewait milliseconds="4000"/>
-             <!--  definition of the response time repartition table (unit is ms)    -->
-             <ResponseTimeRepartition value="10, 20, 30, 40, 50, 100, 150, 200"/>
-             <!--  definition of the call length repartition table (unit is ms)      -->
-             <CallLengthRepartition value="10, 50, 100, 500, 1000, 5000, 10000"/>
-             </scenario>
-
-
-      Run the SIPp  with the command below:
-
-         .. code-block:: bash 
-
-             sipp -sf uas.xml -p 5082
 
 
 
@@ -383,7 +286,7 @@ Just as with the SIP Servers, we have also prepared configurations and init scri
 
       .. code-block:: bash
 
-        sudo systemctl restart opensips
+        sudo /usr/share/cgrates/tutorial_tests/osips/cgrates/etc/init.d/cgrates start
 
 .. note::
    If you have chosen OpenSIPS_, CGRateS has to be started first since the dependency is reversed.
