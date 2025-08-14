@@ -6090,3 +6090,237 @@ func TestStatREPFCGetCompressFactor(t *testing.T) {
 		}
 	})
 }
+
+func TestStatREPSCGetMinItems(t *testing.T) {
+	t.Run("Returns correct MinItems value", func(t *testing.T) {
+		s := &StatREPSC{
+			MinItems: 5,
+		}
+
+		if got := s.GetMinItems(); got != 5 {
+			t.Errorf("expected MinItems to be 5, got %d", got)
+		}
+	})
+
+	t.Run("Returns zero when MinItems is default", func(t *testing.T) {
+		s := &StatREPSC{}
+
+		if got := s.GetMinItems(); got != 0 {
+			t.Errorf("expected MinItems to be 0, got %d", got)
+		}
+	})
+}
+
+func TestStatREPSCGetFilterIDs(t *testing.T) {
+	t.Run("Returns correct FilterIDs", func(t *testing.T) {
+		expected := []string{"FLTR_ACCOUNT_1001", "FLTR_STAT_1_1"}
+		s := &StatREPSC{
+			FilterIDs: expected,
+		}
+
+		got := s.GetFilterIDs()
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("expected FilterIDs %v, got %v", expected, got)
+		}
+	})
+
+	t.Run("Returns empty slice when no FilterIDs set", func(t *testing.T) {
+		s := &StatREPSC{}
+
+		got := s.GetFilterIDs()
+		if len(got) != 0 {
+			t.Errorf("expected empty FilterIDs slice, got %v", got)
+		}
+	})
+}
+
+func TestStatREPSCGetValue(t *testing.T) {
+	t.Run("Returns cached value if set", func(t *testing.T) {
+		val := 42.0
+		s := &StatREPSC{
+			cachedVal: &val,
+		}
+
+		got := s.getValue(0)
+		if got != val {
+			t.Errorf("expected %v, got %v", val, got)
+		}
+	})
+
+	t.Run("Returns StatsNA if Count < MinItems", func(t *testing.T) {
+		s := &StatREPSC{
+			MinItems: 5,
+			Count:    3,
+			Events:   make(map[string]struct{}),
+		}
+
+		got := s.getValue(0)
+		if got != utils.StatsNA {
+			t.Errorf("expected StatsNA (%v), got %v", utils.StatsNA, got)
+		}
+	})
+
+	t.Run("Returns StatsNA if Count == 0", func(t *testing.T) {
+		s := &StatREPSC{
+			MinItems: 1,
+			Count:    0,
+			Events:   make(map[string]struct{}),
+		}
+
+		got := s.getValue(0)
+		if got != utils.StatsNA {
+			t.Errorf("expected StatsNA (%v), got %v", utils.StatsNA, got)
+		}
+	})
+
+	t.Run("Returns Count when Count >= MinItems", func(t *testing.T) {
+		s := &StatREPSC{
+			MinItems: 2,
+			Count:    5,
+			Events:   make(map[string]struct{}),
+		}
+
+		got := s.getValue(0)
+		if got != 5.0 {
+			t.Errorf("expected 5.0, got %v", got)
+		}
+	})
+}
+
+func TestStatREPSCClone(t *testing.T) {
+	t.Run("Nil receiver returns nil", func(t *testing.T) {
+		var s *StatREPSC
+		if got := s.Clone(); got != nil {
+			t.Errorf("expected nil, got %#v", got)
+		}
+	})
+
+	t.Run("Clone returns deep copy", func(t *testing.T) {
+		cached := 42.0
+		original := &StatREPSC{
+			FilterIDs: []string{"f1", "f2"},
+			MinItems:  3,
+			Count:     10,
+			Events: map[string]struct{}{
+				"ev1": {},
+				"ev2": {},
+			},
+			cachedVal: &cached,
+		}
+
+		cloned := original.Clone().(*StatREPSC)
+
+		if !reflect.DeepEqual(original.FilterIDs, cloned.FilterIDs) {
+			t.Errorf("FilterIDs not equal: got %v, want %v", cloned.FilterIDs, original.FilterIDs)
+		}
+		if original.MinItems != cloned.MinItems {
+			t.Errorf("MinItems not equal: got %v, want %v", cloned.MinItems, original.MinItems)
+		}
+		if original.Count != cloned.Count {
+			t.Errorf("Count not equal: got %v, want %v", cloned.Count, original.Count)
+		}
+		if !reflect.DeepEqual(original.Events, cloned.Events) {
+			t.Errorf("Events not equal: got %v, want %v", cloned.Events, original.Events)
+		}
+		if original.cachedVal == cloned.cachedVal {
+			t.Errorf("cachedVal pointers should be different, got same address")
+		}
+		if *original.cachedVal != *cloned.cachedVal {
+			t.Errorf("cachedVal values not equal: got %v, want %v", *cloned.cachedVal, *original.cachedVal)
+		}
+
+		cloned.FilterIDs[0] = "changed"
+		cloned.Events["newEv"] = struct{}{}
+		*cloned.cachedVal = 99.0
+
+		if reflect.DeepEqual(original.FilterIDs, cloned.FilterIDs) {
+			t.Errorf("FilterIDs slice was not deep copied")
+		}
+		if _, exists := original.Events["newEv"]; exists {
+			t.Errorf("Events map was not deep copied")
+		}
+		if *original.cachedVal == 99.0 {
+			t.Errorf("cachedVal was not deep copied")
+		}
+	})
+}
+
+func TestStatsREPSCGetValue(t *testing.T) {
+	t.Run("Returns StatsNA when count below MinItems", func(t *testing.T) {
+		s := &StatREPSC{
+			MinItems: 5,
+			Count:    3,
+			Events:   map[string]struct{}{},
+		}
+		got := s.GetValue(2)
+		want := utils.StatsNA
+		if got != want {
+			t.Errorf("expected %v, got %v", want, got)
+		}
+	})
+
+	t.Run("Returns count as float64 when above MinItems", func(t *testing.T) {
+		s := &StatREPSC{
+			MinItems: 3,
+			Count:    5,
+			Events:   map[string]struct{}{},
+		}
+		got := s.GetValue(2)
+		want := float64(5)
+		if got != want {
+			t.Errorf("expected %v, got %v", want, got)
+		}
+	})
+
+	t.Run("Uses cached value if available", func(t *testing.T) {
+		val := 123.45
+		s := &StatREPSC{
+			cachedVal: &val,
+			Events:    map[string]struct{}{},
+		}
+		got := s.GetValue(2)
+		if got != val {
+			t.Errorf("expected cached value %v, got %v", val, got)
+		}
+	})
+}
+
+func TestStatREPSCGetFloat64Value(t *testing.T) {
+	t.Run("Returns StatsNA when count below MinItems", func(t *testing.T) {
+		s := &StatREPSC{
+			MinItems: 5,
+			Count:    3,
+			Events:   map[string]struct{}{},
+		}
+		got := s.GetFloat64Value(2)
+		want := utils.StatsNA
+		if got != want {
+			t.Errorf("expected %v, got %v", want, got)
+		}
+	})
+
+	t.Run("Returns count as float64 when above MinItems", func(t *testing.T) {
+		s := &StatREPSC{
+			MinItems: 3,
+			Count:    5,
+			Events:   map[string]struct{}{},
+		}
+		got := s.GetFloat64Value(2)
+		want := float64(5)
+		if got != want {
+			t.Errorf("expected %v, got %v", want, got)
+		}
+	})
+
+	t.Run("Uses cached value if available", func(t *testing.T) {
+		val := 77.77
+		s := &StatREPSC{
+			cachedVal: &val,
+			Events:    map[string]struct{}{},
+		}
+		got := s.GetFloat64Value(2)
+		if got != val {
+			t.Errorf("expected cached value %v, got %v", val, got)
+		}
+	})
+}
