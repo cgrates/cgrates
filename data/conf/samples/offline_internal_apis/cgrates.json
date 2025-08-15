@@ -1,0 +1,125 @@
+{
+
+
+
+    "general": {
+        "node_id":"offlineApis",
+        "log_level": 7,
+    },
+    
+    
+    "listen": {
+        "rpc_json": ":2012",
+        "rpc_gob": ":2013",
+        "http": ":2080"
+    },
+    
+    
+    "data_db": {
+        "db_type": "*internal",
+        "opts":{
+            "internalDBDumpPath": "/tmp/internal_db/datadb",
+            "internalDBBackupPath": "/tmp/internal_db/backup_datadb",
+            "internalDBDumpInterval": "1h",
+        }
+    },
+    
+    
+    "stor_db": {
+        "db_type": "*internal",
+        "opts":{
+            "internalDBDumpPath": "/tmp/internal_db/stordb",
+            "internalDBBackupPath": "/tmp/internal_db/backup_stordb",
+            "internalDBDumpInterval": "1h",
+        }
+    },
+    
+    "rals": {
+        "enabled": true,
+        "thresholds_conns": ["*internal"],
+        "max_increments":3000000
+    },
+    
+    
+    "schedulers": {
+        "enabled": true,
+        "cdrs_conns": ["*internal"],
+        "stats_conns": ["*internal"]
+    },
+    
+    
+    "cdrs": {
+        "enabled": true,
+        "chargers_conns":["*internal"]
+    },
+    
+    
+    "attributes": {
+        "enabled": true,
+        "stats_conns": ["*internal"],
+        "resources_conns": ["*internal"],
+        "apiers_conns": ["*internal"]
+    },
+    
+    
+    "chargers": {
+        "enabled": true,
+        "attributes_conns": ["*internal"]
+    },
+    
+    
+    "resources": {
+        "enabled": true,
+        "store_interval": "-1",
+        "thresholds_conns": ["*internal"]
+    },
+    
+    
+    "stats": {
+        "enabled": true,
+        "store_interval": "-1",
+        "thresholds_conns": ["*internal"]
+    },
+    
+    "thresholds": {
+        "enabled": true,
+        "store_interval": "-1"
+    },
+    
+    
+    "routes": {
+        "enabled": true,
+        "prefix_indexed_fields":["*req.Destination"],
+        "stats_conns": ["*internal"],
+        "resources_conns": ["*internal"],
+        "rals_conns": ["*internal"]
+    },
+    
+    
+    "sessions": {
+        "enabled": true,
+        "routes_conns": ["*internal"],
+        "resources_conns": ["*internal"],
+        "attributes_conns": ["*internal"],
+        "rals_conns": ["*internal"],
+        "cdrs_conns": ["*internal"],
+        "chargers_conns": ["*internal"],
+        "backup_interval": "-1"
+    },
+    
+    
+    "apiers": {
+        "enabled": true,
+        "scheduler_conns": ["*internal"]
+    },
+    
+    
+    "filters": {
+        "stats_conns": ["*internal"],
+        "resources_conns": ["*internal"],
+        "apiers_conns": ["*internal"]
+    }
+    
+    
+    }
+    
