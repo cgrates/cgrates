@@ -6324,3 +6324,107 @@ func TestStatREPSCGetFloat64Value(t *testing.T) {
 		}
 	})
 }
+
+func TestNewStatREPSC(t *testing.T) {
+	filterIDs := []string{"fltr1", "fltr2"}
+	minItems := 5
+
+	metric, err := NewStatREPSC(minItems, "ignored", filterIDs)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	stat, ok := metric.(*StatREPSC)
+	if !ok {
+		t.Fatalf("expected type *StatREPSC, got %T", metric)
+	}
+
+	if !reflect.DeepEqual(stat.FilterIDs, filterIDs) {
+		t.Errorf("expected FilterIDs %v, got %v", filterIDs, stat.FilterIDs)
+	}
+
+	if stat.MinItems != minItems {
+		t.Errorf("expected MinItems %d, got %d", minItems, stat.MinItems)
+	}
+
+	if stat.Events == nil {
+		t.Error("expected Events map to be initialized, got nil")
+	} else if len(stat.Events) != 0 {
+		t.Errorf("expected Events to be empty, got length %d", len(stat.Events))
+	}
+
+	if stat.Count != 0 {
+		t.Errorf("expected Count 0, got %d", stat.Count)
+	}
+
+	if stat.cachedVal != nil {
+		t.Errorf("expected cachedVal to be nil, got %v", stat.cachedVal)
+	}
+}
+
+func TestStatREPSCGetStringValue(t *testing.T) {
+	t.Run("returns NotAvailable when StatsNA", func(t *testing.T) {
+		s := &StatREPSC{}
+		na := utils.StatsNA
+		s.cachedVal = &na
+		got := s.GetStringValue(2)
+		if got != utils.NotAvailable {
+			t.Errorf("expected %q, got %q", utils.NotAvailable, got)
+		}
+	})
+
+	t.Run("returns formatted float when value is not StatsNA", func(t *testing.T) {
+		s := &StatREPSC{}
+		val := 123.456
+		s.cachedVal = &val
+
+		got := s.GetStringValue(2)
+		expected := strconv.FormatFloat(val, 'f', -1, 64)
+		if got != expected {
+			t.Errorf("expected %q, got %q", expected, got)
+		}
+	})
+}
+
+func TestStatLowestGetCompressFactor(t *testing.T) {
+	t.Run("adds missing IDs with value 1", func(t *testing.T) {
+		s := &StatLowest{
+			Events: map[string]float64{
+				"id1": 10.0,
+				"id2": 20.0,
+			},
+		}
+		events := map[string]int{
+			"id2": 5,
+		}
+
+		got := s.GetCompressFactor(events)
+
+		expected := map[string]int{
+			"id1": 1,
+			"id2": 5,
+		}
+
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("expected %v, got %v", expected, got)
+		}
+	})
+
+	t.Run("no changes when all IDs exist", func(t *testing.T) {
+		s := &StatLowest{
+			Events: map[string]float64{
+				"id1": 10.0,
+			},
+		}
+		events := map[string]int{
+			"id1": 2,
+		}
+
+		got := s.GetCompressFactor(events)
+		expected := map[string]int{"id1": 2}
+
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("expected %v, got %v", expected, got)
+		}
+	})
+}
