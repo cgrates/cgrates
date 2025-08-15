@@ -1725,6 +1725,12 @@ const (
 	APIerSv1RemoveTiming                      = "APIerSv1.RemoveTiming"
 	APIerSV1GetAccountCost                    = "APIerSv1.GetAccountCost"
 	APIerSV1TimingIsActiveAt                  = "APIerSv1.TimingIsActiveAt"
+	APIerSv1DumpDataDB                        = "APIerSv1.DumpDataDB"
+	APIerSv1RewriteDataDB                     = "APIerSv1.RewriteDataDB"
+	APIerSv1DumpStorDB                        = "APIerSv1.DumpStorDB"
+	APIerSv1RewriteStorDB                     = "APIerSv1.RewriteStorDB"
+	APIerSv1BackupDataDB                      = "APIerSv1.BackupDataDB"
+	APIerSv1BackupStorDB                      = "APIerSv1.BackupStorDB"
 )
 
 // APIerSv1 TP APIs
