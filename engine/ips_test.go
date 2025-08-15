@@ -20,9 +20,11 @@ package engine
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -481,4 +483,210 @@ func TestIPRecordUsage(t *testing.T) {
 			t.Fatal("usage should NOT be recorded when ttl is 0")
 		}
 	})
+}
+
+func TestIPClearUsage(t *testing.T) {
+	t.Run("usage not found", func(t *testing.T) {
+		ip := &IP{Usages: make(map[string]*IPUsage)}
+		err := ip.clearUsage("missing")
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		expected := "cannot find usage record with id: missing"
+		if err.Error() != expected {
+			t.Errorf("expected error %q, got %q", expected, err.Error())
+		}
+	})
+
+	t.Run("usage found with zero expiry time", func(t *testing.T) {
+		totalUsage := 10.0
+		ip := &IP{
+			Usages: map[string]*IPUsage{
+				"id1": {Units: 5.0},
+			},
+			tUsage: &totalUsage,
+			TTLIdx: []string{"id2"},
+		}
+
+		err := ip.clearUsage("id1")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if _, exists := ip.Usages["id1"]; exists {
+			t.Error("expected id1 to be deleted from Usages")
+		}
+		if *ip.tUsage != 5.0 {
+			t.Errorf("expected tUsage=5.0, got %v", *ip.tUsage)
+		}
+		if !slices.Equal(ip.TTLIdx, []string{"id2"}) {
+			t.Errorf("TTLIdx changed unexpectedly: %v", ip.TTLIdx)
+		}
+	})
+
+	t.Run("usage found with non-zero expiry time", func(t *testing.T) {
+		totalUsage := 20.0
+		expTime := time.Now().Add(time.Hour)
+		ip := &IP{
+			Usages: map[string]*IPUsage{
+				"id2": {ExpiryTime: expTime, Units: 7.0},
+			},
+			TTLIdx: []string{"id2", "other"},
+			tUsage: &totalUsage,
+		}
+
+		err := ip.clearUsage("id2")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if _, exists := ip.Usages["id2"]; exists {
+			t.Error("expected id2 to be deleted from Usages")
+		}
+		if *ip.tUsage != 13.0 {
+			t.Errorf("expected tUsage=13.0, got %v", *ip.tUsage)
+		}
+		if slices.Contains(ip.TTLIdx, "id2") {
+			t.Errorf("expected id2 to be removed from TTLIdx, got %v", ip.TTLIdx)
+		}
+	})
+}
+
+func TestIPsSort(t *testing.T) {
+	ip1 := &IP{cfg: &IPProfile{Weight: 1.0}}
+	ip2 := &IP{cfg: &IPProfile{Weight: 3.0}}
+	ip3 := &IP{cfg: &IPProfile{Weight: 2.0}}
+
+	ips := IPs{ip1, ip2, ip3}
+	ips.Sort()
+
+	expected := IPs{ip2, ip3, ip1}
+	for i := range ips {
+		if ips[i] != expected[i] {
+			t.Errorf("expected index %d to be %+v, got %+v", i, expected[i], ips[i])
+		}
+	}
+}
+
+func TestIPsUnlock(t *testing.T) {
+	ip1 := &IP{lkID: "lock1", cfg: &IPProfile{lkID: "cfgLock1"}}
+	ip2 := &IP{lkID: "lock2", cfg: &IPProfile{lkID: "cfgLock2"}}
+	ip3 := &IP{lkID: "lock3", cfg: nil}
+
+	ips := IPs{ip1, ip2, ip3}
+	ips.unlock()
+
+	if ip1.lkID != "" {
+		t.Errorf("expected ip1.lkID to be empty, got %q", ip1.lkID)
+	}
+	if ip2.lkID != "" {
+		t.Errorf("expected ip2.lkID to be empty, got %q", ip2.lkID)
+	}
+	if ip3.lkID != "" {
+		t.Errorf("expected ip3.lkID to be empty, got %q", ip3.lkID)
+	}
+
+	if ip1.cfg.lkID != "" {
+		t.Errorf("expected ip1.cfg.lkID to be empty, got %q", ip1.cfg.lkID)
+	}
+	if ip2.cfg.lkID != "" {
+		t.Errorf("expected ip2.cfg.lkID to be empty, got %q", ip2.cfg.lkID)
+	}
+}
+
+func TestIPsIds(t *testing.T) {
+	ip1 := &IP{ID: "ip1"}
+	ip2 := &IP{ID: "ip2"}
+	ip3 := &IP{ID: "ip3"}
+
+	ips := IPs{ip1, ip2, ip3}
+
+	got := ips.ids()
+
+	if len(got) != 3 {
+		t.Errorf("expected 3 IDs in set, got %d", len(got))
+	}
+
+	expectedIDs := []string{"ip1", "ip2", "ip3"}
+	for _, id := range expectedIDs {
+		if _, exists := got[id]; !exists {
+			t.Errorf("expected ID %q in set, but it was missing", id)
+		}
+	}
+}
+
+func TestIPCacheClone(t *testing.T) {
+	ttl := 10 * time.Minute
+	tUsage := 123.45
+	dirty := true
+
+	original := &IP{
+		Tenant: "cgrates.org",
+		ID:     "ip01",
+		TTLIdx: []string{"idx1", "idx2"},
+		Usages: map[string]*IPUsage{
+			"u1": {Tenant: "cgrates.org", ID: "u1", Units: 50.0},
+		},
+		ttl:    &ttl,
+		tUsage: &tUsage,
+		dirty:  &dirty,
+		cfg: &IPProfile{
+			Tenant: "cgrates.org",
+			ID:     "profile1",
+			Weight: 1.5,
+		},
+	}
+
+	cloneAny := original.CacheClone()
+	if cloneAny == nil {
+		t.Fatal("CacheClone returned nil")
+	}
+
+	clone, ok := cloneAny.(*IP)
+	if !ok {
+		t.Fatalf("expected type *IP, got %T", cloneAny)
+	}
+
+	if clone == original {
+		t.Error("expected clone to be a different pointer than original")
+	}
+
+	if !reflect.DeepEqual(clone, original) {
+		t.Errorf("expected clone to be deeply equal to original:\noriginal: %+v\nclone: %+v", original, clone)
+	}
+}
+
+func TestNewIPService(t *testing.T) {
+	dm := &DataManager{}
+	cgrcfg := &config.CGRConfig{}
+	filterS := &FilterS{}
+	connMgr := &ConnManager{}
+
+	service := NewIPService(dm, cgrcfg, filterS, connMgr)
+	if service == nil {
+		t.Fatal("expected NewIPService to return non-nil")
+	}
+
+	if service.dm != dm {
+		t.Errorf("expected dm=%+v, got %+v", dm, service.dm)
+	}
+	if service.cfg != cgrcfg {
+		t.Errorf("expected cfg=%+v, got %+v", cgrcfg, service.cfg)
+	}
+	if service.fs != filterS {
+		t.Errorf("expected fs=%+v, got %+v", filterS, service.fs)
+	}
+	if service.cm != connMgr {
+		t.Errorf("expected cm=%+v, got %+v", connMgr, service.cm)
+	}
+
+	if service.storedIPs == nil {
+		t.Error("expected storedIPs map to be initialized")
+	}
+	if service.loopStopped == nil {
+		t.Error("expected loopStopped channel to be initialized")
+	}
+	if service.stopBackup == nil {
+		t.Error("expected stopBackup channel to be initialized")
+	}
 }
