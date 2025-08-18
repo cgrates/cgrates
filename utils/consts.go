@@ -616,6 +616,8 @@ const (
 	Categories           = "Categories"
 	Blocker              = "Blocker"
 	RatingPlanID         = "RatingPlanID"
+	RequestProcessorID   = "RequestProcessorID"
+	EventReaderID        = "EventReaderID"
 	StartTime            = "StartTime"
 	EndTime              = "EndTime"
 	ProcessingTime       = "ProcessingTime"

@@ -531,11 +531,12 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		ID:     utils.GenUUID(),
 		Time:   utils.TimePointer(time.Now()),
 		Event: map[string]any{
-			utils.ReplyState:     replyState,
-			utils.StartTime:      startTime,
-			utils.EndTime:        endTime,
-			utils.ProcessingTime: endTime.Sub(startTime),
-			utils.Source:         utils.RadiusAgent,
+			utils.ReplyState:         replyState,
+			utils.StartTime:          startTime,
+			utils.EndTime:            endTime,
+			utils.ProcessingTime:     endTime.Sub(startTime),
+			utils.Source:             utils.RadiusAgent,
+			utils.RequestProcessorID: reqProcessor.ID,
 		},
 		APIOpts: map[string]any{
 			utils.MetaEventType: utils.ProcessTime,
