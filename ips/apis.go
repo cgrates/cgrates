@@ -316,7 +316,7 @@ func (s *IPService) V1ClearIPAllocations(ctx *context.Context, args *utils.Clear
 		utils.IPAllocationsLockKey(tnt, args.ID))
 	defer guardian.Guardian.UnguardIDs(lkID)
 
-	allocs, err := s.dm.GetIPAllocations(ctx, tnt, args.ID, true, true, utils.NonTransactional)
+	allocs, err := s.dm.GetIPAllocations(ctx, tnt, args.ID, true, true, utils.NonTransactional, nil)
 	if err != nil {
 		return err
 	}
