@@ -425,9 +425,15 @@ type ClearIPAllocationsArgs struct {
 	APIOpts       map[string]any
 }
 
-// ComputeUnexported populates lookup maps and profile reference from exported fields.
-// Must be called after retrieving from DB.
+// ComputeUnexported sets up unexported fields based on the provided profile.
+// Safe to call multiple times with the same profile.
 func (a *IPAllocations) ComputeUnexported(prfl *IPProfile) error {
+	if prfl == nil {
+		return nil // nothing to compute without a profile
+	}
+	if a.prfl == prfl {
+		return nil // already computed for this profile
+	}
 	a.prfl = prfl
 	a.poolAllocs = make(map[string]map[netip.Addr]string)
 	for allocID, alloc := range a.Allocations {
