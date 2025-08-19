@@ -1691,7 +1691,11 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
-			return x.(*utils.IPAllocations), nil
+			ip = x.(*utils.IPAllocations)
+			if err = ip.ComputeUnexported(prfl); err != nil {
+				return nil, err
+			}
+			return ip, nil
 		}
 	}
 	if dm == nil {
@@ -1724,10 +1728,8 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 			return nil, err
 		}
 	}
-	if prfl != nil {
-		if err = ip.ComputeUnexported(prfl); err != nil {
-			return nil, err
-		}
+	if err = ip.ComputeUnexported(prfl); err != nil {
+		return nil, err
 	}
 	if cacheWrite {
 		if errCh := Cache.Set(ctx, utils.CacheIPAllocations, tntID, ip, nil,
