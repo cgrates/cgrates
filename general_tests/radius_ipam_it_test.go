@@ -83,77 +83,22 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, cfg := ng.Run(t)
 
+	ippID := "IMSI_123456789012345"
 	var replySet string
 	if err := client.Call(context.Background(), utils.AdminSv1SetIPProfile,
 		&utils.IPProfileWithAPIOpts{
 			IPProfile: &utils.IPProfile{
 				Tenant:    "cgrates.org",
-				ID:        "IPsAPI",
-				FilterIDs: []string{"*string:~*req.Account:123456789012345"},
-				Weights: utils.DynamicWeights{
-					{
-						Weight: 15,
-					},
-				},
-				TTL:    -1,
-				Stored: false,
-
-				// Pool selection logic:
-				// POOL_A (10.100.0.1): weight 50, blocks (APN=internet.test.apn)
-				// POOL_B (10.100.0.2): weight 30, gets removed
-				// POOL_C (10.100.0.3): weight 100 should win
+				ID:        ippID,
+				FilterIDs: []string{"*string:~*req.IMSI:123456789012345"},
+				TTL:       -1,
 				Pools: []*utils.IPPool{
 					{
-						ID:        "POOL_A",
-						FilterIDs: []string{},
-						Type:      "*ipv4",
-						Range:     "10.100.0.1/32",
-						Strategy:  "*ascending",
-						Message:   "Pool A message",
-						Weights: utils.DynamicWeights{
-							{
-								FilterIDs: []string{},
-								Weight:    50,
-							},
-						},
-						Blockers: utils.DynamicBlockers{
-							{
-								FilterIDs: []string{"*string:~*req.APN:internet.test.apn"},
-								Blocker:   true,
-							},
-						},
-					},
-					{
-						ID:        "POOL_B",
-						FilterIDs: []string{},
-						Type:      "*ipv4",
-						Range:     "10.100.0.2/32",
-						Strategy:  "*ascending",
-						Message:   "Pool B message",
-						Weights: utils.DynamicWeights{
-							{
-								FilterIDs: []string{},
-								Weight:    30,
-							},
-						},
-					},
-					{
-						ID:        "POOL_C",
-						FilterIDs: []string{},
-						Type:      "*ipv4",
-						Range:     "10.100.0.3/32",
-						Strategy:  "*ascending",
-						Message:   "Pool C message",
-						Weights: utils.DynamicWeights{
-							{
-								FilterIDs: []string{"*string:~*req.APN:internet.test.apn"},
-								Weight:    100,
-							},
-							{
-								FilterIDs: []string{},
-								Weight:    10,
-							},
-						},
+						ID:       "DEFAULT",
+						Type:     "*ipv4",
+						Range:    "10.100.0.1/32", // Single IP to ensure rejection scenario
+						Strategy: "*ascending",
+						Message:  "Default IP pool",
 					},
 				},
 			},
@@ -176,9 +121,10 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 	acctSessionID := "acct-session-abcdef-123456"
 
 	proxyAuth := "4829"
-	proxyAcctStart := "4830"
-	proxyAcctAlive := "4831"
-	proxyAcctStop := "4832"
+	proxyAuthReject := "4830"
+	proxyAcctStart := "4831"
+	proxyAcctAlive := "4832"
+	proxyAcctStop := "4833"
 
 	// Step 1: Access-Request (should not allocate)
 	dictRad := radigo.RFC2865Dictionary()
@@ -205,9 +151,9 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 			"Event-Timestamp":    currentTimestamp,
 			"NAS-IP-Address":     nasIP,
 			"Proxy-State":        proxyAuth,
-		},
+		}, radigo.AccessAccept,
 	)
-	checkAllocs(t, client, "IPsAPI")
+	checkAllocs(t, client, ippID)
 
 	// retrieve allocatedIP (to be used in Accounting-Request Start)
 	var allocatedIP string
@@ -221,8 +167,8 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 			}
 		}
 	}
-	if allocatedIP != "10.100.0.3" {
-		t.Errorf("expected IP from POOL_C (10.100.0.3), got %s", allocatedIP)
+	if allocatedIP != "10.100.0.1" {
+		t.Errorf("expected IP from DEFAULT pool (10.100.0.1), got %s", allocatedIP)
 	}
 
 	// Step 2: Accounting-Request Start (should allocate)
@@ -249,9 +195,52 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 			"NAS-IP-Address":     "192.168.1.11", // Different NAS IP for accounting
 			"Event-Timestamp":    currentTimestamp,
 			"Proxy-State":        proxyAcctStart,
-		},
+		}, radigo.AccountingResponse,
 	)
-	checkAllocs(t, client, "IPsAPI", acctSessionID)
+	checkAllocs(t, client, ippID, acctSessionID)
+
+	// Step 2.5: Send another Access-Request after IP allocation
+	// This should receive Access-Reject since IP is already allocated.
+	rejectSessID := "reject-session-98765"
+	rejectTimestamp := fmt.Sprintf("%d", time.Now().Unix())
+
+	rejectReply := sendRadReq(t, clientAuth, radigo.AccessRequest, 5,
+		map[string]string{
+			"User-Name":          imsi,
+			"Service-Type":       "Framed",
+			"Framed-Protocol":    "GPRS-PDP-Context",
+			"Called-Station-Id":  apn,
+			"Calling-Station-Id": msisdn,
+			"NAS-Identifier":     nasID,
+			"Acct-Session-Id":    rejectSessID,
+			"Framed-Pool":        poolName,
+			"User-Password":      passwd,
+			"Event-Timestamp":    rejectTimestamp,
+			"NAS-IP-Address":     nasIP,
+			"Proxy-State":        proxyAuthReject,
+		}, radigo.AccessReject)
+
+	// Verify Access-Reject response contains error message and no IP address.
+	var hasReplyMessage, hasFramedIP bool
+	var replyMessage string
+	for _, avp := range rejectReply.AVPs {
+		if avp.Number == 18 { // Reply-Message
+			hasReplyMessage = true
+			replyMessage = string(avp.RawValue)
+		}
+		if avp.Number == 8 { // Framed-IP-Address
+			hasFramedIP = true
+		}
+	}
+	if !hasReplyMessage || replyMessage == "" {
+		t.Errorf("Access-Reject should contain Reply-Message with error, got: %q", replyMessage)
+	}
+	if hasFramedIP {
+		t.Error("Access-Reject should not contain Framed-IP-Address")
+	}
+	if !strings.Contains(replyMessage, "IP_UNAUTHORIZED") {
+		t.Errorf("Reply-Message should contain IP_UNAUTHORIZED error, got: %q", replyMessage)
+	}
 
 	// Step 3: Accounting-Request Alive (should maintain allocation)
 	time.Sleep(100 * time.Millisecond)
@@ -271,9 +260,9 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 			"NAS-IP-Address":     "192.168.1.12",
 			"Event-Timestamp":    aliveTimestamp,
 			"Proxy-State":        proxyAcctAlive,
-		},
+		}, radigo.AccountingResponse,
 	)
-	checkAllocs(t, client, "IPsAPI", acctSessionID)
+	checkAllocs(t, client, ippID, acctSessionID)
 
 	// Step 4: Accounting-Request Stop (should release)
 	time.Sleep(100 * time.Millisecond)
@@ -294,13 +283,13 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 			"NAS-IP-Address":       "192.168.1.12",
 			"Event-Timestamp":      stopTimestamp,
 			"Proxy-State":          proxyAcctStop,
-		},
+		}, radigo.AccountingResponse,
 	)
-	checkAllocs(t, client, "IPsAPI")
+	checkAllocs(t, client, ippID)
 	checkCDR(t, client, imsi)
 }
 
-func sendRadReq(t *testing.T, client *radigo.Client, code radigo.PacketCode, id uint8, avps map[string]string) *radigo.Packet {
+func sendRadReq(t *testing.T, client *radigo.Client, code radigo.PacketCode, id uint8, avps map[string]string, expectedCode radigo.PacketCode) *radigo.Packet {
 	t.Helper()
 	req := client.NewRequest(code, id)
 
@@ -324,15 +313,8 @@ func sendRadReq(t *testing.T, client *radigo.Client, code radigo.PacketCode, id 
 		t.Fatal(err)
 	}
 
-	var failed bool
-	switch code {
-	case radigo.AccessRequest:
-		failed = replyPacket.Code != radigo.AccessAccept
-	case radigo.AccountingRequest:
-		failed = replyPacket.Code != radigo.AccountingResponse
-	}
-	if failed {
-		t.Errorf("unexpected reply received to %s: %+v", code.String(), utils.ToJSON(replyPacket))
+	if replyPacket.Code != expectedCode {
+		t.Errorf("expected reply code %s, got %s for request %s: %+v", expectedCode.String(), replyPacket.Code.String(), code.String(), utils.ToJSON(replyPacket))
 	}
 
 	return replyPacket
