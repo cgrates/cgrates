@@ -690,3 +690,144 @@ func TestNewIPService(t *testing.T) {
 		t.Error("expected stopBackup channel to be initialized")
 	}
 }
+
+func TestIPServiceStoreMatchedIPs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data, err := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dm := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
+
+	t.Run("StoreInterval=0", func(t *testing.T) {
+		cfg.IPsCfg().StoreInterval = 0
+		svc := &IPService{
+			cfg:       cfg,
+			dm:        dm,
+			storedIPs: make(utils.StringSet),
+		}
+
+		dirty := false
+		ip := &IP{Tenant: "cgrates.org", ID: "ip01", dirty: &dirty}
+
+		err := svc.storeMatchedIPs(IPs{ip})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if dirty {
+			t.Errorf("expected dirty=false, got true")
+		}
+		if len(svc.storedIPs) != 0 {
+			t.Errorf("expected storedIPs empty, got %+v", svc.storedIPs)
+		}
+	})
+
+	t.Run("StoreInterval>0 marks dirty and schedules for backup", func(t *testing.T) {
+		cfg.IPsCfg().StoreInterval = 10
+		svc := &IPService{
+			cfg:       cfg,
+			dm:        dm,
+			storedIPs: make(utils.StringSet),
+		}
+
+		dirty := false
+		ip := &IP{Tenant: "cgrates.org", ID: "ip02", dirty: &dirty}
+
+		err := svc.storeMatchedIPs(IPs{ip})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !dirty {
+			t.Errorf("expected dirty=true, got false")
+		}
+		if _, exists := svc.storedIPs[ip.TenantID()]; !exists {
+			t.Errorf("expected ip02 in storedIPs, got %+v", svc.storedIPs)
+		}
+	})
+
+	t.Run("StoreInterval<0 stores immediately", func(t *testing.T) {
+		cfg.IPsCfg().StoreInterval = -1
+		svc := &IPService{
+			cfg:       cfg,
+			dm:        dm,
+			storedIPs: make(utils.StringSet),
+		}
+
+		dirty := true
+		ip := &IP{Tenant: "cgrates.org", ID: "ip03", dirty: &dirty}
+
+		Cache.Set(utils.CacheIPs, ip.TenantID(), ip, nil, true, utils.NonTransactional)
+
+		err := svc.storeMatchedIPs(IPs{ip})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if dirty {
+			t.Errorf("expected dirty=false after storeIP, got true")
+		}
+	})
+}
+
+func TestIPServiceMatchingIPsForEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data, err := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	fs := NewFilterS(cfg, nil, dm)
+
+	svc := &IPService{
+		cfg: cfg,
+		dm:  dm,
+		fs:  fs,
+	}
+
+	profile := &IPProfile{
+		Tenant: "cgrates.org",
+		ID:     "ip01",
+		Stored: true,
+		TTL:    5 * time.Minute,
+	}
+	if err := dm.SetIPProfile(profile, true); err != nil {
+		t.Fatalf("failed to set IPProfile: %v", err)
+	}
+
+	ip := &IP{
+		Tenant: "cgrates.org",
+		ID:     "ip01",
+	}
+	Cache.Set(utils.CacheIPs, ip.TenantID(), ip, nil, true, utils.NonTransactional)
+	if err := dm.SetIP(ip); err != nil {
+		t.Fatalf("failed to set IP: %v", err)
+	}
+
+	ev := &utils.CGREvent{
+		Event: map[string]interface{}{
+			"type": "testEvent",
+		},
+		Time: func() *time.Time { t := time.Now(); return &t }(),
+	}
+	evUUID := "event-uuid-001"
+
+	ips, err := svc.matchingIPsForEvent("cgrates.org", ev, evUUID, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(ips) != 1 {
+		t.Errorf("expected 1 IP, got %d", len(ips))
+	}
+	if ips[0].ID != "ip01" {
+		t.Errorf("expected IP ID 'ip01', got '%s'", ips[0].ID)
+	}
+
+	if ips[0].ttl == nil || *ips[0].ttl != profile.TTL {
+		t.Errorf("expected IP TTL %v, got %v", profile.TTL, ips[0].ttl)
+	}
+
+	cached, ok := Cache.Get(utils.CacheEventIPs, evUUID)
+	if !ok || cached == nil {
+		t.Errorf("expected cached IPIDs for event UUID")
+	}
+}

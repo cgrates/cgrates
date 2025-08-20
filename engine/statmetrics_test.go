@@ -6428,3 +6428,184 @@ func TestStatLowestGetCompressFactor(t *testing.T) {
 		}
 	})
 }
+
+func TestStatLowestMarshal(t *testing.T) {
+	lowest := &StatLowest{
+		FilterIDs: []string{"filter1", "filter2"},
+		FieldName: "Usage",
+		MinItems:  2,
+		Lowest:    15.5,
+		Count:     1,
+		Events: map[string]float64{
+			"Event101": 15.5,
+		},
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event102",
+		Event: map[string]any{
+			"Usage":       20.0,
+			"Account":     "3003",
+			"Destination": "0077",
+		},
+	}
+	lowest.Events[ev.ID] = ev.Event["Usage"].(float64)
+	lowest.Count++
+
+	var nLowest StatLowest
+
+	expected := []byte(`{"FilterIDs":["filter1","filter2"],"FieldName":"Usage","MinItems":2,"Lowest":15.5,"Count":2,"Events":{"Event101":15.5,"Event102":20}}`)
+
+	if b, err := lowest.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
+	} else if err := nLowest.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(lowest, nLowest) {
+		t.Errorf("Expected objects to differ, got same: %s", utils.ToJSON(lowest))
+	}
+}
+
+func TestStatTCDClone(t *testing.T) {
+	val := 5 * time.Minute
+	orig := &StatTCD{
+		FilterIDs: []string{"filter1", "filter2"},
+		Sum:       10 * time.Minute,
+		Count:     2,
+		MinItems:  1,
+		Events: map[string]*DurationWithCompress{
+			"Event201": {Duration: 4 * time.Minute, CompressFactor: 1},
+			"Event202": {Duration: 6 * time.Minute, CompressFactor: 2},
+		},
+		val: &val,
+	}
+
+	clone := orig.Clone().(*StatTCD)
+
+	if orig == clone {
+		t.Fatal("Clone returned the same pointer, expected a deep copy")
+	}
+
+	if !reflect.DeepEqual(orig, clone) {
+		t.Errorf("Expected clone to equal original.\nOrig: %+v\nClone: %+v", orig, clone)
+	}
+
+	clone.FilterIDs[0] = "modifiedFilter"
+	clone.Events["Event201"].Duration = 9 * time.Minute
+	*clone.val = 42 * time.Minute
+
+	if orig.FilterIDs[0] == "modifiedFilter" {
+		t.Error("Expected original FilterIDs to remain unchanged after clone modification")
+	}
+	if orig.Events["Event201"].Duration == 9*time.Minute {
+		t.Error("Expected original Events to remain unchanged after clone modification")
+	}
+	if *orig.val == 42*time.Minute {
+		t.Error("Expected original val to remain unchanged after clone modification")
+	}
+
+	var nilTCD *StatTCD
+	if clonedNil := nilTCD.Clone(); clonedNil != nil {
+		t.Error("Expected nil Clone() to return nil")
+	}
+}
+
+func TestREPFCMarshal(t *testing.T) {
+	repfc := &StatREPFC{
+		MinItems:  2,
+		FilterIDs: []string{"filter1", "filter2"},
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event1",
+		Event: map[string]any{
+			"AnswerTime":  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			"Account":     "1001",
+			"Destination": "0034",
+		},
+	}
+	repfc.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
+
+	var nrepfc StatREPFC
+
+	expected := []byte(`{"FilterIDs":["filter1","filter2"],"MinItems":2,"ErrorType":"","Count":0,"Events":null}`)
+
+	if b, err := repfc.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
+	} else if err := nrepfc.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(repfc, nrepfc) {
+		t.Errorf("Expected objects to differ, got same: %s", utils.ToJSON(repfc))
+	}
+}
+
+func TestREPSCMarshal(t *testing.T) {
+	repsc := &StatREPSC{
+		FilterIDs: []string{"filter1", "filter2"},
+		MinItems:  3,
+	}
+
+	var nrepsc StatREPSC
+
+	expected := []byte(`{"FilterIDs":["filter1","filter2"],"MinItems":3,"Count":0,"Events":null}`)
+
+	if b, err := repsc.Marshal(&jMarshaler); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, b) {
+		t.Errorf("Expected: %s , received: %s", string(expected), string(b))
+	} else if err := nrepsc.LoadMarshaled(&jMarshaler, b); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(repsc, nrepsc) {
+		t.Errorf("Expected objects to differ, got same: %s", utils.ToJSON(repsc))
+	}
+}
+
+func TestStatTCCClone(t *testing.T) {
+	val := 11.45
+	orig := &StatTCC{
+		FilterIDs: []string{"Filter1", "Filter2"},
+		Sum:       200.75,
+		Count:     3,
+		MinItems:  1,
+		Events: map[string]*StatWithCompress{
+			"EventA": {Stat: 100.50, CompressFactor: 1},
+			"EventB": {Stat: 50.25, CompressFactor: 2},
+		},
+		val: &val,
+	}
+
+	clone := orig.Clone().(*StatTCC)
+
+	if orig == clone {
+		t.Fatal("Clone returned the same pointer, expected a deep copy")
+	}
+
+	if !reflect.DeepEqual(orig, clone) {
+		t.Errorf("Expected clone to equal original.\nOrig: %+v\nClone: %+v", orig, clone)
+	}
+
+	clone.FilterIDs[0] = "modifiedCostFilter"
+	clone.Events["EventA"].Stat = 999.99
+	*clone.val = 888.88
+
+	if orig.FilterIDs[0] == "modifiedCostFilter" {
+		t.Error("Expected original FilterIDs to remain unchanged after clone modification")
+	}
+
+	if orig.Events["EventA"].Stat == 999.99 {
+		t.Error("Expected original Events to remain unchanged after clone modification")
+	}
+	if *orig.val == 888.88 {
+		t.Error("Expected original val to remain unchanged after clone modification")
+	}
+
+	var nilTCC *StatTCC
+	if clonedNil := nilTCC.Clone(); clonedNil != nil {
+		t.Error("Expected nil Clone() to return nil")
+	}
+}
