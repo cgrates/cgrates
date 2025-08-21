@@ -121,7 +121,7 @@ sudo systemctl restart rsyslog
 %{_datarootdir}/%{name}/*
 %{_bindir}/*
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.json
-%{_logdir}/*
+%{_logdir}
 %{_spooldir}/*
 %{_libdir}/*
 %{_sysconfdir}/sysconfig/%{name}
