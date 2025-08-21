@@ -83,6 +83,7 @@ mkdir -p %{buildroot}%{_libdir}/internal_db/datadb
 mkdir -p %{buildroot}%{_libdir}/internal_db/backup/datadb
 mkdir -p %{buildroot}%{_libdir}/internal_db/stordb
 mkdir -p %{buildroot}%{_libdir}/internal_db/backup/stordb
+mkdir -p %{buildroot}%{_logdir}
 mkdir -p %{buildroot}/etc/logrotate.d
 mkdir -p %{buildroot}/etc/rsyslog.d
 install -m 0644 src/github.com/cgrates/cgrates/data/conf/logging/logrotate.conf %{buildroot}/etc/logrotate.d/%{name}
