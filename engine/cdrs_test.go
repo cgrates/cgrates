@@ -2839,3 +2839,264 @@ func TestArgV1ProcessEventsClone(t *testing.T) {
 		t.Errorf("Expected cloned APIOpts to be unaffected, but it was modified.")
 	}
 }
+
+func TestNewCDRProcessingArgsNoCfg(t *testing.T) {
+	t.Run("EmptyFlagsAndOpts", func(t *testing.T) {
+		flags := utils.FlagsWithParams{}
+		opts := map[string]any{}
+
+		args, err := newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+		if args == nil {
+			t.Fatal("Expected non-nil args")
+		}
+
+		expected := &cdrProcessingArgs{}
+		if *args != *expected {
+			t.Errorf("Expected %+v, got %+v", expected, args)
+		}
+	})
+
+	t.Run("OptsOnly", func(t *testing.T) {
+		flags := utils.FlagsWithParams{}
+		opts := map[string]any{
+			utils.OptsAttributeS: true,
+			utils.OptsChargerS:   true,
+			utils.OptsThresholdS: true,
+			utils.OptsStatS:      true,
+			utils.OptsRerate:     true,
+			utils.OptsRefund:     false,
+			utils.OptsRALs:       false,
+		}
+
+		args, err := newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+
+		if !args.attrS {
+			t.Error("Expected attrS to be true")
+		}
+		if !args.chrgS {
+			t.Error("Expected chrgS to be true")
+		}
+		if !args.thdS {
+			t.Error("Expected thdS to be true")
+		}
+		if !args.stS {
+			t.Error("Expected stS to be true")
+		}
+		if !args.reRate {
+			t.Error("Expected reRate to be true")
+		}
+		if args.ralS {
+			t.Error("Expected ralS to be false ")
+		}
+		if args.refund {
+			t.Error("Expected refund to be false ")
+		}
+		if args.reprocess {
+			t.Error("Expected reprocess to be false ")
+		}
+	})
+
+	t.Run("FlagsOnly", func(t *testing.T) {
+		flags := utils.FlagsWithParams{
+			utils.MetaAttributes: utils.FlagParams{"true": []string{}},
+			utils.MetaChargers:   utils.FlagParams{"true": []string{}},
+			utils.MetaStore:      utils.FlagParams{"true": []string{}},
+			utils.MetaExport:     utils.FlagParams{"true": []string{}},
+			utils.MetaThresholds: utils.FlagParams{"true": []string{}},
+			utils.MetaStats:      utils.FlagParams{"true": []string{}},
+			utils.MetaRerate:     utils.FlagParams{"false": []string{}},
+			utils.MetaRefund:     utils.FlagParams{"true": []string{}},
+			utils.MetaReprocess:  utils.FlagParams{"false": []string{}},
+			utils.MetaRALs:       utils.FlagParams{"true": []string{}},
+		}
+		opts := map[string]any{}
+
+		args, err := newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+
+		if !args.attrS {
+			t.Error("Expected attrS to be true")
+		}
+		if !args.chrgS {
+			t.Error("Expected chrgS to be true")
+		}
+		if !args.store {
+			t.Error("Expected store to be true")
+		}
+		if !args.export {
+			t.Error("Expected export to be true")
+		}
+		if !args.thdS {
+			t.Error("Expected thdS to be true")
+		}
+		if !args.stS {
+			t.Error("Expected stS to be true")
+		}
+		if args.reRate {
+			t.Error("Expected reRate to be false")
+		}
+		if !args.refund {
+			t.Error("Expected refund to be true")
+		}
+		if args.reprocess {
+			t.Error("Expected reprocess to be false (overridden by flag)")
+		}
+		if !args.ralS {
+			t.Error("Expected ralS to be true")
+		}
+	})
+
+	t.Run("FlagsOverrideOpts", func(t *testing.T) {
+		flags := utils.FlagsWithParams{
+			utils.MetaAttributes: utils.FlagParams{"false": []string{}},
+			utils.MetaChargers:   utils.FlagParams{"true": []string{}},
+		}
+		opts := map[string]any{
+			utils.OptsAttributeS: true,
+			utils.OptsChargerS:   false,
+		}
+
+		args, err := newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+
+		if args.attrS {
+			t.Error("Expected attrS to be false (flag overrides option)")
+		}
+		if !args.chrgS {
+			t.Error("Expected chrgS to be true (flag overrides option)")
+		}
+	})
+
+	t.Run("ReRateLogicTrue", func(t *testing.T) {
+		flags := utils.FlagsWithParams{}
+		opts := map[string]any{
+			utils.OptsRerate: true,
+		}
+
+		args, err := newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+
+		if !args.reRate {
+			t.Error("Expected reRate to be true")
+		}
+		if !args.ralS {
+			t.Error("Expected ralS to be true (auto-set by reRate)")
+		}
+		if !args.refund {
+			t.Error("Expected refund to be true (auto-set by reRate)")
+		}
+		if !args.reprocess {
+			t.Error("Expected reprocess to be true (auto-set by refund)")
+		}
+	})
+
+	t.Run("RefundLogicWithoutReRate", func(t *testing.T) {
+		flags := utils.FlagsWithParams{}
+		opts := map[string]any{
+			utils.OptsRefund: true,
+			utils.OptsRerate: false,
+		}
+
+		args, err := newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+
+		if args.reRate {
+			t.Error("Expected reRate to be false")
+		}
+		if !args.refund {
+			t.Error("Expected refund to be true")
+		}
+		if args.ralS {
+			t.Error("Expected ralS to be false (refund without reRate)")
+		}
+		if !args.reprocess {
+			t.Error("Expected reprocess to be true (auto-set by refund)")
+		}
+	})
+
+	t.Run("ErrorHandling", func(t *testing.T) {
+		flags := utils.FlagsWithParams{}
+
+		opts := map[string]any{
+			utils.OptsAttributeS: make(chan int),
+		}
+
+		args, err := newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err == nil {
+			t.Error("Expected error for invalid option type")
+		}
+		if args != nil {
+			t.Error("Expected nil args when error occurs")
+		}
+
+		opts = map[string]any{
+			utils.OptsChargerS: []int{1, 2, 3},
+		}
+
+		args, err = newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err == nil {
+			t.Error("Expected error for invalid option type")
+		}
+		if args != nil {
+			t.Error("Expected nil args when error occurs")
+		}
+	})
+
+	t.Run("StringAndNumericOpts", func(t *testing.T) {
+		flags := utils.FlagsWithParams{}
+		opts := map[string]any{
+			utils.OptsAttributeS: "true",
+			utils.OptsChargerS:   "false",
+			utils.OptsThresholdS: 1,
+			utils.OptsStatS:      0,
+			utils.OptsRerate:     1.5,
+			utils.OptsRALs:       0.0,
+		}
+
+		args, err := newCDRProcessingArgsNoCfg(flags, opts)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+
+		if !args.attrS {
+			t.Error("Expected attrS to be true (string 'true')")
+		}
+		if args.chrgS {
+			t.Error("Expected chrgS to be false (string 'false')")
+		}
+		if !args.thdS {
+			t.Error("Expected thdS to be true (int 1)")
+		}
+		if args.stS {
+			t.Error("Expected stS to be false (int 0)")
+		}
+		if !args.reRate {
+			t.Error("Expected reRate to be true (float64 1.5)")
+		}
+
+	})
+
+}
