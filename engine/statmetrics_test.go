@@ -6609,3 +6609,71 @@ func TestStatTCCClone(t *testing.T) {
 		t.Error("Expected nil Clone() to return nil")
 	}
 }
+
+func TestStatACDClone(t *testing.T) {
+	var sNil *StatACD
+	if clone := sNil.Clone(); clone != nil {
+		t.Errorf("expected nil clone for nil receiver, got %+v", clone)
+	}
+
+	s := &StatACD{}
+	clone := s.Clone().(*StatACD)
+	if clone == s {
+		t.Errorf("expected a new instance, got same pointer")
+	}
+	if clone.Sum != 0 || clone.Count != 0 || clone.MinItems != 0 {
+		t.Errorf("expected zero values in clone, got %+v", clone)
+	}
+
+	filterIDs := []string{"f1", "f2"}
+	s = &StatACD{FilterIDs: filterIDs}
+	clone = s.Clone().(*StatACD)
+	if len(clone.FilterIDs) != len(filterIDs) {
+		t.Errorf("expected FilterIDs length %d, got %d", len(filterIDs), len(clone.FilterIDs))
+	}
+	if &clone.FilterIDs[0] == &s.FilterIDs[0] {
+		t.Errorf("expected FilterIDs slice to be copied, not same pointer")
+	}
+
+	events := map[string]*DurationWithCompress{
+		"e1": {Duration: 10 * time.Second, CompressFactor: 2},
+	}
+	s = &StatACD{Events: events}
+	clone = s.Clone().(*StatACD)
+	if len(clone.Events) != len(events) {
+		t.Errorf("expected Events length %d, got %d", len(events), len(clone.Events))
+	}
+	if clone.Events["e1"] == events["e1"] {
+		t.Errorf("expected Events map value to be copied, not same pointer")
+	}
+	if clone.Events["e1"].Duration != 10*time.Second || clone.Events["e1"].CompressFactor != 2 {
+		t.Errorf("expected copied event values to match original")
+	}
+
+	val := 42 * time.Second
+	s = &StatACD{val: &val}
+	clone = s.Clone().(*StatACD)
+	if clone.val == nil || *clone.val != val {
+		t.Errorf("expected val %v, got %v", val, clone.val)
+	}
+	if clone.val == s.val {
+		t.Errorf("expected val pointer to be new, not same as original")
+	}
+}
+
+func TestStatLowestGetMinItems(t *testing.T) {
+	stat := &StatLowest{
+		MinItems: 5,
+	}
+
+	got := stat.GetMinItems()
+	if got != 5 {
+		t.Errorf("expected MinItems 5, got %d", got)
+	}
+
+	stat.MinItems = 10
+	got = stat.GetMinItems()
+	if got != 10 {
+		t.Errorf("expected MinItems 10, got %d", got)
+	}
+}
