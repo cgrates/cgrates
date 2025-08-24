@@ -346,33 +346,28 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 				utils.RadiusAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
-		if reqProcessor.Flags.Has(utils.MetaIPs) {
-			cgrEv.APIOpts[utils.MetaIPs] = reqProcessor.Flags.GetBool(utils.MetaIPs)
-		}
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
-		if reqProcessor.Flags.Has(utils.MetaIPs) {
-			cgrEv.APIOpts[utils.MetaIPs] = reqProcessor.Flags.GetBool(utils.MetaIPs)
-		}
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInitiate))
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaInitiate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
 		rply := new(sessions.V1UpdateSessionReply)
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesUpdate))
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaUpdate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		var rply string
-		if reqProcessor.Flags.Has(utils.MetaIPs) {
-			cgrEv.APIOpts[utils.MetaIPs] = reqProcessor.Flags.GetBool(utils.MetaIPs)
-		}
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = ra.cm.Call(ra.ctx, ra.cfg.RadiusAgentCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			cgrEv, &rply)
 		agReq.setCGRReply(nil, err)

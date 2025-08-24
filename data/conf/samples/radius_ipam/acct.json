@@ -8,6 +8,7 @@
         ],
         "flags": [
           "*initiate",
+          "*chargers",
           "*ips"
         ],
         "request_fields": [

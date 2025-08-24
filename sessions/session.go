@@ -226,6 +226,8 @@ func (s *Session) UpdateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 	if alterableFields.Size() == 0 { // do not lock if we can't update any field
 		return
 	}
+
+	// TODO: fix deadlock when called by updateSession method.
 	s.lk.Lock()
 	s.updateSRuns(updEv, alterableFields)
 	s.lk.Unlock()

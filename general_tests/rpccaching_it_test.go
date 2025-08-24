@@ -341,8 +341,8 @@ func testRPCMethodsInitSession(t *testing.T) {
 			utils.Usage:        initUsage,
 		},
 		APIOpts: map[string]any{
-			utils.OptsSesInitiate: true,
-			utils.MetaUsage:       initUsage,
+			utils.MetaInitiate: true,
+			utils.MetaUsage:    initUsage,
 		},
 	}
 	var rplyFirst sessions.V1InitSessionReply
@@ -439,8 +439,8 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 			utils.Usage:        reqUsage,
 		},
 		APIOpts: map[string]any{
-			utils.OptsSesUpdate: true,
-			utils.MetaUsage:     reqUsage,
+			utils.MetaUpdate: true,
+			utils.MetaUsage:  reqUsage,
 		},
 	}
 	var rplyFirst sessions.V1UpdateSessionReply
@@ -535,8 +535,8 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 			utils.Usage:        10 * time.Minute,
 		},
 		APIOpts: map[string]any{
-			utils.OptsSesTerminate: true,
-			utils.MetaUsage:        10 * time.Minute,
+			utils.MetaTerminate: true,
+			utils.MetaUsage:     10 * time.Minute,
 		},
 	}
 	var rply string

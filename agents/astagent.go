@@ -262,9 +262,9 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 	var initS bool
 	if cgrEvDisp.APIOpts == nil {
 		initS = true
-		cgrEvDisp.APIOpts = map[string]any{utils.OptsSesInitiate: true}
+		cgrEvDisp.APIOpts = map[string]any{utils.MetaInitiate: true}
 	} else {
-		initS = utils.OptAsBool(cgrEvDisp.APIOpts, utils.OptsSesInitiate)
+		initS = utils.OptAsBool(cgrEvDisp.APIOpts, utils.MetaInitiate)
 	}
 	//initit Session
 	var initReply sessions.V1InitSessionReply
@@ -303,7 +303,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 	// populate terminate session args
 	if cgrEvDisp.APIOpts == nil {
-		cgrEvDisp.APIOpts = map[string]any{utils.OptsSesTerminate: true}
+		cgrEvDisp.APIOpts = map[string]any{utils.MetaTerminate: true}
 	}
 
 	var reply string

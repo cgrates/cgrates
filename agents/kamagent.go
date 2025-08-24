@@ -175,7 +175,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 	}
 	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]any{utils.OptsSesInitiate: true}
+		cgrEv.APIOpts = map[string]any{utils.MetaInitiate: true}
 	}
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 
@@ -214,7 +214,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 	}
 	cgrEv := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]any{utils.OptsSesTerminate: true}
+		cgrEv.APIOpts = map[string]any{utils.MetaTerminate: true}
 	}
 	var reply string
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it

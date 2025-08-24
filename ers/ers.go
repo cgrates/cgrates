@@ -217,18 +217,22 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 				utils.ERs, rdrCfg.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
+		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
+		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
 	case utils.MetaUpdate:
 		rply := new(sessions.V1UpdateSessionReply)
+		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			cgrEv, rply)
 	case utils.MetaTerminate:
 		rply := utils.StringPointer("")
+		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 		err = erS.connMgr.Call(context.TODO(), erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			cgrEv, rply)
 	case utils.MetaMessage:

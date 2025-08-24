@@ -271,7 +271,7 @@ func testGOCSInitSession(t *testing.T) {
 			utils.Usage:        initUsage,
 		},
 		APIOpts: map[string]any{
-			utils.OptsSesInitiate: true,
+			utils.MetaInitiate: true,
 		},
 	}
 	var rply sessions.V1InitSessionReply
@@ -346,7 +346,7 @@ func testGOCSUpdateSession(t *testing.T) {
 			utils.Usage:        reqUsage,
 		},
 		APIOpts: map[string]any{
-			utils.OptsSesUpdate: true,
+			utils.MetaUpdate: true,
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -427,7 +427,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 			utils.Usage:        reqUsage,
 		},
 		APIOpts: map[string]any{
-			utils.OptsSesUpdate: true,
+			utils.MetaUpdate: true,
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -498,7 +498,7 @@ func testGOCSTerminateSession(t *testing.T) {
 			utils.Usage:        15 * time.Minute,
 		},
 		APIOpts: map[string]any{
-			utils.OptsSesTerminate: true,
+			utils.MetaTerminate: true,
 		},
 	}
 	var rply string
