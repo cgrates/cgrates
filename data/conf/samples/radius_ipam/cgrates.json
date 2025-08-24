@@ -6,6 +6,9 @@
     ],
     "cdrs_conns": [
       "*localhost"
+    ],
+    "chargers_conns": [
+      "*localhost"
     ]
   },
   "ips": {
@@ -13,6 +16,9 @@
     "store_interval": "-1"
   },
   "cdrs": {
+    "enabled": true
+  },
+  "chargers": {
     "enabled": true
   },
   "radius_agent": {

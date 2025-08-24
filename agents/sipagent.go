@@ -414,6 +414,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 				utils.SIPAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = sa.connMgr.Call(context.TODO(), sa.cfg.SIPAgentCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))

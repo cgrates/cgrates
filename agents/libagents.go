@@ -69,24 +69,28 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 				agentName, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Request.String()))
 	case utils.MetaAuthorize:
 		rply := new(sessions.V1AuthorizeReply)
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
 			cgrEv, rply)
 		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaInitiate:
 		rply := new(sessions.V1InitSessionReply)
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1InitiateSession,
 			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesInitiate))
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaInitiate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaUpdate:
 		rply := new(sessions.V1UpdateSessionReply)
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1UpdateSession,
 			cgrEv, rply)
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesUpdate))
+		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaUpdate))
 		agReq.setCGRReply(rply, err)
 	case utils.MetaTerminate:
 		var rply string
+		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1TerminateSession,
 			cgrEv, &rply)
 		agReq.setCGRReply(nil, err)

@@ -44,6 +44,50 @@ var authReqs = engine.MapEvent{
 	utils.MetaPseudoPrepaid: struct{}{},
 }
 
+var methodFlags = map[string][]string{
+	utils.MetaAuthorize: {
+		utils.MetaAccounts,
+		utils.MetaAttributes,
+		utils.MetaChargers,
+		utils.MetaIPs,
+		utils.MetaResources,
+		utils.MetaRoutes,
+		utils.MetaStats,
+		utils.MetaThresholds,
+	},
+	utils.MetaInitiate: {
+		utils.MetaInitiate,
+		utils.MetaAttributes,
+		utils.MetaChargers,
+		utils.MetaIPs,
+		utils.MetaResources,
+		utils.MetaStats,
+		utils.MetaThresholds,
+	},
+	utils.MetaUpdate: {
+		utils.MetaUpdate,
+		utils.MetaAttributes,
+	},
+	utils.MetaTerminate: {
+		utils.MetaTerminate,
+		utils.MetaIPs,
+		utils.MetaResources,
+		utils.MetaStats,
+		utils.MetaThresholds,
+	},
+}
+
+// ApplyFlags sets relevant flags in opts based on request type and processor flags.
+func ApplyFlags(reqType string, flags utils.FlagsWithParams, opts map[string]any) {
+	if flagList, exists := methodFlags[reqType]; exists {
+		for _, flag := range flagList {
+			if flags.Has(flag) {
+				opts[flag] = flags.GetBool(flag)
+			}
+		}
+	}
+}
+
 // BiRPCClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
 type BiRPCClient interface {

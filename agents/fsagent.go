@@ -286,7 +286,7 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 		}
 	}
 	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]any{utils.OptsSesInitiate: true}
+		cgrEv.APIOpts = map[string]any{utils.MetaInitiate: true}
 	}
 	cgrEv.Event[FsConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 	var initReply sessions.V1InitSessionReply
@@ -323,7 +323,7 @@ func (fsa *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 
 	if fsev[VarAnswerEpoch] != "0" { // call was answered
 		if cgrEv.APIOpts == nil {
-			cgrEv.APIOpts = map[string]any{utils.OptsSesTerminate: true}
+			cgrEv.APIOpts = map[string]any{utils.MetaTerminate: true}
 		}
 		cgrEv.Event[FsConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
 		if err := fsa.connMgr.Call(fsa.ctx, fsa.cfg.SessionSConns, utils.SessionSv1TerminateSession,

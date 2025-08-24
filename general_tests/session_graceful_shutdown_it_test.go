@@ -190,8 +190,8 @@ func testSessionSRplcApierGetInitateSessions(t *testing.T) {
 			utils.OriginID: "testSessionRplORIGINID",
 		},
 		APIOpts: map[string]any{
-			utils.MetaOriginID:    "testSessionRploriginID",
-			utils.OptsSesInitiate: true,
+			utils.MetaOriginID: "testSessionRploriginID",
+			utils.MetaInitiate: true,
 		},
 	}
 	var rply sessions.V1InitSessionReply

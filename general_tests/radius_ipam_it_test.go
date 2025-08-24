@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
 )
@@ -78,10 +79,23 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 }`, dictDir+"/"),
 		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
-		// LogBuffer:        &bytes.Buffer{},
+		// LogBuffer: &bytes.Buffer{},
 	}
 	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, cfg := ng.Run(t)
+
+	var replySetCharger string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &replySetCharger); err != nil {
+		t.Fatal(err)
+	}
 
 	ippID := "IMSI_123456789012345"
 	var replySet string
@@ -154,6 +168,7 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 		}, radigo.AccessAccept,
 	)
 	checkAllocs(t, client, ippID)
+	checkActiveSessions(t, client, 0)
 
 	// retrieve allocatedIP (to be used in Accounting-Request Start)
 	var allocatedIP string
@@ -198,6 +213,7 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 		}, radigo.AccountingResponse,
 	)
 	checkAllocs(t, client, ippID, acctSessionID)
+	checkActiveSessions(t, client, 1)
 
 	// Step 2.5: Send another Access-Request after IP allocation
 	// This should receive Access-Reject since IP is already allocated.
@@ -286,6 +302,7 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 		}, radigo.AccountingResponse,
 	)
 	checkAllocs(t, client, ippID)
+	checkActiveSessions(t, client, 0)
 	checkCDR(t, client, imsi)
 }
 
@@ -320,8 +337,8 @@ func sendRadReq(t *testing.T, client *radigo.Client, code radigo.PacketCode, id 
 	return replyPacket
 }
 
-func checkAllocs(t testing.TB, client *birpc.Client, id string, wantAllocs ...string) {
-	t.Helper()
+func checkAllocs(tb testing.TB, client *birpc.Client, id string, wantAllocs ...string) {
+	tb.Helper()
 	var allocs utils.IPAllocations
 	if err := client.Call(context.Background(), utils.IPsV1GetIPAllocations,
 		&utils.TenantIDWithAPIOpts{
@@ -330,21 +347,22 @@ func checkAllocs(t testing.TB, client *birpc.Client, id string, wantAllocs ...st
 				ID:     id,
 			},
 		}, &allocs); err != nil {
-		t.Error(err)
+		tb.Fatalf("Failed to get IP allocations for %s: %v", id, err)
 	}
 	if len(allocs.Allocations) != len(wantAllocs) {
-		t.Errorf("%s unexpected result: %s", utils.IPsV1GetIPAllocations, utils.ToJSON(allocs))
+		tb.Errorf("%s unexpected result: %s", utils.IPsV1GetIPAllocations, utils.ToJSON(allocs))
 	}
 
 	for _, allocID := range wantAllocs {
 		if _, exists := allocs.Allocations[allocID]; !exists {
-			t.Errorf("%s unexpected result: %s", utils.IPsV1GetIPAllocations, utils.ToJSON(allocs))
+			tb.Errorf("%s unexpected result: %s", utils.IPsV1GetIPAllocations, utils.ToJSON(allocs))
 			return
 		}
 	}
 }
 
-func allocateIP(t testing.TB, client *birpc.Client, eventID, id, allocID string) {
+func allocateIP(tb testing.TB, client *birpc.Client, eventID, id, allocID string) {
+	tb.Helper()
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     eventID,
@@ -360,11 +378,12 @@ func allocateIP(t testing.TB, client *birpc.Client, eventID, id, allocID string)
 	}
 	var reply utils.AllocatedIP
 	if err := client.Call(context.Background(), utils.IPsV1AllocateIP, args, &reply); err != nil {
-		t.Errorf("Error allocating IPProfile %s: %v", id, err)
+		tb.Fatalf("Failed to allocate IP for profile %s with allocation ID %s: %v", id, allocID, err)
 	}
 }
 
-func releaseIP(t testing.TB, client *birpc.Client, id, allocID string) {
+func releaseIP(tb testing.TB, client *birpc.Client, id, allocID string) {
+	tb.Helper()
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     utils.GenUUID(),
@@ -379,12 +398,12 @@ func releaseIP(t testing.TB, client *birpc.Client, id, allocID string) {
 		},
 	}
 	if err := client.Call(context.Background(), utils.IPsV1ReleaseIP, args, nil); err != nil {
-		t.Errorf("Error releasing IPProfile %s: %v", id, err)
+		tb.Errorf("Error releasing IPProfile %s: %v", id, err)
 	}
 }
 
-func checkCDR(t testing.TB, client *birpc.Client, acnt string) {
-	t.Helper()
+func checkCDR(tb testing.TB, client *birpc.Client, acnt string) {
+	tb.Helper()
 	var cdrs []*utils.CDR
 	if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
 		&utils.CDRFilters{
@@ -392,10 +411,28 @@ func checkCDR(t testing.TB, client *birpc.Client, acnt string) {
 				fmt.Sprintf("*string:~*req.Account:%s", acnt),
 			},
 		}, &cdrs); err != nil {
-		t.Fatal(err)
+		tb.Fatal(err)
 	}
 	if len(cdrs) != 1 {
-		t.Fatalf("%s received %d cdrs, want exactly one", utils.AdminSv1GetCDRs, len(cdrs))
+		tb.Fatalf("%s received %d cdrs, want exactly one", utils.AdminSv1GetCDRs, len(cdrs))
 	}
-	t.Logf("CDR contents: %s", utils.ToIJSON(cdrs[0]))
+	tb.Logf("CDR contents: %s", utils.ToIJSON(cdrs[0]))
+}
+
+func checkActiveSessions(tb testing.TB, client *birpc.Client, wantCount int) {
+	tb.Helper()
+	var sessions []*sessions.ExternalSession
+	if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+		&utils.SessionFilter{}, &sessions); err != nil {
+		if wantCount == 0 && err.Error() == utils.ErrNotFound.Error() {
+			tb.Logf("no active sessions found (expected)")
+			return
+		}
+		tb.Fatalf("failed to get active sessions: %v", err)
+	}
+	if len(sessions) != wantCount {
+		tb.Fatalf("%s received %d sessions, want exactly %d",
+			utils.SessionSv1GetActiveSessions, len(sessions), wantCount)
+	}
+	tb.Logf("%s reply: %s", utils.SessionSv1GetActiveSessions, utils.ToIJSON(sessions))
 }

@@ -147,7 +147,9 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				APIOpts: map[string]any{},
+				APIOpts: map[string]any{
+					utils.MetaAccounts: true,
+				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
 				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
@@ -184,8 +186,8 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]any{
-					utils.MetaAttributes:  "true",
-					utils.OptsSesInitiate: "true",
+					utils.MetaAttributes: true,
+					utils.MetaInitiate:   true,
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -251,8 +253,8 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]any{
-					utils.MetaAttributes: "true",
-					utils.OptsSesUpdate:  "true",
+					utils.MetaAttributes: true,
+					utils.MetaUpdate:     true,
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -319,7 +321,7 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]any{
-					utils.OptsSesTerminate: "true",
+					utils.MetaTerminate: true,
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -355,7 +357,7 @@ func TestProcessRequest(t *testing.T) {
 					"Usage":       "10s",
 				},
 				APIOpts: map[string]any{
-					utils.OptsSesTerminate: "true",
+					utils.MetaTerminate: true,
 				},
 			}
 			if !reflect.DeepEqual(expargs, arg) {
@@ -467,7 +469,7 @@ func TestProcessRequest(t *testing.T) {
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
 
 	tmpls := []*config.FCTemplate{
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesInitiate,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaInitiate,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
@@ -496,7 +498,7 @@ func TestProcessRequest(t *testing.T) {
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
 
 	tmpls = []*config.FCTemplate{
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesUpdate,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaUpdate,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
@@ -523,7 +525,7 @@ func TestProcessRequest(t *testing.T) {
 	}
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
 	tmpls = []*config.FCTemplate{
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesTerminate,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaTerminate,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 	}
 	for _, v := range tmpls {

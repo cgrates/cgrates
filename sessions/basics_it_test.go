@@ -521,3 +521,155 @@ func assertError(t *testing.T, method string, err error, wantErr string) {
 		}
 	}
 }
+
+func TestSessionLifecycle(t *testing.T) {
+	var dbcfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		dbcfg = engine.InternalDBCfg
+	case utils.MetaMySQL:
+	case utils.MetaMongo:
+		dbcfg = engine.MongoDBCfg
+	case utils.MetaPostgres:
+		dbcfg = engine.PostgresDBCfg
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+	"enabled": true,
+	"chargers_conns": ["*localhost"],
+	// "alterable_fields": ["AlterableField"],
+	"terminate_attempts": 1
+},
+"chargers": {
+	"enabled": true
+},
+"admins": {
+	"enabled": true
+}
+}`,
+		DBCfg:    dbcfg,
+		Encoding: *utils.Encoding,
+		// LogBuffer: new(bytes.Buffer),
+	}
+	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	client, _ := ng.Run(t)
+
+	initSession := func(t *testing.T, originID string) {
+		t.Helper()
+		var reply V1InitSessionReply
+		err := client.Call(context.Background(), utils.SessionSv1InitiateSession,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+					"AlterableField":   "test_val",
+				},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: originID,
+					utils.MetaInitiate: true,
+					utils.MetaChargers: true,
+				},
+			}, &reply)
+		if err != nil {
+			t.Fatalf("failed to initiate session %s: %v", originID, err)
+		}
+	}
+
+	updateSession := func(t *testing.T, originID string) {
+		t.Helper()
+		var reply V1UpdateSessionReply
+		err := client.Call(context.Background(), utils.SessionSv1UpdateSession,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+					"AlterableField":   "new_val",
+				},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: originID,
+					utils.MetaUpdate:   true,
+				},
+			}, &reply)
+		if err != nil {
+			t.Fatalf("failed to update session %s: %v", originID, err)
+		}
+	}
+
+	termSession := func(t *testing.T, originID string) {
+		t.Helper()
+		var reply string
+		err := client.Call(context.Background(), utils.SessionSv1TerminateSession,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.SetupTime:    "2018-01-07T17:00:00Z",
+				},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:  originID,
+					utils.MetaTerminate: true,
+				},
+			}, &reply)
+		if err != nil {
+			t.Fatalf("failed to terminate session %s: %v", originID, err)
+		}
+	}
+
+	checkActiveSessions := func(t *testing.T, wantCount int, filters ...string) {
+		t.Helper()
+		var sessions []*ExternalSession
+		if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+			&utils.SessionFilter{
+				Filters: filters,
+			}, &sessions); err != nil {
+			if wantCount == 0 && err.Error() == utils.ErrNotFound.Error() {
+				t.Logf("no active sessions found (expected)")
+				return
+			}
+			t.Fatalf("failed to get active sessions: %v", err)
+		}
+		if len(sessions) != wantCount {
+			t.Fatalf("%s received %d sessions, want exactly %d",
+				utils.SessionSv1GetActiveSessions, len(sessions), wantCount)
+		}
+		t.Logf("%s reply: %s", utils.SessionSv1GetActiveSessions, utils.ToIJSON(sessions))
+	}
+
+	var replySetCharger string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &replySetCharger); err != nil {
+		t.Fatal(err)
+	}
+
+	checkActiveSessions(t, 0)
+
+	sessionID := "test-session-123"
+	initSession(t, sessionID)
+	checkActiveSessions(t, 1)
+
+	// TODO: Check if passing nil event is intended when updating sessions.
+	// Until then, skip testing UpdateSession API.
+	//
+	// updateSession(t, sessionID)
+	// checkActiveSessions(t, 1)
+	_ = updateSession // prevent compilation err
+
+	termSession(t, sessionID)
+	checkActiveSessions(t, 0)
+}

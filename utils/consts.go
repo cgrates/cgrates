@@ -2591,7 +2591,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, MetaRoutes,
 	OptsSesRouteSDerivedReply, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
 	OptsSesSTIRInitiate, OptsSesThresholdSDerivedReply,
-	OptsSesMaxUsage, OptsSesForceUsage, OptsSesInitiate, OptsSesUpdate, OptsSesTerminate,
+	OptsSesMaxUsage, OptsSesForceUsage, MetaInitiate, MetaUpdate, MetaTerminate,
 	OptsSesMessage, MetaAttributes, MetaChargers, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, MetaStats, OptsCDRsStore, MetaThresholds, MetaRates, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
@@ -2625,9 +2625,6 @@ const (
 	OptsSesSTIRInitiate           = "*sesSTIRInitiate"
 	OptsSesThresholdSDerivedReply = "*sesThresholdSDerivedReply"
 	OptsSesMaxUsage               = "*sesMaxUsage"
-	OptsSesInitiate               = "*sesInitiate"
-	OptsSesUpdate                 = "*sesUpdate"
-	OptsSesTerminate              = "*sesTerminate"
 	OptsSesMessage                = "*sesMessage"
 
 	// Accounts
