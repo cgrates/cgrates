@@ -1,0 +1,3 @@
+#Tenant[0];Id[1];Schedule[2];StatID[3];Metrics[4];TTL[5];QueueLength[6];MinItems[7];CorrelationType[8];Tolerance[9];Stored[10];ThresholdIDs[11];APIOpts[12]
+cgrates.org;TREND1;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;
+*tenant;TREND_<~*req.Account>;0 12 * * *;Stats2;*acc&*tcc;-1;-1;1;*average;2.1;true;TD1&TD2;key:value

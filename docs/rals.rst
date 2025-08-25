@@ -425,6 +425,9 @@ ActionType
 	**\*debit**
 		Debit the value from the :ref:`Balance` matching the filters.
 
+	**\*transfer_balance**
+		Transfers units between accounts' balances. It ensures both source and destination balances are of the same type and non-expired. Destination account and balance IDs, and optionally a reference value, are obtained from Action's ExtraParameters ``{"DestinationAccountID":"","DestinationBalanceID":""}``. If a reference value is specified, the transfer ensures the destination balance reaches this value. If the destination account is different from the source, it is locked during the transfer.
+
 	**\*reset_counters**
 		Reset the :ref:`Balance` counters (used by :ref:`ActionTriggers <ActionTrigger>`).
 
@@ -460,6 +463,33 @@ ActionType
 
 	**\*cgr_rpc**
 		Call a CGRateS API over RPC connection. The API call will be defined as template within the *ExtraParameters*.
+	
+	**\*alter_sessions**
+		Processes the *ExtraParameters* field from the action to construct a request for the ``SessionSv1.AlterSessions`` API call.
+		The ExtraParameters field format is expected as follows:
+		  - tenant
+		  - filters: separated by "&".
+		  - limit, specifying the maximum number of sessions to alter.
+		  - APIOpts: set of key-value pairs (separated by "&").
+		  - Event: set of key-value pairs (separated by "&").
+
+	**\*force_disconnect_sessions**
+		Processes the *ExtraParameters* field from the action to construct a request for the ``SessionSv1.ForceDisconnect`` API call.
+		The ExtraParameters field format is expected as follows:
+		  - tenant
+		  - filters: separated by "&".
+		  - limit, specifying the maximum number of sessions to disconnect.
+		  - APIOpts: set of key-value pairs (separated by "&").
+		  - Event: set of key-value pairs (separated by "&").
+
+	**\*export**
+		Will send the event that triggered the action to be processed by EEs
+
+	**\*reset_threshold**
+		Will reset the specified Threshold in the *ExtraParameters* field by writing inside it the ``Tenant:ID`` of the threshold.
+	
+	**\*reset_stat_queue**
+		Will reset the specified StatQueue in the *ExtraParameters* field by writing inside it the ``Tenant:ID`` of the StatQueue.
 
 	**\*topup_zero_negative**
 		Set the the matching balances to topup value if they are negative.
@@ -482,6 +512,292 @@ ActionType
 	**\*reset_account_cdr**
 		Creates the account out of last *CDR* saved in :ref:`StorDB` matching the account details in the filter. The *CDR* should contain *AccountSummary* within it's *CostDetails*.
 
+	**\*remote_set_account**
+		When an event triggers the action, the event will be used to set an account from a remote server using the URL provided in the *ExtraParameters* field.
+
+	**\*dynamic_threshold** 
+		Processes the *ExtraParameters* field from the action to construct a Threshold profile
+		The ExtraParameters field format is expected as follows:
+			0. Tenant 
+			1. ID
+			2. FilterIDs: separated by "&".
+			3. ActivationInterval: separated by "&".
+			4. MaxHits
+			5. MinHits
+			6. MinSleep
+			7. Blocker
+			8. Weight
+			9. ActionIDs: separated by "&".
+			10. Async
+			11. EeIDs: separated by "&".
+			12. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+   			<Tenant[0];Id[1];FilterIDs[2];ActivationInterval[3];MaxHits[4];MinHits[5];MinSleep[6];Blocker[7];Weight[8];ActionIDs[9];Async[10];EeIDs[11];APIOpts[12]>
+
+	**\*dynamic_stats** 
+		Processes the *ExtraParameters* field from the action to construct a StatQueueProfile
+		The ExtraParameters field format is expected as follows:
+			0. Tenant
+			1. ID
+			2. FilterIDs: separated by "&".
+			3. ActivationInterval: separated by "&".
+			4. QueueLength
+			5. TTL
+			6. MinItems
+			7. Metrics: separated by "&".
+			8. MetricFilterIDs: separated by "&".
+			9. Stored
+			10. Blocker
+			11. Weight
+			12. ThresholdIDs: separated by "&".
+			13. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tenant[0];Id[1];FilterIDs[2];ActivationInterval[3];QueueLength[4];TTL[5];MinItems[6];Metrics[7];MetricFilterIDs[8];Stored[9];Blocker[10];Weight[11];ThresholdIDs[12];APIOpts[13]>
+
+	**\*dynamic_attribute** 
+		Processes the *ExtraParameters* field from the action to construct a AttributeProfile
+		The ExtraParameters field format is expected as follows:
+			0. Tenant
+			1. ID
+			2. Context: separated by "&".
+			3. FilterIDs: separated by "&".
+			4. ActivationInterval: separated by "&".
+		 	5. AttributeFilterIDs: separated by "&".
+		 	6. Path
+		 	7. Type
+		 	8. Value: separated by "&".
+			9. Blocker
+			10. Weight
+			11. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tenant[0];ID[1];Contexts[2];FilterIDs[3];ActivationInterval[4];AttributeFilterIDs[5];Path[6];Type[7];Value[8];Blocker[9];Weight[10];APIOpts[11]>
+
+	**\*dynamic_action_plan** 
+		Processes the *ExtraParameters* field from the action to construct an ActionPlan
+		The ExtraParameters field format is expected as follows:
+			0. Id
+			1. ActionsId
+			2. TimingId
+			3. Weight
+			4. Overwrite
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Id[0];ActionsId[1];TimingId[2];Weight[3];Overwrite[4]>
+
+	**\*dynamic_action_plan_accounts** 
+		Processes the *ExtraParameters* field from the action to construct an ActionPlan with account ids
+		The ExtraParameters field format is expected as follows:
+			0. Id
+			1. ActionsId
+			2. TimingId
+			3. Weight
+			4. Overwrite
+			5. Tenant:AccountIDs: separated by "&".
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Id[0];ActionsId[1];TimingId[2];Weight[3];Overwrite[4];Tenant:AccountIDs[5]>
+
+	**\*dynamic_action** 
+		Processes the *ExtraParameters* field from the action to construct a new Action
+		The ExtraParameters field format is expected as follows:
+			0. ActionsId
+			1. Action
+			2. ExtraParameters encapsulated by \f
+			3. Filters: separated by "&".
+			4. BalanceId
+			5. BalanceType
+			6. Categories: separated by "&".
+			7. DestinationIds: separated by "&".
+			8. RatingSubject
+			9. SharedGroups: separated by "&".
+		   	10. ExpiryTime
+		   	11. TimingIds: separated by "&".
+		   	12. Units
+		   	13. BalanceWeight
+		   	14. BalanceBlocker
+		   	15. BalanceDisabled
+		   	16. Weight
+		   	17. Overwrite
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<ActionsId[0];Action[1];ExtraParameters[2];Filter[3];BalanceId[4];BalanceType[5];Categories[6];DestinationIds[7];RatingSubject[8];SharedGroup[9];ExpiryTime[10];TimingIds[11];Units[12];BalanceWeight[13];BalanceBlocker[14];BalanceDisabled[15];Weight[16]>
+
+	**\*dynamic_destination** 
+		Processes the *ExtraParameters* field from the action to construct a new Destination
+		The ExtraParameters field format is expected as follows:
+			0. Id
+			1. Prefix: separated by "&".
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Id;Prefix>
+
+	**\*dynamic_filter** 
+		Processes the *ExtraParameters* field from the action to construct a Filter
+		The ExtraParameters field format is expected as follows:
+			0. Tenant
+			1. ID
+			2. Type
+			3. Path
+			4. Values: separated by "&".
+			5. ActivationInterval: separated by "&".
+		 	6. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tenant[0];ID[1];Type[2];Path[3];Values[4];ActivationInterval[5];APIOpts[6]>
+
+	**\*dynamic_route** 
+		Processes the *ExtraParameters* field from the action to construct a RouteProfile
+		The ExtraParameters field format is expected as follows:
+			0. Tenant
+			1. ID
+			2. FilterIDs: separated by "&".
+			3. ActivationInterval: separated by "&".
+			4. Sorting
+			5. SortingParameters: separated by "&".
+			6. RouteID
+			7. RouteFilterIDs: separated by "&".
+			8. RouteAccountIDs: separated by "&".
+			9. RouteRatingPlanIDs: separated by "&".
+		   	10. RouteResourceIDs: separated by "&".
+		   	11. RouteStatIDs: separated by "&".
+		   	12. RouteWeight
+		  	13. RouteBlocker
+		   	14. RouteParameters
+		   	15. Weight
+		   	16. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tenant[0];ID[1];FilterIDs[2];ActivationInterval[3];Sorting[4];SortingParameters[5];RouteID[6];RouteFilterIDs[7];RouteAccountIDs[8];RouteRatingPlanIDs[9];RouteResourceIDs[10];RouteStatIDs[11];RouteWeight[12];RouteBlocker[13];RouteParameters[14];Weight[15];APIOpts[16]>
+
+	**\*dynamic_ranking** 
+		Processes the *ExtraParameters* field from the action to construct a RankingProfile
+		The ExtraParameters field format is expected as follows:
+			0. Tenant
+			1. ID
+			2. Schedule
+			3. StatIDs: separated by "&".
+			4. MetricIDs: separated by "&".
+			5. Sorting
+			6. SortingParameters: separated by "&".
+			7. Stored
+			8. ThresholdIDs: separated by "&".
+		    9. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tenant[0];Id[1];Schedule[2];StatIDs[3];MetricIDs[4];Sorting[5];SortingParameters[6];Stored[7];ThresholdIDs[8];APIOpts[9]>
+
+	**\*dynamic_rating_profile** 
+		Processes the *ExtraParameters* field from the action to construct a RatingProfile
+		The ExtraParameters field format is expected as follows:
+			0. Tenant
+			1. Category
+			2. Subject
+			3. ActivationTime
+			4. RatingPlanId
+			5. RatesFallbackSubject
+		   	6. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tenant[0];Category[1];Subject[2];ActivationTime[3];RatingPlanId[4];RatesFallbackSubject[5];APIOpts[6]>
+
+	**\*dynamic_trend** 
+		Processes the *ExtraParameters* field from the action to construct a TrendProfile
+		The ExtraParameters field format is expected as follows:
+			0. Tenant
+			1. ID
+			2. Schedule
+			3. StatID
+			4. Metrics: separated by "&".
+			5. TTL
+			6. QueueLength
+			7. MinItems
+			8. CorrelationType
+			9. Tolerance
+		   	10. Stored
+		   	11. ThresholdIDs: separated by "&".
+		   	12. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tenant[0];Id[1];Schedule[2];StatID[3];Metrics[4];TTL[5];QueueLength[6];MinItems[7];CorrelationType[8];Tolerance[9];Stored[10];ThresholdIDs[11];APIOpts[12]>
+
+	**\*dynamic_resource** 
+		Processes the *ExtraParameters* field from the action to construct a ResourceProfile
+		The ExtraParameters field format is expected as follows:
+			0. Tenant
+			1. Id
+			2. FilterIDs: separated by "&".
+			3. ActivationInterval: separated by "&".
+			4. TTL
+			5. Limit
+			6. AllocationMessage
+			7. Blocker
+			8. Stored
+			9. Weight
+		   	10. ThresholdIDs: separated by "&".
+		   	11. APIOpts: set of key-value pairs (separated by "&").
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tenant[0];Id[1];FilterIDs[2];ActivationInterval[3];TTL[4];Limit[5];AllocationMessage[6];Blocker[7];Stored[8];Weight[9];ThresholdIDs[10];APIOpts[11]>
+
+	**\*dynamic_action_trigger** 
+		Processes the *ExtraParameters* field from the action to construct a ActionTrigger
+		The ExtraParameters field format is expected as follows:
+			0. Tag
+			1. UniqueId
+			2. ThresholdType
+			3. ThresholdValue
+			4. Recurrent
+			5. MinSleep
+			6. ExpiryTime
+			7. ActivationTime
+			8. BalanceTag
+			9. BalanceType
+		   	10. BalanceCategories: separated by "&".
+		   	11. BalanceDestinationIds: separated by "&".
+		   	12. BalanceRatingSubject
+		   	13. BalanceSharedGroup: separated by "&".
+		   	14. BalanceExpiryTime
+		   	15. BalanceTimingIds: separated by "&".
+		   	16. BalanceWeight
+		   	17. BalanceBlocker
+		   	18. BalanceDisabled
+		   	19. ActionsId
+		   	20. Weight
+		Parameters are separated by ";" and must be provided in the specified order.
+
+		.. code-block:: text
+			
+			<Tag[0];UniqueId[1];ThresholdType[2];ThresholdValue[3];Recurrent[4];MinSleep[5];ExpiryTime[6];ActivationTime[7];BalanceTag[8];BalanceType[9];BalanceCategories[10];BalanceDestinationIds[11];BalanceRatingSubject[12];BalanceSharedGroup[13];BalanceExpiryTime[14];BalanceTimingIds[15];BalanceWeight[16];BalanceBlocker[17];BalanceDisabled[18];ActionsId[19];Weight[20]>
+		
 
 Configuration
 -------------
