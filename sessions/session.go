@@ -220,15 +220,3 @@ func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 		}
 	}
 }
-
-// UpdateSRuns updates the SRuns event with the alterable fields (is thread safe)
-func (s *Session) UpdateSRuns(updEv engine.MapEvent, alterableFields utils.StringSet) {
-	if alterableFields.Size() == 0 { // do not lock if we can't update any field
-		return
-	}
-
-	// TODO: fix deadlock when called by updateSession method.
-	s.lk.Lock()
-	s.updateSRuns(updEv, alterableFields)
-	s.lk.Unlock()
-}
