@@ -672,7 +672,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			break
 		}
 		if !isInstantEvent {
-			s.UpdateSRuns(ev, sS.cfg.SessionSCfg().AlterableFields)
+			s.lk.Lock()
+			s.updateSRuns(ev, sS.cfg.SessionSCfg().AlterableFields)
+			s.lk.Unlock()
 		}
 		if err = sS.terminateSession(ctx, s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
