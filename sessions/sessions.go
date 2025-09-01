@@ -1240,7 +1240,7 @@ func (sS *SessionS) updateSession(ctx *context.Context, s *Session, updtEv, opts
 		}
 		s.OriginCGREvent.Event[k] = v // update previoius field with new one
 	}
-	s.UpdateSRuns(updtEv, sS.cfg.SessionSCfg().AlterableFields)
+	s.updateSRuns(updtEv, sS.cfg.SessionSCfg().AlterableFields)
 	sS.setSTerminator(ctx, s, opts) // reset the terminator
 
 	// TODO: Chargeable functionality not yet available in Session struct
