@@ -541,7 +541,7 @@ func TestSessionLifecycle(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"chargers_conns": ["*localhost"],
-	// "alterable_fields": ["AlterableField"],
+	"alterable_fields": ["AlterableField"],
 	"terminate_attempts": 1
 },
 "chargers": {
@@ -624,7 +624,7 @@ func TestSessionLifecycle(t *testing.T) {
 		}
 	}
 
-	checkActiveSessions := func(t *testing.T, wantCount int, filters ...string) {
+	checkActiveSessions := func(t *testing.T, wantCount int, filters ...string) []*ExternalSession {
 		t.Helper()
 		var sessions []*ExternalSession
 		if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
@@ -633,7 +633,7 @@ func TestSessionLifecycle(t *testing.T) {
 			}, &sessions); err != nil {
 			if wantCount == 0 && err.Error() == utils.ErrNotFound.Error() {
 				t.Logf("no active sessions found (expected)")
-				return
+				return nil
 			}
 			t.Fatalf("failed to get active sessions: %v", err)
 		}
@@ -642,6 +642,7 @@ func TestSessionLifecycle(t *testing.T) {
 				utils.SessionSv1GetActiveSessions, len(sessions), wantCount)
 		}
 		t.Logf("%s reply: %s", utils.SessionSv1GetActiveSessions, utils.ToIJSON(sessions))
+		return sessions
 	}
 
 	var replySetCharger string
@@ -661,14 +662,20 @@ func TestSessionLifecycle(t *testing.T) {
 
 	sessionID := "test-session-123"
 	initSession(t, sessionID)
-	checkActiveSessions(t, 1)
 
-	// TODO: Check if passing nil event is intended when updating sessions.
-	// Until then, skip testing UpdateSession API.
-	//
-	// updateSession(t, sessionID)
-	// checkActiveSessions(t, 1)
-	_ = updateSession // prevent compilation err
+	sessions := checkActiveSessions(t, 1)
+	want := "test_val"
+	if sessions[0].CGREvent.Event["AlterableField"] != want {
+		t.Errorf("after init, AlterableField = %v, want %s", sessions[0].CGREvent.Event["AlterableField"], want)
+	}
+
+	updateSession(t, sessionID)
+
+	sessions = checkActiveSessions(t, 1)
+	want = "new_val"
+	if sessions[0].CGREvent.Event["AlterableField"] != want {
+		t.Errorf("after update, AlterableField = %v, want %s", sessions[0].CGREvent.Event["AlterableField"], want)
+	}
 
 	termSession(t, sessionID)
 	checkActiveSessions(t, 0)
