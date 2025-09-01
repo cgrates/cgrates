@@ -555,7 +555,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 			}
 		}
 		var sRunsUsage map[string]time.Duration
-		if sRunsUsage, err = sS.updateSession(ctx, s, nil, engine.MapEvent(args.APIOpts), dbtItvl); err != nil {
+		if sRunsUsage, err = sS.updateSession(ctx, s, engine.MapEvent(args.Event), engine.MapEvent(args.APIOpts), dbtItvl); err != nil {
 			return err
 		}
 
