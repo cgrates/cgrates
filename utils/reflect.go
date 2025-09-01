@@ -377,6 +377,9 @@ func IfaceAsString(fld any) (out string) {
 	case []uint8:
 		return string(value) // byte is an alias for uint8 conversions implicit
 	case time.Duration:
+		if value == -1 {
+			return "-1"
+		}
 		return value.String()
 	case time.Time:
 		return value.Format(time.RFC3339)
