@@ -443,3 +443,29 @@ func TestGetMaxUsageFromRuns(t *testing.T) {
 		})
 	}
 }
+func TestApplyFlags(t *testing.T) {
+	flags := utils.FlagsWithParams{
+		utils.MetaAccounts:  utils.FlagParams{},
+		utils.MetaResources: utils.FlagParams{"false": {""}},
+		utils.MetaIPs:       utils.FlagParams{"true": {""}},
+	}
+
+	opts := make(map[string]any)
+	ApplyFlags(utils.MetaAuthorize, flags, opts)
+
+	if v, ok := opts[utils.MetaAccounts]; !ok || v != true {
+		t.Errorf("expected %s=true, got %v", utils.MetaAccounts, opts[utils.MetaAccounts])
+	}
+	if v, ok := opts[utils.MetaResources]; !ok || v != false {
+		t.Errorf("expected %s=false, got %v", utils.MetaResources, opts[utils.MetaResources])
+	}
+	if v, ok := opts[utils.MetaIPs]; !ok || v != true {
+		t.Errorf("expected %s=true, got %v", utils.MetaIPs, opts[utils.MetaIPs])
+	}
+
+	opts2 := make(map[string]any)
+	ApplyFlags("unknownType", flags, opts2)
+	if len(opts2) != 0 {
+		t.Errorf("expected no opts set for unknown reqType, got %+v", opts2)
+	}
+}

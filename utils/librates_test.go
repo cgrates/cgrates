@@ -20,6 +20,7 @@ package utils
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -2490,5 +2491,98 @@ func TestNewRateProfileFromMapDataDBMap(t *testing.T) {
 	expErr = "invalid character '\"' after top-level value"
 	if _, err := NewRateProfileFromMapDataDBMap("cgrates.org", "ExID", mapRP, JSONMarshaler{}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, received <%v>", expErr, err)
+	}
+}
+
+func TestRateSIncrementFieldAsInterface(t *testing.T) {
+	incStart := &Decimal{Big: decimal.New(123, -2)}
+	usage := &Decimal{Big: decimal.New(456, -2)}
+
+	rI := &RateSIncrement{
+		IncrementStart:    incStart,
+		RateIntervalIndex: 5,
+		RateID:            "rateID1",
+		CompressFactor:    2,
+		Usage:             usage,
+	}
+
+	tests := []struct {
+		name        string
+		fldPath     []string
+		expectedVal any
+		expectErr   bool
+		expectedErr string
+	}{
+		{
+			name:        "IncrementStart returns Decimal",
+			fldPath:     []string{IncrementStart},
+			expectedVal: incStart,
+			expectErr:   false,
+		},
+		{
+			name:        "RateIntervalIndex returns int",
+			fldPath:     []string{RateIntervalIndex},
+			expectedVal: 5,
+			expectErr:   false,
+		},
+		{
+			name:        "RateID returns string",
+			fldPath:     []string{RateID},
+			expectedVal: "rateID1",
+			expectErr:   false,
+		},
+		{
+			name:        "CompressFactor returns int64",
+			fldPath:     []string{CompressFactor},
+			expectedVal: int64(2),
+			expectErr:   false,
+		},
+		{
+			name:        "Usage returns Decimal",
+			fldPath:     []string{Usage},
+			expectedVal: usage,
+			expectErr:   false,
+		},
+		{
+			name:        "UnknownField returns error",
+			fldPath:     []string{"UnknownField"},
+			expectedVal: nil,
+			expectErr:   true,
+			expectedErr: "unsupported field prefix",
+		},
+		{
+			name:        "Empty path returns error",
+			fldPath:     []string{},
+			expectedVal: nil,
+			expectErr:   true,
+			expectedErr: "NOT_FOUND",
+		},
+		{
+			name:        "Too many path parts returns error",
+			fldPath:     []string{"NFound", "NFound"},
+			expectedVal: nil,
+			expectErr:   true,
+			expectedErr: "NOT_FOUND",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			val, err := rI.FieldAsInterface(tt.fldPath)
+
+			if tt.expectErr {
+				if err == nil {
+					t.Errorf("Expected error for field path %v, got nil", tt.fldPath)
+				} else if tt.expectedErr != "" && !strings.Contains(strings.ToUpper(err.Error()), strings.ToUpper(tt.expectedErr)) {
+					t.Errorf("Expected error containing %q, got %v", tt.expectedErr, err)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error for field path %v: %v", tt.fldPath, err)
+				} else if !reflect.DeepEqual(val, tt.expectedVal) {
+					t.Errorf("For field path %v, expected %v, got %v", tt.fldPath, tt.expectedVal, val)
+				}
+			}
+		})
 	}
 }

@@ -2227,3 +2227,99 @@ func TestIPAllocationsComputeUnexported(t *testing.T) {
 		})
 	}
 }
+
+func TestIPAllocationsClearAllocations(t *testing.T) {
+	addr1 := netip.MustParseAddr("192.168.1.10")
+	addr2 := netip.MustParseAddr("192.168.1.11")
+
+	ip1 := netip.MustParseAddr("192.168.1.10")
+	ip2 := netip.MustParseAddr("192.168.1.11")
+
+	alloc := &IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "profile1",
+		Allocations: map[string]*PoolAllocation{
+			"a1": {
+				PoolID:  "pool1",
+				Address: ip1,
+				Time:    time.Now().Add(-2 * time.Minute),
+			},
+			"a2": {
+				PoolID:  "pool1",
+				Address: ip2,
+				Time:    time.Now().Add(-1 * time.Minute),
+			},
+		},
+		TTLIndex: []string{"a1", "a2"},
+		prfl: &IPProfile{
+			Tenant: "cgrates.org",
+			ID:     "profile1",
+			TTL:    time.Minute,
+			Stored: true,
+			Pools: []*IPPool{
+				{
+					ID:       "pool1",
+					Type:     "*ipv4",
+					Range:    "192.168.1.0/24",
+					Strategy: "*ascending",
+				},
+			},
+		},
+		poolRanges: map[string]netip.Prefix{
+			"pool1": netip.MustParsePrefix("192.168.1.0/24"),
+		},
+		poolAllocs: map[string]map[netip.Addr]string{
+			"pool1": {
+				ip1: "a1",
+				ip2: "a2",
+			},
+		},
+	}
+
+	alloc.Allocations["a1"] = &PoolAllocation{PoolID: "p1", Address: addr1, Time: time.Now()}
+	alloc.Allocations["a2"] = &PoolAllocation{PoolID: "p1", Address: addr2, Time: time.Now()}
+	alloc.TTLIndex = []string{"a1", "a2"}
+	alloc.poolAllocs["p1"] = map[netip.Addr]string{
+		addr1: "a1",
+		addr2: "a2",
+	}
+
+	err := alloc.ClearAllocations([]string{"doesNotExist"})
+	if err == nil {
+		t.Errorf("expected error for missing allocation ID")
+	}
+	if len(alloc.Allocations) != 2 {
+		t.Errorf("expected allocations unchanged, got %d", len(alloc.Allocations))
+	}
+
+	err = alloc.ClearAllocations([]string{"a1"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, ok := alloc.Allocations["a1"]; ok {
+		t.Errorf("expected a1 to be cleared")
+	}
+	if _, ok := alloc.Allocations["a2"]; !ok {
+		t.Errorf("expected a2 to remain")
+	}
+	if _, ok := alloc.poolAllocs["p1"][addr1]; ok {
+		t.Errorf("expected addr1 to be removed from poolAllocs")
+	}
+	if len(alloc.TTLIndex) != 1 || alloc.TTLIndex[0] != "a2" {
+		t.Errorf("expected TTLIndex to contain only a2, got %v", alloc.TTLIndex)
+	}
+
+	err = alloc.ClearAllocations(nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(alloc.Allocations) != 0 {
+		t.Errorf("expected all allocations cleared, got %d", len(alloc.Allocations))
+	}
+	if len(alloc.poolAllocs["p1"]) != 0 {
+		t.Errorf("expected all poolAllocs cleared, got %d", len(alloc.poolAllocs["p1"]))
+	}
+	if len(alloc.TTLIndex) != 0 {
+		t.Errorf("expected TTLIndex cleared, got %v", alloc.TTLIndex)
+	}
+}

@@ -750,3 +750,143 @@ func TestNewSession(t *testing.T) {
 		t.Errorf("Expected second SRuns to have runID 'run2', got %s", session.SRuns[1].CGREvent.APIOpts["runID"])
 	}
 }
+
+func TestSessionAsExternalSession(t *testing.T) {
+	tTime1 := time.Now()
+	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
+
+	session := &Session{
+		ID: "sess1",
+		SRuns: []*SRun{
+			{
+				ID:            "run1",
+				CGREvent:      &utils.CGREvent{Tenant: "cgrates1.org", ID: "event1"},
+				NextAutoDebit: &tTime1,
+			},
+			{
+				ID:            "run2",
+				CGREvent:      &utils.CGREvent{Tenant: "cgrates2.org", ID: "event2"},
+				NextAutoDebit: &tTime2,
+			},
+			{
+				ID:       "run3",
+				CGREvent: &utils.CGREvent{Tenant: "cgrates3.org", ID: "event3"},
+			},
+		},
+	}
+
+	tests := []struct {
+		name           string
+		sRunIdx        int
+		nodeID         string
+		expectedRunID  string
+		expectedTenant string
+		expectedDebit  *time.Time
+	}{
+		{
+			name:           "First run with debit",
+			sRunIdx:        0,
+			nodeID:         "nodeA",
+			expectedRunID:  "run1",
+			expectedTenant: "cgrates1.org",
+			expectedDebit:  &tTime1,
+		},
+		{
+			name:           "Second run with debit",
+			sRunIdx:        1,
+			nodeID:         "nodeB",
+			expectedRunID:  "run2",
+			expectedTenant: "cgrates2.org",
+			expectedDebit:  &tTime2,
+		},
+		{
+			name:           "Third run without debit",
+			sRunIdx:        2,
+			nodeID:         "nodeC",
+			expectedRunID:  "run3",
+			expectedTenant: "cgrates3.org",
+			expectedDebit:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			aS := session.AsExternalSession(tt.sRunIdx, tt.nodeID)
+
+			if aS.ID != session.ID {
+				t.Errorf("Expected ID %s, got %s", session.ID, aS.ID)
+			}
+			if aS.RunID != tt.expectedRunID {
+				t.Errorf("Expected RunID %s, got %s", tt.expectedRunID, aS.RunID)
+			}
+			if aS.CGREvent.Tenant != tt.expectedTenant {
+				t.Errorf("Expected Tenant %s, got %s", tt.expectedTenant, aS.CGREvent.Tenant)
+			}
+			if aS.NodeID != tt.nodeID {
+				t.Errorf("Expected NodeID %s, got %s", tt.nodeID, aS.NodeID)
+			}
+			if tt.expectedDebit != nil {
+				if aS.NextAutoDebit != *tt.expectedDebit {
+					t.Errorf("Expected NextAutoDebit %v, got %v", *tt.expectedDebit, aS.NextAutoDebit)
+				}
+			} else if aS.NextAutoDebit != (time.Time{}) {
+				t.Errorf("Expected NextAutoDebit to be zero, got %v", aS.NextAutoDebit)
+			}
+		})
+	}
+}
+
+func TestSessionUpdateSRuns(t *testing.T) {
+	sr1 := &SRun{
+		ID: "run1",
+		CGREvent: &utils.CGREvent{
+			Event: map[string]any{
+				"Destination": "1001",
+				"Subject":     "1002",
+			},
+		},
+	}
+	sr2 := &SRun{
+		ID: "run2",
+		CGREvent: &utils.CGREvent{
+			Event: map[string]any{
+				"Destination": "1001",
+				"Subject":     "2001",
+			},
+		},
+	}
+
+	session := &Session{
+		ID:    "sess1",
+		SRuns: []*SRun{sr1, sr2},
+	}
+
+	updEv := engine.MapEvent{
+		"Destination": "3001",
+		"Subject":     "4001",
+	}
+	alterableFields := utils.StringSet{"Destination": {}}
+
+	session.updateSRuns(updEv, alterableFields)
+
+	for i, sr := range session.SRuns {
+		if sr.CGREvent.Event["Destination"] != "3001" {
+			t.Errorf("SRun[%d]: Expected Destination '3001', got %v", i, sr.CGREvent.Event["Destination"])
+		}
+		expectedSubject := "1002"
+		if i == 1 {
+			expectedSubject = "2001"
+		}
+		if sr.CGREvent.Event["Subject"] != expectedSubject {
+			t.Errorf("SRun[%d]: Expected Subject '%s', got %v", i, expectedSubject, sr.CGREvent.Event["Subject"])
+		}
+	}
+
+	session2 := &Session{
+		SRuns: []*SRun{sr1},
+	}
+	session2.updateSRuns(updEv, utils.StringSet{})
+	if session2.SRuns[0].CGREvent.Event["Destination"] != "3001" {
+		t.Errorf("Expected Destination to remain '3001' when alterableFields is empty, got %v", session2.SRuns[0].CGREvent.Event["Destination"])
+	}
+}
