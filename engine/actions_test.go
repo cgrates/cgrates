@@ -19,6 +19,7 @@ package engine
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -7601,5 +7602,54 @@ func TestDynamicActionTrigger(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestUnsetRecurrentAction(t *testing.T) {
+	err := unsetRecurrentAction(nil, &Action{Id: "act1"}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
+	if err == nil || err.Error() != "nil account" {
+		t.Errorf("expected error 'nil account', got %v", err)
+	}
+
+	trigger1 := &ActionTrigger{
+		ID:        "act1",
+		Recurrent: true,
+		Balance:   &BalanceFilter{Type: utils.StringPointer("data")},
+	}
+	trigger2 := &ActionTrigger{
+		ID:        "act2",
+		Recurrent: true,
+		Balance:   &BalanceFilter{Type: utils.StringPointer("sms")},
+	}
+
+	account := &Account{
+		ID:             "user1",
+		ActionTriggers: ActionTriggers{trigger1, trigger2},
+	}
+
+	action := &Action{
+		Id:      "act1",
+		Balance: &BalanceFilter{Type: utils.StringPointer("data")},
+		ExtraParameters: func() string {
+			tp := struct {
+				GroupID       string
+				UniqueID      string
+				ThresholdType string
+			}{}
+			data, _ := json.Marshal(tp)
+			return string(data)
+		}(),
+	}
+
+	err = unsetRecurrentAction(account, action, nil, nil, nil, SharedActionsData{}, ActionConnCfg{})
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	if trigger1.Recurrent {
+		t.Errorf("expected trigger1.Recurrent to be false after unsetRecurrentAction")
+	}
+	if !trigger2.Recurrent {
+		t.Errorf("expected trigger2.Recurrent to remain true")
 	}
 }

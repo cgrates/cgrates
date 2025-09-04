@@ -772,3 +772,73 @@ func TestUpdateSRuns(t *testing.T) {
 			utils.MetaPostpaid, s.SRuns[0].Event[utils.RequestType])
 	}
 }
+
+func TestSessionLastUsage(t *testing.T) {
+	sess1 := &Session{}
+	if l := sess1.lastUsage(); l != 0 {
+		t.Errorf("expected 0 when no SRun, got %v", l)
+	}
+
+	sr1 := &SRun{LastUsage: 5 * time.Second}
+	sess2 := &Session{
+		SRuns: []*SRun{sr1},
+	}
+	if l := sess2.lastUsage(); l != 5*time.Second {
+		t.Errorf("expected 5s, got %v", l)
+	}
+
+	sr2 := &SRun{LastUsage: 10 * time.Second}
+	sess3 := &Session{
+		SRuns: []*SRun{sr1, sr2},
+	}
+	if l := sess3.lastUsage(); l != 5*time.Second {
+		t.Errorf("expected first SRun LastUsage 5s, got %v", l)
+	}
+}
+func TestSessionMidSessionUsage(t *testing.T) {
+	sess1 := &Session{}
+	usage, last := sess1.midSessionUsage(10 * time.Second)
+	if usage != 10*time.Second || last != nil {
+		t.Errorf("expected usage=10s and last=nil, got usage=%v, last=%v", usage, last)
+	}
+
+	sess2 := &Session{
+		SRuns: []*SRun{
+			{LastUsage: 2 * time.Second, TotalUsage: 3 * time.Second},
+		},
+	}
+	usage, last = sess2.midSessionUsage(10 * time.Second)
+	if last != nil {
+		t.Errorf("expected last=nil, got %v", last)
+	}
+	if usage <= 0 {
+		t.Errorf("expected positive usage, got %v", usage)
+	}
+
+	sess3 := &Session{
+		SRuns: []*SRun{
+			{LastUsage: 5 * time.Second, TotalUsage: 15 * time.Second},
+		},
+	}
+	usage, last = sess3.midSessionUsage(10 * time.Second)
+	if usage != 0 {
+		t.Errorf("expected usage=0, got %v", usage)
+	}
+	if last == nil || *last <= 0 {
+		t.Errorf("expected last>0, got %v", last)
+	}
+
+	sess4 := &Session{
+		SRuns: []*SRun{
+			{LastUsage: 2 * time.Second, TotalUsage: 3 * time.Second},
+			{LastUsage: 1 * time.Second, TotalUsage: 4 * time.Second},
+		},
+	}
+	usage, last = sess4.midSessionUsage(15 * time.Second)
+	if last != nil {
+		t.Errorf("expected last=nil, got %v", last)
+	}
+	if usage <= 0 {
+		t.Errorf("expected positive usage, got %v", usage)
+	}
+}
