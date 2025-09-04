@@ -537,3 +537,101 @@ func TestUpdateInitialValue(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateActionTrigger(t *testing.T) {
+
+	attr := &AttrSetActionTrigger{}
+	updated, err := attr.UpdateActionTrigger(nil, "UTC")
+	if err == nil || err.Error() != "Empty ActionTrigger" {
+		t.Errorf("expected  error, got %v", err)
+	}
+	if updated {
+		t.Errorf("expected updated=false for nil ActionTrigger")
+	}
+
+	at := &ActionTrigger{ID: utils.EmptyString}
+	attr = &AttrSetActionTrigger{
+		GroupID:       "grp1",
+		ActionTrigger: map[string]any{"ThresholdType": "min_balance"},
+	}
+	updated, err = attr.UpdateActionTrigger(at, "UTC")
+	if err == nil {
+		t.Errorf("expected error for missing ThresholdValue")
+	}
+	if updated {
+		t.Errorf("expected updated=false when mandatory fields missing")
+	}
+
+	attr = &AttrSetActionTrigger{
+		GroupID: "grp1",
+		ActionTrigger: map[string]any{
+			"ThresholdType":  "min_balance",
+			"ThresholdValue": 10.5,
+			"Recurrent":      true,
+			"Executed":       true,
+			"MinSleep":       "1s",
+			"ExpirationDate": "2025-01-01T00:00:00Z",
+			"ActivationDate": "2024-01-01T00:00:00Z",
+			"BalanceType":    "minutes",
+			"Weight":         5,
+		},
+	}
+	at = &ActionTrigger{ID: utils.EmptyString}
+	updated, err = attr.UpdateActionTrigger(at, "UTC")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if !updated {
+		t.Errorf("expected updated=true for proper ActionTrigger")
+	}
+	if at.ID != "grp1" {
+		t.Errorf("expected ID to be set, got %s", at.ID)
+	}
+	if at.ThresholdType != "min_balance" || at.ThresholdValue != 10.5 {
+		t.Errorf("expected ThresholdType/Value updated, got %s/%v", at.ThresholdType, at.ThresholdValue)
+	}
+	if !at.Recurrent || !at.Executed {
+		t.Errorf("expected Recurrent and Executed to be true")
+	}
+	if at.MinSleep != time.Second {
+		t.Errorf("expected MinSleep=1s, got %v", at.MinSleep)
+	}
+	if at.Balance == nil || at.Balance.GetType() != "minutes" {
+		t.Errorf("expected Balance.Type='minutes', got %v", at.Balance)
+	}
+	if at.Weight != 5 {
+		t.Errorf("expected Weight=5.5, got %v", at.Weight)
+	}
+
+	attr = &AttrSetActionTrigger{
+		GroupID:       "NonMatchingGroupID",
+		ActionTrigger: map[string]any{"ThresholdType": "max_balance"},
+	}
+	oldType := at.ThresholdType
+	updated, err = attr.UpdateActionTrigger(at, "UTC")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if updated {
+		t.Errorf("expected updated=false when GroupID does not match")
+	}
+	if at.ThresholdType != oldType {
+		t.Errorf("expected ThresholdType unchanged, got %s", at.ThresholdType)
+	}
+
+	attr = &AttrSetActionTrigger{
+		UniqueID:      "NonMatchingUniqueID",
+		ActionTrigger: map[string]any{"ThresholdType": "max_balance"},
+	}
+	oldType = at.ThresholdType
+	updated, err = attr.UpdateActionTrigger(at, "UTC")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if updated {
+		t.Errorf("expected updated=false when UniqueID does not match")
+	}
+	if at.ThresholdType != oldType {
+		t.Errorf("expected ThresholdType unchanged, got %s", at.ThresholdType)
+	}
+}

@@ -26,6 +26,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -4743,4 +4744,104 @@ func TestSyncSessionsSync(t *testing.T) {
 
 	//There are no sessions to be removed
 	sessions.terminateSyncSessions([]string{"no_sesssion"})
+}
+
+func TestBiRPCv1Sleep(t *testing.T) {
+	ss := &SessionS{}
+
+	ctx := &context.Context{}
+	reply := ""
+	duration := 10 * time.Millisecond
+
+	start := time.Now()
+	err := ss.BiRPCv1Sleep(ctx, &utils.DurationArgs{Duration: duration}, &reply)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if reply != utils.OK {
+		t.Errorf("expected reply = %s, got %s", utils.OK, reply)
+	}
+
+	if elapsed < duration {
+		t.Errorf("function returned too quickly, expected >= %v, got %v", duration, elapsed)
+	}
+}
+
+func TestUnregisterSession(t *testing.T) {
+	ss := &SessionS{
+		aSessions: map[string]*Session{
+			"active1": {ClientConnID: "conn01"},
+		},
+		pSessions: map[string]*Session{
+			"passive1": {ClientConnID: "conn02"},
+		},
+		bkpSessionIDs:  make(utils.StringSet),
+		removeSsCGRIDs: make(utils.StringSet),
+		cgrCfg:         config.NewDefaultCGRConfig(),
+	}
+
+	ss.cgrCfg.SessionSCfg().BackupInterval = 10
+
+	ok := ss.unregisterSession("active1", false)
+	if !ok {
+		t.Errorf("expected active session to be unregistered")
+	}
+	if _, exists := ss.aSessions["active1"]; exists {
+		t.Errorf("active session still exists after unregister")
+	}
+	if _, inRemove := ss.removeSsCGRIDs["active1"]; !inRemove {
+		t.Errorf("active session ID not added to removeSsCGRIDs")
+	}
+
+	ok = ss.unregisterSession("passive1", true)
+	if !ok {
+		t.Errorf("expected passive session to be unregistered")
+	}
+	if _, exists := ss.pSessions["passive1"]; exists {
+		t.Errorf("passive session still exists after unregister")
+	}
+}
+
+func TestBiRPCv1BackupActiveSessions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+
+	sess := &Session{
+		CGRID:        "sess01",
+		ClientConnID: "",
+		EventStart: map[string]any{
+			"Destination": "1002",
+			"Tenant":      "cgrates.org",
+		},
+		lk: sync.RWMutex{},
+	}
+
+	ss := &SessionS{
+		aSessions: map[string]*Session{
+			sess.CGRID: sess,
+		},
+		cgrCfg:       cfg,
+		dm:           dm,
+		storeSessMux: sync.RWMutex{},
+	}
+
+	var reply int
+	if err := ss.BiRPCv1BackupActiveSessions(context.Background(), "", &reply); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if reply != 1 {
+		t.Errorf("expected 1 session stored, got %d", reply)
+	}
+
+	storedSessions, err := dm.GetSessionsBackup(cfg.GeneralCfg().NodeID, cfg.GeneralCfg().DefaultTenant)
+	if err != nil {
+		t.Fatalf("failed to get backup sessions: %v", err)
+	}
+	if len(storedSessions) != 1 || storedSessions[0].CGRID != "sess01" {
+		t.Errorf("expected stored session with CGRID 'sess01', got %+v", storedSessions)
+	}
 }
