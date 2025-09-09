@@ -237,6 +237,9 @@ func UpdateFilterIndexes(dm *DataManager, tnt string, oldFltr *Filter, newFltr *
 // Used to update the index map when a filter is modified.
 func removeFilterIndexesForFilter(dm *DataManager, idxItmType, cacheItmType, tnt string,
 	removeIndexKeys []string, itemIDs utils.StringMap) error {
+	if len(removeIndexKeys) == 0 {
+		return nil // no indexes to remove
+	}
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
 		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tnt)
 	defer guardian.Guardian.UnguardIDs(refID)
