@@ -20,15 +20,31 @@ package actions
 
 import (
 	"cmp"
+	"fmt"
 	"reflect"
 	"slices"
 	"testing"
+	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
+
+type ccMock struct {
+	calls map[string]func(ctx *context.Context, args any, reply any) error
+}
+
+func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+	if call, has := ccM.calls[serviceMethod]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return call(ctx, args, reply)
+	}
+}
 
 func TestParseParamStringToMap(t *testing.T) {
 	testcases := []struct {
@@ -200,5 +216,301 @@ func TestActDynamicThresholdExecuteSort(t *testing.T) {
 	err := act.execute(ctx, data, trgID)
 	if err != nil {
 		t.Fatalf("execute failed: %v", err)
+	}
+}
+
+func TestActDynamicThresholdExecute(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+
+	var tpwo *engine.ThresholdProfileWithAPIOpts
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AdminSv1SetThresholdProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if tpwo, canCast = args.(*engine.ThresholdProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				return nil
+			},
+		},
+	}
+
+	testcases := []struct {
+		name    string
+		diktats []*utils.APDiktat
+		expTpwo *engine.ThresholdProfileWithAPIOpts
+		wantErr bool
+	}{
+		{
+			name: "SuccessfulRequest",
+			expTpwo: &engine.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &engine.ThresholdProfile{
+					Tenant:    "cgrates.org",
+					ID:        "THD_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					MaxHits:   1,
+					MinHits:   1,
+					MinSleep:  1 * time.Second,
+					Blocker:   true,
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					ActionProfileIDs: []string{"ACT_LOG_WARNING"},
+					Async:            true,
+					EeIDs:            []string{"eeID1", "eeID2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1001;*string:~*req.Account:1001;&20;1;1;1s;true;ACT_LOG_WARNING;true;eeID1&eeID2;key:value",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestWithDyanmicPaths",
+			expTpwo: &engine.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &engine.ThresholdProfile{
+					Tenant:    "cgrates.org",
+					ID:        "THD_ACNT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					MaxHits:   1,
+					MinHits:   1,
+					MinSleep:  1 * time.Second,
+					Blocker:   true,
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					ActionProfileIDs: []string{"ACT_LOG_WARNING"},
+					Async:            true,
+					EeIDs:            []string{"eeID1", "eeID2"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_<~*req.Account>;*string:~*req.Account:<~*req.Account>;&20;1;1;1s;true;ACT_LOG_WARNING;true;eeID1&eeID2;key:value",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestEmptyFields",
+			expTpwo: &engine.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &engine.ThresholdProfile{
+					Tenant:           "cgrates.org",
+					ID:               "THD_ACNT_1001",
+					FilterIDs:        nil,
+					MaxHits:          0,
+					MinHits:          0,
+					MinSleep:         0,
+					Blocker:          false,
+					Weights:          nil,
+					ActionProfileIDs: nil,
+					Async:            false,
+					EeIDs:            nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1001;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "EmptyDiktats",
+			diktats: []*utils.APDiktat{},
+			wantErr: true,
+		},
+		{
+			name: "InvalidNumberOfParams",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d4",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1004;1;2",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidMaxHitsParam",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d5",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1005;*string:~*req.Account:1005;;invalid;1;1s;true;ACT_LOG_WARNING;true;eeID5;key:value",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidMinSleepParam",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d6",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1006;*string:~*req.Account:1006;&20;1;1;invalid;true;ACT_LOG_WARNING;true;eeID6;key:value",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "WeightParamUnsupportedFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d10",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1010;;w1&w2&w3;1;1;1s;true;ACT_LOG_WARNING;true;eeID10;key:value",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "WeightParamInvalidFloat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d11",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1011;;w1&invalid;1;1;1s;true;ACT_LOG_WARNING;true;eeID11;key:value",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "APIOptsInvalidFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d12",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1012;;;;1;1;1s;true;ACT_LOG_WARNING;true;eeID12;keyvalue",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "BlockerFail",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d14",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1014;*string:~*req.Account:1014;;1;1;1s;notbool;ACT_LOG_WARNING;true;eeID14;key:value",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := config.NewDefaultCGRConfig()
+			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			connMgr := engine.NewConnManager(cfg)
+			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+			dm := engine.NewDataManager(dataDB, cfg, connMgr)
+			fltrS := engine.NewFilterS(cfg, connMgr, dm)
+			rpcInternal := make(chan birpc.ClientConnector, 1)
+			rpcInternal <- ccM
+			connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
+
+			act := &actDynamicThreshold{
+				config:  cfg,
+				connMgr: connMgr,
+				fltrS:   fltrS,
+				tnt:     "cgrates.org",
+				cgrEv: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+				},
+				aCfg: &utils.APAction{
+					ID:      "ACT_DYNAMIC",
+					Diktats: tc.diktats,
+				},
+			}
+
+			t.Cleanup(func() {
+				tpwo = nil
+			})
+
+			ctx := context.Background()
+			data := utils.MapStorage{
+				"*req": map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			trgID := "trigger1"
+			err := act.execute(ctx, data, trgID)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected an error, but got nil")
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(tpwo, tc.expTpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expTpwo), utils.ToJSON(tpwo))
+			}
+		})
 	}
 }
