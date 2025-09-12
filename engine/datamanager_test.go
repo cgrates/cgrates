@@ -4471,7 +4471,7 @@ func TestUpdateFilterIndexStatErr1(t *testing.T) {
 	}
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	dm.dataDB = &DataDBMock{
-		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(idxItmType, tntCtx string, idxKey ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheStatFilterIndexes: {
 					"ATTR_TEST": {},
@@ -4520,7 +4520,7 @@ func TestUpdateFilterIndexRemoveThresholdErr1(t *testing.T) {
 	}
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	dm.dataDB = &DataDBMock{
-		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(idxItmType, tntCtx string, idxKey ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheThresholdFilterIndexes: {
 					"ATTR_TEST": {},
@@ -4654,7 +4654,7 @@ func TestUpdateFilterResourceIndexErr(t *testing.T) {
 	}
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	dm.dataDB = &DataDBMock{
-		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(idxItmType, tntCtx string, idxKey ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheResourceFilterIndexes: {
 					"ATTR_TEST": {},
@@ -4694,7 +4694,7 @@ func TestUpdateFilterRouteIndexErr(t *testing.T) {
 	}
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	dm.dataDB = &DataDBMock{
-		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(idxItmType, tntCtx string, idxKey ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRouteFilterIndexes: {
 					"ATTR_TEST": {},
@@ -4739,7 +4739,7 @@ func TestUpdateFilterChargersIndexErr(t *testing.T) {
 	}
 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
 	dm.dataDB = &DataDBMock{
-		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(idxItmType, tntCtx string, idxKey ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheChargerFilterIndexes: {
 					"ATTR_TEST": {},

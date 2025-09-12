@@ -3762,29 +3762,45 @@ func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg, it
 
 func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 	cacheRead, cacheWrite bool) (indexes map[string]utils.StringSet, err error) {
+	return dm.GetIndexesBatch(idxItmType, tntCtx, cacheRead, cacheWrite, idxKey)
+}
+
+// GetIndexesBatch supports retrieving multiple index keys in a single operation
+// When idxKeys is empty or contains only empty string, retrieves all indexes
+// Otherwise retrieves only the specified keys, returning only found keys (no error if some missing)
+// Returns ErrNotFound only if no keys found at all
+func (dm *DataManager) GetIndexesBatch(idxItmType, tntCtx string,
+	cacheRead, cacheWrite bool, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
 
-	if cacheRead && idxKey != utils.EmptyString { // do not check cache if we want all the indexes
-		if x, ok := Cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey)); ok { // Attempt to find in cache first
+	// Handle backward compatibility: single key cache check
+	if cacheRead && len(idxKeys) == 1 && idxKeys[0] != utils.EmptyString {
+		if x, ok := Cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, idxKeys[0])); ok {
 			if x == nil {
 				return nil, utils.ErrNotFound
 			}
 			return map[string]utils.StringSet{
-				idxKey: x.(utils.StringSet),
+				idxKeys[0]: x.(utils.StringSet),
 			}, nil
 		}
 	}
-	if indexes, err = dm.DataDB().GetIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
+
+	if indexes, err = dm.DataDB().GetIndexesDrv(idxItmType, tntCtx, idxKeys...); err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; err == utils.ErrNotFound && itm.Remote {
+			// For remote fallback, use single key for backward compatibility
+			var singleKey string
+			if len(idxKeys) > 0 {
+				singleKey = idxKeys[0]
+			}
 			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetIndexes,
 				&utils.GetIndexesArg{
 					IdxItmType: idxItmType,
 					TntCtx:     tntCtx,
-					IdxKey:     idxKey,
+					IdxKey:     singleKey,
 					Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
@@ -3795,8 +3811,8 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && idxKey != utils.EmptyString {
-				if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, []string{tntCtx},
+			if err == utils.ErrNotFound && cacheWrite && len(idxKeys) == 1 && idxKeys[0] != utils.EmptyString {
+				if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKeys[0]), nil, []string{tntCtx},
 					true, utils.NonTransactional); errCh != nil {
 					return nil, errCh
 				}

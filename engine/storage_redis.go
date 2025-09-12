@@ -1350,10 +1350,10 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 }
 
 // GetIndexesDrv retrieves Indexes from dataDB
-func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	mp := make(map[string]string)
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
-	if len(idxKey) == 0 {
+	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) {
 		if err = rs.Cmd(&mp, redis_HGETALL, dbKey); err != nil {
 			return
 		} else if len(mp) == 0 {
@@ -1361,12 +1361,22 @@ func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexe
 		}
 	} else {
 		var itmMpStrLst []string
-		if err = rs.Cmd(&itmMpStrLst, redis_HMGET, dbKey, idxKey); err != nil {
+		args := make([]string, len(idxKeys)+1)
+		args[0] = dbKey
+		for i, key := range idxKeys {
+			args[i+1] = key
+		}
+		if err = rs.Cmd(&itmMpStrLst, redis_HMGET, args...); err != nil {
 			return
-		} else if itmMpStrLst[0] == utils.EmptyString {
+		}
+		for i, val := range itmMpStrLst {
+			if val != utils.EmptyString {
+				mp[idxKeys[i]] = val
+			}
+		}
+		if len(mp) == 0 {
 			return nil, utils.ErrNotFound
 		}
-		mp[idxKey] = itmMpStrLst[0]
 	}
 	indexes = make(map[string]utils.StringSet)
 	for k, v := range mp {

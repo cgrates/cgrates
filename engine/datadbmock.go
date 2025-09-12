@@ -26,7 +26,7 @@ type DataDBMock struct {
 	GetKeysForPrefixF         func(string) ([]string, error)
 	GetChargerProfileDrvF     func(string, string) (*ChargerProfile, error)
 	GetFilterDrvF             func(string, string) (*Filter, error)
-	GetIndexesDrvF            func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	GetIndexesDrvF            func(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
 	GetThresholdProfileDrvF   func(tenant, id string) (tp *ThresholdProfile, err error)
 	SetThresholdProfileDrvF   func(tp *ThresholdProfile) (err error)
 	RemThresholdProfileDrvF   func(tenant, id string) (err error)
@@ -339,9 +339,9 @@ func (dbM *DataDBMock) AddLoadHistory(*utils.LoadInstance, int, string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+func (dbM *DataDBMock) GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if dbM.GetIndexesDrvF != nil {
-		return dbM.GetIndexesDrvF(idxItmType, tntCtx, idxKey)
+		return dbM.GetIndexesDrvF(idxItmType, tntCtx, idxKeys...)
 	}
 	return nil, utils.ErrNotImplemented
 }
