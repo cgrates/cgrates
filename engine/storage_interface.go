@@ -97,7 +97,7 @@ type DataDB interface {
 	RemoveTimingDrv(string) error
 	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
 	AddLoadHistory(*utils.LoadInstance, int, string) error
-	GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error)
+	GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrv(idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
 	RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error)

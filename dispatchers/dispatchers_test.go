@@ -1034,12 +1034,17 @@ func TestDispatcherServiceDispatcherProfileForEventNotNotFound(t *testing.T) {
 	var cnt int
 
 	dm := engine.NewDataManager(&engine.DataDBMock{
-		GetIndexesDrvF: func(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			if cnt == 0 {
 				cnt++
-				return map[string]utils.StringSet{
-					idxKey: {"cgrates.org:dsp1": {}},
-				}, nil
+				m := make(map[string]utils.StringSet)
+				for _, idxKey := range idxKeys {
+					itemID := "cgrates.org:dsp1"
+					m[idxKey] = utils.StringSet{
+						itemID: {},
+					}
+				}
+				return m, nil
 			}
 			return nil, utils.ErrNotImplemented
 		},

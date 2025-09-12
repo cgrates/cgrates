@@ -911,8 +911,8 @@ func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes map[string]utils.StringSet, err error) {
-	if idxKey == utils.EmptyString { // return all
+func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) { // return all
 		indexes = make(map[string]utils.StringSet)
 		for _, dbKey := range iDB.db.GetGroupItemIDs(idxItmType, tntCtx) {
 			x, ok := iDB.db.Get(idxItmType, dbKey)
@@ -927,14 +927,18 @@ func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (indexes
 		}
 		return
 	}
-	dbKey := utils.ConcatenatedKey(tntCtx, idxKey)
-	x, ok := iDB.db.Get(idxItmType, dbKey)
-	if !ok || x == nil {
+	indexes = make(map[string]utils.StringSet)
+	for _, idxKey := range idxKeys {
+		dbKey := utils.ConcatenatedKey(tntCtx, idxKey)
+		x, ok := iDB.db.Get(idxItmType, dbKey)
+		if ok && x != nil {
+			indexes[idxKey] = x.(utils.StringSet).Clone()
+		}
+	}
+	if len(indexes) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	return map[string]utils.StringSet{
-		idxKey: x.(utils.StringSet).Clone(),
-	}, nil
+	return indexes, nil
 }
 
 func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,

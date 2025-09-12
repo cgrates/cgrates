@@ -2064,21 +2064,26 @@ func (ms *MongoStorage) RemoveLoadIDsDrv() error {
 // GetIndexesDrv retrieves Indexes from dataDB
 // the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
 // id is used as a concatenated key in case of filterIndexes the id will be filterType:fieldName:fieldVal
-func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (map[string]utils.StringSet, error) {
+func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (map[string]utils.StringSet, error) {
 	type result struct {
 		Key   string
 		Value []string
 	}
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	var q bson.M
-	if len(idxKey) != 0 {
-		q = bson.M{"key": utils.ConcatenatedKey(dbKey, idxKey)}
-	} else {
+	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) {
 		for _, character := range []string{".", "*"} {
 			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
 		}
 		// For optimization, use a caret (^) in the regex pattern.
 		q = bson.M{"key": primitive.Regex{Pattern: "^" + dbKey}}
+	} else {
+		// Build $in query for specific keys (single or multiple).
+		inKeys := make([]string, len(idxKeys))
+		for i, key := range idxKeys {
+			inKeys[i] = utils.ConcatenatedKey(dbKey, key)
+		}
+		q = bson.M{"key": bson.M{"$in": inKeys}}
 	}
 	indexes := make(map[string]utils.StringSet)
 	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
