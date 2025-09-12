@@ -3461,7 +3461,7 @@ func TestUpdateFilterIndexRouteIndex(t *testing.T) {
 		"*string:*req.Cost:unRegVal2": {"ID": {}},
 	}
 
-	getindx, err := dm.GetIndexes(utils.CacheRouteFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true)
+	getindx, err := dm.GetIndexes(utils.CacheRouteFilterIndexes, cfg.GeneralCfg().DefaultTenant, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
@@ -3493,7 +3493,7 @@ func TestUpdateFilterIndexRouteIndex(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*prefix:*req.Usage:10s": {"ID": {}},
 	}
-	getindxNew, err := dm.GetIndexes(utils.CacheRouteFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true)
+	getindxNew, err := dm.GetIndexes(utils.CacheRouteFilterIndexes, cfg.GeneralCfg().DefaultTenant, true, true)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindxNew) {
@@ -3565,7 +3565,7 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 		"*string:*req.Stats:StatQueueProfile1": {"TEST_PROFILE1": {}},
 	}
 
-	if getindx, err := dm.GetIndexes(utils.CacheStatFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
+	if getindx, err := dm.GetIndexes(utils.CacheStatFilterIndexes, cfg.GeneralCfg().DefaultTenant, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindx, getindx) {
 		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
@@ -3593,7 +3593,7 @@ func TestUpdateFilterIndexStatIndex(t *testing.T) {
 	expindxNew := map[string]utils.StringSet{
 		"*prefix:*req.Usage:10s": {"TEST_PROFILE1": {}},
 	}
-	if getindx, err := dm.GetIndexes(utils.CacheStatFilterIndexes, cfg.GeneralCfg().DefaultTenant, utils.EmptyString, true, true); err != nil {
+	if getindx, err := dm.GetIndexes(utils.CacheStatFilterIndexes, cfg.GeneralCfg().DefaultTenant, true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expindxNew, getindx) {
 		t.Errorf("Expected %v, Received %v", utils.ToJSON(expindx), utils.ToJSON(getindx))
@@ -3728,7 +3728,7 @@ func TestUpdateFilterDispatcherIndex(t *testing.T) {
 		"*string:*req.Destination:ACC1": {"Dsp": {}},
 		"*string:*req.Destination:ACC2": {"Dsp": {}},
 	}
-	if indx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, "cgrates.org:*any", utils.EmptyString, true, true); err != nil {
+	if indx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, "cgrates.org:*any", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, indx) {
 		t.Errorf("Expected %v, Received %v", utils.ToJSON(exp), utils.ToJSON(indx))
@@ -3750,7 +3750,7 @@ func TestUpdateFilterDispatcherIndex(t *testing.T) {
 	exp = map[string]utils.StringSet{
 		"*string:*req.Charger:ChargerProfile2": {"Dsp": {}},
 	}
-	if indx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, "cgrates.org:*any", utils.EmptyString, true, true); err != nil {
+	if indx, err := dm.GetIndexes(utils.CacheDispatcherFilterIndexes, "cgrates.org:*any", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, indx) {
 		t.Errorf("Expected %v, Received %v", utils.ToJSON(exp), utils.ToJSON(indx))
@@ -5298,7 +5298,7 @@ func TestIndxFilterContains(t *testing.T) {
 	}
 	if rcvIdx, err := dm.GetIndexes(
 		utils.CacheThresholdFilterIndexes, th.Tenant,
-		utils.EmptyString, false, false); err != nil {
+		false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
 		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)

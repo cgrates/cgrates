@@ -272,7 +272,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(
 				utils.CacheAttributeFilterIndexes,
 				utils.ConcatenatedKey(attrProf.Tenant, utils.MetaAny),
-				"", false, false); err != nil {
+				false, false); err != nil {
 				t.Error(err)
 			} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
 				t.Errorf("Expected %v, received: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
@@ -470,7 +470,7 @@ func testFltrITMigratev2(t *testing.T) {
 		if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(
 			utils.CacheAttributeFilterIndexes,
 			utils.ConcatenatedKey(attrProf.Tenant, utils.MetaAny),
-			"", false, true); err != nil {
+			false, true); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
 			t.Errorf("Expected %v, received: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))

@@ -156,7 +156,7 @@ func TestLibIndexRemoveFilterIndexesForFilter(t *testing.T) {
 				tntCtx, test.keys, test.itemIDs); err != nil {
 				t.Fatalf("removeFilterIndexesForFilter() returned unexpected error: %v", err)
 			}
-			got, err := dm.GetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, "", true, false)
+			got, err := dm.GetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, true, false)
 			switch len(test.want) {
 			case 0:
 				if !errors.Is(err, utils.ErrNotFound) {
@@ -301,7 +301,7 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 		},
 	}
 	tntCtx := utils.ConcatenatedKey("cgrates.org", utils.MetaCDRs)
-	gotIndexes, err := dm.GetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, "", false, false)
+	gotIndexes, err := dm.GetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, false, false)
 	if err != nil {
 		t.Fatal(err)
 	}

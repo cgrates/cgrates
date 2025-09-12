@@ -424,7 +424,7 @@ func getIHFltrIdxFromCache(dm *DataManager, fltrIdxCache *ltcache.Cache, idxItmT
 		return fltrVal.(utils.StringSet), nil
 	}
 	var indexes map[string]utils.StringSet
-	if indexes, err = dm.GetIndexes(idxItmType, tntCtx, idxKey, true, false); err != nil {
+	if indexes, err = dm.GetIndexes(idxItmType, tntCtx, true, false, idxKey); err != nil {
 		if err == utils.ErrNotFound {
 			fltrIdxCache.Set(cacheKey, nil, nil)
 		}

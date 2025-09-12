@@ -91,7 +91,7 @@ func TestFilterIndexUpdates(t *testing.T) {
 		}
 
 		indexes, err := dm.GetIndexes(utils.CacheAttributeFilterIndexes, "cgrates.org:simpleauth",
-			"", true, false)
+			true, false)
 		if err != nil {
 			if len(want) == 0 && err == utils.ErrNotFound {
 				return

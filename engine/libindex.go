@@ -51,8 +51,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
 		var rcvIndx map[string]utils.StringSet
 		if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
-			idxKey,
-			true, false); err != nil {
+			true, false, idxKey); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -91,7 +90,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 				var rcvIndx map[string]utils.StringSet
 				// only read from cache in case if we do not find the index to not cache the negative response
 				if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
-					idxKey, true, false); err != nil {
+					true, false, idxKey); err != nil {
 					if err != utils.ErrNotFound {
 						return
 					}
@@ -122,7 +121,7 @@ func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filter
 				var rcvIndx map[string]utils.StringSet
 				// only read from cache in case if we do not find the index to not cache the negative response
 				if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
-					idxKey, true, false); err != nil {
+					true, false, idxKey); err != nil {
 					if err != utils.ErrNotFound {
 						return
 					}
@@ -477,7 +476,7 @@ func addIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filter
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntCtx)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
-			idxItmType, true, false); err != nil {
+			true, false, idxItmType); err != nil {
 			if err != utils.ErrNotFound {
 				guardian.Guardian.UnguardIDs(refID)
 				return
@@ -514,7 +513,7 @@ func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, fil
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntCtx)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
-			idxItmType, true, false); err != nil {
+			true, false, idxItmType); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err != utils.ErrNotFound {
 				return
@@ -624,7 +623,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	var rcvIndx map[string]utils.StringSet
 	// get all reverse indexes from DB
 	if rcvIndx, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntID,
-		utils.EmptyString, true, false); err != nil {
+		true, false); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
@@ -813,7 +812,7 @@ func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
 
 	for _, idxKey := range removeIndexKeys {
 		fltrIdx, err := dm.GetIndexes(idxItmType, tnt,
-			idxKey, true, false)
+			true, false, idxKey)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return err

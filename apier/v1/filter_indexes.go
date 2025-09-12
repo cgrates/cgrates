@@ -131,7 +131,7 @@ func (apierSv1 *APIerSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFil
 		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	}
 	if indexes, err = apierSv1.DataManager.GetIndexes(
-		arg.ItemType, tntCtx, utils.EmptyString, true, true); err != nil {
+		arg.ItemType, tntCtx, true, true); err != nil {
 		return
 	}
 	if arg.FilterType != utils.EmptyString {
