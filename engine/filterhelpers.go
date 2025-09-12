@@ -71,7 +71,7 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 				if filterIndexTypes[i] == utils.MetaExists {
 					var dbIndexes map[string]utils.StringSet // list of items matched in DB
 					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName)
-					if dbIndexes, err = dm.GetIndexes(cacheID, itemIDPrefix, key, true, true); err != nil {
+					if dbIndexes, err = dm.GetIndexes(cacheID, itemIDPrefix, true, true, key); err != nil {
 						if err == utils.ErrNotFound {
 							err = nil
 							continue
@@ -105,7 +105,7 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 				for _, val := range fldVals {
 					var dbIndexes map[string]utils.StringSet // list of items matched in DB
 					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName, val)
-					if dbIndexes, err = dm.GetIndexes(cacheID, itemIDPrefix, key, true, true); err != nil {
+					if dbIndexes, err = dm.GetIndexes(cacheID, itemIDPrefix, true, true, key); err != nil {
 						if err == utils.ErrNotFound {
 							err = nil
 							continue

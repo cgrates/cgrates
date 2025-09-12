@@ -481,7 +481,7 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 	}
 	if rcvIdx, err := dmAtr.GetIndexes(utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaAny), "", false, false); err != nil {
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaAny), false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -496,7 +496,7 @@ func TestAttributeIndexer(t *testing.T) {
 		t.Error(err)
 	}
 	if rcvIdx, err := dmAtr.GetIndexes(utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaSessionS), "", false, false); err != nil {
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaSessionS), false, false); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -505,7 +505,7 @@ func TestAttributeIndexer(t *testing.T) {
 	}
 	//verify if old index was deleted ( context *any)
 	if _, err := dmAtr.GetIndexes(utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaAny), "", false, false); err != utils.ErrNotFound {
+		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaAny), false, false); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }
