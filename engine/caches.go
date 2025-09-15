@@ -62,13 +62,16 @@ func init() {
 	gob.Register(new(utils.TPIPProfile))
 	// StatS
 	gob.Register(new(StatQueue))
+	gob.Register(new(StatQueueWithAPIOpts))
 	gob.Register(new(StatQueueProfile))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
 	gob.Register(new(StoredStatQueue))
 	gob.Register(new(StatQueueProfileWithAPIOpts))
 	gob.Register(new(utils.TPStatProfile))
 	// RankingS
+	gob.Register(new(RankingWithAPIOpts))
 	gob.Register(new(RankingProfile))
+	gob.Register(new(RankingProfileWithAPIOpts))
 	gob.Register(new(utils.TPRankingProfile))
 	// RouteS
 	gob.Register(new(RouteProfile))
@@ -83,6 +86,7 @@ func init() {
 	gob.Register(new(DispatcherHostProfile))
 	gob.Register(new(DispatcherHostWithAPIOpts))
 	gob.Register(new(DispatcherProfile))
+	gob.Register(new(DispatcherProfileWithAPIOpts))
 	gob.Register(new(utils.TPDispatcherHost))
 	gob.Register(new(utils.TPDispatcherProfile))
 
@@ -119,37 +123,60 @@ func init() {
 	gob.Register(json.RawMessage{})
 	gob.Register(BalanceSummaries{})
 
+	gob.Register(new(utils.TenantIDWithAPIOpts))
+	gob.Register(new(TrendWithAPIOpts))
+	gob.Register(new(SetBackupSessionsArgs))
+	gob.Register(new(RemoveSessionBackupArgs))
+	gob.Register(new(utils.GetIndexesArg))
+	gob.Register(new(utils.SetIndexesArg))
+	gob.Register(new(utils.LoadIDsWithAPIOpts))
+
 	gob.Register(Actions{})
+	gob.Register(new(SetActionsArgsWithAPIOpts))
 	gob.Register(new(ActionPlan))
+	gob.Register(new(SetActionPlanArgWithAPIOpts))
 	gob.Register(ActionTriggers{})
 	gob.Register(new(utils.TPActions))
+	gob.Register(new(SetActionTriggersArgWithAPIOpts))
 	gob.Register(new(utils.TPActionPlan))
 	gob.Register(new(utils.TPActionTriggers))
 
+	gob.Register(new(utils.StringWithAPIOpts))
+
 	gob.Register(new(RatingPlan))
+	gob.Register(new(RatingPlanWithAPIOpts))
+	gob.Register(new(RatingProfileWithAPIOpts))
 	gob.Register(new(RatingProfile))
 	gob.Register(new(utils.TPRatingPlan))
 	gob.Register(new(utils.TPRatingProfile))
 	gob.Register(new(utils.TPRateRALs))
 
 	gob.Register(new(Account))
+	gob.Register(new(SetAccountActionPlansArgWithAPIOpts))
+	gob.Register(new(RemAccountActionPlansArgsWithAPIOpts))
+	gob.Register(new(AccountWithAPIOpts))
 	gob.Register(new(utils.TPAccountActions))
 
 	gob.Register(new(utils.TPTiming))
+	gob.Register(new(utils.TPTimingWithAPIOpts))
 	gob.Register(new(utils.ApierTPTiming))
 
 	gob.Register(new(Destination))
+	gob.Register(new(DestinationWithAPIOpts))
 	gob.Register(new(utils.TPDestination))
 	gob.Register(new(utils.TPDestinationRate))
 
 	gob.Register(new(Trend))
 	gob.Register(new(TrendProfile))
+	gob.Register(new(TrendProfileWithAPIOpts))
 	gob.Register(new(utils.TPTrendsProfile))
 
 	gob.Register(new(SharedGroup))
+	gob.Register(new(SharedGroupWithAPIOpts))
 	gob.Register(new(utils.TPSharedGroups))
 
 	gob.Register(new(ChargerProfile))
+	gob.Register(new(ChargerProfileWithAPIOpts))
 	gob.Register(new(utils.TPChargerProfile))
 
 	gob.Register(Versions{})
