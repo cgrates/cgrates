@@ -32,7 +32,7 @@
       become: true
       ansible.builtin.apt:
         name: cgrates
-        state: present
+        state: latest
         update_cache: true
 
 # Source installation tasks
