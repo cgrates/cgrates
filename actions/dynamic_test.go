@@ -1383,3 +1383,432 @@ func TestActDynamicAttributeExecute(t *testing.T) {
 		})
 	}
 }
+
+func TestActDynamicResourceId(t *testing.T) {
+	testcases := []struct {
+		name   string
+		aCfg   *utils.APAction
+		expect string
+	}{
+		{
+			name: "WithValidID",
+			aCfg: &utils.APAction{
+				ID:        "ResA1",
+				FilterIDs: []string{"f1", "f2"},
+				TTL:       time.Second,
+				Type:      "resource",
+				Opts: map[string]any{
+					"Opts": "Opts1",
+				},
+			},
+			expect: "ResA1",
+		},
+		{
+			name: "WithEmptyID",
+			aCfg: &utils.APAction{
+				ID:        "",
+				FilterIDs: nil,
+				TTL:       0,
+				Type:      "resource",
+				Opts:      nil,
+			},
+			expect: "",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			al := &actDynamicResource{
+				aCfg: tc.aCfg,
+			}
+			got := al.id()
+			if got != tc.expect {
+				t.Errorf("expected %q, got %q", tc.expect, got)
+			}
+		})
+	}
+}
+
+func TestActDynamicResourceCfg(t *testing.T) {
+	testcases := []struct {
+		name   string
+		aCfg   *utils.APAction
+		expect *utils.APAction
+	}{
+		{
+			name: "WithValidCfg",
+			aCfg: &utils.APAction{
+				ID:        "ResCfg1",
+				FilterIDs: []string{"f1"},
+				TTL:       time.Second,
+				Type:      "resource",
+				Opts: map[string]any{
+					"Opts1": "val1",
+				},
+			},
+			expect: &utils.APAction{
+				ID:        "ResCfg1",
+				FilterIDs: []string{"f1"},
+				TTL:       time.Second,
+				Type:      "resource",
+				Opts: map[string]any{
+					"Opts1": "val1",
+				},
+			},
+		},
+		{
+			name:   "WithNilCfg",
+			aCfg:   nil,
+			expect: nil,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			al := &actDynamicResource{
+				aCfg: tc.aCfg,
+			}
+			got := al.cfg()
+
+			if !reflect.DeepEqual(got, tc.expect) {
+				t.Errorf("expected %+v, got %+v", tc.expect, got)
+			}
+		})
+	}
+}
+
+func TestActDynamicResourceExecute(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+
+	var rpwo *utils.ResourceProfileWithAPIOpts
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AdminSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rpwo, canCast = args.(*utils.ResourceProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldn't cast")
+				}
+				*reply.(*string) = utils.OK
+				return nil
+			},
+		},
+	}
+
+	testcases := []struct {
+		name    string
+		diktats []*utils.APDiktat
+		expRpwo *utils.ResourceProfileWithAPIOpts
+		wantErr bool
+	}{
+		{
+			name: "SuccessfulRequest",
+			expRpwo: &utils.ResourceProfileWithAPIOpts{
+				ResourceProfile: &utils.ResourceProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RES_1001",
+					FilterIDs:         []string{"*string:~*req.Account:1001"},
+					UsageTTL:          time.Duration(60 * time.Second),
+					Limit:             100.0,
+					AllocationMessage: "Resource allocated",
+					Blocker:           true,
+					Stored:            true,
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{
+							FilterIDs: []string{"*string:~*req.Account:1001"},
+							Weight:    20.0,
+						},
+					},
+					ThresholdIDs: []string{"THD_1001"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;*string:~*req.Account:1001;*string:~*req.Account:1001&20;60s;100;Resource allocated;true;true;THD_1001;key:value",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestWithDynamicPaths",
+			expRpwo: &utils.ResourceProfileWithAPIOpts{
+				ResourceProfile: &utils.ResourceProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RES_1001",
+					FilterIDs:         []string{"*string:~*req.Account:1001"},
+					UsageTTL:          time.Duration(60 * time.Second),
+					Limit:             100.0,
+					AllocationMessage: "Resource allocated",
+					Blocker:           true,
+					Stored:            true,
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{
+							FilterIDs: []string{"*string:~*req.Account:1001"},
+							Weight:    20.0,
+						},
+					},
+					ThresholdIDs: []string{"THD_1001"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&20;60s;100;Resource allocated;true;true;THD_<~*req.Account>;key:value",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestEmptyFields",
+			expRpwo: &utils.ResourceProfileWithAPIOpts{
+				ResourceProfile: &utils.ResourceProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RES_1001",
+					FilterIDs:         nil,
+					UsageTTL:          0,
+					Limit:             0.0,
+					AllocationMessage: "",
+					Blocker:           false,
+					Stored:            false,
+					Weights:           nil,
+					ThresholdIDs:      nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "WeightParamUnsupportedFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;w1&w2&w3;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "WeightParamInvalidFloat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;w1&invalid;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "UsageTTLInvalidDuration",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;invalid;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "LimitInvalidFloat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;invalid;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "BlockerInvalidBool",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;invalid;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "StoredInvalidBool",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;invalid;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "APIOptsInvalidFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;keyvalue",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidNumberOfParameters",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;not_enough_params",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name:    "NoDiktatsSpecified",
+			diktats: []*utils.APDiktat{},
+			wantErr: true,
+		},
+		{
+			name: "NoAdminSConns",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := config.NewDefaultCGRConfig()
+			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+
+			if tc.name != "NoAdminSConns" {
+				cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			}
+
+			connMgr := engine.NewConnManager(cfg)
+			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+			dm := engine.NewDataManager(dataDB, cfg, connMgr)
+			fltrS := engine.NewFilterS(cfg, connMgr, dm)
+
+			rpcInternal := make(chan birpc.ClientConnector, 1)
+			rpcInternal <- ccM
+			connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
+
+			act := &actDynamicResource{
+				config:  cfg,
+				connMgr: connMgr,
+				fltrS:   fltrS,
+				tnt:     "cgrates.org",
+				cgrEv: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+				},
+				aCfg: &utils.APAction{
+					ID:      "ACT_DYNAMIC_RESOURCE",
+					Diktats: tc.diktats,
+				},
+			}
+
+			t.Cleanup(func() {
+				rpwo = nil
+			})
+
+			ctx := context.Background()
+			data := utils.MapStorage{
+				"*req": map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			trgID := "trigger1"
+
+			err := act.execute(ctx, data, trgID)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected an error, but got nil")
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(rpwo, tc.expRpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+			}
+		})
+	}
+}
