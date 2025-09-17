@@ -1812,3 +1812,351 @@ func TestActDynamicResourceExecute(t *testing.T) {
 		})
 	}
 }
+
+func TestActDynamicTrendId(t *testing.T) {
+	tests := []struct {
+		name     string
+		actionID string
+		expected string
+	}{
+		{
+			name:     "With ID",
+			actionID: "DynamicTrendID",
+			expected: "DynamicTrendID",
+		},
+		{
+			name:     "Empty ID",
+			actionID: "",
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actDT := &actDynamicTrend{
+				aCfg: &utils.APAction{
+					ID: tt.actionID,
+				},
+			}
+
+			result := actDT.id()
+			if result != tt.expected {
+				t.Errorf("Expected %s, got %s", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestActDynamicTrendCfg(t *testing.T) {
+	apAction := &utils.APAction{ID: "TrendProfile1"}
+
+	a := &actDynamicTrend{
+		aCfg: apAction,
+	}
+
+	if got := a.cfg(); !reflect.DeepEqual(got, apAction) {
+		t.Errorf("cfg() = %v, want %v", got, apAction)
+	}
+}
+
+func TestActDynamicTrendExecute(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+
+	var tpwo *utils.TrendProfileWithAPIOpts
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AdminSv1SetTrendProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if tpwo, canCast = args.(*utils.TrendProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldn't cast")
+				}
+				*reply.(*string) = utils.OK
+				return nil
+			},
+		},
+	}
+
+	testcases := []struct {
+		name    string
+		diktats []*utils.APDiktat
+		expTpwo *utils.TrendProfileWithAPIOpts
+		wantErr bool
+	}{
+		{
+			name: "SuccessfulRequest",
+			expTpwo: &utils.TrendProfileWithAPIOpts{
+				TrendProfile: &utils.TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND_1001",
+					Schedule:        "* * * * *",
+					StatID:          "STAT_1001",
+					Metrics:         []string{"*acd", "*tcd"},
+					TTL:             60 * time.Second,
+					QueueLength:     100,
+					MinItems:        10,
+					CorrelationType: "*last",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"THD_1001"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;* * * * *;STAT_1001;*acd&*tcd;60s;100;10;*last;0.05;true;THD_1001;key:value",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestWithDynamicPaths",
+			expTpwo: &utils.TrendProfileWithAPIOpts{
+				TrendProfile: &utils.TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND_1001",
+					Schedule:        "* * * * *",
+					StatID:          "STAT_1001",
+					Metrics:         []string{"*acd", "*tcd"},
+					TTL:             60 * time.Second,
+					QueueLength:     100,
+					MinItems:        10,
+					CorrelationType: "*last",
+					Tolerance:       0.05,
+					Stored:          true,
+					ThresholdIDs:    []string{"THD_1001"},
+				},
+				APIOpts: map[string]any{
+					"key": "value",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_<~*req.Account>;* * * * *;STAT_<~*req.Account>;*acd&*tcd;60s;100;10;*last;0.05;true;THD_<~*req.Account>;key:value",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestEmptyFields",
+			expTpwo: &utils.TrendProfileWithAPIOpts{
+				TrendProfile: &utils.TrendProfile{
+					Tenant:          "cgrates.org",
+					ID:              "TREND_1001",
+					Schedule:        "",
+					StatID:          "",
+					Metrics:         nil,
+					TTL:             0,
+					QueueLength:     0,
+					MinItems:        0,
+					CorrelationType: "",
+					Tolerance:       0.0,
+					Stored:          false,
+					ThresholdIDs:    nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "TTLInvalidDuration",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;;;invalid;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "QueueLengthInvalidInt",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;;;;;invalid;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "MinItemsInvalidInt",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;;;;;;invalid;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ToleranceInvalidFloat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;;;;;;;;invalid;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "StoredInvalidBool",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;;;;;;;;;invalid;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidNumberOfParameters",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;not_enough_params",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name:    "NoDiktatsSpecified",
+			diktats: []*utils.APDiktat{},
+			wantErr: true,
+		},
+		{
+			name: "NoAdminSConns",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;TREND_1001;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := config.NewDefaultCGRConfig()
+			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+
+			if tc.name != "NoAdminSConns" {
+				cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			}
+
+			connMgr := engine.NewConnManager(cfg)
+			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+			dm := engine.NewDataManager(dataDB, cfg, connMgr)
+			fltrS := engine.NewFilterS(cfg, connMgr, dm)
+
+			rpcInternal := make(chan birpc.ClientConnector, 1)
+			rpcInternal <- ccM
+			connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
+
+			act := &actDynamicTrend{
+				config:  cfg,
+				connMgr: connMgr,
+				fltrS:   fltrS,
+				tnt:     "cgrates.org",
+				cgrEv: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+				},
+				aCfg: &utils.APAction{
+					ID:      "ACT_DYNAMIC_TREND",
+					Diktats: tc.diktats,
+				},
+			}
+
+			t.Cleanup(func() {
+				tpwo = nil
+			})
+
+			ctx := context.Background()
+			data := utils.MapStorage{
+				"*req": map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			trgID := "trigger1"
+
+			err := act.execute(ctx, data, trgID)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected an error, but got nil")
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(tpwo, tc.expTpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expTpwo), utils.ToJSON(tpwo))
+			}
+		})
+	}
+}
