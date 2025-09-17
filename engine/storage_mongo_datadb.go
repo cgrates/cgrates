@@ -2177,27 +2177,31 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 }
 
 // RemoveIndexesDrv removes the indexes
-func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) error {
-	if len(idxKey) != 0 {
+func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) error {
+	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) { // remove all
+		regexKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+		for _, character := range []string{".", "*"} {
+			regexKey = strings.ReplaceAll(regexKey, character, `\`+character)
+		}
+		// For optimization, use a caret (^) in the regex pattern.
 		return ms.query(func(sctx mongo.SessionContext) error {
-			dr, err := ms.getCol(ColIndx).DeleteOne(sctx,
-				bson.M{"key": utils.ConcatenatedKey(utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)})
-			if dr.DeletedCount == 0 {
-				return utils.ErrNotFound
-			}
+			_, err := ms.getCol(ColIndx).DeleteMany(sctx, bson.M{
+				"key": primitive.Regex{
+					Pattern: "^" + regexKey,
+				},
+			})
 			return err
 		})
 	}
-	regexKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
-	for _, character := range []string{".", "*"} {
-		regexKey = strings.ReplaceAll(regexKey, character, `\`+character)
+	// Remove specific keys (single or multiple) using $in query.
+	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	inKeys := make([]string, len(idxKeys))
+	for i, key := range idxKeys {
+		inKeys[i] = utils.ConcatenatedKey(dbKey, key)
 	}
-	// For optimization, use a caret (^) in the regex pattern.
 	return ms.query(func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColIndx).DeleteMany(sctx, bson.M{
-			"key": primitive.Regex{
-				Pattern: "^" + regexKey,
-			},
+			"key": bson.M{"$in": inKeys},
 		})
 		return err
 	})

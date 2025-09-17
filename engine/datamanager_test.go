@@ -4831,7 +4831,7 @@ func TestDmIndexes(t *testing.T) {
 		"cgrates.org", idxes, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err := dm.RemoveIndexes(utils.CacheResourceFilterIndexes, "cgrates.org", utils.EmptyString); err != nil {
+	if err := dm.RemoveIndexes(utils.CacheResourceFilterIndexes, "cgrates.org"); err != nil {
 		t.Error(err)
 	}
 }

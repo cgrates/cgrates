@@ -351,7 +351,7 @@ func (dbM *DataDBMock) SetIndexesDrv(idxItmType, tntCtx string,
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
+func (dbM *DataDBMock) RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (err error) {
 	return utils.ErrNotImplemented
 }
 

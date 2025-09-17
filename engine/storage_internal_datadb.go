@@ -976,12 +976,14 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 	return
 }
 
-func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
-	if idxKey == utils.EmptyString {
+func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (err error) {
+	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) { // remove all
 		iDB.db.RemoveGroup(idxItmType, tntCtx, true, utils.EmptyString)
 		return
 	}
-	iDB.db.Remove(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), true, utils.NonTransactional)
+	for _, idxKey := range idxKeys {
+		iDB.db.Remove(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), true, utils.NonTransactional)
+	}
 	return
 }
 
