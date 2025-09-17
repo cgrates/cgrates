@@ -3855,25 +3855,28 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 		}, itm)
 }
 
-func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err error) {
+func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx string, idxKeys ...string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
+	if err = dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKeys...); err != nil {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[idxItmType]
-	_ = dm.replicator.replicate(
-		utils.CacheInstanceToPrefix[idxItmType], tntCtx, // these are used to get the host IDs from cache
-		utils.ReplicatorSv1RemoveIndexes,
-		&utils.GetIndexesArg{
-			IdxItmType: idxItmType,
-			TntCtx:     tntCtx,
-			IdxKey:     idxKey,
-			Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
-			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm)
+	// Handle replication for each key since replication API supports single key only
+	for _, idxKey := range idxKeys {
+		_ = dm.replicator.replicate(
+			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // these are used to get the host IDs from cache
+			utils.ReplicatorSv1RemoveIndexes,
+			&utils.GetIndexesArg{
+				IdxItmType: idxItmType,
+				TntCtx:     tntCtx,
+				IdxKey:     idxKey,
+				Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
+			}, itm)
+	}
 	return
 }
 

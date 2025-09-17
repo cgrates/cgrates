@@ -1436,11 +1436,16 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 	return
 }
 
-func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error) {
-	if idxKey == utils.EmptyString {
+func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (err error) {
+	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) {
 		return rs.Cmd(nil, redis_DEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx)
 	}
-	return rs.Cmd(nil, redis_HDEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)
+	args := make([]string, len(idxKeys)+1)
+	args[0] = utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	for i, key := range idxKeys {
+		args[i+1] = key
+	}
+	return rs.Cmd(nil, redis_HDEL, args...)
 }
 
 // Will backup active sessions in DataDB

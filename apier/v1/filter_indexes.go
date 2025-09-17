@@ -79,7 +79,7 @@ func (apierSv1 *APIerSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRem
 		arg.ItemType = utils.CacheAttributeFilterIndexes
 		tntCtx = utils.ConcatenatedKey(tnt, arg.Context)
 	}
-	if err = apierSv1.DataManager.RemoveIndexes(arg.ItemType, tntCtx, utils.EmptyString); err != nil {
+	if err = apierSv1.DataManager.RemoveIndexes(arg.ItemType, tntCtx); err != nil {
 		return
 	}
 	//generate a loadID for CacheFilterIndexes and store it in database

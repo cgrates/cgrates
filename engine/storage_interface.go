@@ -100,7 +100,7 @@ type DataDB interface {
 	GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrv(idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
-	RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) (err error)
+	RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (err error)
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(tenant, id string) (err error)

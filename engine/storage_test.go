@@ -525,7 +525,7 @@ func TestIDBRemoveIndexesDrv(t *testing.T) {
 	idb.db.Set("chID", "itmID", true, []string{utils.EmptyString}, true, "trID")
 	idb.db.Set("chID2", "itmIDv", true, []string{"grpID"}, true, "trID")
 
-	if err := idb.RemoveIndexesDrv("chID", utils.EmptyString, utils.EmptyString); err != nil {
+	if err := idb.RemoveIndexesDrv("chID", utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if err := idb.RemoveIndexesDrv("chID2", "itmID", "v"); err != nil {
