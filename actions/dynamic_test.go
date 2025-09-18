@@ -2160,3 +2160,286 @@ func TestActDynamicTrendExecute(t *testing.T) {
 		})
 	}
 }
+
+func TestActDynamicRankingId(t *testing.T) {
+	tests := []struct {
+		name string
+		dr   actDynamicRanking
+		want string
+	}{
+		{
+			name: "WithValidID",
+			dr:   actDynamicRanking{aCfg: &utils.APAction{ID: "RankingProfile1"}},
+			want: "RankingProfile1",
+		},
+		{
+			name: "WithEmptyID",
+			dr:   actDynamicRanking{aCfg: &utils.APAction{ID: ""}},
+			want: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.dr.id()
+			if got != tt.want {
+				t.Errorf("id() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestActDynamicRankingCfg(t *testing.T) {
+	tests := []struct {
+		name string
+		al   actDynamicRanking
+		want *utils.APAction
+	}{
+		{
+			name: "WithValidCfg",
+			al:   actDynamicRanking{aCfg: &utils.APAction{ID: "RankingProfile1"}},
+			want: &utils.APAction{ID: "RankingProfile1"},
+		},
+		{
+			name: "WithNilCfg",
+			al:   actDynamicRanking{aCfg: nil},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.al.cfg()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("cfg() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestActDynamicRankingExecute(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+
+	var rpwo *utils.RankingProfileWithAPIOpts
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AdminSv1SetRankingProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rpwo, canCast = args.(*utils.RankingProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				*(reply.(*string)) = utils.OK
+				return nil
+			},
+		},
+	}
+
+	testcases := []struct {
+		name    string
+		diktats []*utils.APDiktat
+		expRpwo *utils.RankingProfileWithAPIOpts
+		wantErr bool
+	}{
+		{
+			name: "SuccessfulRequest",
+			expRpwo: &utils.RankingProfileWithAPIOpts{
+				RankingProfile: &utils.RankingProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RANK_ACNT_1001",
+					Schedule:          "* * * * *",
+					Sorting:           "*desc",
+					SortingParameters: []string{"*tcc", "*tcd"},
+					Stored:            true,
+					StatIDs:           []string{"STAT_1", "STAT_2"},
+					MetricIDs:         []string{"*tcc", "*tcd"},
+					ThresholdIDs:      []string{"THD_1", "THD_2"},
+				},
+				APIOpts: map[string]any{
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RANK_ACNT_1001;* * * * *;STAT_1&STAT_2;*tcc&*tcd;*desc;*tcc&*tcd;true;THD_1&THD_2;key1:value1&key2:value2",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestWithDynamicPaths",
+			expRpwo: &utils.RankingProfileWithAPIOpts{
+				RankingProfile: &utils.RankingProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RANK_ACNT_1001",
+					Schedule:          "0 0 * * *",
+					Sorting:           "*asc",
+					SortingParameters: []string{"*acc"},
+					Stored:            false,
+					StatIDs:           []string{"STAT_1001"},
+					MetricIDs:         []string{"*acc"},
+					ThresholdIDs:      []string{"THD_1001"},
+				},
+				APIOpts: map[string]any{
+					"account": "1001",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 15.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RANK_ACNT_<~*req.Account>;0 0 * * *;STAT_<~*req.Account>;*acc;*asc;*acc;false;THD_<~*req.Account>;account:<~*req.Account>",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestEmptyFields",
+			expRpwo: &utils.RankingProfileWithAPIOpts{
+				RankingProfile: &utils.RankingProfile{
+					Tenant:            "cgrates.org",
+					ID:                "RANK_EMPTY",
+					Schedule:          "",
+					Sorting:           "",
+					SortingParameters: nil,
+					Stored:            false,
+					StatIDs:           nil,
+					MetricIDs:         nil,
+					ThresholdIDs:      nil,
+				},
+				APIOpts: map[string]any{},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 10.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RANK_EMPTY;;;;;;;;",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "EmptyDiktats",
+			diktats: []*utils.APDiktat{},
+			wantErr: true,
+		},
+		{
+			name: "InvalidNumberOfParams",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RANK_INVALID;only;four;params",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidStoredParam",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RANK_INVALID;* * * * *;STAT_1;*tcc;*desc;*tcc;invalid_bool;THD_1;key:value",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "APIOptsInvalidFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RANK_INVALID;* * * * *;STAT_1;*tcc;*desc;*tcc;true;THD_1;invalidformat",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := config.NewDefaultCGRConfig()
+			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			connMgr := engine.NewConnManager(cfg)
+			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+			dm := engine.NewDataManager(dataDB, cfg, connMgr)
+			fltrS := engine.NewFilterS(cfg, connMgr, dm)
+			rpcInternal := make(chan birpc.ClientConnector, 1)
+			rpcInternal <- ccM
+			connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
+
+			act := &actDynamicRanking{
+				config:  cfg,
+				connMgr: connMgr,
+				fltrS:   fltrS,
+				tnt:     "cgrates.org",
+				cgrEv: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+				},
+				aCfg: &utils.APAction{
+					ID:      "ACT_DYNAMIC_RANKING",
+					Diktats: tc.diktats,
+				},
+			}
+
+			t.Cleanup(func() {
+				rpwo = nil
+			})
+
+			ctx := context.Background()
+			data := utils.MapStorage{
+				"*req": map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			trgID := "trigger1"
+			err := act.execute(ctx, data, trgID)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected an error, but got nil")
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if tc.expRpwo != nil && !reflect.DeepEqual(rpwo, tc.expRpwo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRpwo), utils.ToJSON(rpwo))
+			}
+		})
+	}
+}
