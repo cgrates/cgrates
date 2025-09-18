@@ -3760,10 +3760,7 @@ func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg, it
 	return
 }
 
-// GetIndexesBatch supports retrieving multiple index keys in a single operation
-// When idxKeys is empty or contains only empty string, retrieves all indexes
-// Otherwise retrieves only the specified keys, returning only found keys (no error if some missing)
-// Returns ErrNotFound only if no keys found at all
+// GetIndexes retrieves the specified index keys.
 func (dm *DataManager) GetIndexes(idxItmType, tntCtx string, cacheRead, cacheWrite bool,
 	idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if dm == nil {
@@ -3771,15 +3768,29 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx string, cacheRead, cacheWri
 		return
 	}
 
-	// Handle backward compatibility: single key cache check
-	if cacheRead && len(idxKeys) == 1 && idxKeys[0] != utils.EmptyString {
-		if x, ok := Cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, idxKeys[0])); ok {
-			if x == nil {
+	// All-or-nothing cache strategy for multiple keys.
+	if cacheRead && len(idxKeys) > 0 {
+		allKeysInCache := true
+		cachedIndexes := make(map[string]utils.StringSet)
+
+		for _, idxKey := range idxKeys {
+			if x, ok := Cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey)); ok {
+				if x == nil {
+					continue // cached as non-existent, skip it
+				}
+				cachedIndexes[idxKey] = x.(utils.StringSet)
+			} else {
+				// Key missing from cache, fetch all from database.
+				allKeysInCache = false
+				break
+			}
+		}
+
+		if allKeysInCache {
+			if len(cachedIndexes) == 0 {
 				return nil, utils.ErrNotFound
 			}
-			return map[string]utils.StringSet{
-				idxKeys[0]: x.(utils.StringSet),
-			}, nil
+			return cachedIndexes, nil
 		}
 	}
 

@@ -912,7 +912,7 @@ func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 }
 
 func (iDB *InternalDB) GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
-	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) { // return all
+	if len(idxKeys) == 0 { // return all
 		indexes = make(map[string]utils.StringSet)
 		for _, dbKey := range iDB.db.GetGroupItemIDs(idxItmType, tntCtx) {
 			x, ok := iDB.db.Get(idxItmType, dbKey)
@@ -977,7 +977,7 @@ func (iDB *InternalDB) SetIndexesDrv(idxItmType, tntCtx string,
 }
 
 func (iDB *InternalDB) RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (err error) {
-	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) { // remove all
+	if len(idxKeys) == 0 { // remove all
 		iDB.db.RemoveGroup(idxItmType, tntCtx, true, utils.EmptyString)
 		return
 	}

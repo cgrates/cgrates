@@ -1353,7 +1353,7 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 func (rs *RedisStorage) GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	mp := make(map[string]string)
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
-	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) {
+	if len(idxKeys) == 0 {
 		if err = rs.Cmd(&mp, redis_HGETALL, dbKey); err != nil {
 			return
 		} else if len(mp) == 0 {
@@ -1437,7 +1437,7 @@ func (rs *RedisStorage) SetIndexesDrv(idxItmType, tntCtx string,
 }
 
 func (rs *RedisStorage) RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (err error) {
-	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) {
+	if len(idxKeys) == 0 {
 		return rs.Cmd(nil, redis_DEL, utils.CacheInstanceToPrefix[idxItmType]+tntCtx)
 	}
 	args := make([]string, len(idxKeys)+1)

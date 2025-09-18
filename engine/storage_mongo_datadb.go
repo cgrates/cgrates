@@ -2071,7 +2071,7 @@ func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...stri
 	}
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	var q bson.M
-	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) {
+	if len(idxKeys) == 0 {
 		for _, character := range []string{".", "*"} {
 			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
 		}
@@ -2178,7 +2178,7 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 
 // RemoveIndexesDrv removes the indexes
 func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) error {
-	if len(idxKeys) == 0 || (len(idxKeys) == 1 && idxKeys[0] == utils.EmptyString) { // remove all
+	if len(idxKeys) == 0 { // remove all
 		regexKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 		for _, character := range []string{".", "*"} {
 			regexKey = strings.ReplaceAll(regexKey, character, `\`+character)
