@@ -1339,6 +1339,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	if cfg.prometheusAgentCfg.Enabled {
+		for _, connID := range cfg.prometheusAgentCfg.CacheSConns {
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+			}
+		}
+		for _, connID := range cfg.prometheusAgentCfg.CoreSConns {
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+			}
+		}
 		for _, connID := range cfg.prometheusAgentCfg.StatSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatService, utils.PrometheusAgent)
