@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -216,11 +217,31 @@ func (pa *PrometheusAgent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // updateStatsMetrics fetches and updates all StatQueue metrics by calling each
 // configured StatS connection.
 func (pa *PrometheusAgent) updateStatsMetrics() {
-	if len(pa.cfg.PrometheusAgentCfg().StatQueueIDs) == 0 {
-		return
-	}
 	for _, connID := range pa.cfg.PrometheusAgentCfg().StatSConns {
-		for _, sqID := range pa.cfg.PrometheusAgentCfg().StatQueueIDs {
+		sqIDs := pa.cfg.PrometheusAgentCfg().StatQueueIDs
+
+		// When no StatQueueIDs set, fetch all available ones.
+		if len(sqIDs) == 0 {
+
+			// Internal StatS connections cannot handle APIerS calls.
+			// Redirect *internal:*stats to *internal:*apier to get StatQueue IDs.
+			apiersConnID := connID
+			if strings.HasPrefix(connID, utils.MetaInternal) {
+				apiersConnID = utils.ConcatenatedKey(utils.MetaInternal,
+					utils.MetaApier)
+			}
+
+			if err := pa.cm.Call(context.Background(), []string{apiersConnID},
+				utils.APIerSv1GetStatQueueProfileIDs,
+				&utils.PaginatorWithTenant{}, &sqIDs); err != nil {
+				utils.Logger.Err(fmt.Sprintf(
+					"<%s> failed to retrieve all StatQueue IDs (connID=%q): %v",
+					utils.PrometheusAgent, apiersConnID, err))
+				continue
+			}
+		}
+
+		for _, sqID := range sqIDs {
 
 			tenantID := utils.NewTenantID(sqID)
 			if tenantID.Tenant == "" {

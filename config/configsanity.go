@@ -1339,6 +1339,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	if cfg.prometheusAgentCfg.Enabled {
+		if len(cfg.prometheusAgentCfg.StatSConns) > 0 &&
+			len(cfg.prometheusAgentCfg.StatQueueIDs) == 0 &&
+			!cfg.apier.Enabled {
+			return fmt.Errorf(
+				"<%s> when StatQueueIDs is empty, %s must be enabled to retrieve all available StatQueue IDs",
+				utils.PrometheusAgent, utils.ApierS)
+		}
 		for _, connID := range cfg.prometheusAgentCfg.StatSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.StatService, utils.PrometheusAgent)
