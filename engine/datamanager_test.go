@@ -4800,7 +4800,7 @@ func TestDmIndexes(t *testing.T) {
 				if !cancast {
 					return utils.ErrNotConvertible
 				}
-				dm.DataDB().RemoveIndexesDrv(gIdxArg.IdxItmType, gIdxArg.Tenant, utils.EmptyString)
+				dm.DataDB().RemoveIndexesDrv(gIdxArg.IdxItmType, gIdxArg.Tenant, gIdxArg.IdxKeys...)
 				return nil
 			},
 		},
