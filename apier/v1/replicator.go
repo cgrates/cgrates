@@ -399,7 +399,7 @@ func (rplSv1 *ReplicatorSv1) GetItemLoadIDs(ctx *context.Context, itemID *utils.
 // GetIndexes is the remote method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) GetIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
 	engine.UpdateReplicationFilters(utils.CacheInstanceToPrefix[args.IdxItmType], args.TntCtx, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
-	indx, err := rplSv1.dm.DataDB().GetIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey)
+	indx, err := rplSv1.dm.DataDB().GetIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKeys...)
 	if err != nil {
 		return err
 	}
@@ -1272,12 +1272,14 @@ func (rplSv1 *ReplicatorSv1) RemoveDispatcherHost(ctx *context.Context, args *ut
 
 // RemoveIndexes  is the replication method coresponding to the dataDb driver method
 func (rplSv1 *ReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *string) (err error) {
-	if err = rplSv1.dm.DataDB().RemoveIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKey); err != nil {
+	if err = rplSv1.dm.DataDB().RemoveIndexesDrv(args.IdxItmType, args.TntCtx, args.IdxKeys...); err != nil {
 		return
 	}
-	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, args.IdxKey), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
-		return
+	for _, idxKey := range args.IdxKeys {
+		if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
+			args.Tenant, args.IdxItmType, utils.ConcatenatedKey(args.TntCtx, idxKey), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+			return
+		}
 	}
 	*reply = utils.OK
 	return
