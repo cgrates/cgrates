@@ -67,6 +67,7 @@ func TestPrometheusAgentIT(t *testing.T) {
 		"*stat_filter_indexes",
 		"*rpc_connections"
 	],
+	// "apiers_conns": ["*internal", "external"],
 	"stats_conns": ["*internal", "external"],
 	"stat_queue_ids": ["cgrates.org:SQ_1","SQ_2"]
 }
