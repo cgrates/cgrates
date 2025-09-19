@@ -1341,10 +1341,18 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.prometheusAgentCfg.Enabled {
 		if len(cfg.prometheusAgentCfg.StatSConns) > 0 &&
 			len(cfg.prometheusAgentCfg.StatQueueIDs) == 0 &&
-			!cfg.apier.Enabled {
+			len(cfg.prometheusAgentCfg.StatSConns) != len(cfg.prometheusAgentCfg.ApierSConns) {
 			return fmt.Errorf(
-				"<%s> when StatQueueIDs is empty, %s must be enabled to retrieve all available StatQueue IDs",
-				utils.PrometheusAgent, utils.ApierS)
+				"<%s> when StatQueueIDs is empty, apiers_conns must match stats_conns length to fetch StatQueue IDs",
+				utils.PrometheusAgent)
+		}
+		for _, connID := range cfg.prometheusAgentCfg.ApierSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.apier.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.ApierS, utils.PrometheusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.PrometheusAgent, connID)
+			}
 		}
 		for _, connID := range cfg.prometheusAgentCfg.StatSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
