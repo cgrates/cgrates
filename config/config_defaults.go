@@ -841,6 +841,7 @@ const CGRATES_CFG_JSON = `
 "prometheus_agent": {
 	"enabled": false,			// enables the prometheus agent: <true|false>
 	"path": "/prometheus",			// endpoint for prometheus metrics
+	"apiers_conns": [],			// connections to ApierS, empty to disable: <""|*internal|$rpc_conns_id>
 	"caches_conns": [], 			// connections to CacheS, empty to disable: <""|*internal|$rpc_conns_id>
 	"cache_ids": [],			// cache partition IDs to collect statistics for, empty for all partitions
 	"cores_conns": [],			// connections to CoreS, empty to disable: <""|*internal|$rpc_conns_id>

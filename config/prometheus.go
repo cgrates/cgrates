@@ -33,6 +33,7 @@ type PrometheusAgentJsonCfg struct {
 	CacheSConns           *[]string `json:"caches_conns"`
 	CacheIDs              *[]string `json:"cache_ids"`
 	CoreSConns            *[]string `json:"cores_conns"`
+	ApierSConns           *[]string `json:"apiers_conns"`
 	StatSConns            *[]string `json:"stats_conns"`
 	StatQueueIDs          *[]string `json:"stat_queue_ids"`
 }
@@ -46,6 +47,7 @@ type PrometheusAgentCfg struct {
 	CacheSConns           []string
 	CacheIDs              []string
 	CoreSConns            []string
+	ApierSConns           []string
 	StatSConns            []string
 	StatQueueIDs          []string
 }
@@ -75,6 +77,9 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 	if jc.CoreSConns != nil {
 		c.CoreSConns = tagInternalConns(*jc.CoreSConns, utils.MetaCore)
 	}
+	if jc.ApierSConns != nil {
+		c.ApierSConns = tagInternalConns(*jc.ApierSConns, utils.MetaApier)
+	}
 	if jc.StatSConns != nil {
 		c.StatSConns = tagInternalConns(*jc.StatSConns, utils.MetaStats)
 	}
@@ -94,6 +99,7 @@ func (c PrometheusAgentCfg) AsMapInterface() any {
 		utils.CacheSConnsCfg:           stripInternalConns(c.CacheSConns),
 		utils.CacheIDsCfg:              stripInternalConns(c.CacheIDs),
 		utils.CoreSConnsCfg:            stripInternalConns(c.CoreSConns),
+		utils.ApierSConnsCfg:           stripInternalConns(c.ApierSConns),
 		utils.StatSConnsCfg:            stripInternalConns(c.StatSConns),
 		utils.StatQueueIDsCfg:          c.StatQueueIDs,
 	}
@@ -109,6 +115,7 @@ func (c PrometheusAgentCfg) Clone() *PrometheusAgentCfg {
 		CacheSConns:           slices.Clone(c.CacheSConns),
 		CacheIDs:              slices.Clone(c.CacheIDs),
 		CoreSConns:            slices.Clone(c.CoreSConns),
+		ApierSConns:           slices.Clone(c.ApierSConns),
 		StatSConns:            slices.Clone(c.StatSConns),
 		StatQueueIDs:          slices.Clone(c.StatQueueIDs),
 	}

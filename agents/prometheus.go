@@ -21,7 +21,6 @@ package agents
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -217,20 +216,12 @@ func (pa *PrometheusAgent) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // updateStatsMetrics fetches and updates all StatQueue metrics by calling each
 // configured StatS connection.
 func (pa *PrometheusAgent) updateStatsMetrics() {
-	for _, connID := range pa.cfg.PrometheusAgentCfg().StatSConns {
+	for connIdx, connID := range pa.cfg.PrometheusAgentCfg().StatSConns {
 		sqIDs := pa.cfg.PrometheusAgentCfg().StatQueueIDs
 
 		// When no StatQueueIDs set, fetch all available ones.
 		if len(sqIDs) == 0 {
-
-			// Internal StatS connections cannot handle APIerS calls.
-			// Redirect *internal:*stats to *internal:*apier to get StatQueue IDs.
-			apiersConnID := connID
-			if strings.HasPrefix(connID, utils.MetaInternal) {
-				apiersConnID = utils.ConcatenatedKey(utils.MetaInternal,
-					utils.MetaApier)
-			}
-
+			apiersConnID := pa.cfg.PrometheusAgentCfg().ApierSConns[connIdx]
 			if err := pa.cm.Call(context.Background(), []string{apiersConnID},
 				utils.APIerSv1GetStatQueueProfileIDs,
 				&utils.PaginatorWithTenant{}, &sqIDs); err != nil {
