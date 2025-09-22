@@ -204,7 +204,7 @@ func TestLibIndexNewFilterIndexGetFilterErrNotFound(t *testing.T) {
 		Rules:  []*FilterRule{},
 	}
 	_, err := newFilterIndex(dm, idxItmType, tnt, ctx, itemID, filterIDs, newFlt)
-	expectedErr := "broken reference to filter: nonexistent_filter for itemType: indexItemType and ID: item1"
+	expectedErr := `broken filter reference "nonexistent_filter" for item "item1" of type "indexItemType"`
 	if err == nil || err.Error() != expectedErr {
 		t.Fatalf("Expected error %v, got %v", expectedErr, err)
 	}
