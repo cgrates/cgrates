@@ -83,6 +83,10 @@ func (tp *ThresholdProfile) Clone() *ThresholdProfile {
 	if tp.ActivationInterval != nil {
 		clone.ActivationInterval = tp.ActivationInterval.Clone()
 	}
+	if tp.EeIDs != nil {
+		clone.EeIDs = make([]string, len(tp.EeIDs))
+		copy(clone.EeIDs, tp.EeIDs)
+	}
 	return clone
 }
 
