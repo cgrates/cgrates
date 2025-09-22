@@ -100,18 +100,25 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 				} else if filterIndexTypes[i] == utils.MetaSuffix {
 					fldVals = utils.SplitSuffix(fldVal) // all suffix till first digit
 				}
+
+				idxKeys := make([]string, 0, len(fldVals))
 				for _, val := range fldVals {
-					var dbIndexes map[string]utils.StringSet // list of items matched in DB
-					key := utils.ConcatenatedKey(filterIndexTypes[i], fldName, val)
-					if dbIndexes, err = dm.GetIndexes(cacheID, itemIDPrefix, true, true, key); err != nil {
-						if err == utils.ErrNotFound {
-							err = nil
-							continue
-						}
-						return
+					idxKeys = append(idxKeys,
+						utils.ConcatenatedKey(filterIndexTypes[i], fldName, val))
+				}
+				var indexes map[string]utils.StringSet
+				if indexes, err = dm.GetIndexes(cacheID, itemIDPrefix, true, true, idxKeys...); err != nil {
+					if err == utils.ErrNotFound {
+						err = nil
+						continue
 					}
-					dbItemIDs = dbIndexes[key]
-					break // we got at least one answer back, longest prefix wins
+					return
+				}
+				for _, key := range idxKeys {
+					if itemIDs, exists := indexes[key]; exists {
+						dbItemIDs = itemIDs
+						break // longest prefix wins
+					}
 				}
 				for itemID := range dbItemIDs {
 					if _, hasIt := itemIDs[itemID]; !hasIt { // Add it to list if not already there
