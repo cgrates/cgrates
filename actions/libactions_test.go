@@ -144,3 +144,230 @@ func TestACActionTarget(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.MetaNone, rcv)
 	}
 }
+
+func TestActionTarget(t *testing.T) {
+	tests := []struct {
+		name string
+		act  string
+		want string
+	}{
+		{
+			name: "ResetStatQueue",
+			act:  utils.MetaResetStatQueue,
+			want: utils.MetaStats,
+		},
+		{
+			name: "DynamicStats",
+			act:  utils.MetaDynamicStats,
+			want: utils.MetaStats,
+		},
+		{
+			name: "ResetThreshold",
+			act:  utils.MetaResetThreshold,
+			want: utils.MetaThresholds,
+		},
+		{
+			name: "DynamicThreshold",
+			act:  utils.MetaDynamicThreshold,
+			want: utils.MetaThresholds,
+		},
+		{
+			name: "AddBalance",
+			act:  utils.MetaAddBalance,
+			want: utils.MetaAccounts,
+		},
+		{
+			name: "SetBalance",
+			act:  utils.MetaSetBalance,
+			want: utils.MetaAccounts,
+		},
+		{
+			name: "RemBalance",
+			act:  utils.MetaRemBalance,
+			want: utils.MetaAccounts,
+		},
+		{
+			name: "DynamicAttribute",
+			act:  utils.MetaDynamicAttribute,
+			want: utils.MetaAttributes,
+		},
+		{
+			name: "DynamicResource",
+			act:  utils.MetaDynamicResource,
+			want: utils.MetaResources,
+		},
+		{
+			name: "DynamicTrend",
+			act:  utils.MetaDynamicTrend,
+			want: utils.MetaTrends,
+		},
+		{
+			name: "DynamicRanking",
+			act:  utils.MetaDynamicRanking,
+			want: utils.MetaRankings,
+		},
+		{
+			name: "DynamicFilter",
+			act:  utils.MetaDynamicFilter,
+			want: utils.MetaFilters,
+		},
+		{
+			name: "DynamicRoute",
+			act:  utils.MetaDynamicRoute,
+			want: utils.MetaRoutes,
+		},
+		{
+			name: "DynamicRate",
+			act:  utils.MetaDynamicRate,
+			want: utils.MetaRates,
+		},
+		{
+			name: "DynamicIP",
+			act:  utils.MetaDynamicIP,
+			want: utils.MetaIPs,
+		},
+		{
+			name: "DynamicAction",
+			act:  utils.MetaDynamicAction,
+			want: utils.MetaActions,
+		},
+		{
+			name: "UnknownAction",
+			act:  "unknown",
+			want: utils.MetaNone,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := actionTarget(tt.act); got != tt.want {
+				t.Errorf("actionTarget(%q) = %q, want %q", tt.act, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewActioner(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltr := engine.NewFilterS(cfg, nil, nil)
+
+	ctx := context.Background()
+	cgrEv := new(utils.CGREvent)
+	connMgr := new(engine.ConnManager)
+	tnt := utils.CGRateSorg
+
+	tests := []struct {
+		name    string
+		aCfg    *utils.APAction
+		wantErr string
+	}{
+		{
+			name:    "UnsupportedAction",
+			aCfg:    &utils.APAction{Type: "not_a_type"},
+			wantErr: "unsupported action type: <not_a_type>",
+		},
+		{
+			name: "MetaLog",
+			aCfg: &utils.APAction{Type: utils.MetaLog},
+		},
+		{
+			name: "CDRLog",
+			aCfg: &utils.APAction{Type: utils.CDRLog},
+		},
+		{
+			name: "MetaHTTPPost",
+			aCfg: &utils.APAction{Type: utils.MetaHTTPPost},
+		},
+		{
+			name: "MetaExport",
+			aCfg: &utils.APAction{Type: utils.MetaExport},
+		},
+		{
+			name: "MetaResetStatQueue",
+			aCfg: &utils.APAction{Type: utils.MetaResetStatQueue},
+		},
+		{
+			name: "MetaResetThreshold",
+			aCfg: &utils.APAction{Type: utils.MetaResetThreshold},
+		},
+		{
+			name: "MetaAddBalance",
+			aCfg: &utils.APAction{Type: utils.MetaAddBalance},
+		},
+		{
+			name: "MetaSetBalance",
+			aCfg: &utils.APAction{Type: utils.MetaSetBalance},
+		},
+		{
+			name: "MetaRemBalance",
+			aCfg: &utils.APAction{Type: utils.MetaRemBalance},
+		},
+		{
+			name: "MetaDynamicThreshold",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicThreshold},
+		},
+		{
+			name: "MetaDynamicStats",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicStats},
+		},
+		{
+			name: "MetaDynamicAttribute",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicAttribute},
+		},
+		{
+			name: "MetaDynamicResource",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicResource},
+		},
+		{
+			name: "MetaDynamicTrend",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicTrend},
+		},
+		{
+			name: "MetaDynamicRanking",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicRanking},
+		},
+		{
+			name: "MetaDynamicFilter",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicFilter},
+		},
+		{
+			name: "MetaDynamicRoute",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicRoute},
+		},
+		{
+			name: "MetaDynamicRate",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicRate},
+		},
+		{
+			name: "MetaDynamicIP",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicIP},
+		},
+		{
+			name: "MetaDynamicAction",
+			aCfg: &utils.APAction{Type: utils.MetaDynamicAction},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			act, err := newActioner(ctx, cgrEv, cfg, fltr, dm, connMgr, tt.aCfg, tnt)
+			if tt.wantErr != "" {
+				if err == nil || err.Error() != tt.wantErr {
+					t.Errorf("Expected error: %q, got: %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("Unexpected error: %v", err)
+				return
+			}
+			if act == nil {
+				t.Errorf("Expected non-nil action, got nil")
+			}
+		})
+	}
+}
