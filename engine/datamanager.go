@@ -3840,6 +3840,9 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
+	/*
+		TODO: Check if there's any downside to returning early when len(indexes) == 0.
+	*/
 	if err = dm.DataDB().SetIndexesDrv(idxItmType, tntCtx,
 		indexes, commit, transactionID); err != nil {
 		return

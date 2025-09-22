@@ -801,31 +801,37 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 
 // removeFilterIndexesForFilter removes itemIDs from the specified filter index keys.
 // Used to update the index map when a filter is modified.
-func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
-	removeIndexKeys []string, itemIDs utils.StringSet) error {
+func removeFilterIndexesForFilter(dm *DataManager, itemType, tnt string,
+	removeIndexKeys []string, removeItemIDs utils.StringSet) error {
 	if len(removeIndexKeys) == 0 {
 		return nil // no indexes to remove
 	}
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tnt)
+		config.CgrConfig().GeneralCfg().LockingTimeout, itemType+tnt)
 	defer guardian.Guardian.UnguardIDs(refID)
 
-	for _, idxKey := range removeIndexKeys {
-		fltrIdx, err := dm.GetIndexes(idxItmType, tnt,
-			true, false, idxKey)
-		if err != nil {
-			if err != utils.ErrNotFound {
-				return err
-			}
-			continue
+	indexes, err := dm.GetIndexes(itemType, tnt, true, false, removeIndexKeys...)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return nil // nothing to remove
 		}
-		for itemID := range itemIDs {
-			fltrIdx[idxKey].Remove(itemID)
+		return err
+	}
+
+	updatedIndexes := make(map[string]utils.StringSet)
+	for _, key := range removeIndexKeys {
+		itemIDs, exists := indexes[key]
+		if !exists {
+			continue // skip missing indexes
 		}
-		if err := dm.SetIndexes(idxItmType, tnt, fltrIdx, true,
-			utils.NonTransactional); err != nil {
-			return err
+		for itemID := range removeItemIDs {
+			itemIDs.Remove(itemID)
 		}
+		updatedIndexes[key] = itemIDs // only add modified indexes
+	}
+
+	if err := dm.SetIndexes(itemType, tnt, updatedIndexes, true, utils.NonTransactional); err != nil {
+		return err
 	}
 	return nil
 }
