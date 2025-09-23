@@ -3054,3 +3054,303 @@ func TestActDynamicRateCfg(t *testing.T) {
 		})
 	}
 }
+
+func TestActDynamicIPExecute(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+
+	var ipo *utils.IPProfileWithAPIOpts
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AdminSv1SetIPProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if ipo, canCast = args.(*utils.IPProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				*(reply.(*string)) = utils.OK
+				return nil
+			},
+		},
+	}
+
+	testcases := []struct {
+		name    string
+		diktats []*utils.APDiktat
+		expIpo  *utils.IPProfileWithAPIOpts
+		wantErr bool
+	}{
+		{
+			name: "SuccessfulRequest",
+			expIpo: &utils.IPProfileWithAPIOpts{
+				IPProfile: &utils.IPProfile{
+					Tenant:    "cgrates.org",
+					ID:        "IP_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{
+							FilterIDs: []string{"*weight"},
+							Weight:    10.0,
+						},
+					},
+					TTL:    time.Duration(60) * time.Second,
+					Stored: true,
+					Pools: []*utils.IPPool{
+						{
+							ID:        "POOL_1001",
+							FilterIDs: []string{"*string:~*req.Pool:1001"},
+							Type:      "ipv4",
+							Range:     "192.168.1.0/24",
+							Strategy:  "*ascending",
+							Message:   "IP allocated",
+							Weights: utils.DynamicWeights{
+								&utils.DynamicWeight{
+									FilterIDs: []string{"*pool_weight"},
+									Weight:    20.0,
+								},
+							},
+							Blockers: utils.DynamicBlockers{
+								&utils.DynamicBlocker{
+									FilterIDs: []string{"*pool_blocker"},
+									Blocker:   false,
+								},
+							},
+						},
+					},
+				},
+				APIOpts: map[string]any{
+					utils.MetaSubsys: "*sessions",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;IP_1001;*string:~*req.Account:1001;*weight&10.0;60s;true;POOL_1001;*string:~*req.Pool:1001;ipv4;192.168.1.0/24;*ascending;IP allocated;*pool_weight&20.0;*pool_blocker&false;*subsys:*sessions",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestWithDynamicPaths",
+			expIpo: &utils.IPProfileWithAPIOpts{
+				IPProfile: &utils.IPProfile{
+					Tenant: "cgrates.org",
+					ID:     "IP_1001",
+					Pools: []*utils.IPPool{
+						{
+							ID:       "POOL_1001",
+							Type:     "ipv4",
+							Range:    "192.168.1.0/24",
+							Strategy: "*ascending",
+							Message:  "1001",
+						},
+					},
+				},
+				APIOpts: map[string]any{
+					"account": "1001",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 15.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;IP_<~*req.Account>;;;;false;POOL_<~*req.Account>;;ipv4;192.168.1.0/24;*ascending;<~*req.Account>;;;account:<~*req.Account>",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestEmptyFields",
+			expIpo: &utils.IPProfileWithAPIOpts{
+				IPProfile: &utils.IPProfile{
+					Tenant: "cgrates.org",
+					ID:     "IP_EMPTY",
+					Pools: []*utils.IPPool{
+						{
+							ID:       "",
+							Type:     "",
+							Range:    "",
+							Strategy: "",
+							Message:  "",
+						},
+					},
+				},
+				APIOpts: map[string]any{},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 10.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;IP_EMPTY;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "EmptyDiktats",
+			diktats: []*utils.APDiktat{},
+			wantErr: true,
+		},
+		{
+			name: "InvalidNumberOfParams",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;IP_INVALID;only;four;params",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "APIOptsInvalidFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;IP_INVALID;;;;;;;;;;;;;;invalidformat",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := config.NewDefaultCGRConfig()
+			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			connMgr := engine.NewConnManager(cfg)
+			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+			dm := engine.NewDataManager(dataDB, cfg, connMgr)
+			fltrS := engine.NewFilterS(cfg, connMgr, dm)
+			rpcInternal := make(chan birpc.ClientConnector, 1)
+			rpcInternal <- ccM
+			connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
+
+			act := &actDynamicIP{
+				config:  cfg,
+				connMgr: connMgr,
+				fltrS:   fltrS,
+				tnt:     "cgrates.org",
+				cgrEv: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+				},
+				aCfg: &utils.APAction{
+					ID:      "ACT_DYNAMIC_IP",
+					Diktats: tc.diktats,
+				},
+			}
+
+			t.Cleanup(func() {
+				ipo = nil
+			})
+
+			ctx := context.Background()
+			data := utils.MapStorage{
+				"*req": map[string]any{
+					utils.AccountField: "1001",
+				},
+			}
+			trgID := "trigger1"
+			err := act.execute(ctx, data, trgID)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected an error, but got nil")
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if tc.expIpo != nil && !reflect.DeepEqual(ipo, tc.expIpo) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expIpo), utils.ToJSON(ipo))
+			}
+		})
+	}
+}
+
+func TestActDynamicIPId(t *testing.T) {
+	tests := []struct {
+		name string
+		aCfg *utils.APAction
+		want string
+	}{
+		{
+			name: "WithValidID",
+			aCfg: &utils.APAction{ID: "ActDynamicIP"},
+			want: "ActDynamicIP",
+		},
+		{
+			name: "WithEmptyID",
+			aCfg: &utils.APAction{ID: ""},
+			want: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			act := &actDynamicIP{
+				aCfg: tt.aCfg,
+			}
+			if got := act.id(); got != tt.want {
+				t.Errorf("id() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestActDynamicIPCfg(t *testing.T) {
+	tests := []struct {
+		name string
+		aCfg *utils.APAction
+		want *utils.APAction
+	}{
+		{
+			name: "WithValidCfg",
+			aCfg: &utils.APAction{ID: "ActDynamicIP"},
+			want: &utils.APAction{ID: "ActDynamicIP"},
+		},
+		{
+			name: "WithNilCfg",
+			aCfg: nil,
+			want: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			act := &actDynamicIP{
+				aCfg: tt.aCfg,
+			}
+			if got := act.cfg(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("cfg() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
