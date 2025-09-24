@@ -18,6 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"fmt"
+	"log"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -217,4 +222,64 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	if !has {
 		t.Errorf("Expecting: %+v, received: %+v", prefixFilterID, aPrflIDs)
 	}
+}
+
+func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
+	utils.Logger.SetLogLevel(4)
+	utils.Logger.SetSyslog(nil)
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	defer func() { log.SetOutput(os.Stderr) }()
+	cfg := config.NewDefaultCGRConfig()
+	data, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Fatal(dErr)
+	}
+	dm := NewDataManager(data, cfg.CacheCfg(), nil)
+	tnt := cfg.GeneralCfg().DefaultTenant
+	contextKey := utils.MetaRating
+	tntCtx := utils.ConcatenatedKey(tnt, contextKey)
+	for i := 0; i < matchedItemsWarningThreshold+5; i++ {
+		fid := fmt.Sprintf("filter_%d", i)
+		rule := &FilterRule{
+			Type:    utils.MetaString,
+			Element: "~*req.Field",
+			Values:  []string{"trigger"},
+		}
+		if err := rule.CompileValues(); err != nil {
+			t.Fatal(err)
+		}
+		f := &Filter{
+			Tenant: tnt,
+			ID:     fid,
+			Rules:  []*FilterRule{rule},
+		}
+		if err := dm.SetFilter(f, true); err != nil {
+			t.Fatal(err)
+		}
+		if err := addItemToFilterIndex(dm, utils.CacheAttributeFilterIndexes,
+			tnt, contextKey, fid, []string{fid}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	ev := utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			"Field": "trigger",
+		},
+	}
+	ids, err := MatchingItemIDsForEvent(ev, nil, nil, nil, nil,
+		dm, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ids) <= matchedItemsWarningThreshold {
+		t.Errorf("Expected more than %d matched items, got %d",
+			matchedItemsWarningThreshold, len(ids))
+	}
+	expectedLog := fmt.Sprintf("Matched %d *attribute_filter_indexes items. Performance may be affected", len(ids))
+	logContent := buf.String()
+	if !strings.Contains(logContent, expectedLog) {
+		t.Errorf("Expected warning not found in logs:\n%s", logContent)
+	}
+	utils.Logger.SetLogLevel(0)
 }
