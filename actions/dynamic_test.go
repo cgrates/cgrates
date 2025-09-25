@@ -3354,3 +3354,418 @@ func TestActDynamicIPCfg(t *testing.T) {
 		})
 	}
 }
+
+func TestActDynamicRateExecute(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+
+	var rateProfile *utils.APIRateProfile
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AdminSv1SetRateProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rateProfile, canCast = args.(*utils.APIRateProfile); !canCast {
+					return fmt.Errorf("couldn't cast")
+				}
+				*(reply.(*string)) = utils.OK
+				return nil
+			},
+		},
+	}
+
+	testcases := []struct {
+		name           string
+		diktats        []*utils.APDiktat
+		expRateProfile *utils.APIRateProfile
+		wantErr        bool
+	}{
+		{
+			name: "SuccessfulRequest",
+			expRateProfile: &utils.APIRateProfile{
+				RateProfile: &utils.RateProfile{
+					Tenant:    "cgrates.org",
+					ID:        "RATE_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{
+							FilterIDs: []string{"*weight"},
+							Weight:    10.0,
+						},
+					},
+					MinCost:         utils.NewDecimal(5, 2),
+					MaxCost:         utils.NewDecimal(100, 2),
+					MaxCostStrategy: "*free",
+					Rates: map[string]*utils.Rate{
+						"RT_1001": {
+							ID:              "RT_1001",
+							FilterIDs:       []string{"*string:~*req.Destination:+49"},
+							ActivationTimes: "* * * * *",
+							Weights: utils.DynamicWeights{
+								&utils.DynamicWeight{
+									FilterIDs: []string{"fltr1"},
+									Weight:    20.0,
+								},
+							},
+							Blocker: false,
+							IntervalRates: []*utils.IntervalRate{
+								{
+									IntervalStart: utils.NewDecimal(0, 0),
+									FixedFee:      utils.NewDecimal(10, 2),
+									RecurrentFee:  utils.NewDecimal(1, 2),
+									Unit:          utils.NewDecimal(int64(time.Second), 0),
+									Increment:     utils.NewDecimal(int64(time.Second), 0),
+								},
+							},
+						},
+					},
+				},
+				APIOpts: map[string]any{
+					utils.MetaSubsys: "*sessions",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_1001;*string:~*req.Account:1001;*weight&10.0;0.05;1.00;*free;RT_1001;*string:~*req.Destination:+49;* * * * *;fltr1&20.0;false;0;0.10;0.01;1s;1s;*subsys:*sessions",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestWithDynamicPaths",
+			expRateProfile: &utils.APIRateProfile{
+				RateProfile: &utils.RateProfile{
+					Tenant:          "cgrates.org",
+					ID:              "RATE_1001",
+					MaxCostStrategy: "*free",
+					Rates: map[string]*utils.Rate{
+						"RT_1001": {
+							ID:              "RT_1001",
+							ActivationTimes: "* * * * *",
+							IntervalRates: []*utils.IntervalRate{
+								{
+									RecurrentFee: utils.NewDecimal(2, 2),
+									Unit:         utils.NewDecimal(int64(time.Minute), 0),
+									Increment:    utils.NewDecimal(int64(time.Minute), 0),
+								},
+							},
+						},
+					},
+				},
+				APIOpts: map[string]any{
+					"account": "1001",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 15.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_<~*req.Account>;;;;;*free;RT_<~*req.Account>;;* * * * *;;;;;<~*req.RecurrentFee>;1m;1m;account:<~*req.Account>",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestEmptyFields",
+			expRateProfile: &utils.APIRateProfile{
+				RateProfile: &utils.RateProfile{
+					Tenant:          "cgrates.org",
+					ID:              "RATE_EMPTY",
+					MaxCostStrategy: "",
+					Rates: map[string]*utils.Rate{
+						"": {
+							ID:              "",
+							ActivationTimes: "",
+							IntervalRates:   []*utils.IntervalRate{{}},
+						},
+					},
+				},
+				APIOpts: map[string]any{},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 10.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_EMPTY;;;;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "EmptyDiktats",
+			diktats: []*utils.APDiktat{},
+			wantErr: true,
+		},
+		{
+			name: "InvalidNumberOfParams17",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;only;seventeen;params;here;not;eighteen;params;total;missing;one;more;param;here;now;still",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidNumberOfParams19",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;too;many;params;here;now;we;have;nineteen;params;total;which;is;one;too;many;for;this",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidWeightFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;*weight&invalid_weight;;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidMinCostFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;invalid_decimal;;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidMaxCostFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;invalid_decimal;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidRateWeightFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;;;RT_1;;;*weight&invalid_weight;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidBlockerFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;;;RT_1;;;;invalid_bool;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidIntervalStartFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;;;RT_1;;;;false;invalid_decimal;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidFixedFeeFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;;;RT_1;;;;false;;invalid_decimal;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidRecurrentFeeFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;;;RT_1;;;;false;;;invalid_decimal;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidUnitFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;;;RT_1;;;;false;;;;invalid_decimal",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidIncrementFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;;;RT_1;;;;;;;;;invalid_decimal;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "APIOptsInvalidFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;RATE_INVALID;;;;;;;;;;;;;;;;;invalidformat",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := config.NewDefaultCGRConfig()
+			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+			cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			connMgr := engine.NewConnManager(cfg)
+			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+			dm := engine.NewDataManager(dataDB, cfg, connMgr)
+			fltrS := engine.NewFilterS(cfg, connMgr, dm)
+			rpcInternal := make(chan birpc.ClientConnector, 1)
+			rpcInternal <- ccM
+			connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
+
+			act := &actDynamicRate{
+				config:  cfg,
+				connMgr: connMgr,
+				fltrS:   fltrS,
+				tnt:     "cgrates.org",
+				cgrEv: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.Destination:  "+49123456789",
+						utils.RecurrentFee: "0.02",
+					},
+				},
+				aCfg: &utils.APAction{
+					ID:      "ACT_DYNAMIC_RATE",
+					Diktats: tc.diktats,
+				},
+			}
+
+			t.Cleanup(func() {
+				rateProfile = nil
+			})
+
+			ctx := context.Background()
+			data := utils.MapStorage{
+				"*req": map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "+49123456789",
+					utils.RecurrentFee: "0.02",
+				},
+			}
+			trgID := "trigger1"
+			err := act.execute(ctx, data, trgID)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected an error, but got nil")
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if tc.expRateProfile != nil && !reflect.DeepEqual(rateProfile, tc.expRateProfile) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRateProfile), utils.ToJSON(rateProfile))
+			}
+		})
+	}
+}
