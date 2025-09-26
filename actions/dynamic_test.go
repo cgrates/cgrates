@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"reflect"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -3765,6 +3766,432 @@ func TestActDynamicRateExecute(t *testing.T) {
 				t.Error(err)
 			} else if tc.expRateProfile != nil && !reflect.DeepEqual(rateProfile, tc.expRateProfile) {
 				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expRateProfile), utils.ToJSON(rateProfile))
+			}
+		})
+	}
+}
+
+func TestActDynamicActionExecute(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+
+	var actionProfile *utils.ActionProfileWithAPIOpts
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AdminSv1SetActionProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if actionProfile, canCast = args.(*utils.ActionProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldn't cast")
+				}
+				*(reply.(*string)) = utils.OK
+				return nil
+			},
+		},
+	}
+
+	testcases := []struct {
+		name              string
+		diktats           []*utils.APDiktat
+		expActionProfile  *utils.ActionProfileWithAPIOpts
+		wantErr           bool
+		expectErrContains string
+	}{
+		{
+			name: "SuccessfulRequest",
+			expActionProfile: &utils.ActionProfileWithAPIOpts{
+				ActionProfile: &utils.ActionProfile{
+					Tenant:    "cgrates.org",
+					ID:        "ACT_1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{
+							FilterIDs: []string{"*weight"},
+							Weight:    10.0,
+						},
+					},
+					Blockers: utils.DynamicBlockers{
+						&utils.DynamicBlocker{
+							FilterIDs: []string{"*blocker"},
+							Blocker:   false,
+						},
+					},
+					Schedule: "* * * * *",
+					Targets: map[string]utils.StringSet{
+						"*voice": utils.NewStringSet([]string{"account1", "account2"}),
+					},
+					Actions: []*utils.APAction{
+						{
+							ID:        "SUB_ACT_1001",
+							FilterIDs: []string{"*string:~*req.Destination:+49"},
+							TTL:       30 * time.Second,
+							Type:      "*log",
+							Opts: map[string]any{
+								"level": "info",
+								"msg":   "test message",
+							},
+							Weights: utils.DynamicWeights{
+								&utils.DynamicWeight{
+									FilterIDs: []string{"act_weight"},
+									Weight:    20.0,
+								},
+							},
+							Blockers: utils.DynamicBlockers{
+								&utils.DynamicBlocker{
+									FilterIDs: []string{"act_blocker"},
+									Blocker:   true,
+								},
+							},
+							Diktats: []*utils.APDiktat{
+								{
+									ID:        "DIKTAT_1001",
+									FilterIDs: []string{"*string:~*req.Type:test"},
+									Opts: map[string]any{
+										"path":  "*req.Balance",
+										"value": "100",
+									},
+									Weights: utils.DynamicWeights{
+										&utils.DynamicWeight{
+											FilterIDs: []string{"diktat_weight"},
+											Weight:    30.0,
+										},
+									},
+									Blockers: utils.DynamicBlockers{
+										&utils.DynamicBlocker{
+											FilterIDs: []string{"diktat_blocker"},
+											Blocker:   false,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				APIOpts: map[string]any{
+					utils.MetaSubsys: "*sessions",
+					"timeout":        "60s",
+				},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_1001;*string:~*req.Account:1001;*weight&10.0;*blocker&false;* * * * *;*voice;account1&account2;SUB_ACT_1001;*string:~*req.Destination:+49;30s;*log;level:info&msg:test message;act_weight&20.0;act_blocker&true;DIKTAT_1001;*string:~*req.Type:test;path:*req.Balance&value:100;diktat_weight&30.0;diktat_blocker&false;*subsys:*sessions&timeout:60s",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "SuccessfulRequestEmptyFields",
+			expActionProfile: &utils.ActionProfileWithAPIOpts{
+				ActionProfile: &utils.ActionProfile{
+					Tenant:  "cgrates.org",
+					ID:      "ACT_EMPTY",
+					Targets: map[string]utils.StringSet{},
+					Actions: []*utils.APAction{
+						{
+							ID:   "",
+							Type: "",
+							Opts: map[string]any{},
+							Diktats: []*utils.APDiktat{
+								{
+									ID:   "",
+									Opts: map[string]any{},
+								},
+							},
+						},
+					},
+				},
+				APIOpts: map[string]any{},
+			},
+			diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 10.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_EMPTY;;;;;;;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "NoAdminSConns",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_1001;;;;;;;;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr:           true,
+			expectErrContains: "no connection with AdminS",
+		},
+		{
+			name:              "EmptyDiktats",
+			diktats:           []*utils.APDiktat{},
+			wantErr:           true,
+			expectErrContains: "No diktats were specified for action",
+		},
+		{
+			name: "InvalidNumberOfParams20",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;only;twenty;params;here;not;twenty;one;params;total;missing;one;more;param;here;now;still;incomplete;test",
+					},
+				},
+			},
+			wantErr:           true,
+			expectErrContains: "invalid number of parameters <20> expected 21",
+		},
+		{
+			name: "InvalidNumberOfParams22",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;too;many;params;here;now;we;have;twenty;two;params;total;which;is;one;too;many;for;this;function;call",
+					},
+				},
+			},
+			wantErr:           true,
+			expectErrContains: "invalid number of parameters <22> expected 21",
+		},
+		{
+			name: "InvalidWeightFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;*weight&invalid_weight;;;;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidBlockerFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;*blocker&invalid_bool;;;;;;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidTTLFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;;;;;SUB_ACT;;invalid_ttl;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidActionWeightFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;;;;;SUB_ACT;;;*log;;*weight&invalid_weight;;;;;;;",
+					},
+				},
+			},
+			wantErr:           true,
+			expectErrContains: "strconv.ParseFloat",
+		},
+		{
+			name: "InvalidActionBlockerFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;;;;;SUB_ACT;;;*log;;;*blocker&invalid_bool;;;;;;",
+					},
+				},
+			},
+			wantErr:           true,
+			expectErrContains: "strconv.ParseBool",
+		},
+		{
+			name: "InvalidDiktatWeightFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;;;;;SUB_ACT;;;*log;;;;DIKTAT_1;;opt:val;*weight&invalid_weight;;",
+					},
+				},
+			},
+			wantErr:           true,
+			expectErrContains: "strconv.ParseFloat",
+		},
+		{
+			name: "InvalidDiktatBlockerFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;;;;;SUB_ACT;;;*log;;;;DIKTAT_1;;opt:val;;*blocker&invalid_bool;",
+					},
+				},
+			},
+			wantErr:           true,
+			expectErrContains: "strconv.ParseBool",
+		},
+		{
+			name: "InvalidOptsFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;;;;;SUB_ACT;;;*log;invalid_opts_format;;;;;;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidDiktatOptsFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;;;;;SUB_ACT;;;*log;;;;DIKTAT_1;;invalid_opts_format;;;;;",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InvalidAPIOptsFormat",
+			diktats: []*utils.APDiktat{
+				{
+					ID: "d1",
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;ACT_INVALID;;;;;;;;;;;;;;;;;;;invalid_format",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := config.NewDefaultCGRConfig()
+			cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+
+			if !strings.Contains(tc.expectErrContains, "no connection") {
+				cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+			}
+
+			connMgr := engine.NewConnManager(cfg)
+			dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+			dm := engine.NewDataManager(dataDB, cfg, connMgr)
+			fltrS := engine.NewFilterS(cfg, connMgr, dm)
+
+			if len(cfg.ActionSCfg().AdminSConns) > 0 {
+				rpcInternal := make(chan birpc.ClientConnector, 1)
+				rpcInternal <- ccM
+				connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
+			}
+
+			act := &actDynamicAction{
+				config:  cfg,
+				connMgr: connMgr,
+				fltrS:   fltrS,
+				tnt:     "cgrates.org",
+				cgrEv: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.Destination:  "+49123456789",
+					},
+				},
+				aCfg: &utils.APAction{
+					ID:      "ACT_DYNAMIC_ACTION",
+					Diktats: tc.diktats,
+				},
+			}
+
+			t.Cleanup(func() {
+				actionProfile = nil
+			})
+
+			ctx := context.Background()
+			data := utils.MapStorage{
+				"*req": map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "+49123456789",
+				},
+			}
+			trgID := "trigger1"
+			err := act.execute(ctx, data, trgID)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Errorf("expected an error, but got nil")
+				} else if tc.expectErrContains != "" && !strings.Contains(err.Error(), tc.expectErrContains) {
+					t.Errorf("expected error to contain '%s', but got: %v", tc.expectErrContains, err)
+				}
+			} else if err != nil {
+				t.Error(err)
+			} else if tc.expActionProfile != nil && !reflect.DeepEqual(actionProfile, tc.expActionProfile) {
+				t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(tc.expActionProfile), utils.ToJSON(actionProfile))
 			}
 		})
 	}
