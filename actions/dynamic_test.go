@@ -4196,3 +4196,196 @@ func TestActDynamicActionExecute(t *testing.T) {
 		})
 	}
 }
+
+func TestActDynamicActionId(t *testing.T) {
+	tests := []struct {
+		name string
+		aL   actDynamicAction
+		want string
+	}{
+		{
+			name: "WithValidID",
+			aL: actDynamicAction{
+				aCfg: &utils.APAction{ID: "ActionProfile1"},
+			},
+			want: "ActionProfile1",
+		},
+		{
+			name: "WithEmptyID",
+			aL: actDynamicAction{
+				aCfg: &utils.APAction{ID: ""},
+			},
+			want: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.aL.id(); got != tt.want {
+				t.Errorf("actDynamicAction.id() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestActDynamicActionCfg(t *testing.T) {
+	tests := []struct {
+		name string
+		aL   actDynamicAction
+		want *utils.APAction
+	}{
+		{
+			name: "WithValidCfg",
+			aL: actDynamicAction{
+				aCfg: &utils.APAction{ID: "ActionProfile1"},
+			},
+			want: &utils.APAction{ID: "ActionProfile1"},
+		},
+		{
+			name: "WithEmptyCfg",
+			aL: actDynamicAction{
+				aCfg: &utils.APAction{},
+			},
+			want: &utils.APAction{},
+		},
+		{
+			name: "WithNilCfg",
+			aL:   actDynamicAction{aCfg: nil},
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.aL.cfg()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("actDynamicAction.cfg() = %#v, want %#v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestActDynamicRouteExecuteModifyExistingRoute(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+
+	var rpo *utils.RouteProfileWithAPIOpts
+	ccM := &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.AdminSv1SetRouteProfile: func(ctx *context.Context, args, reply any) error {
+				var canCast bool
+				if rpo, canCast = args.(*utils.RouteProfileWithAPIOpts); !canCast {
+					return fmt.Errorf("couldnt cast")
+				}
+				*(reply.(*string)) = utils.OK
+				return nil
+			},
+		},
+	}
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.ActionSCfg().AdminSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS)}
+	connMgr := engine.NewConnManager(cfg)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg, connMgr)
+	fltrS := engine.NewFilterS(cfg, connMgr, dm)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- ccM
+	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAdminS), utils.AdminSv1, rpcInternal)
+
+	existingRP := &utils.RouteProfile{
+		Tenant:  "cgrates.org",
+		ID:      "existingroute",
+		Sorting: "*ascending",
+		Routes: []*utils.Route{
+			{
+				ID:              "rtexisting",
+				FilterIDs:       []string{"*string:~*req.OldFilter:original"},
+				AccountIDs:      []string{"1001"},
+				RateProfileIDs:  []string{"rporiginal"},
+				ResourceIDs:     []string{"resoriginal"},
+				StatIDs:         []string{"statoriginal"},
+				RouteParameters: "originalparam=value",
+			},
+		},
+	}
+	ctx := context.Background()
+	dm.SetRouteProfile(ctx, existingRP, true)
+
+	act := &actDynamicRoute{
+		config:  cfg,
+		connMgr: connMgr,
+		dm:      dm,
+		fltrS:   fltrS,
+		tnt:     "cgrates.org",
+		cgrEv: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "evID",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+		},
+		aCfg: &utils.APAction{
+			ID: "ACT_DYNAMIC_ROUTE",
+			Diktats: []*utils.APDiktat{
+				{
+					ID:        "d1",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{Weight: 20.0},
+					},
+					Opts: map[string]any{
+						utils.MetaTemplate: "cgrates.org;routefromswitch@existingroute;;;;*ascending;;rtexisting;*string:~*req.NewFilter:modified;2001&2002;rpmodified;resmodified;statmodified;*modifiedweight&30.0;*modifiedblocker&true;modifiedparam=value;",
+					},
+				},
+			},
+		},
+	}
+
+	data := utils.MapStorage{
+		"*req": map[string]any{
+			utils.AccountField: "1001",
+		},
+	}
+	trgID := "trigger1"
+	err := act.execute(ctx, data, trgID)
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	expRpo := &utils.RouteProfileWithAPIOpts{
+		RouteProfile: &utils.RouteProfile{
+			Tenant:  "cgrates.org",
+			ID:      "existingroute",
+			Sorting: "*ascending",
+			Routes: []*utils.Route{
+				{
+					ID:             "rtexisting",
+					FilterIDs:      []string{"*string:~*req.NewFilter:modified"},
+					AccountIDs:     []string{"2001", "2002"},
+					RateProfileIDs: []string{"rpmodified"},
+					ResourceIDs:    []string{"resmodified"},
+					StatIDs:        []string{"statmodified"},
+					Weights: utils.DynamicWeights{
+						&utils.DynamicWeight{
+							FilterIDs: []string{"*modifiedweight"},
+							Weight:    30.0,
+						},
+					},
+					Blockers: utils.DynamicBlockers{
+						&utils.DynamicBlocker{
+							FilterIDs: []string{"*modifiedblocker"},
+							Blocker:   true,
+						},
+					},
+					RouteParameters: "modifiedparam=value",
+				},
+			},
+		},
+		APIOpts: map[string]any{},
+	}
+
+	if !reflect.DeepEqual(rpo, expRpo) {
+		t.Errorf("Expected <%v>\nReceived\n<%v>", utils.ToJSON(expRpo), utils.ToJSON(rpo))
+	}
+}
