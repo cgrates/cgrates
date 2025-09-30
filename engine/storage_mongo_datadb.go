@@ -2064,21 +2064,26 @@ func (ms *MongoStorage) RemoveLoadIDsDrv() error {
 // GetIndexesDrv retrieves Indexes from dataDB
 // the key is the tenant of the item or in case of context dependent profiles is a concatenatedKey between tenant and context
 // id is used as a concatenated key in case of filterIndexes the id will be filterType:fieldName:fieldVal
-func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx, idxKey string) (map[string]utils.StringSet, error) {
+func (ms *MongoStorage) GetIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) (map[string]utils.StringSet, error) {
 	type result struct {
 		Key   string
 		Value []string
 	}
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	var q bson.M
-	if len(idxKey) != 0 {
-		q = bson.M{"key": utils.ConcatenatedKey(dbKey, idxKey)}
-	} else {
+	if len(idxKeys) == 0 {
 		for _, character := range []string{".", "*"} {
 			dbKey = strings.Replace(dbKey, character, `\`+character, strings.Count(dbKey, character))
 		}
 		// For optimization, use a caret (^) in the regex pattern.
 		q = bson.M{"key": primitive.Regex{Pattern: "^" + dbKey}}
+	} else {
+		// Build $in query for specific keys (single or multiple).
+		inKeys := make([]string, len(idxKeys))
+		for i, key := range idxKeys {
+			inKeys[i] = utils.ConcatenatedKey(dbKey, key)
+		}
+		q = bson.M{"key": bson.M{"$in": inKeys}}
 	}
 	indexes := make(map[string]utils.StringSet)
 	err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
@@ -2172,27 +2177,31 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 }
 
 // RemoveIndexesDrv removes the indexes
-func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx, idxKey string) error {
-	if len(idxKey) != 0 {
+func (ms *MongoStorage) RemoveIndexesDrv(idxItmType, tntCtx string, idxKeys ...string) error {
+	if len(idxKeys) == 0 { // remove all
+		regexKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+		for _, character := range []string{".", "*"} {
+			regexKey = strings.ReplaceAll(regexKey, character, `\`+character)
+		}
+		// For optimization, use a caret (^) in the regex pattern.
 		return ms.query(func(sctx mongo.SessionContext) error {
-			dr, err := ms.getCol(ColIndx).DeleteOne(sctx,
-				bson.M{"key": utils.ConcatenatedKey(utils.CacheInstanceToPrefix[idxItmType]+tntCtx, idxKey)})
-			if dr.DeletedCount == 0 {
-				return utils.ErrNotFound
-			}
+			_, err := ms.getCol(ColIndx).DeleteMany(sctx, bson.M{
+				"key": primitive.Regex{
+					Pattern: "^" + regexKey,
+				},
+			})
 			return err
 		})
 	}
-	regexKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
-	for _, character := range []string{".", "*"} {
-		regexKey = strings.ReplaceAll(regexKey, character, `\`+character)
+	// Remove specific keys (single or multiple) using $in query.
+	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
+	inKeys := make([]string, len(idxKeys))
+	for i, key := range idxKeys {
+		inKeys[i] = utils.ConcatenatedKey(dbKey, key)
 	}
-	// For optimization, use a caret (^) in the regex pattern.
 	return ms.query(func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColIndx).DeleteMany(sctx, bson.M{
-			"key": primitive.Regex{
-				Pattern: "^" + regexKey,
-			},
+			"key": bson.M{"$in": inKeys},
 		})
 		return err
 	})

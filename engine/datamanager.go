@@ -259,50 +259,50 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(utils.CacheAttributeFilterIndexes, tntCtx, false, true, idxKey)
 		case utils.ResourceFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(utils.CacheResourceFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(utils.CacheResourceFilterIndexes, tntCtx, false, true, idxKey)
 		case utils.StatFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(utils.CacheStatFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(utils.CacheStatFilterIndexes, tntCtx, false, true, idxKey)
 		case utils.ThresholdFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(utils.CacheThresholdFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(utils.CacheThresholdFilterIndexes, tntCtx, false, true, idxKey)
 		case utils.RouteFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(utils.CacheRouteFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(utils.CacheRouteFilterIndexes, tntCtx, false, true, idxKey)
 		case utils.ChargerFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(utils.CacheChargerFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(utils.CacheChargerFilterIndexes, tntCtx, false, true, idxKey)
 		case utils.DispatcherFilterIndexes:
 			var tntCtx, idxKey string
 			if tntCtx, idxKey, err = splitFilterIndex(dataID); err != nil {
 				return
 			}
-			_, err = dm.GetIndexes(utils.CacheDispatcherFilterIndexes, tntCtx, idxKey, false, true)
+			_, err = dm.GetIndexes(utils.CacheDispatcherFilterIndexes, tntCtx, false, true, idxKey)
 		case utils.FilterIndexPrfx:
 			idx := strings.LastIndexByte(dataID, utils.InInFieldSep[0])
 			if idx < 0 {
 				err = fmt.Errorf("WRONG_IDX_KEY_FORMAT<%s>", dataID)
 				return
 			}
-			_, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, dataID[:idx], dataID[idx+1:], false, true)
+			_, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, dataID[:idx], false, true, dataID[idx+1:])
 		case utils.LoadIDPrefix:
 			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		case utils.MetaAPIBan:
@@ -762,7 +762,7 @@ func (dm *DataManager) RemoveFilter(tenant, id string, withIndex bool) (err erro
 		tntCtx = utils.ConcatenatedKey(tenant, id)
 		var rcvIndx map[string]utils.StringSet
 		if rcvIndx, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
-			utils.EmptyString, true, true); err != nil {
+			true, true); err != nil {
 			if err != utils.ErrNotFound {
 				return
 			}
@@ -3760,31 +3760,48 @@ func (dm *DataManager) Reconnect(marshaller string, newcfg *config.DataDbCfg, it
 	return
 }
 
-func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
-	cacheRead, cacheWrite bool) (indexes map[string]utils.StringSet, err error) {
+// GetIndexes retrieves the specified index keys.
+func (dm *DataManager) GetIndexes(idxItmType, tntCtx string, cacheRead, cacheWrite bool,
+	idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	}
 
-	if cacheRead && idxKey != utils.EmptyString { // do not check cache if we want all the indexes
-		if x, ok := Cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey)); ok { // Attempt to find in cache first
-			if x == nil {
+	// All-or-nothing cache strategy for multiple keys.
+	if cacheRead && len(idxKeys) > 0 {
+		allKeysInCache := true
+		cachedIndexes := make(map[string]utils.StringSet)
+
+		for _, idxKey := range idxKeys {
+			if x, ok := Cache.Get(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey)); ok {
+				if x == nil {
+					continue // cached as non-existent, skip it
+				}
+				cachedIndexes[idxKey] = x.(utils.StringSet)
+			} else {
+				// Key missing from cache, fetch all from database.
+				allKeysInCache = false
+				break
+			}
+		}
+
+		if allKeysInCache {
+			if len(cachedIndexes) == 0 {
 				return nil, utils.ErrNotFound
 			}
-			return map[string]utils.StringSet{
-				idxKey: x.(utils.StringSet),
-			}, nil
+			return cachedIndexes, nil
 		}
 	}
-	if indexes, err = dm.DataDB().GetIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
+
+	if indexes, err = dm.DataDB().GetIndexesDrv(idxItmType, tntCtx, idxKeys...); err != nil {
 		if itm := config.CgrConfig().DataDbCfg().Items[idxItmType]; err == utils.ErrNotFound && itm.Remote {
 			if err = dm.connMgr.Call(context.TODO(), config.CgrConfig().DataDbCfg().RmtConns,
 				utils.ReplicatorSv1GetIndexes,
 				&utils.GetIndexesArg{
 					IdxItmType: idxItmType,
 					TntCtx:     tntCtx,
-					IdxKey:     idxKey,
+					IdxKeys:    idxKeys,
 					Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
 					APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, utils.EmptyString,
 						utils.FirstNonEmpty(config.CgrConfig().DataDbCfg().RmtConnID,
@@ -3795,10 +3812,12 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx, idxKey string,
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
-			if err == utils.ErrNotFound && cacheWrite && idxKey != utils.EmptyString {
-				if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, idxKey), nil, []string{tntCtx},
-					true, utils.NonTransactional); errCh != nil {
-					return nil, errCh
+			if err == utils.ErrNotFound && cacheWrite {
+				for _, key := range idxKeys {
+					if errCh := Cache.Set(idxItmType, utils.ConcatenatedKey(tntCtx, key), nil, []string{tntCtx},
+						true, utils.NonTransactional); errCh != nil {
+						return nil, errCh
+					}
 				}
 			}
 			return nil, err
@@ -3821,6 +3840,9 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
+	/*
+		TODO: Check if there's any downside to returning early when len(indexes) == 0.
+	*/
 	if err = dm.DataDB().SetIndexesDrv(idxItmType, tntCtx,
 		indexes, commit, transactionID); err != nil {
 		return
@@ -3839,11 +3861,11 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 		}, itm)
 }
 
-func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err error) {
+func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx string, idxKeys ...string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKey); err != nil {
+	if err = dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKeys...); err != nil {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[idxItmType]
@@ -3853,7 +3875,7 @@ func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx, idxKey string) (err err
 		&utils.GetIndexesArg{
 			IdxItmType: idxItmType,
 			TntCtx:     tntCtx,
-			IdxKey:     idxKey,
+			IdxKeys:    idxKeys,
 			Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),

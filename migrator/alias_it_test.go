@@ -228,7 +228,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 	}
 	if alsidx, err := alsMigrator.dmOut.DataManager().GetIndexes(
 		utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey("cgrates.org", utils.MetaAny),
-		"", false, false); err != nil {
+		false, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expAlsIdx, alsidx) {
 		t.Errorf("Expected %v, received: %v", utils.ToJSON(expAlsIdx), utils.ToJSON(alsidx))

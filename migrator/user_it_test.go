@@ -202,7 +202,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 	if usridx, err := usrMigrator.dmOut.DataManager().GetIndexes(
 		utils.CacheAttributeFilterIndexes,
 		utils.ConcatenatedKey("cgrates.org", utils.MetaAny),
-		"", true, true); err != nil {
+		true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expUsrIdx, usridx) {
 		t.Errorf("Expected %v, received: %v", utils.ToJSON(expUsrIdx), utils.ToJSON(usridx))

@@ -930,7 +930,7 @@ func IsURL(path string) bool {
 type GetIndexesArg struct {
 	IdxItmType string
 	TntCtx     string
-	IdxKey     string
+	IdxKeys    []string
 	Tenant     string
 	APIOpts    map[string]any
 }

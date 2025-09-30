@@ -131,7 +131,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndex(t *testing.T) {
 		},
 	}
 	if fltrIDx, err := dm.GetIndexes(utils.CacheAttributeFilterIndexes,
-		"cgrates.org:*any", utils.EmptyString, true, true); err != nil {
+		"cgrates.org:*any", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIDx, fltrIDx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))
@@ -171,7 +171,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndexAsm(t *testing.T) {
 		},
 	}
 	if fltrIDx, err := dm.GetIndexes(utils.CacheChargerFilterIndexes,
-		"cgrates.org", utils.EmptyString, true, true); err != nil {
+		"cgrates.org", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIDx, fltrIDx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))
@@ -211,7 +211,7 @@ func TestFilterIndexesCheckingDynamicPathToNotIndexLibphNmbr(t *testing.T) {
 		},
 	}
 	if fltrIDx, err := dm.GetIndexes(utils.CacheChargerFilterIndexes,
-		"cgrates.org", utils.EmptyString, true, true); err != nil {
+		"cgrates.org", true, true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expIDx, fltrIDx) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expIDx), utils.ToJSON(fltrIDx))

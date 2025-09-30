@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -39,104 +41,105 @@ var (
 	}
 )
 
-// newFilterIndex will get the index from DataManager if is not found it will create it
-// is used to update the mentioned index
-func newFilterIndex(dm *DataManager, idxItmType, tnt, ctx, itemID string, filterIDs []string, newFlt *Filter) (indexes map[string]utils.StringSet, err error) {
+// newFilterIndex retrieves filter indexes from DataManager.
+// Creates empty indexes for any missing keys.
+func newFilterIndex(dm *DataManager, itemType, tnt, ctx, itemID string,
+	filterIDs []string, newFlt *Filter) (map[string]utils.StringSet, error) {
 	tntCtx := tnt
-	if ctx != utils.EmptyString {
+	if ctx != "" {
 		tntCtx = utils.ConcatenatedKey(tnt, ctx)
 	}
-	indexes = make(map[string]utils.StringSet)
-	if len(filterIDs) == 0 { // in case of None
+	result := make(map[string]utils.StringSet)
+
+	if len(filterIDs) == 0 {
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
-		var rcvIndx map[string]utils.StringSet
-		if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
-			idxKey,
-			true, false); err != nil {
-			if err != utils.ErrNotFound {
-				return
+		indexes, err := dm.GetIndexes(itemType, tntCtx, true, false, idxKey)
+		if err != nil {
+			if !errors.Is(err, utils.ErrNotFound) {
+				return nil, err
 			}
-			err = nil
-			indexes[idxKey] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
-			return
+			result[idxKey] = make(utils.StringSet) // Create empty index
+			return result, nil
 		}
-		for idxKey, idx := range rcvIndx { // parse the received indexes
-			indexes[idxKey] = idx
-		}
-		return
+		maps.Copy(result, indexes)
+		return result, nil
 	}
-	// in case of more filters we parse each filter rule and only for supported index types
-	// we try to get them from Cache/DataDB or if not found in this location we create them here
+
+	// Collect all index keys from all filter rules.
+	var allKeys []string
 	for _, fltrID := range filterIDs {
 		var fltr *Filter
+
+		// Get filter from either new provided filter or DataManager.
 		if newFlt != nil && newFlt.Tenant == tnt && newFlt.ID == fltrID {
 			fltr = newFlt
-		} else if fltr, err = dm.GetFilter(tnt, fltrID,
-			true, false, utils.NonTransactional); err != nil {
-			if err == utils.ErrNotFound {
-				err = fmt.Errorf("broken reference to filter: %+v for itemType: %+v and ID: %+v",
-					fltrID, idxItmType, itemID)
+		} else {
+			var err error
+			fltr, err = dm.GetFilter(tnt, fltrID, true, false, utils.NonTransactional)
+			if err != nil {
+				if errors.Is(err, utils.ErrNotFound) {
+					return nil, fmt.Errorf("broken filter reference %q for item %q of type %q",
+						fltrID, itemID, itemType)
+				}
+				return nil, err
 			}
-			return
 		}
 
-		for _, flt := range fltr.Rules {
-			if !FilterIndexTypes.Has(flt.Type) ||
-				IsDynamicDPPath(flt.Element) {
+		for _, rule := range fltr.Rules {
+			if !FilterIndexTypes.Has(rule.Type) || IsDynamicDPPath(rule.Element) {
 				continue
 			}
-			isDyn := strings.HasPrefix(flt.Element, utils.DynamicDataPrefix)
-			if isDyn && flt.Type == utils.MetaExists {
-				idxKey := utils.ConcatenatedKey(flt.Type, flt.Element[1:])
-				var rcvIndx map[string]utils.StringSet
-				// only read from cache in case if we do not find the index to not cache the negative response
-				if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
-					idxKey, true, false); err != nil {
-					if err != utils.ErrNotFound {
-						return
-					}
-					err = nil
-					indexes[idxKey] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
-					continue
-				}
-				for idxKey, idx := range rcvIndx { // parse the received indexes
-					indexes[idxKey] = idx
-				}
+
+			elemIsDyn := strings.HasPrefix(rule.Element, utils.DynamicDataPrefix)
+
+			// Handle *exists separately.
+			if elemIsDyn && rule.Type == utils.MetaExists {
+				idxKey := utils.ConcatenatedKey(rule.Type, rule.Element[1:])
+				allKeys = append(allKeys, idxKey)
+				continue // skip values loop for *exists
 			}
-			for _, fldVal := range flt.Values {
-				if IsDynamicDPPath(fldVal) {
+
+			for _, val := range rule.Values {
+				if IsDynamicDPPath(val) {
 					continue
 				}
+
+				valIsDyn := strings.HasPrefix(val, utils.DynamicDataPrefix)
+
+				// Skip if both element and value are dynamic or both are static.
+				if elemIsDyn == valIsDyn {
+					continue
+				}
+
+				// Build index key based on which one is dynamic.
 				var idxKey string
-				if isDyn {
-					if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) { // do not index if both the element and the value is dynamic
-						continue
-					}
-					idxKey = utils.ConcatenatedKey(flt.Type, flt.Element[1:], fldVal)
-				} else if strings.HasPrefix(fldVal, utils.DynamicDataPrefix) {
-					idxKey = utils.ConcatenatedKey(flt.Type, fldVal[1:], flt.Element)
+				if elemIsDyn {
+					idxKey = utils.ConcatenatedKey(rule.Type, rule.Element[1:], val)
 				} else {
-					// do not index not dynamic filters
-					continue
+					idxKey = utils.ConcatenatedKey(rule.Type, val[1:], rule.Element)
 				}
-				var rcvIndx map[string]utils.StringSet
-				// only read from cache in case if we do not find the index to not cache the negative response
-				if rcvIndx, err = dm.GetIndexes(idxItmType, tntCtx,
-					idxKey, true, false); err != nil {
-					if err != utils.ErrNotFound {
-						return
-					}
-					err = nil
-					indexes[idxKey] = make(utils.StringSet) // create an empty index if is not found in DB in case we add them later
-					continue
-				}
-				for idxKey, idx := range rcvIndx { // parse the received indexes
-					indexes[idxKey] = idx
-				}
+
+				allKeys = append(allKeys, idxKey)
 			}
 		}
 	}
-	return
+
+	if len(allKeys) > 0 {
+		indexes, err := dm.GetIndexes(itemType, tntCtx, true, false, allKeys...)
+		if err != nil && !errors.Is(err, utils.ErrNotFound) {
+			return nil, err
+		}
+		maps.Copy(result, indexes) // merge fetched indexes into result map
+
+		// Create empty sets for any requested keys that weren't returned.
+		for _, key := range allKeys {
+			if _, exists := result[key]; !exists {
+				result[key] = make(utils.StringSet)
+			}
+		}
+	}
+
+	return result, nil
 }
 
 // addItemToFilterIndex will add the itemID to the existing/created index and set it in the DataDB
@@ -477,7 +480,7 @@ func addIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, filter
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntCtx)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
-			idxItmType, true, false); err != nil {
+			true, false, idxItmType); err != nil {
 			if err != utils.ErrNotFound {
 				guardian.Guardian.UnguardIDs(refID)
 				return
@@ -514,7 +517,7 @@ func removeIndexFiltersItem(dm *DataManager, idxItmType, tnt, itemID string, fil
 			config.CgrConfig().GeneralCfg().LockingTimeout, utils.CacheReverseFilterIndexes+tntCtx)
 		var indexes map[string]utils.StringSet
 		if indexes, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntCtx,
-			idxItmType, true, false); err != nil {
+			true, false, idxItmType); err != nil {
 			guardian.Guardian.UnguardIDs(refID)
 			if err != utils.ErrNotFound {
 				return
@@ -624,7 +627,7 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	var rcvIndx map[string]utils.StringSet
 	// get all reverse indexes from DB
 	if rcvIndx, err = dm.GetIndexes(utils.CacheReverseFilterIndexes, tntID,
-		utils.EmptyString, true, false); err != nil {
+		true, false); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
@@ -802,31 +805,37 @@ func UpdateFilterIndex(dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 
 // removeFilterIndexesForFilter removes itemIDs from the specified filter index keys.
 // Used to update the index map when a filter is modified.
-func removeFilterIndexesForFilter(dm *DataManager, idxItmType, tnt string,
-	removeIndexKeys []string, itemIDs utils.StringSet) error {
+func removeFilterIndexesForFilter(dm *DataManager, itemType, tnt string,
+	removeIndexKeys []string, removeItemIDs utils.StringSet) error {
 	if len(removeIndexKeys) == 0 {
 		return nil // no indexes to remove
 	}
 	refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-		config.CgrConfig().GeneralCfg().LockingTimeout, idxItmType+tnt)
+		config.CgrConfig().GeneralCfg().LockingTimeout, itemType+tnt)
 	defer guardian.Guardian.UnguardIDs(refID)
 
-	for _, idxKey := range removeIndexKeys {
-		fltrIdx, err := dm.GetIndexes(idxItmType, tnt,
-			idxKey, true, false)
-		if err != nil {
-			if err != utils.ErrNotFound {
-				return err
-			}
-			continue
+	indexes, err := dm.GetIndexes(itemType, tnt, true, false, removeIndexKeys...)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return nil // nothing to remove
 		}
-		for itemID := range itemIDs {
-			fltrIdx[idxKey].Remove(itemID)
+		return err
+	}
+
+	updatedIndexes := make(map[string]utils.StringSet)
+	for _, key := range removeIndexKeys {
+		itemIDs, exists := indexes[key]
+		if !exists {
+			continue // skip missing indexes
 		}
-		if err := dm.SetIndexes(idxItmType, tnt, fltrIdx, true,
-			utils.NonTransactional); err != nil {
-			return err
+		for itemID := range removeItemIDs {
+			itemIDs.Remove(itemID)
 		}
+		updatedIndexes[key] = itemIDs // only add modified indexes
+	}
+
+	if err := dm.SetIndexes(itemType, tnt, updatedIndexes, true, utils.NonTransactional); err != nil {
+		return err
 	}
 	return nil
 }
