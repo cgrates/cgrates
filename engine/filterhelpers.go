@@ -132,7 +132,8 @@ func MatchingItemIDsForEvent(ev utils.MapStorage, stringFldIDs, prefixFldIDs, su
 	}
 	if len(itemIDs) > matchedItemsWarningThreshold {
 		utils.Logger.Warning(fmt.Sprintf(
-			"Matched %d %s items. Performance may be affected", len(itemIDs), cacheID))
+			"Matched %d %s items. Performance may be affected.\nevent = %s",
+			len(itemIDs), cacheID, utils.ToJSON(ev)))
 	}
 	return
 }
