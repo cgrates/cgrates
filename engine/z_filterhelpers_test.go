@@ -229,7 +229,10 @@ func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
 	utils.Logger.SetSyslog(nil)
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
-	defer func() { log.SetOutput(os.Stderr) }()
+	t.Cleanup(func() {
+		utils.Logger.SetLogLevel(0)
+		log.SetOutput(os.Stderr)
+	})
 	cfg := config.NewDefaultCGRConfig()
 	data, dErr := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
 	if dErr != nil {
@@ -276,10 +279,9 @@ func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
 		t.Errorf("Expected more than %d matched items, got %d",
 			matchedItemsWarningThreshold, len(ids))
 	}
-	expectedLog := fmt.Sprintf("Matched %d *attribute_filter_indexes items. Performance may be affected", len(ids))
+	expectedLog := "Matched 105 *attribute_filter_indexes items. Performance may be affected."
 	logContent := buf.String()
 	if !strings.Contains(logContent, expectedLog) {
 		t.Errorf("Expected warning not found in logs:\n%s", logContent)
 	}
-	utils.Logger.SetLogLevel(0)
 }
