@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -191,5 +194,72 @@ func TestFilterHelpersExtractURLFromHTTPType(t *testing.T) {
 				t.Errorf("Expected URL %q, got %q", tt.wantURL, gotURL)
 			}
 		})
+	}
+}
+
+func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
+
+	cfg := config.NewDefaultCGRConfig()
+	data, dErr := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	if dErr != nil {
+		t.Fatal(dErr)
+	}
+	dm := NewDataManager(data, cfg, nil)
+
+	tnt := cfg.GeneralCfg().DefaultTenant
+	contextKey := utils.MetaRating
+	tntCtx := utils.ConcatenatedKey(tnt, contextKey)
+
+	for i := 0; i < matchedItemsWarningThreshold+5; i++ {
+		fid := fmt.Sprintf("filter_%d", i)
+		rule := &FilterRule{
+			Type:    utils.MetaString,
+			Element: "~*req.Field",
+			Values:  []string{"trigger"},
+		}
+		if err := rule.CompileValues(); err != nil {
+			t.Fatal(err)
+		}
+		f := &Filter{
+			Tenant: tnt,
+			ID:     fid,
+			Rules:  []*FilterRule{rule},
+		}
+		if err := dm.SetFilter(context.Background(), f, true); err != nil {
+			t.Fatal(err)
+		}
+		if err := addItemToFilterIndex(context.Background(), dm, utils.CacheAttributeFilterIndexes,
+			tnt, contextKey, fid, []string{fid}); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	ev := utils.MapStorage{
+		utils.MetaReq: map[string]any{
+			"Field": "trigger",
+		},
+	}
+
+	ids, err := MatchingItemIDsForEvent(context.Background(), ev, nil, nil, nil, nil, nil,
+		dm, utils.CacheAttributeFilterIndexes, tntCtx, true, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(ids) <= matchedItemsWarningThreshold {
+		t.Errorf("Expected more than %d matched items, got %d",
+			matchedItemsWarningThreshold, len(ids))
+	}
+
+	expectedLog := "Matched 105 *attribute_filter_indexes items. Performance may be affected."
+	logContent := buf.String()
+	if !strings.Contains(logContent, expectedLog) {
+		t.Errorf("Expected warning not found in logs:\n%s", logContent)
 	}
 }
