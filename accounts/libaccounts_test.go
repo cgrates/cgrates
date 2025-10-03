@@ -789,3 +789,130 @@ func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
 	}
 
 }
+
+func TestRefundUnitsOnAccount(t *testing.T) {
+	acnt1 := &utils.Account{
+		ID:       "acc1",
+		Balances: map[string]*utils.Balance{},
+	}
+	origBlnc1 := &utils.Balance{
+		ID:    "blnc1",
+		Units: &utils.Decimal{Big: decimal.New(10, 0)},
+	}
+	acnt1.Balances["blnc1"] = origBlnc1
+
+	refund1 := &utils.Decimal{Big: decimal.New(5, 0)}
+	refundUnitsOnAccount(acnt1, refund1, origBlnc1)
+
+	got1 := acnt1.Balances["blnc1"].Units.String()
+	want1 := "15"
+	if got1 != want1 {
+		t.Errorf("existing balance: expected %s, got %s", want1, got1)
+	}
+
+	acnt2 := &utils.Account{
+		ID:       "acc2",
+		Balances: map[string]*utils.Balance{},
+	}
+	origBlnc2 := &utils.Balance{
+		ID:    "blnc2",
+		Units: &utils.Decimal{Big: decimal.New(20, 0)},
+	}
+	refund2 := &utils.Decimal{Big: decimal.New(7, 0)}
+
+	refundUnitsOnAccount(acnt2, refund2, origBlnc2)
+
+	got2 := acnt2.Balances["blnc2"].Units.String()
+	want2 := "7"
+	if got2 != want2 {
+		t.Errorf("new balance: expected %s, got %s", want2, got2)
+	}
+}
+
+func TestUncompressUnits(t *testing.T) {
+	tests := []struct {
+		name      string
+		units     *utils.Decimal
+		cmprsFctr int
+		uf        *utils.UnitFactor
+		want      string
+	}{
+		{
+			name:      "NoCompressionNoFactor",
+			units:     &utils.Decimal{Big: decimal.New(10, 0)},
+			cmprsFctr: 1,
+			uf:        nil,
+			want:      "10",
+		},
+		{
+			name:      "WithCompression",
+			units:     &utils.Decimal{Big: decimal.New(5, 0)},
+			cmprsFctr: 3,
+			uf:        nil,
+			want:      "15",
+		},
+		{
+			name:      "WithUnitFactor",
+			units:     &utils.Decimal{Big: decimal.New(4, 0)},
+			cmprsFctr: 1,
+			uf:        &utils.UnitFactor{Factor: &utils.Decimal{Big: decimal.New(2, 0)}},
+			want:      "8",
+		},
+		{
+			name:      "WithCompressionAndFactor",
+			units:     &utils.Decimal{Big: decimal.New(2, 0)},
+			cmprsFctr: 4,
+			uf:        &utils.UnitFactor{Factor: &utils.Decimal{Big: decimal.New(5, 0)}},
+			want:      "40",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := uncompressUnits(tt.units, tt.cmprsFctr, nil, tt.uf).String()
+			if got != tt.want {
+				t.Errorf("expected %s, got %s", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestNewBalanceOperator(t *testing.T) {
+	ctx := new(context.Context)
+	acntID := "1001"
+	filters := new(engine.FilterS)
+
+	blncCfg := &utils.Balance{ID: "B1", Type: "unknown"}
+	bOp, err := newBalanceOperator(ctx, acntID, blncCfg, nil, filters, nil, nil, nil)
+	if err == nil {
+		t.Errorf("expected error for unsupported type, got nil")
+	}
+	if bOp != nil {
+		t.Errorf("expected nil operator, got %T", bOp)
+	}
+
+	blncCfg = &utils.Balance{ID: "B2", Type: utils.MetaConcrete}
+	bOp, err = newBalanceOperator(ctx, acntID, blncCfg, nil, filters, nil, nil, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, ok := bOp.(*concreteBalance); !ok {
+		t.Errorf("expected *concreteBalance, got %T", bOp)
+	}
+	if bOp.balanceCfg().ID != "B2" {
+		t.Errorf("expected balance ID B2, got %s", bOp.balanceCfg().ID)
+	}
+
+	cncrt := &concreteBalance{}
+	blncCfg = &utils.Balance{ID: "B3", Type: utils.MetaAbstract}
+	bOp, err = newBalanceOperator(ctx, acntID, blncCfg, []*concreteBalance{cncrt}, filters, nil, nil, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, ok := bOp.(*abstractBalance); !ok {
+		t.Errorf("expected *abstractBalance, got %T", bOp)
+	}
+	if bOp.balanceCfg().ID != "B3" {
+		t.Errorf("expected balance ID B3, got %s", bOp.balanceCfg().ID)
+	}
+}

@@ -34,6 +34,8 @@ import (
 	"github.com/cgrates/guardian"
 )
 
+const matchedItemsWarningThreshold int = 100
+
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of dataDB.GetIndexes, adding utils.MetaAny to list of fields queried
@@ -115,6 +117,11 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 	}
 	if len(itemIDs) == 0 {
 		return nil, utils.ErrNotFound
+	}
+	if len(itemIDs) > matchedItemsWarningThreshold {
+		utils.Logger.Warning(fmt.Sprintf(
+			"Matched %d %s items. Performance may be affected.\nevent = %s",
+			len(itemIDs), cacheID, utils.ToJSON(ev)))
 	}
 	return
 }
