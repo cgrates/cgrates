@@ -627,6 +627,12 @@ const (
 	StatUpdate                  = "StatUpdate"
 	TrendUpdate                 = "TrendUpdate"
 	EventPerformanceReport      = "PerformanceReport"
+	EventConnectionStatusReport = "ConnectionStatusReport"
+
+	// Connection status event fields.
+	ConnLocalAddr  = "LocalAddr"
+	ConnRemoteAddr = "RemoteAddr"
+	ConnStatus     = "ConnectionStatus" // -1=down, 0=duplicate, 1=up
 
 	// ReplyState error constants
 	ErrReplyStateAuthorize = "ERR_AUTHORIZE"

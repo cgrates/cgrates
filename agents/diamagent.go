@@ -452,28 +452,127 @@ func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 	ch <- m
 }
 
-// handleConns is used to handle all conns that are connected to the agent
-// it register the connection so it can be used to send a DPR
+const (
+	// Connection status values for ConnectionStatus event field:
+	//   -1 : connection closed/down
+	//    0 : duplicate connection (no metric change)
+	//    1 : new connection established/up
+	diamConnStatusDown      = -1
+	diamConnStatusDuplicate = 0
+	diamConnStatusUp        = 1
+
+	// Health check interval for detecting closed connections.
+	// TODO: Make this configurable.
+	diamConnHealthCheckInterval = 500 * time.Millisecond
+)
+
+// sendConnStatusReport reports connection status changes to StatS and ThresholdS.
+func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status int, localAddr, remoteAddr net.Addr) {
+	statsConns := da.cgrCfg.DiameterAgentCfg().StatSConns
+	thConns := da.cgrCfg.DiameterAgentCfg().ThresholdSConns
+
+	ev := &utils.CGREvent{
+		Tenant: da.cgrCfg.GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Time:   utils.TimePointer(time.Now()),
+		Event: map[string]any{
+			utils.ConnLocalAddr:  localAddr.String(),
+			utils.ConnRemoteAddr: remoteAddr.String(),
+			utils.OriginHost:     metadata.OriginHost,
+			utils.OriginRealm:    metadata.OriginRealm,
+			utils.ConnStatus:     status,
+			utils.Source:         utils.DiameterAgent,
+		},
+		APIOpts: map[string]any{
+			utils.MetaEventType: utils.EventConnectionStatusReport,
+		},
+	}
+
+	if len(statsConns) != 0 {
+		var reply []string
+		if err := da.connMgr.Call(context.TODO(), statsConns, utils.StatSv1ProcessEvent,
+			ev, &reply); err != nil {
+			utils.Logger.Err(fmt.Sprintf("failed to process %s event in %s: %v",
+				utils.EventConnectionStatusReport, utils.StatS, err))
+		}
+	}
+	if len(thConns) != 0 {
+		var reply []string
+		if err := da.connMgr.Call(context.TODO(), thConns, utils.ThresholdSv1ProcessEvent,
+			ev, &reply); err != nil {
+			utils.Logger.Err(fmt.Sprintf("failed to process %s event in %s: %v",
+				utils.EventConnectionStatusReport, utils.ThresholdS, err))
+		}
+	}
+}
+
+// handleConns handles all connections to the agent and registers them for DPR support.
 func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 	for c := range peers {
-		meta, _ := smpeer.FromContext(c.Context())
+		meta, ok := smpeer.FromContext(c.Context())
+		if !ok {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> could not extract peer metadata from connection %s, skipping status tracking",
+				utils.DiameterAgent, c.RemoteAddr().String()))
+			continue
+		}
 		key := string(meta.OriginHost + utils.ConcatenatedKeySep + meta.OriginRealm)
 		da.peersLck.Lock()
-		da.peers[key] = c // store in peers table
+		diamConnStatus := diamConnStatusUp
+		if _, exists := da.peers[key]; exists {
+			// Connection already exists for this peer. Set status to 0 (duplicate)
+			// to prevent incrementing StatS metrics.
+			diamConnStatus = diamConnStatusDuplicate
+
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> a connection from a peer with the same ID (%q) is already registered, overwriting...",
+				utils.DiameterAgent, key))
+		}
+		da.peers[key] = c
 		da.peersLck.Unlock()
-		go func(c diam.Conn, key string) {
-			// wait for disconnect notification
-			<-c.(diam.CloseNotifier).CloseNotify()
-			da.peersLck.Lock()
-			delete(da.peers, key) // remove from peers table
-			da.peersLck.Unlock()
-		}(c, key)
+		localAddr, remoteAddr := c.LocalAddr(), c.RemoteAddr()
+		da.sendConnStatusReport(meta, diamConnStatus, localAddr, remoteAddr)
+		go func() {
+			// Use hybrid approach to detect connection closure. CloseNotify() may not
+			// fire if the serve() goroutine is blocked in Read(), so we also perform
+			// periodic write checks as a fallback.
+			// TODO: Remove fallback once go-diameter fixes CloseNotify race condition.
+			defer func() {
+				da.peersLck.Lock()
+				delete(da.peers, key)
+				da.peersLck.Unlock()
+				da.sendConnStatusReport(meta, diamConnStatusDown, localAddr, remoteAddr)
+			}()
+
+			closeChan := c.(diam.CloseNotifier).CloseNotify()
+			ticker := time.NewTicker(diamConnHealthCheckInterval)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-closeChan:
+					return
+				case <-ticker.C:
+					// Periodic health check: write 0 bytes to detect broken connections.
+					_, err := c.Connection().Write([]byte{})
+					if err != nil {
+						return
+					}
+				}
+			}
+		}()
 	}
 }
 
 // handleDPA is used to handle all DisconnectPeer Answers that are received
 func (da *DiameterAgent) handleDPA(c diam.Conn, m *diam.Message) {
-	meta, _ := smpeer.FromContext(c.Context())
+	meta, ok := smpeer.FromContext(c.Context())
+	if !ok {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<%s> could not extract peer metadata from DPA connection %s",
+			utils.DiameterAgent, c.RemoteAddr().String()))
+		return
+	}
 	key := string(meta.OriginHost + utils.ConcatenatedKeySep + meta.OriginRealm)
 
 	da.dpaLck.Lock()
