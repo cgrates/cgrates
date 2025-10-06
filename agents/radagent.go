@@ -539,7 +539,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			utils.RequestProcessorID: reqProcessor.ID,
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType: utils.ProcessTime,
+			utils.MetaEventType: utils.EventPerformanceReport,
 		},
 	}
 

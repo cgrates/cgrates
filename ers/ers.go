@@ -263,7 +263,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 				utils.EventReaderID:  rdrCfg.ID,
 			},
 			APIOpts: map[string]any{
-				utils.MetaEventType: utils.ProcessTime,
+				utils.MetaEventType: utils.EventPerformanceReport,
 			},
 		}
 

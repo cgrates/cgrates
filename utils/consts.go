@@ -566,13 +566,6 @@ const (
 	BalanceDisabled       = "BalanceDisabled"
 	BalanceFactorID       = "BalanceFactorID"
 	Units                 = "Units"
-	AccountUpdate         = "AccountUpdate"
-	StatUpdate            = "StatUpdate"
-	TrendUpdate           = "TrendUpdate"
-	RankingUpdate         = "RankingUpdate"
-	ResourceUpdate        = "ResourceUpdate"
-	ProcessTime           = "ProcessTime"
-	CDR                   = "CDR"
 	CDRs                  = "CDRs"
 	ExpiryTime            = "ExpiryTime"
 	AllowNegative         = "AllowNegative"
@@ -622,6 +615,18 @@ const (
 	EndTime              = "EndTime"
 	ProcessingTime       = "ProcessingTime"
 	ReplyState           = "ReplyState"
+
+	// Event types
+	EventType                   = "EventType"
+	MetaEventType               = "*eventType"
+	CDR                         = "CDR"
+	ThresholdHit                = "ThresholdHit"
+	AccountUpdate               = "AccountUpdate"
+	RankingUpdate               = "RankingUpdate"
+	ResourceUpdate              = "ResourceUpdate"
+	StatUpdate                  = "StatUpdate"
+	TrendUpdate                 = "TrendUpdate"
+	EventPerformanceReport      = "PerformanceReport"
 
 	// ReplyState error constants
 	ErrReplyStateAuthorize = "ERR_AUTHORIZE"
@@ -2956,7 +2961,6 @@ const (
 	OptsStatsProfileIDs           = "*stsProfileIDs"
 	OptsStatsProfileIgnoreFilters = "*stsProfileIgnoreFilters"
 	// Thresholds
-	ThresholdHit                       = "ThresholdHit"
 	Hits                               = "Hits"
 	Snooze                             = "Snooze"
 	ThresholdConfig                    = "Config"
@@ -2978,9 +2982,7 @@ const (
 	OptsAttributesProcessRuns          = "*attrProcessRuns"
 	OptsAttributesProfileRuns          = "*attrProfileRuns"
 	OptsAttributesProfileIgnoreFilters = "*attrProfileIgnoreFilters"
-	MetaEventType                      = "*eventType"
 	MetaEventTime                      = "*eventTime"
-	EventType                          = "EventType"
 	SchedulerInit                      = "SchedulerInit"
 
 	RemoteHostOpt = "*rmtHost"
