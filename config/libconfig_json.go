@@ -549,23 +549,24 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled            *bool                  `json:"enabled"`
-	Listen             *string                `json:"listen"`
-	ListenNet          *string                `json:"listen_net"`
-	DictionariesPath   *string                `json:"dictionaries_path"`
-	CeApplications     *[]string              `json:"ce_applications"`
-	SessionSConns      *[]string              `json:"sessions_conns"`
-	StatSConns         *[]string              `json:"stats_conns"`
-	ThresholdSConns    *[]string              `json:"thresholds_conns"`
-	OriginHost         *string                `json:"origin_host"`
-	OriginRealm        *string                `json:"origin_realm"`
-	VendorID           *int                   `json:"vendor_id"`
-	ProductName        *string                `json:"product_name"`
-	SyncedConnRequests *bool                  `json:"synced_conn_requests"`
-	ASRTemplate        *string                `json:"asr_template"`
-	RARTemplate        *string                `json:"rar_template"`
-	ForcedDisconnect   *string                `json:"forced_disconnect"`
-	RequestProcessors  *[]*ReqProcessorJsnCfg `json:"request_processors"`
+	Enabled                 *bool                  `json:"enabled"`
+	Listen                  *string                `json:"listen"`
+	ListenNet               *string                `json:"listen_net"`
+	DictionariesPath        *string                `json:"dictionaries_path"`
+	CeApplications          *[]string              `json:"ce_applications"`
+	SessionSConns           *[]string              `json:"sessions_conns"`
+	StatSConns              *[]string              `json:"stats_conns"`
+	ThresholdSConns         *[]string              `json:"thresholds_conns"`
+	OriginHost              *string                `json:"origin_host"`
+	OriginRealm             *string                `json:"origin_realm"`
+	VendorID                *int                   `json:"vendor_id"`
+	ProductName             *string                `json:"product_name"`
+	SyncedConnRequests      *bool                  `json:"synced_conn_requests"`
+	ASRTemplate             *string                `json:"asr_template"`
+	RARTemplate             *string                `json:"rar_template"`
+	ForcedDisconnect        *string                `json:"forced_disconnect"`
+	ConnHealthCheckInterval *string                `json:"conn_health_check_interval"`
+	RequestProcessors       *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
 
 type RadiListenerJsnCfg struct {

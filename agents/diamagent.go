@@ -460,10 +460,6 @@ const (
 	diamConnStatusDown      = -1
 	diamConnStatusDuplicate = 0
 	diamConnStatusUp        = 1
-
-	// Health check interval for detecting closed connections.
-	// TODO: Make this configurable.
-	diamConnHealthCheckInterval = 500 * time.Millisecond
 )
 
 // sendConnStatusReport reports connection status changes to StatS and ThresholdS.
@@ -545,17 +541,24 @@ func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 			}()
 
 			closeChan := c.(diam.CloseNotifier).CloseNotify()
-			ticker := time.NewTicker(diamConnHealthCheckInterval)
-			defer ticker.Stop()
+
+			// Setup optional health check ticker. If interval is 0, tickChan remains nil
+			// and that select case blocks forever, effectively disabling periodic checks.
+			var tickChan <-chan time.Time
+			interval := da.cgrCfg.DiameterAgentCfg().ConnHealthCheckInterval
+			if interval > 0 {
+				ticker := time.NewTicker(interval)
+				defer ticker.Stop()
+				tickChan = ticker.C
+			}
 
 			for {
 				select {
 				case <-closeChan:
 					return
-				case <-ticker.C:
+				case <-tickChan:
 					// Periodic health check: write 0 bytes to detect broken connections.
-					_, err := c.Connection().Write([]byte{})
-					if err != nil {
+					if _, err := c.Connection().Write([]byte{}); err != nil {
 						return
 					}
 				}
