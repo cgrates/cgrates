@@ -51,22 +51,24 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		},
 	}
 	expected := &DiameterAgentCfg{
-		Enabled:          true,
-		ListenNet:        "tcp",
-		Listen:           "127.0.0.1:3868",
-		CeApplications:   []string{"Base"},
-		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		SessionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
-		StatSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
-		ThresholdSConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
-		OriginHost:       "CGR-DA",
-		OriginRealm:      "cgrates.org",
-		VendorID:         0,
-		ProductName:      "randomName",
-		SyncedConnReqs:   true,
-		ASRTemplate:      "randomTemplate",
-		RARTemplate:      "randomTemplate",
-		ForcedDisconnect: "forced",
+		Enabled:                true,
+		ListenNet:              "tcp",
+		Listen:                 "127.0.0.1:3868",
+		CeApplications:         []string{"Base"},
+		DictionariesPath:       "/usr/share/cgrates/diameter/dict/",
+		SessionSConns:          []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
+		StatSConns:             []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"},
+		ThresholdSConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds), "*conn1"},
+		ConnStatusStatQueueIDs: []string{},
+		ConnStatusThresholdIDs: []string{},
+		OriginHost:             "CGR-DA",
+		OriginRealm:            "cgrates.org",
+		VendorID:               0,
+		ProductName:            "randomName",
+		SyncedConnReqs:         true,
+		ASRTemplate:            "randomTemplate",
+		RARTemplate:            "randomTemplate",
+		ForcedDisconnect:       "forced",
 		RequestProcessors: []*RequestProcessor{
 			{
 				ID:       "cgrates",
@@ -169,6 +171,8 @@ func TestDiameterAgentCfgAsMapInterface(t *testing.T) {
 		utils.SessionSConnsCfg:           []string{rpcclient.BiRPCInternal, utils.MetaInternal, "*conn1"},
 		utils.StatSConnsCfg:              []string{utils.MetaInternal, "*conn1"},
 		utils.ThresholdSConnsCfg:         []string{utils.MetaInternal, "*conn1"},
+		utils.ConnStatusStatQueueIDsCfg:  []string{},
+		utils.ConnStatusThresholdIDsCfg:  []string{},
 		utils.SyncedConnReqsCfg:          true,
 		utils.VendorIDCfg:                0,
 		utils.ConnHealthCheckIntervalCfg: "0s",
@@ -238,6 +242,8 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 		utils.SessionSConnsCfg:           []string{rpcclient.BiRPCInternal},
 		utils.StatSConnsCfg:              []string{rpcclient.InternalRPC},
 		utils.ThresholdSConnsCfg:         []string{"conn1"},
+		utils.ConnStatusStatQueueIDsCfg:  []string{},
+		utils.ConnStatusThresholdIDsCfg:  []string{},
 		utils.SyncedConnReqsCfg:          false,
 		utils.VendorIDCfg:                0,
 		utils.ConnHealthCheckIntervalCfg: "0s",
@@ -246,7 +252,7 @@ func TestDiameterAgentCfgAsMapInterface1(t *testing.T) {
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
 	} else if rcv := cgrCfg.diameterAgentCfg.AsMapInterface(cgrCfg.generalCfg.RSRSep); !reflect.DeepEqual(rcv, eMap) {
-		t.Errorf("Expected %+v \n, received %+v", eMap, rcv)
+		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(eMap), utils.ToJSON(rcv))
 	}
 }
 

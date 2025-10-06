@@ -1087,6 +1087,8 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		SessionSConns:           &[]string{rpcclient.BiRPCInternal},
 		StatSConns:              &[]string{},
 		ThresholdSConns:         &[]string{},
+		StatQueueIDs:            &[]string{},
+		ThresholdIDs:            &[]string{},
 		OriginHost:              utils.StringPointer("CGR-DA"),
 		OriginRealm:             utils.StringPointer("cgrates.org"),
 		VendorID:                utils.IntPointer(0),

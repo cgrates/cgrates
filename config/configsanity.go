@@ -303,6 +303,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.DiameterAgent, utils.SessionS)
 		}
+		if len(cfg.diameterAgentCfg.ConnStatusStatQueueIDs) != 0 && len(cfg.diameterAgentCfg.StatSConns) == 0 {
+			return fmt.Errorf("<%s> stat_queue_ids defined but no %s connections configured",
+				utils.DiameterAgent, utils.StatS)
+		}
+		if len(cfg.diameterAgentCfg.ConnStatusThresholdIDs) != 0 && len(cfg.diameterAgentCfg.ThresholdSConns) == 0 {
+			return fmt.Errorf("<%s> threshold_ids defined but no %s connections configured",
+				utils.DiameterAgent, utils.ThresholdS)
+		}
 		for _, connID := range cfg.diameterAgentCfg.SessionSConns {
 			isInternal := strings.HasPrefix(connID, utils.MetaInternal) || strings.HasPrefix(connID, rpcclient.BiRPCInternal)
 			if isInternal && !cfg.sessionSCfg.Enabled {

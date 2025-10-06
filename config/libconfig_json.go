@@ -565,6 +565,8 @@ type DiameterAgentJsonCfg struct {
 	ASRTemplate             *string                `json:"asr_template"`
 	RARTemplate             *string                `json:"rar_template"`
 	ForcedDisconnect        *string                `json:"forced_disconnect"`
+	StatQueueIDs            *[]string              `json:"conn_status_stat_queue_ids"`
+	ThresholdIDs            *[]string              `json:"conn_status_threshold_ids"`
 	ConnHealthCheckInterval *string                `json:"conn_health_check_interval"`
 	RequestProcessors       *[]*ReqProcessorJsnCfg `json:"request_processors"`
 }
