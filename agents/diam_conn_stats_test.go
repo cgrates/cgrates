@@ -73,6 +73,7 @@ func TestDiamConnStats(t *testing.T) {
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 	// "thresholds_conns": ["*localhost"]
+	"conn_health_check_interval": "100ms"
 }
 }`,
 		DBCfg: engine.InternalDBCfg,
@@ -193,7 +194,7 @@ func TestDiamConnStats(t *testing.T) {
 	connHost3.Close()
 
 	// Ensure periodic health check happens.
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	checkConnStatusMetric("SQ_CONN_1", 0)
 	checkConnStatusMetric("SQ_CONN_2", 0)
