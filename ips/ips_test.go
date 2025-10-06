@@ -260,3 +260,298 @@ func TestNewIPService(t *testing.T) {
 		t.Errorf("expected loopStopped channel initialized")
 	}
 }
+
+func TestFilterAndSortPools(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dm := engine.NewDataManager(db, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	ctx := context.Background()
+	tenant := "cgrates.org"
+
+	t.Run("EmptyPools", func(t *testing.T) {
+		pools := []*utils.IPPool{}
+		ev := utils.MapStorage{}
+
+		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+
+		if err != utils.ErrNotFound {
+			t.Errorf("Expected ErrNotFound, got: %v", err)
+		}
+		if result != nil {
+			t.Errorf("Expected nil result, got: %v", result)
+		}
+	})
+
+	t.Run("NilPools", func(t *testing.T) {
+		ev := utils.MapStorage{}
+
+		result, err := filterAndSortPools(ctx, tenant, nil, fltrs, ev)
+
+		if err != utils.ErrNotFound {
+			t.Errorf("Expected ErrNotFound, got: %v", err)
+		}
+		if result != nil {
+			t.Errorf("Expected nil result, got: %v", result)
+		}
+	})
+
+	t.Run("SinglePoolNoFilters", func(t *testing.T) {
+		pools := []*utils.IPPool{
+			{
+				ID:        "POOL1",
+				FilterIDs: []string{},
+				Weights:   utils.DynamicWeights{},
+				Blockers:  utils.DynamicBlockers{},
+			},
+		}
+		ev := utils.MapStorage{}
+
+		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+		if len(result) != 1 {
+			t.Errorf("Expected 1 pool, got: %d", len(result))
+		}
+		if result[0] != "POOL1" {
+			t.Errorf("Expected POOL1, got: %s", result[0])
+		}
+	})
+
+	t.Run("MultiplePoolsSortedByWeight", func(t *testing.T) {
+		pools := []*utils.IPPool{
+			{
+				ID:        "POOL1",
+				FilterIDs: []string{},
+				Weights:   utils.DynamicWeights{{Weight: 10.0}},
+				Blockers:  utils.DynamicBlockers{},
+			},
+			{
+				ID:        "POOL2",
+				FilterIDs: []string{},
+				Weights:   utils.DynamicWeights{{Weight: 20.0}},
+				Blockers:  utils.DynamicBlockers{},
+			},
+			{
+				ID:        "POOL3",
+				FilterIDs: []string{},
+				Weights:   utils.DynamicWeights{{Weight: 15.0}},
+				Blockers:  utils.DynamicBlockers{},
+			},
+		}
+		ev := utils.MapStorage{}
+
+		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+		if len(result) != 3 {
+			t.Errorf("Expected 3 pools, got: %d", len(result))
+		}
+		if result[0] != "POOL2" {
+			t.Errorf("Expected POOL2 first, got: %s", result[0])
+		}
+		if result[1] != "POOL3" {
+			t.Errorf("Expected POOL3 second, got: %s", result[1])
+		}
+		if result[2] != "POOL1" {
+			t.Errorf("Expected POOL1 third, got: %s", result[2])
+		}
+	})
+
+	t.Run("PoolsFilteredOut", func(t *testing.T) {
+		filter := &engine.Filter{
+			Tenant: tenant,
+			ID:     "FltrNoMatch",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
+		}
+		if err := dm.SetFilter(ctx, filter, true); err != nil {
+			t.Fatal(err)
+		}
+
+		pools := []*utils.IPPool{
+			{
+				ID:        "POOL1",
+				FilterIDs: []string{"FltrNoMatch"},
+				Weights:   utils.DynamicWeights{},
+				Blockers:  utils.DynamicBlockers{},
+			},
+		}
+		ev := utils.MapStorage{
+			utils.MetaReq: map[string]interface{}{
+				"Account": "1002",
+			},
+		}
+
+		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+
+		if err != utils.ErrNotFound {
+			t.Errorf("Expected ErrNotFound, got: %v", err)
+		}
+		if result != nil {
+			t.Errorf("Expected nil result, got: %v", result)
+		}
+	})
+
+	t.Run("PoolsPass", func(t *testing.T) {
+		filter := &engine.Filter{
+			Tenant: tenant,
+			ID:     "FltrMatch",
+			Rules: []*engine.FilterRule{
+				{
+					Type:    utils.MetaString,
+					Element: "~*req.Account",
+					Values:  []string{"1001"},
+				},
+			},
+		}
+		if err := dm.SetFilter(ctx, filter, true); err != nil {
+			t.Fatal(err)
+		}
+
+		pools := []*utils.IPPool{
+			{
+				ID:        "POOL1",
+				FilterIDs: []string{"FltrMatch"},
+				Weights:   utils.DynamicWeights{{Weight: 10.0}},
+				Blockers:  utils.DynamicBlockers{},
+			},
+			{
+				ID:        "POOL2",
+				FilterIDs: []string{},
+				Weights:   utils.DynamicWeights{{Weight: 5.0}},
+				Blockers:  utils.DynamicBlockers{},
+			},
+		}
+		ev := utils.MapStorage{
+			utils.MetaReq: map[string]interface{}{
+				"Account": "1001",
+			},
+		}
+
+		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+
+		if err != nil {
+			t.Errorf("Expected no error, got: %v", err)
+		}
+		if len(result) != 2 {
+			t.Errorf("Expected 2 pools, got: %d", len(result))
+		}
+		if result[0] != "POOL1" {
+			t.Errorf("Expected POOL1 first, got: %s", result[0])
+		}
+		if result[1] != "POOL2" {
+			t.Errorf("Expected POOL2 second, got: %s", result[1])
+		}
+	})
+
+	t.Run("FilterPassError", func(t *testing.T) {
+		pools := []*utils.IPPool{
+			{
+				ID:        "POOL1",
+				FilterIDs: []string{"NonExistentFilter"},
+				Weights:   utils.DynamicWeights{},
+				Blockers:  utils.DynamicBlockers{},
+			},
+		}
+		ev := utils.MapStorage{}
+
+		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+
+		if err == nil {
+			t.Error("Expected error for non-existent filter, got nil")
+		}
+		if result != nil {
+			t.Errorf("Expected nil result on error, got: %v", result)
+		}
+	})
+
+	t.Run("WeightFromDynamicsError", func(t *testing.T) {
+		pools := []*utils.IPPool{
+			{
+				ID:        "POOL1",
+				FilterIDs: []string{},
+				Weights: utils.DynamicWeights{
+					{FilterIDs: []string{"NonExistentWeightFilter"}, Weight: 10.0},
+				},
+				Blockers: utils.DynamicBlockers{},
+			},
+		}
+		ev := utils.MapStorage{}
+
+		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+
+		if err == nil {
+			t.Error("Expected error for weight calculation, got nil")
+		}
+		if result != nil {
+			t.Errorf("Expected nil result on error, got: %v", result)
+		}
+	})
+
+	t.Run("BlockerFromDynamicsError", func(t *testing.T) {
+		pools := []*utils.IPPool{
+			{
+				ID:        "POOL1",
+				FilterIDs: []string{},
+				Weights:   utils.DynamicWeights{{Weight: 10.0}},
+				Blockers: utils.DynamicBlockers{
+					{FilterIDs: []string{"NonExistentBlockerFilter"}, Blocker: true},
+				},
+			},
+		}
+		ev := utils.MapStorage{}
+
+		result, err := filterAndSortPools(ctx, tenant, pools, fltrs, ev)
+
+		if err == nil {
+			t.Error("Expected error for blocker, got nil")
+		}
+		if result != nil {
+			t.Errorf("Expected nil result on error, got: %v", result)
+		}
+	})
+}
+
+func TestFindPoolByID(t *testing.T) {
+	pools := []*utils.IPPool{
+		{ID: "pool1", Type: "*ipv4"},
+		{ID: "pool2", Type: "*ipv4"},
+		{ID: "pool3", Type: "*ipv4"},
+	}
+
+	result := findPoolByID(pools, "pool2")
+	if result == nil {
+		t.Errorf("expected non-nil result for existing ID")
+	} else if result.ID != "pool2" {
+		t.Errorf("expected ID 'pool2', got '%s'", result.ID)
+	}
+
+	result = findPoolByID(pools, "notfound")
+	if result != nil {
+		t.Errorf("expected nil for non-existing ID, got %+v", result)
+	}
+
+	result = findPoolByID([]*utils.IPPool{}, "pool1")
+	if result != nil {
+		t.Errorf("expected nil for empty slice, got %+v", result)
+	}
+
+	var nilPools []*utils.IPPool
+	result = findPoolByID(nilPools, "pool1")
+	if result != nil {
+		t.Errorf("expected nil for nil slice, got %+v", result)
+	}
+}
