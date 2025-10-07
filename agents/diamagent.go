@@ -452,18 +452,8 @@ func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 	ch <- m
 }
 
-const (
-	// Connection status values for ConnectionStatus event field:
-	//   -1 : connection closed/down
-	//    0 : duplicate connection (no metric change)
-	//    1 : new connection established/up
-	diamConnStatusDown      = -1
-	diamConnStatusDuplicate = 0
-	diamConnStatusUp        = 1
-)
-
 // sendConnStatusReport reports connection status changes to StatS and ThresholdS.
-func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status int, localAddr, remoteAddr net.Addr) {
+func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status string, localAddr, remoteAddr net.Addr) {
 	sqIDs := da.cgrCfg.DiameterAgentCfg().ConnStatusStatQueueIDs
 	thIDs := da.cgrCfg.DiameterAgentCfg().ConnStatusThresholdIDs
 	if len(sqIDs) == 0 && len(thIDs) == 0 {
@@ -522,11 +512,11 @@ func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 		}
 		key := string(meta.OriginHost + utils.ConcatenatedKeySep + meta.OriginRealm)
 		da.peersLck.Lock()
-		diamConnStatus := diamConnStatusUp
+		connStatus := utils.ConnStatusUp
 		if _, exists := da.peers[key]; exists {
-			// Connection already exists for this peer. Set status to 0 (duplicate)
+			// Connection already exists for this peer. Set status to DUPLICATE
 			// to prevent incrementing StatS metrics.
-			diamConnStatus = diamConnStatusDuplicate
+			connStatus = utils.ConnStatusDuplicate
 
 			utils.Logger.Warning(fmt.Sprintf(
 				"<%s> a connection from a peer with the same ID (%q) is already registered, overwriting...",
@@ -535,7 +525,7 @@ func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 		da.peers[key] = c
 		da.peersLck.Unlock()
 		localAddr, remoteAddr := c.LocalAddr(), c.RemoteAddr()
-		da.sendConnStatusReport(meta, diamConnStatus, localAddr, remoteAddr)
+		da.sendConnStatusReport(meta, connStatus, localAddr, remoteAddr)
 		go func() {
 			// Use hybrid approach to detect connection closure. CloseNotify() may not
 			// fire if the serve() goroutine is blocked in Read(), so we also perform
@@ -545,7 +535,7 @@ func (da *DiameterAgent) handleConns(peers <-chan diam.Conn) {
 				da.peersLck.Lock()
 				delete(da.peers, key)
 				da.peersLck.Unlock()
-				da.sendConnStatusReport(meta, diamConnStatusDown, localAddr, remoteAddr)
+				da.sendConnStatusReport(meta, utils.ConnStatusDown, localAddr, remoteAddr)
 			}()
 
 			closeChan := c.(diam.CloseNotifier).CloseNotify()

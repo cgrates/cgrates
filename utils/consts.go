@@ -630,9 +630,12 @@ const (
 	EventConnectionStatusReport = "ConnectionStatusReport"
 
 	// Connection status event fields.
-	ConnLocalAddr  = "LocalAddr"
-	ConnRemoteAddr = "RemoteAddr"
-	ConnStatus     = "ConnectionStatus" // -1=down, 0=duplicate, 1=up
+	ConnLocalAddr       = "LocalAddr"
+	ConnRemoteAddr      = "RemoteAddr"
+	ConnStatus          = "ConnectionStatus" // sum metric: UP=1, DOWN=-1, DUPLICATE=0
+	ConnStatusUp        = "UP"
+	ConnStatusDown      = "DOWN"
+	ConnStatusDuplicate = "DUPLICATE"
 
 	// ReplyState error constants
 	ErrReplyStateAuthorize = "ERR_AUTHORIZE"
