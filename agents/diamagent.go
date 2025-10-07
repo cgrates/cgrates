@@ -454,9 +454,8 @@ func (da *DiameterAgent) handleRAA(c diam.Conn, m *diam.Message) {
 
 // sendConnStatusReport reports connection status changes to StatS and ThresholdS.
 func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status string, localAddr, remoteAddr net.Addr) {
-	sqIDs := da.cgrCfg.DiameterAgentCfg().ConnStatusStatQueueIDs
-	thIDs := da.cgrCfg.DiameterAgentCfg().ConnStatusThresholdIDs
-	if len(sqIDs) == 0 && len(thIDs) == 0 {
+	daCfg := da.cgrCfg.DiameterAgentCfg()
+	if len(daCfg.StatSConns) == 0 && len(daCfg.ThresholdSConns) == 0 {
 		return // nothing to do
 	}
 
@@ -477,22 +476,20 @@ func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status 
 		},
 	}
 
-	if len(sqIDs) != 0 {
-		ev.APIOpts[utils.OptsStatsProfileIDs] = sqIDs
+	if len(daCfg.StatSConns) != 0 {
+		ev.APIOpts[utils.OptsStatsProfileIDs] = daCfg.ConnStatusStatQueueIDs
 		var reply []string
-		if err := da.connMgr.Call(context.TODO(),
-			da.cgrCfg.DiameterAgentCfg().StatSConns,
+		if err := da.connMgr.Call(context.TODO(), daCfg.StatSConns,
 			utils.StatSv1ProcessEvent, ev, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("failed to process %s event in %s: %v",
 				utils.EventConnectionStatusReport, utils.StatS, err))
 		}
 		delete(ev.APIOpts, utils.OptsStatsProfileIDs)
 	}
-	if len(thIDs) != 0 {
-		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+	if len(daCfg.ThresholdSConns) != 0 {
+		ev.APIOpts[utils.OptsThresholdsProfileIDs] = daCfg.ConnStatusThresholdIDs
 		var reply []string
-		if err := da.connMgr.Call(context.TODO(),
-			da.cgrCfg.DiameterAgentCfg().ThresholdSConns,
+		if err := da.connMgr.Call(context.TODO(), daCfg.ThresholdSConns,
 			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("failed to process %s event in %s: %v",
 				utils.EventConnectionStatusReport, utils.ThresholdS, err))
