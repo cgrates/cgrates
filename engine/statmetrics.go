@@ -1500,17 +1500,40 @@ func (sum *StatSum) GetFloat64Value(roundingDecimal int) (v float64) {
 	return sum.getValue(roundingDecimal)
 }
 
-func (sum *StatSum) getFieldVal(ev utils.DataProvider) (val float64, err error) {
-	var ival any
-	if ival, err = utils.DPDynamicInterface(sum.FieldName, ev); err != nil {
+// connStatusToFloat converts connection status strings to numeric values for *sum metrics.
+// This allows sending status as strings in events while computing numeric sums:
+//   - "UP" returns 1 (connection established)
+//   - "DOWN" returns -1 (connection closed)
+//   - "DUPLICATE" returns 0 (connection already exists, no change)
+func connStatusToFloat(v string) (float64, bool) {
+	switch v {
+	case utils.ConnStatusUp:
+		return 1, true
+	case utils.ConnStatusDown:
+		return -1, true
+	case utils.ConnStatusDuplicate:
+		return 0, true
+	}
+	return 0, false
+}
+
+func (sum *StatSum) getFieldVal(ev utils.DataProvider) (float64, error) {
+	ival, err := utils.DPDynamicInterface(sum.FieldName, ev)
+	if err != nil {
 		if err == utils.ErrNotFound {
 			err = utils.ErrPrefix(err, sum.FieldName)
 		}
-		return
-	} else if val, err = utils.IfaceAsFloat64(ival); err != nil {
-		return
+		return 0, err
 	}
-	return
+
+	// Check for connection status strings before numeric conversion.
+	if str, ok := ival.(string); ok {
+		if v, isConnStatus := connStatusToFloat(str); isConnStatus {
+			return v, nil
+		}
+	}
+
+	return utils.IfaceAsFloat64(ival)
 }
 
 func (sum *StatSum) AddEvent(evID string, ev utils.DataProvider) (err error) {
