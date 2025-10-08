@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ips
 
 import (
+	"fmt"
+	"net/netip"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -553,5 +556,270 @@ func TestFindPoolByID(t *testing.T) {
 	result = findPoolByID(nilPools, "pool1")
 	if result != nil {
 		t.Errorf("expected nil for nil slice, got %+v", result)
+	}
+}
+
+func TestIPsReload(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.IPsCfg().StoreInterval = 10 * time.Millisecond
+
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	svc := NewIPService(dm, cfg, fltrs, connMgr)
+
+	ctx := &context.Context{}
+
+	numAlloc := 5
+	for i := 1; i <= numAlloc; i++ {
+		poolAlloc := &utils.PoolAllocation{
+			PoolID:  fmt.Sprintf("pool%d", i),
+			Address: netip.MustParseAddr(fmt.Sprintf("192.168.1.%d", 10+i)),
+			Time:    time.Now(),
+		}
+
+		ipAlloc := &utils.IPAllocations{
+			Tenant: "cgrates.org",
+			ID:     fmt.Sprintf("alloc%d", i),
+			Allocations: map[string]*utils.PoolAllocation{
+				fmt.Sprintf("alloc%d", i): poolAlloc,
+			},
+		}
+
+		engine.Cache.Set(ctx, utils.CacheIPAllocations, ipAlloc.ID, ipAlloc, nil, true, utils.NonTransactional)
+		svc.storedIPs.Add(ipAlloc.ID)
+	}
+
+	go svc.runBackup(ctx)
+	time.Sleep(20 * time.Millisecond)
+
+	go func() {
+		time.Sleep(30 * time.Millisecond)
+		svc.Reload(ctx)
+	}()
+
+	select {
+	case <-time.After(500 * time.Millisecond):
+		t.Fatalf("timeout waiting for Reload to finish")
+	case <-time.After(100 * time.Millisecond):
+		if svc.stopBackup == nil {
+			t.Errorf("expected stopBackup reinitialized, got nil")
+		}
+		if svc.loopStopped == nil {
+			t.Errorf("expected loopStopped reinitialized, got nil")
+		}
+
+		for i := 1; i <= numAlloc; i++ {
+			id := fmt.Sprintf("alloc%d", i)
+			allocIf, ok := engine.Cache.Get(utils.CacheIPAllocations, id)
+			if !ok || allocIf == nil {
+				t.Errorf("expected IPAllocations %q to be saved in cache, got nil", id)
+				continue
+			}
+
+			alloc := allocIf.(*utils.IPAllocations)
+			if alloc.ID != id {
+				t.Errorf("expected IPAllocations ID %q, got %q", id, alloc.ID)
+			}
+
+			pa, exists := alloc.Allocations[id]
+			if !exists {
+				t.Errorf("expected PoolAllocation %q to exist", id)
+			} else if pa.Address.String() != fmt.Sprintf("192.168.1.%d", 10+i) {
+				t.Errorf("expected PoolAllocation address 192.168.1.%d, got %s", 10+i, pa.Address.String())
+			}
+		}
+	}
+}
+
+func TestIPsShutdown(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.IPsCfg().StoreInterval = 10 * time.Millisecond
+
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	svc := NewIPService(dm, cfg, fltrs, connMgr)
+
+	ctx := &context.Context{}
+
+	poolAlloc := &utils.PoolAllocation{
+		PoolID:  "pool1",
+		Address: netip.MustParseAddr("192.168.1.10"),
+		Time:    time.Now(),
+	}
+
+	ipAlloc := &utils.IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "alloc1",
+		Allocations: map[string]*utils.PoolAllocation{
+			"alloc1": poolAlloc,
+		},
+	}
+
+	engine.Cache.Set(ctx, utils.CacheIPAllocations, ipAlloc.ID, ipAlloc, nil, true, utils.NonTransactional)
+
+	svc.storedIPsMux.Lock()
+	svc.storedIPs.Add(ipAlloc.ID)
+	svc.storedIPsMux.Unlock()
+
+	svc.Shutdown(ctx)
+
+	allocIf, ok := engine.Cache.Get(utils.CacheIPAllocations, ipAlloc.ID)
+	if !ok || allocIf == nil {
+		t.Errorf("expected IPAllocations %q to be saved in cache, got nil", ipAlloc.ID)
+	} else {
+		alloc := allocIf.(*utils.IPAllocations)
+		if alloc.ID != ipAlloc.ID {
+			t.Errorf("expected IPAllocations ID %q, got %q", ipAlloc.ID, alloc.ID)
+		}
+		pa, exists := alloc.Allocations[ipAlloc.ID]
+		if !exists {
+			t.Errorf("expected PoolAllocation %q to exist", ipAlloc.ID)
+		} else if pa.Address.String() != "192.168.1.10" {
+			t.Errorf("expected PoolAllocation address 192.168.1.10, got %s", pa.Address.String())
+		}
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("expected panic when sending to closed stopBackup channel, but none occurred")
+		}
+	}()
+	svc.stopBackup <- struct{}{}
+}
+
+func TestIPsRunBackup(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	ctx := &context.Context{}
+
+	cfg.IPsCfg().StoreInterval = 0
+	svc := NewIPService(dm, cfg, fltrs, connMgr)
+
+	done1 := make(chan struct{})
+	go func() {
+		svc.runBackup(ctx)
+		close(done1)
+	}()
+
+	select {
+	case <-svc.loopStopped:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatalf("runBackup did not send to loopStopped when StoreInterval <= 0")
+	}
+	<-done1
+
+	cfg.IPsCfg().StoreInterval = 10 * time.Millisecond
+	svc2 := NewIPService(dm, cfg, fltrs, connMgr)
+
+	poolAlloc := &utils.PoolAllocation{
+		PoolID:  "pool1",
+		Address: netip.MustParseAddr("192.168.1.20"),
+		Time:    time.Now(),
+	}
+	ipAlloc := &utils.IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "alloc1",
+		Allocations: map[string]*utils.PoolAllocation{
+			"alloc1": poolAlloc,
+		},
+	}
+	engine.Cache.Set(ctx, utils.CacheIPAllocations, ipAlloc.ID, ipAlloc, nil, true, utils.NonTransactional)
+	svc2.storedIPs.Add(ipAlloc.ID)
+
+	done2 := make(chan struct{})
+	go func() {
+		svc2.runBackup(ctx)
+		close(done2)
+	}()
+
+	time.Sleep(20 * time.Millisecond)
+
+	close(svc2.stopBackup)
+
+	select {
+	case <-svc2.loopStopped:
+	case <-time.After(200 * time.Millisecond):
+		t.Fatalf("runBackup did not stop after receiving stopBackup signal")
+	}
+
+	allocIf, ok := engine.Cache.Get(utils.CacheIPAllocations, ipAlloc.ID)
+	if !ok || allocIf == nil {
+		t.Errorf("expected IPAllocations %q to be saved in cache, got nil", ipAlloc.ID)
+	} else {
+		alloc := allocIf.(*utils.IPAllocations)
+		if alloc.ID != ipAlloc.ID {
+			t.Errorf("expected IPAllocations ID %q, got %q", ipAlloc.ID, alloc.ID)
+		}
+		pa, exists := alloc.Allocations[ipAlloc.ID]
+		if !exists {
+			t.Errorf("expected PoolAllocation %q to exist", ipAlloc.ID)
+		} else if pa.Address.String() != "192.168.1.20" {
+			t.Errorf("expected PoolAllocation address 192.168.1.20, got %s", pa.Address.String())
+		}
+	}
+}
+
+func TestIPsStartLoop(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.IPsCfg().StoreInterval = 10 * time.Millisecond
+
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltrs := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	svc := NewIPService(dm, cfg, fltrs, connMgr)
+
+	ctx := &context.Context{}
+
+	poolAlloc := &utils.PoolAllocation{
+		PoolID:  "pool1",
+		Address: netip.MustParseAddr("192.168.1.10"),
+		Time:    time.Now(),
+	}
+
+	ipAlloc := &utils.IPAllocations{
+		Tenant: "cgrates.org",
+		ID:     "alloc1",
+		Allocations: map[string]*utils.PoolAllocation{
+			"alloc1": poolAlloc,
+		},
+	}
+
+	engine.Cache.Set(ctx, utils.CacheIPAllocations, ipAlloc.ID, ipAlloc, nil, true, utils.NonTransactional)
+	svc.storedIPs.Add(ipAlloc.ID)
+
+	svc.StartLoop(ctx)
+	time.Sleep(20 * time.Millisecond)
+
+	select {
+	case svc.stopBackup <- struct{}{}:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatalf("backup loop did not start")
+	}
+
+	select {
+	case <-svc.loopStopped:
+	case <-time.After(100 * time.Millisecond):
+		t.Fatalf("backup loop did not stop after signal")
+	}
+
+	allocIf, ok := engine.Cache.Get(utils.CacheIPAllocations, ipAlloc.ID)
+	if !ok || allocIf == nil {
+		t.Errorf("expected IPAllocations to be saved in cache, got nil")
+	} else if alloc := allocIf.(*utils.IPAllocations); alloc.ID != ipAlloc.ID {
+		t.Errorf("expected IPAllocations ID %q, got %q", ipAlloc.ID, alloc.ID)
+	} else {
+		if pa, exists := alloc.Allocations["alloc1"]; !exists {
+			t.Errorf("expected PoolAllocation 'alloc1' to exist")
+		} else if pa.Address.String() != "192.168.1.10" {
+			t.Errorf("expected PoolAllocation address 192.168.1.10, got %s", pa.Address.String())
+		}
 	}
 }
