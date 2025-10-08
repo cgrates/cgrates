@@ -57,7 +57,7 @@ func TestERsNewERService(t *testing.T) {
 		rdrEvents: make(chan *erEvent),
 		rdrErr:    make(chan error),
 	}
-	rcv := NewERService(cfg, fltrS, nil)
+	rcv := NewERService(nil, cfg, fltrS, nil)
 
 	if !reflect.DeepEqual(expected.cfg, rcv.cfg) {
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.cfg, rcv.cfg)
@@ -69,7 +69,7 @@ func TestERsNewERService(t *testing.T) {
 func TestERsAddReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fltrS := &engine.FilterS{}
-	erS := NewERService(cfg, fltrS, nil)
+	erS := NewERService(nil, cfg, fltrS, nil)
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = utils.MetaFileCSV
 	reader.ID = "file_reader"
@@ -93,7 +93,7 @@ func TestERsListenAndServeErr(t *testing.T) {
 		{},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	stopChan := make(chan struct{}, 1)
 	cfgRldChan := make(chan struct{}, 1)
 	err := srv.ListenAndServe(stopChan, cfgRldChan)
@@ -107,7 +107,7 @@ func TestERsProcessEventErr(t *testing.T) {
 		{},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{}
 	cgrEvent := &utils.CGREvent{}
 	err := srv.processEvent(cgrEvent, rdrCfg)
@@ -122,7 +122,7 @@ func TestERsCloseAllRdrs(t *testing.T) {
 		{},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	srv.stopLsn[""] = make(chan struct{}, 1)
 	srv.closeAllRdrs()
 }
@@ -134,7 +134,7 @@ func TestERsListenAndServeRdrErr(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	stopChan := make(chan struct{}, 1)
 	cfgRldChan := make(chan struct{}, 1)
 	srv.rdrErr = make(chan error, 1)
@@ -154,7 +154,7 @@ func TestERsListenAndServeStopchan(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	stopChan := make(chan struct{}, 1)
 	cfgRldChan := make(chan struct{}, 1)
 	stopChan <- struct{}{}
@@ -173,7 +173,7 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	stopChan := make(chan struct{}, 1)
 	cfgRldChan := make(chan struct{}, 1)
 	srv.rdrErr = make(chan error, 1)
@@ -200,7 +200,7 @@ func TestERsListenAndServeCfgRldChan(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	stopChan := make(chan struct{}, 1)
 	cfgRldChan := make(chan struct{}, 1)
 	srv.rdrErr = make(chan error, 1)
@@ -224,7 +224,7 @@ func TestERsListenAndServeCfgRldChan2(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	exp := &CSVFileER{
 		cgrCfg: cfg,
 		cfgIdx: 0,
@@ -258,7 +258,7 @@ func TestERsListenAndServeCfgRldChan3(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	exp := &CSVFileER{
 		cgrCfg: cfg,
 		cfgIdx: 0,
@@ -291,7 +291,7 @@ func TestERsListenAndServeCfgRldChan4(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	exp := &CSVFileER{
 		cgrCfg: cfg,
 		cfgIdx: 0,
@@ -326,7 +326,7 @@ func TestERsListenAndServeCfgRldChan5(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	exp := &CSVFileER{
 		cgrCfg: cfg,
 	}
@@ -360,7 +360,7 @@ func TestERsListenAndServeCfgRldChan6(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	exp := &CSVFileER{
 		cgrCfg: cfg,
 		cfgIdx: 0,
@@ -400,7 +400,7 @@ func TestERsProcessEvent(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaLog: map[string][]string{
@@ -423,7 +423,7 @@ func TestERsProcessEvent2(t *testing.T) {
 		},
 	}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaDryRun: map[string][]string{
@@ -447,7 +447,7 @@ func TestERsProcessEvent3(t *testing.T) {
 	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaEvent: map[string][]string{},
@@ -474,7 +474,7 @@ func TestERsProcessEvent4(t *testing.T) {
 	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaAuthorize: map[string][]string{},
@@ -501,7 +501,7 @@ func TestERsProcessEvent5(t *testing.T) {
 	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaTerminate: map[string][]string{},
@@ -528,7 +528,7 @@ func TestERsProcessEvent6(t *testing.T) {
 	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaInitiate: map[string][]string{},
@@ -554,7 +554,7 @@ func TestERsProcessEvent7(t *testing.T) {
 	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaUpdate: map[string][]string{},
@@ -580,7 +580,7 @@ func TestERsProcessEvent8(t *testing.T) {
 	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaMessage: map[string][]string{},
@@ -607,7 +607,7 @@ func TestERsProcessEvent9(t *testing.T) {
 	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaCDRs: map[string][]string{},
@@ -634,7 +634,7 @@ func TestERsProcessEvent10(t *testing.T) {
 	}
 	cfg.ERsCfg().SessionSConns = []string{}
 	fltrS := &engine.FilterS{}
-	srv := NewERService(cfg, fltrS, nil)
+	srv := NewERService(nil, cfg, fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaMessage:  map[string][]string{},
@@ -688,7 +688,7 @@ func TestERsProcessEvent11(t *testing.T) {
 	clientChan <- testMockClient
 	connMng := engine.NewConnManager(cfg)
 	connMng.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), utils.SessionSv1, clientChan)
-	srv := NewERService(cfg, fltrS, connMng)
+	srv := NewERService(nil, cfg, fltrS, connMng)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
 			utils.MetaMessage: map[string][]string{},

@@ -34,7 +34,7 @@ type EventReader interface {
 
 // NewEventReader instantiates the event reader based on configuration at index
 func NewEventReader(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, dm *engine.DataManager) (EventReader, error) {
 	switch cfg.ERsCfg().Readers[cfgIdx].Type {
 	case utils.MetaFileCSV:
 		return NewCSVFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
@@ -45,7 +45,7 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int, rdrEvents, partialEvents 
 	case utils.MetaKafkajsonMap:
 		return NewKafkaER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaSQL:
-		return NewSQLEventReader(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
+		return NewSQLEventReader(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit, dm)
 	case utils.MetaFileJSON:
 		return NewJSONFileER(cfg, cfgIdx, rdrEvents, partialEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaAMQPjsonMap:

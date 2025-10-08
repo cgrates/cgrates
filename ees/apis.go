@@ -121,6 +121,9 @@ func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEe
 		}
 		go func(evict, sync bool, ee EventExporter) {
 			if err := exportEventWithExporter(ctx, ee, eeS.connMgr, cgrEv.CGREvent, evict, eeS.cfg, eeS.fltrS, cgrEv.Tenant); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Exporter <%s> error : <%s>",
+						utils.EEs, ee.Cfg().ID, err.Error()))
 				withErr = true
 			}
 			if sync {

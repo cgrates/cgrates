@@ -20,6 +20,7 @@ package ers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/url"
@@ -47,12 +48,13 @@ const (
 // NewSQLEventReader return a new sql event reader
 func NewSQLEventReader(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
-	fltrS *engine.FilterS, rdrExit chan struct{}) (EventReader, error) {
+	fltrS *engine.FilterS, rdrExit chan struct{}, dm *engine.DataManager) (EventReader, error) {
 
 	rdr := &SQLEventReader{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
+		dm:            dm,
 		rdrEvents:     rdrEvents,
 		partialEvents: partialEvents,
 		rdrExit:       rdrExit,
@@ -76,10 +78,13 @@ type SQLEventReader struct {
 	cgrCfg *config.CGRConfig
 	cfgIdx int // index of config instance within ERsCfg.Readers
 	fltrS  *engine.FilterS
+	dm     *engine.DataManager
 
-	connString string
-	connType   string
-	tableName  string
+	connString  string
+	connType    string
+	tableName   string
+	dbFilters   []string // filters converted to SQL WHERE conditions from reader config filters
+	lazyFilters []string // filters used when processing reader events
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -135,20 +140,56 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 			return
 		}
 	}
+	var filtersObjList []*engine.Filter // List of filter objects from rdr.Config().Filters, received from DB
+	for _, fltrID := range rdr.Config().Filters {
+		if resultFilter, err := rdr.dm.GetFilter(context.TODO(), config.CgrConfig().GeneralCfg().DefaultTenant, fltrID, true, false, utils.NonTransactional); err != nil {
+			rdr.rdrErr <- err
+			return
+		} else {
+			filtersObjList = append(filtersObjList, resultFilter)
+		}
+	}
+	for _, filterObj := range filtersObjList { // seperate filters used for WHERE clause from other filters, and build query conditions out of them
+		if err := engine.CheckFilter(filterObj); err != nil {
+			rdr.rdrErr <- err
+			return
+		}
+		var lazyFltrPopulated bool // Track if a lazyFilter is already populated by the previous filterObj.Rules, so we dont store the same lazy filter more than once
+		for _, rule := range filterObj.Rules {
+			if strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep) { // convert filter to WHERE condition only on filters with ~*req.
+				rdr.dbFilters = append(rdr.dbFilters, strings.Join(rule.FilterToSQLQuery(), " OR "))
+				continue
+			}
+			// If not used in the WHERE condition, put the filter in rdr.lazyFilters
+			if !lazyFltrPopulated {
+				rdr.lazyFilters = append(rdr.lazyFilters, filterObj.ID)
+				lazyFltrPopulated = true
+			}
+		}
+	}
+	selectWhereQuery := strings.Join(rdr.dbFilters, " AND ") // the whole WHERE query gotten from filters
 	tm := time.NewTimer(0)
 	for {
-		rows, err := db.Table(rdr.tableName).Select(utils.Meta).Rows()
+		tx := db.Table(rdr.tableName).Select(utils.Meta)         // Select everything from the table
+		if err := tx.Where(selectWhereQuery).Error; err != nil { // apply WHERE conditions to the select if any
+			rdr.rdrErr <- err
+			return
+		}
+		if rdr.Config().Opts.SQLBatchSize != nil && *rdr.Config().Opts.SQLBatchSize > 0 {
+			tx.Limit(*rdr.Config().Opts.SQLBatchSize) // limit how much can be selected per iteration
+		}
+		rows, err := tx.Rows() // get all rows selected
 		if err != nil {
 			rdr.rdrErr <- err
 			return
 		}
-		colNames, err := rows.Columns()
+		colNames, err := rows.Columns() // get column names from rows selected
 		if err != nil {
 			rdr.rdrErr <- err
 			rows.Close()
 			return
 		}
-		for rows.Next() {
+		for rows.Next() { // iterate on each row
 			select {
 			case <-rdr.rdrExit:
 				utils.Logger.Info(
@@ -164,64 +205,81 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 				return
 			}
 			if rdr.Config().ConcurrentReqs != -1 {
-				<-rdr.cap // do not try to read if the limit is reached
+				<-rdr.cap
 			}
-			columns := make([]any, len(colNames))
-			columnPointers := make([]any, len(colNames))
+
+			columns := make([]any, len(colNames))        // create a list of interfaces correlating to the columns selected
+			columnPointers := make([]any, len(colNames)) // create a list of interfaces pointing to columns to be gotten from rows.Scan
 			for i := range columns {
 				columnPointers[i] = &columns[i]
 			}
-			if err = rows.Scan(columnPointers...); err != nil {
-				rdr.rdrErr <- err
-				rows.Close()
-				return
-			}
-			msg := make(map[string]any)
-			fltr := make(map[string]string)
-			for i, colName := range colNames {
-				msg[colName] = columns[i]
-				if colName != createdAt && colName != updatedAt && colName != deletedAt { // ignore the sql colums for filter only
-					switch tm := columns[i].(type) { // also ignore the values that are zero for time
-					case time.Time:
-						if tm.IsZero() {
-							continue
-						}
-					case *time.Time:
-						if tm == nil || tm.IsZero() {
-							continue
-						}
-					case nil:
-						continue
-					}
-					fltr[colName] = utils.IfaceAsString(columns[i])
-				}
-			}
-			if err = db.Table(rdr.tableName).Delete(nil, fltr).Error; err != nil { // to ensure we don't read it again
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> deleting message %s error: %s",
-						utils.ERs, utils.ToJSON(msg), err.Error()))
+			if err = rows.Scan(columnPointers...); err != nil { // copy row values to their respective column
 				rdr.rdrErr <- err
 				rows.Close()
 				return
 			}
 
-			go func(msg map[string]any) {
-				if err := rdr.processMessage(msg); err != nil {
+			ev := make(map[string]any)         // event to be processed
+			for i, colName := range colNames { // populate ev from columns
+				ev[colName] = columns[i]
+				if colName == utils.OptsCfg || colName == utils.EventLowCase {
+					var temp map[string]any
+					// Unmarshal JSON data into the map[string]any,
+					// using the default unmarshaler.
+					if data, canCast := columns[i].([]byte); canCast {
+						err := json.Unmarshal(data, &temp)
+						if err != nil {
+							utils.Logger.Warning(
+								fmt.Sprintf("<%s> Failed to unmarshal for SQL column <%s> error: %s",
+									utils.ERs, colName, err.Error()))
+							rdr.rdrErr <- err
+							rows.Close()
+							return
+						}
+						ev[colName] = temp
+					}
+				}
+			}
+			sqlClauseVars := make(map[string]any) // map used for conditioning queries used for marking processed events
+			if rdr.Config().ProcessedPath == utils.MetaDelete {
+				if rdr.Config().Opts.SQLDeleteIndexedFields != nil {
+					for _, fieldName := range *rdr.Config().Opts.SQLDeleteIndexedFields {
+						if _, has := ev[fieldName]; has && fieldName != createdAt &&
+							fieldName != updatedAt && fieldName != deletedAt { // ignore the sql colums for sqlWhereVars only
+							addValidFieldToSQLWhereVars(sqlClauseVars, fieldName, ev[fieldName])
+						}
+					}
+				}
+				if len(sqlClauseVars) == 0 {
+					for i, colName := range colNames {
+						if colName != createdAt && colName != updatedAt && colName != deletedAt { // ignore the sql colums for sqlWhereVars only
+							addValidFieldToSQLWhereVars(sqlClauseVars, colName, columns[i])
+						}
+					}
+				}
+				if err = db.Table(rdr.tableName).Delete(nil, sqlClauseVars).Error; err != nil { // to ensure we don't read it again
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> deleting message %s error: %s",
+							utils.ERs, utils.ToJSON(ev), err.Error()))
+					rdr.rdrErr <- err
+					rows.Close()
+					return
+				}
+			}
+			go func(ev map[string]any) {
+				if err := rdr.processMessage(ev); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> processing message %s error: %s",
-							utils.ERs, utils.ToJSON(msg), err.Error()))
+							utils.ERs, utils.ToJSON(ev), err.Error()))
 				}
 				if rdr.Config().ConcurrentReqs != -1 {
 					rdr.cap <- struct{}{}
 				}
-			}(msg)
+			}(ev)
 		}
 		rows.Close()
-		if rdr.Config().RunDelay < 0 {
-			return
-		}
-		tm.Reset(rdr.Config().RunDelay)
-		select {
+		tm.Reset(rdr.Config().RunDelay) // reset the timer to RunDelay
+		select {                        // wait for timer or rdrExit
 		case <-rdr.rdrExit:
 			tm.Stop()
 			utils.Logger.Info(
@@ -233,17 +291,37 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	}
 }
 
-func (rdr *SQLEventReader) processMessage(msg map[string]any) (err error) {
+// Helper function to add valid time and non-time values to the sqlWhereVars map
+func addValidFieldToSQLWhereVars(sqlWhereVars map[string]any, fieldName string, value any) {
+	switch dateTimeCol := value.(type) {
+	case time.Time:
+		if dateTimeCol.IsZero() {
+			return
+		}
+		sqlWhereVars[fieldName] = value
+	case *time.Time:
+		if dateTimeCol == nil || dateTimeCol.IsZero() {
+			return
+		}
+		sqlWhereVars[fieldName] = value
+	case nil:
+		return
+	default:
+		sqlWhereVars[fieldName] = utils.IfaceAsString(value)
+	}
+}
+
+func (rdr *SQLEventReader) processMessage(ev map[string]any) (err error) {
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaReaderID: utils.NewLeafNode(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].ID)}}
 	agReq := agents.NewAgentRequest(
-		utils.MapStorage(msg), reqVars,
+		utils.MapStorage(ev), reqVars,
 		nil, nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.fltrS, nil) // create an AgentRequest
 	var pass bool
-	if pass, err = rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
+	if pass, err = rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.lazyFilters,
 		agReq); err != nil || !pass {
 		return
 	}
@@ -255,8 +333,24 @@ func (rdr *SQLEventReader) processMessage(msg map[string]any) (err error) {
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
 		rdrEv = rdr.partialEvents
 	}
+	rawEvent := make(map[string]any, len(ev))
+	if len(rdr.Config().EEsSuccessIDs) != 0 {
+		for key, value := range ev {
+			switch val := value.(type) {
+			case []byte: // convert byte values to string to comply with the INSERT INTO query on SQL exporter. Converted before sent to rpc call to avoid unnecesary decoding and converting on SQL exporter side
+				rawEvent[key] = string(val)
+				continue
+			case map[string]any:
+				var jsonb utils.JSONB = val
+				rawEvent[key] = jsonb
+				continue
+			}
+			rawEvent[key] = value
+		}
+	}
 	rdrEv <- &erEvent{
 		cgrEvent: cgrEv,
+		rawEvent: rawEvent,
 		rdrCfg:   rdr.Config(),
 	}
 	return
