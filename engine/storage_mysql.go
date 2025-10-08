@@ -44,7 +44,7 @@ func NewMySQLStorage(host, port, name, user, password string,
 	if mySQLStorage.DB, err = db.DB(); err != nil {
 		return nil, err
 	}
-	if mySQLStorage.DB.Ping(); err != nil {
+	if err := mySQLStorage.DB.Ping(); err != nil {
 		return nil, err
 	}
 	mySQLStorage.DB.SetMaxIdleConns(maxIdleConn)

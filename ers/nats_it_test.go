@@ -152,7 +152,7 @@ var natsCfg string = `{
 			"type": "*natsJSONMap",
 			"source_path": "%s",
 			"ees_success_ids": ["nats_processed"],
-			"flags": ["*dryRun"],
+			"flags": ["*dryRun", "*export"],
 			"opts": {
 				%s
 			},

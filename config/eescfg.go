@@ -192,6 +192,7 @@ type EventExporterOpts struct {
 	MYSQLDSNParams           map[string]string
 	SQLTableName             *string
 	SQLDBName                *string
+	SQLUpdateIndexedFields   *[]string
 	PgSSLMode                *string
 	KafkaTopic               *string
 	KafkaBatchSize           *int
@@ -376,6 +377,11 @@ func (eeOpts *EventExporterOpts) loadFromJSONCfg(jsnCfg *EventExporterOptsJson) 
 	}
 	if jsnCfg.SQLDBName != nil {
 		eeOpts.SQLDBName = jsnCfg.SQLDBName
+	}
+	if jsnCfg.SQLUpdateIndexedFields != nil {
+		uif := make([]string, len(*jsnCfg.SQLUpdateIndexedFields))
+		copy(uif, *jsnCfg.SQLUpdateIndexedFields)
+		eeOpts.SQLUpdateIndexedFields = &uif
 	}
 	if jsnCfg.PgSSLMode != nil {
 		eeOpts.PgSSLMode = jsnCfg.PgSSLMode
@@ -722,6 +728,11 @@ func (eeOpts *EventExporterOpts) Clone() *EventExporterOpts {
 		cln.SQLDBName = new(string)
 		*cln.SQLDBName = *eeOpts.SQLDBName
 	}
+	if eeOpts.SQLUpdateIndexedFields != nil {
+		idx := make([]string, len(*eeOpts.SQLUpdateIndexedFields))
+		copy(idx, *eeOpts.SQLUpdateIndexedFields)
+		cln.SQLUpdateIndexedFields = &idx
+	}
 	if eeOpts.PgSSLMode != nil {
 		cln.PgSSLMode = new(string)
 		*cln.PgSSLMode = *eeOpts.PgSSLMode
@@ -1049,6 +1060,11 @@ func (optsEes *EventExporterOpts) AsMapInterface() map[string]any {
 	if optsEes.SQLDBName != nil {
 		opts[utils.SQLDBNameOpt] = *optsEes.SQLDBName
 	}
+	if optsEes.SQLUpdateIndexedFields != nil {
+		updateIndexedFields := make([]string, len(*optsEes.SQLUpdateIndexedFields))
+		copy(updateIndexedFields, *optsEes.SQLUpdateIndexedFields)
+		opts[utils.SQLUpdateIndexedFieldsOpt] = updateIndexedFields
+	}
 	if optsEes.KafkaTopic != nil {
 		opts[utils.KafkaTopic] = *optsEes.KafkaTopic
 	}
@@ -1191,6 +1207,7 @@ type EventExporterOptsJson struct {
 	MYSQLDSNParams              map[string]string `json:"mysqlDSNParams"`
 	SQLTableName                *string           `json:"sqlTableName"`
 	SQLDBName                   *string           `json:"sqlDBName"`
+	SQLUpdateIndexedFields      *[]string         `json:"sqlUpdateIndexedFields"`
 	PgSSLMode                   *string           `json:"pgSSLMode"`
 	KafkaTopic                  *string           `json:"kafkaTopic"`
 	KafkaBatchSize              *int              `json:"kafkaBatchSize"`
@@ -1364,6 +1381,20 @@ func diffEventExporterOptsJsonCfg(d *EventExporterOptsJson, v1, v2 *EventExporte
 		}
 	} else {
 		d.SQLDBName = nil
+	}
+	if v2.SQLUpdateIndexedFields != nil {
+		equal := true
+		for i, val := range *v2.SQLUpdateIndexedFields {
+			if (*v1.SQLUpdateIndexedFields)[i] != val {
+				equal = false
+				break
+			}
+		}
+		if v1.SQLUpdateIndexedFields == nil || !equal {
+			d.SQLUpdateIndexedFields = v2.SQLUpdateIndexedFields
+		} else {
+			d.SQLUpdateIndexedFields = nil
+		}
 	}
 	if v2.PgSSLMode != nil {
 		if v1.PgSSLMode == nil ||

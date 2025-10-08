@@ -1337,12 +1337,6 @@ func TestConfigSanityEventExporter(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.eesCfg.Exporters[0].Type = utils.MetaSQL
-	expected = "<EEs> empty content fields for exporter with ID: "
-	if err := cfg.CheckConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
 	cfg.eesCfg.Exporters[0].Type = utils.MetaHTTPPost
 	cfg.eesCfg.Exporters[0].Fields[0].Path = "~Field1..Field2[0]"
 	expected = "<EEs> Empty field path  for ~Field1..Field2[0] at Path"
