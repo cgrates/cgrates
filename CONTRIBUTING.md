@@ -1,6 +1,6 @@
 ## Contributor Agreement (required for pull requests)
 
-While the CGRateS project is open source under the GPLv3 license, contributions
+While the CGRateS project is open source under the AGPLv3 license, contributions
 back to this project which contain code must be made available to ITsysCOM GmbH under the terms of the MIT license.
 
 ### What does this mean?
