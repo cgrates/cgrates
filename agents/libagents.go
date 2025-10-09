@@ -270,7 +270,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			utils.RequestProcessorID: reqProcessor.ID,
 		},
 		APIOpts: map[string]any{
-			utils.MetaEventType: utils.ProcessTime,
+			utils.MetaEventType: utils.EventPerformanceReport,
 		},
 	}
 
