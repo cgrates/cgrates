@@ -293,6 +293,13 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		} else {
 			return time.Now().Add(tmStrTmp), nil
 		}
+	case strings.HasPrefix(tmStr, "-"):
+		tmStr = strings.TrimPrefix(tmStr, "-")
+		if tmStrTmp, err := time.ParseDuration(tmStr); err != nil {
+			return nilTime, err
+		} else {
+			return time.Now().Add(-tmStrTmp), nil
+		}
 	case utcFormat.MatchString(tmStr):
 		return time.ParseInLocation("2006-01-02T15:04:05", tmStr, loc)
 

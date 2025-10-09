@@ -1,0 +1,62 @@
+{
+
+"general": {
+	"reply_timeout": "10s",									
+	"default_timezone": "UTC"
+},
+
+"logger": {
+    "level": 7
+},
+
+"sessions": {
+	"enabled": true,
+},
+
+"ers": {
+	"enabled": true,
+	"readers": [
+		{
+			"id": "mysql",
+			"run_delay": "1m",
+			"type": "*sql",
+			"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"opts": {
+				"sqlDBName":"cgrates2",
+				"sqlTableName":"cdrs",
+				"sqlBatchSize": 1,
+			},
+			"start_delay": "500ms", // wait for db to be populated before starting reader
+			"flags": ["*dryRun"],
+			"processed_path": "*delete",
+			"tenant": "cgrates.org",
+			"filters": [
+					"*gt:~*req.event.AnswerTime:-168h", // dont process cdrs with answer_time older than 7 days ago
+					"FLTR_SQL_RatingID", // "*eq:~*req.opts.*rateSCost.CostIntervals[0].Increments[0].RateID:RateID",
+					"*string:~*vars.*readerID:mysql",
+					"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
+			],
+			"fields":[
+				{"tag": "*cdrID", "path": "*opts.*cdrID", "type": "*variable", "value": "~*req.opts.*cdrID", "mandatory": true},
+				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.event.ToR", "mandatory": true},
+				{"tag": "*originID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.opts.*originID", "mandatory": true},
+				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.event.RequestType", "mandatory": true},
+				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.tenant", "mandatory": true},
+				{"tag": "Category", "path": "*cgreq.Category", "type": "*variable", "value": "~*req.event.Category", "mandatory": true},
+				{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.event.Account", "mandatory": true},
+				{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.event.Subject", "mandatory": true},
+				{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.event.Destination", "mandatory": true},
+				{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.event.SetupTime", "mandatory": true},
+				{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.event.AnswerTime", "mandatory": true},
+				{"tag": "RateSCost", "path": "*opts.*rateSCost", "type": "*variable", "value": "~*req.opts.*rateSCost", "mandatory": true},
+				{"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.event.Usage", "mandatory": true},
+			]
+		}
+	]
+},
+
+"admins": {
+	"enabled": true
+}
+
+}

@@ -485,6 +485,11 @@ func setupLoader(t testing.TB, tpPath, cfgPath string) {
 	if err := os.WriteFile(filePath, []byte(loadersJSON), 0644); err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		if err := os.Remove(filepath.Join(cfgPath, "zzz_dynamic_loader.json")); err != nil {
+			t.Error(err)
+		}
+	})
 }
 
 // loadCSVs loads tariff plan data from CSV files. The CSV files are created

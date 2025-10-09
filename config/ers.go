@@ -178,6 +178,8 @@ type EventReaderOpts struct {
 	KafkaSkipTLSVerify       *bool
 	SQLDBName                *string
 	SQLTableName             *string
+	SQLBatchSize             *int
+	SQLDeleteIndexedFields   *[]string
 	PgSSLMode                *string
 	AWSRegion                *string
 	AWSKey                   *string
@@ -216,6 +218,7 @@ type EventReaderCfg struct {
 	ProcessedPath        string
 	Tenant               utils.RSRParsers
 	Timezone             string
+	EEsIDs               []string
 	EEsSuccessIDs        []string
 	EEsFailedIDs         []string
 	Filters              []string
@@ -307,6 +310,14 @@ func (erOpts *EventReaderOpts) loadFromJSONCfg(jsnCfg *EventReaderOptsJson) (err
 	}
 	if jsnCfg.SQLTableName != nil {
 		erOpts.SQLTableName = jsnCfg.SQLTableName
+	}
+	if jsnCfg.SQLBatchSize != nil {
+		erOpts.SQLBatchSize = jsnCfg.SQLBatchSize
+	}
+	if jsnCfg.SQLDeleteIndexedFields != nil {
+		dif := make([]string, len(*jsnCfg.SQLDeleteIndexedFields))
+		copy(dif, *jsnCfg.SQLDeleteIndexedFields)
+		erOpts.SQLDeleteIndexedFields = &dif
 	}
 	if jsnCfg.PgSSLMode != nil {
 		erOpts.PgSSLMode = jsnCfg.PgSSLMode
@@ -405,6 +416,10 @@ func (er *EventReaderCfg) loadFromJSONCfg(jsnCfg *EventReaderJsonCfg, msgTemplat
 	}
 	if jsnCfg.Timezone != nil {
 		er.Timezone = *jsnCfg.Timezone
+	}
+	if jsnCfg.EEsIds != nil {
+		er.EEsIDs = make([]string, len(*jsnCfg.EEsIds))
+		copy(er.EEsIDs, *jsnCfg.EEsIds)
 	}
 	if jsnCfg.EEsSuccessIDs != nil {
 		er.EEsSuccessIDs = make([]string, len(*jsnCfg.EEsSuccessIDs))
@@ -562,6 +577,15 @@ func (erOpts *EventReaderOpts) Clone() *EventReaderOpts {
 		cln.SQLTableName = new(string)
 		*cln.SQLTableName = *erOpts.SQLTableName
 	}
+	if erOpts.SQLBatchSize != nil {
+		cln.SQLBatchSize = new(int)
+		*cln.SQLBatchSize = *erOpts.SQLBatchSize
+	}
+	if erOpts.SQLDeleteIndexedFields != nil {
+		idx := make([]string, len(*erOpts.SQLDeleteIndexedFields))
+		copy(idx, *erOpts.SQLDeleteIndexedFields)
+		cln.SQLDeleteIndexedFields = &idx
+	}
 	if erOpts.PgSSLMode != nil {
 		cln.PgSSLMode = new(string)
 		*cln.PgSSLMode = *erOpts.PgSSLMode
@@ -649,6 +673,7 @@ func (er EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		ProcessedPath:        er.ProcessedPath,
 		Tenant:               er.Tenant.Clone(),
 		Timezone:             er.Timezone,
+		EEsIDs:               slices.Clone(er.EEsIDs),
 		EEsSuccessIDs:        slices.Clone(er.EEsSuccessIDs),
 		EEsFailedIDs:         slices.Clone(er.EEsFailedIDs),
 		Filters:              slices.Clone(er.Filters),
@@ -754,6 +779,14 @@ func (er *EventReaderCfg) AsMapInterface() (initialMP map[string]any) {
 	if er.Opts.SQLTableName != nil {
 		opts[utils.SQLTableNameOpt] = *er.Opts.SQLTableName
 	}
+	if er.Opts.SQLBatchSize != nil {
+		opts[utils.SQLBatchSize] = *er.Opts.SQLBatchSize
+	}
+	if er.Opts.SQLDeleteIndexedFields != nil {
+		deleteIndexedFields := make([]string, len(*er.Opts.SQLDeleteIndexedFields))
+		copy(deleteIndexedFields, *er.Opts.SQLDeleteIndexedFields)
+		opts[utils.SQLDeleteIndexedFieldsOpt] = deleteIndexedFields
+	}
 	if er.Opts.PgSSLMode != nil {
 		opts[utils.PgSSLModeCfg] = *er.Opts.PgSSLMode
 	}
@@ -825,6 +858,9 @@ func (er *EventReaderCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.MaxReconnectIntervalCfg: "0",
 		utils.OptsCfg:                 opts,
 	}
+	if er.EEsIDs != nil {
+		initialMP[utils.EEsIDsCfg] = er.EEsIDs
+	}
 	if er.EEsSuccessIDs != nil {
 		initialMP[utils.EEsSuccessIDsCfg] = er.EEsSuccessIDs
 	}
@@ -872,48 +908,50 @@ func (er *EventReaderCfg) AsMapInterface() (initialMP map[string]any) {
 }
 
 type EventReaderOptsJson struct {
-	PartialPath              *string `json:"partialPath"`
-	PartialCacheAction       *string `json:"partialCacheAction"`
-	PartialOrderField        *string `json:"partialOrderField"`
-	PartialCSVFieldSeparator *string `json:"partialcsvFieldSeparator"`
-	CSVRowLength             *int    `json:"csvRowLength"`
-	CSVFieldSeparator        *string `json:"csvFieldSeparator"`
-	CSVHeaderDefineChar      *string `json:"csvHeaderDefineChar"`
-	CSVLazyQuotes            *bool   `json:"csvLazyQuotes"`
-	XMLRootPath              *string `json:"xmlRootPath"`
-	AMQPQueueID              *string `json:"amqpQueueID"`
-	AMQPUsername             *string `json:"amqpUsername"`
-	AMQPPassword             *string `json:"amqpPassword"`
-	AMQPConsumerTag          *string `json:"amqpConsumerTag"`
-	AMQPExchange             *string `json:"amqpExchange"`
-	AMQPExchangeType         *string `json:"amqpExchangeType"`
-	AMQPRoutingKey           *string `json:"amqpRoutingKey"`
-	KafkaTopic               *string `json:"kafkaTopic"`
-	KafkaGroupID             *string `json:"kafkaGroupID"`
-	KafkaMaxWait             *string `json:"kafkaMaxWait"`
-	KafkaTLS                 *bool   `json:"kafkaTLS"`
-	KafkaCAPath              *string `json:"kafkaCAPath"`
-	KafkaSkipTLSVerify       *bool   `json:"kafkaSkipTLSVerify"`
-	SQLDBName                *string `json:"sqlDBName"`
-	SQLTableName             *string `json:"sqlTableName"`
-	PgSSLMode                *string `json:"pgSSLMode"`
-	AWSRegion                *string `json:"awsRegion"`
-	AWSKey                   *string `json:"awsKey"`
-	AWSSecret                *string `json:"awsSecret"`
-	AWSToken                 *string `json:"awsToken"`
-	SQSQueueID               *string `json:"sqsQueueID"`
-	S3BucketID               *string `json:"s3BucketID"`
-	NATSJetStream            *bool   `json:"natsJetStream"`
-	NATSConsumerName         *string `json:"natsConsumerName"`
-	NATSStreamName           *string `json:"natsStreamName"`
-	NATSSubject              *string `json:"natsSubject"`
-	NATSQueueID              *string `json:"natsQueueID"`
-	NATSJWTFile              *string `json:"natsJWTFile"`
-	NATSSeedFile             *string `json:"natsSeedFile"`
-	NATSCertificateAuthority *string `json:"natsCertificateAuthority"`
-	NATSClientCertificate    *string `json:"natsClientCertificate"`
-	NATSClientKey            *string `json:"natsClientKey"`
-	NATSJetStreamMaxWait     *string `json:"natsJetStreamMaxWait"`
+	PartialPath              *string   `json:"partialPath"`
+	PartialCacheAction       *string   `json:"partialCacheAction"`
+	PartialOrderField        *string   `json:"partialOrderField"`
+	PartialCSVFieldSeparator *string   `json:"partialcsvFieldSeparator"`
+	CSVRowLength             *int      `json:"csvRowLength"`
+	CSVFieldSeparator        *string   `json:"csvFieldSeparator"`
+	CSVHeaderDefineChar      *string   `json:"csvHeaderDefineChar"`
+	CSVLazyQuotes            *bool     `json:"csvLazyQuotes"`
+	XMLRootPath              *string   `json:"xmlRootPath"`
+	AMQPQueueID              *string   `json:"amqpQueueID"`
+	AMQPUsername             *string   `json:"amqpUsername"`
+	AMQPPassword             *string   `json:"amqpPassword"`
+	AMQPConsumerTag          *string   `json:"amqpConsumerTag"`
+	AMQPExchange             *string   `json:"amqpExchange"`
+	AMQPExchangeType         *string   `json:"amqpExchangeType"`
+	AMQPRoutingKey           *string   `json:"amqpRoutingKey"`
+	KafkaTopic               *string   `json:"kafkaTopic"`
+	KafkaGroupID             *string   `json:"kafkaGroupID"`
+	KafkaMaxWait             *string   `json:"kafkaMaxWait"`
+	KafkaTLS                 *bool     `json:"kafkaTLS"`
+	KafkaCAPath              *string   `json:"kafkaCAPath"`
+	KafkaSkipTLSVerify       *bool     `json:"kafkaSkipTLSVerify"`
+	SQLDBName                *string   `json:"sqlDBName"`
+	SQLTableName             *string   `json:"sqlTableName"`
+	SQLBatchSize             *int      `json:"sqlBatchSize"`
+	SQLDeleteIndexedFields   *[]string `json:"sqlDeleteIndexedFields"`
+	PgSSLMode                *string   `json:"pgSSLMode"`
+	AWSRegion                *string   `json:"awsRegion"`
+	AWSKey                   *string   `json:"awsKey"`
+	AWSSecret                *string   `json:"awsSecret"`
+	AWSToken                 *string   `json:"awsToken"`
+	SQSQueueID               *string   `json:"sqsQueueID"`
+	S3BucketID               *string   `json:"s3BucketID"`
+	NATSJetStream            *bool     `json:"natsJetStream"`
+	NATSConsumerName         *string   `json:"natsConsumerName"`
+	NATSStreamName           *string   `json:"natsStreamName"`
+	NATSSubject              *string   `json:"natsSubject"`
+	NATSQueueID              *string   `json:"natsQueueID"`
+	NATSJWTFile              *string   `json:"natsJWTFile"`
+	NATSSeedFile             *string   `json:"natsSeedFile"`
+	NATSCertificateAuthority *string   `json:"natsCertificateAuthority"`
+	NATSClientCertificate    *string   `json:"natsClientCertificate"`
+	NATSClientKey            *string   `json:"natsClientKey"`
+	NATSJetStreamMaxWait     *string   `json:"natsJetStreamMaxWait"`
 }
 
 // EventReaderSJsonCfg is the configuration of a single EventReader
@@ -927,6 +965,7 @@ type EventReaderJsonCfg struct {
 	ProcessedPath        *string               `json:"processed_path"`
 	Tenant               *string               `json:"tenant"`
 	Timezone             *string               `json:"timezone"`
+	EEsIds               *[]string             `json:"ees_ids"`
 	EEsSuccessIDs        *[]string             `json:"ees_success_ids"`
 	EEsFailedIDs         *[]string             `json:"ees_failed_ids"`
 	Filters              *[]string             `json:"filters"`
@@ -1135,6 +1174,28 @@ func diffEventReaderOptsJsonCfg(d *EventReaderOptsJson, v1, v2 *EventReaderOpts)
 	} else {
 		d.SQLTableName = nil
 	}
+	if v2.SQLBatchSize != nil {
+		if v1.SQLBatchSize == nil ||
+			*v1.SQLBatchSize != *v2.SQLBatchSize {
+			d.SQLBatchSize = v2.SQLBatchSize
+		}
+	} else {
+		d.SQLBatchSize = nil
+	}
+	if v2.SQLDeleteIndexedFields != nil {
+		equal := true
+		for i, val := range *v2.SQLDeleteIndexedFields {
+			if (*v1.SQLDeleteIndexedFields)[i] != val {
+				equal = false
+				break
+			}
+		}
+		if v1.SQLDeleteIndexedFields == nil || !equal {
+			d.SQLDeleteIndexedFields = v2.SQLDeleteIndexedFields
+		} else {
+			d.SQLDeleteIndexedFields = nil
+		}
+	}
 	if v2.PgSSLMode != nil {
 		if v1.PgSSLMode == nil ||
 			*v1.PgSSLMode != *v2.PgSSLMode {
@@ -1321,6 +1382,9 @@ func diffEventReaderJsonCfg(d *EventReaderJsonCfg, v1, v2 *EventReaderCfg) *Even
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
+	}
+	if !slices.Equal(v1.EEsIDs, v2.EEsIDs) {
+		d.EEsIds = &v2.EEsIDs
 	}
 	if !slices.Equal(v1.EEsSuccessIDs, v2.EEsSuccessIDs) {
 		d.EEsSuccessIDs = &v2.EEsSuccessIDs

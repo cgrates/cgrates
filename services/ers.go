@@ -55,6 +55,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
+			utils.DataDB,
 		},
 		registry, erS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -63,6 +64,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
+	dbs := srvDeps[utils.DataDB].(*DataDBService)
 
 	erS.mu.Lock()
 	defer erS.mu.Unlock()
@@ -71,7 +73,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	erS.stopChan = make(chan struct{})
 
 	// build the service
-	erS.ers = ers.NewERService(erS.cfg, fs.FilterS(), cms.ConnManager())
+	erS.ers = ers.NewERService(dbs.DataManager(), erS.cfg, fs.FilterS(), cms.ConnManager())
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shutdown)
 
 	srv, err := engine.NewServiceWithPing(erS.ers, utils.ErSv1, utils.V1Prfx)

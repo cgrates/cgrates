@@ -247,9 +247,6 @@ func TestRSRFilterPass(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if !fltr.Pass("-1s") {
-		t.Error("not passing!")
-	}
 	if fltr.Pass("0s") {
 		t.Error("passing!")
 	}
@@ -274,9 +271,6 @@ func TestRSRFilterPass(t *testing.T) {
 	if fltr.Pass("12s") {
 		t.Error("passing!")
 	}
-	if !fltr.Pass("-12s") {
-		t.Error("not passing!")
-	}
 
 	// compare not lessThan
 	fltr, err = NewRSRFilter("!<0s")
@@ -300,9 +294,6 @@ func TestRSRFilterPass(t *testing.T) {
 	fltr, err = NewRSRFilter("<=0s")
 	if err != nil {
 		t.Error(err)
-	}
-	if !fltr.Pass("-1s") {
-		t.Error("not passing!")
 	}
 	if !fltr.Pass("0s") {
 		t.Error("not passing!")

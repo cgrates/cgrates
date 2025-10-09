@@ -30,18 +30,18 @@ type CDR struct {
 	Tenant    string
 	Opts      map[string]any
 	Event     map[string]any
-	CreatedAt time.Time  `json:",omitempty"`
-	UpdatedAt time.Time  `json:",omitempty"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	DeletedAt *time.Time `json:",omitempty"`
 }
 
 type CDRSQLTable struct {
 	ID        int64 // this is used for incrementing while seting
 	Tenant    string
-	Opts      JSONB      `gorm:"type:jsonb"` //string
-	Event     JSONB      `gorm:"type:jsonb"` //string
-	CreatedAt time.Time  `json:",omitempty"`
-	UpdatedAt time.Time  `json:",omitempty"`
+	Opts      JSONB `gorm:"type:jsonb"` //string
+	Event     JSONB `gorm:"type:jsonb"` //string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	DeletedAt *time.Time `json:",omitempty"`
 }
 

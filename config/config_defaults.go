@@ -430,15 +430,16 @@ const CGRATES_CFG_JSON = `
 		{
 			"id": "*default",				// identifier of the EventReader profile
 			"type": "*none",				// reader type <*fileCSV>
-			"run_delay": "0",				// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+			"run_delay": "0",				// sleep interval in seconds between consecutive runs, "-1" to use automation via inotify; "0" to disable running all together; <""|$dur>
 			"start_delay": "0",                 // time to wait before an reader starts to run 	
 			"concurrent_requests": 1024,			// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "/var/spool/cgrates/ers/in",	// read data from this path
 			"processed_path": "/var/spool/cgrates/ers/out",	// move processed data here
 			"tenant": "",					// tenant used by import
 			"timezone": "",					// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-			// "ees_success_ids": [],			// ids of exporters used for moving the successfully processed event
-			// "ees_failed_ids": [],			// ids of exporters used for moving the unprocessed event
+			"ees_ids": [], 						// ids of exporters used for moving the processed event to EEs
+			"ees_success_ids": [],					// ids of exporters used for moving the raw event to EEs
+			"ees_failed_ids": [],					// ids of exporters used for moving the failed raw event to EEs
 			"filters": [],					// limit parsing based on the filters
 			"flags": [],					// flags to influence the event processing
 			"reconnects": -1,				// number of retries in case of connection lost
@@ -480,6 +481,8 @@ const CGRATES_CFG_JSON = `
 				// SQL
 				// "sqlDBName": "cgrates", 	// the name of the database from were the events are read
 				// "sqlTableName": "cdrs",	// the name of the table from were the events are read
+				// "sqlBatchSize: 0, 				// number of SQL rows that can be selected at a time. 0 or lower for unlimited
+				// "sqlDeleteIndexedFields": [],   		// list of fields to DELETE from the table
 				// "pgSSLMode": "disable",	// the ssl mode for postgres db
 
 				// SQS and S3
@@ -592,6 +595,7 @@ const CGRATES_CFG_JSON = `
 				// "sqlMaxIdleConns": 0,		// SQLMaxIdleConns    
 				// "sqlMaxOpenConns": 0,		// SQLMaxOpenConns
 				// "sqlConnMaxLifetime": "0",		// SQLConnMaxLifetime 
+				// "sqlUpdateIndexedFields": [], // list of field names used for indexing UPDATE queries from the table
 				// "mysqlDSNParams": {},                // DSN params
 
 
