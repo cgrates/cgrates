@@ -141,10 +141,6 @@ func TestDiamConnStats(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-
-		// TODO: Remove after updating go-diameter dependency.
-		time.Sleep(10 * time.Millisecond)
-
 		return client
 	}
 
