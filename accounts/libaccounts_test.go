@@ -916,3 +916,48 @@ func TestNewBalanceOperator(t *testing.T) {
 		t.Errorf("expected balance ID B3, got %s", bOp.balanceCfg().ID)
 	}
 }
+
+func TestBalanceLimit(t *testing.T) {
+	opts := map[string]any{
+		utils.MetaBalanceUnlimited: true,
+	}
+	limit, err := balanceLimit(opts)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if limit != nil {
+		t.Errorf("Expected nil limit for unlimited balance, got %+v", limit)
+	}
+
+	opts = map[string]any{
+		utils.MetaBalanceLimit: 123.45,
+	}
+	limit, err = balanceLimit(opts)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	expected := utils.NewDecimalFromFloat64(123.45)
+	if limit.String() != expected.String() {
+		t.Errorf("Expected %v, got %v", expected.String(), limit.String())
+	}
+
+	opts = map[string]any{
+		utils.MetaBalanceLimit: "invalid",
+	}
+	limit, err = balanceLimit(opts)
+	if err == nil || err.Error() != "unsupported *balanceLimit format" {
+		t.Errorf("Expected 'unsupported *balanceLimit format', got %v", err)
+	}
+	if limit != nil {
+		t.Errorf("Expected nil limit when error occurs, got %v", limit)
+	}
+
+	opts = map[string]any{}
+	limit, err = balanceLimit(opts)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if limit.String() != utils.NewDecimal(0, 0).String() {
+		t.Errorf("Expected default limit 0, got %v", limit.String())
+	}
+}

@@ -902,3 +902,123 @@ func TestAccountsAccountsForEvent(t *testing.T) {
 	}
 	engine.Cache = cacheInit
 }
+
+func TestV1GetAccount(t *testing.T) {
+	engine.Cache.Clear(nil)
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, cfg, nil)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{Tenant: "cgrates.org"},
+	}
+	var reply utils.Account
+
+	expected := "MANDATORY_IE_MISSING: [ID]"
+	err := accnts.V1GetAccount(context.Background(), arg, &reply)
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v, got %v", expected, err)
+	}
+
+	arg.TenantID.ID = "unknown_acc"
+	err = accnts.V1GetAccount(context.Background(), arg, &reply)
+	if err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected ErrNotFound, got %v", err)
+	}
+
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "acc1",
+	}
+	if err := dm.SetAccount(context.Background(), acc, false); err != nil {
+		t.Fatalf("failed to create test account: %v", err)
+	}
+
+	arg.TenantID.ID = "acc1"
+	err = accnts.V1GetAccount(context.Background(), arg, &reply)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if reply.ID != acc.ID || reply.Tenant != acc.Tenant {
+		t.Errorf("expected %+v, got %+v", acc, reply)
+	}
+}
+
+func TestV1RefundCharges(t *testing.T) {
+	engine.Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(dataDB, cfg, connMgr)
+	accnts := NewAccountS(cfg, &engine.FilterS{}, connMgr, dm)
+
+	ctx := context.Background()
+	var reply string
+
+	acc1 := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "acc1",
+		Balances: map[string]*utils.Balance{
+			"balance1": {ID: "balance1", Units: utils.NewDecimal(100, 0)},
+		},
+	}
+	acc2 := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "acc2",
+		Balances: map[string]*utils.Balance{
+			"balance2": {ID: "balance2", Units: utils.NewDecimal(50, 0)},
+		},
+	}
+
+	if err := dm.SetAccount(ctx, acc1, false); err != nil {
+		t.Fatalf("failed to create account1: %v", err)
+	}
+	if err := dm.SetAccount(ctx, acc2, false); err != nil {
+		t.Fatalf("failed to create account2: %v", err)
+	}
+
+	eventCharges := &utils.EventCharges{
+		Accounts: map[string]*utils.Account{
+			acc1.ID: acc1,
+			acc2.ID: acc2,
+		},
+		Charges: []*utils.ChargeEntry{
+			{ChargingID: "charge1"},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"charge1": {
+				AccountID: "acc1",
+				BalanceID: "balance1",
+				Units:     utils.NewDecimal(10, 0),
+			},
+		},
+	}
+
+	args := &utils.APIEventCharges{
+		Tenant:       "cgrates.org",
+		EventCharges: eventCharges,
+	}
+
+	if err := accnts.V1RefundCharges(ctx, args, &reply); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if reply != utils.OK {
+		t.Fatalf("expected reply OK, got %v", reply)
+	}
+
+	acc1After, _ := dm.GetAccount(ctx, acc1.Tenant, acc1.ID)
+	expected := utils.NewDecimal(110, 0)
+	if acc1After.Balances["balance1"].Units.Big.Cmp(expected.Big) != 0 {
+		t.Errorf("expected balance1 %v, got %v", expected, acc1After.Balances["balance1"].Units)
+	}
+
+	acc2After, _ := dm.GetAccount(ctx, acc2.Tenant, acc2.ID)
+	expected2 := utils.NewDecimal(50, 0)
+	if acc2After.Balances["balance2"].Units.Big.Cmp(expected2.Big) != 0 {
+		t.Errorf("expected balance2 %v, got %v", expected2, acc2After.Balances["balance2"].Units)
+	}
+}

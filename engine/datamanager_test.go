@@ -9514,3 +9514,219 @@ func TestDMResourcesUpdateResource(t *testing.T) {
 
 	dm.DataDB().Flush(utils.EmptyString)
 }
+
+func TestDMGetTrend(t *testing.T) {
+	var dm *DataManager
+	if _, err := dm.GetTrend(context.Background(), utils.CGRateSorg, "TrendNil", false, false, utils.NonTransactional); err != utils.ErrNoDatabaseConn {
+		t.Errorf("expected ErrNoDatabaseConn, got %v", err)
+	}
+
+	tmp := Cache
+	cfgtmp := config.CgrConfig()
+	defer func() {
+		Cache = tmp
+		config.SetCgrConfig(cfgtmp)
+	}()
+	Cache.Clear(nil)
+
+	cfg := config.NewDefaultCGRConfig()
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	cM := NewConnManager(cfg)
+	dm = NewDataManager(data, cfg, cM)
+
+	tntID := utils.ConcatenatedKey(utils.CGRateSorg, "TrendCacheNil")
+	if err := Cache.Set(context.Background(), utils.CacheTrends, tntID, nil, []string{}, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := dm.GetTrend(context.Background(), utils.CGRateSorg, "TrendCacheNil", true, false, utils.NonTransactional); err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+
+	Cache.Clear(nil)
+	tr := &utils.Trend{
+		Tenant: "cgrates.org",
+		ID:     "TrendOk",
+		RunTimes: []time.Time{
+			time.Now(),
+		},
+		Metrics: map[time.Time]map[string]*utils.MetricWithTrend{
+			time.Now(): {
+				"metric1": {
+					ID:          "metric1",
+					Value:       5,
+					TrendGrowth: 0.5,
+					TrendLabel:  "*positive",
+				},
+			},
+		},
+	}
+	if err := dm.dataDB.SetTrendDrv(context.Background(), tr); err != nil {
+		t.Fatalf("failed SetTrendDrv: %v", err)
+	}
+	got, err := dm.GetTrend(context.Background(), utils.CGRateSorg, "TrendOk", false, true, utils.NonTransactional)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.ID != "TrendOk" {
+		t.Fatalf("expected TrendOk, got %s", got.ID)
+	}
+
+	Cache.Clear(nil)
+	if _, err := dm.GetTrend(context.Background(), utils.CGRateSorg, "TrendNotFound", false, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+
+	Cache.Clear(nil)
+	cfg.DataDbCfg().Items[utils.MetaTrends].Remote = true
+	cfg.DataDbCfg().RmtConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg)}
+	config.SetCgrConfig(cfg)
+
+	cc := make(chan birpc.ClientConnector, 1)
+	cc <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetTrend: func(ctx *context.Context, args, reply any) error {
+				return utils.ErrNotFound
+			},
+		},
+	}
+	cM = NewConnManager(cfg)
+	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
+
+	dm = NewDataManager(data, cfg, cM)
+	if _, err := dm.GetTrend(context.Background(), utils.CGRateSorg, "TrendRemote", false, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		t.Errorf("expected ErrNotFound or nil, got %v", err)
+	}
+}
+
+func TestDataDBGetIPProfileDrv(t *testing.T) {
+	ctx := &context.Context{}
+	tenant := "cgrates.org"
+	id := "ip1"
+
+	dbNil := &DataDBMock{}
+	profile, err := dbNil.GetIPProfileDrv(ctx, tenant, id)
+	if profile != nil {
+		t.Errorf("expected profile to be nil, got %+v", profile)
+	}
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected ErrNotImplemented, got %v", err)
+	}
+
+	expectedProfile := &utils.IPProfile{
+		Tenant:    tenant,
+		ID:        id,
+		FilterIDs: []string{"f1", "f2"},
+		Weights:   nil,
+		TTL:       5 * time.Minute,
+		Stored:    true,
+		Pools:     nil,
+	}
+
+	dbMock := &DataDBMock{
+		GetIPProfileDrvF: func(ctx *context.Context, tnt, iid string) (*utils.IPProfile, error) {
+			if tnt != tenant || iid != id {
+				t.Errorf("unexpected arguments: got %s, %s", tnt, iid)
+			}
+			return expectedProfile, nil
+		},
+	}
+
+	profile2, err2 := dbMock.GetIPProfileDrv(ctx, tenant, id)
+	if err2 != nil {
+		t.Errorf("expected no error, got %v", err2)
+	}
+	if profile2 != expectedProfile {
+		t.Errorf("expected profile %+v, got %+v", expectedProfile, profile2)
+	}
+}
+
+func TestDataDBSetIPProfileDrv(t *testing.T) {
+	ctx := &context.Context{}
+	ipp := &utils.IPProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ip1",
+		FilterIDs: []string{"f1", "f2"},
+		TTL:       5 * time.Minute,
+		Stored:    true,
+	}
+
+	dbNil := &DataDBMock{}
+	err := dbNil.SetIPProfileDrv(ctx, ipp)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected ErrNotImplemented, got %v", err)
+	}
+
+	called := false
+	dbMock := &DataDBMock{
+		SetIPProfileDrvF: func(ctx *context.Context, ip *utils.IPProfile) error {
+			called = true
+			if ip != ipp {
+				t.Errorf("expected IPProfile %+v, got %+v", ipp, ip)
+			}
+			return nil
+		},
+	}
+
+	err2 := dbMock.SetIPProfileDrv(ctx, ipp)
+	if err2 != nil {
+		t.Errorf("expected no error, got %v", err2)
+	}
+	if !called {
+		t.Errorf("expected SetIPProfileDrvF to be called")
+	}
+
+	expectedErr := utils.ErrNotFound
+	dbMock2 := &DataDBMock{
+		SetIPProfileDrvF: func(ctx *context.Context, ip *utils.IPProfile) error {
+			return expectedErr
+		},
+	}
+
+	err3 := dbMock2.SetIPProfileDrv(ctx, ipp)
+	if err3 != expectedErr {
+		t.Errorf("expected error %v, got %v", expectedErr, err3)
+	}
+}
+
+func TestDataDBRemoveIPProfileDrv(t *testing.T) {
+	ctx := &context.Context{}
+	tenant := "cgrates.org"
+	id := "ip1"
+
+	dbNil := &DataDBMock{}
+	err := dbNil.RemoveIPProfileDrv(ctx, tenant, id)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("expected ErrNotImplemented, got %v", err)
+	}
+
+	called := false
+	dbMock := &DataDBMock{
+		RemoveIPProfileDrvF: func(ctx *context.Context, tntArg, idArg string) error {
+			called = true
+			if tntArg != tenant || idArg != id {
+				t.Errorf("unexpected arguments: got %s, %s", tntArg, idArg)
+			}
+			return nil
+		},
+	}
+
+	err2 := dbMock.RemoveIPProfileDrv(ctx, tenant, id)
+	if err2 != nil {
+		t.Errorf("expected no error, got %v", err2)
+	}
+	if !called {
+		t.Errorf("expected RemoveIPProfileDrvF to be called")
+	}
+
+	expectedErr := utils.ErrNotFound
+	dbMock2 := &DataDBMock{
+		RemoveIPProfileDrvF: func(ctx *context.Context, tntArg, idArg string) error {
+			return expectedErr
+		},
+	}
+
+	err3 := dbMock2.RemoveIPProfileDrv(ctx, tenant, id)
+	if err3 != expectedErr {
+		t.Errorf("expected error %v, got %v", expectedErr, err3)
+	}
+}
