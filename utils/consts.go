@@ -2108,6 +2108,8 @@ const (
 	RedisCACertificateCfg        = "redisCACertificate"
 	ReplicationFilteredCfg       = "replication_filtered"
 	ReplicationCache             = "replication_cache"
+	ReplicationFailedDirCfg      = "replication_failed_dir"
+	ReplicationIntervalCfg       = "replication_interval"
 	RemoteConnIDCfg              = "remote_conn_id"
 )
 

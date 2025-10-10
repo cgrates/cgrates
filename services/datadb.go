@@ -128,7 +128,7 @@ func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
 	}
 	db.mu.Lock()
 	defer db.mu.Unlock()
-	db.dm.DataDB().Close()
+	db.dm.Close()
 	return nil
 }
 
