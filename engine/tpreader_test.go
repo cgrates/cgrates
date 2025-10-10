@@ -658,6 +658,6 @@ func TestTpReaderLoadAll(t *testing.T) {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(tpr, tprCopy) {
-		t.Errorf("Expected <%+v> , \nReceived <%+v>", tprCopy, tpr)
+		t.Errorf("Expected <%+v> , \nReceived <%+v>", utils.ToJSON(tprCopy), utils.ToJSON(tpr))
 	}
 }
