@@ -30,6 +30,8 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestTPReaderCallCacheNoCaching(t *testing.T) {
@@ -657,7 +659,7 @@ func TestTpReaderLoadAll(t *testing.T) {
 	if err = tpr.LoadAll(); err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(tpr, tprCopy) {
+	if !cmp.Equal(tpr, tprCopy, cmpopts.IgnoreUnexported(TpReader{})) {
 		t.Errorf("Expected <%+v> , \nReceived <%+v>", tprCopy, tpr)
 	}
 }

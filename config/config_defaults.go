@@ -118,6 +118,8 @@ const CGRATES_CFG_JSON = `
 	"replication_conns":[],		// the conns the items are replicated
 	"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
 	"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
+	"replication_failed_dir": "", 		// directory for failed batch replications (used when interval > 0)
+	"replication_interval": "", 		// interval between batched replications (0 for immediate)
 	"items":{
 		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
 		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},

@@ -1402,7 +1402,7 @@ const (
 	// APIerSv1SetDataDBVersions   = "APIerSv1.SetDataDBVersions"
 
 	// APIerSv1GetActions          = "APIerSv1.GetActions"
-
+	AdminSv1ReplayFailedReplications = "AdminSv1.ReplayFailedReplications"
 	// APIerSv1GetDataDBVersions        = "APIerSv1.GetDataDBVersions"
 
 	// APIerSv1GetCDRs                  = "APIerSv1.GetCDRs"
@@ -2110,6 +2110,8 @@ const (
 	RedisCACertificateCfg        = "redisCACertificate"
 	ReplicationFilteredCfg       = "replication_filtered"
 	ReplicationCache             = "replication_cache"
+	ReplicationFailedDirCfg      = "replication_failed_dir"
+	ReplicationIntervalCfg       = "replication_interval"
 	RemoteConnIDCfg              = "remote_conn_id"
 )
 
