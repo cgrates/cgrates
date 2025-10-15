@@ -828,6 +828,7 @@ const (
 	MetaSIPURIMethod        = "*sipuri_method"
 	MetaSIPURIHost          = "*sipuri_host"
 	MetaSIPURIUser          = "*sipuri_user"
+	MetaConnStatus          = "*conn_status"
 	E164DomainConverter     = "*e164Domain"
 	E164Converter           = "*e164"
 	URLDecConverter         = "*urldecode"

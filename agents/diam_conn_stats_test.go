@@ -60,7 +60,7 @@ func TestDiamConnStats(t *testing.T) {
 "stats": {
 	"enabled": true,
 	"store_interval": "-1",
-	"string_indexed_fields": ["*req.OriginHost"]
+	"string_indexed_fields": ["*opts.*eventType"]
 },
 "thresholds": {
 	"enabled": true,
@@ -82,27 +82,32 @@ func TestDiamConnStats(t *testing.T) {
 		// LogBuffer:        &bytes.Buffer{},
 		GracefulShutdown: true,
 	}
-	// defer fmt.Println(ng.LogBuffer)
+	// t.Cleanup(func() {
+	// 	fmt.Println(ng.LogBuffer)
+	// })
 	client, cfg := ng.Run(t)
 
 	setSQProfile := func(id, originHost, originRealm string, ttl time.Duration) {
 		t.Helper()
+		fltrIDs := []string{"*string:~*opts.*eventType:ConnectionStatusReport"}
+		if originHost != "" {
+			fltrIDs = append(fltrIDs, fmt.Sprintf("*string:~*req.OriginHost:%s", originHost))
+		}
+		if originRealm != "" {
+			fltrIDs = append(fltrIDs, fmt.Sprintf("*string:~*req.OriginRealm:%s", originRealm))
+		}
 		var reply string
 		if err := client.Call(context.Background(), utils.APIerSv1SetStatQueueProfile,
 			engine.StatQueueProfileWithAPIOpts{
 				StatQueueProfile: &engine.StatQueueProfile{
-					Tenant: "cgrates.org",
-					ID:     id,
-					FilterIDs: []string{
-						"*string:~*opts.*eventType:ConnectionStatusReport",
-						fmt.Sprintf("*string:~*req.OriginHost:%s", originHost),
-						fmt.Sprintf("*string:~*req.OriginRealm:%s", originRealm),
-					},
+					Tenant:      "cgrates.org",
+					ID:          id,
+					FilterIDs:   fltrIDs,
 					QueueLength: -1,
 					TTL:         ttl,
 					Metrics: []*engine.MetricWithFilters{
 						{
-							MetricID: "*sum#~*req.ConnectionStatus",
+							MetricID: "*sum#~*req.ConnectionStatus{*conn_status}",
 						},
 					},
 					Stored:   true,
@@ -157,7 +162,7 @@ func TestDiamConnStats(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		metricID := "*sum#~*req.ConnectionStatus"
+		metricID := "*sum#~*req.ConnectionStatus{*conn_status}"
 		got, ok := metrics[metricID]
 		if !ok {
 			t.Errorf("could not find metric %q", metricID)
@@ -167,11 +172,13 @@ func TestDiamConnStats(t *testing.T) {
 		}
 	}
 
+	setSQProfile("SQ_CONN_ALL", "", "", -1)
 	setSQProfile("SQ_CONN_1", "host1", "realm1", -1)
 	setSQProfile("SQ_CONN_2", "host2", "realm1", -1)
 	setSQProfile("SQ_CONN_3", "host3", "realm2", -1)
 
 	// no connections have been established yet, expect -1
+	checkConnStatusMetric("SQ_CONN_ALL", -1)
 	checkConnStatusMetric("SQ_CONN_1", -1)
 	checkConnStatusMetric("SQ_CONN_2", -1)
 	checkConnStatusMetric("SQ_CONN_3", -1)
@@ -181,6 +188,8 @@ func TestDiamConnStats(t *testing.T) {
 	connHost1 := initDiamConn("host1", "realm1")
 	connHost2 := initDiamConn("host2", "realm1")
 	connHost3 := initDiamConn("host3", "realm2")
+	time.Sleep(10 * time.Millisecond) // wait for stats to process
+	checkConnStatusMetric("SQ_CONN_ALL", 3)
 	checkConnStatusMetric("SQ_CONN_1", 1)
 	checkConnStatusMetric("SQ_CONN_2", 1)
 	checkConnStatusMetric("SQ_CONN_3", 1)
@@ -194,6 +203,7 @@ func TestDiamConnStats(t *testing.T) {
 	// Ensure periodic health check happens.
 	time.Sleep(100 * time.Millisecond)
 
+	checkConnStatusMetric("SQ_CONN_ALL", 0)
 	checkConnStatusMetric("SQ_CONN_1", 0)
 	checkConnStatusMetric("SQ_CONN_2", 0)
 	checkConnStatusMetric("SQ_CONN_3", 0)
@@ -201,9 +211,11 @@ func TestDiamConnStats(t *testing.T) {
 
 	// restart connection from host1
 	connHost1 = initDiamConn("host1", "realm1")
+	t.Cleanup(func() { connHost1.Close() })
+	time.Sleep(10 * time.Millisecond) // wait for stats to process
+	checkConnStatusMetric("SQ_CONN_ALL", 1)
 	checkConnStatusMetric("SQ_CONN_1", 1)
 	checkConnStatusMetric("SQ_CONN_2", 0)
 	checkConnStatusMetric("SQ_CONN_3", 0)
-	t.Cleanup(func() { connHost1.Close() })
 	// scrapePromURL(t)
 }

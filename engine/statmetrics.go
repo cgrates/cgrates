@@ -1421,10 +1421,14 @@ func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
 }
 
 func NewStatSum(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+	flds, err := config.NewRSRParsers(extraParams, utils.InfieldSep)
+	if err != nil {
+		return nil, err
+	}
 	return &StatSum{
 		Events:    make(map[string]*StatWithCompress),
 		MinItems:  minItems,
-		FieldName: extraParams,
+		Fields:    flds,
 		FilterIDs: filterIDs,
 	}, nil
 }
@@ -1435,7 +1439,7 @@ type StatSum struct {
 	Count     int64
 	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
 	MinItems  int
-	FieldName string
+	Fields    config.RSRParsers
 	val       *float64 // cached sum value
 }
 
@@ -1445,10 +1449,10 @@ func (s *StatSum) Clone() StatMetric {
 		return nil
 	}
 	clone := &StatSum{
-		Sum:       s.Sum,
-		Count:     s.Count,
-		MinItems:  s.MinItems,
-		FieldName: s.FieldName,
+		Sum:      s.Sum,
+		Count:    s.Count,
+		MinItems: s.MinItems,
+		Fields:   s.Fields,
 	}
 	if s.FilterIDs != nil {
 		clone.FilterIDs = make([]string, len(s.FilterIDs))
@@ -1500,39 +1504,11 @@ func (sum *StatSum) GetFloat64Value(roundingDecimal int) (v float64) {
 	return sum.getValue(roundingDecimal)
 }
 
-// connStatusToFloat converts connection status strings to numeric values for *sum metrics.
-// This allows sending status as strings in events while computing numeric sums:
-//   - "UP" returns 1 (connection established)
-//   - "DOWN" returns -1 (connection closed)
-//   - "DUPLICATE" returns 0 (connection already exists, no change)
-func connStatusToFloat(v string) (float64, bool) {
-	switch v {
-	case utils.ConnStatusUp:
-		return 1, true
-	case utils.ConnStatusDown:
-		return -1, true
-	case utils.ConnStatusDuplicate:
-		return 0, true
-	}
-	return 0, false
-}
-
 func (sum *StatSum) getFieldVal(ev utils.DataProvider) (float64, error) {
-	ival, err := utils.DPDynamicInterface(sum.FieldName, ev)
+	ival, err := sum.Fields.ParseDataProvider(ev)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, sum.FieldName)
-		}
 		return 0, err
 	}
-
-	// Check for connection status strings before numeric conversion.
-	if str, ok := ival.(string); ok {
-		if v, isConnStatus := connStatusToFloat(str); isConnStatus {
-			return v, nil
-		}
-	}
-
 	return utils.IfaceAsFloat64(ival)
 }
 

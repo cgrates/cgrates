@@ -132,6 +132,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return NewRandomConverter(params[len(MetaRandom)+1:])
 	case strings.HasPrefix(params, MetaStrip):
 		return NewStripConverter(params)
+	case params == MetaConnStatus:
+		return ConnStatusConverter{}, nil
 	case strings.HasPrefix(params, MetaGigawords):
 		return new(GigawordsConverter), nil
 	default:
@@ -840,4 +842,22 @@ func (ts TimeStringConverter) Convert(in any) (out any, err error) {
 	}
 	tm = tm.In(ts.loc)
 	return tm.Format(ts.layout), nil
+}
+
+// ConnStatusConverter converts connection status strings to numeric values.
+// Returns 1 for UP, -1 for DOWN, and 0 for DUPLICATE.
+type ConnStatusConverter struct{}
+
+// Convert implements DataConverter interface
+func (c ConnStatusConverter) Convert(in any) (any, error) {
+	status := IfaceAsString(in)
+	switch status {
+	case ConnStatusUp:
+		return 1, nil
+	case ConnStatusDown:
+		return -1, nil
+	case ConnStatusDuplicate:
+		return 0, nil
+	}
+	return 0, fmt.Errorf("unsupported connection status: %q", status)
 }
