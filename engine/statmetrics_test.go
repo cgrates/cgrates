@@ -2267,7 +2267,8 @@ func TestStatSumGetFloat64Value(t *testing.T) {
 		t.Errorf("wrong statSum value: %v", v)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
-	if err := statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event}); err == nil || err.Error() != "NOT_FOUND:~*req.Cost" {
+	if err := statSum.AddEvent(ev2.ID, utils.MapStorage{utils.MetaReq: ev2.Event}); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if v := statSum.GetFloat64Value(config.CgrConfig().GeneralCfg().RoundingDecimals); v != -1.0 {
@@ -2386,7 +2387,12 @@ func TestStatSumGetStringValue2(t *testing.T) {
 }
 
 func TestStatSumGetStringValue3(t *testing.T) {
-	statSum := &StatSum{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}, FieldName: "~*req.Cost"}
+	statSum := &StatSum{
+		Events:    make(map[string]*StatWithCompress),
+		MinItems:  2,
+		FilterIDs: []string{},
+		Fields:    config.NewRSRParsersMustCompile("~*req.Cost", utils.InfieldSep),
+	}
 	expected := &StatSum{
 		Events: map[string]*StatWithCompress{
 			"EVENT_1": {Stat: 12.2, CompressFactor: 2},
@@ -2394,7 +2400,7 @@ func TestStatSumGetStringValue3(t *testing.T) {
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
-		FieldName: "~*req.Cost",
+		Fields:    config.NewRSRParsersMustCompile("~*req.Cost", utils.InfieldSep),
 		Count:     3,
 		Sum:       42.7,
 	}
@@ -2432,8 +2438,12 @@ func TestStatSumGetStringValue3(t *testing.T) {
 }
 
 func TestStatSumCompress(t *testing.T) {
-	sum := &StatSum{Events: make(map[string]*StatWithCompress), FieldName: "~*req.Cost",
-		MinItems: 2, FilterIDs: []string{}}
+	sum := &StatSum{
+		Events:    make(map[string]*StatWithCompress),
+		Fields:    config.NewRSRParsersMustCompile("~*req.Cost", utils.InfieldSep),
+		MinItems:  2,
+		FilterIDs: []string{},
+	}
 	expected := &StatSum{
 		Events: map[string]*StatWithCompress{
 			"EVENT_1": {Stat: 18.2, CompressFactor: 1},
@@ -2442,7 +2452,7 @@ func TestStatSumCompress(t *testing.T) {
 		MinItems:  2,
 		FilterIDs: []string{},
 		Sum:       24.4,
-		FieldName: "~*req.Cost",
+		Fields:    config.NewRSRParsersMustCompile("~*req.Cost", utils.InfieldSep),
 		Count:     2,
 	}
 	expected.GetStringValue(config.CgrConfig().GeneralCfg().RoundingDecimals)
@@ -2470,7 +2480,7 @@ func TestStatSumCompress(t *testing.T) {
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
-		FieldName: "~*req.Cost",
+		Fields:    config.NewRSRParsersMustCompile("~*req.Cost", utils.InfieldSep),
 		Sum:       24.4,
 		Count:     2,
 	}
@@ -3231,7 +3241,7 @@ func TestStatSumMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statSum.AddEvent(ev.ID, utils.MapStorage{utils.MetaReq: ev.Event})
 	var nstatSum StatSum
-	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FieldName":"~*req.Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"Fields":[{"Rules":"~*req.Cost"}]}`)
 	if b, err := statSum.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -3574,9 +3584,9 @@ func TestStatMetricsStatSumGetMinItems(t *testing.T) {
 				CompressFactor: 6,
 			},
 		},
-		MinItems:  20,
-		FieldName: "Field_Name",
-		val:       nil,
+		MinItems: 20,
+		Fields:   config.NewRSRParsersMustCompile("Field Name", utils.InfieldSep),
+		val:      nil,
 	}
 	result := sum.GetMinItems()
 	if !reflect.DeepEqual(result, 20) {
@@ -3595,9 +3605,9 @@ func TestStatMetricsStatSumGetFilterIDs(t *testing.T) {
 				CompressFactor: 6,
 			},
 		},
-		MinItems:  20,
-		FieldName: "Field_Name",
-		val:       nil,
+		MinItems: 20,
+		Fields:   config.NewRSRParsersMustCompile("Field Name", utils.InfieldSep),
+		val:      nil,
 	}
 	result := sum.GetFilterIDs()
 	if !reflect.DeepEqual(result, sum.FilterIDs) {
@@ -3616,9 +3626,9 @@ func TestStatMetricsStatSumGetValue(t *testing.T) {
 				CompressFactor: 6,
 			},
 		},
-		MinItems:  20,
-		FieldName: "Field_Name",
-		val:       nil,
+		MinItems: 20,
+		Fields:   config.NewRSRParsersMustCompile("Field Name", utils.InfieldSep),
+		val:      nil,
 	}
 	result := sum.GetValue(50)
 	if !reflect.DeepEqual(result, float64(-1)) {
@@ -5099,7 +5109,7 @@ func TestStatSumClone(t *testing.T) {
 			Sum:       123.45,
 			Count:     5,
 			MinItems:  3,
-			FieldName: "*cost",
+			Fields:    config.NewRSRParsersMustCompile("*cost", utils.InfieldSep),
 			val:       &val,
 			Events: map[string]*StatWithCompress{
 				"event1": {Stat: 55.5, CompressFactor: 2},
