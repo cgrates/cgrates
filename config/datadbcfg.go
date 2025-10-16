@@ -20,6 +20,7 @@ package config
 
 import (
 	"fmt"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -48,7 +49,7 @@ func defaultDBPort(dbType, port string) string {
 	return port
 }
 
-type DataDBOpts struct {
+type DBOpts struct {
 	InternalDBDumpPath        string        // Path to the dump file
 	InternalDBBackupPath      string        // Path where db dump will backup
 	InternalDBStartTimeout    time.Duration // Transcache recover from dump files timeout duration
@@ -72,48 +73,141 @@ type DataDBOpts struct {
 	RedisCACertificate        string
 	MongoQueryTimeout         time.Duration
 	MongoConnScheme           string
+	SQLMaxOpenConns           int
+	SQLMaxIdleConns           int
+	SQLLogLevel               int
+	SQLConnMaxLifetime        time.Duration
+	SQLDSNParams              map[string]string
+	PgSSLMode                 string
+	PgSSLCert                 string
+	PgSSLKey                  string
+	PgSSLPassword             string
+	PgSSLCertMode             string
+	PgSSLRootCert             string
+	MySQLLocation             string
 }
 
-// DataDbCfg Database config
-type DataDbCfg struct {
-	Type        string
-	Host        string   // The host to connect to. Values that start with / are for UNIX domain sockets.
-	Port        string   // The port to bind to.
-	Name        string   // The name of the database to connect to.
-	User        string   // The user to sign in as.
-	Password    string   // The user's password.
-	RmtConns    []string // Remote DataDB  connIDs
-	RmtConnID   string
-	RplConns    []string // Replication connIDs
-	RplFiltered bool
-	RplCache    string
-	Items       map[string]*ItemOpts
-	Opts        *DataDBOpts
+// DBConn the config to establish connection to DataDB
+type DBConn struct {
+	Type                string
+	Host                string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	Port                string // The port to bind to.
+	Name                string // The name of the database to connect to.
+	User                string // The user to sign in as.
+	Password            string // The user's password.
+	StringIndexedFields []string
+	PrefixIndexedFields []string
+	RmtConns            []string // Remote DataDB  connIDs
+	RmtConnID           string
+	RplConns            []string // Replication connIDs
+	RplFiltered         bool
+	RplCache            string
+}
+
+// loadFromJSONCfg load the DBConn section of the DataDBCfg
+func (dbC *DBConn) loadFromJSONCfg(jsnDbConnCfg *DbConnJson) (err error) {
+	if dbC == nil {
+		return
+	}
+	if jsnDbConnCfg.Db_type != nil {
+		if !strings.HasPrefix(*jsnDbConnCfg.Db_type, "*") {
+			dbC.Type = fmt.Sprintf("*%v", *jsnDbConnCfg.Db_type)
+		} else {
+			dbC.Type = *jsnDbConnCfg.Db_type
+		}
+	}
+	if jsnDbConnCfg.Db_host != nil {
+		dbC.Host = *jsnDbConnCfg.Db_host
+	}
+	if jsnDbConnCfg.Db_port != nil {
+		port := strconv.Itoa(*jsnDbConnCfg.Db_port)
+		if port == "-1" {
+			port = utils.MetaDynamic
+		}
+		dbC.Port = defaultDBPort(dbC.Type, port)
+	}
+	if jsnDbConnCfg.Db_name != nil {
+		dbC.Name = *jsnDbConnCfg.Db_name
+	}
+	if jsnDbConnCfg.Db_user != nil {
+		dbC.User = *jsnDbConnCfg.Db_user
+	}
+	if jsnDbConnCfg.Db_password != nil {
+		dbC.Password = *jsnDbConnCfg.Db_password
+	}
+	if jsnDbConnCfg.String_indexed_fields != nil {
+		dbC.StringIndexedFields = *jsnDbConnCfg.String_indexed_fields
+	}
+	if jsnDbConnCfg.Prefix_indexed_fields != nil {
+		dbC.PrefixIndexedFields = *jsnDbConnCfg.Prefix_indexed_fields
+	}
+	if jsnDbConnCfg.Remote_conns != nil {
+		dbC.RmtConns = make([]string, len(*jsnDbConnCfg.Remote_conns))
+		for idx, rmtConn := range *jsnDbConnCfg.Remote_conns {
+			if rmtConn == utils.MetaInternal {
+				return fmt.Errorf("remote connection ID needs to be different than <%s> ", utils.MetaInternal)
+			}
+			dbC.RmtConns[idx] = rmtConn
+		}
+	}
+	if jsnDbConnCfg.Replication_conns != nil {
+		dbC.RplConns = make([]string, len(*jsnDbConnCfg.Replication_conns))
+		for idx, rplConn := range *jsnDbConnCfg.Replication_conns {
+			if rplConn == utils.MetaInternal {
+				return fmt.Errorf("remote connection ID needs to be different than <%s> ", utils.MetaInternal)
+			}
+			dbC.RplConns[idx] = rplConn
+		}
+	}
+	if jsnDbConnCfg.Replication_filtered != nil {
+		dbC.RplFiltered = *jsnDbConnCfg.Replication_filtered
+	}
+	if jsnDbConnCfg.Remote_conn_id != nil {
+		dbC.RmtConnID = *jsnDbConnCfg.Remote_conn_id
+	}
+	if jsnDbConnCfg.Replication_cache != nil {
+		dbC.RplCache = *jsnDbConnCfg.Replication_cache
+	}
+	return
+}
+
+// DBConns the config for all DataDB connections
+type DBConns map[string]*DBConn
+
+// DbCfg Database config
+type DbCfg struct {
+	DBConns DBConns
+	Items   map[string]*ItemOpts
+	Opts    *DBOpts
 }
 
 // loadDataDBCfg loads the DataDB section of the configuration
-func (dbcfg *DataDbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
-	jsnDataDbCfg := new(DbJsonCfg)
-	if err = jsnCfg.GetSection(ctx, DataDBJSON, jsnDataDbCfg); err != nil {
+func (dbcfg *DbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+	jsnDbCfg := new(DbJsonCfg)
+	if err = jsnCfg.GetSection(ctx, DBJSON, jsnDbCfg); err != nil {
 		return
 	}
-	if err = dbcfg.loadFromJSONCfg(jsnDataDbCfg); err != nil {
+	if err = dbcfg.loadFromJSONCfg(jsnDbCfg); err != nil {
 		return
 	}
 	// in case of internalDB we need to disable the cache
 	// so we enforce it here
-	if cfg.dataDbCfg.Type == utils.MetaInternal {
+	for _, dbCfg := range cfg.dbCfg.DBConns {
+		if dbCfg.Type != utils.MetaInternal {
+			continue
+		}
 		// overwrite only StatelessDataDBPartitions and leave other unmodified ( e.g. *diameter_messages, *closed_sessions, etc... )
 		for key := range utils.StatelessDataDBPartitions {
 			if _, has := cfg.cacheCfg.Partitions[key]; has {
 				cfg.cacheCfg.Partitions[key] = &CacheParamCfg{}
 			}
 		}
+		return // there is only 1 internalDB, stop searching for more
 	}
 	return
 }
 
-func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
+func (dbOpts *DBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -208,56 +302,63 @@ func (dbOpts *DataDBOpts) loadFromJSONCfg(jsnCfg *DBOptsJson) (err error) {
 	if jsnCfg.MongoConnScheme != nil {
 		dbOpts.MongoConnScheme = *jsnCfg.MongoConnScheme
 	}
+	if jsnCfg.SQLMaxOpenConns != nil {
+		dbOpts.SQLMaxOpenConns = *jsnCfg.SQLMaxOpenConns
+	}
+	if jsnCfg.SQLMaxIdleConns != nil {
+		dbOpts.SQLMaxIdleConns = *jsnCfg.SQLMaxIdleConns
+	}
+	if jsnCfg.SQLLogLevel != nil {
+		dbOpts.SQLLogLevel = *jsnCfg.SQLLogLevel
+	}
+	if jsnCfg.SQLConnMaxLifetime != nil {
+		if dbOpts.SQLConnMaxLifetime, err = utils.ParseDurationWithNanosecs(*jsnCfg.SQLConnMaxLifetime); err != nil {
+			return
+		}
+	}
+	if jsnCfg.MYSQLDSNParams != nil {
+		dbOpts.SQLDSNParams = make(map[string]string)
+		dbOpts.SQLDSNParams = jsnCfg.MYSQLDSNParams
+	}
+	if jsnCfg.PgSSLMode != nil {
+		dbOpts.PgSSLMode = *jsnCfg.PgSSLMode
+	}
+	if jsnCfg.PgSSLCert != nil {
+		dbOpts.PgSSLCert = *jsnCfg.PgSSLCert
+	}
+	if jsnCfg.PgSSLKey != nil {
+		dbOpts.PgSSLKey = *jsnCfg.PgSSLKey
+	}
+	if jsnCfg.PgSSLPassword != nil {
+		dbOpts.PgSSLPassword = *jsnCfg.PgSSLPassword
+	}
+	if jsnCfg.PgSSLCertMode != nil {
+		dbOpts.PgSSLCertMode = *jsnCfg.PgSSLCertMode
+	}
+	if jsnCfg.PgSSLRootCert != nil {
+		dbOpts.PgSSLRootCert = *jsnCfg.PgSSLRootCert
+	}
+	if jsnCfg.MySQLLocation != nil {
+		dbOpts.MySQLLocation = *jsnCfg.MySQLLocation
+	}
 	return
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
-func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
+func (dbcfg *DbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
 	}
-	if jsnDbCfg.Db_type != nil {
-		if !strings.HasPrefix(*jsnDbCfg.Db_type, "*") {
-			dbcfg.Type = fmt.Sprintf("*%v", *jsnDbCfg.Db_type)
-		} else {
-			dbcfg.Type = *jsnDbCfg.Db_type
+	if jsnDbCfg.Db_conns != nil {
+		// hardcoded *default connection to internal, can be overwritten
+		dbcfg.DBConns[utils.MetaDefault] = &DBConn{
+			Type: utils.MetaInternal,
 		}
-	}
-	if jsnDbCfg.Db_host != nil {
-		dbcfg.Host = *jsnDbCfg.Db_host
-	}
-	if jsnDbCfg.Db_port != nil {
-		port := strconv.Itoa(*jsnDbCfg.Db_port)
-		if port == "-1" {
-			port = utils.MetaDynamic
-		}
-		dbcfg.Port = defaultDBPort(dbcfg.Type, port)
-	}
-	if jsnDbCfg.Db_name != nil {
-		dbcfg.Name = *jsnDbCfg.Db_name
-	}
-	if jsnDbCfg.Db_user != nil {
-		dbcfg.User = *jsnDbCfg.Db_user
-	}
-	if jsnDbCfg.Db_password != nil {
-		dbcfg.Password = *jsnDbCfg.Db_password
-	}
-	if jsnDbCfg.Remote_conns != nil {
-		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
-		for idx, rmtConn := range *jsnDbCfg.Remote_conns {
-			if rmtConn == utils.MetaInternal {
-				return fmt.Errorf("Remote connection ID needs to be different than <%s> ", utils.MetaInternal)
+		for kJsn, vJsn := range jsnDbCfg.Db_conns {
+			dbcfg.DBConns[kJsn] = new(DBConn)
+			if err = dbcfg.DBConns[kJsn].loadFromJSONCfg(vJsn); err != nil {
+				return err
 			}
-			dbcfg.RmtConns[idx] = rmtConn
-		}
-	}
-	if jsnDbCfg.Replication_conns != nil {
-		dbcfg.RplConns = make([]string, len(*jsnDbCfg.Replication_conns))
-		for idx, rplConn := range *jsnDbCfg.Replication_conns {
-			if rplConn == utils.MetaInternal {
-				return fmt.Errorf("Remote connection ID needs to be different than <%s> ", utils.MetaInternal)
-			}
-			dbcfg.RplConns[idx] = rplConn
 		}
 	}
 	if jsnDbCfg.Items != nil {
@@ -272,26 +373,18 @@ func (dbcfg *DataDbCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			dbcfg.Items[kJsn] = val
 		}
 	}
-	if jsnDbCfg.Replication_filtered != nil {
-		dbcfg.RplFiltered = *jsnDbCfg.Replication_filtered
-	}
-	if jsnDbCfg.Remote_conn_id != nil {
-		dbcfg.RmtConnID = *jsnDbCfg.Remote_conn_id
-	}
-	if jsnDbCfg.Replication_cache != nil {
-		dbcfg.RplCache = *jsnDbCfg.Replication_cache
-	}
+
 	if jsnDbCfg.Opts != nil {
 		err = dbcfg.Opts.loadFromJSONCfg(jsnDbCfg.Opts)
 	}
 	return
 }
 
-func (DataDbCfg) SName() string               { return DataDBJSON }
-func (dbcfg DataDbCfg) CloneSection() Section { return dbcfg.Clone() }
+func (DbCfg) SName() string               { return DBJSON }
+func (dbcfg DbCfg) CloneSection() Section { return dbcfg.Clone() }
 
-func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
-	return &DataDBOpts{
+func (dbOpts *DBOpts) Clone() *DBOpts {
+	return &DBOpts{
 		InternalDBDumpPath:        dbOpts.InternalDBDumpPath,
 		InternalDBBackupPath:      dbOpts.InternalDBBackupPath,
 		InternalDBStartTimeout:    dbOpts.InternalDBStartTimeout,
@@ -315,38 +408,67 @@ func (dbOpts *DataDBOpts) Clone() *DataDBOpts {
 		RedisCACertificate:        dbOpts.RedisCACertificate,
 		MongoQueryTimeout:         dbOpts.MongoQueryTimeout,
 		MongoConnScheme:           dbOpts.MongoConnScheme,
+		SQLMaxOpenConns:           dbOpts.SQLMaxOpenConns,
+		SQLMaxIdleConns:           dbOpts.SQLMaxIdleConns,
+		SQLLogLevel:               dbOpts.SQLLogLevel,
+		SQLConnMaxLifetime:        dbOpts.SQLConnMaxLifetime,
+		SQLDSNParams:              dbOpts.SQLDSNParams,
+		PgSSLMode:                 dbOpts.PgSSLMode,
+		PgSSLCert:                 dbOpts.PgSSLCert,
+		PgSSLKey:                  dbOpts.PgSSLKey,
+		PgSSLPassword:             dbOpts.PgSSLPassword,
+		PgSSLCertMode:             dbOpts.PgSSLCertMode,
+		PgSSLRootCert:             dbOpts.PgSSLRootCert,
+		MySQLLocation:             dbOpts.MySQLLocation,
 	}
 }
 
 // Clone returns the cloned object
-func (dbcfg DataDbCfg) Clone() (cln *DataDbCfg) {
-	cln = &DataDbCfg{
-		Type:        dbcfg.Type,
-		Host:        dbcfg.Host,
-		Port:        dbcfg.Port,
-		Name:        dbcfg.Name,
-		User:        dbcfg.User,
-		Password:    dbcfg.Password,
-		RplFiltered: dbcfg.RplFiltered,
-		RplCache:    dbcfg.RplCache,
-		RmtConnID:   dbcfg.RmtConnID,
-		Items:       make(map[string]*ItemOpts),
-		Opts:        dbcfg.Opts.Clone(),
+func (dbcfg DbCfg) Clone() (cln *DbCfg) {
+	cln = &DbCfg{
+		DBConns: make(DBConns),
+		Items:   make(map[string]*ItemOpts),
+		Opts:    dbcfg.Opts.Clone(),
+	}
+	for k, v := range dbcfg.DBConns {
+		cln.DBConns[k] = v.Clone()
 	}
 	for k, itm := range dbcfg.Items {
 		cln.Items[k] = itm.Clone()
 	}
-	if dbcfg.RmtConns != nil {
-		cln.RmtConns = slices.Clone(dbcfg.RmtConns)
+	return
+}
+
+// Clone returns the cloned object
+func (dbC *DBConn) Clone() (cln *DBConn) {
+	cln = &DBConn{
+		Type:        dbC.Type,
+		Host:        dbC.Host,
+		Port:        dbC.Port,
+		Name:        dbC.Name,
+		User:        dbC.User,
+		Password:    dbC.Password,
+		RplFiltered: dbC.RplFiltered,
+		RplCache:    dbC.RplCache,
+		RmtConnID:   dbC.RmtConnID,
 	}
-	if dbcfg.RplConns != nil {
-		cln.RplConns = slices.Clone(dbcfg.RplConns)
+	if dbC.StringIndexedFields != nil {
+		cln.StringIndexedFields = slices.Clone(dbC.StringIndexedFields)
+	}
+	if dbC.PrefixIndexedFields != nil {
+		cln.PrefixIndexedFields = slices.Clone(dbC.PrefixIndexedFields)
+	}
+	if dbC.RmtConns != nil {
+		cln.RmtConns = slices.Clone(dbC.RmtConns)
+	}
+	if dbC.RplConns != nil {
+		cln.RplConns = slices.Clone(dbC.RplConns)
 	}
 	return
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (dbcfg DataDbCfg) AsMapInterface() any {
+func (dbcfg DbCfg) AsMapInterface() any {
 	opts := map[string]any{
 		utils.InternalDBDumpPathCfg:        dbcfg.Opts.InternalDBDumpPath,
 		utils.InternalDBBackupPathCfg:      dbcfg.Opts.InternalDBBackupPath,
@@ -371,19 +493,52 @@ func (dbcfg DataDbCfg) AsMapInterface() any {
 		utils.RedisCACertificateCfg:        dbcfg.Opts.RedisCACertificate,
 		utils.MongoQueryTimeoutCfg:         dbcfg.Opts.MongoQueryTimeout.String(),
 		utils.MongoConnSchemeCfg:           dbcfg.Opts.MongoConnScheme,
+		utils.SQLMaxOpenConnsCfg:           dbcfg.Opts.SQLMaxOpenConns,
+		utils.SQLMaxIdleConnsCfg:           dbcfg.Opts.SQLMaxIdleConns,
+		utils.SQLLogLevelCfg:               dbcfg.Opts.SQLLogLevel,
+		utils.SQLConnMaxLifetime:           dbcfg.Opts.SQLConnMaxLifetime.String(),
+		utils.MYSQLDSNParams:               dbcfg.Opts.SQLDSNParams,
+		utils.PgSSLModeCfg:                 dbcfg.Opts.PgSSLMode,
+		utils.MysqlLocation:                dbcfg.Opts.MySQLLocation,
+	}
+	if dbcfg.Opts.PgSSLCert != "" {
+		opts[utils.PgSSLCertCfg] = dbcfg.Opts.PgSSLCert
+	}
+	if dbcfg.Opts.PgSSLKey != "" {
+		opts[utils.PgSSLKeyCfg] = dbcfg.Opts.PgSSLKey
+	}
+	if dbcfg.Opts.PgSSLPassword != "" {
+		opts[utils.PgSSLPasswordCfg] = dbcfg.Opts.PgSSLPassword
+	}
+	if dbcfg.Opts.PgSSLCertMode != "" {
+		opts[utils.PgSSLCertModeCfg] = dbcfg.Opts.PgSSLCertMode
+	}
+	if dbcfg.Opts.PgSSLRootCert != "" {
+		opts[utils.PgSSLRootCertCfg] = dbcfg.Opts.PgSSLRootCert
+	}
+	dbConns := make(map[string]map[string]any)
+	for k, dbc := range dbcfg.DBConns {
+		dbConns[k] = map[string]any{
+			utils.DataDbTypeCfg:          dbc.Type,
+			utils.DataDbHostCfg:          dbc.Host,
+			utils.DataDbNameCfg:          dbc.Name,
+			utils.DataDbUserCfg:          dbc.User,
+			utils.DataDbPassCfg:          dbc.Password,
+			utils.StringIndexedFieldsCfg: dbc.StringIndexedFields,
+			utils.PrefixIndexedFieldsCfg: dbc.PrefixIndexedFields,
+			utils.RemoteConnsCfg:         dbc.RmtConns,
+			utils.RemoteConnIDCfg:        dbc.RmtConnID,
+			utils.ReplicationConnsCfg:    dbc.RplConns,
+			utils.ReplicationFilteredCfg: dbc.RplFiltered,
+			utils.ReplicationCache:       dbc.RplCache,
+		}
+		if dbc.Port != "" {
+			dbConns[k][utils.DataDbPortCfg], _ = strconv.Atoi(dbc.Port)
+		}
 	}
 	mp := map[string]any{
-		utils.DataDbTypeCfg:          dbcfg.Type,
-		utils.DataDbHostCfg:          dbcfg.Host,
-		utils.DataDbNameCfg:          dbcfg.Name,
-		utils.DataDbUserCfg:          dbcfg.User,
-		utils.DataDbPassCfg:          dbcfg.Password,
-		utils.RemoteConnsCfg:         dbcfg.RmtConns,
-		utils.RemoteConnIDCfg:        dbcfg.RmtConnID,
-		utils.ReplicationConnsCfg:    dbcfg.RplConns,
-		utils.ReplicationFilteredCfg: dbcfg.RplFiltered,
-		utils.ReplicationCache:       dbcfg.RplCache,
-		utils.OptsCfg:                opts,
+		utils.DataDbConnsCfg: dbConns,
+		utils.OptsCfg:        opts,
 	}
 	if dbcfg.Items != nil {
 		items := make(map[string]any)
@@ -391,9 +546,6 @@ func (dbcfg DataDbCfg) AsMapInterface() any {
 			items[key] = item.AsMapInterface()
 		}
 		mp[utils.ItemsCfg] = items
-	}
-	if dbcfg.Port != "" {
-		mp[utils.DataDbPortCfg], _ = strconv.Atoi(dbcfg.Port)
 	}
 	return mp
 }
@@ -405,82 +557,90 @@ type ItemOpts struct {
 	StaticTTL bool
 	Remote    bool
 	Replicate bool
+	DBConn    string // ID of the DB connection that this item belongs to
+
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	RouteID string
 	APIKey  string
 }
 
 // AsMapInterface returns the config as a map[string]any
-func (itm *ItemOpts) AsMapInterface() (initialMP map[string]any) {
+func (iI *ItemOpts) AsMapInterface() (initialMP map[string]any) {
 	initialMP = map[string]any{
-		utils.RemoteCfg:    itm.Remote,
-		utils.ReplicateCfg: itm.Replicate,
-		utils.LimitCfg:     itm.Limit,
-		utils.StaticTTLCfg: itm.StaticTTL,
+		utils.RemoteCfg:    iI.Remote,
+		utils.ReplicateCfg: iI.Replicate,
+		utils.LimitCfg:     iI.Limit,
+		utils.StaticTTLCfg: iI.StaticTTL,
+		utils.DBConnCfg:    iI.DBConn,
 	}
-	if itm.APIKey != utils.EmptyString {
-		initialMP[utils.APIKeyCfg] = itm.APIKey
+	if iI.APIKey != utils.EmptyString {
+		initialMP[utils.APIKeyCfg] = iI.APIKey
 	}
-	if itm.RouteID != utils.EmptyString {
-		initialMP[utils.RouteIDCfg] = itm.RouteID
+	if iI.RouteID != utils.EmptyString {
+		initialMP[utils.RouteIDCfg] = iI.RouteID
 	}
-	if itm.TTL != 0 {
-		initialMP[utils.TTLCfg] = itm.TTL.String()
+	if iI.TTL != 0 {
+		initialMP[utils.TTLCfg] = iI.TTL.String()
 	}
 	return
 }
 
-func (itm *ItemOpts) loadFromJSONCfg(jsonItm *ItemOptsJson) (err error) {
+func (iI *ItemOpts) loadFromJSONCfg(jsonItm *ItemOptsJson) (err error) {
 	if jsonItm == nil {
 		return
 	}
 	if jsonItm.Limit != nil {
-		itm.Limit = *jsonItm.Limit
+		iI.Limit = *jsonItm.Limit
 	}
 	if jsonItm.Static_ttl != nil {
-		itm.StaticTTL = *jsonItm.Static_ttl
+		iI.StaticTTL = *jsonItm.Static_ttl
 	}
 	if jsonItm.Remote != nil {
-		itm.Remote = *jsonItm.Remote
+		iI.Remote = *jsonItm.Remote
 	}
 	if jsonItm.Replicate != nil {
-		itm.Replicate = *jsonItm.Replicate
+		iI.Replicate = *jsonItm.Replicate
+	}
+	if jsonItm.DbConn != nil {
+		iI.DBConn = *jsonItm.DbConn
 	}
 	if jsonItm.Route_id != nil {
-		itm.RouteID = *jsonItm.Route_id
+		iI.RouteID = *jsonItm.Route_id
 	}
 	if jsonItm.Api_key != nil {
-		itm.APIKey = *jsonItm.Api_key
+		iI.APIKey = *jsonItm.Api_key
 	}
 	if jsonItm.Ttl != nil {
-		itm.TTL, err = utils.ParseDurationWithNanosecs(*jsonItm.Ttl)
+		iI.TTL, err = utils.ParseDurationWithNanosecs(*jsonItm.Ttl)
 	}
 	return
 }
 
 // Clone returns a deep copy of ItemOpt
-func (itm *ItemOpts) Clone() *ItemOpts {
+func (iI *ItemOpts) Clone() *ItemOpts {
 	return &ItemOpts{
-		Limit:     itm.Limit,
-		TTL:       itm.TTL,
-		StaticTTL: itm.StaticTTL,
-		Remote:    itm.Remote,
-		Replicate: itm.Replicate,
-		APIKey:    itm.APIKey,
-		RouteID:   itm.RouteID,
+		Limit:     iI.Limit,
+		TTL:       iI.TTL,
+		StaticTTL: iI.StaticTTL,
+		Remote:    iI.Remote,
+		Replicate: iI.Replicate,
+		DBConn:    iI.DBConn,
+		APIKey:    iI.APIKey,
+		RouteID:   iI.RouteID,
 	}
 }
 
-func (itm *ItemOpts) Equals(itm2 *ItemOpts) bool {
-	return itm == nil && itm2 == nil ||
-		itm != nil && itm2 != nil &&
-			itm.Remote == itm2.Remote &&
-			itm.Replicate == itm2.Replicate &&
-			itm.RouteID == itm2.RouteID &&
-			itm.APIKey == itm2.APIKey &&
-			itm.Limit == itm2.Limit &&
-			itm.TTL == itm2.TTL &&
-			itm.StaticTTL == itm2.StaticTTL
+func (iI *ItemOpts) Equals(itm2 *ItemOpts) bool {
+	return iI == nil && itm2 == nil ||
+		iI != nil && itm2 != nil &&
+			iI.Remote == itm2.Remote &&
+			iI.Replicate == itm2.Replicate &&
+			iI.RouteID == itm2.RouteID &&
+			iI.APIKey == itm2.APIKey &&
+			iI.Limit == itm2.Limit &&
+			iI.TTL == itm2.TTL &&
+			iI.DBConn == itm2.DBConn &&
+			iI.StaticTTL == itm2.StaticTTL
 }
 
 type ItemOptsJson struct {
@@ -489,6 +649,7 @@ type ItemOptsJson struct {
 	Static_ttl *bool
 	Remote     *bool
 	Replicate  *bool
+	DbConn     *string
 	// used for ArgDispatcher in case we send this to a dispatcher engine
 	Route_id *string
 	Api_key  *string
@@ -512,6 +673,9 @@ func diffItemOptJson(d *ItemOptsJson, v1, v2 *ItemOpts) *ItemOptsJson {
 	}
 	if v2.TTL != v1.TTL {
 		d.Ttl = utils.StringPointer(v2.TTL.String())
+	}
+	if v2.DBConn != v1.DBConn {
+		d.DbConn = utils.StringPointer(v2.DBConn)
 	}
 	if v2.RouteID != v1.RouteID {
 		d.Route_id = utils.StringPointer(v2.RouteID)
@@ -574,8 +738,7 @@ type DBOptsJson struct {
 	MySQLLocation             *string           `json:"mysqlLocation"`
 }
 
-// Database config
-type DbJsonCfg struct {
+type DbConnJson struct {
 	Db_type               *string
 	Db_host               *string
 	Db_port               *int
@@ -589,11 +752,18 @@ type DbJsonCfg struct {
 	Replication_conns     *[]string
 	Replication_filtered  *bool
 	Replication_cache     *string
-	Items                 map[string]*ItemOptsJson
-	Opts                  *DBOptsJson
 }
 
-func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
+type DbConnsJson map[string]*DbConnJson
+
+// Database config
+type DbJsonCfg struct {
+	Db_conns DbConnsJson
+	Items    map[string]*ItemOptsJson
+	Opts     *DBOptsJson
+}
+
+func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DBOpts) *DBOptsJson {
 	if d == nil {
 		d = new(DBOptsJson)
 	}
@@ -666,12 +836,48 @@ func diffDataDBOptsJsonCfg(d *DBOptsJson, v1, v2 *DataDBOpts) *DBOptsJson {
 	if v1.MongoConnScheme != v2.MongoConnScheme {
 		d.MongoConnScheme = utils.StringPointer(v2.MongoConnScheme)
 	}
+	if v1.SQLMaxOpenConns != v2.SQLMaxOpenConns {
+		d.SQLMaxOpenConns = utils.IntPointer(v2.SQLMaxOpenConns)
+	}
+	if v1.SQLMaxIdleConns != v2.SQLMaxIdleConns {
+		d.SQLMaxIdleConns = utils.IntPointer(v2.SQLMaxIdleConns)
+	}
+	if v1.SQLLogLevel != v2.SQLLogLevel {
+		d.SQLLogLevel = utils.IntPointer(v2.SQLLogLevel)
+	}
+	if v1.SQLConnMaxLifetime != v2.SQLConnMaxLifetime {
+		d.SQLConnMaxLifetime = utils.StringPointer(v2.SQLConnMaxLifetime.String())
+	}
+	if !reflect.DeepEqual(v1.SQLDSNParams, v2.SQLDSNParams) {
+		d.MYSQLDSNParams = v2.SQLDSNParams
+	}
+	if v1.PgSSLMode != v2.PgSSLMode {
+		d.PgSSLMode = utils.StringPointer(v2.PgSSLMode)
+	}
+	if v1.PgSSLCert != v2.PgSSLCert {
+		d.PgSSLCert = utils.StringPointer(v2.PgSSLCert)
+	}
+	if v1.PgSSLKey != v2.PgSSLKey {
+		d.PgSSLKey = utils.StringPointer(v2.PgSSLKey)
+	}
+	if v1.PgSSLPassword != v2.PgSSLPassword {
+		d.PgSSLPassword = utils.StringPointer(v2.PgSSLPassword)
+	}
+	if v1.PgSSLCertMode != v2.PgSSLCertMode {
+		d.PgSSLCertMode = utils.StringPointer(v2.PgSSLCertMode)
+	}
+	if v1.PgSSLRootCert != v2.PgSSLRootCert {
+		d.PgSSLRootCert = utils.StringPointer(v2.PgSSLRootCert)
+	}
+	if v1.MySQLLocation != v2.MySQLLocation {
+		d.MySQLLocation = utils.StringPointer(v2.MySQLLocation)
+	}
 	return d
 }
 
-func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
+func diffDataDBConnJsonCfg(d *DbConnJson, v1, v2 *DBConn) *DbConnJson {
 	if d == nil {
-		d = new(DbJsonCfg)
+		d = new(DbConnJson)
 	}
 	if v1.Type != v2.Type {
 		d.Db_type = utils.StringPointer(v2.Type)
@@ -692,6 +898,12 @@ func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
 	if v1.Password != v2.Password {
 		d.Db_password = utils.StringPointer(v2.Password)
 	}
+	if !slices.Equal(v1.StringIndexedFields, v2.StringIndexedFields) {
+		d.String_indexed_fields = &v2.StringIndexedFields
+	}
+	if !slices.Equal(v1.PrefixIndexedFields, v2.PrefixIndexedFields) {
+		d.Prefix_indexed_fields = &v2.PrefixIndexedFields
+	}
 	if !slices.Equal(v1.RmtConns, v2.RmtConns) {
 		d.Remote_conns = &v2.RmtConns
 	}
@@ -707,13 +919,69 @@ func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DataDbCfg) *DbJsonCfg {
 	if v1.RplCache != v2.RplCache {
 		d.Replication_cache = utils.StringPointer(v2.RplCache)
 	}
+	return d
+}
+
+func diffDataDBConnsJsonCfg(d DbConnsJson, v1, v2 DBConns) DbConnsJson {
+	if d == nil {
+		d = make(DbConnsJson)
+	}
+	for key, val2 := range v2 {
+		if val1, has := v1[key]; !has {
+			d[key] = diffDataDBConnJsonCfg(d[key], new(DBConn), val2)
+		} else if !val1.Equals(val2) {
+			d[key] = diffDataDBConnJsonCfg(d[key], val1, val2)
+		}
+	}
+	return d
+}
+
+func (dbC *DBConn) Equals(dbC2 *DBConn) bool {
+	if dbC2 == nil {
+		return false
+	}
+	if dbC.Type != dbC2.Type ||
+		dbC.Host != dbC2.Host ||
+		dbC.Port != dbC2.Port ||
+		dbC.Name != dbC2.Name ||
+		dbC.User != dbC2.User ||
+		dbC.Password != dbC2.Password ||
+		dbC.RmtConnID != dbC2.RmtConnID ||
+		dbC.RplFiltered != dbC2.RplFiltered ||
+		dbC.RplCache != dbC2.RplCache {
+		return false
+	}
+	if len(dbC.RmtConns) != len(dbC2.RmtConns) {
+		return false
+	}
+	for i := range dbC.RmtConns {
+		if dbC.RmtConns[i] != dbC2.RmtConns[i] {
+			return false
+		}
+	}
+	if len(dbC.RplConns) != len(dbC2.RplConns) {
+		return false
+	}
+	for i := range dbC.RplConns {
+		if dbC.RplConns[i] != dbC2.RplConns[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func diffDataDBJsonCfg(d *DbJsonCfg, v1, v2 *DbCfg) *DbJsonCfg {
+	if d == nil {
+		d = new(DbJsonCfg)
+	}
+	d.Db_conns = diffDataDBConnsJsonCfg(d.Db_conns, v1.DBConns, v2.DBConns)
 	d.Items = diffMapItemOptJson(d.Items, v1.Items, v2.Items)
 	d.Opts = diffDataDBOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d
 }
 
 // ToTransCacheOpts returns to ltcache.TransCacheOpts from DataDBOpts
-func (d *DataDBOpts) ToTransCacheOpts() *ltcache.TransCacheOpts {
+func (d *DBOpts) ToTransCacheOpts() *ltcache.TransCacheOpts {
 	if d == nil {
 		return nil
 	}

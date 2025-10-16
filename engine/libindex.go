@@ -293,9 +293,13 @@ func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType 
 	var profilesIDs []string
 	if IDs == nil { // get all items
 		Cache.Clear([]string{idxItmType})
+		dataDB, _, err := dm.dbConns.GetConn(idxItmType)
+		if err != nil {
+			return nil, err
+		}
 		var ids []string
-		if ids, err = dm.DataDB().GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[idxItmType]); err != nil {
-			return
+		if ids, err = dataDB.GetKeysForPrefix(ctx, utils.CacheIndexesToPrefix[idxItmType]); err != nil {
+			return nil, err
 		}
 		for _, id := range ids {
 			profilesIDs = append(profilesIDs, utils.SplitConcatenatedKey(id)[1])

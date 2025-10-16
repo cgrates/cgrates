@@ -42,49 +42,49 @@ var (
 	cfgPath        = cgrLoaderFlags.String(utils.CfgPathCgr, utils.EmptyString,
 		"Configuration directory path.")
 	printConfig = cgrLoaderFlags.Bool(utils.PrintCfgCgr, false, "Print the configuration object in JSON format")
-	dataDBType  = cgrLoaderFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().Type,
+	dataDBType  = cgrLoaderFlags.String(utils.DataDBTypeCgr, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Type,
 		"The type of the DataDB database <*redis|*mongo>")
-	dataDBHost = cgrLoaderFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().Host,
+	dataDBHost = cgrLoaderFlags.String(utils.DataDBHostCgr, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Host,
 		"The DataDb host to connect to.")
-	dataDBPort = cgrLoaderFlags.String(utils.DataDBPortCgr, dfltCfg.DataDbCfg().Port,
+	dataDBPort = cgrLoaderFlags.String(utils.DataDBPortCgr, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Port,
 		"The DataDb port to bind to.")
-	dataDBName = cgrLoaderFlags.String(utils.DataDBNameCgr, dfltCfg.DataDbCfg().Name,
+	dataDBName = cgrLoaderFlags.String(utils.DataDBNameCgr, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Name,
 		"The name/number of the DataDb to connect to.")
-	dataDBUser = cgrLoaderFlags.String(utils.DataDBUserCgr, dfltCfg.DataDbCfg().User,
+	dataDBUser = cgrLoaderFlags.String(utils.DataDBUserCgr, dfltCfg.DbCfg().DBConns[utils.MetaDefault].User,
 		"The DataDb user to sign in as.")
-	dataDBPasswd = cgrLoaderFlags.String(utils.DataDBPasswdCgr, dfltCfg.DataDbCfg().Password,
+	dataDBPasswd = cgrLoaderFlags.String(utils.DataDBPasswdCgr, dfltCfg.DbCfg().DBConns[utils.MetaDefault].Password,
 		"The DataDb user's password.")
 	dbDataEncoding = cgrLoaderFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"The encoding used to store object data in strings")
-	dbRedisMaxConns = cgrLoaderFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DataDbCfg().Opts.RedisMaxConns,
+	dbRedisMaxConns = cgrLoaderFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DbCfg().Opts.RedisMaxConns,
 		"The connection pool size")
-	dbRedisConnectAttempts = cgrLoaderFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DataDbCfg().Opts.RedisConnectAttempts,
+	dbRedisConnectAttempts = cgrLoaderFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DbCfg().Opts.RedisConnectAttempts,
 		"The maximum amount of dial attempts")
-	dbRedisSentinel = cgrLoaderFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DataDbCfg().Opts.RedisSentinel,
+	dbRedisSentinel = cgrLoaderFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DbCfg().Opts.RedisSentinel,
 		"The name of redis sentinel")
 	dbRedisCluster = cgrLoaderFlags.Bool(utils.RedisClusterCfg, false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrLoaderFlags.Duration(utils.RedisClusterSyncCfg, dfltCfg.DataDbCfg().Opts.RedisClusterSync,
+	dbRedisClusterSync = cgrLoaderFlags.Duration(utils.RedisClusterSyncCfg, dfltCfg.DbCfg().Opts.RedisClusterSync,
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrLoaderFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay,
+	dbRedisClusterDownDelay = cgrLoaderFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbRedisConnectTimeout = cgrLoaderFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisConnectTimeout,
+	dbRedisConnectTimeout = cgrLoaderFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DbCfg().Opts.RedisConnectTimeout,
 		"The amount of wait time until timeout for a connection attempt")
-	dbRedisReadTimeout = cgrLoaderFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisReadTimeout,
+	dbRedisReadTimeout = cgrLoaderFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DbCfg().Opts.RedisReadTimeout,
 		"The amount of wait time until timeout for reading operations")
-	dbRedisWriteTimeout = cgrLoaderFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisWriteTimeout,
+	dbRedisWriteTimeout = cgrLoaderFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DbCfg().Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
-	dbRedisPoolPipelineWindow = cgrLoaderFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow,
+	dbRedisPoolPipelineWindow = cgrLoaderFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DbCfg().Opts.RedisPoolPipelineWindow,
 		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
-	dbRedisPoolPipelineLimit = cgrLoaderFlags.Int(utils.RedisPoolPipelineLimitCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineLimit,
+	dbRedisPoolPipelineLimit = cgrLoaderFlags.Int(utils.RedisPoolPipelineLimitCfg, dfltCfg.DbCfg().Opts.RedisPoolPipelineLimit,
 		"Maximum number of commands that can be pipelined before flushing. Zero means no limit.")
 	dbRedisTls               = cgrLoaderFlags.Bool(utils.RedisTLSCfg, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrLoaderFlags.String(utils.RedisClientCertificateCfg, utils.EmptyString, "Path to the client certificate")
 	dbRedisClientKey         = cgrLoaderFlags.String(utils.RedisClientKeyCfg, utils.EmptyString, "Path to the client key")
 	dbRedisCACertificate     = cgrLoaderFlags.String(utils.RedisCACertificateCfg, utils.EmptyString, "Path to the CA certificate")
-	dbQueryTimeout           = cgrLoaderFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
+	dbQueryTimeout           = cgrLoaderFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
-	dbMongoConnScheme = cgrLoaderFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DataDbCfg().Opts.MongoConnScheme,
+	dbMongoConnScheme = cgrLoaderFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DbCfg().Opts.MongoConnScheme,
 		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 
 	cachingArg = cgrLoaderFlags.String(utils.CachingArgCgr, utils.EmptyString,
@@ -128,7 +128,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 			d, err := engine.NewDataDBConn(ldrCfg.ConfigDBCfg().Type,
 				ldrCfg.ConfigDBCfg().Host, ldrCfg.ConfigDBCfg().Port,
 				ldrCfg.ConfigDBCfg().Name, ldrCfg.ConfigDBCfg().User,
-				ldrCfg.ConfigDBCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
+				ldrCfg.ConfigDBCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding, nil, nil,
 				ldrCfg.ConfigDBCfg().Opts, nil)
 			if err != nil { // Cannot configure getter database, show stopper
 				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
@@ -142,80 +142,80 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		config.SetCgrConfig(ldrCfg)
 	}
 	// Data for DataDB
-	if *dataDBType != dfltCfg.DataDbCfg().Type {
-		ldrCfg.DataDbCfg().Type = *dataDBType
+	if *dataDBType != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Type {
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Type = *dataDBType
 	}
 
-	if *dataDBHost != dfltCfg.DataDbCfg().Host {
-		ldrCfg.DataDbCfg().Host = *dataDBHost
+	if *dataDBHost != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Host {
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Host = *dataDBHost
 	}
 
-	if *dataDBPort != dfltCfg.DataDbCfg().Port {
-		ldrCfg.DataDbCfg().Port = *dataDBPort
+	if *dataDBPort != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Port {
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Port = *dataDBPort
 	}
 
-	if *dataDBName != dfltCfg.DataDbCfg().Name {
-		ldrCfg.DataDbCfg().Name = *dataDBName
+	if *dataDBName != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Name {
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Name = *dataDBName
 	}
 
-	if *dataDBUser != dfltCfg.DataDbCfg().User {
-		ldrCfg.DataDbCfg().User = *dataDBUser
+	if *dataDBUser != dfltCfg.DbCfg().DBConns[utils.MetaDefault].User {
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].User = *dataDBUser
 	}
 
-	if *dataDBPasswd != dfltCfg.DataDbCfg().Password {
-		ldrCfg.DataDbCfg().Password = *dataDBPasswd
+	if *dataDBPasswd != dfltCfg.DbCfg().DBConns[utils.MetaDefault].Password {
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Password = *dataDBPasswd
 	}
 
-	if *dbRedisMaxConns != dfltCfg.DataDbCfg().Opts.RedisMaxConns {
-		ldrCfg.DataDbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
+	if *dbRedisMaxConns != dfltCfg.DbCfg().Opts.RedisMaxConns {
+		ldrCfg.DbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
 	}
-	if *dbRedisConnectAttempts != dfltCfg.DataDbCfg().Opts.RedisConnectAttempts {
-		ldrCfg.DataDbCfg().Opts.RedisConnectAttempts = *dbRedisConnectAttempts
+	if *dbRedisConnectAttempts != dfltCfg.DbCfg().Opts.RedisConnectAttempts {
+		ldrCfg.DbCfg().Opts.RedisConnectAttempts = *dbRedisConnectAttempts
 	}
-	if *dbRedisSentinel != dfltCfg.DataDbCfg().Opts.RedisSentinel {
-		ldrCfg.DataDbCfg().Opts.RedisSentinel = *dbRedisSentinel
+	if *dbRedisSentinel != dfltCfg.DbCfg().Opts.RedisSentinel {
+		ldrCfg.DbCfg().Opts.RedisSentinel = *dbRedisSentinel
 	}
-	if *dbRedisCluster != dfltCfg.DataDbCfg().Opts.RedisCluster {
-		ldrCfg.DataDbCfg().Opts.RedisCluster = *dbRedisCluster
+	if *dbRedisCluster != dfltCfg.DbCfg().Opts.RedisCluster {
+		ldrCfg.DbCfg().Opts.RedisCluster = *dbRedisCluster
 	}
-	if *dbRedisClusterSync != dfltCfg.DataDbCfg().Opts.RedisClusterSync {
-		ldrCfg.DataDbCfg().Opts.RedisClusterSync = *dbRedisClusterSync
+	if *dbRedisClusterSync != dfltCfg.DbCfg().Opts.RedisClusterSync {
+		ldrCfg.DbCfg().Opts.RedisClusterSync = *dbRedisClusterSync
 	}
-	if *dbRedisClusterDownDelay != dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay {
-		ldrCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
+	if *dbRedisClusterDownDelay != dfltCfg.DbCfg().Opts.RedisClusterOndownDelay {
+		ldrCfg.DbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
 	}
-	if *dbRedisConnectTimeout != dfltCfg.DataDbCfg().Opts.RedisConnectTimeout {
-		ldrCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
+	if *dbRedisConnectTimeout != dfltCfg.DbCfg().Opts.RedisConnectTimeout {
+		ldrCfg.DbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
 	}
-	if *dbRedisReadTimeout != dfltCfg.DataDbCfg().Opts.RedisReadTimeout {
-		ldrCfg.DataDbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout
+	if *dbRedisReadTimeout != dfltCfg.DbCfg().Opts.RedisReadTimeout {
+		ldrCfg.DbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout
 	}
-	if *dbRedisWriteTimeout != dfltCfg.DataDbCfg().Opts.RedisWriteTimeout {
-		ldrCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
+	if *dbRedisWriteTimeout != dfltCfg.DbCfg().Opts.RedisWriteTimeout {
+		ldrCfg.DbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
 	}
-	if *dbRedisPoolPipelineWindow != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow {
-		ldrCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
+	if *dbRedisPoolPipelineWindow != dfltCfg.DbCfg().Opts.RedisPoolPipelineWindow {
+		ldrCfg.DbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
 	}
-	if *dbRedisPoolPipelineLimit != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineLimit {
-		ldrCfg.DataDbCfg().Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
+	if *dbRedisPoolPipelineLimit != dfltCfg.DbCfg().Opts.RedisPoolPipelineLimit {
+		ldrCfg.DbCfg().Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
 	}
-	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
-		ldrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
+	if *dbQueryTimeout != dfltCfg.DbCfg().Opts.MongoQueryTimeout {
+		ldrCfg.DbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
 	}
-	if *dbMongoConnScheme != dfltCfg.DataDbCfg().Opts.MongoConnScheme {
-		ldrCfg.DataDbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
+	if *dbMongoConnScheme != dfltCfg.DbCfg().Opts.MongoConnScheme {
+		ldrCfg.DbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
 	}
-	if *dbRedisTls != dfltCfg.DataDbCfg().Opts.RedisTLS {
-		ldrCfg.DataDbCfg().Opts.RedisTLS = *dbRedisTls
+	if *dbRedisTls != dfltCfg.DbCfg().Opts.RedisTLS {
+		ldrCfg.DbCfg().Opts.RedisTLS = *dbRedisTls
 	}
-	if *dbRedisClientCertificate != dfltCfg.DataDbCfg().Opts.RedisClientCertificate {
-		ldrCfg.DataDbCfg().Opts.RedisClientCertificate = *dbRedisClientCertificate
+	if *dbRedisClientCertificate != dfltCfg.DbCfg().Opts.RedisClientCertificate {
+		ldrCfg.DbCfg().Opts.RedisClientCertificate = *dbRedisClientCertificate
 	}
-	if *dbRedisClientKey != dfltCfg.DataDbCfg().Opts.RedisClientKey {
-		ldrCfg.DataDbCfg().Opts.RedisClientKey = *dbRedisClientKey
+	if *dbRedisClientKey != dfltCfg.DbCfg().Opts.RedisClientKey {
+		ldrCfg.DbCfg().Opts.RedisClientKey = *dbRedisClientKey
 	}
-	if *dbRedisCACertificate != dfltCfg.DataDbCfg().Opts.RedisCACertificate {
-		ldrCfg.DataDbCfg().Opts.RedisCACertificate = *dbRedisCACertificate
+	if *dbRedisCACertificate != dfltCfg.DbCfg().Opts.RedisCACertificate {
+		ldrCfg.DbCfg().Opts.RedisCACertificate = *dbRedisCACertificate
 	}
 
 	if *dbDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
@@ -317,21 +317,27 @@ func main() {
 	// we initialize connManager here with nil for InternalChannels
 	engine.NewConnManager(ldrCfg)
 
-	if dataDB, err = engine.NewDataDBConn(ldrCfg.DataDbCfg().Type,
-		ldrCfg.DataDbCfg().Host, ldrCfg.DataDbCfg().Port,
-		ldrCfg.DataDbCfg().Name, ldrCfg.DataDbCfg().User,
-		ldrCfg.DataDbCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
-		ldrCfg.DataDbCfg().Opts, ldrCfg.DataDbCfg().Items); err != nil {
+	if dataDB, err = engine.NewDataDBConn(ldrCfg.DbCfg().DBConns[utils.MetaDefault].Type,
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Host,
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Port,
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Name,
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].User,
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Password,
+		ldrCfg.GeneralCfg().DBDataEncoding,
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields,
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].PrefixIndexedFields, ldrCfg.DbCfg().Opts,
+		ldrCfg.DbCfg().Items); err != nil {
 		log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 	}
 	defer dataDB.Close()
-
 	var loader engine.LoadReader
 	if loader, err = getLoader(ldrCfg); err != nil {
 		log.Fatal(err)
 	}
+	dbcManager := engine.NewDBConnManager(map[string]engine.DataDB{
+		utils.MetaDefault: dataDB}, ldrCfg.DbCfg())
 	var tpReader *engine.TpReader
-	if tpReader, err = engine.NewTpReader(dataDB, loader,
+	if tpReader, err = engine.NewTpReader(dbcManager, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
 		ldrCfg.LoaderCgrCfg().ActionSConns); err != nil {

@@ -52,8 +52,12 @@ func (adms *AdminS) V1GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 	prfx := utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
 	prfx += args.ItemsPrefix
+	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaRouteProfiles)
+	if err != nil {
+		return err
+	}
 	var keys []string
-	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -101,8 +105,12 @@ func (adms *AdminS) V1GetRouteProfilesCount(ctx *context.Context, args *utils.Ar
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	dataDB, _, err := adms.dm.DBConns().GetConn(utils.MetaRouteProfiles)
+	if err != nil {
+		return err
+	}
 	var keys []string
-	if keys, err = adms.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

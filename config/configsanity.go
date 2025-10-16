@@ -1024,68 +1024,86 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 
-	// StorDB sanity checks
-	if cfg.storDbCfg.Type == utils.MetaInternal &&
-		(cfg.storDbCfg.Opts.InternalDBDumpInterval != 0 ||
-			cfg.storDbCfg.Opts.InternalDBRewriteInterval != 0) &&
-		cfg.storDbCfg.Opts.InternalDBFileSizeLimit <= 0 {
-		return fmt.Errorf("<%s> InternalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.StorDB,
-			cfg.storDbCfg.Opts.InternalDBFileSizeLimit)
-	}
-	if cfg.storDbCfg.Type == utils.MetaPostgres {
-		if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow,
-			utils.PgSSLModePrefer, utils.PgSSLModeRequire, utils.PgSSLModeVerifyCA,
-			utils.PgSSLModeVerifyFull}, cfg.storDbCfg.Opts.PgSSLMode) {
-			return fmt.Errorf("<%s> unsupported pgSSLMode (sslmode) in storDB configuration", utils.StorDB)
-		}
-		if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow, utils.PgSSLModeRequire,
-			utils.EmptyString}, cfg.storDbCfg.Opts.PgSSLCertMode) {
-			return fmt.Errorf("<%s> unsupported pgSSLCertMode (sslcertmode) in storDB configuration", utils.StorDB)
-		}
-	}
-
 	// DataDB sanity checks
-	if cfg.dataDbCfg.Type == utils.MetaInternal {
-		if (cfg.dataDbCfg.Opts.InternalDBDumpInterval != 0 ||
-			cfg.dataDbCfg.Opts.InternalDBRewriteInterval != 0) &&
-			cfg.dataDbCfg.Opts.InternalDBFileSizeLimit <= 0 {
-			return fmt.Errorf("<%s> InternalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.DataDB,
-				cfg.dataDbCfg.Opts.InternalDBFileSizeLimit)
+	hasOneInternalDB := false // used to reutrn error in case more then 1 internaldb is found
+	for _, dbcfg := range cfg.dbCfg.DBConns {
+		if dbcfg.Type == utils.MetaInternal {
+			if hasOneInternalDB {
+				return fmt.Errorf("<%s> There can only be 1 internal DataDB", utils.DB)
+			}
+			if (cfg.dbCfg.Opts.InternalDBDumpInterval != 0 ||
+				cfg.dbCfg.Opts.InternalDBRewriteInterval != 0) &&
+				cfg.dbCfg.Opts.InternalDBFileSizeLimit <= 0 {
+				return fmt.Errorf("<%s> InternalDBFileSizeLimit field cannot be equal or smaller than 0: <%v>", utils.DB,
+					cfg.dbCfg.Opts.InternalDBFileSizeLimit)
+			}
+			hasOneInternalDB = true
 		}
-		for key, config := range cfg.cacheCfg.Partitions {
-			if utils.StatelessDataDBPartitions.Has(key) && config.Limit != 0 {
-				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
+		if dbcfg.Type == utils.MetaPostgres {
+			if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow,
+				utils.PgSSLModePrefer, utils.PgSSLModeRequire, utils.PgSSLModeVerifyCA,
+				utils.PgSSLModeVerifyFull}, cfg.dbCfg.Opts.PgSSLMode) {
+				return fmt.Errorf("<%s> unsupported pgSSLMode (sslmode) in DB configuration", utils.DB)
+			}
+			if !slices.Contains([]string{utils.PgSSLModeDisable, utils.PgSSLModeAllow, utils.PgSSLModeRequire,
+				utils.EmptyString}, cfg.dbCfg.Opts.PgSSLCertMode) {
+				return fmt.Errorf("<%s> unsupported pgSSLCertMode (sslcertmode) in DB configuration", utils.DB)
 			}
 		}
 	}
-	for item, val := range cfg.dataDbCfg.Items {
-		if val.Remote && len(cfg.dataDbCfg.RmtConns) == 0 {
+	for item, val := range cfg.dbCfg.Items {
+		if _, has := cfg.dbCfg.DBConns[val.DBConn]; !has {
+			return fmt.Errorf("item's <%s> dbConn <%v>, does not match any db_conns ID", item, val.DBConn)
+		}
+		storDBTypes := []string{utils.MetaInternal, utils.MetaMySQL, utils.MetaMongo,
+			utils.MetaPostgres, utils.Internal, utils.MySQL, utils.Mongo, utils.Postgres}
+		dataDBTypes := []string{utils.MetaInternal, utils.MetaRedis, utils.MetaMongo,
+			utils.Internal, utils.Redis, utils.Mongo}
+
+		// if *cdrs item db type is not supported, return error
+		if item == utils.MetaCDRs {
+			if !slices.Contains(storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
+				return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item,
+					storDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type)
+			}
+		} else {
+			if !slices.Contains(dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type) {
+				return fmt.Errorf("<%s> db item can only be of types <%v>, got <%s>", item, dataDBTypes, cfg.dbCfg.DBConns[val.DBConn].Type)
+			}
+		}
+		found1RmtConns := false
+		found1RplConns := false
+		for _, dbcfg := range cfg.dbCfg.DBConns {
+			for _, connID := range dbcfg.RplConns {
+				conn, has := cfg.rpcConns[connID]
+				if !has {
+					return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DB, connID)
+				}
+				for _, rpc := range conn.Conns {
+					if rpc.Transport != utils.MetaGOB {
+						return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DB, rpc.Transport, connID)
+					}
+				}
+				found1RplConns = true
+			}
+			for _, connID := range dbcfg.RmtConns {
+				conn, has := cfg.rpcConns[connID]
+				if !has {
+					return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DB, connID)
+				}
+				for _, rpc := range conn.Conns {
+					if rpc.Transport != utils.MetaGOB {
+						return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DB, rpc.Transport, connID)
+					}
+				}
+				found1RmtConns = true
+			}
+		}
+		if val.Remote && !found1RmtConns {
 			return fmt.Errorf("remote connections required by: <%s>", item)
 		}
-		if val.Replicate && len(cfg.dataDbCfg.RplConns) == 0 {
+		if val.Replicate && !found1RplConns {
 			return fmt.Errorf("replicate connections required by: <%s>", item)
-		}
-	}
-	for _, connID := range cfg.dataDbCfg.RplConns {
-		conn, has := cfg.rpcConns[connID]
-		if !has {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DataDB, connID)
-		}
-		for _, rpc := range conn.Conns {
-			if rpc.Transport != utils.MetaGOB {
-				return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
-			}
-		}
-	}
-	for _, connID := range cfg.dataDbCfg.RmtConns {
-		conn, has := cfg.rpcConns[connID]
-		if !has {
-			return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.DataDB, connID)
-		}
-		for _, rpc := range conn.Conns {
-			if rpc.Transport != utils.MetaGOB {
-				return fmt.Errorf("<%s> unsupported transport <%s> for connection with ID: <%s>", utils.DataDB, rpc.Transport, connID)
-			}
 		}
 	}
 	// APIer sanity checks

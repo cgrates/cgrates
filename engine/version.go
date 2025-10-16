@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"maps"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -52,8 +53,7 @@ func CheckVersions(storage Storage) error {
 
 	// Retrieve the current DB versions.
 	storType := storage.GetStorageType()
-	isDataDB := isDataDB(storage)
-	currentVersions := CurrentDBVersions(storType, isDataDB)
+	currentVersions := CurrentDBVersions(storType)
 
 	dbVersions, err := storage.GetVersions("")
 	if err == utils.ErrNotFound {
@@ -70,21 +70,15 @@ func CheckVersions(storage Storage) error {
 		return err
 	}
 	// Compare db versions with current versions.
-	message := dbVersions.Compare(currentVersions, storType, isDataDB)
+	message := dbVersions.Compare(currentVersions, storType)
 	if message != "" {
 		return fmt.Errorf("Migration needed: please backup cgr data and run: <%s>", message)
 	}
 	return nil
 }
 
-// relevant only for mongoDB
-func isDataDB(storage Storage) bool {
-	conv, ok := storage.(*MongoStorage)
-	return ok && conv.IsDataDB()
-}
-
 func setDBVersions(storage Storage, overwrite bool) (err error) {
-	x := CurrentDBVersions(storage.GetStorageType(), isDataDB(storage))
+	x := CurrentDBVersions(storage.GetStorageType())
 	// no data, write version
 	if err = storage.SetVersions(x, overwrite); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
@@ -104,7 +98,7 @@ func OverwriteDBVersions(storage Storage) (err error) {
 }
 
 // Compare returns the migration message if the versions are not the latest
-func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) string {
+func (vers Versions) Compare(curent Versions, storType string) string {
 	var message map[string]string
 	switch storType {
 	case utils.MetaMongo:
@@ -162,20 +156,15 @@ func CurrentStorDBVersions() Versions {
 func CurrentAllDBVersions() Versions {
 	dataDBVersions := CurrentDataDBVersions()
 	allVersions := make(Versions)
-	for k, v := range dataDBVersions {
-		allVersions[k] = v
-	}
+	maps.Copy(allVersions, dataDBVersions)
 	return allVersions
 }
 
 // CurrentDBVersions returns versions based on dbType
-func CurrentDBVersions(storType string, isDataDB bool) Versions {
+func CurrentDBVersions(storType string) Versions {
 	switch storType {
 	case utils.MetaMongo:
-		if isDataDB {
-			return CurrentDataDBVersions()
-		}
-		return CurrentStorDBVersions()
+		return CurrentAllDBVersions()
 	case utils.MetaInternal:
 		return CurrentAllDBVersions()
 	case utils.MetaRedis:

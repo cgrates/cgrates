@@ -29,8 +29,16 @@ import (
 )
 
 func (m *Migrator) migrateCurrentCharger() (err error) {
+	mInDB, err := m.GetINConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -39,17 +47,21 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating chargers", id)
 		}
-		cpp, err := m.dmIN.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		cpp, err := mInDB.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		if cpp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
+		mOutDB, err := m.GetOUTConn(utils.MetaChargerProfiles)
+		if err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveChargerProfile(context.TODO(), tntID[0],
+		if err := mOutDB.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
+			return err
+		}
+		if err := mInDB.DataManager().RemoveChargerProfile(context.TODO(), tntID[0],
 			tntID[1], false); err != nil {
 			return err
 		}
@@ -98,8 +110,12 @@ func (m *Migrator) migrateChargers() (err error) {
 
 		if !m.dryRun {
 			//set action plan
-			if err = m.dmOut.DataManager().SetChargerProfile(context.TODO(), v2, true); err != nil {
-				return
+			mOutDB, err := m.GetOUTConn(utils.MetaChargerProfiles)
+			if err != nil {
+				return err
+			}
+			if err = mOutDB.DataManager().SetChargerProfile(context.TODO(), v2, true); err != nil {
+				return err
 			}
 		}
 		m.stats[utils.Chargers]++
@@ -112,7 +128,11 @@ func (m *Migrator) migrateChargers() (err error) {
 }
 
 func (m *Migrator) migrateV1ToV2Chargers() (v4Cpp *utils.ChargerProfile, err error) {
-	v4Cpp, err = m.dmIN.getV1ChargerProfile()
+	mInDB, err := m.GetINConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return
+	}
+	v4Cpp, err = mInDB.getV1ChargerProfile()
 	if err != nil {
 		return nil, err
 	} else if v4Cpp == nil {

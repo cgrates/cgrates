@@ -107,8 +107,12 @@ func (admS *AdminS) V1GetRateProfileIDs(ctx *context.Context, args *utils.ArgsIt
 	prfx := utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
 	prfx += args.ItemsPrefix
+	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaRateProfiles)
+	if err != nil {
+		return err
+	}
 	var keys []string
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -180,8 +184,12 @@ func (admS *AdminS) V1GetRateProfilesCount(ctx *context.Context, args *utils.Arg
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaRateProfiles)
+	if err != nil {
+		return err
+	}
 	var keys []string
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

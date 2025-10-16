@@ -1,7 +1,5 @@
-var/lib/cgrates/internal_db/datadb
-var/lib/cgrates/internal_db/backup/datadb
-var/lib/cgrates/internal_db/stordb
-var/lib/cgrates/internal_db/backup/stordb
+var/lib/cgrates/internal_db/db
+var/lib/cgrates/internal_db/backup/db
 var/lib/cgrates/internal_db/configdb
 var/lib/cgrates/internal_db/backup/configdb
 var/log/cgrates

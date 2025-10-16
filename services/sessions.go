@@ -56,7 +56,7 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, smg.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -65,7 +65,7 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
 
 	smg.mu.Lock()
 	defer smg.mu.Unlock()

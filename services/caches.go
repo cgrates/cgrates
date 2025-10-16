@@ -49,7 +49,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	srvDeps, err := WaitForServicesToReachState(utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
-			utils.DataDB,
+			utils.DB,
 			utils.ConnManager,
 			utils.CoreS,
 		},
@@ -58,7 +58,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		return err
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cs := srvDeps[utils.CoreS].(*CoreService)
 

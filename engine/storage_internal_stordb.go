@@ -262,18 +262,3 @@ func (iDB *InternalDB) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err 
 	}
 	return
 }
-
-// Will dump everything inside stordb to files
-func (iDB *InternalDB) DumpStorDB() (err error) {
-	return iDB.db.DumpAll()
-}
-
-// Will rewrite every dump file of StorDB
-func (iDB *InternalDB) RewriteStorDB() (err error) {
-	return iDB.db.RewriteAll()
-}
-
-// BackupStorDB will momentarely stop any dumping and rewriting until all dump folder is backed up in folder path backupFolderPath, making zip true will create a zip file in the path instead
-func (iDB *InternalDB) BackupStorDB(backupFolderPath string, zip bool) (err error) {
-	return iDB.db.BackupDumpFolder(backupFolderPath, zip)
-}

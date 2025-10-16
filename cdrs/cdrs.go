@@ -46,12 +46,10 @@ func newMapEventFromReqForm(r *http.Request) (mp engine.MapEvent, err error) {
 }
 
 // NewCDRServer is a constructor for CDRServer
-func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, filterS *engine.FilterS, connMgr *engine.ConnManager,
-	storDB engine.StorDB) *CDRServer {
+func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, filterS *engine.FilterS, connMgr *engine.ConnManager) *CDRServer {
 	return &CDRServer{
 		cfg:     cfg,
 		dm:      dm,
-		db:      storDB,
 		guard:   guardian.Guardian,
 		fltrS:   filterS,
 		connMgr: connMgr,
@@ -62,7 +60,6 @@ func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, filterS *engine
 type CDRServer struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
-	db      engine.StorDB
 	guard   *guardian.GuardianLocker
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
@@ -324,13 +321,13 @@ func (cdrS *CDRServer) processEvents(ctx *context.Context, evs []*utils.CGREvent
 			cgrEv.APIOpts[utils.MetaCDRID] = utils.GetUniqueCDRID(cgrEv)
 		}
 
-		if err := cdrS.db.SetCDR(ctx, cgrEv, false); err != nil {
+		if err := cdrS.dm.SetCDR(ctx, cgrEv, false); err != nil {
 			if err != utils.ErrExists || !rerate {
 
 				// ToDo: add refund logic
 				return nil, fmt.Errorf("storing CDR %s failed: %w", utils.ToJSON(cgrEv), err)
 			}
-			if err = cdrS.db.SetCDR(ctx, cgrEv, true); err != nil {
+			if err = cdrS.dm.SetCDR(ctx, cgrEv, true); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
 						utils.CDRs, err.Error(), utils.ToJSON(cgrEv)))

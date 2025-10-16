@@ -51,7 +51,7 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, attrS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -66,7 +66,7 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dm := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+	dm := srvDeps[utils.DB].(*DataDBService).DataManager()
 
 	attrS.mu.Lock()
 	defer attrS.mu.Unlock()

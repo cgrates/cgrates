@@ -110,6 +110,9 @@ type DataDB interface {
 	GetConfigSectionsDrv(*context.Context, string, []string) (map[string][]byte, error)
 	SetConfigSectionsDrv(*context.Context, string, map[string][]byte) error
 	RemoveConfigSectionsDrv(*context.Context, string, []string) error
+	SetCDR(*context.Context, *utils.CGREvent, bool) error
+	GetCDRs(*context.Context, []*Filter, map[string]any) ([]*utils.CDR, error)
+	RemoveCDRs(*context.Context, []*Filter) error
 	DumpDataDB() error
 	RewriteDataDB() error
 	BackupDataDB(string, bool) error
@@ -119,16 +122,6 @@ type DataDB interface {
 type DataDBDriver interface {
 	DataDB
 	config.ConfigDB
-}
-
-type StorDB interface {
-	Storage
-	SetCDR(*context.Context, *utils.CGREvent, bool) error
-	GetCDRs(*context.Context, []*Filter, map[string]any) ([]*utils.CDR, error)
-	RemoveCDRs(*context.Context, []*Filter) error
-	DumpStorDB() error
-	RewriteStorDB() error
-	BackupStorDB(string, bool) error
 }
 
 type LoadStorage interface {

@@ -53,8 +53,7 @@ func (s *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmanager.Servi
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
-			utils.DataDB,
-			utils.StorDB,
+			utils.DB,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -63,13 +62,12 @@ func (s *AdminSv1Service) Start(_ *utils.SyncedChan, registry *servmanager.Servi
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dm := srvDeps[utils.DataDB].(*DataDBService).DataManager()
-	sdb := srvDeps[utils.StorDB].(*StorDBService).DB()
+	dm := srvDeps[utils.DB].(*DataDBService).DataManager()
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.api = apis.NewAdminSv1(s.cfg, dm, cms.ConnManager(), fs, sdb)
+	s.api = apis.NewAdminSv1(s.cfg, dm, cms.ConnManager(), fs)
 
 	srv, _ := engine.NewService(s.api)
 	// srv, _ := birpc.NewService(s.api, "", false)

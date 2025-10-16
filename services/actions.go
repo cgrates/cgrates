@@ -56,7 +56,7 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, acts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -71,7 +71,7 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
 
 	acts.mu.Lock()
 	defer acts.mu.Unlock()

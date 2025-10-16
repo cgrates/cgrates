@@ -52,7 +52,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, sts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -68,7 +68,7 @@ func (sts *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	sts.mu.Lock()
 	defer sts.mu.Unlock()

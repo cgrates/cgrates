@@ -41,7 +41,7 @@ func NewDataDBService(cfg *config.CGRConfig, setVersions bool) *DataDBService {
 type DataDBService struct {
 	mu          sync.RWMutex
 	cfg         *config.CGRConfig
-	oldDBCfg    *config.DataDbCfg
+	oldDBCfg    *config.DbCfg
 	dm          *engine.DataManager
 	setVersions bool
 	stateDeps   *StateDependencies // channel subscriptions for state changes
@@ -55,25 +55,39 @@ func (db *DataDBService) Start(_ *utils.SyncedChan, registry *servmanager.Servic
 	}
 	db.mu.Lock()
 	defer db.mu.Unlock()
-	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
-	dbConn, err := engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
-		db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
-		db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
-		db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
-		db.cfg.DataDbCfg().Opts, db.cfg.DataDbCfg().Items)
-	if err != nil { // Cannot configure getter database, show stopper
-		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
-		return
+	db.oldDBCfg = db.cfg.DbCfg().Clone()
+	dbConnMap := new(engine.DBConnManager)
+	for dbConnKey, dbconn := range db.cfg.DbCfg().DBConns {
+		dbConn, err := engine.NewDataDBConn(dbconn.Type,
+			dbconn.Host, dbconn.Port, dbconn.Name, dbconn.User,
+			dbconn.Password, db.cfg.GeneralCfg().DBDataEncoding, dbconn.StringIndexedFields,
+			dbconn.PrefixIndexedFields, db.cfg.DbCfg().Opts, db.cfg.DbCfg().Items)
+		if err != nil { // Cannot configure getter database, show stopper
+			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+			return err
+		}
+		dbConnMap.AddDataDBDriver(dbConnKey, dbConn)
+		if dbconn.Type != utils.MetaInternal {
+			utils.Logger.Info(fmt.Sprintf("<DB> connection established with <%s:%s> with DB name <%s>, Type <%s>", dbconn.Host, dbconn.Port, dbconn.Name, dbconn.Type))
+		} else {
+			utils.Logger.Info("<DB> Internal DB established")
+		}
 	}
-	db.dm = engine.NewDataManager(dbConn, db.cfg, cms.(*ConnManagerService).ConnManager())
-
+	db.dm = engine.NewDataManager(dbConnMap, db.cfg, cms.(*ConnManagerService).ConnManager())
 	if db.setVersions {
-		err = engine.OverwriteDBVersions(dbConn)
+		dataDB, _, err := dbConnMap.GetConn(utils.CacheVersions)
+		if err != nil {
+			return err
+		}
+		if err = engine.OverwriteDBVersions(dataDB); err != nil {
+			return err
+		}
 	} else {
-		err = engine.CheckVersions(db.dm.DataDB())
-	}
-	if err != nil {
-		return err
+		for _, dataDB := range db.dm.DataDB() {
+			if err = engine.CheckVersions(dataDB); err != nil {
+				return err
+			}
+		}
 	}
 	return
 }
@@ -83,26 +97,40 @@ func (db *DataDBService) Reload(_ *utils.SyncedChan, _ *servmanager.ServiceRegis
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	if db.needsConnectionReload() {
-		var d engine.DataDBDriver
-		d, err = engine.NewDataDBConn(db.cfg.DataDbCfg().Type,
-			db.cfg.DataDbCfg().Host, db.cfg.DataDbCfg().Port,
-			db.cfg.DataDbCfg().Name, db.cfg.DataDbCfg().User,
-			db.cfg.DataDbCfg().Password, db.cfg.GeneralCfg().DBDataEncoding,
-			db.cfg.DataDbCfg().Opts, db.cfg.DataDbCfg().Items)
-		if err != nil {
+		if err = db.dm.ReconnectAll(db.cfg); err != nil {
 			return
 		}
-		db.dm.Reconnect(d)
-		db.oldDBCfg = db.cfg.DataDbCfg().Clone()
+		db.oldDBCfg = db.cfg.DbCfg().Clone()
 		return
 	}
-	if db.cfg.DataDbCfg().Type == utils.MetaMongo {
-		mgo, canCast := db.dm.DataDB().(*engine.MongoStorage)
-		if !canCast {
-			return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
-				db.cfg.DataDbCfg().Type)
+	for dbKey, dbConn := range db.cfg.DbCfg().DBConns {
+		switch dbConn.Type {
+		case utils.MetaMongo:
+			mgo, canCast := db.dm.DataDB()[dbKey].(*engine.MongoStorage)
+			if !canCast {
+				return fmt.Errorf("can't conver DataDB of type %s to MongoStorage",
+					dbConn.Type)
+			}
+			mgo.SetTTL(db.cfg.DbCfg().Opts.MongoQueryTimeout)
+		case utils.MetaPostgres, utils.MetaMySQL:
+			msql, canCast := db.dm.DataDB()[dbKey].(*engine.SQLStorage)
+			if !canCast {
+				return fmt.Errorf("can't convert DB of type %s to SQLStorage",
+					dbConn.Type)
+			}
+			msql.DB.SetMaxOpenConns(db.cfg.DbCfg().Opts.SQLMaxOpenConns)
+			msql.DB.SetMaxIdleConns(db.cfg.DbCfg().Opts.SQLMaxIdleConns)
+			msql.DB.SetConnMaxLifetime(db.cfg.DbCfg().Opts.SQLConnMaxLifetime)
+		case utils.MetaInternal:
+			idb, canCast := db.dm.DataDB()[dbKey].(*engine.InternalDB)
+			if !canCast {
+				return fmt.Errorf("can't convert DB of type %s to InternalDB",
+					dbConn.Type)
+			}
+			idb.SetStringIndexedFields(dbConn.StringIndexedFields)
+			idb.SetPrefixIndexedFields(dbConn.PrefixIndexedFields)
 		}
-		mgo.SetTTL(db.cfg.DataDbCfg().Opts.MongoQueryTimeout)
+
 	}
 	return
 }
@@ -128,13 +156,15 @@ func (db *DataDBService) Shutdown(registry *servmanager.ServiceRegistry) error {
 	}
 	db.mu.Lock()
 	defer db.mu.Unlock()
-	db.dm.DataDB().Close()
+	for dataDBKey := range db.dm.DataDB() {
+		db.dm.DataDB()[dataDBKey].Close()
+	}
 	return nil
 }
 
 // ServiceName returns the service name
 func (db *DataDBService) ServiceName() string {
-	return utils.DataDB
+	return utils.DB
 }
 
 // ShouldRun returns if the service should be running
@@ -144,35 +174,60 @@ func (db *DataDBService) ShouldRun() bool { // db should allways run
 
 // needsConnectionReload returns if the DB connection needs to reloaded
 func (db *DataDBService) needsConnectionReload() bool {
-	if db.oldDBCfg.Type != db.cfg.DataDbCfg().Type ||
-		db.oldDBCfg.Host != db.cfg.DataDbCfg().Host ||
-		db.oldDBCfg.Name != db.cfg.DataDbCfg().Name ||
-		db.oldDBCfg.Port != db.cfg.DataDbCfg().Port ||
-		db.oldDBCfg.User != db.cfg.DataDbCfg().User ||
-		db.oldDBCfg.Password != db.cfg.DataDbCfg().Password {
+	if len(db.oldDBCfg.DBConns) != len(db.cfg.DbCfg().DBConns) {
 		return true
 	}
-	if db.cfg.DataDbCfg().Type == utils.MetaInternal { // in case of internal recreate the db using the new config
-		for key, itm := range db.oldDBCfg.Items {
-			if db.cfg.DataDbCfg().Items[key].Limit != itm.Limit &&
-				db.cfg.DataDbCfg().Items[key].StaticTTL != itm.StaticTTL &&
-				db.cfg.DataDbCfg().Items[key].TTL != itm.TTL {
-				return true
+	for dbConnKey, dbConn := range db.oldDBCfg.DBConns {
+		if _, has := db.cfg.DbCfg().DBConns[dbConnKey]; !has {
+			return true
+		}
+		if dbConn.Type != db.cfg.DbCfg().DBConns[dbConnKey].Type ||
+			dbConn.Host != db.cfg.DbCfg().DBConns[dbConnKey].Host ||
+			dbConn.Name != db.cfg.DbCfg().DBConns[dbConnKey].Name ||
+			dbConn.Port != db.cfg.DbCfg().DBConns[dbConnKey].Port ||
+			dbConn.User != db.cfg.DbCfg().DBConns[dbConnKey].User ||
+			dbConn.Password != db.cfg.DbCfg().DBConns[dbConnKey].Password ||
+			!utils.EqualUnorderedStringSlices(dbConn.StringIndexedFields,
+				db.cfg.DbCfg().DBConns[dbConnKey].StringIndexedFields) ||
+			!utils.EqualUnorderedStringSlices(dbConn.PrefixIndexedFields,
+				db.cfg.DbCfg().DBConns[dbConnKey].PrefixIndexedFields) {
+			return true
+		}
+		if db.cfg.DbCfg().DBConns[dbConnKey].Type == utils.MetaInternal { // in case of internal recreate the db using the new config
+			for key, itm := range db.oldDBCfg.Items {
+				if db.cfg.DbCfg().Items[key].Limit != itm.Limit &&
+					db.cfg.DbCfg().Items[key].StaticTTL != itm.StaticTTL &&
+					db.cfg.DbCfg().Items[key].TTL != itm.TTL &&
+					db.cfg.DbCfg().Items[key].DBConn != itm.DBConn {
+					return true
+				}
 			}
 		}
+		if db.oldDBCfg.DBConns[dbConnKey].Type == utils.MetaRedis &&
+			(db.oldDBCfg.Opts.RedisMaxConns != db.cfg.DbCfg().Opts.RedisMaxConns ||
+				db.oldDBCfg.Opts.RedisConnectAttempts != db.cfg.DbCfg().Opts.RedisConnectAttempts ||
+				db.oldDBCfg.Opts.RedisSentinel != db.cfg.DbCfg().Opts.RedisSentinel ||
+				db.oldDBCfg.Opts.RedisCluster != db.cfg.DbCfg().Opts.RedisCluster ||
+				db.oldDBCfg.Opts.RedisClusterSync != db.cfg.DbCfg().Opts.RedisClusterSync ||
+				db.oldDBCfg.Opts.RedisClusterOndownDelay != db.cfg.DbCfg().Opts.RedisClusterOndownDelay ||
+				db.oldDBCfg.Opts.RedisConnectTimeout != db.cfg.DbCfg().Opts.RedisConnectTimeout ||
+				db.oldDBCfg.Opts.RedisReadTimeout != db.cfg.DbCfg().Opts.RedisReadTimeout ||
+				db.oldDBCfg.Opts.RedisWriteTimeout != db.cfg.DbCfg().Opts.RedisWriteTimeout ||
+				db.oldDBCfg.Opts.RedisPoolPipelineWindow != db.cfg.DbCfg().Opts.RedisPoolPipelineWindow ||
+				db.oldDBCfg.Opts.RedisPoolPipelineLimit != db.cfg.DbCfg().Opts.RedisPoolPipelineLimit) {
+			return true
+		}
+		if db.cfg.DbCfg().DBConns[dbConnKey].Type == utils.MetaPostgres &&
+			(db.oldDBCfg.Opts.PgSSLMode != db.cfg.DbCfg().Opts.PgSSLMode ||
+				db.oldDBCfg.Opts.PgSSLCert != db.cfg.DbCfg().Opts.PgSSLCert ||
+				db.oldDBCfg.Opts.PgSSLKey != db.cfg.DbCfg().Opts.PgSSLKey ||
+				db.oldDBCfg.Opts.PgSSLPassword != db.cfg.DbCfg().Opts.PgSSLPassword ||
+				db.oldDBCfg.Opts.PgSSLCertMode != db.cfg.DbCfg().Opts.PgSSLCertMode ||
+				db.oldDBCfg.Opts.PgSSLRootCert != db.cfg.DbCfg().Opts.PgSSLRootCert) {
+			return true
+		}
 	}
-	return db.oldDBCfg.Type == utils.MetaRedis &&
-		(db.oldDBCfg.Opts.RedisMaxConns != db.cfg.DataDbCfg().Opts.RedisMaxConns ||
-			db.oldDBCfg.Opts.RedisConnectAttempts != db.cfg.DataDbCfg().Opts.RedisConnectAttempts ||
-			db.oldDBCfg.Opts.RedisSentinel != db.cfg.DataDbCfg().Opts.RedisSentinel ||
-			db.oldDBCfg.Opts.RedisCluster != db.cfg.DataDbCfg().Opts.RedisCluster ||
-			db.oldDBCfg.Opts.RedisClusterSync != db.cfg.DataDbCfg().Opts.RedisClusterSync ||
-			db.oldDBCfg.Opts.RedisClusterOndownDelay != db.cfg.DataDbCfg().Opts.RedisClusterOndownDelay ||
-			db.oldDBCfg.Opts.RedisConnectTimeout != db.cfg.DataDbCfg().Opts.RedisConnectTimeout ||
-			db.oldDBCfg.Opts.RedisReadTimeout != db.cfg.DataDbCfg().Opts.RedisReadTimeout ||
-			db.oldDBCfg.Opts.RedisWriteTimeout != db.cfg.DataDbCfg().Opts.RedisWriteTimeout ||
-			db.oldDBCfg.Opts.RedisPoolPipelineWindow != db.cfg.DataDbCfg().Opts.RedisPoolPipelineWindow ||
-			db.oldDBCfg.Opts.RedisPoolPipelineLimit != db.cfg.DataDbCfg().Opts.RedisPoolPipelineLimit)
+	return false
 }
 
 // DataManager returns the DataManager object.

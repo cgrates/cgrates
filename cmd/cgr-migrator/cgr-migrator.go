@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -36,8 +37,8 @@ var (
 	cgrMigratorFlags = flag.NewFlagSet(utils.CgrMigrator, flag.ContinueOnError)
 
 	sameDataDB bool
-	dmIN       migrator.MigratorDataDB
-	dmOUT      migrator.MigratorDataDB
+	dmFrom     = make(map[string]migrator.MigratorDataDB)
+	dmTo       = make(map[string]migrator.MigratorDataDB)
 	err        error
 	dfltCfg    = config.NewDefaultCGRConfig()
 	cfgPath    = cgrMigratorFlags.String(utils.CfgPathCgr, utils.EmptyString,
@@ -47,66 +48,40 @@ var (
 		"<*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*filters|*datadb>")
 	version = cgrMigratorFlags.Bool(utils.VersionCgr, false, "prints the application version")
 
-	inDataDBType = cgrMigratorFlags.String(utils.DataDBTypeCgr, dfltCfg.DataDbCfg().Type,
-		"the type of the DataDB Database <*redis|*mongo>")
-	inDataDBHost = cgrMigratorFlags.String(utils.DataDBHostCgr, dfltCfg.DataDbCfg().Host,
-		"the DataDB host")
-	inDataDBPort = cgrMigratorFlags.String(utils.DataDBPortCgr, dfltCfg.DataDbCfg().Port,
-		"the DataDB port")
-	inDataDBName = cgrMigratorFlags.String(utils.DataDBNameCgr, dfltCfg.DataDbCfg().Name,
-		"the name/number of the DataDB")
-	inDataDBUser = cgrMigratorFlags.String(utils.DataDBUserCgr, dfltCfg.DataDbCfg().User,
-		"the DataDB user")
-	inDataDBPass = cgrMigratorFlags.String(utils.DataDBPasswdCgr, dfltCfg.DataDbCfg().Password,
-		"the DataDB password")
 	inDBDataEncoding = cgrMigratorFlags.String(utils.DBDataEncodingCfg, dfltCfg.GeneralCfg().DBDataEncoding,
 		"the encoding used to store object Data in strings")
-	dbRedisMaxConns = cgrMigratorFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DataDbCfg().Opts.RedisMaxConns,
+	dbRedisMaxConns = cgrMigratorFlags.Int(utils.RedisMaxConnsCfg, dfltCfg.DbCfg().Opts.RedisMaxConns,
 		"The connection pool size")
-	dbRedisConnectAttempts = cgrMigratorFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DataDbCfg().Opts.RedisConnectAttempts,
+	dbRedisConnectAttempts = cgrMigratorFlags.Int(utils.RedisConnectAttemptsCfg, dfltCfg.DbCfg().Opts.RedisConnectAttempts,
 		"The maximum amount of dial attempts")
-	inDataDBRedisSentinel = cgrMigratorFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DataDbCfg().Opts.RedisSentinel,
+	inDataDBRedisSentinel = cgrMigratorFlags.String(utils.RedisSentinelNameCfg, dfltCfg.DbCfg().Opts.RedisSentinel,
 		"the name of redis sentinel")
 	dbRedisCluster = cgrMigratorFlags.Bool(utils.RedisClusterCfg, false,
 		"Is the redis datadb a cluster")
-	dbRedisClusterSync = cgrMigratorFlags.Duration(utils.RedisClusterSyncCfg, dfltCfg.DataDbCfg().Opts.RedisClusterSync,
+	dbRedisClusterSync = cgrMigratorFlags.Duration(utils.RedisClusterSyncCfg, dfltCfg.DbCfg().Opts.RedisClusterSync,
 		"The sync interval for the redis cluster")
-	dbRedisClusterDownDelay = cgrMigratorFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay,
+	dbRedisClusterDownDelay = cgrMigratorFlags.Duration(utils.RedisClusterOnDownDelayCfg, dfltCfg.DbCfg().Opts.RedisClusterOndownDelay,
 		"The delay before executing the commands if the redis cluster is in the CLUSTERDOWN state")
-	dbRedisConnectTimeout = cgrMigratorFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisConnectTimeout,
+	dbRedisConnectTimeout = cgrMigratorFlags.Duration(utils.RedisConnectTimeoutCfg, dfltCfg.DbCfg().Opts.RedisConnectTimeout,
 		"The amount of wait time until timeout for a connection attempt")
-	dbRedisReadTimeout = cgrMigratorFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisReadTimeout,
+	dbRedisReadTimeout = cgrMigratorFlags.Duration(utils.RedisReadTimeoutCfg, dfltCfg.DbCfg().Opts.RedisReadTimeout,
 		"The amount of wait time until timeout for reading operations")
-	dbRedisWriteTimeout = cgrMigratorFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DataDbCfg().Opts.RedisWriteTimeout,
+	dbRedisWriteTimeout = cgrMigratorFlags.Duration(utils.RedisWriteTimeoutCfg, dfltCfg.DbCfg().Opts.RedisWriteTimeout,
 		"The amount of wait time until timeout for writing operations")
-	dbRedisPoolPipelineWindow = cgrMigratorFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow,
+	dbRedisPoolPipelineWindow = cgrMigratorFlags.Duration(utils.RedisPoolPipelineWindowCfg, dfltCfg.DbCfg().Opts.RedisPoolPipelineWindow,
 		"Duration after which internal pipelines are flushed. Zero disables implicit pipelining.")
-	dbRedisPoolPipelineLimit = cgrMigratorFlags.Int(utils.RedisPoolPipelineLimitCfg, dfltCfg.DataDbCfg().Opts.RedisPoolPipelineLimit,
+	dbRedisPoolPipelineLimit = cgrMigratorFlags.Int(utils.RedisPoolPipelineLimitCfg, dfltCfg.DbCfg().Opts.RedisPoolPipelineLimit,
 		"Maximum number of commands that can be pipelined before flushing. Zero means no limit.")
 	dbRedisTls               = cgrMigratorFlags.Bool(utils.RedisTLSCfg, false, "Enable TLS when connecting to Redis")
 	dbRedisClientCertificate = cgrMigratorFlags.String(utils.RedisClientCertificateCfg, utils.EmptyString, "Path to the client certificate")
 	dbRedisClientKey         = cgrMigratorFlags.String(utils.RedisClientKeyCfg, utils.EmptyString, "Path to the client key")
 	dbRedisCACertificate     = cgrMigratorFlags.String(utils.RedisCACertificateCfg, utils.EmptyString, "Path to the CA certificate")
-	dbQueryTimeout           = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DataDbCfg().Opts.MongoQueryTimeout,
+	dbQueryTimeout           = cgrMigratorFlags.Duration(utils.MongoQueryTimeoutCfg, dfltCfg.DbCfg().Opts.MongoQueryTimeout,
 		"The timeout for queries")
-	dbMongoConnScheme = cgrMigratorFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DataDbCfg().Opts.MongoConnScheme,
+	dbMongoConnScheme = cgrMigratorFlags.String(utils.MongoConnSchemeCfg, dfltCfg.DbCfg().Opts.MongoConnScheme,
 		"Scheme for MongoDB connection <mongodb|mongodb+srv>")
 
-	outDataDBType = cgrMigratorFlags.String(utils.OutDataDBTypeCfg, utils.MetaDataDB,
-		"output DataDB type <*redis|*mongo>")
-	outDataDBHost = cgrMigratorFlags.String(utils.OutDataDBHostCfg, utils.MetaDataDB,
-		"output DataDB host to connect to")
-	outDataDBPort = cgrMigratorFlags.String(utils.OutDataDBPortCfg, utils.MetaDataDB,
-		"output DataDB port")
-	outDataDBName = cgrMigratorFlags.String(utils.OutDataDBNameCfg, utils.MetaDataDB,
-		"output DataDB name/number")
-	outDataDBUser = cgrMigratorFlags.String(utils.OutDataDBUserCfg, utils.MetaDataDB,
-		"output DataDB user")
-	outDataDBPass = cgrMigratorFlags.String(utils.OutDataDBPasswordCfg, utils.MetaDataDB,
-		"output DataDB password")
-	outDBDataEncoding = cgrMigratorFlags.String(utils.OutDataDBEncodingCfg, utils.MetaDataDB,
-		"the encoding used to store object Data in strings in move mode")
-	outDataDBRedisSentinel = cgrMigratorFlags.String(utils.OutDataDBRedisSentinel, utils.MetaDataDB,
+	outDataDBRedisSentinel = cgrMigratorFlags.String(utils.OutDBRedisSentinel, utils.MetaDataDB,
 		"the name of redis sentinel")
 	dryRun = cgrMigratorFlags.Bool(utils.DryRunCfg, false,
 		"parse loaded data for consistency and errors, without storing it")
@@ -135,7 +110,7 @@ func main() {
 			d, err := engine.NewDataDBConn(mgrCfg.ConfigDBCfg().Type,
 				mgrCfg.ConfigDBCfg().Host, mgrCfg.ConfigDBCfg().Port,
 				mgrCfg.ConfigDBCfg().Name, mgrCfg.ConfigDBCfg().User,
-				mgrCfg.ConfigDBCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
+				mgrCfg.ConfigDBCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding, nil, nil,
 				mgrCfg.ConfigDBCfg().Opts, nil)
 			if err != nil { // Cannot configure getter database, show stopper
 				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
@@ -149,178 +124,112 @@ func main() {
 		config.SetCgrConfig(mgrCfg)
 	}
 
-	// inDataDB
-	if *inDataDBType != dfltCfg.DataDbCfg().Type {
-		mgrCfg.DataDbCfg().Type = *inDataDBType
-	}
-	if *inDataDBHost != dfltCfg.DataDbCfg().Host {
-		mgrCfg.DataDbCfg().Host = *inDataDBHost
-	}
-	if *inDataDBPort != dfltCfg.DataDbCfg().Port {
-		mgrCfg.DataDbCfg().Port = *inDataDBPort
-	}
-	if *inDataDBName != dfltCfg.DataDbCfg().Name {
-		mgrCfg.DataDbCfg().Name = *inDataDBName
-	}
-	if *inDataDBUser != dfltCfg.DataDbCfg().User {
-		mgrCfg.DataDbCfg().User = *inDataDBUser
-	}
-	if *inDataDBPass != dfltCfg.DataDbCfg().Password {
-		mgrCfg.DataDbCfg().Password = *inDataDBPass
-	}
 	if *inDBDataEncoding != dfltCfg.GeneralCfg().DBDataEncoding {
 		mgrCfg.GeneralCfg().DBDataEncoding = *inDBDataEncoding
 	}
-	if *dbRedisMaxConns != dfltCfg.DataDbCfg().Opts.RedisMaxConns {
-		mgrCfg.DataDbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
+	if *dbRedisMaxConns != dfltCfg.DbCfg().Opts.RedisMaxConns {
+		mgrCfg.DbCfg().Opts.RedisMaxConns = *dbRedisMaxConns
 	}
-	if *dbRedisConnectAttempts != dfltCfg.DataDbCfg().Opts.RedisConnectAttempts {
-		mgrCfg.DataDbCfg().Opts.RedisConnectAttempts = *dbRedisConnectAttempts
+	if *dbRedisConnectAttempts != dfltCfg.DbCfg().Opts.RedisConnectAttempts {
+		mgrCfg.DbCfg().Opts.RedisConnectAttempts = *dbRedisConnectAttempts
 	}
-	if *inDataDBRedisSentinel != dfltCfg.DataDbCfg().Opts.RedisSentinel {
-		mgrCfg.DataDbCfg().Opts.RedisSentinel = *inDataDBRedisSentinel
+	if *inDataDBRedisSentinel != dfltCfg.DbCfg().Opts.RedisSentinel {
+		mgrCfg.DbCfg().Opts.RedisSentinel = *inDataDBRedisSentinel
 	}
-	if *dbRedisCluster != dfltCfg.DataDbCfg().Opts.RedisCluster {
-		mgrCfg.DataDbCfg().Opts.RedisCluster = *dbRedisCluster
+	if *dbRedisCluster != dfltCfg.DbCfg().Opts.RedisCluster {
+		mgrCfg.DbCfg().Opts.RedisCluster = *dbRedisCluster
 	}
-	if *dbRedisClusterSync != dfltCfg.DataDbCfg().Opts.RedisClusterSync {
-		mgrCfg.DataDbCfg().Opts.RedisClusterSync = *dbRedisClusterSync
+	if *dbRedisClusterSync != dfltCfg.DbCfg().Opts.RedisClusterSync {
+		mgrCfg.DbCfg().Opts.RedisClusterSync = *dbRedisClusterSync
 	}
-	if *dbRedisClusterDownDelay != dfltCfg.DataDbCfg().Opts.RedisClusterOndownDelay {
-		mgrCfg.DataDbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
+	if *dbRedisClusterDownDelay != dfltCfg.DbCfg().Opts.RedisClusterOndownDelay {
+		mgrCfg.DbCfg().Opts.RedisClusterOndownDelay = *dbRedisClusterDownDelay
 	}
-	if *dbRedisConnectTimeout != dfltCfg.DataDbCfg().Opts.RedisConnectTimeout {
-		mgrCfg.DataDbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
+	if *dbRedisConnectTimeout != dfltCfg.DbCfg().Opts.RedisConnectTimeout {
+		mgrCfg.DbCfg().Opts.RedisConnectTimeout = *dbRedisConnectTimeout
 	}
-	if *dbRedisReadTimeout != dfltCfg.DataDbCfg().Opts.RedisReadTimeout {
-		mgrCfg.DataDbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout
+	if *dbRedisReadTimeout != dfltCfg.DbCfg().Opts.RedisReadTimeout {
+		mgrCfg.DbCfg().Opts.RedisReadTimeout = *dbRedisReadTimeout
 	}
-	if *dbRedisWriteTimeout != dfltCfg.DataDbCfg().Opts.RedisWriteTimeout {
-		mgrCfg.DataDbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
+	if *dbRedisWriteTimeout != dfltCfg.DbCfg().Opts.RedisWriteTimeout {
+		mgrCfg.DbCfg().Opts.RedisWriteTimeout = *dbRedisWriteTimeout
 	}
-	if *dbRedisPoolPipelineWindow != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineWindow {
-		mgrCfg.DataDbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
+	if *dbRedisPoolPipelineWindow != dfltCfg.DbCfg().Opts.RedisPoolPipelineWindow {
+		mgrCfg.DbCfg().Opts.RedisPoolPipelineWindow = *dbRedisPoolPipelineWindow
 	}
-	if *dbRedisPoolPipelineLimit != dfltCfg.DataDbCfg().Opts.RedisPoolPipelineLimit {
-		mgrCfg.DataDbCfg().Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
+	if *dbRedisPoolPipelineLimit != dfltCfg.DbCfg().Opts.RedisPoolPipelineLimit {
+		mgrCfg.DbCfg().Opts.RedisPoolPipelineLimit = *dbRedisPoolPipelineLimit
 	}
-	if *dbRedisTls != dfltCfg.DataDbCfg().Opts.RedisTLS {
-		mgrCfg.DataDbCfg().Opts.RedisTLS = *dbRedisTls
+	if *dbRedisTls != dfltCfg.DbCfg().Opts.RedisTLS {
+		mgrCfg.DbCfg().Opts.RedisTLS = *dbRedisTls
 	}
-	if *dbRedisClientCertificate != dfltCfg.DataDbCfg().Opts.RedisClientCertificate {
-		mgrCfg.DataDbCfg().Opts.RedisClientCertificate = *dbRedisClientCertificate
+	if *dbRedisClientCertificate != dfltCfg.DbCfg().Opts.RedisClientCertificate {
+		mgrCfg.DbCfg().Opts.RedisClientCertificate = *dbRedisClientCertificate
 	}
-	if *dbRedisClientKey != dfltCfg.DataDbCfg().Opts.RedisClientKey {
-		mgrCfg.DataDbCfg().Opts.RedisClientKey = *dbRedisClientKey
+	if *dbRedisClientKey != dfltCfg.DbCfg().Opts.RedisClientKey {
+		mgrCfg.DbCfg().Opts.RedisClientKey = *dbRedisClientKey
 	}
-	if *dbRedisCACertificate != dfltCfg.DataDbCfg().Opts.RedisCACertificate {
-		mgrCfg.DataDbCfg().Opts.RedisCACertificate = *dbRedisCACertificate
+	if *dbRedisCACertificate != dfltCfg.DbCfg().Opts.RedisCACertificate {
+		mgrCfg.DbCfg().Opts.RedisCACertificate = *dbRedisCACertificate
 	}
-	if *dbQueryTimeout != dfltCfg.DataDbCfg().Opts.MongoQueryTimeout {
-		mgrCfg.DataDbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
+	if *dbQueryTimeout != dfltCfg.DbCfg().Opts.MongoQueryTimeout {
+		mgrCfg.DbCfg().Opts.MongoQueryTimeout = *dbQueryTimeout
 	}
-	if *dbMongoConnScheme != dfltCfg.DataDbCfg().Opts.MongoConnScheme {
-		mgrCfg.DataDbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
-	}
-
-	// outDataDB
-	if *outDataDBType == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBType == mgrCfg.MigratorCgrCfg().OutDataDBType {
-			mgrCfg.MigratorCgrCfg().OutDataDBType = mgrCfg.DataDbCfg().Type
-		}
-	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBType = *outDataDBType
+	if *dbMongoConnScheme != dfltCfg.DbCfg().Opts.MongoConnScheme {
+		mgrCfg.DbCfg().Opts.MongoConnScheme = *dbMongoConnScheme
 	}
 
-	if *outDataDBHost == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBHost == mgrCfg.MigratorCgrCfg().OutDataDBHost {
-			mgrCfg.MigratorCgrCfg().OutDataDBHost = mgrCfg.DataDbCfg().Host
-		}
-	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBHost = *outDataDBHost
-	}
-	if *outDataDBPort == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBPort == mgrCfg.MigratorCgrCfg().OutDataDBPort {
-			mgrCfg.MigratorCgrCfg().OutDataDBPort = mgrCfg.DataDbCfg().Port
-		}
-	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBPort = *outDataDBPort
-	}
-	if *outDataDBName == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBName == mgrCfg.MigratorCgrCfg().OutDataDBName {
-			mgrCfg.MigratorCgrCfg().OutDataDBName = mgrCfg.DataDbCfg().Name
-		}
-	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBName = *outDataDBName
-	}
-	if *outDataDBUser == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBUser == mgrCfg.MigratorCgrCfg().OutDataDBUser {
-			mgrCfg.MigratorCgrCfg().OutDataDBUser = mgrCfg.DataDbCfg().User
-		}
-	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBUser = *outDataDBUser
-	}
-	if *outDataDBPass == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBPassword == mgrCfg.MigratorCgrCfg().OutDataDBPassword {
-			mgrCfg.MigratorCgrCfg().OutDataDBPassword = mgrCfg.DataDbCfg().Password
-		}
-	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBPassword = *outDataDBPass
-	}
-	if *outDBDataEncoding == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBEncoding == mgrCfg.MigratorCgrCfg().OutDataDBEncoding {
-			mgrCfg.MigratorCgrCfg().OutDataDBEncoding = mgrCfg.GeneralCfg().DBDataEncoding
-		}
-	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBEncoding = *outDBDataEncoding
-	}
 	if *outDataDBRedisSentinel == utils.MetaDataDB {
-		if dfltCfg.MigratorCgrCfg().OutDataDBOpts.RedisSentinel == mgrCfg.MigratorCgrCfg().OutDataDBOpts.RedisSentinel {
-			mgrCfg.MigratorCgrCfg().OutDataDBOpts.RedisSentinel = dfltCfg.DataDbCfg().Opts.RedisSentinel
+		if dfltCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel == mgrCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel {
+			mgrCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel = dfltCfg.DbCfg().Opts.RedisSentinel
 		}
 	} else {
-		mgrCfg.MigratorCgrCfg().OutDataDBOpts.RedisSentinel = *outDataDBRedisSentinel
+		mgrCfg.MigratorCgrCfg().OutDBOpts.RedisSentinel = *outDataDBRedisSentinel
 	}
 
-	sameDataDB = mgrCfg.MigratorCgrCfg().OutDataDBType == mgrCfg.DataDbCfg().Type &&
-		mgrCfg.MigratorCgrCfg().OutDataDBHost == mgrCfg.DataDbCfg().Host &&
-		mgrCfg.MigratorCgrCfg().OutDataDBPort == mgrCfg.DataDbCfg().Port &&
-		mgrCfg.MigratorCgrCfg().OutDataDBName == mgrCfg.DataDbCfg().Name &&
-		mgrCfg.MigratorCgrCfg().OutDataDBEncoding == mgrCfg.GeneralCfg().DBDataEncoding
+	toDBIDsList := []string{} // collect all DBConns of Items in data_db config
+	for _, item := range mgrCfg.DbCfg().Items {
+		if !slices.Contains(toDBIDsList, item.DBConn) {
+			toDBIDsList = append(toDBIDsList, item.DBConn)
+		}
+	}
 
-	if dmIN, err = migrator.NewMigratorDataDB(mgrCfg.DataDbCfg().Type,
-		mgrCfg.DataDbCfg().Host, mgrCfg.DataDbCfg().Port,
-		mgrCfg.DataDbCfg().Name, mgrCfg.DataDbCfg().User,
-		mgrCfg.DataDbCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
-		mgrCfg, mgrCfg.DataDbCfg().Opts, mgrCfg.DataDbCfg().Items); err != nil {
+	fromDBIDsList := []string{} // collect all DBConns of MigratorFromItems in migrator config
+	for _, item := range mgrCfg.MigratorCgrCfg().FromItems {
+		if !slices.Contains(fromDBIDsList, item.DBConn) {
+			fromDBIDsList = append(fromDBIDsList, item.DBConn)
+		}
+	}
+
+	// order and compare the DBConns. If IDs are the same it means the db conns will be the same
+	sameDataDB = utils.EqualUnorderedStringSlices(fromDBIDsList, toDBIDsList)
+
+	if dmFrom, err = migrator.NewMigratorDataDBs(fromDBIDsList, mgrCfg.GeneralCfg().DBDataEncoding, mgrCfg); err != nil {
 		log.Fatal(err)
 	}
+
 	if *printConfig {
 		cfgJSON := utils.ToIJSON(mgrCfg.AsMapInterface())
 		log.Printf("Configuration loaded from %q:\n%s", *cfgPath, cfgJSON)
 	}
 
 	if sameDataDB {
-		dmOUT = dmIN
-	} else if dmOUT, err = migrator.NewMigratorDataDB(mgrCfg.MigratorCgrCfg().OutDataDBType,
-		mgrCfg.MigratorCgrCfg().OutDataDBHost, mgrCfg.MigratorCgrCfg().OutDataDBPort,
-		mgrCfg.MigratorCgrCfg().OutDataDBName, mgrCfg.MigratorCgrCfg().OutDataDBUser,
-		mgrCfg.MigratorCgrCfg().OutDataDBPassword, mgrCfg.MigratorCgrCfg().OutDataDBEncoding,
-		mgrCfg, mgrCfg.MigratorCgrCfg().OutDataDBOpts, mgrCfg.DataDbCfg().Items); err != nil {
-		log.Fatal(err)
+		dmTo = dmFrom
+	} else {
+		if dmTo, err = migrator.NewMigratorDataDBs(toDBIDsList, mgrCfg.GeneralCfg().DBDataEncoding, mgrCfg); err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	m, err := migrator.NewMigrator(dmIN, dmOUT,
-		*dryRun, sameDataDB)
+	m, err := migrator.NewMigrator(mgrCfg.DbCfg(), dmFrom, dmTo, *dryRun, sameDataDB)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer m.Close()
 	config.SetCgrConfig(mgrCfg)
 	if exec != nil && *exec != utils.EmptyString { // Run migrator
-		migrstats := make(map[string]int)
 		mig := strings.Split(*exec, utils.FieldsSep)
-		err, migrstats = m.Migrate(mig)
+		err, migrstats := m.Migrate(mig)
 		if err != nil {
 			log.Fatal(err)
 		}

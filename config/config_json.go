@@ -31,7 +31,7 @@ const (
 	CacheJSON           = "caches"
 	ListenJSON          = "listen"
 	HTTPJSON            = "http"
-	DataDBJSON          = "data_db"
+	DBJSON              = "db"
 	StorDBJSON          = "stor_db"
 	FilterSJSON         = "filters"
 	CDRsJSON            = "cdrs"
@@ -105,8 +105,7 @@ var (
 		PrometheusAgentJSON: utils.PrometheusAgent,
 		LoaderSJSON:         utils.LoaderS,
 		AnalyzerSJSON:       utils.AnalyzerS,
-		DataDBJSON:          utils.DataDB,
-		StorDBJSON:          utils.StorDB,
+		DBJSON:              utils.DB,
 		EEsJSON:             utils.EEs,
 		EFsJSON:             utils.EFs,
 		RateSJSON:           utils.RateS,
@@ -184,8 +183,7 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.loggerCfg,
 		cfg.efsCfg,
 		cfg.rpcConns,
-		cfg.dataDbCfg,
-		cfg.storDbCfg,
+		cfg.dbCfg,
 		cfg.listenCfg,
 		cfg.tlsCfg,
 		cfg.httpCfg,

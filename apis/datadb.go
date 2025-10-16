@@ -24,7 +24,7 @@ import (
 
 // DumpDataDB will dump all of datadb from memory to a file
 func (adms *AdminSv1) DumpDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
-	if err = adms.dm.DataDB().DumpDataDB(); err != nil {
+	if err = adms.dm.DumpDataDB(); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -33,7 +33,7 @@ func (adms *AdminSv1) DumpDataDB(ctx *context.Context, ignr *string, reply *stri
 
 // Will rewrite every dump file of DataDB
 func (adms *AdminSv1) RewriteDataDB(ctx *context.Context, ignr *string, reply *string) (err error) {
-	if err = adms.dm.DataDB().RewriteDataDB(); err != nil {
+	if err = adms.dm.RewriteDataDB(); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -47,7 +47,7 @@ type DumpBackupParams struct {
 
 // BackupDataDB will momentarely stop any dumping and rewriting in dataDB, until dump folder is backed up in folder path backupFolderPath. Making zip true will create a zip file in the path instead
 func (adms *AdminSv1) BackupDataDB(ctx *context.Context, params DumpBackupParams, reply *string) (err error) {
-	if err = adms.dm.DataDB().BackupDataDB(params.BackupFolderPath, params.Zip); err != nil {
+	if err = adms.dm.BackupDataDB(params.BackupFolderPath, params.Zip); err != nil {
 		return
 	}
 	*reply = utils.OK

@@ -55,8 +55,12 @@ func (admS *AdminS) V1GetAccountIDs(ctx *context.Context, args *utils.ArgsItemID
 	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep
 	lenPrfx := len(prfx)
 	prfx += args.ItemsPrefix
+	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaAccounts)
+	if err != nil {
+		return err
+	}
 	var keys []string
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
 		return
 	}
 	if len(keys) == 0 {
@@ -104,8 +108,12 @@ func (admS *AdminS) V1GetAccountsCount(ctx *context.Context, args *utils.ArgsIte
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.AccountPrefix + tnt + utils.ConcatenatedKeySep + args.ItemsPrefix
+	dataDB, _, err := admS.dm.DBConns().GetConn(utils.MetaAccounts)
+	if err != nil {
+		return err
+	}
 	var keys []string
-	if keys, err = admS.dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if keys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
 		return err
 	}
 	if len(keys) == 0 {

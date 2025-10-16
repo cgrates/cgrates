@@ -49,7 +49,7 @@ func (s *FilterService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		[]string{
 			utils.ConnManager,
 			utils.CacheS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -60,7 +60,7 @@ func (s *FilterService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	if err = cacheS.WaitToPrecache(shutdown, utils.CacheFilters); err != nil {
 		return err
 	}
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	s.mu.Lock()
 	defer s.mu.Unlock()

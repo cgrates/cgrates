@@ -23,12 +23,10 @@ import (
 	"github.com/cgrates/cgrates/engine"
 )
 
-func NewAdminS(cfg *config.CGRConfig, dm *engine.DataManager, connMgr *engine.ConnManager, fltrS *engine.FilterS,
-	storDB engine.StorDB) *AdminS {
+func NewAdminS(cfg *config.CGRConfig, dm *engine.DataManager, connMgr *engine.ConnManager, fltrS *engine.FilterS) *AdminS {
 	return &AdminS{
 		cfg:     cfg,
 		dm:      dm,
-		storDB:  storDB,
 		connMgr: connMgr,
 		fltrS:   fltrS,
 	}
@@ -37,7 +35,6 @@ func NewAdminS(cfg *config.CGRConfig, dm *engine.DataManager, connMgr *engine.Co
 type AdminS struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
-	storDB  engine.StorDB
 	connMgr *engine.ConnManager
 	fltrS   *engine.FilterS
 }

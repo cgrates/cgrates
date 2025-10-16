@@ -55,7 +55,7 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, rs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -71,7 +71,7 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.S
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
 
 	rs.mu.Lock()
 	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)

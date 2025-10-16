@@ -59,9 +59,17 @@ type v1Stat struct {
 }
 
 func (m *Migrator) migrateCurrentStats() (err error) {
+	mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaStatQueueProfiles)
+	if err != nil {
+		return err
+	}
 	//StatQueueProfile
 	var ids []string
-	if ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.Background(), utils.StatQueueProfilePrefix); err != nil {
+	if ids, err = dataDB.GetKeysForPrefix(context.Background(), utils.StatQueueProfilePrefix); err != nil {
 		return err
 	}
 	for _, id := range ids {
@@ -69,11 +77,11 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating stat queue profiles", id)
 		}
-		sqp, err := m.dmIN.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		sqp, err := mInDB.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
-		sgs, err := m.dmIN.DataManager().GetStatQueue(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		sgs, err := mInDB.DataManager().GetStatQueue(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 
 			return err
@@ -81,15 +89,23 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 		if sqp == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetStatQueueProfile(context.TODO(), sqp, true); err != nil {
+		mOutDB, err := m.GetOUTConn(utils.MetaStatQueueProfiles)
+		if err != nil {
+			return err
+		}
+		if err := mOutDB.DataManager().SetStatQueueProfile(context.TODO(), sqp, true); err != nil {
 			return err
 		}
 		if sgs != nil {
-			if err := m.dmOut.DataManager().SetStatQueue(context.TODO(), sgs); err != nil {
+			mOutDB, err := m.GetOUTConn(utils.MetaStatQueues)
+			if err != nil {
+				return err
+			}
+			if err := mOutDB.DataManager().SetStatQueue(context.TODO(), sgs); err != nil {
 				return err
 			}
 		}
-		if err := m.dmIN.DataManager().RemoveStatQueueProfile(context.TODO(), tntID[0], tntID[1], false); err != nil {
+		if err := mInDB.DataManager().RemoveStatQueueProfile(context.TODO(), tntID[0], tntID[1], false); err != nil {
 			return err
 		}
 		m.stats[utils.Stats]++
@@ -98,8 +114,12 @@ func (m *Migrator) migrateCurrentStats() (err error) {
 }
 
 func (m *Migrator) migrateV1Stats() (filter *engine.Filter, v2Stats *engine.StatQueue, sts *engine.StatQueueProfile, err error) {
+	mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
+	if err != nil {
+		return
+	}
 	var v1Sts *v1Stat
-	v1Sts, err = m.dmIN.getV1Stats()
+	v1Sts, err = mInDB.getV1Stats()
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -127,7 +147,11 @@ func remakeQueue(sq *engine.StatQueue) (out *engine.StatQueue) {
 func (m *Migrator) migrateV2Stats(v2Stats *engine.StatQueue) (v3Stats *engine.StatQueue, err error) {
 	if v2Stats == nil {
 		// read from DB
-		v2Stats, err = m.dmIN.getV2Stats()
+		mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
+		if err != nil {
+			return nil, err
+		}
+		v2Stats, err = mInDB.getV2Stats()
 		if err != nil {
 			return nil, err
 		} else if v2Stats == nil {
@@ -196,17 +220,29 @@ func (m *Migrator) migrateStats() (err error) {
 		}
 		if !m.dryRun {
 			if vrs[utils.Stats] == 1 {
-				if err = m.dmOut.DataManager().SetFilter(context.TODO(), filter, true); err != nil {
-					return
+				mOutDB, err := m.GetOUTConn(utils.MetaFilters)
+				if err != nil {
+					return err
+				}
+				if err = mOutDB.DataManager().SetFilter(context.TODO(), filter, true); err != nil {
+					return err
 				}
 			}
+			mOutDB, err := m.GetOUTConn(utils.MetaStatQueueProfiles)
+			if err != nil {
+				return err
+			}
 			// Set the fresh-migrated Stats into DB
-			if err = m.dmOut.DataManager().SetStatQueueProfile(context.TODO(), v4sts, true); err != nil {
-				return
+			if err = mOutDB.DataManager().SetStatQueueProfile(context.TODO(), v4sts, true); err != nil {
+				return err
 			}
 			if v3Stats != nil {
-				if err = m.dmOut.DataManager().SetStatQueue(context.TODO(), v3Stats); err != nil {
-					return
+				mOutDB, err := m.GetOUTConn(utils.MetaStatQueues)
+				if err != nil {
+					return err
+				}
+				if err = mOutDB.DataManager().SetStatQueue(context.TODO(), v3Stats); err != nil {
+					return err
 				}
 			}
 		}
@@ -404,9 +440,13 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 
 func (m *Migrator) migrateV3ToV4Stats(v3sts *engine.StatQueueProfile) (v4Cpp *engine.StatQueueProfile, err error) {
 	if v3sts == nil {
+		mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
+		if err != nil {
+			return nil, err
+		}
 		// read data from DataDB
-		if v3sts, err = m.dmIN.getV3Stats(); err != nil {
-			return
+		if v3sts, err = mInDB.getV3Stats(); err != nil {
+			return nil, err
 		}
 	}
 	if v3sts.FilterIDs, err = migrateInlineFilterV4(v3sts.FilterIDs); err != nil {

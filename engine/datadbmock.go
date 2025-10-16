@@ -585,6 +585,14 @@ func (dbM *DataDBMock) BackupDataDB(backupFolderPath string, zip bool) (err erro
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) BackupStorDBDump(backupFolderPath string, zip bool) (err error) {
+func (dbM *DataDBMock) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) ([]*utils.CDR, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err error) {
 	return utils.ErrNotImplemented
 }

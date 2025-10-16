@@ -52,7 +52,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, thrs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -68,7 +68,7 @@ func (thrs *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servma
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	thrs.mu.Lock()
 	defer thrs.mu.Unlock()
