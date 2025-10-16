@@ -213,6 +213,7 @@ func TestERSSQLFilters(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -398,6 +399,7 @@ func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -593,6 +595,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -786,6 +789,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -1017,6 +1021,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -1216,6 +1221,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -1416,6 +1422,7 @@ func TestERSSQLFiltersErr(t *testing.T) {
 	case utils.MetaInternal:
 		dbcfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
+		dbcfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbcfg = engine.MongoDBCfg
 	case utils.MetaPostgres:
@@ -1546,6 +1553,18 @@ cgrates.org,FLTR_VARS,*string,~*vars.*readerID,mysql`,
 
 "logger": {
     "level": 7
+},
+
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 
 "admins": {

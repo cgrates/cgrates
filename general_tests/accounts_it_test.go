@@ -90,10 +90,7 @@ func testV1AccLoadConfig(t *testing.T) {
 }
 
 func testV1AccResetDBs(t *testing.T) {
-	if err := engine.InitDataDB(accCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(accCfg); err != nil {
+	if err := engine.InitDB(accCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -125,7 +122,7 @@ func testV1AccGetAccountBeforeSet(t *testing.T) {
 
 func testV1AccLoadTarrifPlans(t *testing.T) {
 	caching := utils.MetaReload
-	if accCfg.DataDbCfg().Type == utils.MetaInternal {
+	if accCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

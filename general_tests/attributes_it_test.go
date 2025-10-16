@@ -91,10 +91,7 @@ func testAttributeSInitCfg(t *testing.T) {
 }
 
 func testAttributeSFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(attrCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(attrCfg); err != nil {
+	if err := engine.InitDB(attrCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -113,7 +110,7 @@ func testAttributeSRPCConn(t *testing.T) {
 
 func testAttributeSLoadFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if attrCfg.DataDbCfg().Type == utils.MetaInternal {
+	if attrCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var replyLD string

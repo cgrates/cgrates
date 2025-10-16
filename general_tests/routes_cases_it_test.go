@@ -197,10 +197,7 @@ func testV1RtsCaseLoadConfig(t *testing.T) {
 }
 
 func testV1RtsCaseFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(rtsCaseSv1Cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(rtsCaseSv1Cfg); err != nil {
+	if err := engine.InitDB(rtsCaseSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -217,7 +214,7 @@ func testV1RtsCaseRpcConn(t *testing.T) {
 
 func testV1RtsCaseFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if rtsCaseSv1Cfg.DataDbCfg().Type == utils.MetaInternal {
+	if rtsCaseSv1Cfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

@@ -42,11 +42,12 @@ func TestNewLoaderService(t *testing.T) {
 	cfg.LoaderCfg()[0].RunDelay = -1
 	cfg.LoaderCfg()[0].TpInDir = "notAFolder"
 	cM := engine.NewConnManager(cfg)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(idb, cfg, cM)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
@@ -148,11 +149,12 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(idb, cfg, cM)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)
@@ -231,11 +233,12 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(idb, cfg, cM)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)
@@ -353,11 +356,12 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(idb, cfg, cM)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)
@@ -416,11 +420,12 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(idb, cfg, cM)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM)

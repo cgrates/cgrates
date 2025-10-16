@@ -33,7 +33,7 @@ func TestTPEnewTPFilters(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(&engine.DataDBMock{
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*engine.Filter, error) {
 			fltr := &engine.Filter{
 				Tenant: utils.CGRateSorg,
@@ -62,7 +62,8 @@ func TestTPEnewTPFilters(t *testing.T) {
 			}
 			return fltr, nil
 		},
-	}, cfg, connMng)
+	}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMng)
 	exp := &TPFilters{
 		dm: dm,
 	}
@@ -75,8 +76,9 @@ func TestTPEnewTPFilters(t *testing.T) {
 func TestTPEExportItemsFilters(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpFltr := TPFilters{
 		dm: dm,
 	}
@@ -153,8 +155,9 @@ func TestTPEExportItemsFiltersNoDbConn(t *testing.T) {
 func TestTPEExportItemsFiltersIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpFltr := TPFilters{
 		dm: dm,
 	}

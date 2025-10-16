@@ -40,8 +40,9 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 	defer engine.Cache.Clear(nil)
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	acts := NewActionS(cfg, filters, dm, nil)
 
@@ -129,7 +130,8 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
-	acts.dm = engine.NewDataManager(data, cfg, nil)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	acts.dm = engine.NewDataManager(dbCm, cfg, nil)
 	actPrf.FilterIDs = []string{"invalid_filters"}
 	//Set in database and invalid filter, so it won t pass
 	if err := acts.dm.SetActionProfile(context.Background(), actPrf, false); err != nil {
@@ -151,8 +153,9 @@ func TestMatchingActionProfilesForEvent(t *testing.T) {
 func TestScheduledActions(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	acts := NewActionS(cfg, filters, dm, nil)
 
@@ -218,8 +221,9 @@ func TestScheduleAction(t *testing.T) {
 	engine.Cache.Clear(nil)
 	defer engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	acts := NewActionS(cfg, filters, dm, nil)
 
@@ -288,7 +292,8 @@ func TestScheduleAction(t *testing.T) {
 func TestAsapExecuteActions(t *testing.T) {
 	newData := &dataDBMockError{}
 	cfg := config.NewDefaultCGRConfig()
-	dm := engine.NewDataManager(newData, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newData}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	acts := NewActionS(cfg, filters, dm, nil)
 
@@ -315,8 +320,9 @@ func TestAsapExecuteActions(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
 	}
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	acts.dm = engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	acts.dm = engine.NewDataManager(dbCm, cfg, nil)
 	expSchedActs = newScheduledActs(context.Background(), cgrEv[0].Tenant, "another_id", utils.MetaNone, utils.EmptyString,
 		utils.EmptyString, evNM, nil)
 	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNotFound {
@@ -327,8 +333,9 @@ func TestAsapExecuteActions(t *testing.T) {
 func TestV1ScheduleActions(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	acts := NewActionS(cfg, filters, dm, nil)
 
@@ -385,8 +392,9 @@ func TestV1ScheduleActions(t *testing.T) {
 func TestV1ExecuteActions(t *testing.T) {
 	engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	acts := NewActionS(cfg, filters, dm, nil)
 
@@ -435,7 +443,8 @@ func TestV1ExecuteActions(t *testing.T) {
 	}
 
 	newData := &dataDBMockError{}
-	newDm := engine.NewDataManager(newData, cfg, nil)
+	dbCm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newData}, cfg.DbCfg())
+	newDm := engine.NewDataManager(dbCm, cfg, nil)
 	newActs := NewActionS(cfg, filters, newDm, nil)
 	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{}
 	if err := newActs.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrPartiallyExecuted {
@@ -557,8 +566,9 @@ func TestCDRLogActionExecute(t *testing.T) {
 	internalCDRsChann <- sMock
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
@@ -662,8 +672,9 @@ func TestCDRLogActionWithOpts(t *testing.T) {
 		tpl.ComputePath()
 	}
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(config.CgrConfig())
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), utils.CDRsV1, internalCDRsChann)
@@ -997,8 +1008,9 @@ func TestACScheduledActions(t *testing.T) {
 	engine.Cache.Clear(nil)
 	defer engine.Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	actPrf := &utils.ActionProfile{
 		Tenant:    "cgrates.org",
@@ -1096,8 +1108,9 @@ func TestV1ScheduleActionsProfileIgnoreFilters(t *testing.T) {
 	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 
 	filters := engine.NewFilterS(cfg, nil, dm)
 	acts := NewActionS(cfg, filters, dm, nil)
@@ -1152,8 +1165,9 @@ func TestV1ExecuteActionsProfileIgnoreFilters(t *testing.T) {
 	cfg.ActionSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	filters := engine.NewFilterS(cfg, nil, dm)
 	acts := NewActionS(cfg, filters, dm, nil)
 

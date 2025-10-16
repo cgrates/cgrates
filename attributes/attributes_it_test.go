@@ -45,7 +45,6 @@ var (
 	sTestsAttr = []func(t *testing.T){
 		testAttributesInitCfg,
 		testAttributesInitDataDb,
-		testAttributeSResetStorDb,
 		testAttributesStartEngine,
 		testAttributesRPCConn,
 
@@ -131,13 +130,7 @@ func testAttributesInitCfg(t *testing.T) {
 }
 
 func testAttributesInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(attrCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testAttributeSResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(attrCfg); err != nil {
+	if err := engine.InitDB(attrCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -2250,6 +2243,17 @@ func TestAttributesArith(t *testing.T) {
 	content := `{
 "attributes": {
 	"enabled": true
+},
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 "admins": {
 	"enabled": true

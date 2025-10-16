@@ -91,10 +91,7 @@ func testFltrSepLoadConfig(t *testing.T) {
 }
 
 func testFltrSepFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(fltrSepCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(fltrSepCfg); err != nil {
+	if err := engine.InitDB(fltrSepCfg); err != nil {
 		t.Fatal(err)
 	}
 }

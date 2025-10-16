@@ -447,13 +447,13 @@ func TestStoreDiffSectionHTTP(t *testing.T) {
 }
 
 func TestStoreDiffSectionDataDB(t *testing.T) {
-	section := DataDBJSON
+	section := DBJSON
 
 	cgrCfgV1 := NewDefaultCGRConfig()
-	cgrCfgV1.dataDbCfg = &DataDbCfg{}
+	cgrCfgV1.dbCfg = &DbCfg{}
 
 	cgrCfgV2 := NewDefaultCGRConfig()
-	cgrCfgV2.dataDbCfg = &DataDbCfg{}
+	cgrCfgV2.dbCfg = &DbCfg{}
 
 	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
 		t.Error(err)
@@ -987,6 +987,9 @@ func TestV1SetConfigErr2(t *testing.T) {
 
 func TestV1SetConfigErr3(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	args := &SetConfigArgs{
 		Config: map[string]any{
 			"cdrs": map[string]any{

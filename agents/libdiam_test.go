@@ -1147,11 +1147,12 @@ func TestFilterWithDiameterDP(t *testing.T) {
 		}})
 	dP := newDADataProvider(nil, avps)
 	cfg := config.NewDefaultCGRConfig()
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(idb,
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM,
 		cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, nil, "cgrates.org", "", filterS, nil)

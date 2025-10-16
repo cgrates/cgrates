@@ -49,6 +49,17 @@ func TestCoreSProfilingFlags(t *testing.T) {
 	cfgJSON := `{
 "general": {
 	"node_id": "apis_cores_test"
+},
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 }
 }`
 
@@ -173,9 +184,20 @@ func TestCoreSProfilingAPI(t *testing.T) {
 	})
 
 	ng := engine.TestEngine{
-		ConfigJSON: "{}",
-		Encoding:   *utils.Encoding,
-		DBCfg:      dbCfg,
+		ConfigJSON: `{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},}`,
+		Encoding: *utils.Encoding,
+		DBCfg:    dbCfg,
 	}
 	client, _ := ng.Run(t)
 

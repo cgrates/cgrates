@@ -85,10 +85,7 @@ func testLoadersIDBIdxItLoadConfig(t *testing.T) {
 }
 
 func testLoadersIDBIdxItFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(loadersIDBIdxCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(loadersIDBIdxCfg); err != nil {
+	if err := engine.InitDB(loadersIDBIdxCfg); err != nil {
 		t.Fatal(err)
 	}
 }

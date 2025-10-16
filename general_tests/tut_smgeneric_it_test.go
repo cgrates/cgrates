@@ -83,10 +83,7 @@ func testTutSMGInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testTutSMGFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(tutSMGCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(tutSMGCfg); err != nil {
+	if err := engine.InitDB(tutSMGCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -106,7 +103,7 @@ func testTutSMGRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if tutSMGCfg.DataDbCfg().Type == utils.MetaInternal {
+	if tutSMGCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

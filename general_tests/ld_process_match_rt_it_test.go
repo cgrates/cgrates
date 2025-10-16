@@ -107,10 +107,7 @@ func testLdPrMatchRtLoadConfig(t *testing.T) {
 }
 
 func testLdPrMatchRtFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(testLdPrMatchRtCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(testLdPrMatchRtCfg); err != nil {
+	if err := engine.InitDB(testLdPrMatchRtCfg); err != nil {
 		t.Fatal(err)
 	}
 }

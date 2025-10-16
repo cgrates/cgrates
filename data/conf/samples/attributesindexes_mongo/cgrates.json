@@ -4,17 +4,26 @@
   "level": 7
 },
 
-"data_db": {
-  "db_type": "mongo",
-  "db_name": "10",
-  "db_port": 27017
-},
-
-"stor_db": {
-  "db_type": "mongo",
-  "db_name": "cgrates",
-  "db_port": 27017,
-  "db_password": ""
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "mongo",
+			"db_host": "127.0.0.1",	
+			"db_port": 27017,
+			"db_name": "10",
+			"db_user": "cgrates"
+		},
+		"StorDB": {
+			"db_type": "mongo",
+			"db_host": "127.0.0.1",	
+			"db_port": 27017,
+			"db_name": "cgrates",
+			"db_user": "cgrates"
+		}
+	},
+	"items": {
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
+	}
 },
 
 "admins": {
@@ -24,7 +33,7 @@
 "attributes": {
   "enabled": true,
   "string_indexed_fields": [],
-  "prefix_indexed_fields": ["*req.Subject"],
+  "prefix_indexed_fields": ["*req.Subject"]
 }
   
 }

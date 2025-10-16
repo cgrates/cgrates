@@ -85,10 +85,7 @@ func testCsvLoadConfig(t *testing.T) {
 }
 
 func testCsvResetDBs(t *testing.T) {
-	if err := engine.InitDataDB(csvCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(csvCfg); err != nil {
+	if err := engine.InitDB(csvCfg); err != nil {
 		t.Fatal(err)
 	}
 }

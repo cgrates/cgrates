@@ -114,10 +114,7 @@ func testExpLoadConfig(t *testing.T) {
 }
 
 func testExpFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(expCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(expCfg); err != nil {
+	if err := engine.InitDB(expCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -140,7 +137,7 @@ func testExpRPCConn(t *testing.T) {
 
 func testExpLoadTPFromFolder(t *testing.T) {
 	caching := utils.MetaReload
-	if expCfg.DataDbCfg().Type == utils.MetaInternal {
+	if expCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string
@@ -218,7 +215,7 @@ func testExpCreatDirectoryWithTariffplan(t *testing.T) {
 
 func testExpLoadTPFromExported(t *testing.T) {
 	caching := utils.MetaReload
-	if expCfg.DataDbCfg().Type == utils.MetaInternal {
+	if expCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

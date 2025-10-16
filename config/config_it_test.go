@@ -1322,8 +1322,16 @@ func testApisLoadFromPath(t *testing.T) {
 		},
 		
 		
-		"data_db": {
-			"db_type": "*internal"
+		"db": {
+			"db_conns": {
+				"*default": {	
+					"db_type": "*internal"
+				},
+			},
+			"opts":{
+				"internalDBRewriteInterval": "0s",
+				"internalDBDumpInterval": "0s"
+			}
 		},
 			
 		

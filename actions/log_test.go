@@ -32,8 +32,9 @@ func TestACExecuteActCDRLog(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().CDRsConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}
 	cfg.TemplatesCfg()[utils.MetaCdrLog][0].Filters = []string{"invalid_filter_value"}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	apAction := &utils.APAction{
 		ID:   "TEST_ACTION",

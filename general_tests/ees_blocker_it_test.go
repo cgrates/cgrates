@@ -99,10 +99,7 @@ func testEEsBlockerLoadConfig(t *testing.T) {
 }
 
 func testEEsBlockerFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(eesBlockerCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(eesBlockerCfg); err != nil {
+	if err := engine.InitDB(eesBlockerCfg); err != nil {
 		t.Fatal(err)
 	}
 }

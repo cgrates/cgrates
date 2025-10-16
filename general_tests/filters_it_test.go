@@ -99,10 +99,7 @@ func testV1FltrLoadConfig(t *testing.T) {
 }
 
 func testV1FltrFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(fltrCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(fltrCfg); err != nil {
+	if err := engine.InitDB(fltrCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -120,7 +117,7 @@ func testV1FltrRpcConn(t *testing.T) {
 func testV1FltrLoadTarrifPlans(t *testing.T) {
 
 	caching := utils.MetaReload
-	if fltrCfg.DataDbCfg().Type == utils.MetaInternal {
+	if fltrCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

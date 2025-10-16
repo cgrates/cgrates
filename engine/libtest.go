@@ -45,48 +45,36 @@ import (
 	"github.com/creack/pty"
 )
 
-func InitDataDB(cfg *config.CGRConfig) error {
-	dataDB, err := NewDataDBConn(cfg.DataDbCfg().Type,
-		cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-		cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-		cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
-	if err != nil {
-		return err
-	}
-	defer dataDB.Close()
-	if err := dataDB.Flush(""); err != nil {
-		return err
-	}
-	// Set versions before starting.
-	if err := OverwriteDBVersions(dataDB); err != nil {
-		return err
-	}
-	return nil
-}
-
-func InitStorDB(cfg *config.CGRConfig) error {
-	storDB, err := NewStorDBConn(cfg.StorDbCfg().Type,
-		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields,
-		cfg.StorDbCfg().Opts, cfg.StorDbCfg().Items)
-	if err != nil {
-		return err
-	}
-	defer storDB.Close()
-
-	dbPath := strings.Trim(cfg.StorDbCfg().Type, "*")
-	if err := storDB.Flush(path.Join(cfg.DataFolderPath, "storage",
-		dbPath)); err != nil {
-		return err
-	}
-
-	if slices.Contains([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
-		cfg.StorDbCfg().Type) {
-		if err := SetDBVersions(storDB); err != nil {
+func InitDB(cfg *config.CGRConfig) error {
+	for _, dbConn := range cfg.DbCfg().DBConns {
+		dataDB, err := NewDataDBConn(dbConn.Type,
+			dbConn.Host, dbConn.Port,
+			dbConn.Name, dbConn.User,
+			dbConn.Password, cfg.GeneralCfg().DBDataEncoding,
+			dbConn.StringIndexedFields, dbConn.PrefixIndexedFields,
+			cfg.DbCfg().Opts, cfg.DbCfg().Items)
+		if err != nil {
 			return err
+		}
+		defer dataDB.Close()
+		var dbPath string
+		if slices.Contains([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
+			dbConn.Type) {
+			dbPath = path.Join(cfg.DataFolderPath, "storage", strings.Trim(dbConn.Type, "*"))
+		}
+		if err := dataDB.Flush(dbPath); err != nil {
+			return err
+		}
+		// Set versions before starting.
+		if slices.Contains([]string{utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres},
+			dbConn.Type) {
+			if err := SetDBVersions(dataDB); err != nil {
+				return err
+			}
+		} else {
+			if err := OverwriteDBVersions(dataDB); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -96,7 +84,7 @@ func InitConfigDB(cfg *config.CGRConfig) error {
 	d, err := NewDataDBConn(cfg.ConfigDBCfg().Type,
 		cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 		cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
-		cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+		cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding, nil, nil,
 		cfg.ConfigDBCfg().Opts, nil)
 	if err != nil {
 		return err
@@ -177,7 +165,12 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disableR
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	loader, err := NewTpReader(dm.dataDB, csvStorage, "",
+	dataDBs := make(map[string]DataDB, len(dm.DataDB()))
+	for connID, dataDB := range dm.DataDB() {
+		dataDBs[connID] = dataDB
+	}
+	dbcManager := NewDBConnManager(dataDBs, dm.cfg.DbCfg())
+	loader, err := NewTpReader(dbcManager, csvStorage, "",
 		timezone, cacheConns, schedConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -346,7 +339,6 @@ type TestEngine struct {
 	Encoding         string            // data encoding type (e.g. JSON, GOB)
 	LogBuffer        io.Writer         // captures log output of the test environment
 	PreserveDataDB   bool              // prevents automatic data_db flush when set
-	PreserveStorDB   bool              // prevents automatic stor_db flush when set
 	TpPath           string            // path to the tariff plans
 	TpFiles          map[string]string // CSV data for tariff plans: filename -> content
 	GracefulShutdown bool              // shutdown the engine gracefuly, otherwise use process.Kill
@@ -362,7 +354,7 @@ type TestEngine struct {
 func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
 	cfg := parseCfg(t, ng.ConfigPath, ng.ConfigJSON, ng.DBCfg)
-	FlushDBs(t, cfg, !ng.PreserveDataDB, !ng.PreserveStorDB)
+	FlushDBs(t, cfg, !ng.PreserveDataDB)
 	if ng.TpPath != "" || len(ng.TpFiles) != 0 {
 		if ng.TpPath == "" {
 			ng.TpPath = t.TempDir()
@@ -377,12 +369,15 @@ func (ng TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *co
 	if ng.TpPath == "" {
 		ng.TpPath = cfg.LoaderCfg()[0].TpInDir
 	}
+	if cfg.LoaderCfg().Enabled() {
+		WaitForServiceStart(t, client, utils.LoaderS, 200*time.Millisecond)
+	}
 	loadCSVs(t, ng.TpPath, ng.TpFiles)
 	return client, cfg
 }
 
-// DBParams contains database connection parameters.
-type DBParams struct {
+// DBConn contains database connection parameters.
+type DBConn struct {
 	Type     *string `json:"db_type,omitempty"`
 	Host     *string `json:"db_host,omitempty"`
 	Port     *int    `json:"db_port,omitempty"`
@@ -391,10 +386,21 @@ type DBParams struct {
 	Password *string `json:"db_password,omitempty"`
 }
 
+// Item contains db item parameters
+type Item struct {
+	Limit  *int    `json:"limit,omitempty"`
+	DbConn *string `json:"dbConn,omitempty"`
+}
+
+// DBParams contains database connection parameters.
+type DBParams struct {
+	DBConns map[string]DBConn `json:"db_conns,omitempty"`
+	Items   map[string]Item   `json:"items,omitempty"`
+}
+
 // DBCfg holds the configurations for data_db and/or stor_db.
 type DBCfg struct {
-	DataDB *DBParams `json:"data_db,omitempty"`
-	StorDB *DBParams `json:"stor_db,omitempty"`
+	DB *DBParams `json:"db,omitempty"`
 }
 
 // parseCfg initializes and returns a CGRConfig. It handles both static and
@@ -418,7 +424,7 @@ func parseCfg(t testing.TB, cfgPath, cfgJSON string, dbCfg DBCfg) (cfg *config.C
 		}
 	}()
 
-	hasCustomDBConfig := dbCfg.DataDB != nil || dbCfg.StorDB != nil
+	hasCustomDBConfig := dbCfg.DB != nil
 	if cfgPath != "" && cfgJSON == "" && !hasCustomDBConfig {
 		// Config file already exists and is static; no need for
 		// further processing.
@@ -513,16 +519,11 @@ func loadCSVs(t testing.TB, tpPath string, csvFiles map[string]string) {
 
 // FlushDBs resets the databases specified in the configuration if the
 // corresponding flags are true.
-func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB, flushStorDB bool) {
+func FlushDBs(t testing.TB, cfg *config.CGRConfig, flushDataDB bool) {
 	t.Helper()
 	if flushDataDB {
-		if err := InitDataDB(cfg); err != nil {
-			t.Fatalf("failed to flush %s dataDB: %v", cfg.DataDbCfg().Type, err)
-		}
-	}
-	if flushStorDB {
-		if err := InitStorDB(cfg); err != nil {
-			t.Fatalf("failed to flush %s storDB: %v", cfg.StorDbCfg().Type, err)
+		if err := InitDB(cfg); err != nil {
+			t.Fatalf("failed to flush DataDB err: %v", err)
 		}
 	}
 }
@@ -608,11 +609,10 @@ var serviceReceivers = map[string]string{
 	utils.CapS:            "",
 	utils.CommonListenerS: "",
 	utils.ConnManager:     "",
-	utils.DataDB:          "",
+	utils.DB:              "",
 	utils.FilterS:         "",
 	utils.GlobalVarS:      "",
 	utils.LoggerS:         "",
-	utils.StorDB:          "",
 	utils.RegistrarC:      "",
 	utils.AsteriskAgent:   "",
 	utils.DiameterAgent:   "",
@@ -688,34 +688,96 @@ func WaitForServiceShutdown(t testing.TB, client *birpc.Client, service string, 
 	}
 }
 
-// Default DB configurations. For Redis/MySQL, it's missing because
-// it's the default.
+// Default DB configurations.
 var (
 	InternalDBCfg = DBCfg{
-		DataDB: &DBParams{
-			Type: utils.StringPointer(utils.MetaInternal),
+		DB: &DBParams{
+			DBConns: map[string]DBConn{
+				utils.MetaDefault: {
+					Type: utils.StringPointer(utils.MetaInternal),
+				},
+			},
 		},
-		StorDB: &DBParams{
-			Type: utils.StringPointer(utils.MetaInternal),
+	}
+	MySQLDBCfg = DBCfg{
+		DB: &DBParams{
+			DBConns: map[string]DBConn{
+				utils.MetaDefault: {
+					Type: utils.StringPointer(utils.MetaRedis),
+					Host: utils.StringPointer("127.0.0.1"),
+					Port: utils.IntPointer(6379),
+					Name: utils.StringPointer("10"),
+					User: utils.StringPointer(utils.CGRateSLwr),
+				},
+				utils.StorDB: {
+					Type:     utils.StringPointer(utils.MetaMySQL),
+					Host:     utils.StringPointer("127.0.0.1"),
+					Port:     utils.IntPointer(3306),
+					Name:     utils.StringPointer(utils.CGRateSLwr),
+					User:     utils.StringPointer(utils.CGRateSLwr),
+					Password: utils.StringPointer("CGRateS.org"),
+				},
+			},
+			Items: map[string]Item{
+				utils.MetaCDRs: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+			},
 		},
 	}
 	MongoDBCfg = DBCfg{
-		DataDB: &DBParams{
-			Type: utils.StringPointer(utils.MetaMongo),
-			Port: utils.IntPointer(27017),
-			Name: utils.StringPointer("10"),
-		},
-		StorDB: &DBParams{
-			Type:     utils.StringPointer(utils.MetaMongo),
-			Port:     utils.IntPointer(27017),
-			Name:     utils.StringPointer("cgrates"),
-			Password: utils.StringPointer(""),
+		DB: &DBParams{
+			DBConns: map[string]DBConn{
+				utils.MetaDefault: {
+					Type: utils.StringPointer(utils.MetaMongo),
+					Host: utils.StringPointer("127.0.0.1"),
+					Port: utils.IntPointer(27017),
+					Name: utils.StringPointer("10"),
+					User: utils.StringPointer(utils.CGRateSLwr),
+				},
+				utils.StorDB: {
+					Type:     utils.StringPointer(utils.MetaMongo),
+					Host:     utils.StringPointer("127.0.0.1"),
+					Port:     utils.IntPointer(27017),
+					Name:     utils.StringPointer(utils.CGRateSLwr),
+					User:     utils.StringPointer(utils.CGRateSLwr),
+					Password: utils.StringPointer(""),
+				},
+			},
+			Items: map[string]Item{
+				utils.MetaCDRs: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+			},
 		},
 	}
 	PostgresDBCfg = DBCfg{
-		StorDB: &DBParams{
-			Type: utils.StringPointer(utils.MetaPostgres),
-			Port: utils.IntPointer(5432),
+		DB: &DBParams{
+			DBConns: map[string]DBConn{
+				utils.MetaDefault: {
+					Type: utils.StringPointer(utils.MetaRedis),
+					Host: utils.StringPointer("127.0.0.1"),
+					Port: utils.IntPointer(6379),
+					Name: utils.StringPointer("10"),
+					User: utils.StringPointer(utils.CGRateSLwr),
+				},
+				utils.StorDB: {
+					Type:     utils.StringPointer(utils.MetaPostgres),
+					Host:     utils.StringPointer("127.0.0.1"),
+					Port:     utils.IntPointer(5432),
+					Name:     utils.StringPointer(utils.CGRateSLwr),
+					User:     utils.StringPointer(utils.CGRateSLwr),
+					Password: utils.StringPointer("CGRateS.org"),
+				},
+			},
+			Items: map[string]Item{
+				utils.MetaCDRs: {
+					Limit:  utils.IntPointer(-1),
+					DbConn: utils.StringPointer(utils.StorDB),
+				},
+			},
 		},
 	}
 )

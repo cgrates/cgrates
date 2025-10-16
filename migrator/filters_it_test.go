@@ -103,27 +103,19 @@ func testFltrStart(testName, action string, t *testing.T) {
 }
 
 func testFltrITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(fltrCfgIn.DataDbCfg().Type,
-		fltrCfgIn.DataDbCfg().Host, fltrCfgIn.DataDbCfg().Port,
-		fltrCfgIn.DataDbCfg().Name, fltrCfgIn.DataDbCfg().User,
-		fltrCfgIn.DataDbCfg().Password, fltrCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig(), fltrCfgIn.DataDbCfg().Opts, fltrCfgIn.DataDbCfg().Items)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgIn.GeneralCfg().DBDataEncoding, fltrCfgIn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(fltrCfgOut.DataDbCfg().Type,
-		fltrCfgOut.DataDbCfg().Host, fltrCfgOut.DataDbCfg().Port,
-		fltrCfgOut.DataDbCfg().Name, fltrCfgOut.DataDbCfg().User,
-		fltrCfgOut.DataDbCfg().Password, fltrCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig(), fltrCfgOut.DataDbCfg().Opts, fltrCfgOut.DataDbCfg().Items)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgOut.GeneralCfg().DBDataEncoding, fltrCfgOut)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if reflect.DeepEqual(inPath, outPath) {
-		fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+		fltrMigrator, err = NewMigrator(fltrCfgOut.DbCfg(), dataDBIn, dataDBOut,
 			false, true)
 	} else {
-		fltrMigrator, err = NewMigrator(dataDBIn, dataDBOut,
+		fltrMigrator, err = NewMigrator(fltrCfgOut.DbCfg(), dataDBIn, dataDBOut,
 			false, false)
 	}
 	if err != nil {
@@ -132,12 +124,12 @@ func testFltrITConnect(t *testing.T) {
 }
 
 func testFltrITFlush(t *testing.T) {
-	fltrMigrator.dmOut.DataManager().DataDB().Flush("")
-	if err := engine.SetDBVersions(fltrMigrator.dmOut.DataManager().DataDB()); err != nil {
+	fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
-	fltrMigrator.dmIN.DataManager().DataDB().Flush("")
-	if err := engine.SetDBVersions(fltrMigrator.dmIN.DataManager().DataDB()); err != nil {
+	fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].Flush("")
+	if err := engine.SetDBVersions(fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault]); err != nil {
 		t.Error("Error  ", err.Error())
 	}
 }
@@ -162,79 +154,31 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		}},
 	}
 	expFilters.Compile()
-	attrProf := &utils.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_1",
-		FilterIDs: []string{"*string:Account:1001", "FLTR_2"},
-		Attributes: []*utils.Attribute{
-			{
-				FilterIDs: []string{"*string:Account:1001"},
-				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     utils.NewRSRParsersMustCompile("1002", utils.InfieldSep),
-			},
-		},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-	}
-	expAttrProf := &utils.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "FLTR_2"},
-		Attributes: []*utils.Attribute{
-			{
-				FilterIDs: []string{"*string:~*req.Account:1001"},
-				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     utils.NewRSRParsersMustCompile("1002", utils.InfieldSep),
-			},
-		},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-	}
-	expAttrProf.Compile()
-	attrProf.Compile()
 	switch fltrAction {
 	case utils.Migrate:
-		if err := fltrMigrator.dmIN.setV1Filter(fltr); err != nil {
+		if err := fltrMigrator.dmFrom[utils.MetaDefault].setV1Filter(fltr); err != nil {
 			t.Error("Error when setting v1 Filters ", err.Error())
 		}
-		if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(context.TODO(), attrProf, false); err != nil {
-			t.Error("Error when setting attribute profile for v1 Filters ", err.Error())
-		}
+
 		// manually set the indexes because the GetFilter context.TODO(),functions compile the value from DB that is still the old version
 		wrongFltrIdx := map[string]utils.StringSet{
 			"*prefix::1001": {"ATTR_1": struct{}{}},
 			// "*string:Account:1001": {"ATTR_1": struct{}{}},
 		}
 
-		if err := fltrMigrator.dmIN.DataManager().SetIndexes(context.TODO(),
-			utils.CacheAttributeFilterIndexes,
-			utils.ConcatenatedKey(attrProf.Tenant, utils.MetaAny),
-			wrongFltrIdx, false, ""); err != nil {
-			t.Error(err)
-		}
-
-		wrongFltrIdx = map[string]utils.StringSet{
-			utils.CacheAttributeFilterIndexes: {"ATTR_1": struct{}{}},
-		}
-		if err := fltrMigrator.dmIN.DataManager().SetIndexes(context.TODO(),
+		if err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().SetIndexes(context.TODO(),
 			utils.CacheReverseFilterIndexes,
 			"cgrates.org:FLTR_2",
 			wrongFltrIdx, false, ""); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.Versions{utils.RQF: 1}
-		err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Filters ", err.Error())
 		}
 		//check if version was set correctly
-		if vrs, err := fltrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+		if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.RQF] != 1 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
@@ -246,13 +190,13 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when migrating Filters ", err.Error())
 		}
 		//check if version was updated
-		if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 			t.Error(err)
 		} else if vrs[utils.RQF] != 5 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 		}
 		//check if Filters was migrate correctly
-		result, err := fltrMigrator.dmOut.DataManager().GetFilter(context.TODO(), fltr.Tenant, fltr.ID, false, false, utils.NonTransactional)
+		result, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().GetFilter(context.TODO(), fltr.Tenant, fltr.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatalf("Error when getting Attributes %v", err.Error())
 		}
@@ -260,36 +204,12 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		if !reflect.DeepEqual(*expFilters, *result) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expFilters), utils.ToJSON(result))
 		}
-
-		resultattr, err := fltrMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(context.TODO(), attrProf.Tenant, attrProf.ID)
-		if err != nil {
-			t.Fatalf("Error when getting Attributes %v", err.Error())
-		}
-		resultattr.Compile()
-		if !reflect.DeepEqual(*expAttrProf, *resultattr) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultattr))
-		}
-		// the Indexes should be recomputed after migration to the same DB
-		if inPath != outPath {
-			expFltrIdx := map[string]utils.StringSet{
-				"*prefix:*req.Account:1001": {"ATTR_1": struct{}{}},
-				"*string:*req.Account:1001": {"ATTR_1": struct{}{}}}
-
-			if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(context.TODO(),
-				utils.CacheAttributeFilterIndexes,
-				attrProf.Tenant,
-				"", utils.NonTransactional, false, false); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
-				t.Errorf("Expected %v, received: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
-			}
-		}
 	case utils.Move:
-		if err := fltrMigrator.dmIN.DataManager().SetFilter(context.TODO(), expFilters, true); err != nil {
+		if err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().SetFilter(context.TODO(), expFilters, true); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for Filters ", err.Error())
 		}
@@ -299,7 +219,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when fltrMigratorrating Filters ", err.Error())
 		}
 		//check if account was migrate correctly
-		result, err := fltrMigrator.dmOut.DataManager().GetFilter(context.TODO(), expFilters.Tenant, expFilters.ID, false, false, utils.NonTransactional)
+		result, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().GetFilter(context.TODO(), expFilters.Tenant, expFilters.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error(err)
 		}
@@ -308,7 +228,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expFilters), utils.ToJSON(result))
 		}
 		// check if old account was deleted
-		result, err = fltrMigrator.dmIN.DataManager().GetFilter(context.TODO(), expFilters.Tenant, expFilters.ID, false, false, utils.NonTransactional)
+		result, err = fltrMigrator.dmFrom[utils.MetaDefault].DataManager().GetFilter(context.TODO(), expFilters.Tenant, expFilters.ID, false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -362,48 +282,8 @@ func testFltrITMigratev2(t *testing.T) {
 		},
 	}
 	expFilters.Compile()
-	attrProf := &utils.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_1",
-		FilterIDs: []string{"*string:~Account:1001", "FLTR_2"},
-		Attributes: []*utils.Attribute{
-			{
-				FilterIDs: []string{"*string:~Account:1001"},
-				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     utils.NewRSRParsersMustCompile("1002", utils.InfieldSep),
-			},
-		},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-	}
-	expAttrProf := &utils.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_1",
-		FilterIDs: []string{"*string:~*req.Account:1001", "FLTR_2"},
-		Attributes: []*utils.Attribute{
-			{
-				FilterIDs: []string{"*string:~*req.Account:1001"},
-				Path:      utils.MetaReq + utils.NestingSep + "Account",
-				Value:     utils.NewRSRParsersMustCompile("1002", utils.InfieldSep),
-			},
-		},
-		Weights: utils.DynamicWeights{
-			{
-				Weight: 10,
-			},
-		},
-	}
-	expAttrProf.Compile()
-	attrProf.Compile()
-
-	if err := fltrMigrator.dmIN.setV1Filter(filters); err != nil {
+	if err := fltrMigrator.dmFrom[utils.MetaDefault].setV1Filter(filters); err != nil {
 		t.Error("Error when setting v1 Filters ", err.Error())
-	}
-	if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(context.TODO(), attrProf, false); err != nil {
-		t.Error("Error when setting attribute profile for v1 Filters ", err.Error())
 	}
 
 	// manually set the indexes because the GetFilter context.TODO(),functions compile the value from DB that is still the old version
@@ -411,17 +291,7 @@ func testFltrITMigratev2(t *testing.T) {
 		"*string::1001":         {"ATTR_1": struct{}{}},
 		"*string:~Account:1001": {"ATTR_1": struct{}{}}}
 
-	if err := fltrMigrator.dmIN.DataManager().SetIndexes(context.TODO(),
-		utils.CacheAttributeFilterIndexes,
-		utils.ConcatenatedKey(attrProf.Tenant, utils.MetaAny),
-		wrongFltrIdx, false, ""); err != nil {
-		t.Error(err)
-	}
-
-	wrongFltrIdx = map[string]utils.StringSet{
-		utils.CacheAttributeFilterIndexes: {"ATTR_1": struct{}{}},
-	}
-	if err := fltrMigrator.dmIN.DataManager().SetIndexes(context.TODO(),
+	if err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().SetIndexes(context.TODO(),
 		utils.CacheReverseFilterIndexes,
 		"cgrates.org:FLTR_2",
 		wrongFltrIdx, false, ""); err != nil {
@@ -429,12 +299,12 @@ func testFltrITMigratev2(t *testing.T) {
 	}
 
 	currentVersion := engine.Versions{utils.RQF: 2}
-	err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for Filters ", err.Error())
 	}
 	//check if version was set correctly
-	if vrs, err := fltrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+	if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.RQF] != 2 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
@@ -446,45 +316,19 @@ func testFltrITMigratev2(t *testing.T) {
 		t.Error("Error when migrating Filters ", err.Error())
 	}
 	//check if version was updated
-	if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+	if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.RQF] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
 	//check if Filters was migrate correctly
-	result, err := fltrMigrator.dmOut.DataManager().GetFilter(context.TODO(), filters.Tenant, filters.ID, false, false, utils.NonTransactional)
+	result, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().GetFilter(context.TODO(), filters.Tenant, filters.ID, false, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatalf("Error when getting filters %v", err.Error())
 	}
 	result.Compile()
 	if !reflect.DeepEqual(*expFilters, *result) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expFilters), utils.ToJSON(result))
-	}
-
-	resultAttr, err := fltrMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(context.TODO(), attrProf.Tenant, attrProf.ID)
-	if err != nil {
-		t.Fatalf("Error when getting Attributes %v", err.Error())
-	}
-	resultAttr.Compile()
-	if !reflect.DeepEqual(*expAttrProf, *resultAttr) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultAttr))
-	}
-
-	// the Indexes should be recomputed after migration to the same DB
-	if inPath != outPath {
-		expFltrIdx := map[string]utils.StringSet{
-			"*string:*req.Account:1001": {"ATTR_1": struct{}{}},
-			"*string:*req.Subject:1001": {"ATTR_1": struct{}{}},
-		}
-
-		if fltridx, err := fltrMigrator.dmOut.DataManager().GetIndexes(context.TODO(),
-			utils.CacheAttributeFilterIndexes,
-			attrProf.Tenant,
-			"", utils.NonTransactional, false, true); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
-			t.Errorf("Expected %v, received: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
-		}
 	}
 }
 
@@ -536,16 +380,16 @@ func testFltrITMigratev3(t *testing.T) {
 	}
 	expFilters.Compile()
 
-	if err := fltrMigrator.dmIN.setV1Filter(filters); err != nil {
+	if err := fltrMigrator.dmFrom[utils.MetaDefault].setV1Filter(filters); err != nil {
 		t.Error("Error when setting v1 Filters ", err.Error())
 	}
 	currentVersion := engine.Versions{utils.RQF: 3}
-	err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].SetVersions(currentVersion, false)
 	if err != nil {
 		t.Error("Error when setting version for Filters ", err.Error())
 	}
 	//check if version was set correctly
-	if vrs, err := fltrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+	if vrs, err := fltrMigrator.dmFrom[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.RQF] != 3 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
@@ -556,20 +400,20 @@ func testFltrITMigratev3(t *testing.T) {
 		t.Error("Error when migrating Filters ", err.Error())
 	}
 	//check if version was updated
-	if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+	if vrs, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().DataDB()[utils.MetaDefault].GetVersions(""); err != nil {
 		t.Error(err)
 	} else if vrs[utils.RQF] != 5 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
 	//check if Filters was migrate correctly
-	result, err := fltrMigrator.dmOut.DataManager().GetFilter(context.TODO(), filters.Tenant, filters.ID, false, false, utils.NonTransactional)
+	result, err := fltrMigrator.dmTo[utils.MetaDefault].DataManager().GetFilter(context.TODO(), filters.Tenant, filters.ID, false, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatalf("Error when getting filters %v", err.Error())
 	}
 	result.Compile()
 	if !reflect.DeepEqual(*expFilters, *result) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expFilters), utils.ToJSON(result))
-	} else if fltrMigrator.stats[utils.RQF] != 5 {
-		t.Errorf("Expected 5, received: %v", fltrMigrator.stats[utils.RQF])
+	} else if fltrMigrator.stats[utils.RQF] != 3 {
+		t.Errorf("Expected 3, received: %v", fltrMigrator.stats[utils.RQF])
 	}
 }

@@ -33,7 +33,7 @@ func TestTPEnewTPAccounts(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(&engine.DataDBMock{
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetAccountDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
 			acc := &utils.Account{
 				Tenant: "cgrates.org",
@@ -63,7 +63,8 @@ func TestTPEnewTPAccounts(t *testing.T) {
 			}
 			return acc, nil
 		},
-	}, cfg, connMng)
+	}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMng)
 	exp := &TPAccounts{
 		dm: dm,
 	}
@@ -77,18 +78,20 @@ func TestTPEExportItemsAccount(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
 	// connMng := engine.NewConnManager(cfg)
-	// dataDB, err := engine.NewDataDBConn(cfg.DataDbCfg().Type,
-	// 	cfg.DataDbCfg().Host, cfg.DataDbCfg().Port,
-	// 	cfg.DataDbCfg().Name, cfg.DataDbCfg().User,
-	// 	cfg.DataDbCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-	// 	cfg.DataDbCfg().Opts, cfg.DataDbCfg().Items)
+	// dataDB, err := engine.NewDataDBConn(cfg.DbCfg().DBConns[utils.MetaDefault].Type,
+	// 	cfg.DbCfg().DBConns[utils.MetaDefault].Host, cfg.DbCfg().DBConns[utils.MetaDefault].Port,
+	// 	cfg.DbCfg().DBConns[utils.MetaDefault].Name, cfg.DbCfg().DBConns[utils.MetaDefault].User,
+	// 	cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding,
+	// 	cfg.DbCfg().Opts, cfg.DbCfg().Items)
 	// if err != nil {
 	// 	t.Error(err)
 	// }
 	// defer dataDB.Close()
-	// dm := engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), connMng)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	// dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	// dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), connMng)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpAcc := TPAccounts{
 		dm: dm,
 	}
@@ -217,8 +220,9 @@ func TestTPEExportItemsAccountNoDbConn(t *testing.T) {
 func TestTPEExportItemsAccountIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpAcc := TPAccounts{
 		dm: dm,
 	}

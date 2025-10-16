@@ -43,7 +43,6 @@ var (
 	sTestsServManager = []func(t *testing.T){
 		testSrvMngInitCfg,
 		testSrvMngInitDataDb,
-		testSrvMngResetStorDb,
 		testSrvMngStartEngine,
 		testSrvMngSRPCConn,
 
@@ -82,13 +81,7 @@ func testSrvMngInitCfg(t *testing.T) {
 }
 
 func testSrvMngInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(srvMngCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testSrvMngResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(srvMngCfg); err != nil {
+	if err := engine.InitDB(srvMngCfg); err != nil {
 		t.Fatal(err)
 	}
 }

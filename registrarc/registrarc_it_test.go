@@ -38,6 +38,7 @@ package registrarc
 // 	}
 // 	switch *utils.DBType {
 // 	case utils.MetaMySQL:
+//      dbCfg.DataDB = engine.MySQLDBCfg
 // 	case utils.MetaMongo:
 // 		dbCfg.DataDB = engine.MongoDBCfg.DataDB
 // 	case utils.MetaInternal, utils.MetaPostgres:

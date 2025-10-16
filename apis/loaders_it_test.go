@@ -49,7 +49,6 @@ var (
 
 		testLoadersInitCfg,
 		testLoadersInitDataDB,
-		testLoadersResetStorDB,
 		testLoadersStartEngine,
 		testLoadersRPCConn,
 
@@ -115,13 +114,7 @@ func testLoadersInitCfg(t *testing.T) {
 }
 
 func testLoadersInitDataDB(t *testing.T) {
-	if err := engine.InitDataDB(ldrCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testLoadersResetStorDB(t *testing.T) {
-	if err := engine.InitStorDB(ldrCfg); err != nil {
+	if err := engine.InitDB(ldrCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -1652,8 +1645,9 @@ func TestLoadersLoad(t *testing.T) {
 	}
 
 	cfg.LoaderCfg()[0] = loaderCfg
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	ldrS := loaders.NewLoaderS(cfg, dm, fltrs, nil)
 	lSv1 := NewLoaderSv1(ldrS)

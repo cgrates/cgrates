@@ -1398,7 +1398,9 @@ func TestConfigSanityCache(t *testing.T) {
 
 func TestConfigSanityRegistrarCRPC(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	cfg.registrarCCfg = &RegistrarCCfgs{
 		RPC: &RegistrarCCfg{
 			RegistrarSConns: []string{utils.MetaLocalHost},
@@ -1464,7 +1466,9 @@ func TestConfigSanityRegistrarCRPC(t *testing.T) {
 
 func TestConfigSanityAnalyzer(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	cfg.analyzerSCfg = &AnalyzerSCfg{
 		Enabled: true,
 		DBPath:  "/",
@@ -1497,7 +1501,7 @@ func TestConfigSanityAnalyzer(t *testing.T) {
 
 func TestConfigSanityDataDB(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
-	cfg.dataDbCfg.Type = utils.MetaInternal
+	cfg.dbCfg.DBConns[utils.MetaDefault].Type = utils.MetaInternal
 
 	cfg.cacheCfg = &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{},
@@ -1515,9 +1519,10 @@ func TestConfigSanityDataDB(t *testing.T) {
 	expected := "<CacheS> *accounts needs to be 0 when DataBD is *internal, received : 1"
 	cfg.cacheCfg.Partitions[utils.CacheAccounts].Limit = 0
 
-	cfg.dataDbCfg.Items = map[string]*ItemOpts{
+	cfg.dbCfg.Items = map[string]*ItemOpts{
 		"test1": {
 			Remote: true,
+			DBConn: utils.MetaDefault,
 		},
 	}
 	expected = "remote connections required by: <test1>"
@@ -1525,10 +1530,11 @@ func TestConfigSanityDataDB(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dataDbCfg.Items = map[string]*ItemOpts{
+	cfg.dbCfg.Items = map[string]*ItemOpts{
 		"test2": {
 			Remote:    false,
 			Replicate: true,
+			DBConn:    utils.MetaDefault,
 		},
 	}
 	expected = "replicate connections required by: <test2>"
@@ -1536,44 +1542,47 @@ func TestConfigSanityDataDB(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	//RpcConns
-	cfg.dataDbCfg.RplConns = []string{"test1"}
-	expected = "<data_db> connection with id: <test1> not defined"
+	cfg.dbCfg.DBConns[utils.MetaDefault].RplConns = []string{"test1"}
+	expected = "<db> connection with id: <test1> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.dataDbCfg.RplConns = []string{utils.MetaInternal}
+	cfg.dbCfg.DBConns[utils.MetaDefault].RplConns = []string{utils.MetaInternal}
 	cfg.rpcConns[utils.MetaInternal].Conns = []*RemoteHost{
 		{
 			Transport: utils.MetaNone,
 		},
 	}
-	expected = "<data_db> unsupported transport <*none> for connection with ID: <*internal>"
+	expected = "<db> unsupported transport <*none> for connection with ID: <*internal>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.dataDbCfg.RplConns = []string{}
-	cfg.dataDbCfg.Items = map[string]*ItemOpts{}
+	cfg.dbCfg.DBConns[utils.MetaDefault].RplConns = []string{}
+	cfg.dbCfg.Items = map[string]*ItemOpts{"otherITem": {DBConn: utils.MetaDefault}}
 	//RmtConns
-	cfg.dataDbCfg.RmtConns = []string{"test2"}
-	expected = "<data_db> connection with id: <test2> not defined"
+	cfg.dbCfg.DBConns[utils.MetaDefault].RmtConns = []string{"test2"}
+	expected = "<db> connection with id: <test2> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+		t.Errorf("Expecting: %v  received: %v", expected, err)
 	}
-	cfg.dataDbCfg.RmtConns = []string{utils.MetaInternal}
+	cfg.dbCfg.DBConns[utils.MetaDefault].RmtConns = []string{utils.MetaInternal}
 	cfg.rpcConns[utils.MetaInternal].Conns = []*RemoteHost{
 		{
 			Transport: utils.MetaNone,
 		},
 	}
-	expected = "<data_db> unsupported transport <*none> for connection with ID: <*internal>"
+	expected = "<db> unsupported transport <*none> for connection with ID: <*internal>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+		t.Errorf("Expecting: %v  received: %v", expected, err)
 	}
 }
 
 func TestConfigSanityAPIer(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	cfg.admS.AttributeSConns = []string{utils.MetaInternal}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <AdminS> component" {
@@ -1606,6 +1615,7 @@ func TestConfigSanityCacheS(t *testing.T) {
 		t.Error(err)
 	}
 
+	cfg.dbCfg.DBConns[utils.MetaDefault].Type = utils.MetaMongo
 	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{utils.CacheLoadIDs: {Limit: 9}}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error(err)
@@ -1614,6 +1624,9 @@ func TestConfigSanityCacheS(t *testing.T) {
 
 func TestConfigSanityFilterS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	cfg.filterSCfg.StatSConns = []string{utils.MetaInternal}
 
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<StatS> not enabled but requested by <FilterS> component" {
@@ -1829,24 +1842,13 @@ func TestCGRConfigcheckConfigSanityEEsCfgExportersFWV(t *testing.T) {
 	// 	t.Errorf("Expected cfg not to change, was <%+v> \nnow is <%+v>", *CfgCopy, cfg)
 	// }
 }
-func TestCGRConfigcheckConfigSanityCacheSErr(t *testing.T) {
 
-	cfg := NewDefaultCGRConfig()
-	cfg.cacheCfg.Partitions = map[string]*CacheParamCfg{
-		utils.CacheAccounts: {
-			Limit: 1,
-		},
-	}
-	cfg.dataDbCfg.Type = utils.MetaInternal
-
-	expErr := "<CacheS> *accounts needs to be 0 when DataBD is *internal, received : 1"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expErr {
-		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err.Error())
-	}
-}
 func TestCGRConfigcheckConfigSanityCacheSIdErr(t *testing.T) {
 
 	cfg := NewDefaultCGRConfig()
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	cfg.cacheCfg.RemoteConns = []string{"remote conn"}
 	cfg.attributeSCfg = &AttributeSCfg{
 		Enabled: true,
@@ -1867,6 +1869,9 @@ func TestCGRConfigcheckConfigSanityCacheSIdErr(t *testing.T) {
 func TestCGRConfigcheckConfigSanityCacheSTransportErr(t *testing.T) {
 
 	cfg := NewDefaultCGRConfig()
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	cfg.cacheCfg.RemoteConns = []string{"con1"}
 	cfg.admS.ActionSConns = []string{utils.MetaInternal}
 	cfg.actionSCfg = &ActionSCfg{Enabled: true}
@@ -1904,6 +1909,9 @@ func TestCGRConfigcheckConfigSanityCacheSPartitionErr(t *testing.T) {
 func TestCGRConfigcheckConfigSanityEEsErr(t *testing.T) {
 
 	cfg := NewDefaultCGRConfig()
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	cfg.eesCfg = &EEsCfg{Enabled: false}
 	cfg.analyzerSCfg = &AnalyzerSCfg{
 		Enabled:         true,
@@ -1920,6 +1928,9 @@ func TestCGRConfigcheckConfigSanityEEsErr(t *testing.T) {
 }
 func TestCGRConfigcheckConfigSanityAnalyzerSErr(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
+	for key := range utils.StatelessDataDBPartitions {
+		cfg.cacheCfg.Partitions[key].Limit = 0
+	}
 	cfg.eesCfg = &EEsCfg{Enabled: true}
 	cfg.analyzerSCfg = &AnalyzerSCfg{
 		Enabled:   true,

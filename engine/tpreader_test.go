@@ -576,7 +576,7 @@ func TestTPReaderGetLoadedIdsError(t *testing.T) {
 
 func TestTPReaderReloadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	data.SetLoadIDsDrv(nil, make(map[string]int64))
 	argExpect := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts:              map[string]any{},
@@ -612,6 +612,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 	cnMgr := NewConnManager(cfg)
 	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
 	cnMgr.AddInternalConn(connID, utils.CacheSv1, rpcInternal)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	tpr := &TpReader{
 		resProfiles: map[utils.TenantID]*utils.TPResourceProfile{
 			{Tenant: "cgrates.org", ID: "resourceProfilesID"}: {},
@@ -634,7 +635,7 @@ func TestTPReaderReloadCache(t *testing.T) {
 		chargerProfiles: map[utils.TenantID]*utils.TPChargerProfile{
 			{Tenant: "cgrates.org", ID: "chargerProfilesID"}: {},
 		},
-		dm:         NewDataManager(data, cfg, cnMgr),
+		dm:         NewDataManager(dbCM, cfg, cnMgr),
 		cacheConns: []string{connID},
 	}
 	if err := tpr.ReloadCache(context.Background(), utils.MetaReload, false, make(map[string]any), "cgrates.org"); err != nil {
@@ -645,12 +646,13 @@ func TestTPReaderReloadCache(t *testing.T) {
 func TestTpReaderLoadAll(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	storeCSV := &CSVStorage{}
-	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	tpr, err := NewTpReader(db, storeCSV, "", "", nil, nil)
+	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	tpr, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	tprCopy, err := NewTpReader(db, storeCSV, "", "", nil, nil)
+	tprCopy, err := NewTpReader(dbCM, storeCSV, "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}

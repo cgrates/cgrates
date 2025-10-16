@@ -45,13 +45,19 @@ func TestTrendSchedule(t *testing.T) {
 	"level": 7,			
 },
 
-"data_db": {
-	"db_type": "*internal"
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 
-"stor_db": {
-	"db_type": "*internal"
-},
+
 
 "trends": {
 	"enabled": true,

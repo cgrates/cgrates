@@ -40,24 +40,7 @@ func TestDynThdIT(t *testing.T) {
 	case utils.MetaInternal:
 		dbCfg = engine.InternalDBCfg
 	case utils.MetaMySQL:
-		dbCfg = engine.DBCfg{
-			StorDB: &engine.DBParams{
-				Type:     utils.StringPointer(utils.MetaMySQL),
-				Port:     utils.IntPointer(3306),
-				Host:     utils.StringPointer("127.0.0.1"),
-				Name:     utils.StringPointer("cgrates"),
-				User:     utils.StringPointer("cgrates"),
-				Password: utils.StringPointer("CGRateS.org"),
-			},
-			DataDB: &engine.DBParams{
-				Type:     utils.StringPointer(utils.MetaRedis),
-				Port:     utils.IntPointer(6379),
-				Host:     utils.StringPointer("127.0.0.1"),
-				Name:     utils.StringPointer("10"),
-				User:     utils.StringPointer("cgrates"),
-				Password: utils.StringPointer(""),
-			},
-		}
+		dbCfg = engine.MySQLDBCfg
 	case utils.MetaMongo:
 		dbCfg = engine.MongoDBCfg
 	case utils.MetaPostgres:

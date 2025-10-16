@@ -43,6 +43,17 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"http": ":2080",
 	"http_tls": ":2280"
 },
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "stats": {
 	"enabled": true,
 	"store_interval": "-1"
@@ -78,6 +89,17 @@ func TestPrometheusAgentIT(t *testing.T) {
 	"rpc_json_tls" : "",
 	"rpc_gob_tls": "",
 	"http_tls": "127.0.0.1:22280"
+},
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 "stats": {
 	"enabled": true,

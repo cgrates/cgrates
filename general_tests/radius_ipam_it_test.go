@@ -69,6 +69,17 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_ipam"),
 		ConfigJSON: fmt.Sprintf(`{
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "radius_agent": {
 	"client_dictionaries": {
 		"*default": [

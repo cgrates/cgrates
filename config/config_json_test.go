@@ -275,23 +275,29 @@ func TestDfListenJsonCfg(t *testing.T) {
 
 func TestDfDataDbJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
-		Db_type:              utils.StringPointer("*redis"),
-		Db_host:              utils.StringPointer("127.0.0.1"),
-		Db_port:              utils.IntPointer(6379),
-		Db_name:              utils.StringPointer("10"),
-		Db_user:              utils.StringPointer("cgrates"),
-		Db_password:          utils.StringPointer(""),
-		Replication_conns:    &[]string{},
-		Remote_conns:         &[]string{},
-		Replication_filtered: utils.BoolPointer(false),
-		Remote_conn_id:       utils.StringPointer(""),
-		Replication_cache:    utils.StringPointer(""),
+		Db_conns: DbConnsJson{
+			utils.MetaDefault: &DbConnJson{
+				Db_type:               utils.StringPointer(utils.MetaInternal),
+				Db_host:               utils.StringPointer(utils.EmptyString),
+				Db_port:               utils.IntPointer(0),
+				Db_name:               utils.StringPointer(utils.EmptyString),
+				Db_user:               utils.StringPointer(utils.EmptyString),
+				Db_password:           utils.StringPointer(utils.EmptyString),
+				String_indexed_fields: &[]string{},
+				Prefix_indexed_fields: &[]string{},
+				Replication_conns:     &[]string{},
+				Remote_conns:          &[]string{},
+				Replication_filtered:  utils.BoolPointer(false),
+				Remote_conn_id:        utils.StringPointer(utils.EmptyString),
+				Replication_cache:     utils.StringPointer(utils.EmptyString),
+			},
+		},
 		Opts: &DBOptsJson{
-			InternalDBDumpPath:        utils.StringPointer("/var/lib/cgrates/internal_db/datadb"),
-			InternalDBBackupPath:      utils.StringPointer("/var/lib/cgrates/internal_db/backup/datadb"),
+			InternalDBDumpPath:        utils.StringPointer("/var/lib/cgrates/internal_db/db"),
+			InternalDBBackupPath:      utils.StringPointer("/var/lib/cgrates/internal_db/backup/db"),
 			InternalDBStartTimeout:    utils.StringPointer("5m"),
-			InternalDBDumpInterval:    utils.StringPointer("0s"),
-			InternalDBRewriteInterval: utils.StringPointer("0s"),
+			InternalDBDumpInterval:    utils.StringPointer("1m"),
+			InternalDBRewriteInterval: utils.StringPointer("1h"),
 			InternalDBFileSizeLimit:   utils.StringPointer("1GB"),
 			RedisMaxConns:             utils.IntPointer(10),
 			RedisConnectAttempts:      utils.IntPointer(20),
@@ -310,6 +316,13 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 			RedisClusterSync:          utils.StringPointer("5s"),
 			RedisPoolPipelineWindow:   utils.StringPointer("150µs"),
 			RedisPoolPipelineLimit:    utils.IntPointer(0),
+			SQLMaxOpenConns:           utils.IntPointer(100),
+			SQLMaxIdleConns:           utils.IntPointer(10),
+			SQLLogLevel:               utils.IntPointer(3),
+			SQLConnMaxLifetime:        utils.StringPointer("0"),
+			MYSQLDSNParams:            map[string]string{},
+			PgSSLMode:                 utils.StringPointer("disable"),
+			MySQLLocation:             utils.StringPointer("Local"),
 		},
 		Items: map[string]*ItemOptsJson{
 			utils.CacheAccounts: {
@@ -318,6 +331,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.MetaActions: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -325,6 +339,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheResourceProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -332,6 +347,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheIPProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -339,6 +355,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheStatQueues: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -346,6 +363,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheResources: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -353,6 +371,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheIPAllocations: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -360,6 +379,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheStatQueueProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -367,6 +387,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheThresholds: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -374,6 +395,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheTrends: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -381,6 +403,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheThresholdProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -388,6 +411,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheFilters: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -395,6 +419,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheRouteProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -402,6 +427,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheAttributeProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -409,6 +435,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheRateProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -416,6 +443,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheActionProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -423,6 +451,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheChargerProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -430,6 +459,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheLoadIDs: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -437,6 +467,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheResourceFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -444,6 +475,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheIPFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -451,6 +483,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheStatFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -458,6 +491,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheThresholdFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -465,6 +499,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheRouteFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -472,6 +507,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheAttributeFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -479,6 +515,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheChargerFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -486,6 +523,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheRateProfilesFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -493,6 +531,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheActionProfilesFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -500,6 +539,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheAccountsFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -507,6 +547,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheVersions: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -514,6 +555,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheReverseFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -521,6 +563,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheRankingProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -528,6 +571,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheRankings: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -535,6 +579,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheTrendProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -542,6 +587,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 			utils.CacheRateFilterIndexes: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
@@ -549,6 +595,15 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Limit:      utils.IntPointer(-1),
 				Replicate:  utils.BoolPointer(false),
 				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
+			},
+			utils.MetaCDRs: {
+				Ttl:        utils.StringPointer(utils.EmptyString),
+				Static_ttl: utils.BoolPointer(false),
+				Limit:      utils.IntPointer(-1),
+				Replicate:  utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
 		},
 	}
@@ -557,7 +612,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		t.Error(err)
 	}
 	cfg := new(DbJsonCfg)
-	if err := dfCgrJSONCfg.GetSection(context.Background(), DataDBJSON, cfg); err != nil {
+	if err := dfCgrJSONCfg.GetSection(context.Background(), DBJSON, cfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Errorf("expecting: %s, \nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
@@ -2001,16 +2056,28 @@ func TestDfLoaderCfg(t *testing.T) {
 
 func TestDfMigratorCfg(t *testing.T) {
 	eCfg := &MigratorCfgJson{
-		Out_dataDB_type:     utils.StringPointer("redis"),
-		Out_dataDB_host:     utils.StringPointer("127.0.0.1"),
-		Out_dataDB_port:     utils.StringPointer("6379"),
-		Out_dataDB_name:     utils.StringPointer("10"),
-		Out_dataDB_user:     utils.StringPointer("cgrates"),
-		Out_dataDB_password: utils.StringPointer(""),
-		Out_dataDB_encoding: utils.StringPointer("msgpack"),
-
+		FromItems: map[string]*FromItemJson{
+			utils.MetaAccounts: {
+				DbConn: utils.StringPointer(utils.MetaDefault),
+			},
+			utils.MetaStatQueueProfiles: {
+				DbConn: utils.StringPointer(utils.MetaDefault),
+			},
+			utils.MetaFilters: {
+				DbConn: utils.StringPointer(utils.MetaDefault),
+			},
+			utils.MetaChargerProfiles: {
+				DbConn: utils.StringPointer(utils.MetaDefault),
+			},
+			utils.MetaLoadIDs: {
+				DbConn: utils.StringPointer(utils.MetaDefault),
+			},
+			utils.CacheVersions: {
+				DbConn: utils.StringPointer(utils.MetaDefault),
+			},
+		},
 		Users_filters: &[]string{},
-		Out_dataDB_opts: &DBOptsJson{
+		Out_db_opts: &DBOptsJson{
 			RedisMaxConns:           utils.IntPointer(10),
 			RedisConnectAttempts:    utils.IntPointer(20),
 			RedisClusterSync:        utils.StringPointer("5s"),

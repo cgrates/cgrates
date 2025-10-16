@@ -75,10 +75,7 @@ func testKafkaLoadConfig(t *testing.T) {
 }
 
 func testKafkaResetDBs(t *testing.T) {
-	if err := engine.InitDataDB(kafkaCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(kafkaCfg); err != nil {
+	if err := engine.InitDB(kafkaCfg); err != nil {
 		t.Fatal(err)
 	}
 }

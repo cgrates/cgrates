@@ -153,8 +153,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 	t.Run("StoreInterval is negative, with DataManager no DB", func(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = -1
-
-		dm := engine.NewDataManager(nil, cfg, nil)
+		dm := engine.NewDataManager(engine.NewDBConnManager(map[string]engine.DataDB{}, &config.DbCfg{}), cfg, nil)
 
 		s := &IPService{
 			cfg:       cfg,
@@ -182,11 +181,12 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		cfg := config.NewDefaultCGRConfig()
 		cfg.IPsCfg().StoreInterval = -1
 
-		db, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+		db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 		if err != nil {
 			t.Fatal(err)
 		}
-		dm := engine.NewDataManager(db, cfg, nil)
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+		dm := engine.NewDataManager(dbCM, cfg, nil)
 
 		s := &IPService{
 			cfg:       cfg,
@@ -231,8 +231,9 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 
 func TestNewIPService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 
@@ -266,11 +267,12 @@ func TestNewIPService(t *testing.T) {
 
 func TestFilterAndSortPools(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
-	dm := engine.NewDataManager(db, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	ctx := context.Background()
 	tenant := "cgrates.org"
@@ -563,8 +565,9 @@ func TestIPsReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.IPsCfg().StoreInterval = 10 * time.Millisecond
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 	svc := NewIPService(dm, cfg, fltrs, connMgr)
@@ -637,8 +640,9 @@ func TestIPsShutdown(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.IPsCfg().StoreInterval = 10 * time.Millisecond
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 	svc := NewIPService(dm, cfg, fltrs, connMgr)
@@ -693,8 +697,9 @@ func TestIPsShutdown(t *testing.T) {
 
 func TestIPsRunBackup(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 	ctx := &context.Context{}
@@ -770,8 +775,9 @@ func TestIPsStartLoop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.IPsCfg().StoreInterval = 10 * time.Millisecond
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
 	svc := NewIPService(dm, cfg, fltrs, connMgr)

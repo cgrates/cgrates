@@ -127,10 +127,7 @@ func testEfSInitCfg(t *testing.T) {
 }
 
 func testEfsResetDBs(t *testing.T) {
-	if err := engine.InitDataDB(efsCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(efsCfg); err != nil {
+	if err := engine.InitDB(efsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -199,12 +196,18 @@ func TestEFsReplayEvents(t *testing.T) {
 	}
 	failedDir := t.TempDir()
 	content := fmt.Sprintf(`{
-"data_db": {
-	"db_type": "*internal"
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
-"stor_db": {
-	"db_type": "*internal"
-},
+
 "admins": {
 	"enabled": true
 },

@@ -84,10 +84,7 @@ func testCGRLoaderInitConfig(t *testing.T) {
 }
 
 func testCGRLoaderFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(cgrloaderCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(cgrloaderCfg); err != nil {
+	if err := engine.InitDB(cgrloaderCfg); err != nil {
 		t.Fatal(err)
 	}
 }

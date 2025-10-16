@@ -108,10 +108,7 @@ func testLdPrMatchAcLoadConfig(t *testing.T) {
 }
 
 func testLdPrMatchAcFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(testLdPrMatchAcCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(testLdPrMatchAcCfg); err != nil {
+	if err := engine.InitDB(testLdPrMatchAcCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -128,7 +125,7 @@ func testLdPrMatchAcRPCConn(t *testing.T) {
 
 func testLdPrMatchAcLoadTP(t *testing.T) {
 	caching := utils.MetaReload
-	if testLdPrMatchAcCfg.DataDbCfg().Type == utils.MetaInternal {
+	if testLdPrMatchAcCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
 	var reply string

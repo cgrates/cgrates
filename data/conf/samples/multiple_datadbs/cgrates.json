@@ -1,25 +1,13 @@
 {
 
+
 "general": {
 	"reply_timeout": "50s"
 },
 
-/*
- "logger": {
-	"type": "*kafkaLog",        // controls the destination of logs <*syslog|*stdout|*kafka>
-	"level": 6,               // system level precision for floats 
-	"opts": {
-		"kafka_conn": "ldasdas:9092",    // the connection trough kafka
-		"kafka_topic": "TutorialTopic",    // the topic from where the events are exported
-		"kafka_attempts": 1,                     // number of attempts of connecting
-	},
-},
-*/ 
-
 "logger": {
-	"type": "*syslog",        // controls the destination of logs <*syslog|*stdout|*kafka>
-	"level": 6,               // system level precision for floats 
-},  
+	"level": 7
+},
 
 "listen": {
 	"rpc_json": ":2012",
@@ -27,16 +15,34 @@
 	"http": ":2080"
 },
 
-
 "db": {
 	"db_conns": {
 		"*default": {
+			"db_type": "*redis",		
+			"db_port": 6379, 	
+			"db_name": "10"
+		},
+		"intrnl": {
 			"db_type": "*internal"
-    	}
+		},
+		"redis2": {
+			"db_type": "*redis",		
+			"db_port": 6379, 	
+			"db_name": "11"
+		},
+		"StorDB": {
+			"db_type": "mysql",
+			"db_host": "127.0.0.1",
+			"db_port": 3306,
+			"db_name": "cgrates",
+			"db_user": "cgrates",
+			"db_password": "CGRateS.org"
+		}
 	},
-	"opts":{
-		"internalDBRewriteInterval": "0s",
-		"internalDBDumpInterval": "0s"
+	"items":{
+		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "intrnl"},
+		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "redis2"},
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
 	}
 },
 
@@ -45,13 +51,13 @@
 	"chargers_conns":["*internal"]
 },
 
+
 "attributes": {
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 	"resources_conns": ["*localhost"],
 	"accounts_conns": ["*localhost"]
 },
-
 
 "chargers": {
 	"enabled": true,
@@ -61,21 +67,21 @@
 
 "resources": {
 	"enabled": true,
-	"store_interval": "-1",
+	"store_interval": "1s",
 	"thresholds_conns": ["*internal"]
 },
 
 
 "stats": {
 	"enabled": true,
-	"store_interval": "-1",
+	"store_interval": "1s",
 	"thresholds_conns": ["*internal"]
 },
 
+
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1",
-	"actions_conns": ["*internal"]
+	"store_interval": "1s"
 },
 
 
@@ -90,17 +96,24 @@
 
 "sessions": {
 	"enabled": true,
-	"rates_conns": ["*internal"],
 	"routes_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
+	"rates_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"]
 },
 
 
+"migrator":{
+
+	"users_filters":["Account"]
+},
+
+
 "admins": {
-	"enabled": true
+	"enabled": true,
+	"scheduler_conns": ["*internal"]
 },
 
 
@@ -111,14 +124,12 @@
 
 "actions": {
 	"enabled": true,
-	"accounts_conns": ["*localhost"],
-	"admins_conns":  ["*internal"]
+	"accounts_conns": ["*localhost"]
 },
 
 
 "accounts": {
-	"enabled": true,
-	"rates_conns": ["*internal"]
+	"enabled": true
 },
 
 

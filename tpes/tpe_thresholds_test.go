@@ -33,7 +33,7 @@ func TestTPEnewTPThresholds(t *testing.T) {
 	// dm := &engine.NewDataManager()
 	cfg := config.NewDefaultCGRConfig()
 	connMng := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(&engine.DataDBMock{
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tnt string, id string) (*engine.ThresholdProfile, error) {
 			thd := &engine.ThresholdProfile{
 				Tenant:           "cgrates.org",
@@ -51,7 +51,8 @@ func TestTPEnewTPThresholds(t *testing.T) {
 			}
 			return thd, nil
 		},
-	}, cfg, connMng)
+	}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMng)
 	exp := &TPThresholds{
 		dm: dm,
 	}
@@ -64,8 +65,9 @@ func TestTPEnewTPThresholds(t *testing.T) {
 func TestTPEExportThresholds(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpThd := TPThresholds{
 		dm: dm,
 	}
@@ -120,8 +122,9 @@ func TestTPEExportItemsThresholdsNoDbConn(t *testing.T) {
 func TestTPEExportItemsThresholdsIDNotFound(t *testing.T) {
 	wrtr := new(bytes.Buffer)
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg, nil)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	tpThd := TPThresholds{
 		dm: dm,
 	}

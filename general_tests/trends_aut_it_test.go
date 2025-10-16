@@ -104,7 +104,7 @@ func testtrendAuQLoadConfig(t *testing.T) {
 }
 
 func testtrendAuQInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(trendAuQCfg); err != nil {
+	if err := engine.InitDB(trendAuQCfg); err != nil {
 		t.Fatal(err)
 	}
 }

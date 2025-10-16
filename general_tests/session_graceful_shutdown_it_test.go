@@ -96,10 +96,7 @@ func testSessionSRplcInitCfg(t *testing.T) {
 
 // Remove data in both rating and accounting db
 func testSessionSRplcFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(smgRplCfg1); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(smgRplCfg1); err != nil {
+	if err := engine.InitDB(smgRplCfg1); err != nil {
 		t.Fatal(err)
 	}
 }

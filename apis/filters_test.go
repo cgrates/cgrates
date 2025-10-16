@@ -36,9 +36,10 @@ func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -202,9 +203,10 @@ func TestFiltersSetFiltersMissingField(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -226,9 +228,10 @@ func TestFiltersSetFiltersTenantEmpty(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
@@ -277,8 +280,9 @@ func TestFiltersSetFiltersGetFilterError(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -331,8 +335,9 @@ func TestFiltersSetFiltersError(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -375,8 +380,9 @@ func TestFiltersSetFiltersSetFilterError(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -438,8 +444,9 @@ func TestFiltersSetFiltersComposeCacheArgsForFilterError(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -503,8 +510,9 @@ func TestFiltersSetFiltersSetLoadIDsError(t *testing.T) {
 			return utils.ErrNotImplemented
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -568,8 +576,9 @@ func TestFiltersSetFiltersCacheForFilterError(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
@@ -604,9 +613,10 @@ func TestFiltersGetFilterNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
@@ -650,9 +660,10 @@ func TestFiltersGetFilterMissingField(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",
@@ -697,8 +708,9 @@ func TestFiltersGetFilterGetFilterError(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var replyGet engine.Filter
 	argsGet := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -723,8 +735,9 @@ func TestFiltersGetFiltersCountError(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var reply int
 	args := &utils.ArgsItemIDs{}
 
@@ -740,9 +753,10 @@ func TestFiltersRemoveFilterMissingStructFieldError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{},
@@ -766,8 +780,9 @@ func TestFiltersRemoveFilterRemoveFilterError(t *testing.T) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -800,8 +815,9 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	expArgs := &utils.AttrReloadCacheWithAPIOpts{
 		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaReload,
@@ -963,7 +979,7 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestFiltersSetFilterClearCache(t *testing.T) {
@@ -971,8 +987,9 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.AdminSCfg().CachesConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	expArgs := &utils.AttrCacheIDsWithAPIOpts{
 		APIOpts: map[string]any{
 			utils.MetaCache: utils.MetaClear,
@@ -1134,7 +1151,7 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 	engine.Cache.Clear(nil)
@@ -1143,8 +1160,8 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"rep"}
 	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = false
 	cfg.RPCConns()["connID"] = &config.RPCConn{}
-	config.CgrConfig().DataDbCfg().Items[utils.CacheReverseFilterIndexes].Remote = true
-	config.CgrConfig().DataDbCfg().RmtConns = []string{"connID"}
+	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = true
+	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{"connID"}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
 		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
@@ -1160,8 +1177,9 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -1175,8 +1193,8 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 	if err == nil || err.Error() != "SERVER_ERROR: NOT_IMPLEMENTED" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: NOT_IMPLEMENTED", err)
 	}
-	config.CgrConfig().DataDbCfg().RmtConns = []string{}
-	config.CgrConfig().DataDbCfg().Items[utils.CacheReverseFilterIndexes].Remote = false
+	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{}
+	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = false
 }
 
 func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
@@ -1186,8 +1204,8 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"rep"}
 	cfg.CacheCfg().Partitions[utils.CacheReverseFilterIndexes].Replicate = false
 	cfg.RPCConns()["connID"] = &config.RPCConn{}
-	config.CgrConfig().DataDbCfg().Items[utils.CacheReverseFilterIndexes].Remote = true
-	config.CgrConfig().DataDbCfg().RmtConns = []string{"connID"}
+	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = true
+	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{"connID"}
 	cfg.AdminSCfg().CachesConns = []string{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
@@ -1207,8 +1225,9 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 			return nil
 		},
 	}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	var reply string
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: &utils.TenantID{
@@ -1222,8 +1241,8 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 	if err == nil || err.Error() != "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]" {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "SERVER_ERROR: MANDATORY_IE_MISSING: [connIDs]", err)
 	}
-	config.CgrConfig().DataDbCfg().RmtConns = []string{}
-	config.CgrConfig().DataDbCfg().Items[utils.CacheReverseFilterIndexes].Remote = false
+	config.CgrConfig().DbCfg().DBConns[utils.MetaDefault].RmtConns = []string{}
+	config.CgrConfig().DbCfg().Items[utils.CacheReverseFilterIndexes].Remote = false
 }
 
 func TestFiltersGetFilterIDs(t *testing.T) {
@@ -1232,8 +1251,9 @@ func TestFiltersGetFilterIDs(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 
 	args6 := &utils.ArgsItemIDs{}
 	var reply6 []string
@@ -1298,10 +1318,11 @@ func TestFiltersFiltersMatchTrue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrS)
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -1329,10 +1350,11 @@ func TestFiltersFiltersMatchFalse(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrS)
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			ID: "EventTest",
@@ -1359,10 +1381,11 @@ func TestFiltersFiltersMatchErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	fltrS := engine.NewFilterS(cfg, connMgr, dm)
-	admS := NewAdminSv1(cfg, dm, connMgr, fltrS, nil)
+	admS := NewAdminSv1(cfg, dm, connMgr, fltrS)
 	args := &engine.ArgsFiltersMatch{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -1389,9 +1412,10 @@ func TestFiltersGetFiltersOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args1 := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
@@ -1507,9 +1531,10 @@ func TestFiltersGetFiltersGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	args := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
@@ -1565,7 +1590,8 @@ func TestFiltersGetFiltersGetProfileErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -1581,7 +1607,7 @@ func TestFiltersGetFiltersGetProfileErr(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
@@ -1607,7 +1633,8 @@ func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -1626,7 +1653,7 @@ func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
@@ -1652,7 +1679,8 @@ func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
 		},
 	}
 
-	dm := engine.NewDataManager(dbMock, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	adms := &AdminSv1{
 		cfg: cfg,
 		dm:  dm,
@@ -1673,7 +1701,7 @@ func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
 	}
 
-	dm.DataDB().Flush(utils.EmptyString)
+	dm.DataDB()[utils.MetaDefault].Flush(utils.EmptyString)
 }
 
 func TestFiltersSetFilterNoRulesErr(t *testing.T) {
@@ -1681,9 +1709,10 @@ func TestFiltersSetFilterNoRulesErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID:    "fltr_for_attr",
@@ -1703,9 +1732,10 @@ func TestFiltersSetFilterInvalidRulesErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
-	admS := NewAdminSv1(cfg, dm, connMgr, nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil)
 	fltr := &engine.FilterWithAPIOpts{
 		Filter: &engine.Filter{
 			ID: "fltr_for_attr",

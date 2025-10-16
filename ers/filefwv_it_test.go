@@ -435,8 +435,9 @@ func TestFileFWVExit(t *testing.T) {
 
 func TestFileFWVProcessTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	eR := &FWVFileER{
@@ -494,8 +495,9 @@ func TestFileFWVProcessTrailer(t *testing.T) {
 
 func TestFileFWVProcessTrailerError1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	eR := &FWVFileER{
@@ -531,8 +533,9 @@ func TestFileFWVProcessTrailerError1(t *testing.T) {
 
 func TestFileFWVProcessTrailerError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	eR := &FWVFileER{
 		cgrCfg:    cfg,
@@ -578,8 +581,9 @@ func TestFileFWVProcessTrailerError2(t *testing.T) {
 
 func TestFileFWVProcessTrailerError3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	eR := &FWVFileER{
 		cgrCfg:    cfg,
@@ -609,8 +613,9 @@ func TestFileFWVProcessTrailerError3(t *testing.T) {
 
 func TestFileFWVCreateHeaderMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	eR := &FWVFileER{
 		cgrCfg:    cfg,
@@ -657,8 +662,9 @@ func TestFileFWVCreateHeaderMap(t *testing.T) {
 
 func TestFileFWVCreateHeaderMapError1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	eR := &FWVFileER{
 		cgrCfg:    cfg,
@@ -683,8 +689,9 @@ func TestFileFWVCreateHeaderMapError1(t *testing.T) {
 
 func TestFileFWVCreateHeaderMapError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(data, cfg.CacheCfg(), nil)
+	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	eR := &FWVFileER{
 		cgrCfg:    cfg,

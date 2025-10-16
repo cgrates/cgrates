@@ -41,14 +41,7 @@ func TestDiameterAgentCapsIT(t *testing.T) {
 	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		dbCfg = engine.DBCfg{
-			DataDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-			StorDB: &engine.DBParams{
-				Type: utils.StringPointer(utils.MetaInternal),
-			},
-		}
+		dbCfg = engine.InternalDBCfg
 	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
@@ -60,6 +53,17 @@ func TestDiameterAgentCapsIT(t *testing.T) {
 	"caps": 2,
 	"caps_strategy": "*busy",
 	"shutdown_timeout": "5ms"
+},
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 "sessions":{
 	"enabled": true

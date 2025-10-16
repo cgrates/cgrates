@@ -52,6 +52,17 @@ func TestDiamPrometheus(t *testing.T) {
 "admins": {
 	"enabled": true
 },
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
+},
 "sessions": {
 	"enabled": true,
 	"cdrs_conns": ["*internal"]

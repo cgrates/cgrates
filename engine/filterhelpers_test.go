@@ -61,8 +61,9 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 
 	cM := NewConnManager(cfg)
 	fltrs := NewFilterS(cfg, cM, dm)
@@ -87,8 +88,9 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 	cM := NewConnManager(cfg)
 	fltrs := NewFilterS(cfg, cM, dm)
 	tnt := utils.CGRateSorg
@@ -111,7 +113,8 @@ func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
 		GetKeysForPrefixF: func(ctx *context.Context, s string) ([]string, error) { return []string{}, utils.ErrNotImplemented },
 	}
 	cfg := config.NewDefaultCGRConfig()
-	dmMatch := NewDataManager(data, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmMatch := NewDataManager(dbCM, cfg, nil)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
 
@@ -128,8 +131,9 @@ func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
 		"Fiel..d":        "profile",
 	}}
 	cfg := config.NewDefaultCGRConfig()
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dmMatch := NewDataManager(data, cfg, nil)
+	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmMatch := NewDataManager(dbCM, cfg, nil)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
 
@@ -206,11 +210,12 @@ func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	cfg := config.NewDefaultCGRConfig()
-	data, dErr := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	data, dErr := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if dErr != nil {
 		t.Fatal(dErr)
 	}
-	dm := NewDataManager(data, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil)
 
 	tnt := cfg.GeneralCfg().DefaultTenant
 	contextKey := utils.MetaRating

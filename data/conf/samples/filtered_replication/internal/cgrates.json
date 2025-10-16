@@ -24,10 +24,14 @@
 	}
 },
 
-"data_db": {
-	"db_type": "*internal",
-	"replication_conns": ["conn2"],
-	"replication_filtered": true,
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal",
+			"replication_conns": ["conn2"],
+			"replication_filtered": true,
+		},
+	},
 	"items":{
 		"*accounts":{"remote":false,"replicate":true},
 		"*resource_profiles":{"remote":false,"replicate":true},
@@ -40,17 +44,17 @@
 		"*route_profiles":{"remote":false,"replicate":true},
 		"*attribute_profiles":{"remote":false,"replicate":true},
 		"*charger_profiles": {"remote":false,"replicate":true},
-		"*indexes" :{"remote":false,"replicate":true},
 		"*rate_profiles":{"remote":false,"replicate":true},
 		"*load_ids":{"remote":false,"replicate":true},
 		"*action_profiles":{"remote":false,"replicate":true},
-		"*account_profiles":{"remote":false,"replicate":true}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
 	}
 },
 
-"stor_db": {
-	"db_type": "*internal"
-},
+
 
 "caches":{
 	"partitions": {

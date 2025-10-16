@@ -45,7 +45,6 @@ var (
 	sTestsChargers = []func(t *testing.T){
 		testChargersInitCfg,
 		testChargersInitDataDb,
-		testChargersResetStorDb,
 		testChargersStartEngine,
 		testChargersSRPCConn,
 
@@ -108,13 +107,7 @@ func testChargersInitCfg(t *testing.T) {
 }
 
 func testChargersInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(chargersCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testChargersResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(chargersCfg); err != nil {
+	if err := engine.InitDB(chargersCfg); err != nil {
 		t.Fatal(err)
 	}
 }

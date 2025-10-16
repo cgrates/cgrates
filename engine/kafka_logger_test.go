@@ -104,8 +104,9 @@ package engine
 // 	cM := NewConnManager(cfg)
 // 	cM.connCache.Set(connID, nil, nil)
 // 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
-// 	db, _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(db, cfg, cM)
+// 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+// dm := NewDataManager(dbCM, cfg, cM)
 // 	Cache = NewCacheS(cfg, dm, cM, nil)
 
 // 	el := NewExportLogger(context.Background(), "cgrates.org", cM, cfg)
@@ -167,8 +168,9 @@ package engine
 // // 	cM := NewConnManager(cfg)
 // // 	cM.connCache.Set(connID, nil, nil)
 // // 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
-// // 	db , _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-// // 	dm := NewDataManager(db, cfg.CacheCfg(), cM)
+// // 	db , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// // 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+// dm := NewDataManager(dbCM, cfg.CacheCfg(), cM)
 // // 	Cache = NewCacheS(cfg, dm, cM, nil)
 
 // // 	el := NewExportLogger(context.Background(), "123", "cgrates.org", 7, cM, cfg)
@@ -198,9 +200,10 @@ package engine
 // 		cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 // 			utils.MetaEEs)}
 
-// 		data , _ := NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+// 		data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 // 		cM := NewConnManager(cfg)
-// 		dm := NewDataManager(data, cfg.CacheCfg(), nil)
+// 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+// dm := NewDataManager(dbCM, cfg.CacheCfg(), nil)
 // 		fltrs := NewFilterS(cfg, nil, dm)
 // 		Cache = NewCacheS(cfg, dm, nil, nil)
 // 		newCDRSrv := NewCDRServer(cfg, dm, fltrs, cM)

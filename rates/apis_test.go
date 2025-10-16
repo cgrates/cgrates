@@ -39,8 +39,9 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(db, cfg, nil)
+	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rts := NewRateS(cfg, fltrs, dm)
 
@@ -151,8 +152,9 @@ func TestRatesCostForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	dm := engine.NewDataManager(dataDB, cfg, connMgr)
+	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr)
 	rateS := NewRateS(cfg, nil, dm)
 
 	ev := &utils.CGREvent{
@@ -189,11 +191,12 @@ func TestV1RateProfilesForEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(db, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rS := NewRateS(cfg, fltrs, dm)
 
@@ -256,11 +259,12 @@ func TestV1RateProfileRatesForEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
+	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
-	dm := engine.NewDataManager(db, cfg, nil)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	rS := NewRateS(cfg, fltrs, dm)
 

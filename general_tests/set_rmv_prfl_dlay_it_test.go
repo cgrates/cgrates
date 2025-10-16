@@ -49,10 +49,7 @@ func TestSetRemoveProfilesWithCachingDelay(t *testing.T) {
 	cfgPath := path.Join("/usr/share/cgrates", "conf", "samples", cfgDir)
 	cfg, err := config.NewCGRConfigFromPath(ctx, cfgPath)
 	// Flush DBs.
-	if err := engine.InitDataDB(cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(cfg); err != nil {
+	if err := engine.InitDB(cfg); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := engine.StopStartEngine(cfgPath, 100); err != nil {

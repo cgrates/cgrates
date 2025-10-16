@@ -54,8 +54,9 @@ func (nopCloser) Close() error { return nil }
 
 func TestFileCsvComposeHeader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg, nil)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
+	newDM := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
@@ -117,8 +118,9 @@ func TestFileCsvComposeHeader(t *testing.T) {
 
 func TestFileCsvComposeTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg, nil)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
+	newDM := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
@@ -180,8 +182,9 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 
 func TestFileCsvExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg, nil)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
+	newDM := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
@@ -213,8 +216,9 @@ func TestFileCsvExportEvent(t *testing.T) {
 
 func TestFileCsvOnEvictedTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg, nil)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
+	newDM := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)
@@ -247,8 +251,9 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 
 func TestFileCsvOnEvictedClose(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DataDbCfg().Items)
-	newDM := engine.NewDataManager(newIDb, cfg, nil)
+	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
+	newDM := engine.NewDataManager(dbCM, cfg, nil)
 	filterS := engine.NewFilterS(cfg, nil, newDM)
 	byteBuff := new(bytes.Buffer)
 	csvNW := csv.NewWriter(byteBuff)

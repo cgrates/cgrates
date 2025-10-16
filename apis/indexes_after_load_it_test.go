@@ -43,7 +43,6 @@ var (
 	idxLoadAccPrf = []func(t *testing.T){
 		testIdxLoadInitCfg,
 		testIdxLoadInitDataDb,
-		testIdxLoadResetStorDb,
 
 		testIdxLoadStartEngine,
 		testIdxLoadRPCConn,
@@ -81,13 +80,7 @@ func testIdxLoadInitCfg(t *testing.T) {
 }
 
 func testIdxLoadInitDataDb(t *testing.T) {
-	if err := engine.InitDataDB(idxLoadCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func testIdxLoadResetStorDb(t *testing.T) {
-	if err := engine.InitStorDB(idxLoadCfg); err != nil {
+	if err := engine.InitDB(idxLoadCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -134,7 +127,7 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaRateProfiles,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DataDbCfg().Type == utils.MetaInternal {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -152,7 +145,7 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaChargers,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DataDbCfg().Type == utils.MetaInternal {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)
@@ -170,7 +163,7 @@ func testIdxLoadCheckIndexes(t *testing.T) {
 	if err := idxLoadBiRPC.Call(context.Background(), utils.AdminSv1GetFilterIndexes,
 		&AttrGetFilterIndexes{
 			ItemType: utils.MetaAttributes,
-		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DataDbCfg().Type == utils.MetaInternal {
+		}, &reply); (err == nil || err.Error() != utils.ErrNotFound.Error()) && idxLoadCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		t.Error(err)
 	} else {
 		sort.Strings(expected)

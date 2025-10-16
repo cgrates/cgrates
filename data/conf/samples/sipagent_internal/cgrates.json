@@ -19,12 +19,16 @@
 },				
 
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "*internal",					// stor database type to use: <mysql|postgres>
-},
-
-"stor_db": {
-	"db_type": "*internal"			
+"db": {
+	"db_conns": {
+		"*default": {
+			"db_type": "*internal"
+    	}
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 
 "sessions": {

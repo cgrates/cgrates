@@ -91,10 +91,7 @@ func testDCInitConfig(t *testing.T) {
 }
 
 func testDCFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(dcCfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(dcCfg); err != nil {
+	if err := engine.InitDB(dcCfg); err != nil {
 		t.Fatal(err)
 	}
 }

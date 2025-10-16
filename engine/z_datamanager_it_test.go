@@ -22,7 +22,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -50,12 +49,11 @@ func TestDMitinitDB(t *testing.T) {
 	case utils.MetaInternal:
 		t.SkipNow()
 	case utils.MetaMySQL:
-		dataDB, err = NewRedisStorage(fmt.Sprintf("%s:%s",
-			cfg.DataDbCfg().Host, cfg.DataDbCfg().Port), 4,
-			cfg.DataDbCfg().User, cfg.DataDbCfg().Password,
+		dataDB, err = NewRedisStorage("127.0.0.1:6379", 4, utils.CGRateSLwr,
+			cfg.DbCfg().DBConns[utils.MetaDefault].Password,
 			cfg.GeneralCfg().DBDataEncoding,
-			cfg.DataDbCfg().Opts.RedisMaxConns,
-			cfg.DataDbCfg().Opts.RedisConnectAttempts, "", false,
+			cfg.DbCfg().Opts.RedisMaxConns,
+			cfg.DbCfg().Opts.RedisConnectAttempts, "", false,
 			0, 0, 0, 0, 0, 150*time.Microsecond, 0, false,
 			utils.EmptyString, utils.EmptyString,
 			utils.EmptyString)
@@ -67,7 +65,8 @@ func TestDMitinitDB(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	dm2 = NewDataManager(dataDB, cfg, nil)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm2 = NewDataManager(dbCM, cfg, nil)
 
 	for _, stest := range sTestsDMit {
 		t.Run(*utils.DBType, stest)
@@ -75,7 +74,7 @@ func TestDMitinitDB(t *testing.T) {
 }
 
 func testDMitDataFlush(t *testing.T) {
-	if err := dm2.dataDB.Flush(utils.EmptyString); err != nil {
+	if err := dm2.dbConns.dataDBs[utils.MetaDefault].Flush(utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	Cache.Clear(nil)

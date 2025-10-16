@@ -88,10 +88,7 @@ func testdoubleRemoveLoadConfig(t *testing.T) {
 }
 
 func testdoubleRemoveFlushDBs(t *testing.T) {
-	if err := engine.InitDataDB(doubleRemove); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(doubleRemove); err != nil {
+	if err := engine.InitDB(doubleRemove); err != nil {
 		t.Fatal(err)
 	}
 }

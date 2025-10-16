@@ -23,11 +23,15 @@
 	},
 },
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
-	"db_port": 27017, 						// the port to reach the datadb
-	"db_name": "datadb",
-	"db_password": "",
+"db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_conns": {
+		"*default": {
+			"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+			"db_port": 27017, 						// the port to reach the datadb
+			"db_name": "datadb",
+			"db_password": "",
+    	}
+	}
 },
 
 "rates": {

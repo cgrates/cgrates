@@ -59,12 +59,12 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 	}
 	for i, pth := range paths {
 		dfltCfg := config.NewDefaultCGRConfig()
-		if err := os.MkdirAll(dfltCfg.DataDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+		if err := os.MkdirAll(dfltCfg.DbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
-		if err := os.MkdirAll(dfltCfg.StorDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
-			t.Fatal(err)
-		}
+		// if err := os.MkdirAll(dfltCfg.StorDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
+		// 	t.Fatal(err)
+		// }
 		if err := os.MkdirAll(dfltCfg.ConfigDBCfg().Opts.InternalDBDumpPath, 0755); err != nil {
 			t.Fatal(err)
 		}
@@ -308,7 +308,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 
 			t.Run("CountDataDBFiles", func(t *testing.T) {
 				var dirs, files int
-				if err := filepath.Walk(cfg.DataDbCfg().Opts.InternalDBDumpPath, func(_ string, info os.FileInfo, err error) error {
+				if err := filepath.Walk(cfg.DbCfg().Opts.InternalDBDumpPath, func(_ string, info os.FileInfo, err error) error {
 					if err != nil {
 						return err
 					}
@@ -320,33 +320,12 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					return nil
 				}); err != nil {
 					t.Error(err)
-				} else if dirs != 36 {
-					t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
+				} else if dirs != 37 {
+					t.Errorf("expected <%d> directories, received <%d>", 37, dirs)
 				} else if i > 6 && files != 33 {
 					t.Errorf("expected <%d> files, received <%d>", 33, files)
 				} else if i < 6 && files != 32 {
 					t.Errorf("expected <%d> files, received <%d>", 32, files)
-				}
-			})
-
-			t.Run("CountStorDBFiles", func(t *testing.T) {
-				var dirs, files int
-				if err := filepath.Walk(cfg.StorDbCfg().Opts.InternalDBDumpPath, func(_ string, info os.FileInfo, err error) error {
-					if err != nil {
-						return err
-					}
-					if info.IsDir() {
-						dirs++
-					} else {
-						files++
-					}
-					return nil
-				}); err != nil {
-					t.Error(err)
-				} else if dirs != 3 {
-					t.Errorf("expected <%d> directories, received <%d>", 3, dirs)
-				} else if files != 1 {
-					t.Errorf("expected <%d> files, received <%d>", 3, files)
 				}
 			})
 
@@ -372,7 +351,6 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 			})
 
 			ng.PreserveDataDB = true
-			ng.PreserveStorDB = true
 			client, cfg = ng.Run(t)
 			time.Sleep(100 * time.Millisecond)
 

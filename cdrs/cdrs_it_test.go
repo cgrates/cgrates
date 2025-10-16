@@ -69,13 +69,17 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 	"level": 7
 },
 
-"data_db": {
-	"db_type": "*internal"
-},
-
-"stor_db": {
-	"db_type": "*internal",
-	"string_indexed_fields": ["RunID"]
+"db": {
+	"db_conns": {
+		"*default": {	
+			"db_type": "*internal",
+			"string_indexed_fields": ["RunID"]
+		},
+	},
+	"opts":{
+		"internalDBRewriteInterval": "0s",
+		"internalDBDumpInterval": "0s"
+	}
 },
 
 "rates": {
@@ -133,10 +137,7 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 	defer clean()
 
 	// Flush DBs.
-	if err := engine.InitDataDB(cfg); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDB(cfg); err != nil {
+	if err := engine.InitDB(cfg); err != nil {
 		t.Fatal(err)
 	}
 
