@@ -50,9 +50,8 @@ type TpReader struct {
 	//schedulerConns     []string
 }
 
-func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
+func NewTpReader(db *DBConnManager, lr LoadReader, tpid, timezone string,
 	cacheConns, schedulerConns []string) (*TpReader, error) {
-
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
@@ -359,8 +358,10 @@ func (tpr *TpReader) LoadAll() (err error) {
 }
 
 func (tpr *TpReader) WriteToDatabase(verbose, disableReverse bool) (err error) {
-	if tpr.dm.dataDB == nil {
-		return errors.New("no database connection")
+	for _, db := range tpr.dm.DataDB() {
+		if db == nil {
+			return errors.New("no database connection")
+		}
 	}
 	//generate a loadID
 	loadID := time.Now().UnixNano()

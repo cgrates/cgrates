@@ -106,65 +106,75 @@ const CGRATES_CFG_JSON = `
 	// }
 },
 
-"data_db": {				// database used to store runtime data (eg: accounts)
-	"db_type": "*redis",		// data_db type: <*redis|*mongo>
-	"db_host": "127.0.0.1",		// data_db host address
-	"db_port": 6379, 		// data_db port to reach the database
-	"db_name": "10", 		// data_db database name to connect to
-	"db_user": "cgrates", 		// username to use when connecting to data_db
-	"db_password": "", 		// password to use when connecting to data_db
-	"remote_conns":[],		// the conns that are queried when the items are not found in local DB
-	"remote_conn_id": "",		// the ID to be sent to remote_conns to identify the connection
-	"replication_conns":[],		// the conns the items are replicated
-	"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
-	"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
+"db": {				// database used to store data (eg: accounts)
+	"db_conns": {
+		"*default": {		// The id of the DB connection
+			"db_type": "*internal",		// db type: <*internal|*redis|*mysql|*mongo|*postgres>
+			"db_host": "",		// db host address
+			"db_port": 0, 		// db port to reach the database
+			"db_name": "", 		// db database name to connect to
+			"db_user": "", 		// username to use when connecting to db
+			"db_password": "", 		// password to use when connecting to db
+			"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+			"prefix_indexed_fields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
+			"remote_conns": [],		// the conns that are queried when the items are not found in local DB
+			"remote_conn_id": "",		// the ID to be sent to remote_conns to identify the connection
+			"replication_conns": [],		// the conns the items are replicated
+			"replication_filtered": false, 	// if this is enabled the replication will be made only to the conns that received a get
+			"replication_cache": "", 	// the caching action that is executed on the replication_conns when the items are replicated
+		},
+	},
 	"items":{
-		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false},
-		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false},
-		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false}
+		// compatible db types: <*internal|*redis|*mongo>
+		"*accounts": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"}, 
+		"*actions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*ip_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*ip_allocations": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*route_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*rate_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*action_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*versions": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*ip_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*ranking_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*rankings": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*trend_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*trends": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*route_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*rate_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*rate_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*action_profile_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*account_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+		"*reverse_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate": false, "dbConn": "*default"},
+
+		// compatible db types: <*internal|*mysql|*mongo|*postgres>
+		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false, "dbConn": "*default"} // Compatible only for Internal, MySQL, Mongo and PostgresSQL databases
 	},
 	"opts":{
-		"internalDBDumpPath": "/var/lib/cgrates/internal_db/datadb",		// the path where datadb will be dumped
-		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/datadb", // default path taken by AdminSv1.BackupDataDB when "BackupFolderPath" is not provided
+		"internalDBDumpPath": "/var/lib/cgrates/internal_db/db",		// the path where db will be dumped
+		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/db", // default path taken by AdminSv1.Backupdb when "BackupFolderPath" is not provided
 		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
-		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
-		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
+		"internalDBDumpInterval": "1m",		// dump db regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
+		"internalDBRewriteInterval": "1h",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
 		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",			// the name of sentinel when used
-		"redisCluster": false,			// if enabled the datadb will try to connect to the redis cluster
+		"redisCluster": false,			// if enabled the db will try to connect to the redis cluster
 		"redisClusterSync": "5s",		// the sync interval for the redis cluster
 		"redisClusterOndownDelay": "0",		// the delay before executing the commands if the redis cluster is in the CLUSTERDOWN state
 		"redisConnectTimeout": "0",		// the amount of wait time until timeout for a connection attempt
@@ -176,27 +186,6 @@ const CGRATES_CFG_JSON = `
 		"redisClientCertificate": "",		// path to client certificate
 		"redisClientKey": "",			// path to client key
 		"redisCACertificate": "",		// path to CA certificate (populate for self-signed certificate otherwise let it empty)
-		"mongoQueryTimeout": "10s",		// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
-	}
-},
-
-"stor_db": {					// database used to store offline tariff plans and CDRs
-	"db_type": "*mysql",			// stor database type to use: <*mongo|*mysql|*postgres|*internal>
-	"db_host": "127.0.0.1",			// the host to connect to
-	"db_port": 3306,			// the port to reach the stor_db
-	"db_name": "cgrates",			// stor database name
-	"db_user": "cgrates",			// username to use when connecting to stor_db
-	"db_password": "CGRateS.org",		// password to use when connecting to stor_db
-	"string_indexed_fields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
-	"prefix_indexed_fields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
-	"opts": {
-		"internalDBDumpPath": "/var/lib/cgrates/internal_db/stordb",		// the path where stordb will be dumped
-		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/stordb", // default path taken by AdminSv1.BackupStorDB when "BackupFolderPath" is not provided
-		"internalDBStartTimeout": "5m",		// the amount of wait time until timeout for DB startup
-		"internalDBDumpInterval": "0s",		// dump datadb regularly to a file: "0" - disables it; "-1" - dump on each set/remove; <""|$dur>
-		"internalDBRewriteInterval": "0s",	// rewrite dump files regularly: "0" - disables it; "-1" - rewrite on engine start; "-2" - rewrite on engine shutdown; <""|$dur>
-		"internalDBFileSizeLimit": "1GB",	// maximum size that can be written in a singular dump file 
 		"sqlMaxOpenConns": 100,		// maximum database connections opened, not applying for mongo
 		"sqlMaxIdleConns": 10,		// maximum database connections idle, not applying for mongo
 		"sqlLogLevel": 3,	        // sql logger verbosity: 1=Silent, 2=Error, 3=Warn, 4=Info
@@ -209,11 +198,8 @@ const CGRATES_CFG_JSON = `
 		//"pgSSLCertMode": "allow",	// determines whether a client certificate may be sent to the server, and whether the server is required to request one
 		//"pgSSLRootCert": "",		// name of a file containing SSL certificate authority (CA) certificate(s)
 		"mysqlLocation": "Local",	// the location the time from mysql is retrived
-		"mongoQueryTimeout":"10s",	// timeout for query when mongo is used
-		"mongoConnScheme": "mongodb"	// scheme for MongoDB connection <mongodb|mongodb+srv>
-	},
-	"items":{
-		"*cdrs": {"limit": -1, "ttl": "", "static_ttl": false, "remote":false, "replicate":false}
+		"mongoQueryTimeout": "10s",		// timeout for query when mongo is used
+		"mongoConnScheme": "mongodb"		// scheme for MongoDB connection <mongodb|mongodb+srv>
 	}
 },
 
@@ -1169,7 +1155,7 @@ const CGRATES_CFG_JSON = `
 
 "resources": {
 	"enabled": false,		// starts ResourceLimiter service: <true|false>
-	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"thresholds_conns": [],		// connections to ThresholdS for resource reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 	"indexed_selects": true,	// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1205,7 +1191,7 @@ const CGRATES_CFG_JSON = `
 
 "ips": {
     "enabled": false,			// enables the IPs service: <true|false>
-    "store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+    "store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
     "indexed_selects": true,		// enable profile matching exclusively on indexes
     //"string_indexed_fields": [],	// query indexes based on these fields for faster processing
     "prefix_indexed_fields": [],	// query indexes based on these fields for faster processing
@@ -1241,7 +1227,7 @@ const CGRATES_CFG_JSON = `
 
 "stats": {
 	"enabled": false,		// starts Stat service: <true|false>
-	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"store_uncompressed_limit": 0,	// used to compress data
 	"thresholds_conns": [],		// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
 	"ees_conns": [],		// connections to EEs for StatUpdates, empty to disable export functionality: <""|*internal|$rpc_conns_id>
@@ -1281,7 +1267,7 @@ const CGRATES_CFG_JSON = `
 
 "thresholds": {
 	"enabled": false,			// starts ThresholdS service: <true|false>
-	"store_interval": "",			// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"store_interval": "",			// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"indexed_selects": true,		// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],		// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],		// query indexes based on these fields for faster processing
@@ -1313,7 +1299,7 @@ const CGRATES_CFG_JSON = `
 
 "trends":{
 	"enabled": false,		// starts TrendS service: <true|false>.
-	"store_interval": "",		// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"store_interval": "",		// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"store_uncompressed_limit": 0,	// used to compress metrics
 	"stats_conns": [],		// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"scheduled_ids": {},		// autoload these trend ids on start
@@ -1325,7 +1311,7 @@ const CGRATES_CFG_JSON = `
 
 "rankings":{
 	"enabled": false,	// starts RankingS service: <true|false>.
-	"store_interval": "",	// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"store_interval": "",	// dump cache regularly to db, 0 - dump at start/shutdown: <""|$dur>
 	"stats_conns": [],	// connections to StatS ,empty to disable stats functionality: <""|*internal|$rpc_conns_id>
 	"scheduled_ids": {},	// autoload these ranking ids on start
 	"thresholds_conns": [],	// connections to ThresholdS for rankingSummary reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
@@ -1732,15 +1718,16 @@ const CGRATES_CFG_JSON = `
 
 
 "migrator": {
-	"out_datadb_type": "redis",
-	"out_datadb_host": "127.0.0.1",
-	"out_datadb_port": "6379",
-	"out_datadb_name": "10",
-	"out_datadb_user": "cgrates",
-	"out_datadb_password": "",
-	"out_datadb_encoding" : "msgpack",
 	"users_filters":[],
-	"out_datadb_opts":{
+	"fromItems":{
+		"*accounts": {"dbConn": "*default"},
+		"*statqueue_profiles": {"dbConn": "*default"},
+		"*filters": {"dbConn": "*default"},
+		"*charger_profiles": {"dbConn": "*default"},
+		"*load_ids": {"dbConn": "*default"},
+		"*versions": {"dbConn": "*default"}
+	},
+	"out_db_opts":{
 		"redisMaxConns": 10,			// the connection pool size
 		"redisConnectAttempts": 20,		// the maximum amount of dial attempts
 		"redisSentinel": "",
@@ -2143,12 +2130,12 @@ const CGRATES_CFG_JSON = `
 
 
 "config_db": {					// database used to store runtime data (eg: accounts)
-	"db_type": "*internal",			// data_db type: <*redis|*mongo>
-	"db_host": "",				// data_db host address
-	"db_port": 0,	 			// data_db port to reach the database
-	"db_name": "",	 			// data_db database name to connect to
-	"db_user": "",		 		// username to use when connecting to data_db
-	"db_password": "", 			// password to use when connecting to data_db
+	"db_type": "*internal",			// db type: <*internal|*redis|*mongo>
+	"db_host": "",				// db host address
+	"db_port": 0,	 			// db port to reach the database
+	"db_name": "",	 			// db database name to connect to
+	"db_user": "",		 		// username to use when connecting to db
+	"db_password": "", 			// password to use when connecting to db
 	"opts":{
 		"internalDBDumpPath": "/var/lib/cgrates/internal_db/configdb",		// the path where configdb will be dumped
 		"internalDBBackupPath": "/var/lib/cgrates/internal_db/backup/configdb", // default path taken by ConfigSv1.BackupConfigDB when "BackupFolderPath" is not provided

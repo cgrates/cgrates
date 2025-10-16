@@ -37,7 +37,7 @@ func (admS AdminSv1) GetCDRs(ctx *context.Context, args *utils.CDRFilters, reply
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
 	}
-	cdrs, err := admS.storDB.GetCDRs(ctx, fltrs, args.APIOpts)
+	cdrs, err := admS.dm.GetCDRs(ctx, fltrs, args.APIOpts)
 	if err != nil {
 		return fmt.Errorf("retrieving CDRs failed: %w", err)
 	}
@@ -54,7 +54,7 @@ func (admS AdminSv1) RemoveCDRs(ctx *context.Context, args *utils.CDRFilters, re
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
 	}
-	if err := admS.storDB.RemoveCDRs(ctx, fltrs); err != nil {
+	if err := admS.dm.RemoveCDRs(ctx, fltrs); err != nil {
 		return fmt.Errorf("removing CDRs failed: %w", err)
 	}
 	*reply = utils.OK

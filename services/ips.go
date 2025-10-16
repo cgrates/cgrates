@@ -53,7 +53,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Serv
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -69,7 +69,7 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Serv
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -44,7 +44,7 @@ type SQLImpl interface {
 type SQLStorage struct {
 	DB *sql.DB
 	db *gorm.DB
-	StorDB
+	DataDB
 	SQLImpl
 }
 
@@ -350,17 +350,399 @@ func (sqls *SQLStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 	return
 }
 
-// Will dump everything inside stordb to a file, only for InternalDB
-func (sqls *SQLStorage) DumpStorDB() (err error) {
+// AddLoadHistory DataDB method not implemented yet
+func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
+	loadHistSize int, transactionID string) error {
 	return utils.ErrNotImplemented
 }
 
-// Will rewrite every dump file of StorDB, only for InternalDB
-func (sqls *SQLStorage) RewriteStorDB() (err error) {
+// Only intended for InternalDB
+func (sqls *SQLStorage) BackupConfigDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
 }
 
-// BackupStorDB used only for InternalDB
-func (sqls *SQLStorage) BackupStorDB(backupFolderPath string, zip bool) (err error) {
+// BackupDataDB used only for InternalDB
+func (sqls *SQLStorage) BackupDataDB(backupFolderPath string, zip bool) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Will dump everything inside DB to a file, only for InternalDB
+func (sqls *SQLStorage) DumpConfigDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Will dump everything inside DB to a file, only for InternalDB
+func (sqls *SQLStorage) DumpDataDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Will rewrite every dump file of DataDB,  only for InternalDB
+func (sqls *SQLStorage) RewriteDataDB() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (exists bool, err error) {
+	return false, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
+	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetResourceProfileDrv(ctx *context.Context, rsp *utils.ResourceProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (r *utils.Resource, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetIPProfileDrv(ctx *context.Context, tenant, id string) (*utils.IPProfile, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfile) error {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveIPProfileDrv(ctx *context.Context, tenant, id string) error {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id string) (*utils.IPAllocations, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAllocations) error {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveIPAllocationsDrv(ctx *context.Context, tenant, id string) error {
+	return utils.ErrNotImplemented
+}
+
+// GetStatQueueProfileDrv DataDB method not implemented yet
+func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *StatQueueProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// SetStatQueueProfileDrv DataDB method not implemented yet
+func (sqls *SQLStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *StatQueueProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// RemStatQueueProfileDrv DataDB method not implemented yet
+func (sqls *SQLStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// GetStatQueueDrv DataDB method not implemented yet
+func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *StatQueue, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// SetStatQueueDrv DataDB method not implemented yet
+func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *StatQueue) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// RemStatQueueDrv DataDB method not implemented yet
+func (sqls *SQLStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetTrendProfileDrv(ctx *context.Context, sg *utils.TrendProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sg *utils.TrendProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (r *utils.Trend, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetTrendDrv(ctx *context.Context, r *utils.Trend) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetRankingProfileDrv(ctx *context.Context, sg *utils.RankingProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sg *utils.RankingProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (rn *utils.Ranking, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// GetThresholdProfileDrv DataDB method not implemented yet
+func (sqls *SQLStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (tp *ThresholdProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// SetThresholdProfileDrv DataDB method not implemented yet
+func (sqls *SQLStorage) SetThresholdProfileDrv(ctx *context.Context, tp *ThresholdProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// RemThresholdProfileDrv DataDB method not implemented yet
+func (sqls *SQLStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (r *Threshold, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetThresholdDrv(ctx *context.Context, r *Threshold) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveThresholdDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetFilterDrv(ctx *context.Context, tenant, id string) (r *Filter, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetFilterDrv(ctx *context.Context, r *Filter) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveFilterDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (r *utils.RouteProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetRouteProfileDrv(ctx *context.Context, r *utils.RouteProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (r *utils.AttributeProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetAttributeProfileDrv(ctx *context.Context, r *utils.AttributeProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetChargerProfileDrv(_ *context.Context, tenant, id string) (r *utils.ChargerProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetChargerProfileDrv(_ *context.Context, r *utils.ChargerProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveChargerProfileDrv(_ *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// GetStorageType returns the storage type that is being used
+func (sqls *SQLStorage) GetStorageType() string {
+	return utils.MetaMySQL
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveLoadIDsDrv() (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// GetRateProfileRateIDsDrv DataDB method not implemented yet
+func (sqls *SQLStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
+	return nil, nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetActionProfileDrv(ctx *context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// GetIndexesDrv DataDB method not implemented yet
+func (sqls *SQLStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey, transactionID string) (indexes map[string]utils.StringSet, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// SetIndexesDrv DataDB method not implemented yet
+func (sqls *SQLStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
+	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx, idxKey string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) SetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// DataDB method not implemented yet
+func (sqls *SQLStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// ConfigDB method not implemented yet
+func (sqls *SQLStorage) GetSection(ctx *context.Context, section string, val any) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// ConfigDB method not implemented yet
+func (sqls *SQLStorage) SetSection(_ *context.Context, section string, jsn any) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Only intended for InternalDB
+func (sqls *SQLStorage) RewriteConfigDB() (err error) {
 	return utils.ErrNotImplemented
 }

@@ -53,7 +53,7 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, reS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -69,7 +69,7 @@ func (reS *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmana
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	reS.mu.Lock()
 	defer reS.mu.Unlock()

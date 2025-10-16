@@ -31,8 +31,8 @@ import (
 
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
-	pass, marshaler string, opts *config.DataDBOpts,
-	itmsCfg map[string]*config.ItemOpts) (d DataDBDriver, err error) {
+	pass, marshaler string, stringIndexedFields, prefixIndexedFields []string,
+	opts *config.DBOpts, itmsCfg map[string]*config.ItemOpts) (d DataDBDriver, err error) {
 	switch dbType {
 	case utils.MetaRedis:
 		var dbNo int
@@ -52,34 +52,18 @@ func NewDataDBConn(dbType, host, port, name, user,
 			opts.RedisPoolPipelineWindow, opts.RedisPoolPipelineLimit,
 			opts.RedisTLS, opts.RedisClientCertificate, opts.RedisClientKey, opts.RedisCACertificate)
 	case utils.MetaMongo:
-		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.DataDB, nil, opts.MongoQueryTimeout)
-	case utils.MetaInternal:
-		d, err = NewInternalDB(nil, nil, opts.ToTransCacheOpts(), itmsCfg)
-	default:
-		err = fmt.Errorf("unsupported db_type <%s>", dbType)
-	}
-	return
-}
-
-// NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
-func NewStorDBConn(dbType, host, port, name, user, pass, marshaler string,
-	stringIndexedFields, prefixIndexedFields []string,
-	opts *config.StorDBOpts, itmsCfg map[string]*config.ItemOpts) (db StorDB, err error) {
-	switch dbType {
-	case utils.MetaMongo:
-		db, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, utils.MetaStorDB, stringIndexedFields, opts.MongoQueryTimeout)
+		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass, marshaler, stringIndexedFields, opts.MongoQueryTimeout)
 	case utils.MetaPostgres:
-		db, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
+		d, err = NewPostgresStorage(host, port, name, user, pass, opts.PgSSLMode,
 			opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword, opts.PgSSLCertMode, opts.PgSSLRootCert,
 			opts.SQLMaxOpenConns, opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime)
 	case utils.MetaMySQL:
-		db, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
+		d, err = NewMySQLStorage(host, port, name, user, pass, opts.SQLMaxOpenConns, opts.SQLMaxIdleConns,
 			opts.SQLLogLevel, opts.SQLConnMaxLifetime, opts.MySQLLocation, opts.SQLDSNParams)
 	case utils.MetaInternal:
-		db, err = NewInternalDB(stringIndexedFields, prefixIndexedFields, opts.ToTransCacheOpts(), itmsCfg)
+		d, err = NewInternalDB(stringIndexedFields, prefixIndexedFields, opts.ToTransCacheOpts(), itmsCfg)
 	default:
-		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			dbType, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres, utils.MetaInternal)
+		err = fmt.Errorf("unsupported db_type <%s>", dbType)
 	}
 	return
 }

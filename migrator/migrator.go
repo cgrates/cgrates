@@ -22,16 +22,19 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMigrator(dmIN, dmOut MigratorDataDB,
+func NewMigrator(dataDBCfg *config.DbCfg, dmFrom, dmTo map[string]MigratorDataDB,
 	dryRun, sameDataDB bool) (m *Migrator, err error) {
 	stats := make(map[string]int)
+
 	m = &Migrator{
-		dmOut:      dmOut,
-		dmIN:       dmIN,
+		dataDBCfg:  dataDBCfg,
+		dmTo:       dmTo,
+		dmFrom:     dmFrom,
 		dryRun:     dryRun,
 		sameDataDB: sameDataDB,
 		stats:      stats,
@@ -40,11 +43,42 @@ func NewMigrator(dmIN, dmOut MigratorDataDB,
 }
 
 type Migrator struct {
-	dmIN       MigratorDataDB
-	dmOut      MigratorDataDB
+	dataDBCfg  *config.DbCfg
+	dmFrom     map[string]MigratorDataDB
+	dmTo       map[string]MigratorDataDB
 	dryRun     bool
 	sameDataDB bool
 	stats      map[string]int
+}
+
+// GetINConn returns the IN MigratorDataDB where the provided itemID is stored.
+// Returns the *default MigratorDataDB conn if it can't find the item's corresponding DB
+func (m *Migrator) GetINConn(itemID string) (db MigratorDataDB, err error) {
+	var ok bool
+	dbConnID, ok := m.dataDBCfg.Items[itemID]
+	if !ok {
+		return nil, fmt.Errorf("couldn't find item with ID: <%v>", itemID)
+	}
+	if db, ok = m.dmFrom[dbConnID.DBConn]; !ok {
+		// return *default db if DBConn is not found
+		return m.dmFrom[utils.MetaDefault], nil
+	}
+	return
+}
+
+// GetOUTConn returns the OUT MigratorDataDB where the provided itemID is stored.
+// Returns the *default MigratorDataDB conn if it can't find the item's corresponding DB
+func (m *Migrator) GetOUTConn(itemID string) (db MigratorDataDB, err error) {
+	var ok bool
+	dbConnID, ok := m.dataDBCfg.Items[itemID]
+	if !ok {
+		return nil, fmt.Errorf("couldn't find item with ID: <%v>", itemID)
+	}
+	if db, ok = m.dmTo[dbConnID.DBConn]; !ok {
+		// return *default db if DBConn is not found
+		return m.dmTo[utils.MetaDefault], nil
+	}
+	return
 }
 
 // Migrate implements the tasks to migrate, used as a dispatcher to the individual methods
@@ -62,43 +96,40 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				log.Print("Cannot dryRun SetVersions!")
 				return
 			}
-			err = engine.OverwriteDBVersions(m.dmOut.DataManager().DataDB())
-			if err != nil {
-				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
-					fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
+			if dmTo, err := m.GetOUTConn(utils.CacheVersions); err != nil {
+				return err, nil
+			} else {
+				if dataDB, _, err := dmTo.DataManager().DBConns().GetConn(utils.CacheVersions); err != nil {
+					return err, nil
+				} else if err = engine.OverwriteDBVersions(dataDB); err != nil {
+					return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
+						fmt.Sprintf("error: <%s> when seting versions for DataDB", err.Error())), nil
+				}
 			}
 		case utils.MetaEnsureIndexes:
-
-			if m.dmOut.DataManager().DataDB().GetStorageType() == utils.MetaMongo {
-				mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
-				if err = mgo.EnsureIndexes(); err != nil {
-					return
+			mongoDBFound := false // track if no mongo DBs were found for case *ensure_indexes
+			// since DataManager is the same in all OUT migratorDataDBs, taking the default
+			// migratorDataDB will suffice
+			for _, db := range m.dmTo[utils.MetaDefault].DataManager().DataDB() {
+				if db.GetStorageType() == utils.MetaMongo {
+					mgo := db.(*engine.MongoStorage)
+					if err = mgo.EnsureIndexes(); err != nil {
+						return
+					}
+					mongoDBFound = true
 				}
-			} else {
+			}
+			if !mongoDBFound {
 				log.Printf("The DataDB type has to be %s .\n ", utils.MetaMongo)
 			}
 
 		case utils.MetaStats:
 			err = m.migrateStats()
-		case utils.MetaThresholds:
-			err = m.migrateThresholds()
-		case utils.MetaAttributes:
-			err = m.migrateAttributeProfile()
 		case utils.MetaFilters:
 			err = m.migrateFilters()
-		case utils.MetaRoutes:
-			err = m.migrateRouteProfiles()
 		case utils.MetaAccounts:
 			err = m.migrateAccounts()
 		//only Move
-		case utils.MetaActionProfiles:
-			err = m.migrateActionProfiles()
-		case utils.MetaResources:
-			err = m.migrateResources()
-		case utils.MetaRateProfiles:
-			err = m.migrateRateProfiles()
-		case utils.MetaSubscribers:
-			err = m.migrateSubscribers()
 		case utils.MetaChargers:
 			err = m.migrateChargers()
 			//TPs
@@ -109,23 +140,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			if err := m.migrateStats(); err != nil {
 				log.Print("ERROR: ", utils.MetaStats, " ", err)
 			}
-			if err := m.migrateThresholds(); err != nil {
-				log.Print("ERROR: ", utils.MetaThresholds, " ", err)
-			}
-			if err := m.migrateRouteProfiles(); err != nil {
-				log.Print("ERROR: ", utils.MetaRoutes, " ", err)
-			}
-			if err := m.migrateAttributeProfile(); err != nil {
-				log.Print("ERROR: ", utils.MetaAttributes, " ", err)
-			}
 			if err := m.migrateFilters(); err != nil {
 				log.Print("ERROR: ", utils.MetaFilters, " ", err)
-			}
-			if err := m.migrateResources(); err != nil {
-				log.Print("ERROR: ", utils.MetaResources, " ", err)
-			}
-			if err := m.migrateSubscribers(); err != nil {
-				log.Print("ERROR: ", utils.MetaSubscribers, " ", err)
 			}
 			if err = m.migrateLoadIDs(); err != nil {
 				log.Print("ERROR: ", utils.MetaLoadIDs, " ", err)
@@ -141,19 +157,29 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 }
 
 func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
-	if m.dmOut.DataManager().DataDB().GetStorageType() != utils.MetaMongo {
-		return nil
+	// since DataManager is the same in all OUT migratorDataDBs, taking the default
+	// migratorDataDB will suffice
+	for _, db := range m.dmTo[utils.MetaDefault].DataManager().DataDB() {
+		if db.GetStorageType() == utils.MetaMongo {
+			mgo := db.(*engine.MongoStorage)
+			if err := mgo.EnsureIndexes(cols...); err != nil {
+				return err
+			}
+		}
 	}
-	mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
-	return mgo.EnsureIndexes(cols...)
+	return nil
 }
 
 // closes all opened DBs
 func (m *Migrator) Close() {
-	if m.dmIN != nil {
-		m.dmIN.close()
+	if m.dmFrom != nil {
+		for _, dm := range m.dmFrom {
+			dm.close()
+		}
 	}
-	if m.dmOut != nil {
-		m.dmOut.close()
+	if m.dmTo != nil {
+		for _, dm := range m.dmTo {
+			dm.close()
+		}
 	}
 }

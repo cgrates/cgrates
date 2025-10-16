@@ -53,7 +53,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, ran.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -68,7 +68,7 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	ran.mu.Lock()
 	defer ran.mu.Unlock()

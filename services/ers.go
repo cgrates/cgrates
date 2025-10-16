@@ -55,7 +55,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, erS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -64,7 +64,7 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	erS.mu.Lock()
 	defer erS.mu.Unlock()

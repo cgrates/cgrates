@@ -52,7 +52,7 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, routeS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -67,7 +67,7 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 		return
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	routeS.mu.Lock()
 	defer routeS.mu.Unlock()

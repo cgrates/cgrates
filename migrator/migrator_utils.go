@@ -30,34 +30,51 @@ var (
 	SUPPLIER = "Supplier"
 )
 
-func NewMigratorDataDB(db_type, host, port, name, user, pass,
-	marshaler string, cfg *config.CGRConfig,
-	opts *config.DataDBOpts, itmsCfg map[string]*config.ItemOpts) (db MigratorDataDB, err error) {
-	dbCon, err := engine.NewDataDBConn(db_type, host,
-		port, name, user, pass, marshaler, opts, itmsCfg)
-	if err != nil {
-		return nil, err
+func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
+	cfg *config.CGRConfig) (db map[string]MigratorDataDB, err error) {
+	dataDBs := make(map[string]engine.DataDB, len(dbConnIDList))
+	for _, dbConnID := range dbConnIDList {
+		dbCon, err := engine.NewDataDBConn(cfg.DbCfg().DBConns[dbConnID].Type,
+			cfg.DbCfg().DBConns[dbConnID].Host, cfg.DbCfg().DBConns[dbConnID].Port,
+			cfg.DbCfg().DBConns[dbConnID].Name, cfg.DbCfg().DBConns[dbConnID].User,
+			cfg.DbCfg().DBConns[dbConnID].Password, marshaler,
+			cfg.DbCfg().DBConns[dbConnID].StringIndexedFields,
+			cfg.DbCfg().DBConns[dbConnID].PrefixIndexedFields,
+			cfg.MigratorCgrCfg().OutDBOpts, cfg.DbCfg().Items)
+		if err != nil {
+			return nil, err
+		}
+		dataDBs[dbConnID] = dbCon
 	}
-	dm := engine.NewDataManager(dbCon, cfg, nil)
-	var d MigratorDataDB
-	switch db_type {
-	case utils.MetaRedis:
-		d = newRedisMigrator(dm)
-	case utils.MetaMongo:
-		d = newMongoMigrator(dm)
-		db = d.(MigratorDataDB)
-	case utils.MetaInternal:
-		d = newInternalMigrator(dm)
-		db = d.(MigratorDataDB)
-	default:
-		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
-			db_type, utils.MetaRedis, utils.MetaMongo, utils.MetaInternal)
+	dbcManager := engine.NewDBConnManager(dataDBs, cfg.DbCfg())
+	dm := engine.NewDataManager(dbcManager, cfg, nil)
+	d := make(map[string]MigratorDataDB, len(dbConnIDList))
+	for _, dbConnID := range dbConnIDList {
+		switch cfg.DbCfg().DBConns[dbConnID].Type {
+		case utils.MetaRedis:
+			d[dbConnID] = newRedisMigrator(dm)
+		case utils.MetaMongo:
+			d[dbConnID] = newMongoMigrator(dm)
+		case utils.MetaInternal:
+			d[dbConnID] = newInternalMigrator(dm)
+		default:
+			err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
+				cfg.DbCfg().DBConns[dbConnID].Type, utils.MetaRedis, utils.MetaMongo, utils.MetaInternal)
+		}
 	}
 	return d, nil
 }
 
 func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
-	vrs, err = m.dmIN.DataManager().DataDB().GetVersions(utils.EmptyString)
+	mInDB, err := m.GetINConn(utils.CacheVersions)
+	if err != nil {
+		return nil, err
+	}
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.CacheVersions)
+	if err != nil {
+		return nil, err
+	}
+	vrs, err = dataDB.GetVersions(utils.EmptyString)
 	if err != nil {
 		return nil, utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -73,8 +90,16 @@ func (m *Migrator) getVersions(str string) (vrs engine.Versions, err error) {
 }
 
 func (m *Migrator) setVersions(str string) (err error) {
+	mOutDB, err := m.GetOUTConn(utils.CacheVersions)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mOutDB.DataManager().DBConns().GetConn(utils.CacheVersions)
+	if err != nil {
+		return err
+	}
 	vrs := engine.Versions{str: engine.CurrentDataDBVersions()[str]}
-	err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false)
+	err = dataDB.SetVersions(vrs, false)
 	if err != nil {
 		err = utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,

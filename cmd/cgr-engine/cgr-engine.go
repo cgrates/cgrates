@@ -211,7 +211,6 @@ func runCGREngine(fs []string) (err error) {
 		services.NewConnManagerService(cfg),
 		services.NewLoggerService(cfg, flags.logger.typ),
 		services.NewDataDBService(cfg, flags.data.setVersions),
-		services.NewStorDBService(cfg, flags.data.setVersions),
 		services.NewConfigService(cfg),
 		services.NewGuardianService(cfg),
 		coreS,
@@ -329,7 +328,7 @@ func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logL
 		if d, err = engine.NewDataDBConn(cfg.ConfigDBCfg().Type,
 			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
-			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
+			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding, nil, nil,
 			cfg.ConfigDBCfg().Opts, nil); err != nil { // Cannot configure getter database, show stopper
 			err = fmt.Errorf("could not configure configDB: <%s>", err)
 			return

@@ -405,18 +405,3 @@ func (ms *MongoStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 	})
 	return err
 }
-
-// RewriteStorDB used only for InternalDB
-func (ms *MongoStorage) DumpStorDB() (err error) {
-	return utils.ErrNotImplemented
-}
-
-// RewriteStorDB used only for InternalDB
-func (ms *MongoStorage) RewriteStorDB() (err error) {
-	return utils.ErrNotImplemented
-}
-
-// BackupStorDB used only for InternalDB
-func (ms *MongoStorage) BackupStorDB(backupFolderPath string, zip bool) (err error) {
-	return utils.ErrNotImplemented
-}

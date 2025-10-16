@@ -52,7 +52,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, trs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -67,7 +67,7 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	trs.mu.Lock()
 	defer trs.mu.Unlock()

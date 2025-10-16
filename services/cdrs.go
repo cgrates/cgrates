@@ -52,8 +52,7 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
-			utils.DataDB,
-			utils.StorDB,
+			utils.DB,
 		},
 		registry, cs.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -62,13 +61,12 @@ func (cs *CDRService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
-	sdbs := srvDeps[utils.StorDB].(*StorDBService).DB()
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	cs.mu.Lock()
 	defer cs.mu.Unlock()
 
-	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs, cms.ConnManager(), sdbs)
+	cs.cdrS = cdrs.NewCDRServer(cs.cfg, dbs.DataManager(), fs, cms.ConnManager())
 	runtime.Gosched()
 	srv, err := engine.NewServiceWithPing(cs.cdrS, utils.CDRsV1, utils.V1Prfx)
 	if err != nil {

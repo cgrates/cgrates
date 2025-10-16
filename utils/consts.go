@@ -234,9 +234,12 @@ const (
 	CSV                     = "csv"
 	FWV                     = "fwv"
 	MetaMongo               = "*mongo"
+	Mongo                   = "mongo"
 	MetaRedis               = "*redis"
+	Redis                   = "redis"
 	MetaPostgres            = "*postgres"
 	MetaInternal            = "*internal"
+	Internal                = "internal"
 	MetaLocalHost           = "*localhost"
 	MetaBiJSONLocalHost     = "*bijson_localhost"
 	MetaRatingSubjectPrefix = "*zero"
@@ -359,8 +362,8 @@ const (
 	MetaDumpToFile           = "*dump_to_file"
 	MetaDumpToJSON           = "*dump_to_json"
 	NonTransactional         = ""
-	DataDB                   = "data_db"
-	StorDB                   = "stor_db"
+	DB                       = "db"
+	StorDB                   = "StorDB"
 	NotFoundCaps             = "NOT_FOUND"
 	ServerErrorCaps          = "SERVER_ERROR"
 	MandatoryIEMissingCaps   = "MANDATORY_IE_MISSING"
@@ -2081,6 +2084,7 @@ const (
 
 // DataDbCfg
 const (
+	DataDbConnsCfg               = "db_conns"
 	DataDbTypeCfg                = "db_type"
 	DataDbHostCfg                = "db_host"
 	DataDbPortCfg                = "db_port"
@@ -2122,6 +2126,7 @@ const (
 	TTLCfg       = "ttl"
 	LimitCfg     = "limit"
 	StaticTTLCfg = "static_ttl"
+	DBConnCfg    = "dbConn"
 )
 
 // Tls
@@ -2490,16 +2495,10 @@ const (
 
 // MigratorCgrCfg
 const (
-	OutDataDBTypeCfg       = "out_datadb_type"
-	OutDataDBHostCfg       = "out_datadb_host"
-	OutDataDBPortCfg       = "out_datadb_port"
-	OutDataDBNameCfg       = "out_datadb_name"
-	OutDataDBUserCfg       = "out_datadb_user"
-	OutDataDBPasswordCfg   = "out_datadb_password"
-	OutDataDBEncodingCfg   = "out_datadb_encoding"
-	OutDataDBRedisSentinel = "out_redis_sentinel"
-	OutDataDBOptsCfg       = "out_datadb_opts"
-	UsersFiltersCfg        = "users_filters"
+	OutDBRedisSentinel = "out_redis_sentinel"
+	OutDBOptsCfg       = "out_db_opts"
+	UsersFiltersCfg    = "users_filters"
+	FromItemsCfg       = "fromItems"
 )
 
 // MailerCfg

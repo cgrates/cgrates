@@ -1113,6 +1113,21 @@ func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID str
 	return
 }
 
+// StorDB method not implemented yet
+func (rs *RedisStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
+	return utils.ErrNotImplemented
+}
+
+// StorDB method not implemented yet
+func (rs *RedisStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) ([]*utils.CDR, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// StorDB method not implemented yet
+func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err error) {
+	return utils.ErrNotImplemented
+}
+
 // DumpDataDB will dump all of datadb from memory to a file, only for InternalDB
 func (rs *RedisStorage) DumpDataDB() error {
 	return utils.ErrNotImplemented

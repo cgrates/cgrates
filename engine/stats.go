@@ -608,7 +608,11 @@ func (sS *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOp
 		tenant = sS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.StatQueuePrefix + tenant + utils.ConcatenatedKeySep
-	keys, err := sS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
+	dataDB, _, err := sS.dm.DBConns().GetConn(utils.MetaStatQueues)
+	if err != nil {
+		return err
+	}
+	keys, err := dataDB.GetKeysForPrefix(ctx, prfx)
 	if err != nil {
 		return err
 	}

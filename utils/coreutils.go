@@ -1029,3 +1029,19 @@ func ParseBinarySize(size string) (int64, error) {
 
 	return 0, fmt.Errorf("unknown unit: %s", unit)
 }
+
+// EqualUnorderedStringSlices will return true if the length of the slices and strings
+// inside the slices are equal, no matter the order
+func EqualUnorderedStringSlices(slice1, slice2 []string) bool {
+	if len(slice1) != len(slice2) {
+		return false
+	}
+	// Make copies to avoid modifying originals
+	s1 := slices.Clone(slice1)
+	s2 := slices.Clone(slice2)
+	// Sort both slices
+	slices.Sort(s1)
+	slices.Sort(s2)
+	// Compare sorted slices
+	return slices.Equal(s1, s2)
+}

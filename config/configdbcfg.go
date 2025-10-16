@@ -35,12 +35,23 @@ type ConfigDBCfg struct {
 	Name     string // The name of the database to connect to.
 	User     string // The user to sign in as.
 	Password string // The user's password.
-	Opts     *DataDBOpts
+	Opts     *DBOpts
+}
+
+// Database config for config_db
+type ConfigDbJsonCfg struct {
+	Db_type     *string
+	Db_host     *string
+	Db_port     *int
+	Db_name     *string
+	Db_user     *string
+	Db_password *string
+	Opts        *DBOptsJson
 }
 
 // loadConfigDBCfg loads the DataDB section of the configuration
 func (dbcfg *ConfigDBCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
-	jsnConfigDBCfg := new(DbJsonCfg)
+	jsnConfigDBCfg := new(ConfigDbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ConfigDBJSON, jsnConfigDBCfg); err != nil {
 		return
 	}
@@ -51,7 +62,7 @@ func (dbcfg *ConfigDBCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConf
 }
 
 // loadFromJSONCfg loads Database config from JsonCfg
-func (dbcfg *ConfigDBCfg) loadFromJSONCfg(jsnDbCfg *DbJsonCfg) (err error) {
+func (dbcfg *ConfigDBCfg) loadFromJSONCfg(jsnDbCfg *ConfigDbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
 	}

@@ -29,8 +29,16 @@ import (
 )
 
 func (m *Migrator) migrateCurrentAccounts() (err error) {
+	mInDB, err := m.GetINConn(utils.MetaAccounts)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaAccounts)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AccountPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.AccountPrefix)
 	if err != nil {
 		return err
 	}
@@ -39,17 +47,21 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating from account ", id)
 		}
-		ap, err := m.dmIN.DataManager().GetAccount(context.TODO(), tntID[0], tntID[1])
+		ap, err := mInDB.DataManager().GetAccount(context.TODO(), tntID[0], tntID[1])
 		if err != nil {
 			return err
 		}
 		if ap == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetAccount(context.TODO(), ap, true); err != nil {
+		mOutDB, err := m.GetOUTConn(utils.MetaAccounts)
+		if err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().RemoveAccount(context.TODO(), tntID[0], tntID[1], false); err != nil {
+		if err := mOutDB.DataManager().SetAccount(context.TODO(), ap, true); err != nil {
+			return err
+		}
+		if err := mInDB.DataManager().RemoveAccount(context.TODO(), tntID[0], tntID[1], false); err != nil {
 			return err
 		}
 		m.stats[utils.AccountsString]++

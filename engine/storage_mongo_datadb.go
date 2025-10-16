@@ -177,12 +177,11 @@ func mapStringAnyDecoderWithDecimal(dc bsoncodec.DecodeContext, vr bsonrw.ValueR
 
 // NewMongoStorage initializes a new MongoDB storage instance with provided connection parameters and settings.
 // Returns an error if the setup fails.
-func NewMongoStorage(scheme, host, port, db, user, pass, mrshlerStr string, storageType string,
+func NewMongoStorage(scheme, host, port, db, user, pass, mrshlerStr string,
 	cdrsIndexes []string, ttl time.Duration) (*MongoStorage, error) {
 	mongoStorage := &MongoStorage{
 		ctxTTL:      ttl,
 		cdrsIndexes: cdrsIndexes,
-		storageType: storageType,
 		counter:     utils.NewCounter(time.Now().UnixNano(), 0),
 	}
 	uri := composeMongoURI(scheme, host, port, db, user, pass)
@@ -248,7 +247,6 @@ type MongoStorage struct {
 	ctxTTL      time.Duration
 	ctxTTLMutex sync.RWMutex // used for TTL reload
 	db          string
-	storageType string // DataDB/StorDB
 	ms          utils.Marshaler
 	cdrsIndexes []string
 	counter     *utils.Counter
@@ -260,11 +258,6 @@ func (ms *MongoStorage) query(ctx *context.Context, argfunc func(ctx mongo.Sessi
 	ms.ctxTTLMutex.RUnlock()
 	defer ctxSessionCancel()
 	return ms.client.UseSession(ctxSession, argfunc)
-}
-
-// IsDataDB returns whether or not the storage is used for DataDB.
-func (ms *MongoStorage) IsDataDB() bool {
-	return ms.storageType == utils.DataDB
 }
 
 // SetTTL sets the context TTL used for queries (Thread-safe).
@@ -348,15 +341,11 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 // EnsureIndexes creates database indexes for the specified collections.
 func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 	if len(cols) == 0 {
-		if ms.IsDataDB() {
-			cols = []string{
-				ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
-				ColRsP, ColRes, ColIPp, ColIPs, ColSqs, ColSqp, ColTps, ColThs, ColRts,
-				ColAttr, ColFlt, ColCpp, ColRpp, ColApp, ColRpf, ColShg, ColAcc, ColAnp,
-				ColTrd, ColTrs,
-			}
-		} else {
-			cols = []string{utils.CDRsTBL}
+		cols = []string{
+			ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
+			ColRsP, ColRes, ColIPp, ColIPs, ColSqs, ColSqp, ColTps, ColThs, ColRts,
+			ColAttr, ColFlt, ColCpp, ColRpp, ColApp, ColRpf, ColShg, ColAcc, ColAnp,
+			ColTrd, ColTrs, utils.CDRsTBL,
 		}
 	}
 	for _, col := range cols {

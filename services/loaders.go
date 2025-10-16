@@ -57,7 +57,7 @@ func (s *LoaderService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 			utils.CommonListenerS,
 			utils.ConnManager,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -66,7 +66,7 @@ func (s *LoaderService) Start(_ *utils.SyncedChan, registry *servmanager.Service
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -107,7 +107,7 @@ func (s *LoaderService) Reload(_ *utils.SyncedChan, registry *servmanager.Servic
 		[]string{
 			utils.ConnManager,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -115,7 +115,7 @@ func (s *LoaderService) Reload(_ *utils.SyncedChan, registry *servmanager.Servic
 	}
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
-	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
 	close(s.stopChan)
 	s.stopChan = make(chan struct{})
 

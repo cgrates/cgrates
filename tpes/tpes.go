@@ -65,38 +65,55 @@ type ArgsExportTP struct {
 }
 
 func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tnt, expType string) (profileIDs []string, err error) {
+	var itemID string
 	var prfx string
 	switch expType {
 	case utils.MetaAttributes:
 		prfx = utils.AttributeProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaAttributeProfiles
 	case utils.MetaActions:
 		prfx = utils.ActionProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaActionProfiles
 	case utils.MetaAccounts:
 		prfx = utils.AccountPrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaAccounts
 	case utils.MetaChargers:
 		prfx = utils.ChargerProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaChargerProfiles
 	case utils.MetaFilters:
 		prfx = utils.FilterPrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaFilters
 	case utils.MetaRates:
 		prfx = utils.RateProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaRateProfiles
 	case utils.MetaResources:
 		prfx = utils.ResourceProfilesPrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaResourceProfiles
 	case utils.MetaRoutes:
 		prfx = utils.RouteProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaRouteProfiles
 	case utils.MetaStats:
 		prfx = utils.StatQueueProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaStatQueueProfiles
 	case utils.MetaThresholds:
 		prfx = utils.ThresholdProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaThresholdProfiles
 	case utils.MetaRankings:
 		prfx = utils.RankingProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaRankingProfiles
 	case utils.MetaTrends:
 		prfx = utils.TrendProfilePrefix + tnt + utils.ConcatenatedKeySep
+		itemID = utils.MetaTrendProfiles
 	default:
 		return nil, fmt.Errorf("Unsuported exporter type")
 	}
 	// dbKeys will contain the full name of the key, but we will need just the IDs e.g. "alp_cgrates.org:ATTR_1" -- just ATTR_1
+	dataDB, _, err := dm.DBConns().GetConn(itemID)
+	if err != nil {
+		return nil, err
+	}
 	var dbKeys []string
-	if dbKeys, err = dm.DataDB().GetKeysForPrefix(ctx, prfx); err != nil {
+	if dbKeys, err = dataDB.GetKeysForPrefix(ctx, prfx); err != nil {
 		return nil, err
 	}
 	profileIDs = make([]string, 0, len(dbKeys))

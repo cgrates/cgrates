@@ -29,8 +29,16 @@ import (
 )
 
 func (m *Migrator) migrateCurrentRequestFilter() (err error) {
+	mInDB, err := m.GetINConn(utils.MetaFilters)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaFilters)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.FilterPrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.FilterPrefix)
 	if err != nil {
 		return
 	}
@@ -40,19 +48,23 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 			return fmt.Errorf("Invalid key <%s> when migrating filters", id)
 		}
 		var fl *engine.Filter
-		if fl, err = m.dmIN.DataManager().GetFilter(context.TODO(), tntID[0], tntID[1], false, false,
+		if fl, err = mInDB.DataManager().GetFilter(context.TODO(), tntID[0], tntID[1], false, false,
 			utils.NonTransactional); err != nil {
 			return
 		}
 		if m.dryRun || fl == nil {
 			continue
 		}
-		if err = m.dmOut.DataManager().SetFilter(context.TODO(), fl, true); err != nil {
-			return
+		mOutDB, err := m.GetOUTConn(utils.MetaFilters)
+		if err != nil {
+			return err
 		}
-		if err = m.dmIN.DataManager().RemoveFilter(context.TODO(), tntID[0], tntID[1],
+		if err = mOutDB.DataManager().SetFilter(context.TODO(), fl, true); err != nil {
+			return err
+		}
+		if err = mInDB.DataManager().RemoveFilter(context.TODO(), tntID[0], tntID[1],
 			true); err != nil {
-			return
+			return err
 		}
 		m.stats[utils.RQF]++
 	}
@@ -185,19 +197,7 @@ func migrateInlineFilterV2(fl string) string {
 }
 
 func (m *Migrator) migrateOthersv1() (err error) {
-	if err = m.migrateResourceProfileFiltersV1(); err != nil {
-		return err
-	}
 	if err = m.migrateStatQueueProfileFiltersV1(); err != nil {
-		return err
-	}
-	if err = m.migrateThresholdsProfileFiltersV1(); err != nil {
-		return err
-	}
-	if err = m.migrateSupplierProfileFiltersV1(); err != nil {
-		return err
-	}
-	if err = m.migrateAttributeProfileFiltersV1(); err != nil {
 		return err
 	}
 	if err = m.migrateChargerProfileFiltersV1(); err != nil {
@@ -207,8 +207,12 @@ func (m *Migrator) migrateOthersv1() (err error) {
 }
 
 func (m *Migrator) migrateRequestFilterV1() (fltr *engine.Filter, err error) {
+	mInDB, err := m.GetINConn(utils.MetaFilters)
+	if err != nil {
+		return nil, err
+	}
 	var v1Fltr *v1Filter
-	if v1Fltr, err = m.dmIN.getV1Filter(); err != nil {
+	if v1Fltr, err = mInDB.getV1Filter(); err != nil {
 		return
 	}
 	if v1Fltr == nil {
@@ -219,24 +223,8 @@ func (m *Migrator) migrateRequestFilterV1() (fltr *engine.Filter, err error) {
 }
 
 func (m *Migrator) migrateOthersV2() (err error) {
-	if err = m.migrateResourceProfileFiltersV2(); err != nil {
-		return fmt.Errorf("Error: <%s> when trying to migrate filter for ResourceProfiles",
-			err.Error())
-	}
 	if err = m.migrateStatQueueProfileFiltersV2(); err != nil {
 		return fmt.Errorf("Error: <%s> when trying to migrate filter for StatQueueProfiles",
-			err.Error())
-	}
-	if err = m.migrateThresholdsProfileFiltersV2(); err != nil {
-		return fmt.Errorf("Error: <%s> when trying to migrate filter for ThresholdProfiles",
-			err.Error())
-	}
-	if err = m.migrateSupplierProfileFiltersV2(); err != nil {
-		return fmt.Errorf("Error: <%s> when trying to migrate filter for SupplierProfiles",
-			err.Error())
-	}
-	if err = m.migrateAttributeProfileFiltersV2(); err != nil {
-		return fmt.Errorf("Error: <%s> when trying to migrate filter for AttributeProfiles",
 			err.Error())
 	}
 	if err = m.migrateChargerProfileFiltersV2(); err != nil {
@@ -247,8 +235,12 @@ func (m *Migrator) migrateOthersV2() (err error) {
 }
 
 func (m *Migrator) migrateRequestFilterV2() (fltr *engine.Filter, err error) {
+	mInDB, err := m.GetINConn(utils.MetaFilters)
+	if err != nil {
+		return nil, err
+	}
 	var v1Fltr *v1Filter
-	if v1Fltr, err = m.dmIN.getV1Filter(); err != nil {
+	if v1Fltr, err = mInDB.getV1Filter(); err != nil {
 		return nil, err
 	}
 	if err == utils.ErrNoMoreData {
@@ -259,8 +251,12 @@ func (m *Migrator) migrateRequestFilterV2() (fltr *engine.Filter, err error) {
 }
 
 func (m *Migrator) migrateRequestFilterV3() (fltr *engine.Filter, err error) {
+	mInDB, err := m.GetINConn(utils.MetaFilters)
+	if err != nil {
+		return nil, err
+	}
 	var v1Fltr *v1Filter
-	if v1Fltr, err = m.dmIN.getV1Filter(); err != nil {
+	if v1Fltr, err = mInDB.getV1Filter(); err != nil {
 		return nil, err
 	}
 	if v1Fltr == nil {
@@ -353,38 +349,17 @@ func (m *Migrator) migrateFilters() (err error) {
 	return m.ensureIndexesDataDB(engine.ColFlt)
 }
 
-func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
+func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
+	mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
 	if err != nil {
 		return err
 	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ResourceProfilesPrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating filter for resourceProfile", id)
-		}
-		res, err := m.dmIN.DataManager().GetResourceProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if m.dryRun || res == nil {
-			continue
-		}
-		for i, fl := range res.FilterIDs {
-			res.FilterIDs[i] = migrateInlineFilter(fl)
-		}
-		if err := m.dmOut.DataManager().SetResourceProfile(context.TODO(), res, true); err != nil {
-			return err
-		}
-		m.stats[utils.RQF]++
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaStatQueueProfiles)
+	if err != nil {
+		return err
 	}
-	return
-}
-
-func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -393,7 +368,11 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for statQueueProfile", id)
 		}
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
+		if err != nil {
+			return err
+		}
+		sgs, err := mInDB.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -403,100 +382,11 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 		for i, fl := range sgs.FilterIDs {
 			sgs.FilterIDs[i] = migrateInlineFilter(fl)
 		}
-		if err = m.dmOut.DataManager().SetStatQueueProfile(context.TODO(), sgs, true); err != nil {
-			return err
-		}
-		m.stats[utils.RQF]++
-	}
-	return
-}
-
-func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ThresholdProfilePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating filter for thresholdProfile", id)
-		}
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		mOutDB, err := m.GetOUTConn(utils.MetaStatQueueProfiles)
 		if err != nil {
 			return err
 		}
-		if ths == nil || m.dryRun {
-			continue
-		}
-		for i, fl := range ths.FilterIDs {
-			ths.FilterIDs[i] = migrateInlineFilter(fl)
-		}
-		if err := m.dmOut.DataManager().SetThresholdProfile(context.TODO(), ths, true); err != nil {
-			return err
-		}
-		m.stats[utils.RQF]++
-	}
-	return
-}
-
-func (m *Migrator) migrateSupplierProfileFiltersV1() (err error) {
-	for {
-		var spp *SupplierProfile
-		spp, err = m.dmIN.getSupplier()
-		if err == utils.ErrNoMoreData {
-			err = nil
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if spp == nil || m.dryRun {
-			continue
-		}
-		for i, fl := range spp.FilterIDs {
-			spp.FilterIDs[i] = migrateInlineFilter(fl)
-		}
-		if err := m.dmOut.setSupplier(spp); err != nil {
-			return err
-		}
-		m.stats[utils.RQF]++
-	}
-	return
-}
-
-func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.AttributeProfilePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating filter for attributeProfile", id)
-		}
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
-		if err != nil {
-			return err
-		}
-		if attrPrf == nil || m.dryRun {
-			continue
-		}
-		for i, fl := range attrPrf.FilterIDs {
-			attrPrf.FilterIDs[i] = migrateInlineFilter(fl)
-		}
-		for i, attr := range attrPrf.Attributes {
-			if attr.Path == utils.EmptyString {
-				// in case of older version of attributes we do not have Path
-				// stop the inline migration until the attributes are migrated
-				return fmt.Errorf("error: <empty path> when migrating filter for attribute profile: <%s>", attrPrf.TenantID())
-			}
-			for j, fl := range attr.FilterIDs {
-				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilter(fl)
-			}
-		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
+		if err = mOutDB.DataManager().SetStatQueueProfile(context.TODO(), sgs, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -505,8 +395,16 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 }
 
 func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
+	mInDB, err := m.GetINConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 	if err != nil {
 		return err
 	}
@@ -515,7 +413,7 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for chragerProfile", id)
 		}
-		cpp, err := m.dmIN.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		cpp, err := mInDB.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -525,7 +423,11 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 		for i, fl := range cpp.FilterIDs {
 			cpp.FilterIDs[i] = migrateInlineFilter(fl)
 		}
-		if err := m.dmOut.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
+		mOutDB, err := m.GetOUTConn(utils.MetaChargerProfiles)
+		if err != nil {
+			return err
+		}
+		if err := mOutDB.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF]++
@@ -533,41 +435,17 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 	return
 }
 
-// migrate filters from v2 to v3 for items
-func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ResourceProfilesPrefix)
-	if err != nil {
-		return fmt.Errorf("error: <%s> when getting resource profile IDs", err.Error())
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ResourceProfilesPrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating filter for resourcerProfile", id)
-		}
-		res, err := m.dmIN.DataManager().GetResourceProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
-		if err != nil {
-			return fmt.Errorf("error: <%s> when getting resource profile with tenant: <%s> and id: <%s>",
-				err.Error(), tntID[0], tntID[1])
-		}
-		if m.dryRun || res == nil {
-			continue
-		}
-		for i, fl := range res.FilterIDs {
-			res.FilterIDs[i] = migrateInlineFilterV2(fl)
-		}
-		if err := m.dmOut.DataManager().SetResourceProfile(context.TODO(), res, true); err != nil {
-			return fmt.Errorf("error: <%s> when setting resource profile with tenant: <%s> and id: <%s>",
-				err.Error(), tntID[0], tntID[1])
-		}
-		m.stats[utils.RQF]++
-	}
-	return
-}
-
 func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
+	mInDB, err := m.GetINConn(utils.MetaStatQueueProfiles)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaStatQueueProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.StatQueueProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting statQueue profile IDs", err.Error())
 	}
@@ -576,7 +454,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for statQueueProfile", id)
 		}
-		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		sgs, err := mInDB.DataManager().GetStatQueueProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting statQueue profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
@@ -587,7 +465,11 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 		for i, fl := range sgs.FilterIDs {
 			sgs.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
-		if err = m.dmOut.DataManager().SetStatQueueProfile(context.TODO(), sgs, true); err != nil {
+		mOutDB, err := m.GetOUTConn(utils.MetaStatQueueProfiles)
+		if err != nil {
+			return err
+		}
+		if err = mOutDB.DataManager().SetStatQueueProfile(context.TODO(), sgs, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting statQueue profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
 		}
@@ -596,107 +478,17 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 	return
 }
 
-func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ThresholdProfilePrefix)
-	if err != nil {
-		return fmt.Errorf("error: <%s> when getting threshold profile IDs", err)
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.ThresholdProfilePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating filter for thresholdProfile", id)
-		}
-		ths, err := m.dmIN.DataManager().GetThresholdProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
-		if err != nil {
-			return fmt.Errorf("error: <%s> when getting threshold profile with tenant: <%s> and id: <%s>",
-				err.Error(), tntID[0], tntID[1])
-		}
-		if ths == nil || m.dryRun {
-			continue
-		}
-		for i, fl := range ths.FilterIDs {
-			ths.FilterIDs[i] = migrateInlineFilterV2(fl)
-		}
-		if err := m.dmOut.DataManager().SetThresholdProfile(context.TODO(), ths, true); err != nil {
-			return fmt.Errorf("error: <%s> when setting threshold profile with tenant: <%s> and id: <%s>",
-				err.Error(), tntID[0], tntID[1])
-		}
-		m.stats[utils.RQF]++
-	}
-	return
-}
-
-func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
-	for {
-		var spp *SupplierProfile
-		spp, err = m.dmIN.getSupplier()
-		if err == utils.ErrNoMoreData {
-			err = nil
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if spp == nil || m.dryRun {
-			continue
-		}
-		for i, fl := range spp.FilterIDs {
-			spp.FilterIDs[i] = migrateInlineFilterV2(fl)
-		}
-		if err := m.dmOut.setSupplier(spp); err != nil {
-			return fmt.Errorf("error: <%s> when setting supplier profile with tenant: <%s> and id: <%s>",
-				err.Error(), spp.Tenant, spp.ID)
-		}
-		m.stats[utils.RQF]++
-	}
-	return
-}
-
-func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
-	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.AttributeProfilePrefix)
-	if err != nil {
-		return fmt.Errorf("error: <%s> when getting attribute profile IDs", err)
-	}
-	for _, id := range ids {
-		tntID := strings.SplitN(strings.TrimPrefix(id, utils.AttributeProfilePrefix), utils.InInFieldSep, 2)
-		if len(tntID) < 2 {
-			return fmt.Errorf("Invalid key <%s> when migrating filter for attributeProfile", id)
-		}
-		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
-		if err != nil {
-			return fmt.Errorf("error: <%s> when getting attribute profile with tenant: <%s> and id: <%s>",
-				err.Error(), tntID[0], tntID[1])
-		}
-		if attrPrf == nil || m.dryRun {
-			continue
-		}
-		for i, fl := range attrPrf.FilterIDs {
-			attrPrf.FilterIDs[i] = migrateInlineFilterV2(fl)
-		}
-		for i, attr := range attrPrf.Attributes {
-			if attr.Path == utils.EmptyString {
-				// in case of older version of attributes we do not have Path
-				// stop the inline migration until the attributes are migrated
-				return fmt.Errorf("error: <empty path> when migrating filter for attribute profile: <%s>", attrPrf.TenantID())
-			}
-			for j, fl := range attr.FilterIDs {
-				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilterV2(fl)
-			}
-		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(context.TODO(), attrPrf, true); err != nil {
-			return fmt.Errorf("error: <%s> when setting attribute profile with tenant: <%s> and id: <%s>",
-				err.Error(), tntID[0], tntID[1])
-		}
-		m.stats[utils.RQF]++
-	}
-	return
-}
-
 func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
+	mInDB, err := m.GetINConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mInDB.DataManager().DBConns().GetConn(utils.MetaChargerProfiles)
+	if err != nil {
+		return err
+	}
 	var ids []string
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
+	ids, err = dataDB.GetKeysForPrefix(context.TODO(), utils.ChargerProfilePrefix)
 	if err != nil {
 		return fmt.Errorf("error: <%s> when getting charger profile IDs", err)
 	}
@@ -705,7 +497,7 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 		if len(tntID) < 2 {
 			return fmt.Errorf("Invalid key <%s> when migrating filter for chargerProfile", id)
 		}
-		cpp, err := m.dmIN.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
+		cpp, err := mInDB.DataManager().GetChargerProfile(context.TODO(), tntID[0], tntID[1], false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("error: <%s> when getting charger profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
@@ -716,7 +508,11 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 		for i, fl := range cpp.FilterIDs {
 			cpp.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
-		if err := m.dmOut.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
+		mOutDB, err := m.GetOUTConn(utils.MetaChargerProfiles)
+		if err != nil {
+			return err
+		}
+		if err := mOutDB.DataManager().SetChargerProfile(context.TODO(), cpp, true); err != nil {
 			return fmt.Errorf("error: <%s> when setting charger profile with tenant: <%s> and id: <%s>",
 				err.Error(), tntID[0], tntID[1])
 		}
@@ -743,7 +539,11 @@ type v1FilterRule struct {
 func (m *Migrator) migrateRequestFilterV4(v4Fltr *engine.Filter) (fltr *engine.Filter, err error) {
 	if v4Fltr == nil {
 		// read data from DataDB
-		v4Fltr, err = m.dmIN.getV4Filter()
+		mInDB, err := m.GetINConn(utils.MetaFilters)
+		if err != nil {
+			return nil, err
+		}
+		v4Fltr, err = mInDB.getV4Filter()
 		if err != nil {
 			return nil, err
 		}
@@ -841,13 +641,21 @@ func migrateInlineFilterV4(v4fltIDs []string) (fltrIDs []string, err error) {
 
 // setFilterv5WithoutCompile we need a method that get's the filter from DataDB without compiling the filter rules
 func (m *Migrator) setFilterv5WithoutCompile(fltr *engine.Filter) (err error) {
+	mOutDB, err := m.GetOUTConn(utils.MetaFilters)
+	if err != nil {
+		return err
+	}
+	dataDB, _, err := mOutDB.DataManager().DBConns().GetConn(utils.MetaFilters)
+	if err != nil {
+		return err
+	}
 	var oldFlt *engine.Filter
-	if oldFlt, err = m.dmOut.DataManager().DataDB().GetFilterDrv(context.TODO(), fltr.Tenant, fltr.ID); err != nil &&
+	if oldFlt, err = dataDB.GetFilterDrv(context.TODO(), fltr.Tenant, fltr.ID); err != nil &&
 		err != utils.ErrNotFound {
 		return
 	}
-	if err = m.dmOut.DataManager().DataDB().SetFilterDrv(context.TODO(), fltr); err != nil {
+	if err = dataDB.SetFilterDrv(context.TODO(), fltr); err != nil {
 		return
 	}
-	return engine.UpdateFilterIndex(context.TODO(), m.dmOut.DataManager(), oldFlt, fltr)
+	return engine.UpdateFilterIndex(context.TODO(), mOutDB.DataManager(), oldFlt, fltr)
 }

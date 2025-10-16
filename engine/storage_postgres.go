@@ -32,7 +32,7 @@ type PostgresStorage struct {
 	SQLStorage
 }
 
-// NewPostgresStorage returns the posgres storDB
+// NewPostgresStorage returns the posgres DB
 func NewPostgresStorage(host, port, name, user, password,
 	sslmode, sslcert, sslkey, sslpassword, sslcertmode, sslrootcert string,
 	maxConn, maxIdleConn, sqlLogLevel int, connMaxLifetime time.Duration) (*SQLStorage, error) {
@@ -73,7 +73,7 @@ func NewPostgresStorage(host, port, name, user, password,
 	return &SQLStorage{
 		DB:      pgStor.DB,
 		db:      pgStor.db,
-		StorDB:  pgStor,
+		DataDB:  pgStor,
 		SQLImpl: pgStor,
 	}, nil
 }

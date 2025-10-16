@@ -52,7 +52,7 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 			utils.ConnManager,
 			utils.CacheS,
 			utils.FilterS,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, chrS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -67,7 +67,7 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 		return err
 	}
 	fs := srvDeps[utils.FilterS].(*FilterService)
-	dbs := srvDeps[utils.DataDB].(*DataDBService)
+	dbs := srvDeps[utils.DB].(*DataDBService)
 
 	chrS.mu.Lock()
 	defer chrS.mu.Unlock()

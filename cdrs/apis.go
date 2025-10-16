@@ -131,7 +131,7 @@ func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *utils.C
 	if err != nil {
 		return fmt.Errorf("preparing filters failed: %w", err)
 	}
-	cdrs, err := cdrS.db.GetCDRs(ctx, fltrs, args.APIOpts)
+	cdrs, err := cdrS.dm.GetCDRs(ctx, fltrs, args.APIOpts)
 	if err != nil {
 		return fmt.Errorf("retrieving CDRs failed: %w", err)
 	}

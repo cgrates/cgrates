@@ -55,7 +55,7 @@ func NewMySQLStorage(host, port, name, user, password string,
 	return &SQLStorage{
 		DB:      mySQLStorage.DB,
 		db:      mySQLStorage.db,
-		StorDB:  mySQLStorage,
+		DataDB:  mySQLStorage,
 		SQLImpl: mySQLStorage,
 	}, nil
 }

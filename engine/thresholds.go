@@ -642,7 +642,11 @@ func (tS *ThresholdS) V1GetThresholdIDs(ctx *context.Context, args *utils.Tenant
 		tenant = tS.cfg.GeneralCfg().DefaultTenant
 	}
 	prfx := utils.ThresholdPrefix + tenant + utils.ConcatenatedKeySep
-	keys, err := tS.dm.DataDB().GetKeysForPrefix(ctx, prfx)
+	dataDB, _, err := tS.dm.DBConns().GetConn(utils.MetaThresholds)
+	if err != nil {
+		return err
+	}
+	keys, err := dataDB.GetKeysForPrefix(ctx, prfx)
 	if err != nil {
 		return err
 	}

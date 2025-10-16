@@ -52,7 +52,7 @@ func (ts *TPeService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
-			utils.DataDB,
+			utils.DB,
 		},
 		registry, ts.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -60,7 +60,7 @@ func (ts *TPeService) Start(_ *utils.SyncedChan, registry *servmanager.ServiceRe
 	}
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cm := srvDeps[utils.ConnManager].(*ConnManagerService).ConnManager()
-	dbs := srvDeps[utils.DataDB].(*DataDBService).DataManager()
+	dbs := srvDeps[utils.DB].(*DataDBService).DataManager()
 
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
